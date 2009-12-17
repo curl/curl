@@ -679,7 +679,6 @@ struct connectdata {
 #define PROT_EXTMASK 0xfffff
 
 #define PROT_SSL     (1<<25) /* protocol requires SSL */
-#define PROT_MISSING (1<<26)
 
 /* these ones need action before socket close */
 #define PROT_CLOSEACTION (PROT_FTP | PROT_TFTP | PROT_IMAP | PROT_POP3)

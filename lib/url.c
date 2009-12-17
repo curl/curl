@@ -3302,7 +3302,8 @@ static CURLcode findprotocol(struct SessionHandle *data,
  * Parse URL and fill in the relevant members of the connection struct.
  */
 static CURLcode parseurlandfillconn(struct SessionHandle *data,
-                                    struct connectdata *conn)
+                                    struct connectdata *conn,
+                                    bool *prot_missing)
 {
   char *at;
   char *tmp;
@@ -3310,6 +3311,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   int rc;
   char protobuf[16];
   const char *protop;
+
+  prot_missing = FALSE;
 
   /*************************************************************
    * Parse the URL.
@@ -3418,7 +3421,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
         protop = "http";
       }
 
-      conn->protocol |= PROT_MISSING; /* not given in URL */
+      *prot_missing = TRUE; /* not given in URL */
     }
     else
       protop = protobuf;
@@ -4341,6 +4344,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   bool reuse;
   char *proxy = NULL;
+  bool prot_missing = FALSE;
 
   *async = FALSE;
 
@@ -4447,7 +4451,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  result = parseurlandfillconn(data, conn);
+  result = parseurlandfillconn(data, conn, &prot_missing);
   if(result != CURLE_OK) {
       return result;
   }
@@ -4455,7 +4459,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   /*************************************************************
    * No protocol part in URL was used, add it!
    *************************************************************/
-  if(conn->protocol&PROT_MISSING) {
+  if(prot_missing) {
     /* We're guessing prefixes here and if we're told to use a proxy or if
        we're gonna follow a Location: later or... then we need the protocol
        part added so that we have a valid URL. */
@@ -4470,7 +4474,6 @@ static CURLcode create_conn(struct SessionHandle *data,
 
     data->change.url = reurl;
     data->change.url_alloc = TRUE; /* free this later */
-    conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
   /*************************************************************
@@ -4519,7 +4522,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   }
   /* proxy must be freed later unless NULL */
   if(proxy && *proxy) {
-    long bits = conn->protocol & (PROT_HTTPS|PROT_SSL|PROT_MISSING);
+    long bits = conn->protocol & (PROT_HTTPS|PROT_SSL);
 
     if((conn->proxytype == CURLPROXY_HTTP) ||
        (conn->proxytype == CURLPROXY_HTTP_1_0)) {
