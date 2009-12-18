@@ -58,6 +58,9 @@
 
 BEGIN {
     @INC=(@INC, $ENV{'srcdir'}, ".");
+    if($] > 5.006) {
+        use Time::HiRes qw(time);
+    }
 }
 
 use strict;
@@ -216,6 +219,11 @@ my $sshderror;   # for socks server, ssh daemon version error
 my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
+my $timestats=1; # time stamping and stats generation
+my %timetoolini; # timestamp for each test command run starting
+my %timetoolend; # timestamp for each test command run stopping
+my %timesrvrlog; # timestamp for each test server logs lock removal
+
 my $testnumcheck; # test number, set in singletest sub.
 
 #######################################################################
@@ -246,6 +254,16 @@ sub logmsg {
     for(@_) {
         print "$_";
     }
+}
+
+# perl newer than 5.6 required for time stamping and stats generation
+if(($] > 5.006) && $timestats) {
+    keys(%timetoolini) = 1000;
+    keys(%timetoolend) = 1000;
+    keys(%timesrvrlog) = 1000;
+}
+else {
+    $timestats = 0;
 }
 
 # get the name of the current user
@@ -2118,6 +2136,10 @@ sub singletest {
         print GDBCMD "source $gdbinit\n" if -e $gdbinit;
         close(GDBCMD);
     }
+
+    # timestamp starting of test command
+    $timetoolini{$testnum} = Time::HiRes::time() if($timestats);
+
     # run the command line we built
     if ($torture) {
         $cmdres = torture($CMDLINE,
@@ -2140,6 +2162,10 @@ sub singletest {
             $cmdres = (2000 + $signal_num) if($signal_num && !$cmdres);
         }
     }
+
+    # timestamp finishing of test command
+    $timetoolend{$testnum} = Time::HiRes::time() if($timestats);
+
     if(!$dumped_core) {
         if(-r "core") {
             # there's core file present now!
@@ -2182,6 +2208,9 @@ sub singletest {
     # once that the client command has run to avoid false test failures.
 
     sleep($postcommanddelay) if($postcommanddelay);
+
+    # timestamp removal of server logs advisor read lock
+    $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
@@ -3199,6 +3228,59 @@ if($skipped) {
             }
         }
         logmsg ")\n";
+    }
+}
+
+if($timestats) {
+    logmsg "\nGenerating execution time stats...\n\n";
+
+    my @timetool;
+    my @timelock;
+    my @timetest;
+    my $timetooltot = 0.0;
+    my $timelocktot = 0.0;
+    my $timetesttot = 0.0;
+
+    for my $testnum (1 .. $lasttest) {
+        if($timetoolini{$testnum}) {
+            $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
+            $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
+            $timetesttot += $timesrvrlog{$testnum} - $timetoolini{$testnum};
+            push @timetool, sprintf("%06.3f  %04d",
+                $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
+            push @timelock, sprintf("%06.3f  %04d",
+                $timesrvrlog{$testnum} - $timetoolend{$testnum}, $testnum);
+            push @timetest, sprintf("%06.3f  %04d",
+                $timesrvrlog{$testnum} - $timetoolini{$testnum}, $testnum);
+        }
+    }
+    @timetool = sort { $b <=> $a } @timetool;
+    @timelock = sort { $b <=> $a } @timelock;
+    @timetest = sort { $b <=> $a } @timetest;
+
+    logmsg "Total tool time: ". sprintf("%07.2f", $timetooltot) ." seconds\n";
+    logmsg "Total lock time: ". sprintf("%07.2f", $timelocktot) ." seconds\n";
+    logmsg "Total test time: ". sprintf("%07.2f", $timetesttot) ." seconds\n";
+
+    logmsg "\nTool execution time per test...\n\n";
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timetool) {
+        logmsg "$txt\n";
+    }
+
+    logmsg "\nServer logs lock removal time per test...\n\n";
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timelock) {
+        logmsg "$txt\n";
+    }
+
+    logmsg "\nAggregated time per test...\n\n";
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timetest) {
+        logmsg "$txt\n";
     }
 }
 
