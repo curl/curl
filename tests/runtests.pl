@@ -220,6 +220,9 @@ my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
 my $timestats=1; # time stamping and stats generation
+my %timeprepini; # timestamp for each test preparation start
+my %timesrvrini; # timestamp for each test required servers verification start
+my %timesrvrend; # timestamp for each test required servers verification end
 my %timetoolini; # timestamp for each test command run starting
 my %timetoolend; # timestamp for each test command run stopping
 my %timesrvrlog; # timestamp for each test server logs lock removal
@@ -258,6 +261,9 @@ sub logmsg {
 
 # perl newer than 5.6 required for time stamping and stats generation
 if(($] > 5.006) && $timestats) {
+    keys(%timeprepini) = 1000;
+    keys(%timesrvrini) = 1000;
+    keys(%timesrvrend) = 1000;
     keys(%timetoolini) = 1000;
     keys(%timetoolend) = 1000;
     keys(%timesrvrlog) = 1000;
@@ -1762,9 +1768,48 @@ sub fixarray {
 }
 
 #######################################################################
+# Provide time stamps for single test skipped events
+#
+sub timestampskippedevents {
+    my $testnum = $_[0];
+
+    return if((not defined($testnum)) || ($testnum < 1));
+
+    if($timestats) {
+        if($timesrvrlog{$testnum}) {
+            return;
+        }
+        elsif($timetoolend{$testnum}) {
+            $timesrvrlog{$testnum} = $timetoolend{$testnum};
+        }
+        elsif($timetoolini{$testnum}) {
+            $timesrvrlog{$testnum} = $timetoolini{$testnum};
+            $timetoolend{$testnum} = $timetoolini{$testnum};
+        }
+        elsif($timesrvrend{$testnum}) {
+            $timesrvrlog{$testnum} = $timesrvrend{$testnum};
+            $timetoolend{$testnum} = $timesrvrend{$testnum};
+            $timetoolini{$testnum} = $timesrvrend{$testnum};
+        }
+        elsif($timesrvrini{$testnum}) {
+            $timesrvrlog{$testnum} = $timesrvrini{$testnum};
+            $timetoolend{$testnum} = $timesrvrini{$testnum};
+            $timetoolini{$testnum} = $timesrvrini{$testnum};
+            $timesrvrend{$testnum} = $timesrvrini{$testnum};
+        }
+        elsif($timeprepini{$testnum}) {
+            $timesrvrlog{$testnum} = $timeprepini{$testnum};
+            $timetoolend{$testnum} = $timeprepini{$testnum};
+            $timetoolini{$testnum} = $timeprepini{$testnum};
+            $timesrvrend{$testnum} = $timeprepini{$testnum};
+            $timesrvrini{$testnum} = $timeprepini{$testnum};
+        }
+    }
+}
+
+#######################################################################
 # Run a single specified test case
 #
-
 sub singletest {
     my ($testnum, $count, $total)=@_;
 
@@ -1776,6 +1821,9 @@ sub singletest {
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
     $testnumcheck = $testnum;
+
+    # timestamp test preparation start
+    $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -1885,9 +1933,15 @@ sub singletest {
 	}
     }
 
+    # timestamp required servers verification start
+    $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
+
     if(!$why) {
         $why = serverfortest($testnum);
     }
+
+    # timestamp required servers verification end
+    $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
 
     if(!$why) {
         my @precheck = getpart("client", "precheck");
@@ -1916,6 +1970,7 @@ sub singletest {
             printf "test %03d SKIPPED: $why\n", $testnum;
         }
 
+        timestampskippedevents($testnum);
         return -1;
     }
     logmsg sprintf("test %03d...", $testnum);
@@ -1968,6 +2023,7 @@ sub singletest {
     }
 
     if($listonly) {
+        timestampskippedevents($testnum);
         return 0; # look successful
     }
 
@@ -2026,6 +2082,7 @@ sub singletest {
     if(@inputfile || $filename) {
         if(!$filename) {
             logmsg "ERROR: section client=>file has no name attribute\n";
+            timestampskippedevents($testnum);
             return -1;
         }
         my $fileContent = join('', @inputfile);
@@ -2091,6 +2148,7 @@ sub singletest {
         $CMDLINE="$LIBDIR/$tool";
         if(! -f $CMDLINE) {
             print "The tool set in the test case for this: '$tool' does not exist\n";
+            timestampskippedevents($testnum);
             return -1;
         }
         $DBGCURL=$CMDLINE;
@@ -2124,6 +2182,7 @@ sub singletest {
             logmsg "perl: $code\n";
             logmsg "precommand: $@";
             stopservers($verbose);
+            timestampskippedevents($testnum);
             return -1;
         }
     }
@@ -3205,7 +3264,8 @@ else {
 
 if($all) {
     my $sofar = time()-$start;
-    logmsg "TESTDONE: $all tests were considered during $sofar seconds.\n";
+    logmsg "TESTDONE: $all tests were considered during ".
+        sprintf("%.0f", $sofar) ." seconds.\n";
 }
 
 if($skipped) {
@@ -3234,33 +3294,64 @@ if($skipped) {
 if($timestats) {
     logmsg "\nGenerating execution time stats...\n\n";
 
+    my @timesrvr;
+    my @timeprep;
     my @timetool;
     my @timelock;
     my @timetest;
+    my $timesrvrtot = 0.0;
+    my $timepreptot = 0.0;
     my $timetooltot = 0.0;
     my $timelocktot = 0.0;
     my $timetesttot = 0.0;
 
     for my $testnum (1 .. $lasttest) {
-        if($timetoolini{$testnum}) {
+        if($timesrvrini{$testnum}) {
+            $timesrvrtot += $timesrvrend{$testnum} - $timesrvrini{$testnum};
+            $timepreptot +=
+                (($timetoolini{$testnum} - $timeprepini{$testnum}) -
+                 ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
             $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
             $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
-            $timetesttot += $timesrvrlog{$testnum} - $timetoolini{$testnum};
+            $timetesttot += $timesrvrlog{$testnum} - $timeprepini{$testnum};
+            push @timesrvr, sprintf("%06.3f  %04d",
+                $timesrvrend{$testnum} - $timesrvrini{$testnum}, $testnum);
+            push @timeprep, sprintf("%06.3f  %04d",
+                ($timetoolini{$testnum} - $timeprepini{$testnum}) -
+                ($timesrvrend{$testnum} - $timesrvrini{$testnum}), $testnum);
             push @timetool, sprintf("%06.3f  %04d",
                 $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
             push @timelock, sprintf("%06.3f  %04d",
                 $timesrvrlog{$testnum} - $timetoolend{$testnum}, $testnum);
             push @timetest, sprintf("%06.3f  %04d",
-                $timesrvrlog{$testnum} - $timetoolini{$testnum}, $testnum);
+                $timesrvrlog{$testnum} - $timeprepini{$testnum}, $testnum);
         }
     }
+    @timesrvr = sort { $b <=> $a } @timesrvr;
+    @timeprep = sort { $b <=> $a } @timeprep;
     @timetool = sort { $b <=> $a } @timetool;
     @timelock = sort { $b <=> $a } @timelock;
     @timetest = sort { $b <=> $a } @timetest;
 
-    logmsg "Total tool time: ". sprintf("%07.2f", $timetooltot) ." seconds\n";
-    logmsg "Total lock time: ". sprintf("%07.2f", $timelocktot) ." seconds\n";
-    logmsg "Total test time: ". sprintf("%07.2f", $timetesttot) ." seconds\n";
+    logmsg "Total srvr time: ". sprintf("%08.3f", $timesrvrtot) ." seconds\n";
+    logmsg "Total prep time: ". sprintf("%08.3f", $timepreptot) ." seconds\n";
+    logmsg "Total tool time: ". sprintf("%08.3f", $timetooltot) ." seconds\n";
+    logmsg "Total lock time: ". sprintf("%08.3f", $timelocktot) ." seconds\n";
+    logmsg "Total test time: ". sprintf("%08.3f", $timetesttot) ." seconds\n";
+
+    logmsg "\nServer start verification time per test...\n\n";
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timesrvr) {
+        logmsg "$txt\n";
+    }
+
+    logmsg "\nTest preparation time per test...\n\n";
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timeprep) {
+        logmsg "$txt\n";
+    }
 
     logmsg "\nTool execution time per test...\n\n";
     logmsg "-time-  test\n";
