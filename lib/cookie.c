@@ -909,7 +909,7 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
 {
   struct Cookie *first, *curr, *next, *prev = NULL;
 
-  if(!cookies->cookies || !cookies->cookies)
+  if(!cookies || !cookies->cookies)
     return;
 
   first = curr = prev = cookies->cookies;
