@@ -2251,9 +2251,9 @@ sub singletest {
     # of time until the server removes it, or the given time expires.
 
     if($serverlogslocktimeout) {
-        my $lockretry = $serverlogslocktimeout * 8;
+        my $lockretry = $serverlogslocktimeout * 20;
         while((-f $SERVERLOGS_LOCK) && $lockretry--) {
-            select(undef, undef, undef, 0.125);
+            select(undef, undef, undef, 0.05);
         }
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
@@ -3421,7 +3421,7 @@ if($timestats) {
         logmsg "$txt\n";
     }
 
-    $counter = 25;
+    $counter = 10;
     logmsg "\nTest definition reading and preparation time per test ".
         sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
@@ -3441,7 +3441,7 @@ if($timestats) {
         logmsg "$txt\n";
     }
 
-    $counter = 25;
+    $counter = 15;
     logmsg "\nTest server logs lock removal time per test ".
         sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
@@ -3451,7 +3451,7 @@ if($timestats) {
         logmsg "$txt\n";
     }
 
-    $counter = 25;
+    $counter = 10;
     logmsg "\nTest results verification time per test ".
         sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
@@ -3462,7 +3462,7 @@ if($timestats) {
     }
 
     $counter = 50;
-    logmsg "\nAggregated time per test ".
+    logmsg "\nTotal time per test ".
         sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";

@@ -120,8 +120,8 @@ sub killpid {
 
     # Allow all signalled processes five seconds to gracefully die.
     if(defined(@signalled)) {
-        my $eighths = 40;
-        while($eighths--) {
+        my $twentieths = 5 * 20;
+        while($twentieths--) {
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
                 my $pid = $signalled[$i];
                 if(!kill(0, $pid)) {
@@ -132,7 +132,7 @@ sub killpid {
                 }
             }
             last if(not scalar(@signalled));
-            select(undef, undef, undef, 0.125);
+            select(undef, undef, undef, 0.05);
         }
     }
 
