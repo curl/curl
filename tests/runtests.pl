@@ -650,7 +650,7 @@ sub verifyftp {
         logmsg "RUN: Verifying our test ". uc($proto) .
                " server took $took seconds\n";
     }
-    $ftpchecktime = $took?$took:1; # make sure it never is zero
+    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
 
     return $pid;
 }
