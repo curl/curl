@@ -348,18 +348,18 @@ if($proto eq "ftp") {
                     'PROT' => '500 PROT not implemented',
         );
 
-    %commandfunc = ( 'PORT' => \&PORT_command,
-                     'EPRT' => \&PORT_command,
-                     'LIST' => \&LIST_command,
-                     'NLST' => \&NLST_command,
-                     'PASV' => \&PASV_command,
-                     'EPSV' => \&PASV_command,
-                     'RETR' => \&RETR_command,   
-                     'SIZE' => \&SIZE_command,
-                     'REST' => \&REST_command,
-                     'STOR' => \&STOR_command,
-                     'APPE' => \&STOR_command, # append looks like upload
-                     'MDTM' => \&MDTM_command,
+    %commandfunc = ( 'PORT' => \&PORT_ftp,
+                     'EPRT' => \&PORT_ftp,
+                     'LIST' => \&LIST_ftp,
+                     'NLST' => \&NLST_ftp,
+                     'PASV' => \&PASV_ftp,
+                     'EPSV' => \&PASV_ftp,
+                     'RETR' => \&RETR_ftp,   
+                     'SIZE' => \&SIZE_ftp,
+                     'REST' => \&REST_ftp,
+                     'STOR' => \&STOR_ftp,
+                     'APPE' => \&STOR_ftp, # append looks like upload
+                     'MDTM' => \&MDTM_ftp,
         );
 }
 elsif($proto eq "pop3") {
@@ -374,10 +374,12 @@ elsif($proto eq "pop3") {
 }
 elsif($proto eq "imap") {
     %commandfunc = ('FETCH' => \&FETCH_imap,
+                    'SELECT' => \&SELECT_imap,
         );
 
     %displaytext = ('LOGIN' => ' OK We are happy you popped in!',
                     'SELECT' => ' OK selection done',
+                    'LOGOUT' => ' OK thanks for the fish',
         );
 
 }
@@ -407,9 +409,33 @@ sub close_dataconn {
 ################ IMAP commands 
 ################
 
+# global to allow the command functions to read it
+my $cmdid;
+
+# what was picked by SELECT
+my $selected;
+
+sub SELECT_imap {
+    my ($testno) = @_;
+    my @data;
+    my $size;
+
+    logmsg "SELECT_imap got test $testno\n";
+
+    $selected = $testno;
+
+    return 0;
+}
+
+
 sub FETCH_imap {
      my ($testno) = @_;
      my @data;
+     my $size;
+
+     logmsg "FETCH_imap got test $testno\n";
+
+     $testno = $selected;
 
      if($testno =~ /^verifiedserver$/) {
          # this is the secret command that verifies that this actually is
@@ -437,11 +463,17 @@ sub FETCH_imap {
          @data = getpart("reply", "data$testpart");
      }
 
-     sendcontrol "- OK Mail transfer starts\r\n";
+     for (@data) {
+         $size += length($_);
+     }
+
+     sendcontrol "* FETCH starts {$size}\r\n";
 
      for my $d (@data) {
          sendcontrol $d;
      }
+
+     sendcontrol "$cmdid OK FETCH completed\r\n";
     
      return 0;
 }
@@ -496,12 +528,12 @@ sub RETR_pop3 {
 ################ FTP commands 
 ################
 my $rest=0;
-sub REST_command {
+sub REST_ftp {
     $rest = $_[0];
     logmsg "Set REST position to $rest\n"
 }
 
-sub LIST_command {
+sub LIST_ftp {
   #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
 # this is a built-in fake-dir ;-)
@@ -526,7 +558,7 @@ my @ftpdir=("total 20\r\n",
     return 0;
 }
 
-sub NLST_command {
+sub NLST_ftp {
     my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
     logmsg "pass NLST data on data connection\n";
     for(@ftpdir) {
@@ -537,7 +569,7 @@ sub NLST_command {
     return 0;
 }
 
-sub MDTM_command {
+sub MDTM_ftp {
     my $testno = $_[0];
     my $testpart = "";
     if ($testno > 10000) {
@@ -564,7 +596,7 @@ sub MDTM_command {
     return 0;
 }
 
-sub SIZE_command {
+sub SIZE_ftp {
     my $testno = $_[0];
     my $testpart = "";
     if ($testno > 10000) {
@@ -609,7 +641,7 @@ sub SIZE_command {
     return 0;
 }
 
-sub RETR_command {
+sub RETR_ftp {
     my ($testno) = @_;
 
     if($testno =~ /^verifiedserver$/) {
@@ -686,7 +718,7 @@ sub RETR_command {
     return 0;
 }
 
-sub STOR_command {
+sub STOR_ftp {
     my $testno=$_[0];
 
     my $filename = "log/upload.$testno";
@@ -737,7 +769,7 @@ sub STOR_command {
     return 0;
 }
 
-sub PASV_command {
+sub PASV_ftp {
     my ($arg, $cmd)=@_;
     my $pasvport;
     my $pidf=".sockdata$ftpdnum$ext.pid";
@@ -843,7 +875,7 @@ sub PASV_command {
 
 # Support both PORT and EPRT here. Consider LPRT too.
 
-sub PORT_command {
+sub PORT_ftp {
     my ($arg, $cmd) = @_;
     my $port;
     my $addr;
@@ -1055,17 +1087,17 @@ while(1) {
         # Remove trailing CRLF.
         s/[\n\r]+$//;
 
-        my $cmdid;
         my $FTPCMD;
         my $FTPARG;
         my $full=$_;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            unless (m/^([^ ]+) ([^ ]+) (.*)/i) {
-                sendcontrol "500 '$_': command not understood.\r\n";
+            unless (m/^([^ ]+) ([^ ]+) (.*)/ ||
+                    m/^([^ ]+) ([^ ]+)/) {
+                sendcontrol "$1 '$_': command not understood.\r\n";
                 last;
             }
-            $cmdid=$1;
+            $cmdid=$1; # set the global variable
             $FTPCMD=$2;
             $FTPARG=$3;
         }
