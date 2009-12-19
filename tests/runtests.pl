@@ -58,8 +58,9 @@
 
 BEGIN {
     @INC=(@INC, $ENV{'srcdir'}, ".");
-    if($] > 5.006) {
-        use Time::HiRes qw(time);
+    # run time statistics needs perl 5.7 or newer
+    if($] >= 5.007) {
+        use Time::HiRes qw( time );
     }
 }
 
@@ -219,13 +220,15 @@ my $sshderror;   # for socks server, ssh daemon version error
 my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
-my $timestats=1; # time stamping and stats generation
+my $timestats;   # time stamping and stats generation
+my $fullstats;   # show time stats for every single test
 my %timeprepini; # timestamp for each test preparation start
 my %timesrvrini; # timestamp for each test required servers verification start
 my %timesrvrend; # timestamp for each test required servers verification end
 my %timetoolini; # timestamp for each test command run starting
 my %timetoolend; # timestamp for each test command run stopping
 my %timesrvrlog; # timestamp for each test server logs lock removal
+my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
 
@@ -257,19 +260,6 @@ sub logmsg {
     for(@_) {
         print "$_";
     }
-}
-
-# perl newer than 5.6 required for time stamping and stats generation
-if(($] > 5.006) && $timestats) {
-    keys(%timeprepini) = 1000;
-    keys(%timesrvrini) = 1000;
-    keys(%timesrvrend) = 1000;
-    keys(%timetoolini) = 1000;
-    keys(%timetoolend) = 1000;
-    keys(%timesrvrlog) = 1000;
-}
-else {
-    $timestats = 0;
 }
 
 # get the name of the current user
@@ -1776,28 +1766,38 @@ sub timestampskippedevents {
     return if((not defined($testnum)) || ($testnum < 1));
 
     if($timestats) {
-        if($timesrvrlog{$testnum}) {
+
+        if($timevrfyend{$testnum}) {
+            return;
+        }
+        elsif($timesrvrlog{$testnum}) {
+            $timevrfyend{$testnum} = $timesrvrlog{$testnum};
             return;
         }
         elsif($timetoolend{$testnum}) {
+            $timevrfyend{$testnum} = $timetoolend{$testnum};
             $timesrvrlog{$testnum} = $timetoolend{$testnum};
         }
         elsif($timetoolini{$testnum}) {
+            $timevrfyend{$testnum} = $timetoolini{$testnum};
             $timesrvrlog{$testnum} = $timetoolini{$testnum};
             $timetoolend{$testnum} = $timetoolini{$testnum};
         }
         elsif($timesrvrend{$testnum}) {
+            $timevrfyend{$testnum} = $timesrvrend{$testnum};
             $timesrvrlog{$testnum} = $timesrvrend{$testnum};
             $timetoolend{$testnum} = $timesrvrend{$testnum};
             $timetoolini{$testnum} = $timesrvrend{$testnum};
         }
         elsif($timesrvrini{$testnum}) {
+            $timevrfyend{$testnum} = $timesrvrini{$testnum};
             $timesrvrlog{$testnum} = $timesrvrini{$testnum};
             $timetoolend{$testnum} = $timesrvrini{$testnum};
             $timetoolini{$testnum} = $timesrvrini{$testnum};
             $timesrvrend{$testnum} = $timesrvrini{$testnum};
         }
         elsif($timeprepini{$testnum}) {
+            $timevrfyend{$testnum} = $timeprepini{$testnum};
             $timesrvrlog{$testnum} = $timeprepini{$testnum};
             $timetoolend{$testnum} = $timeprepini{$testnum};
             $timetoolini{$testnum} = $timeprepini{$testnum};
@@ -2251,9 +2251,9 @@ sub singletest {
     # of time until the server removes it, or the given time expires.
 
     if($serverlogslocktimeout) {
-        my $lockretry = $serverlogslocktimeout * 4;
+        my $lockretry = $serverlogslocktimeout * 8;
         while((-f $SERVERLOGS_LOCK) && $lockretry--) {
-            select(undef, undef, undef, 0.25);
+            select(undef, undef, undef, 0.125);
         }
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
@@ -2283,6 +2283,8 @@ sub singletest {
 	# to clean up, but the result can't be relied upon.
 	if($rc != 0 && !$torture) {
 	    logmsg " postcheck FAILED\n";
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
 	    return 1;
 	}
     }
@@ -2300,6 +2302,8 @@ sub singletest {
 	if(!$cmdres && !$keepoutfiles) {
 	    cleardir($LOGDIR);
 	}
+        # timestamp test result verification end
+        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
         return $cmdres;
     }
 
@@ -2332,6 +2336,8 @@ sub singletest {
 
         $res = compare("stdout", \@actual, \@validstdout);
         if($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "s";
@@ -2354,6 +2360,8 @@ sub singletest {
 
         $res = compare("data", \@out, \@reply);
         if ($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "d";
@@ -2367,6 +2375,8 @@ sub singletest {
         my @out = loadarray("$LOGDIR/upload.$testnum");
         $res = compare("upload", \@out, \@upload);
         if ($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "u";
@@ -2412,6 +2422,8 @@ sub singletest {
 
         $res = compare("protocol", \@out, \@protstrip);
         if($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -2431,6 +2443,8 @@ sub singletest {
         if(!$filename) {
             logmsg "ERROR: section verify=>file has no name attribute\n";
             stopservers($verbose);
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return -1;
         }
         my @generated=loadarray($filename);
@@ -2457,6 +2471,8 @@ sub singletest {
 
         $res = compare("output", \@generated, \@outfile);
         if($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -2486,6 +2502,8 @@ sub singletest {
                    (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " exit FAILED\n";
+        # timestamp test result verification end
+        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
         return 1;
     }
 
@@ -2524,6 +2542,8 @@ sub singletest {
             if($leak) {
                 logmsg "\n** MEMORY FAILURE\n";
                 logmsg @memdata;
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
             }
             else {
@@ -2539,8 +2559,11 @@ sub singletest {
         # this is the valid protocol blurb curl should generate
         if($usevalgrind) {
 
-            opendir(DIR, "log") ||
+            if(!opendir(DIR, "log")) {
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 0; # can't open log dir
+            }
             my @files = readdir(DIR);
             closedir(DIR);
             my $f;
@@ -2559,6 +2582,8 @@ sub singletest {
             if($e[0]) {
                 logmsg " valgrind ERROR ";
                 logmsg @e;
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
             }
             $ok .= "v";
@@ -2590,6 +2615,9 @@ sub singletest {
     }
 
     unlink($FTPDCMD); # remove the instructions for this test
+
+    # timestamp test result verification end
+    $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
 
     return 0;
 }
@@ -2920,6 +2948,34 @@ while(@ARGV) {
         # keep stdout and stderr files after tests
         $keepoutfiles=1;
     }
+    elsif($ARGV[0] eq "-r") {
+        # run time statistics needs perl 5.7 or newer
+        if($] >= 5.007) {
+            keys(%timeprepini) = 1000;
+            keys(%timesrvrini) = 1000;
+            keys(%timesrvrend) = 1000;
+            keys(%timetoolini) = 1000;
+            keys(%timetoolend) = 1000;
+            keys(%timesrvrlog) = 1000;
+            keys(%timevrfyend) = 1000;
+            $timestats=1;
+            $fullstats=0;
+        }
+    }
+    elsif($ARGV[0] eq "-rf") {
+        # run time statistics needs perl 5.7 or newer
+        if($] >= 5.007) {
+            keys(%timeprepini) = 1000;
+            keys(%timesrvrini) = 1000;
+            keys(%timesrvrend) = 1000;
+            keys(%timetoolini) = 1000;
+            keys(%timetoolend) = 1000;
+            keys(%timesrvrlog) = 1000;
+            keys(%timevrfyend) = 1000;
+            $timestats=1;
+            $fullstats=1;
+        }
+    }
     elsif(($ARGV[0] eq "-h") || ($ARGV[0] eq "--help")) {
         # show help text
         print <<EOHELP
@@ -2934,6 +2990,8 @@ Usage: runtests.pl [options] [test selection(s)]
   -l       list all test case names/descriptions
   -n       no valgrind
   -p       print log file contents when a test fails
+  -r       run time statistics
+  -rf      full run time statistics
   -s       short output
   -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
   -v       verbose output
@@ -3292,18 +3350,21 @@ if($skipped) {
 }
 
 if($timestats) {
-    logmsg "\nGenerating execution time stats...\n\n";
+    logmsg "\nTest suite total running time breakdown per task...\n\n";
 
     my @timesrvr;
     my @timeprep;
     my @timetool;
     my @timelock;
+    my @timevrfy;
     my @timetest;
     my $timesrvrtot = 0.0;
     my $timepreptot = 0.0;
     my $timetooltot = 0.0;
     my $timelocktot = 0.0;
+    my $timevrfytot = 0.0;
     my $timetesttot = 0.0;
+    my $counter;
 
     for my $testnum (1 .. $lasttest) {
         if($timesrvrini{$testnum}) {
@@ -3313,7 +3374,8 @@ if($timestats) {
                  ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
             $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
             $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
-            $timetesttot += $timesrvrlog{$testnum} - $timeprepini{$testnum};
+            $timevrfytot += $timevrfyend{$testnum} - $timesrvrlog{$testnum};
+            $timetesttot += $timevrfyend{$testnum} - $timeprepini{$testnum};
             push @timesrvr, sprintf("%06.3f  %04d",
                 $timesrvrend{$testnum} - $timesrvrini{$testnum}, $testnum);
             push @timeprep, sprintf("%06.3f  %04d",
@@ -3323,56 +3385,93 @@ if($timestats) {
                 $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
             push @timelock, sprintf("%06.3f  %04d",
                 $timesrvrlog{$testnum} - $timetoolend{$testnum}, $testnum);
+            push @timevrfy, sprintf("%06.3f  %04d",
+                $timevrfyend{$testnum} - $timesrvrlog{$testnum}, $testnum);
             push @timetest, sprintf("%06.3f  %04d",
-                $timesrvrlog{$testnum} - $timeprepini{$testnum}, $testnum);
+                $timevrfyend{$testnum} - $timeprepini{$testnum}, $testnum);
         }
     }
     @timesrvr = sort { $b <=> $a } @timesrvr;
     @timeprep = sort { $b <=> $a } @timeprep;
     @timetool = sort { $b <=> $a } @timetool;
     @timelock = sort { $b <=> $a } @timelock;
+    @timevrfy = sort { $b <=> $a } @timevrfy;
     @timetest = sort { $b <=> $a } @timetest;
 
-    logmsg "Total srvr time: ". sprintf("%08.3f", $timesrvrtot) ." seconds\n";
-    logmsg "Total prep time: ". sprintf("%08.3f", $timepreptot) ." seconds\n";
-    logmsg "Total tool time: ". sprintf("%08.3f", $timetooltot) ." seconds\n";
-    logmsg "Total lock time: ". sprintf("%08.3f", $timelocktot) ." seconds\n";
-    logmsg "Total test time: ". sprintf("%08.3f", $timetesttot) ." seconds\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
+           "seconds starting and verifying test harness servers.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
+           "seconds reading definitions and doing test preparations.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
+           "seconds actually running test tools.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
+           "seconds awaiting server logs lock removal.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
+           "seconds verifying test results.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
+           "seconds doing all of the above.\n";
 
-    logmsg "\nServer start verification time per test...\n\n";
+    $counter = 25;
+    logmsg "\nTest server starting and verification time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timesrvr) {
+        last if((not $fullstats) && (not $counter--));
         logmsg "$txt\n";
     }
 
-    logmsg "\nTest preparation time per test...\n\n";
+    $counter = 25;
+    logmsg "\nTest definition reading and preparation time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timeprep) {
+        last if((not $fullstats) && (not $counter--));
         logmsg "$txt\n";
     }
 
-    logmsg "\nTool execution time per test...\n\n";
+    $counter = 25;
+    logmsg "\nTest tool execution time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetool) {
+        last if((not $fullstats) && (not $counter--));
         logmsg "$txt\n";
     }
 
-    logmsg "\nServer logs lock removal time per test...\n\n";
+    $counter = 25;
+    logmsg "\nTest server logs lock removal time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timelock) {
+        last if((not $fullstats) && (not $counter--));
         logmsg "$txt\n";
     }
 
-    logmsg "\nAggregated time per test...\n\n";
+    $counter = 25;
+    logmsg "\nTest results verification time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timevrfy) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 50;
+    logmsg "\nAggregated time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetest) {
+        last if((not $fullstats) && (not $counter--));
         logmsg "$txt\n";
     }
+
+    logmsg "\n";
 }
 
 if($total && ($ok != $total)) {

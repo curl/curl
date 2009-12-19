@@ -48,7 +48,7 @@ TEST_T =
 else # if not cross-compiling:
 TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 TEST_Q = -a -s
-TEST_F = -a -p
+TEST_F = -a -p -r
 TEST_T = -a -t
 endif
 
