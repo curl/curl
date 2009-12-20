@@ -59,8 +59,9 @@
 BEGIN {
     @INC=(@INC, $ENV{'srcdir'}, ".");
     # run time statistics needs perl 5.7 or newer
-    if($] >= 5.007) {
-        use Time::HiRes qw( time );
+    if($] >= 5.007003) {
+        require Time::HiRes;
+        import  Time::HiRes qw( time );
     }
 }
 
@@ -644,7 +645,7 @@ sub verifyftp {
     }
     # we can/should use the time it took to verify the FTP server as a measure
     # on how fast/slow this host/FTP is.
-    my $took = time()-$time;
+    my $took = int(0.5+time()-$time);
 
     if($verbose) {
         logmsg "RUN: Verifying our test ". uc($proto) .
@@ -2950,7 +2951,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-r") {
         # run time statistics needs perl 5.7 or newer
-        if($] >= 5.007) {
+        if($] >= 5.007003) {
             keys(%timeprepini) = 1000;
             keys(%timesrvrini) = 1000;
             keys(%timesrvrend) = 1000;
@@ -2964,7 +2965,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-rf") {
         # run time statistics needs perl 5.7 or newer
-        if($] >= 5.007) {
+        if($] >= 5.007003) {
             keys(%timeprepini) = 1000;
             keys(%timesrvrini) = 1000;
             keys(%timesrvrend) = 1000;
