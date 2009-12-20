@@ -49,11 +49,67 @@ require "ftp.pm";
 #    }
 #}
 
+#**********************************************************************
+# global vars...
+#
+my $verbose = 0; # set to 1 for debugging
 my $ftpdnum="";
-
 my $logfilename = 'log/logfile.log'; # Override this for each test server
 
-#######################################################################
+my $pasvbadip=0;
+my $retrweirdo=0;
+my $retrnosize=0;
+my $srcdir=".";
+my $nosave=0;
+my $controldelay=0; # set to 1 to delay the control connect data sending to
+ # test that curl deals with that nicely
+my $slavepid; # for the DATA connection sockfilt slave process
+my $ipv6;
+my $ext; # append to log/pid file names
+my $grok_eprt;
+my $port = 8921; # just a default
+my $listenaddr = "127.0.0.1"; # just a default
+my $pidfile = ".ftpd.pid"; # a default, use --pidfile
+
+my $SERVERLOGS_LOCK="log/serverlogs.lock"; # server logs advisor read lock
+my $serverlogslocked=0;
+
+my $proto="ftp";
+
+my $sfpid;
+
+local(*SFREAD, *SFWRITE);
+
+#**********************************************************************
+# global vars used for signal handling
+#
+my $got_exit_signal = 0; # set if program should finish execution ASAP
+my $exit_signal;         # first signal handled in exit_signal_handler
+
+#**********************************************************************
+# exit_signal_handler will be triggered to indicate that the program
+# should finish its execution in a controlled way as soon as possible.
+# For now, program will also terminate from within this handler.
+#
+sub exit_signal_handler {
+    my $signame = shift;
+    local $!; # preserve errno
+    if($got_exit_signal == 0) {
+        $got_exit_signal = 1;
+        $exit_signal = $signame;
+    }
+    $SIG{$signame} = \&exit_signal_handler;
+    # For now, simply mimic old behavior.
+    ftpkillslaves($verbose);
+    unlink($pidfile);
+    if($serverlogslocked) {
+        $serverlogslocked = 0;
+        clear_advisor_read_lock($SERVERLOGS_LOCK);
+    }
+    exit;
+}
+
+#**********************************************************************
 # getlogfilename returns a log file name depending on given arguments.
 #
 sub getlogfilename {
@@ -66,7 +122,7 @@ sub getlogfilename {
     return $filename;
 }
 
-#######################################################################
+#**********************************************************************
 # logmsg is general message logging subroutine for our test servers.
 #
 sub logmsg {
@@ -102,27 +158,6 @@ sub ftpmsg {
   # open as little as possible, to make the test suite run
   # better on windows/cygwin
 }
-
-my $verbose=0; # set to 1 for debugging
-my $pasvbadip=0;
-my $retrweirdo=0;
-my $retrnosize=0;
-my $srcdir=".";
-my $nosave=0;
-my $controldelay=0; # set to 1 to delay the control connect data sending to
- # test that curl deals with that nicely
-my $slavepid; # for the DATA connection sockfilt slave process
-my $ipv6;
-my $ext; # append to log/pid file names
-my $grok_eprt;
-my $port = 8921; # just a default
-my $listenaddr = "127.0.0.1"; # just a default
-my $pidfile = ".ftpd.pid"; # a default, use --pidfile
-
-my $SERVERLOGS_LOCK="log/serverlogs.lock"; # server logs advisor read lock
-my $serverlogslocked=0;
-
-my $proto="ftp";
 
 do {
     if($ARGV[0] eq "-v") {
@@ -166,22 +201,8 @@ if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
     die "unsupported protocol selected";
 }
 
-sub catch_zap {
-    my $signame = shift;
-    ftpkillslaves($verbose);
-    unlink($pidfile);
-    if($serverlogslocked) {
-        $serverlogslocked = 0;
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
-    }
-    exit;
-}
-$SIG{INT} = \&catch_zap;
-$SIG{TERM} = \&catch_zap;
-
-my $sfpid;
-
-local(*SFREAD, *SFWRITE);
+$SIG{INT} = \&exit_signal_handler;
+$SIG{TERM} = \&exit_signal_handler;
 
 sub sysread_or_die {
     my $FH     = shift;
@@ -1120,7 +1141,10 @@ while(1) {
         if($delay) {
             # just go sleep this many seconds!
             logmsg("Sleep for $delay seconds\n");
-            sleep($delay);
+            my $twentieths = $delay * 20;
+            while($twentieths--) {
+                select(undef, undef, undef, 0.05) unless($got_exit_signal);
+            }
         }
 
         my $text;
