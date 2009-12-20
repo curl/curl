@@ -94,7 +94,6 @@
 #include "memdebug.h"
 
 /* Local API functions */
-static CURLcode smtp_parse_url_path(struct connectdata *conn);
 static CURLcode smtp_regular_transfer(struct connectdata *conn, bool *done);
 static CURLcode smtp_do(struct connectdata *conn, bool *done);
 static CURLcode smtp_done(struct connectdata *conn,
@@ -108,9 +107,7 @@ static int smtp_getsock(struct connectdata *conn,
 static CURLcode smtp_doing(struct connectdata *conn,
                            bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata * conn);
-#if 0
-static void smtp_respinit(struct connectdata *conn);
-#endif
+
 
 /*
  * SMTP protocol handler.
@@ -322,9 +319,6 @@ static CURLcode smtp_mail(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-#if 0
-  struct FTP *smtp = data->state.proto.smtp;
-#endif
 
   /* send MAIL */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<%s>",
@@ -739,10 +733,6 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
   if(retcode)
     return retcode;
 
-  retcode = smtp_parse_url_path(conn);
-  if(retcode)
-    return retcode;
-
   retcode = smtp_regular_transfer(conn, done);
 
   return retcode;
@@ -792,27 +782,6 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
   (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&smtpc->pp);
-
-  return CURLE_OK;
-}
-
-/***********************************************************************
- *
- * smtp_parse_url_path()
- *
- * Parse the URL path into separate path components.
- *
- */
-static CURLcode smtp_parse_url_path(struct connectdata *conn)
-{
-  /* the smtp struct is already inited in smtp_connect() */
-#if 0
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-  struct SessionHandle *data = conn->data;
-#endif
-  (void)conn;
-
-  /* url decode... */
 
   return CURLE_OK;
 }
