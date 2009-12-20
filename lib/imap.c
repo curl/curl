@@ -889,6 +889,8 @@ static CURLcode imap_disconnect(struct connectdata *conn)
 
   Curl_pp_disconnect(&imapc->pp);
 
+  free(imapc->mailbox);
+
   return CURLE_OK;
 }
 
