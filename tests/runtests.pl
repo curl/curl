@@ -2272,6 +2272,27 @@ sub singletest {
     # timestamp removal of server logs advisor read lock
     $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
 
+    # test definition might instruct to stop some servers
+    my @killservers = getpart("client", "killserver");
+    foreach my $serv (@killservers) {
+        chomp $serv;
+        if($run{$serv}) {
+            stopserver($run{$serv}); # the pid file is in the hash table
+            $run{$serv}=0; # clear pid
+        }
+        else {
+            logmsg "RUN: The $serv server is not running\n";
+        }
+        if($serv =~ /^ftp(\d*)(-ipv6|)/) {
+            my ($id, $ext) = ($1, $2);
+            #print STDERR "SERV $serv $id $ext\n";
+            ftpkillslave($id, $ext, $verbose);
+        }
+    }
+
+    # remove the test server commands file after each test
+    unlink($FTPDCMD);
+
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
     $cmd = $postcheck[0];
@@ -2289,9 +2310,6 @@ sub singletest {
             return 1;
         }
     }
-
-    # remove the special FTP command file after each test!
-    unlink($FTPDCMD);
 
     my $e;
     for $e (@envs) {
@@ -2508,24 +2526,6 @@ sub singletest {
         return 1;
     }
 
-    @what = getpart("client", "killserver");
-    for(@what) {
-        my $serv = $_;
-        chomp $serv;
-        if($serv =~ /^ftp(\d*)(-ipv6|)/) {
-            my ($id, $ext) = ($1, $2);
-            #print STDERR "SERV $serv $id $ext\n";
-            ftpkillslave($id, $ext, $verbose);
-        }
-        if($run{$serv}) {
-            stopserver($run{$serv}); # the pid file is in the hash table
-            $run{$serv}=0; # clear pid
-        }
-        else {
-            logmsg "RUN: The $serv server is not running\n";
-        }
-    }
-
     if($curl_debug) {
         if(! -f $memdump) {
             logmsg "\n** ALERT! memory debugging with no output file?\n";
@@ -2614,8 +2614,6 @@ sub singletest {
     if(!$keepoutfiles) {
         cleardir($LOGDIR);
     }
-
-    unlink($FTPDCMD); # remove the instructions for this test
 
     # timestamp test result verification end
     $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
