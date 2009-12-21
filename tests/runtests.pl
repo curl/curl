@@ -210,8 +210,8 @@ my @protocols;   # array of supported protocols
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
-my %disabled_keywords;	# key words of tests to skip
-my %enabled_keywords;	# key words of tests to run
+my %disabled_keywords;  # key words of tests to skip
+my %enabled_keywords;   # key words of tests to run
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -264,11 +264,11 @@ sub logmsg {
 }
 
 # get the name of the current user
-my $USER = $ENV{USER};	# Linux
+my $USER = $ENV{USER};          # Linux
 if (!$USER) {
-    $USER = $ENV{USERNAME};	# Windows
+    $USER = $ENV{USERNAME};     # Windows
     if (!$USER) {
-        $USER = $ENV{LOGNAME};	# Some UNIX (I think)
+        $USER = $ENV{LOGNAME};  # Some UNIX (I think)
     }
 }
 
@@ -431,7 +431,7 @@ sub runclient {
 
 # This is one way to test curl on a remote machine
 #    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
-#    sleep 2;	# time to allow the NFS server to be updated
+#    sleep 2;    # time to allow the NFS server to be updated
 #    return $out;
 }
 
@@ -444,7 +444,7 @@ sub runclientoutput {
 
 # This is one way to test curl on a remote machine
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
-#    sleep 2;	# time to allow the NFS server to be updated
+#    sleep 2;    # time to allow the NFS server to be updated
 #    return @out;
  }
 
@@ -623,7 +623,7 @@ sub verifyftp {
     my $time=time();
     my $extra;
     if($proto eq "ftps") {
-    	$extra = "--insecure --ftp-ssl-control ";
+        $extra = "--insecure --ftp-ssl-control ";
     }
     my $cmd="$VCURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
     # check if this is our server running on this port:
@@ -1918,20 +1918,20 @@ sub singletest {
 
     if(!$why) {
         my @keywords = getpart("info", "keywords");
-	my $match;
+        my $match;
         my $k;
         for $k (@keywords) {
             chomp $k;
             if ($disabled_keywords{$k}) {
-            	$why = "disabled by keyword";
+                $why = "disabled by keyword";
             } elsif ($enabled_keywords{$k}) {
-            	$match = 1;
+                $match = 1;
             }
         }
 
-	if(!$why && !$match && %enabled_keywords) {
-	  $why = "disabled by missing keyword";
-	}
+        if(!$why && !$match && %enabled_keywords) {
+            $why = "disabled by missing keyword";
+        }
     }
 
     # timestamp required servers verification start
@@ -2278,16 +2278,16 @@ sub singletest {
     chomp $cmd;
     subVariables \$cmd;
     if($cmd) {
-	logmsg "postcheck $cmd\n" if($verbose);
-	my $rc = runclient("$cmd");
-	# Must run the postcheck command in torture mode in order
-	# to clean up, but the result can't be relied upon.
-	if($rc != 0 && !$torture) {
-	    logmsg " postcheck FAILED\n";
+        logmsg "postcheck $cmd\n" if($verbose);
+        my $rc = runclient("$cmd");
+        # Must run the postcheck command in torture mode in order
+        # to clean up, but the result can't be relied upon.
+        if($rc != 0 && !$torture) {
+            logmsg " postcheck FAILED\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-	    return 1;
-	}
+            return 1;
+        }
     }
 
     # remove the special FTP command file after each test!
@@ -2300,9 +2300,9 @@ sub singletest {
 
     # Skip all the verification on torture tests
     if ($torture) {
-	if(!$cmdres && !$keepoutfiles) {
-	    cleardir($LOGDIR);
-	}
+        if(!$cmdres && !$keepoutfiles) {
+            cleardir($LOGDIR);
+        }
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
         return $cmdres;
@@ -2864,14 +2864,14 @@ sub serverfortest {
     }
 
     for (@what) {
-	my $proto = lc($_);
-	chomp $proto;
+        my $proto = lc($_);
+        chomp $proto;
         $proto =~ s/\s.*//g;  # take first word
-	if (! grep /^$proto$/, @protocols) {
-	    if (substr($proto,0,5) ne "socks") {
-		    return "curl lacks $proto support";
-	    }
-	}
+        if (! grep /^$proto$/, @protocols) {
+            if (substr($proto,0,5) ne "socks") {
+                return "curl lacks $proto support";
+            }
+        }
     }
 
     return &startservers(@what);
@@ -3030,8 +3030,8 @@ EOHELP
         $enabled_keywords{$1}=$1;
     }
     else {
-    	print "Unknown option: $ARGV[0]\n";
-    	exit;
+        print "Unknown option: $ARGV[0]\n";
+        exit;
     }
     shift @ARGV;
 } 
@@ -3051,28 +3051,28 @@ if($valgrind) {
         undef $valgrind;
     } else {
 
-	# since valgrind 2.1.x, '--tool' option is mandatory
-	# use it, if it is supported by the version installed on the system
-	runclient("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
-	if (($? >> 8)==0) {
-	    $valgrind_tool="--tool=memcheck ";
-	}
-	open(C, "<$CURL");
-	my $l = <C>;
-	if($l =~ /^\#\!/) {
-	    # A shell script. This is typically when built with libtool,
-	    $valgrind="../libtool --mode=execute $valgrind";
-	}
-	close(C);
+        # since valgrind 2.1.x, '--tool' option is mandatory
+        # use it, if it is supported by the version installed on the system
+        runclient("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
+        if (($? >> 8)==0) {
+            $valgrind_tool="--tool=memcheck ";
+        }
+        open(C, "<$CURL");
+        my $l = <C>;
+        if($l =~ /^\#\!/) {
+            # A shell script. This is typically when built with libtool,
+            $valgrind="../libtool --mode=execute $valgrind";
+        }
+        close(C);
 
-	# valgrind 3 renamed the --logfile option to --log-file!!!
-	my $ver=join(' ', runclientoutput("valgrind --version"));
-	# cut off all but digits and dots
-	$ver =~ s/[^0-9.]//g;
+        # valgrind 3 renamed the --logfile option to --log-file!!!
+        my $ver=join(' ', runclientoutput("valgrind --version"));
+        # cut off all but digits and dots
+        $ver =~ s/[^0-9.]//g;
 
-	if($ver >= 3) {
-	    $valgrind_logfile="--log-file";
-	}
+        if($ver >= 3) {
+            $valgrind_logfile="--log-file";
+        }
     }
 }
 
@@ -3083,9 +3083,9 @@ if ($gdbthis) {
     sysread CHECK, $c, 4;
     close(CHECK);
     if($c eq "#! /") {
-	# A shell script. This is typically when built with libtool,
-	$libtool = 1;
-	$gdb = "libtool --mode=execute gdb";
+        # A shell script. This is typically when built with libtool,
+        $libtool = 1;
+        $gdb = "libtool --mode=execute gdb";
     }
 }
 
@@ -3183,16 +3183,16 @@ sub displaylogcontent {
             $string =~ s/[\r\f\032]/\n/g;
             $string .= "\n" unless ($string =~ /\n$/);
             $string =~ tr/\n//;
-	    for my $line (split("\n", $string)) {
-		$line =~ s/\s*\!$//;
-		if ($truncate) {
-		    push @tail, " $line\n";
-		} else {
-		    logmsg " $line\n";
-		}
-		$linecount++;
-		$truncate = $linecount > 1000;
-	    }
+            for my $line (split("\n", $string)) {
+                $line =~ s/\s*\!$//;
+                if ($truncate) {
+                    push @tail, " $line\n";
+                } else {
+                    logmsg " $line\n";
+                }
+                $linecount++;
+                $truncate = $linecount > 1000;
+            }
         }
         if (@tail) {
             logmsg "=== File too long: lines here were removed\n";
