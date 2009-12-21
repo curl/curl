@@ -63,7 +63,7 @@ sub processexists {
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
-            # waitpid($pid, &WNOHANG);
+            waitpid($pid, &WNOHANG);
             # negative return value means dead process
             return -$pid;
         }
@@ -112,6 +112,8 @@ sub killpid {
                 else {
                     print("RUN: Process with pid $pid already dead\n")
                         if($verbose);
+                    # if possible reap its dead children
+                    waitpid($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -128,6 +130,8 @@ sub killpid {
                     print("RUN: Process with pid $pid gracefully died\n")
                         if($verbose);
                     splice @signalled, $i, 1;
+                    # if possible reap its dead children
+                    waitpid($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -143,12 +147,14 @@ sub killpid {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
                     if($verbose);
                 kill("KILL", $pid);
+                # if possible reap its dead children
+                waitpid($pid, &WNOHANG);
                 push @reapchild, $pid;
             }
         }
     }
 
-    # Reap processes dead children.
+    # Reap processes dead children for sure.
     if(defined(@reapchild)) {
         foreach my $pid (@reapchild) {
             if($pid > 0) {
