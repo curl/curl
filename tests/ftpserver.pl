@@ -404,6 +404,14 @@ elsif($proto eq "imap") {
         );
 
 }
+elsif($proto eq "smtp") {
+    %displaytext = ('EHLO' => '230 We are happy you popped in!',
+                    'MAIL' => '200 Note taken',
+                    'RCPT' => '200 Receivers accepted',
+                    'QUIT' => '200 byebye',
+                    'DATA' => '200 hit me',
+        );
+}
 
 
 sub close_dataconn {
@@ -1015,7 +1023,7 @@ sub customize {
 
 my @welcome;
 
-if($proto eq "ftp") {
+if(($proto eq "ftp") || ($proto eq "smtp")) {
     @welcome=(
         '220-        _   _ ____  _     '."\r\n",
         '220-    ___| | | |  _ \| |    '."\r\n",
