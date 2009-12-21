@@ -111,6 +111,19 @@ sub exit_signal_handler {
 }
 
 #**********************************************************************
+# dead_child_handler takes care of reaping dead child processes.
+#
+sub dead_child_handler {
+    use POSIX ":sys_wait_h";
+    local $!; # preserve errno
+    local $?; # preserve exit status
+    while (waitpid(-1, &WNOHANG) > 0) {
+        select(undef, undef, undef, 0.05);
+    }
+    $SIG{CHLD} = \&dead_child_handler;
+}
+
+#**********************************************************************
 # getlogfilename returns a log file name depending on given arguments.
 #
 sub getlogfilename {
@@ -204,6 +217,7 @@ if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
 
 $SIG{INT} = \&exit_signal_handler;
 $SIG{TERM} = \&exit_signal_handler;
+$SIG{CHLD} = \&dead_child_handler;
 
 sub sysread_or_die {
     my $FH     = shift;
