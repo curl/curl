@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* December 21, 2009 (Yang Tse)
+- Ingmar Runge noticed that Windows config-win32.h configuration file
+  did not include a definition for HAVE_CLOSESOCKET which resulted in
+  function close() being inappropriately used to close sockets.
+
 Version 1.7.0 (Nov 30, 2009)
 
 * November 26, 2009 (Yang Tse)
