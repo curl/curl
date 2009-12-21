@@ -2876,6 +2876,138 @@ sub serverfortest {
 }
 
 #######################################################################
+# runtimestats displays test-suite run time statistics
+#
+sub runtimestats {
+    my $lasttest = $_[0];
+
+    return if(not $timestats);
+
+    logmsg "\nTest suite total running time breakdown per task...\n\n";
+
+    my @timesrvr;
+    my @timeprep;
+    my @timetool;
+    my @timelock;
+    my @timevrfy;
+    my @timetest;
+    my $timesrvrtot = 0.0;
+    my $timepreptot = 0.0;
+    my $timetooltot = 0.0;
+    my $timelocktot = 0.0;
+    my $timevrfytot = 0.0;
+    my $timetesttot = 0.0;
+    my $counter;
+
+    for my $testnum (1 .. $lasttest) {
+        if($timesrvrini{$testnum}) {
+            $timesrvrtot += $timesrvrend{$testnum} - $timesrvrini{$testnum};
+            $timepreptot +=
+                (($timetoolini{$testnum} - $timeprepini{$testnum}) -
+                 ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
+            $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
+            $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
+            $timevrfytot += $timevrfyend{$testnum} - $timesrvrlog{$testnum};
+            $timetesttot += $timevrfyend{$testnum} - $timeprepini{$testnum};
+            push @timesrvr, sprintf("%06.3f  %04d",
+                $timesrvrend{$testnum} - $timesrvrini{$testnum}, $testnum);
+            push @timeprep, sprintf("%06.3f  %04d",
+                ($timetoolini{$testnum} - $timeprepini{$testnum}) -
+                ($timesrvrend{$testnum} - $timesrvrini{$testnum}), $testnum);
+            push @timetool, sprintf("%06.3f  %04d",
+                $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
+            push @timelock, sprintf("%06.3f  %04d",
+                $timesrvrlog{$testnum} - $timetoolend{$testnum}, $testnum);
+            push @timevrfy, sprintf("%06.3f  %04d",
+                $timevrfyend{$testnum} - $timesrvrlog{$testnum}, $testnum);
+            push @timetest, sprintf("%06.3f  %04d",
+                $timevrfyend{$testnum} - $timeprepini{$testnum}, $testnum);
+        }
+    }
+    @timesrvr = sort { $b <=> $a } @timesrvr;
+    @timeprep = sort { $b <=> $a } @timeprep;
+    @timetool = sort { $b <=> $a } @timetool;
+    @timelock = sort { $b <=> $a } @timelock;
+    @timevrfy = sort { $b <=> $a } @timevrfy;
+    @timetest = sort { $b <=> $a } @timetest;
+
+    logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
+           "seconds starting and verifying test harness servers.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
+           "seconds reading definitions and doing test preparations.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
+           "seconds actually running test tools.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
+           "seconds awaiting server logs lock removal.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
+           "seconds verifying test results.\n";
+    logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
+           "seconds doing all of the above.\n";
+
+    $counter = 25;
+    logmsg "\nTest server starting and verification time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timesrvr) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 10;
+    logmsg "\nTest definition reading and preparation time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timeprep) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 25;
+    logmsg "\nTest tool execution time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timetool) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 15;
+    logmsg "\nTest server logs lock removal time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timelock) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 10;
+    logmsg "\nTest results verification time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timevrfy) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    $counter = 50;
+    logmsg "\nTotal time per test ".
+        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+    logmsg "-time-  test\n";
+    logmsg "------  ----\n";
+    foreach my $txt (@timetest) {
+        last if((not $fullstats) && (not $counter--));
+        logmsg "$txt\n";
+    }
+
+    logmsg "\n";
+}
+
+#######################################################################
 # Check options to this test program
 #
 
@@ -3295,6 +3427,8 @@ foreach $testnum (@at) {
     # loop for next test
 }
 
+my $sofar = time() - $start;
+
 #######################################################################
 # Close command log
 #
@@ -3306,6 +3440,8 @@ stopservers($verbose);
 unlink($SOCKSPIDFILE);
 
 my $all = $total + $skipped;
+
+runtimestats($lasttest);
 
 if($total) {
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
@@ -3320,7 +3456,6 @@ else {
 }
 
 if($all) {
-    my $sofar = time()-$start;
     logmsg "TESTDONE: $all tests were considered during ".
         sprintf("%.0f", $sofar) ." seconds.\n";
 }
@@ -3346,131 +3481,6 @@ if($skipped) {
         }
         logmsg ")\n";
     }
-}
-
-if($timestats) {
-    logmsg "\nTest suite total running time breakdown per task...\n\n";
-
-    my @timesrvr;
-    my @timeprep;
-    my @timetool;
-    my @timelock;
-    my @timevrfy;
-    my @timetest;
-    my $timesrvrtot = 0.0;
-    my $timepreptot = 0.0;
-    my $timetooltot = 0.0;
-    my $timelocktot = 0.0;
-    my $timevrfytot = 0.0;
-    my $timetesttot = 0.0;
-    my $counter;
-
-    for my $testnum (1 .. $lasttest) {
-        if($timesrvrini{$testnum}) {
-            $timesrvrtot += $timesrvrend{$testnum} - $timesrvrini{$testnum};
-            $timepreptot +=
-                (($timetoolini{$testnum} - $timeprepini{$testnum}) -
-                 ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
-            $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
-            $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
-            $timevrfytot += $timevrfyend{$testnum} - $timesrvrlog{$testnum};
-            $timetesttot += $timevrfyend{$testnum} - $timeprepini{$testnum};
-            push @timesrvr, sprintf("%06.3f  %04d",
-                $timesrvrend{$testnum} - $timesrvrini{$testnum}, $testnum);
-            push @timeprep, sprintf("%06.3f  %04d",
-                ($timetoolini{$testnum} - $timeprepini{$testnum}) -
-                ($timesrvrend{$testnum} - $timesrvrini{$testnum}), $testnum);
-            push @timetool, sprintf("%06.3f  %04d",
-                $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
-            push @timelock, sprintf("%06.3f  %04d",
-                $timesrvrlog{$testnum} - $timetoolend{$testnum}, $testnum);
-            push @timevrfy, sprintf("%06.3f  %04d",
-                $timevrfyend{$testnum} - $timesrvrlog{$testnum}, $testnum);
-            push @timetest, sprintf("%06.3f  %04d",
-                $timevrfyend{$testnum} - $timeprepini{$testnum}, $testnum);
-        }
-    }
-    @timesrvr = sort { $b <=> $a } @timesrvr;
-    @timeprep = sort { $b <=> $a } @timeprep;
-    @timetool = sort { $b <=> $a } @timetool;
-    @timelock = sort { $b <=> $a } @timelock;
-    @timevrfy = sort { $b <=> $a } @timevrfy;
-    @timetest = sort { $b <=> $a } @timetest;
-
-    logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
-           "seconds starting and verifying test harness servers.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
-           "seconds reading definitions and doing test preparations.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
-           "seconds actually running test tools.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
-           "seconds awaiting server logs lock removal.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
-           "seconds verifying test results.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
-           "seconds doing all of the above.\n";
-
-    $counter = 25;
-    logmsg "\nTest server starting and verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timesrvr) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    $counter = 10;
-    logmsg "\nTest definition reading and preparation time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timeprep) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    $counter = 25;
-    logmsg "\nTest tool execution time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timetool) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    $counter = 15;
-    logmsg "\nTest server logs lock removal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timelock) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    $counter = 10;
-    logmsg "\nTest results verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timevrfy) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    $counter = 50;
-    logmsg "\nTotal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
-    logmsg "-time-  test\n";
-    logmsg "------  ----\n";
-    foreach my $txt (@timetest) {
-        last if((not $fullstats) && (not $counter--));
-        logmsg "$txt\n";
-    }
-
-    logmsg "\n";
 }
 
 if($total && ($ok != $total)) {
