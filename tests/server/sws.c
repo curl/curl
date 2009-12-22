@@ -975,15 +975,17 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
             quarters--;
             res = wait_ms(250);
             if(got_exit_signal)
-              quarters = 0;
+              break;
             if(res) {
               /* should not happen */
               error = SOCKERRNO;
               logmsg("wait_ms() failed with error: (%d) %s",
                      error, strerror(error));
-              quarters = 0;
+              break;
             }
           }
+          if(!quarters)
+            logmsg("Continuing after sleeping %d seconds", num);
         }
         else
           logmsg("Unknown command in reply command section");
