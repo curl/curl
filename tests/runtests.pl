@@ -58,8 +58,9 @@
 
 BEGIN {
     @INC=(@INC, $ENV{'srcdir'}, ".");
-    # run time statistics needs perl 5.7 or newer
-    if($] >= 5.007003) {
+    # run time statistics needs Time::HiRes
+    eval {
+        no warnings "all";
         require Time::HiRes;
         import  Time::HiRes qw( time );
     }
@@ -3080,8 +3081,8 @@ while(@ARGV) {
         $keepoutfiles=1;
     }
     elsif($ARGV[0] eq "-r") {
-        # run time statistics needs perl 5.7 or newer
-        if($] >= 5.007003) {
+        # run time statistics needs Time::HiRes
+        if($Time::HiRes::VERSION) {
             keys(%timeprepini) = 1000;
             keys(%timesrvrini) = 1000;
             keys(%timesrvrend) = 1000;
@@ -3094,8 +3095,8 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0] eq "-rf") {
-        # run time statistics needs perl 5.7 or newer
-        if($] >= 5.007003) {
+        # run time statistics needs Time::HiRes
+        if($Time::HiRes::VERSION) {
             keys(%timeprepini) = 1000;
             keys(%timesrvrini) = 1000;
             keys(%timesrvrend) = 1000;

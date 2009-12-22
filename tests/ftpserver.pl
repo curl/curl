@@ -44,7 +44,9 @@ require "getpart.pm";
 require "ftp.pm";
 
 BEGIN {
-    if($] >= 5.007003) {
+    # sub second timestamping needs Time::HiRes
+    eval {
+        no warnings "all";
         require Time::HiRes;
         import  Time::HiRes qw( gettimeofday );
     }
@@ -141,7 +143,8 @@ sub getlogfilename {
 #
 sub logmsg {
     my $now;
-    if($] >= 5.007003) {
+    # sub second timestamping needs Time::HiRes
+    if($Time::HiRes::VERSION) {
         my ($seconds, $usec) = gettimeofday();
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
             localtime($seconds);
