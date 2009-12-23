@@ -87,7 +87,7 @@ sub killpid {
 
     # Make 'requested' hold the non-duplicate pids from 'pidlist'.
     @requested = split(' ', $pidlist);
-    return if(not defined(@requested));
+    return if(not @requested);
     if(scalar(@requested) > 2) {
         @requested = sort({$a <=> $b} @requested);
     }
@@ -121,7 +121,7 @@ sub killpid {
     }
 
     # Allow all signalled processes five seconds to gracefully die.
-    if(defined(@signalled)) {
+    if(@signalled) {
         my $twentieths = 5 * 20;
         while($twentieths--) {
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
@@ -141,7 +141,7 @@ sub killpid {
     }
 
     # Mercilessly SIGKILL processes still alive.
-    if(defined(@signalled)) {
+    if(@signalled) {
         foreach my $pid (@signalled) {
             if($pid > 0) {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
@@ -155,7 +155,7 @@ sub killpid {
     }
 
     # Reap processes dead children for sure.
-    if(defined(@reapchild)) {
+    if(@reapchild) {
         foreach my $pid (@reapchild) {
             if($pid > 0) {
                 waitpid($pid, 0);
@@ -169,13 +169,12 @@ sub killpid {
 #
 sub ftpkillslave {
     my ($id, $ext, $verbose)=@_;
-    my $base;
 
-    for $base (('filt', 'data')) {
+    for my $base (('filt', 'data')) {
         my $f = ".sock$base$id$ext.pid";
         my $pid = processexists($f);
         if($pid > 0) {
-            printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid)
+            printf("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid)
                 if($verbose);
             kill (9, $pid);
             waitpid($pid, 0);
@@ -191,13 +190,13 @@ sub ftpkillslave {
 sub ftpkillslaves {
     my ($verbose) = @_;
 
-    for $ext (('', 'ipv6')) {
-        for $id (('', '2')) {
-            for $base (('filt', 'data')) {
+    for my $ext (('', 'ipv6')) {
+        for my $id (('', '2')) {
+            for my $base (('filt', 'data')) {
                 my $f = ".sock$base$id$ext.pid";
                 my $pid = processexists($f);
                 if($pid > 0) {
-                    printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext",
+                    printf("* kill pid for %s => %d\n", "ftp-$base$id$ext",
                         $pid) if($verbose);
                     kill (9, $pid);
                     waitpid($pid, 0);

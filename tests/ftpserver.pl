@@ -157,7 +157,7 @@ sub ftpmsg {
   # better on windows/cygwin
 }
 
-do {
+while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
     }
@@ -192,7 +192,8 @@ do {
         $listenaddr =~ s/^\[(.*)\]$/$1/;
         shift @ARGV;
     }
-} while(shift @ARGV);
+    shift @ARGV;
+};
 
 # a dedicated protocol has been selected, check that it's a fine one
 if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
@@ -768,9 +769,11 @@ sub STOR_ftp {
             my $i;
             sysread DREAD, $i, 5;
 
-            #print STDERR "  GOT: $i";
+            my $size = 0;
+            if($i =~ /^([0-9a-fA-F]{4})\n/) {
+                $size = hex($1);
+            }
 
-            my $size = hex($i);
             sysread DREAD, $line, $size;
             
             #print STDERR "  GOT: $size bytes\n";
@@ -840,8 +843,11 @@ sub PASV_ftp {
     # READ the response size
     sysread_or_die(\*DREAD, \$i, 5);
 
-    my $size = hex($i);
-        
+    my $size = 0;
+    if($i =~ /^([0-9a-fA-F]{4})\n/) {
+        $size = hex($1);
+    }
+       
     # READ the response data
     sysread_or_die(\*DREAD, \$i, $size);
         
@@ -1111,7 +1117,10 @@ while(1) {
         # SIZE of data
         sysread_or_die(\*SFREAD, \$i, 5);
 
-        my $size = hex($i);
+        my $size = 0;
+        if($i =~ /^([0-9a-fA-F]{4})\n/) {
+            $size = hex($1);
+        }
 
         # data
         sysread SFREAD, $_, $size;
@@ -1163,24 +1172,30 @@ while(1) {
         my $text;
         $text = $customreply{$FTPCMD};
         my $fake = $text;
-        if($text eq "") {
-            $text = $displaytext{$FTPCMD};
-        }
-        else {
+
+        if($text && ($text ne "")) {
             if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
                 # used enough number of times, now blank the customreply
                 $customreply{$FTPCMD}="";
             }
         }
+        else {
+            $text = $displaytext{$FTPCMD};
+        }
         my $check;
-        if($text) {
-            sendcontrol "$cmdid$text\r\n";
+        if($text && ($text ne "")) {
+            if($cmdid && ($cmdid ne "")) {
+                sendcontrol "$cmdid$text\r\n";
+            }
+            else {
+                sendcontrol "$text\r\n";
+            }
         }
         else {
             $check=1; # no response yet
         }
 
-        if($fake eq "") {
+        unless($fake && ($fake ne "")) {
             # only perform this if we're not faking a reply
             my $func = $commandfunc{$FTPCMD};
             if($func) {
