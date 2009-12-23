@@ -170,8 +170,6 @@ sub killpid {
 sub ftpkillslave {
     my ($id, $ext, $verbose)=@_;
     my $base;
-    my $pidlist;
-    my @pidfiles;
 
     for $base (('filt', 'data')) {
         my $f = ".sock$base$id$ext.pid";
@@ -179,15 +177,10 @@ sub ftpkillslave {
         if($pid > 0) {
             printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid)
                 if($verbose);
-            $pidlist .= "$pid ";
+            kill (9, $pid);
+            waitpid($pid, 0);
         }
-        push @pidfiles, $f;
-    }
-
-    killpid($verbose, $pidlist);
-
-    foreach my $pidfile (@pidfiles) {
-        unlink($pidfile);
+        unlink($f);
     }
 }
 
@@ -197,8 +190,6 @@ sub ftpkillslave {
 #
 sub ftpkillslaves {
     my ($verbose) = @_;
-    my $pidlist;
-    my @pidfiles;
 
     for $ext (('', 'ipv6')) {
         for $id (('', '2')) {
@@ -208,17 +199,12 @@ sub ftpkillslaves {
                 if($pid > 0) {
                     printf ("* kill pid for %s => %d\n", "ftp-$base$id$ext",
                         $pid) if($verbose);
-                    $pidlist .= "$pid ";
+                    kill (9, $pid);
+                    waitpid($pid, 0);
                 }
-                push @pidfiles, $f;
+                unlink($f);
             }
         }
-    }
-
-    killpid($verbose, $pidlist);
-
-    foreach my $pidfile (@pidfiles) {
-        unlink($pidfile);
     }
 }
 

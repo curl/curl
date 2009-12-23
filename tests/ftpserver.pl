@@ -96,12 +96,6 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 #
 sub exit_signal_handler {
     my $signame = shift;
-    local $!; # preserve errno
-    if($got_exit_signal == 0) {
-        $got_exit_signal = 1;
-        $exit_signal = $signame;
-    }
-    $SIG{$signame} = \&exit_signal_handler;
     # For now, simply mimic old behavior.
     ftpkillslaves($verbose);
     unlink($pidfile);
@@ -110,19 +104,6 @@ sub exit_signal_handler {
         clear_advisor_read_lock($SERVERLOGS_LOCK);
     }
     exit;
-}
-
-#**********************************************************************
-# dead_child_handler takes care of reaping dead child processes.
-#
-sub dead_child_handler {
-    use POSIX ":sys_wait_h";
-    local $!; # preserve errno
-    local $?; # preserve exit status
-    while (waitpid(-1, &WNOHANG) > 0) {
-        select(undef, undef, undef, 0.05);
-    }
-    $SIG{CHLD} = \&dead_child_handler;
 }
 
 #**********************************************************************
@@ -220,7 +201,6 @@ if($proto !~ /^(ftp|imap|pop3|smtp)\z/) {
 
 $SIG{INT} = \&exit_signal_handler;
 $SIG{TERM} = \&exit_signal_handler;
-$SIG{CHLD} = \&dead_child_handler;
 
 sub sysread_or_die {
     my $FH     = shift;
@@ -236,7 +216,8 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
-        killpid($verbose, $sfpid);
+        kill(9, $sfpid);
+        waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
         unlink($pidfile);
@@ -250,7 +231,8 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: ftp$ftpdnum$ext read zero\n";
-        killpid($verbose, $sfpid);
+        kill(9, $sfpid);
+        waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. ftp$ftpdnum$ext read zero\n";
         unlink($pidfile);
@@ -276,7 +258,8 @@ sub startsf {
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $cmd\n";
-        killpid($verbose, $sfpid);
+        kill(9, $sfpid);
+        waitpid($sfpid, 0);
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -824,7 +807,8 @@ sub PASV_ftp {
     my $prev = processexists($pidf);
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
-        killpid($verbose, $prev);
+        kill(9, $prev);
+        waitpid($prev, 0);
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
@@ -837,7 +821,8 @@ sub PASV_ftp {
     sysread_or_die(\*DREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
-        killpid($verbose, $slavepid);
+        kill(9, $slavepid);
+        waitpid($slavepid, 0);
         sendcontrol "500 no free ports!\r\n";
         logmsg "failed to run sockfilt for data connection\n";
         return 0;
@@ -971,7 +956,8 @@ sub PORT_ftp {
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt for data connection\n";
-        killpid($verbose, $slavepid);
+        kill(9, $slavepid);
+        waitpid($slavepid, 0);
     }
 
     logmsg "====> Client DATA connect to port $port\n";
@@ -1091,7 +1077,8 @@ while(1) {
     # flush data:
     $| = 1;
 
-    killpid($verbose, $slavepid);
+    kill(9, $slavepid) if($slavepid);
+    waitpid($slavepid, 0) if($slavepid);
     $slavepid=0;
         
     &customize(); # read test control instructions
