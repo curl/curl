@@ -38,6 +38,7 @@
 #
 
 use strict;
+use warnings;
 use IPC::Open2;
 
 require "getpart.pm";

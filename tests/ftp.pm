@@ -21,6 +21,9 @@
 # $Id$
 ###########################################################################
 
+use strict;
+use warnings;
+
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
 # of the returned pid will never be a negative value. It will be zero
