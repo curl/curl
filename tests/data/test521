@@ -39,7 +39,7 @@ lib521
 FTP dir list PASV with CURLOPT_PORT
  </name>
  <command>
-ftp://%HOSTIP/520/ %FTPPORT
+ftp://%HOSTIP/521/ %FTPPORT
 </command>
 </client>
 
@@ -50,7 +50,7 @@ ftp://%HOSTIP/520/ %FTPPORT
 USER xxx
 PASS yyy
 PWD
-CWD 520
+CWD 521
 EPSV
 TYPE A
 LIST

@@ -32,7 +32,7 @@ ftp
 FTP user+password in URL and ASCII transfer
  </name>
  <command>
-ftp://userdude:passfellow@%HOSTIP:%FTPPORT/103 --use-ascii
+ftp://userdude:passfellow@%HOSTIP:%FTPPORT/105 --use-ascii
 </command>
 </client>
 
@@ -45,8 +45,8 @@ PWD
 EPSV
 PASV
 TYPE A
-SIZE 103
-RETR 103
+SIZE 105
+RETR 105
 QUIT
 </protocol>
 </verify>
