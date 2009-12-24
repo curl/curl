@@ -67,8 +67,8 @@ my $nosave=0;
 my $controldelay=0; # set to 1 to delay the control connect data sending to
  # test that curl deals with that nicely
 my $slavepid; # for the DATA connection sockfilt slave process
-my $ipv6;
-my $ext; # append to log/pid file names
+my $ipv6="";
+my $ext=""; # append to log/pid file names
 my $grok_eprt;
 my $port = 8921; # just a default
 my $listenaddr = "127.0.0.1"; # just a default
@@ -613,9 +613,9 @@ sub MDTM_ftp {
     my @data = getpart("reply", "mdtm");
 
     my $reply = $data[0];
-    chomp $reply;
+    chomp $reply if($reply);
 
-    if($reply <0) {
+    if($reply && ($reply =~ /^[+-]?\d+$/) && ($reply < 0)) {
         sendcontrol "550 $testno: no such file.\r\n";
     }
     elsif($reply) {
@@ -629,20 +629,29 @@ sub MDTM_ftp {
 
 sub SIZE_ftp {
     my $testno = $_[0];
-    my $testpart = "";
-    if ($testno > 10000) {
-        $testpart = $testno % 10000;
-        $testno = int($testno / 10000);
-    }
 
-    loadtest("$srcdir/data/test$testno");
-
-    if($testno eq "verifiedserver") {
+    if($testno =~ /^verifiedserver$/) {
         my $response = "WE ROOLZ: $$\r\n";
         my $size = length($response);
         sendcontrol "213 $size\r\n";
         return 0;
     }
+
+    if($testno =~ /(\d+)\/?$/) {
+        $testno = $1;
+    }
+    else {
+        print STDERR "SIZE_ftp: invalid test number: $testno\n";
+        return 1;
+    }
+
+    my $testpart = "";
+    if($testno > 10000) {
+        $testpart = $testno % 10000;
+        $testno = int($testno / 10000);
+    }
+
+    loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "size");
 
