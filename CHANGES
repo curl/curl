@@ -10,6 +10,8 @@ Daniel Stenberg (26 Dec 2009)
 - Renato Botelho and Peter Pentchev brought a patch that makes the libcurl
   headers work correctly even on FreeBSD systems before v8.
 
+  (http://curl.haxx.se/bug/view.cgi?id=2916915)
+
 Daniel Stenberg (17 Dec 2009)
 - David Byron fixed Curl_ossl_cleanup to actually call ENGINE_cleanup when
   available.
