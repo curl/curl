@@ -624,15 +624,23 @@ sub verifyftp {
     my $time=time();
     my $extra;
     if($proto eq "ftps") {
-        $extra = "--insecure --ftp-ssl-control ";
+    	$extra .= "--insecure --ftp-ssl-control ";
+    }
+    elsif($proto eq "smtp") {
+        # SMTP is a bit different since it requires more options and it
+        # has _no_ output!
+        $extra .= "--mail-rcpt verifiedserver ";
+        $extra .= "--mail-from fake ";
+        $extra .= "--user localhost:unused ";
+        $extra .= "--upload /dev/null ";
+        $extra .= "--stderr - "; # move stderr to parse the verbose stuff
     }
     my $cmd="$VCURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
     # check if this is our server running on this port:
     my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
-    my $line;
 
-    foreach $line (@data) {
+    foreach my $line (@data) {
         if ( $line =~ /WE ROOLZ: (\d+)/ ) {
             # this is our test server with a known pid!
             $pid = 0+$1;
