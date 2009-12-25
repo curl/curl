@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o --retry didn't do right for FTP transient errors
  o some *_proxy environment variables didn't function
  o libcurl-OpenSSL engine cleanup
+ o header include fix for FreeBSD versions before v8
 
 This release includes the following known bugs:
 
@@ -48,6 +49,6 @@ advice from friends like these:
  Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman,
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
- Jon Nelson, Julien Chaffraix
+ Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev
 
         Thanks! (and sorry if I forgot to mention someone)

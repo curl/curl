@@ -47,6 +47,11 @@
 #include <stdio.h>
 #include <limits.h>
 
+#if defined(__FreeBSD__)
+/* Needed to check FreeBSD version */
+#include <osreldate.h>
+#endif
+
 /* The include stuff here below is mainly for time_t! */
 #include <sys/types.h>
 #include <time.h>
@@ -66,7 +71,7 @@
    require it! */
 #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
     defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || \
-    defined(ANDROID)
+    defined(ANDROID) || (defined(__FreeBSD__) && __FreeBSD_version < 800000)
 #include <sys/select.h>
 #endif
 
