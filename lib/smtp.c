@@ -321,7 +321,7 @@ static CURLcode smtp_mail(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
 
   /* send MAIL */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<%s>",
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
                          data->set.str[STRING_MAIL_FROM]);
   if(result)
     return result;
@@ -346,7 +346,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
   }
   else {
     /* send RCPT TO */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
                            data->set.str[STRING_MAIL_RCPT]);
     if(result)
       return result;
@@ -392,15 +392,14 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
+  if(smtpcode != 354) {
     state(conn, SMTP_STOP);
     return CURLE_RECV_ERROR;
   }
 
   /* SMTP upload */
-  result=Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
-                             smtp->bytecountp,
-                             -1, NULL); /* no upload here */
+  result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                               FIRSTSOCKET, smtp->bytecountp);
 
   state(conn, SMTP_STOP);
   return result;
