@@ -25,8 +25,10 @@
 # This is a server designed for the curl test suite.
 #
 # In December 2009 we started remaking the server to support more protocols
-# that are similar in spirit. Like POP3, IMAP and SMTP in addition to the
-# FTP it already supported since a long time.
+# that are similar in spirit. Like POP3, IMAP and SMTP in addition to the FTP
+# it already supported since a long time. Note that it still only supports one
+# protocol per invoke. You need to start mulitple servers to support multiple
+# protocols simultaneously.
 #
 # It is meant to exercise curl, it is not meant to be a fully working
 # or even very standard compliant server.
@@ -408,11 +410,13 @@ elsif($proto eq "imap") {
 
 }
 elsif($proto eq "smtp") {
+    %commandfunc = ('DATA' => \&DATA_smtp,
+                    'RCPT' => \&RCPT_smtp,
+        );
     %displaytext = ('EHLO' => '230 We are happy you popped in!',
                     'MAIL' => '200 Note taken',
                     'RCPT' => '200 Receivers accepted',
                     'QUIT' => '200 byebye',
-                    'DATA' => '200 hit me',
         );
 }
 
@@ -435,6 +439,39 @@ sub close_dataconn {
     print DWRITE "QUIT\n";
     waitpid $slavepid, 0;
     $slavepid=0;
+}
+
+################
+################ SMTP commands 
+################
+
+# what set by "RCPT"
+my $smtp_rcpt;
+
+sub DATA_smtp {
+    my $testno;
+
+    if($smtp_rcpt =~ /^TO:(.*)/) {
+        $testno = $1;
+    }
+    else {
+        return; # failure
+    }
+
+    if($testno eq "verifiedserver") {
+        sendcontrol "554 WE ROOLZ: $$\r\n";
+    }
+    else {
+        sendcontrol "354 Show me the mail\r\n";
+    }
+
+    logmsg "===> rcpt $testno was $smtp_rcpt\n";
+}
+
+sub RCPT_smtp {
+    my ($args) = @_;
+
+    $smtp_rcpt = $args;
 }
 
 ################
