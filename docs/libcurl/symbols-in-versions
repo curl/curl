@@ -259,6 +259,8 @@ CURLOPT_LOCALPORT               7.15.2
 CURLOPT_LOCALPORTRANGE          7.15.2
 CURLOPT_LOW_SPEED_LIMIT         7.1
 CURLOPT_LOW_SPEED_TIME          7.1
+CURLOPT_MAIL_FROM               7.20.0
+CURLOPT_MAIL_RCPT               7.20.0
 CURLOPT_MAXCONNECTS             7.7
 CURLOPT_MAXFILESIZE             7.10.8
 CURLOPT_MAXFILESIZE_LARGE       7.11.0
@@ -374,10 +376,16 @@ CURLPROTO_FTP                   7.19.4
 CURLPROTO_FTPS                  7.19.4
 CURLPROTO_HTTP                  7.19.4
 CURLPROTO_HTTPS                 7.19.4
+CURLPROTO_IMAP                  7.20.0
+CURLPROTO_IMAPS                 7.20.0
 CURLPROTO_LDAP                  7.19.4
 CURLPROTO_LDAPS                 7.19.4
+CURLPROTO_POP3                  7.20.0
+CURLPROTO_POP3S                 7.20.0
 CURLPROTO_SCP                   7.19.4
 CURLPROTO_SFTP                  7.19.4
+CURLPROTO_SMTP                  7.20.0
+CURLPROTO_SMTPS                 7.20.0
 CURLPROTO_TELNET                7.19.4
 CURLPROTO_TFTP                  7.19.4
 CURLPROXY_HTTP                  7.10
