@@ -47,8 +47,8 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if defined(__FreeBSD__)
-/* Needed to check FreeBSD version */
+#if defined(__FreeBSD__) && (__FreeBSD__ >= 2)
+/* Needed for __FreeBSD_version symbol definition */
 #include <osreldate.h>
 #endif
 
@@ -71,7 +71,8 @@
    require it! */
 #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
     defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || \
-    defined(ANDROID) || (defined(__FreeBSD__) && __FreeBSD_version < 800000)
+    defined(ANDROID) || \
+   (defined(__FreeBSD_version) && (__FreeBSD_version < 800000))
 #include <sys/select.h>
 #endif
 
