@@ -21,6 +21,11 @@ but be sure to FD_ZERO them before calling this function as
 otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should be
 called as soon as one of them is ready to be read from or written to.
 
+To be sure to have up-to-date results, you should call
+\fIcurl_multi_perform\fP until it does not return CURLM_CALL_MULTI_PERFORM
+prior to calling \fIcurl_multi_fdset\fP.  This will make sure that libcurl has
+updated the handles' socket states.
+
 If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
 this function returns. Otherwise it will contain the higher descriptor number
 libcurl set.
@@ -37,5 +42,5 @@ figure out how long to wait for action.
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3)," curl_multi_init "(3), "
-.BR curl_multi_timeout "(3) "
+.BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
+.BR curl_multi_timeout "(3), " curl_multi_perform "(3) "
