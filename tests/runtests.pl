@@ -70,6 +70,11 @@ use strict;
 #use warnings;
 use Cwd;
 
+# Subs imported from serverhelp module
+use serverhelp qw(
+    servername_str
+    );
+
 # Variables and subs imported from sshhelp module
 use sshhelp qw(
     $sshdexe
@@ -802,21 +807,26 @@ sub runhttpserver {
     my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
-    my $nameext;
+    my $proto = 'http';
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $srvrname;
     my $fork = $forkserver?"--fork":"";
 
     if($ipv6) {
         # if IPv6, use a different setup
+        $ipvnum = 6;
         $pidfile = $HTTP6PIDFILE;
         $port = $HTTP6PORT;
         $ip = $HOST6IP;
-        $nameext="-ipv6";
     }
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -836,7 +846,7 @@ sub runhttpserver {
 
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTP$nameext server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopserver("$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -846,7 +856,7 @@ sub runhttpserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver("http", $ip, $port);
     if(!$pid3) {
-        logmsg "RUN: HTTP$nameext server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httppid $pid2");
         displaylogs($testnumcheck);
@@ -856,7 +866,7 @@ sub runhttpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: HTTP$nameext server is now running PID $httppid\n";
+        logmsg "RUN: $srvrname server is now running PID $httppid\n";
     }
 
     sleep(1);
@@ -873,6 +883,10 @@ sub runhttpsserver {
     my $RUNNING;
     my $ip = $HOSTIP;
     my $pidfile = $HTTPSPIDFILE;
+    my $proto = 'https';
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $srvrname;
 
     if(!$stunnel) {
         return 0;
@@ -880,6 +894,7 @@ sub runhttpsserver {
 
     if($ipv6) {
         # not complete yet
+        $ipvnum = 6;
         $ip = $HOST6IP;
     }
 
@@ -887,6 +902,8 @@ sub runhttpsserver {
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -903,7 +920,7 @@ sub runhttpsserver {
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the HTTPS server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopservers($verbose);
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -913,7 +930,7 @@ sub runhttpsserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver("https", $ip, $HTTPSPORT);
     if(!$pid3) {
-        logmsg "RUN: HTTPS server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$httpspid $pid2");
         displaylogs($testnumcheck);
@@ -923,7 +940,7 @@ sub runhttpsserver {
     # Here pid3 is actually the pid returned by the unsecure-http server.
 
     if($verbose) {
-        logmsg "RUN: HTTPS server is now running PID $httpspid\n";
+        logmsg "RUN: $srvrname server is now running PID $httpspid\n";
     }
 
     sleep(1);
@@ -941,20 +958,22 @@ sub runpingpongserver {
     my $port;
     my $pidfile;
     my $ip=$HOSTIP;
-    my $nameext;
     my $cmd;
     my $flag;
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $srvrname;
 
     if($proto eq "ftp") {
-        $port = $id?$FTP2PORT:$FTPPORT;
-        $pidfile = $id?$FTP2PIDFILE:$FTPPIDFILE;
+        $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
+        $pidfile = ($idnum>1)?$FTP2PIDFILE:$FTPPIDFILE;
 
         if($ipv6) {
             # if IPv6, use a different setup
+            $ipvnum = 6;
             $pidfile = $FTP6PIDFILE;
             $port = $FTP6PORT;
             $ip = $HOST6IP;
-            $nameext="-ipv6";
         }
     }
     elsif($proto eq "pop3") {
@@ -980,6 +999,8 @@ sub runpingpongserver {
         return (0,0);
     }
 
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
     my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($pid);
@@ -990,8 +1011,8 @@ sub runpingpongserver {
     $flag .= $debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
     my $addr;
-    if($id) {
-        $flag .="--id $id ";
+    if($idnum > 1) {
+        $flag .="--id $idnum ";
     }
     if($ipv6) {
         $flag .="--ipv6 ";
@@ -1005,7 +1026,7 @@ sub runpingpongserver {
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the ". uc($proto) ."$id$nameext server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopserver("$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -1015,7 +1036,7 @@ sub runpingpongserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver($proto, $ip, $port);
     if(!$pid3) {
-        logmsg "RUN: ". uc($proto) ."$id$nameext server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftppid $pid2");
         displaylogs($testnumcheck);
@@ -1025,8 +1046,7 @@ sub runpingpongserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: ". uc($proto) ."$id$nameext server is now running".
-               " PID $ftppid\n";
+        logmsg "RUN: $srvrname server is now running PID $ftppid\n";
     }
 
     sleep(1);
@@ -1043,6 +1063,10 @@ sub runftpsserver {
     my $RUNNING;
     my $ip = $HOSTIP;
     my $pidfile = $FTPSPIDFILE;
+    my $proto = 'ftps';
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $srvrname;
 
     if(!$stunnel) {
         return 0;
@@ -1050,6 +1074,7 @@ sub runftpsserver {
 
     if($ipv6) {
         # not complete yet
+        $ipvnum = 6;
         $ip = $HOST6IP;
     }
 
@@ -1057,6 +1082,8 @@ sub runftpsserver {
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1072,7 +1099,7 @@ sub runftpsserver {
 
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the FTPS server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopservers($verbose);
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -1082,7 +1109,7 @@ sub runftpsserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver("ftps", $ip, $FTPSPORT);
     if(!$pid3) {
-        logmsg "RUN: FTPS server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$ftpspid $pid2");
         displaylogs($testnumcheck);
@@ -1092,7 +1119,7 @@ sub runftpsserver {
     # Here pid3 is actually the pid returned by the unsecure-ftp server.
 
     if($verbose) {
-        logmsg "RUN: FTPS server is now running PID $ftpspid\n";
+        logmsg "RUN: $srvrname server is now running PID $ftpspid\n";
     }
 
     sleep(1);
@@ -1111,21 +1138,26 @@ sub runtftpserver {
     # check for pidfile
     my $pidfile = $TFTPPIDFILE;
     my $ip=$HOSTIP;
-    my $nameext;
     my $cmd;
+    my $proto = 'tftp';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $srvrname;
 
     if($ipv6) {
         # if IPv6, use a different setup
+        $ipvnum = 6;
         $pidfile = $TFTP6PIDFILE;
         $port = $TFTP6PORT;
         $ip = $HOST6IP;
-        $nameext="-ipv6";
     }
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1136,8 +1168,8 @@ sub runtftpserver {
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\" ";
-    if($id) {
-        $flag .="--id $id ";
+    if($idnum > 1) {
+        $flag .="--id $idnum ";
     }
     if($ipv6) {
         $flag .="--ipv6 ";
@@ -1148,7 +1180,7 @@ sub runtftpserver {
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the TFTP$id$nameext server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopserver("$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
@@ -1158,7 +1190,7 @@ sub runtftpserver {
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver("tftp", $ip, $port);
     if(!$pid3) {
-        logmsg "RUN: TFTP$id$nameext server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver("$tftppid $pid2");
         displaylogs($testnumcheck);
@@ -1168,7 +1200,7 @@ sub runtftpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: TFTP$id$nameext server is now running PID $tftppid\n";
+        logmsg "RUN: $srvrname server is now running PID $tftppid\n";
     }
 
     sleep(1);
@@ -1186,11 +1218,17 @@ sub runsshserver {
     my $port = $SSHPORT;
     my $socksport = $SOCKSPORT;
     my $pidfile = $SSHPIDFILE;
+    my $proto = 'ssh';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $srvrname;
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1210,7 +1248,7 @@ sub runsshserver {
 
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
-        logmsg "RUN: failed to start the SSH server\n";
+        logmsg "RUN: failed to start the $srvrname server\n";
         stopserver("$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1222,7 +1260,7 @@ sub runsshserver {
 
     my $pid3 = verifyserver("ssh",$ip,$port);
     if(!$pid3) {
-        logmsg "RUN: SSH server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to fetch server pid. Kill the server and return failure
         stopserver("$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
@@ -1247,7 +1285,7 @@ sub runsshserver {
     }
 
     if($verbose) {
-        logmsg "RUN: SSH server is now running PID $pid2\n";
+        logmsg "RUN: $srvrname server is now running PID $pid2\n";
     }
 
     return ($pid2, $sshpid);
@@ -1261,11 +1299,17 @@ sub runsocksserver {
     my $ip=$HOSTIP;
     my $port = $SOCKSPORT;
     my $pidfile = $SOCKSPIDFILE;
+    my $proto = 'socks';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $srvrname;
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
