@@ -7,9 +7,10 @@ Changed:
 Fixed:
 
  o closing of sockets on Windows systems
+ o MSVC deprecated compiler options warnings
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Ingmar Runge 
+ Ingmar Runge, Laszlo Tamas Szabo
 
 Have fun!

@@ -1,5 +1,12 @@
   Changelog for the c-ares project
 
+* December 29, 2009 (Yang Tse)
+- Laszlo Tamas Szabo adjusted Makefile.msvc compiler options so that where
+  run-time error checks enabling compiler option /GZ was used it is replaced
+  with equivalent /RTCsu for Visual Studio 2003 and newer versions. Option
+  /GX is replaced with equivalent /EHsc for all versions. Also fixed socket
+  data type for internal configure_socket function.
+
 * December 21, 2009 (Yang Tse)
 - Ingmar Runge noticed that Windows config-win32.h configuration file
   did not include a definition for HAVE_CLOSESOCKET which resulted in
