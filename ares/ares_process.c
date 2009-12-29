@@ -92,7 +92,7 @@ static void skip_server(ares_channel channel, struct query *query,
                         int whichserver);
 static void next_server(ares_channel channel, struct query *query,
                         struct timeval *now);
-static int configure_socket(int s, ares_channel channel);
+static int configure_socket(ares_socket_t s, ares_channel channel);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
 static int same_questions(const unsigned char *qbuf, int qlen,
@@ -856,7 +856,7 @@ static int setsocknonblock(ares_socket_t sockfd,    /* operate on this */
 #endif
 }
 
-static int configure_socket(int s, ares_channel channel)
+static int configure_socket(ares_socket_t s, ares_channel channel)
 {
   setsocknonblock(s, TRUE);
 
