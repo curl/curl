@@ -25,6 +25,8 @@
  ***************************************************************************/
 #ifndef CURL_DISABLE_HTTP
 
+struct SingleRequest;
+
 extern const struct Curl_handler Curl_handler_http;
 
 #ifdef USE_SSL
@@ -122,5 +124,15 @@ struct HTTP {
   void *send_buffer; /* used if the request couldn't be sent in one chunk,
                         points to an allocated send_buffer struct */
 };
+
+CURLcode Curl_http_header_append(struct SessionHandle *data,
+                                 struct SingleRequest *k,
+                                 size_t length);
+
+CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
+                                     struct connectdata *conn,
+                                     struct SingleRequest *k,
+                                     ssize_t *nread,
+                                     bool *stop_reading);
 
 #endif
