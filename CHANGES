@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (30 Dec 2009)
+- Steven M. Schweda improved VMS build system, and Craig A. Berry helped
+  with the patch and testing.
+
 Daniel Stenberg (26 Dec 2009)
 - Renato Botelho and Peter Pentchev brought a patch that makes the libcurl
   headers work correctly even on FreeBSD systems before v8.
