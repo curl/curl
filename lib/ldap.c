@@ -488,15 +488,15 @@ static void _ldap_trace (const char *fmt, ...)
  */
 static int str2scope (const char *p)
 {
-  if(!stricmp(p, "one"))
+  if(!strequal(p, "one"))
      return LDAP_SCOPE_ONELEVEL;
-  if(!stricmp(p, "onetree"))
+  if(!strequal(p, "onetree"))
      return LDAP_SCOPE_ONELEVEL;
-  if(!stricmp(p, "base"))
+  if(!strequal(p, "base"))
      return LDAP_SCOPE_BASE;
-  if(!stricmp(p, "sub"))
+  if(!strequal(p, "sub"))
      return LDAP_SCOPE_SUBTREE;
-  if(!stricmp( p, "subtree"))
+  if(!strequal( p, "subtree"))
      return LDAP_SCOPE_SUBTREE;
   return (-1);
 }
