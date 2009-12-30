@@ -64,7 +64,7 @@
 #undef in_addr_t
 #define in_addr_t unsigned long
 #endif
-#ifdef VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
 #endif

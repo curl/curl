@@ -42,7 +42,7 @@
 #if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
 #include <sys/filio.h>
 #endif
-#ifdef VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
 #endif

@@ -326,7 +326,7 @@
  */
 
 #ifndef SIZEOF_OFF_T
-#  if defined(__VMS) && (defined(__alpha) || defined(__ia64))
+#  if defined(__VMS) && !defined(__VAX)
 #    if defined(_LARGEFILE)
 #      define SIZEOF_OFF_T 8
 #    endif

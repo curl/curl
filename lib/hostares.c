@@ -46,7 +46,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>     /* for the close() proto */
 #endif
-#ifdef  VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
 #include <stdlib.h>

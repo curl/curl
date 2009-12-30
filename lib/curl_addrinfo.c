@@ -38,7 +38,7 @@
 #  include <arpa/inet.h>
 #endif
 
-#ifdef  VMS
+#ifdef __VMS
 #  include <in.h>
 #  include <inet.h>
 #  include <stdlib.h>
@@ -365,7 +365,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 {
   Curl_addrinfo *ai;
 
-#if defined(VMS) && \
+#if defined(__VMS) && \
     defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
 #pragma pointer_size save
 #pragma pointer_size short
@@ -418,7 +418,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
   h->h_addr_list[0] = addrentry;
   h->h_addr_list[1] = NULL; /* terminate list of entries */
 
-#if defined(VMS) && \
+#if defined(__VMS) && \
     defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
 #pragma pointer_size restore
 #pragma message enable PTRMISMATCH

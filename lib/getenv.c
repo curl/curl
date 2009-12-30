@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef VMS
+#ifdef __VMS
 #include <unixlib.h>
 #endif
 
@@ -51,7 +51,7 @@ char *GetEnv(const char *variable)
   return (env[0] != '\0')?strdup(env):NULL;
 #else
   char *env = getenv(variable);
-#ifdef VMS
+#ifdef __VMS
   if(env && strcmp("HOME",variable) == 0)
     env = decc_translate_vms(env);
 #endif

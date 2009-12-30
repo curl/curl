@@ -53,7 +53,7 @@
 #ifdef HAVE_STROPTS_H
 #  include <stropts.h>
 #endif
-#ifdef VMS
+#ifdef __VMS
 #  include <inet.h>
 #endif
 

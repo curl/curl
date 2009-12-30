@@ -65,7 +65,7 @@
 #include <sys/param.h>
 #endif
 
-#ifdef VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
 #endif

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,7 +54,7 @@
 #include "memdebug.h"
 #endif
 
-#ifdef VMS
+#ifdef __VMS
 /* VMS implementation */
 #include descrip
 #include starlet
@@ -93,7 +93,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* VMS */
+#endif /* __VMS */
 
 
 #ifdef WIN32

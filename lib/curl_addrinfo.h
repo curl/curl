@@ -38,7 +38,7 @@
 #  include <arpa/inet.h>
 #endif
 
-#ifdef  VMS
+#ifdef __VMS
 #  include <in.h>
 #  include <inet.h>
 #  include <stdlib.h>

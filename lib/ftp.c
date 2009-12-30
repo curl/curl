@@ -49,7 +49,7 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef  VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
 #endif

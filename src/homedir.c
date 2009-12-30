@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,7 +33,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef VMS
+#ifdef __VMS
 #include <unixlib.h>
 #endif
 
@@ -68,7 +68,7 @@ char *GetEnv(const char *variable, char do_expand)
   }
 #else
   (void)do_expand;
-#ifdef  VMS
+#ifdef __VMS
   env = getenv(variable);
   if (env && strcmp("HOME",variable) == 0) {
         env = decc_translate_vms(env);
@@ -99,7 +99,7 @@ char *homedir(void)
    struct passwd *pw = getpwuid(geteuid());
 
    if (pw) {
-#ifdef VMS
+#ifdef __VMS
      home = decc_translate_vms(pw->pw_dir);
 #else
      home = pw->pw_dir;
