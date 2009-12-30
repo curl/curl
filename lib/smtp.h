@@ -45,9 +45,9 @@ typedef enum {
    struct */
 struct smtp_conn {
   struct pingpong pp;
-  char *domain;      /* what to send in the EHLO */
-  int eob;        /* number of bytes of the EOB (End Of Body) that has been
-                     received thus far */
+  char *domain;    /* what to send in the EHLO */
+  int eob;         /* number of bytes of the EOB (End Of Body) that has been
+                      received thus far */
   smtpstate state; /* always use smtp.c:state() to change state! */
 };
 

@@ -248,11 +248,10 @@ static void state(struct connectdata *conn,
 static CURLcode smtp_state_ehlo(struct connectdata *conn)
 {
   CURLcode result;
-  struct FTP *smtp = conn->data->state.proto.smtp;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   /* send EHLO */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "EHLO %s",
-                         smtp->user?smtp->user:"");
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "EHLO %s", smtpc->domain);
   if(result)
     return result;
 
@@ -545,6 +544,8 @@ static CURLcode smtp_connect(struct connectdata *conn,
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data=conn->data;
   struct pingpong *pp=&smtpc->pp;
+  const char *path = conn->data->state.path;
+  int len;
 
   *done = FALSE; /* default to not done yet */
 
@@ -608,6 +609,12 @@ static CURLcode smtp_connect(struct connectdata *conn,
   pp->statemach_act = smtp_statemach_act;
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
+
+  if(!*path)
+    path = "localhost";
+
+  /* url decode the path and use it as domain with EHLO */
+  smtpc->domain = curl_easy_unescape(conn->data, path, 0, &len);
 
   /* When we connect, we start in the state where we await the server greeting
    */
@@ -801,11 +808,14 @@ static CURLcode smtp_dophase_done(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct FTP *smtp = conn->data->state.proto.smtp;
+  struct smtp_conn *smtpc= &conn->proto.smtpc;
   (void)connected;
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
     result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+
+  free(smtpc->domain);
 
   return result;
 }
