@@ -786,62 +786,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_SMTP
       if(conn->protocol & PROT_SMTP) {
-        /* When sending SMTP payload, we must detect CRLF.CRLF sequences in
-         * the data and make sure it is sent as CRLF..CRLF instead, as
-         * otherwise it will wrongly be detected as end of data by the server.
-         */
-        struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-        if(data->state.scratch == NULL)
-          data->state.scratch = malloc(2*BUFSIZE);
-        if(data->state.scratch == NULL) {
-          failf (data, "Failed to alloc scratch buffer!");
-          return CURLE_OUT_OF_MEMORY;
-        }
-        /* This loop can be improved by some kind of Boyer-Moore style of
-           approach but that is saved for later... */
-        for(i = 0, si = 0; i < nread; i++, si++) {
-          int left = nread - i;
-
-          if(left>= (SMTP_EOB_LEN-smtpc->eob)) {
-            if(!memcmp(SMTP_EOB+smtpc->eob, &data->req.upload_fromhere[i],
-                       SMTP_EOB_LEN-smtpc->eob)) {
-              /* It matched, copy the replacement data to the target buffer
-                 instead. Note that the replacement does not contain the
-                 trailing CRLF but we instead continue to match on that one
-                 to deal with repeated sequences. Like CRLF.CRLF.CRLF etc
-              */
-              memcpy(&data->state.scratch[si], SMTP_EOB_REPL,
-                     SMTP_EOB_REPL_LEN);
-              si+=SMTP_EOB_REPL_LEN-1; /* minus one since the for() increments
-                                          it */
-              i+=SMTP_EOB_LEN-smtpc->eob-1-2;
-              smtpc->eob = 0; /* start over */
-              continue;
-            }
-          }
-          else if(!memcmp(SMTP_EOB+smtpc->eob, &data->req.upload_fromhere[i],
-                          left)) {
-            /* the last piece of the data matches the EOB so we can't send that
-               until we know the rest of it */
-            smtpc->eob += left;
-            break;
-          }
-
-          data->state.scratch[si] = data->req.upload_fromhere[i];
-        } /* for() */
-
-        if(si != nread) {
-          /* only use the new buffer if we replaced something */
-          nread = si;
-
-          /* upload from the new (replaced) buffer instead */
-          data->req.upload_fromhere = data->state.scratch;
-
-          /* set the new amount too */
-          data->req.upload_present = nread;
-        }
-
+        result = Curl_smtp_escape_eob(conn, nread);
+        if(result)
+          return result;
       }
       else
 #endif /* CURL_DISABLE_SMTP */
