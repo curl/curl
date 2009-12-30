@@ -473,12 +473,69 @@ sub DATA_smtp {
 
     if($testno eq "verifiedserver") {
         sendcontrol "554 WE ROOLZ: $$\r\n";
+        return 0; # don't wait for data now
     }
     else {
+        $testno =~ s/^([0-9]*).*/$1/;
         sendcontrol "354 Show me the mail\r\n";
     }
 
     logmsg "===> rcpt $testno was $smtp_rcpt\n";
+
+    my $filename = "log/upload.$testno";
+
+    logmsg "Store test number $testno in $filename\n";
+
+    open(FILE, ">$filename") ||
+        return 0; # failed to open output
+
+    my $line;
+    my $ulsize=0;
+    my $disc=0;
+    my $raw;
+    while (5 == (sysread \*SFREAD, $line, 5)) {
+        if($line eq "DATA\n") {
+            my $i;
+            my $eob;
+            sysread \*SFREAD, $i, 5;
+
+            my $size = 0;
+            if($i =~ /^([0-9a-fA-F]{4})\n/) {
+                $size = hex($1);
+            }
+
+            sysread \*SFREAD, $line, $size;
+            
+            $ulsize += $size;
+            print FILE $line if(!$nosave);
+
+            $raw .= $line;
+            if($raw =~ /\x0d\x0a\x2e\x0d\x0a\z/) {
+                # end of data marker!
+                $eob = 1;
+            }
+            logmsg "> Appending $size bytes to file\n";
+            if($eob) {
+                logmsg "Found SMTP EOB marker\n";
+                last;
+            }
+        }
+        elsif($line eq "DISC\n") {
+            # disconnect!
+            $disc=1;
+            last;
+        }
+        else {
+            logmsg "No support for: $line";
+            last;
+        }
+    }
+    if($nosave) {
+        print FILE "$ulsize bytes would've been stored here\n";
+    }
+    close(FILE);
+    logmsg "received $ulsize bytes upload\n";
+
 }
 
 sub RCPT_smtp {

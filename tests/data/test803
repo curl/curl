@@ -17,16 +17,22 @@ SMTP
 smtp
 </server>
  <name>
-SMTP
+SMTP with CRLF-dot-CRLF in data
  </name>
 <stdin>
 From: different
 To: another
 
+
+.
+.
+
+.
+
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT -u user:secret --mail-rcpt 802@foo --mail-from 802@from -T -
+smtp://%HOSTIP:%SMTPPORT -u user:secret --mail-rcpt 803@foo --mail-from 803@from -T -
 </command>
 </client>
 
@@ -35,14 +41,20 @@ smtp://%HOSTIP:%SMTPPORT -u user:secret --mail-rcpt 802@foo --mail-from 802@from
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:802@from
-RCPT TO:802@foo
+MAIL FROM:803@from
+RCPT TO:803@foo
 DATA
 QUIT
 </protocol>
 <upload>
 From: different
 To: another
+
+
+..
+..
+
+..
 
 body
 
