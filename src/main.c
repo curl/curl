@@ -4839,7 +4839,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_QUOTE, config->quote);
         my_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
         my_setopt(curl, CURLOPT_PREQUOTE, config->prequote);
-        my_setopt(curl, CURLOPT_WRITEHEADER,
+        my_setopt(curl, CURLOPT_HEADERDATA,
                   config->headerfile?&heads:NULL);
         my_setopt_str(curl, CURLOPT_COOKIEFILE, config->cookiefile);
         /* cookie jar was added in 7.9 */
