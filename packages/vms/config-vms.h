@@ -14,14 +14,14 @@
 /* MSK, 01/27/07, needed to add HAVE_STRUCT_TIMEVAL define                 */
 
 /* Define cpu-machine-OS */
-#ifdef __ALPHA
-#define OS "ALPHA-HP-VMS"
+#if defined(__alpha)
+#  define OS "ALPHA-HP-VMS"
+#elif defined(__vax)
+#  define OS "VAX-HP-VMS"
+#elif defined(__ia64)
+#  define OS "IA64-HP-VMS"
 #else
-#ifdef __VAX
-#define OS "VAX-HP-VMS"
-#else
-#define OS "IA64-HP-VMS"
-#endif
+#  define OS "UNKNOWN-HP-VMS"
 #endif
 
 /* Define if you have the ANSI C header files.  */
@@ -94,7 +94,7 @@
 #define HAVE_STRCASECMP 1
 
 /* Define if you have the strcmpi function.  */
-#define HAVE_STRCMPI 1
+/* #define HAVE_STRCMPI 1 */
 
 /* Define if you have the strdup function.  */
 #define HAVE_STRDUP 1
@@ -103,10 +103,10 @@
 #define HAVE_STRFTIME 1
 
 /* Define if you have the stricmp function.  */
-#define HAVE_STRICMP 1
+/* #define HAVE_STRICMP 1 */
 
 /* Define if you have the strstr function.  */
-#define  HAVE_STRSTR 1
+#define HAVE_STRSTR 1
 
 /* Define if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
@@ -153,25 +153,25 @@
 #define HAVE_LIBCRYPTO 1
 
 /* Define if you have the ssl library (-lssl).  */
-#define HAVE_LIBSSL	1
+#define HAVE_LIBSSL 1
 
 /* Define if you have the <openssl/crypto.h> header file.  */
 #define HAVE_OPENSSL_CRYPTO_H 1
 
 /* Define if you have the <openssl/err.h> header file.  */
-#define HAVE_OPENSSL_ERR_H	1
+#define HAVE_OPENSSL_ERR_H 1
 
 /* Define if you have the <openssl/pem.h> header file.  */
-#define HAVE_OPENSSL_PEM_H	1
+#define HAVE_OPENSSL_PEM_H 1
 
 /* Define if you have the <openssl/rsa.h> header file.  */
 #define HAVE_OPENSSL_RSA_H 1
 
 /* Define if you have the <openssl/ssl.h> header file.  */
-#define HAVE_OPENSSL_SSL_H	1
+#define HAVE_OPENSSL_SSL_H 1
 
 /* Define if you have the <openssl/x509.h> header file.  */
-#define HAVE_OPENSSL_X509_H	1
+#define HAVE_OPENSSL_X509_H 1
 
 /*
  * This needs to be defined for OpenSSL 0.9.7 and other versions that have the
@@ -223,10 +223,10 @@
 #define HAVE_GETADDRINFO 1
 
 /* Define if you have the <timeval.h> header file.  */
-#define	HAVE_TIMEVAL_H	1
+#define HAVE_TIMEVAL_H 1
 
 /* Define if you have the timeval struct.  */
-#define	HAVE_STRUCT_TIMEVAL 1
+#define HAVE_STRUCT_TIMEVAL 1
 
 /* Name of this package! */
 #define PACKAGE "not-used"
@@ -249,14 +249,14 @@
 /* Define if you have the `strtok_r' function.  */
 /* Condition lifted from <string.h>             */
 #if __CRTL_VER >= 70301000
-#define HAVE_STRTOK_R 1
+#  define HAVE_STRTOK_R 1
 #endif
 
 /* Define if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
 
 /* Define if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H   1
+#define HAVE_MEMORY_H 1
 
 /* Define to 1 if you need the memory.h header file even with stdlib.h */
 #define NEED_MEMORY_H 1
@@ -275,9 +275,6 @@
 
 /* Define to 1 if you have the <stropts.h> header file. */
 #define HAVE_STROPTS_H 1
-
-/* to disable LDAP */
-#define CURL_DISABLE_LDAP 1
 
 /* Define if you have the getnameinfo function. */
 #define HAVE_GETNAMEINFO 1
