@@ -122,6 +122,7 @@ sub server_pidfilename {
 sub server_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.log';
+    $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|imap|pop3|smtp)s$/);
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
