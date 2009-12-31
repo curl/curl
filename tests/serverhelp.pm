@@ -50,6 +50,15 @@ use vars qw(
     servername_id
     servername_str
     servername_canon
+    server_pidfilename
+    server_logfilename
+    server_cmdfilename
+    server_inputfilename
+    server_outputfilename
+    mainsockf_pidfilename
+    mainsockf_logfilename
+    datasockf_pidfilename
+    datasockf_logfilename
     );
 
 
@@ -94,6 +103,104 @@ sub servername_canon {
     my $string = lc(servername_str($proto, $ipver, $idnum));
     $string =~ tr/-/_/;
     return $string;
+}
+
+
+#***************************************************************************
+# Return file name for server pid file.
+#
+sub server_pidfilename {
+    my ($proto, $ipver, $idnum) = @_;
+    my $trailer = '_server.pid';
+    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for server log file.
+#
+sub server_logfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    my $trailer = '_server.log';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for server commands file.
+#
+sub server_cmdfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    my $trailer = '_server.cmd';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for server input file.
+#
+sub server_inputfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    my $trailer = '_server.input';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for server output file.
+#
+sub server_outputfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    my $trailer = '_server.output';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for main or primary sockfilter pid file.
+#
+sub mainsockf_pidfilename {
+    my ($proto, $ipver, $idnum) = @_;
+    die "unsupported protocol: $proto" unless($proto &&
+        (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
+    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
+    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for main or primary sockfilter log file.
+#
+sub mainsockf_logfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    die "unsupported protocol: $proto" unless($proto &&
+        (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
+    my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log':'_sockfilt.log';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for data or secondary sockfilter pid file.
+#
+sub datasockf_pidfilename {
+    my ($proto, $ipver, $idnum) = @_;
+    die "unsupported protocol: $proto" unless($proto &&
+        (lc($proto) =~ /^ftps?$/));
+    my $trailer = '_sockdata.pid';
+    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#***************************************************************************
+# Return file name for data or secondary sockfilter log file.
+#
+sub datasockf_logfilename {
+    my ($logdir, $proto, $ipver, $idnum) = @_;
+    die "unsupported protocol: $proto" unless($proto &&
+        (lc($proto) =~ /^ftps?$/));
+    my $trailer = '_sockdata.log';
+    return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 
