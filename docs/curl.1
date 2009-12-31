@@ -756,7 +756,15 @@ password to all hosts that the site may redirect to. This may or may not
 introduce a security breach if the site redirects you to a site to which
 you'll send your authentication info (which is plaintext in the case of HTTP
 Basic authentication).
+.IP "--mail-rcpt <address>"
+(SMTP) Specify a single address that the given mail should get sent to. This
+option can be used multiple times to specify many recipients.
 
+(Added in 7.20.0)
+.IP "--mail-from <address>"
+(SMTP) Specify a single address that the given mail should get sent from.
+
+(Added in 7.20.0)
 .IP "--max-filesize <bytes>"
 Specify the maximum size (in bytes) of a file to download. If the file
 requested is larger than this value, the transfer will not start and curl will
