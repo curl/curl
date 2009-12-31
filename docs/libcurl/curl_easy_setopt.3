@@ -1053,6 +1053,19 @@ Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
 transfer decoding will be disabled, if set to 1 it is enabled
 (default). libcurl does chunked transfer decoding by default unless this
 option is set to zero. (added in 7.16.2)
+.SH SMTP OPTIONS
+.IP CURLOPT_MAIL_FROM
+Pass a pointer to a zero terminated string as parameter. It will be used to
+specify the sender address in a mail when sending an SMTP mail with libcurl.
+
+(Added in 7.20.0)
+.IP CURLOPT_MAIL_RCPT
+Pass a pointer to a linked list of recipients to pass to the server in your
+SMTP mail request.  The linked list should be a fully valid list of \fBstruct
+curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
+create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire list.
+
+(Added in 7.20.0)
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
 Specify block size to use for TFTP data transmission. Valid range as per RFC
