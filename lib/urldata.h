@@ -1166,7 +1166,6 @@ enum dupstring {
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
   STRING_MAIL_FROM,
-  STRING_MAIL_RCPT,
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */
@@ -1337,6 +1336,7 @@ struct UserDefined {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
+  struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 };
 
 struct Names {

@@ -345,8 +345,23 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
   }
   else {
     /* send RCPT TO */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                           data->set.str[STRING_MAIL_RCPT]);
+    struct curl_slist *rcpt;
+    char *buffer = NULL;
+
+    for(rcpt = data->set.mail_rcpt; rcpt; rcpt=rcpt->next) {
+      char *add = aprintf("%s%s%s", buffer?buffer:"", buffer?", ":"",
+                          rcpt->data);
+      if(!add) {
+        free(buffer);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      buffer = add;
+    }
+
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s", buffer);
+
+    free(buffer);
+
     if(result)
       return result;
 

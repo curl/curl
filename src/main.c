@@ -501,7 +501,7 @@ struct Configurable {
   int proxyver;     /* set to CURLPROXY_HTTP* define */
   char *noproxy;
   char *mail_from;
-  char *mail_rcpt;
+  struct curl_slist *mail_rcpt;
   bool proxytunnel;
   bool ftp_append;         /* APPE on ftp */
   bool mute;               /* shutup */
@@ -2279,7 +2279,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->mail_from, nextarg);
         break;
       case 'B': /* --mail-rcpt */
-        GetStr(&config->mail_rcpt, nextarg);
+        /* append receiver to a list */
+        err = add2list(&config->mail_rcpt, nextarg);
+        if(err)
+          return err;
         break;
       }
       break;
@@ -3837,6 +3840,7 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->postquote);
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->telnet_options);
+  curl_slist_free_all(config->mail_rcpt);
 
   if(config->easy)
     curl_easy_cleanup(config->easy);

@@ -2314,8 +2314,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_MAIL_RCPT:
-    result = setstropt(&data->set.str[STRING_MAIL_RCPT],
-                       va_arg(param, char *));
+    /* get a list of mail recipients */
+    data->set.mail_rcpt = va_arg(param, struct curl_slist *);
     break;
 
   default:
