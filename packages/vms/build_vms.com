@@ -449,7 +449,7 @@ $ endif
 $!
 $ link 'link_qual' /executable = 'exedir'CURL.EXE -
    'objdir'curlsrc.olb /library /include = (main, curlmsg), -
-   'objdir'curllib.olb /library /include = (vms_misc) -
+   'objdir'curllib.olb /library -
    'ssl_opt' -
    'ldap_opt'
 $!

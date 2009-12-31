@@ -109,5 +109,114 @@ void vms_special_exit(int code, int vms_show)
   decc$exit(vms_code);
 }
 
+#if defined(__DECC) && !defined(__VAX) && \
+    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+
+/*
+ * 2004-09-19 SMS.
+ *
+ * decc_init()
+ *
+ * On non-VAX systems, use LIB$INITIALIZE to set a collection of C
+ * RTL features without using the DECC$* logical name method, nor
+ * requiring the user to define the corresponding logical names.
+ */
+
+#include <unixlib.h>
+
+/* Structure to hold a DECC$* feature name and its desired value. */
+typedef struct {
+  char *name;
+  int value;
+} decc_feat_t;
+
+/* Array of DECC$* feature names and their desired values. */
+static decc_feat_t decc_feat_array[] = {
+  /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
+  { "DECC$ARGV_PARSE_STYLE", 1 },
+  /* Preserve case for file names on ODS5 disks. */
+  { "DECC$EFS_CASE_PRESERVE", 1 },
+  /* Enable multiple dots (and most characters) in ODS5 file names,
+     while preserving VMS-ness of ";version". */
+  { "DECC$EFS_CHARSET", 1 },
+  /* List terminator. */
+  { (char *)NULL, 0 }
+};
+
+/* Flag to sense if decc_init() was called. */
+static int decc_init_done = -1;
+
+/* LIB$INITIALIZE initialization function. */
+static void decc_init(void)
+{
+  int feat_index;
+  int feat_value;
+  int feat_value_max;
+  int feat_value_min;
+  int i;
+  int sts;
+
+  /* Set the global flag to indicate that LIB$INITIALIZE worked. */
+  decc_init_done = 1;
+
+  /* Loop through all items in the decc_feat_array[]. */
+  for(i = 0; decc_feat_array[i].name != NULL; i++) {
+
+    /* Get the feature index. */
+    feat_index = decc$feature_get_index( decc_feat_array[i].name);
+
+    if(feat_index >= 0) {
+      /* Valid item.  Collect its properties. */
+      feat_value = decc$feature_get_value( feat_index, 1);
+      feat_value_min = decc$feature_get_value( feat_index, 2);
+      feat_value_max = decc$feature_get_value( feat_index, 3);
+
+      if((decc_feat_array[i].value >= feat_value_min) &&
+         (decc_feat_array[i].value <= feat_value_max)) {
+        /* Valid value.  Set it if necessary. */
+        if(feat_value != decc_feat_array[i].value) {
+          sts = decc$feature_set_value( feat_index, 1,
+                                        decc_feat_array[i].value);
+        }
+      }
+      else {
+        /* Invalid DECC feature value. */
+        printf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
+               feat_value,
+               feat_value_min, decc_feat_array[i].name, feat_value_max);
+      }
+    }
+    else {
+      /* Invalid DECC feature name. */
+      printf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
+    }
+
+  }
+}
+
+/* Get "decc_init()" into a valid, loaded LIB$INITIALIZE PSECT. */
+
+#pragma nostandard
+
+/* Establish the LIB$INITIALIZE PSECTs, with proper alignment and
+   other attributes.  Note that "nopic" is significant only on VAX. */
+#pragma extern_model save
+#pragma extern_model strict_refdef "LIB$INITIALIZ" 2, nopic, nowrt
+const int spare[8] = {0};
+#pragma extern_model strict_refdef "LIB$INITIALIZE" 2, nopic, nowrt
+void (*const x_decc_init)() = decc_init;
+#pragma extern_model restore
+
+/* Fake reference to ensure loading the LIB$INITIALIZE PSECT. */
+#pragma extern_model save
+int LIB$INITIALIZE(void);
+#pragma extern_model strict_refdef
+int dmy_lib$initialize = (int) LIB$INITIALIZE;
+#pragma extern_model restore
+
+#pragma standard
+
+#endif /* __DECC && !__VAX && __CRTL_VER && __CRTL_VER >= 70301000 */
+
 #endif /* __VMS */
 
