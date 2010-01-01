@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-errors 3 "8 Jun 2008" "libcurl 7.19.0" "libcurl errors"
+.TH libcurl-errors 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -71,9 +71,10 @@ either a PASV or a EPSV command. The server is flawed.
 FTP servers return a 227-line as a response to a PASV command. If libcurl
 fails to parse that line, this return code is passed back.
 .IP "CURLE_FTP_PRET_FAILED (84)"
-The FTP server does not understand the PRET command at all or does not
-support the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST\fP,
-a custom LIST command will be sent with PRET CMD before PASV as well.
+The FTP server does not understand the PRET command at all or does not support
+the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST\fP, a
+custom LIST command will be sent with PRET CMD before PASV as well. (Added in
+7.20.0)
 .IP "CURLE_FTP_CANT_GET_HOST (15)"
 An internal failure to lookup the host used for the new connection.
 .IP "CURLE_FTP_COULDNT_SET_TYPE (17)"

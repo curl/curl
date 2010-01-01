@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "11 Dec 2008" "libcurl 7.19.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -1161,11 +1161,10 @@ pass zero to this option, it will not try using EPSV, only plain PASV.
 
 If the server is an IPv6 host, this option will have no effect as of 7.12.3.
 .IP CURLOPT_FTP_USE_PRET
-Pass a long. If the value is 1, it tells curl to send a PRET command
-before PASV (and EPSV). Certain FTP servers, mainly drftpd, require this
-non-standard command for directory listings as well as up and downloads in
-PASV mode. Has no effect when using the active FTP transfers mode.
-(Added in 7.20.x)
+Pass a long. If the value is 1, it tells curl to send a PRET command before
+PASV (and EPSV). Certain FTP servers, mainly drftpd, require this non-standard
+command for directory listings as well as up and downloads in PASV mode. Has
+no effect when using the active FTP transfers mode.  (Added in 7.20.0)
 .IP CURLOPT_FTP_CREATE_MISSING_DIRS
 Pass a long. If the value is 1, curl will attempt to create any remote
 directory that it fails to CWD into. CWD is the command that changes working
