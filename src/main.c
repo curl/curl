@@ -477,6 +477,7 @@ struct Configurable {
   bool resume_from_current;
   bool disable_epsv;
   bool disable_eprt;
+  bool ftp_pret;
   curl_off_t resume_from;
   char *postfields;
   curl_off_t postfieldsize;
@@ -794,6 +795,7 @@ static void help(void)
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
     " -P/--ftp-port <address> Use PORT with address instead of PASV (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
+    "    --ftp-pret      Send PRET before PASV (for drftpd) (F)",
     "    --ftp-ssl       Try SSL/TLS for ftp transfer (F)",
     "    --ftp-ssl-ccc   Send CCC after authenticating (F)",
     "    --ftp-ssl-ccc-mode [active/passive] Set CCC mode (F)",
@@ -1746,6 +1748,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$9", "tftp-blksize", TRUE},
     {"$A", "mail-from", TRUE},
     {"$B", "mail-rcpt", TRUE},
+    {"$C", "ftp-pret",   FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2283,6 +2286,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         err = add2list(&config->mail_rcpt, nextarg);
         if(err)
           return err;
+        break;
+      case 'C': /* --ftp-pret */
+        config->ftp_pret = toggle;
         break;
       }
       break;
@@ -5031,6 +5037,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->mail_rcpt)
           my_setopt_str(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+
+        /* curl 7.20.x */
+        if(config->ftp_pret)
+          my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
 
         retry_numretries = config->req_retry;
 

@@ -565,6 +565,7 @@ static void state(struct connectdata *conn,
     "REST",
     "RETR_REST",
     "PORT",
+    "PRET",
     "PASV",
     "LIST",
     "RETR",
@@ -1090,7 +1091,25 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn)
   }
   else {
     /* We have chosen (this is default) to use the PASV (or similar) command */
-    result = ftp_state_use_pasv(conn);
+    if(data->set.ftp_use_pret) {
+      /* The user has requested that we send a PRET command
+         to prepare the server for the upcoming PASV */
+      if(!conn->proto.ftpc.file) {
+        PPSENDF(&conn->proto.ftpc.pp, "PRET %s", data->set.str[STRING_CUSTOMREQUEST]?
+                 data->set.str[STRING_CUSTOMREQUEST]:
+                 (data->set.ftp_list_only?"NLST":"LIST"));
+      }
+      else if(data->set.upload) {
+        PPSENDF(&conn->proto.ftpc.pp, "PRET STOR %s", conn->proto.ftpc.file);
+      }
+      else {
+        PPSENDF(&conn->proto.ftpc.pp, "PRET RETR %s", conn->proto.ftpc.file);
+      }
+      state(conn, FTP_PRET);
+    }
+    else {
+      result = ftp_state_use_pasv(conn);
+    }
   }
   return result;
 }
@@ -2708,6 +2727,15 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_REST:
     case FTP_RETR_REST:
       result = ftp_state_rest_resp(conn, ftpcode, ftpc->state);
+      break;
+
+    case FTP_PRET:
+      if(ftpcode != 200) {
+       /* there only is this one standard OK return code. */
+        failf(data, "PRET command not accepted: %03d", ftpcode);
+        return CURLE_FTP_PRET_FAILED;
+      }
+      result = ftp_state_use_pasv(conn);
       break;
 
     case FTP_PASV:

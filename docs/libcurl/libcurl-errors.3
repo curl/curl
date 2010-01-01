@@ -70,6 +70,10 @@ either a PASV or a EPSV command. The server is flawed.
 .IP "CURLE_FTP_WEIRD_227_FORMAT (14)"
 FTP servers return a 227-line as a response to a PASV command. If libcurl
 fails to parse that line, this return code is passed back.
+.IP "CURLE_FTP_PRET_FAILED (84)"
+The FTP server does not understand the PRET command at all or does not
+support the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST\fP,
+a custom LIST command will be sent with PRET CMD before PASV as well.
 .IP "CURLE_FTP_CANT_GET_HOST (15)"
 An internal failure to lookup the host used for the new connection.
 .IP "CURLE_FTP_COULDNT_SET_TYPE (17)"

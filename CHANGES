@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Jan 2010)
+- Ingmar Runge enhanced libcurl's FTP engine to support the PRET command. This
+  command is a special "hack" used by the drftpd server, but even though it is
+  a custom extension I've deemed it fine to add to libcurl since this server
+  seems to survive and people keep using it and want libcurl to support
+  it. The new libcurl option is named CURLOPT_FTP_USE_PRET, and it is also
+  usable from the curl tool with --ftp-pret. Using this option on a server
+  that doesn't support this command will make libcurl fail.
+
+  I added test cases 1107 and 1108 to verify the functionality.
+
+  The PRET command is documented at
+  http://www.drftpd.org/index.php/Distributed_PASV
+
 Yang Tse (30 Dec 2009)
 - Steven M. Schweda improved VMS build system, and Craig A. Berry helped
   with the patch and testing.

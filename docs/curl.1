@@ -461,6 +461,11 @@ will re-use the same IP address it already uses for the control
 connection. (Added in 7.14.2)
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
+.IP "--ftp-pret"
+(FTP) Tell curl to send a PRET command before PASV (and EPSV). Certain
+FTP servers, mainly drftpd, require this non-standard command for
+directory listings as well as up and downloads in PASV mode.
+(Added in 7.20.x)
 .IP "--ftp-ssl"
 (FTP) Try to use SSL/TLS for the FTP connection.  Reverts to a non-secure
 connection if the server doesn't support SSL/TLS.  See also

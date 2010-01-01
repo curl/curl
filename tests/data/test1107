@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+PRET
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<servercmd>
+REPLY PRET 200 fine
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP RETR PASV with PRET
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1107 --ftp-pret
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+PRET RETR 1107
+EPSV
+TYPE I
+SIZE 1107
+RETR 1107
+QUIT
+</protocol>
+</verify>
+</testcase>

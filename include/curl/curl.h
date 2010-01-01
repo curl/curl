@@ -413,6 +413,7 @@ typedef enum {
                                     wrong format (Added in 7.19.0) */
   CURLE_SSL_ISSUER_ERROR,        /* 83 - Issuer check failed.  (Added in
                                     7.19.0) */
+  CURLE_FTP_PRET_FAILED,         /* 84 - a PRET command failed */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -1290,6 +1291,9 @@ typedef enum {
 
   /* set the SMTP mail receiver(s) */
   CINIT(MAIL_RCPT, OBJECTPOINT, 187),
+
+  /* FTP: send PRET before PASV */
+  CINIT(FTP_USE_PRET, LONG, 188),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
