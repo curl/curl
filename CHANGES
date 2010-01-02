@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Jan 2010)
+- Make curl support --ssl and --ssl-reqd instead of the previous FTP-specific
+  versions --ftp-ssl and --ftp-ssl-reqd as these options are now used to
+  control SSL/TLS for IMAP, POP3 and SMTP as well in addition to FTP. The old
+  option names are still working but the new ones are the ones listed and
+  documented.
+
 Daniel Stenberg (1 Jan 2010)
 - Ingmar Runge enhanced libcurl's FTP engine to support the PRET command. This
   command is a special "hack" used by the drftpd server, but even though it is

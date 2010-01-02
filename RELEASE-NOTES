@@ -17,6 +17,7 @@ This release includes the following changes:
  o added --mail-from and --mail-rcpt for SMTP
  o VMS build system enhancements
  o added support for the PRET ftp command
+ o curl supports --ssl and --ssl-reqd
 
 This release includes the following bugfixes:
 

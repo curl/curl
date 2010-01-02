@@ -796,11 +796,9 @@ static void help(void)
     " -P/--ftp-port <address> Use PORT with address instead of PASV (F)",
     "    --ftp-skip-pasv-ip Skip the IP address for PASV (F)\n"
     "    --ftp-pret      Send PRET before PASV (for drftpd) (F)",
-    "    --ftp-ssl       Try SSL/TLS for ftp transfer (F)",
     "    --ftp-ssl-ccc   Send CCC after authenticating (F)",
     "    --ftp-ssl-ccc-mode [active/passive] Set CCC mode (F)",
     "    --ftp-ssl-control Require SSL/TLS for ftp login, clear for transfer (F)",
-    "    --ftp-ssl-reqd  Require SSL/TLS for ftp transfer (F)",
     " -G/--get           Send the -d data with a HTTP GET (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
     " -H/--header <line> Custom header to pass to server (H)",
@@ -878,6 +876,8 @@ static void help(void)
 #endif
     " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs",
     " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30",
+    "    --ssl           Try SSL/TLS (FTP, IMAP, POP3, SMTP)",
+    "    --ssl-reqd      Require SSL/TLS (FTP, IMAP, POP3, SMTP)",
     " -2/--sslv2         Use SSLv2 (SSL)",
     " -3/--sslv3         Use SSLv3 (SSL)",
     "    --stderr <file> Where to redirect stderr. - means stdout",
@@ -1703,7 +1703,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*Z", "eprt", FALSE}, /* made like this to make --no-eprt and --eprt to
                               work although --disable-eprt is the documented
                               option */
-    {"$a", "ftp-ssl",    FALSE},
+    {"$a", "ftp-ssl",    FALSE}, /* deprecated name since 7.20.0 */
+    {"$a", "ssl",        FALSE}, /* new option name in 7.20.0, previously this
+                                    was ftp-ssl */
     {"$b", "ftp-pasv",   FALSE},
     {"$c", "socks5",   TRUE},
     {"$c", "socks",      TRUE}, /* this is how the option once was documented
@@ -1726,7 +1728,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$t", "socks4",     TRUE},
     {"$T", "socks4a",    TRUE},
     {"$u", "ftp-alternative-to-user", TRUE},
-    {"$v", "ftp-ssl-reqd", FALSE},
+    {"$v", "ftp-ssl-reqd", FALSE}, /* deprecated name since 7.20.0 */
+    {"$v", "ssl-reqd", FALSE},  /* new option name in 7.20.0, previously this
+                                   was ftp-ssl-reqd */
     {"$w", "sessionid", FALSE}, /* listed as --no-sessionid in the help */
     {"$x", "ftp-ssl-control", FALSE},
     {"$y", "ftp-ssl-ccc", FALSE},

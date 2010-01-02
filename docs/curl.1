@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -466,19 +466,24 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 FTP servers, mainly drftpd, require this non-standard command for
 directory listings as well as up and downloads in PASV mode.
 (Added in 7.20.x)
-.IP "--ftp-ssl"
-(FTP) Try to use SSL/TLS for the FTP connection.  Reverts to a non-secure
-connection if the server doesn't support SSL/TLS.  See also
-\fI--ftp-ssl-control\fP and \fI--ftp-ssl-reqd\fP for different levels of
-encryption required. (Added in 7.11.0)
+.IP "--ssl"
+(FTP, POP3, IMAP, SMTP) Try to use SSL/TLS for the connection.  Reverts to a
+non-secure connection if the server doesn't support SSL/TLS.  See also
+\fI--ftp-ssl-control\fP and \fI--ssl-reqd\fP for different levels of
+encryption required. (Added in 7.20.0)
+
+This option was formerly known as \fI--ftp-ssl\fP (Added in 7.11.0) and that
+can still be used but will be removed in a future version.
 .IP "--ftp-ssl-control"
 (FTP) Require SSL/TLS for the FTP login, clear for transfer.  Allows secure
 authentication, but non-encrypted data transfers for efficiency.  Fails the
 transfer if the server doesn't support SSL/TLS.  (Added in 7.16.0)
-.IP "--ftp-ssl-reqd"
-(FTP) Require SSL/TLS for the FTP connection.
-Terminates the connection if the server doesn't support SSL/TLS.
-(Added in 7.15.5)
+.IP "--ssl-reqd"
+(FTP, POP3, IMAP, SMTP) Require SSL/TLS for the connection.  Terminates the
+connection if the server doesn't support SSL/TLS. (Added in 7.20.0)
+
+This option was formerly known as \fI--ftp-ssl-reqd\fP (added in 7.15.5) and
+that can still be used but will be removed in a future version.
 .IP "--ftp-ssl-ccc"
 (FTP) Use CCC (Clear Command Channel)
 Shuts down the SSL/TLS layer after authenticating. The rest of the
