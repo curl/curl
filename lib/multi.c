@@ -1760,7 +1760,6 @@ static void singlesocket(struct Curl_multi *multi,
   struct Curl_one_easy *easy_by_hash;
   bool remove_sock_from_hash;
 
-  memset(&socks, 0, sizeof(socks));
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
     socks[i] = CURL_SOCKET_BAD;
 

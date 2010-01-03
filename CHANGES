@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Kamil Dudka (3 Jan 2010)
+- Julien Chaffraix eliminated a duplicated initialization in singlesocket().
+
 Daniel Stenberg (2 Jan 2010)
 - Make curl support --ssl and --ssl-reqd instead of the previous FTP-specific
   versions --ftp-ssl and --ftp-ssl-reqd as these options are now used to
