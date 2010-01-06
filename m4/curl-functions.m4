@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 61
+# serial 62
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -121,6 +121,11 @@ curl_includes_inttypes="\
 # include <inttypes.h>
 #endif
 /* includes end */"
+  case $host_os in
+    irix*)
+      ac_cv_header_stdint_h="no"
+      ;;
+  esac
   AC_CHECK_HEADERS(
     sys/types.h stdint.h inttypes.h,
     [], [], [$curl_includes_inttypes])
