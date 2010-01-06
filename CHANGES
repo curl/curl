@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (7 Jan 2010)
+- Make sure the progress callback is called repeatedly even during very slow
+  name resolves when c-ares is used for resolving.
+
 Claes Jakobsson (6 Jan 2010)
 - Julien Chaffraix fixed so that the fragment part in an URL is not sent
   to the server anymore.

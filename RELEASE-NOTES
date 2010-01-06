@@ -41,6 +41,7 @@ This release includes the following bugfixes:
  o libcurl-OpenSSL engine cleanup
  o header include fix for FreeBSD versions before v8
  o fragment part of URLs are no longer sent to the server
+ o progress callback called repeatedly with c-ares for resolving
 
 This release includes the following known bugs:
 

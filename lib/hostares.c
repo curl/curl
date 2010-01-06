@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,6 +72,7 @@
 #include "inet_pton.h"
 #include "connect.h"
 #include "select.h"
+#include "progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -119,7 +120,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
 }
 
 /*
- * ares_waitperform()
+ * waitperform()
  *
  * 1) Ask ares what sockets it currently plays with, then
  * 2) wait for the timeout period to check for action on ares' sockets.
@@ -128,7 +129,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
  * return number of sockets it worked on
  */
 
-static int ares_waitperform(struct connectdata *conn, int timeout_ms)
+static int waitperform(struct connectdata *conn, int timeout_ms)
 {
   struct SessionHandle *data = conn->data;
   int nfds;
@@ -192,7 +193,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   *dns = NULL;
 
-  ares_waitperform(conn, 0);
+  waitperform(conn, 0);
 
   if(conn->async.done) {
     /* we're done, kill the ares handle */
@@ -238,6 +239,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     struct timeval *tvp, tv, store;
     long timediff;
     int itimeout;
+    int timeout_ms;
 
     itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
 
@@ -246,14 +248,27 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
 
-    /* use the timeout period ares returned to us above */
-    ares_waitperform(conn, (int)(tvp->tv_sec * 1000 + tvp->tv_usec/1000));
+    /* use the timeout period ares returned to us above if less than one
+       second is left, otherwise just use 1000ms to make sure the progress
+       callback gets called frequent enough */
+    if(!tvp->tv_sec)
+      timeout_ms = tvp->tv_usec/1000;
+    else
+      timeout_ms = 1000;
+
+    waitperform(conn, timeout_ms);
 
     if(conn->async.done)
       break;
 
-    timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
-    timeout -= timediff?timediff:1; /* always deduct at least 1 */
+    if(Curl_pgrsUpdate(conn)) {
+      rc = CURLE_ABORTED_BY_CALLBACK;
+      timeout = -1; /* trigger the cancel below */
+    }
+    else {
+      timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
+      timeout -= timediff?timediff:1; /* always deduct at least 1 */
+    }
     if(timeout < 0) {
       /* our timeout, so we cancel the ares operation */
       ares_cancel(data->state.areschannel);
