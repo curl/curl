@@ -449,6 +449,9 @@ on which protocols are supported.
 The string given to CURLOPT_URL must be url-encoded and follow RFC 2396
 (http://curl.haxx.se/rfc/rfc2396.txt).
 
+Please note that starting with version 7.20.0, the fragment part of the URI will
+not be send as part of the path, which was the case previously.
+
 \fICURLOPT_URL\fP is the only option that \fBmust\fP be set before
 \fIcurl_easy_perform(3)\fP is called.
 

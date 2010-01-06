@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Claes Jakobsson (6 Jan 2010)
+- Julien Chaffraix fixed so that the fragment part in an URL is not sent
+  to the server anymore.
+
 Kamil Dudka (3 Jan 2010)
 - Julien Chaffraix eliminated a duplicated initialization in singlesocket().
 

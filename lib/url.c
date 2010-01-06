@@ -3311,8 +3311,9 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                     bool *prot_missing)
 {
   char *at;
-  char *tmp;
+  char *fragment;
   char *path = data->state.path;
+  char *query;
   int rc;
   char protobuf[16];
   const char *protop;
@@ -3438,11 +3439,11 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
    */
   at = strchr(conn->host.name, '@');
   if(at)
-    tmp = strchr(at+1, '?');
+    query = strchr(at+1, '?');
   else
-    tmp = strchr(conn->host.name, '?');
+    query = strchr(conn->host.name, '?');
 
-  if(tmp) {
+  if(query) {
     /* We must insert a slash before the '?'-letter in the URL. If the URL had
        a slash after the '?', that is where the path currently begins and the
        '?string' is still part of the host name.
@@ -3451,7 +3452,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        the path. And have it all prefixed with a slash.
     */
 
-    size_t hostlen = strlen(tmp);
+    size_t hostlen = strlen(query);
     size_t pathlen = strlen(path);
 
     /* move the existing path plus the zero byte forward, to make room for
@@ -3459,11 +3460,11 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     memmove(path+hostlen+1, path, pathlen+1);
 
      /* now copy the trailing host part in front of the existing path */
-    memcpy(path+1, tmp, hostlen);
+    memcpy(path+1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
 
-    *tmp=0; /* now cut off the hostname at the ? */
+    *query=0; /* now cut off the hostname at the ? */
   }
   else if(!path[0]) {
     /* if there's no path set, use a single slash */
@@ -3500,12 +3501,19 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     }
   }
 
-  if (data->set.scope)
+  if(data->set.scope)
     /* Override any scope that was set above.  */
     conn->scope = data->set.scope;
 
+  /* Remove the fragment part of the path. Per RFC 2396, this is always the
+     last part of the URI. We are looking for the first '#' so that we deal gracefully
+     with non conformant URI such as http://example.com#foo#bar. */
+  fragment = strchr(path, '#');
+  if(fragment)
+    *fragment = 0;
+
   /*
-   * So if the URL was A://B/C,
+   * So if the URL was A://B/C#D,
    *   protop is A
    *   conn->host.name is B
    *   data->state.path is /C
