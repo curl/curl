@@ -23,7 +23,7 @@ hello
 http
 </server>
  <name>
-HTTP GET
+HTTP GET with URL that contains a fragment containing a # (which is illegal). 
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1111?q=foobar#fragment#fragment2
