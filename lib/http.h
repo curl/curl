@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,10 +124,6 @@ struct HTTP {
   void *send_buffer; /* used if the request couldn't be sent in one chunk,
                         points to an allocated send_buffer struct */
 };
-
-CURLcode Curl_http_header_append(struct SessionHandle *data,
-                                 struct SingleRequest *k,
-                                 size_t length);
 
 CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                                      struct connectdata *conn,
