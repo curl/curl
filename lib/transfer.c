@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -441,7 +441,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
     if(k->header) {
       /* we are in parse-the-header-mode */
       bool stop_reading = FALSE;
-      result = Curl_http_readwrite_headers(data, conn, k, &nread, &stop_reading);
+      result = Curl_http_readwrite_headers(data, conn, &nread, &stop_reading);
       if(result)
         return result;
       if(stop_reading)
