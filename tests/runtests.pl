@@ -73,6 +73,8 @@ use Cwd;
 # Subs imported from serverhelp module
 use serverhelp qw(
     servername_str
+    server_pidfilename
+    server_logfilename
     );
 
 # Variables and subs imported from sshhelp module
@@ -803,30 +805,29 @@ sub verifyserver {
 #
 sub runhttpserver {
     my ($verbose, $ipv6) = @_;
-    my $RUNNING;
-    my $pidfile = $HTTPPIDFILE;
     my $port = $HTTPPORT;
     my $ip = $HOSTIP;
     my $proto = 'http';
     my $ipvnum = 4;
     my $idnum = 1;
     my $srvrname;
-    my $fork = $forkserver?"--fork":"";
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
 
     if($ipv6) {
         # if IPv6, use a different setup
         $ipvnum = 6;
-        $pidfile = $HTTP6PIDFILE;
         $port = $HTTP6PORT;
         $ip = $HOST6IP;
     }
+
+    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
-    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -834,15 +835,18 @@ sub runhttpserver {
     }
     unlink($pidfile);
 
-    my $flag=$debugprotocol?"-v ":"";
-    my $dir=$ENV{'srcdir'};
-    if($dir) {
-        $flag .= "-d \"$dir\" ";
-    }
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
-    my $cmd="$perl $srcdir/httpserver.pl -p $pidfile $fork$flag $port $ipv6";
-    my ($httppid, $pid2) =
-        startnew($cmd, $pidfile, 15, 0); # start the server in a new process
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--fork " if($forkserver);
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$perl $srcdir/httpserver.pl $flags";
+    my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
@@ -854,7 +858,7 @@ sub runhttpserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver("http", $ip, $port);
+    my $pid3 = verifyserver($proto, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1132,32 +1136,29 @@ sub runftpsserver {
 #
 sub runtftpserver {
     my ($id, $verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
     my $port = $TFTPPORT;
-    # check for pidfile
-    my $pidfile = $TFTPPIDFILE;
-    my $ip=$HOSTIP;
-    my $cmd;
+    my $ip = $HOSTIP;
     my $proto = 'tftp';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
     my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
 
     if($ipv6) {
         # if IPv6, use a different setup
         $ipvnum = 6;
-        $pidfile = $TFTP6PIDFILE;
         $port = $TFTP6PORT;
         $ip = $HOST6IP;
     }
+
+    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
-    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1165,17 +1166,16 @@ sub runtftpserver {
     }
     unlink($pidfile);
 
-    # start our server:
-    my $flag=$debugprotocol?"-v ":"";
-    $flag .= "--srcdir \"$srcdir\" ";
-    if($idnum > 1) {
-        $flag .="--id $idnum ";
-    }
-    if($ipv6) {
-        $flag .="--ipv6 ";
-    }
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
-    $cmd="./server/tftpd --pidfile $pidfile $flag --port $port";
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$perl $srcdir/tftpserver.pl $flags";
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
@@ -1188,7 +1188,7 @@ sub runtftpserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver("tftp", $ip, $port);
+    my $pid3 = verifyserver($proto, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
