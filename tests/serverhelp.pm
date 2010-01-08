@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -122,7 +122,7 @@ sub server_pidfilename {
 sub server_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.log';
-    $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|imap|pop3|smtp)s$/);
+    $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|http|imap|pop3|smtp)s$/);
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
