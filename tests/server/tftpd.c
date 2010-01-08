@@ -682,6 +682,18 @@ int main(int argc, char **argv)
       if(argc>arg)
         pidname = argv[arg++];
     }
+    else if(!strcmp("--logfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        serverlogfile = argv[arg++];
+    }
+    else if(!strcmp("--ipv4", argv[arg])) {
+#ifdef ENABLE_IPV6
+      ipv_inuse = "IPv4";
+      use_ipv6 = FALSE;
+#endif
+      arg++;
+    }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
       ipv_inuse = "IPv6";
@@ -689,13 +701,30 @@ int main(int argc, char **argv)
 #endif
       arg++;
     }
-    else if(argc>arg) {
-
-      if(atoi(argv[arg]))
-        port = (unsigned short)atoi(argv[arg++]);
-
-      if(argc>arg)
-        path = argv[arg++];
+    else if(!strcmp("--port", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        port = (unsigned short)atoi(argv[arg]);
+        arg++;
+      }
+    }
+    else if(!strcmp("--srcdir", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        path = argv[arg];
+        arg++;
+      }
+    }
+    else {
+      puts("Usage: tftpd [option]\n"
+           " --version\n"
+           " --logfile [file]\n"
+           " --pidfile [file]\n"
+           " --ipv4\n"
+           " --ipv6\n"
+           " --port [port]\n"
+           " --srcdir [path]\n");
+      return 0;
     }
   }
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1051,6 +1051,18 @@ int main(int argc, char *argv[])
       if(argc>arg)
         pidname = argv[arg++];
     }
+    else if(!strcmp("--logfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        serverlogfile = argv[arg++];
+    }
+    else if(!strcmp("--ipv4", argv[arg])) {
+#ifdef ENABLE_IPV6
+      ipv_inuse = "IPv4";
+      use_ipv6 = FALSE;
+#endif
+      arg++;
+    }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
       ipv_inuse = "IPv6";
@@ -1064,13 +1076,31 @@ int main(int argc, char *argv[])
       arg++;
     }
 #endif
-    else if(argc>arg) {
-
-      if(atoi(argv[arg]))
-        port = (unsigned short)atoi(argv[arg++]);
-
-      if(argc>arg)
-        path = argv[arg++];
+    else if(!strcmp("--port", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        port = (unsigned short)atoi(argv[arg]);
+        arg++;
+      }
+    }
+    else if(!strcmp("--srcdir", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        path = argv[arg];
+        arg++;
+      }
+    }
+    else {
+      puts("Usage: sws [option]\n"
+           " --version\n"
+           " --logfile [file]\n"
+           " --pidfile [file]\n"
+           " --ipv4\n"
+           " --ipv6\n"
+           " --port [port]\n"
+           " --srcdir [path]\n"
+           " --fork");
+      return 0;
     }
   }
 

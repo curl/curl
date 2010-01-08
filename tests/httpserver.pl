@@ -9,6 +9,9 @@ my $port = 8999; # just a default
 my $ipv6;
 my $pid=".http.pid"; # name of the pidfile
 my $fork;
+
+my $flags  = "";
+
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -33,4 +36,9 @@ do {
     }
 } while(shift @ARGV);
 
-exec("server/sws --pidfile $pid$fork $ipv6$port $dir");
+$flags .= "--pidfile \"$pid\" ";
+$flags .= "--fork " if(defined($fork));
+$flags .= "--ipv6 " if(defined($ipv6));
+$flags .= "--port $port --srcdir \"$dir\"";
+
+exec("server/sws $flags");

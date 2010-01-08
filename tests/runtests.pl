@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1167,7 +1167,7 @@ sub runtftpserver {
 
     # start our server:
     my $flag=$debugprotocol?"-v ":"";
-    $flag .= "-s \"$srcdir\" ";
+    $flag .= "--srcdir \"$srcdir\" ";
     if($idnum > 1) {
         $flag .="--id $idnum ";
     }
@@ -1175,7 +1175,7 @@ sub runtftpserver {
         $flag .="--ipv6 ";
     }
 
-    $cmd="./server/tftpd --pidfile $pidfile $flag $port";
+    $cmd="./server/tftpd --pidfile $pidfile $flag --port $port";
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($tftppid <= 0 || !kill(0, $tftppid)) {
