@@ -723,7 +723,7 @@ int main(int argc, char **argv)
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]\n"
-           " --srcdir [path]\n");
+           " --srcdir [path]");
       return 0;
     }
   }
