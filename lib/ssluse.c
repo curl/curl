@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2315,7 +2315,15 @@ ossl_connect_step3(struct connectdata *conn,
       return retcode;
     }
   }
-
+#ifdef HAVE_SSL_GET1_SESSION
+  else {
+    /* Session was incache, so refcount already incremented earlier.
+     * Avoid further increments with each SSL_get1_session() call.
+     * This does not free the session as refcount remains > 0
+     */
+    SSL_SESSION_free(our_ssl_sessionid);
+  }
+#endif
 
   /*
    * We check certificates to authenticate the server; otherwise we risk

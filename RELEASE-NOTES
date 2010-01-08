@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o header include fix for FreeBSD versions before v8
  o fragment part of URLs are no longer sent to the server
  o progress callback called repeatedly with c-ares for resolving
+ o OpenSSL session id ref count leak
 
 This release includes the following known bugs:
 
@@ -54,6 +55,7 @@ advice from friends like these:
  Marco Maggi, Camille Moncelier, Claes Jakobsson, Kevin Baughman,
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
- Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge
+ Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
+ Johan van Selst
 
         Thanks! (and sorry if I forgot to mention someone)

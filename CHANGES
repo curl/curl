@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Jan 2010)
+- Johan van Selst found and fixed a OpenSSL session ref count leak:
+
+  ossl_connect_step3() increments an SSL session handle reference counter on
+  each call. When sessions are re-used this reference counter may be
+  incremented many times, but it will be decremented only once when done (by
+  Curl_ossl_session_free()); and the internal OpenSSL data will not be freed
+  if this reference count remains positive. When a session is re-used the
+  reference counter should be corrected by explicitly calling
+  SSL_SESSION_free() after each consecutive SSL_get1_session() to avoid
+  introducing a memory leak.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2926284)
+
 Daniel Stenberg (7 Jan 2010)
 - Make sure the progress callback is called repeatedly even during very slow
   name resolves when c-ares is used for resolving.
