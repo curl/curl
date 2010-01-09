@@ -122,8 +122,11 @@ my $TFTP6PORT; # TFTP
 my $SSHPORT; # SCP/SFTP
 my $SOCKSPORT; # SOCKS4/5 port
 my $POP3PORT; # POP3
+my $POP36PORT; # POP3 IPv6 server port
 my $IMAPPORT; # IMAP
+my $IMAP6PORT; # IMAP IPv6 server port
 my $SMTPPORT; # SMTP
+my $SMTP6PORT; # SMTP IPv6 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl"; # what curl executable to run on the tests
@@ -957,53 +960,49 @@ sub runhttpsserver {
 #
 sub runpingpongserver {
     my ($proto, $id, $verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
     my $port;
-    my $pidfile;
-    my $ip=$HOSTIP;
-    my $cmd;
-    my $flag;
+    my $ip = $HOSTIP;
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
     my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
 
     if($proto eq "ftp") {
         $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
-        $pidfile = ($idnum>1)?$FTP2PIDFILE:$FTPPIDFILE;
 
         if($ipv6) {
             # if IPv6, use a different setup
-            $ipvnum = 6;
-            $pidfile = $FTP6PIDFILE;
             $port = $FTP6PORT;
-            $ip = $HOST6IP;
         }
     }
     elsif($proto eq "pop3") {
-        $port = $POP3PORT;
-        $pidfile = $POP3PIDFILE;
+        $port = ($ipv6) ? $POP36PORT : $POP3PORT;
     }
     elsif($proto eq "imap") {
-        $port = $IMAPPORT;
-        $pidfile = $IMAPPIDFILE;
+        $port = ($ipv6) ? $IMAP6PORT : $IMAPPORT;
     }
     elsif($proto eq "smtp") {
-        $port = $SMTPPORT;
-        $pidfile = $SMTPPIDFILE;
+        $port = ($ipv6) ? $SMTP6PORT : $SMTPPORT;
     }
     else {
         print STDERR "Unsupported protocol $proto!!\n";
         return 0;
     }
-    $flag .= "--proto $proto ";
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $ip = $HOST6IP;
+    }
+
+    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
-    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1011,21 +1010,17 @@ sub runpingpongserver {
     }
     unlink($pidfile);
 
-    # start our server:
-    $flag .= $debugprotocol?"-v ":"";
-    $flag .= "-s \"$srcdir\" ";
-    my $addr;
-    if($idnum > 1) {
-        $flag .="--id $idnum ";
-    }
-    if($ipv6) {
-        $flag .="--ipv6 ";
-        $addr = $HOST6IP;
-    } else {
-        $addr = $HOSTIP;
-    }
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
-    $cmd="$perl $srcdir/ftpserver.pl --pidfile $pidfile $flag --port $port --addr \"$addr\"";
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--srcdir \"$srcdir\" --proto $proto ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --port $port --addr \"$ip\"";
+
+    my $cmd = "$perl $srcdir/ftpserver.pl $flags";
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftppid <= 0 || !kill(0, $ftppid)) {
@@ -1754,6 +1749,11 @@ sub checksystem {
     logmsg sprintf("POP3/%d ", $POP3PORT);
     logmsg sprintf("IMAP/%d ", $IMAPPORT);
     logmsg sprintf("SMTP/%d\n", $SMTPPORT);
+    if($tftp_ipv6) {
+        logmsg sprintf("POP3-IPv6/%d ", $POP36PORT);
+        logmsg sprintf("IMAP-IPv6/%d ", $IMAP6PORT);
+        logmsg sprintf("SMTP-IPv6/%d ", $SMTP6PORT);
+    }
 
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
@@ -1783,8 +1783,11 @@ sub subVariables {
   $$thing =~ s/%SSHPORT/$SSHPORT/g;
   $$thing =~ s/%SOCKSPORT/$SOCKSPORT/g;
   $$thing =~ s/%POP3PORT/$POP3PORT/g;
+  $$thing =~ s/%POP36PORT/$POP36PORT/g;
   $$thing =~ s/%IMAPPORT/$IMAPPORT/g;
+  $$thing =~ s/%IMAP6PORT/$IMAP6PORT/g;
   $$thing =~ s/%SMTPPORT/$SMTPPORT/g;
+  $$thing =~ s/%SMTP6PORT/$SMTP6PORT/g;
   $$thing =~ s/%CURL/$CURL/g;
   $$thing =~ s/%USER/$USER/g;
   $$thing =~ s/%CLIENTIP/$CLIENTIP/g;
@@ -2329,10 +2332,11 @@ sub singletest {
     my @killservers = getpart("client", "killserver");
     foreach my $serv (@killservers) {
         chomp $serv;
-        if($serv =~ /^ftp(\d*)(-ipv6|)/) {
-            my ($id, $ext) = ($1, $2);
-            #print STDERR "SERV $serv $id $ext\n";
-            ftpkillslave($id, $ext, $verbose);
+        if($serv =~ /^(ftp|imap|pop3|smtp)(\d*)(-ipv6|)/) {
+            my $proto  = $1;
+            my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
+            my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+            killsockfilters($proto, $ipvnum, $idnum, $verbose);
         }
         if($run{$serv}) {
             stopserver($run{$serv}); # the pid file is in the hash table
@@ -2677,7 +2681,7 @@ sub singletest {
 #######################################################################
 # Stop all running test servers
 sub stopservers {
-    my ($verbose)=@_;
+    my $verbose = $_[0];
     my $pidlist;
 
     for(keys %run) {
@@ -2698,7 +2702,7 @@ sub stopservers {
         delete $run{$server};
     }
     killpid($verbose, $pidlist);
-    ftpkillslaves($verbose);
+    killallsockfilters($verbose);
 }
 
 #######################################################################
@@ -3285,8 +3289,11 @@ $TFTP6PORT = $base++; # TFTP IPv6 (UDP) port
 $SSHPORT =   $base++; # SSH (SCP/SFTP) port
 $SOCKSPORT = $base++; # SOCKS port
 $POP3PORT =  $base++;
+$POP36PORT = $base++;
 $IMAPPORT =  $base++;
+$IMAP6PORT = $base++;
 $SMTPPORT =  $base++;
+$SMTP6PORT = $base++;
 
 #######################################################################
 # clear and create logging directory:

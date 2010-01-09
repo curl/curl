@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,6 +23,12 @@
 
 use strict;
 use warnings;
+
+use serverhelp qw(
+    servername_str
+    mainsockf_pidfilename
+    datasockf_pidfilename
+    );
 
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
@@ -167,44 +173,52 @@ sub killpid {
     }
 }
 
-#############################################################################
-# Kill a specific slave
+#######################################################################
+# killsockfilters kills sockfilter processes for a given server.
 #
-sub ftpkillslave {
-    my ($id, $ext, $verbose)=@_;
+sub killsockfilters {
+    my ($proto, $ipvnum, $idnum, $verbose) = @_;
+    my $srvrname;
+    my $pidfile;
+    my $pid;
 
-    for my $base (('filt', 'data')) {
-        my $f = ".sock$base$id$ext.pid";
-        my $pid = processexists($f);
-        if($pid > 0) {
-            printf("* kill pid for %s => %d\n", "ftp-$base$id$ext", $pid)
-                if($verbose);
-            kill (9, $pid);
-            waitpid($pid, 0);
-        }
-        unlink($f);
+    return if($proto !~ /^(ftp|imap|pop3|smtp)$/);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum) if($verbose);
+
+    $pidfile = "./". mainsockf_pidfilename($proto, $ipvnum, $idnum);
+    $pid = processexists($pidfile);
+    if($pid > 0) {
+        printf("* kill pid for %s => %d\n", "${srvrname}-CTRL", $pid)
+          if($verbose);
+        kill("KILL", $pid);
+        waitpid($pid, 0);
     }
+    unlink($pidfile) if(-f $pidfile);
+
+    return if($proto ne 'ftp');
+
+    $pidfile = "./". datasockf_pidfilename($proto, $ipvnum, $idnum);
+    $pid = processexists($pidfile);
+    if($pid > 0) {
+        printf("* kill pid for %s => %d\n", "${srvrname}-DATA", $pid)
+          if($verbose);
+        kill("KILL", $pid);
+        waitpid($pid, 0);
+    }
+    unlink($pidfile) if(-f $pidfile);
 }
 
-#############################################################################
-# Make sure no FTP leftovers are still running. Kill all slave processes.
-# This uses pidfiles since it might be used by other processes.
+#######################################################################
+# killallsockfilters kills sockfilter processes for all servers.
 #
-sub ftpkillslaves {
-    my ($verbose) = @_;
+sub killallsockfilters {
+    my $verbose = $_[0];
 
-    for my $ext (('', 'ipv6')) {
-        for my $id (('', '2')) {
-            for my $base (('filt', 'data')) {
-                my $f = ".sock$base$id$ext.pid";
-                my $pid = processexists($f);
-                if($pid > 0) {
-                    printf("* kill pid for %s => %d\n", "ftp-$base$id$ext",
-                        $pid) if($verbose);
-                    kill (9, $pid);
-                    waitpid($pid, 0);
-                }
-                unlink($f);
+    for my $proto (('ftp', 'imap', 'pop3', 'smtp')) {
+        for my $ipvnum (('4', '6')) {
+            for my $idnum (('1', '2')) {
+                killsockfilters($proto, $ipvnum, $idnum, $verbose);
             }
         }
     }

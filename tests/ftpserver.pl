@@ -39,14 +39,8 @@
 # All socket/network/TCP related stuff is done by the 'sockfilt' program.
 #
 
-use strict;
-use warnings;
-use IPC::Open2;
-
-require "getpart.pm";
-require "ftp.pm";
-
 BEGIN {
+    @INC=(@INC, $ENV{'srcdir'}, '.');
     # sub second timestamping needs Time::HiRes
     eval {
         no warnings "all";
@@ -55,29 +49,53 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+use IPC::Open2;
+
+require "getpart.pm";
+require "ftp.pm";
+
+use serverhelp qw(
+    servername_str
+    server_pidfilename
+    server_logfilename
+    mainsockf_pidfilename
+    mainsockf_logfilename
+    datasockf_pidfilename
+    datasockf_logfilename
+    );
+
 #**********************************************************************
 # global vars...
 #
 my $verbose = 0;    # set to 1 for debugging
-my $ftpdnum = "";   # server instance number
+my $idstr = "";     # server instance string
+my $idnum = 1;      # server instance number
 my $ipvnum = 4;     # server IPv number (4 or 6)
-my $proto = 'ftp';  # server protocol
-my $srcdir = '.';   # directory where ftpserver.pl is located
-my $ipv6 = "";
-my $ext = "";
+my $proto = 'ftp';  # default server protocol
+my $srcdir;         # directory where ftpserver.pl is located
+my $srvrname;       # server name for presentation purposes
 my $grok_eprt;
+
+my $path   = '.';
+my $logdir = $path .'/log';
 
 #**********************************************************************
 # global vars used for server address and primary listener port
 #
-my $port = 8921;               # server primary listener port
-my $listenaddr = '127.0.0.1';  # server address for listener port
+my $port = 8921;               # default primary listener port
+my $listenaddr = '127.0.0.1';  # default address for listener port
 
 #**********************************************************************
 # global vars used for file names
 #
-my $logfilename = 'log/logfile.log'; # Override this for each test server
-my $pidfile = '.ftpd.pid';           # a default, use --pidfile
+my $pidfile;            # server pid file name
+my $logfile;            # server log file name
+my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
+my $mainsockf_logfile;  # log file for primary connection sockfilt process
+my $datasockf_pidfile;  # pid file for secondary connection sockfilt process
+my $datasockf_logfile;  # log file for secondary connection sockfilt process
 
 #**********************************************************************
 # global vars used for server logs advisor read lock handling
@@ -133,26 +151,13 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 sub exit_signal_handler {
     my $signame = shift;
     # For now, simply mimic old behavior.
-    ftpkillslaves($verbose);
+    killsockfilters($proto, $ipvnum, $idnum, $verbose);
     unlink($pidfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
         clear_advisor_read_lock($SERVERLOGS_LOCK);
     }
     exit;
-}
-
-#**********************************************************************
-# getlogfilename returns a log file name depending on given arguments.
-#
-sub getlogfilename {
-    my ($proto, $ipversion, $ssl, $instance, $sockfilter) = @_;
-    my $filename;
-
-    # For now, simply mimic old behavior.
-    $filename = "log/ftpd$ftpdnum.log";
-
-    return $filename;
 }
 
 #**********************************************************************
@@ -173,7 +178,7 @@ sub logmsg {
             localtime($seconds);
         $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
     }
-    if(open(LOGFILEFH, ">>$logfilename")) {
+    if(open(LOGFILEFH, ">>$logfile")) {
         print LOGFILEFH $now;
         print LOGFILEFH @_;
         close(LOGFILEFH);
@@ -182,8 +187,8 @@ sub logmsg {
 
 sub ftpmsg {
   # append to the server.input file
-  open(INPUT, ">>log/server$ftpdnum.input") ||
-    logmsg "failed to open log/server$ftpdnum.input\n";
+  open(INPUT, ">>log/server$idstr.input") ||
+    logmsg "failed to open log/server$idstr.input\n";
 
   print INPUT @_;
   close(INPUT);
@@ -207,11 +212,11 @@ sub sysread_or_die {
     if(not defined $result) {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
-        logmsg "Error: ftp$ftpdnum$ext sysread error: $!\n";
+        logmsg "Error: $srvrname server, sysread error: $!\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
-               "line $lcaller. ftp$ftpdnum$ext sysread error: $!\n";
+               "line $lcaller. $srvrname server, sysread error: $!\n";
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -222,11 +227,11 @@ sub sysread_or_die {
     elsif($result == 0) {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
-        logmsg "Error: ftp$ftpdnum$ext read zero\n";
+        logmsg "Error: $srvrname server, read zero\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
-               "line $lcaller. ftp$ftpdnum$ext read zero\n";
+               "line $lcaller. $srvrname server, read zero\n";
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -239,17 +244,20 @@ sub sysread_or_die {
 }
 
 sub startsf {
-    my $cmd="./server/sockfilt --port $port --logfile log/sockctrl$ftpdnum$ext.log --pidfile .sockfilt$ftpdnum$ext.pid $ipv6";
-    $sfpid = open2(*SFREAD, *SFWRITE, $cmd);
+    my $mainsockfcmd = "./server/sockfilt " .
+        "--ipv$ipvnum --port $port " .
+        "--pidfile \"$mainsockf_pidfile\" " .
+        "--logfile \"$mainsockf_logfile\"";
+    $sfpid = open2(*SFREAD, *SFWRITE, $mainsockfcmd);
 
-    print STDERR "$cmd\n" if($verbose);
+    print STDERR "$mainsockfcmd\n" if($verbose);
 
     print SFWRITE "PING\n";
     my $pong;
     sysread SFREAD, $pong, 5;
 
     if($pong !~ /^PONG/) {
-        logmsg "Failed sockfilt command: $cmd\n";
+        logmsg "Failed sockfilt command: $mainsockfcmd\n";
         kill(9, $sfpid);
         waitpid($sfpid, 0);
         unlink($pidfile);
@@ -922,9 +930,8 @@ sub STOR_ftp {
 sub PASV_ftp {
     my ($arg, $cmd)=@_;
     my $pasvport;
-    my $pidf=".sockdata$ftpdnum$ext.pid";
 
-    my $prev = processexists($pidf);
+    my $prev = processexists($datasockf_pidfile);
     if($prev > 0) {
         print "kill existing server: $prev\n" if($verbose);
         kill(9, $prev);
@@ -932,8 +939,11 @@ sub PASV_ftp {
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
-    $slavepid = open2(\*DREAD, \*DWRITE,
-                      "./server/sockfilt --port 0 --logfile log/sockdata$ftpdnum$ext.log --pidfile $pidf $ipv6");
+    my $datasockfcmd = "./server/sockfilt " .
+        "--ipv$ipvnum --port 0 " .
+        "--pidfile \"$datasockf_pidfile\" " .
+        "--logfile \"$datasockf_logfile\"";
+    $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
     print DWRITE "PING\n";
     my $pong;
@@ -1067,11 +1077,13 @@ sub PORT_ftp {
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
-    # FIX: make it use IPv6 if need be
-    my $filtcmd="./server/sockfilt --connect $port --addr $addr --logfile log/sockdata$ftpdnum$ext.log --pidfile .sockdata$ftpdnum$ext.pid $ipv6";
-    $slavepid = open2(\*DREAD, \*DWRITE, $filtcmd);
+    my $datasockfcmd = "./server/sockfilt " .
+        "--ipv$ipvnum --connect $port --addr \"$addr\" " .
+        "--pidfile \"$datasockf_pidfile\" " .
+        "--logfile \"$datasockf_logfile\"";
+    $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
-    print STDERR "$filtcmd\n" if($verbose);
+    print STDERR "$datasockfcmd\n" if($verbose);
 
     print DWRITE "PING\n";
     my $pong;
@@ -1163,74 +1175,118 @@ sub customize {
 #
 # Options:
 #
-# -v          # verbose
-# -s          # source directory
+# --verbose   # verbose
+# --srcdir    # source directory
 # --id        # server instance number
 # --proto     # server protocol
 # --pidfile   # server pid file
+# --logfile   # server log file
+# --ipv4      # server IP version 4
 # --ipv6      # server IP version 6
 # --port      # server listener port
 # --addr      # server address for listener port binding
 #
 while(@ARGV) {
-    if($ARGV[0] eq '-v') {
+    if($ARGV[0] eq '--verbose') {
         $verbose = 1;
     }
-    elsif($ARGV[0] eq '-s') {
-        $srcdir = $ARGV[1];
-        shift @ARGV;
+    elsif($ARGV[0] eq '--srcdir') {
+        if($ARGV[1]) {
+            $srcdir = $ARGV[1];
+            shift @ARGV;
+        }
     }
     elsif($ARGV[0] eq '--id') {
-        if($ARGV[1] =~ /^(\d+)$/) {
-            $ftpdnum = $1 if($1 > 0);
+        if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {
+            $idnum = $1 if($1 > 0);
+            shift @ARGV;
         }
-        shift @ARGV;
     }
     elsif($ARGV[0] eq '--proto') {
-        if($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/) {
+        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/)) {
             $proto = $1;
+            shift @ARGV;
         }
         else {
             die "unsupported protocol $ARGV[1]";
         }
-        shift @ARGV;
     }
     elsif($ARGV[0] eq '--pidfile') {
-        $pidfile = $ARGV[1];
-        shift @ARGV;
+        if($ARGV[1]) {
+            $pidfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--logfile') {
+        if($ARGV[1]) {
+            $logfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--ipv4') {
+        $ipvnum = 4;
+        $listenaddr = '127.0.0.1' if($listenaddr eq '::1');
+        $grok_eprt = 0;
     }
     elsif($ARGV[0] eq '--ipv6') {
         $ipvnum = 6;
         $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
-        $ipv6 = '--ipv6';
-        $ext = 'ipv6';
         $grok_eprt = 1;
     }
     elsif($ARGV[0] eq '--port') {
-        if($ARGV[1] =~ /^(\d+)$/) {
+        if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {
             $port = $1 if($1 > 1024);
+            shift @ARGV;
         }
-        shift @ARGV;
     }
     elsif($ARGV[0] eq '--addr') {
-        my $tmpstr = $ARGV[1];
-        if($tmpstr =~ /^(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)$/) {
-            $listenaddr = "$1.$2.$3.$4" if($ipvnum == 4);
+        if($ARGV[1]) {
+            my $tmpstr = $ARGV[1];
+            if($tmpstr =~ /^(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)$/) {
+                $listenaddr = "$1.$2.$3.$4" if($ipvnum == 4);
+            }
+            elsif($ipvnum == 6) {
+                $listenaddr = $tmpstr;
+                $listenaddr =~ s/^\[(.*)\]$/$1/;
+            }
+            shift @ARGV;
         }
-        elsif($ipvnum == 6) {
-            $listenaddr = $tmpstr;
-            $listenaddr =~ s/^\[(.*)\]$/$1/;
-        }
-        shift @ARGV;
+    }
+    else {
+        print STDERR "\nWarning: ftpserver.pl unknown parameter: $ARGV[0]\n";
     }
     shift @ARGV;
-};
+}
 
 #***************************************************************************
 # Initialize command line option dependant variables
 #
 
-$logfilename = getlogfilename();
+if(!$srcdir) {
+    $srcdir = $ENV{'srcdir'} || '.';
+}
+if(!$pidfile) {
+    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+}
+if(!$logfile) {
+    $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
+}
+
+$mainsockf_pidfile = "$path/".
+    mainsockf_pidfilename($proto, $ipvnum, $idnum);
+$mainsockf_logfile =
+    mainsockf_logfilename($logdir, $proto, $ipvnum, $idnum);
+
+if($proto eq 'ftp') {
+    $datasockf_pidfile = "$path/".
+        datasockf_pidfilename($proto, $ipvnum, $idnum);
+    $datasockf_logfile =
+        datasockf_logfilename($logdir, $proto, $ipvnum, $idnum);
+}
+
+$srvrname = servername_str($proto, $ipvnum, $idnum);
+
+$idstr = "$idnum" if($idnum > 1);
 
 protocolsetup($proto);
 
@@ -1239,8 +1295,8 @@ $SIG{TERM} = \&exit_signal_handler;
 
 startsf();
 
-logmsg sprintf("%s server listens on port IPv%d/$port\n", uc($proto),
-               $ipv6?6:4);
+logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
+
 open(PID, ">$pidfile");
 print PID $$."\n";
 close(PID);
