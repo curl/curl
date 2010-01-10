@@ -758,7 +758,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif /* ENABLE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket: (%d) %s", error, strerror(error));
+    logmsg("Error binding socket on port %hu: (%d) %s",
+           *listenport, error, strerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
