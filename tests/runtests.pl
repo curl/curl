@@ -961,8 +961,8 @@ sub runhttpsserver {
 sub runpingpongserver {
     my ($proto, $id, $verbose, $ipv6) = @_;
     my $port;
-    my $ip = $HOSTIP;
-    my $ipvnum = 4;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
     my $srvrname;
     my $pidfile;
@@ -972,29 +972,23 @@ sub runpingpongserver {
     if($proto eq "ftp") {
         $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
 
-        if($ipv6) {
+        if($ipvnum==6) {
             # if IPv6, use a different setup
             $port = $FTP6PORT;
         }
     }
     elsif($proto eq "pop3") {
-        $port = ($ipv6) ? $POP36PORT : $POP3PORT;
+        $port = ($ipvnum==6) ? $POP36PORT : $POP3PORT;
     }
     elsif($proto eq "imap") {
-        $port = ($ipv6) ? $IMAP6PORT : $IMAPPORT;
+        $port = ($ipvnum==6) ? $IMAP6PORT : $IMAPPORT;
     }
     elsif($proto eq "smtp") {
-        $port = ($ipv6) ? $SMTP6PORT : $SMTPPORT;
+        $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
     }
     else {
         print STDERR "Unsupported protocol $proto!!\n";
         return 0;
-    }
-
-    if($ipv6) {
-        # if IPv6, use a different setup
-        $ipvnum = 6;
-        $ip = $HOST6IP;
     }
 
     $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
@@ -1749,12 +1743,11 @@ sub checksystem {
     logmsg sprintf("POP3/%d ", $POP3PORT);
     logmsg sprintf("IMAP/%d ", $IMAPPORT);
     logmsg sprintf("SMTP/%d\n", $SMTPPORT);
-    if($tftp_ipv6) {
-        logmsg sprintf("POP3-IPv6/%d ", $POP36PORT);
+    if($ftp_ipv6) {
+        logmsg sprintf("*   POP3-IPv6/%d ", $POP36PORT);
         logmsg sprintf("IMAP-IPv6/%d ", $IMAP6PORT);
-        logmsg sprintf("SMTP-IPv6/%d ", $SMTP6PORT);
+        logmsg sprintf("SMTP-IPv6/%d\n", $SMTP6PORT);
     }
-
 
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
