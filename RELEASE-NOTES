@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o fragment part of URLs are no longer sent to the server
  o progress callback called repeatedly with c-ares for resolving
  o OpenSSL session id ref count leak
+ o progress callback called repeatedly during slow connects
 
 This release includes the following known bugs:
 
