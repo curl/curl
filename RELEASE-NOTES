@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o progress callback called repeatedly with c-ares for resolving
  o OpenSSL session id ref count leak
  o progress callback called repeatedly during slow connects
+ o curl_multi_fdset() would return -1 too often during SCP/SFTP transfers
 
 This release includes the following known bugs:
 
@@ -57,6 +58,6 @@ advice from friends like these:
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
  Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
- Johan van Selst, Charles Kerr
+ Johan van Selst, Charles Kerr, Gil Weber
 
         Thanks! (and sorry if I forgot to mention someone)

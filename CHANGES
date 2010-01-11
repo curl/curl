@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Jan 2010)
+- Gil Weber reported a peculiar flaw with the multi interface when doing SFTP
+  transfers: curl_multi_fdset() would return -1 and not set and file
+  descriptors several times during a transfer of a single file. It turned out
+  to be due to two different flaws now fixed. Gil's excellent recipe helped me
+  nail this.
+
 Daniel Stenberg (11 Jan 2010)
 - Made sure that the progress callback is repeatedly called at a regular
   interval even during very slow connects.
