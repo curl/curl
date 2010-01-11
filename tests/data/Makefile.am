@@ -84,3 +84,5 @@ filecheck:
 	rm -rf test-place ; \
 	exit $$RC
 
+show:
+	@echo $(EXTRA_DIST)

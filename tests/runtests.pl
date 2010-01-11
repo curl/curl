@@ -426,6 +426,15 @@ sub checkcmd {
 }
 
 #######################################################################
+# Get the list of tests that the tests/data/Makefile.am knows about!
+#
+my $disttests;
+sub get_disttests {
+    my @dist = `cd $srcdir/data && make show`;
+    $disttests = join("", @dist);
+}
+
+#######################################################################
 # Check for a command in the PATH of the machine running curl.
 #
 sub checktestcmd {
@@ -1882,6 +1891,11 @@ sub singletest {
     # timestamp test preparation start
     $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
 
+    if($disttests !~ /\Wtest$testnum\W/ ) {
+        print STDERR "NOTICE: data/test$testnum is not present in tests/data/Makefile.am!\n";
+    }
+
+
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
@@ -3307,6 +3321,7 @@ mkdir($LOGDIR, 0777);
 #
 
 if(!$listonly) {
+    get_disttests();
     checksystem();
 }
 

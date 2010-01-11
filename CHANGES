@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (11 Jan 2010)
+- The tests/runtests.pl script now checks to see if the test case that runs is
+  present in the tests/data/Makefile.am and outputs a notice message on the
+  screen if not. Each test file has to be included in that Makefile.am to get
+  included in release archives and forgetting to add files there is a common
+  mistake. This is an attempt to make it harder to forget.
+
 Daniel Stenberg (9 Jan 2010)
 - Johan van Selst found and fixed a OpenSSL session ref count leak:
 
