@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,6 +89,7 @@
 #include "inet_ntop.h"
 #include "inet_pton.h"
 #include "sslgen.h" /* for Curl_ssl_check_cxn() */
+#include "progress.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -192,7 +193,8 @@ long Curl_timeleft(struct connectdata *conn,
 #define WAITCONN_FDSET_ERROR   2
 
 static
-int waitconnect(curl_socket_t sockfd, /* socket */
+int waitconnect(struct connectdata *conn,
+                curl_socket_t sockfd, /* socket */
                 long timeout_msec)
 {
   int rc;
@@ -203,21 +205,34 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   (void)verifyconnect(sockfd, NULL);
 #endif
 
-  /* now select() until we get connect or timeout */
-  rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, (int)timeout_msec);
-  if(-1 == rc)
-    /* error, no connect here, try next */
-    return WAITCONN_SELECT_ERROR;
+  while(1) {
 
-  else if(0 == rc)
-    /* timeout, no connect today */
-    return WAITCONN_TIMEOUT;
+    /* now select() until we get connect or timeout */
+    rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, (int)(timeout_msec>1000?
+                                                          1000:timeout_msec));
 
-  if(rc & CURL_CSELECT_ERR)
-    /* error condition caught */
-    return WAITCONN_FDSET_ERROR;
+    if(Curl_pgrsUpdate(conn))
+      return CURLE_ABORTED_BY_CALLBACK;
 
-  /* we have a connect! */
+    if(-1 == rc)
+      /* error, no connect here, try next */
+      return WAITCONN_SELECT_ERROR;
+
+    else if(0 == rc) {
+      /* timeout */
+      timeout_msec -= 1000;
+      if(timeout_msec <= 0)
+        return WAITCONN_TIMEOUT;
+
+      continue;
+    }
+
+    if(rc & CURL_CSELECT_ERR)
+      /* error condition caught */
+      return WAITCONN_FDSET_ERROR;
+
+    break;
+  }
   return WAITCONN_CONNECTED;
 }
 
@@ -553,7 +568,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   Curl_expire(data, allow);
 
   /* check for connect without timeout as we want to return immediately */
-  rc = waitconnect(sockfd, 0);
+  rc = waitconnect(conn, sockfd, 0);
 
   if(WAITCONN_CONNECTED == rc) {
     int error;
@@ -823,7 +838,7 @@ singleipconnect(struct connectdata *conn,
     case EAGAIN:
 #endif
 #endif
-      rc = waitconnect(sockfd, timeout_ms);
+      rc = waitconnect(conn, sockfd, timeout_ms);
       break;
     default:
       /* unknown error, fallthrough and try another address! */

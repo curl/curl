@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel Stenberg (11 Jan 2010)
+- Made sure that the progress callback is repeatedly called at a regular
+  interval even during very slow connects.
+
 - The tests/runtests.pl script now checks to see if the test case that runs is
   present in the tests/data/Makefile.am and outputs a notice message on the
   screen if not. Each test file has to be included in that Makefile.am to get
