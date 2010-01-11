@@ -24,7 +24,7 @@
 HTMLPAGES = testcurl.html runtests.html
 PDFPAGES = testcurl.pdf runtests.pdf
 
-EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl getpart.pm \
+EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl valgrind.pm ftp.pm   \
  sshserver.pl sshhelp.pm testcurl.1 runtests.1 $(HTMLPAGES) $(PDFPAGES) \
  CMakeLists.txt certs/scripts/*.sh certs/Server* certs/EdelCurlRoot* \
