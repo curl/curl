@@ -1099,14 +1099,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
 #endif
             multistate(easy, CURLM_STATE_PROTOCONNECT);
+
         }
-        else {
+        else
           /* after the connect has completed, go WAITDO or DO */
           multistate(easy, multi->pipelining_enabled?
                      CURLM_STATE_WAITDO:CURLM_STATE_DO);
 
-          result = CURLM_CALL_MULTI_PERFORM;
-        }
+        result = CURLM_CALL_MULTI_PERFORM;
       }
       break;
 
