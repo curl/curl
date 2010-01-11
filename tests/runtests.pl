@@ -885,32 +885,26 @@ sub runhttpserver {
 # start the https server (or rather, tunnel)
 #
 sub runhttpsserver {
-    my ($verbose, $ipv6, $parm) = @_;
-    my $STATUS;
-    my $RUNNING;
-    my $ip = $HOSTIP;
-    my $pidfile = $HTTPSPIDFILE;
+    my ($verbose, $ipv6, $certfile) = @_;
     my $proto = 'https';
-    my $ipvnum = 4;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
     my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
 
     if(!$stunnel) {
         return 0;
     }
 
-    if($ipv6) {
-        # not complete yet
-        $ipvnum = 6;
-        $ip = $HOST6IP;
-    }
+    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
-    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -919,10 +913,19 @@ sub runhttpsserver {
     }
     unlink($pidfile);
 
-    my $flag=$debugprotocol?"-v ":"";
-    $flag .= " -c $parm" if ($parm);
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -p https -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT";
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --proto $proto ";
+    $flags .= "--certfile \"$certfile\" " if($certfile);
+    $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    $flags .= "--connect $HTTPPORT --accept $HTTPSPORT";
+
+    my $cmd = "$perl $srcdir/secureserver.pl $flags";
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
@@ -1051,32 +1054,26 @@ sub runpingpongserver {
 # start the ftps server (or rather, tunnel)
 #
 sub runftpsserver {
-    my ($verbose, $ipv6) = @_;
-    my $STATUS;
-    my $RUNNING;
-    my $ip = $HOSTIP;
-    my $pidfile = $FTPSPIDFILE;
+    my ($verbose, $ipv6, $certfile) = @_;
     my $proto = 'ftps';
-    my $ipvnum = 4;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
     my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
 
     if(!$stunnel) {
         return 0;
     }
 
-    if($ipv6) {
-        # not complete yet
-        $ipvnum = 6;
-        $ip = $HOST6IP;
-    }
+    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
-    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
@@ -1085,9 +1082,19 @@ sub runftpsserver {
     }
     unlink($pidfile);
 
-    my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -p ftps -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT";
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
 
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --proto $proto ";
+    $flags .= "--certfile \"$certfile\" " if($certfile);
+    $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    $flags .= "--connect $FTPPORT --accept $FTPSPORT";
+
+    my $cmd = "$perl $srcdir/secureserver.pl $flags";
     my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
