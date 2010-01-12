@@ -259,6 +259,7 @@ my $postmortem;   # display detailed info about failed tests
 
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
+my %serverpidfile;# all server pid file names, identified by server id
 
 # torture test variables
 my $torture;
@@ -315,6 +316,32 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
 $ENV{'SSL_CERT_DIR'}=undef;
 $ENV{'SSL_CERT_PATH'}=undef;
 $ENV{'CURL_CA_BUNDLE'}=undef;
+
+#######################################################################
+# Load serverpidfile hash with pidfile names for all possible servers.
+#
+sub init_serverpidfile_hash {
+  for my $proto (('ftp', 'http', 'imap', 'pop3', 'smtp')) {
+    for my $ssl (('', 's')) {
+      for my $ipvnum ((4, 6)) {
+        for my $idnum ((1, 2)) {
+          my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
+          my $pidf = server_pidfilename("$proto$ssl", $ipvnum, $idnum);
+          $serverpidfile{$serv} = $pidf;
+        }
+      }
+    }
+  }
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh')) {
+    for my $ipvnum ((4, 6)) {
+      for my $idnum ((1, 2)) {
+        my $serv = servername_id($proto, $ipvnum, $idnum);
+        my $pidf = server_pidfilename($proto, $ipvnum, $idnum);
+        $serverpidfile{$serv} = $pidf;
+      }
+    }
+  }
+}
 
 #######################################################################
 # Check if a given child process has just died. Reaps it if so.
@@ -2346,18 +2373,42 @@ sub singletest {
     my @killservers = getpart("client", "killserver");
     foreach my $serv (@killservers) {
         chomp $serv;
-        if($serv =~ /^(ftp|imap|pop3|smtp)(\d*)(-ipv6|)/) {
+        my $pid;
+        # handle given server no matter if secure or not
+        if($run{$serv}) {
+            # stop server pid(s) from %run hash clearing them
+            stopserver($run{$serv});
+            $run{$serv} = 0;
+        }
+        # deal with unexpectedly still alive server
+        $pid = processexists($serverpidfile{$serv});
+        if($pid > 0) {
+            print STDERR "Warning: $serv server unexpectedly alive\n";
+            stopserver($pid);
+        }
+        # handle unsecure server when given a secure one
+        my $unsec = $serv;
+        if($serv =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+            $unsec = "$1$2";
+            # stop unsecure server when stopping a secure one
+            if($run{$unsec}) {
+                # stop server pid(s) from %run hash clearing them
+                stopserver($run{$unsec});
+                $run{$unsec} = 0;
+            }
+            # deal with unexpectedly still alive server
+            $pid = processexists($serverpidfile{$unsec});
+            if($pid > 0) {
+                print STDERR "Warning: $unsec server unexpectedly alive\n";
+                stopserver($pid);
+            }
+        }
+        # handle potentially still alive server sockfilters
+        if($unsec =~ /^(ftp|imap|pop3|smtp)(\d*)(-ipv6|)/) {
             my $proto  = $1;
             my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
             my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
             killsockfilters($proto, $ipvnum, $idnum, $verbose);
-        }
-        if($run{$serv}) {
-            stopserver($run{$serv}); # the pid file is in the hash table
-            $run{$serv}=0; # clear pid
-        }
-        else {
-            logmsg "RUN: The $serv server is not running\n";
         }
     }
 
@@ -3317,11 +3368,17 @@ cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
 
 #######################################################################
+# initialize some variables
+#
+
+get_disttests();
+init_serverpidfile_hash();
+
+#######################################################################
 # Output curl version and host info being tested
 #
 
 if(!$listonly) {
-    get_disttests();
     checksystem();
 }
 
