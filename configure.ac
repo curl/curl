@@ -1706,14 +1706,14 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
           version="unknown"
         fi
       fi
-    else	 
-        # Without pkg-config, we'll kludge in some defaults	 
-        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"	 
-        addcflags="-I$OPT_NSS/include"	 
-        version="unknown"	 
+    else
+        # Without pkg-config, we'll kludge in some defaults
+        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
+        addcflags="-I$OPT_NSS/include"
+        version="unknown"
         nssprefix=$OPT_NSS
     fi
-	
+
     dnl Check for functionPK11_CreateGenericObject
     dnl this is needed for using the PEM PKCS#11 module
     AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
@@ -1807,7 +1807,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
       version=`$PKGCONFIG --modversion libssh2`
       DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/-L//'`
     fi
-    
+
     ;;
   off)
     dnl no --with-libssh2 option given, just check default places
