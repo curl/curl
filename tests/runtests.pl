@@ -1919,7 +1919,7 @@ sub singletest {
     $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
 
     if($disttests !~ /test$testnum\W/ ) {
-        print STDERR "Warning: data/test$testnum is not present in tests/data/Makefile.am\n";
+        logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
     }
 
 
@@ -2370,45 +2370,62 @@ sub singletest {
     $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
 
     # test definition might instruct to stop some servers
+    # stop also non-secure server when stopping a ssl one
     my @killservers = getpart("client", "killserver");
-    foreach my $serv (@killservers) {
-        chomp $serv;
-        my $pid;
-        # handle given server no matter if secure or not
-        if($run{$serv}) {
-            # stop server pid(s) from %run hash clearing them
-            stopserver($run{$serv});
-            $run{$serv} = 0;
-        }
-        # deal with unexpectedly still alive server
-        $pid = processexists($serverpidfile{$serv});
-        if($pid > 0) {
-            print STDERR "Warning: $serv server unexpectedly alive\n";
-            stopserver($pid);
-        }
-        # handle unsecure server when given a secure one
-        my $unsec = $serv;
-        if($serv =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
-            $unsec = "$1$2";
-            # stop unsecure server when stopping a secure one
-            if($run{$unsec}) {
-                # stop server pid(s) from %run hash clearing them
-                stopserver($run{$unsec});
-                $run{$unsec} = 0;
+    if(@killservers) {
+        #
+        # kill sockfilter processes for pingpong servers
+        #
+        foreach my $server (@killservers) {
+            chomp $server;
+            if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
+                my $proto  = $1;
+                my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
+                my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+                killsockfilters($proto, $ipvnum, $idnum, $verbose);
             }
-            # deal with unexpectedly still alive server
-            $pid = processexists($serverpidfile{$unsec});
+        }
+        #
+        # kill server pids from %run hash clearing them
+        #
+        my $pidlist;
+        foreach my $server (@killservers) {
+            chomp $server;
+            if($run{$server}) {
+                $pidlist .= " $run{$server}";
+                $run{$server} = 0;
+            }
+            if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+                $server = "$1$2";
+                if($run{$server}) {
+                    $pidlist .= " $run{$server}";
+                    $run{$server} = 0;
+                }
+            }
+        }
+        killpid($verbose, $pidlist);
+        #
+        # cleanup server pid files
+        #
+        foreach my $server (@killservers) {
+            chomp $server;
+            my $pidfile = $serverpidfile{$server};
+            my $pid = processexists($pidfile);
             if($pid > 0) {
-                print STDERR "Warning: $unsec server unexpectedly alive\n";
-                stopserver($pid);
+                logmsg "Warning: $server server unexpectedly alive\n";
+                killpid($verbose, $pid);
             }
-        }
-        # handle potentially still alive server sockfilters
-        if($unsec =~ /^(ftp|imap|pop3|smtp)(\d*)(-ipv6|)/) {
-            my $proto  = $1;
-            my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
-            my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
-            killsockfilters($proto, $ipvnum, $idnum, $verbose);
+            unlink($pidfile) if(-f $pidfile);
+            if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+                $server = "$1$2";
+                $pidfile = $serverpidfile{$server};
+                $pid = processexists($pidfile);
+                if($pid > 0) {
+                    logmsg "Warning: $server server unexpectedly alive\n";
+                    killpid($verbose, $pid);
+                }
+                unlink($pidfile) if(-f $pidfile);
+            }
         }
     }
 
