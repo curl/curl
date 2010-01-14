@@ -3190,13 +3190,30 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   esac
 ])
 
-dnl CURL_CHECK_PKGCONFIG ($module)
+dnl CURL_EXPORT_PCDIR ($pcdir)
+dnl ------------------------
+dnl if $pcdir is not empty, set PKG_CONFIG_LIBDIR to $pcdir and export
+dnl
+dnl we need this macro since pkg-config distinguishes among empty and unset
+dnl variable while checking PKG_CONFIG_LIBDIR
+dnl
+
+AC_DEFUN([CURL_EXPORT_PCDIR], [
+    if test -n "$1"; then
+      PKG_CONFIG_LIBDIR="$1"
+      export PKG_CONFIG_LIBDIR
+    fi
+])
+
+dnl CURL_CHECK_PKGCONFIG ($module, [$pcdir])
 dnl ------------------------
 dnl search for the pkg-config tool (if not cross-compiling). Set the PKGCONFIG
 dnl variable to hold the path to it, or 'no' if not found/present.
 dnl
 dnl If pkg-config is present, check that it has info about the $module or
 dnl return "no" anyway!
+dnl
+dnl Optionally PKG_CONFIG_LIBDIR may be given as $pcdir.
 dnl
 
 AC_DEFUN([CURL_CHECK_PKGCONFIG], [
@@ -3216,8 +3233,10 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
     if test x$PKGCONFIG != xno; then
       AC_MSG_CHECKING([for $1 options with pkg-config])
       dnl ask pkg-config about $1
-      $PKGCONFIG --exists $1
-      if test "$?" -ne "0"; then
+      itexists=`CURL_EXPORT_PCDIR([$2]) dnl
+        $PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
         dnl pkg-config does not have info about the given module! set the
         dnl variable to 'no'
         PKGCONFIG="no"

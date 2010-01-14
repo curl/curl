@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Kamil Dudka (14 Jan 2010)
+- Suppressed side effect of OpenSSL configure checks, which prevented NSS from
+  being properly detected under certain circumstances. It had been caused by
+  strange behavior of pkg-config when handling PKG_CONFIG_LIBDIR. pkg-config
+  distinguishes among empty and non-existent environment variable in that case.
+
 Daniel Stenberg (12 Jan 2010)
 - Gil Weber reported a peculiar flaw with the multi interface when doing SFTP
   transfers: curl_multi_fdset() would return -1 and not set and file

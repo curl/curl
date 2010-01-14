@@ -1205,7 +1205,6 @@ if test X"$OPT_SSL" != Xno; then
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
-  SAVE_PKG_CONFIG_LIBDIR="$PKG_CONFIG_LIBDIR"
 
   case "$OPT_SSL" in
   yes)
@@ -1233,10 +1232,9 @@ if test X"$OPT_SSL" != Xno; then
     dnl Try pkg-config even when cross-compiling.  Since we
     dnl specify PKG_CONFIG_LIBDIR we're only looking where
     dnl the user told us to look
-    PKG_CONFIG_LIBDIR=$OPT_SSL/lib/pkgconfig
-    export PKG_CONFIG_LIBDIR
-    AC_MSG_NOTICE([set PKG_CONFIG_LIBDIR to "$PKG_CONFIG_LIBDIR"])
-    if test -e "$PKG_CONFIG_LIBDIR/openssl.pc"; then
+    OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
+    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+    if test -e "$OPENSSL_PCDIR/openssl.pc"; then
       PKGTEST="yes"
     fi
 
@@ -1253,12 +1251,17 @@ if test X"$OPT_SSL" != Xno; then
 
   if test "$PKGTEST" = "yes"; then
 
-    CURL_CHECK_PKGCONFIG(openssl)
+    CURL_CHECK_PKGCONFIG(openssl, [$OPENSSL_PCDIR])
 
     if test "$PKGCONFIG" != "no" ; then
-      SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
-      SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
-      SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
+      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+        $PKGCONFIG --libs-only-l openssl 2>/dev/null`
+
+      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+        $PKGCONFIG --libs-only-L openssl 2>/dev/null`
+
+      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+        $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
@@ -1275,10 +1278,6 @@ if test X"$OPT_SSL" != Xno; then
       LIBS="$LIBS $SSL_LIBS"
     fi
   fi
-
-  dnl we're done using pkg-config for openssl
-  PKG_CONFIG_LIBDIR="$SAVE_PKG_CONFIG_LIBDIR"
-  export PKG_CONFIG_LIBDIR
 
   dnl finally, set flags to use SSL
   CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
