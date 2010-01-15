@@ -19,7 +19,7 @@ OBJS = amigaos.c base64.c connect.c content_encoding.c cookie.c dict.c easy.c \
 	strequal.c strtok.c telnet.c timeval.c transfer.c url.c version.c     \
 	sslgen.c gtls.c strerror.c rawstr.c curl_addrinfo.c curl_rand.c	      \
 	socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c            \
-	curl_memrchr.c
+	curl_memrchr.c imap.c pop3.c smtp.c pingpong.c
 
 
 all:	$(OBJS:.c=.o)

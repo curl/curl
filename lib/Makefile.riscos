@@ -14,7 +14,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
-	o.curl_memrchr
+	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong
 
 
 # Compile options:
@@ -92,6 +92,9 @@ o.http_chunks:	c.http_chunks
 o.if2ip:	c.if2ip
 		gcc $(compileropts) -c -o if2ip.o c.if2ip
 
+o.imap:		c.imap
+		gcc $(compileropts) -c -o imap.o c.imap
+
 o.inet_ntop:	c.inet_ntop
 		gcc $(compileropts) -c -o inet_ntop.o c.inet_ntop
 
@@ -116,6 +119,12 @@ o.netrc:	c.netrc
 o.parsedate:	c.parsedate
 		gcc $(compileropts) -c -o parsedate.o c.parsedate
 
+o.pingpong:	c.pingpong
+		gcc $(compileropts) -c -o pingpong.o c.pingpong
+
+o.pop3:		c.pop3
+		gcc $(compileropts) -c -o pop3.o c.pop3
+
 o.progress:	c.progress
 		gcc $(compileropts) -c -o progress.o c.progress
 
@@ -130,6 +139,9 @@ o.sendf:	c.sendf
 
 o.slist:	c.slist
 		gcc $(compileropts) -c -o slist.o c.slist
+
+o.smtp:		c.smtp
+		gcc $(compileropts) -c -o smtp.o c.smtp
 
 o.speedcheck:	c.speedcheck
 		gcc $(compileropts) -c -o speedcheck.o c.speedcheck

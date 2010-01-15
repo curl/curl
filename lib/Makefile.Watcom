@@ -39,6 +39,8 @@ C_ARG    = $(OBJ_BASE)\wcc386.arg
 LINK_ARG = $(OBJ_BASE)\dyn\wlink.arg
 LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 
+# Unfortunately, we can't include Makefile.inc here because wmake doesn't
+# use backslash as the line continuation character by default
 OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\cookie.obj         &
        $(OBJ_DIR)\curl_addrinfo.obj    $(OBJ_DIR)\dict.obj           &
@@ -70,7 +72,9 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
        $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
        $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj       &
-       $(OBJ_DIR)\curl_rand.obj        $(OBJ_DIR)\curl_memrchr.obj
+       $(OBJ_DIR)\curl_rand.obj        $(OBJ_DIR)\curl_memrchr.obj   &
+       $(OBJ_DIR)\imap.obj             $(OBJ_DIR)\pop3.obj           &
+       $(OBJ_DIR)\smtp.obj             $(OBJ_DIR)\pingpong.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
@@ -553,4 +557,28 @@ $(OBJ_DIR)\curl_memrchr.obj: curl_memrchr.c setup.h config-win32.h &
   ..\include\curl\curl.h ..\include\curl\curlver.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h curl_memrchr.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\imap.obj: imap.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h imap.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\pop3.obj: pop3.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h pop3.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\smtp.obj: smtp.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h smtp.h &
+  ..\include\curl\mprintf.h curl_memory.h memdebug.h
+$(OBJ_DIR)\pingpong.obj: pingpong.c setup.h config-win32.h &
+  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h setup_once.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\curlrules.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h pingpong.h &
   ..\include\curl\mprintf.h curl_memory.h memdebug.h
