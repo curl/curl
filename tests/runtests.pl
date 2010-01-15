@@ -84,6 +84,7 @@ use sshhelp qw(
     $sftpexe
     $sshconfig
     $sftpconfig
+    $sshdlog
     $sshlog
     $sftplog
     $sftpcmds
