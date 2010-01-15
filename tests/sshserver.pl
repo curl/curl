@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -25,17 +25,8 @@
 # Starts sshd for use in the SCP, SFTP and SOCKS curl test harness tests.
 # Also creates the ssh configuration files needed for these tests.
 
-# Options:
-#
-# -v
-# -d
-# -u user
-# -l listen address
-# -p SCP/SFTP server port
-# -s SOCKS4/5 server port
-
 use strict;
-#use warnings;
+use warnings;
 use Cwd;
 
 #***************************************************************************
@@ -75,6 +66,14 @@ use sshhelp qw(
     sshversioninfo
     );
 
+#***************************************************************************
+# Subs imported from serverhelp module
+#
+use serverhelp qw(
+    server_pidfilename
+    server_logfilename
+    );
+
 
 #***************************************************************************
 
@@ -83,8 +82,13 @@ my $debugprotocol = 0;        # set to 1 for protocol debugging
 my $port = 8999;              # our default SCP/SFTP server port
 my $socksport = $port + 1;    # our default SOCKS4/5 server port
 my $listenaddr = '127.0.0.1'; # default address on which to listen
+my $ipvnum = 4;               # default IP version of listener address
+my $idnum = 1;                # dafault ssh daemon instance number
+my $proto = 'ssh';            # protocol the ssh daemon speaks
 my $path = getcwd();          # current working directory
+my $logdir = $path .'/log';   # directory for log files
 my $username = $ENV{USER};    # default user
+my $pidfile;                  # ssh daemon pid file
 
 my $error;
 my @cfgarr;
@@ -94,35 +98,92 @@ my @cfgarr;
 # Parse command line options
 #
 while(@ARGV) {
-    if($ARGV[0] eq '-v') {
+    if($ARGV[0] eq '--verbose') {
         $verbose = 1;
     }
-    elsif($ARGV[0] eq '-d') {
+    elsif($ARGV[0] eq '--debugprotocol') {
         $verbose = 1;
         $debugprotocol = 1;
     }
-    elsif($ARGV[0] eq '-u') {
-        $username = $ARGV[1];
-        shift @ARGV;
-    }
-    elsif($ARGV[0] eq '-l') {
-        $listenaddr = $ARGV[1];
-        shift @ARGV;
-    }
-    elsif($ARGV[0] eq '-p') {
-        if($ARGV[1] =~ /^(\d+)$/) {
-            $port = $1;
+    elsif($ARGV[0] eq '--user') {
+        if($ARGV[1]) {
+            $username = $ARGV[1];
+            shift @ARGV;
         }
-        shift @ARGV;
     }
-    elsif($ARGV[0] eq '-s') {
-        if($ARGV[1] =~ /^(\d+)$/) {
-            $socksport = $1;
+    elsif($ARGV[0] eq '--id') {
+        if($ARGV[1]) {
+            if($ARGV[1] =~ /^(\d+)$/) {
+                $idnum = $1 if($1 > 0);
+                shift @ARGV;
+            }
         }
-        shift @ARGV;
+    }
+    elsif($ARGV[0] eq '--ipv4') {
+        $ipvnum = 4;
+        $listenaddr = '127.0.0.1' if($listenaddr eq '::1');
+    }
+    elsif($ARGV[0] eq '--ipv6') {
+        $ipvnum = 6;
+        $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
+    }
+    elsif($ARGV[0] eq '--addr') {
+        if($ARGV[1]) {
+            my $tmpstr = $ARGV[1];
+            if($tmpstr =~ /^(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)$/) {
+                $listenaddr = "$1.$2.$3.$4" if($ipvnum == 4);
+                shift @ARGV;
+            }
+            elsif($ipvnum == 6) {
+                $listenaddr = $tmpstr;
+                $listenaddr =~ s/^\[(.*)\]$/$1/;
+                shift @ARGV;
+            }
+        }
+    }
+    elsif($ARGV[0] eq '--pidfile') {
+        if($ARGV[1]) {
+            $pidfile = "$path/". $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--sshport') {
+        if($ARGV[1]) {
+            if($ARGV[1] =~ /^(\d+)$/) {
+                $port = $1;
+                shift @ARGV;
+            }
+        }
+    }
+    elsif($ARGV[0] eq '--socksport') {
+        if($ARGV[1]) {
+            if($ARGV[1] =~ /^(\d+)$/) {
+                $socksport = $1;
+                shift @ARGV;
+            }
+        }
+    }
+    else {
+        print STDERR "\nWarning: sshserver.pl unknown parameter: $ARGV[0]\n";
     }
     shift @ARGV;
-};
+}
+
+
+#***************************************************************************
+# Default ssh daemon pid file name
+#
+if(!$pidfile) {
+    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+}
+
+
+#***************************************************************************
+# ssh, socks and sftp server log file names
+#
+$sshdlog = server_logfilename($logdir, 'ssh', $ipvnum, $idnum);
+$sftplog = server_logfilename($logdir, 'sftp', $ipvnum, $idnum);
+$sshlog  = server_logfilename($logdir, 'socks', $ipvnum, $idnum);
 
 
 #***************************************************************************
@@ -420,7 +481,7 @@ push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $path/$clipubkeyf";
 push @cfgarr, "AuthorizedKeysFile2 $path/$clipubkeyf";
 push @cfgarr, "HostKey $path/$hstprvkeyf";
-push @cfgarr, "PidFile $path/.ssh.pid";
+push @cfgarr, "PidFile $pidfile";
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
 push @cfgarr, "ListenAddress $listenaddr";

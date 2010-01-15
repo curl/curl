@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 package sshhelp;
 
 use strict;
-#use warnings;
+use warnings;
 use Exporter;
 use File::Spec;
 
@@ -111,9 +111,9 @@ $sshkeygenexe = 'ssh-keygen'  .exe_ext(); # base name and ext of ssh-keygen
 $sshdconfig   = 'curl_sshd_config';       # ssh daemon config file
 $sshconfig    = 'curl_ssh_config';        # ssh client config file
 $sftpconfig   = 'curl_sftp_config';       # sftp client config file
-$sshdlog      = 'log/sshd.log';           # ssh daemon log file
-$sshlog       = 'log/ssh.log';            # ssh client log file
-$sftplog      = 'log/sftp.log';           # sftp client log file
+$sshdlog      = undef;                    # ssh daemon log file
+$sshlog       = undef;                    # ssh client log file
+$sftplog      = undef;                    # sftp client log file
 $sftpcmds     = 'curl_sftp_cmds';         # sftp client commands batch file
 $knownhosts   = 'curl_client_knownhosts'; # ssh knownhosts file
 $hstprvkeyf   = 'curl_host_dsa_key';      # host private key file
@@ -240,6 +240,7 @@ sub display_sftpconfig {
 # Display contents of the ssh daemon log file
 #
 sub display_sshdlog {
+    die "error: \$sshdlog uninitialized" if(not defined $sshdlog);
     display_file($sshdlog);
 }
 
@@ -248,6 +249,7 @@ sub display_sshdlog {
 # Display contents of the ssh client log file
 #
 sub display_sshlog {
+    die "error: \$sshlog uninitialized" if(not defined $sshlog);
     display_file($sshlog);
 }
 
@@ -256,6 +258,7 @@ sub display_sshlog {
 # Display contents of the sftp client log file
 #
 sub display_sftplog {
+    die "error: \$sftplog uninitialized" if(not defined $sftplog);
     display_file($sftplog);
 }
 
