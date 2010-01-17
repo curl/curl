@@ -67,7 +67,7 @@ BEGIN {
 }
 
 use strict;
-#use warnings;
+use warnings;
 use Cwd;
 
 # Subs imported from serverhelp module
@@ -174,7 +174,7 @@ my $pwd = getcwd();          # current working directory
 
 my $start;
 my $forkserver=0;
-my $ftpchecktime; # time it took to verify our test FTP server
+my $ftpchecktime=1; # time it took to verify our test FTP server
 
 my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
 my $valgrind = checktestcmd("valgrind");
@@ -627,8 +627,10 @@ sub stopserver {
     # kill given pids and server relative ones clearing them in %run hash
     #
     foreach my $server (@killservers) {
-        $pidlist .= "$run{$server} ";
-        $run{$server} = 0;
+        if($run{$server}) {
+            $pidlist .= "$run{$server} ";
+            $run{$server} = 0;
+        }
     }
     killpid($verbose, $pidlist);
     #
@@ -704,7 +706,7 @@ sub verifyftp {
     my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
     my $pid;
     my $time=time();
-    my $extra;
+    my $extra="";
     if($proto eq "ftps") {
     	$extra .= "--insecure --ftp-ssl-control ";
     }
@@ -2133,18 +2135,20 @@ sub singletest {
 
     if(!$why) {
         my @precheck = getpart("client", "precheck");
-        $cmd = $precheck[0];
-        chomp $cmd;
-        subVariables \$cmd;
-        if($cmd) {
-            my @o = `$cmd 2>/dev/null`;
-            if($o[0]) {
-                $why = $o[0];
-                chomp $why;
-            } elsif($?) {
-                $why = "precheck command error";
+        if(@precheck) {
+            $cmd = $precheck[0];
+            chomp $cmd;
+            subVariables \$cmd;
+            if($cmd) {
+                my @o = `$cmd 2>/dev/null`;
+                if($o[0]) {
+                    $why = $o[0];
+                    chomp $why;
+                } elsif($?) {
+                    $why = "precheck command error";
+                }
+                logmsg "prechecked $cmd\n" if($verbose);
             }
-            logmsg "prechecked $cmd\n" if($verbose);
         }
     }
 
@@ -2286,7 +2290,7 @@ sub singletest {
 
     my $out="";
 
-    if($cmdhash{'option'} !~ /no-output/) {
+    if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
         if (!@validstdout) {
             $out=" --output $CURLOUT ";
@@ -2504,8 +2508,10 @@ sub singletest {
         #
         my $pidlist;
         foreach my $server (@killservers) {
-            $pidlist .= "$run{$server} ";
-            $run{$server} = 0;
+            if($run{$server}) {
+                $pidlist .= "$run{$server} ";
+                $run{$server} = 0;
+            }
         }
         killpid($verbose, $pidlist);
         #
@@ -2527,19 +2533,21 @@ sub singletest {
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
-    $cmd = $postcheck[0];
-    chomp $cmd;
-    subVariables \$cmd;
-    if($cmd) {
-        logmsg "postcheck $cmd\n" if($verbose);
-        my $rc = runclient("$cmd");
-        # Must run the postcheck command in torture mode in order
-        # to clean up, but the result can't be relied upon.
-        if($rc != 0 && !$torture) {
-            logmsg " postcheck FAILED\n";
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-            return 1;
+    if(@postcheck) {
+        $cmd = $postcheck[0];
+        chomp $cmd;
+        subVariables \$cmd;
+        if($cmd) {
+            logmsg "postcheck $cmd\n" if($verbose);
+            my $rc = runclient("$cmd");
+            # Must run the postcheck command in torture mode in order
+            # to clean up, but the result can't be relied upon.
+            if($rc != 0 && !$torture) {
+                logmsg " postcheck FAILED\n";
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                return 1;
+            }
         }
     }
 
@@ -2574,7 +2582,7 @@ sub singletest {
 
         # get the mode attribute
         my $filemode=$hash{'mode'};
-        if(($filemode eq "text") && $has_textaware) {
+        if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
             map s/\r\n/\n/g, @actual;
         }
@@ -2604,7 +2612,7 @@ sub singletest {
         my %hash = getpartattr("reply", "data");
         # get the mode attribute
         my $filemode=$hash{'mode'};
-        if(($filemode eq "text") && $has_textaware) {
+        if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
             map s/\r\n/\n/g, @out;
         }
@@ -2704,7 +2712,7 @@ sub singletest {
         my @stripfile = getpart("verify", "stripfile");
 
         my $filemode=$hash{'mode'};
-        if(($filemode eq "text") && $has_textaware) {
+        if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows means adding an extra
             # strip expression
             push @stripfile, "s/\r\n/\n/";
@@ -3648,7 +3656,7 @@ my $failed;
 my $testnum;
 my $ok=0;
 my $total=0;
-my $lasttest;
+my $lasttest=0;
 my @at = split(" ", $TESTCASES);
 my $count=0;
 
