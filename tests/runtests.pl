@@ -155,8 +155,6 @@ my $TESTCASES="all";
 # No variables below this point should need to be modified
 #
 
-my $SOCKSPIDFILE;
-
 # invoke perl like this:
 my $perl="perl -I$srcdir";
 my $server_response_maxtime=13;
@@ -589,12 +587,61 @@ sub torture {
 }
 
 #######################################################################
-# stop the given test server (pid)
+# Stop a test server along with pids which aren't in the %run hash yet.
+# This also stops all servers which are relative to the given one.
 #
 sub stopserver {
-    my ($pidlist) = @_;
-
+    my ($server, $pidlist) = @_;
+    #
+    # kill sockfilter processes for pingpong relative server
+    #
+    if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
+        my $proto  = $1;
+        my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
+        my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+        killsockfilters($proto, $ipvnum, $idnum, $verbose);
+    }
+    #
+    # All servers relative to the given one must be stopped also
+    #
+    my @killservers;
+    if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+        # given an ssl server, also kill non-ssl underlying one
+        push @killservers, "${1}${2}";
+    }
+    elsif($server =~ /^(ftp|http|imap|pop3|smtp)(.*)$/) {
+        # given a non-ssl server, also kill ssl piggybacking one
+        push @killservers, "${1}s${2}";
+    }
+    elsif($server =~ /^(socks)(.*)$/) {
+        # given an socks server, also kill ssh underlying one
+        push @killservers, "ssh${2}";
+    }
+    elsif($server =~ /^(ssh)(.*)$/) {
+        # given an ssh server, also kill socks piggybacking one
+        push @killservers, "socks${2}";
+    }
+    push @killservers, $server;
+    #
+    # kill given pids and server relative ones clearing them in %run hash
+    #
+    foreach my $server (@killservers) {
+        $pidlist .= "$run{$server} ";
+        $run{$server} = 0;
+    }
     killpid($verbose, $pidlist);
+    #
+    # cleanup server pid files
+    #
+    foreach my $server (@killservers) {
+        my $pidfile = $serverpidfile{$server};
+        my $pid = processexists($pidfile);
+        if($pid > 0) {
+            logmsg "Warning: $server server unexpectedly alive\n";
+            killpid($verbose, $pid);
+        }
+        unlink($pidfile) if(-f $pidfile);
+    }
 }
 
 #######################################################################
@@ -839,6 +886,7 @@ sub runhttpserver {
     my $proto = 'http';
     my $ipvnum = 4;
     my $idnum = 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
@@ -851,7 +899,9 @@ sub runhttpserver {
         $ip = $HOST6IP;
     }
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -860,9 +910,9 @@ sub runhttpserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -880,7 +930,7 @@ sub runhttpserver {
     if($httppid <= 0 || !kill(0, $httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver("$pid2");
+        stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -891,7 +941,7 @@ sub runhttpserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$httppid $pid2");
+        stopserver($server, "$httppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -916,6 +966,7 @@ sub runhttpsserver {
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
@@ -925,7 +976,9 @@ sub runhttpsserver {
         return 0;
     }
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -934,10 +987,9 @@ sub runhttpsserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        # kill previous stunnel!
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -957,7 +1009,7 @@ sub runhttpsserver {
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopservers($verbose);
+        stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return(0,0);
@@ -968,7 +1020,7 @@ sub runhttpsserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$httpspid $pid2");
+        stopserver($server, "$httpspid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -993,6 +1045,7 @@ sub runpingpongserver {
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
@@ -1020,7 +1073,9 @@ sub runpingpongserver {
         return 0;
     }
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1029,9 +1084,9 @@ sub runpingpongserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -1049,7 +1104,7 @@ sub runpingpongserver {
     if($ftppid <= 0 || !kill(0, $ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver("$pid2");
+        stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1060,7 +1115,7 @@ sub runpingpongserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$ftppid $pid2");
+        stopserver($server, "$ftppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1085,6 +1140,7 @@ sub runftpsserver {
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
@@ -1094,7 +1150,9 @@ sub runftpsserver {
         return 0;
     }
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1103,10 +1161,9 @@ sub runftpsserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        # kill previous stunnel!
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -1126,7 +1183,7 @@ sub runftpsserver {
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopservers($verbose);
+        stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return(0,0);
@@ -1137,7 +1194,7 @@ sub runftpsserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$ftpspid $pid2");
+        stopserver($server, "$ftpspid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1163,6 +1220,7 @@ sub runtftpserver {
     my $proto = 'tftp';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
@@ -1175,7 +1233,9 @@ sub runtftpserver {
         $ip = $HOST6IP;
     }
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1184,9 +1244,9 @@ sub runtftpserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -1203,7 +1263,7 @@ sub runtftpserver {
     if($tftppid <= 0 || !kill(0, $tftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver("$pid2");
+        stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1214,7 +1274,7 @@ sub runtftpserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$tftppid $pid2");
+        stopserver($server, "$tftppid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
@@ -1242,12 +1302,15 @@ sub runsshserver {
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
     my $flags = "";
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1256,9 +1319,9 @@ sub runsshserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -1282,7 +1345,7 @@ sub runsshserver {
     if($sshpid <= 0 || !kill(0, $sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver("$pid2");
+        stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1295,7 +1358,7 @@ sub runsshserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to fetch server pid. Kill the server and return failure
-        stopserver("$sshpid $pid2");
+        stopserver($server, "$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1315,7 +1378,7 @@ sub runsshserver {
         display_sftpconfig();
         display_sshdlog();
         display_sshdconfig();
-        stopserver("$sshpid $pid2");
+        stopserver($server, "$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1337,13 +1400,15 @@ sub runsocksserver {
     my $proto = 'socks';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+    my $server;
     my $srvrname;
     my $pidfile;
     my $logfile;
     my $flags = "";
 
-    $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    $SOCKSPIDFILE = $pidfile;
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1352,9 +1417,9 @@ sub runsocksserver {
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        stopserver($pid);
+        stopserver($server, "$pid");
     }
-    unlink($pidfile);
+    unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
@@ -1441,7 +1506,7 @@ sub runsocksserver {
         display_sshconfig();
         display_sshdlog();
         display_sshdconfig();
-        stopserver("$pid2");
+        stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -1451,7 +1516,7 @@ sub runsocksserver {
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
-        stopserver("$sshpid $pid2");
+        stopserver($server, "$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
@@ -2382,14 +2447,38 @@ sub singletest {
     $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
 
     # test definition might instruct to stop some servers
-    # stop also non-secure server when stopping a ssl one
-    my @killservers = getpart("client", "killserver");
-    if(@killservers) {
+    # stop also all servers relative to the given one
+
+    my @killtestservers = getpart("client", "killserver");
+    if(@killtestservers) {
         #
-        # kill sockfilter processes for pingpong servers
+        # All servers relative to the given one must be stopped also
+        #
+        my @killservers;
+        foreach my $server (@killtestservers) {
+            chomp $server;
+            if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+                # given an ssl server, also kill non-ssl underlying one
+                push @killservers, "${1}${2}";
+            }
+            elsif($server =~ /^(ftp|http|imap|pop3|smtp)(.*)$/) {
+                # given a non-ssl server, also kill ssl piggybacking one
+                push @killservers, "${1}s${2}";
+            }
+            elsif($server =~ /^(socks)(.*)$/) {
+                # given an socks server, also kill ssh underlying one
+                push @killservers, "ssh${2}";
+            }
+            elsif($server =~ /^(ssh)(.*)$/) {
+                # given an ssh server, also kill socks piggybacking one
+                push @killservers, "socks${2}";
+            }
+            push @killservers, $server;
+        }
+        #
+        # kill sockfilter processes for pingpong relative servers
         #
         foreach my $server (@killservers) {
-            chomp $server;
             if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
                 my $proto  = $1;
                 my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
@@ -2398,29 +2487,18 @@ sub singletest {
             }
         }
         #
-        # kill server pids from %run hash clearing them
+        # kill server relative pids clearing them in %run hash
         #
         my $pidlist;
         foreach my $server (@killservers) {
-            chomp $server;
-            if($run{$server}) {
-                $pidlist .= "$run{$server} ";
-                $run{$server} = 0;
-            }
-            if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
-                $server = "$1$2";
-                if($run{$server}) {
-                    $pidlist .= "$run{$server} ";
-                    $run{$server} = 0;
-                }
-            }
+            $pidlist .= "$run{$server} ";
+            $run{$server} = 0;
         }
         killpid($verbose, $pidlist);
         #
         # cleanup server pid files
         #
         foreach my $server (@killservers) {
-            chomp $server;
             my $pidfile = $serverpidfile{$server};
             my $pid = processexists($pidfile);
             if($pid > 0) {
@@ -2428,16 +2506,6 @@ sub singletest {
                 killpid($verbose, $pid);
             }
             unlink($pidfile) if(-f $pidfile);
-            if($server =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
-                $server = "$1$2";
-                $pidfile = $serverpidfile{$server};
-                $pid = processexists($pidfile);
-                if($pid > 0) {
-                    logmsg "Warning: $server server unexpectedly alive\n";
-                    killpid($verbose, $pid);
-                }
-                unlink($pidfile) if(-f $pidfile);
-            }
         }
     }
 
@@ -2776,27 +2844,44 @@ sub singletest {
 # Stop all running test servers
 sub stopservers {
     my $verbose = $_[0];
+    #
+    # kill sockfilter processes for all pingpong servers
+    #
+    killallsockfilters($verbose);
+    #
+    # kill all server pids from %run hash clearing them
+    #
     my $pidlist;
-
-    for(keys %run) {
-        my $server = $_;
-        my $pids=$run{$server};
-        my $pid;
-        my $prev;
-
-        foreach $pid (split(' ', $pids)) {
-            if($pid != $prev) {
-                # no need to kill same pid twice!
-                logmsg sprintf("* kill pid for %s => %d\n",
-                               $server, $pid) if($verbose);
-                $pidlist .= "$pid ";
-                $prev = $pid;
+    foreach my $server (keys %run) {
+        if($run{$server}) {
+            if($verbose) {
+                my $prev = 0;
+                my $pids = $run{$server};
+                foreach my $pid (split(' ', $pids)) {
+                    if($pid != $prev) {
+                        logmsg sprintf("* kill pid for %s => %d\n",
+                            $server, $pid);
+                        $prev = $pid;
+                    }
+                }
             }
+            $pidlist .= "$run{$server} ";
+            $run{$server} = 0;
         }
-        delete $run{$server};
     }
     killpid($verbose, $pidlist);
-    killallsockfilters($verbose);
+    #
+    # cleanup all server pid files
+    #
+    foreach my $server (keys %serverpidfile) {
+        my $pidfile = $serverpidfile{$server};
+        my $pid = processexists($pidfile);
+        if($pid > 0) {
+            logmsg "Warning: $server server unexpectedly alive\n";
+            killpid($verbose, $pid);
+        }
+        unlink($pidfile) if(-f $pidfile);
+    }
 }
 
 #######################################################################
@@ -3597,8 +3682,6 @@ close(CMDLOG);
 
 # Tests done, stop the servers
 stopservers($verbose);
-
-unlink($SOCKSPIDFILE);
 
 my $all = $total + $skipped;
 
