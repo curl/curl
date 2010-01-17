@@ -72,6 +72,7 @@ use Cwd;
 
 # Subs imported from serverhelp module
 use serverhelp qw(
+    servername_id
     servername_str
     server_pidfilename
     server_logfilename
