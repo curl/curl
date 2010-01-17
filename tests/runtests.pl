@@ -3181,12 +3181,16 @@ sub runtimestats {
                 $timevrfyend{$testnum} - $timeprepini{$testnum}, $testnum);
         }
     }
-    @timesrvr = sort { $b <=> $a } @timesrvr;
-    @timeprep = sort { $b <=> $a } @timeprep;
-    @timetool = sort { $b <=> $a } @timetool;
-    @timelock = sort { $b <=> $a } @timelock;
-    @timevrfy = sort { $b <=> $a } @timevrfy;
-    @timetest = sort { $b <=> $a } @timetest;
+
+    {
+        no warnings 'numeric';
+        @timesrvr = sort { $b <=> $a } @timesrvr;
+        @timeprep = sort { $b <=> $a } @timeprep;
+        @timetool = sort { $b <=> $a } @timetool;
+        @timelock = sort { $b <=> $a } @timelock;
+        @timevrfy = sort { $b <=> $a } @timevrfy;
+        @timetest = sort { $b <=> $a } @timetest;
+    }
 
     logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
            "seconds starting and verifying test harness servers.\n";
@@ -3738,7 +3742,7 @@ if($skipped) {
         my $c=0;
         for(0 .. scalar @teststat) {
             my $t = $_;
-            if($teststat[$_] eq $r) {
+            if($teststat[$_] && ($teststat[$_] eq $r)) {
                 logmsg ", " if($c);
                 logmsg $_;
                 $c++;
