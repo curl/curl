@@ -292,17 +292,17 @@ my $protocol;
 foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
     my $proxy = "${protocol}_proxy";
     # clear lowercase version
-    $ENV{$proxy}=undef;
+    $ENV{$proxy} = undef if($ENV{$proxy});
     # clear uppercase version
-    $ENV{uc($proxy)}=undef;
+    $ENV{uc($proxy)} = undef if($ENV{uc($proxy)});
 }
 
 # make sure we don't get affected by other variables that control our
 # behaviour
 
-$ENV{'SSL_CERT_DIR'}=undef;
-$ENV{'SSL_CERT_PATH'}=undef;
-$ENV{'CURL_CA_BUNDLE'}=undef;
+$ENV{'SSL_CERT_DIR'} = undef if($ENV{'SSL_CERT_DIR'});
+$ENV{'SSL_CERT_PATH'} = undef if($ENV{'SSL_CERT_PATH'});
+$ENV{'CURL_CA_BUNDLE'} = undef if($ENV{'CURL_CA_BUNDLE'});
 
 #######################################################################
 # Load serverpidfile hash with pidfile names for all possible servers.
@@ -656,7 +656,7 @@ sub stopserver {
 sub verifyhttp {
     my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
     my $cmd = "$VCURL --max-time $server_response_maxtime --output $LOGDIR/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyhttp";
-    my $pid;
+    my $pid = 0;
 
     # verify if our/any server is running on this port
     logmsg "CMD; $cmd\n" if ($verbose);
@@ -676,12 +676,12 @@ sub verifyhttp {
             }
         }
     }
-    open(FILE, "<$LOGDIR/verifiedserver");
-    my @file=<FILE>;
-    close(FILE);
-    $data=$file[0]; # first line
-
-    if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+    if(open(FILE, "<$LOGDIR/verifiedserver")) {
+        my @file=<FILE>;
+        close(FILE);
+        $data=$file[0]; # first line
+    }
+    if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
         $pid = 0+$1;
     }
     elsif($res == 6) {
@@ -3427,7 +3427,7 @@ EOHELP
     shift @ARGV;
 } 
 
-if($testthis[0] ne "") {
+if(@testthis && ($testthis[0] ne "")) {
     $TESTCASES=join(" ", @testthis);
 }
 
