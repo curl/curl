@@ -47,6 +47,7 @@ use vars qw(
 # Global symbols this module will export upon request
 #
 @EXPORT_OK = qw(
+    serverfactors
     servername_id
     servername_str
     servername_canon
@@ -60,6 +61,32 @@ use vars qw(
     datasockf_pidfilename
     datasockf_logfilename
     );
+
+
+#***************************************************************************
+# Return server characterization factors given a server id string.
+#
+sub serverfactors {
+    my $server = $_[0];
+    my $proto;
+    my $ipvnum;
+    my $idnum;
+
+    if($server =~ /^((ftp|http|imap|pop3|smtp)s?)(\d*)(-ipv6|)$/) {
+        $proto  = $1;
+        $idnum  = ($3 && ($3 > 1)) ? $3 : 1;
+        $ipvnum = ($4 && ($4 =~ /6$/)) ? 6 : 4;
+    }
+    elsif($server =~ /^(tftp|sftp|socks|ssh)(\d*)(-ipv6|)$/) {
+        $proto  = $1;
+        $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
+        $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+    }
+    else {
+        die "invalid server id: $server"
+    }
+    return($proto, $ipvnum, $idnum);
+}
 
 
 #***************************************************************************
