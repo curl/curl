@@ -72,8 +72,10 @@ use Cwd;
 
 # Subs imported from serverhelp module
 use serverhelp qw(
+    serverfactors
     servername_id
     servername_str
+    servername_canon
     server_pidfilename
     server_logfilename
     );
@@ -654,33 +656,52 @@ sub stopserver {
 # assign requested address" #
 
 sub verifyhttp {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
-    my $cmd = "$VCURL --max-time $server_response_maxtime --output $LOGDIR/verifiedserver --insecure --silent --verbose --globoff \"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyhttp";
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $pid = 0;
 
+    my $verifyout = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+
+    unlink($verifyout) if(-f $verifyout);
+    unlink($verifylog) if(-f $verifylog);
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--output $verifyout ";
+    $flags .= "--insecure ";
+    $flags .= "--silent ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
+
+    my $cmd = "$VCURL $flags 2>$verifylog";
+
     # verify if our/any server is running on this port
-    logmsg "CMD; $cmd\n" if ($verbose);
+    logmsg "RUN: $cmd\n" if($verbose);
     my $res = runclient($cmd);
 
     $res >>= 8; # rotate the result
     my $data;
 
     if($res && $verbose) {
-        open(ERR, "<$LOGDIR/verifyhttp");
-        my @e = <ERR>;
-        close(ERR);
         logmsg "RUN: curl command returned $res\n";
-        for(@e) {
-            if($_ !~ /^([ \t]*)$/) {
-                logmsg "RUN: $_";
+        if(open(FILE, "<$verifylog")) {
+            while(my $string = <FILE>) {
+                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
             }
+            close(FILE);
         }
     }
-    if(open(FILE, "<$LOGDIR/verifiedserver")) {
-        my @file=<FILE>;
+
+    if(open(FILE, "<$verifyout")) {
+        while(my $string = <FILE>) {
+            $data = $string;
+            last; # only want first line
+        }
         close(FILE);
-        $data=$file[0]; # first line
     }
+
     if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
         $pid = 0+$1;
     }
@@ -703,7 +724,8 @@ sub verifyhttp {
 # assign requested address" #
 
 sub verifyftp {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
     my $pid;
     my $time=time();
     my $extra="";
@@ -755,7 +777,8 @@ sub verifyftp {
 # actually alive.
 
 sub verifyssh {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
     my $pid = 0;
     if(open(FILE, "<$pidfile")) {
@@ -780,7 +803,8 @@ sub verifyssh {
 # with generated config and key files and run a simple remote pwd.
 
 sub verifysftp {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
     my $verified = 0;
     # Find out sftp client canonical file name
     my $sftp = find_sftp();
@@ -816,7 +840,8 @@ sub verifysftp {
 # STUB for verifying socks
 
 sub verifysocks {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
     my $pid = 0;
     if(open(FILE, "<$pidfile")) {
@@ -855,7 +880,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'socks' => \&verifysocks);
 
 sub verifyserver {
-    my ($proto, $ip, $port, $ipvnum, $idnum) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
 
     my $count = 30; # try for this many seconds
     my $pid;
@@ -863,7 +888,7 @@ sub verifyserver {
     while($count--) {
         my $fun = $protofunc{$proto};
 
-        $pid = &$fun($proto, $ip, $port, $ipvnum, $idnum);
+        $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
 
         if($pid > 0) {
             last;
@@ -940,7 +965,7 @@ sub runhttpserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ip, $port, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1029,7 +1054,7 @@ sub runhttpsserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ip, $HTTPSPORT, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $HTTPSPORT);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1126,7 +1151,7 @@ sub runpingpongserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ip, $port, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1205,7 +1230,7 @@ sub runftpsserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ip, $FTPSPORT, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $FTPSPORT);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1285,7 +1310,7 @@ sub runtftpserver {
     }
 
     # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ip, $port, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
@@ -1369,7 +1394,7 @@ sub runsshserver {
     # and gives us the opportunity of recovering the pid from the pidfile, when
     # this verification succeeds the recovered pid is assigned to pid2.
 
-    my $pid3 = verifyserver($proto, $ip, $port, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to fetch server pid. Kill the server and return failure
@@ -1386,7 +1411,7 @@ sub runsshserver {
     $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
     $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
 
-    if(verifysftp("sftp", $ip, $port, $ipvnum, $idnum) < 1) {
+    if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
         logmsg "RUN: SFTP server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         display_sftplog();
@@ -1527,7 +1552,7 @@ sub runsocksserver {
     }
 
     # Ugly hack but ssh doesn't support pid files
-    my $pid3 = verifyserver($proto, $ip, $port, $ipvnum, $idnum);
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
     if(!$pid3) {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
