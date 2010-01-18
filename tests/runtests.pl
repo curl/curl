@@ -2359,9 +2359,18 @@ sub singletest {
         $DBGCURL=$CMDLINE;
     }
 
-    my $usevalgrind = $valgrind && ((getpart("verify", "valgrind"))[0] !~ /disable/);
-    if($usevalgrind) {
-        $CMDLINE = "$valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 ${valgrind_logfile}=$LOGDIR/valgrind$testnum $CMDLINE";
+    my $usevalgrind;
+    if($valgrind) {
+        my @valgrindoption = getpart("verify", "valgrind");
+        if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
+            $usevalgrind = 1;
+            my $valgrindcmd = "$valgrind ";
+            $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
+            $valgrindcmd .= "--leak-check=yes ";
+            $valgrindcmd .= "--num-callers=16 ";
+            $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
+            $CMDLINE = "$valgrindcmd $CMDLINE";
+        }
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
@@ -2823,7 +2832,7 @@ sub singletest {
             my $f;
             my $l;
             foreach $f (@files) {
-                if($f =~ /^valgrind$testnum\.pid/) {
+                if($f =~ /^valgrind$testnum\./) {
                     $l = $f;
                     last;
                 }
@@ -3461,7 +3470,7 @@ if($valgrind) {
         # use it, if it is supported by the version installed on the system
         runclient("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
         if (($? >> 8)==0) {
-            $valgrind_tool="--tool=memcheck ";
+            $valgrind_tool="--tool=memcheck";
         }
         open(C, "<$CURL");
         my $l = <C>;
@@ -3476,8 +3485,11 @@ if($valgrind) {
         # cut off all but digits and dots
         $ver =~ s/[^0-9.]//g;
 
-        if($ver >= 3) {
-            $valgrind_logfile="--log-file";
+        if($ver =~ /^(\d+)/) {
+            $ver = $1;
+            if($ver >= 3) {
+                $valgrind_logfile="--log-file";
+            }
         }
     }
 }
@@ -3658,7 +3670,7 @@ sub displaylogs {
         if(($log =~ /^file\d+\.txt/) && ($log !~ /^file$testnum\.txt/)) {
             next; # skip fileNnn.txt of other tests
         }
-        if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum/)) {
+        if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum\./)) {
             next; # skip valgrindNnn of other tests
         }
         logmsg "=== Start of file $log\n";
