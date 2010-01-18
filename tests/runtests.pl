@@ -728,7 +728,7 @@ sub verifyhttp {
 sub verifyftp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pid;
+    my $pid = 0;
     my $time=time();
     my $extra="";
     if($proto eq "ftps") {
@@ -755,7 +755,7 @@ sub verifyftp {
             last;
         }
     }
-    if($pid <= 0 && $data[0]) {
+    if($pid <= 0 && @data && $data[0]) {
         # this is not a known server
         logmsg "RUN: Unknown server on our ". uc($proto) ." port: $port\n";
         return 0;
