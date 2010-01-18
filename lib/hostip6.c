@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,17 +112,13 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                           host, hostlen,
                           serv, servlen,
                           flags);
-  if(0 == res) {
+  if(0 == res)
     /* success */
-    if(logfile)
-      fprintf(logfile, "GETNAME %s:%d getnameinfo()\n",
-              source, line);
-  }
-  else {
-    if(logfile)
-      fprintf(logfile, "GETNAME %s:%d getnameinfo() failed = %d\n",
-              source, line, res);
-  }
+    curl_memlog("GETNAME %s:%d getnameinfo()\n",
+                source, line);
+  else
+    curl_memlog("GETNAME %s:%d getnameinfo() failed = %d\n",
+                source, line, res);
   return res;
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO) */

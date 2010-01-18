@@ -54,6 +54,7 @@ CURL_EXTERN void curl_dofree(void *ptr, int line, const char *source);
 CURL_EXTERN char *curl_dostrdup(const char *str, int line, const char *source);
 CURL_EXTERN void curl_memdebug(const char *logname);
 CURL_EXTERN void curl_memlimit(long limit);
+CURL_EXTERN void curl_memlog(const char *format, ...);
 
 /* file descriptor manipulators */
 CURL_EXTERN int curl_socket(int domain, int type, int protocol, int line , const char *);

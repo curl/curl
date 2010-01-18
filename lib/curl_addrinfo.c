@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -447,9 +447,8 @@ curl_dofreeaddrinfo(struct addrinfo *freethis,
                     int line, const char *source)
 {
   (freeaddrinfo)(freethis);
-  if(logfile)
-    fprintf(logfile, "ADDR %s:%d freeaddrinfo(%p)\n",
-            source, line, (void *)freethis);
+  curl_memlog("ADDR %s:%d freeaddrinfo(%p)\n",
+              source, line, (void *)freethis);
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
 
@@ -471,17 +470,13 @@ curl_dogetaddrinfo(const char *hostname,
                    int line, const char *source)
 {
   int res=(getaddrinfo)(hostname, service, hints, result);
-  if(0 == res) {
+  if(0 == res)
     /* success */
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
-              source, line, (void *)*result);
-  }
-  else {
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() failed\n",
-              source, line);
-  }
+    curl_memlog("ADDR %s:%d getaddrinfo() = %p\n",
+                source, line, (void *)*result);
+  else
+    curl_memlog("ADDR %s:%d getaddrinfo() failed\n",
+                source, line);
   return res;
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */

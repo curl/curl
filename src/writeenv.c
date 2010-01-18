@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,6 +34,10 @@
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
+
+#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
+#include "memdebug.h"
+#endif
 
 static const struct
 {
@@ -69,9 +73,7 @@ static void internalSetEnv(const char * name, char * value)
 #ifdef __riscos__
   _kernel_setenv(name, value);
 #elif defined (CURLDEBUG)
-  extern FILE *curl_debuglogfile;
-  if (curl_debuglogfile)
-     fprintf (curl_debuglogfile, "ENV %s = %s\n", name, value);
+  curl_memlog("ENV %s = %s\n", name, value);
 #endif
   return;
 }
