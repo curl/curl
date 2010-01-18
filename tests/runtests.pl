@@ -1001,34 +1001,27 @@ sub runhttpsserver {
     my $flags = "";
 
     if(!$stunnel) {
-        logmsg "DEBUG: runhttpsserver: return point 1\n";
         return (0,0);
     }
 
     $server = servername_id($proto, $ipvnum, $idnum);
-    logmsg "DEBUG: runhttpsserver: server = $server\n";
 
     $pidfile = $serverpidfile{$server};
-    logmsg "DEBUG: runhttpsserver: pidfile = $pidfile\n";
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        logmsg "DEBUG: runhttpsserver: return point 2\n";
         return (0,0);
     }
 
     my $pid = processexists($pidfile);
     if($pid > 0) {
-        logmsg "DEBUG: runhttpsserver: pid = $pid\n";
         stopserver($server, "$pid");
     }
     unlink($pidfile) if(-f $pidfile);
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
-    logmsg "DEBUG: runhttpsserver: srvrname = $srvrname\n";
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
-    logmsg "DEBUG: runhttpsserver: logfile = $logfile\n";
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
@@ -1037,11 +1030,9 @@ sub runhttpsserver {
     $flags .= "--certfile \"$certfile\" " if($certfile);
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $HTTPPORT --accept $HTTPSPORT";
-    logmsg "DEBUG: runhttpsserver: flags = $flags\n";
 
     my $cmd = "$perl $srcdir/secureserver.pl $flags";
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
-    logmsg "DEBUG: runhttpsserver: httpspid = $httpspid : pid2 = $pid2\n";
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
@@ -1049,7 +1040,6 @@ sub runhttpsserver {
         stopserver($server, "$pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        logmsg "DEBUG: runhttpsserver: return point 3\n";
         return(0,0);
     }
 
@@ -1061,7 +1051,6 @@ sub runhttpsserver {
         stopserver($server, "$httpspid $pid2");
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
-        logmsg "DEBUG: runhttpsserver: return point 4\n";
         return (0,0);
     }
     # Here pid3 is actually the pid returned by the unsecure-http server.
@@ -1072,7 +1061,6 @@ sub runhttpsserver {
 
     sleep(1);
 
-    logmsg "DEBUG: runhttpsserver: return point 5\n";
     return ($httpspid, $pid2);
 }
 
@@ -3047,7 +3035,9 @@ sub startservers {
                 printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(1 || !$run{'https'}) {  # QD to restart always conf file may change
+            # FIXME properly - ssl tests may use different cert files.
+            #     We must stop running server when using a different cert.
+            if(!$run{'https'}) {
                 ($pid, $pid2) = runhttpsserver($verbose,"",$whatlist[1]);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
