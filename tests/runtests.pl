@@ -249,6 +249,7 @@ my $postmortem;   # display detailed info about failed tests
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
 my %serverpidfile;# all server pid file names, identified by server id
+my %runcert;      # cert file currently in use by an ssl running server
 
 # torture test variables
 my $torture;
@@ -631,6 +632,7 @@ sub stopserver {
     foreach my $server (@killservers) {
         if($run{$server}) {
             $pidlist .= "$run{$server} ";
+            $runcert{$server} = 0;
             $run{$server} = 0;
         }
     }
@@ -1021,13 +1023,15 @@ sub runhttpsserver {
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
+    $certfile = 'stunnel.pem' unless($certfile);
+
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --proto $proto ";
-    $flags .= "--certfile \"$certfile\" " if($certfile);
+    $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $HTTPPORT --accept $HTTPSPORT";
 
@@ -1054,6 +1058,8 @@ sub runhttpsserver {
         return (0,0);
     }
     # Here pid3 is actually the pid returned by the unsecure-http server.
+
+    $runcert{$server} = $certfile;
 
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $httpspid\n";
@@ -1195,13 +1201,15 @@ sub runftpsserver {
 
     $srvrname = servername_str($proto, $ipvnum, $idnum);
 
+    $certfile = 'stunnel.pem' unless($certfile);
+
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --proto $proto ";
-    $flags .= "--certfile \"$certfile\" " if($certfile);
+    $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $FTPPORT --accept $FTPSPORT";
 
@@ -1228,6 +1236,8 @@ sub runftpsserver {
         return (0,0);
     }
     # Here pid3 is actually the pid returned by the unsecure-ftp server.
+
+    $runcert{$server} = $certfile;
 
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $ftpspid\n";
@@ -2532,6 +2542,7 @@ sub singletest {
         foreach my $server (@killservers) {
             if($run{$server}) {
                 $pidlist .= "$run{$server} ";
+                $runcert{$server} = 0;
                 $run{$server} = 0;
             }
         }
@@ -2909,6 +2920,7 @@ sub stopservers {
                 }
             }
             $pidlist .= "$run{$server} ";
+            $runcert{$server} = 0;
             $run{$server} = 0;
         }
     }
@@ -2939,6 +2951,11 @@ sub startservers {
         my (@whatlist) = split(/\s+/,$_);
         my $what = lc($whatlist[0]);
         $what =~ s/[^a-z0-9-]//g;
+
+        my $certfile;
+        if($what =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
+            $certfile = ($whatlist[1]) ? $whatlist[1] : 'stunnel.pem';
+        }
 
         if(($what eq "pop3") ||
            ($what eq "ftp") ||
@@ -3004,7 +3021,10 @@ sub startservers {
                 # we can't run ftps tests if libcurl is SSL-less
                 return "curl lacks SSL support";
             }
-
+            if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
+                # stop server when running and using a different cert
+                stopserver('ftps');
+            }
             if(!$run{'ftp'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "", $verbose);
                 if($pid <= 0) {
@@ -3014,7 +3034,7 @@ sub startservers {
                 $run{'ftp'}="$pid $pid2";
             }
             if(!$run{'ftps'}) {
-                ($pid, $pid2) = runftpsserver($verbose);
+                ($pid, $pid2) = runftpsserver($verbose, "", $certfile);
                 if($pid <= 0) {
                     return "failed starting FTPS server (stunnel)";
                 }
@@ -3035,7 +3055,10 @@ sub startservers {
                 # we can't run ftps tests if libcurl is SSL-less
                 return "curl lacks SSL support";
             }
-
+            if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
+                # stop server when running and using a different cert
+                stopserver('https');
+            }
             if(!$run{'http'}) {
                 ($pid, $pid2) = runhttpserver($verbose);
                 if($pid <= 0) {
@@ -3044,10 +3067,8 @@ sub startservers {
                 printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            # FIXME properly - ssl tests may use different cert files.
-            #     We must stop running server when using a different cert.
             if(!$run{'https'}) {
-                ($pid, $pid2) = runhttpsserver($verbose,"",$whatlist[1]);
+                ($pid, $pid2) = runhttpsserver($verbose, "", $certfile);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
