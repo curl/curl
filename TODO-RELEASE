@@ -12,6 +12,4 @@ To be addressed in 7.20.0 (planned release: January 2010)
 
 253 - add option to disable SNI for TLS handshakes
 
-260 - IMAP, POP3 and SMTP support
-
 261 - 
