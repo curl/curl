@@ -2864,7 +2864,7 @@ sub singletest {
             closedir(DIR);
             logmsg "DEBUG: No valgrind files\n" unless(@files);
             my $f;
-            my $l;
+            my $l="";
             foreach $f (@files) {
                 logmsg "DEBUG: valgrind file: $f\n";
                 if($f =~ /^valgrind$testnum\./) {
