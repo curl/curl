@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (19 Jan 2010)
+- David McCreedy brought a fix and a new test case (129) to make libcurl work
+  again when downloading files over FTP using ASCII and it turns out that the
+  final size of the file is not the same as the initial size the server
+  reported. This is very common since servers don't take the newline
+  conversions into account.
+
 Kamil Dudka (14 Jan 2010)
 - Suppressed side effect of OpenSSL configure checks, which prevented NSS from
   being properly detected under certain circumstances. It had been caused by

@@ -2204,6 +2204,8 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
 
     if(size > data->req.maxdownload && data->req.maxdownload > 0)
       size = data->req.size = data->req.maxdownload;
+    else if((instate != FTP_LIST) && (data->set.prefer_ascii))
+      size = -1; /* kludge for servers that understate ASCII mode file size */
 
     infof(data, "Maxdownload = %" FORMAT_OFF_T "\n", data->req.maxdownload);
 
