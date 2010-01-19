@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Jan 2010)
+- As was pointed out on the http-state mailing list, the order of cookies in a
+  HTTP Cookie: header _needs_ to be sorted on the path length in the cases
+  where two cookies using the same name are set more than once using
+  (overlapping) paths. Realizing this, identically named cookies must be
+  sorted correctly. But detecting only identically named cookies and take care
+  of them individually is harder than just to blindly and unconditionally sort
+  all cookies based on their path lengths. All major browsers also already do
+  this, so this makes our behavior one step closer to them in the cookie area.
+
+  Test case 8 was the only one that broke due to this change and I updated it
+  accordingly.
+
 Daniel Stenberg (19 Jan 2010)
 - David McCreedy brought a fix and a new test case (129) to make libcurl work
   again when downloading files over FTP using ASCII and it turns out that the

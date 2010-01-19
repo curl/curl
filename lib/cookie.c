@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -774,6 +774,18 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
   return c;
 }
 
+/* sort this so that the longest path gets before the shorter path */
+static int cookie_sort(const void *p1, const void *p2)
+{
+  struct Cookie *c1 = *(struct Cookie **)p1;
+  struct Cookie *c2 = *(struct Cookie **)p2;
+
+  size_t l1 = c1->path?strlen(c1->path):0;
+  size_t l2 = c2->path?strlen(c2->path):0;
+
+  return l2 - l1;
+}
+
 /*****************************************************************************
  *
  * Curl_cookie_getlist()
@@ -794,6 +806,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
   struct Cookie *co;
   time_t now = time(NULL);
   struct Cookie *mainco=NULL;
+  int matches=0;
 
   if(!c || !c->cookies)
     return NULL; /* no cookie struct or no cookies in the struct */
@@ -834,8 +847,11 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
             /* point the main to us */
             mainco = newco;
+
+            matches++;
           }
           else {
+            fail:
             /* failure, clear up the allocated chain and return NULL */
             while(mainco) {
               co = mainco->next;
@@ -849,6 +865,36 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
       }
     }
     co = co->next;
+  }
+
+  if(matches) {
+    /* Now we need to make sure that if there is a name appearing more than
+       once, the longest specified path version comes first. To make this
+       the swiftest way, we just sort them all based on path length. */
+    struct Cookie **array;
+    int i;
+
+    /* alloc an array and store all cookie pointers */
+    array = (struct Cookie **)malloc(sizeof(struct Cookie *) * matches);
+    if(!array)
+      goto fail;
+
+    co = mainco;
+
+    for(i=0; co; co = co->next)
+      array[i++] = co;
+
+    /* now sort the cookie pointers in path lenth order */
+    qsort(array, matches, sizeof(struct Cookie *), cookie_sort);
+
+    /* remake the linked list order according to the new order */
+
+    mainco = array[0]; /* start here */
+    for(i=0; i<matches-1; i++)
+      array[i]->next = array[i+1];
+    array[matches-1]->next = NULL; /* terminate the list */
+
+    free(array); /* remove the temporary data again */
   }
 
   return mainco; /* return the new list */

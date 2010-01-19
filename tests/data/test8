@@ -55,7 +55,7 @@ Set-Cookie: blexp=yesyes; domain=.0.0.1; domain=.0.0.1; expiry=totally bad;
 GET /we/want/8 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: blexp=yesyes; cookie=yes; partmatch=present; foobar=name
+Cookie: cookie=yes; partmatch=present; foobar=name; blexp=yesyes
 
 </protocol>
 </verify>
