@@ -546,7 +546,7 @@ sub torture {
         #logmsg "$_ Returned " . $ret / 256 . "\n";
 
         # Now clear the variable again
-        $ENV{'CURL_MEMLIMIT'} = undef;
+        $ENV{'CURL_MEMLIMIT'} = undef if($ENV{'CURL_MEMLIMIT'});
 
         if(-r "core") {
             # there's core file present now!
@@ -659,22 +659,23 @@ sub stopserver {
 
 sub verifyhttp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
     my $pid = 0;
 
     my $verifyout = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+    unlink($verifyout) if(-f $verifyout);
+
     my $verifylog = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-
-    unlink($verifyout) if(-f $verifyout);
     unlink($verifylog) if(-f $verifylog);
 
     my $flags = "--max-time $server_response_maxtime ";
     $flags .= "--output $verifyout ";
-    $flags .= "--insecure ";
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
+    $flags .= "--insecure " if($proto eq 'https');
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -684,7 +685,10 @@ sub verifyhttp {
     my $res = runclient($cmd);
 
     $res >>= 8; # rotate the result
-    my $data;
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
@@ -696,6 +700,7 @@ sub verifyhttp {
         }
     }
 
+    my $data;
     if(open(FILE, "<$verifyout")) {
         while(my $string = <FILE>) {
             $data = $string;
@@ -713,7 +718,7 @@ sub verifyhttp {
         return -1;
     }
     elsif($data || ($res != 7)) {
-        logmsg "RUN: Unknown server is running on port $port\n";
+        logmsg "RUN: Unknown server on our $server port: $port\n";
         return -1;
     }
     return $pid;
@@ -731,6 +736,11 @@ sub verifyftp {
     my $pid = 0;
     my $time=time();
     my $extra="";
+
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    unlink($verifylog) if(-f $verifylog);
+
     if($proto eq "ftps") {
     	$extra .= "--insecure --ftp-ssl-control ";
     }
@@ -743,13 +753,28 @@ sub verifyftp {
         $extra .= "--upload /dev/null ";
         $extra .= "--stderr - "; # move stderr to parse the verbose stuff
     }
-    my $cmd="$VCURL --max-time $server_response_maxtime --silent --verbose --globoff $extra\"$proto://$ip:$port/verifiedserver\" 2>$LOGDIR/verifyftp";
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--silent ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    $flags .= $extra;
+    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
+
+    my $cmd = "$VCURL $flags 2>$verifylog";
+
     # check if this is our server running on this port:
-    my @data=runclientoutput($cmd);
     logmsg "RUN: $cmd\n" if($verbose);
+    my @data = runclientoutput($cmd);
+
+    my $res = $? >> 8; # rotate the result
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
 
     foreach my $line (@data) {
-        if ( $line =~ /WE ROOLZ: (\d+)/ ) {
+        if($line =~ /WE ROOLZ: (\d+)/) {
             # this is our test server with a known pid!
             $pid = 0+$1;
             last;
@@ -757,7 +782,7 @@ sub verifyftp {
     }
     if($pid <= 0 && @data && $data[0]) {
         # this is not a known server
-        logmsg "RUN: Unknown server on our ". uc($proto) ." port: $port\n";
+        logmsg "RUN: Unknown server on our $server port: $port\n";
         return 0;
     }
     # we can/should use the time it took to verify the FTP server as a measure
@@ -765,8 +790,7 @@ sub verifyftp {
     my $took = int(0.5+time()-$time);
 
     if($verbose) {
-        logmsg "RUN: Verifying our test ". uc($proto) .
-               " server took $took seconds\n";
+        logmsg "RUN: Verifying our test $server server took $took seconds\n";
     }
     $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
 
@@ -2830,19 +2854,19 @@ sub singletest {
     }
 
     if($valgrind) {
-        # this is the valid protocol blurb curl should generate
         if($usevalgrind) {
-
-            if(!opendir(DIR, "log")) {
+            unless(opendir(DIR, "$LOGDIR")) {
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 0; # can't open log dir
             }
-            my @files = readdir(DIR);
+            my @files = grep { /valgrind/ } readdir(DIR);
             closedir(DIR);
+            logmsg "DEBUG: No valgrind files\n" unless(@files);
             my $f;
             my $l;
             foreach $f (@files) {
+                logmsg "DEBUG: valgrind file: $f\n";
                 if($f =~ /^valgrind$testnum\./) {
                     $l = $f;
                     last;
