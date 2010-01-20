@@ -285,7 +285,7 @@ sub catch_zap {
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
-$SIG{KILL} = \&catch_zap;
+$SIG{TERM} = \&catch_zap;
 
 ##########################################################################
 # Clear all possible '*_proxy' environment variables for various protocols
