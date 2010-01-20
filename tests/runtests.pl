@@ -295,17 +295,17 @@ my $protocol;
 foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
     my $proxy = "${protocol}_proxy";
     # clear lowercase version
-    $ENV{$proxy} = undef if($ENV{$proxy});
+    delete $ENV{$proxy} if($ENV{$proxy});
     # clear uppercase version
-    $ENV{uc($proxy)} = undef if($ENV{uc($proxy)});
+    delete $ENV{uc($proxy)} if($ENV{uc($proxy)});
 }
 
 # make sure we don't get affected by other variables that control our
 # behaviour
 
-$ENV{'SSL_CERT_DIR'} = undef if($ENV{'SSL_CERT_DIR'});
-$ENV{'SSL_CERT_PATH'} = undef if($ENV{'SSL_CERT_PATH'});
-$ENV{'CURL_CA_BUNDLE'} = undef if($ENV{'CURL_CA_BUNDLE'});
+delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
+delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});
+delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 
 #######################################################################
 # Load serverpidfile hash with pidfile names for all possible servers.
@@ -550,7 +550,7 @@ sub torture {
         #logmsg "$_ Returned " . $ret >> 8 . "\n";
 
         # Now clear the variable again
-        $ENV{'CURL_MEMLIMIT'} = undef if($ENV{'CURL_MEMLIMIT'});
+        delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
 
         if(-r "core") {
             # there's core file present now!
@@ -2300,7 +2300,7 @@ sub singletest {
                 $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
                 # set new value
                 if(!$content) {
-                    $ENV{$var} = undef if($ENV{$var});
+                    delete $ENV{$var} if($ENV{$var});
                 }
                 else {
                     $ENV{$var} = "$content";
@@ -2621,7 +2621,7 @@ sub singletest {
     if(%oldenv) {
         foreach my $var (keys %oldenv) {
             if($oldenv{$var} eq 'notset') {
-                $ENV{$var} = undef if($ENV{$var});
+                delete $ENV{$var} if($ENV{$var});
             }
             else {
                 $ENV{$var} = "$oldenv{$var}";
