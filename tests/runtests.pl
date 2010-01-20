@@ -489,7 +489,6 @@ sub runclientoutput {
 # Memory allocation test and failure torture testing.
 #
 sub torture {
-    use POSIX "strftime";
     my $testcmd = shift;
     my $gdbline = shift;
 
@@ -526,7 +525,12 @@ sub torture {
             next;
         }
 
-        logmsg "Fail alloc no: $limit @ " . strftime ("%H:%M:%S", localtime) . "\r" if($verbose);
+        if($verbose) {
+            my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                localtime(time());
+            my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
+            logmsg "Fail alloc no: $limit at $now\r";
+        }
 
         # make the memory allocation function number $limit return failure
         $ENV{'CURL_MEMLIMIT'} = $limit;
@@ -534,7 +538,7 @@ sub torture {
         # remove memdump first to be sure we get a new nice and clean one
         unlink($memdump);
 
-        logmsg "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
+        logmsg "*** Alloc number $limit is now set to fail ***\n" if($gdbthis);
 
         my $ret;
         if($gdbthis) {
@@ -543,7 +547,7 @@ sub torture {
         else {
             $ret = runclient($testcmd);
         }
-        #logmsg "$_ Returned " . $ret / 256 . "\n";
+        #logmsg "$_ Returned " . $ret >> 8 . "\n";
 
         # Now clear the variable again
         $ENV{'CURL_MEMLIMIT'} = undef if($ENV{'CURL_MEMLIMIT'});
@@ -580,7 +584,7 @@ sub torture {
         }
         if($fail) {
             logmsg " Failed on alloc number $limit in test.\n",
-            " invoke with -t$limit to repeat this single case.\n";
+            " invoke with \"-t$limit\" to repeat this single case.\n";
             stopservers($verbose);
             return 1;
         }
@@ -2283,20 +2287,25 @@ sub singletest {
         writearray($FTPDCMD, \@ftpservercmd);
     }
 
-    my (@setenv)= getpart("client", "setenv");
-    my @envs;
-
-    my $s;
-    for $s (@setenv) {
-        chomp $s; # cut off the newline
-
-        subVariables \$s;
-
-        if($s =~ /([^=]*)=(.*)/) {
-            my ($var, $content)=($1, $2);
-            $ENV{$var}=$content;
-            # remember which, so that we can clear them afterwards!
-            push @envs, $var;
+    # test definition may instruct to (un)set environment vars
+    my %oldenv;
+    my @setenv = getpart("client", "setenv");
+    if(@setenv) {
+        foreach my $s (@setenv) {
+            chomp $s;
+            subVariables \$s;
+            if($s =~ /([^=]*)=(.*)/) {
+                my ($var, $content) = ($1, $2);
+                # remember current setting, to restore it once test runs
+                $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
+                # set new value
+                if(!$content) {
+                    $ENV{$var} = undef if($ENV{$var});
+                }
+                else {
+                    $ENV{$var} = "$content";
+                }
+            }
         }
     }
 
@@ -2608,9 +2617,16 @@ sub singletest {
         }
     }
 
-    my $e;
-    for $e (@envs) {
-        $ENV{$e}=""; # clean up
+    # restore environment variables that were modified
+    if(%oldenv) {
+        foreach my $var (keys %oldenv) {
+            if($oldenv{$var} eq 'notset') {
+                $ENV{$var} = undef if($ENV{$var});
+            }
+            else {
+                $ENV{$var} = "$oldenv{$var}";
+            }
+        }
     }
 
     # Skip all the verification on torture tests
@@ -2801,7 +2817,7 @@ sub singletest {
     # accept multiple comma-separated error codes
     my @splerr = split(/ *, */, $errorcode);
     my $errok;
-    foreach $e (@splerr) {
+    foreach my $e (@splerr) {
         if($e == $cmdres) {
             # a fine error code
             $errok = 1;
@@ -2856,28 +2872,28 @@ sub singletest {
     if($valgrind) {
         if($usevalgrind) {
             unless(opendir(DIR, "$LOGDIR")) {
+                logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-                return 0; # can't open log dir
+                return 1;
             }
-            my @files = grep { /valgrind/ } readdir(DIR);
+            my @files = readdir(DIR);
             closedir(DIR);
-            logmsg "DEBUG: No valgrind files\n" unless(@files);
-            my $f;
-            my $l="";
-            foreach $f (@files) {
-                logmsg "DEBUG: valgrind file: $f\n";
-                if($f =~ /^valgrind$testnum\./) {
-                    $l = $f;
+            my $vgfile;
+            foreach my $file (@files) {
+                if($file =~ /^valgrind$testnum(\..*|)$/) {
+                    $vgfile = $file;
                     last;
                 }
             }
-            my $src=$ENV{'srcdir'};
-            if(!$src) {
-                $src=".";
+            if(!$vgfile) {
+                logmsg "ERROR: valgrind log file missing for test $testnum\n";
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                return 1;
             }
-            my @e = valgrindparse($src, $feature{'SSL'}, "$LOGDIR/$l");
-            if($e[0]) {
+            my @e = valgrindparse($srcdir, $feature{'SSL'}, "$LOGDIR/$vgfile");
+            if(@e && $e[0]) {
                 logmsg " valgrind ERROR ";
                 logmsg @e;
                 # timestamp test result verification end
@@ -3715,7 +3731,7 @@ sub displaylogs {
         if(($log =~ /^file\d+\.txt/) && ($log !~ /^file$testnum\.txt/)) {
             next; # skip fileNnn.txt of other tests
         }
-        if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum\./)) {
+        if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests
         }
         logmsg "=== Start of file $log\n";
