@@ -177,36 +177,43 @@ sub killpid {
 # killsockfilters kills sockfilter processes for a given server.
 #
 sub killsockfilters {
-    my ($proto, $ipvnum, $idnum, $verbose) = @_;
+    my ($proto, $ipvnum, $idnum, $verbose, $which) = @_;
     my $server;
     my $pidfile;
     my $pid;
 
     return if($proto !~ /^(ftp|imap|pop3|smtp)$/);
 
+    die "unsupported sockfilter: $which"
+        if($which && ($which !~ /^(main|data)$/));
+
     $server = servername_id($proto, $ipvnum, $idnum) if($verbose);
 
-    $pidfile = mainsockf_pidfilename($proto, $ipvnum, $idnum);
-    $pid = processexists($pidfile);
-    if($pid > 0) {
-        printf("* kill pid for %s-%s => %d\n", $server,
-            ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
-        kill("KILL", $pid);
-        waitpid($pid, 0);
+    if(!$which || ($which eq 'main')) {
+        $pidfile = mainsockf_pidfilename($proto, $ipvnum, $idnum);
+        $pid = processexists($pidfile);
+        if($pid > 0) {
+            printf("* kill pid for %s-%s => %d\n", $server,
+                ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
+            kill("KILL", $pid);
+            waitpid($pid, 0);
+        }
+        unlink($pidfile) if(-f $pidfile);
     }
-    unlink($pidfile) if(-f $pidfile);
 
     return if($proto ne 'ftp');
 
-    $pidfile = datasockf_pidfilename($proto, $ipvnum, $idnum);
-    $pid = processexists($pidfile);
-    if($pid > 0) {
-        printf("* kill pid for %s-data => %d\n", $server,
-            $pid) if($verbose);
-        kill("KILL", $pid);
-        waitpid($pid, 0);
+    if(!$which || ($which eq 'data')) {
+        $pidfile = datasockf_pidfilename($proto, $ipvnum, $idnum);
+        $pid = processexists($pidfile);
+        if($pid > 0) {
+            printf("* kill pid for %s-data => %d\n", $server,
+                $pid) if($verbose);
+            kill("KILL", $pid);
+            waitpid($pid, 0);
+        }
+        unlink($pidfile) if(-f $pidfile);
     }
-    unlink($pidfile) if(-f $pidfile);
 }
 
 #######################################################################
