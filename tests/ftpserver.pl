@@ -213,10 +213,9 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, sysread error: $!\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, sysread error: $!\n";
+        killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -228,10 +227,9 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1,2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, read zero\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, read zero\n";
+        killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -254,12 +252,11 @@ sub startsf {
 
     print SFWRITE "PING\n";
     my $pong;
-    sysread SFREAD, $pong, 5;
+    sysread_or_die(\*SFREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $mainsockfcmd\n";
-        kill(9, $sfpid);
-        waitpid($sfpid, 0);
+        killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
@@ -445,21 +442,27 @@ sub protocolsetup {
 sub close_dataconn {
     my ($closed)=@_; # non-zero if already disconnected
 
+    my $datapid = processexists($datasockf_pidfile);
+
     if(!$closed) {
         logmsg "* disconnect data connection\n";
-        print DWRITE "DISC\n";
-        my $i;
-        sysread DREAD, $i, 5;
+        if($datapid > 0) {
+            print DWRITE "DISC\n";
+            my $i;
+            sysread DREAD, $i, 5;
+        }
     }
     else {
         logmsg "data connection already disconnected\n";
     }
     logmsg "=====> Closed data connection\n";
 
-    logmsg "* quit sockfilt for data (pid $slavepid)\n";
-    print DWRITE "QUIT\n";
-    waitpid $slavepid, 0;
-    $slavepid=0;
+    logmsg "* quit sockfilt for data (pid $datapid)\n";
+    if($datapid > 0) {
+        print DWRITE "QUIT\n";
+        waitpid($datapid, 0);
+        unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
+    }
 }
 
 ################
@@ -931,12 +934,8 @@ sub PASV_ftp {
     my ($arg, $cmd)=@_;
     my $pasvport;
 
-    my $prev = processexists($datasockf_pidfile);
-    if($prev > 0) {
-        print "kill existing server: $prev\n" if($verbose);
-        kill(9, $prev);
-        waitpid($prev, 0);
-    }
+    # kill previous data connection sockfilt when alive
+    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
 
     # We fire up a new sockfilt to do the data transfer for us.
     my $datasockfcmd = "./server/sockfilt " .
@@ -947,14 +946,12 @@ sub PASV_ftp {
 
     print DWRITE "PING\n";
     my $pong;
-
     sysread_or_die(\*DREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
-        kill(9, $slavepid);
-        waitpid($slavepid, 0);
-        sendcontrol "500 no free ports!\r\n";
         logmsg "failed to run sockfilt for data connection\n";
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        sendcontrol "500 no free ports!\r\n";
         return 0;
     }
 
@@ -1024,11 +1021,10 @@ sub PASV_ftp {
     };
     if ($@) {
         # timed out
-
-        print DWRITE "QUIT\n";
-        waitpid $slavepid, 0;
-        logmsg "accept failed\n";
-        $slavepid=0;
+        logmsg "$srvrname server timed out awaiting data connection ".
+            "on port $pasvport\n";
+        logmsg "accept failed or connection not even attempted\n";
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         return;
     }
     else {
@@ -1087,12 +1083,11 @@ sub PORT_ftp {
 
     print DWRITE "PING\n";
     my $pong;
-    sysread DREAD, $pong, 5;
+    sysread_or_die(\*DREAD, \$pong, 5);
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt for data connection\n";
-        kill(9, $slavepid);
-        waitpid($slavepid, 0);
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
     }
 
     logmsg "====> Client DATA connect to port $port\n";
@@ -1326,10 +1321,8 @@ while(1) {
     # flush data:
     $| = 1;
 
-    kill(9, $slavepid) if($slavepid);
-    waitpid($slavepid, 0) if($slavepid);
-    $slavepid=0;
-        
+    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+ 
     &customize(); # read test control instructions
 
     sendcontrol @welcome;
@@ -1461,11 +1454,8 @@ while(1) {
     }
 }
 
-print SFWRITE "QUIT\n";
-waitpid $sfpid, 0;
-
+killsockfilters($proto, $ipvnum, $idnum, $verbose);
 unlink($pidfile);
-
 if($serverlogslocked) {
     $serverlogslocked = 0;
     clear_advisor_read_lock($SERVERLOGS_LOCK);
