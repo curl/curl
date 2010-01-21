@@ -197,12 +197,6 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
-typedef size_t (*curl_rtp_write_callback)(char *buffer,
-                                      size_t size,
-                                      size_t nitems,
-                                      void *outstream,
-                                      int channel);
-
 /* These are the return codes for the seek callbacks */
 #define CURL_SEEKFUNC_OK       0
 #define CURL_SEEKFUNC_FAIL     1 /* fail the entire transfer */
