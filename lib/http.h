@@ -35,7 +35,39 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 
+char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader);
+
 char *Curl_copy_header_value(const char *h);
+
+
+/* ------------------------------------------------------------------------- */
+/*
+ * The add_buffer series of functions are used to build one large memory chunk
+ * from repeated function invokes. Used so that the entire HTTP request can
+ * be sent in one go.
+ */
+struct Curl_send_buffer {
+  char *buffer;
+  size_t size_max;
+  size_t size_used;
+};
+typedef struct Curl_send_buffer Curl_send_buffer;
+
+Curl_send_buffer *Curl_add_buffer_init(void);
+CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...);
+CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size);
+CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
+                         struct connectdata *conn,
+                         long *bytes_written,
+                         size_t included_body_bytes,
+                         int socketindex);
+
+
+CURLcode Curl_add_timecondition(struct SessionHandle *data,
+                                Curl_send_buffer *buf);
+CURLcode Curl_add_custom_headers(struct connectdata *conn,
+                                   Curl_send_buffer *req_buffer);
+
 
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,

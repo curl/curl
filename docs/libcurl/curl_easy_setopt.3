@@ -401,6 +401,34 @@ follows:
 
 You will need to override these definitions if they are different on your
 system.
+.IP CURLOPT_RTPFUNCTION
+Function pointer that should match the following prototype: \fIsize_t
+function( void *ptr, size_t size, size_t nmemb, void *stream)\fP. This
+function gets called by libcurl as soon as it has received interleaved RTP
+data. This function gets called for each $ block and therefore contains
+exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl writes the
+interleaved header as well as the included data for each call. The first byte
+is always an ASCII dollar sign. The dollar sign is followed by a one byte
+channel identifier and then a 2 byte integer length in network byte order. See
+\fIRFC 2326 Section 10.12\fP for more information on how RTP interleaving
+behaves.
+
+Interleaved RTP poses some challeneges for the client application. Since the
+stream data is sharing the RTSP control connection, it is critical to service
+the RTP in a timely fashion. If the RTP data is not handled quickly,
+subsequent response processing may become unreasonably delayed and the
+connection may close. The application may use \fICURL_RTSPREQ_RECEIVE\fP to
+service RTP data when no requests are desired. If the application makes a
+request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
+process any pending RTP data before marking the request as finished.  (Added
+in 7.20.0)
+.IP CURLOPT_RTPDATA
+This is the stream that will be passed to \fICURLOPT_RTPFUNCTION\fP when
+interleaved RTP data is received. Since the application is required to provide
+a custom function for RTP data, there is no requirement that the stream
+pointer be a valid FILE pointer. An application may wish to pass a cookie
+containing information about many streams to assist in demultiplexing the
+different RTP channels. (Added in 7.20.0)
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error
@@ -1275,6 +1303,107 @@ file \&"normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE
 (Added in 7.15.1)
+.SH RTSP OPTIONS
+.IP CURLOPT_RTSP_REQUEST
+Tell libcurl what kind of RTSP request to make. Pass one of the following RTSP
+enum values. Unless noted otherwise, commands require the Session ID to be
+initialized. (Added in 7.20.0)
+.RS
+.IP CURL_RTSPREQ_OPTIONS
+Used to retrieve the available methods of the server. The application is
+responsbile for parsing and obeying the response. \fB(The session ID is not
+needed for this method.)\fP  (Added in 7.20.0)
+.IP CURL_RTSPREQ_DESCRIBE
+Used to get the low level description of a stream. The application should note
+what formats it understands in the \fI'Accept:'\fP header. Unless set
+manually, libcurl will automatically fill in \fI'Accept:
+application/sdp'\fP. Time-condition headers will be added to Describe requests
+if the \fICURLOPT_TIMECONDITION\fP option is active. \fB(The session ID is not
+needed for this method)\fP  (Added in 7.20.0)
+.IP CURL_RTSPREQ_ANNOUNCE
+When sent by a client, this method changes the description of the session. For
+example, if a client is using the server to record a meeting, the client can
+use Announce to inform the server of all the meta-information about the
+session.  ANNOUNCE acts like an HTTP PUT or POST just like
+\fICURL_RTSPREQ_SET_PARAMETER\fP (Added in 7.20.0)
+.IP CURL_RTSPREQ_SETUP
+Setup is used to initialize the transport layer for the session. The
+application must set the desired Transport options for a session by using the
+\fICURLOPT_RTSP_TRANSPORT\fP option prior to calling setup. If no session ID
+is currently set with \fICURLOPT_RTSP_SESSION_ID\fP, libcurl will extract and
+use the session ID in the response to this request. \fB(The session ID is not
+needed for this method).\fP  (Added in 7.20.0)
+.IP CURL_RTSPREQ_PLAY
+Send a Play command to the server. Use the \fICURLOPT_RANGE\fP option to
+modify the playback time (e.g. 'npt=10-15').  (Added in 7.20.0)
+.IP CURL_RTSPREQ_PAUSE
+Send a Pause command to the server. Use the \fICURLOPT_RANGE\fP option with a
+single value to indicate when the stream should be halted. (e.g. npt='25')
+(Added in 7.20.0)
+.IP CURL_RTSPREQ_TEARDOWN
+This command terminates an RTSP session. Note that simply closing a connection
+does not terminate the RTSP session since it is valid to control an RTSP
+session over different connections.  (Added in 7.20.0)
+.IP CURL_RTSPREQ_GET_PARAMETER
+Retrieve a parameter from the server. By default, libcurl will automatically
+include an \fIAccept: text/parameters\fP header unless a custom one is set.
+Applications wishing to send a heartbeat message (e.g. in the presence of a
+server-specified timeout) should send use an empty GET_PARAMETER request.
+(Added in 7.20.0)
+.IP CURL_RTSPREQ_SET_PARAMETER
+Set a parameter on the server. By default, libcurl will automatically include
+a \fIContent-Type: text/parameters\fP header unless a custom one is set. The
+interaction with SET_PARAMTER is much like an HTTP PUT or POST. An application
+may either use \fICURLOPT_UPLOAD\fP with \fICURLOPT_READDATA\fP like an HTTP
+PUT, or it may use \fICURLOPT_POSTFIELDS\fP like an HTTP POST. Note that no
+chunked transfers are allowed, so the application must set the
+\fICURLOPT_INFILESIZE\fP in the former and \fICURLOPT_POSTFIELDSIZE\fP in the
+latter. Also, there is no use of multi-part POSTs within RTSP. (Added in
+7.20.0)
+.IP CURL_RTSPREQ_RECORD
+Used to tell the server to record a session. Use the \fICURLOPT_RANGE\fP
+option to modify the record time. (Added in 7.20.0)
+.IP CURL_RTSPREQ_RECEIVE
+This is a special request because it does not send any data to the server. The
+application may call this function in order to receive interleaved RTP
+data. It will return after processing one read buffer of data in order to give
+the application a chance to run. (Added in 7.20.0)
+.RE
+.IP CURLOPT_RTSP_SESSION_ID
+Pass a char * as a parameter to set the value of the current RTSP Session ID
+for the handle. Useful for resuming an in-progress session. Once this value is
+set to any non-NULL value, libcurl will return \fICURLE_RTSP_SESSION_ERROR\fP
+if ID received from the server does not match. If unset (or set to NULL),
+libcurl will automatically set the ID the first time the server sets it in a
+response. (Added in 7.20.0)
+.IP CURLOPT_RTSP_STREAM_URI
+Set the stream URI to operate on by passing a char * . For example, a single
+session may be controlling \fIrtsp://foo/twister/audio\fP and
+\fIrtsp://foo/twister/video\fP and the application can switch to the
+appropriate stream using this option. If unset, libcurl will default to
+operating on generic server options by passing '*' in the place of the RTSP
+Stream URI. Note that this option is distinct from \fICURLOPT_URL\fP. When
+working with RTSP, the \fICURLOPT_STREAM_URI\fP indicates what URL to send to
+the server in the request header while the \fICURLOPT_URL\fP indicates where
+to make the connection to.  (e.g. the \fICURLOPT_URL\fP for the above examples
+might be set to \fIrtsp://foo/twister\fP (Added in 7.20.0)
+.IP CURLOPT_RTSP_TRANSPORT
+Pass a char * to tell libcurl what to pass for the Transport: header for this
+RTSP session. This is mainly a convenience method to avoid needing to set a
+custom Transport: header for every SETUP request. The application must set a
+Transport: header before issuing a SETUP request. (Added in 7.20.0)
+.IP CURLOPT_RTSP_HEADER
+This option is simply an alias for \fICURLOPT_HTTP_HEADER\fP. Use this to
+replace the standard headers that RTSP and HTTP share. It is also valid to use
+the shortcuts such as \fICURLOPT_USERAGENT\fP. (Added in 7.20.0)
+.IP CURLOPT_RTSP_CLIENT_CSEQ
+Manually set the the CSEQ number to issue for the next RTSP request. Useful if
+the application is resuming a previously broken connection. The CSEQ will
+increment from this new number henceforth. (Added in 7.20.0)
+.IP CURLOPT_RTSP_SERVER_CSEQ
+Manually set the CSEQ number to expect for the next RTSP Server->Client
+request.  At the moment, this feature (listening for Server requests) is
+unimplemented. (Added in 7.20.0)
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A parameter set to 1 tells the library to use ASCII mode for FTP transfers,
@@ -1301,9 +1430,14 @@ want. It should be in the format "X-Y", where X or Y may be left out. HTTP
 transfers also support several intervals, separated with commas as in
 \fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
 server to send the response document in pieces (using standard MIME separation
-techniques). Pass a NULL to this option to disable the use of ranges.
+techniques). For RTSP, the formatting of a range should follow RFC 2326 Section
+12.29. Note that for RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges
+should be given in npt, utc, or smpte formats.
 
-Ranges work on HTTP, FTP and FILE (since 7.18.0) transfers only.
+Pass a NULL to this option to disable the use of ranges.
+
+Ranges work on HTTP, FTP, FILE (since 7.18.0), and RTSP (since 7.20.0)
+transfers only.
 .IP CURLOPT_RESUME_FROM
 Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from. Set this option to 0 to make the transfer
@@ -1408,7 +1542,8 @@ given limit. This concerns both FTP and HTTP transfers.
 .IP CURLOPT_TIMECONDITION
 Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
 value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
-or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP and FTP.
+or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP, FTP, and
+RTSP.
 
 The last modification time of a file is not always known and in such instances
 this feature will have no effect even if the given time condition would not
@@ -1629,8 +1764,8 @@ Pass a char * to a zero terminated string naming a file holding a CA
 certificate in PEM format. If the option is set, an additional check against
 the peer certificate is performed to verify the issuer is indeed the one
 associated with the certificate provided by the option. This additional check
-is useful in multi-level PKI where one needs to enforce that the peer certificate is
-from a specific branch of the tree.
+is useful in multi-level PKI where one needs to enforce that the peer
+certificate is from a specific branch of the tree.
 
 This option makes sense only when used in combination with the
 \fICURLOPT_SSL_VERIFYPEER\fP option. Otherwise, the result of the check is not

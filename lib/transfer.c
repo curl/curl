@@ -103,6 +103,7 @@
 #include "select.h"
 #include "multiif.h"
 #include "easyif.h" /* for Curl_convert_to_network prototype */
+#include "rtsp.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -124,7 +125,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
-  if((conn->protocol&PROT_HTTP) &&
+  if((conn->protocol&(PROT_HTTP|PROT_RTSP)) &&
      (data->state.proto.http->sending == HTTPSEND_REQUEST)) {
     /* We're sending the HTTP request headers, not the data.
        Remember that so we don't re-translate them into garbage. */
@@ -368,6 +369,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
   bool is_empty_data = FALSE;
+  bool readmore = FALSE; /* used by RTP to signal for more data */
 
   *done = FALSE;
 
@@ -435,6 +437,19 @@ static CURLcode readwrite_data(struct SessionHandle *data,
        in the flow below before the actual storing is done. */
     k->str = k->buf;
 
+#ifndef CURL_DISABLE_RTSP
+    if(conn->protocol & PROT_RTSP) {
+      readmore = FALSE;
+      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore, done);
+      if(result)
+        return result;
+      if(readmore)
+        break;
+      if(*done)
+        return CURLE_OK;
+    }
+#endif
+
 #ifndef CURL_DISABLE_HTTP
     /* Since this is a two-state thing, we check if we are parsing
        headers at the moment or not. */
@@ -456,11 +471,12 @@ static CURLcode readwrite_data(struct SessionHandle *data,
        is non-headers. */
     if(k->str && !k->header && (nread > 0 || is_empty_data)) {
 
+
 #ifndef CURL_DISABLE_HTTP
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to
            write a piece of the body */
-        if(conn->protocol&PROT_HTTP) {
+        if(conn->protocol&(PROT_HTTP|PROT_RTSP)) {
           /* HTTP-only checks */
 
           if(data->req.newurl) {
@@ -747,7 +763,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           break;
         }
 
-        if(conn->protocol&PROT_HTTP) {
+        if(conn->protocol&(PROT_HTTP|PROT_RTSP)) {
           if(data->state.proto.http->sending == HTTPSEND_REQUEST)
             /* We're sending the HTTP request headers, not the data.
                Remember that so we don't change the line endings. */
@@ -846,7 +862,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
     /* write to socket (send away data) */
     result = Curl_write(conn,
-                        conn->writesockfd,         /* socket to send to */
+                        conn->writesockfd,     /* socket to send to */
                         data->req.upload_fromhere, /* buffer pointer */
                         data->req.upload_present,  /* buffer size */
                         &bytes_written);           /* actually sent */
@@ -1825,14 +1841,15 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
   /* if we're talking upload, we can't do the checks below, unless the protocol
      is HTTP as when uploading over HTTP we will still get a response */
-  if(data->set.upload && !(conn->protocol&PROT_HTTP))
+  if(data->set.upload && !(conn->protocol&(PROT_HTTP|PROT_RTSP)))
     return CURLE_OK;
 
   if(/* workaround for broken TLS servers */ data->state.ssl_connect_retry ||
       ((data->req.bytecount +
-      data->req.headerbytecount == 0) &&
-     conn->bits.reuse &&
-     !data->set.opt_no_body)) {
+        data->req.headerbytecount == 0) &&
+        conn->bits.reuse &&
+        !data->set.opt_no_body &&
+        data->set.rtspreq != RTSPREQ_RECEIVE)) {
     /* We got no data, we attempted to re-use a connection and yet we want a
        "body". This might happen if the connection was left alive when we were
        done using it before, but that was closed when we wanted to read from

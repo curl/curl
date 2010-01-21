@@ -209,6 +209,28 @@ the previous request didn't match (see \fICURLOPT_TIMECONDITION\fP). Alas, if
 this returns a 1 you know that the reason you didn't get data in return is
 because it didn't fulfill the condition. The long ths argument points to will
 get a zero stored if the condition instead was met. (Added in 7.19.4)
+.IP CURLINFO_RTSP_SESSION_ID
+Pass a pointer to a char pointer to receive a pointer to a string holding the
+most recent RTSP Session ID.
+
+Applications wishing to resume an RTSP session on another connection should
+retreive this info before closing the active connection.
+.IP CURLINFO_RTSP_CLIENT_CSEQ
+Pass a pointer to a long to receive the next CSeq that will be used by the
+application. 
+.IP CURLINFO_RTSP_SERVER_CSEQ
+Pass a pointer to a long to receive the next server CSeq that will be expected
+by the application. 
+
+\fI(NOTE: listening for server initiated requests is currently
+unimplemented).\fP
+
+Applications wishing to resume an RTSP session on another connection should
+retreive this info before closing the active connection.
+.IP CURLINFO_RTSP_CSEQ_RECV
+Pass a pointer to a long to receive the most recently received CSeq from the
+server. If your application encounters a \fICURLE_RTSP_CSEQ_ERROR\fP then you
+may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this value.
 .SH TIMES
 .nf
 An overview of the six time values available from curl_easy_getinfo()

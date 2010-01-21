@@ -43,6 +43,7 @@
 #define PORT_POP3S 995
 #define PORT_SMTP 25
 #define PORT_SMTPS 465 /* sometimes called SSMTP */
+#define PORT_RTSP 554
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -147,6 +148,7 @@
 #include "file.h"
 #include "ssh.h"
 #include "http.h"
+#include "rtsp.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -510,7 +512,8 @@ struct SingleRequest {
   bool content_range;           /* set TRUE if Content-Range: was found */
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
-  int httpcode;                 /* error code from the 'HTTP/1.? XXX' line */
+  int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
+                                   'RTSP/1.? XXX' line */
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
 
@@ -672,8 +675,9 @@ struct connectdata {
 #define PROT_POP3S   CURLPROTO_POP3S
 #define PROT_SMTP    CURLPROTO_SMTP
 #define PROT_SMTPS   CURLPROTO_SMTPS
+#define PROT_RTSP    CURLPROTO_RTSP
 
-/* (1<<17) is currently the highest used bit in the public bitmask. We make
+/* (1<<18) is currently the highest used bit in the public bitmask. We make
    sure we use "private bits" above the public ones to make things easier. */
 
 #define PROT_EXTMASK 0xfffff
@@ -718,7 +722,8 @@ struct connectdata {
   char *proxypasswd;  /* proxy password string, allocated */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
 
-  int httpversion;              /* the HTTP version*10 reported by the server */
+  int httpversion;        /* the HTTP version*10 reported by the server */
+  int rtspversion;        /* the RTSP version*10 reported by the server */
 
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
@@ -750,6 +755,7 @@ struct connectdata {
     char *ref; /* free later if not NULL! */
     char *host; /* free later if not NULL */
     char *cookiehost; /* free later if not NULL */
+    char *rtsp_transport; /* free later if not NULL */
   } allocptr;
 
   int sec_complete; /* if kerberos is enabled for this connection */
@@ -825,6 +831,7 @@ struct connectdata {
     struct imap_conn imapc;
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
+    struct rtsp_conn rtspc;
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
@@ -844,7 +851,7 @@ struct connectdata {
  * Struct to keep statistical and informational data.
  */
 struct PureInfo {
-  int httpcode;  /* Recent HTTP or FTP response code */
+  int httpcode;  /* Recent HTTP, FTP, or RTSP response code */
   int httpproxycode; /* response code from proxy when received separate */
   int httpversion; /* the http version number X.Y = X*10+Y */
   long filetime; /* If requested, this is might get set. Set to -1 if the time
@@ -914,6 +921,22 @@ typedef enum {
   HTTPREQ_CUSTOM,
   HTTPREQ_LAST /* last in list */
 } Curl_HttpReq;
+
+typedef enum {
+    RTSPREQ_NONE, /* first in list */
+    RTSPREQ_OPTIONS,
+    RTSPREQ_DESCRIBE,
+    RTSPREQ_ANNOUNCE,
+    RTSPREQ_SETUP,
+    RTSPREQ_PLAY,
+    RTSPREQ_PAUSE,
+    RTSPREQ_TEARDOWN,
+    RTSPREQ_GET_PARAMETER,
+    RTSPREQ_SET_PARAMETER,
+    RTSPREQ_RECORD,
+    RTSPREQ_RECEIVE,
+    RTSPREQ_LAST /* last in list */
+} Curl_RtspReq;
 
 /*
  * Values that are generated, temporary or calculated internally for a
@@ -1065,6 +1088,11 @@ struct UrlState {
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
 
+  /* This RTSP state information survives requests and connections */
+  long rtsp_next_client_CSeq; /* the session's next client CSeq */
+  long rtsp_next_server_CSeq; /* the session's next server CSeq */
+  long rtsp_CSeq_recv; /* most recent CSeq received */
+
   /* Protocol specific data.
    *
    *************************************************************************
@@ -1075,6 +1103,7 @@ struct UrlState {
   union {
     struct HTTP *http;
     struct HTTP *https;  /* alias, just for the sake of being more readable */
+    struct RTSP *rtsp;
     struct FTP *ftp;
     /* void *tftp;    not used */
     struct FILEPROTO *file;
@@ -1125,7 +1154,7 @@ enum dupstring {
   STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
-  STRING_CUSTOMREQUEST,   /* HTTP/FTP request/method to use */
+  STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
   STRING_DEVICE,          /* local network interface/address to use */
   STRING_ENCODING,        /* Accept-Encoding string */
   STRING_FTP_ACCOUNT,     /* ftp account data */
@@ -1156,6 +1185,9 @@ enum dupstring {
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
   STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
                              used */
+  STRING_RTSP_SESSION_ID, /* Session ID to use */
+  STRING_RTSP_STREAM_URI, /* Stream URI for this request */
+  STRING_RTSP_TRANSPORT,  /* Transport for this session */
 #ifdef USE_LIBSSH2
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
@@ -1181,6 +1213,7 @@ struct UserDefined {
   void *out;         /* the fetched file goes here */
   void *in;          /* the uploaded file is read from here */
   void *writeheader; /* write the header to this if non-NULL */
+  void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
   long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
   long proxyauth;    /* what kind of proxy authentication to use (bitmask) */
@@ -1202,6 +1235,7 @@ struct UserDefined {
                          'localport' one can't be bind()ed */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
+  curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
   curl_read_callback fread_func;     /* function that reads the input */
   curl_progress_callback fprogress;  /* function for progress information */
   curl_debug_callback fdebug;      /* function that write informational data */
@@ -1338,6 +1372,9 @@ struct UserDefined {
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+  /* Common RTSP header options */
+  Curl_RtspReq rtspreq; /* RTSP request type */
+  long rtspversion; /* like httpversion, for RTSP */
 };
 
 struct Names {

@@ -169,6 +169,7 @@
 #  define CURL_DISABLE_TELNET
 #  define CURL_DISABLE_DICT
 #  define CURL_DISABLE_FILE
+#  define CURL_DISABLE_RTSP
 #endif
 
 /* ================================================================ */

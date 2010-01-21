@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (21 Jan 2010)
+- Chris Conroy brought support for RTSP transfers, and with it comes 8(!) new
+  libcurl options for controlling what to get and how to receive posssibly
+  interleaved RTP data.
+
 Daniel Stenberg (20 Jan 2010)
 - As was pointed out on the http-state mailing list, the order of cookies in a
   HTTP Cookie: header _needs_ to be sorted on the path length in the cases

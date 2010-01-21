@@ -55,6 +55,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
   AH_TEMPLATE([LIBCURL_PROTOCOL_LDAP],[Defined if libcurl supports LDAP])
   AH_TEMPLATE([LIBCURL_PROTOCOL_DICT],[Defined if libcurl supports DICT])
   AH_TEMPLATE([LIBCURL_PROTOCOL_TFTP],[Defined if libcurl supports TFTP])
+  AH_TEMPLATE([LIBCURL_PROTOCOL_RTSP],[Defined if libcurl supports RTSP])
 
   AC_ARG_WITH(libcurl,
      AC_HELP_STRING([--with-libcurl=DIR],[look for the curl library in DIR]),
@@ -194,7 +195,7 @@ x=CURLOPT_VERBOSE;
 
 	      # We don't have --protocols, so just assume that all
 	      # protocols are available
-	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT"
+	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP RTSP"
 
 	      if test x$libcurl_feature_SSL = xyes ; then
 	         _libcurl_protocols="$_libcurl_protocols HTTPS"

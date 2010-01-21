@@ -135,6 +135,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
+  curl_rtsp_msg="no       (--enable-rtsp)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -414,6 +415,28 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
        AC_SUBST(CURL_DISABLE_LDAPS, [1])
+)
+
+AC_MSG_CHECKING([whether to support rtsp])
+AC_ARG_ENABLE(rtsp,
+AC_HELP_STRING([--enable-rtsp],[Enable RTSP support])
+AC_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
+       AC_SUBST(CURL_DISABLE_RTSP, [1])
+       ;;
+       *)   if test x$CURL_DISABLE_HTTP = x1 ; then
+                    AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
+            else
+                    AC_MSG_RESULT(yes)
+                    curl_rtsp_msg="enabled"
+            fi
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+       curl_rtsp_msg="disabled"
 )
 
 AC_MSG_CHECKING([whether to support proxies])
@@ -2579,6 +2602,9 @@ if test "x$USE_LIBSSH2" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
 fi
+if test "x$CURL_DISABLE_RTSP" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
+fi
 
 AC_SUBST(SUPPORT_PROTOCOLS)
 
@@ -2653,6 +2679,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   ca cert path:    ${capath}
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
+  RTSP support:    ${curl_rtsp_msg}
   Protocols:       ${SUPPORT_PROTOCOLS}
 ])
 

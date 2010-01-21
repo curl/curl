@@ -2,7 +2,7 @@ Curl and libcurl 7.20.0
 
  Public curl releases:         114
  Command line options:         135
- curl_easy_setopt() options:   166
+ curl_easy_setopt() options:   174
  Public functions in libcurl:  58
  Known libcurl bindings:       39
  Contributors:                 761
@@ -13,7 +13,8 @@ This release includes the following changes:
  o curl-config can now show the arguments used when building curl
  o non-blocking TFTP
  o send Expect: 100-continue for POSTs with unknown sizes
- o added support for IMAP, POP3 and SMTP transfers
+ o added support for IMAP(S), POP3(S), SMTP(S) and RTSP
+ o added new curl_easy_setopt() options for SMTP and RTSP
  o added --mail-from and --mail-rcpt for SMTP
  o VMS build system enhancements
  o added support for the PRET ftp command
@@ -60,6 +61,6 @@ advice from friends like these:
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
  Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
- Johan van Selst, Charles Kerr, Gil Weber, David McCreedy
+ Johan van Selst, Charles Kerr, Gil Weber, David McCreedy, Chris Conroy
 
         Thanks! (and sorry if I forgot to mention someone)

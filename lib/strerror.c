@@ -270,6 +270,12 @@ curl_easy_strerror(CURLcode error)
   case CURLE_AGAIN:
     return "Socket not ready for send/recv";
 
+  case CURLE_RTSP_CSEQ_ERROR:
+    return "RTSP CSeq mismatch or invalid CSeq";
+
+  case CURLE_RTSP_SESSION_ERROR:
+    return "RTSP session error";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:

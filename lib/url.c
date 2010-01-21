@@ -136,6 +136,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "inet_ntop.h"
 #include "http_ntlm.h"
 #include "socks.h"
+#include "rtsp.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -224,6 +225,10 @@ static const struct Curl_handler * const protocols[] = {
 #ifdef USE_SSL
   &Curl_handler_smtps,
 #endif
+#endif
+
+#ifndef CURL_DISABLE_RTSP
+  &Curl_handler_rtsp,
 #endif
 
   (struct Curl_handler *) NULL
@@ -699,6 +704,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->maxredirs = -1;       /* allow any amount by default */
 
   set->httpreq = HTTPREQ_GET; /* Default HTTP request */
+  set->rtspreq = RTSPREQ_OPTIONS; /* Default RTSP request */
   set->ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
   set->ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
   set->ftp_use_pret = FALSE;  /* mainly useful for drftpd servers */
@@ -2323,6 +2329,114 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
     break;
 
+  case CURLOPT_RTSP_REQUEST:
+    {
+      /*
+       * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
+       * Would this be better if the RTSPREQ_* were just moved into here?
+       */
+      long curl_rtspreq = va_arg(param, long);
+      long rtspreq = RTSPREQ_NONE;
+      switch(curl_rtspreq) {
+        case CURL_RTSPREQ_OPTIONS:
+          rtspreq = RTSPREQ_OPTIONS;
+          break;
+
+        case CURL_RTSPREQ_DESCRIBE:
+          rtspreq = RTSPREQ_DESCRIBE;
+          break;
+
+        case CURL_RTSPREQ_ANNOUNCE:
+          rtspreq = RTSPREQ_ANNOUNCE;
+          break;
+
+        case CURL_RTSPREQ_SETUP:
+          rtspreq = RTSPREQ_SETUP;
+          break;
+
+        case CURL_RTSPREQ_PLAY:
+          rtspreq = RTSPREQ_PLAY;
+          break;
+
+        case CURL_RTSPREQ_PAUSE:
+          rtspreq = RTSPREQ_PAUSE;
+          break;
+
+        case CURL_RTSPREQ_TEARDOWN:
+          rtspreq = RTSPREQ_TEARDOWN;
+          break;
+
+        case CURL_RTSPREQ_GET_PARAMETER:
+          rtspreq = RTSPREQ_GET_PARAMETER;
+          break;
+
+        case CURL_RTSPREQ_SET_PARAMETER:
+          rtspreq = RTSPREQ_SET_PARAMETER;
+          break;
+
+        case CURL_RTSPREQ_RECORD:
+          rtspreq = RTSPREQ_RECORD;
+          break;
+
+        case CURL_RTSPREQ_RECEIVE:
+          rtspreq = RTSPREQ_RECEIVE;
+          break;
+        default:
+          rtspreq = RTSPREQ_NONE;
+      }
+
+      data->set.rtspreq = rtspreq;
+    break;
+    }
+
+
+  case CURLOPT_RTSP_SESSION_ID:
+    /*
+     * Set the RTSP Session ID manually. Useful if the application is
+     * resuming a previously established RTSP session
+     */
+    result = setstropt(&data->set.str[STRING_RTSP_SESSION_ID],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_RTSP_STREAM_URI:
+    /*
+     * Set the Stream URI for the RTSP request. Unless the request is
+     * for generic server options, the application will need to set this.
+     */
+    result = setstropt(&data->set.str[STRING_RTSP_STREAM_URI],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_RTSP_TRANSPORT:
+    /*
+     * The content of the Transport: header for the RTSP request
+     */
+    result = setstropt(&data->set.str[STRING_RTSP_TRANSPORT],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_RTSP_CLIENT_CSEQ:
+    /*
+     * Set the CSEQ number to issue for the next RTSP request. Useful if the
+     * application is resuming a previously broken connection. The CSEQ
+     * will increment from this new number henceforth.
+     */
+    data->state.rtsp_next_client_CSeq = va_arg(param, long);
+    break;
+
+  case CURLOPT_RTSP_SERVER_CSEQ:
+    /* Same as the above, but for server-initiated requests */
+    data->state.rtsp_next_client_CSeq = va_arg(param, long);
+    break;
+
+  case CURLOPT_RTPDATA:
+    data->set.rtp_out = va_arg(param, void *);
+    break;
+  case CURLOPT_RTPFUNCTION:
+    /* Set the user defined RTP write function */
+    data->set.fwrite_rtp = va_arg(param, curl_write_callback);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
@@ -2360,6 +2474,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.ref);
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
+  Curl_safefree(conn->allocptr.rtsp_transport);
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
@@ -2499,6 +2614,42 @@ static bool SocketIsDead(curl_socket_t sock)
 
   return ret_val;
 }
+
+#ifndef CURL_DISABLE_RTSP
+/*
+ * The server may send us RTP data at any point, and RTSPREQ_RECEIVE does not
+ * want to block the application forever while receiving a stream. Therefore,
+ * we cannot assume that an RTSP socket is dead just because it is readable.
+ *
+ * Instead, if it is readable, run Curl_getconnectinfo() to peek at the socket
+ * and distinguish between closed and data.
+ */
+static bool RTSPConnIsDead(struct connectdata *check)
+{
+  int sval;
+  bool ret_val = TRUE;
+
+  sval = Curl_socket_ready(check->sock[FIRSTSOCKET], CURL_SOCKET_BAD, 0);
+  if(sval == 0) {
+    /* timeout */
+    ret_val = FALSE;
+  }
+  else if (sval & CURL_CSELECT_ERR) {
+    /* socket is in an error state */
+    ret_val = TRUE;
+  }
+  else if (sval & CURL_CSELECT_IN) {
+    /* readable with no error. could be closed or could be alive */
+    long connectinfo = 0;
+    Curl_getconnectinfo(check->data, &connectinfo, &check);
+    if(connectinfo != -1) {
+      ret_val = FALSE;
+    }
+  }
+
+  return ret_val;
+}
+#endif /* CURL_DISABLE_RTSP */
 
 static bool IsPipeliningPossible(const struct SessionHandle *handle)
 {
@@ -2664,7 +2815,15 @@ ConnectionExists(struct SessionHandle *data,
       /* The check for a dead socket makes sense only if there are no
          handles in pipeline and the connection isn't already marked in
          use */
-      bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
+      bool dead;
+#ifndef CURL_DISABLE_RTSP
+      if(check->protocol & PROT_RTSP)
+        /* RTSP is a special case due to RTP interleaving */
+        dead = RTSPConnIsDead(check);
+      else
+#endif /*CURL_DISABLE_RTSP*/
+        dead = SocketIsDead(check->sock[FIRSTSOCKET]);
+
       if(dead) {
         check->data = data;
         infof(data, "Connection #%d seems to be dead!\n", i);

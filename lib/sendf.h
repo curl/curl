@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,12 +48,14 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #define failf Curl_failf
 
-#define CLIENTWRITE_BODY   1
-#define CLIENTWRITE_HEADER 2
+#define CLIENTWRITE_BODY   (1<<0)
+#define CLIENTWRITE_HEADER (1<<1)
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
 CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len);
+
+CURLcode Curl_rtp_client_write(struct connectdata *conn, char *ptr, size_t len);
 
 /* internal read-function, does plain socket only */
 int Curl_read_plain(curl_socket_t sockfd,

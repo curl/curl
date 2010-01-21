@@ -197,6 +197,12 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
+typedef size_t (*curl_rtp_write_callback)(char *buffer,
+                                      size_t size,
+                                      size_t nitems,
+                                      void *outstream,
+                                      int channel);
+
 /* These are the return codes for the seek callbacks */
 #define CURL_SEEKFUNC_OK       0
 #define CURL_SEEKFUNC_FAIL     1 /* fail the entire transfer */
@@ -406,6 +412,9 @@ typedef enum {
   CURLE_SSL_ISSUER_ERROR,        /* 83 - Issuer check failed.  (Added in
                                     7.19.0) */
   CURLE_FTP_PRET_FAILED,         /* 84 - a PRET command failed */
+  CURLE_RTSP_CSEQ_ERROR,         /* 85 - mismatch of RTSP CSeq numbers */
+  CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Identifiers */
+
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -618,6 +627,7 @@ typedef enum {
 #define CURLPROTO_POP3S  (1<<15)
 #define CURLPROTO_SMTP   (1<<16)
 #define CURLPROTO_SMTPS  (1<<17)
+#define CURLPROTO_RTSP   (1<<18)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
@@ -1287,6 +1297,30 @@ typedef enum {
   /* FTP: send PRET before PASV */
   CINIT(FTP_USE_PRET, LONG, 188),
 
+  /* RTSP request method (OPTIONS, SETUP, PLAY, etc...) */
+  CINIT(RTSP_REQUEST, LONG, 189),
+
+  /* The RTSP session identifier */
+  CINIT(RTSP_SESSION_ID, OBJECTPOINT, 190),
+
+  /* The RTSP stream URI */
+  CINIT(RTSP_STREAM_URI, OBJECTPOINT, 191),
+
+  /* The Transport: header to use in RTSP requests */
+  CINIT(RTSP_TRANSPORT, OBJECTPOINT, 192),
+
+  /* Manually initialize the client RTSP CSeq for this handle */
+  CINIT(RTSP_CLIENT_CSEQ, LONG, 193),
+
+  /* Manually initialize the server RTSP CSeq for this handle */
+  CINIT(RTSP_SERVER_CSEQ, LONG, 194),
+
+  /* The stream to pass to RTPFUNCTION. */
+  CINIT(RTPDATA, OBJECTPOINT, 195),
+
+  /* Let the application define a custom write method for RTP data */
+  CINIT(RTPFUNCTION, FUNCTIONPOINT, 196),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1330,6 +1364,7 @@ typedef enum {
 #define CURLOPT_WRITEDATA CURLOPT_FILE
 #define CURLOPT_READDATA  CURLOPT_INFILE
 #define CURLOPT_HEADERDATA CURLOPT_WRITEHEADER
+#define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
 enum {
@@ -1340,6 +1375,25 @@ enum {
   CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
 
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
+};
+
+/*
+ * Public API enums for RTSP requests
+ */
+enum {
+    CURL_RTSPREQ_NONE, /* first in list */
+    CURL_RTSPREQ_OPTIONS,
+    CURL_RTSPREQ_DESCRIBE,
+    CURL_RTSPREQ_ANNOUNCE,
+    CURL_RTSPREQ_SETUP,
+    CURL_RTSPREQ_PLAY,
+    CURL_RTSPREQ_PAUSE,
+    CURL_RTSPREQ_TEARDOWN,
+    CURL_RTSPREQ_GET_PARAMETER,
+    CURL_RTSPREQ_SET_PARAMETER,
+    CURL_RTSPREQ_RECORD,
+    CURL_RTSPREQ_RECEIVE,
+    CURL_RTSPREQ_LAST /* last in list */
 };
 
   /* These enums are for use with the CURLOPT_NETRC option. */
@@ -1711,9 +1765,13 @@ typedef enum {
   CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
   CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
   CURLINFO_CONDITION_UNMET  = CURLINFO_LONG   + 35,
+  CURLINFO_RTSP_SESSION_ID  = CURLINFO_STRING + 36,
+  CURLINFO_RTSP_CLIENT_CSEQ = CURLINFO_LONG   + 37,
+  CURLINFO_RTSP_SERVER_CSEQ = CURLINFO_LONG   + 38,
+  CURLINFO_RTSP_CSEQ_RECV   = CURLINFO_LONG   + 39,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 35
+  CURLINFO_LASTONE          = 39
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
