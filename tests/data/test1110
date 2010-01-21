@@ -1,5 +1,6 @@
 <testcase>
-# Test that the fragment is not send as part of the path when the path contains a query.
+# Test that the fragment is not send as part of the path
+# when it contains a query.
 <info>
 <keywords>
 HTTP

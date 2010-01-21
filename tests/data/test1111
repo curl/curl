@@ -1,5 +1,6 @@
 <testcase>
-# Test that no fragment is not send as part of the path when the URI contains 2 '#' (does not follow RFC 2396)
+# Test that no fragment is not send as part of the path
+# when the URI contains 2 '#' (does not follow RFC 2396)
 <info>
 <keywords>
 HTTP
