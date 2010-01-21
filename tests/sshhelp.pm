@@ -90,6 +90,7 @@ use vars qw(
     display_sshlog
     display_sftplog
     dump_array
+    exe_ext
     find_sshd
     find_ssh
     find_sftpsrv
