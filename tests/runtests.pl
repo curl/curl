@@ -3683,10 +3683,17 @@ sub displaylogcontent {
                 $truncate = $linecount > 1000;
             }
         }
-        if (@tail) {
-            logmsg "=== File too long: lines here were removed\n";
-            # This won't work properly if time stamps are enabled in logmsg
-            logmsg join('',@tail[$#tail-200..$#tail]);
+        if(@tail) {
+            my $tailshow = 200;
+            my $tailskip = 0;
+            my $tailtotal = scalar @tail;
+            if($tailtotal > $tailshow) {
+                $tailskip = $tailtotal - $tailshow;
+                logmsg "=== File too long: $tailskip lines omitted here\n";
+            }
+            for($tailskip .. $tailtotal-1) {
+                logmsg "$tail[$_]";
+            }
         }
         close(SINGLE);
     }
