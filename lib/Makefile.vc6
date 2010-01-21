@@ -492,6 +492,7 @@ X_OBJS= \
 	$(DIROBJ)\pop3.obj \
 	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\rawstr.obj \
+	$(DIROBJ)\rtsp.obj \
 	$(DIROBJ)\select.obj \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\share.obj \

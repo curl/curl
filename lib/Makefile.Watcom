@@ -74,7 +74,8 @@ OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
        $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj       &
        $(OBJ_DIR)\curl_rand.obj        $(OBJ_DIR)\curl_memrchr.obj   &
        $(OBJ_DIR)\imap.obj             $(OBJ_DIR)\pop3.obj           &
-       $(OBJ_DIR)\smtp.obj             $(OBJ_DIR)\pingpong.obj
+       $(OBJ_DIR)\smtp.obj             $(OBJ_DIR)\pingpong.obj       &
+       $(OBJ_DIR)\rtsp.obj
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).

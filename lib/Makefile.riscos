@@ -14,7 +14,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
-	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong
+	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp
 
 
 # Compile options:
@@ -127,6 +127,9 @@ o.pop3:		c.pop3
 
 o.progress:	c.progress
 		gcc $(compileropts) -c -o progress.o c.progress
+
+o.rtsp:		c.rtsp
+		gcc $(compileropts) -c -o rtsp.o c.rtsp
 
 o.security:	c.security
 		gcc $(compileropts) -c -o security.o c.security

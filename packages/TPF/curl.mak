@@ -81,6 +81,7 @@ C_SRC += pingpong.c
 C_SRC += progress.c
 C_SRC += qssl.c
 C_SRC += rawstr.c
+C_SRC += rtsp.c
 C_SRC += security.c
 C_SRC += select.c
 C_SRC += sendf.c
