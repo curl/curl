@@ -3322,7 +3322,7 @@ static bool tld_check_name(struct SessionHandle *data,
   /* Convert (and downcase) ACE-name back into locale's character set */
   rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
   if(rc != IDNA_SUCCESS)
-    return (FALSE);
+    return FALSE;
 
   rc = tld_check_lz(uc_name, &err_pos, NULL);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -3340,7 +3340,10 @@ static bool tld_check_name(struct SessionHandle *data,
 #endif /* CURL_DISABLE_VERBOSE_STRINGS */
   if(uc_name)
      idn_free(uc_name);
-  return (bool)(rc == TLD_SUCCESS);
+  if(rc != TLD_SUCCESS)
+    return FALSE;
+
+  return TRUE;
 }
 #endif
 
@@ -4217,7 +4220,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
       /* we need to create new URL with the new port number */
       char *url;
       /* FTPS connections have the FTP bit set too, so they match as well */
-      bool isftp = (bool)conn->protocol & PROT_FTP;
+      bool isftp = (bool)(conn->protocol & PROT_FTP);
 
       /*
        * This synthesized URL isn't always right--suffixes like ;type=A

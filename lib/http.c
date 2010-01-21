@@ -3381,7 +3381,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
          or else we consider this to be the body right away! */
       int httpversion_major;
       int rtspversion_major;
-      int nc;
+      int nc = 0;
 #ifdef CURL_DOES_CONVERSIONS
 #define HEADER1 scratch
 #define SCRATCHSIZE 21
