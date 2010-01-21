@@ -242,14 +242,6 @@ typedef curl_socket_t
                             curlsocktype purpose,
                             struct curl_sockaddr *address);
 
-#ifndef CURL_NO_OLDIES
-  /* not used since 7.10.8, will be removed in a future release */
-typedef int (*curl_passwd_callback)(void *clientp,
-                                    const char *prompt,
-                                    char *buffer,
-                                    int buflen);
-#endif
-
 typedef enum {
   CURLIOE_OK,            /* I/O operation successful */
   CURLIOE_UNKNOWNCMD,    /* command was unknown to callback */
