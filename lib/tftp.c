@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -174,7 +174,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done);
 static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
-CURLcode tftp_translate_code(tftp_error_t error);
+static CURLcode tftp_translate_code(tftp_error_t error);
 
 
 /*
@@ -811,7 +811,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
  * Translate internal error codes to CURL error codes
  *
  **********************************************************/
-CURLcode tftp_translate_code(tftp_error_t error)
+static CURLcode tftp_translate_code(tftp_error_t error)
 {
   CURLcode code = CURLE_OK;
 
