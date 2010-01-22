@@ -135,7 +135,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
-  curl_rtsp_msg="no       (--enable-rtsp)"
+   curl_rtsp_msg="no      (--enable-rtsp)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -319,8 +319,10 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
-       AC_MSG_WARN([disable HTTP disables FTP over proxy])
+       AC_MSG_WARN([disable HTTP disables FTP over proxy and RTSP])
        AC_SUBST(CURL_DISABLE_HTTP, [1])
+       AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
+       AC_SUBST(CURL_DISABLE_RTSP, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -434,10 +436,13 @@ AC_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
           curl_rtsp_msg="enabled"
        fi
        ;;
-  esac
- ],
-       AC_MSG_RESULT(yes)
-       curl_rtsp_msg="enabled"
+  esac ],
+       if test "x$CURL_DISABLE_HTTP" != "x1"; then
+          AC_MSG_RESULT(yes)
+          curl_rtsp_msg="enabled"
+       else
+          AC_MSG_RESULT(no)
+       fi
 )
 
 AC_MSG_CHECKING([whether to support proxies])
@@ -2377,7 +2382,7 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
          AC_SUBST(USE_WINDOWS_SSPI, [1])
-         curl_sspi_msg="yes"
+         curl_sspi_msg="enabled"
        else
          AC_MSG_RESULT(no)
          AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
@@ -2625,6 +2630,9 @@ squeeze LIBS
 squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze TEST_SERVER_LIBS
+
+squeeze SUPPORT_FEATURES
+squeeze SUPPORT_PROTOCOLS
 
 if test "x$want_curldebug_assumed" = "xyes" &&
   test "x$want_curldebug" = "xyes" && test "x$HAVE_ARES" = "x1"; then
