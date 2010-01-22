@@ -23,7 +23,7 @@ hello
 http
 </server>
  <name>
-HTTP GET with URL that contains fragment after the path.
+HTTP GET with URL that contains fragment after the path
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1109#test
