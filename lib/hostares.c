@@ -304,6 +304,31 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   return rc;
 }
 
+/*
+ * ares_query_completed_cb() is the callback that ares will call when
+ * the host query initiated by ares_gethostbyname() from Curl_getaddrinfo(),
+ * when using ares, is completed either successfully or with failure.
+ */
+static void ares_query_completed_cb(void *arg,  /* (struct connectdata *) */
+                                    int status,
+#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
+                                    int timeouts,
+#endif
+                                    struct hostent *hostent)
+{
+  struct connectdata *conn = (struct connectdata *)arg;
+  struct Curl_addrinfo * ai = NULL;
+    
+#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
+  (void)timeouts; /* ignored */
+#endif
+
+  if (status == CURL_ASYNC_SUCCESS) {
+    ai = Curl_he2ai(hostent, conn->async.port);
+  }
+ 
+  (void)Curl_addrinfo_callback(arg, status, ai);
+}
 
 /*
  * Curl_getaddrinfo() - when using ares
@@ -369,7 +394,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
     /* areschannel is already setup in the Curl_open() function */
     ares_gethostbyname(data->state.areschannel, hostname, family,
-                       (ares_host_callback)Curl_addrinfo4_callback, conn);
+                       (ares_host_callback)ares_query_completed_cb, conn);
 
     *waitp = TRUE; /* please wait for the response */
   }

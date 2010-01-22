@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -219,7 +219,7 @@ void release_thread_sync(struct thread_sync_data * tsd)
 
 #if defined(CURLRES_IPV4)
 /*
- * gethostbyname_thread() resolves a name, calls the Curl_addrinfo4_callback
+ * gethostbyname_thread() resolves a name, calls the Curl_addrinfo_callback
  * and then exits.
  *
  * For builds without ARES/ENABLE_IPV6, create a resolver thread and wait on
@@ -254,14 +254,16 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
 
   /* is parent thread waiting for us and are we able to access conn members? */
   if(acquire_thread_sync(&tsd)) {
+    Curl_addrinfo *ai = Curl_he2ai(he, conn->async.port);
+
     /* Mark that we have obtained the information, and that we are calling
      * back with it. */
     SetEvent(td->event_resolved);
-    if(he) {
-      rc = Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
+    if(ai) {
+      rc = Curl_addrinfo_callback(conn, CURL_ASYNC_SUCCESS, ai);
     }
     else {
-      rc = Curl_addrinfo4_callback(conn, SOCKERRNO, NULL);
+      rc = Curl_addrinfo_callback(conn, SOCKERRNO, NULL);
     }
     release_thread_sync(&tsd);
   }
@@ -276,7 +278,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
 #elif defined(CURLRES_IPV6)
 
 /*
- * getaddrinfo_thread() resolves a name, calls Curl_addrinfo6_callback and then
+ * getaddrinfo_thread() resolves a name, calls Curl_addrinfo_callback and then
  * exits.
  *
  * For builds without ARES, but with ENABLE_IPV6, create a resolver thread
@@ -320,10 +322,10 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
     SetEvent(td->event_resolved);
 
     if(rc == 0) {
-      rc = Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
+      rc = Curl_addrinfo_callback(conn, CURL_ASYNC_SUCCESS, res);
     }
     else {
-      rc = Curl_addrinfo6_callback(conn, SOCKERRNO, NULL);
+      rc = Curl_addrinfo_callback(conn, SOCKERRNO, NULL);
     }
     release_thread_sync(&tsd);
   }

@@ -72,38 +72,27 @@
  * Only for builds using asynchronous name resolves
  **********************************************************************/
 #ifdef CURLRES_ASYNCH
+
 /*
- * addrinfo_callback() gets called by ares, gethostbyname_thread() or
- * getaddrinfo_thread() when we got the name resolved (or not!).
+ * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
+ * or getaddrinfo_thread() when we got the name resolved (or not!).
  *
- * If the status argument is CURL_ASYNC_SUCCESS, we might need to copy the
- * address field since it might be freed when this function returns. This
- * operation stores the resolved data in the DNS cache.
- *
- * NOTE: for IPv6 operations, Curl_addrinfo_copy() returns the same
- * pointer it is given as argument!
+ * If the status argument is CURL_ASYNC_SUCCESS, this function takes
+ * ownership of the Curl_addrinfo passed, storing the resolved data
+ * in the DNS cache.
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-static CURLcode addrinfo_callback(void *arg, /* "struct connectdata *" */
-                                  int status,
-                                  void *addr)
+CURLcode Curl_addrinfo_callback(struct connectdata * conn,
+                                int status,
+                                struct Curl_addrinfo *ai)
 {
-  struct connectdata *conn = (struct connectdata *)arg;
   struct Curl_dns_entry *dns = NULL;
   CURLcode rc = CURLE_OK;
 
   conn->async.status = status;
 
   if(CURL_ASYNC_SUCCESS == status) {
-
-    /*
-     * IPv4/ares: Curl_addrinfo_copy() copies the address and returns an
-     * allocated version.
-     *
-     * IPv6: Curl_addrinfo_copy() returns the input pointer!
-     */
-    Curl_addrinfo *ai = Curl_addrinfo_copy(addr, conn->async.port);
     if(ai) {
       struct SessionHandle *data = conn->data;
 
@@ -138,35 +127,4 @@ static CURLcode addrinfo_callback(void *arg, /* "struct connectdata *" */
   return rc;
 }
 
-CURLcode Curl_addrinfo4_callback(void *arg, /* "struct connectdata *" */
-                                 int status,
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-                                 int timeouts,
-#endif
-                                 struct hostent *hostent)
-{
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-  (void)timeouts; /* ignored */
-#endif
-  return addrinfo_callback(arg, status, hostent);
-}
-
-#ifdef CURLRES_IPV6
-CURLcode Curl_addrinfo6_callback(void *arg, /* "struct connectdata *" */
-                                 int status,
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-                                 int timeouts,
-#endif
-                                 Curl_addrinfo *ai)
-{
- /* NOTE: for CURLRES_ARES, the 'ai' argument is really a
-  * 'struct hostent' pointer.
-  */
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-  (void)timeouts; /* ignored */
-#endif
-  return addrinfo_callback(arg, status, ai);
-}
-#endif
-
-#endif /* CURLRES_ASYNC */
+#endif /* CURLRES_ASYNCH */

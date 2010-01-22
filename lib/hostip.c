@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -712,20 +712,4 @@ struct curl_hash *Curl_mk_dnscache(void)
   return Curl_hash_alloc(7, Curl_hash_str, Curl_str_key_compare, freednsentry);
 }
 
-#ifdef CURLRES_ADDRINFO_COPY
 
-/* align on even 64bit boundaries */
-#define MEMALIGN(x) ((x)+(8-(((unsigned long)(x))&0x7)))
-
-/*
- * Curl_addrinfo_copy() performs a "deep" copy of a hostent into a buffer and
- * returns a pointer to the malloc()ed copy. You need to call free() on the
- * returned buffer when you're done with it.
- */
-Curl_addrinfo *Curl_addrinfo_copy(const void *org, int port)
-{
-  const struct hostent *orig = org;
-
-  return Curl_he2ai(orig, port);
-}
-#endif /* CURLRES_ADDRINFO_COPY */

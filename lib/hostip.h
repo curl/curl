@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,21 +65,8 @@
 #define CURLRES_IPV4
 #endif
 
-#if defined(CURLRES_IPV4) || defined(CURLRES_ARES)
-#if !defined(HAVE_GETHOSTBYNAME_R) || defined(CURLRES_ASYNCH)
-/* If built for ipv4 and missing gethostbyname_r(), or if using async name
-   resolve, we need the Curl_addrinfo_copy() function (which itself needs the
-   Curl_he2ai() function)) */
-#define CURLRES_ADDRINFO_COPY
-#endif
-#endif /* IPv4/ares-only */
-
 #ifndef CURLRES_ASYNCH
 #define CURLRES_SYNCH
-#endif
-
-#ifndef USE_LIBIDN
-#define CURLRES_IDN
 #endif
 
 /* Allocate enough memory to hold the full name information structs and
@@ -203,26 +190,15 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        int line, const char *source);
 #endif
 
-/* This is the callback function that is used when we build with asynch
-   resolve, ipv4 */
-CURLcode Curl_addrinfo4_callback(void *arg,
-                                 int status,
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-                                 int timeouts,
-#endif
-                                 struct hostent *hostent);
-/* This is the callback function that is used when we build with asynch
-   resolve, ipv6 */
-CURLcode Curl_addrinfo6_callback(void *arg,
-                                 int status,
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-                                 int timeouts,
-#endif
-                                 Curl_addrinfo *ai);
-
-
-/* Clone a Curl_addrinfo struct, works protocol independently */
-Curl_addrinfo *Curl_addrinfo_copy(const void *orig, int port);
+/*
+ * Curl_addrinfo_callback() is used when we build with any asynch specialty.
+ * Handles end of async request processing. Inserts ai into hostcache when
+ * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
+ * request completed wether successfull or failed.
+ */
+CURLcode Curl_addrinfo_callback(struct connectdata *conn,
+                                int status,
+                                Curl_addrinfo *ai);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
