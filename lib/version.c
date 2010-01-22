@@ -116,70 +116,69 @@ char *curl_version(void)
   return version;
 }
 
-/* data for curl_version_info */
+/* data for curl_version_info
+
+   Keep the list sorted alphabetically. It is also written so that each
+   protocol line has its own #if line to make things easier on the eye.
+ */
 
 static const char * const protocols[] = {
-#ifndef CURL_DISABLE_TFTP
-  "tftp",
-#endif
-#ifndef CURL_DISABLE_FTP
-  "ftp",
-#endif
-#ifndef CURL_DISABLE_TELNET
-  "telnet",
-#endif
 #ifndef CURL_DISABLE_DICT
   "dict",
-#endif
-#ifndef CURL_DISABLE_LDAP
-  "ldap",
-#ifdef HAVE_LDAP_SSL
-  "ldaps",
-#endif
-#endif
-#ifndef CURL_DISABLE_HTTP
-  "http",
 #endif
 #ifndef CURL_DISABLE_FILE
   "file",
 #endif
+#ifndef CURL_DISABLE_FTP
+  "ftp",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+  "ftps",
+#endif
+#ifndef CURL_DISABLE_HTTP
+  "http",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+  "https",
+#endif
+#ifndef CURL_DISABLE_IMAP
+  "imap",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
+  "imaps",
+#endif
+#ifndef CURL_DISABLE_LDAP
+  "ldap",
+#endif
+#if defined(HAVE_LDAP_SSL) && !defined(CURL_DISABLE_LDAP)
+  "ldaps",
+#endif
+#ifndef CURL_DISABLE_POP3
+  "pop3",
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
+  "pop3s",
+#endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
 #endif
-
-#ifdef USE_SSL
-#ifndef CURL_DISABLE_HTTP
-  "https",
-#endif
-#ifndef CURL_DISABLE_FTP
-  "ftps",
-#endif
-#endif
-
 #ifdef USE_LIBSSH2
   "scp",
+#endif
+#ifdef USE_LIBSSH2
   "sftp",
 #endif
-
-#ifndef CURL_DISABLE_IMAP
-  "imap",
-#ifdef USE_SSL
-  "imaps",
-#endif
-#endif
-
-#ifndef CURL_DISABLE_POP3
-  "pop3",
-#ifdef USE_SSL
-  "pop3s",
-#endif
-#endif
-
 #ifndef CURL_DISABLE_SMTP
   "smtp",
-#ifdef USE_SSL
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
   "smtps",
 #endif
+#ifndef CURL_DISABLE_TELNET
+  "telnet",
+#endif
+#ifndef CURL_DISABLE_TFTP
+  "tftp",
 #endif
 
   NULL
