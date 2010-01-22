@@ -3065,10 +3065,6 @@ checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
   return checkhttpprefix(data, s);
 }
 
-#endif
-
-
-
 /*
  * header_append() copies a chunk of data to the end of the already received
  * header. We make sure that the full string fit in the allocated header
@@ -3805,3 +3801,4 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+#endif /* CURL_DISABLE_HTTP */

@@ -25,8 +25,24 @@
  ***************************************************************************/
 #ifndef CURL_DISABLE_RTSP
 
-
 extern const struct Curl_handler Curl_handler_rtsp;
+
+CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
+                                 struct connectdata *conn,
+                                 ssize_t *nread,
+                                 bool *readmore,
+                                 bool *done);
+
+
+/* protocol-specific functions set up to be called by the main engine */
+CURLcode Curl_rtsp(struct connectdata *conn, bool *done);
+CURLcode Curl_rtsp_done(struct connectdata *conn, CURLcode, bool premature);
+CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done);
+CURLcode Curl_rtsp_disconnect(struct connectdata *conn);
+
+CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
+
+#endif /* CURL_DISABLE_RTSP */
 
 /*
  * RTSP Connection data
@@ -58,20 +74,4 @@ struct RTSP {
 };
 
 
-CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
-                                 struct connectdata *conn,
-                                 ssize_t *nread,
-                                 bool *readmore,
-                                 bool *done);
-
-
-/* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_rtsp(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_done(struct connectdata *conn, CURLcode, bool premature);
-CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn);
-
-CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
-
-#endif /* CURL_DISABLE_RTSP */
 #endif /* __RTSP_H_ */
