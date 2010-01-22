@@ -436,8 +436,7 @@ typedef enum {
 } zlibInitState;
 #endif
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
-    defined(USE_THREADING_GETADDRINFO)
+#ifdef CURLRES_ASYNCH
 struct Curl_async {
   char *hostname;
   int port;
@@ -813,8 +812,7 @@ struct connectdata {
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
-    defined(USE_THREADING_GETADDRINFO)
+#ifdef CURLRES_ASYNCH
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 #endif

@@ -5044,8 +5044,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
 CURLcode Curl_async_resolved(struct connectdata *conn,
                              bool *protocol_done)
 {
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
-    defined(USE_THREADING_GETADDRINFO)
+#ifdef CURLRES_ASYNCH
   CURLcode code;
 
   if(conn->async.dns) {

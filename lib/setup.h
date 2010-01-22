@@ -407,6 +407,27 @@
 
 #endif /* WIN32 */
 
+/*
+ * msvc 6.0 requires PSDK in order to have INET6_ADDRSTRLEN
+ * defined in ws2tcpip.h as well as to provide IPv6 support.
+ */
+
+#if defined(_MSC_VER) && !defined(__POCC__)
+#  if !defined(HAVE_WS2TCPIP_H) || \
+     ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
+#    undef HAVE_GETADDRINFO_THREADSAFE
+#    undef HAVE_FREEADDRINFO
+#    undef HAVE_GETADDRINFO
+#    undef HAVE_GETNAMEINFO
+#    undef ENABLE_IPV6
+#  endif
+#endif
+
+/* ---------------------------------------------------------------- */
+/*             resolver specialty compile-time defines              */
+/*         CURLRES_* defines to use in the host*.c sources          */
+/* ---------------------------------------------------------------- */
+
 #if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES) && \
     !defined(__LCC__)  /* lcc-win32 doesn't have _beginthreadex() */
 #ifdef ENABLE_IPV6
@@ -423,6 +444,33 @@
 #undef USE_THREADING_GETHOSTBYNAME
 #define CURL_NO__BEGINTHREADEX
 #endif
+
+#ifdef USE_ARES
+#  define CURLRES_ASYNCH
+#  define CURLRES_ARES
+#endif
+
+#ifdef USE_THREADING_GETHOSTBYNAME
+#  define CURLRES_ASYNCH
+#  define CURLRES_THREADED
+#endif
+
+#ifdef USE_THREADING_GETADDRINFO
+#  define CURLRES_ASYNCH
+#  define CURLRES_THREADED
+#endif
+
+#ifdef ENABLE_IPV6
+#  define CURLRES_IPV6
+#else
+#  define CURLRES_IPV4
+#endif
+
+#ifndef CURLRES_ASYNCH
+#  define CURLRES_SYNCH
+#endif
+
+/* ---------------------------------------------------------------- */
 
 /*
  * When using WINSOCK, TELNET protocol requires WINSOCK2 API.
@@ -441,20 +489,6 @@
 #if defined(_MSC_VER) && !defined(__POCC__)
 #  if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
 #    undef HAVE_STRUCT_SOCKADDR_STORAGE
-#  endif
-#endif
-
-/*
- * msvc 6.0 requires PSDK in order to have INET6_ADDRSTRLEN
- * defined in ws2tcpip.h as well as to provide IPv6 support.
- */
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  if !defined(HAVE_WS2TCPIP_H) || ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
-#    undef HAVE_FREEADDRINFO
-#    undef HAVE_GETADDRINFO
-#    undef HAVE_GETNAMEINFO
-#    undef ENABLE_IPV6
 #  endif
 #endif
 
