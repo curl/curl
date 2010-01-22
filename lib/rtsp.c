@@ -199,7 +199,6 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   case RTSPREQ_NONE:
     failf(data, "Got invalid RTSP request: RTSPREQ_NONE");
     return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
   case RTSPREQ_OPTIONS:
     p_request = "OPTIONS";
     break;
@@ -240,7 +239,6 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   case RTSPREQ_LAST:
     failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
     return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
@@ -508,9 +506,6 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   }
 
   return result;
-
-  return CURLE_OK;
-
 }
 
 CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
