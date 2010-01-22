@@ -176,7 +176,7 @@
  * When http is disabled rtsp is not supported.
  */
 
-#ifdef CURL_DISABLE_HTTP
+#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
 #  define CURL_DISABLE_RTSP
 #endif
 
