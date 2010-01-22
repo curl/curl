@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -427,16 +427,17 @@ AC_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
        AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
        AC_SUBST(CURL_DISABLE_RTSP, [1])
        ;;
-       *)   if test x$CURL_DISABLE_HTTP = x1 ; then
-                    AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
-            else
-                    AC_MSG_RESULT(yes)
-                    curl_rtsp_msg="enabled"
-            fi
+  *)   if test x$CURL_DISABLE_HTTP = x1 ; then
+          AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
+       else
+          AC_MSG_RESULT(yes)
+          curl_rtsp_msg="enabled"
+       fi
        ;;
-  esac ],
-       AC_MSG_RESULT(no)
-       curl_rtsp_msg="disabled"
+  esac
+ ],
+       AC_MSG_RESULT(yes)
+       curl_rtsp_msg="enabled"
 )
 
 AC_MSG_CHECKING([whether to support proxies])
@@ -2605,6 +2606,11 @@ fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
 fi
+
+dnl replace spaces with newlines
+dnl sort the lines
+dnl replace the newlines back to spaces
+SUPPORT_PROTOCOLS=`echo $SUPPORT_PROTOCOLS | tr ' ' '\012' | sort | tr '\012' ' '`
 
 AC_SUBST(SUPPORT_PROTOCOLS)
 
