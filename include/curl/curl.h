@@ -1309,11 +1309,11 @@ typedef enum {
   /* Manually initialize the server RTSP CSeq for this handle */
   CINIT(RTSP_SERVER_CSEQ, LONG, 194),
 
-  /* The stream to pass to RTPFUNCTION. */
-  CINIT(RTPDATA, OBJECTPOINT, 195),
+  /* The stream to pass to INTERLEAVEFUNCTION. */
+  CINIT(INTERLEAVEDATA, OBJECTPOINT, 195),
 
   /* Let the application define a custom write method for RTP data */
-  CINIT(RTPFUNCTION, FUNCTIONPOINT, 196),
+  CINIT(INTERLEAVEFUNCTION, FUNCTIONPOINT, 196),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -401,7 +401,7 @@ follows:
 
 You will need to override these definitions if they are different on your
 system.
-.IP CURLOPT_RTPFUNCTION
+.IP CURLOPT_INTERLEAVEFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
 function( void *ptr, size_t size, size_t nmemb, void *stream)\fP. This
 function gets called by libcurl as soon as it has received interleaved RTP
@@ -422,8 +422,8 @@ service RTP data when no requests are desired. If the application makes a
 request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
 process any pending RTP data before marking the request as finished.  (Added
 in 7.20.0)
-.IP CURLOPT_RTPDATA
-This is the stream that will be passed to \fICURLOPT_RTPFUNCTION\fP when
+.IP CURLOPT_INTERLEAVEDATA
+This is the stream that will be passed to \fICURLOPT_INTERLEAVEFUNCTION\fP when
 interleaved RTP data is received. Since the application is required to provide
 a custom function for RTP data, there is no requirement that the stream
 pointer be a valid FILE pointer. An application may wish to pass a cookie
