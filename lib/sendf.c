@@ -511,7 +511,8 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   /* If session can pipeline, check connection buffer  */
   if(pipelining) {
-    size_t bytestocopy = CURLMIN(conn->buf_len - conn->read_pos, sizerequested);
+    size_t bytestocopy = CURLMIN(conn->buf_len - conn->read_pos,
+                                 sizerequested);
 
     /* Copy from our master buffer first if we have some unread data there*/
     if(bytestocopy > 0) {
@@ -528,8 +529,9 @@ int Curl_read(struct connectdata *conn, /* connection data */
     buffertofill = conn->master_buffer;
   }
   else {
-    bytesfromsocket = CURLMIN((long)sizerequested, conn->data->set.buffer_size ?
-                          conn->data->set.buffer_size : BUFSIZE);
+    bytesfromsocket = CURLMIN((long)sizerequested,
+                              conn->data->set.buffer_size ?
+                              conn->data->set.buffer_size : BUFSIZE);
     buffertofill = buf;
   }
 

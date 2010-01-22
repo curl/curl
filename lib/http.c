@@ -972,8 +972,8 @@ Curl_send_buffer *Curl_add_buffer_init(void)
 }
 
 /*
- * Curl_add_buffer_send() sends a header buffer and frees all associated memory.
- * Body data may be appended to the header data if desired.
+ * Curl_add_buffer_send() sends a header buffer and frees all associated
+ * memory.  Body data may be appended to the header data if desired.
  *
  * Returns CURLcode
  */
@@ -1420,7 +1420,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       }
     }
     else {
-      DEBUGF(infof(data, "Easy mode waiting for response from proxy CONNECT."));
+      DEBUGF(infof(data, "Easy mode waiting response from proxy CONNECT."));
     }
 
     /* at this point, either:
@@ -1538,7 +1538,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
 #ifdef CURL_DOES_CONVERSIONS
                   /* convert from the network encoding */
-                  result = Curl_convert_from_network(data, line_start, perline);
+                  result = Curl_convert_from_network(data, line_start,
+                                                     perline);
                   /* Curl_convert_from_network calls failf if unsuccessful */
                   if(result)
                     return result;
@@ -1642,14 +1643,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                       return result;
                   }
                   else if(checkprefix("Content-Length:", line_start)) {
-                    cl = curlx_strtoofft(line_start + strlen("Content-Length:"),
-                                         NULL, 10);
+                    cl = curlx_strtoofft(line_start +
+                                         strlen("Content-Length:"), NULL, 10);
                   }
                   else if(Curl_compareheader(line_start,
                                              "Connection:", "close"))
                     closeConnection = TRUE;
                   else if(Curl_compareheader(line_start,
-                                             "Transfer-Encoding:", "chunked")) {
+                                             "Transfer-Encoding:",
+                                             "chunked")) {
                     infof(data, "CONNECT responded chunked\n");
                     chunked_encoding = TRUE;
                     /* init our chunky engine */
@@ -2829,7 +2831,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(!Curl_checkheaders(data, "Content-Type:")) {
       result = Curl_add_bufferf(req_buffer,
-                           "Content-Type: application/x-www-form-urlencoded\r\n");
+                                "Content-Type: application/"
+                                "x-www-form-urlencoded\r\n");
       if(result)
         return result;
     }

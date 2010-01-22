@@ -730,13 +730,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       ip_start = string_ftpport + 1;
       if((ip_end = strchr(string_ftpport, ']')) != NULL )
         strncpy(addr, ip_start, ip_end - ip_start);
-    } else
+    }
+    else
 #endif
       if( *string_ftpport == ':') {
         /* :port */
         ip_end = string_ftpport;
-    } else
-      if( (ip_end = strchr(string_ftpport, ':')) != NULL) {
+    }
+    else if( (ip_end = strchr(string_ftpport, ':')) != NULL) {
         /* either ipv6 or (ipv4|domain|interface):port(-range) */
 #ifdef ENABLE_IPV6
       if(Curl_inet_pton(AF_INET6, string_ftpport, sa6) == 1) {
@@ -750,10 +751,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         /* (ipv4|domain|interface):port(-range) */
         strncpy(addr, string_ftpport, ip_end - ip_start );
       }
-    } else {
+    }
+    else
       /* ipv4|interface */
       strcpy(addr, string_ftpport);
-    }
 
     /* parse the port */
     if( ip_end != NULL ) {
@@ -901,7 +902,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         return CURLE_FTP_PORT_FAILED;
       }
 
-    } else
+    }
+    else
       break;
 
     port++;
@@ -1095,9 +1097,10 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn)
       /* The user has requested that we send a PRET command
          to prepare the server for the upcoming PASV */
       if(!conn->proto.ftpc.file) {
-        PPSENDF(&conn->proto.ftpc.pp, "PRET %s", data->set.str[STRING_CUSTOMREQUEST]?
-                 data->set.str[STRING_CUSTOMREQUEST]:
-                 (data->set.ftp_list_only?"NLST":"LIST"));
+        PPSENDF(&conn->proto.ftpc.pp, "PRET %s",
+                data->set.str[STRING_CUSTOMREQUEST]?
+                data->set.str[STRING_CUSTOMREQUEST]:
+                (data->set.ftp_list_only?"NLST":"LIST"));
       }
       else if(data->set.upload) {
         PPSENDF(&conn->proto.ftpc.pp, "PRET STOR %s", conn->proto.ftpc.file);
@@ -1845,7 +1848,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       default:
         if(data->info.filetime <= data->set.timevalue) {
           infof(data, "The requested document is not new enough\n");
-          ftp->transfer = FTPTRANSFER_NONE; /* mark this to not transfer data */
+          ftp->transfer = FTPTRANSFER_NONE; /* mark to not transfer data */
           data->info.timecond = TRUE;
           state(conn, FTP_STOP);
           return CURLE_OK;
@@ -1854,7 +1857,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       case CURL_TIMECOND_IFUNMODSINCE:
         if(data->info.filetime > data->set.timevalue) {
           infof(data, "The requested document is not old enough\n");
-          ftp->transfer = FTPTRANSFER_NONE; /* mark this to not transfer data */
+          ftp->transfer = FTPTRANSFER_NONE; /* mark to not transfer data */
           data->info.timecond = TRUE;
           state(conn, FTP_STOP);
           return CURLE_OK;
@@ -2230,8 +2233,9 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     }
     else {
       failf(data, "RETR response: %03d", ftpcode);
-      return instate == FTP_RETR && ftpcode == 550? CURLE_REMOTE_FILE_NOT_FOUND:
-                                                    CURLE_FTP_COULDNT_RETR_FILE;
+      return instate == FTP_RETR && ftpcode == 550?
+        CURLE_REMOTE_FILE_NOT_FOUND:
+        CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
 
@@ -2995,8 +2999,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     /* out of memory, but we can limp along anyway (and should try to
      * since we're in the out of memory cleanup path) */
     ftpc->prevpath = NULL; /* no path */
-
-  } else {
+  }
+  else {
     size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
     if(!ftpc->cwdfail) {
@@ -3034,8 +3038,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
     if(conn->ssl[SECONDARYSOCKET].use) {
-      /* The secondary socket is using SSL so we must close down that part first
-         before we close the socket for real */
+      /* The secondary socket is using SSL so we must close down that part
+         first before we close the socket for real */
       Curl_ssl_close(conn, SECONDARYSOCKET);
 
       /* Note that we keep "use" set to TRUE since that (next) connection is

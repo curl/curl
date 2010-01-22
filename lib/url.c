@@ -432,7 +432,7 @@ CURLcode Curl_close(struct SessionHandle *data)
         for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
-                    "MAJOR problem we %p are still in send pipe for %p done %d\n",
+                    "problem we %p are still in send pipe for %p done %d\n",
                     data, connptr, (int)connptr->bits.done);
           }
         }
@@ -442,7 +442,7 @@ CURLcode Curl_close(struct SessionHandle *data)
         for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
-                    "MAJOR problem we %p are still in recv pipe for %p done %d\n",
+                    "problem we %p are still in recv pipe for %p done %d\n",
                     data, connptr, (int)connptr->bits.done);
           }
         }
@@ -452,7 +452,7 @@ CURLcode Curl_close(struct SessionHandle *data)
         for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
-                    "MAJOR problem we %p are still in done pipe for %p done %d\n",
+                    "problem we %p are still in done pipe for %p done %d\n",
                     data, connptr, (int)connptr->bits.done);
           }
         }
@@ -462,7 +462,7 @@ CURLcode Curl_close(struct SessionHandle *data)
         for (curr = pipeline->head; curr; curr=curr->next) {
           if(data == (struct SessionHandle *) curr->ptr) {
             fprintf(stderr,
-                    "MAJOR problem we %p are still in pend pipe for %p done %d\n",
+                    "problem we %p are still in pend pipe for %p done %d\n",
                     data, connptr, (int)connptr->bits.done);
           }
         }
@@ -1160,7 +1160,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
            to mark that postfields is used rather than read function or
            form data.
         */
-        p = malloc((size_t)(data->set.postfieldsize?data->set.postfieldsize:1));
+        p = malloc((size_t)(data->set.postfieldsize?
+                            data->set.postfieldsize:1));
 
         if(!p)
           result = CURLE_OUT_OF_MEMORY;
@@ -1411,7 +1412,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authhost.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE);
+    data->state.authhost.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?
+                                          TRUE:FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -1456,7 +1458,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authproxy.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?TRUE:FALSE);
+    data->state.authproxy.iestyle = (bool)((auth & CURLAUTH_DIGEST_IE)?
+                                           TRUE:FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -2874,8 +2877,8 @@ ConnectionExists(struct SessionHandle *data,
 #endif
 
       if((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) || check->bits.close) {
-        /* Don't pick a connection that hasn't connected yet or that is going to
-           get closed. */
+        /* Don't pick a connection that hasn't connected yet or that is going
+           to get closed. */
         infof(data, "Connection #%ld isn't open enough, can't reuse\n",
               check->connectindex);
 #ifdef DEBUGBUILD
@@ -3653,7 +3656,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       char *endp;
       unsigned long scope = strtoul (percent + 3, &endp, 10);
       if (*endp == ']') {
-        /* The address scope was well formed.  Knock it out of the hostname.  */
+        /* The address scope was well formed.  Knock it out of the
+           hostname. */
         memmove(percent, endp, strlen(endp)+1);
         if (!data->state.this_is_a_follow)
           /* Don't honour a scope given in a Location: header */
@@ -3668,8 +3672,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     conn->scope = data->set.scope;
 
   /* Remove the fragment part of the path. Per RFC 2396, this is always the
-     last part of the URI. We are looking for the first '#' so that we deal gracefully
-     with non conformant URI such as http://example.com#foo#bar. */
+     last part of the URI. We are looking for the first '#' so that we deal
+     gracefully with non conformant URI such as http://example.com#foo#bar. */
   fragment = strchr(path, '#');
   if(fragment)
     *fragment = 0;
@@ -3816,7 +3820,8 @@ static bool check_noproxy(const char* name, const char* no_proxy)
       if((tok_end - tok_start) <= namelen) {
         /* Match the last part of the name to the domain we are checking. */
         const char *checkn = name + namelen - (tok_end - tok_start);
-        if(Curl_raw_nequal(no_proxy + tok_start, checkn, tok_end - tok_start)) {
+        if(Curl_raw_nequal(no_proxy + tok_start, checkn,
+                           tok_end - tok_start)) {
           if((tok_end - tok_start) == namelen || *(checkn - 1) == '.') {
             /* We either have an exact match, or the previous character is a .
              * so it is within the same domain, so no proxy for this host.
@@ -4005,7 +4010,8 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   /* detect and extract RFC2732-style IPv6-addresses */
   if(*proxyptr == '[') {
     char *ptr = ++proxyptr; /* advance beyond the initial bracket */
-    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '%') || (*ptr == '.')))
+    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '%') ||
+                   (*ptr == '.')))
       ptr++;
     if(*ptr == ']') {
       /* yeps, it ended nicely with a bracket as well */
