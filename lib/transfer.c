@@ -1124,15 +1124,13 @@ int Curl_single_getsock(const struct connectdata *conn,
 /*
  * Transfer()
  *
- * This function is what performs the actual transfer. It is capable of
- * doing both ways simultaneously.
- * The transfer must already have been setup by a call to Curl_setup_transfer().
+ * This function is what performs the actual transfer. It is capable of doing
+ * both ways simultaneously.  The transfer must already have been setup by a
+ * call to Curl_setup_transfer().
  *
  * Note that headers are created in a preallocated buffer of a default size.
  * That buffer can be enlarged on demand, but it is never shrunken again.
  *
- * Parts of this function was once written by the friendly Mark Butler
- * <butlerm@xmission.com>.
  */
 
 static CURLcode
