@@ -56,6 +56,9 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
   AH_TEMPLATE([LIBCURL_PROTOCOL_DICT],[Defined if libcurl supports DICT])
   AH_TEMPLATE([LIBCURL_PROTOCOL_TFTP],[Defined if libcurl supports TFTP])
   AH_TEMPLATE([LIBCURL_PROTOCOL_RTSP],[Defined if libcurl supports RTSP])
+  AH_TEMPLATE([LIBCURL_PROTOCOL_POP3],[Defined if libcurl supports POP3])
+  AH_TEMPLATE([LIBCURL_PROTOCOL_IMAP],[Defined if libcurl supports IMAP])
+  AH_TEMPLATE([LIBCURL_PROTOCOL_SMTP],[Defined if libcurl supports SMTP])
 
   AC_ARG_WITH(libcurl,
      AC_HELP_STRING([--with-libcurl=DIR],[look for the curl library in DIR]),
@@ -195,16 +198,22 @@ x=CURLOPT_VERBOSE;
 
 	      # We don't have --protocols, so just assume that all
 	      # protocols are available
-	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP RTSP"
+	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP
 
 	      if test x$libcurl_feature_SSL = xyes ; then
 	         _libcurl_protocols="$_libcurl_protocols HTTPS"
 
 		 # FTPS wasn't standards-compliant until version
-		 # 7.11.0
+		 # 7.11.0 (0x070b00 == 461568)
 		 if test $_libcurl_version -ge 461568; then
 		    _libcurl_protocols="$_libcurl_protocols FTPS"
 		 fi
+	      fi
+
+	      # RTSP, IMAP, POP3 and SMTP were added in
+              # 7.20.0 (0x071400 == 463872)
+	      if test $_libcurl_version -ge 463872; then
+		  _libcurl_protocols="$_libcurl_protocols RTSP IMAP POP3 SMTP"
 	      fi
 	   fi
 
