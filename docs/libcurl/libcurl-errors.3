@@ -92,15 +92,13 @@ returned an error code that was 400 or higher (for FTP) or otherwise
 indicated unsuccessful completion of the command.
 .IP "CURLE_HTTP_RETURNED_ERROR (22)"
 This is returned if CURLOPT_FAILONERROR is set TRUE and the HTTP server
-returns an error code that is >= 400. (This error code was formerly known as
-CURLE_HTTP_NOT_FOUND.)
+returns an error code that is >= 400.
 .IP "CURLE_WRITE_ERROR (23)"
 An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
 .IP "CURLE_UPLOAD_FAILED (25)"
 Failed starting the upload. For FTP, the server typically denied the STOR
 command. The error buffer usually contains the server's explanation for this.
-(This error code was formerly known as CURLE_FTP_COULDNT_STOR_FILE.)
 .IP "CURLE_READ_ERROR (26)"
 There was a problem reading a local file or an error returned by the read
 callback.
@@ -125,8 +123,9 @@ A problem occurred somewhere in the SSL/TLS handshake. You really want the
 error buffer and read the message there as it pinpoints the problem slightly
 more. Could be certificates (file formats, paths, permissions), passwords, and
 others.
-.IP "CURLE_FTP_BAD_DOWNLOAD_RESUME (36)"
-Attempting FTP resume beyond file size.
+.IP "CURLE_BAD_DOWNLOAD_RESUME (36)"
+The download could not be resumed because the specified offset was out of the
+file boundary.
 .IP "CURLE_FILE_COULDNT_READ_FILE (37)"
 A file given with FILE:// couldn't be opened. Most likely because the file
 path doesn't identify an existing file. Did you check file permissions?
@@ -143,8 +142,7 @@ Internal error. A function was called with a bad parameter.
 .IP "CURLE_INTERFACE_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
-CURLOPT_INTERFACE. (This error code was formerly known as
-CURLE_HTTP_PORT_FAILED.)
+CURLOPT_INTERFACE.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
 Too many redirects. When following redirects, libcurl hit the maximum amount.
 Set your limit with CURLOPT_MAXREDIRS.
