@@ -76,8 +76,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP) \
-    && !defined(USE_ARES)
+#if defined(CURLRES_SYNCH) && \
+    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
 /* alarm-based timeouts can only be used with all the dependencies satisfied */
 #define USE_ALARM_TIMEOUT
 #endif

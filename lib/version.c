@@ -217,7 +217,7 @@ static curl_version_info_data version_info = {
 #ifdef CURLDEBUG
   | CURL_VERSION_CURLDEBUG
 #endif
-#ifdef USE_ARES
+#ifdef CURLRES_ASYNCH
   | CURL_VERSION_ASYNCHDNS
 #endif
 #ifdef HAVE_SPNEGO
