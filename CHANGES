@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Björn Stenberg (23 Jan 2010)
+- Added a new flag: -J/--remote-header-name. This option tells the
+  -O/--remote-name option to use the server-specified Content-Disposition
+  filename instead of extracting a filename from the URL.
+
 Daniel Stenberg (21 Jan 2010)
 - Chris Conroy brought support for RTSP transfers, and with it comes 8(!) new
   libcurl options for controlling what to get and how to receive posssibly

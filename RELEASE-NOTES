@@ -1,7 +1,7 @@
 Curl and libcurl 7.20.0
 
  Public curl releases:         114
- Command line options:         135
+ Command line options:         136
  curl_easy_setopt() options:   174
  Public functions in libcurl:  58
  Known libcurl bindings:       39
@@ -19,6 +19,7 @@ This release includes the following changes:
  o VMS build system enhancements
  o added support for the PRET ftp command
  o curl supports --ssl and --ssl-reqd
+ o added -J/--remote-header-name for using server-provided filename with -O
 
 This release includes the following bugfixes:
 
@@ -61,6 +62,7 @@ advice from friends like these:
  Marc Kleine-Budde, Jad Chamcham, Bjorn Augustsson, David Byron,
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
  Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
- Johan van Selst, Charles Kerr, Gil Weber, David McCreedy, Chris Conroy
+ Johan van Selst, Charles Kerr, Gil Weber, David McCreedy, Chris Conroy,
+ Björn Stenberg
 
         Thanks! (and sorry if I forgot to mention someone)
