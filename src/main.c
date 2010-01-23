@@ -615,6 +615,7 @@ struct Configurable {
   bool post302;
   bool nokeepalive; /* for keepalive needs */
   long alivetime;
+  bool content_disposition; /* use Content-disposition filename */
 
   int default_node_flags; /* default flags to seach for each 'node', which is
                              basically each given URL to transfer */
@@ -819,6 +820,7 @@ static void help(void)
     "    --krb <level>   Enable Kerberos with specified security level (F)",
     "    --libcurl <file> Dump libcurl equivalent code of this command line",
     "    --limit-rate <rate> Limit transfer speed to this rate",
+    " -J/--remote-header-name Use the header-provided filename (H)",
     " -l/--list-only     List only names of an FTP directory (F)",
     "    --local-port <num>[-num] Force use of these local port numbers",
     " -L/--location      Follow Location: hints (H)",
@@ -1792,6 +1794,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"i", "include",     FALSE},
     {"I", "head",        FALSE},
     {"j", "junk-session-cookies", FALSE},
+    {"J", "remote-header-name", FALSE},
     {"k", "insecure",    FALSE},
     {"K", "config",      TRUE},
     {"l", "list-only",   FALSE},
@@ -2664,6 +2667,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                         &config->httpreq))
         return PARAM_BAD_USE;
       break;
+    case 'J': /* --remote-header-name */
+      if (config->include_headers) {
+        warnf(config,
+              "--include and --remote-header-name cannot be combined.\n");
+        return PARAM_BAD_USE;
+      }
+      config->content_disposition = toggle;
+      break;
     case 'k': /* allow insecure SSL connects */
       config->insecure_ok = toggle;
       break;
@@ -3314,24 +3325,41 @@ static void go_sleep(long ms)
 
 static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 {
-  int res;
   size_t rc;
   struct OutStruct *out=(struct OutStruct *)stream;
   struct Configurable *config = out->config;
 
+  /*
+   * Once that libcurl has called back my_fwrite() the returned value
+   * is checked against the amount that was intended to be written, if
+   * it does not match then it fails with CURLE_WRITE_ERROR. So at this
+   * point returning a value different from sz*nmemb indicates failure.
+   */
+  const size_t err_rc = (sz * nmemb) ? 0 : 1;
+
   if(!out->stream) {
+    if (!out->filename) {
+      warnf(config, "Remote filename has no length!\n");
+      return err_rc; /* Failure */
+    }
+
+    if (config->content_disposition) {
+      /* don't overwrite existing files */
+      FILE* f = fopen(out->filename, "r");
+      if (f) {
+        fclose(f);
+        warnf(config, "Refusing to overwrite %s: %s\n", out->filename,
+              strerror(EEXIST));
+        return err_rc; /* Failure */
+      }
+    }
+
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
     if(!out->stream) {
-      warnf(config, "Failed to create the file %s\n", out->filename);
-      /*
-       * Once that libcurl has called back my_fwrite() the returned value
-       * is checked against the amount that was intended to be written, if
-       * it does not match then it fails with CURLE_WRITE_ERROR. So at this
-       * point returning a value different from sz*nmemb indicates failure.
-       */
-      rc = (0 == (sz * nmemb)) ? 1 : 0;
-      return rc; /* failure */
+      warnf(config, "Failed to create the file %s: %s\n", out->filename,
+            strerror(errno));
+      return err_rc; /* failure */
     }
   }
 
@@ -3349,11 +3377,10 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 
   if(config->nobuffer) {
     /* disable output buffering */
-    res = fflush(out->stream);
+    int res = fflush(out->stream);
     if(res) {
       /* return a value that isn't the same as sz * nmemb */
-      rc = (0 == (sz * nmemb)) ? 1 : 0;
-      return rc; /* failure */
+      return err_rc; /* failure */
     }
   }
 
@@ -4049,6 +4076,87 @@ static bool stdin_upload(const char *uploadfile)
   return curlx_strequal(uploadfile, "-") || curlx_strequal(uploadfile, ".");
 }
 
+static char*
+parse_filename(char *ptr, int len)
+{
+  char* copy;
+  char* p;
+  char* q;
+  char quote = 0;
+
+  /* simple implementation of strndup() */
+  copy = malloc(len+1);
+  if (!copy)
+    return NULL;
+  strncpy(copy, ptr, len);
+  copy[len] = 0;
+  
+  p = copy;
+  if (*p == '\'' || *p == '"') {
+    /* store the starting quote */
+    quote = *p;
+    p++;
+  }
+
+  /* if the filename contains a path, only use filename portion */
+  q = strrchr(copy, '/');
+  if (q) {
+    p=q+1;
+    if (!*p) {
+      free(copy);
+      return NULL;
+    }
+  }
+
+  q = strrchr(p, quote);
+  if (q)
+    *q = 0;
+
+  if (copy!=p)
+    memmove(copy, p, strlen(p)+1);
+
+  return copy;
+}
+
+static size_t
+header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+  struct OutStruct* outs = (struct OutStruct*)stream;
+  const char* str = (char*)ptr;
+  const size_t cb = size*nmemb;
+  const char* end = (char*)ptr + cb;
+
+  if (cb > 20 && curlx_strnequal(str, "Content-disposition:", 20)) {
+    char *p = (char*)str + 20;
+
+    /* look for the 'filename=' parameter
+       (encoded filenames (*=) are not supported) */
+    while (1) {
+      char *filename;
+
+      while (p < end && !isalpha(*p))
+        p++;
+      if (p > end-9)
+        break;
+
+      if (memcmp(p, "filename=", 9)) {
+        /* no match, find next parameter */
+        while ((p < end) && (*p != ';'))
+          p++;
+        continue;
+      }
+      p+=9;
+      filename = parse_filename(p, cb - (p - str));
+      if (filename) {
+        outs->filename = filename;
+        break;
+      }
+    }
+  }
+
+  return cb;
+}
+
 static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
@@ -4431,7 +4539,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               pc++;
               outfile = *pc ? strdup(pc): NULL;
             }
-            if(!outfile || !*outfile) {
+            if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
               free(url);
@@ -5046,6 +5154,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
 
+        if ((urlnode->flags & GETOUT_USEREMOTE)
+            && config->content_disposition) {
+          my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+          my_setopt(curl, CURLOPT_HEADERDATA, &outs);
+        }
+        
         retry_numretries = config->req_retry;
 
         retrystart = cutil_tvnow();
@@ -5056,6 +5170,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             res = CURLE_OUT_OF_MEMORY;
             break;
           }
+
+          if (config->content_disposition && outs.stream && !config->mute)
+            printf("curl: Saved to filename '%s'\n", outs.filename);
 
           /* if retry-max-time is non-zero, make sure we haven't exceeded the
              time */
