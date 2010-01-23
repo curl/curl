@@ -103,7 +103,9 @@
 *                      STRUCT DECLARATIONS AND DEFINES                       *
 *****************************************************************************/
 
+#ifndef PKTSIZE
 #define PKTSIZE (SEGSIZE + 4)  /* SEGSIZE defined in arpa/tftp.h */
+#endif
 
 struct testcase {
   char *buffer;   /* holds the file data to send to the client */
