@@ -104,6 +104,7 @@
  15.4 remove several functions
  15.5 remove CURLOPT_FAILONERROR
  15.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+ 15.7 remove progress meter from libcurl
 
 ==============================================================================
 
@@ -577,3 +578,13 @@ to provide the data to send.
  Remove support for a global DNS cache. Anything global is silly, and we
  already offer the share interface for the same functionality but done
  "right".
+
+15.7 remove progress meter from libcurl
+
+ The internally provided progress meter output doesn't belong in the library.
+ Basically no application wants it (apart from curl) but instead applications
+ can and should do their own progress meters using the progress callback.
+
+ The progress callback should then be bumped as well to get proper 64bit
+ variable types passed to it instead of doubles so that big files work
+ correctly.
