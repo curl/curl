@@ -386,7 +386,7 @@ static void lm_resp(const unsigned char *keys,
   setup_des_key(keys+14, DESKEY(ks));
   DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+16),
                   DESKEY(ks), DES_ENCRYPT);
-#elif USE_GNUTLS
+#elif defined(USE_GNUTLS)
   gcry_cipher_hd_t des;
 
   gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
@@ -447,7 +447,7 @@ static void mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw+7, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
                     DESKEY(ks), DES_ENCRYPT);
-#elif USE_GNUTLS
+#elif defined(USE_GNUTLS)
     gcry_cipher_hd_t des;
 
     gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
@@ -508,7 +508,7 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2*len);
     MD4_Final(ntbuffer, &MD4pw);
-#elif USE_GNUTLS
+#elif defined(USE_GNUTLS)
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
     gcry_md_write(MD4pw, pw, 2*len);
@@ -911,7 +911,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       MD5_CTX MD5pw;
       Curl_ossl_seed(conn->data); /* Initiate the seed if not already done */
       RAND_bytes(entropy,8);
-#elif USE_GNUTLS
+#elif defined(USE_GNUTLS)
       gcry_md_hd_t MD5pw;
       Curl_gtls_seed(conn->data); /* Initiate the seed if not already done */
       gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
@@ -930,7 +930,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       MD5_Init(&MD5pw);
       MD5_Update(&MD5pw, tmp, 16);
       MD5_Final(md5sum, &MD5pw);
-#elif USE_GNUTLS
+#elif defined(USE_GNUTLS)
       gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
       gcry_md_write(MD5pw, tmp, MD5_DIGEST_LENGTH);
       memcpy(md5sum, gcry_md_read (MD5pw, 0), MD5_DIGEST_LENGTH);
