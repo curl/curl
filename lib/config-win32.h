@@ -456,17 +456,20 @@
    quite convoluted, compiler dependent and even build target dependent. */
 #if defined(HAVE_WS2TCPIP_H)
 #  if defined(__POCC__)
-#    define HAVE_FREEADDRINFO 1
-#    define HAVE_GETADDRINFO  1
-#    define HAVE_GETNAMEINFO  1
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
 #  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
-#    define HAVE_FREEADDRINFO 1
-#    define HAVE_GETADDRINFO  1
-#    define HAVE_GETNAMEINFO  1
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
 #  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
-#    define HAVE_FREEADDRINFO 1
-#    define HAVE_GETADDRINFO  1
-#    define HAVE_GETNAMEINFO  1
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
 #  endif
 #endif
 
