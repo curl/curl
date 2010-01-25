@@ -4134,7 +4134,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
     while (1) {
       char *filename;
 
-      while (p < end && !isalpha(*p))
+      while (*p && (p < end) && !ISALPHA(*p))
         p++;
       if (p > end-9)
         break;

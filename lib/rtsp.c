@@ -650,6 +650,7 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+static
 CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
 {
   struct SessionHandle *data = conn->data;

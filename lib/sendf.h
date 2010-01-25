@@ -1,5 +1,5 @@
-#ifndef __SENDF_H
-#define __SENDF_H
+#ifndef HEADER_CURL_SENDF_H
+#define HEADER_CURL_SENDF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -55,8 +55,6 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len);
 
-CURLcode Curl_rtp_client_write(struct connectdata *conn, char *ptr, size_t len);
-
 /* internal read-function, does plain socket only */
 int Curl_read_plain(curl_socket_t sockfd,
                     char *buf,
@@ -85,4 +83,4 @@ int Curl_debug(struct SessionHandle *handle, curl_infotype type,
                struct connectdata *conn);
 
 
-#endif /* __SENDF_H */
+#endif /* HEADER_CURL_SENDF_H */
