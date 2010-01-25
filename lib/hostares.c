@@ -350,7 +350,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
   struct in6_addr in6;
 #endif /* CURLRES_IPV6 */
-  *waitp = FALSE;
+
+  *waitp = 0; /* default to synchronous response */
 
   /* First check if this is an IPv4 address string */
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
@@ -396,7 +397,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     ares_gethostbyname(data->state.areschannel, hostname, family,
                        (ares_host_callback)ares_query_completed_cb, conn);
 
-    *waitp = TRUE; /* please wait for the response */
+    *waitp = 1; /* expect asynchronous response */
   }
   return NULL; /* no struct yet */
 }

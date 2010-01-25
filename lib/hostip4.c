@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,8 +87,7 @@ bool Curl_ipvalid(struct SessionHandle *data)
   return TRUE; /* OK, proceed */
 }
 
-#ifdef CURLRES_SYNCH /* the functions below are for synchronous resolves */
-
+#ifdef CURLRES_SYNCH
 /*
  * Curl_getaddrinfo() - the ipv4 synchronous version.
  *
@@ -110,6 +109,33 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
+  Curl_addrinfo *ai = NULL;
+
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)conn;
+#endif
+
+  *waitp = 0; /* synchronous response only */
+
+  ai = Curl_ipv4_resolve_r(hostname, port);
+  if(!ai)
+    infof(conn->data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
+
+  return ai;  
+}
+#endif /* CURLRES_SYNCH */
+#endif /* CURLRES_IPV4 */
+
+/*
+ * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
+ *
+ * This is used for both synchronous and asynchronous resolver builds,
+ * implying that only threadsafe code and function calls may be used.
+ *
+ */
+Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
+                                   int port)
+{
 #if defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
@@ -118,17 +144,28 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   struct in_addr in;
   struct hostent *buf = NULL;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)conn;
-#endif
-
-  *waitp = 0; /* don't wait, we act synchronously */
-
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
-#if defined(HAVE_GETHOSTBYNAME_R)
+#if defined(HAVE_GETADDRINFO_THREADSAFE)
+  else { 
+    struct addrinfo hints;
+    char sbuf[NI_MAXSERV];
+    char *sbufptr = NULL;
+    int error;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    if (port) {
+      snprintf(sbuf, sizeof(sbuf), "%d", port);
+      sbufptr = sbuf;
+    }
+    hints.ai_flags = AI_CANONNAME;
+    error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
+
+#elif defined(HAVE_GETHOSTBYNAME_R)
   /*
    * gethostbyname_r() is the preferred resolve function for many platforms.
    * Since there are three different versions of it, the following code is
@@ -260,8 +297,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     }
     else
 #endif /* HAVE_GETHOSTBYNAME_R_3 */
-      {
-      infof(conn->data, "gethostbyname_r(2) failed for %s\n", hostname);
+    {
       h = NULL; /* set return code to NULL */
       free(buf);
     }
@@ -276,8 +312,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #else
     h = gethostbyname(hostname);
 #endif
-    if(!h)
-      infof(conn->data, "gethostbyname(2) failed for %s\n", hostname);
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
 
@@ -290,7 +324,3 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   return ai;
 }
-
-#endif /* CURLRES_SYNCH */
-#endif /* CURLRES_IPV4 */
-

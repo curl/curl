@@ -1,5 +1,5 @@
-#ifndef __HOSTIP_H
-#define __HOSTIP_H
+#ifndef HEADER_CURL_HOSTIP_H
+#define HEADER_CURL_HOSTIP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -165,6 +165,9 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
                        int line, const char *source);
 #endif
 
+/* IPv4 threadsafe resolve function used for synch and asynch builds */
+Curl_addrinfo *Curl_ipv4_resolve_r(const char * hostname, int port);
+
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
  * Handles end of async request processing. Inserts ai into hostcache when
@@ -214,4 +217,4 @@ void Curl_destroy_thread_data(struct Curl_async *async);
 extern sigjmp_buf curl_jmpenv;
 #endif
 
-#endif
+#endif /* HEADER_CURL_HOSTIP_H */
