@@ -201,7 +201,7 @@ const struct Curl_handler Curl_handler_ftps = {
  * HTTP-proxyed FTP protocol handler.
  */
 
-const struct Curl_handler Curl_handler_ftp_proxy = {
+static const struct Curl_handler Curl_handler_ftp_proxy = {
   "FTP",                                /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
@@ -224,7 +224,7 @@ const struct Curl_handler Curl_handler_ftp_proxy = {
  * HTTP-proxyed FTPS protocol handler.
  */
 
-const struct Curl_handler Curl_handler_ftps_proxy = {
+static const struct Curl_handler Curl_handler_ftps_proxy = {
   "FTPS",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */

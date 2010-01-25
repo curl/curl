@@ -1,5 +1,5 @@
-#ifndef __FTP_H
-#define __FTP_H
+#ifndef HEADER_CURL_FTP_H
+#define HEADER_CURL_FTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -30,14 +30,6 @@ extern const struct Curl_handler Curl_handler_ftp;
 
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_ftps;
-#endif
-
-#ifndef CURL_DISABLE_HTTP
-extern const struct Curl_handler Curl_handler_ftp_proxy;
-
-# ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_ftps_proxy;
-# endif
 #endif
 
 CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
@@ -146,4 +138,4 @@ struct ftp_conn {
   char * server_os;     /* The target server operating system. */
 };
 
-#endif /* __FTP_H */
+#endif /* HEADER_CURL_FTP_H */

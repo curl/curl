@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -159,7 +159,7 @@ const struct Curl_handler Curl_handler_smtps = {
  * HTTP-proxyed SMTP protocol handler.
  */
 
-const struct Curl_handler Curl_handler_smtp_proxy = {
+static const struct Curl_handler Curl_handler_smtp_proxy = {
   "SMTP",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
@@ -182,7 +182,7 @@ const struct Curl_handler Curl_handler_smtp_proxy = {
  * HTTP-proxyed SMTPS protocol handler.
  */
 
-const struct Curl_handler Curl_handler_smtps_proxy = {
+static const struct Curl_handler Curl_handler_smtps_proxy = {
   "SMTPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */

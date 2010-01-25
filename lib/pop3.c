@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -161,7 +161,7 @@ const struct Curl_handler Curl_handler_pop3s = {
  * HTTP-proxyed POP3 protocol handler.
  */
 
-const struct Curl_handler Curl_handler_pop3_proxy = {
+static const struct Curl_handler Curl_handler_pop3_proxy = {
   "POP3",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
@@ -184,7 +184,7 @@ const struct Curl_handler Curl_handler_pop3_proxy = {
  * HTTP-proxyed POP3S protocol handler.
  */
 
-const struct Curl_handler Curl_handler_pop3s_proxy = {
+static const struct Curl_handler Curl_handler_pop3s_proxy = {
   "POP3S",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
