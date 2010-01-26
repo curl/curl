@@ -42,6 +42,7 @@ CURL_CHECK_OPTION_DEBUG
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_CURLDEBUG
+CURL_CHECK_OPTION_ARES
 
 CURL_CHECK_PATH_SEPARATOR_REQUIRED
 
@@ -2274,81 +2275,8 @@ fi
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
-aresembedded="unknown"
-configure_rundir=`pwd`
-embedded_ares_builddir="$configure_rundir/ares"
-AC_MSG_CHECKING([whether to enable c-ares])
-AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares=PATH],[Enable c-ares for name lookups])
-AC_HELP_STRING([--disable-ares],[Disable c-ares for name lookups]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-       if test "x$IPV6_ENABLED" = "x1"; then
-         AC_MSG_NOTICE([c-ares may not work properly with ipv6])
-       fi
-
-       AC_DEFINE(USE_ARES, 1, [Define if you want to enable c-ares support])
-       dnl substitute HAVE_ARES for curl-config and similar
-       HAVE_ARES="1"
-       AC_SUBST(HAVE_ARES)
-       curl_ares_msg="enabled"
-
-       LIBS="-lcares $LIBS"
-
-       dnl For backwards compatibility default to includes/lib in srcdir/ares
-       dnl If a value is specified it is assumed that the libs are in $val/lib
-       dnl and the includes are in $val/include. This is the default setup for
-       dnl ares so it should not be a problem.
-       if test "x$enableval" = "xyes" ; then
-         if test -d "$srcdir/ares"; then
-            aresembedded="yes"
-            AC_CONFIG_SUBDIRS(ares)
-            dnl Since c-ares has installable configured header files, path
-            dnl inclusion is fully done in makefiles for in-tree builds.
-            LDFLAGS="$LDFLAGS -L$embedded_ares_builddir"
-         fi
-       else
-         CPPFLAGS="$CPPFLAGS -I$enableval/include"
-         LDFLAGS="$LDFLAGS -L$enableval/lib"
-       fi
-
-       if test -z "$aresembedded"; then
-         dnl verify that a sufficient c-ares is here if we have pointed one
-         dnl out and don't use the "embedded" ares dir (in which case we don't
-         dnl check it because it might not have been built yet)
-         AC_MSG_CHECKING([that c-ares is good and recent enough])
-         AC_LINK_IFELSE([
-           AC_LANG_PROGRAM([[
-#include <ares.h>
-             /* set of dummy functions in case c-ares was built with debug */
-             void curl_dofree() { }
-             void curl_sclose() { }
-             void curl_domalloc() { }
-             void curl_docalloc() { }
-             void curl_socket() { }
-           ]],[[
-             ares_channel channel;
-             ares_cancel(channel); /* added in 1.2.0 */
-             ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
-           ]])
-         ],[
-           AC_MSG_RESULT([yes])
-         ],[
-           AC_MSG_RESULT([no])
-           AC_MSG_ERROR([c-ares library defective or too old])
-         ])
-       fi
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
-
-dnl set variable for use in automakefile(s)
-AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$aresembedded = xyes)
+CURL_CHECK_LIB_ARES
+AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
 dnl ************************************************************
 dnl disable verbose text strings
@@ -2540,7 +2468,7 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
-if test "x$HAVE_ARES" = "x1"; then
+if test "x$USE_ARES" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
@@ -2635,7 +2563,7 @@ squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
 
 if test "x$want_curldebug_assumed" = "xyes" &&
-  test "x$want_curldebug" = "xyes" && test "x$HAVE_ARES" = "x1"; then
+  test "x$want_curldebug" = "xyes" && test "x$USE_ARES" = "x1"; then
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 

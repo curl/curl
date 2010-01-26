@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,43 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 6
+# serial 7
+
+
+dnl CURL_CHECK_OPTION_ARES
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-ares or --disable-ares, and
+dnl set shell variable want_ares as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_ARES], [
+dnl   AC_BEFORE([$0],[CURL_CHECK_OPTION_THREADS])dnl
+  AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])dnl
+  AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
+  OPT_ARES="default"
+  AC_ARG_ENABLE(ares,
+AC_HELP_STRING([--enable-ares@<:@=PATH@:>@],[Enable c-ares for DNS lookups])
+AC_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
+  OPT_ARES=$enableval)
+  case "$OPT_ARES" in
+    no)
+      dnl --disable-ares option used
+      want_ares="no"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_ares="assume_yes"
+      AC_MSG_RESULT([(assumed) yes])
+      ;;
+    *)
+      dnl --enable-ares option used
+      want_ares="yes"
+      want_ares_path="$enableval"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
 
 
 dnl CURL_CHECK_OPTION_CURLDEBUG
@@ -53,7 +89,7 @@ AC_HELP_STRING([--disable-curldebug],[Disable curl debug memory tracking]),
       dnl possible, and for debug-disabled builds this will be handled
       dnl as a request to disable curldebug.
       if test "$want_debug" = "yes"; then
-        AC_MSG_RESULT([not specified (assuming yes)])
+        AC_MSG_RESULT([(assumed) yes])
       else
         AC_MSG_RESULT([no])
       fi
@@ -180,10 +216,10 @@ AC_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
       dnl will always take precedence over any initial assumption.
       if test "$want_debug" = "yes"; then
         want_optimize="assume_no"
-        AC_MSG_RESULT([not specified (assuming no)])
+        AC_MSG_RESULT([(assumed) no])
       else
         want_optimize="assume_yes"
-        AC_MSG_RESULT([not specified (assuming yes)])
+        AC_MSG_RESULT([(assumed) yes])
       fi
       ;;
     *)
@@ -196,6 +232,54 @@ AC_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
       ;;
   esac
 ])
+
+
+dnl CURL_CHECK_OPTION_THREADS
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-threads or --disable-threads, and
+dnl set shell variable want_threads as appropriate.
+
+dnl AC_DEFUN([CURL_CHECK_OPTION_THREADS], [
+dnl   AC_BEFORE([$0],[CURL_CHECK_LIB_THREADS])dnl
+dnl   AC_MSG_CHECKING([whether to enable threads for DNS lookups])
+dnl   OPT_THREADS="default"
+dnl   AC_ARG_ENABLE(threads,
+dnl AC_HELP_STRING([--enable-threads@<:@=PATH@:>@],[Enable threads for DNS lookups])
+dnl AC_HELP_STRING([--disable-threads],[Disable threads for DNS lookups]),
+dnl   OPT_THREADS=$enableval)
+dnl   case "$OPT_THREADS" in
+dnl     no)
+dnl       dnl --disable-threads option used
+dnl       want_threads="no"
+dnl       AC_MSG_RESULT([no])
+dnl       ;;
+dnl     default)
+dnl       dnl configure option not specified
+dnl       want_threads="no"
+dnl       AC_MSG_RESULT([(assumed) no])
+dnl       ;;
+dnl     *)
+dnl       dnl --enable-threads option used
+dnl       want_threads="yes"
+dnl       want_threads_path="$enableval"
+dnl       AC_MSG_RESULT([yes])
+dnl       ;;
+dnl   esac
+dnl   #
+dnl   if test "$want_ares" = "assume_yes"; then
+dnl     if test "$want_threads" = "yes"; then
+dnl       AC_MSG_CHECKING([whether to ignore c-ares enabling assumed setting])
+dnl       AC_MSG_RESULT([yes])
+dnl       want_ares="no"
+dnl     else
+dnl       want_ares="yes"
+dnl     fi
+dnl   fi
+dnl   if test "$want_threads" = "yes" && test "$want_ares" = "yes"; then
+dnl     AC_MSG_ERROR([options --enable-ares and --enable-threads are mutually exclusive, at most one may be enabled.])
+dnl   fi
+dnl ])
 
 
 dnl CURL_CHECK_OPTION_WARNINGS
@@ -267,6 +351,91 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
     AC_DEFINE_UNQUOTED(USE_BLOCKING_SOCKETS, 1,
       [Define to disable non-blocking sockets.])
     AC_MSG_WARN([non-blocking sockets disabled.])
+  fi
+])
+
+
+dnl CURL_CHECK_LIB_ARES
+dnl -------------------------------------------------
+dnl When c-ares library support has been requested,
+dnl performs necessary checks and adjustsments needed
+dnl to enable support of this library.
+
+AC_DEFUN([CURL_CHECK_LIB_ARES], [
+  #
+  if test "$want_ares" = "yes"; then
+    dnl c-ares library support has been requested
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_CFLAGS="$CFLAGS"
+    clean_LIBS="$LIBS"
+    embedded_ares="unknown"
+    configure_runpath=`pwd`
+    embedded_ares_builddir="$configure_runpath/ares"
+    if test -n "$want_ares_path" && test "$want_ares_path" != "yes"; then
+      dnl c-ares library path has been specified
+      ares_CPPFLAGS="-I$want_ares_path/include"
+      ares_LDFLAGS="-L$want_ares_path/lib"
+      ares_LIBS="-lcares"
+    else
+      dnl c-ares library path has not been given
+      if test -d "$srcdir/ares"; then
+        dnl c-ares sources embedded in curl tree
+        embedded_ares="yes"
+        AC_CONFIG_SUBDIRS(ares)
+        dnl c-ares has installable configured header files, path
+        dnl inclusion fully done in makefiles for in-tree builds.
+        ares_CPPFLAGS=""
+        ares_LDFLAGS="-L$embedded_ares_builddir"
+        ares_LIBS="-lcares"
+      else
+        dnl c-ares path not specified, use defaults
+        ares_CPPFLAGS=""
+        ares_LDFLAGS=""
+        ares_LIBS="-lcares"
+      fi
+    fi
+    #
+    CPPFLAGS="$ares_CPPFLAGS $clean_CPPFLAGS"
+    LDFLAGS="$ares_LDFLAGS $clean_LDFLAGS"
+    LIBS="$ares_LIBS $clean_LIBS"
+    #
+    if test "$embedded_ares" != "yes"; then
+      dnl check if c-ares new enough when not using an embedded
+      dnl source tree one which normally has not been built yet.
+      AC_MSG_CHECKING([that c-ares is good and recent enough])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+#include <ares.h>
+          /* set of dummy functions in case c-ares was built with debug */
+          void curl_dofree() { }
+          void curl_sclose() { }
+          void curl_domalloc() { }
+          void curl_docalloc() { }
+          void curl_socket() { }
+        ]],[[
+          ares_channel channel;
+          ares_cancel(channel); /* added in 1.2.0 */
+          ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+      ],[
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([c-ares library defective or too old])
+        dnl restore initial settings
+        CPPFLAGS="$clean_CPPFLAGS"
+        CFLAGS="$clean_CFLAGS"
+        LIBS="$clean_LIBS"
+        # prevent usage
+        want_ares="no"
+      ])
+    fi
+    if test "$want_ares" = "yes"; then
+      dnl finally c-ares will be used
+      AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
+      AC_SUBST([USE_ARES], [1])
+      curl_ares_msg="enabled"
+    fi
   fi
 ])
 
