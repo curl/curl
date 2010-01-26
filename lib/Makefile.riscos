@@ -14,7 +14,8 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
-	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp
+	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp \
+	o.curl_threads
 
 
 # Compile options:
@@ -43,6 +44,9 @@ o.curl_memrchr:	c.curl_memrchr
 
 o.curl_rand:	c.curl_rand
 		gcc $(compileropts) -c -o curl_rand.o c.curl_rand
+
+o.curl_threads:	c.curl_threads
+		gcc $(compileropts) -c -o curl_threads.o c.curl_threads
 
 o.dict:	c.dict
 		gcc $(compileropts) -c -o dict.o c.dict
