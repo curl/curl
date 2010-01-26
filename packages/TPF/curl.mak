@@ -38,6 +38,7 @@ C_SRC += curl_addrinfo.c
 C_SRC += curl_memrchr.c
 C_SRC += curl_rand.c
 C_SRC += curl_sspi.c
+C_SRC += curl_threads.c
 C_SRC += dict.c
 C_SRC += easy.c
 C_SRC += escape.c
