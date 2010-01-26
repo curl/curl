@@ -428,46 +428,43 @@
 /*         CURLRES_* defines to use in the host*.c sources          */
 /* ---------------------------------------------------------------- */
 
-#if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES) && \
-    !defined(__LCC__)  /* lcc-win32 doesn't have _beginthreadex() */
-#ifdef ENABLE_IPV6
-#define USE_THREADING_GETADDRINFO
-#else
-#define USE_THREADING_GETHOSTBYNAME  /* Cygwin uses alarm() function */
-#endif
+/*
+ * lcc-win32 doesn't have _beginthreadex(), lacks threads support.
+ */
+
+#if defined(__LCC__) && defined(WIN32)
+#  undef USE_THREADS_POSIX
+#  undef USE_THREADS_WIN32
 #endif
 
-/* "cl -ML" or "cl -MLd" implies a single-threaded runtime library where
-   _beginthreadex() is not available */
-#if (defined(_MSC_VER) && !defined(__POCC__)) && !defined(_MT) && !defined(USE_ARES)
-#undef USE_THREADING_GETADDRINFO
-#undef USE_THREADING_GETHOSTBYNAME
-#define CURL_NO__BEGINTHREADEX
+/*
+ * MSVC threads support requires a multi-threaded runtime library.
+ * _beginthreadex() is not available in single-threaded ones.
+ */
+
+#if defined(_MSC_VER) && !defined(__POCC__) && !defined(_MT)
+#  undef USE_THREADS_POSIX
+#  undef USE_THREADS_WIN32
 #endif
+
+/*
+ * Mutually exclusive CURLRES_* definitions.
+ */
 
 #ifdef USE_ARES
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
-#endif
-
-#ifdef USE_THREADING_GETHOSTBYNAME
+#elif defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 #  define CURLRES_ASYNCH
 #  define CURLRES_THREADED
-#endif
-
-#ifdef USE_THREADING_GETADDRINFO
-#  define CURLRES_ASYNCH
-#  define CURLRES_THREADED
+#else
+#  define CURLRES_SYNCH
 #endif
 
 #ifdef ENABLE_IPV6
 #  define CURLRES_IPV6
 #else
 #  define CURLRES_IPV4
-#endif
-
-#ifndef CURLRES_ASYNCH
-#  define CURLRES_SYNCH
 #endif
 
 /* ---------------------------------------------------------------- */
