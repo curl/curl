@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Jan 2010)
+- Mike Crowe made libcurl return CURLE_COULDNT_RESOLVE_PROXY when it is the
+  proxy that cannot be resolved when using c-ares. This matches the behaviour
+  when not using c-ares.
+
 Björn Stenberg (23 Jan 2010)
 - Added a new flag: -J/--remote-header-name. This option tells the
   -O/--remote-name option to use the server-specified Content-Disposition

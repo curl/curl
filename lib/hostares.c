@@ -285,13 +285,26 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      failf(data, "Resolving host timed out: %s", conn->host.dispname);
-      rc = CURLE_COULDNT_RESOLVE_HOST;
+      if (conn->bits.httpproxy) {
+        failf(data, "Resolving proxy timed out: %s", conn->proxy.dispname);
+        rc = CURLE_COULDNT_RESOLVE_PROXY;
+      }
+      else {
+        failf(data, "Resolving host timed out: %s", conn->host.dispname);
+        rc = CURLE_COULDNT_RESOLVE_HOST;
+      }
     }
     else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s (%s)", conn->host.dispname,
-            ares_strerror(conn->async.status));
-      rc = CURLE_COULDNT_RESOLVE_HOST;
+      if (conn->bits.httpproxy) {
+        failf(data, "Could not resolve proxy: %s (%s)", conn->proxy.dispname,
+              ares_strerror(conn->async.status));
+        rc = CURLE_COULDNT_RESOLVE_PROXY;
+      }
+      else {
+        failf(data, "Could not resolve host: %s (%s)", conn->host.dispname,
+              ares_strerror(conn->async.status));
+        rc = CURLE_COULDNT_RESOLVE_HOST;
+      }
     }
     else
       rc = CURLE_OPERATION_TIMEDOUT;
@@ -318,7 +331,7 @@ static void ares_query_completed_cb(void *arg,  /* (struct connectdata *) */
 {
   struct connectdata *conn = (struct connectdata *)arg;
   struct Curl_addrinfo * ai = NULL;
-    
+
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
   (void)timeouts; /* ignored */
 #endif
@@ -326,7 +339,7 @@ static void ares_query_completed_cb(void *arg,  /* (struct connectdata *) */
   if (status == CURL_ASYNC_SUCCESS) {
     ai = Curl_he2ai(hostent, conn->async.port);
   }
- 
+
   (void)Curl_addrinfo_callback(arg, status, ai);
 }
 
