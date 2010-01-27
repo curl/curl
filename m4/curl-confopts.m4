@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 8
+# serial 9
 
 
 dnl CURL_CHECK_OPTION_ARES
@@ -363,7 +363,7 @@ dnl to enable support of this library.
 
 AC_DEFUN([CURL_CHECK_LIB_ARES], [
   #
-  if test "$want_ares" = "yes"; then
+  if test "$want_ares" = "yes" || test "$want_ares" = "assume_yes"; then
     dnl c-ares library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
@@ -430,7 +430,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         want_ares="no"
       ])
     fi
-    if test "$want_ares" = "yes"; then
+    if test "$want_ares" != "no"; then
       dnl finally c-ares will be used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       AC_SUBST([USE_ARES], [1])
