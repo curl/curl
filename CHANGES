@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Yang Tse (26 Jan 2010)
+- Constantine Sapuntzakis' and Joshua Kwan's work done in the last four months
+  relative to the asynchronous DNS lookups, along with with some integration
+  adjustments I have done are finally committed to CVS.
+
+  Currently these enhancements will benefit builds done using c-ares on any
+  platform as well as Windows builds using the default threaded resolver.
+
+  This release does not make generally available POSIX threaded DNS lookups
+  yet. There is no configure option to enable this feature yet. It is possible
+  to experimantally try this feature running configure with compiler flags that
+  make simultaneous definition of preprocessor symbols USE_THREADS_POSIX and
+  HAVE_PTHREAD_H, as well as whatever reentrancy compiler flags and linker ones
+  are required to link and properly use pthread_* functions on each platform.
+
 Daniel Stenberg (26 Jan 2010)
 - Mike Crowe made libcurl return CURLE_COULDNT_RESOLVE_PROXY when it is the
   proxy that cannot be resolved when using c-ares. This matches the behaviour

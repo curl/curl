@@ -20,6 +20,7 @@ This release includes the following changes:
  o added support for the PRET ftp command
  o curl supports --ssl and --ssl-reqd
  o added -J/--remote-header-name for using server-provided filename with -O
+ o enhanced asynchronous DNS lookups
 
 This release includes the following bugfixes:
 
@@ -63,6 +64,6 @@ advice from friends like these:
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
  Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
  Johan van Selst, Charles Kerr, Gil Weber, David McCreedy, Chris Conroy,
- Bjorn Stenberg, Mike Crowe
+ Bjorn Stenberg, Mike Crowe, Joshua Kwan, Daniel Fandrich
 
         Thanks! (and sorry if I forgot to mention someone)
