@@ -44,20 +44,20 @@ AC_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
     no)
       dnl --disable-ares option used
       want_ares="no"
-      AC_MSG_RESULT([no])
       ;;
     default)
       dnl configure option not specified
-      want_ares="assume_yes"
-      AC_MSG_RESULT([(assumed) yes])
+      want_ares="no"
       ;;
     *)
       dnl --enable-ares option used
       want_ares="yes"
-      want_ares_path="$enableval"
-      AC_MSG_RESULT([yes])
+      if test -n "$enableval" && test "$enableval" != "yes"; then
+        want_ares_path="$enableval"
+      fi
       ;;
   esac
+  AC_MSG_RESULT([$want_ares])
 ])
 
 
@@ -363,7 +363,7 @@ dnl to enable support of this library.
 
 AC_DEFUN([CURL_CHECK_LIB_ARES], [
   #
-  if test "$want_ares" = "yes" || test "$want_ares" = "assume_yes"; then
+  if test "$want_ares" = "yes"; then
     dnl c-ares library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
@@ -371,7 +371,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     embedded_ares="unknown"
     configure_runpath=`pwd`
     embedded_ares_builddir="$configure_runpath/ares"
-    if test -n "$want_ares_path" && test "$want_ares_path" != "yes"; then
+    if test -n "$want_ares_path"; then
       dnl c-ares library path has been specified
       ares_CPPFLAGS="-I$want_ares_path/include"
       ares_LDFLAGS="-L$want_ares_path/lib"
@@ -430,7 +430,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         want_ares="no"
       ])
     fi
-    if test "$want_ares" != "no"; then
+    if test "$want_ares" = "yes"; then
       dnl finally c-ares will be used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       AC_SUBST([USE_ARES], [1])
