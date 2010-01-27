@@ -2339,7 +2339,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
        * Would this be better if the RTSPREQ_* were just moved into here?
        */
       long curl_rtspreq = va_arg(param, long);
-      long rtspreq = RTSPREQ_NONE;
+      Curl_RtspReq rtspreq = RTSPREQ_NONE;
       switch(curl_rtspreq) {
         case CURL_RTSPREQ_OPTIONS:
           rtspreq = RTSPREQ_OPTIONS;
@@ -3557,8 +3557,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if(1 > (rc = sscanf(data->change.url, "%[^\n/]%[^\n]",
-                          conn->host.name, path)) ) {
+      rc = sscanf(data->change.url, "%[^\n/]%[^\n]", conn->host.name, path);
+      if(1 > rc) {
         /*
          * We couldn't even get this format.
          * djgpp 2.04 has a sscanf() bug where 'conn->host.name' is

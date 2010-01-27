@@ -4073,7 +4073,8 @@ static void dumpeasycode(struct Configurable *config)
 
 static bool stdin_upload(const char *uploadfile)
 {
-  return curlx_strequal(uploadfile, "-") || curlx_strequal(uploadfile, ".");
+  return (bool)(curlx_strequal(uploadfile, "-") ||
+                curlx_strequal(uploadfile, "."));
 }
 
 static char*
