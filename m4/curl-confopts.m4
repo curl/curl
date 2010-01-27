@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 7
+# serial 8
 
 
 dnl CURL_CHECK_OPTION_ARES
@@ -366,7 +366,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
   if test "$want_ares" = "yes"; then
     dnl c-ares library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
-    clean_CFLAGS="$CFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
     clean_LIBS="$LIBS"
     embedded_ares="unknown"
     configure_runpath=`pwd`
@@ -424,7 +424,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         AC_MSG_ERROR([c-ares library defective or too old])
         dnl restore initial settings
         CPPFLAGS="$clean_CPPFLAGS"
-        CFLAGS="$clean_CFLAGS"
+        LDFLAGS="$clean_LDFLAGS"
         LIBS="$clean_LIBS"
         # prevent usage
         want_ares="no"
