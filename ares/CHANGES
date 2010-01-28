@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* January 28, 2010 (Daniel Stenberg)
+- Tommie Gannert pointed out a silly bug in ares_process_fd() since it didn't
+  check for broken connections like ares_process() did. Based on that, I
+  merged the two functions into a single generic one with two front-ends.
+
 * December 29, 2009 (Yang Tse)
 - Laszlo Tamas Szabo adjusted Makefile.msvc compiler options so that where
   run-time error checks enabling compiler option /GZ was used it is replaced

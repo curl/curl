@@ -8,9 +8,10 @@ Fixed:
 
  o closing of sockets on Windows systems
  o MSVC deprecated compiler options warnings
+ o ares_process_fd() didn't check broken connections
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Ingmar Runge, Laszlo Tamas Szabo
+ Ingmar Runge, Laszlo Tamas Szabo, Yang Tse, Tommie Gannert
 
 Have fun!

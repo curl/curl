@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2004-2009 by Daniel Stenberg
+ * Copyright (C) 2004-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -139,18 +139,28 @@ long ares__timeoffset(struct timeval *now,
 }
 
 
+/*
+ * generic process function
+ */
+static void processfds(ares_channel channel,
+                       fd_set *read_fds, ares_socket_t read_fd,
+                       fd_set *write_fds, ares_socket_t write_fd)
+{
+  struct timeval now = ares__tvnow();
+
+  write_tcp_data(channel, write_fds, write_fd, &now);
+  read_tcp_data(channel, read_fds, read_fd, &now);
+  read_udp_packets(channel, read_fds, read_fd, &now);
+  process_timeouts(channel, &now);
+  process_broken_connections(channel, &now);
+}
+
 /* Something interesting happened on the wire, or there was a timeout.
  * See what's up and respond accordingly.
  */
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
 {
-  struct timeval now = ares__tvnow();
-
-  write_tcp_data(channel, write_fds, ARES_SOCKET_BAD, &now);
-  read_tcp_data(channel, read_fds, ARES_SOCKET_BAD, &now);
-  read_udp_packets(channel, read_fds, ARES_SOCKET_BAD, &now);
-  process_timeouts(channel, &now);
-  process_broken_connections(channel, &now);
+  processfds(channel, read_fds, ARES_SOCKET_BAD, write_fds, ARES_SOCKET_BAD);
 }
 
 /* Something interesting happened on the wire, or there was a timeout.
@@ -161,12 +171,7 @@ void ares_process_fd(ares_channel channel,
                                                file descriptors */
                      ares_socket_t write_fd)
 {
-  struct timeval now = ares__tvnow();
-
-  write_tcp_data(channel, NULL, write_fd, &now);
-  read_tcp_data(channel, NULL, read_fd, &now);
-  read_udp_packets(channel, NULL, read_fd, &now);
-  process_timeouts(channel, &now);
+  processfds(channel, NULL, read_fd, NULL, write_fd);
 }
 
 
@@ -174,7 +179,8 @@ void ares_process_fd(ares_channel channel,
  * otherwise. This is mostly for HP-UX, which could return EAGAIN or
  * EWOULDBLOCK. See this man page
  *
- *      http://devrsrc1.external.hp.com/STKS/cgi-bin/man2html?manpage=/usr/share/man/man2.Z/send.2
+ * http://devrsrc1.external.hp.com/STKS/cgi-bin/man2html?
+ *     manpage=/usr/share/man/man2.Z/send.2
  */
 static int try_again(int errnum)
 {
@@ -802,8 +808,9 @@ void ares__send_query(ares_channel channel, struct query *query,
 }
 
 /*
- * setsocknonblock sets the given socket to either blocking or non-blocking mode
- * based on the 'nonblock' boolean argument. This function is highly portable.
+ * setsocknonblock sets the given socket to either blocking or non-blocking
+ * mode based on the 'nonblock' boolean argument. This function is highly
+ * portable.
  */
 static int setsocknonblock(ares_socket_t sockfd,    /* operate on this */
                     int nonblock   /* TRUE or FALSE */)
@@ -902,10 +909,10 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 
 #ifdef TCP_NODELAY
   /*
-   * Disable the Nagle algorithm (only relevant for TCP sockets, and thus not in
-   * configure_socket). In general, in DNS lookups we're pretty much interested
-   * in firing off a single request and then waiting for a reply, so batching
-   * isn't very interesting in general.
+   * Disable the Nagle algorithm (only relevant for TCP sockets, and thus not
+   * in configure_socket). In general, in DNS lookups we're pretty much
+   * interested in firing off a single request and then waiting for a reply,
+   * so batching isn't very interesting in general.
    */
   opt = 1;
   if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY,
