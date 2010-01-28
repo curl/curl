@@ -40,11 +40,6 @@ may have been fixed since this was written!
   properly wait for the connect to be confirmed. See test case 564 for a first
   shot at a test case.
 
-64. The threaded resolver used in libcurl on Windows has some kind of race
-  problem when multiple simultanoes resolves are done, like with the multi
-  interface transferring many files in parallell:
-  http://curl.haxx.se/mail/lib-2009-04/0028.html
-
 63. When CURLOPT_CONNECT_ONLY is used, the handle cannot reliably be re-used
   for any further requests or transfers. The work-around is then to close that
   handle with curl_easy_cleanup() and create a new. Some more details:
