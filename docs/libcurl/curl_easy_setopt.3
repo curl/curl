@@ -411,7 +411,7 @@ interleaved header as well as the included data for each call. The first byte
 is always an ASCII dollar sign. The dollar sign is followed by a one byte
 channel identifier and then a 2 byte integer length in network byte order. See
 \fIRFC 2326 Section 10.12\fP for more information on how RTP interleaving
-behaves.
+behaves. If unset or set to NULL, curl will use the default write function.
 
 Interleaved RTP poses some challeneges for the client application. Since the
 stream data is sharing the RTSP control connection, it is critical to service
@@ -424,11 +424,7 @@ process any pending RTP data before marking the request as finished.  (Added
 in 7.20.0)
 .IP CURLOPT_INTERLEAVEDATA
 This is the stream that will be passed to \fICURLOPT_INTERLEAVEFUNCTION\fP when
-interleaved RTP data is received. Since the application is required to provide
-a custom function for RTP data, there is no requirement that the stream
-pointer be a valid FILE pointer. An application may wish to pass a cookie
-containing information about many streams to assist in demultiplexing the
-different RTP channels. (Added in 7.20.0)
+interleaved RTP data is received. (Added in 7.20.0)
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error

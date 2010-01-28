@@ -27,11 +27,17 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
+/*
+ * Parse and write out any available RTP data.
+ *
+ * nread: amount of data left after k->str. will be modified if RTP
+ *        data is parsed and k->str is moved up
+ * readmore: whether or not the RTP parser needs more data right away
+ */
 CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
                                  struct connectdata *conn,
                                  ssize_t *nread,
-                                 bool *readmore,
-                                 bool *done);
+                                 bool *readmore);
 
 
 /* protocol-specific functions set up to be called by the main engine */

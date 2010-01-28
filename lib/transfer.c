@@ -368,7 +368,11 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 {
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
+  size_t excess = 0; /* excess bytes read */
   bool is_empty_data = FALSE;
+#ifndef CURL_DISABLE_RTSP
+  bool readmore = FALSE; /* used by RTP to signal for more data */
+#endif
 
   *done = FALSE;
 
@@ -437,15 +441,13 @@ static CURLcode readwrite_data(struct SessionHandle *data,
     k->str = k->buf;
 
 #ifndef CURL_DISABLE_RTSP
+    /* Check for RTP at the beginning of the data */
     if(conn->protocol & PROT_RTSP) {
-      bool readmore = FALSE;
-      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore, done);
+      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
       if(result)
         return result;
       if(readmore)
         break;
-      if(*done)
-        return CURLE_OK;
     }
 #endif
 
@@ -458,6 +460,18 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       result = Curl_http_readwrite_headers(data, conn, &nread, &stop_reading);
       if(result)
         return result;
+
+#ifndef CURL_DISABLE_RTSP
+      /* Check for RTP after the headers if there is no Content */
+      if(k->maxdownload <= 0 && nread > 0 && (conn->protocol & PROT_RTSP)) {
+        result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
+        if(result)
+          return result;
+        if(readmore)
+          break;
+      }
+#endif
+
       if(stop_reading)
         /* We've stopped dealing with input, get out of the do-while loop */
         break;
@@ -594,13 +608,19 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       }
 #endif   /* CURL_DISABLE_HTTP */
 
+      /* Account for body content stored in the header buffer */
+      if(k->badheader && !k->ignorebody) {
+        DEBUGF(infof(data, "Increasing bytecount by %" FORMAT_OFF_T" from hbuflen\n", k->hbuflen));
+        k->bytecount += k->hbuflen;
+      }
+
       if((-1 != k->maxdownload) &&
          (k->bytecount + nread >= k->maxdownload)) {
 
+        excess = (size_t)(k->bytecount + nread - k->maxdownload);
         if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
           /* The 'excess' amount below can't be more than BUFSIZE which
              always will fit in a size_t */
-          size_t excess = (size_t)(k->bytecount + nread - k->maxdownload);
           if(excess > 0 && !k->ignorebody) {
             infof(data,
                   "Rewinding stream by : %d"
@@ -611,6 +631,15 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
           }
+        }
+        else {
+          infof(data,
+                "Excess found in a non pipelined read:"
+                " excess=%zu"
+                ", size=%" FORMAT_OFF_T
+                ", maxdownload=%" FORMAT_OFF_T
+                ", bytecount=%" FORMAT_OFF_T "\n",
+                excess, k->size, k->maxdownload, k->bytecount);
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
@@ -630,9 +659,17 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         if(k->badheader && !k->ignorebody) {
           /* we parsed a piece of data wrongly assuming it was a header
              and now we output it as body instead */
-          result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                     data->state.headerbuff,
-                                     k->hbuflen);
+
+          /* Don't let excess data pollute body writes */
+          if(k->maxdownload == -1 || (curl_off_t)k->hbuflen <= k->maxdownload)
+            result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                data->state.headerbuff,
+                k->hbuflen);
+          else
+            result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                data->state.headerbuff,
+                k->maxdownload);
+
           if(result)
             return result;
         }
@@ -693,6 +730,25 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       }
 
     } /* if(! header and data to read ) */
+
+#ifndef CURL_DISABLE_RTSP
+    if(excess > 0 && !conn->bits.stream_was_rewound &&
+        (conn->protocol & PROT_RTSP)) {
+      /* Check for RTP after the content if there is unrewound excess */
+
+      /* Parse the excess data */
+      k->str += nread;
+      nread = excess;
+
+      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
+      if(result)
+        return result;
+
+      if(readmore)
+        k->keepon |= KEEP_RECV; /* we're not done reading */
+        break;
+    }
+#endif
 
     if(is_empty_data) {
       /* if we received nothing, the server closed the connection and we

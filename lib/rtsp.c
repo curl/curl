@@ -127,6 +127,10 @@ CURLcode Curl_rtsp_done(struct connectdata *conn,
   long CSeq_sent;
   long CSeq_recv;
 
+  /* Bypass HTTP empty-reply checks on receive */
+  if(data->set.rtspreq == RTSPREQ_RECEIVE)
+    premature = TRUE;
+
   httpStatus = Curl_http_done(conn, status, premature);
 
   /* Check the sequence numbers */
@@ -139,7 +143,7 @@ CURLcode Curl_rtsp_done(struct connectdata *conn,
   }
   else if (data->set.rtspreq == RTSPREQ_RECEIVE &&
            (conn->proto.rtspc.rtp_channel == -1)) {
-    infof(data, "Got a non RTP Receive with a CSeq of %ld\n", CSeq_recv);
+    infof(data, "Got an RTP Receive with a CSeq of %ld\n", CSeq_recv);
     /* TODO CPC: Server -> Client logic here */
   }
 
@@ -376,7 +380,7 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   result =
     Curl_add_bufferf(req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
-                     "CSeq: %d \r\n", /* CSeq */
+                     "CSeq: %d\r\n", /* CSeq */
                      (p_request ? p_request : ""), p_stream_uri,
                      rtsp->CSeq_sent);
   if(result)
@@ -387,7 +391,7 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
    * to make comparison easier
    */
   if(p_session_id) {
-    result = Curl_add_bufferf(req_buffer, "Session: %s \r\n", p_session_id);
+    result = Curl_add_bufferf(req_buffer, "Session: %s\r\n", p_session_id);
     if(result)
       return result;
   }
@@ -512,8 +516,7 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
 CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
                                  struct connectdata *conn,
                                  ssize_t *nread,
-                                 bool *readmore,
-                                 bool *done) {
+                                 bool *readmore) {
   struct SingleRequest *k = &data->req;
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
 
@@ -538,10 +541,6 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
     rtp_dataleft = *nread;
   }
 
-  if(rtp_dataleft == 0 || rtp[0] != '$') {
-    return  CURLE_OK;
-  }
-
   while((rtp_dataleft > 0) &&
         (rtp[0] == '$')) {
     if(rtp_dataleft > 4) {
@@ -564,21 +563,17 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
       else {
         /* We have the full RTP interleaved packet
          * Write out the header but strip the leading '$' */
-        infof(data, "CPCDEBUG: RTP write channel %d rtp_length %d\n",
-              rtspc->rtp_channel, rtp_length);
+        DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
+              rtspc->rtp_channel, rtp_length));
         result = rtp_client_write(conn, &rtp[1], rtp_length + 3);
         if(result) {
-            failf(data, "Got an error writing an RTP packet");
-            *done = TRUE;
-            *readmore = FALSE;
-            return result;
+          failf(data, "Got an error writing an RTP packet");
+          *readmore = FALSE;
+          Curl_safefree(rtspc->rtp_buf);
+          rtspc->rtp_buf = NULL;
+          rtspc->rtp_bufsize = 0;
+          return result;
         }
-
-        /* Update progress */
-        k->bytecount += rtp_length + 4;
-        Curl_pgrsSetDownloadCounter(data, k->bytecount);
-        if(k->bytecountp)
-          *k->bytecountp = k->bytecount;
 
         /* Move forward in the buffer */
         rtp_dataleft -= rtp_length + 4;
@@ -587,11 +582,8 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
         if(data->set.rtspreq == RTSPREQ_RECEIVE) {
           /* If we are in a passive receive, give control back
            * to the app as often as we can.
-           *
-           * Otherwise, keep chugging along until we get RTSP data
            */
           k->keepon &= ~KEEP_RECV;
-          *done = TRUE;
         }
       }
     }
@@ -602,50 +594,42 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
     }
   }
 
-  if(*done || *readmore) {
-    if(rtp_dataleft != 0 && rtp[0] == '$') {
-      infof(data, "RTP Rewinding %zu %s %s\n", rtp_dataleft,
-            *done ? "DONE " : "",
-            *readmore ? "READMORE" : "");
+  if(rtp_dataleft != 0 && rtp[0] == '$') {
+    DEBUGF(infof(data, "RTP Rewinding %zu %s\n", rtp_dataleft,
+          *readmore ? "(READMORE)" : ""));
 
-      /* Store the incomplete RTP packet for a "rewind" */
-      scratch = malloc(rtp_dataleft);
-      if(!scratch)
-        return CURLE_OUT_OF_MEMORY;
-      memcpy(scratch, rtp, rtp_dataleft);
-      Curl_safefree(rtspc->rtp_buf);
-      rtspc->rtp_buf = scratch;
-      rtspc->rtp_bufsize = rtp_dataleft;
-      return CURLE_OK;
-    }
+    /* Store the incomplete RTP packet for a "rewind" */
+    scratch = malloc(rtp_dataleft);
+    if(!scratch)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(scratch, rtp, rtp_dataleft);
+    Curl_safefree(rtspc->rtp_buf);
+    rtspc->rtp_buf = scratch;
+    rtspc->rtp_bufsize = rtp_dataleft;
+
+    /* As far as the transfer is concerned, this data is consumed */
+    *nread = 0;
+    return CURLE_OK;
   }
   else {
-    /* RTP followed by RTSP */
-    if(rtp_dataleft == 0) {
-      /* Need more */
-      *readmore = TRUE;
-    }
-    else {
-      /* Fix up k->str to point just after the last RTP packet */
-      k->str += *nread - rtp_dataleft;
+    /* Fix up k->str to point just after the last RTP packet */
+    k->str += *nread - rtp_dataleft;
 
-      /* rtp may point into the leftover buffer, but at this point
-       * it is somewhere in the merged data from k->str. */
+    /* either all of the data has been read or...
+     * rtp now points at the next byte to parse
+     */
+    if(rtp_dataleft > 0)
       DEBUGASSERT(k->str[0] == rtp[0]);
 
-      DEBUGASSERT(rtp_dataleft < *nread); /* sanity check */
+    DEBUGASSERT(rtp_dataleft <= *nread); /* sanity check */
 
-      *nread = rtp_dataleft;
-    }
+    *nread = rtp_dataleft;
   }
 
   /* If we get here, we have finished with the leftover/merge buffer */
   Curl_safefree(rtspc->rtp_buf);
   rtspc->rtp_buf = NULL;
   rtspc->rtp_bufsize = 0;
-
-  /* TODO CPC: Could implement parsing logic for Server->Client requests
-     here */
 
   return CURLE_OK;
 }
@@ -701,7 +685,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
       failf(data, "Unable to read the CSeq header: [%s]", header);
       return CURLE_RTSP_CSEQ_ERROR;
     }
-    }
+  }
   else if(checkprefix("Session:", header)) {
     char *start;
 
