@@ -1,0 +1,54 @@
+/*****************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * $Id$
+ */
+
+#include "test.h"
+#include "memdebug.h"
+
+/*
+ * Test a simple OPTIONS request with a custom header
+ */
+int test(char *URL)
+{
+  CURLcode res;
+  CURL *curl;
+  struct curl_slist *custom_headers=NULL;
+
+  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  /* Dump data to stdout for protocol verification */
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
+  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "test567");
+
+  custom_headers = curl_slist_append(custom_headers, "Test-Number: 567");
+  curl_easy_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
+
+  res = curl_easy_perform(curl);
+
+  curl_slist_free_all(custom_headers);
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return (int)res;
+}
+

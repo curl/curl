@@ -10,7 +10,8 @@ noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
   lib517 lib518 lib519 lib520 lib521 lib523 lib524 lib525 lib526 lib527	\
   lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542 lib543 \
   lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 \
-  lib539 lib557 lib558 lib559 lib560 lib562 lib564 lib565 lib566
+  lib539 lib557 lib558 lib559 lib560 lib562 lib564 lib565 lib566 lib567 \
+  lib568 lib569 lib570 lib571
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES)
 
@@ -131,3 +132,14 @@ lib565_SOURCES = lib510.c $(SUPPORTFILES)
 lib565_CFLAGS = -DLIB565
 
 lib566_SOURCES = lib566.c $(SUPPORTFILES)
+
+lib567_SOURCES = lib567.c $(SUPPORTFILES)
+
+lib568_SOURCES = lib568.c $(SUPPORTFILES)
+
+lib569_SOURCES = lib569.c $(SUPPORTFILES)
+
+lib570_SOURCES = lib570.c $(SUPPORTFILES)
+
+lib571_SOURCES = lib571.c $(SUPPORTFILES)
+
