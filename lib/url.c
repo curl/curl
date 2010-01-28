@@ -2830,7 +2830,7 @@ ConnectionExists(struct SessionHandle *data,
 
       if(dead) {
         check->data = data;
-        infof(data, "Connection #%d seems to be dead!\n", i);
+        infof(data, "Connection #%ld seems to be dead!\n", i);
 
         Curl_disconnect(check); /* disconnect resources */
         data->state.connc->connects[i]=NULL; /* nothing here */
@@ -3056,7 +3056,7 @@ ConnectionStore(struct SessionHandle *data,
     /* there was no room available, kill one */
     i = ConnectionKillOne(data);
     if(-1 != i)
-      infof(data, "Connection (#%d) was killed to make room (holds %d)\n",
+      infof(data, "Connection (#%ld) was killed to make room (holds %ld)\n",
             i, data->state.connc->num);
     else
       infof(data, "This connection did not fit in the connection cache\n");
@@ -3137,7 +3137,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
-  infof(data, "About to connect() to %s%s port %d (#%d)\n",
+  infof(data, "About to connect() to %s%s port %ld (#%ld)\n",
         conn->bits.proxy?"proxy ":"",
         hostname, conn->port, conn->connectindex);
 #else
@@ -3172,7 +3172,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void verboseconnect(struct connectdata *conn)
 {
-  infof(conn->data, "Connected to %s (%s) port %d (#%d)\n",
+  infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
         conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
         conn->ip_addr_str, conn->port, conn->connectindex);
 }

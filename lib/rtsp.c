@@ -380,7 +380,7 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   result =
     Curl_add_bufferf(req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
-                     "CSeq: %d\r\n", /* CSeq */
+                     "CSeq: %ld\r\n", /* CSeq */
                      (p_request ? p_request : ""), p_stream_uri,
                      rtsp->CSeq_sent);
   if(result)

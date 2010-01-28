@@ -273,8 +273,8 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     state->retry_time=1;
 
   infof(state->conn->data,
-        "set timeouts for state %d; Total %d, retry %d maxtry %d\n",
-        state->state, (state->max_time-state->start_time),
+        "set timeouts for state %d; Total %ld, retry %d maxtry %d\n",
+        state->state, (long)(state->max_time-state->start_time),
         state->retry_time, state->retry_max);
 
   /* init RX time */
@@ -385,7 +385,7 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
         /* could realloc pkt buffers here, but the spec doesn't call out
          * support for the server requesting a bigger blksize than the client
          * requests */
-        failf(data, "%s (%d)",
+        failf(data, "%s (%ld)",
                 "server requested blksize larger than allocated", blksize);
         return CURLE_TFTP_ILLEGAL;
       }
@@ -403,7 +403,7 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
         return CURLE_TFTP_ILLEGAL;
       }
       Curl_pgrsSetDownloadSize(data, tsize);
-      infof(data, "%s (%d)\n", "tsize parsed from OACK", tsize);
+      infof(data, "%s (%ld)\n", "tsize parsed from OACK", tsize);
     }
   }
 
@@ -643,7 +643,8 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     /* Increment the retry count and fail if over the limit */
     state->retries++;
     infof(data,
-          "Timeout waiting for block %d ACK.  Retries = %d\n", state->retries);
+          "Timeout waiting for block %d ACK.  Retries = %d\n",
+          state->block+1, state->retries);
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
@@ -761,7 +762,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     /* Increment the retry counter and log the timeout */
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
-          " Retries = %d\n", state->retries);
+          " Retries = %d\n", state->block+1, state->retries);
     /* Decide if we've had enough */
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -1149,8 +1150,8 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
 
   time(&current);
   if(current > state->max_time) {
-    DEBUGF(infof(conn->data, "timeout: %d > %d\n",
-                 current, state->max_time));
+    DEBUGF(infof(conn->data, "timeout: %ld > %ld\n",
+                 (long)current, (long)state->max_time));
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
     return(0);

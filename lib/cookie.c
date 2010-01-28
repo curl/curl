@@ -681,7 +681,8 @@ Curl_cookie_add(struct SessionHandle *data,
 
   if(c->running)
     /* Only show this when NOT reading the cookies from a file */
-    infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, expire %d\n",
+    infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
+          "expire %" FORMAT_OFF_T "\n",
           replace_old?"Replaced":"Added", co->name, co->value,
           co->domain, co->path, co->expires);
 

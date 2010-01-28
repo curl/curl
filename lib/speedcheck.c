@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,7 +54,7 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
       /* we have been this slow for long enough, now die */
       failf(data,
             "Operation too slow. "
-            "Less than %d bytes/sec transfered the last %d seconds",
+            "Less than %ld bytes/sec transfered the last %ld seconds",
             data->set.low_speed_limit,
             data->set.low_speed_time);
       return CURLE_OPERATION_TIMEDOUT;

@@ -581,7 +581,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     data->state.os_errno = error;
     infof(data, "Connection failed\n");
     if(trynextip(conn, sockindex, connected)) {
-      failf(data, "Failed connect to %s:%d; %s",
+      failf(data, "Failed connect to %s:%ld; %s",
             conn->host.name, conn->port, Curl_strerror(conn, error));
       code = CURLE_COULDNT_CONNECT;
     }
@@ -601,7 +601,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     if(trynextip(conn, sockindex, connected)) {
       error = SOCKERRNO;
       data->state.os_errno = error;
-      failf(data, "Failed connect to %s:%d; %s",
+      failf(data, "Failed connect to %s:%ld; %s",
             conn->host.name, conn->port, Curl_strerror(conn, error));
       code = CURLE_COULDNT_CONNECT;
     }

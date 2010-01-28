@@ -923,7 +923,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* Handle the case when the pipe breaks, i.e., the connection
        we're using gets cleaned up and we're left with nothing. */
     if(easy->easy_handle->state.pipe_broke) {
-      infof(easy->easy_handle, "Pipe broke: handle 0x%x, url = %s\n",
+      infof(easy->easy_handle, "Pipe broke: handle 0x%p, url = %s\n",
             easy, easy->easy_handle->state.path);
 
       if(easy->state != CURLM_STATE_COMPLETED) {
@@ -1131,7 +1131,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
 #ifdef DEBUGBUILD
-      infof(easy->easy_handle, "Conn %d send pipe %d inuse %d athead %d\n",
+      infof(easy->easy_handle, "Conn %ld send pipe %d inuse %d athead %d\n",
             easy->easy_conn->connectindex,
             easy->easy_conn->send_pipe->size,
             easy->easy_conn->writechannel_inuse,
@@ -1319,7 +1319,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 #ifdef DEBUGBUILD
       else {
-        infof(easy->easy_handle, "Conn %d recv pipe %d inuse %d athead %d\n",
+        infof(easy->easy_handle, "Conn %ld recv pipe %d inuse %d athead %d\n",
               easy->easy_conn->connectindex,
               easy->easy_conn->recv_pipe->size,
               easy->easy_conn->readchannel_inuse,
