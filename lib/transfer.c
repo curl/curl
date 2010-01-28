@@ -349,7 +349,7 @@ static void read_rewind(struct connectdata *conn,
     }
 
     DEBUGF(infof(conn->data,
-                 "Buffer after stream rewind (read_pos = %d): [%s]",
+                 "Buffer after stream rewind (read_pos = %zu): [%s]",
                  conn->read_pos, buf));
   }
 #endif
@@ -600,7 +600,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
             infof(conn->data, "Leftovers after chunking. "
-                  " Rewinding %d bytes\n",dataleft);
+                  " Rewinding %zu bytes\n",dataleft);
             read_rewind(conn, dataleft);
           }
         }
@@ -610,7 +610,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
       /* Account for body content stored in the header buffer */
       if(k->badheader && !k->ignorebody) {
-        DEBUGF(infof(data, "Increasing bytecount by %" FORMAT_OFF_T" from hbuflen\n", k->hbuflen));
+        DEBUGF(infof(data, "Increasing bytecount by %zu from hbuflen\n",
+                     k->hbuflen));
         k->bytecount += k->hbuflen;
       }
 
@@ -623,10 +624,10 @@ static CURLcode readwrite_data(struct SessionHandle *data,
              always will fit in a size_t */
           if(excess > 0 && !k->ignorebody) {
             infof(data,
-                  "Rewinding stream by : %d"
+                  "Rewinding stream by : %zu"
                   " bytes on url %s (size = %" FORMAT_OFF_T
                   ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T ", nread = %d)\n",
+                  ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
                   excess, data->state.path,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
@@ -635,10 +636,10 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         else {
           infof(data,
                 "Excess found in a non pipelined read:"
-                " excess=%zu"
-                ", size=%" FORMAT_OFF_T
-                ", maxdownload=%" FORMAT_OFF_T
-                ", bytecount=%" FORMAT_OFF_T "\n",
+                " excess = %zu"
+                ", size = %" FORMAT_OFF_T
+                ", maxdownload = %" FORMAT_OFF_T
+                ", bytecount = %" FORMAT_OFF_T "\n",
                 excess, k->size, k->maxdownload, k->bytecount);
         }
 
@@ -668,7 +669,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           else
             result = Curl_client_write(conn, CLIENTWRITE_BODY,
                 data->state.headerbuff,
-                k->maxdownload);
+                (size_t)k->maxdownload);
 
           if(result)
             return result;
