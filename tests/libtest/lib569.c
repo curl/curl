@@ -33,7 +33,7 @@ int test(char *URL)
   int i;
   FILE *idfile;
 
-  idfile = fopen(libtest_arg2, "w");
+  idfile = fopen(libtest_arg2, "wb");
   if(idfile == NULL) {
     fprintf(stderr, "couldn't open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;

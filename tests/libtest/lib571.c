@@ -10,10 +10,12 @@
 
 #include "test.h"
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #include <curl/mprintf.h>
 
@@ -67,7 +69,7 @@ int test(char *URL)
   int request=1;
   FILE *protofile;
 
-  protofile = fopen(libtest_arg2, "w");
+  protofile = fopen(libtest_arg2, "wb");
   if(protofile == NULL) {
     fprintf(stderr, "Couldn't open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;

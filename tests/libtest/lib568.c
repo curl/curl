@@ -10,10 +10,12 @@
 
 #include "test.h"
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #include <curl/mprintf.h>
 
@@ -34,7 +36,7 @@ int test(char *URL)
   CURL *curl;
   int sdp;
   FILE *sdpf;
-  struct stat file_info;
+  struct_stat file_info;
   char *stream_uri;
   int request=1;
   struct curl_slist *custom_headers=NULL;
@@ -61,9 +63,10 @@ int test(char *URL)
 
   sdp = open("log/file568.txt", O_RDONLY);
   fstat(sdp, &file_info);
-  sdpf = fdopen(sdp, "rb");
+  close(sdp);
+
+  sdpf = fopen("log/file568.txt", "rb");
   if(sdpf == NULL) {
-    close(sdp);
     fprintf(stderr, "can't open log/file568.txt\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -77,13 +80,11 @@ int test(char *URL)
   res = curl_easy_perform(curl);
   if(res) {
     fclose(sdpf);
-    close(sdp);
     return res;
   }
 
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 0L);
   fclose(sdpf);
-  close(sdp);
 
   /* Make sure we can do a normal request now */
   stream_uri = suburl(URL, request++);
