@@ -2825,7 +2825,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               "A specified range MUST include at least one dash (-). "
               "Appending one for you!\n");
         off = curlx_strtoofft(nextarg, NULL, 10);
-        snprintf(buffer, sizeof(buffer), "%Od-", off);
+        snprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
         GetStr(&config->range, buffer);
       }
       {
@@ -2977,18 +2977,23 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* the data begins with a '@' letter, it means that a file name
            or - (stdin) follows */
         FILE *file;
+        const char *fname;
         nextarg++; /* pass the @ */
-        if(curlx_strequal("-", nextarg))
+        if(curlx_strequal("-", nextarg)) {
+          fname = "<stdin>";
           file = stdin;
-        else
+        }
+        else {
+          fname = nextarg;
           file = fopen(nextarg, "r");
+        }
         err = file2string(&config->writeout, file);
         if(file && (file != stdin))
           fclose(file);
         if(err)
           return err;
         if(!config->writeout)
-          warnf(config, "Failed to read %s", file);
+          warnf(config, "Failed to read %s", fname);
       }
       else
         GetStr(&config->writeout, nextarg);
@@ -3983,7 +3988,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
   }
   else {
     curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(value, sizeof(value), "(curl_off_t)%Od", oval);
+    snprintf(value, sizeof(value), "%" CURL_FORMAT_CURL_OFF_T, oval);
     ret = curl_easy_setopt(curl, tag, oval);
   }
 
@@ -5253,7 +5258,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                 /* We have written data to a output file, we truncate file
                  */
                 if(!config->mute)
-                  fprintf(config->errors, "Throwing away %Od bytes\n",
+                  fprintf(config->errors, "Throwing away %"
+                          CURL_FORMAT_CURL_OFF_T " bytes\n",
                           outs.bytes);
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
@@ -5345,7 +5351,7 @@ show_error:
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
-            fprintf(config->errors, "(%s) Failed writing body\n", res);
+            fprintf(config->errors, "(%d) Failed writing body\n", res);
           }
         }
 
