@@ -83,7 +83,7 @@ m=video 2232 RTP/AVP 31
 <protocol>
 ANNOUNCE rtsp://%HOSTIP:%RTSPPORT/5680001 RTSP/1.0
 CSeq: 1
-Content-Length: 317
+Content-Length: 306
 Content-Type: application/sdp
 
 v=0
