@@ -876,14 +876,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     /* Try binding the given address. */
     if(bind(portsock, sa, sslen) ) {
       /* It failed. */
-      if(errno == EADDRNOTAVAIL) {
+      error = SOCKERRNO;
+      if(error == EADDRNOTAVAIL) {
 
         /* The requested bind address is not local
          * use the address used forthe control connection instead
          * restart the port loop
          */
         failf(data, "bind(port=%i) failed: %s", port,
-              Curl_strerror(conn, SOCKERRNO) );
+              Curl_strerror(conn, error) );
 
         sslen = sizeof(ss);
         if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
@@ -895,9 +896,9 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         port = port_min;
         continue;
       }else
-      if(errno != EADDRINUSE && errno != EACCES) {
+      if(error != EADDRINUSE && error != EACCES) {
         failf(data, "bind(port=%i) failed: %s", port,
-              Curl_strerror(conn, SOCKERRNO) );
+              Curl_strerror(conn, error) );
         sclose(portsock);
         return CURLE_FTP_PORT_FAILED;
       }
