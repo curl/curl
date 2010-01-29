@@ -619,28 +619,28 @@ static CURLcode readwrite_data(struct SessionHandle *data,
          (k->bytecount + nread >= k->maxdownload)) {
 
         excess = (size_t)(k->bytecount + nread - k->maxdownload);
-        if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
-          /* The 'excess' amount below can't be more than BUFSIZE which
-             always will fit in a size_t */
-          if(excess > 0 && !k->ignorebody) {
+        if(excess > 0 && !k->ignorebody) {
+          if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+            /* The 'excess' amount below can't be more than BUFSIZE which
+               always will fit in a size_t */
             infof(data,
-                  "Rewinding stream by : %zu"
-                  " bytes on url %s (size = %" FORMAT_OFF_T
-                  ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
-                  excess, data->state.path,
-                  k->size, k->maxdownload, k->bytecount, nread);
+                "Rewinding stream by : %zu"
+                " bytes on url %s (size = %" FORMAT_OFF_T
+                ", maxdownload = %" FORMAT_OFF_T
+                ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
+                excess, data->state.path,
+                k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
           }
-        }
-        else {
-          infof(data,
+          else {
+            infof(data,
                 "Excess found in a non pipelined read:"
                 " excess = %zu"
                 ", size = %" FORMAT_OFF_T
                 ", maxdownload = %" FORMAT_OFF_T
                 ", bytecount = %" FORMAT_OFF_T "\n",
                 excess, k->size, k->maxdownload, k->bytecount);
+          }
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
