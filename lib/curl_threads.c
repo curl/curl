@@ -101,7 +101,11 @@ curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void*), void
 #ifdef _WIN32_WCE
   return CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
-  return (curl_thread_t)_beginthreadex(NULL, 0, func, arg, 0, NULL);
+  curl_thread_t t;
+  t = (curl_thread_t)_beginthreadex(NULL, 0, func, arg, 0, NULL);
+  if((t == 0) || (t == (curl_thread_t)-1L))
+    return curl_thread_t_null;
+  return t;
 #endif
 }
 
