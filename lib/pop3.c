@@ -935,6 +935,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
     pop3c->eob += check;
     if(pop3c->eob == POP3_EOB_LEN) {
       /* full match, the transfer is done! */
+      str[nread - check] = '\0';
       nread -= check;
       k->keepon &= ~KEEP_RECV;
       pop3c->eob = 0;
