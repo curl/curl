@@ -12,7 +12,7 @@ Mismatch checking
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 2
 Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
 Informational: CSeq Mismatch
@@ -20,14 +20,14 @@ Informational: CSeq Mismatch
 </data1>
 <data2>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Session: asdf
 CSeq: 999
 
 </data2>
 <data3>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Session: asdfWRONG
 Informational: Session ID mismatch
 Curl-Private: swsclose

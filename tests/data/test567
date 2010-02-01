@@ -12,7 +12,7 @@ OPTIONS
 <reply>
 <data>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 1
 Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
 Curl-Private: swsclose

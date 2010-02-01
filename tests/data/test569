@@ -12,14 +12,14 @@ SESSION_ID
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 1
 Session: 00.+1-am-aSe55ion_id\$yes-i-am\$;timeout=60
 
 </data1>
 <data2>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 2
 
 </data2>
@@ -27,26 +27,26 @@ CSeq: 2
 RTSP/1.0 200 OK
 Session:        \$extraspaces ignore-this-part-------;foo=bar
 CSeq: 3
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 
 </data3>
 <data4>
 RTSP/1.0 200 OK
 CSeq: 4
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 
 </data4>
 <data5>
 RTSP/1.0 200 OK
 Session: A
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 5
 Informational: Single Character
 
 </data5>
 <data6>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Curl-Private: swsclose
 CSeq: 6
 

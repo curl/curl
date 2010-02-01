@@ -12,32 +12,32 @@ ANNOUNCE
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Cseq: 1
 
 </data1>
 
 <data2>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Cseq: 2
 Content-Length: 70
 Content-Type: application/sdp
 
 v=0
-s=sws SDP
+s=rtspd SDP
 i=A fake SDP reply
 u=http://www.curl.haxx.se/fakesdp.ps
 </data2>
 <data3>
 RTSP/1.0 200 Okie Dokie
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 Cseq: 3
 
 </data3>
 <data4>
 RTSP/1.0 200 OK
-Server: SWS/libcurl-test
+Server: RTSPD/libcurl-test
 CSeq: 4
 Curl-private: swsclose
 Informational: Empty Options Response
