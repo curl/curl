@@ -562,10 +562,10 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
       }
       else {
         /* We have the full RTP interleaved packet
-         * Write out the header but strip the leading '$' */
+         * Write out the header including the leading '$' */
         DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
               rtspc->rtp_channel, rtp_length));
-        result = rtp_client_write(conn, &rtp[1], rtp_length + 3);
+        result = rtp_client_write(conn, &rtp[0], rtp_length + 4);
         if(result) {
           failf(data, "Got an error writing an RTP packet");
           *readmore = FALSE;
