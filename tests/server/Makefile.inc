@@ -1,4 +1,4 @@
-noinst_PROGRAMS = sws getpart sockfilt resolve tftpd
+noinst_PROGRAMS = sws getpart sockfilt resolve tftpd rtspd
 
 useful = getpart.c getpart.h $(top_srcdir)/lib/strequal.c	\
  $(top_srcdir)/lib/base64.c $(top_srcdir)/lib/mprintf.c		\
@@ -20,3 +20,6 @@ getpart_LDADD = @TEST_SERVER_LIBS@
 
 tftpd_SOURCES = tftpd.c util.c util.h $(useful) tftp.h
 tftpd_LDADD = @TEST_SERVER_LIBS@
+
+rtspd_SOURCES = rtspd.c util.c util.h $(useful)
+rtspd_LDADD = @TEST_SERVER_LIBS@

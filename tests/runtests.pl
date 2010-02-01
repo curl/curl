@@ -132,6 +132,8 @@ my $IMAPPORT; # IMAP
 my $IMAP6PORT; # IMAP IPv6 server port
 my $SMTPPORT; # SMTP
 my $SMTP6PORT; # SMTP IPv6 server port
+my $RTSPPORT; # RTSP
+my $RTSP6PORT; # RTSP IPv6 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -323,7 +325,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh')) {
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -803,6 +805,79 @@ sub verifyftp {
 }
 
 #######################################################################
+# Verify that the server that runs on $ip, $port is our server.  This also
+# implies that we can speak with it, as there might be occasions when the
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# assign requested address" #
+
+sub verifyrtsp {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
+    my $pid = 0;
+
+    my $verifyout = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+    unlink($verifyout) if(-f $verifyout);
+
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    unlink($verifylog) if(-f $verifylog);
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--output $verifyout ";
+    $flags .= "--silent ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    # currently verification is done using http
+    $flags .= "\"http://$ip:$port/verifiedserver\"";
+
+    my $cmd = "$VCURL $flags 2>$verifylog";
+
+    # verify if our/any server is running on this port
+    logmsg "RUN: $cmd\n" if($verbose);
+    my $res = runclient($cmd);
+
+    $res >>= 8; # rotate the result
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
+
+    if($res && $verbose) {
+        logmsg "RUN: curl command returned $res\n";
+        if(open(FILE, "<$verifylog")) {
+            while(my $string = <FILE>) {
+                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
+            }
+            close(FILE);
+        }
+    }
+
+    my $data;
+    if(open(FILE, "<$verifyout")) {
+        while(my $string = <FILE>) {
+            $data = $string;
+            last; # only want first line
+        }
+        close(FILE);
+    }
+
+    if($data && ($data =~ /RTSP_SERVER WE ROOLZ: (\d+)/)) {
+        $pid = 0+$1;
+    }
+    elsif($res == 6) {
+        # curl: (6) Couldn't resolve host '::1'
+        logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
+        return -1;
+    }
+    elsif($data || ($res != 7)) {
+        logmsg "RUN: Unknown server on our $server port: $port\n";
+        return -1;
+    }
+    return $pid;
+}
+
+#######################################################################
 # Verify that the ssh server has written out its pidfile, recovering
 # the pid from the file and returning it if a process with that pid is
 # actually alive.
@@ -901,6 +976,7 @@ sub verifysocks {
 
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
+                 'rtsp' => \&verifyrtsp,
                  'ftp' => \&verifyftp,
                  'pop3' => \&verifyftp,
                  'imap' => \&verifyftp,
@@ -1355,6 +1431,87 @@ sub runtftpserver {
     sleep(1);
 
     return ($pid2, $tftppid);
+}
+
+
+#######################################################################
+# start the rtsp server
+#
+sub runrtspserver {
+    my ($verbose, $ipv6) = @_;
+    my $port = $RTSPPORT;
+    my $ip = $HOSTIP;
+    my $proto = 'rtsp';
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $port = $RTSP6PORT;
+        $ip = $HOST6IP;
+    }
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$perl $srcdir/rtspserver.pl $flags";
+    my ($rtsppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($rtsppid <= 0 || !kill(0, $rtsppid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+    if(!$pid3) {
+        logmsg "RUN: $srvrname server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver($server, "$rtsppid $pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    $pid2 = $pid3;
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $rtsppid\n";
+    }
+
+    sleep(1);
+
+    return ($rtsppid, $pid2);
 }
 
 
@@ -1912,6 +2069,7 @@ sub checksystem {
     logmsg sprintf("*   HTTP/%d ", $HTTPPORT);
     logmsg sprintf("FTP/%d ", $FTPPORT);
     logmsg sprintf("FTP2/%d ", $FTP2PORT);
+    logmsg sprintf("RTSP/%d ", $RTSPPORT);
     if($stunnel) {
         logmsg sprintf("FTPS/%d ", $FTPSPORT);
         logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
@@ -1919,6 +2077,7 @@ sub checksystem {
     logmsg sprintf("\n*   TFTP/%d ", $TFTPPORT);
     if($http_ipv6) {
         logmsg sprintf("HTTP-IPv6/%d ", $HTTP6PORT);
+        logmsg sprintf("RTSP-IPv6/%d ", $RTSP6PORT);
     }
     if($ftp_ipv6) {
         logmsg sprintf("FTP-IPv6/%d ", $FTP6PORT);
@@ -1973,6 +2132,8 @@ sub subVariables {
   $$thing =~ s/%USER/$USER/g;
   $$thing =~ s/%CLIENTIP/$CLIENTIP/g;
   $$thing =~ s/%CLIENT6IP/$CLIENT6IP/g;
+  $$thing =~ s/%RTSPPORT/$RTSPPORT/g;
+  $$thing =~ s/%RTSP6PORT/$RTSP6PORT/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -3053,6 +3214,28 @@ sub startservers {
                 $run{'http-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "rtsp") {
+            if(!$run{'rtsp'}) {
+                ($pid, $pid2) = runrtspserver($verbose);
+                if($pid <= 0) {
+                    return "failed starting RTSP server";
+                }
+                printf ("* pid rtsp => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'rtsp'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "rtsp-ipv6") {
+            if(!$run{'rtsp-ipv6'}) {
+                ($pid, $pid2) = runrtspserver($verbose, "IPv6");
+                if($pid <= 0) {
+                    return "failed starting RTSP-IPv6 server";
+                }
+                logmsg sprintf("* pid rtsp-ipv6 => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'rtsp-ipv6'}="$pid $pid2";
+            }
+        }
+
         elsif($what eq "ftps") {
             if(!$stunnel) {
                 # we can't run ftps tests without stunnel
@@ -3587,6 +3770,8 @@ $IMAPPORT =  $base++;
 $IMAP6PORT = $base++;
 $SMTPPORT =  $base++;
 $SMTP6PORT = $base++;
+$RTSPPORT =  $base++;
+$RTSP6PORT = $base++;
 
 #######################################################################
 # clear and create logging directory:
