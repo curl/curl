@@ -28,14 +28,19 @@ static int rtp_packet_count = 0;
 
 static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream) {
   char *data = (char *)ptr;
-  int channel = (int)data[0];
-  int message_size = (int)(size * nmemb - 3);
+  int channel = (int)data[1];
+  int message_size = (int)(size * nmemb - 4);
+  unsigned short coded_size = ntohs(*((unsigned short*)(&data[2])));
   int i;
   (void)stream;
 
   printf("RTP: message size %d, channel %d\n", message_size, channel);
+  if((unsigned short) message_size != coded_size) {
+      printf("RTP embedded size (%hu) does not match the write size (%d).\n",
+              coded_size, message_size);
+  }
 
-  data += 3;
+  data += 4;
   for(i = 0; i < message_size; i+= RTP_DATA_SIZE) {
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
