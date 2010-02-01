@@ -22,25 +22,26 @@ changed from the previous call (or is less than the amount of easy handles
 you've added to the multi handle), you know that there is one or more
 transfers less "running". You can then call \fIcurl_multi_info_read(3)\fP to
 get information about each individual completed transfer, and that returned
-info includes CURLcode and more.
+info includes CURLcode and more. If an added handle fails very quickly, it may
+never be counted as a running_handle.
 
 When \fIrunning_handles\fP is set to zero (0) on the return of this function,
 there is no longer any transfers in progress.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
-If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means that you
-should call \fIcurl_multi_perform\fP again, before you select() on more
-actions. You don't have to do it immediately, but the return code means that
-libcurl may have more data available to return or that there may be more data
-to send off before it is "satisfied". Do note that \fIcurl_multi_perform(3)\fP
-will return \fICURLM_CALL_MULTI_PERFORM\fP only when it wants to be called
-again \fBimmediately\fP. When things are fine and there is nothing immediate
-it wants done, it'll return \fICURLM_OK\fP and you need to wait for \&"action"
-and then call this function again.
+Before version 7.20.0: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
+basically means that you should call \fIcurl_multi_perform\fP again, before
+you select() on more actions. You don't have to do it immediately, but the
+return code means that libcurl may have more data available to return or that
+there may be more data to send off before it is "satisfied". Do note that
+\fIcurl_multi_perform(3)\fP will return \fICURLM_CALL_MULTI_PERFORM\fP only
+when it wants to be called again \fBimmediately\fP. When things are fine and
+there is nothing immediate it wants done, it'll return \fICURLM_OK\fP and you
+need to wait for \&"action" and then call this function again.
 
-NOTE that this only returns errors etc regarding the whole multi stack. Problems
-still might have occurred on individual transfers even when this
+This function only returns errors etc regarding the whole multi stack.
+Problems still might have occurred on individual transfers even when this
 function returns \fICURLM_OK\fP.
 .SH "TYPICAL USAGE"
 Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's

@@ -1568,17 +1568,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multi->num_msgs++; /* increase message counter */
   }
 
-  if(CURLM_CALL_MULTI_PERFORM == result)
-    /* Set the timeout for this handle to expire really soon so that it will
-       be taken care of even when this handle is added in the midst of
-       operation when only the curl_multi_socket() API is used. During that
-       flow, only sockets that time-out or have actions will be dealt
-       with. Since this handle has no action yet, we make sure it times out to
-       get things to happen. Also, this makes it less important for callers of
-       the curl_multi_* functions to bother about the CURLM_CALL_MULTI_PERFORM
-       return code, as long as they deal with the timeouts properly. */
-    Curl_expire(easy->easy_handle, 1);
-
   return result;
 }
 
@@ -1597,7 +1586,10 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   while(easy != &multi->easy) {
     CURLMcode result;
 
-    result = multi_runsingle(multi, easy);
+    do
+      result = multi_runsingle(multi, easy);
+    while (CURLM_CALL_MULTI_PERFORM == result);
+
     if(result)
       returncode = result;
 
@@ -1956,7 +1948,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       if(data->set.one_easy->easy_conn)  /* set socket event bitmask */
         data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
 
-      result = multi_runsingle(multi, data->set.one_easy);
+      do
+        result = multi_runsingle(multi, data->set.one_easy);
+      while (CURLM_CALL_MULTI_PERFORM == result);
 
       if(data->set.one_easy->easy_conn)
         data->set.one_easy->easy_conn->cselect_bits = 0;
@@ -1985,7 +1979,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* the first loop lap 'data' can be NULL */
     if(data) {
-      result = multi_runsingle(multi, data->set.one_easy);
+      do
+        result = multi_runsingle(multi, data->set.one_easy);
+      while (CURLM_CALL_MULTI_PERFORM == result);
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since

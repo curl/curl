@@ -22,8 +22,8 @@ CURL_CSELECT_ERR. When the events on a socket are unknown, pass 0 instead, and
 libcurl will test the descriptor internally.
 
 At return, the integer \fBrunning_handles\fP points to will contain the number
-of still running easy handles within the multi handle. When this number
-reaches zero, all transfers are complete/done. Note that when you call
+of running easy handles within the multi handle. When this number reaches
+zero, all transfers are complete/done. When you call
 \fIcurl_multi_socket_action(3)\fP on a specific socket and the counter
 decreases by one, it DOES NOT necessarily mean that this exact socket/transfer
 is the one that completed. Use \fIcurl_multi_info_read(3)\fP to figure out
@@ -89,19 +89,16 @@ The \fIuserp\fP argument is a private pointer you have previously set with
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
-Legacy: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means
-that you should call \fIcurl_multi_socket_action(3)\fP again, before you wait
-for more actions on libcurl's sockets. You don't have to do it immediately,
-but the return code means that libcurl may have more data available to return
-or that there may be more data to send off before it is "satisfied".
+Before version 7.20.0: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
+basically means that you should call \fIcurl_multi_socket_action(3)\fP again
+before you wait for more actions on libcurl's sockets. You don't have to do it
+immediately, but the return code means that libcurl may have more data
+available to return or that there may be more data to send off before it is
+"satisfied".
 
-In modern libcurls (from around 7.19.0 or later),
-\fICURLM_CALL_MULTI_PERFORM\fP or \fICURLM_CALL_MULTI_SOKCET\fP will not be
-returned and no application needs to care about them.
-
-NOTE that the return code from this function is for the whole multi stack.
-Problems still might have occurred on individual transfers even when one of
-these functions return OK.
+The return code from this function is for the whole multi stack.  Problems
+still might have occurred on individual transfers even when one of these
+functions return OK.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
 

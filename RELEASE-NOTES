@@ -50,6 +50,7 @@ This release includes the following bugfixes:
  o curl_multi_fdset() would return -1 too often during SCP/SFTP transfers
  o FTP file size checks with ASCII transfers
  o HTTP Cookie: headers sort cookies based on specified path lengths
+ o CURLM_CALL_MULTI_PERFORM fix for multi socket timeout calls
 
 This release includes the following known bugs:
 

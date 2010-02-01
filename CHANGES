@@ -6,6 +6,63 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Feb 2010)
+- Using the multi_socket API, it turns out at times it seemed to "forget"
+  connections (which caused a hang). It turned out to be an existing (7.19.7)
+  bug in libcurl (that's been around for a long time) and it happened like
+  this:
+
+  The app calls curl_multi_add_handle() to add a new easy handle, libcurl will
+  then set it to timeout in 1 millisecond so libcurl will tell the app about
+  it.
+
+  The app's timeout fires off that there's a timeout, the app calls libcurl as
+  we so often document it:
+
+  do {
+   res = curl_multi_socket_action(... TIMEOUT ...);
+  } while(CURLM_CALL_MULTI_PERFORM == res);
+
+  And this is the problem number one:
+
+  When curl_multi_socket_action() is called with no specific handle, but only
+  a timeout-action, it will *only* perform actions within libcurl that are
+  marked to run at this time. In this case, the request would go from INIT to
+  CONNECT and return CURLM_CALL_MULTI_PERFORM. When the app then calls libcurl
+  again, there's no timer set for this handle so it remains in the CONNECT
+  state. The CONNECT state is a transitional state in libcurl so it reports no
+  sockets there, and thus libcurl never tells the app anything more about that
+  easy handle/connection.
+
+  libcurl _does_ set a 1ms timeout for the handle at the end of
+  multi_runsingle() if it returns CURLM_CALL_MULTI_PERFORM, but since the loop
+  is instant the new job is not ready to run at that point (and there's no
+  code that makes libcurl call the app to update the timout for this new
+  timeout). It will simply rely on that some other timeout will trigger later
+  on or that something else will update the timeout callback. This makes the
+  bug fairly hard to repeat.
+
+  The fix made to adress this issue:
+
+  We introduce a loop in lib/multi.c around all calls to multi_runsingle() and
+  simply check for CURLM_CALL_MULTI_PERFORM internally. This has the added
+  benefit that this goes in line with my long-term wishes to get rid of the
+  CURLM_CALL_MULTI_PERFORM all together from the public API.
+
+  The downside of this fix, is that the counter we return in 'running_handles'
+  in several of our public functions then gets a slightly new and possibly
+  confusing behavior during times:
+
+  If an app adds a handle that fails to connect (very quickly) it may just
+  as well never appear as a 'running_handle' with this fix. Previously it
+  would first bump the counter only to get it decreased again at next call.
+  Even I have used that change in handle counter to signal "end of a
+  transfer". The only *good* way to find the end of a individual transfer
+  is calling curl_multi_info_read() to see if it returns one.
+
+  Of course, if the app previously did the looping before it checked the
+  counter, it really shouldn't be any new effect.
+
 Yang Tse (26 Jan 2010)
 - Constantine Sapuntzakis' and Joshua Kwan's work done in the last four months
   relative to the asynchronous DNS lookups, along with with some integration
