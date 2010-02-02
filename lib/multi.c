@@ -1201,7 +1201,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             disconnect_conn = TRUE;
           }
           else
-            retry = newurl?TRUE:FALSE;
+            retry = (bool)(newurl?TRUE:FALSE);
 
           Curl_posttransfer(easy->easy_handle);
           drc = Curl_done(&easy->easy_conn, easy->result, FALSE);
@@ -1393,7 +1393,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         easy->result = Curl_retry_request(easy->easy_conn, &newurl);
         if(!easy->result)
-          retry = newurl?TRUE:FALSE;
+          retry = (bool)(newurl?TRUE:FALSE);
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(easy->easy_handle);
