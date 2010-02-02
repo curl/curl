@@ -8,7 +8,6 @@
  * $Id$
  */
 
-#include "setup.h" /* struct_stat etc. */
 #include "test.h"
 
 #ifdef HAVE_SYS_SOCKET_H

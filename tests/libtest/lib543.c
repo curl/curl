@@ -10,7 +10,6 @@
  * Based on Alex Fishman's bug report on September 30, 2007
  */
 
-#include "setup.h"
 #include "test.h"
 
 #include "memdebug.h"
