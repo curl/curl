@@ -153,17 +153,16 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     struct addrinfo hints;
     char sbuf[NI_MAXSERV];
     char *sbufptr = NULL;
-    int error;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    if (port) {
+    if(port) {
       snprintf(sbuf, sizeof(sbuf), "%d", port);
       sbufptr = sbuf;
     }
     hints.ai_flags = AI_CANONNAME;
-    error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
+    (void)Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
 
 #elif defined(HAVE_GETHOSTBYNAME_R)
   /*
@@ -183,7 +182,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      * platforms.
      */
 
-#ifdef HAVE_GETHOSTBYNAME_R_5
+#if defined(HAVE_GETHOSTBYNAME_R_5)
     /* Solaris, IRIX and more */
     h = gethostbyname_r(hostname,
                         (struct hostent *)buf,
@@ -201,8 +200,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       ;
     }
     else
-#endif /* HAVE_GETHOSTBYNAME_R_5 */
-#ifdef HAVE_GETHOSTBYNAME_R_6
+#elif defined(HAVE_GETHOSTBYNAME_R_6)
     /* Linux */
 
     (void)gethostbyname_r(hostname,
@@ -243,8 +241,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      */
 
     if(!h) /* failure */
-#endif/* HAVE_GETHOSTBYNAME_R_6 */
-#ifdef HAVE_GETHOSTBYNAME_R_3
+#elif defined(HAVE_GETHOSTBYNAME_R_3)
     /* AIX, Digital Unix/Tru64, HPUX 10, more? */
 
     /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
@@ -296,23 +293,20 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
        */
     }
     else
-#endif /* HAVE_GETHOSTBYNAME_R_3 */
+#endif /* HAVE_...BYNAME_R_5 || HAVE_...BYNAME_R_6 || HAVE_...BYNAME_R_3 */
     {
       h = NULL; /* set return code to NULL */
       free(buf);
     }
-#else /* HAVE_GETHOSTBYNAME_R */
+#else /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
     /*
-     * Here is code for platforms that don't have gethostbyname_r() or for
-     * which the gethostbyname() is the preferred() function.
+     * Here is code for platforms that don't have a thread safe
+     * getaddrinfo() nor gethostbyname_r() function or for which
+     * gethostbyname() is the preferred one.
      */
   else {
-#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-    h = gethostbyname((char*)hostname);
-#else
-    h = gethostbyname(hostname);
-#endif
-#endif /*HAVE_GETHOSTBYNAME_R */
+    h = gethostbyname((void*)hostname);
+#endif /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
   }
 
   if(h) {
