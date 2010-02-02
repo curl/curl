@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -245,5 +245,9 @@ typedef char
 
 #undef CURL_TYPEOF_CURL_SOCKLEN_T
 #undef CURL_TYPEOF_CURL_OFF_T
+
+#ifdef CURL_NO_OLDIES
+#undef CURL_FORMAT_OFF_T /* not required since 7.19.0 - obsoleted in 7.20.0 */
+#endif
 
 #endif /* __CURL_CURLRULES_H */

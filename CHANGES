@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (2 Feb 2010)
+- Symbol CURL_FORMAT_OFF_T now obsoleted, will be removed in a future release,
+  symbol will not be available when building with CURL_NO_OLDIES defined. Use
+  of CURL_FORMAT_CURL_OFF_T is preferred since 7.19.0
+
 Daniel Stenberg (1 Feb 2010)
 - Using the multi_socket API, it turns out at times it seemed to "forget"
   connections (which caused a hang). It turned out to be an existing (7.19.7)

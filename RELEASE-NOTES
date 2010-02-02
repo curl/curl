@@ -21,6 +21,7 @@ This release includes the following changes:
  o curl supports --ssl and --ssl-reqd
  o added -J/--remote-header-name for using server-provided filename with -O
  o enhanced asynchronous DNS lookups
+ o symbol CURL_FORMAT_OFF_T is obsoleted
 
 This release includes the following bugfixes:
 
