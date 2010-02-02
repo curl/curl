@@ -210,7 +210,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   write_len = strlen(s);
   sptr = s;
 
-  while(1) {
+  for(;;) {
     /* Write the buffer to the socket */
     res = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
 

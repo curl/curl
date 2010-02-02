@@ -3488,7 +3488,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
-  while(1) {
+  for(;;) {
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
     conn->data_prot = prot_cmd;
 #endif

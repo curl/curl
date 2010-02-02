@@ -1949,7 +1949,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
    * performed after this do-while loop.
    */
 
-  do {
+  for(;;) {
     res = connect_host(data, &conn);   /* primary connection */
 
     if(res == CURLE_OK) {
@@ -2052,7 +2052,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
     }
     break; /* it only reaches here when this shouldn't loop */
 
-  } while(1); /* loop if Location: */
+  } /* loop if Location: */
 
   if(newurl)
     free(newurl);

@@ -72,7 +72,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   struct timeval tvnow;
   long conntime;
   *n = 0;
-  do {
+  for(;;) {
     tvnow = Curl_tvnow();
     /* calculating how long connection is establishing */
     conntime = Curl_tvdiff(tvnow, conn->created);
@@ -104,7 +104,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
     buffersize -= nread;
     buf += nread;
     allread += nread;
-  } while(1);
+  }
   return result;
 }
 

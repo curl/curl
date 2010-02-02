@@ -205,7 +205,7 @@ int waitconnect(struct connectdata *conn,
   (void)verifyconnect(sockfd, NULL);
 #endif
 
-  while(1) {
+  for(;;) {
 
     /* now select() until we get connect or timeout */
     rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, (int)(timeout_msec>1000?
@@ -385,7 +385,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
   }
 
-  do {
+  for(;;) {
     if( bind(sockfd, sock, sizeof_sa) >= 0) {
     /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
@@ -415,7 +415,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
     else
       break;
-  } while(1);
+  }
 
   data->state.os_errno = error = SOCKERRNO;
   failf(data, "bind failed with errno %d: %s",
