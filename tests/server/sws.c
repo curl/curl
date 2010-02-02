@@ -27,6 +27,9 @@
    Wilke. Thanks a bunch!
 
  */
+
+#define CURL_NO_OLDIES
+
 #include "setup.h" /* portability help from the lib directory */
 
 #ifdef HAVE_SIGNAL_H

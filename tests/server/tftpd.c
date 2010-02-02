@@ -48,6 +48,8 @@
  * SUCH DAMAGE.
  */
 
+#define CURL_NO_OLDIES
+
 #include "setup.h" /* portability help from the lib directory */
 
 #ifdef HAVE_SYS_IOCTL_H

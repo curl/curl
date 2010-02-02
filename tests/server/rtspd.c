@@ -27,6 +27,8 @@
  * This source file was started based on curl's HTTP test suite server.
  */
 
+#define CURL_NO_OLDIES
+
 #include "setup.h" /* portability help from the lib directory */
 
 #ifdef HAVE_SIGNAL_H
