@@ -336,6 +336,11 @@ Kamil Dudka (15 Nov 2009)
   (and in particular the list of required libraries) even if a path is given
   as argument to --with-ssl
 
+Yang Tse (15 Nov 2009)
+- I removed enable-thread / disable-thread configure option. These were only
+  placebo options. The library is always built as thread safe as possible on
+  every system.
+
 Claes Jakobsson (14 Nov 2009)
 - curl-config now accepts '--configure' to see what arguments was
   passed to the configure script when building curl.
@@ -355,6 +360,8 @@ Daniel Stenberg (14 Nov 2009)
 Yang Tse (14 Nov 2009)
 - Constantine Sapuntzakis provided the fix that ensures that an SSL connection
   won't be reused unless protection level for peer and host verification match.
+
+  I refactored how preprocessor symbol _THREAD_SAFE definition is done.
 
 Kamil Dudka (12 Nov 2009)
 - Kevin Baughman provided a fix preventing libcurl-NSS from crash on doubly
