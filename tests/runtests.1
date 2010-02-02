@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "11 Oct 2007" "Curl 7.17.1" "runtests"
+.TH runtests.pl 1 "2 Feb 2010" "Curl 7.20.0" "runtests"
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -73,6 +73,10 @@ Prints out all files in "log/" to stdout when a test case fails. Very
 practical when used in the automated and distributed tests since then the
 people checking the failures and the reasons for them might not have physical
 access to the machine and logs.
+.IP "-r"
+Display run time statistics. (Requires Perl Time::HiRes module)
+.IP "-rf"
+Display full run time statistics. (Requires Perl Time::HiRes module)
 .IP "-s"
 Shorter output. Speaks less than default.
 .IP "-t[num]"
