@@ -356,7 +356,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 {
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   struct SessionHandle *data = conn->data;
-  CURLcode rc;
+  CURLcode rc = CURLE_OK;
 
   DEBUGASSERT(conn && td);
 
