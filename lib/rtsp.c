@@ -54,6 +54,11 @@
  */
 
 
+#define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
+
+#define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \
+                             ((int)((unsigned char)((p)[3]))))
+
 static int rtsp_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
@@ -544,16 +549,14 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
   while((rtp_dataleft > 0) &&
         (rtp[0] == '$')) {
     if(rtp_dataleft > 4) {
-      char channel;
       int rtp_length;
 
       /* Parse the header */
       /* The channel identifier immediately follows and is 1 byte */
-      channel = rtp[1];
-      rtspc->rtp_channel = (int) channel;
+      rtspc->rtp_channel = RTP_PKT_CHANNEL(rtp);
 
       /* The length is two bytes */
-      rtp_length = ntohs( *((unsigned short *)(&rtp[2])) );
+      rtp_length = RTP_PKT_LENGTH(rtp);
 
       if(rtp_dataleft < rtp_length + 4) {
         /* Need more - incomplete payload*/
