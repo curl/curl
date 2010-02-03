@@ -12,10 +12,15 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
 
 OBJ_DIR = WC_Win32.obj
 
-OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj  $(OBJ_DIR)\hugehelp.obj &
-       $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj  $(OBJ_DIR)\writeenv.obj &
-       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\curlutil.obj $(OBJ_DIR)\rawstr.obj   &
-       $(OBJ_DIR)\os-specific.obj
+# Unfortunately, we can't include Makefile.inc here because wmake doesn't
+# use backslash as the line continuation character by default
+CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c &
+	getpass.c homedir.c curlutil.c os-specific.c
+
+CURLX_SOURCES = rawstr.c
+
+OBJS = $(CURL_SOURCES:.c=.obj) $(CURLX_SOURCES:.c=.obj)
+OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 
 RESOURCE = $(OBJ_DIR)\curl.res
 

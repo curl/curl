@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Fandrich (3 Feb 2010)
+- Changed the Watcom makefiles to make them easier to keep in sync with
+  Makefile.inc since that can't be included directly.
+
 Yang Tse (2 Feb 2010)
 - Symbol CURL_FORMAT_OFF_T now obsoleted, will be removed in a future release,
   symbol will not be available when building with CURL_NO_OLDIES defined. Use

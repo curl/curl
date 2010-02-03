@@ -41,41 +41,21 @@ LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 
 # Unfortunately, we can't include Makefile.inc here because wmake doesn't
 # use backslash as the line continuation character by default
-OBJS = $(OBJ_DIR)\base64.obj           $(OBJ_DIR)\connect.obj        &
-       $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\cookie.obj         &
-       $(OBJ_DIR)\curl_addrinfo.obj    $(OBJ_DIR)\dict.obj           &
-       $(OBJ_DIR)\easy.obj             $(OBJ_DIR)\escape.obj         &
-       $(OBJ_DIR)\file.obj             $(OBJ_DIR)\formdata.obj       &
-       $(OBJ_DIR)\ftp.obj              $(OBJ_DIR)\getenv.obj         &
-       $(OBJ_DIR)\getinfo.obj          $(OBJ_DIR)\gtls.obj           &
-       $(OBJ_DIR)\hash.obj             $(OBJ_DIR)\hostares.obj       &
-       $(OBJ_DIR)\hostasyn.obj         $(OBJ_DIR)\hostip.obj         &
-       $(OBJ_DIR)\hostip4.obj          $(OBJ_DIR)\hostip6.obj        &
-       $(OBJ_DIR)\hostsyn.obj          $(OBJ_DIR)\hostthre.obj       &
-       $(OBJ_DIR)\http.obj             $(OBJ_DIR)\http_chunks.obj    &
-       $(OBJ_DIR)\http_digest.obj      $(OBJ_DIR)\http_negotiate.obj &
-       $(OBJ_DIR)\http_ntlm.obj        $(OBJ_DIR)\if2ip.obj          &
-       $(OBJ_DIR)\inet_ntop.obj        $(OBJ_DIR)\inet_pton.obj      &
-       $(OBJ_DIR)\krb4.obj             $(OBJ_DIR)\ldap.obj           &
-       $(OBJ_DIR)\llist.obj            $(OBJ_DIR)\md5.obj            &
-       $(OBJ_DIR)\memdebug.obj         $(OBJ_DIR)\mprintf.obj        &
-       $(OBJ_DIR)\multi.obj            $(OBJ_DIR)\netrc.obj          &
-       $(OBJ_DIR)\parsedate.obj        $(OBJ_DIR)\progress.obj       &
-       $(OBJ_DIR)\security.obj         $(OBJ_DIR)\rawstr.obj         &
-       $(OBJ_DIR)\select.obj           $(OBJ_DIR)\sendf.obj          &
-       $(OBJ_DIR)\share.obj            $(OBJ_DIR)\socks.obj          &
-       $(OBJ_DIR)\speedcheck.obj       $(OBJ_DIR)\splay.obj          &
-       $(OBJ_DIR)\sslgen.obj           $(OBJ_DIR)\ssluse.obj         &
-       $(OBJ_DIR)\strequal.obj         $(OBJ_DIR)\strerror.obj       &
-       $(OBJ_DIR)\strtok.obj           $(OBJ_DIR)\strtoofft.obj      &
-       $(OBJ_DIR)\telnet.obj           $(OBJ_DIR)\tftp.obj           &
-       $(OBJ_DIR)\timeval.obj          $(OBJ_DIR)\transfer.obj       &
-       $(OBJ_DIR)\url.obj              $(OBJ_DIR)\version.obj        &
-       $(OBJ_DIR)\slist.obj            $(OBJ_DIR)\nonblock.obj       &
-       $(OBJ_DIR)\curl_rand.obj        $(OBJ_DIR)\curl_memrchr.obj   &
-       $(OBJ_DIR)\imap.obj             $(OBJ_DIR)\pop3.obj           &
-       $(OBJ_DIR)\smtp.obj             $(OBJ_DIR)\pingpong.obj       &
-       $(OBJ_DIR)\rtsp.obj             $(OBJ_DIR)\curl_threads.obj
+CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	&
+  cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	&
+  ldap.c ssluse.c version.c getenv.c escape.c mprintf.c telnet.c	&
+  netrc.c getinfo.c transfer.c strequal.c easy.c security.c krb4.c	&
+  krb5.c memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c	&
+  multi.c content_encoding.c share.c http_digest.c md5.c curl_rand.c	&
+  http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	&
+  hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c	&
+  inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c	&
+  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c          &
+  socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c		&
+  curl_memrchr.c imap.c pop3.c smtp.c pingpong.c rtsp.c curl_threads.c
+
+OBJS = $(CSOURCES:.c=.obj)
+OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
