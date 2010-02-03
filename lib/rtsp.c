@@ -183,7 +183,7 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   if(!data->state.proto.rtsp) {
     /* Only allocate this struct if we don't already have it! */
 
-    rtsp = calloc(sizeof(struct RTSP), 1);
+    rtsp = calloc(1, sizeof(struct RTSP));
     if(!rtsp)
       return CURLE_OUT_OF_MEMORY;
     data->state.proto.rtsp = rtsp;
@@ -532,9 +532,14 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
 
   if(rtspc->rtp_buf) {
     /* There was some leftover data the last time. Merge buffers */
-    rtspc->rtp_buf = realloc(rtspc->rtp_buf, rtspc->rtp_bufsize + *nread);
-    if(!rtspc->rtp_buf)
+    char *newptr = realloc(rtspc->rtp_buf, rtspc->rtp_bufsize + *nread);
+    if(!newptr) {
+      Curl_safefree(rtspc->rtp_buf);
+      rtspc->rtp_buf = NULL;
+      rtspc->rtp_bufsize = 0;
       return CURLE_OUT_OF_MEMORY;
+    }
+    rtspc->rtp_buf = newptr;
     memcpy(rtspc->rtp_buf + rtspc->rtp_bufsize, k->str, *nread);
     rtspc->rtp_bufsize += *nread;
     rtp = rtspc->rtp_buf;
@@ -603,8 +608,12 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
 
     /* Store the incomplete RTP packet for a "rewind" */
     scratch = malloc(rtp_dataleft);
-    if(!scratch)
+    if(!scratch) {
+      Curl_safefree(rtspc->rtp_buf);
+      rtspc->rtp_buf = NULL;
+      rtspc->rtp_bufsize = 0;
       return CURLE_OUT_OF_MEMORY;
+    }
     memcpy(scratch, rtp, rtp_dataleft);
     Curl_safefree(rtspc->rtp_buf);
     rtspc->rtp_buf = scratch;
@@ -727,6 +736,8 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
 
       /* Copy the id substring into a new buffer */
       data->set.str[STRING_RTSP_SESSION_ID] = malloc(end - start + 1);
+      if(data->set.str[STRING_RTSP_SESSION_ID] == NULL)
+        return CURLE_OUT_OF_MEMORY;
       memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, end - start);
       (data->set.str[STRING_RTSP_SESSION_ID])[end - start] = '\0';
     }
