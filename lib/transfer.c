@@ -1970,7 +1970,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
           if(rc)
             res = rc;
           else
-            retry = newurl?TRUE:FALSE;
+            retry = (bool)(newurl?TRUE:FALSE);
 
           if(retry) {
             res = CURLE_OK;
