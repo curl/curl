@@ -30,10 +30,10 @@ SSL
 https
 </server>
  <name>
-HTTPS with 7 secs timeout
+HTTPS with 8 secs timeout
  </name>
  <command>
--k https://%HOSTIP:%HTTPSPORT/want/303 -m 7
+-k https://%HOSTIP:%HTTPSPORT/want/303 -m 8
 </command>
 </client>
 
