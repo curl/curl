@@ -219,7 +219,7 @@ static int test_signed_short_formatting(void)
 
 #if (SIZEOF_SHORT == 1)
 
-  i++; ss_test[i].num = 0x7F; ss_test[i].expected = "127";
+  i=1; ss_test[i].num = 0x7F; ss_test[i].expected = "127";
 
   i++; ss_test[i].num = 0x70; ss_test[i].expected = "112";
   i++; ss_test[i].num = 0x07; ss_test[i].expected = "7";
