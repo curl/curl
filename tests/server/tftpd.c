@@ -708,7 +708,16 @@ int main(int argc, char **argv)
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc>arg) {
-        port = (unsigned short)atoi(argv[arg]);
+        char *endptr;
+        long lnum = -1;
+        lnum = strtol(argv[arg], &endptr, 10);
+        if((endptr != argv[arg] + strlen(argv[arg])) ||
+           (lnum < 1025L) || (lnum > 65535L)) {
+          fprintf(stderr, "tftpd: invalid --port argument (%s)\n",
+                  argv[arg]);
+          return 0;
+        }
+        port = (unsigned short)(lnum & 0xFFFFL);
         arg++;
       }
     }
