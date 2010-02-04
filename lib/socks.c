@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -393,7 +393,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   if(!socks5_resolve_local && hostname_len > 255)
   {
     infof(conn->data,"SOCKS5: server resolving disabled for hostnames of "
-          "length > 255 [actual len=%d]\n", hostname_len);
+          "length > 255 [actual len=%zu]\n", hostname_len);
     socks5_resolve_local = TRUE;
   }
 

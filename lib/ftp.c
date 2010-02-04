@@ -882,7 +882,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         /* The requested bind address is not local.  Use the address used for
          * the control connection instead and restart the port loop
          */
-        failf(data, "bind(port=%i) failed: %s", port,
+        failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(conn, error) );
 
         sslen = sizeof(ss);
@@ -896,7 +896,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         continue;
       }
       else if(error != EADDRINUSE && error != EACCES) {
-        failf(data, "bind(port=%i) failed: %s", port,
+        failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(conn, error) );
         sclose(portsock);
         return CURLE_FTP_PORT_FAILED;
@@ -978,7 +978,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        * EPRT |2|1080::8:800:200C:417A|5282|
        */
 
-      result = Curl_pp_sendf(&ftpc->pp, "%s |%d|%s|%d|", mode[fcmd],
+      result = Curl_pp_sendf(&ftpc->pp, "%s |%d|%s|%hu|", mode[fcmd],
                              sa->sa_family == AF_INET?1:2,
                              myhost, port);
       if(result)
@@ -999,7 +999,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         source++;
       }
       *dest = 0;
-      snprintf(dest, 20, ",%d,%d", port>>8, port&0xff);
+      snprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
 
       result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
       if(result)
@@ -1623,7 +1623,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       (unsigned short)conn->port; /* we connect to the proxy's port */
 
     if(!addr) {
-      failf(data, "Can't resolve proxy host %s:%d",
+      failf(data, "Can't resolve proxy host %s:%hu",
             conn->proxy.name, connectport);
       return CURLE_FTP_CANT_GET_HOST;
     }
@@ -1638,7 +1638,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     connectport = newport; /* we connect to the remote port */
 
     if(!addr) {
-      failf(data, "Can't resolve new host %s:%d", newhost, connectport);
+      failf(data, "Can't resolve new host %s:%hu", newhost, connectport);
       return CURLE_FTP_CANT_GET_HOST;
     }
   }
@@ -2420,7 +2420,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           break;
         default:
           failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
-                data->set.ftpsslauth);
+                (int)data->set.ftpsslauth);
           return CURLE_FAILED_INIT; /* we don't know what to do */
         }
         PPSENDF(&ftpc->pp, "AUTH %s", ftpauth[ftpc->count1]);
@@ -3367,7 +3367,7 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
     result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
-  DEBUGF(infof(data, "DO-MORE phase ends with %d\n", result));
+  DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
 
   return result;
 }

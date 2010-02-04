@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -289,7 +289,7 @@ static int Curl_qsossl_close_one(struct ssl_connect_data * conn,
     }
 
     /* An SSL error. */
-    failf(data, "SSL_Destroy() returned error %d", SSL_Strerror(rc, NULL));
+    failf(data, "SSL_Destroy() returned error %s", SSL_Strerror(rc, NULL));
     return -1;
   }
 
@@ -406,7 +406,7 @@ ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex,
     }
 
     /* An SSL error. */
-    failf(conn->data, "SSL_Write() returned error %d",
+    failf(conn->data, "SSL_Write() returned error %s",
           SSL_Strerror(rc, NULL));
     return -1;
   }

@@ -965,7 +965,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         err = libssh2_sftp_last_error(sshc->sftp_session);
         result = sftp_libssh2_error_to_CURLE(err);
         sshc->actualcode = result?result:CURLE_SSH;
-        DEBUGF(infof(data, "error = %d makes libcurl = %d\n", err, result));
+        DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
+                     err, (int)result));
         state(conn, SSH_STOP);
         break;
       }
@@ -2491,7 +2492,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 
 #ifdef CURL_LIBSSH2_DEBUG
   libssh2_trace(ssh->ssh_session, ~0);
-  infof(data, "SSH socket: %d\n", sock);
+  infof(data, "SSH socket: %d\n", (int)sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
   state(conn, SSH_S_STARTUP);

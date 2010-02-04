@@ -1305,7 +1305,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       char *host_port;
       Curl_send_buffer *req_buffer;
 
-      infof(data, "Establish HTTP proxy tunnel to %s:%d\n",
+      infof(data, "Establish HTTP proxy tunnel to %s:%hu\n",
             hostname, remote_port);
 
       if(data->req.newurl) {
@@ -1322,7 +1322,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       if(!req_buffer)
         return CURLE_OUT_OF_MEMORY;
 
-      host_port = aprintf("%s:%d", hostname, remote_port);
+      host_port = aprintf("%s:%hu", hostname, remote_port);
       if(!host_port) {
         free(req_buffer);
         return CURLE_OUT_OF_MEMORY;
@@ -1357,7 +1357,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         /* BLOCKING */
         result =
           Curl_add_bufferf(req_buffer,
-                      "CONNECT %s:%d HTTP/%s\r\n"
+                      "CONNECT %s:%hu HTTP/%s\r\n"
                       "%s"  /* Host: */
                       "%s"  /* Proxy-Authorization */
                       "%s"  /* User-Agent */
@@ -1525,7 +1525,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   keepon = FALSE;
                 }
                 else
-                  infof(data, "Read %d bytes of chunk, continue\n",
+                  infof(data, "Read %zd bytes of chunk, continue\n",
                         tookcareof);
               }
             }
@@ -1596,7 +1596,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            attention so that this is cleared again when this
                            function returns! */
                         k->ignorebody = TRUE;
-                        infof(data, "%d bytes of chunk left\n", gotbytes-i);
+                        infof(data, "%zd bytes of chunk left\n", gotbytes-i);
 
                         if(line_start[1] == '\n') {
                           /* this can only be a LF if the letter at index 0
@@ -1615,7 +1615,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                           keepon = FALSE;
                         }
                         else
-                          infof(data, "Read %d bytes of chunk, continue\n",
+                          infof(data, "Read %zd bytes of chunk, continue\n",
                                 gotbytes);
                       }
                       else {
@@ -2284,7 +2284,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                     host,
                                     conn->bits.ipv6_ip?"]":"");
     else
-      conn->allocptr.host = aprintf("Host: %s%s%s:%d\r\n",
+      conn->allocptr.host = aprintf("Host: %s%s%s:%hu\r\n",
                                     conn->bits.ipv6_ip?"[":"",
                                     host,
                                     conn->bits.ipv6_ip?"]":"",

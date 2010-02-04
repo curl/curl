@@ -882,8 +882,8 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
     rc = data->set.convtonetwork(buffer, length);
     if(rc != CURLE_OK) {
       failf(data,
-            "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %i: %s",
-            rc, curl_easy_strerror(rc));
+            "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %d: %s",
+            (int)rc, curl_easy_strerror(rc));
     }
     return(rc);
   }
@@ -943,8 +943,8 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
     rc = data->set.convfromnetwork(buffer, length);
     if(rc != CURLE_OK) {
       failf(data,
-            "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %i: %s",
-            rc, curl_easy_strerror(rc));
+            "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %d: %s",
+            (int)rc, curl_easy_strerror(rc));
     }
     return(rc);
   }
@@ -1004,8 +1004,8 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
     rc = data->set.convfromutf8(buffer, length);
     if(rc != CURLE_OK) {
       failf(data,
-            "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %i: %s",
-            rc, curl_easy_strerror(rc));
+            "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %d: %s",
+            (int)rc, curl_easy_strerror(rc));
     }
     return(rc);
   }

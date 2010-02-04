@@ -567,7 +567,7 @@ static void debug_print_sock_hash(void *p)
   struct Curl_sh_entry *sh = (struct Curl_sh_entry *)p;
 
   fprintf(stderr, " [easy %p/magic %x/socket %d]",
-          (void *)sh->easy, sh->easy->magic, sh->socket);
+          (void *)sh->easy, sh->easy->magic, (int)sh->socket);
 }
 #endif
 
@@ -1131,12 +1131,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
 #ifdef DEBUGBUILD
-      infof(easy->easy_handle, "Conn %ld send pipe %d inuse %d athead %d\n",
+      infof(easy->easy_handle, "Conn %ld send pipe %zu inuse %d athead %d\n",
             easy->easy_conn->connectindex,
             easy->easy_conn->send_pipe->size,
-            easy->easy_conn->writechannel_inuse,
+            easy->easy_conn->writechannel_inuse?1:0,
             isHandleAtHead(easy->easy_handle,
-                           easy->easy_conn->send_pipe));
+                           easy->easy_conn->send_pipe)?1:0);
 #endif
       if(!easy->easy_conn->writechannel_inuse &&
          isHandleAtHead(easy->easy_handle,
@@ -1319,12 +1319,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 #ifdef DEBUGBUILD
       else {
-        infof(easy->easy_handle, "Conn %ld recv pipe %d inuse %d athead %d\n",
+        infof(easy->easy_handle, "Conn %ld recv pipe %zu inuse %d athead %d\n",
               easy->easy_conn->connectindex,
               easy->easy_conn->recv_pipe->size,
-              easy->easy_conn->readchannel_inuse,
+              easy->easy_conn->readchannel_inuse?1:0,
               isHandleAtHead(easy->easy_handle,
-                             easy->easy_conn->recv_pipe));
+                             easy->easy_conn->recv_pipe)?1:0);
       }
 #endif
       break;
