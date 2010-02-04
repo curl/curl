@@ -136,7 +136,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                                    int port)
 {
-#if defined(HAVE_GETHOSTBYNAME_R_3)
+#if !defined(HAVE_GETADDRINFO_THREADSAFE) && defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
   Curl_addrinfo *ai = NULL;
