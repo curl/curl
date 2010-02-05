@@ -29,13 +29,15 @@ int test(char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_HTTPPOST, NULL);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
-  curl_easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_HTTPPOST, NULL);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   /* Now, we should be making a zero byte POST request */
   res = curl_easy_perform(curl);
+
+test_cleanup:
 
   /* always cleanup */
   curl_easy_cleanup(curl);

@@ -39,8 +39,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
 
   res = curl_easy_perform(curl);
 
@@ -82,6 +82,7 @@ int test(char *URL)
     }
   }
 
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

@@ -90,16 +90,16 @@ int test(char *URL)
   }
 
   /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  test_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* enable verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
-  curl_easy_setopt(curl,CURLOPT_URL, URL);
+  test_setopt(curl,CURLOPT_URL, URL);
 
   /* now specify which file to upload */
-  curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
+  test_setopt(curl, CURLOPT_INFILE, hd_src);
 
   /* Now run off and do what you've been told! */
   res = curl_easy_perform(curl);
@@ -107,6 +107,8 @@ int test(char *URL)
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */
   res = curl_easy_perform(curl);
+
+test_cleanup:
 
   /* close the local file */
   fclose(hd_src);

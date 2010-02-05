@@ -93,9 +93,9 @@ int test(char *URL)
 
   curl_multi_setopt(multi, CURLMOPT_PIPELINING, 1L);
 
-  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, fwrite);
-  curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
-  curl_easy_setopt(easy, CURLOPT_URL, URL);
+  test_setopt(easy, CURLOPT_WRITEFUNCTION, fwrite);
+  test_setopt(easy, CURLOPT_FAILONERROR, 1L);
+  test_setopt(easy, CURLOPT_URL, URL);
 
   if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
     printf("curl_multi_add_handle() failed\n");
@@ -108,8 +108,8 @@ int test(char *URL)
   }
   curl_easy_reset(easy);
 
-  curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
-  curl_easy_setopt(easy, CURLOPT_URL, libtest_arg2);
+  test_setopt(easy, CURLOPT_FAILONERROR, 1L);
+  test_setopt(easy, CURLOPT_URL, libtest_arg2);
 
   if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
     printf("curl_multi_add_handle() 2 failed\n");
@@ -120,6 +120,9 @@ int test(char *URL)
 
     curl_multi_remove_handle(multi, easy);
   }
+
+test_cleanup:
+
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_global_cleanup();

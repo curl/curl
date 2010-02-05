@@ -51,19 +51,21 @@ int test(char *URL)
   }
 
   /* enable verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* enable NOBODY */
-  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+  test_setopt(curl, CURLOPT_NOBODY, 1L);
 
   /* disable HEADER */
-  curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+  test_setopt(curl, CURLOPT_HEADER, 0L);
 
   /* specify target */
-  curl_easy_setopt(curl,CURLOPT_URL, URL);
+  test_setopt(curl,CURLOPT_URL, URL);
 
   /* Now run off and do what you've been told! */
   res = curl_easy_perform(curl);
+
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

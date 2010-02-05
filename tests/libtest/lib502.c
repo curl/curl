@@ -23,7 +23,7 @@
 int test(char *URL)
 {
   CURL *c;
-  CURLM *m;
+  CURLM *m = NULL;
   int res = 0;
   int running=1;
   struct timeval mp_start;
@@ -40,7 +40,7 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl_easy_setopt(c, CURLOPT_URL, URL);
+  test_setopt(c, CURLOPT_URL, URL);
 
   if ((m = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");
@@ -81,9 +81,13 @@ int test(char *URL)
     res = TEST_ERR_RUNS_FOREVER;
   }
 
-  curl_multi_remove_handle(m, c);
+test_cleanup:
+
+  if(m) {
+    curl_multi_remove_handle(m, c);
+    curl_multi_cleanup(m);
+  }
   curl_easy_cleanup(c);
-  curl_multi_cleanup(m);
   curl_global_cleanup();
 
   return res;

@@ -28,10 +28,10 @@
 int test(char *URL)
 {
   CURL *c;
-  int ret=0;
-  CURLM *m;
+  int res = 0;
+  CURLM *m = NULL;
   fd_set rd, wr, exc;
-  CURLMcode res;
+  CURLMcode ret;
   char done = FALSE;
   int running;
   int max_fd;
@@ -54,9 +54,9 @@ int test(char *URL)
 
   /* the point here being that there must not run anything on the given
      proxy port */
-  curl_easy_setopt(c, CURLOPT_PROXY, libtest_arg2);
-  curl_easy_setopt(c, CURLOPT_URL, URL);
-  curl_easy_setopt(c, CURLOPT_VERBOSE, 1L);
+  test_setopt(c, CURLOPT_PROXY, libtest_arg2);
+  test_setopt(c, CURLOPT_URL, URL);
+  test_setopt(c, CURLOPT_VERBOSE, 1L);
 
   if ((m = curl_multi_init()) == NULL) {
     fprintf(stderr, "curl_multi_init() failed\n");
@@ -65,9 +65,9 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((res = curl_multi_add_handle(m, c)) != CURLM_OK) {
+  if ((ret = curl_multi_add_handle(m, c)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
+            "with code %d\n", ret);
     curl_multi_cleanup(m);
     curl_easy_cleanup(c);
     curl_global_cleanup();
@@ -93,10 +93,10 @@ int test(char *URL)
 
     fprintf(stderr, "curl_multi_perform()\n");
 
-    res = CURLM_CALL_MULTI_PERFORM;
+    ret = CURLM_CALL_MULTI_PERFORM;
 
-    while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = curl_multi_perform(m, &running);
+    while (ret == CURLM_CALL_MULTI_PERFORM) {
+      ret = curl_multi_perform(m, &running);
       if (tutil_tvdiff(tutil_tvnow(), mp_start) >
           MULTI_PERFORM_HANG_TIMEOUT) {
         mp_timedout = TRUE;
@@ -112,15 +112,15 @@ int test(char *URL)
       CURLMsg *msg = curl_multi_info_read(m, &numleft);
       fprintf(stderr, "Expected: not running\n");
       if(msg && !numleft)
-        ret = 100; /* this is where we should be */
+        res = 100; /* this is where we should be */
       else
-        ret = 99; /* not correct */
+        res = 99; /* not correct */
       break;
     }
-    fprintf(stderr, "running == %d, res == %d\n", running, res);
+    fprintf(stderr, "running == %d, ret == %d\n", running, ret);
 
-    if (res != CURLM_OK) {
-      ret = 2;
+    if (ret != CURLM_OK) {
+      res = 2;
       break;
     }
 
@@ -132,7 +132,7 @@ int test(char *URL)
     fprintf(stderr, "curl_multi_fdset()\n");
     if (curl_multi_fdset(m, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
       fprintf(stderr, "unexpected failured of fdset.\n");
-      ret = 3;
+      res = 3;
       break;
     }
     rc = select_test(max_fd+1, &rd, &wr, &exc, &interval);
@@ -144,14 +144,18 @@ int test(char *URL)
     if (mp_timedout) fprintf(stderr, "mp_timedout\n");
     fprintf(stderr, "ABORTING TEST, since it seems "
             "that it would have run forever.\n");
-    ret = TEST_ERR_RUNS_FOREVER;
+    res = TEST_ERR_RUNS_FOREVER;
   }
 
-  curl_multi_remove_handle(m, c);
+test_cleanup:
+
+  if(m) {
+    curl_multi_remove_handle(m, c);
+    curl_multi_cleanup(m);
+  }
   curl_easy_cleanup(c);
-  curl_multi_cleanup(m);
   curl_global_cleanup();
 
-  return ret;
+  return res;
 }
 

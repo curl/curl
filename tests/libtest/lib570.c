@@ -25,7 +25,7 @@ int test(char *URL)
   CURLcode res;
   CURL *curl;
   int request=1;
-  char *stream_uri;
+  char *stream_uri = NULL;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -38,46 +38,62 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_URL, URL);
 
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
 
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
+  stream_uri = NULL;
 
   res = curl_easy_perform(curl);
   if(res != CURLE_RTSP_CSEQ_ERROR) {
     fprintf(stderr, "Failed to detect CSeq mismatch");
-    return res;
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
   }
 
-  curl_easy_setopt(curl, CURLOPT_RTSP_CLIENT_CSEQ, 999);
-  curl_easy_setopt(curl, CURLOPT_RTSP_TRANSPORT,
-                         "RAW/RAW/UDP;unicast;client_port=3056-3057");
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+  test_setopt(curl, CURLOPT_RTSP_CLIENT_CSEQ, 999);
+  test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
+                    "RAW/RAW/UDP;unicast;client_port=3056-3057");
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
+  stream_uri = NULL;
 
   res = curl_easy_perform(curl);
   if(res)
-    return res;
+    goto test_cleanup;
 
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
+  stream_uri = NULL;
 
   res = curl_easy_perform(curl);
   if(res != CURLE_RTSP_SESSION_ERROR) {
     fprintf(stderr, "Failed to detect a Session ID mismatch");
   }
+
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

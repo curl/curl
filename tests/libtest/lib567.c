@@ -32,20 +32,23 @@ int test(char *URL)
   }
 
   /* Dump data to stdout for protocol verification */
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
 
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "test567");
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  test_setopt(curl, CURLOPT_USERAGENT, "test567");
 
   custom_headers = curl_slist_append(custom_headers, "Test-Number: 567");
-  curl_easy_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
+  test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
 
   res = curl_easy_perform(curl);
 
-  curl_slist_free_all(custom_headers);
+test_cleanup:
+
+  if(custom_headers)
+    curl_slist_free_all(custom_headers);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

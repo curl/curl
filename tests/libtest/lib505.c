@@ -117,26 +117,28 @@ int test(char *URL)
   headerlist = hl;
 
   /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  test_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* enable verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* specify target */
-  curl_easy_setopt(curl,CURLOPT_URL, URL);
+  test_setopt(curl,CURLOPT_URL, URL);
 
   /* pass in that last of FTP commands to run after the transfer */
-  curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
+  test_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
 
   /* now specify which file to upload */
-  curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
+  test_setopt(curl, CURLOPT_INFILE, hd_src);
 
   /* and give the size of the upload (optional) */
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
+  test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                    (curl_off_t)file_info.st_size);
 
   /* Now run off and do what you've been told! */
   res = curl_easy_perform(curl);
+
+test_cleanup:
 
   /* clean up the FTP commands list */
   curl_slist_free_all(headerlist);

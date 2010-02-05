@@ -16,8 +16,8 @@ int test(char *URL)
 {
    CURLcode res;
    CURL *curl;
-   char *newURL;
-   struct curl_slist *slist;
+   char *newURL = NULL;
+   struct curl_slist *slist = NULL;
 
    if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
      fprintf(stderr, "curl_global_init() failed\n");
@@ -33,9 +33,9 @@ int test(char *URL)
    /*
     * Begin with cURL set to use a single CWD to the URL's directory.
     */
-   curl_easy_setopt(curl, CURLOPT_URL, URL);
-   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
+   test_setopt(curl, CURLOPT_URL, URL);
+   test_setopt(curl, CURLOPT_VERBOSE, 1L);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
 
    res = curl_easy_perform(curl);
 
@@ -63,14 +63,17 @@ int test(char *URL)
      return TEST_ERR_MAJOR_BAD;
    }
 
-   curl_easy_setopt(curl, CURLOPT_URL, newURL);
-   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
-   curl_easy_setopt(curl, CURLOPT_QUOTE, slist);
+   test_setopt(curl, CURLOPT_URL, newURL);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+   test_setopt(curl, CURLOPT_QUOTE, slist);
 
    res = curl_easy_perform(curl);
 
+test_cleanup:
+
    curl_slist_free_all(slist);
-   free(newURL);
+   if(newURL)
+     free(newURL);
    curl_easy_cleanup(curl);
    curl_global_cleanup();
 

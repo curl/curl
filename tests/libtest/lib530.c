@@ -69,13 +69,47 @@ int test(char *URL)
     }
     sprintf(target_url, "%s%04i", URL, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
-    curl_easy_setopt(curl[i], CURLOPT_URL, target_url);
+
+    res = curl_easy_setopt(curl[i], CURLOPT_URL, target_url);
+    if(res) {
+      fprintf(stderr, "curl_easy_setopt() failed "
+              "on handle #%d\n", i);
+      for (j=i; j >= 0; j--) {
+        curl_multi_remove_handle(m, curl[j]);
+        curl_easy_cleanup(curl[j]);
+      }
+      curl_multi_cleanup(m);
+      curl_global_cleanup();
+      return TEST_ERR_MAJOR_BAD + i;
+    }
 
     /* go verbose */
-    curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
+    res = curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
+    if(res) {
+      fprintf(stderr, "curl_easy_setopt() failed "
+              "on handle #%d\n", i);
+      for (j=i; j >= 0; j--) {
+        curl_multi_remove_handle(m, curl[j]);
+        curl_easy_cleanup(curl[j]);
+      }
+      curl_multi_cleanup(m);
+      curl_global_cleanup();
+      return TEST_ERR_MAJOR_BAD + i;
+    }
 
     /* include headers */
-    curl_easy_setopt(curl[i], CURLOPT_HEADER, 1L);
+    res = curl_easy_setopt(curl[i], CURLOPT_HEADER, 1L);
+    if(res) {
+      fprintf(stderr, "curl_easy_setopt() failed "
+              "on handle #%d\n", i);
+      for (j=i; j >= 0; j--) {
+        curl_multi_remove_handle(m, curl[j]);
+        curl_easy_cleanup(curl[j]);
+      }
+      curl_multi_cleanup(m);
+      curl_global_cleanup();
+      return TEST_ERR_MAJOR_BAD + i;
+    }
 
     /* add handle to multi */
     if ((res = (int)curl_multi_add_handle(m, curl[i])) != CURLM_OK) {
@@ -162,6 +196,8 @@ int test(char *URL)
             "that it would have run forever.\n");
     res = TEST_ERR_RUNS_FOREVER;
   }
+
+test_cleanup:
 
   /* cleanup NUM_HANDLES easy handles */
   for(i=0; i < NUM_HANDLES; i++) {

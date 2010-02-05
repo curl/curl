@@ -22,8 +22,9 @@ int test(char *URL)
   CURLM* multi;
   int still_running;
   int i = -1;
+  int res = 0;
   CURLMsg *msg;
-  CURLMcode res;
+  CURLMcode ret;
   struct timeval ml_start;
   struct timeval mp_start;
   char ml_timedout = FALSE;
@@ -47,11 +48,11 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl_easy_setopt(curls, CURLOPT_URL, URL);
+  test_setopt(curls, CURLOPT_URL, URL);
 
-  if ((res = curl_multi_add_handle(multi, curls)) != CURLM_OK) {
+  if ((ret = curl_multi_add_handle(multi, curls)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
+            "with code %d\n", ret);
     curl_easy_cleanup(curls);
     curl_multi_cleanup(multi);
     curl_global_cleanup();
@@ -62,13 +63,13 @@ int test(char *URL)
   mp_start = tutil_tvnow();
 
   do {
-    res = curl_multi_perform(multi, &still_running);
+    ret = curl_multi_perform(multi, &still_running);
     if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;
     }
-  } while (res == CURLM_CALL_MULTI_PERFORM);
+  } while (ret == CURLM_CALL_MULTI_PERFORM);
 
   ml_timedout = FALSE;
   ml_start = tutil_tvnow();
@@ -103,13 +104,13 @@ int test(char *URL)
         mp_timedout = FALSE;
         mp_start = tutil_tvnow();
         do {
-          res = curl_multi_perform(multi, &still_running);
+          ret = curl_multi_perform(multi, &still_running);
           if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
               MULTI_PERFORM_HANG_TIMEOUT) {
             mp_timedout = TRUE;
             break;
           }
-        } while (res == CURLM_CALL_MULTI_PERFORM);
+        } while (ret == CURLM_CALL_MULTI_PERFORM);
         break;
     }
   }
@@ -128,9 +129,14 @@ int test(char *URL)
       i = msg->data.result;
   }
 
+test_cleanup:
+
   curl_multi_cleanup(multi);
   curl_easy_cleanup(curls);
   curl_global_cleanup();
+
+  if(res)
+    i = res;
 
   return i; /* return the final return code */
 }

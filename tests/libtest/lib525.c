@@ -30,7 +30,7 @@ int test(char *URL)
   struct_stat file_info;
   int running;
   char done=FALSE;
-  CURLM *m;
+  CURLM *m = NULL;
   struct timeval ml_start;
   struct timeval mp_start;
   char ml_timedout = FALSE;
@@ -72,19 +72,19 @@ int test(char *URL)
   }
 
   /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  test_setopt(curl, CURLOPT_UPLOAD, 1L);
 
   /* specify target */
-  curl_easy_setopt(curl,CURLOPT_URL, URL);
+  test_setopt(curl,CURLOPT_URL, URL);
 
   /* go verbose */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* use active FTP */
-  curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");
+  test_setopt(curl, CURLOPT_FTPPORT, "-");
 
   /* now specify which file to upload */
-  curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
+  test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* NOTE: if you want this code to work on Windows with libcurl as a DLL, you
      MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
@@ -95,7 +95,7 @@ int test(char *URL)
      option you MUST make sure that the type of the passed-in argument is a
      curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
      make sure that to pass in a type 'long' argument. */
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
+  test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                    (curl_off_t)file_info.st_size);
 
   if ((m = curl_multi_init()) == NULL) {
@@ -183,16 +183,22 @@ int test(char *URL)
     res = TEST_ERR_RUNS_FOREVER;
   }
 
+test_cleanup:
+
 #ifdef LIB529
   /* test 529 */
-  curl_multi_remove_handle(m, curl);
-  curl_multi_cleanup(m);
+  if(m) {
+    curl_multi_remove_handle(m, curl);
+    curl_multi_cleanup(m);
+  }
   curl_easy_cleanup(curl);
 #else
   /* test 525 */
-  curl_multi_remove_handle(m, curl);
+  if(m)
+    curl_multi_remove_handle(m, curl);
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  if(m)
+    curl_multi_cleanup(m);
 #endif
 
   fclose(hd_src); /* close the local file */

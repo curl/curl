@@ -91,7 +91,7 @@ int test(char *URL)
 {
   CURLcode res;
   CURL *curl;
-  char *stream_uri;
+  char *stream_uri = NULL;
   int request=1;
   FILE *protofile;
 
@@ -113,54 +113,81 @@ int test(char *URL)
     fclose(protofile);
     return TEST_ERR_MAJOR_BAD;
   }
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_URL, URL);
 
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
+  stream_uri = NULL;
 
-  curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, rtp_write);
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, protofile);
+  test_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, rtp_write);
+  test_setopt(curl, CURLOPT_TIMEOUT, 3);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_WRITEDATA, protofile);
 
-  curl_easy_setopt(curl, CURLOPT_RTSP_TRANSPORT, "RTP/AVP/TCP;interleaved=0-1");
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+  test_setopt(curl, CURLOPT_RTSP_TRANSPORT, "RTP/AVP/TCP;interleaved=0-1");
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   /* This PLAY starts the interleave */
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+  stream_uri = NULL;
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   /* The DESCRIBE request will try to consume data after the Content */
-  stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
+  stream_uri = NULL;
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
 
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   stream_uri = suburl(URL, request++);
-  curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI,stream_uri);
+  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
-  curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+  stream_uri = NULL;
+  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   fprintf(stderr, "PLAY COMPLETE\n");
 
   /* Use Receive to get the rest of the data */
   while(!res && rtp_packet_count < 13) {
     fprintf(stderr, "LOOPY LOOP!\n");
-    curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_RECEIVE);
+    test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_RECEIVE);
     res = curl_easy_perform(curl);
   }
 
+test_cleanup:
+
+  fclose(protofile);
+
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  fclose(protofile);
 
   return (int)res;
 }
