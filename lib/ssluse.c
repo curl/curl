@@ -594,14 +594,14 @@ int cert_stuff(struct connectdata *conn,
      * the SSL context */
     if(!SSL_CTX_check_private_key(ctx)) {
       failf(data, "Private key does not match the certificate public key");
-      return(0);
+      return 0;
     }
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
     /* erase it now */
     memset(global_passwd, 0, sizeof(global_passwd));
 #endif
   }
-  return(1);
+  return 1;
 }
 
 /* returns non-zero on failure */
@@ -658,7 +658,7 @@ static char *SSL_strerror(unsigned long error, char *buf, size_t size)
   (void) size;
   ERR_error_string(error, buf);
 #endif
-  return (buf);
+  return buf;
 }
 
 #endif /* USE_SSLEAY */
@@ -747,11 +747,22 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
 CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-  ENGINE *e = ENGINE_by_id(engine);
+  ENGINE *e;
+
+#if OPENSSL_VERSION_NUMBER >= 0x00909000L
+  e = ENGINE_by_id(engine);
+#else
+  /* avoid memory leak */
+  for(e = ENGINE_get_first(); e; e = ENGINE_get_next(e)) {
+    const char *e_id = ENGINE_get_id(e);
+    if(!strcmp(engine, e_id))
+      break;
+  }
+#endif
 
   if(!e) {
     failf(data, "SSL Engine '%s' not found", engine);
-    return (CURLE_SSL_ENGINE_NOTFOUND);
+    return CURLE_SSL_ENGINE_NOTFOUND;
   }
 
   if(data->state.engine) {
@@ -765,14 +776,14 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
     ENGINE_free(e);
     failf(data, "Failed to initialise SSL Engine '%s':\n%s",
           engine, SSL_strerror(ERR_get_error(), buf, sizeof(buf)));
-    return (CURLE_SSL_ENGINE_INITFAILED);
+    return CURLE_SSL_ENGINE_INITFAILED;
   }
   data->state.engine = e;
-  return (CURLE_OK);
+  return CURLE_OK;
 #else
   (void)engine;
   failf(data, "SSL Engine not supported");
-  return (CURLE_SSL_ENGINE_NOTFOUND);
+  return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
 }
 
@@ -817,7 +828,7 @@ struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
   }
 #endif
   (void) data;
-  return (list);
+  return list;
 }
 
 
