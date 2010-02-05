@@ -25,7 +25,7 @@ static char *suburl(const char *base, int i)
  */
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURL *curl;
   char *stream_uri;
   char *rtsp_session_id;
@@ -60,7 +60,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
   res = curl_easy_perform(curl);
-  if(res != CURLE_BAD_FUNCTION_ARGUMENT) {
+  if(res != (int)CURLE_BAD_FUNCTION_ARGUMENT) {
     fprintf(stderr, "This should have failed. "
             "Cannot setup without a Transport: header");
     res = TEST_ERR_MAJOR_BAD;
@@ -113,6 +113,6 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 

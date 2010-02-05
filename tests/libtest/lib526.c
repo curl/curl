@@ -215,7 +215,7 @@ int test(char *URL)
     res = TEST_ERR_RUNS_FOREVER;
   }
 
-test_cleanup:
+/* test_cleanup: */
 
 #ifndef LIB527
   /* get NUM_HANDLES easy handles */

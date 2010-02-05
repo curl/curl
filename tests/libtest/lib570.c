@@ -22,7 +22,7 @@ static char *suburl(const char *base, int i)
 
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURL *curl;
   int request=1;
   char *stream_uri = NULL;
@@ -55,7 +55,7 @@ int test(char *URL)
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
-  if(res != CURLE_RTSP_CSEQ_ERROR) {
+  if(res != (int)CURLE_RTSP_CSEQ_ERROR) {
     fprintf(stderr, "Failed to detect CSeq mismatch");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -98,6 +98,6 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 

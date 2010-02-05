@@ -89,7 +89,7 @@ static char *suburl(const char *base, int i)
 
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURL *curl;
   char *stream_uri = NULL;
   int request=1;
@@ -189,6 +189,6 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 

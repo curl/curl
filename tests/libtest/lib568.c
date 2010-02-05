@@ -32,7 +32,7 @@ static char *suburl(const char *base, int i)
  */
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURL *curl;
   int sdp;
   FILE *sdpf = NULL;
