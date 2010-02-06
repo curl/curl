@@ -4321,13 +4321,19 @@ static CURLcode set_userpass(struct connectdata *conn,
        !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);
-    conn->passwd = strdup(CURL_DEFAULT_PASSWORD);
+    if(conn->user)
+      conn->passwd = strdup(CURL_DEFAULT_PASSWORD);
+    else
+      conn->passwd = NULL;
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
   else {
     /* store user + password, zero-length if not set */
     conn->user = strdup(user);
-    conn->passwd = strdup(passwd);
+    if(conn->user)
+      conn->passwd = strdup(passwd);
+    else
+      conn->passwd = NULL;
   }
   if(!conn->user || !conn->passwd)
     return CURLE_OUT_OF_MEMORY;

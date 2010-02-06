@@ -461,15 +461,17 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
       if(!Curl_checkheaders(data, "Content-Type:")) {
         result = Curl_add_bufferf(req_buffer,
                                   "Content-Type: text/parameters\r\n");
+        if(result)
+          return result;
       }
-      if(result)
-        return result;
     }
 
     if(rtspreq == RTSPREQ_ANNOUNCE) {
       if(!Curl_checkheaders(data, "Content-Type:")) {
         result = Curl_add_bufferf(req_buffer,
                                   "Content-Type: application/sdp\r\n");
+        if(result)
+          return result;
       }
     }
 
