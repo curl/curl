@@ -543,7 +543,7 @@ sub torture {
 
         logmsg "*** Alloc number $limit is now set to fail ***\n" if($gdbthis);
 
-        my $ret;
+        my $ret = 0;
         if($gdbthis) {
             runclient($gdbline)
         }
