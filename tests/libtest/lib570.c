@@ -95,6 +95,9 @@ int test(char *URL)
 
 test_cleanup:
 
+  if(stream_uri)
+    free(stream_uri);
+
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

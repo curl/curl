@@ -93,7 +93,7 @@ int test(char *URL)
   CURL *curl;
   char *stream_uri = NULL;
   int request=1;
-  FILE *protofile;
+  FILE *protofile = NULL;
 
   protofile = fopen(libtest_arg2, "wb");
   if(protofile == NULL) {
@@ -109,8 +109,8 @@ int test(char *URL)
 
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
     fclose(protofile);
+    curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
   test_setopt(curl, CURLOPT_URL, URL);
@@ -163,7 +163,10 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-  stream_uri = suburl(URL, request++);
+  if((stream_uri = suburl(URL, request++)) == NULL) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
   stream_uri = NULL;
@@ -184,7 +187,11 @@ int test(char *URL)
 
 test_cleanup:
 
-  fclose(protofile);
+  if(stream_uri)
+    free(stream_uri);
+
+  if(protofile)
+    fclose(protofile);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
