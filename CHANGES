@@ -6,13 +6,14 @@
 
                                   Changelog
 
+Version 7.20.0 (9 February 2010)
+
 Daniel Stenberg (9 Feb 2010)
-- When downloading compressed content over HTTP and the app as asked libcurl
-  to automatically uncompress it with the CURLOPT_ENCODING option, libcurl
-  could wrongly provide the callback with more data than what the maximum
-  documented amount. An application could thus get tricked into badness if the
-  maximum limit was trusted to be enforced by libcurl itself (as it is
-  documented).
+- When downloading compressed content over HTTP and the app asked libcurl to
+  automatically uncompress it with the CURLOPT_ENCODING option, libcurl could
+  wrongly provide the callback with more data than the maximum documented
+  amount. An application could thus get tricked into badness if the maximum
+  limit was trusted to be enforced by libcurl itself (as it is documented).
 
   This is further detailed and explained in the libcurl security advisory
   20100209 at
