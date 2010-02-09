@@ -40,7 +40,7 @@
    (doing so will reduce code size slightly). */
 #define OLD_ZLIB_SUPPORT 1
 
-#define DSIZ 0x10000             /* buffer size for decompressed data */
+#define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
 
 #define GZIP_MAGIC_0 0x1f
 #define GZIP_MAGIC_1 0x8b

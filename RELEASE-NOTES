@@ -52,6 +52,8 @@ This release includes the following bugfixes:
  o FTP file size checks with ASCII transfers
  o HTTP Cookie: headers sort cookies based on specified path lengths
  o CURLM_CALL_MULTI_PERFORM fix for multi socket timeout calls
+ o libcurl data callback excessive length:
+   http://curl.haxx.se/docs/adv_20100209.html
 
 This release includes the following known bugs:
 
@@ -66,6 +68,6 @@ advice from friends like these:
  Markus Koetter, Chad Monroe, Martin Storsjo, Siegfried Gyuricsko,
  Jon Nelson, Julien Chaffraix, Renato Botelho, Peter Pentchev, Ingmar Runge,
  Johan van Selst, Charles Kerr, Gil Weber, David McCreedy, Chris Conroy,
- Bjorn Stenberg, Mike Crowe, Joshua Kwan, Daniel Fandrich
+ Bjorn Stenberg, Mike Crowe, Joshua Kwan, Daniel Fandrich, Wesley Miaw
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Feb 2010)
+- When downloading compressed content over HTTP and the app as asked libcurl
+  to automatically uncompress it with the CURLOPT_ENCODING option, libcurl
+  could wrongly provide the callback with more data than what the maximum
+  documented amount. An application could thus get tricked into badness if the
+  maximum limit was trusted to be enforced by libcurl itself (as it is
+  documented).
+
+  This is further detailed and explained in the libcurl security advisory
+  20100209 at
+
+    http://curl.haxx.se/docs/adv_20100209.html
+
 Daniel Fandrich (3 Feb 2010)
 - Changed the Watcom makefiles to make them easier to keep in sync with
   Makefile.inc since that can't be included directly.
