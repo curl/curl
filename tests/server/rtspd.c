@@ -88,6 +88,11 @@ typedef enum {
   RPROT_HTTP = 2
 } reqprot_t;
 
+#define SET_RTP_PKT_CHN(p,c)  ((p)[1] = (unsigned char)((c) & 0xFF))
+
+#define SET_RTP_PKT_LEN(p,l) (((p)[2] = (unsigned char)(((l) >> 8) & 0xFF)), \
+                              ((p)[3] = (unsigned char)((l) & 0xFF)))
+
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   size_t checkindex; /* where to start checking of the request */
@@ -188,7 +193,7 @@ static const char *doc404_HTTP = "HTTP/1.1 404 Not Found\r\n"
 
 /* send back this on RTSP 404 file not found */
 static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
-    "Server: " RTSPDVERSION "\r\n"
+    "Server: " RTSPDVERSION
     END_OF_HEADERS;
 
 /* Default size to send away fake RTP data */
@@ -465,11 +470,10 @@ static int ProcessRequest(struct httprequest *req)
                 rtp_scratch[0] = '$';
 
                 /* The channel follows and is one byte */
-                rtp_scratch[1] = (char)(rtp_channel & 0xFF);
+                SET_RTP_PKT_CHN(rtp_scratch ,rtp_channel);
 
                 /* Length follows and is a two byte short in network order */
-                *((unsigned short *)(&rtp_scratch[2])) =
-                  htons((unsigned short)rtp_size);
+                SET_RTP_PKT_LEN(rtp_scratch, rtp_size);
 
                 /* Fill it with junk data */
                 for(i = 0; i < rtp_size; i+= RTP_DATA_SIZE) {
