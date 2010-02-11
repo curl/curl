@@ -137,6 +137,7 @@ $! Interpret command-line options.
 $!
 $ hpssl = 0
 $ ldap = 0
+$ list = 0
 $ nohpssl = 0
 $ nossl = 0
 $ openssl = 0
@@ -150,6 +151,7 @@ $    CURL_CCDEFS = f$edit( CURL_CCDEFS, "TRIM")
 $    cc_defs = cc_defs+ ", "+ CURL_CCDEFS
 $ endif
 $ link_qual = ""
+$ msg_qual = "/object = ''objdir'"
 $ ssl_opt = ""
 $!
 $ arg = 1
@@ -187,7 +189,7 @@ $    endif
 $!
 $    if (arg_val .eqs. "64")
 $    then
-$       cc_qual1 = cc_qual1 + " /POINTER = 64"
+$       cc_qual1 = cc_qual1+ " /POINTER = 64"
 $       goto arg_loop_end
 $    endif
 $!
@@ -201,15 +203,14 @@ $    endif
 $!
 $    if (arg_val .eqs. "DEBUG")
 $    then
-$       cc_qual1 = cc_qual1 + -
-         " /debug /nooptimize"
-$       link_qual = link_qual+ " /debug /map = ''lisdir'"
+$       cc_qual1 = cc_qual1+ " /debug /nooptimize"
+$       link_qual = link_qual+ " /debug"
 $       goto arg_loop_end
 $    endif
 $!
 $    if (arg_val .eqs. "IEEE")
 $    then
-$       cc_qual1 = cc_qual1 + " /FLOAT = IEEE_FLOAT"
+$       cc_qual1 = cc_qual1+ " /FLOAT = IEEE_FLOAT"
 $       goto arg_loop_end
 $    endif
 $!
@@ -232,7 +233,10 @@ $    endif
 $!
 $    if (f$extract( 0, 4, arg_val) .eqs. "LIST")
 $    then
-$       cc_qual1 = cc_qual1 + " /list = ''lisdir' /show = (all, nomessages)"
+$       list = 1
+$       cc_qual1 = cc_qual1+ " /list = ''lisdir' /show = (all, nomessages)"
+$       link_qual = link_qual+ " /map = ''lisdir'"
+$       msg_qual = msg_qual+ " /list = ''lisdir'"
 $       goto arg_loop_end
 $    endif
 $!
@@ -262,6 +266,16 @@ $ arg = arg+ 1
 $ goto arg_loop
 $arg_loop_out:
 $!
+$! CC /LIST, LINK /MAP, and MESSAGE /LIST are defaults in batch mode,
+$! so be explicit when they're not desired.
+$!
+$ if (list .eq. 0)
+$ then
+$    cc_qual1 = cc_qual1+ " /nolist"
+$    link_qual = link_qual+ " /nomap"
+$    msg_qual = msg_qual+ " /nolist"
+$ endif
+$!
 $! Create product directory, if needed.
 $!
 $ if (f$search( proc_dev_dir+ arch_name+ ".DIR;1") .eqs. "")
@@ -281,7 +295,7 @@ $       then
 $!         Use HP SSL.
 $          hpssl = 1
 $          ssl_opt = ", ''proc_dev_dir'hpssl_"+ -
-            f$getsyi("ARCH_NAME") + ".opt /options"
+            f$getsyi("ARCH_NAME")+ ".opt /options"
 $       else
 $!         Use OpenSSL.  Assume object libraries, unless shared images
 $!         are found (and not prohibited).
@@ -296,7 +310,7 @@ $             then
 $!               OpenSSL shared images with "SSL_xxx.EXE names.
 $                openssl = 2
 $                ssl_opt = ", ''proc_dev_dir'openssl_ssl_"+ -
-                  f$getsyi("ARCH_NAME") + ".opt /options"
+                  f$getsyi("ARCH_NAME")+ ".opt /options"
 $             else
 $                if ((f$search( "ssllib:libcrypto.exe") .nes. "") .and. -
                   (f$search( "ssllib:libssl.exe") .nes. ""))
@@ -304,7 +318,7 @@ $                then
 $!                  OpenSSL shared images with "xxx.EXE names.
 $                   openssl = 3
 $                   ssl_opt = ", ''proc_dev_dir'openssl_"+ -
-                     f$getsyi("ARCH_NAME") + ".opt /options"
+                     f$getsyi("ARCH_NAME")+ ".opt /options"
 $                endif
 $             endif
 $          endif
@@ -330,8 +344,6 @@ $ 'vo_c' "CC opts:", -
   " ''cc_defs'", -
   " ''cc_qual1'", -
   " ''cc_qual2'"
-$!
-$ msg_qual = "/object = ''objdir'"
 $!
 $! Inform the victim of our plans.
 $!
