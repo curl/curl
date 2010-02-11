@@ -106,9 +106,11 @@ options:
         CURLOPT_PROXYUSERNAME
         CURLOPT_PROXYPASSWORD
         CURLOPT_NOPROXY
+        CURLOPT_RTSP_SESSION_UID
+        CURLOPT_RTSP_STREAM_URI
+        CURLOPT_RTSP_TRANSPORT
         CURLOPT_SOCKS5_GSSAPI_SERVICE
 	CURLOPT_MAIL_FROM
-	CURLOPT_MAIL_RCPT
   Else it is the same as for curl_easy_setopt().
   Note that CURLOPT_ERRORBUFFER is not in the list above, since it gives the
 address of an (empty) character buffer, not the address of a string.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1030,7 +1030,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if (testwarn) {
     testwarn = 0;
 
-    if ((int) STRING_LAST != (int) STRING_MAIL_RCPT + 1)
+    if ((int) STRING_LAST != (int) STRING_MAIL_FROM + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
@@ -1080,11 +1080,13 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_NOPROXY:
+  case CURLOPT_RTSP_SESSION_ID:
+  case CURLOPT_RTSP_STREAM_URI:
+  case CURLOPT_RTSP_TRANSPORT:
   /* SSH2 not (yet) implemented on OS400. */
   /* case CURLOPT_SSH_KNOWNHOSTS: */
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_MAIL_FROM:
-  case CURLOPT_MAIL_RCPT:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 

@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -408,6 +408,12 @@
      d                 c                   82
      d  CURLE_SSL_ISSUER_ERROR...
      d                 c                   83
+     d  CURLE_FTP_PRET_FAILED...
+     d                 c                   84
+     d  CURLE_RTSP_CSEQ_ERROR...
+     d                 c                   85
+     d  CURLE_RTSP_SESSION_ERROR...
+     d                 c                   86
       *
      d curlioerr       s             10i 0 based(######ptr######)               Enum
      d  CURLIOE_OK     c                   0
@@ -556,6 +562,8 @@
      d                 c                   X'00010000'
      d  CURLPROTO_SMTPS...
      d                 c                   X'00020000'
+     d  CURLPROTO_RTSP...
+     d                 c                   X'00040000'
       *
      d CURLoption      s             10i 0 based(######ptr######)               Enum
      d  CURLOPT_FILE   c                   10001
@@ -600,6 +608,8 @@
      d  CURLOPT_COOKIE...
      d                 c                   10022
      d  CURLOPT_HTTPHEADER...
+     d                 c                   10023
+     d  CURLOPT_RTSPHEADER...
      d                 c                   10023
      d  CURLOPT_HTTPPOST...
      d                 c                   10024
@@ -893,6 +903,24 @@
      d                 c                   10186
      d  CURLOPT_MAIL_RCPT...
      d                 c                   10187
+     d  CURLOPT_FTP_USE_PRET...
+     d                 c                   00188
+     d  CURLOPT_RTSP_REQUEST...
+     d                 c                   00189
+     d  CURLOPT_RTSP_SESSION_ID...
+     d                 c                   10190
+     d  CURLOPT_RTSP_STREAM_URI...
+     d                 c                   10191
+     d  CURLOPT_RTSP_TRANSPORT...
+     d                 c                   10192
+     d  CURLOPT_RTSP_CLIENT_CSEQ...
+     d                 c                   00193
+     d  CURLOPT_RTSP_SERVER_CSEQ...
+     d                 c                   00194
+     d  CURLOPT_INTERLEAVEDATA...
+     d                 c                   10195
+     d  CURLOPT_INTERLEAVEFUNCTION...
+     d                 c                   20196
       *
      d  CURLOPT_SERVER_RESPONSE_TIMEOUT...
      d                 c                   00112
@@ -1030,6 +1058,14 @@
      d                 c                   X'00400022'
      d  CURLINFO_CONDITION_UNMET...                                             CURLINFO_LONG + 35
      d                 c                   X'00200023'
+     d  CURLINFO_RTSP_SESSION_ID...                                             CURLINFO_STRING + 36
+     d                 c                   X'00100024'
+     d  CURLINFO_RTSP_CLIENT_CSEQ...                                            CURLINFO_LONG + 37
+     d                 c                   X'00200025'
+     d  CURLINFO_RTSP_SERVER_CSEQ...                                            CURLINFO_LONG + 38
+     d                 c                   X'00200026'
+     d  CURLINFO_RTSP_CSEQ_RECV...                                              CURLINFO_LONG + 39
+     d                 c                   X'00200027'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -1160,6 +1196,36 @@
      d                 c                   10005
      d  CURLMOPT_MAXCONNECTS...
      d                 c                   00006
+      *
+      *  Public API enums for RTSP requests.
+      *
+     d CURLRTSPREQ_NONE...
+     d                 c                   0
+     d CURL_RTSPREQ_OPTIONS...
+     d                 c                   1
+     d CURL_RTSPREQ_DESCRIBE...
+     d                 c                   2
+     d CURL_RTSPREQ_ANNOUNCE...
+     d                 c                   3
+     d CURL_RTSPREQ_SETUP...
+     d                 c                   4
+     d CURL_RTSPREQ_PLAY...
+     d                 c                   5
+     d CURL_RTSPREQ_PAUSE...
+     d                 c                   6
+     d CURL_RTSPREQ_TEARDOWN...
+     d                 c                   7
+     d CURL_RTSPREQ_GET_PARAMETER...
+     d                 c                   8
+     d CURL_RTSPREQ_SET_PARAMETER...
+     d                 c                   9
+     d CURL_RTSPREQ_RECORD...
+     d                 c                   10
+     d CURL_RTSPREQ_RECEIVE...
+     d                 c                   12
+     d CURL_RTSPREQ_LAST...
+     d                 c                   13
+
       *
       *  Renaming CURLMsg to CURL_Msg to avoid case-insensivity name clash.
       *
