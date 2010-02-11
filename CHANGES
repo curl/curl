@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (11 Feb 2010)
+- Steven M. Schweda fixed VMS builder bad behavior when used in a batch job,
+  removed obsolete batch_compile.com and defines.com and updated VMS readme.
+
 Version 7.20.0 (9 February 2010)
 
 Daniel Stenberg (9 Feb 2010)
