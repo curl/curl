@@ -11,7 +11,7 @@ History:
  9-MAR-2004, Created this readme. file.  Marty Kuhrt (MSK).
 15-MAR-2004, MSK, Updated to reflect the new files in this directory.
 14-FEB-2005, MSK, removed config-vms.h_with* file comments
-
+10-FEB-2010, SMS. General update.
 
 Prerequisites:
 
@@ -23,45 +23,49 @@ What is Here:
 
 This directory contains the following files:
 
-AXP.DIR                  - Target directory for Alpha builds.
-BATCH_COMPILE.COM        - Quick and dirty batch build procedure.
-BUILD_VMS.COM            - The brute force build procedure that sets
-                           up the config files, and builds all the C 
-                           and MSG files in the lib and src
-                           subdirectories.
-CONFIG-VMS.H             - The config file used for all builds.
-CURLMSG.H                - Created with SDL/ALPHA/LANGUAGE=CC CURLMSG.SDL
-                           (Needs freeware SDL tool)
-CURLMSG.MSG              - Source for .SDL and .H as well as the 
-                           .OBJ used to link against for error messages.
-CURLMSG.SDL              - Created with MESSAGE/SDL CURLMSG.MSG.
-CURLMSG_VMS.H            - Maps curl error codes to VMS error numbers.
-DEFINES.COM              - Some handy logicals needed for the build.
-                           You may need to update this for your setup.
-HPSSL_ALPHA.OPT          - Option file for hp SSL link on Alpha.
-HPSSL_IA64.OPT           - Option file for hp SSL link on IA64.
-HPSSL_VAX.OPT            - Option file for hp SSL link on VAX.
-IA64.DIR                 - Target directory for IA64 builds.
-README.                  - This file.
-VAX.DIR                  - Target directory for VAX builds.
+build_vms.com           Build procedure.
+config-vms.h            VMS-specific config.h.
+curlmsg.h               C header defining cURL status code macros.
+curlmsg.msg             Error message source for curlmsg.h and curlmsg.sdl.
+curlmsg.sdl             SDL source defining cURL status code constants.
+curlmsg_vms.h           Mapping of cURL status codes to VMS-form codes.
+hpssl_alpha.opt         LINK options file for HP SSL on Alpha.
+hpssl_ia64.opt          LINK options file for HP SSL on IA64.
+hpssl_vax.opt           LINK options file for HP SSL on VAX.
+ldap.opt                LINK options file for LDAP.
+Makefile.am             cURL kit file list for this directory.
+Makefile.in             cURL kit makefile source for this directory.
+openssl_alpha.opt       LINK options file for OpenSSL on Alpha.
+openssl_ia64.opt        LINK options file for OpenSSL on IA64.
+openssl_ssl_alpha.opt   LINK options file for OpenSSL (SSL_ prefix) on Alpha.
+openssl_ssl_ia64.opt    LINK options file for OpenSSL (SSL_ prefix) on IA64.
+openssl_ssl_vax.opt     LINK options file for OpenSSL (SSL_ prefix) on VAX.
+openssl_vax.opt         LINK options file for OpenSSL on VAX.
+readme.                 This file.
 
 
 How to Build:
 
-In theory you should be able to do an @defines followed by an
-@build_vms from this directory and it will create brand new .olbs and
-an .exe.  I say in theory because every release of cURL tosses in a
-new twist that has to be addressed by updating the config-vms.h*
-files, or other files.  I'm working on keeping all the OpenVMS
-dependent stuff in this config file to keep from having to wade
-through gobs of #ifdefs and such.
+The (brute-force) builder is [.packages.vms]build_vms.com.  Comments in
+this procedure describe various optional parameters which enable or
+disable optional program features, or which control the build in other
+ways.  Product files (.EXE, .H, .LIS, .MAP, .OBJ, .OLB, ...) should be
+produced in an architecture-specific subdirectory under this directory
+([.ALPHA], [.IA64], [.VAX]).
+
+   Example build commands:
+
+      @ [.packages.vms]build_vms.com CLEAN
+      @ [.packages.vms]build_vms.com LARGE LDAP
+      submit /noprint [.packages.vms]build_vms.com /param = (LARGE, LDAP)
+
 
 Other Notes:
 
 The test suites are not supported as of 7.11.0.
 
-The CURLMSG.SDL and CURLMSG.H files are generated from CURLMSG.MSG.
+The curlmsg.sdl and curlmsg.h files are generated from curlmsg.msg.
 This is not done automatically, since the .MSG file is a hand edit
-of the relevant stuff from the CURL.H file.  If you want to do this
-yourself you'll need the SDL package from the freeware CD.
+of the relevant stuff from the curl.h file.  If you want to do this
+yourself you'll need the SDL package from the freeware collection.
 
