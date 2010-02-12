@@ -4101,7 +4101,7 @@ parse_filename(char *ptr, int len)
     return NULL;
   strncpy(copy, ptr, len);
   copy[len] = 0;
-  
+
   p = copy;
   if (*p == '\'' || *p == '"') {
     /* store the starting quote */
@@ -5159,7 +5159,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
 
         if(config->mail_rcpt)
-          my_setopt_str(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+          my_setopt(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         /* curl 7.20.x */
         if(config->ftp_pret)
@@ -5170,7 +5170,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
           my_setopt(curl, CURLOPT_HEADERDATA, &outs);
         }
-        
+
         retry_numretries = config->req_retry;
 
         retrystart = cutil_tvnow();
