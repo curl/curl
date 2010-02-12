@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,6 +49,7 @@ struct smtp_conn {
   int eob;         /* number of bytes of the EOB (End Of Body) that has been
                       received thus far */
   smtpstate state; /* always use smtp.c:state() to change state! */
+  struct curl_slist *rcpt;
 };
 
 extern const struct Curl_handler Curl_handler_smtp;

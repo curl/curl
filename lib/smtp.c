@@ -344,26 +344,17 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
     state(conn, SMTP_STOP);
   }
   else {
+    struct smtp_conn *smtpc = &conn->proto.smtpc;
+
     /* send RCPT TO */
-    struct curl_slist *rcpt;
-    char *buffer = NULL;
+    smtpc->rcpt = data->set.mail_rcpt;
 
-    for(rcpt = data->set.mail_rcpt; rcpt; rcpt=rcpt->next) {
-      char *add = aprintf("%s%s%s", buffer?buffer:"", buffer?", ":"",
-                          rcpt->data);
-      if(!add) {
-        free(buffer);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      buffer = add;
+    if(smtpc->rcpt) {
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
+                             smtpc->rcpt->data);
+      if(result)
+        return result;
     }
-
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s", buffer);
-
-    free(buffer);
-
-    if(result)
-      return result;
 
     state(conn, SMTP_RCPT);
   }
@@ -385,6 +376,20 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
     state(conn, SMTP_STOP);
   }
   else {
+    struct smtp_conn *smtpc = &conn->proto.smtpc;
+
+    /* one RCPT is done, but if there's one more to send go on */
+    smtpc->rcpt = smtpc->rcpt->next;
+    if(smtpc->rcpt) {
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
+                             smtpc->rcpt->data);
+      if(result)
+        return result;
+
+      state(conn, SMTP_RCPT);
+      return CURLE_OK;
+    }
+
     /* send DATA */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA", "");
     if(result)

@@ -14,6 +14,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o VMS builder bad behavior when used in a batch job
+ o multiple recepients with SMTP
 
 This release includes the following known bugs:
 
@@ -22,6 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steven M. Schweda
+ Steven M. Schweda, Yang Tse, Jack Zhang
 
         Thanks! (and sorry if I forgot to mention someone)

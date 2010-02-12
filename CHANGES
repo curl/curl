@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (12 Feb 2010)
+- Jack Zhang reported a problem with SMTP: we wrongly used multiple addresses
+  in the same RCPT TO line, when they should be sent in separate single
+  commands. I updated test case 802 to verify this.
+
+- I also fixed a bad use of my_setopt_str() of CURLOPT_MAIL_RCPT in the curl
+  tool which made it try to output it as string for the --libcurl feature
+  which could lead to crashes.
+
 Yang Tse (11 Feb 2010)
 - Steven M. Schweda fixed VMS builder bad behavior when used in a batch job,
   removed obsolete batch_compile.com and defines.com and updated VMS readme.
