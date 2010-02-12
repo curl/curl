@@ -3875,6 +3875,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->referer);
   if (config->hostpubmd5)
     free(config->hostpubmd5);
+  if(config->mail_from)
+    free(config->mail_from);
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   if(config->socks5_gssapi_service)
     free(config->socks5_gssapi_service);
