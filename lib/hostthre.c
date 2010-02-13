@@ -181,28 +181,6 @@ int init_thread_sync_data(struct thread_sync_data * tsd,
   return 0;
 }
 
-/*
- * gethostbyname_thread() resolves a name and then exits.
- */
-static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
-{
-  struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
-
-  tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
-
-  if (!tsd->res) {
-    tsd->sock_error = SOCKERRNO;
-    if (tsd->sock_error == 0)
-      tsd->sock_error = ENOMEM;
-  }
-
-  Curl_mutex_acquire(tsd->mtx);
-  tsd->done = 1;
-  Curl_mutex_release(tsd->mtx);
-
-  return 0;
-}
-
 static int getaddrinfo_complete(struct connectdata *conn)
 {
   struct thread_sync_data *tsd = conn_thread_sync_data(conn);
@@ -218,7 +196,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
 }
 
 
-#if defined(HAVE_GETADDRINFO)
+#ifdef HAVE_GETADDRINFO
 
 /*
  * getaddrinfo_thread() resolves a name and then exits.
@@ -237,6 +215,30 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
   if (rc != 0) {
+    tsd->sock_error = SOCKERRNO;
+    if (tsd->sock_error == 0)
+      tsd->sock_error = ENOMEM;
+  }
+
+  Curl_mutex_acquire(tsd->mtx);
+  tsd->done = 1;
+  Curl_mutex_release(tsd->mtx);
+
+  return 0;
+}
+
+#else /* HAVE_GETADDRINFO */
+
+/*
+ * gethostbyname_thread() resolves a name and then exits.
+ */
+static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
+{
+  struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
+
+  tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
+
+  if (!tsd->res) {
     tsd->sock_error = SOCKERRNO;
     if (tsd->sock_error == 0)
       tsd->sock_error = ENOMEM;
@@ -474,7 +476,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
   return 0;
 }
 
-#if !defined(HAVE_GETADDRINFO)
+#ifndef HAVE_GETADDRINFO
 /*
  * Curl_getaddrinfo() - for platforms without getaddrinfo
  */
@@ -503,7 +505,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return Curl_ipv4_resolve_r(hostname, port);
 }
 
-#else /* HAVE_GETADDRINFO */
+#else /* !HAVE_GETADDRINFO */
 
 /*
  * Curl_getaddrinfo() - for getaddrinfo
@@ -522,7 +524,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
-#if !defined(CURLRES_IPV4)
+#ifndef CURLRES_IPV4
   /*
    * Check if a limited name resolve has been requested.
    */
@@ -584,6 +586,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return res;
 }
 
-#endif /* HAVE_GETADDRINFO */
+#endif /* !HAVE_GETADDRINFO */
 
 #endif /* CURLRES_THREADED */
