@@ -16,6 +16,7 @@ This release includes the following bugfixes:
  o VMS builder bad behavior when used in a batch job
  o multiple recepients with SMTP
  o fixed the CURL_FORMAT_* defines when building with cmake
+ o missing quote in libcurl.m4
 
 This release includes the following known bugs:
 
@@ -24,6 +25,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan
+ Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager
 
         Thanks! (and sorry if I forgot to mention someone)

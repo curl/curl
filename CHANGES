@@ -7,7 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (13 Feb 2010)
+- Martin Hager reported and fixed a problem with a missing quote in libcurl.m4
+
+  (http://curl.haxx.se/bug/view.cgi?id=2951319)
+ 
 - Tom Donovan fixed the CURL_FORMAT_* defines when building with cmake.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2951269)
 
 Daniel Stenberg (12 Feb 2010)
 - Jack Zhang reported a problem with SMTP: we wrongly used multiple addresses

@@ -198,7 +198,7 @@ x=CURLOPT_VERBOSE;
 
 	      # We don't have --protocols, so just assume that all
 	      # protocols are available
-	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP
+	      _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP"
 
 	      if test x$libcurl_feature_SSL = xyes ; then
 	         _libcurl_protocols="$_libcurl_protocols HTTPS"
