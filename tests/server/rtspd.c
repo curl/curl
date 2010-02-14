@@ -957,13 +957,13 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       return 0;
     }
     else {
-      error = getpart(&buffer, &count, "reply", partbuf, stream);
+      error = getpart(&ptr, &count, "reply", partbuf, stream);
       fclose(stream);
       if(error) {
         logmsg("getpart() failed with error: %d", error);
         return 0;
       }
-      ptr = (char *)buffer;
+      buffer = ptr;
     }
 
     if(got_exit_signal) {
