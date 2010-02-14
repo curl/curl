@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Yang Tse (14 Feb 2010)
+- Overhauled test suite getpart() function. Fixing potential out of bounds
+  stack and memory overwrites triggered with huge test case definitions.
+
 Daniel Stenberg (13 Feb 2010)
 - Martin Hager reported and fixed a problem with a missing quote in libcurl.m4
 

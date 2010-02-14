@@ -35,15 +35,20 @@
 
 int main(int argc, char **argv)
 {
+  int rc;
+  char  *part;
+  size_t partlen, i;
+
   if(argc< 3) {
     printf("./testpart main sub\n");
   }
   else {
-    size_t size;
-    unsigned int i;
-    const char *buffer = spitout(stdin, argv[1], argv[2], &size);
-    for(i=0; i< size; i++)
-      printf("%c", buffer[i]);
+    rc = getpart(&part, &partlen, argv[1], argv[2], stdin);
+    if(rc)
+      return(rc);
+    for(i = 0; i < partlen; i++)
+      printf("%c", part[i]);
+    free(part);
   }
   return 0;
 }

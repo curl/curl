@@ -1051,8 +1051,12 @@ static int validate_access(struct testcase *test,
       }
       else {
         size_t count;
-        test->buffer = (char *)spitout(stream, "reply", partbuf, &count);
+        error = getpart(&test->buffer, &count, "reply", partbuf, stream);
         fclose(stream);
+        if(error) {
+          logmsg("getpart() failed with error: %d", error);
+          return EACCESS;
+        }
         if(test->buffer) {
           test->rptr = test->buffer; /* set read pointer */
           test->bufsize = count;    /* set total count */

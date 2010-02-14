@@ -1,3 +1,5 @@
+#ifndef HEADER_SERVER_GETPART_H
+#define HEADER_SERVER_GETPART_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +22,13 @@
  *
  * $Id$
  ***************************************************************************/
-const char *
-spitout(FILE *stream,
-        const char *main,
-        const char *sub,
-        size_t *size);
+
+#define GPE_NO_BUFFER_SPACE -2
+#define GPE_OUT_OF_MEMORY   -1
+#define GPE_OK               0
+#define GPE_END_OF_FILE      1
+
+int getpart(char **outbuf, size_t *outlen,
+            const char *main, const char *sub, FILE *stream);
+
+#endif /* HEADER_SERVER_GETPART_H */

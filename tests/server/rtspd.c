@@ -423,9 +423,14 @@ static int ProcessRequest(struct httprequest *req)
         char *rtp_scratch = NULL;
 
         /* get the custom server control "commands" */
-        cmd = (char *)spitout(stream, "reply", "servercmd", &cmdsize);
-        ptr = cmd;
+        error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
+        if(error) {
+          logmsg("getpart() failed with error: %d", error);
+          req->open = FALSE; /* closes connection */
+          return 1; /* done */
+        }
+        ptr = cmd;
 
         if(cmdsize) {
           logmsg("Found a reply-servercmd section!");
@@ -505,6 +510,8 @@ static int ProcessRequest(struct httprequest *req)
           } while(ptr && *ptr);
           logmsg("Done parsing server commands");
         }
+        if(cmd)
+          free(cmd);
       }
     }
     else {
@@ -950,13 +957,20 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       return 0;
     }
     else {
-      buffer = spitout(stream, "reply", partbuf, &count);
-      ptr = (char *)buffer;
+      error = getpart(&buffer, &count, "reply", partbuf, stream);
       fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
+        return 0;
+      }
+      ptr = (char *)buffer;
     }
 
-    if(got_exit_signal)
+    if(got_exit_signal) {
+      if(ptr)
+        free(ptr);
       return -1;
+    }
 
     /* re-open the same file again */
     stream=fopen(filename, "rb");
@@ -965,17 +979,30 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
       logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
+      if(ptr)
+        free(ptr);
       return 0;
     }
     else {
       /* get the custom server control "commands" */
-      cmd = (char *)spitout(stream, "reply", "postcmd", &cmdsize);
+      error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
       fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
+        if(ptr)
+          free(ptr);
+        return 0;
+      }
     }
   }
 
-  if(got_exit_signal)
+  if(got_exit_signal) {
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
+  }
 
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection will be closed after the data has been sent to the requesting
@@ -997,6 +1024,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", RESPONSE_DUMP);
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
   }
 
@@ -1045,7 +1076,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     req->rtp_buffersize = 0;
   }
 
-
   do {
     res = fclose(dump);
   } while(res && ((error = ERRNO) == EINTR));
@@ -1053,8 +1083,13 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("Error closing file %s error: %d %s",
            RESPONSE_DUMP, error, strerror(error));
 
-  if(got_exit_signal)
+  if(got_exit_signal) {
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
+  }
 
   if(sendfailure) {
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
