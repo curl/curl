@@ -144,7 +144,7 @@ UNIX
 
      To get support for SCP and SFTP, build with --with-libssh2 and have
      libssh2 0.16 or later installed.
-     
+
    SPECIAL CASES
    -------------
    Some versions of uClibc require configuring with CPPFLAGS=-D_GNU_SOURCE=1
@@ -202,7 +202,7 @@ Win32
 
    If you have any problems linking libraries or finding header files, be sure
    to verify that the provided "Makefile.m32" files use the proper paths, and
-   adjust as necessary. It is also possible to override these paths with 
+   adjust as necessary. It is also possible to override these paths with
    environment variables, for example:
 
      set ZLIB_PATH=c:\zlib-1.2.3
@@ -676,8 +676,8 @@ eCos
 +++ src/main.c	24 Jul 2006 21:37:23 -0000
 @@ -4286,11 +4286,31 @@
  }
- 
- 
+
+
 +#ifdef __ECOS
 +#include <cyg/fileio/fileio.h>
 +MTAB_ENTRY( testfs_mte1,
@@ -686,7 +686,7 @@ eCos
 +                   "",
 +                   0);
 +#endif
- 
+
  int main(int argc, char *argv[])
  {
    int res;
@@ -704,7 +704,7 @@ eCos
 +  }
 +#endif
    memset(&config, 0, sizeof(struct Configurable));
- 
+
    config.errors = stderr; /* default errors to stderr */
 
 
@@ -713,7 +713,7 @@ Minix
    curl can be compiled on Minix 3 using gcc or ACK (starting with
    ver. 3.1.3).  Ensure that GNU gawk and bash are both installed and
    available in the PATH.
-   
+
    ACK
    ---
    Increase the heap sizes of the compiler with the command:
@@ -730,9 +730,9 @@ Minix
    GCC
    ---
    Make sure gcc is in your PATH with the command:
-   
+
      export PATH=/usr/gnu/bin:$PATH
-   
+
    then configure and compile curl with:
 
      ./configure CC=gcc AR=/usr/gnu/bin/gar GREP=grep
@@ -756,11 +756,11 @@ Symbian OS
 VxWorks
 ========
    Build for VxWorks is performed using cross compilation.
-   That means you build on Windows machine using VxWorks tools and 
+   That means you build on Windows machine using VxWorks tools and
    run the built image on the VxWorks device.
-   
+
    To build libcurl for VxWorks you need:
-   
+
       - CYGWIN (free, http://cygwin.com/)
       - Wind River Workbench (commercial)
 
@@ -774,10 +774,10 @@ VxWorks
     3. Adjust environment variables defined in 'Environment' section
        of the Makefile.vxworks file to point to your software folders.
     4. Build the libcurl by typing 'make -f ./Makefile.vxworks'
-   
-   As a result the libcurl.a library should be created in the 'lib' folder.   
+
+   As a result the libcurl.a library should be created in the 'lib' folder.
    To clean the build results type 'make -f ./Makefile.vxworks clean'.
-   
+
 
 CROSS COMPILE
 =============

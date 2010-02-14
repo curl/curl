@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   struct curl_slist *headerlist=NULL;
   static const char buf[] = "Expect:";
 
-  /* Fill in the file upload field. This makes libcurl load data from  
+  /* Fill in the file upload field. This makes libcurl load data from
      the given file name when curl_easy_perform() is called. */
   curl_formadd(&formpost,
                &lastptr,

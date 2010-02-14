@@ -1,18 +1,18 @@
-#ifndef __ARPA_TELNET_H
-#define __ARPA_TELNET_H
+#ifndef HEADER_CURL_ARPA_TELNET_H
+#define HEADER_CURL_ARPA_TELNET_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -58,12 +58,12 @@ static const char * const telnetoptions[]=
 #define CURL_TELOPT_OK(x) ((x) <= CURL_TELOPT_MAXIMUM)
 #define CURL_TELOPT(x)    telnetoptions[x]
 
-#define CURL_NTELOPTS 40 
+#define CURL_NTELOPTS 40
 
 /*
  * First some defines
  */
-#define CURL_xEOF 236 /* End Of File */ 
+#define CURL_xEOF 236 /* End Of File */
 #define CURL_SE   240 /* Sub negotiation End */
 #define CURL_NOP  241 /* No OPeration */
 #define CURL_DM   242 /* Data Mark */
@@ -97,5 +97,7 @@ static const char * const telnetcmds[]=
 #define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
                        ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
 #define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
-#endif
-#endif
+
+#endif /* CURL_DISABLE_TELNET */
+
+#endif /* HEADER_CURL_ARPA_TELNET_H */

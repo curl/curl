@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 INTERNALS
@@ -304,7 +304,7 @@ Library
 
  lib/timeval.c features replacement functions for systems that don't have
  gettimeofday() and a few support functions for timeval convertions.
- 
+
  A function named curl_version() that returns the full curl version string is
  found in lib/version.c.
 
@@ -375,7 +375,7 @@ SSL libraries
 
 Library Symbols
 ===============
- 
+
  All symbols used internally in libcurl must use a 'Curl_' prefix if they're
  used in more than a single file. Single-file symbols must be made static.
  Public ("exported") symbols must use a 'curl_' prefix. (There are exceptions,

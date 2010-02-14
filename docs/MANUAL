@@ -168,7 +168,7 @@ RANGES
 
   Get the first 100 bytes of a document using FTP:
 
-        curl -r 0-99 ftp://www.get.this/README  
+        curl -r 0-99 ftp://www.get.this/README
 
 UPLOADING
 
@@ -184,7 +184,7 @@ UPLOADING
 
   Upload a local file to the remote site, and use the local file name remote
   too:
- 
+
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/
 
   Upload a local file to get appended to the remote file:
@@ -223,7 +223,7 @@ VERBOSE / DEBUG
   this:
 
         curl --trace trace.txt www.haxx.se
- 
+
 
 DETAILED INFORMATION
 
@@ -325,12 +325,12 @@ POST (HTTP)
   To send two files in one post you can do it in two ways:
 
   1. Send multiple files in a single "field" with a single field name:
- 
-        curl -F "pictures=@dog.gif,cat.gif" 
- 
-  2. Send two fields with two field names: 
 
-        curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" 
+        curl -F "pictures=@dog.gif,cat.gif"
+
+  2. Send two fields with two field names:
+
+        curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif"
 
   To send a field value literally without interpreting a leading '@'
   or '<', or an embedded ';type=', use --form-string instead of
@@ -678,15 +678,15 @@ HTTPS
   formatted one that curl can use, do something like this (assuming netscape,
   but IE is likely to work similarly):
 
-    You start with hitting the 'security' menu button in netscape. 
+    You start with hitting the 'security' menu button in netscape.
 
-    Select 'certificates->yours' and then pick a certificate in the list 
+    Select 'certificates->yours' and then pick a certificate in the list
 
-    Press the 'export' button 
+    Press the 'export' button
 
-    enter your PIN code for the certs 
+    enter your PIN code for the certs
 
-    select a proper place to save it 
+    select a proper place to save it
 
     Run the 'openssl' application to convert the certificate. If you cd to the
     openssl installation, you can do it like:
@@ -793,7 +793,7 @@ ENVIRONMENT VARIABLES
 
   They should be set for protocol-specific proxies. General proxy should be
   set with
-        
+
         ALL_PROXY
 
   A comma-separated list of host names that shouldn't go through any proxy is

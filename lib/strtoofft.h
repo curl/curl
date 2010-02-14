@@ -1,5 +1,5 @@
-#ifndef _CURL_STRTOOFFT_H
-#define _CURL_STRTOOFFT_H
+#ifndef HEADER_CURL_STRTOOFFT_H
+#define HEADER_CURL_STRTOOFFT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@
  * to implement string conversion to our curl_off_t integral data type.
  *
  * Notice that curl_off_t might be 64 or 32 bit wide, and that it might use
- * an undelying data type which might be 'long', 'int64_t', 'long long' or 
+ * an undelying data type which might be 'long', 'int64_t', 'long long' or
  * '__int64' and more remotely other data types.
  *
  * On systems where the size of curl_off_t is greater than the size of 'long'
@@ -61,5 +61,4 @@
 #define CURL_LLONG_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #define CURL_LLONG_MIN (-CURL_LLONG_MAX - CURL_OFF_T_C(1))
 
-#endif
-
+#endif /* HEADER_CURL_STRTOOFFT_H */

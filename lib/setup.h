@@ -1,5 +1,5 @@
-#ifndef __LIB_CURL_SETUP_H
-#define __LIB_CURL_SETUP_H
+#ifndef HEADER_CURL_LIB_SETUP_H
+#define HEADER_CURL_LIB_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -549,4 +549,4 @@ int netware_init(void);
 #include "setup_once.h"
 #endif
 
-#endif /* __LIB_CURL_SETUP_H */
+#endif /* HEADER_CURL_LIB_SETUP_H */

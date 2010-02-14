@@ -205,7 +205,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <termios.h> header file.  */
-#undef HAVE_TERMIOS_H 
+#undef HAVE_TERMIOS_H
 
 /* Define if you have the <time.h> header file.  */
 #define HAVE_TIME_H 1

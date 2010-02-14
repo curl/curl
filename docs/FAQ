@@ -90,7 +90,7 @@ FAQ
   5.12 Can I make libcurl fake or hide my real IP address?
   5.13 How do I stop an ongoing transfer?
   5.14 Using C++ non-static functions for callbacks?
-  5.15 How do I get an FTP directory listing? 
+  5.15 How do I get an FTP directory listing?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -648,7 +648,7 @@ FAQ
      curl ftp://ftp.sunet.se//tmp/
 
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
- 
+
   No.
 
   But you could easily write your own program using libcurl to do such stunts.
@@ -1164,7 +1164,7 @@ FAQ
      curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:staticFunction);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
-  5.15 How do I get an FTP directory listing? 
+  5.15 How do I get an FTP directory listing?
 
   If you end the FTP URL you request with a slash, libcurl will provide you
   with a directory listing of that given directory. You can also set

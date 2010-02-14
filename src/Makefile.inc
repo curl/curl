@@ -1,5 +1,5 @@
 # ./src/Makefile.inc
- 
+
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_ONES =  $(top_srcdir)/lib/strtoofft.c \

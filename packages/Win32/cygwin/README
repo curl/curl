@@ -1,7 +1,7 @@
-Curl is a tool for transferring files with URL syntax, supporting 
+Curl is a tool for transferring files with URL syntax, supporting
   FTP, FTPS, HTTP, HTTPS, TELNET, DICT, FILE and LDAP.
-  Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
-  FTP uploading, kerberos, HTTP form based upload, proxies, 
+  Curl supports HTTPS certificates, HTTP POST, HTTP PUT,
+  FTP uploading, kerberos, HTTP form based upload, proxies,
   cookies, user+password authentication, file transfer resume,
   http proxy tunneling and a busload of other useful tricks.
 
@@ -43,7 +43,7 @@ Build Instructions (to recompile from the cygwin source tarball):
          http://mail.gnu.org/pipermail/libtool/2001-September/005549.html
       The copy of ltmain.sh that is distributed with cURL includes this patch.
 
-  As of curl 7.9.1, the official source compiles (under Cygwin) and tests 
+  As of curl 7.9.1, the official source compiles (under Cygwin) and tests
     100% cleanly OOTB (Out Of The Box)
 
   ---NO SSL RELEASE---
@@ -63,7 +63,7 @@ Packaging Instructions:
 
   where n is the cygwin release number (e.g. the "1" in curl-7.9-1),
   and "CYGBUILD=n" is optional (n defaults to 1 if not specified)
-  
+
   Assuming everything worked, you'll find your binary tarballs in
    $(buildtop)/packages/Win32/cygwin/
 
@@ -77,8 +77,8 @@ Packaging Instructions:
      $ cd curl-7.9-1; mkdir CYGWIN-PATCHES
      $ cp packages/Win32/cygwin/README CYGWIN-PATCHES/curl-7.9-1.README
   4. if applicable, document any changes in the README file
-  5. create a patch which, when applied 
-     (using `patch -p1 < curl-7.9-$(REL).patch`) 
+  5. create a patch which, when applied
+     (using `patch -p1 < curl-7.9-$(REL).patch`)
      will remove any changes you've made to the pristine source:
      $ cd ..
      $ diff -Nrup curl-7.9-1 curl-7.9 > curl-7.9-1.patch
@@ -91,9 +91,9 @@ Packaging Instructions:
   @ curl
   sdesc: "a client that groks URLs"
   ldesc: "Curl is a tool for transferring files with URL syntax,
-  supporting FTP, FTPS, HTTP, HTTPS, TELNET, DICT, FILE 
-  and LDAP. Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
-  FTP uploading, kerberos, HTTP form based upload, proxies, 
+  supporting FTP, FTPS, HTTP, HTTPS, TELNET, DICT, FILE
+  and LDAP. Curl supports HTTPS certificates, HTTP POST, HTTP PUT,
+  FTP uploading, kerberos, HTTP form based upload, proxies,
   cookies, user+password authentication, file transfer resume,
   http proxy tunneling and a busload of other useful tricks."
   category: Web Libs

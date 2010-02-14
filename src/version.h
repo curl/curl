@@ -1,18 +1,18 @@
-#ifndef __VERSION_H
-#define __VERSION_H
+#ifndef HEADER_CURL_VERSION_H
+#define HEADER_CURL_VERSION_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -33,4 +33,4 @@
 #define CURL_VERSION_PATCH LIBCURL_VERSION_PATCH
 #define CURL_ID CURL_NAME " " CURL_VERSION " (" OS ") "
 
-#endif
+#endif /* HEADER_CURL_VERSION_H */

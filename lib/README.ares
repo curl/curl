@@ -1,14 +1,14 @@
 $Id$
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
           How To Build libcurl to Use c-ares For Asynch Name Resolves
           ===========================================================
 
-c-ares: 
+c-ares:
   http://daniel.haxx.se/projects/c-ares/
 
 NOTE

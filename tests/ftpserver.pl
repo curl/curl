@@ -346,7 +346,7 @@ sub protocolsetup {
             'NLST' => \&NLST_ftp,
             'PASV' => \&PASV_ftp,
             'EPSV' => \&PASV_ftp,
-            'RETR' => \&RETR_ftp,   
+            'RETR' => \&RETR_ftp,
             'SIZE' => \&SIZE_ftp,
             'REST' => \&REST_ftp,
             'STOR' => \&STOR_ftp,
@@ -466,7 +466,7 @@ sub close_dataconn {
 }
 
 ################
-################ SMTP commands 
+################ SMTP commands
 ################
 
 # what set by "RCPT"
@@ -516,7 +516,7 @@ sub DATA_smtp {
             }
 
             sysread \*SFREAD, $line, $size;
-            
+
             $ulsize += $size;
             print FILE $line if(!$nosave);
 
@@ -556,7 +556,7 @@ sub RCPT_smtp {
 }
 
 ################
-################ IMAP commands 
+################ IMAP commands
 ################
 
 # global to allow the command functions to read it
@@ -624,12 +624,12 @@ sub FETCH_imap {
      }
 
      sendcontrol "$cmdid OK FETCH completed\r\n";
-    
+
      return 0;
 }
 
 ################
-################ POP3 commands 
+################ POP3 commands
 ################
 
 sub RETR_pop3 {
@@ -670,12 +670,12 @@ sub RETR_pop3 {
 
      # end with the magic 5-byte end of mail marker
      sendcontrol "\r\n.\r\n";
-    
+
      return 0;
 }
 
 ################
-################ FTP commands 
+################ FTP commands
 ################
 my $rest=0;
 sub REST_ftp {
@@ -837,7 +837,7 @@ sub RETR_ftp {
     my %hash = getpartattr("reply", "data$testpart");
 
     if($size || $hash{'sendzero'}) {
-    
+
         if($rest) {
             # move read pointer forward
             $size -= $rest;
@@ -903,7 +903,7 @@ sub STOR_ftp {
             }
 
             sysread DREAD, $line, $size;
-            
+
             #print STDERR "  GOT: $size bytes\n";
 
             $ulsize += $size;
@@ -960,7 +960,7 @@ sub PASV_ftp {
     # Find out what port we listen on
     my $i;
     print DWRITE "PORT\n";
-        
+
     # READ the response code
     sysread_or_die(\*DREAD, \$i, 5);
 
@@ -971,10 +971,10 @@ sub PASV_ftp {
     if($i =~ /^([0-9a-fA-F]{4})\n/) {
         $size = hex($1);
     }
-       
+
     # READ the response data
     sysread_or_die(\*DREAD, \$i, $size);
-        
+
     # The data is in the format
     # IPvX/NNN
 
@@ -1302,7 +1302,7 @@ logmsg("logged pid $$ in $pidfile\n");
 while(1) {
     #
     # We read 'sockfilt' commands.
-    # 
+    #
     my $input;
 
     logmsg "Awaiting input\n";
@@ -1322,7 +1322,7 @@ while(1) {
     $| = 1;
 
     killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
- 
+
     &customize(); # read test control instructions
 
     sendcontrol @welcome;
@@ -1360,9 +1360,9 @@ while(1) {
 
         # data
         sysread SFREAD, $_, $size;
-        
+
         ftpmsg $_;
-        
+
         # Remove trailing CRLF.
         s/[\n\r]+$//;
 
@@ -1388,7 +1388,7 @@ while(1) {
             $FTPCMD=$1;
             $FTPARG=$2;
         }
-                 
+
         logmsg "< \"$full\"\n";
 
         if($verbose) {
@@ -1444,7 +1444,7 @@ while(1) {
             logmsg "$FTPCMD wasn't handled!\n";
             sendcontrol "500 $FTPCMD is not dealt with!\r\n";
         }
-            
+
     } # while(1)
     logmsg "====> Client disconnected\n";
 

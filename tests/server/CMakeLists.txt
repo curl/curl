@@ -11,8 +11,8 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
     )
   if(CURL_USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
-  endif()  
-  # resolve test needs this 
+  endif()
+  # resolve test needs this
   setup_curl_dependencies(${TEST_NAME})
   #TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
 
@@ -23,13 +23,13 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   # files on Win32 targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
   if(NOT CURL_STATICLIB)
-    set_target_properties(${TEST_NAME} PROPERTIES 
+    set_target_properties(${TEST_NAME} PROPERTIES
       COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
   endif()
-  set_target_properties(${TEST_NAME} PROPERTIES 
+  set_target_properties(${TEST_NAME} PROPERTIES
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 
-  # Add the postfix to the executable since it is not added 
+  # Add the postfix to the executable since it is not added
   # automatically as for modules and shared libraries
   set_target_properties(${TEST_NAME} PROPERTIES
     DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
@@ -45,7 +45,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
 endfunction()
 
 
-transform_makefile_inc("Makefile.inc" 
+transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 

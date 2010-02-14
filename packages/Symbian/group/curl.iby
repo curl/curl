@@ -1,8 +1,8 @@
-// 
+//
 // curl file transfer utility command-line utility
 //
 // Use this file with buildrom to add curl to a device ROM
-// 
+//
 
 #ifndef CURL_IBY
 #define CURL_IBY

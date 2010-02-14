@@ -1,7 +1,7 @@
 
 		    Content Encoding Support for libcurl
 
-* About content encodings: 
+* About content encodings:
 
 HTTP/1.1 [RFC 2616] specifies that a client may request that a server encode
 its response. This is usually used to compress a response using one of a set
@@ -31,9 +31,9 @@ Gallagher, and support for the 'gzip' encoding was added by Dan Fandrich.
 
 * The libcurl interface:
 
-To cause libcurl to request a content encoding use: 
+To cause libcurl to request a content encoding use:
 
-    curl_easy_setopt(curl, CURLOPT_ENCODING, <string>) 
+    curl_easy_setopt(curl, CURLOPT_ENCODING, <string>)
 
 where <string> is the intended value of the Accept-Encoding header.
 

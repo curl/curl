@@ -115,7 +115,7 @@ static const char *curlx_usage[]={
 
 */
 
-/* 
+/*
  * We use this ZERO_NULL to avoid picky compiler warnings,
  * when assigning a NULL pointer to a function pointer var.
  */

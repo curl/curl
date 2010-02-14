@@ -22,7 +22,7 @@ passed to the curl_formget_callback function.
 
 The curl_formget_callback will be executed for each part of the HTTP POST
 chain. The void *arg pointer will be the one passed as second argument to
-curl_formget(). The character buffer passed to it must not be freed. The 
+curl_formget(). The character buffer passed to it must not be freed. The
 callback should return the buffer length passed to it on success.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred

@@ -1,13 +1,13 @@
 DevCpp-Mingw Install & Compilation                                   Sept 2005
 ==================================
 
-Reference Emails available at curl@haxx.se: 
+Reference Emails available at curl@haxx.se:
 
   Libcurl Install and Use Issues
-  Awaiting an Answer for Win 32 Install 
+  Awaiting an Answer for Win 32 Install
   res = curl_easy_perform(curl); Error
   Makefile Issues
-  
+
 
 Having previously done a thorough review of what was available that met my
 requirements under GPL, I settled for Libcurl as the software of choice for
@@ -110,7 +110,7 @@ Next read the contents of Makefile.m32. It includes instructions on its use.
 
 Method I - DOS Command Line
 ---------------------------
- 
+
 Note - The only reason I have included this method is that Method II which is
 the preferred method for compiling does not allow for the setting of option
 switches (e.g. SSL = 1 or SSL =0). At least that's what they tell me at the
@@ -191,7 +191,7 @@ the contents of the LIB Folder. If not go there.
 files and close box. Wait till all files are added. This may take 30 seconds
 or longer.
 
-9- Drop the Menu Execute/Click on Compile. 
+9- Drop the Menu Execute/Click on Compile.
 
 10- That's it.
 
@@ -269,7 +269,7 @@ added. Otherwise you may experience link errors.
 2- Don't forget to include   #include "curl/curl.h".
 
 e.g.
-    #define CURL_STATICLIB 
+    #define CURL_STATICLIB
 #include <windows.h>
     #include "curl/curl.h"
 #include <fstream>

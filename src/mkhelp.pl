@@ -87,7 +87,7 @@ if($c) {
         close(GZIP);
 
         system("gzip --best --no-name dumpit");
-        
+
         open(GZIP, "<dumpit.gz") ||
              die "can't read the dumpit.gz file, try without -c";
         binmode GZIP;

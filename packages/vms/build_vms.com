@@ -1,5 +1,5 @@
 $! $Id$
-$! BUILD_VMS.COM 
+$! BUILD_VMS.COM
 $!
 $! I've taken the original build_vms.com, supplied by Nico Baggus, if
 $! memory serves me correctly, and made some modifications.
@@ -45,11 +45,11 @@ $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and
 $!                   src directories as curl_config.h.
-$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to 
-$!                   this build directory.  They will be copied to the src 
-$!                   directory before build.  The .msg file will be compiled 
-$!                   to get the .obj for messages, but the .h and .sdl files 
-$!                   are not automatically created since they partly rely on 
+$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to
+$!                   this build directory.  They will be copied to the src
+$!                   directory before build.  The .msg file will be compiled
+$!                   to get the .obj for messages, but the .h and .sdl files
+$!                   are not automatically created since they partly rely on
 $!                   the freeware SDL tool.
 $!  8-FEB-2005, MSK, merged the two config-vms.h* files into one that uses
 $!                   USE_SSLEAY to define if the target has SSL support built
@@ -95,7 +95,7 @@ $ orig_def = f$environment( "DEFAULT")
 $ on error then goto Common_Exit
 $ on control_y then goto Common_Exit
 $!
-$ ctrl_y  = 1556 
+$ ctrl_y  = 1556
 $ proc = f$environment( "PROCEDURE")
 $ proc_dev_dir = -
    f$parse( proc, , , "DEVICE")+ f$parse( proc, , , "DIRECTORY")
@@ -467,8 +467,8 @@ $ link 'link_qual' /executable = 'exedir'CURL.EXE -
 $!
 $ goto Common_Exit
 $!
-$! Subroutine to build everything with a filetype passed in via P2 in 
-$! the directory passed in via P1 and put it in the object library named 
+$! Subroutine to build everything with a filetype passed in via P2 in
+$! the directory passed in via P1 and put it in the object library named
 $! via P3.  Exclude items in P4.
 $!
 $build:   subroutine
@@ -533,7 +533,7 @@ $    set default 'build_def'
 $    exit 'sts'
 $ endsubroutine   ! Build
 $!
-$! Based on the file TYPE, do the right compile command.  
+$! Based on the file TYPE, do the right compile command.
 $! Only C and MSG supported.
 $!
 $compile:   subroutine

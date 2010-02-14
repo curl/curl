@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 PACKAGES
@@ -14,14 +14,14 @@ of those custom formats.
  The hierarchy for these directories is something like this:
 
    packages/[OS]/[FORMAT]/
- 
+
  Currently, we have Win32 and Linux for [OS]. There might be different formats
 for the same OS so for Linux we have RPM as format.
 
  We might need to add some differentiation for CPU as well, as there is
 Linux-RPMs for several CPUs. However, it might not be necessary since the
 packaging should be pretty much the same no matter what CPU that is used.
-    
+
  For each unique OS-FORMAT pair, there's a directory to "fill"! I'd like to
 see a single README with as much details as possible, and then I'd like some
 template files for the package process.

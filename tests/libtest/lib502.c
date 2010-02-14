@@ -63,7 +63,7 @@ int test(char *URL)
 
   while (running) {
     res = (int)curl_multi_perform(m, &running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;

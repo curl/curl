@@ -14,7 +14,7 @@ handle that you must use as input to other easy-functions. curl_easy_init
 initializes curl and this call \fBMUST\fP have a corresponding call to
 \fIcurl_easy_cleanup(3)\fP when the operation is complete.
 
-If you did not already call \fIcurl_global_init(3)\fP, 
+If you did not already call \fIcurl_global_init(3)\fP,
 \fIcurl_easy_init(3)\fP does it automatically.
 This may be lethal in multi-threaded cases, since \fIcurl_global_init(3)\fP is
 not thread-safe, and it may result in resource problems because there is

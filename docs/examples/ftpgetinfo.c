@@ -23,7 +23,7 @@
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 {
   /* we are not interested in the headers itself,
-     so we only return the size we would have saved ... */  
+     so we only return the size we would have saved ... */
   return (size_t)(size * nmemb);
 }
 
@@ -45,7 +45,7 @@ int main(void)
     /* No download if the file */
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
     /* Ask for filetime */
-    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L); 
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
     /* No header output: TODO 14.1 http-style HEAD output for ftp */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, throw_away);
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);

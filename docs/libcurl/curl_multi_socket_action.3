@@ -7,7 +7,7 @@ curl_multi_socket_action \- reads/writes available data given an action
 .nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_socket_action(CURLM * multi_handle, 
+CURLMcode curl_multi_socket_action(CURLM * multi_handle,
                                    curl_socket_t sockfd, int ev_bitmask,
                                    int *running_handles);
 .fi

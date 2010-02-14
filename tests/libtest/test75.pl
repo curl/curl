@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # Check that the length of a given URL is correct
-if ( $#ARGV != 1 ) 
+if ( $#ARGV != 1 )
 {
 	print "Usage: $0 string length\n";
 	exit 3;

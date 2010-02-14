@@ -23,7 +23,7 @@
 ###########################################################################
 
 # Experimental hooks are available to run tests remotely on machines that
-# are able to run curl but are unable to run the test harness.  
+# are able to run curl but are unable to run the test harness.
 # The following sections need to be modified:
 #
 #  $HOSTIP, $HOST6IP - Set to the address of the host running the test suite
@@ -3694,7 +3694,7 @@ EOHELP
         exit;
     }
     shift @ARGV;
-} 
+}
 
 if(@testthis && ($testthis[0] ne "")) {
     $TESTCASES=join(" ", @testthis);

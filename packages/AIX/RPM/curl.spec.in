@@ -38,14 +38,14 @@ Note: this version is compiled without SSL support.
 %package	devel
 Summary:	Development files for the curl libary
 Group:		Development/Libraries
-%if %{SSL} == 1 
-Requires: openssl >= 0.9.5 
-%endif 
+%if %{SSL} == 1
+Requires: openssl >= 0.9.5
+%endif
 Requires:	curl = %{version}
 Provides:	curl-devel
 
 %description devel
-libcurl is the core engine of curl; this packages contains all the 
+libcurl is the core engine of curl; this packages contains all the
 libs, headers, and manual pages to develop applications using libcurl.
 
 %define DEFCC xlc
@@ -61,7 +61,7 @@ if [[ -z "$CC" ]]
 then
     if test "X`type %{DEFCC} 2>/dev/null`" != 'X'; then
        export CC=%{DEFCC}
-    else 
+    else
        export CC=gcc
     fi
 fi
@@ -109,9 +109,9 @@ make DESTDIR=%{buildroot} install-strip
 %if %{SSL} == 1
 %{_datadir}/curl/curl-ca-bundle.crt
 %endif
-%doc CHANGES COPYING README RELEASE-NOTES 
+%doc CHANGES COPYING README RELEASE-NOTES
 %doc docs/BUGS docs/CONTRIBUTE docs/FAQ docs/FEATURES docs/HISTORY
-%doc docs/INSTALL docs/KNOWN_BUGS 
+%doc docs/INSTALL docs/KNOWN_BUGS
 %doc docs/MANUAL docs/RESOURCES docs/THANKS docs/VERSIONS docs/TODO
 %doc docs/TheArtOfHttpScripting
 %if %{SSL} == 1

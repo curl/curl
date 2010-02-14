@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -273,7 +273,7 @@ GnuTLS
  http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
 
 NSS
- 
+
  is claimed to be thread-safe already without anything required.
 
 yassl
@@ -391,7 +391,7 @@ another option for this, the CURLOPT_PROXYUSERPWD. It is used quite similar
 to the CURLOPT_USERPWD option like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
- 
+
 There's a long time UNIX "standard" way of storing ftp user names and
 passwords, namely in the $HOME/.netrc file. The file should be made private
 so that only the user may read it (see also the "Security Considerations"
@@ -1200,7 +1200,7 @@ between requests.
 
 .IP "Dangerous URLs"
 SCP URLs can contain raw commands within the scp: URL, which is a side effect
-of how the SCP protocol is designed. e.g. 
+of how the SCP protocol is designed. e.g.
 scp://user:pass@host/a;date >/tmp/test;
 Apps must not allow unsanitized SCP: URLs to be passed in for downloads.
 
@@ -1223,7 +1223,7 @@ the CURLOPT_MAXFILESIZE_LARGE option is not sufficient to guard against this.
 Instead, the app should monitor the amount of data received within the
 write or progress callback and abort once the limit is reached.
 
-A malicious HTTP server could cause an infinite redirection loop, causing a 
+A malicious HTTP server could cause an infinite redirection loop, causing a
 denial-of-service. This can be mitigated by using the CURLOPT_MAXREDIRS
 option.
 

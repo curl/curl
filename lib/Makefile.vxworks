@@ -43,14 +43,14 @@ ARES_LIB    :=
 
 
 # ----------------------------------------------------------------------
-# Compiler 
+# Compiler
 # ----------------------------------------------------------------------
 
 CC := ccppc
 AR := arppc
 LINK := ccppc
 CFLAGS := -D__GNUC__ -D__ppc__ -msoft-float -fno-builtin -mcpu=604 -mlongcall -DCPU=PPC604 -D_GNU_TOOL -Wall -W -Winline $(USER_CFLAGS)
-LDFLAGS := -nostdlib -Wl,-i -Wl,-X 
+LDFLAGS := -nostdlib -Wl,-i -Wl,-X
 INCLUDE_FLAG := -I
 C_DEBUGFLAG := -g
 C_OPTFLAG := -O2

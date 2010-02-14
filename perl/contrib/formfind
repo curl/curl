@@ -76,7 +76,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
     $tag = $1;
 	
     if($tag =~ /^<!--/) {
-        # this is a comment tag, ignore it 
+        # this is a comment tag, ignore it
     }
     else {
         if(!$form &&
@@ -90,13 +90,13 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
             }
             $action= $tag;
             $action=~ s/.*action *= *(\'|\"|)([^ \"\'>]*).*/$2/gi;
-            
+
             $method=uc($method);
-            
+
             $enctype=$tag;
             if ($enctype =~ /enctype *=/) {
                 $enctype=~ s/.*enctype *= *(\'|\"|)([^ \"\'>]*).*/$2/gi;
-                
+
                 if($enctype eq "multipart/form-data") {
                     $enctype="multipart form upload [use -F]"
 		    }
@@ -132,7 +132,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
         elsif($form &&
               ($tag =~ /^< *(input|select)/i)) {
             $mtag = $1;
-            
+
             ($name, $value)=namevalue($tag);
 		
             if($mtag =~ /select/i) {
@@ -154,7 +154,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
                 }
                 elsif($name eq "") {
                     # let's read the value parameter
-                    
+
                     print "Button: \"$value\" ($type)\n";
                     push @alts, "$value";
                 }
@@ -173,7 +173,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
         elsif($form &&
               ($tag =~ /^< *textarea/i)) {
             my ($name, $value)=namevalue($tag);
-            
+
             print "Textarea: NAME=\"$name\"\n";
         }
         elsif($select) {

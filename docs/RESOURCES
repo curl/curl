@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-  Project                     ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+  Project                     ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 
@@ -46,7 +46,7 @@ This document lists documents and standards used by curl.
              Character Sets, Languages, and Continuations
 
   RFC 2388 - "Returning Values from Forms: multipart/form-data"
-             Use this as an addition to the RFC1867 
+             Use this as an addition to the RFC1867
 
   RFC 2396 - "Uniform Resource Identifiers: Generic Syntax and Semantics" This
              one obsoletes RFC 1738, but since RFC 1738 is often mentioned
@@ -61,12 +61,12 @@ This document lists documents and standards used by curl.
   RFC 2617 - HTTP Authentication
 
   RFC 2718 - Guidelines for new URL Schemes
-             
+
   RFC 2732 - Format for Literal IPv6 Addresses in URL's
-             
+
   RFC 2818 - HTTP Over TLS (TLS is the successor to SSL)
-             
+
   RFC 2964 - Use of HTTP State Management
-             
+
   RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 

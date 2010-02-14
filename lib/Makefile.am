@@ -95,7 +95,7 @@ endif
 #
 # Here's the simplified rule guide on how to change -version-info:
 # (current version is C:R:A)
-# 
+#
 # 1. if there are only source changes, use C:R+1:A
 # 2. if interfaces were added use C+1:0:A+1
 # 3. if interfaces were removed, then use C+1:0:0

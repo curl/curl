@@ -121,7 +121,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   if(!ai)
     infof(conn->data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
 
-  return ai;  
+  return ai;
 }
 #endif /* CURLRES_SYNCH */
 #endif /* CURLRES_IPV4 */
@@ -149,7 +149,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
 #if defined(HAVE_GETADDRINFO_THREADSAFE)
-  else { 
+  else {
     struct addrinfo hints;
     char sbuf[NI_MAXSERV];
     char *sbufptr = NULL;

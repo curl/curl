@@ -14,9 +14,9 @@ Building with CMake
    CMake is specifed in the file CMakeLists.txt found in the top of the curl
    source tree. Once the correct version of CMake is installed you can follow
    the instructions below for the platform you are building on.
-  
+
    CMake builds can be configured either from the command line, or from one
-   of CMake's GUI's.  
+   of CMake's GUI's.
 
 Command Line CMake
 ==================
@@ -30,7 +30,7 @@ Command Line CMake
        # the Curl source tree.  CMake will pick a compiler for you. If you
        # want to specifiy the compile, you can set the CC environment
        # variable prior to running CMake.
-       cmake ../curl  
+       cmake ../curl
        make
        # currently make test and make install are not implemented
        #make test
@@ -54,12 +54,12 @@ cmake-gui
         2. Fill in the "Where to build the binaries" combo box with the path
         to the directory for your build tree, ideally this should not be the
         same as the source tree, but a parallel diretory called curl-build or
-        something similar.  
+        something similar.
         3. Once the source and binary directories are specified, press the
         "Configure" button.
-        4. Select the native build tool that you want to use.  
+        4. Select the native build tool that you want to use.
         5. At this point you can change any of the options presented in the
         GUI.  Once you have selected all the options you want, click the
-        "Generate" button. 
+        "Generate" button.
         6. Run the native build tool that you used CMake to genratate.
-        
+

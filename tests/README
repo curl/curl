@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 The cURL Test Suite
@@ -156,5 +156,5 @@ TEST CASE NUMBERS
 TODO:
 
   * Add tests for TELNET, LDAP, DICT...
-  * SOCKS4/5 test deficiencies - no proxy authentication tests as SSH (the 
+  * SOCKS4/5 test deficiencies - no proxy authentication tests as SSH (the
     test mechanism) doesn't support them

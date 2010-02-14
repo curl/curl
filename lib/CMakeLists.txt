@@ -57,7 +57,7 @@ if(HAVE_FEATURES_H)
     nonblock.c
     hash.c
     http.c
-    if2ip.c 
+    if2ip.c
     mprintf.c
     multi.c
     sendf.c

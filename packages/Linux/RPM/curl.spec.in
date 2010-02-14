@@ -42,7 +42,7 @@ rm -rf %{builddir}
 
 %build
 %configure --without-ssl --prefix=%{prefix}
-make 
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT

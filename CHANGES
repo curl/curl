@@ -14,7 +14,7 @@ Daniel Stenberg (13 Feb 2010)
 - Martin Hager reported and fixed a problem with a missing quote in libcurl.m4
 
   (http://curl.haxx.se/bug/view.cgi?id=2951319)
- 
+
 - Tom Donovan fixed the CURL_FORMAT_* defines when building with cmake.
 
   (http://curl.haxx.se/bug/view.cgi?id=2951269)
@@ -244,7 +244,7 @@ Daniel Stenberg (26 Dec 2009)
 Daniel Stenberg (17 Dec 2009)
 - David Byron fixed Curl_ossl_cleanup to actually call ENGINE_cleanup when
   available.
-  
+
 - Follow-up fix for the proxy fix I did for Jon Nelson's bug. It turned out I
   was a bit too quick and broke test case 1101 with that change. The order of
   some of the setups is sensitive. I now changed it slightly again to make
@@ -435,7 +435,7 @@ Daniel Stenberg (11 Nov 2009)
   in the DNS cache would linger too long if the request that added it was in
   use that long. He also provided the patch that now makes libcurl capable of
   still doing a request while the DNS hash entry may get timed out.
-  
+
 - Christian Schmitz noticed that the progress meter/callback was not properly
   used during the FTP connection phase (after the actual TCP connect), while
   it of course should be. I also made the speed check get called correctly so
@@ -530,7 +530,7 @@ Daniel Stenberg (1 Oct 2009)
   him grief. This is a regression that was introduced in 7.19.1 and I find it
   strange it hasn't hit us harder, but I won't persue into figuring out
   exactly why.
- 
+
 - Constantine Sapuntzakis: The current implementation will always set
   SO_SNDBUF to CURL_WRITE_SIZE even if the SO_SNDBUF starts out larger.  The
   patch doesn't do a setsockopt if SO_SNDBUF is already greater than
@@ -564,7 +564,7 @@ Daniel Stenberg (25 Sep 2009)
   (http://curl.haxx.se/bug/view.cgi?id=2861587) identifying that libcurl used
   the OpenSSL function X509_load_crl_file() wrongly and failed if it would
   load a CRL file with more than one certificate within. This is now fixed.
-  
+
 Daniel Stenberg (16 Sep 2009)
 - Sven Anders reported that we introduced a cert verfication flaw for OpenSSL-
   powered libcurl in 7.19.6. If there was a X509v3 Subject Alternative Name
@@ -787,7 +787,7 @@ Michal Marek (15 Jul 2009)
 Guenter Knauf (14 Jul 2009)
 - renamed generated config.h to curl_config.h to avoid any future clashes
   with config.h from other projects.
-  
+
 Daniel Stenberg (9 Jul 2009)
 - Eric Wong introduced curlx_nonblock() that the curl tool now (re-)uses for
   setting a file descriptor non-blocking. Used by the functionality Eric
@@ -1239,7 +1239,7 @@ Yang Tse (2 Apr 2009)
 
 Daniel Stenberg (1 Apr 2009)
 - Andre Guibert de Bruet fixed a NULL pointer use in an infof() call if a
-  strdup() call failed. 
+  strdup() call failed.
 
 Daniel Fandrich (31 Mar 2009)
 - Properly return an error code in curl_easy_recv (reported by Jim Freeman).
@@ -1248,7 +1248,7 @@ Daniel Stenberg (18 Mar 2009)
 - Kamil Dudka brought a patch that enables 6 additional crypto algorithms when
   NSS is used. These ciphers were added in NSS 3.4 and require to be enabled
   explicitly.
- 
+
 Daniel Stenberg (13 Mar 2009)
 - Use libssh2_version() to present the libssh2 version in case the libssh2
   library is found to support it.
@@ -1268,8 +1268,8 @@ Yang Tse (11 Mar 2009)
   reported by Pierre Brico.
 
 Daniel Stenberg (9 Mar 2009)
-- Frank Hempel found out a bug and provided the fix: 
-  
+- Frank Hempel found out a bug and provided the fix:
+
   curl_easy_duphandle did not necessarily duplicate the CURLOPT_COOKIEFILE
   option. It only enabled the cookie engine in the destination handle if
   data->cookies is not NULL (where data is the source handle). In case of a
@@ -1288,7 +1288,7 @@ Daniel Stenberg (9 Mar 2009)
   checkouts who don't do cvs update with the -d option won't get the new dirs
   and then will get funny outputs that can be a bit hard to understand and
   fix.
-  
+
 Daniel Stenberg (8 Mar 2009)
 - Andre Guibert de Bruet found and fixed a code segment in ssluse.c where the
   allocation of the memory BIO was not being properly checked.
@@ -1361,7 +1361,7 @@ Daniel Stenberg (25 Feb 2009)
   just to avoid it to fail very early when libgcrypt dislikes the situation,
   but that move was bad and the fix should rather be in libgcrypt or
   elsewhere.
-  
+
 Daniel Stenberg (24 Feb 2009)
 - Brian J. Murrell found out that Negotiate proxy authentication didn't work.
   It happened because the code used the struct for server-based auth all the
@@ -1395,7 +1395,7 @@ Daniel Stenberg (20 Feb 2009)
   necessary to get read in ftp_done().
 
 Daniel Stenberg (19 Feb 2009)
-- Patrik Thunstrom reported a problem and helped me repeat it. It turned out 
+- Patrik Thunstrom reported a problem and helped me repeat it. It turned out
   libcurl did a superfluous 1000ms wait when doing SFTP downloads!
 
   We read data with libssh2 while doing the "DO" operation for SFTP and then
@@ -1525,7 +1525,7 @@ Daniel Stenberg (26 Jan 2009)
 
 - Alexey Borzov filed bug report #2535504
   (http://curl.haxx.se/bug/view.cgi?id=2535504) pointing out that realms with
-  quoted quotation marks in HTTP Digest headers didn't work. I've now added 
+  quoted quotation marks in HTTP Digest headers didn't work. I've now added
   test case 1095 that verifies my fix.
 
 - Craig A West brought CURLOPT_NOPROXY and the corresponding --noproxy option.
@@ -1676,7 +1676,7 @@ Daniel Stenberg (29 Dec 2008)
 Daniel Stenberg (28 Dec 2008)
 - Peter Korsgaard fixed building libcurl with "configure --with-ssl
   --disable-verbose".
-  
+
 - Anthony Bryan fixed more language and spelling flaws in man pages.
 
 Daniel Stenberg (22 Dec 2008)

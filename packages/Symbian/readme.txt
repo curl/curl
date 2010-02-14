@@ -9,7 +9,7 @@ from client applications as well as creating a GUI application to allow
 file transfers.  The author has no current plans to do so.
 
 This means that integration with standard Symbian OS programs can be
-tricky, since libcurl isn't designed with Symbian's native asynchronous 
+tricky, since libcurl isn't designed with Symbian's native asynchronous
 message passing idioms in mind. However, it may be possible to use libcurl
 in an active object-based application through libcurl's multi interface.
 The port is most easily used when porting POSIX applications to Symbian

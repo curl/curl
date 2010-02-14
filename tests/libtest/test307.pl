@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # Determine if the given curl executable supports the 'openssl' SSL engine
-if ( $#ARGV != 0 ) 
+if ( $#ARGV != 0 )
 {
 	print "Usage: $0 curl-executable\n";
 	exit 3;

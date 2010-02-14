@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script performs all of the steps needed to build a 
+# This script performs all of the steps needed to build a
 # universal binary libcurl.framework for Mac OS X 10.4 or greater.
 
 VERSION=`/usr/bin/sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' include/curl/curlver.h`
@@ -22,10 +22,10 @@ if test -d $SDK32; then
     CFLAGS="-Os -isysroot $SDK32 $ARCHES32 $MINVER32" \
     LDFLAGS="-Wl,-syslibroot,$SDK32 $ARCHES32 $MINVER32 -Wl,-headerpad_max_install_names" \
     CC=$CC
-  
+
   echo "----Building 32 bit libcurl..."
   make
-  
+
   echo "----Creating 32 bit framework..."
   rm -r libcurl.framework
   mkdir -p libcurl.framework/Versions/A/Resources
@@ -40,7 +40,7 @@ if test -d $SDK32; then
   ln -fs Versions/A/Headers Headers
   cd Versions
   ln -fs A Current
-  
+
   if test -d $SDK64; then
     popd
     make clean
@@ -49,10 +49,10 @@ if test -d $SDK32; then
       CFLAGS="-Os -isysroot $SDK64 $ARCHES64 $MINVER64" \
       LDFLAGS="-Wl,-syslibroot,$SDK64 $ARCHES64 $MINVER64 -Wl,-headerpad_max_install_names" \
       CC=$CC
-  
+
     echo "----Building 64 bit libcurl..."
     make
-  
+
     echo "----Appending 64 bit framework to 32 bit framework..."
     cp lib/.libs/libcurl.dylib libcurl.framework/Versions/A/libcurl64
     install_name_tool -id @executable_path/../Frameworks/libcurl.framework/Versions/A/libcurl libcurl.framework/Versions/A/libcurl64
@@ -69,7 +69,7 @@ if test -d $SDK32; then
 #endif
 EOF
   fi
-  
+
   lipo -info libcurl.framework/Versions/A/libcurl
   echo "libcurl.framework is built and can now be included in other projects."
   echo "Copy libcurl.framework to your bundle's Contents/Frameworks folder, ~/Library/Frameworks or /Library/Frameworks."

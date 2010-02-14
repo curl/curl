@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -92,7 +92,7 @@ sub valgrindparse {
                 # us use OpenSSL. OpenSSL produces numerous valgrind
                 # errors of this kind, rendering it impossible for us to
                 # detect (valid) reports on actual curl or libcurl code.
-                
+
                 if(!$sslenabled) {
                     $uninitedvar = 1;
                     $error++;

@@ -40,13 +40,13 @@ headers, and manual pages to develop applications using libcurl.
 
 %prep
 
-%setup -q -n %{tarball}-%{version} 
+%setup -q -n %{tarball}-%{version}
 
 %build
 cd %{curlroot} && (if [ -f configure.in ]; then mv -f configure.in configure.in.rpm; fi)
 %configure
 cd %{curlroot} && (if [ -f configure.in.rpm ]; then mv -f configure.in.rpm configure.in; fi)
-make 
+make
 
 %install
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}

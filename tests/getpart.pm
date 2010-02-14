@@ -199,7 +199,7 @@ sub showdiff {
 
     my $file1="$logdir/check-generated";
     my $file2="$logdir/check-expected";
-    
+
     open(TEMP, ">$file1");
     for(@$firstref) {
         print TEMP $_;

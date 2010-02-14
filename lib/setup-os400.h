@@ -1,5 +1,5 @@
-#ifndef __SETUP_OS400_H
-#define __SETUP_OS400_H
+#ifndef HEADER_CURL_SETUP_OS400_H
+#define HEADER_CURL_SETUP_OS400_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@ extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
                                              gss_flags_t req_flags,
                                              OM_uint32 time_req,
                                              gss_channel_bindings_t
-                                             input_chan_bindings,  
+                                             input_chan_bindings,
                                              gss_buffer_t input_token,
                                              gss_OID * actual_mech_type,
                                              gss_buffer_t output_token,
@@ -138,4 +138,4 @@ extern int Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
 #define recvfrom                Curl_os400_recvfrom
 
 
-#endif /* __SETUP_OS400_H */
+#endif /* HEADER_CURL_SETUP_OS400_H */

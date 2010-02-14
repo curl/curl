@@ -6,7 +6,7 @@ EXTRA_DIST = README
 # Read the README file for details on using this Makefile
 #
 # NOTE: As I'm not particularly familiar with Makefiles, this was the
-#  best I could come up with. It should probably be enhanced someday 
+#  best I could come up with. It should probably be enhanced someday
 #  to actually use the correct target and pre-requisite names, etc...
 #  If anyone else wants to volunteer, feel free ;-)
 #

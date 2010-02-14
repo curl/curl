@@ -435,7 +435,7 @@ Therefore the (probably undefined) contents of the buffer is NOT copied
 by the library. You should keep the associated storage available until
 libcurl no longer needs it. Failing to do so will cause very odd behavior
 or even crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP
-or you set the same option again to use a different pointer. 
+or you set the same option again to use a different pointer.
 
 Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
 debug/trace why errors happen.

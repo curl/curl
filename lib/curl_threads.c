@@ -45,7 +45,7 @@
 
 struct curl_actual_call {
   unsigned int (*func)(void *);
-  void *arg;  
+  void *arg;
 };
 
 static void *curl_thread_create_thunk(void *arg)

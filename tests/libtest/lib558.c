@@ -88,7 +88,7 @@ int test(char *URL)
   CURL *easyh = NULL;
   struct curl_hash *hp = NULL;
   int result = 0;
- 
+
   if(!strcmp(URL, "check")) {
     /* test harness script verifying if this test can run */
     return 0; /* sure, run this! */

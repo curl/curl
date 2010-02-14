@@ -1,5 +1,5 @@
-#ifndef __SRC_CURL_SETUP_H
-#define __SRC_CURL_SETUP_H
+#ifndef HEADER_CURL_SRC_SETUP_H
+#define HEADER_CURL_SRC_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -91,10 +91,10 @@
 #  endif
 #endif
 
-/* 
+/*
  * Include header files for windows builds before redefining anything.
- * Use this preproessor block only to include or exclude windows.h, 
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs 
+ * Use this preproessor block only to include or exclude windows.h,
+ * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
  * to any other further and independent block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
  * never be included when __CYGWIN__ is defined.  configure script takes
@@ -216,4 +216,4 @@ int fileno( FILE *stream);
 #include "setup_once.h"
 #endif
 
-#endif /* __SRC_CURL_SETUP_H */
+#endif /* HEADER_CURL_SRC_SETUP_H */

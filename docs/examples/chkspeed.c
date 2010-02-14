@@ -40,7 +40,7 @@
 static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
   /* we are not interested in the downloaded bytes itself,
-     so we only return the size we would have saved ... */  
+     so we only return the size we would have saved ... */
   return (size_t)(size * nmemb);
 }
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     for (argc--, argv++; *argv; argc--, argv++) {
       if (strncasecmp(*argv, "-", 1) == 0) {
         if (strncasecmp(*argv, "-H", 2) == 0) {
-          fprintf(stderr, 
+          fprintf(stderr,
                   "\rUsage: %s [-m=1|2|5|10|20|50|100] [-t] [-x] [url]\n",
                   appname);
           exit(1);

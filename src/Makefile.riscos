@@ -9,7 +9,7 @@ objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv o.rawstr o.nonblock
 
 # Compile options:
 linkopts	= ../lib/libcurl openldap:libraries/libldap/libldap -o curl
-compileropts	= -mpoke-function-name -IUtilLib: -mthrowback 
+compileropts	= -mpoke-function-name -IUtilLib: -mthrowback
 
 # Project target:
 curl:		$(objs)

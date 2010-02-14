@@ -28,7 +28,7 @@
  2.10 Document
  2.11 Test Cases
 
- 3. Pushing Out Your Changes 
+ 3. Pushing Out Your Changes
  3.1 Write Access to CVS Repository
  3.2 How To Make a Patch
  3.3 How to get your changes into the main sources
@@ -175,7 +175,7 @@
  test case that verifies that it works as documented. If every submitter also
  posts a few test cases, it won't end up as a heavy burden on a single person!
 
-3. Pushing Out Your Changes 
+3. Pushing Out Your Changes
 
 3.1 Write Access to CVS Repository
 

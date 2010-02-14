@@ -33,7 +33,7 @@ static CURLMcode perform(CURLM * multi)
 
   for (;;) {
     code = curl_multi_perform(multi, &handles);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;

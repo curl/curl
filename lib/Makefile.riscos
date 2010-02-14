@@ -20,7 +20,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 
 # Compile options:
 linkopts	= -o libcurl
-compileropts	= -mpoke-function-name -IUtilLib: -mthrowback 
+compileropts	= -mpoke-function-name -IUtilLib: -mthrowback
 
 # Project target:
 libcurl:		$(objs)

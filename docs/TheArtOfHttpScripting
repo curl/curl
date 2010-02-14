@@ -222,7 +222,7 @@ Date:    May 28, 2008
  The site might require a different authentication method (check the headers
  returned by the server), and then --ntlm, --digest, --negotiate or even
  --anyauth might be options that suit you.
- 
+
  Sometimes your HTTP access is only available through the use of a HTTP
  proxy. This seems to be especially common at various companies. A HTTP proxy
  may require its own user and password to allow the client to get through to
@@ -292,8 +292,8 @@ Date:    May 28, 2008
  such pages in the same manner it display all HTTP replies. It does however
  feature an option that will make it attempt to follow the Location: pointers.
 
- To tell curl to follow a Location: 
- 
+ To tell curl to follow a Location:
+
         curl -L www.sitethatredirects.com
 
  If you use curl to POST to a site that immediately redirects you to another

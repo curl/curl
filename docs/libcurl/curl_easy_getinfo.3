@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -217,10 +217,10 @@ Applications wishing to resume an RTSP session on another connection should
 retreive this info before closing the active connection.
 .IP CURLINFO_RTSP_CLIENT_CSEQ
 Pass a pointer to a long to receive the next CSeq that will be used by the
-application. 
+application.
 .IP CURLINFO_RTSP_SERVER_CSEQ
 Pass a pointer to a long to receive the next server CSeq that will be expected
-by the application. 
+by the application.
 
 \fI(NOTE: listening for server initiated requests is currently
 unimplemented).\fP

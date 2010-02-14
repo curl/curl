@@ -2,7 +2,7 @@
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;
 
-if ( $#ARGV < 1 ) 
+if ( $#ARGV < 1 )
 {
 	print "Usage: $0 prepare|postprocess dir [logfile]\n";
 	exit 1;

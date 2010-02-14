@@ -140,7 +140,7 @@ sub SplitURL {
 	    $getpath ="";
 	    $getdocument = $3;
 	}
-    
+
     }
     elsif ($inurl=~ /^([^:]+):\/\/(.*)/ ) {
 	$getprotocol = $1;
@@ -235,7 +235,7 @@ sub LinkWorks {
 	    return "GOOD";
 	}
 	else {
-	    
+
 	    if($head && ($error >= 500)) {
 		# This server doesn't like HEAD!
 		@doc = `$linkcheckfull \"$check\"`;
@@ -258,7 +258,7 @@ sub GetLinks {
 	my $tag = $1;
 	
 	if($tag =~ /^<!--/) {
-	    # this is a comment tag, ignore it 
+	    # this is a comment tag, ignore it
 	}
 	else {
 	    if($tag =~ /(src|href|background|archive) *= *(\"[^\"]\"|[^ \)>]*)/i) {
@@ -274,7 +274,7 @@ sub GetLinks {
 		if($url eq "") {
 		    # if the link was nothing than a #-link it may now have
 		    # been emptied completely so then we skip the rest
-		    next;		    
+		    next;
 		}
 
 		if($done{$url}) {
@@ -355,7 +355,7 @@ while(1) {
     #print "path = $getpath\n";
     #print "document = $getdocument\n";
     #exit;
-    
+
     #
     # Extracts all links from the given HTML buffer
     #
@@ -377,7 +377,7 @@ while(1) {
             if($external) {
                 next;
             }
-            
+
             # this is a link on the same server:
             if($url =~ /^\//) {
                 # from root
@@ -386,7 +386,7 @@ while(1) {
             else {
                 # from the scanned page's dir
                 my $nyurl=$url;
-                
+
                 if(length($getpath) &&
                    ($getpath !~ /\/$/) &&
                    ($nyurl !~ /^\//)) {
@@ -402,7 +402,7 @@ while(1) {
         my $count = $done{$url};
 
         $allcount += $count;
-        
+
         print "$success $count <".$tagtype{$url}."> $link $url\n";
 
         if("BAD" eq $success) {
@@ -430,7 +430,7 @@ while(1) {
                 $rooturls{$link}++; # check this if not checked already
             }
         }
-        
+
     }
 }
 

@@ -95,7 +95,7 @@ sub SplitURL {
 	    $getpath ="";
 	    $getdocument = $3;
 	}
-    
+
     }
     elsif ($inurl=~ /^([^:]+):\/\/(.*)/ ) {
 	$getprotocol = $1;
@@ -178,7 +178,7 @@ sub GetLinks {
 	$tag = $1;
 	
 	if($tag =~ /^<!--/) {
-	    # this is a comment tag, ignore it 
+	    # this is a comment tag, ignore it
 	}
 	else {
 	    if($tag =~ /(src|href|background|archive) *= *(\"[^\"]\"|[^ )>]*)/i) {
@@ -194,7 +194,7 @@ sub GetLinks {
 		if($url eq "") {
 		    # if the link was nothing than a #-link it may now have
 		    # been emptied completely so then we skip the rest
-		    next getlinkloop;		    
+		    next getlinkloop;
 		}
 
 		if($done{$url}) {
