@@ -652,7 +652,7 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
              max text width then! */
           cut = WARN_TEXTWIDTH-1;
 
-        fwrite(ptr, cut + 1, 1, config->errors);
+        (void)fwrite(ptr, cut + 1, 1, config->errors);
         fputs("\n", config->errors);
         ptr += cut+1; /* skip the space too */
         len -= cut;
@@ -3704,14 +3704,14 @@ int my_trace(CURL *handle, curl_infotype type,
           if(!newl) {
             fprintf(output, "%s%s ", timebuf, s_infotype[type]);
           }
-          fwrite(data+st, i-st+1, 1, output);
+          (void)fwrite(data+st, i-st+1, 1, output);
           st = i+1;
           newl = FALSE;
         }
       }
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      fwrite(data+st, i-st+1, 1, output);
+      (void)fwrite(data+st, i-st+1, 1, output);
       newl = (bool)(size && (data[size-1] != '\n'));
       traced_data = FALSE;
       break;
@@ -3719,7 +3719,7 @@ int my_trace(CURL *handle, curl_infotype type,
     case CURLINFO_HEADER_IN:
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      fwrite(data, size, 1, output);
+      (void)fwrite(data, size, 1, output);
       newl = (bool)(size && (data[size-1] != '\n'));
       traced_data = FALSE;
       break;
