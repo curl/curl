@@ -238,7 +238,10 @@ int getpart(char **outbuf, size_t *outlen,
   char *buffer = NULL;
   char *ptr;
   char *end;
-  size_t length;
+  union {
+    ssize_t sig;
+     size_t uns;
+  } len;
   size_t bufsize = 0;
   size_t outalloc = 256;
   int in_wanted_part = 0;
@@ -286,12 +289,12 @@ int getpart(char **outbuf, size_t *outlen,
       ptr++;
       end = ptr;
       EAT_WORD(end);
-      if((length = end - ptr) > MAX_TAG_LEN) {
+      if((len.sig = end - ptr) > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
-      memcpy(ptag, ptr, length);
-      ptag[length] = '\0';
+      memcpy(ptag, ptr, len.uns);
+      ptag[len.uns] = '\0';
 
       if((STATE_INSUB == state) && !strcmp(csub, ptag)) {
         /* end of current sub section */
@@ -333,12 +336,12 @@ int getpart(char **outbuf, size_t *outlen,
       /* get potential tag */
       end = ptr;
       EAT_WORD(end);
-      if((length = end - ptr) > MAX_TAG_LEN) {
+      if((len.sig = end - ptr) > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
-      memcpy(ptag, ptr, length);
-      ptag[length] = '\0';
+      memcpy(ptag, ptr, len.uns);
+      ptag[len.uns] = '\0';
 
       /* ignore comments, doctypes and xml declarations */
       if(('!' == ptag[0]) || ('?' == ptag[0])) {
@@ -352,12 +355,12 @@ int getpart(char **outbuf, size_t *outlen,
       end = ptr;
       while(*end && ('>' != *end))
         end++;
-      if((length = end - ptr) > MAX_TAG_LEN) {
+      if((len.sig = end - ptr) > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
-      memcpy(patt, ptr, length);
-      patt[length] = '\0';
+      memcpy(patt, ptr, len.uns);
+      patt[len.uns] = '\0';
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */

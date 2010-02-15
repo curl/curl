@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,16 +95,19 @@ size_t Curl_strlcat(char *dst, const char *src, size_t siz)
   char *d = dst;
   const char *s = src;
   size_t n = siz;
-  size_t dlen;
+  union {
+    ssize_t sig;
+     size_t uns;
+  } dlen;
 
   /* Find the end of dst and adjust bytes left but don't go past end */
   while(n-- != 0 && *d != '\0')
     d++;
-  dlen = d - dst;
-  n = siz - dlen;
+  dlen.sig = d - dst;
+  n = siz - dlen.uns;
 
   if(n == 0)
-    return(dlen + strlen(s));
+    return(dlen.uns + strlen(s));
   while(*s != '\0') {
     if(n != 1) {
       *d++ = *s;
@@ -114,6 +117,6 @@ size_t Curl_strlcat(char *dst, const char *src, size_t siz)
   }
   *d = '\0';
 
-  return(dlen + (s - src));     /* count does not include NUL */
+  return(dlen.uns + (s - src));     /* count does not include NUL */
 }
 #endif
