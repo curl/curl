@@ -578,10 +578,21 @@ static int ProcessRequest(struct httprequest *req)
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
-      size_t cl = strtol(line+15, &line, 10);
-      req->cl = cl - req->skip;
+      char *endptr;
+      char *ptr = line + 15;
+      unsigned long clen = 0;
+      while(*ptr && (' ' == *ptr))
+        ptr++;
+      clen = strtoul(ptr, &endptr, 10);
+      if((ptr == endptr) || ERRNO) {
+        /* this assumes that a zero Content-Length is valid */
+        logmsg("Found invalid Content-Length: (%s) in the request", ptr);
+        req->open = FALSE; /* closes connection */
+        return 1; /* done */
+      }
+      req->cl = clen - req->skip;
 
-      logmsg("Found Content-Length: %zu in the request", cl);
+      logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
         logmsg("... but will abort after %zu bytes", req->cl);
       break;
