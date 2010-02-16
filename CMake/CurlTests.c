@@ -503,7 +503,7 @@ main ()
 
 /* IoctlSocket source code */
     if(0 != IoctlSocket(0, 0, 0))
-	return 1;
+      return 1;
   ;
   return 0;
 }

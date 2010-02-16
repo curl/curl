@@ -6,12 +6,12 @@
 #  CARES_FOUND, If false, do not try to use c-ares.
 # also defined, but not for general use are
 # CARES_LIBRARY, where to find the c-ares library.
-	
+
 FIND_PATH(CARES_INCLUDE_DIR ares.h
   /usr/local/include
   /usr/include
   )
- 	
+ 
 SET(CARES_NAMES ${CARES_NAMES} cares)
 FIND_LIBRARY(CARES_LIBRARY
   NAMES ${CARES_NAMES}

@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-    			(curl_off_t)file_info.st_size);
+                     (curl_off_t)file_info.st_size);
 
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT

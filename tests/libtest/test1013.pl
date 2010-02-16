@@ -3,8 +3,8 @@
 # curl --version protocols/features
 if ( $#ARGV != 2 )
 {
-	print "Usage: $0 curl-config-script curl-version-output-file features|protocols\n";
-	exit 3;
+    print "Usage: $0 curl-config-script curl-version-output-file features|protocols\n";
+    exit 3;
 }
 
 my $what=$ARGV[2];
@@ -42,8 +42,8 @@ my $curlconfigproto = join ' ', @curl_config;
 
 my $different = $curlproto ne $curlconfigproto;
 if ($different) {
-	print "Mismatch in $what lists:\n";
-	print "curl:        $curlproto\n";
-	print "curl-config: $curlconfigproto\n";
+    print "Mismatch in $what lists:\n";
+    print "curl:        $curlproto\n";
+    print "curl-config: $curlconfigproto\n";
 }
 exit $different;

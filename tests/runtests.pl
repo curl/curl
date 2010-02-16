@@ -749,7 +749,7 @@ sub verifyftp {
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "ftps") {
-    	$extra .= "--insecure --ftp-ssl-control ";
+        $extra .= "--insecure --ftp-ssl-control ";
     }
     elsif($proto eq "smtp") {
         # SMTP is a bit different since it requires more options and it

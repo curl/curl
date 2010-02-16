@@ -12,7 +12,7 @@ line or use the curl interface.
 
 The latest release of Curl_easy, a Perl interface to curl is available from
 
-	http://curl.haxx.se/libcurl/perl/
+    http://curl.haxx.se/libcurl/perl/
 
 (Georg Horn's original version of Curl_easy, supporting curl versions
 before 7.7 is still available from: http://www.koblenz-net.de/~horn/export/ )

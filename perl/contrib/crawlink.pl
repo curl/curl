@@ -125,32 +125,32 @@ my $badlinks=0;
 sub SplitURL {
     my $inurl = $_[0];
     if($inurl=~ /^([^:]+):\/\/([^\/]*)\/(.*)\/(.*)/ ) {
-	$getprotocol = $1;
-	$getserver = $2;
-	$getpath = $3;
-	$getdocument = $4;
+        $getprotocol = $1;
+        $getserver = $2;
+        $getpath = $3;
+        $getdocument = $4;
     }
     elsif ($inurl=~ /^([^:]+):\/\/([^\/]*)\/(.*)/ ) {
-	$getprotocol = $1;
-	$getserver = $2;
-	$getpath = $3;
-	$getdocument = "";
-	
-	if($getpath !~ /\//) {
-	    $getpath ="";
-	    $getdocument = $3;
-	}
+        $getprotocol = $1;
+        $getserver = $2;
+        $getpath = $3;
+        $getdocument = "";
+    
+        if($getpath !~ /\//) {
+            $getpath ="";
+            $getdocument = $3;
+        }
 
     }
     elsif ($inurl=~ /^([^:]+):\/\/(.*)/ ) {
-	$getprotocol = $1;
-	$getserver = $2;
-	$getpath = "";
-	$getdocument = "";
+        $getprotocol = $1;
+        $getserver = $2;
+        $getpath = "";
+        $getdocument = "";
     }
     else {
-	print "Couldn't parse the specified URL, retry please!\n";
-	exit;
+        print "Couldn't parse the specified URL, retry please!\n";
+        exit;
     }
 }
 
@@ -164,35 +164,35 @@ sub GetRootPage {
 
     my $pagemoved=0;
     open(HEADGET, "$linkcheck $geturl|") ||
-	die "Couldn't get web page for some reason";
+        die "Couldn't get web page for some reason";
 
     while(<HEADGET>) {
-	#print STDERR $_;
-	if($_ =~ /HTTP\/1\.[01] (\d\d\d) /) {
+        #print STDERR $_;
+        if($_ =~ /HTTP\/1\.[01] (\d\d\d) /) {
             $code=$1;
             if($code =~ /^3/) {
                 $pagemoved=1;
             }
-	}
+        }
         elsif($_ =~ /^Content-Type: ([\/a-zA-Z]+)/) {
             $type=$1;
         }
-	elsif($pagemoved &&
-	       ($_ =~ /^Location: (.*)/)) {
-	    $geturl = $1;
+        elsif($pagemoved &&
+                ($_ =~ /^Location: (.*)/)) {
+            $geturl = $1;
 
-	    &SplitURL($geturl);
+            &SplitURL($geturl);
 
-	    $pagemoved++;
-	    last;
-	}
+            $pagemoved++;
+            last;
+        }
     }
     close(HEADGET);
 
     if($pagemoved == 1) {
-	print "Page is moved but we don't know where. Did you forget the ",
-	"traling slash?\n";
-	exit;
+        print "Page is moved but we don't know where. Did you forget the ",
+            "traling slash?\n";
+        exit;
     }
 
     if($type ne "text/html") {
@@ -229,21 +229,21 @@ sub LinkWorks {
 
   boo:
     if( $doc[0] =~ /^HTTP[^ ]+ (\d+)/ ) {
-	my $error = $1;
+        my $error = $1;
 
-	if($error < 400 ) {
-	    return "GOOD";
-	}
-	else {
+        if($error < 400 ) {
+            return "GOOD";
+        }
+        else {
 
-	    if($head && ($error >= 500)) {
-		# This server doesn't like HEAD!
-		@doc = `$linkcheckfull \"$check\"`;
-		$head = 0;
-		goto boo;
-	    }
-	    return "BAD";
-	}
+            if($head && ($error >= 500)) {
+                # This server doesn't like HEAD!
+                @doc = `$linkcheckfull \"$check\"`;
+                $head = 0;
+                goto boo;
+            }
+            return "BAD";
+        }
     }
     return "BAD";
 }
@@ -254,45 +254,45 @@ sub GetLinks {
     my @result;
 
     while($in =~ /[^<]*(<[^>]+>)/g ) {
-	# we have a tag in $1
-	my $tag = $1;
-	
-	if($tag =~ /^<!--/) {
-	    # this is a comment tag, ignore it
-	}
-	else {
-	    if($tag =~ /(src|href|background|archive) *= *(\"[^\"]\"|[^ \)>]*)/i) {
-   	        my $url=$2;
-		if($url =~ /^\"(.*)\"$/) {
-		    # this was a "string" now $1 has removed the quotes:
-		    $url=$1;
-		}
+        # we have a tag in $1
+        my $tag = $1;
+    
+        if($tag =~ /^<!--/) {
+            # this is a comment tag, ignore it
+        }
+        else {
+            if($tag =~ /(src|href|background|archive) *= *(\"[^\"]\"|[^ \)>]*)/i) {
+                my $url=$2;
+                if($url =~ /^\"(.*)\"$/) {
+                    # this was a "string" now $1 has removed the quotes:
+                    $url=$1;
+                }
 
 
-		$url =~ s/([^\#]*)\#.*/$1/g;
+                $url =~ s/([^\#]*)\#.*/$1/g;
 
-		if($url eq "") {
-		    # if the link was nothing than a #-link it may now have
-		    # been emptied completely so then we skip the rest
-		    next;
-		}
+                if($url eq "") {
+                    # if the link was nothing than a #-link it may now have
+                    # been emptied completely so then we skip the rest
+                    next;
+                }
 
-		if($done{$url}) {
-		    # if this url already is done, do next
-		    $done{$url}++;
+                if($done{$url}) {
+                    # if this url already is done, do next
+                    $done{$url}++;
                     if($verbose) {
                         print " FOUND $url but that is already checked\n";
                     }
-		    next;
-		}
+                    next;
+                }
 
-		$done{$url} = 1; # this is "done"
+                $done{$url} = 1; # this is "done"
 
-	        push @result, $url;
-		if($tag =~ /< *([^ ]+)/) {
-		    $tagtype{$url}=$1;
-		}
-	    }
+                push @result, $url;
+                if($tag =~ /< *([^ ]+)/) {
+                    $tagtype{$url}=$1;
+                }
+            }
         }
     }
     return @result;
@@ -437,7 +437,7 @@ while(1) {
 if($verbose) {
     print "$allcount links were checked";
     if($badlinks > 0) {
-	print ", $badlinks were found bad";
+        print ", $badlinks were found bad";
     }
     print "\n";
 }

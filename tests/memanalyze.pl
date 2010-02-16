@@ -117,7 +117,7 @@ while(<FILE>) {
             if($sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile ($source:$linenum at line $lnum), rebuild curl now\n";
-		print "We think $sizeataddr{$addr} bytes are already allocated at that memory address: $addr!\n";
+                print "We think $sizeataddr{$addr} bytes are already allocated at that memory address: $addr!\n";
             }
 
             $sizeataddr{$addr}=$size;

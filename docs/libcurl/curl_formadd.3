@@ -165,8 +165,8 @@ to a CURL_FORMADD_* constant defined in
 
  /* Add ptrname/ptrcontent section */
  curl_formadd(&post, &last, CURLFORM_PTRNAME, namebuffer,
-	      CURLFORM_PTRCONTENTS, buffer, CURLFORM_NAMELENGTH,
-	      namelength, CURLFORM_END);
+              CURLFORM_PTRCONTENTS, buffer, CURLFORM_NAMELENGTH,
+              namelength, CURLFORM_END);
 
  /* Add name/ptrcontent/contenttype section */
  curl_formadd(&post, &last, CURLFORM_COPYNAME, "html_code_with_hole",

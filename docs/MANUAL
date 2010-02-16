@@ -46,7 +46,7 @@ SIMPLE USAGE
   Get a file from an SSH server using SCP using a private key to authenticate:
 
         curl -u username: --key ~/.ssh/id_dsa --pubkey ~/.ssh/id_dsa.pub \
-        	scp://shell.example.com/~/personal.txt
+            scp://shell.example.com/~/personal.txt
 
   Get the main page from an IPv6 web server:
 

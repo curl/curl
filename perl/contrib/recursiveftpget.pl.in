@@ -51,7 +51,7 @@ for(@all) {
         }
         print "Recursing for dir $dir$name in target $target/$name\n";
 
-	$nextdepth=$maxdepth-1;
+        $nextdepth=$maxdepth-1;
         print `$0 $dir$name/ $target/$name $nextdepth`;
     }
     elsif($firstletter eq "-") {

@@ -74,7 +74,7 @@ while(<STDIN>) {
 while($in =~ /[^<]*(<[^>]+>)/g ) {
     # we have a tag in $1
     $tag = $1;
-	
+
     if($tag =~ /^<!--/) {
         # this is a comment tag, ignore it
     }
@@ -99,7 +99,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
 
                 if($enctype eq "multipart/form-data") {
                     $enctype="multipart form upload [use -F]"
-		    }
+                }
                 $enctype = "\n--- type: $enctype";
             }
             else {
@@ -134,7 +134,7 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
             $mtag = $1;
 
             ($name, $value)=namevalue($tag);
-		
+
             if($mtag =~ /select/i) {
                 print "Select: NAME=\"$name\"\n";
                 push @vars, "$name";

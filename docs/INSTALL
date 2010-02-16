@@ -672,8 +672,8 @@ eCos
    of running curl in this way is the contents of the configuration file
    printed to the console.
 
---- src/main.c	19 Jul 2006 19:09:56 -0000	1.363
-+++ src/main.c	24 Jul 2006 21:37:23 -0000
+--- src/main.c  19 Jul 2006 19:09:56 -0000    1.363
++++ src/main.c  24 Jul 2006 21:37:23 -0000
 @@ -4286,11 +4286,31 @@
  }
 
@@ -808,10 +808,10 @@ CROSS COMPILE
    export NM=ppc_405-nm
 
    ./configure --target=powerpc-hardhat-linux \
-	--host=powerpc-hardhat-linux \
-	--build=i586-pc-linux-gnu \
-	--prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
-	--exec-prefix=/usr/local
+        --host=powerpc-hardhat-linux \
+        --build=i586-pc-linux-gnu \
+        --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
+        --exec-prefix=/usr/local
 
    (end script)
 

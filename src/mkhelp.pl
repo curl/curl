@@ -20,10 +20,10 @@ if($README eq "") {
 }
 
 
-push @out, "                                  _   _ ____  _     \n";
-push @out, "  Project                     ___| | | |  _ \\| |    \n";
-push @out, "                             / __| | | | |_) | |    \n";
-push @out, "                            | (__| |_| |  _ <| |___ \n";
+push @out, "                                  _   _ ____  _\n";
+push @out, "  Project                     ___| | | |  _ \\| |\n";
+push @out, "                             / __| | | | |_) | |\n";
+push @out, "                            | (__| |_| |  _ <| |___\n";
 push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
 
 my $olen=0;
@@ -35,8 +35,8 @@ while (<STDIN>) {
 
     if($line =~ /^([ \t]*\n|curl)/i) {
         # cut off headers and empty lines
-	$wline++; # count number of cut off lines
-	next;
+        $wline++; # count number of cut off lines
+        next;
     }
 
     my $text = $line;
@@ -57,8 +57,8 @@ while (<STDIN>) {
     $olen = $tlen;
 
     if($wline) {
-	# we only make one empty line max
-	$wline = 0;
+        # we only make one empty line max
+        $wline = 0;
         push @out, "\n";
     }
     push @out, $line;
@@ -174,12 +174,12 @@ void hugehelp(void)
       z.next_out = buf;
       status = inflate(&z, Z_SYNC_FLUSH);
       if (status == Z_OK || status == Z_STREAM_END) {
-	fwrite(buf, BUF_SIZE - z.avail_out, 1, stdout);
-	if (status == Z_STREAM_END)
-	   break;
+        fwrite(buf, BUF_SIZE - z.avail_out, 1, stdout);
+        if (status == Z_STREAM_END)
+          break;
       }
-       else
-	break;    /* Error */
+      else
+        break;    /* Error */
     }
     free(buf);
   }
