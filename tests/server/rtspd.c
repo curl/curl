@@ -581,10 +581,12 @@ static int ProcessRequest(struct httprequest *req)
       char *endptr;
       char *ptr = line + 15;
       unsigned long clen = 0;
-      while(*ptr && (' ' == *ptr))
+      while(*ptr && ISSPACE(*ptr))
         ptr++;
+      endptr = ptr;
+      SET_ERRNO(0);
       clen = strtoul(ptr, &endptr, 10);
-      if((ptr == endptr) || ERRNO) {
+      if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == ERRNO)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid Content-Length: (%s) in the request", ptr);
         req->open = FALSE; /* closes connection */
