@@ -1,6 +1,11 @@
 TODO
 ====
 
+ares_reinit()
+
+- To allow an app to force a re-read of /etc/resolv.conf etc, pretty much
+  like the res_init() resolver function offers
+
 ares_gethostbyname
 
 - When built to support IPv6, it needs to also support PF_UNSPEC or similar,
