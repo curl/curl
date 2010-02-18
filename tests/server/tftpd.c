@@ -709,15 +709,14 @@ int main(int argc, char **argv)
       arg++;
       if(argc>arg) {
         char *endptr;
-        long lnum = -1;
-        lnum = strtol(argv[arg], &endptr, 10);
+        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (lnum < 1025L) || (lnum > 65535L)) {
+           (ulnum < 1025UL) || (ulnum > 65535UL)) {
           fprintf(stderr, "tftpd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = (unsigned short)(lnum & 0xFFFFL);
+        port = (unsigned short)(ulnum & 0xFFFFUL);
         arg++;
       }
     }
