@@ -108,6 +108,7 @@ C_SRC += timeval.c
 C_SRC += transfer.c
 C_SRC += url.c
 C_SRC += version.c
+C_SRC += warnless.c
 
 #######################################################################
 # Additions and overrides for gcc compiler flags

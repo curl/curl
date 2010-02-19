@@ -15,7 +15,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
 	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp \
-	o.curl_threads
+	o.curl_threads o.warnless
 
 
 # Compile options:
@@ -191,3 +191,6 @@ o.url:	c.url
 
 o.version:	c.version
 		gcc $(compileropts) -c -o version.o c.version
+
+o.warnless:	c.warnless
+		gcc $(compileropts) -c -o warnless.o c.warnless

@@ -517,6 +517,7 @@ X_OBJS= \
 	$(DIROBJ)\transfer.obj \
 	$(DIROBJ)\url.obj \
 	$(DIROBJ)\version.obj \
+	$(DIROBJ)\warnless.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

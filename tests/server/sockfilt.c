@@ -110,6 +110,7 @@
 #include "getpart.h"
 #include "inet_pton.h"
 #include "util.h"
+#include "warnless.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -898,7 +899,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        port = (unsigned short)(ulnum & 0xFFFFUL);
+        port = Curl_ultous(ulnum);
         arg++;
       }
     }
@@ -915,7 +916,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        connectport = (unsigned short)(ulnum & 0xFFFFUL);
+        connectport = Curl_ultous(ulnum);
         arg++;
       }
     }
