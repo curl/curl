@@ -222,7 +222,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
     return NULL;
 
   if(ptr)
-    mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
+    mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
 
   mem = (Curl_crealloc)(mem, size);
   if(source)
@@ -243,7 +243,7 @@ void curl_dofree(void *ptr, int line, const char *source)
 
   assert(ptr != NULL);
 
-  mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
+  mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
 
   /* destroy  */
   memset(mem->mem, 0x13, mem->size);

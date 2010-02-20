@@ -911,7 +911,7 @@ static int dprintf_formatf(
           static const char strnil[] = "(nil)";
           const char *point;
 
-          width -= sizeof(strnil) - 1;
+          width -= (long)(sizeof(strnil) - 1);
           if(p->flags & FLAGS_LEFT)
             while(width-- > 0)
               OUTCHAR(' ');

@@ -54,22 +54,28 @@ static const char table64[]=
 
 static void decodeQuantum(unsigned char *dest, const char *src)
 {
-  unsigned int x = 0;
+  unsigned long x = 0;
   int i;
   char *found;
+  union {
+    unsigned long uns;
+             long sig;
+  } offset;
 
   for(i = 0; i < 4; i++) {
-    if((found = strchr(table64, src[i])) != NULL)
-      x = (x << 6) + (unsigned int)(found - table64);
+    if((found = strchr(table64, src[i])) != NULL) {
+      offset.sig = found - table64;
+      x = (x << 6) + offset.uns;
+    }
     else if(src[i] == '=')
       x = (x << 6);
   }
 
-  dest[2] = (unsigned char)(x & 255);
+  dest[2] = (unsigned char)(x & 0xFFUL);
   x >>= 8;
-  dest[1] = (unsigned char)(x & 255);
+  dest[1] = (unsigned char)(x & 0xFFUL);
   x >>= 8;
-  dest[0] = (unsigned char)(x & 255);
+  dest[0] = (unsigned char)(x & 0xFFUL);
 }
 
 /*
