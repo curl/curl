@@ -54,12 +54,12 @@ static const char table64[]=
 
 static void decodeQuantum(unsigned char *dest, const char *src)
 {
-  unsigned long x = 0;
+  size_t x = 0;
   int i;
   char *found;
   union {
-    unsigned long uns;
-             long sig;
+    ssize_t sig;
+     size_t uns;
   } offset;
 
   for(i = 0; i < 4; i++) {
@@ -71,11 +71,11 @@ static void decodeQuantum(unsigned char *dest, const char *src)
       x = (x << 6);
   }
 
-  dest[2] = (unsigned char)(x & 0xFFUL);
+  dest[2] = (unsigned char)(x & (size_t)0xFFUL);
   x >>= 8;
-  dest[1] = (unsigned char)(x & 0xFFUL);
+  dest[1] = (unsigned char)(x & (size_t)0xFFUL);
   x >>= 8;
-  dest[0] = (unsigned char)(x & 0xFFUL);
+  dest[0] = (unsigned char)(x & (size_t)0xFFUL);
 }
 
 /*
@@ -199,7 +199,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
     for (i = inputparts = 0; i < 3; i++) {
       if(insize > 0) {
         inputparts++;
-        ibuf[i] = *indata;
+        ibuf[i] = (unsigned char) *indata;
         indata++;
         insize--;
       }
