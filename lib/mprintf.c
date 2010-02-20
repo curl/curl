@@ -871,7 +871,7 @@ static int dprintf_formatf(
           len = strlen(str);
 
         if(prec != -1 && (size_t) prec < len)
-          len = prec;
+          len = (size_t)prec;
         width -= (long)len;
 
         if(p->flags & FLAGS_ALT)

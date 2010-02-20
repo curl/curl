@@ -80,12 +80,12 @@ static void decodeQuantum(unsigned char *dest, const char *src)
  */
 size_t Curl_base64_decode(const char *src, unsigned char **outptr)
 {
-  int length = 0;
-  int equalsTerm = 0;
-  int i;
-  int numQuantums;
+  size_t length = 0;
+  size_t equalsTerm = 0;
+  size_t i;
+  size_t numQuantums;
   unsigned char lastQuantum[3];
-  size_t rawlen=0;
+  size_t rawlen = 0;
   unsigned char *newstr;
 
   *outptr = NULL;
@@ -101,7 +101,7 @@ size_t Curl_base64_decode(const char *src, unsigned char **outptr)
   numQuantums = (length + equalsTerm) / 4;
 
   /* Don't allocate a buffer if the decoded length is 0 */
-  if(numQuantums <= 0)
+  if(numQuantums == 0)
     return 0;
 
   rawlen = (numQuantums * 3) - equalsTerm;
@@ -128,7 +128,7 @@ size_t Curl_base64_decode(const char *src, unsigned char **outptr)
   for(i = 0; i < 3 - equalsTerm; i++)
     newstr[i] = lastQuantum[i];
 
-  newstr[i] = 0; /* zero terminate */
+  newstr[i] = '\0'; /* zero terminate */
   return rawlen;
 }
 
