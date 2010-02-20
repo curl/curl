@@ -719,7 +719,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
       }
-      infof(data, "SSH authentication methods available: %s\n", sshc->authlist);
+      infof(data, "SSH authentication methods available: %s\n",
+            sshc->authlist);
 
       state(conn, SSH_AUTH_PKEY_INIT);
       break;
@@ -1187,8 +1188,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     case SSH_SFTP_QUOTE_STAT:
       if(!curl_strnequal(sshc->quote_item->data, "chmod", 5)) {
         /* Since chown and chgrp only set owner OR group but libssh2 wants to
-         * set them both at once, we need to obtain the current ownership first.
-         * This takes an extra protocol round trip.
+         * set them both at once, we need to obtain the current ownership
+         * first.  This takes an extra protocol round trip.
          */
         rc = libssh2_sftp_stat(sshc->sftp_session, sshc->quote_path2,
                                &sshc->quote_attrs);
@@ -1950,7 +1951,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
 
-      /* FIXME: here should be explained why we need it to start the download */
+      /* FIXME: here should be explained why we need it to start the
+       * download */
       conn->cselect_bits = CURL_CSELECT_IN;
     }
     if(result) {
@@ -2127,7 +2129,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
 
-      /* FIXME: here should be explained why we need it to start the download */
+      /* FIXME: here should be explained why we need it to start the
+       * download */
       conn->cselect_bits = CURL_CSELECT_IN;
 
       if(result) {
@@ -2412,7 +2415,8 @@ static CURLcode ssh_init(struct connectdata *conn)
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   sshc->actualcode = CURLE_OK; /* reset error code */
-  sshc->secondCreateDirs =0;   /* reset the create dir attempt state variable */
+  sshc->secondCreateDirs =0;   /* reset the create dir attempt state
+                                  variable */
 
   if(data->state.proto.ssh)
     return CURLE_OK;
@@ -2601,8 +2605,8 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
   return res;
 }
 
-/* BLOCKING, but the function is using the state machine so the only reason this
-   is still blocking is that the multi interface code has no support for
+/* BLOCKING, but the function is using the state machine so the only reason
+   this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
 static CURLcode scp_disconnect(struct connectdata *conn)
 {
@@ -2633,8 +2637,8 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   if(status == CURLE_OK) {
     /* run the state-machine
 
-       TODO: when the multi interface this _really_ should be using the
-       ssh_multi_statemach function but we have no general support for
+       TODO: when the multi interface is used, this _really_ should be using
+       the ssh_multi_statemach function but we have no general support for
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
@@ -2759,8 +2763,8 @@ static CURLcode sftp_doing(struct connectdata *conn,
   return result;
 }
 
-/* BLOCKING, but the function is using the state machine so the only reason this
-   is still blocking is that the multi interface code has no support for
+/* BLOCKING, but the function is using the state machine so the only reason
+   this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
 static CURLcode sftp_disconnect(struct connectdata *conn)
 {
@@ -2789,7 +2793,8 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   if(status == CURLE_OK) {
-    /* Before we shut down, see if there are any post-quote commands to send: */
+    /* Before we shut down, see if there are any post-quote commands to
+       send: */
     if(!status && !premature && conn->data->set.postquote) {
       sshc->nextstate = SSH_SFTP_CLOSE;
       state(conn, SSH_SFTP_POSTQUOTE_INIT);
