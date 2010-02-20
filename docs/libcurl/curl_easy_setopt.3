@@ -1092,6 +1092,10 @@ SMTP mail request.  The linked list should be a fully valid list of \fBstruct
 curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
 create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire list.
 
+Each recipient in SMTP lingo is specified with angle brackets (<>), but should
+you not use an angle bracket as first letter libcurl will assume you provide a
+single email address only and enclose that with angle brackets for you.
+
 (Added in 7.20.0)
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE

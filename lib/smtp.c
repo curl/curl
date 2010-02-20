@@ -330,6 +330,25 @@ static CURLcode smtp_mail(struct connectdata *conn)
   return result;
 }
 
+static CURLcode smtp_rcpt_to(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+
+  /* send RCPT TO */
+  if(smtpc->rcpt) {
+    if(smtpc->rcpt->data[0] == '<')
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
+                             smtpc->rcpt->data);
+    else
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
+                             smtpc->rcpt->data);
+    if(!result)
+      state(conn, SMTP_RCPT);
+  }
+  return result;
+}
+
 /* for MAIL responses */
 static CURLcode smtp_state_mail_resp(struct connectdata *conn,
                                      int smtpcode,
@@ -346,19 +365,11 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
   }
   else {
     struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-    /* send RCPT TO */
     smtpc->rcpt = data->set.mail_rcpt;
 
-    if(smtpc->rcpt) {
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtpc->rcpt->data);
-      if(result)
-        return result;
-    }
-
-    state(conn, SMTP_RCPT);
+    result = smtp_rcpt_to(conn);
   }
+
   return result;
 }
 
@@ -379,16 +390,13 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
   else {
     struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-    /* one RCPT is done, but if there's one more to send go on */
-    smtpc->rcpt = smtpc->rcpt->next;
     if(smtpc->rcpt) {
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtpc->rcpt->data);
-      if(result)
-        return result;
+      smtpc->rcpt = smtpc->rcpt->next;
+      result = smtp_rcpt_to(conn);
 
-      state(conn, SMTP_RCPT);
-      return CURLE_OK;
+      /* if we failed or still is in RCPT sending, return */
+      if(result || smtpc->rcpt)
+        return result;
     }
 
     /* send DATA */
@@ -432,8 +440,6 @@ static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 

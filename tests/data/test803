@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 803@foo --mail-from 803@from -T -
 <protocol>
 EHLO user
 MAIL FROM:803@from
-RCPT TO:803@foo
+RCPT TO:<803@foo>
 DATA
 QUIT
 </protocol>

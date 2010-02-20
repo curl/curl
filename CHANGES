@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (20 Feb 2010)
+- Fixed the SMTP compliance by making sure RCPT TO addresses are specified
+  properly in angle brackets. Recipients provided with CURLOPT_MAIL_RCPT now
+  get angle bracket wrapping automatically by libcurl unless the recipient
+  starts with an angle bracket as then the app is assumed to deal with that
+  properly on its own.
+
 - I made the SMTP code expect a 250 response back from the server after the
   full DATA has been sent, and I modified the test SMTP server to also send
   that response. As usual, the DONE operation that is made after a completed

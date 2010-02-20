@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o fixed the CURL_FORMAT_* defines when building with cmake
  o missing quote in libcurl.m4
  o SMTP: now waits for 250 after the DATA transfer
+ o SMTP: use angle brackets in RCPT TO
 
 This release includes the following known bugs:
 

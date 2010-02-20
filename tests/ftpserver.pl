@@ -482,12 +482,12 @@ sub DATA_smtp {
         return; # failure
     }
 
-    if($testno eq "verifiedserver") {
+    if($testno eq "<verifiedserver>") {
         sendcontrol "554 WE ROOLZ: $$\r\n";
         return 0; # don't wait for data now
     }
     else {
-        $testno =~ s/^([0-9]*).*/$1/;
+        $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
         sendcontrol "354 Show me the mail\r\n";
     }
 
