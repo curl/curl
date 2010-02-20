@@ -37,6 +37,7 @@ typedef enum {
   SMTP_MAIL, /* MAIL FROM */
   SMTP_RCPT, /* RCPT TO */
   SMTP_DATA,
+  SMTP_POSTDATA,
   SMTP_QUIT,
   SMTP_LAST  /* never used */
 } smtpstate;

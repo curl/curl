@@ -545,6 +545,7 @@ sub DATA_smtp {
         print FILE "$ulsize bytes would've been stored here\n";
     }
     close(FILE);
+    sendcontrol "250 OK, data received!\r\n";
     logmsg "received $ulsize bytes upload\n";
 
 }

@@ -232,6 +232,7 @@ static void state(struct connectdata *conn,
     "MAIL",
     "RCPT",
     "DATA",
+    "POSTDATA",
     "QUIT",
     /* LAST */
   };
@@ -424,6 +425,25 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
   return result;
 }
 
+/* for the POSTDATA response, which is received after the entire DATA
+   part has been sent off to the server */
+static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
+                                     int smtpcode,
+                                     smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct FTP *smtp = data->state.proto.smtp;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 250)
+    result = CURLE_RECV_ERROR;
+
+  state(conn, SMTP_STOP);
+  return result;
+}
+
 static CURLcode smtp_statemach_act(struct connectdata *conn)
 {
   CURLcode result;
@@ -482,6 +502,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 
     case SMTP_DATA:
       result = smtp_state_data_resp(conn, smtpcode, smtpc->state);
+      break;
+
+    case SMTP_POSTDATA:
+      result = smtp_state_postdata_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_QUIT:
@@ -690,6 +714,19 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
                         SMTP_EOB,           /* buffer pointer */
                         SMTP_EOB_LEN,       /* buffer size */
                         &bytes_written);    /* actually sent away */
+
+
+  if(status == CURLE_OK) {
+    state(conn, SMTP_POSTDATA);
+    /* run the state-machine
+
+       TODO: when the multi interface is used, this _really_ should be using
+       the smtp_multi_statemach function but we have no general support for
+       non-blocking DONE operations, not in the multi state machine and with
+       Curl_done() invokes on several places in the code!
+    */
+    result = smtp_easy_statemach(conn);
+  }
 
   /* clear these for next connection */
   smtp->transfer = FTPTRANSFER_BODY;

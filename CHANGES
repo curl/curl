@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (20 Feb 2010)
+- I made the SMTP code expect a 250 response back from the server after the
+  full DATA has been sent, and I modified the test SMTP server to also send
+  that response. As usual, the DONE operation that is made after a completed
+  transfer is still not doable in a non-blocking way so this waiting for 250
+  is unfortunately made blockingly.
+
 Yang Tse (14 Feb 2010)
 - Overhauled test suite getpart() function. Fixing potential out of bounds
   stack and memory overwrites triggered with huge test case definitions.
