@@ -45,7 +45,17 @@ void ares_free_data(void *dataptr)
   if (!dataptr)
     return;
 
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:1684)
+   /* 1684: conversion from pointer to same-sized integral type */
+#endif
+
   ptr = (void *)((char *)dataptr - offsetof(struct ares_data, data));
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
 
   if (ptr->mark != ARES_DATATYPE_MARK)
     return;
@@ -134,7 +144,17 @@ ares_datatype ares_get_datatype(void * dataptr)
 {
   struct ares_data *ptr;
 
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:1684)
+   /* 1684: conversion from pointer to same-sized integral type */
+#endif
+
   ptr = (void *)((char *)dataptr - offsetof(struct ares_data, data));
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
 
   if (ptr->mark == ARES_DATATYPE_MARK)
     return ptr->type;

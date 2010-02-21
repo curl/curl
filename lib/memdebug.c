@@ -221,8 +221,18 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
   if(countcheck("realloc", line, source))
     return NULL;
 
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:1684)
+   /* 1684: conversion from pointer to same-sized integral type */
+#endif
+
   if(ptr)
     mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
 
   mem = (Curl_crealloc)(mem, size);
   if(source)
@@ -243,7 +253,17 @@ void curl_dofree(void *ptr, int line, const char *source)
 
   assert(ptr != NULL);
 
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:1684)
+   /* 1684: conversion from pointer to same-sized integral type */
+#endif
+
   mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
 
   /* destroy  */
   memset(mem->mem, 0x13, mem->size);
