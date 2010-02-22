@@ -66,7 +66,10 @@ This document lists documents and standards used by curl.
 
   RFC 2818 - HTTP Over TLS (TLS is the successor to SSL)
 
+  RFC 2821 - SMTP protocol
+
   RFC 2964 - Use of HTTP State Management
 
   RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 
+  RFC 3207 - SMTP over TLS

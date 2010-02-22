@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Patrick Monnerat (22 Feb 2010)
+- Proper handling of STARTTLS on SMTP, taking CURLUSESSL_TRY into account.
+- SMTP falls back to RFC821 HELO when EHLO fails (and SSL is not required).
+- Use of true local host name (i.e.: via gethostname()) when available, as
+  default argument to SMTP HELO/EHLO.
+- Test case 804 for HELO fallback.
+
 Daniel Stenberg (20 Feb 2010)
 - Fixed the SMTP compliance by making sure RCPT TO addresses are specified
   properly in angle brackets. Recipients provided with CURLOPT_MAIL_RCPT now

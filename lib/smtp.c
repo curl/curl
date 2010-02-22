@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  * RFC2821 SMTP protocol
+ * RFC3207 SMTP over TLS
  *
  * $Id$
  ***************************************************************************/
@@ -228,6 +229,7 @@ static void state(struct connectdata *conn,
     "STOP",
     "SERVERGREET",
     "EHLO",
+    "HELO",
     "STARTTLS",
     "MAIL",
     "RCPT",
@@ -253,11 +255,26 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
 
   /* send EHLO */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "EHLO %s", smtpc->domain);
+
   if(result)
     return result;
 
   state(conn, SMTP_EHLO);
+  return CURLE_OK;
+}
 
+static CURLcode smtp_state_helo(struct connectdata *conn)
+{
+  CURLcode result;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+
+  /* send HELO */
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "HELO %s", smtpc->domain);
+
+  if(result)
+    return result;
+
+  state(conn, SMTP_HELO);
   return CURLE_OK;
 }
 
@@ -278,9 +295,13 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   (void)instate; /* no use for this yet */
 
-  if(smtpcode != 'O') {
-    failf(data, "STARTTLS denied. %c", smtpcode);
-    result = CURLE_LOGIN_DENIED;
+  if(smtpcode != 220) {
+    if(data->set.ftp_ssl == CURLUSESSL_TRY)
+      state(conn, SMTP_STOP);
+    else {
+      failf(data, "STARTTLS denied. %c", smtpcode);
+      result = CURLE_LOGIN_DENIED;
+    }
   }
   else {
     /* Curl_ssl_connect is BLOCKING */
@@ -290,7 +311,6 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
       result = smtp_state_ehlo(conn);
     }
   }
-  state(conn, SMTP_STOP);
   return result;
 }
 
@@ -305,12 +325,44 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
+    if(data->set.ftp_ssl > CURLUSESSL_TRY && !conn->ssl[FIRSTSOCKET].use)
+      result = smtp_state_helo(conn);
+    else {
+      failf(data, "Access denied: %d", smtpcode);
+      result = CURLE_LOGIN_DENIED;
+    }
+  } 
+  else if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
+       to TLS connection now */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS", NULL);
+    state(conn, SMTP_STARTTLS);
+  }
+  else {
+    /* end the connect phase */
+    state(conn, SMTP_STOP);
+  }
+  return result;
+}
+
+/* for HELO responses */
+static CURLcode smtp_state_helo_resp(struct connectdata *conn,
+                                     int smtpcode,
+                                     smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode/100 != 2) {
     failf(data, "Access denied: %d", smtpcode);
     result = CURLE_LOGIN_DENIED;
+  } 
+  else {
+    /* end the connect phase */
+    state(conn, SMTP_STOP);
   }
-
-  /* end the connect phase */
-  state(conn, SMTP_STOP);
   return result;
 }
 
@@ -478,20 +530,17 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
         return CURLE_FTP_WEIRD_SERVER_REPLY;
       }
 
-      if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
-        /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-           to TLS connection now */
-        result = Curl_pp_sendf(&smtpc->pp, "STARTTLS", NULL);
-        state(conn, SMTP_STARTTLS);
-      }
-      else
-        result = smtp_state_ehlo(conn);
+      result = smtp_state_ehlo(conn);
       if(result)
         return result;
       break;
 
     case SMTP_EHLO:
       result = smtp_state_ehlo_resp(conn, smtpcode, smtpc->state);
+      break;
+
+    case SMTP_HELO:
+      result = smtp_state_helo_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_MAIL:
@@ -597,6 +646,10 @@ static CURLcode smtp_connect(struct connectdata *conn,
   const char *path = conn->data->state.path;
   int len;
 
+#ifdef HAVE_GETHOSTNAME
+    char localhost[1024 + 1];
+#endif
+
   *done = FALSE; /* default to not done yet */
 
   /* If there already is a protocol-specific struct allocated for this
@@ -660,8 +713,14 @@ static CURLcode smtp_connect(struct connectdata *conn,
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
-  if(!*path)
+  if(!*path) {
+#ifdef HAVE_GETHOSTNAME
+    if(!gethostname(localhost, sizeof localhost))
+      path = localhost;
+    else
+#endif
     path = "localhost";
+  }
 
   /* url decode the path and use it as domain with EHLO */
   smtpc->domain = curl_easy_unescape(conn->data, path, 0, &len);

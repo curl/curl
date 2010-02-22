@@ -33,6 +33,7 @@ typedef enum {
   SMTP_SERVERGREET, /* waiting for the initial greeting immediately after
                        a connect */
   SMTP_EHLO,
+  SMTP_HELO,
   SMTP_STARTTLS,
   SMTP_MAIL, /* MAIL FROM */
   SMTP_RCPT, /* RCPT TO */
