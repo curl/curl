@@ -275,38 +275,53 @@ void curl_dofree(void *ptr, int line, const char *source)
     curl_memlog("MEM %s:%d free(%p)\n", source, line, ptr);
 }
 
-int curl_socket(int domain, int type, int protocol, int line,
-                const char *source)
+curl_socket_t curl_socket(int domain, int type, int protocol,
+                          int line, const char *source)
 {
-  int sockfd=socket(domain, type, protocol);
-  if(source && (sockfd!=-1))
-    curl_memlog("FD %s:%d socket() = %d\n",
-                source, line, sockfd);
+  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
+                    "FD %s:%d socket() = %d\n" :
+                    (sizeof(curl_socket_t) == sizeof(long)) ?
+                    "FD %s:%d socket() = %ld\n" :
+                    "FD %s:%d socket() = %zd\n" ;
+
+  curl_socket_t sockfd = socket(domain, type, protocol);
+  if(source && (sockfd != CURL_SOCKET_BAD))
+    curl_memlog(fmt, source, line, sockfd);
   return sockfd;
 }
 
-int curl_accept(int s, void *saddr, void *saddrlen,
-                int line, const char *source)
+curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
+                          int line, const char *source)
 {
+  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
+                    "FD %s:%d accept() = %d\n" :
+                    (sizeof(curl_socket_t) == sizeof(long)) ?
+                    "FD %s:%d accept() = %ld\n" :
+                    "FD %s:%d accept() = %zd\n" ;
+
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
-  int sockfd=accept(s, addr, addrlen);
-  if(source)
-    curl_memlog("FD %s:%d accept() = %d\n",
-                source, line, sockfd);
+  curl_socket_t sockfd = accept(s, addr, addrlen);
+  if(source && (sockfd != CURL_SOCKET_BAD))
+    curl_memlog(fmt, source, line, sockfd);
   return sockfd;
 }
 
 /* separate function to allow libcurl to mark a "faked" close */
-void curl_mark_sclose(int sockfd, int line, const char *source)
+void curl_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
+  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
+                    "FD %s:%d sclose(%d)\n" :
+                    (sizeof(curl_socket_t) == sizeof(long)) ?
+                    "FD %s:%d sclose(%ld)\n" :
+                    "FD %s:%d sclose(%zd)\n" ;
+
   if(source)
-    curl_memlog("FD %s:%d sclose(%d)\n",
-                source, line, sockfd);
+    curl_memlog(fmt, source, line, sockfd);
 }
 
 /* this is our own defined way to close sockets on *ALL* platforms */
-int curl_sclose(int sockfd, int line, const char *source)
+int curl_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   int res=sclose(sockfd);
   curl_mark_sclose(sockfd, line, source);

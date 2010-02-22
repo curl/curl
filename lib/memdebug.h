@@ -57,11 +57,14 @@ CURL_EXTERN void curl_memlimit(long limit);
 CURL_EXTERN void curl_memlog(const char *format, ...);
 
 /* file descriptor manipulators */
-CURL_EXTERN int curl_socket(int domain, int type, int protocol, int line , const char *);
-CURL_EXTERN void curl_mark_sclose(int sockfd, int, const char *source);
-CURL_EXTERN int curl_sclose(int sockfd, int, const char *source);
-CURL_EXTERN int curl_accept(int s, void *addr, void *addrlen,
-                            int line, const char *source);
+CURL_EXTERN curl_socket_t curl_socket(int domain, int type, int protocol,
+                                      int line , const char *source);
+CURL_EXTERN void curl_mark_sclose(curl_socket_t sockfd,
+                                  int line , const char *source);
+CURL_EXTERN int curl_sclose(curl_socket_t sockfd,
+                            int line , const char *source);
+CURL_EXTERN curl_socket_t curl_accept(curl_socket_t s, void *a, void *alen,
+                                      int line, const char *source);
 
 /* FILE functions */
 CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
