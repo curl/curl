@@ -71,11 +71,11 @@ static void decodeQuantum(unsigned char *dest, const char *src)
       x = (x << 6);
   }
 
-  dest[2] = Curl_ultouc(x);
+  dest[2] = curlx_ultouc(x);
   x >>= 8;
-  dest[1] = Curl_ultouc(x);
+  dest[1] = curlx_ultouc(x);
   x >>= 8;
-  dest[0] = Curl_ultouc(x);
+  dest[0] = curlx_ultouc(x);
 }
 
 /*

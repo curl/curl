@@ -25,7 +25,7 @@
 
 #include "warnless.h"
 
-unsigned short Curl_ultous(unsigned long ulnum)
+unsigned short curlx_ultous(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -39,7 +39,7 @@ unsigned short Curl_ultous(unsigned long ulnum)
 #endif
 }
 
-unsigned char Curl_ultouc(unsigned long ulnum)
+unsigned char curlx_ultouc(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
