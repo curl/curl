@@ -38,3 +38,17 @@ unsigned short Curl_ultous(unsigned long ulnum)
 #  pragma warning(pop)
 #endif
 }
+
+unsigned char Curl_ultouc(unsigned long ulnum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  return (unsigned char)(ulnum & 0xFFUL);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}

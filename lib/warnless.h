@@ -25,4 +25,6 @@
 
 unsigned short Curl_ultous(unsigned long ulnum);
 
+unsigned char Curl_ultouc(unsigned long ulnum);
+
 #endif /* HEADER_CURL_WARNLESS_H */
