@@ -325,7 +325,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
-    if(data->set.ftp_ssl > CURLUSESSL_TRY && !conn->ssl[FIRSTSOCKET].use)
+    if(data->set.ftp_ssl <= CURLUSESSL_TRY)
       result = smtp_state_helo(conn);
     else {
       failf(data, "Access denied: %d", smtpcode);
