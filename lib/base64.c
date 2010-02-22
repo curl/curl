@@ -42,6 +42,7 @@
 
 #include "urldata.h" /* for the SessionHandle definition */
 #include "easyif.h"  /* for Curl_convert_... prototypes */
+#include "warnless.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
 
