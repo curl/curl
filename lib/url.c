@@ -4227,7 +4227,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
       /* we need to create new URL with the new port number */
       char *url;
       /* FTPS connections have the FTP bit set too, so they match as well */
-      bool isftp = (bool)(conn->protocol & PROT_FTP);
+      bool isftp = (bool)(0 != (conn->protocol & PROT_FTP));
 
       /*
        * This synthesized URL isn't always right--suffixes like ;type=A
