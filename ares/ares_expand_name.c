@@ -69,17 +69,21 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
   int len, indir = 0;
   char *q;
   const unsigned char *p;
+  union {
+    ssize_t sig;
+     size_t uns;
+  } nlen;
 
-  len = name_length(encoded, abuf, alen);
-  if (len < 0)
+  nlen.sig = name_length(encoded, abuf, alen);
+  if (nlen.sig < 0)
     return ARES_EBADNAME;
 
-  *s = malloc(((size_t)len) + 1);
+  *s = malloc(nlen.uns + 1);
   if (!*s)
     return ARES_ENOMEM;
   q = *s;
 
-  if (len == 0) {
+  if (nlen.uns == 0) {
     /* RFC2181 says this should be ".": the root of the DNS tree.
      * Since this function strips trailing dots though, it becomes ""
      */
