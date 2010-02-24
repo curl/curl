@@ -1212,7 +1212,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* Now set the new attributes... */
       if(curl_strnequal(sshc->quote_item->data, "chgrp", 5)) {
-        sshc->quote_attrs.gid = strtol(sshc->quote_path1, NULL, 10);
+        sshc->quote_attrs.gid = strtoul(sshc->quote_path1, NULL, 10);
         sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
         if(sshc->quote_attrs.gid == 0 && !ISDIGIT(sshc->quote_path1[0])) {
           Curl_safefree(sshc->quote_path1);
@@ -1226,7 +1226,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
       }
       else if(curl_strnequal(sshc->quote_item->data, "chmod", 5)) {
-        sshc->quote_attrs.permissions = strtol(sshc->quote_path1, NULL, 8);
+        sshc->quote_attrs.permissions = strtoul(sshc->quote_path1, NULL, 8);
         sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_PERMISSIONS;
         /* permissions are octal */
         if(sshc->quote_attrs.permissions == 0 &&
@@ -1242,7 +1242,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
       }
       else if(curl_strnequal(sshc->quote_item->data, "chown", 5)) {
-        sshc->quote_attrs.uid = strtol(sshc->quote_path1, NULL, 10);
+        sshc->quote_attrs.uid = strtoul(sshc->quote_path1, NULL, 10);
         sshc->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
         if(sshc->quote_attrs.uid == 0 && !ISDIGIT(sshc->quote_path1[0])) {
           Curl_safefree(sshc->quote_path1);

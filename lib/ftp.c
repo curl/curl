@@ -91,6 +91,7 @@
 #include "url.h"
 #include "rawstr.h"
 #include "speedcheck.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -759,9 +760,9 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     /* parse the port */
     if( ip_end != NULL ) {
       if((port_start = strchr(ip_end, ':')) != NULL) {
-        port_min = (unsigned short)strtol(port_start+1, NULL, 10);
+        port_min = curlx_ultous(strtoul(port_start+1, NULL, 10));
         if((port_sep = strchr(port_start, '-')) != NULL) {
-          port_max = (unsigned short)strtol(port_sep + 1, NULL, 10);
+          port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
         }
         else
           port_max = port_min;

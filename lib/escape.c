@@ -35,6 +35,7 @@
 /* urldata.h and easyif.h are included for Curl_convert_... prototypes */
 #include "urldata.h"
 #include "easyif.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -152,7 +153,7 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
   char *ns = malloc(alloc);
   unsigned char in;
   int strindex=0;
-  long hex;
+  unsigned long hex;
 
 #ifndef CURL_DOES_CONVERSIONS
   /* avoid compiler warnings */
@@ -171,9 +172,9 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
       hexstr[1] = string[2];
       hexstr[2] = 0;
 
-      hex = strtol(hexstr, &ptr, 16);
+      hex = strtoul(hexstr, &ptr, 16);
 
-      in = (unsigned char)hex; /* this long is never bigger than 255 anyway */
+      in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
 
 #ifdef CURL_DOES_CONVERSIONS
 /* escape sequences are always in ASCII so convert them on non-ASCII hosts */

@@ -120,6 +120,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "easyif.h"
 #include "speedcheck.h"
 #include "rawstr.h"
+#include "warnless.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -4267,7 +4268,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
       }
 
       *portptr = '\0'; /* cut off the name there */
-      conn->remote_port = (unsigned short)port;
+      conn->remote_port = curlx_ultous(port);
     }
   }
   return CURLE_OK;
