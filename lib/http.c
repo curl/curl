@@ -3063,6 +3063,8 @@ checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
 #ifndef CURL_DISABLE_RTSP
   if(conn->protocol & PROT_RTSP)
     return checkrtspprefix(data, s);
+#else
+  (void)conn;
 #endif /* CURL_DISABLE_RTSP */
 
   return checkhttpprefix(data, s);
