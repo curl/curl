@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Fandrich (25 Feb 2010)
+- Fixed a couple of out of memory leaks and a segfault in the SMTP code.
+
 Yang Tse (25 Feb 2010)
 - I fixed bug report #2958074 indicating
   (http://curl.haxx.se/bug/view.cgi?id=2958074) that curl on Windows with

@@ -724,6 +724,8 @@ static CURLcode smtp_connect(struct connectdata *conn,
 
   /* url decode the path and use it as domain with EHLO */
   smtpc->domain = curl_easy_unescape(conn->data, path, 0, &len);
+  if (!smtpc->domain)
+    return CURLE_OUT_OF_MEMORY;
 
   /* When we connect, we start in the state where we await the server greeting
    */
@@ -917,7 +919,8 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
 
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
-  (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
+  if (smtpc->pp.conn)
+    (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&smtpc->pp);
 
