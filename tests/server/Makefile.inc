@@ -20,7 +20,7 @@ USEFUL = \
  getpart.c \
  getpart.h \
  $(top_srcdir)/lib/base64.c \
- $(top_srcdir)/lib/base64.h \
+ $(top_srcdir)/lib/curl_base64.h \
  $(top_srcdir)/lib/memdebug.c \
  $(top_srcdir)/lib/memdebug.h
 
