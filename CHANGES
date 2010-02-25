@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (25 Feb 2010)
+- I fixed bug report #2958074 indicating
+  (http://curl.haxx.se/bug/view.cgi?id=2958074) that curl on Windows with
+  option --trace-time did not use local time when timestamping trace lines.
+  This could also happen on other systems depending on time souurce.
+
 Patrick Monnerat (22 Feb 2010)
 - Proper handling of STARTTLS on SMTP, taking CURLUSESSL_TRY into account.
 - SMTP falls back to RFC821 HELO when EHLO fails (and SSL is not required).

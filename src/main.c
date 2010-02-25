@@ -580,10 +580,7 @@ struct Configurable {
   /* for bandwidth limiting features: */
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
-  struct timeval lastsendtime;
-  size_t lastsendsize;
-  struct timeval lastrecvtime;
-  size_t lastrecvsize;
+
   bool ftp_ssl;
   bool ftp_ssl_reqd;
   bool ftp_ssl_control;
@@ -3651,15 +3648,22 @@ int my_trace(CURL *handle, curl_infotype type,
   struct tm *now;
   char timebuf[20];
   time_t secs;
+  static time_t epoch_offset;
+  static int    known_offset;
 
   (void)handle; /* prevent compiler warning */
 
-  tv = cutil_tvnow();
-  secs = tv.tv_sec;
-  now = localtime(&secs);  /* not multithread safe but we don't care */
-  if(config->tracetime)
+  if(config->tracetime) {
+    tv = cutil_tvnow();
+    if(!known_offset) {
+      epoch_offset = time(NULL) - tv.tv_sec;
+      known_offset = 1;
+    }
+    secs = epoch_offset + tv.tv_sec;
+    now = localtime(&secs);  /* not thread safe but we don't care */
     snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+  }
   else
     timebuf[0]=0;
 
@@ -4263,8 +4267,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   config->showerror=TRUE;
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
-  config->lastrecvtime = cutil_tvnow();
-  config->lastsendtime = cutil_tvnow();
   config->maxredirs = DEFAULT_MAXREDIRS;
 
   if(argc>1 &&

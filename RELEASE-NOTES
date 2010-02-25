@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o missing quote in libcurl.m4
  o SMTP: now waits for 250 after the DATA transfer
  o SMTP: use angle brackets in RCPT TO
+ o curl --trace-time not using local time
 
 This release includes the following known bugs:
 
