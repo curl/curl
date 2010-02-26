@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Feb 2010)
+- Pat Ray in bug #2958474 pointed out an off-by-one case when receiving a
+  chunked-encoding trailer.
+
+  http://curl.haxx.se/bug/view.cgi?id=2958474
+
 Daniel Fandrich (25 Feb 2010)
 - Fixed a couple of out of memory leaks and a segfault in the SMTP & IMAP code.
 
