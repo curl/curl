@@ -7,7 +7,7 @@
                                   Changelog
 
 Daniel Fandrich (25 Feb 2010)
-- Fixed a couple of out of memory leaks and a segfault in the SMTP code.
+- Fixed a couple of out of memory leaks and a segfault in the SMTP & IMAP code.
 
 Yang Tse (25 Feb 2010)
 - I fixed bug report #2958074 indicating
