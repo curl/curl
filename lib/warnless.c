@@ -25,6 +25,52 @@
 
 #include "warnless.h"
 
+#define CURL_MASK_SCHAR  0x7F
+#define CURL_MASK_UCHAR  0xFF
+
+#if (SIZEOF_SHORT == 2)
+#  define CURL_MASK_SSHORT  0x7FFF
+#  define CURL_MASK_USHORT  0xFFFF
+#elif (SIZEOF_SHORT == 4)
+#  define CURL_MASK_SSHORT  0x7FFFFFFF
+#  define CURL_MASK_USHORT  0xFFFFFFFF
+#elif (SIZEOF_SHORT == 8)
+#  define CURL_MASK_SSHORT  0x7FFFFFFFFFFFFFFF
+#  define CURL_MASK_USHORT  0xFFFFFFFFFFFFFFFF
+#endif
+
+#if (SIZEOF_INT == 2)
+#  define CURL_MASK_SINT  0x7FFF
+#  define CURL_MASK_UINT  0xFFFF
+#elif (SIZEOF_INT == 4)
+#  define CURL_MASK_SINT  0x7FFFFFFF
+#  define CURL_MASK_UINT  0xFFFFFFFF
+#elif (SIZEOF_INT == 8)
+#  define CURL_MASK_SINT  0x7FFFFFFFFFFFFFFF
+#  define CURL_MASK_UINT  0xFFFFFFFFFFFFFFFF
+#elif (SIZEOF_INT == 16)
+#  define CURL_MASK_SINT  0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#  define CURL_MASK_UINT  0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#endif
+
+#if (SIZEOF_LONG == 2)
+#  define CURL_MASK_SLONG  0x7FFFL
+#  define CURL_MASK_ULONG  0xFFFFUL
+#elif (SIZEOF_LONG == 4)
+#  define CURL_MASK_SLONG  0x7FFFFFFFL
+#  define CURL_MASK_ULONG  0xFFFFFFFFUL
+#elif (SIZEOF_LONG == 8)
+#  define CURL_MASK_SLONG  0x7FFFFFFFFFFFFFFFL
+#  define CURL_MASK_ULONG  0xFFFFFFFFFFFFFFFFUL
+#elif (SIZEOF_LONG == 16)
+#  define CURL_MASK_SLONG  0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFL
+#  define CURL_MASK_ULONG  0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFUL
+#endif
+
+/*
+** unsigned long to unsigned short
+*/
+
 unsigned short curlx_ultous(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
@@ -32,12 +78,16 @@ unsigned short curlx_ultous(unsigned long ulnum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  return (unsigned short)(ulnum & 0xFFFFUL);
+  return (unsigned short)(ulnum & (unsigned long) CURL_MASK_USHORT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
 #endif
 }
+
+/*
+** unsigned long to unsigned char
+*/
 
 unsigned char curlx_ultouc(unsigned long ulnum)
 {
@@ -46,7 +96,25 @@ unsigned char curlx_ultouc(unsigned long ulnum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  return (unsigned char)(ulnum & 0xFFUL);
+  return (unsigned char)(ulnum & (unsigned long) CURL_MASK_UCHAR);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** size_t to signed int
+*/
+
+int curlx_uztosi(size_t uznum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  return (int)(uznum & (size_t) CURL_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)

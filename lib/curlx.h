@@ -61,6 +61,7 @@
 
   curlx_ultous()
   curlx_ultouc()
+  curlx_uztosi()
 */
 
 /* Now setup curlx_ * names for the functions that are to become curlx_ and

@@ -27,4 +27,6 @@ unsigned short curlx_ultous(unsigned long ulnum);
 
 unsigned char curlx_ultouc(unsigned long ulnum);
 
+int curlx_uztosi(size_t uznum);
+
 #endif /* HEADER_CURL_WARNLESS_H */

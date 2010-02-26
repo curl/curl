@@ -27,8 +27,10 @@
 
 #include "getpart.h"
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
+#define ENABLE_CURLX_PRINTF
+/* make the curlx header define all printf() functions to use the curlx_*
+   versions instead */
+#include "curlx.h" /* from the private lib dir */
 
 /* just to please base64.h we create a fake struct */
 struct SessionHandle {
@@ -97,7 +99,9 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
   }
 
   for(;;) {
-    if(!fgets(*buffer + offset, (int)(*bufsize - offset), stream))
+    int bytestoread = curlx_uztosi(*bufsize - offset);
+
+    if(!fgets(*buffer + offset, bytestoread, stream))
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE ;
 
     length = offset + strlen(*buffer + offset);

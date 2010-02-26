@@ -19,6 +19,7 @@ CSOURCES = ares__close_sockets.c	\
   ares_library_init.c			\
   ares_llist.c				\
   ares_mkquery.c			\
+  ares_nowarn.c				\
   ares_parse_a_reply.c			\
   ares_parse_aaaa_reply.c		\
   ares_parse_ns_reply.c			\
@@ -47,6 +48,7 @@ HHEADERS = ares.h			\
   ares_ipv6.h				\
   ares_library_init.h			\
   ares_llist.h				\
+  ares_nowarn.h				\
   ares_private.h			\
   ares_rules.h				\
   ares_strcasecmp.h			\
