@@ -208,6 +208,22 @@
 #endif
 
 /* ---------------------------------------------------------------- */
+/*                            TYPE SIZES                            */
+/* ---------------------------------------------------------------- */
+
+/* The size of `int', as computed by sizeof. */
+#define SIZEOF_INT 4
+
+/* The size of `long double', as computed by sizeof. */
+#define SIZEOF_LONG_DOUBLE 16
+
+/* The size of `long long', as computed by sizeof. */
+/* #define SIZEOF_LONG_LONG 8 */
+
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
+
+/* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
 

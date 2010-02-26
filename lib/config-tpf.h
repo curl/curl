@@ -598,13 +598,19 @@
 /* Define to the type of arg 5 for `select'. */
 #define SELECT_TYPE_ARG5 (struct timeval *)
 
-/* The size of an `off_t', as computed by sizeof. */
+/* The size of `int', as computed by sizeof. */
+#define SIZEOF_INT 4
+
+/* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
 
-/* The size of a `size_t', as computed by sizeof. */
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
+
+/* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
 
-/* The size of a `time_t', as computed by sizeof. */
+/* The size of `time_t', as computed by sizeof. */
 #define SIZEOF_TIME_T 8
 
 /* Define to 1 if you have the ANSI C header files. */

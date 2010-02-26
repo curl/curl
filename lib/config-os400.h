@@ -349,6 +349,9 @@
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
 
+/* The size of `int', as computed by sizeof. */
+#define SIZEOF_INT              4
+
 /* The size of a `long double', as computed by sizeof. */
 #define SIZEOF_LONG_DOUBLE      8
 
@@ -357,6 +360,9 @@
 
 /* The size of a `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG        8
+
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT            2
 
 /* Whether long long constants must be suffixed by LL. */
 

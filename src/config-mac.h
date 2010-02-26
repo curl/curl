@@ -24,6 +24,9 @@
 #define TIME_WITH_SYS_TIME      1
 #define HAVE_STRUCT_TIMEVAL     1
 
+#define SIZEOF_INT              4
+#define SIZEOF_SHORT            2
+
 #define main(x,y) curl_main(x,y)
 
 /* we provide our own strdup prototype */

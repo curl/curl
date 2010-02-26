@@ -65,7 +65,9 @@
 #define NEED_MALLOC_H          1
 
 #define RETSIGTYPE             void
+#define SIZEOF_INT             4
 #define SIZEOF_LONG_DOUBLE     16
+#define SIZEOF_SHORT           2
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

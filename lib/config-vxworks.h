@@ -847,6 +847,9 @@
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
 
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
+
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 4
 

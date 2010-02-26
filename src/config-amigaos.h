@@ -63,5 +63,8 @@
 # define        LONG_MIN        (-0x7fffffffL-1)        /* min value for a long */
 #endif
 
+#define SIZEOF_INT              4
+#define SIZEOF_SHORT            2
+
 #endif /* __AMIGA__ */
 #endif /* CURL_CONFIG_AMIGAOS_H */
