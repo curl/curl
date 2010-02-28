@@ -226,6 +226,10 @@ SOURCE=..\..\ares_mkquery.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_nowarn.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_parse_a_reply.c
 # End Source File
 # Begin Source File
@@ -331,6 +335,10 @@ SOURCE=..\..\ares_library_init.h
 # Begin Source File
 
 SOURCE=..\..\ares_llist.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_nowarn.h
 # End Source File
 # Begin Source File
 
