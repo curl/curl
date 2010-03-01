@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o SMTP: use angle brackets in RCPT TO
  o curl --trace-time not using local time
  o off-by-one in the chunked encoding trailer parser
+ o superfluous blocking for OpenSSL-based SSH connects and multi interface
 
 This release includes the following known bugs:
 
@@ -30,6 +31,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
- Daniel Fandrich, Patrick Monnerat, Pat Ray
+ Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw
 
         Thanks! (and sorry if I forgot to mention someone)

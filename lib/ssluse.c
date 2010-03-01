@@ -2423,7 +2423,7 @@ ossl_connect_common(struct connectdata *conn,
     }
 
     retcode = ossl_connect_step2(conn, sockindex);
-    if(retcode)
+    if(retcode || (data->state.used_interface == Curl_if_multi))
       return retcode;
 
   } /* repeat step2 until all transactions are done. */
