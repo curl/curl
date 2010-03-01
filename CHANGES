@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel Stenberg (1 Mar 2010)
+- Ben Greear provided an update for TFTP that fixes upload.
+
 - Wesley Miaw reported bug #2958179 which identified a case of looping during
   OpenSSL based SSL handshaking even though the multi interface was used and
   there was no good reason for it.

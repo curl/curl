@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o curl --trace-time not using local time
  o off-by-one in the chunked encoding trailer parser
  o superfluous blocking for OpenSSL-based SSL connects and multi interface
+ o TFTP upload
 
 This release includes the following known bugs:
 
@@ -31,6 +32,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
- Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw
+ Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear
 
         Thanks! (and sorry if I forgot to mention someone)

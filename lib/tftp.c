@@ -399,7 +399,7 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
 
       tsize = strtol( value, NULL, 10 );
       if(!tsize) {
-        failf(data, "invalid tsize value in OACK packet");
+        failf(data, "invalid tsize -:%s:- value in OACK packet", value);
         return CURLE_TFTP_ILLEGAL;
       }
       Curl_pgrsSetDownloadSize(data, tsize);
@@ -701,38 +701,44 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   switch(event) {
 
   case TFTP_EVENT_ACK:
-    /* Ack the packet */
-    rblock = getrpacketblock(&state->rpacket);
+  case TFTP_EVENT_OACK:
+    if (event == TFTP_EVENT_ACK) {
+       /* Ack the packet */
+       rblock = getrpacketblock(&state->rpacket);
 
-    if(rblock != state->block) {
-      /* This isn't the expected block.  Log it and up the retry counter */
-      infof(data, "Received ACK for block %d, expecting %d\n",
-            rblock, state->block);
-      state->retries++;
-      /* Bail out if over the maximum */
-      if(state->retries>state->retry_max) {
-        failf(data, "tftp_tx: giving up waiting for block %d ack",
-              state->block);
-        res = CURLE_SEND_ERROR;
-      }
-      else {
-        /* Re-send the data packet */
-        sbytes = sendto(state->sockfd, (void *)&state->spacket,
-                        4+state->sbytes, SEND_4TH_ARG,
-                        (struct sockaddr *)&state->remote_addr,
-                        state->remote_addrlen);
-        /* Check all sbytes were sent */
-        if(sbytes<0) {
-          failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
-          res = CURLE_SEND_ERROR;
-        }
-      }
-      return res;
+       if(rblock != state->block) {
+          /* This isn't the expected block.  Log it and up the retry counter */
+          infof(data, "Received ACK for block %d, expecting %d\n",
+                rblock, state->block);
+          state->retries++;
+          /* Bail out if over the maximum */
+          if(state->retries>state->retry_max) {
+             failf(data, "tftp_tx: giving up waiting for block %d ack",
+                   state->block);
+             res = CURLE_SEND_ERROR;
+          }
+          else {
+             /* Re-send the data packet */
+             sbytes = sendto(state->sockfd, (void *)&state->spacket,
+                             4+state->sbytes, SEND_4TH_ARG,
+                             (struct sockaddr *)&state->remote_addr,
+                             state->remote_addrlen);
+             /* Check all sbytes were sent */
+             if(sbytes<0) {
+                failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
+                res = CURLE_SEND_ERROR;
+             }
+          }
+          return res;
+       }
+       /* This is the expected packet.  Reset the counters and send the next
+          block */
+       time(&state->rx_time);
+       state->block++;
     }
-    /* This is the expected packet.  Reset the counters and send the next
-       block */
-    time(&state->rx_time);
-    state->block++;
+    else {
+       state->block = 1; /* first data block is 1 when using OACK */
+    }
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_DATA);
     setpacketblock(&state->spacket, state->block);
@@ -798,7 +804,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     break;
 
   default:
-    failf(data, "%s", "tftp_tx: internal error");
+    failf(data, "tftp_tx: internal error, event: %i", (int)(event));
     break;
   }
 
