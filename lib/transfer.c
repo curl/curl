@@ -1067,11 +1067,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(k->size != -1) {
       failf(data, "Operation timed out after %ld milliseconds with %"
             FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-            data->set.timeout, k->bytecount, k->size);
+            Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
     } else {
       failf(data, "Operation timed out after %ld milliseconds with %"
             FORMAT_OFF_T " bytes received",
-            data->set.timeout, k->bytecount);
+            Curl_tvdiff(k->now, k->start), k->bytecount);
     }
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -1266,8 +1266,17 @@ Transfer(struct connectdata *conn)
       /* if this is the first lap and one of the file descriptors is fine
          to work with, skip the timeout */
       timeout_ms = 0;
-    else
-      timeout_ms = 1000;
+    else {
+      if(data->set.timeout) {
+        timeout_ms = data->set.timeout - Curl_tvdiff(k->now, k->start);
+        if(timeout_ms > 1000)
+          timeout_ms = 1000;
+        else if(timeout_ms < 0)
+          return CURLE_OPERATION_TIMEDOUT;
+      }
+      else
+        timeout_ms = 1000;
+    }
 
     switch (Curl_socket_ready(fd_read, fd_write, timeout_ms)) {
     case -1: /* select() error, stop reading */

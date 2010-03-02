@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (2 Mar 2010)
+- Based on patch provided by Jacob Moshenko, the transfer logic now properly
+  makes sure that when using sub-second timeouts, there's no final bad 1000ms
+  wait. Previously, a sub-second timeout would often make the elapsed time end
+  up the time rounded up to the nearest second (e.g. 1s for 200ms timeout)
+
 - Andrei Benea filed bug report #2956698 and pointed out that the
   CURLOPT_CERTINFO feature leaked memory due to a missing OpenSSL function
   call. He provided the patch to fix it too.
