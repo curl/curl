@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (2 Mar 2010)
+- Made the pingpong timeout code properly deal with the response timeout AND
+  the global timeout if set. Also, as was reported in the bug report #2956437
+  by Ryan Chan, the time stamp to use as basis for the per command timeout was
+  not set properly in the DONE phase for FTP (and not for SMTP) so I fixed
+  that just now. This was a regression compared to 7.19.7 due to the
+  conversion of FTP code over to the generic pingpong concepts.
+
+  http://curl.haxx.se/bug/view.cgi?id=2956437
+
 Daniel Stenberg (1 Mar 2010)
 - Ben Greear provided an update for TFTP that fixes upload.
 

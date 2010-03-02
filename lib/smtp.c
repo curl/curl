@@ -637,7 +637,7 @@ static CURLcode smtp_init(struct connectdata *conn)
  * a part of the easy interface, it will always be TRUE.
  */
 static CURLcode smtp_connect(struct connectdata *conn,
-                                 bool *done) /* see description above */
+                             bool *done) /* see description above */
 {
   CURLcode result;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
@@ -784,6 +784,10 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
 
   if(status == CURLE_OK) {
+    struct smtp_conn *smtpc = &conn->proto.smtpc;
+    struct pingpong *pp= &smtpc->pp;
+    pp->response = Curl_tvnow(); /* timeout relative now */
+
     state(conn, SMTP_POSTDATA);
     /* run the state-machine
 

@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o off-by-one in the chunked encoding trailer parser
  o superfluous blocking for OpenSSL-based SSL connects and multi interface
  o TFTP upload
+ o FTP timeouts after file transferred completely
 
 This release includes the following known bugs:
 
@@ -32,6 +33,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
- Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear
+ Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
+ Ryan Chan
 
         Thanks! (and sorry if I forgot to mention someone)
