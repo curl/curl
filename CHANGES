@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (2 Mar 2010)
+- Markus Duft pointed out in bug #2961796 that even though Interix has a
+  poll() function it doesn't quite work the way we want it so we must disable
+  it, and he also provided a patch for it.
+
+  http://curl.haxx.se/bug/view.cgi?id=2961796
+
 - Made the pingpong timeout code properly deal with the response timeout AND
   the global timeout if set. Also, as was reported in the bug report #2956437
   by Ryan Chan, the time stamp to use as basis for the per command timeout was

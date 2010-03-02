@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o superfluous blocking for OpenSSL-based SSL connects and multi interface
  o TFTP upload
  o FTP timeouts after file transferred completely
+ o skip poll() on Interix
 
 This release includes the following known bugs:
 
@@ -34,6 +35,6 @@ advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
- Ryan Chan
+ Ryan Chan, Markus Duft
 
         Thanks! (and sorry if I forgot to mention someone)

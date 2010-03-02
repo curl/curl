@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3815,8 +3815,11 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*)
-      dnl poll does not work on this platform
+    darwin*|interix*)
+      dnl poll() does not work on these platforms
+      dnl Interix: "does provide poll(), but the implementing developer must
+      dnl have been in a bad mood, because poll() only works on the /proc
+      dnl filesystem here"
       curl_disallow_poll="yes"
       ;;
   esac
