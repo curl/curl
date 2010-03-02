@@ -7,6 +7,20 @@
                                   Changelog
 
 Daniel Stenberg (2 Mar 2010)
+- [Daniel Johnson] I've been trying to build libcurl with clang on Darwin and
+  ran into some issues with the GSSAPI tests in configure.ac. The tests first
+  try to determine the include dirs and libs and set CPPFLAGS and LIBS
+  accordingly. It then checks for the headers and finally sets LIBS a second
+  time, causing the libs to be included twice. The first setting of LIBS seems
+  redundant and should be left out, since the first part is otherwise just
+  about finding headers.
+
+  My second issue is that 'krb5-config --libs gssapi' on Darwin is less than
+  useless and returns junk that, while it happens to work with gcc, causes
+  clang to choke. For example, --libs returns $CFLAGS along with the libs,
+  which is really retarded. Simply setting 'LIBS="$LIBS -lgssapi_krb5
+  -lresolv"' on Darwin is sufficient.
+
 - Based on patch provided by Jacob Moshenko, the transfer logic now properly
   makes sure that when using sub-second timeouts, there's no final bad 1000ms
   wait. Previously, a sub-second timeout would often make the elapsed time end

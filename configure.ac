@@ -1123,15 +1123,12 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
-        GSSAPI_LIBS=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
-        GSSAPI_LIBS="-lgssapi"
      fi
   fi
 
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
-  LIBS="$LIBS $GSSAPI_LIBS"
 
   AC_CHECK_HEADER(gss.h,
     [
@@ -1198,17 +1195,24 @@ if test x"$want_gss" = xyes; then
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LIBS="$LIBS -lgss"
   elif test -z "$GSSAPI_LIB_DIR"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-        LIBS="$LIBS $gss_libs"
-     elif test "$GSSAPI_ROOT" != "yes"; then
-        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-        LIBS="$LIBS -lgssapi"
-     else
-        LIBS="$LIBS -lgssapi"
-     fi
+     case $host in
+     *-*-darwin*)
+        LIBS="$LIBS -lgssapi_krb5 -lresolv"
+        ;;
+     *)
+        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+           dnl krb5-config doesn't have --libs-only-L or similar, put everything
+           dnl into LIBS
+           gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+           LIBS="$LIBS $gss_libs"
+        elif test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+           LIBS="$LIBS -lgssapi"
+        else
+           LIBS="$LIBS -lgssapi"
+        fi
+        ;;
+     esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
      LIBS="$LIBS -lgssapi"

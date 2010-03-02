@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o skip poll() on Interix
  o CURLOPT_CERTINFO memory leak
  o sub-second timeouts improvements
+ o configure fixes for GSSAPI
 
 This release includes the following known bugs:
 
@@ -37,6 +38,6 @@ advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
- Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko
+ Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson
 
         Thanks! (and sorry if I forgot to mention someone)
