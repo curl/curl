@@ -2125,6 +2125,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
         break;
 #endif
       }
+      EVP_PKEY_free(pubkey);
     }
 
     X509V3_ext(data, i, cinf->extensions);

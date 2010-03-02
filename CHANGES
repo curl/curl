@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel Stenberg (2 Mar 2010)
+- Andrei Benea filed bug report #2956698 and pointed out that the
+  CURLOPT_CERTINFO feature leaked memory due to a missing OpenSSL function
+  call. He provided the patch to fix it too.
+
+  http://curl.haxx.se/bug/view.cgi?id=2956698
+
 - Markus Duft pointed out in bug #2961796 that even though Interix has a
   poll() function it doesn't quite work the way we want it so we must disable
   it, and he also provided a patch for it.

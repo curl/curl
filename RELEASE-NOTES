@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o TFTP upload
  o FTP timeouts after file transferred completely
  o skip poll() on Interix
+ o CURLOPT_CERTINFO memory leak
 
 This release includes the following known bugs:
 
@@ -35,6 +36,6 @@ advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
- Ryan Chan, Markus Duft
+ Ryan Chan, Markus Duft, Andrei Benea
 
         Thanks! (and sorry if I forgot to mention someone)
