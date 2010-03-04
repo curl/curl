@@ -94,7 +94,7 @@ function gets called by libcurl as soon as there is data received that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
 of bytes actually taken care of. If that amount differs from the amount passed
-to your function, it'll signal an error to the library and it will abort the
+to your function, it'll signal an error to the library. This will abort the
 transfer and return \fICURLE_WRITE_ERROR\fP.
 
 From 7.18.0, the function can return CURL_WRITEFUNC_PAUSE which then will
@@ -272,9 +272,9 @@ using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP. Do not assume that the header line is zero
 terminated! The pointer named \fIstream\fP is the one you set with the
 \fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
-of bytes actually taken care of, or return -1 to signal error to the library
-(it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
-code).
+of bytes actually taken care of. If that amount differs from the amount passed
+to your function, it'll signal an error to the library. This will abort the
+transfer and return \fICURL_WRITE_ERROR\fP.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
