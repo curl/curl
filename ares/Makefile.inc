@@ -49,6 +49,7 @@ HHEADERS = ares.h			\
   ares_library_init.h			\
   ares_llist.h				\
   ares_private.h			\
+  ares_nowarn.h				\
   ares_rules.h				\
   ares_strcasecmp.h			\
   ares_strdup.h				\
