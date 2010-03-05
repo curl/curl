@@ -30,11 +30,17 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1
 
-/* The number of bytes in a long double.  */
+/* The size of `int', as computed by sizeof. */
+#define SIZEOF_INT 4
+
+/* The size of `long double', as computed by sizeof. */
 #define SIZEOF_LONG_DOUBLE 8
 
-/* The number of bytes in a long long.  */
+/* The size of `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
+
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
 
 /* Define if you have the alarm function.  */
 #define HAVE_ALARM 1
