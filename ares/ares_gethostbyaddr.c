@@ -79,8 +79,8 @@ void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
       return;
     }
 
-  if ((family == AF_INET && addrlen != sizeof(struct in_addr)) ||
-      (family == AF_INET6 && addrlen != sizeof(struct in6_addr)))
+  if ((family == AF_INET && addrlen != sizeof(aquery->addr.addrV4)) ||
+      (family == AF_INET6 && addrlen != sizeof(aquery->addr.addrV6)))
     {
       callback(arg, ARES_ENOTIMP, 0, NULL);
       return;
@@ -94,9 +94,9 @@ void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
     }
   aquery->channel = channel;
   if (family == AF_INET)
-    memcpy(&aquery->addr.addrV4, addr, sizeof(struct in_addr));
+    memcpy(&aquery->addr.addrV4, addr, sizeof(aquery->addr.addrV4));
   else
-    memcpy(&aquery->addr.addrV6, addr, sizeof(struct in6_addr));
+    memcpy(&aquery->addr.addrV6, addr, sizeof(aquery->addr.addrV6));
   aquery->addr.family = family;
   aquery->callback = callback;
   aquery->arg = arg;
@@ -152,13 +152,13 @@ static void addr_callback(void *arg, int status, int timeouts,
     {
       if (aquery->addr.family == AF_INET)
         {
-          addrlen = sizeof(struct in_addr);
+          addrlen = sizeof(aquery->addr.addrV4);
           status = ares_parse_ptr_reply(abuf, alen, &aquery->addr.addrV4,
                                         (int)addrlen, AF_INET, &host);
         }
       else
         {
-          addrlen = sizeof(struct in6_addr);
+          addrlen = sizeof(aquery->addr.addrV6);
           status = ares_parse_ptr_reply(abuf, alen, &aquery->addr.addrV6,
                                         (int)addrlen, AF_INET6, &host);
         }
@@ -241,12 +241,12 @@ static int file_lookup(struct ares_addr *addr, struct hostent **host)
         }
       if (addr->family == AF_INET)
         {
-          if (memcmp((*host)->h_addr, &addr->addrV4, sizeof(struct in_addr)) == 0)
+          if (memcmp((*host)->h_addr, &addr->addrV4, sizeof(addr->addrV4)) == 0)
             break;
         }
       else if (addr->family == AF_INET6)
         {
-          if (memcmp((*host)->h_addr, &addr->addrV6, sizeof(struct in6_addr)) == 0)
+          if (memcmp((*host)->h_addr, &addr->addrV6, sizeof(addr->addrV6)) == 0)
             break;
         }
       ares_free_hostent(*host);

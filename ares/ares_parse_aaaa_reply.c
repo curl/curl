@@ -65,7 +65,7 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
   long len;
   const unsigned char *aptr;
   char *hostname, *rr_name, *rr_data, **aliases;
-  struct in6_addr *addrs;
+  struct ares_in6_addr *addrs;
   struct hostent *hostent;
   const int max_addr_ttls = (addrttls && naddrttls) ? *naddrttls : 0;
 
@@ -101,7 +101,7 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
   /* Allocate addresses and aliases; ancount gives an upper bound for both. */
   if (host)
     {
-      addrs = malloc(ancount * sizeof(struct in6_addr));
+      addrs = malloc(ancount * sizeof(struct ares_in6_addr));
       if (!addrs)
         {
           free(hostname);
@@ -143,27 +143,27 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
       aptr += RRFIXEDSZ;
 
       if (rr_class == C_IN && rr_type == T_AAAA
-          && rr_len == sizeof(struct in6_addr)
+          && rr_len == sizeof(struct ares_in6_addr)
           && strcasecmp(rr_name, hostname) == 0)
         {
           if (addrs)
             {
-              if (aptr + sizeof(struct in6_addr) > abuf + alen)
+              if (aptr + sizeof(struct ares_in6_addr) > abuf + alen)
               {
                 status = ARES_EBADRESP;
                 break;
               }
-              memcpy(&addrs[naddrs], aptr, sizeof(struct in6_addr));
+              memcpy(&addrs[naddrs], aptr, sizeof(struct ares_in6_addr));
             }
           if (naddrs < max_addr_ttls)
             {
               struct ares_addr6ttl * const at = &addrttls[naddrs];
-              if (aptr + sizeof(struct in6_addr) > abuf + alen)
+              if (aptr + sizeof(struct ares_in6_addr) > abuf + alen)
               {
                 status = ARES_EBADRESP;
                 break;
               }
-              memcpy(&at->ip6addr, aptr,  sizeof(struct in6_addr));
+              memcpy(&at->ip6addr, aptr,  sizeof(struct ares_in6_addr));
               at->ttl = rr_ttl;
             }
           naddrs++;
@@ -233,7 +233,7 @@ int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
                   hostent->h_name = hostname;
                   hostent->h_aliases = aliases;
                   hostent->h_addrtype = AF_INET6;
-                  hostent->h_length = sizeof(struct in6_addr);
+                  hostent->h_length = sizeof(struct ares_in6_addr);
                   for (i = 0; i < naddrs; i++)
                     hostent->h_addr_list[i] = (char *) &addrs[i];
                   hostent->h_addr_list[naddrs] = NULL;

@@ -74,9 +74,11 @@ struct nameinfo_query {
 };
 
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-#define IPBUFSIZ 40+IF_NAMESIZE
+#define IPBUFSIZ \
+        (sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255") + IF_NAMESIZE)
 #else
-#define IPBUFSIZ 40
+#define IPBUFSIZ \
+        (sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"))
 #endif
 
 static void nameinfo_callback(void *arg, int status, int timeouts, struct hostent *host);
@@ -184,14 +186,16 @@ void ares_getnameinfo(ares_channel channel, const struct sockaddr *sa,
           {
             niquery->family = AF_INET;
             memcpy(&niquery->addr.addr4, addr, sizeof(addr));
-            ares_gethostbyaddr(channel, &addr->sin_addr, sizeof(struct in_addr), AF_INET,
+            ares_gethostbyaddr(channel, &addr->sin_addr,
+                               sizeof(struct in_addr), AF_INET,
                                nameinfo_callback, niquery);
           }
         else
           {
             niquery->family = AF_INET6;
             memcpy(&niquery->addr.addr6, addr6, sizeof(addr6));
-            ares_gethostbyaddr(channel, &addr6->sin6_addr, sizeof(struct in6_addr), AF_INET6,
+            ares_gethostbyaddr(channel, &addr6->sin6_addr,
+                               sizeof(struct ares_in6_addr), AF_INET6,
                                nameinfo_callback, niquery);
           }
       }

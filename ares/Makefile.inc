@@ -20,6 +20,7 @@ CSOURCES = ares__close_sockets.c	\
   ares_llist.c				\
   ares_mkquery.c			\
   ares_nowarn.c				\
+  ares_options.c			\
   ares_parse_a_reply.c			\
   ares_parse_aaaa_reply.c		\
   ares_parse_ns_reply.c			\
@@ -48,8 +49,8 @@ HHEADERS = ares.h			\
   ares_ipv6.h				\
   ares_library_init.h			\
   ares_llist.h				\
-  ares_private.h			\
   ares_nowarn.h				\
+  ares_private.h			\
   ares_rules.h				\
   ares_strcasecmp.h			\
   ares_strdup.h				\
@@ -72,6 +73,7 @@ MANPAGES = ares_cancel.3		\
   ares_free_data.3			\
   ares_free_hostent.3			\
   ares_free_string.3			\
+  ares_get_servers.3			\
   ares_gethostbyaddr.3			\
   ares_gethostbyname.3			\
   ares_gethostbyname_file.3		\
@@ -93,6 +95,7 @@ MANPAGES = ares_cancel.3		\
   ares_save_options.3			\
   ares_search.3				\
   ares_send.3				\
+  ares_set_servers.3			\
   ares_set_socket_callback.3		\
   ares_strerror.3			\
   ares_timeout.3			\
@@ -108,6 +111,7 @@ HTMLPAGES = ares_cancel.html		\
   ares_free_data.html			\
   ares_free_hostent.html		\
   ares_free_string.html			\
+  ares_get_servers.html			\
   ares_gethostbyaddr.html		\
   ares_gethostbyname.html		\
   ares_gethostbyname_file.html		\
@@ -129,6 +133,7 @@ HTMLPAGES = ares_cancel.html		\
   ares_save_options.html		\
   ares_search.html			\
   ares_send.html			\
+  ares_set_servers.html			\
   ares_set_socket_callback.html		\
   ares_strerror.html			\
   ares_timeout.html			\
@@ -144,6 +149,7 @@ PDFPAGES = ares_cancel.pdf		\
   ares_free_data.pdf			\
   ares_free_hostent.pdf			\
   ares_free_string.pdf			\
+  ares_get_servers.pdf			\
   ares_gethostbyaddr.pdf		\
   ares_gethostbyname.pdf		\
   ares_gethostbyname_file.pdf		\
@@ -165,6 +171,7 @@ PDFPAGES = ares_cancel.pdf		\
   ares_save_options.pdf			\
   ares_search.pdf			\
   ares_send.pdf				\
+  ares_set_servers.pdf			\
   ares_set_socket_callback.pdf		\
   ares_strerror.pdf			\
   ares_timeout.pdf			\

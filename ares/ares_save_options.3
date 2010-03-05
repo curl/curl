@@ -14,7 +14,7 @@
 .\" this software for any purpose.  It is provided "as is"
 .\" without express or implied warranty.
 .\"
-.TH ARES_SAVE_OPTIONS 3 "1 June 2007"
+.TH ARES_SAVE_OPTIONS 3 "5 March 2010"
 .SH NAME
 ares_save_options \- Save configuration values obtained from initialized ares_channel
 .SH SYNOPSIS
@@ -52,13 +52,20 @@ The channel data identified by
 were invalid.
 .SH NOTE
 Since c-ares 1.6.0 the ares_options struct has been "locked" meaning that it
-won't be extended to cover new funtions. This function will remain
+won't be extended to cover new functions. This function will remain
 functioning, but it can only return config data that can be represented in
 this config struct, which may no longer be the complete set of config
 options. \fBares_dup(3)\fP will not have that restriction.
+
+The ares_options struct can not handle potential IPv6 name servers the
+ares_channel might be configured to use. Function \fBares_save_options(3)\fP
+will only return IPv4 servers if any. In order to retrieve all name servers
+an ares_channel might be using, function \fBares_get_servers(3)\fP must be
+used instead.
 .SH SEE ALSO
 .BR ares_destroy_options (3),
 .BR ares_init_options (3),
+.BR ares_get_servers (3),
 .BR ares_dup (3)
 .SH AVAILABILITY
 ares_save_options(3) was added in c-ares 1.4.0

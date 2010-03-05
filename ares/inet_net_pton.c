@@ -43,6 +43,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "ares.h"
 #include "ares_ipv6.h"
 #include "inet_net_pton.h"
 
@@ -432,7 +433,7 @@ int ares_inet_pton(int af, const char *src, void *dst)
   if (af == AF_INET)
     size = sizeof(struct in_addr);
   else if (af == AF_INET6)
-    size = sizeof(struct in6_addr);
+    size = sizeof(struct ares_in6_addr);
   else
   {
     SET_ERRNO(EAFNOSUPPORT);

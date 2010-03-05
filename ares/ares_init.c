@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2007-2009 by Daniel Stenberg
+ * Copyright (C) 2007-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -118,7 +118,6 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   ares_channel channel;
   int i;
   int status = ARES_SUCCESS;
-  struct server_state *server;
   struct timeval now;
 
 #ifdef CURLDEBUG
@@ -247,21 +246,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   if ((channel->flags & ARES_FLAG_PRIMARY) && channel->nservers > 1)
     channel->nservers = 1;
 
-  /* Initialize server states. */
-  for (i = 0; i < channel->nservers; i++)
-    {
-      server = &channel->servers[i];
-      server->udp_socket = ARES_SOCKET_BAD;
-      server->tcp_socket = ARES_SOCKET_BAD;
-      server->tcp_connection_generation = ++channel->tcp_connection_generation;
-      server->tcp_lenbuf_pos = 0;
-      server->tcp_buffer = NULL;
-      server->qhead = NULL;
-      server->qtail = NULL;
-      ares__init_list_head(&(server->queries_to_server));
-      server->channel = channel;
-      server->is_broken = 0;
-    }
+  ares__init_servers_state(channel);
 
   *channelptr = channel;
   return ARES_SUCCESS;
@@ -272,7 +257,9 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
 int ares_dup(ares_channel *dest, ares_channel src)
 {
   struct ares_options opts;
-  int rc;
+  struct ares_addr_node *servers;
+  int ipv6_nservers = 0;
+  int i, rc;
   int optmask;
 
   *dest = NULL; /* in case of failure return NULL explicitly */
@@ -296,16 +283,33 @@ int ares_dup(ares_channel *dest, ares_channel src)
   (*dest)->sock_create_cb      = src->sock_create_cb;
   (*dest)->sock_create_cb_data = src->sock_create_cb_data;
 
+  /* Full name server cloning required when not all are IPv4 */
+  for (i = 0; i < src->nservers; i++)
+    {
+      if (src->servers[i].addr.family != AF_INET) {
+        ipv6_nservers++;
+        break;
+      }
+    }
+  if (ipv6_nservers) {
+    rc = ares_get_servers(src, &servers);
+    if (rc != ARES_SUCCESS)
+      return rc;
+    rc = ares_set_servers(*dest, servers);
+    ares_free_data(servers);
+    if (rc != ARES_SUCCESS)
+      return rc;
+  }
 
   return ARES_SUCCESS; /* everything went fine */
-
 }
 
 /* Save options from initialized channel */
 int ares_save_options(ares_channel channel, struct ares_options *options,
                       int *optmask)
 {
-  int i;
+  int i, j;
+  int ipv4_nservers = 0;
 
   /* Zero everything out */
   memset(options, 0, sizeof(struct ares_options));
@@ -335,16 +339,27 @@ int ares_save_options(ares_channel channel, struct ares_options *options,
   options->sock_state_cb     = channel->sock_state_cb;
   options->sock_state_cb_data = channel->sock_state_cb_data;
 
-  /* Copy servers */
+  /* Copy IPv4 servers */
   if (channel->nservers) {
-    options->servers =
-      malloc(channel->nservers * sizeof(struct server_state));
-    if (!options->servers && channel->nservers != 0)
-      return ARES_ENOMEM;
     for (i = 0; i < channel->nservers; i++)
-      options->servers[i] = channel->servers[i].addr;
+    {
+      if (channel->servers[i].addr.family == AF_INET)
+        ipv4_nservers++;
+    }
+    if (ipv4_nservers) {
+      options->servers = malloc(ipv4_nservers * sizeof(struct server_state));
+      if (!options->servers)
+        return ARES_ENOMEM;
+      for (i = j = 0; i < channel->nservers; i++)
+      {
+        if (channel->servers[i].addr.family == AF_INET)
+          memcpy(&options->servers[j++],
+                 &channel->servers[i].addr.addrV4,
+                 sizeof(channel->servers[i].addr.addrV4));
+      }
+    }
   }
-  options->nservers = channel->nservers;
+  options->nservers = ipv4_nservers;
 
   /* copy domains */
   if (channel->ndomains) {
@@ -420,7 +435,7 @@ static int init_by_options(ares_channel channel,
       && channel->socket_receive_buffer_size == -1)
     channel->socket_receive_buffer_size = options->socket_receive_buffer_size;
 
-  /* Copy the servers, if given. */
+  /* Copy the IPv4 servers, if given. */
   if ((optmask & ARES_OPT_SERVERS) && channel->nservers == -1)
     {
       /* Avoid zero size allocations at any cost */
@@ -431,7 +446,12 @@ static int init_by_options(ares_channel channel,
           if (!channel->servers)
             return ARES_ENOMEM;
           for (i = 0; i < options->nservers; i++)
-            channel->servers[i].addr = options->servers[i];
+            {
+              channel->servers[i].addr.family = AF_INET;
+              memcpy(&channel->servers[i].addr.addrV4,
+                     &options->servers[i],
+                     sizeof(channel->servers[i].addr.addrV4));
+            }
         }
       channel->nservers = options->nservers;
     }
@@ -1001,7 +1021,8 @@ static int init_by_defaults(ares_channel channel)
       rc = ARES_ENOMEM;
       goto error;
     }
-    channel->servers[0].addr.s_addr = htonl(INADDR_LOOPBACK);
+    channel->servers[0].addr.family = AF_INET;
+    channel->servers[0].addr.addrV4.s_addr = htonl(INADDR_LOOPBACK);
     channel->nservers = 1;
   }
 
@@ -1149,61 +1170,62 @@ static int config_lookup(ares_channel channel, const char *str,
 static int config_nameserver(struct server_state **servers, int *nservers,
                              char *str)
 {
-  struct in_addr addr;
+  struct ares_addr host;
   struct server_state *newserv;
+  char *p, *txtaddr;
   /* On Windows, there may be more than one nameserver specified in the same
-   * registry key, so we parse it as a space or comma seperated list.
+   * registry key, so we parse input as a space or comma seperated list.
    */
-#ifdef WIN32
-  char *p = str;
-  char *begin = str;
-  int more = 1;
-  while (more)
-  {
-    more = 0;
-    while (*p && !ISSPACE(*p) && *p != ',')
-      p++;
-
-    if (*p)
+  for (p = str; p;)
     {
-      *p = '\0';
-      more = 1;
+      /* Skip whitespace and commas. */
+      while (*p && (ISSPACE(*p) || (*p == ',')))
+        p++;
+      if (!*p)
+        /* No more input, done. */
+        break;
+
+      /* Pointer to start of IPv4 or IPv6 address part. */
+      txtaddr = p;
+
+      /* Advance past this address. */
+      while (*p && !ISSPACE(*p) && (*p != ','))
+        p++;
+      if (*p)
+        /* Null terminate this address. */
+        *p++ = '\0';
+      else
+        /* Reached end of input, done when this address is processed. */
+        p = NULL;
+
+      /* Convert textual address to binary format. */
+      if (ares_inet_pton(AF_INET, txtaddr, &host.addrV4) == 1)
+        host.family = AF_INET;
+      else if (ares_inet_pton(AF_INET6, txtaddr, &host.addrV6) == 1)
+        host.family = AF_INET6;
+      else
+        continue;
+
+      /* Resize servers state array. */
+      newserv = realloc(*servers, (*nservers + 1) *
+                        sizeof(struct server_state));
+      if (!newserv)
+        return ARES_ENOMEM;
+
+      /* Store address data. */
+      newserv[*nservers].addr.family = host.family;
+      if (host.family == AF_INET)
+        memcpy(&newserv[*nservers].addr.addrV4, &host.addrV4,
+               sizeof(host.addrV4));
+      else
+        memcpy(&newserv[*nservers].addr.addrV6, &host.addrV6,
+               sizeof(host.addrV6));
+
+      /* Update arguments. */
+      *servers = newserv;
+      *nservers += 1;
     }
 
-    /* Skip multiple spaces or trailing spaces */
-    if (!*begin)
-    {
-      begin = ++p;
-      continue;
-    }
-
-    /* This is the part that actually sets the nameserver */
-    addr.s_addr = inet_addr(begin);
-    if (addr.s_addr == INADDR_NONE)
-      continue;
-    newserv = realloc(*servers, (*nservers + 1) * sizeof(struct server_state));
-    if (!newserv)
-      return ARES_ENOMEM;
-    newserv[*nservers].addr = addr;
-    *servers = newserv;
-    (*nservers)++;
-
-    if (!more)
-      break;
-    begin = ++p;
-  }
-#else
-  /* Add a nameserver entry, if this is a valid address. */
-  addr.s_addr = inet_addr(str);
-  if (addr.s_addr == INADDR_NONE)
-    return ARES_SUCCESS;
-  newserv = realloc(*servers, (*nservers + 1) * sizeof(struct server_state));
-  if (!newserv)
-    return ARES_ENOMEM;
-  newserv[*nservers].addr = addr;
-  *servers = newserv;
-  (*nservers)++;
-#endif
   return ARES_SUCCESS;
 }
 
@@ -1579,4 +1601,27 @@ void ares_set_socket_callback(ares_channel channel,
 {
   channel->sock_create_cb = cb;
   channel->sock_create_cb_data = data;
+}
+
+void ares__init_servers_state(ares_channel channel)
+{
+  struct server_state *server;
+  int i;
+
+  for (i = 0; i < channel->nservers; i++)
+    {
+      server = &channel->servers[i];
+      server->udp_socket = ARES_SOCKET_BAD;
+      server->tcp_socket = ARES_SOCKET_BAD;
+      server->tcp_connection_generation = ++channel->tcp_connection_generation;
+      server->tcp_lenbuf_pos = 0;
+      server->tcp_buffer_pos = 0;
+      server->tcp_buffer = NULL;
+      server->tcp_length = 0;
+      server->qhead = NULL;
+      server->qtail = NULL;
+      ares__init_list_head(&server->queries_to_server);
+      server->channel = channel;
+      server->is_broken = 0;
+    }
 }

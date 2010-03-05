@@ -81,7 +81,7 @@ static void sort6_addresses(struct hostent *host,
                             const struct apattern *sortlist, int nsort);
 static int get_address_index(const struct in_addr *addr,
                              const struct apattern *sortlist, int nsort);
-static int get6_address_index(const struct in6_addr *addr,
+static int get6_address_index(const struct ares_in6_addr *addr,
                               const struct apattern *sortlist, int nsort);
 
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
@@ -243,7 +243,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
   char *addrs[2];
   int result = 0;
   struct in_addr in;
-  struct in6_addr in6;
+  struct ares_in6_addr in6;
 
   if (family == AF_INET || family == AF_INET6)
     {
@@ -284,7 +284,7 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
     }
   else if (family == AF_INET6)
     {
-      hostent.h_length = (int)sizeof(struct in6_addr);
+      hostent.h_length = (int)sizeof(struct ares_in6_addr);
       addrs[0] = (char *)&in6;
     }
   /* Duplicate the name, to avoid a constness violation. */
@@ -467,7 +467,7 @@ static int get_address_index(const struct in_addr *addr,
 static void sort6_addresses(struct hostent *host, const struct apattern *sortlist,
                            int nsort)
 {
-  struct in6_addr a1, a2;
+  struct ares_in6_addr a1, a2;
   int i1, i2, ind1, ind2;
 
   /* This is a simple insertion sort, not optimized at all.  i1 walks
@@ -477,24 +477,24 @@ static void sort6_addresses(struct hostent *host, const struct apattern *sortlis
    */
   for (i1 = 0; host->h_addr_list[i1]; i1++)
     {
-      memcpy(&a1, host->h_addr_list[i1], sizeof(struct in6_addr));
+      memcpy(&a1, host->h_addr_list[i1], sizeof(struct ares_in6_addr));
       ind1 = get6_address_index(&a1, sortlist, nsort);
       for (i2 = i1 - 1; i2 >= 0; i2--)
         {
-          memcpy(&a2, host->h_addr_list[i2], sizeof(struct in6_addr));
+          memcpy(&a2, host->h_addr_list[i2], sizeof(struct ares_in6_addr));
           ind2 = get6_address_index(&a2, sortlist, nsort);
           if (ind2 <= ind1)
             break;
-          memcpy(host->h_addr_list[i2 + 1], &a2, sizeof(struct in6_addr));
+          memcpy(host->h_addr_list[i2 + 1], &a2, sizeof(struct ares_in6_addr));
         }
-      memcpy(host->h_addr_list[i2 + 1], &a1, sizeof(struct in6_addr));
+      memcpy(host->h_addr_list[i2 + 1], &a1, sizeof(struct ares_in6_addr));
     }
 }
 
 /* Find the first entry in sortlist which matches addr.  Return nsort
  * if none of them match.
  */
-static int get6_address_index(const struct in6_addr *addr,
+static int get6_address_index(const struct ares_in6_addr *addr,
                               const struct apattern *sortlist,
                               int nsort)
 {

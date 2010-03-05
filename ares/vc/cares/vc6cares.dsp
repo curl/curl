@@ -230,6 +230,10 @@ SOURCE=..\..\ares_nowarn.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_options.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_parse_a_reply.c
 # End Source File
 # Begin Source File

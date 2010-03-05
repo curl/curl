@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /* Copyright 1998, 2009 by the Massachusetts Institute of Technology.
- * Copyright (C) 2007-2009 by Daniel Stenberg
+ * Copyright (C) 2007-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -486,6 +486,21 @@ CARES_EXTERN void ares_free_hostent(struct hostent *host);
 CARES_EXTERN void ares_free_data(void *dataptr);
 
 CARES_EXTERN const char *ares_strerror(int code);
+
+struct ares_addr_node {
+  struct ares_addr_node *next;
+  int family;
+  union {
+    struct in_addr       addr4;
+    struct ares_in6_addr addr6;
+  } addr;
+};
+
+CARES_EXTERN int ares_set_servers(ares_channel channel,
+                                  struct ares_addr_node *servers);
+
+CARES_EXTERN int ares_get_servers(ares_channel channel,
+                                  struct ares_addr_node **servers);
 
 #ifdef  __cplusplus
 }

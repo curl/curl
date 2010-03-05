@@ -1,6 +1,6 @@
 /* $Id$ */
 
-/* Copyright (C) 2009 by Daniel Stenberg
+/* Copyright (C) 2009-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -19,6 +19,7 @@ typedef enum {
   ARES_DATATYPE_UNKNOWN = 1,  /* unknown data type     - introduced in 1.7.0 */
   ARES_DATATYPE_SRV_REPLY,    /* struct ares_srv_reply - introduced in 1.7.0 */
   ARES_DATATYPE_TXT_REPLY,    /* struct ares_txt_reply - introduced in 1.7.0 */
+  ARES_DATATYPE_ADDR_NODE,    /* struct ares_addr_node - introduced in 1.7.1 */
 #if 0
   ARES_DATATYPE_ADDR6TTL,     /* struct ares_addrttl   */
   ARES_DATATYPE_ADDRTTL,      /* struct ares_addr6ttl  */
@@ -54,6 +55,7 @@ struct ares_data {
   union {
     struct ares_txt_reply txt_reply;
     struct ares_srv_reply srv_reply;
+    struct ares_addr_node addr_node;
   } data;
 };
 

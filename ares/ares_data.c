@@ -1,6 +1,6 @@
 /* $Id$ */
 
-/* Copyright (C) 2009 by Daniel Stenberg
+/* Copyright (C) 2009-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -34,6 +34,7 @@
 ** of c-ares functions returning pointers that must be free'ed using this
 ** function is:
 **
+**   ares_get_servers()
 **   ares_parse_srv_reply()
 **   ares_parse_txt_reply()
 */
@@ -78,6 +79,12 @@ void ares_free_data(void *dataptr)
           free(ptr->data.txt_reply.txt);
         break;
 
+      case ARES_DATATYPE_ADDR_NODE:
+
+        if (ptr->data.addr_node.next)
+          ares_free_data(ptr->data.addr_node.next);
+        break;
+
       default:
         return;
     }
@@ -120,6 +127,12 @@ void *ares_malloc_data(ares_datatype type)
         ptr->data.txt_reply.txt = NULL;
         ptr->data.txt_reply.length  = 0;
         break;
+
+      case ARES_DATATYPE_ADDR_NODE:
+        ptr->data.addr_node.next = NULL;
+        ptr->data.addr_node.family = 0;
+        memset(&ptr->data.addr_node.addrV6, 0,
+          sizeof(ptr->data.addr_node.addrV6));
 
       default:
         free(ptr);

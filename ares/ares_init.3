@@ -1,7 +1,7 @@
 .\" $Id$
 .\"
 .\" Copyright 1998 by the Massachusetts Institute of Technology.
-.\" Copyright (C) 2004-2009 by Daniel Stenberg
+.\" Copyright (C) 2004-2010 by Daniel Stenberg
 .\"
 .\" Permission to use, copy, modify, and distribute this
 .\" software and its documentation for any purpose and without
@@ -15,7 +15,7 @@
 .\" this software for any purpose.  It is provided "as is"
 .\" without express or implied warranty.
 .\"
-.TH ARES_INIT 3 "26 May 2009"
+.TH ARES_INIT 3 "5 March 2010"
 .SH NAME
 ares_init, ares_init_options \- Initialize a resolver channel
 .SH SYNOPSIS
@@ -93,8 +93,11 @@ service port.
 .br
 .B int \fInservers\fP;
 .br
-The list of servers to contact, instead of the servers specified in
-resolv.conf or the local named.
+The list of IPv4 servers to contact, instead of the servers specified in
+resolv.conf or the local named. In order to allow specification of either
+IPv4 or IPv6 name servers, function
+.BR ares_set_servers(3)
+must be used instead.
 .TP 18
 .B ARES_OPT_DOMAINS
 .B char **\fIdomains\fP;
@@ -190,10 +193,11 @@ c-ares library initialization not yet performed.
 .SH SEE ALSO
 .BR ares_destroy(3),
 .BR ares_dup(3),
-.BR ares_library_init(3)
+.BR ares_library_init(3),
+.BR ares_set_servers(3)
 .SH AUTHOR
 Greg Hudson, MIT Information Systems
 .br
 Copyright 1998 by the Massachusetts Institute of Technology.
 .br
-Copyright (C) 2004-2009 by Daniel Stenberg.
+Copyright (C) 2004-2010 by Daniel Stenberg.

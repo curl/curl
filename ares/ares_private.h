@@ -4,7 +4,7 @@
 /* $Id$ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
- * Copyright (C) 2004-2009 by Daniel Stenberg
+ * Copyright (C) 2004-2010 by Daniel Stenberg
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -113,8 +113,8 @@
 struct ares_addr {
   int family;
   union {
-    struct in_addr  addr4;
-    struct in6_addr addr6;
+    struct in_addr       addr4;
+    struct ares_in6_addr addr6;
   } addr;
 };
 #define addrV4 addr.addr4
@@ -137,7 +137,7 @@ struct send_request {
 };
 
 struct server_state {
-  struct in_addr addr;
+  struct ares_addr addr;
   ares_socket_t udp_socket;
   ares_socket_t tcp_socket;
 
@@ -221,14 +221,14 @@ struct query_server_info {
 struct apattern {
   union
   {
-    struct in_addr  addr4;
-    struct in6_addr addr6;
+    struct in_addr       addr4;
+    struct ares_in6_addr addr6;
   } addr;
   union
   {
-    struct in_addr  addr4;
-    struct in6_addr addr6;
-    unsigned short  bits;
+    struct in_addr       addr4;
+    struct ares_in6_addr addr6;
+    unsigned short       bits;
   } mask;
   int family;
   unsigned short type;
@@ -319,6 +319,8 @@ struct timeval ares__tvnow(void);
 int ares__expand_name_for_response(const unsigned char *encoded,
                                    const unsigned char *abuf, int alen,
                                    char **s, long *enclen);
+void ares__init_servers_state(ares_channel channel);
+void ares__destroy_servers_state(ares_channel channel);
 #if 0 /* Not used */
 long ares__tvdiff(struct timeval t1, struct timeval t2);
 #endif

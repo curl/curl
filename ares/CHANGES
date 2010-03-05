@@ -1,5 +1,26 @@
   Changelog for the c-ares project
 
+* March 5, 2010 (Yang Tse)
+- Added IPv6 name servers support. Implementation has been based on code,
+  comments and feedback provided November and December of 2008 by Daniel
+  Stenberg, Gregor Jasny, Phil Blundell and myself, December 2009 by Cedric
+  Bail, and February 2010 by Jakub Hrozek on the c-ares mailing list. On
+  March I reviewed all that, selected the best of each, and adjusted or
+  extended parts of it to make the best fit.
+
+  The external and visible result of all this is that two new functions are
+  added to the external API, ares_get_servers() and ares_set_servers(), which
+  becomes now the preferred way of getting and setting name servers for any
+  ares channel as these support both IPv4 and IPv6 name servers.
+
+  In order to not break ABI compatibility, ares_init_options() with option
+  mask ARES_OPT_SERVERS and ares_save_options() may still be used in code
+  which is intended to run on IPv4-only stacks. But remember that these
+  functions do not support IPv6 name servers. This implies that if the user
+  is capable of defining or providing an IPv6 name server, and the app is
+  using ares_init_options() or ares_save_options() at some point to handle
+  the name servers, the app will likely loose IPv6 name servers.
+
 * January 28, 2010 (Daniel Stenberg)
 - Tommie Gannert pointed out a silly bug in ares_process_fd() since it didn't
   check for broken connections like ares_process() did. Based on that, I

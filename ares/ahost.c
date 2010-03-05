@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
   struct in_addr addr4;
-  struct in6_addr addr6;
+  struct ares_in6_addr addr6;
 
 #ifdef USE_WINSOCK
   WORD wVersionRequested = MAKEWORD(USE_WINSOCK,USE_WINSOCK);

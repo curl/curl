@@ -164,8 +164,6 @@ static const char *rcodes[] = {
   "(unknown)", "(unknown)", "(unknown)", "(unknown)", "NOCHANGE"
 };
 
-static struct in_addr inaddr;
-
 static void callback(void *arg, int status, int timeouts,
                      unsigned char *abuf, int alen);
 static const unsigned char *display_question(const unsigned char *aptr,
@@ -176,6 +174,9 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 static const char *type_name(int type);
 static const char *class_name(int dnsclass);
 static void usage(void);
+static void destroy_addr_list(struct ares_addr_node *head);
+static void append_addr_list(struct ares_addr_node **head,
+                             struct ares_addr_node *node);
 
 int main(int argc, char **argv)
 {
@@ -186,6 +187,7 @@ int main(int argc, char **argv)
   struct hostent *hostent;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
+  struct ares_addr_node *srvr, *servers = NULL;
 
 #ifdef USE_WINSOCK
   WORD wVersionRequested = MAKEWORD(USE_WINSOCK,USE_WINSOCK);
@@ -227,27 +229,56 @@ int main(int argc, char **argv)
           break;
 
         case 's':
-          /* Add a server, and specify servers in the option mask. */
-          if (ares_inet_pton(AF_INET, optarg, &inaddr) <= 0)
-            {
-              hostent = gethostbyname(optarg);
-              if (!hostent || hostent->h_addrtype != AF_INET)
-                {
-                  fprintf(stderr, "adig: server %s not found.\n", optarg);
-                  return 1;
-                }
-              memcpy(&inaddr, hostent->h_addr, sizeof(struct in_addr));
-            }
-          options.servers = realloc(options.servers, (options.nservers + 1)
-                                    * sizeof(struct in_addr));
-          if (!options.servers)
+          /* User specified name servers override default ones. */
+          srvr = malloc(sizeof(struct ares_addr_node));
+          if (!srvr)
             {
               fprintf(stderr, "Out of memory!\n");
+              destroy_addr_list(servers);
               return 1;
             }
-          memcpy(&options.servers[options.nservers], &inaddr,
-                 sizeof(struct in_addr));
-          options.nservers++;
+          append_addr_list(&servers, srvr);
+          if (ares_inet_pton(AF_INET, optarg, &srvr->addr.addr4) > 0)
+            srvr->family = AF_INET;
+          else if (ares_inet_pton(AF_INET6, optarg, &srvr->addr.addr6) > 0)
+            srvr->family = AF_INET6;
+          else
+            {
+              hostent = gethostbyname(optarg);
+              if (!hostent)
+                {
+                  fprintf(stderr, "adig: server %s not found.\n", optarg);
+                  destroy_addr_list(servers);
+                  return 1;
+                }
+              switch (hostent->h_addrtype)
+                {
+                  case AF_INET:
+                    srvr->family = AF_INET;
+                    memcpy(&srvr->addr.addr4, hostent->h_addr,
+                           sizeof(srvr->addr.addr4));
+                    break;
+                  case AF_INET6:
+                    srvr->family = AF_INET6;
+                    memcpy(&srvr->addr.addr6, hostent->h_addr,
+                           sizeof(srvr->addr.addr6));
+                    break;
+                  default:
+                    fprintf(stderr,
+                      "adig: server %s unsupported address family.\n", optarg);
+                    destroy_addr_list(servers);
+                    return 1;
+                }
+            }
+          /* Notice that calling ares_init_options() without servers in the
+           * options struct and with ARES_OPT_SERVERS set simultaneously in
+           * the options mask, results in an initialization with no servers.
+           * When alternative name servers have been specified these are set
+           * later calling ares_set_servers() overriding any existing server
+           * configuration. To prevent initial configuration with default
+           * servers that will be discarded later ARES_OPT_SERVERS is set.
+           * If this flag is not set here the result shall be the same but
+           * ares_init_options() will do needless work. */
           optmask |= ARES_OPT_SERVERS;
           break;
 
@@ -306,6 +337,18 @@ int main(int argc, char **argv)
       fprintf(stderr, "ares_init_options: %s\n",
               ares_strerror(status));
       return 1;
+    }
+
+  if(servers)
+    {
+      status = ares_set_servers(channel, servers);
+      destroy_addr_list(servers);
+      if (status != ARES_SUCCESS)
+        {
+          fprintf(stderr, "ares_init_options: %s\n",
+                  ares_strerror(status));
+          return 1;
+        }
     }
 
   /* Initiate the queries, one per command-line argument.  If there is
@@ -748,4 +791,30 @@ static void usage(void)
   fprintf(stderr, "usage: adig [-f flag] [-s server] [-c class] "
           "[-t type] [-p port] name ...\n");
   exit(1);
+}
+
+static void destroy_addr_list(struct ares_addr_node *head)
+{
+  while(head)
+    {
+      struct ares_addr_node *detached = head;
+      head = head->next;
+      free(detached);
+    }
+}
+
+static void append_addr_list(struct ares_addr_node **head,
+                             struct ares_addr_node *node)
+{
+  struct ares_addr_node *last;
+  node->next = NULL;
+  if(*head)
+    {
+      last = *head;
+      while(last->next)
+        last = last->next;
+      last->next = node;
+    }
+  else
+    *head = node;
 }

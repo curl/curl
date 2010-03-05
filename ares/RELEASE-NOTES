@@ -2,7 +2,7 @@ This is what's new and changed in the c-ares 1.7.1 release:
 
 Changed:
 
- o 
+ o added IPv6 name servers support
 
 Fixed:
 
@@ -12,6 +12,7 @@ Fixed:
 
 Thanks go to these friendly people for their efforts and contributions:
 
- Ingmar Runge, Laszlo Tamas Szabo, Yang Tse, Tommie Gannert
+ Ingmar Runge, Laszlo Tamas Szabo, Yang Tse, Tommie Gannert, Gregor Jasny,
+ Phil Blundell, Cedric Bail, Jakub Hrozek
 
 Have fun!
