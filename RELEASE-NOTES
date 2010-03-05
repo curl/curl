@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o sub-second timeouts improvements
  o configure fixes for GSSAPI
  o threaded resolver double free when closing curl handle
+ o configure fixes for building with the clang compiler
 
 This release includes the following known bugs:
 

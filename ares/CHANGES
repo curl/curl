@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* March 5, 2010 (Daniel Stenberg)
+- Daniel Johnson provided fixes for building with the clang compiler.
+
 * March 5, 2010 (Yang Tse)
 - Added IPv6 name servers support. Implementation has been based on code,
   comments and feedback provided November and December of 2008 by Daniel

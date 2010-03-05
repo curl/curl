@@ -2380,7 +2380,10 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
   *)
        AC_MSG_CHECKING([whether $CC supports it])
        if test "$GCC" = yes ; then
-         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ||
+           dnl clang always supports -fvisibility= but it doesn't show up
+           dnl under --help.
+           test "$compiler_id" = "CLANG"; then
            AC_MSG_RESULT(yes)
            AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
            AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])

@@ -45,6 +45,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_HPUX_C
   CURL_CHECK_COMPILER_IBM_C
   CURL_CHECK_COMPILER_INTEL_C
+  CURL_CHECK_COMPILER_CLANG
   CURL_CHECK_COMPILER_GNU_C
   CURL_CHECK_COMPILER_LCC
   CURL_CHECK_COMPILER_SGI_MIPSPRO_C
@@ -67,6 +68,40 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
 *** mailing list: http://cool.haxx.se/mailman/listinfo/curl-library/
 ***
 _EOF
+  fi
+])
+
+
+dnl CURL_CHECK_COMPILER_CLANG
+dnl -------------------------------------------------
+dnl Verify if compiler being used is clang.
+
+AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_GNU_C])dnl
+  AC_MSG_CHECKING([if compiler is clang])
+  CURL_CHECK_DEF([__clang__], [], [silent])
+  if test "$curl_cv_have_def___clang__" = "yes"; then
+    AC_MSG_RESULT([yes])
+    compiler_id="CLANG"
+    clangver=`$CC -dumpversion`
+    clangvhi=`echo $clangver | cut -d . -f1`
+    clangvlo=`echo $clangver | cut -d . -f2`
+    compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_all="$flags_dbg_all -ggdb"
+    flags_dbg_all="$flags_dbg_all -gstabs"
+    flags_dbg_all="$flags_dbg_all -gstabs+"
+    flags_dbg_all="$flags_dbg_all -gcoff"
+    flags_dbg_all="$flags_dbg_all -gxcoff"
+    flags_dbg_all="$flags_dbg_all -gdwarf-2"
+    flags_dbg_all="$flags_dbg_all -gvms"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -Os -O3 -O4"
+    flags_opt_yes="-Os"
+    flags_opt_off="-O0"
+  else
+    AC_MSG_RESULT([no])
   fi
 ])
 
@@ -101,6 +136,7 @@ dnl Verify if compiler being used is GNU C.
 
 AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
   AC_REQUIRE([CURL_CHECK_COMPILER_INTEL_C])dnl
+  AC_REQUIRE([CURL_CHECK_COMPILER_CLANG])dnl
   AC_MSG_CHECKING([if compiler is GNU C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "yes" &&
@@ -500,7 +536,8 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
   #
   if test "$compiler_id" != "unknown"; then
     #
-    if test "$compiler_id" = "GNU_C"; then
+    if test "$compiler_id" = "GNU_C" ||
+      test "$compiler_id" = "CLANG"; then
       CURL_CONVERT_INCLUDE_TO_ISYSTEM
     fi
     #
@@ -510,6 +547,14 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
     tmp_CFLAGS=""
     #
     case "$compiler_id" in
+        #
+      CLANG)
+        #
+        dnl Disable warnings for unused arguments, otherwise clang will
+        dnl warn about compile-time arguments used during link-time, like
+        dnl -O and -g and -pedantic.
+        tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
+        ;;
         #
       DEC_C)
         #
@@ -790,6 +835,31 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
     tmp_CFLAGS=""
     #
     case "$compiler_id" in
+        #
+      CLANG)
+        #
+        if test "$want_warnings" = "yes"; then
+          dnl All versions of clang support the same warnings as at least
+          dnl gcc 4.2.1.
+          tmp_CFLAGS="$tmp_CFLAGS -pedantic"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
+          tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
+          tmp_CFLAGS="$tmp_CFLAGS -Wunused -Wshadow"
+          tmp_CFLAGS="$tmp_CFLAGS -Winline -Wnested-externs"
+          tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
+          tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
+          tmp_CFLAGS="$tmp_CFLAGS -Wfloat-equal"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-multichar -Wsign-compare"
+          tmp_CFLAGS="$tmp_CFLAGS -Wundef"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
+          tmp_CFLAGS="$tmp_CFLAGS -Wendif-labels -Wstrict-prototypes"
+          tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+          tmp_CFLAGS="$tmp_CFLAGS -Wcast-align"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-system-headers"
+          tmp_CFLAGS="$tmp_CFLAGS -Wshorten-64-to-32"
+        fi
+        ;;
         #
       DEC_C)
         #
