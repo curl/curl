@@ -2490,12 +2490,11 @@ static void conn_free(struct connectdata *conn)
   Curl_llist_destroy(conn->done_pipe, NULL);
 
   /* possible left-overs from the async name resolvers */
-#if defined(CURLRES_ASYNCH)
-  Curl_safefree(conn->async.hostname);
-  Curl_safefree(conn->async.os_specific);
 #if defined(CURLRES_THREADED)
   Curl_destroy_thread_data(&conn->async);
-#endif
+#elif defined(CURLRES_ASYNCH)
+  Curl_safefree(conn->async.hostname);
+  Curl_safefree(conn->async.os_specific);
 #endif
 
   Curl_free_ssl_config(&conn->ssl_config);

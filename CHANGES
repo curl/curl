@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (5 Mar 2010)
+- Constantine Sapuntzakis detected and fixed a double free in builds done
+  with threaded resolver enabled (Windows default configuration) that would
+  get triggered when a curl handle is closed while doing DNS resolution.
+
 Daniel Stenberg (2 Mar 2010)
 - [Daniel Johnson] I've been trying to build libcurl with clang on Darwin and
   ran into some issues with the GSSAPI tests in configure.ac. The tests first
