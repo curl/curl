@@ -1173,6 +1173,34 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
   }
 }
 
+static curl_off_t sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
+                             int pkt_size)
+{
+  curl_off_t min_sleep = 0;
+  curl_off_t rv = 0;
+
+  if (rate_bps == 0)
+    return 0;
+
+  if (cur_rate_bps > (rate_bps + (rate_bps >> 10))) {
+    /* running too fast */
+    rate_bps -= rate_bps >> 6;
+    min_sleep = 1;
+  }
+  else if (cur_rate_bps < (rate_bps - (rate_bps >> 10))) {
+    /* running too slow */
+    rate_bps += rate_bps >> 6;
+  }
+
+  rv = ((curl_off_t)((pkt_size * 8) * 1000) / rate_bps);
+
+  if (rv < min_sleep)
+    rv = min_sleep;
+
+  return rv;
+}
+
+
 /**********************************************************
  *
  * tftp_easy_statemach
@@ -1187,15 +1215,64 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
   CURLcode              result = CURLE_OK;
   struct SessionHandle  *data = conn->data;
   tftp_state_data_t     *state = (tftp_state_data_t *)conn->proto.tftpc;
+  int                   fd_read;
+  curl_off_t            timeout_ms;
+  struct SingleRequest  *k = &data->req;
+  struct timeval        transaction_start = Curl_tvnow();
+
+  k->start = transaction_start;
+  k->now = transaction_start;
 
   /* Run the TFTP State Machine */
-  for(;
-      (state->state != TFTP_STATE_FIN) && (result == CURLE_OK);
-      result=tftp_state_machine(state, state->event) ) {
+  for(; (state->state != TFTP_STATE_FIN) && (result == CURLE_OK); ) {
+
+    timeout_ms = state->retry_time * 1000;
+
+    if (data->set.upload) {
+      if (data->set.max_send_speed &&
+          (data->progress.ulspeed > data->set.max_send_speed)) {
+        fd_read = CURL_SOCKET_BAD;
+        timeout_ms = sleep_time(data->set.max_send_speed,
+                                data->progress.ulspeed, state->blksize);
+      }
+      else {
+        fd_read = state->sockfd;
+      }
+    }
+    else {
+      if (data->set.max_recv_speed &&
+          (data->progress.dlspeed > data->set.max_recv_speed)) {
+        fd_read = CURL_SOCKET_BAD;
+        timeout_ms = sleep_time(data->set.max_recv_speed,
+                                data->progress.dlspeed, state->blksize);
+      }
+      else {
+        fd_read = state->sockfd;
+      }
+    }
+
+    if(data->set.timeout) {
+      timeout_ms = data->set.timeout - Curl_tvdiff(k->now, k->start);
+      if (timeout_ms > state->retry_time * 1000)
+        timeout_ms = state->retry_time * 1000;
+      else if(timeout_ms < 0)
+        timeout_ms = 0;
+    }
+
 
     /* Wait until ready to read or timeout occurs */
-    rc=Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD,
-                         state->retry_time * 1000);
+    rc=Curl_socket_ready(fd_read, CURL_SOCKET_BAD, timeout_ms);
+
+    k->now = Curl_tvnow();
+
+    /* Force a progress callback if it's been too long */
+    if (Curl_tvdiff(k->now, k->start) >= data->set.timeout) {
+       if(Curl_pgrsUpdate(conn)) {
+          tftp_state_machine(state, TFTP_EVENT_ERROR);
+          return CURLE_ABORTED_BY_CALLBACK;
+       }
+       k->start = k->now;
+    }
 
     if(rc == -1) {
       /* bail out */
@@ -1203,27 +1280,42 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
       failf(data, "%s", Curl_strerror(conn, error));
       state->event = TFTP_EVENT_ERROR;
     }
-    else if(rc==0) {
-      /* A timeout occured */
-      state->event = TFTP_EVENT_TIMEOUT;
-
-      /* Force a look at transfer timeouts */
-      check_time = 0;
-
-    }
     else {
+
+      if(rc==0) {
+        /* A timeout occured, but our timeout is variable, so maybe
+           just continue? */
+        long rtms = state->retry_time * 1000;
+        if (Curl_tvdiff(k->now, transaction_start) > rtms) {
+          state->event = TFTP_EVENT_TIMEOUT;
+          /* Force a look at transfer timeouts */
+          check_time = 1;
+        }
+        else {
+          continue; /* skip state machine */
+        }
+      }
+      else {
         result = tftp_receive_packet(conn);
+        if (result == CURLE_OK)
+           transaction_start = Curl_tvnow();
+
+        if(k->bytecountp)
+          *k->bytecountp = k->bytecount; /* read count */
+        if(k->writebytecountp)
+          *k->writebytecountp = k->writebytecount; /* write count */
+      }
     }
 
-    /* Check for transfer timeout every 10 blocks, or after timeout */
-    if(check_time%10==0) {
-      /* ignore the event here as Curl_socket_ready() handles
-       * retransmission timeouts inside the easy state mach */
+    if(check_time) {
       tftp_state_timeout(conn, NULL);
+      check_time = 0;
     }
 
     if(result)
       return(result);
+
+    result = tftp_state_machine(state, state->event);
   }
 
   /* Tell curl we're done */

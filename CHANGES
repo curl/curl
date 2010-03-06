@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (6 Mar 2010)
+- Ben Greear brought a patch that fixed the rate limiting logic for TFTP when
+  the easy interface was used.
+
 Daniel Stenberg (5 Mar 2010)
 - Daniel Johnson provided fixes for building curl with the clang compiler.
 
