@@ -981,9 +981,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
 
-  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV) {
+  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
     fd_read = conn->sockfd;
-  } else
+  else
     fd_read = CURL_SOCKET_BAD;
 
   if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
@@ -991,10 +991,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-   if(!select_res) { /* Call for select()/poll() only, if read/write/error
-                         status is not known. */
-       select_res = Curl_socket_ready(fd_read, fd_write, 0);
-   }
+  if(!select_res) /* Call for select()/poll() only, if read/write/error
+                     status is not known. */
+    select_res = Curl_socket_ready(fd_read, fd_write, 0);
 
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
