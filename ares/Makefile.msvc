@@ -1,6 +1,6 @@
 # $Id$
 
-# Copyright (C) 2009 by Daniel Stenberg
+# Copyright (C) 2009-2010 by Daniel Stenberg
 #
 # Permission to use, copy, modify, and distribute this
 # software and its documentation for any purpose and without
@@ -103,6 +103,8 @@ CC_VERS_NUM = 90
 !ELSEIF "$(_NMAKE_VER)" == "9.00.30729.01"
 CC_VERS_NUM = 90
 !ELSEIF "$(_NMAKE_VER)" == "10.00.20506.01"
+CC_VERS_NUM = 100
+!ELSEIF "$(_NMAKE_VER)" == "10.00.21003.01"
 CC_VERS_NUM = 100
 !ELSE
 !  MESSAGE Unknown value for _NMAKE_VER macro: "$(_NMAKE_VER)"
