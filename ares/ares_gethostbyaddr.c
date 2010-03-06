@@ -272,7 +272,7 @@ static void ptr_rr_name(char *name, const struct ares_addr *addr)
     }
   else
     {
-       unsigned char *bytes = (unsigned char *)&addr->addrV6.s6_addr;
+       unsigned char *bytes = (unsigned char *)&addr->addrV6;
        /* There are too many arguments to do this in one line using
         * minimally C89-compliant compilers */
        sprintf(name,

@@ -504,7 +504,9 @@ static int get6_address_index(const struct ares_in6_addr *addr,
     {
       if (sortlist[i].family != AF_INET6)
         continue;
-        if (!ares_bitncmp(&addr->s6_addr, &sortlist[i].addrV6.s6_addr, sortlist[i].mask.bits))
+        if (!ares_bitncmp(addr,
+                          &sortlist[i].addrV6,
+                          sortlist[i].mask.bits))
           break;
     }
   return i;

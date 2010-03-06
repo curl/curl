@@ -22,10 +22,6 @@
 #define PF_INET6 AF_INET6
 #endif
 
-#if !defined(HAVE_STRUCT_IN6_ADDR) && !defined(s6_addr)
-#define s6_addr _S6_un._S6_u8
-#endif
-
 #ifndef HAVE_STRUCT_SOCKADDR_IN6
 struct sockaddr_in6
 {
