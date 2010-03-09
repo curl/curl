@@ -822,7 +822,7 @@ DhcpNameServer
      return ARES_ENOMEM;
 
   for (i = 0; def_nameservers[i]; i++)
-      servers[i].addr.s_addr = htonl(def_nameservers[i]);
+      servers[i].addr.addrV4.s_addr = htonl(def_nameservers[i]);
   status = ARES_EOF;
 
 #else
