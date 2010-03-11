@@ -71,13 +71,17 @@
 #include "ssluse.h"
 #    ifdef USE_OPENSSL
 #      include <openssl/des.h>
-#      include <openssl/md4.h>
+#      ifndef OPENSSL_NO_MD4
+#        include <openssl/md4.h>
+#      endif
 #      include <openssl/md5.h>
 #      include <openssl/ssl.h>
 #      include <openssl/rand.h>
 #    else
 #      include <des.h>
-#      include <md4.h>
+#      ifndef OPENSSL_NO_MD4
+#        include <md4.h>
+#      endif
 #      include <md5.h>
 #      include <ssl.h>
 #      include <rand.h>
@@ -99,6 +103,12 @@
 #define DESKEY(x) &x
 #endif
 
+#ifdef OPENSSL_NO_MD4
+/* This requires MD4, but OpenSSL was compiled without it */
+#define USE_NTRESPONSES 0
+#define USE_NTLM2SESSION 0
+#endif
+
 #elif defined(USE_GNUTLS)
 
 #include "gtls.h"
@@ -118,12 +128,14 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifndef USE_NTRESPONSES 
 /* Define this to make the type-3 message include the NT response message */
 #define USE_NTRESPONSES 1
 
 /* Define this to make the type-3 message include the NTLM2Session response
    message, requires USE_NTRESPONSES. */
 #define USE_NTLM2SESSION 1
+#endif
 
 #ifndef USE_WINDOWS_SSPI
 /* this function converts from the little endian format used in the incoming
@@ -945,8 +957,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
       /* End of NTLM2 Session code */
     }
-    else {
+    else
 #endif
+	{
 
 #if USE_NTRESPONSES
       unsigned char ntbuffer[0x18];
@@ -964,9 +977,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       /* A safer but less compatible alternative is:
        *   lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
        * See http://davenport.sourceforge.net/ntlm.html#ntlmVersion2 */
-#if USE_NTLM2SESSION
     }
-#endif
 
     lmrespoff = 64; /* size of the message header */
 #if USE_NTRESPONSES
