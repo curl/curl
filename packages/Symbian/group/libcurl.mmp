@@ -3,7 +3,7 @@
 //
 
 // Build-time options (uncomment these to enable)
-//#define ENABLE_ZLIB     // Enable gzip/deflate decompression
+#define ENABLE_ZLIB     // Enable gzip/deflate decompression
 //#define ENABLE_SSL      // Enable SSL for HTTPS/FTPS (requires S60 Open C SDK)
 
 TARGET        libcurl.dll
