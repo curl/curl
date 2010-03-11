@@ -13,7 +13,7 @@ tricky, since libcurl isn't designed with Symbian's native asynchronous
 message passing idioms in mind. However, it may be possible to use libcurl
 in an active object-based application through libcurl's multi interface.
 The port is most easily used when porting POSIX applications to Symbian
-OS using P.I.P.S.
+OS using P.I.P.S. (a.k.a. Open C).
 
 libcurl is built as a standard Symbian ordinal-linked DLL, and curl is
 built as a text mode EXE application.  They have not been Symbian
@@ -76,9 +76,7 @@ is uncommented in the libcurl.mmp file.
 SSL/TLS encryption is not enabled by default, but it is possible to add
 when the OpenSSL libraries included in the S60 Open C SDK are available.
 The appropriate macro in the libcurl.mmp file must be uncommented to
-enable support.  In addition, some manual editing of the libcurl source
-code must also be done since the S60 port of OpenSSL disables support
-for some encryption methods that libcurl assumes are always available.
+enable support.
 
 Debug builds are not supported (i.e. --enable-debug) because they cause
 additional symbol exports in the library which are not frozen in the .def
@@ -87,4 +85,4 @@ files.
 
 Dan Fandrich
 dan@coneharvesters.com
-April 2009
+March 2010
