@@ -368,7 +368,7 @@ CARES_EXTERN int ares_fds(ares_channel channel,
                           fd_set *write_fds);
 
 CARES_EXTERN int ares_getsock(ares_channel channel,
-                              int *socks,
+                              ares_socket_t *socks,
                               int numsocks);
 
 CARES_EXTERN struct timeval *ares_timeout(ares_channel channel,

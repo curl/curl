@@ -105,7 +105,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
   struct timeval timebuf;
   struct timeval *timeout;
   int max = ares_getsock(conn->data->state.areschannel,
-                         (int *)socks, numsocks);
+                         (ares_socket_t *)socks, numsocks);
 
 
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
@@ -134,7 +134,7 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
   struct SessionHandle *data = conn->data;
   int nfds;
   int bitmask;
-  int socks[ARES_GETSOCK_MAXNUM];
+  ares_socket_t socks[ARES_GETSOCK_MAXNUM];
   struct pollfd pfd[ARES_GETSOCK_MAXNUM];
   int i;
   int num = 0;

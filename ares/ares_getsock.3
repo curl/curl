@@ -14,25 +14,25 @@
 .\" this software for any purpose.  It is provided "as is"
 .\" without express or implied warranty.
 .\"
-.TH ARES_GETSOCK 3 "22 December 2005"
+.TH ARES_GETSOCK 3 "11 March 2010"
 .SH NAME
-ares_getsock \- get file descriptors to wait on
+ares_getsock \- get socket descriptors to wait on
 .SH SYNOPSIS
 .nf
 .B #include <ares.h>
 .PP
-.B int ares_getsock(ares_channel \fIchannel\fP, int *\fIsocks\fP, 
+.B int ares_getsock(ares_channel \fIchannel\fP, ares_socket_t *\fIsocks\fP,
 .B int \fInumsocks\fP);
 .fi
 .SH DESCRIPTION
 The
 .B ares_getsock
-function retrieves the set of file descriptors which the calling
+function retrieves the set of socket descriptors which the calling
 application should wait on for reading and/or writing for the
 processing of name service queries pending on the name service channel
 identified by
 .IR channel .
-File descriptors will be set in the integer array pointed to by
+Socket descriptors will be set in the socket descriptor array pointed to by
 \fIsocks\fP.
 \fInumsocks\fP is the size of the given array in number of ints.
 
