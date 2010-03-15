@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o threaded resolver double free when closing curl handle
  o configure fixes for building with the clang compiler
  o easy interix rate limiting logic
+ o curl_multi_remove_handle() caused use after free
 
 This release includes the following known bugs:
 
@@ -41,6 +42,7 @@ advice from friends like these:
 
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
- Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson
+ Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson,
+ Constantine Sapuntzakis
 
         Thanks! (and sorry if I forgot to mention someone)

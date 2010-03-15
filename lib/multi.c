@@ -181,12 +181,12 @@ struct Curl_multi {
                                     previous callback */
 };
 
-static struct connectdata *conn_using(struct Curl_multi *multi,
+static void multi_connc_remove_handle(struct Curl_multi *multi,
                                       struct SessionHandle *data);
 static void singlesocket(struct Curl_multi *multi,
                          struct Curl_one_easy *easy);
-static void add_closure(struct Curl_multi *multi,
-                        struct SessionHandle *data);
+static CURLMcode add_closure(struct Curl_multi *multi,
+                             struct SessionHandle *data);
 static int update_timer(struct Curl_multi *multi);
 
 static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
@@ -576,7 +576,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
-  struct connectdata *conn;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -649,42 +648,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
         Curl_getoff_all_pipelines(easy->easy_handle, easy->easy_conn);
     }
 
-    /* figure out if the easy handle is used by a connection in the cache */
-    conn = conn_using(multi, easy->easy_handle);
-
-    /* If this easy_handle was the last one in charge for one or more
-       connections in the shared connection cache, we might need to keep this
-       handle around until either A) the connection is closed and killed
-       properly, or B) another easy_handle uses the connection.
-
-       The reason why we need to have a easy_handle associated with a live
-       connection is simply that some connections will need a handle to get
-       closed down properly. Currently, the only connections that need to keep
-       a easy_handle handle around are using FTP(S). Such connections have
-       the PROT_CLOSEACTION bit set.
-
-       Thus, we need to check for all connections in the shared cache that
-       points to this handle and are using PROT_CLOSEACTION. If there's any,
-       we need to add this handle to the list of "easy handles kept around for
-       nice connection closures".
-    */
-    if(conn) {
-      if(conn->protocol & PROT_CLOSEACTION) {
-        /* There's at least one CLOSEACTION connection using this handle so we
-           must keep this handle around. We also keep the connection cache
-           pointer pointing to the shared one since that will be used on close
-           as well. */
-        easy->easy_handle->state.shared_conn = multi;
-
-        /* this handle is still being used by a shared connection cache and
-           thus we leave it around for now */
-        add_closure(multi, easy->easy_handle);
-      }
-      else
-        /* disconect the easy handle from the connection since the connection
-           will now remain but this easy handle is going */
-        conn->data = NULL;
-    }
+    /* figure out if the easy handle is used by one or more connections in the
+       cache */
+    multi_connc_remove_handle(multi, easy->easy_handle);
 
     if(easy->easy_handle->state.connc->type == CONNCACHE_MULTI) {
       /* if this was using the shared connection cache we clear the pointer
@@ -2373,48 +2339,71 @@ CURLMcode curl_multi_assign(CURLM *multi_handle,
   return CURLM_OK;
 }
 
-static struct connectdata *conn_using(struct Curl_multi *multi,
+static void multi_connc_remove_handle(struct Curl_multi *multi,
                                       struct SessionHandle *data)
 {
   /* a connection in the connection cache pointing to the given 'data' ? */
   int i;
 
   for(i=0; i< multi->connc->num; i++) {
-    if(multi->connc->connects[i] &&
-       (multi->connc->connects[i]->data == data))
-      return multi->connc->connects[i];
-  }
+    struct connectdata * conn = multi->connc->connects[i];
 
-  return NULL;
+    if(conn && conn->data == data) {
+      /* If this easy_handle was the last one in charge for one or more
+         connections in the shared connection cache, we might need to keep
+         this handle around until either A) the connection is closed and
+         killed properly, or B) another easy_handle uses the connection.
+
+         The reason why we need to have a easy_handle associated with a live
+         connection is simply that some connections will need a handle to get
+         closed down properly. Currently, the only connections that need to
+         keep a easy_handle handle around are using FTP(S). Such connections
+         have the PROT_CLOSEACTION bit set.
+
+         Thus, we need to check for all connections in the shared cache that
+         points to this handle and are using PROT_CLOSEACTION. If there's any,
+         we need to add this handle to the list of "easy handles kept around
+         for nice connection closures".
+      */
+
+      if(conn->protocol & PROT_CLOSEACTION) {
+        /* this handle is still being used by a shared connection and
+           thus we leave it around for now */
+        if(add_closure(multi, data) == CURLM_OK)
+          data->state.shared_conn = multi;
+        else {
+          /* out of memory - so much for graceful shutdown */
+          Curl_disconnect(conn);
+          multi->connc->connects[i] = NULL;
+        }
+      }
+      else
+        /* disconect the easy handle from the connection since the connection
+           will now remain but this easy handle is going */
+        conn->data = NULL;
+    }
+  }
 }
 
 /* Add the given data pointer to the list of 'closure handles' that are kept
    around only to be able to close some connections nicely - just make sure
    that this handle isn't already added, like for the cases when an easy
    handle is removed, added and removed again... */
-static void add_closure(struct Curl_multi *multi,
-                        struct SessionHandle *data)
+static CURLMcode add_closure(struct Curl_multi *multi,
+                             struct SessionHandle *data)
 {
-  int i;
-  struct closure *cl = calloc(1, sizeof(struct closure));
-  struct closure *p=NULL;
-  struct closure *n;
-  if(cl) {
-    cl->easy_handle = data;
-    cl->next = multi->closure;
-    multi->closure = cl;
-  }
+  struct closure *cl = multi->closure;
+  struct closure *p = NULL;
+  bool add = TRUE;
 
-  p = multi->closure;
-  cl = p->next; /* start immediately on the second since the first is the one
-                   we just added and it is _very_ likely to actually exist
-                   used in the cache since that's the whole purpose of adding
-                   it to this list! */
-
-  /* When adding, scan through all the other currently kept handles and see if
-     there are any connections still referring to them and kill them if not. */
+  /* Before adding, scan through all the other currently kept handles and see
+     if there are any connections still referring to them and kill them if
+     not. */
   while(cl) {
+    struct closure *n;
     bool inuse = FALSE;
+    int i;
+
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
          (multi->connc->connects[i]->data == cl->easy_handle)) {
@@ -2436,13 +2425,27 @@ static void add_closure(struct Curl_multi *multi,
       else
         multi->closure = n;
       free(cl);
-    }
-    else
+    } else {
+      if(cl->easy_handle == data)
+        add = FALSE;
+
       p = cl;
+    }
 
     cl = n;
   }
 
+  if (add) {
+    cl = calloc(1, sizeof(struct closure));
+    if(!cl)
+      return CURLM_OUT_OF_MEMORY;
+
+    cl->easy_handle = data;
+    cl->next = multi->closure;
+    multi->closure = cl;
+  }
+
+  return CURLM_OK;
 }
 
 #ifdef DEBUGBUILD

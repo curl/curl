@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Mar 2010)
+- Constantine Sapuntzakis brought a patch:
+
+  The problem mentioned on Dec 10 2009
+  (http://curl.haxx.se/bug/view.cgi?id=2905220) was only partially fixed.
+  Partially because an easy handle can be associated with many connections in
+  the cache (e.g. if there is a redirect during the lifetime of the easy
+  handle).  The previous patch only cleaned up the first one. The new fix now
+  removes the easy handle from all connections, not just the first one.
+
 Daniel Stenberg (6 Mar 2010)
 - Ben Greear brought a patch that fixed the rate limiting logic for TFTP when
   the easy interface was used.
