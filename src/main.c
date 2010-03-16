@@ -168,6 +168,7 @@ static int vms_show = 0;
 
 static const char *msdosify(const char *);
 static char *rename_if_dos_device_name(char *);
+static char *sanitize_dos_name(char *);
 
 #ifndef S_ISCHR
 #  ifdef S_IFCHR
@@ -4091,6 +4092,83 @@ static bool stdin_upload(const char *uploadfile)
                 curlx_strequal(uploadfile, "."));
 }
 
+/* Adds the file name to the URL if it doesn't already have one.
+ * url will be freed before return if the returned pointer is different
+ */
+static char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
+{
+  /* If no file name part is given in the URL, we add this file name */
+  char *ptr=strstr(url, "://");
+  if(ptr)
+    ptr+=3;
+  else
+    ptr=url;
+  ptr = strrchr(ptr, '/');
+  if(!ptr || !strlen(++ptr)) {
+    /* The URL has no file name part, add the local file name. In order
+       to be able to do so, we have to create a new URL in another
+       buffer.*/
+
+    /* We only want the part of the local path that is on the right
+       side of the rightmost slash and backslash. */
+    const char *filep = strrchr(filename, '/');
+    char *file2 = strrchr(filep?filep:filename, '\\');
+    char *encfile;
+
+    if(file2)
+      filep = file2+1;
+    else if(filep)
+      filep++;
+    else
+      filep = filename;
+
+    /* URL encode the file name */
+    encfile = curl_easy_escape(curl, filep, 0 /* use strlen */);
+    if(encfile) {
+      char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
+      if(!urlbuffer) {
+        free(url);
+        return NULL;
+      }
+      if(ptr)
+        /* there is a trailing slash on the URL */
+        sprintf(urlbuffer, "%s%s", url, encfile);
+      else
+        /* there is no trailing slash on the URL */
+        sprintf(urlbuffer, "%s/%s", url, encfile);
+
+      curl_free(encfile);
+
+      free(url);
+      url = urlbuffer; /* use our new URL instead! */
+    }
+  }
+  return url;
+}
+
+/* Extracts the name portion of the URL.
+ * Returns a heap-allocated string, or NULL if no name part
+ */
+static char *get_url_file_name(const char *url)
+{
+  char *fn = NULL;
+
+  /* Find and get the remote file name */
+  const char * pc =strstr(url, "://");
+  if(pc)
+    pc+=3;
+  else
+    pc=url;
+  pc = strrchr(pc, '/');
+
+  if(pc) {
+    /* duplicate the string beyond the slash */
+    pc++;
+    fn = *pc ? strdup(pc): NULL;
+  }
+  return fn;
+}
+
 static char*
 parse_filename(char *ptr, int len)
 {
@@ -4539,19 +4617,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
 
           if(!outfile) {
-            /* Find and get the remote file name */
-            char * pc =strstr(url, "://");
-            if(pc)
-              pc+=3;
-            else
-              pc=url;
-            pc = strrchr(pc, '/');
-
-            if(pc) {
-              /* duplicate the string beyond the slash */
-              pc++;
-              outfile = *pc ? strdup(pc): NULL;
-            }
+            /* extract the file name from the URL */
+            outfile = get_url_file_name(url);
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
@@ -4559,20 +4626,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               break;
             }
 #if defined(MSDOS) || defined(WIN32)
-            {
-              /* For DOS and WIN32, we do some major replacing of
-                 bad characters in the file name before using it */
-              char file1[PATH_MAX];
-              if(strlen(outfile) >= PATH_MAX)
-                outfile[PATH_MAX-1]=0; /* cut it */
-              strcpy(file1, msdosify(outfile));
-              free(outfile);
-
-              outfile = strdup(rename_if_dos_device_name(file1));
-              if(!outfile) {
-                res = CURLE_OUT_OF_MEMORY;
-                break;
-              }
+            /* For DOS and WIN32, we do some major replacing of
+             bad characters in the file name before using it */
+            outfile = sanitize_dos_name(outfile);
+            if(!outfile) {
+              res = CURLE_OUT_OF_MEMORY;
+              break;
             }
 #endif /* MSDOS || WIN32 */
           }
@@ -4639,53 +4698,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
           struct_stat fileinfo;
 
-          /* If no file name part is given in the URL, we add this file name */
-          char *ptr=strstr(url, "://");
-          if(ptr)
-            ptr+=3;
-          else
-            ptr=url;
-          ptr = strrchr(ptr, '/');
-          if(!ptr || !strlen(++ptr)) {
-            /* The URL has no file name part, add the local file name. In order
-               to be able to do so, we have to create a new URL in another
-               buffer.*/
-
-            /* We only want the part of the local path that is on the right
-               side of the rightmost slash and backslash. */
-            char *filep = strrchr(uploadfile, '/');
-            char *file2 = strrchr(filep?filep:uploadfile, '\\');
-
-            if(file2)
-              filep = file2+1;
-            else if(filep)
-              filep++;
-            else
-              filep = uploadfile;
-
-            /* URL encode the file name */
-            filep = curl_easy_escape(curl, filep, 0 /* use strlen */);
-
-            if(filep) {
-              char *urlbuffer = malloc(strlen(url) + strlen(filep) + 3);
-              if(!urlbuffer) {
-                helpf(config->errors, "out of memory\n");
-                free(url);
-                res = CURLE_OUT_OF_MEMORY;
-                break;
-              }
-              if(ptr)
-                /* there is a trailing slash on the URL */
-                sprintf(urlbuffer, "%s%s", url, filep);
-              else
-                /* there is no trailing slash on the URL */
-                sprintf(urlbuffer, "%s/%s", url, filep);
-
-              curl_free(filep);
-
-              free(url);
-              url = urlbuffer; /* use our new URL instead! */
-            }
+          url = add_file_name_to_url(curl, url, uploadfile);
+          if(!url) {
+            helpf(config->errors, "out of memory\n");
+            res = CURLE_OUT_OF_MEMORY;
+            break;
           }
           /* VMS Note:
            *
@@ -5782,7 +5799,7 @@ rename_if_dos_device_name (char *file_name)
 
   strncpy(fname, file_name, PATH_MAX-1);
   fname[PATH_MAX-1] = 0;
-  base = basename (fname);
+  base = basename(fname);
   if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen (base);
 
@@ -5797,5 +5814,18 @@ rename_if_dos_device_name (char *file_name)
     strcpy (file_name, fname);
   }
   return file_name;
+}
+
+/* Replace bad characters in the file name before using it.
+ * fn will always be freed before return
+ * The returned pointer must be freed by the caller if not NULL
+ */
+static char *sanitize_dos_name(char *fn)
+{
+  char tmpfn[PATH_MAX];
+  fn[PATH_MAX-1]=0; /* ensure fn is not too long by possibly truncating it */
+  strcpy(tmpfn, msdosify(fn));
+  free(fn);
+  return strdup(rename_if_dos_device_name(tmpfn));
 }
 #endif /* MSDOS || WIN32 */
