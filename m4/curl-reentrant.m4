@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 6
+# serial 8
 
 dnl Note 1
 dnl ------

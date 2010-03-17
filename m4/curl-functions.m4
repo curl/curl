@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 62
+# serial 64
 
 
 dnl CURL_INCLUDES_ARPA_INET

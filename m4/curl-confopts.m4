@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 9
+# serial 11
 
 
 dnl CURL_CHECK_OPTION_ARES
