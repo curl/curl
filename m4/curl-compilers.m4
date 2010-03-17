@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 52
+# serial 55
 
 
 dnl CURL_CHECK_COMPILER
@@ -1022,7 +1022,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         dnl Disable using EBP register in optimizations
         tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
         dnl Disable use of ANSI C aliasing rules in optimizations
-        tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+        tmp_CFLAGS="$tmp_CFLAGS -fno-strict-aliasing"
         dnl Value-safe optimizations on floating-point data
         tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
         dnl Only icc 10.0 or later

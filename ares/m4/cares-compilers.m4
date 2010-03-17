@@ -1,7 +1,7 @@
 #***************************************************************************
 # $Id$
 #
-# Copyright (C) 2009 by Daniel Stenberg et al
+# Copyright (C) 2009-2010 by Daniel Stenberg et al
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 63
+# serial 65
 
 
 dnl CARES_CHECK_COMPILER
@@ -1012,7 +1012,7 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         dnl Disable using EBP register in optimizations
         tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
         dnl Disable use of ANSI C aliasing rules in optimizations
-        tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+        tmp_CFLAGS="$tmp_CFLAGS -fno-strict-aliasing"
         dnl Value-safe optimizations on floating-point data
         tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
         dnl Only icc 10.0 or later
