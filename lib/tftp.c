@@ -1173,8 +1173,8 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
   }
 }
 
-static curl_off_t sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
-                             int pkt_size)
+static long sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
+                       int pkt_size)
 {
   curl_off_t min_sleep = 0;
   curl_off_t rv = 0;
@@ -1197,7 +1197,10 @@ static curl_off_t sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
   if (rv < min_sleep)
     rv = min_sleep;
 
-  return rv;
+  if(rv > 0x7fffffff)
+    rv = 0x7fffffff;
+
+  return (long)rv;
 }
 
 
@@ -1216,7 +1219,7 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
   struct SessionHandle  *data = conn->data;
   tftp_state_data_t     *state = (tftp_state_data_t *)conn->proto.tftpc;
   int                   fd_read;
-  curl_off_t            timeout_ms;
+  long                  timeout_ms;
   struct SingleRequest  *k = &data->req;
   struct timeval        transaction_start = Curl_tvnow();
 
