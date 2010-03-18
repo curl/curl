@@ -2812,14 +2812,12 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
     defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
-# define vqualifier volatile
-#else
-# define vqualifier
+#pragma optimize("", off)
 #endif
 
 static CURLcode ftp_init(struct connectdata *conn)
 {
-  struct FTP *vqualifier ftp;
+  struct FTP *ftp;
 
   if(NULL == conn->data->state.proto.ftp) {
     conn->data->state.proto.ftp = malloc(sizeof(struct FTP));
@@ -2847,6 +2845,12 @@ static CURLcode ftp_init(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
+    defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
+  /* workaround icc 9.1 optimizer issue */
+#pragma optimize("", on)
+#endif
 
 /*
  * ftp_connect() should do everything that is to be considered a part of
