@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Kamil Dudka (19 Mar 2010)
+- Improved Curl_read() to not ignore the error returned from Curl_ssl_recv().
+
 Daniel Stenberg (15 Mar 2010)
 - Constantine Sapuntzakis brought a patch:
 

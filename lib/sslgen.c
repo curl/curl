@@ -399,7 +399,7 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
   return curlssl_engines_list(data);
 }
 
-/* return number of sent (non-SSL) bytes */
+/* return number of sent (non-SSL) bytes; -1 on error */
 ssize_t Curl_ssl_send(struct connectdata *conn,
                       int sockindex,
                       const void *mem,
@@ -411,8 +411,8 @@ ssize_t Curl_ssl_send(struct connectdata *conn,
 /* return number of received (decrypted) bytes */
 
 /*
- * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
- * a regular CURLcode value.
+ * If the read would block (EWOULDBLOCK) we return -1. If an error occurs during
+ * the read, we return -2. Otherwise we return the count of bytes transfered.
  */
 ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
                       int sockindex,            /* socketindex */
@@ -425,9 +425,9 @@ ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
   nread = curlssl_recv(conn, sockindex, mem, len, &block);
   if(nread == -1) {
     if(!block)
-      return 0; /* this is a true error, not EWOULDBLOCK */
+      return -2; /* this is a true error, not EWOULDBLOCK */
     else
-      return -1;
+      return -1; /* EWOULDBLOCK */
   }
 
   return nread;

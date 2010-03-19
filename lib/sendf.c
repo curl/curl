@@ -538,9 +538,11 @@ int Curl_read(struct connectdata *conn, /* connection data */
   if(conn->ssl[num].state == ssl_connection_complete) {
     nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket);
 
-    if(nread == -1) {
+    if(nread == -1)
       return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
-    }
+    else if(nread == -2)
+      /* -2 from Curl_ssl_recv() means a true error, not EWOULDBLOCK */
+      return CURLE_RECV_ERROR;
   }
   else if(Curl_ssh_enabled(conn, (PROT_SCP|PROT_SFTP))) {
     if(conn->protocol & PROT_SCP)
