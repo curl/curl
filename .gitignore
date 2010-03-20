@@ -33,6 +33,6 @@ install-sh
 *.la
 mkinstalldirs
 tags
-libssh2.pc
+TAGS
 *~
 aclocal.m4.bak
