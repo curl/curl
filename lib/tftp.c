@@ -398,12 +398,17 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
       long tsize = 0;
 
       tsize = strtol( value, NULL, 10 );
-      if(!tsize) {
-        failf(data, "invalid tsize -:%s:- value in OACK packet", value);
-        return CURLE_TFTP_ILLEGAL;
-      }
-      Curl_pgrsSetDownloadSize(data, tsize);
       infof(data, "%s (%ld)\n", "tsize parsed from OACK", tsize);
+
+      /* tsize should be ignored on upload: Who cares about the size of the
+         remote file? */
+      if (!data->set.upload) {
+        if(!tsize) {
+          failf(data, "invalid tsize -:%s:- value in OACK packet", value);
+          return CURLE_TFTP_ILLEGAL;
+        }
+        Curl_pgrsSetDownloadSize(data, tsize);
+      }
     }
   }
 
@@ -1471,8 +1476,11 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
 
   code = tftp_perform(conn, done);
 
-  /* If we have encountered an error */
-  code = tftp_translate_code(state->error);
+  /* If tftp_perform() returned an error, use that for return code. If it
+     was OK, see if tftp_translate_code() has an error. */
+  if (code == CURLE_OK) 
+    /* If we have encountered an internal tftp error, translate it. */
+    code = tftp_translate_code(state->error);
 
   return code;
 }
