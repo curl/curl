@@ -32,6 +32,8 @@ This release includes the following bugfixes:
  o configure fixes for building with the clang compiler
  o easy interix rate limiting logic
  o curl_multi_remove_handle() caused use after free
+ o TFTP improved error codes
+ o TFTP fixed TSIZE handling for uploads
 
 This release includes the following known bugs:
 
