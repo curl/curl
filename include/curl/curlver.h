@@ -31,7 +31,7 @@
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
-#define LIBCURL_VERSION "7.20.1-CVS"
+#define LIBCURL_VERSION "7.20.1-DEV"
 
 /* The numeric version number is also available "in parts" by using these
    defines: */
@@ -58,13 +58,13 @@
 
 /*
  * This is the date and time when the full source package was created. The
- * timestamp is not stored in CVS, as the timestamp is properly set in the
+ * timestamp is not stored in git, as the timestamp is properly set in the
  * tarballs by the maketgz script.
  *
  * The format of the date should follow this template:
  *
  * "Mon Feb 12 11:35:33 UTC 2007"
  */
-#define LIBCURL_TIMESTAMP "CVS"
+#define LIBCURL_TIMESTAMP "DEV"
 
 #endif /* __CURL_CURLVER_H */
