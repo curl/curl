@@ -571,15 +571,6 @@ int Curl_resolv_timeout(struct connectdata *conn,
     return CURLRESOLV_TIMEDOUT;
 
   if (timeout > 0) {
-    /* This allows us to time-out from the name resolver, as the timeout
-       will generate a signal and we will siglongjmp() from that here.
-       This technique has problems (see alarmfunc). */
-      if(sigsetjmp(curl_jmpenv, 1)) {
-        /* this is coming from a siglongjmp() after an alarm signal */
-        failf(data, "name lookup timed out");
-        return CURLRESOLV_ERROR;
-      }
-
     /*************************************************************
      * Set signal handler to catch SIGALRM
      * Store the old value to be able to set it back later!
@@ -605,6 +596,19 @@ int Curl_resolv_timeout(struct connectdata *conn,
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
     prev_alarm = alarm((unsigned int) (timeout/1000L));
+
+    /* This allows us to time-out from the name resolver, as the timeout
+       will generate a signal and we will siglongjmp() from that here.
+       This technique has problems (see alarmfunc).
+       This should be the last thing we do before calling Curl_resolv(),
+       as otherwise we'd have to worry about variables that get modified
+       before we invoke Curl_resolv() (and thus use "volatile"). */
+    if(sigsetjmp(curl_jmpenv, 1)) {
+      /* this is coming from a siglongjmp() after an alarm signal */
+      failf(data, "name lookup timed out");
+      rc = CURLRESOLV_ERROR;
+      goto clean_up;
+    }
   }
 
 #else
@@ -620,6 +624,8 @@ int Curl_resolv_timeout(struct connectdata *conn,
    * alarm if it takes too long.
    */
   rc = Curl_resolv(conn, hostname, port, entry);
+
+clean_up:
 
 #ifdef USE_ALARM_TIMEOUT
   if (timeout > 0) {
