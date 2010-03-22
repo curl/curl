@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Kamil Dudka (22 Mar 2010)
+- Douglas Steinwand contributed a patch fixing insufficient initialization in
+  Curl_clone_ssl_config()
+
 Daniel Stenberg (21 Mar 2010)
 - Ben Greear improved TFTP: the error code returning and the treatment
   of TSIZE == 0 when uploading.
