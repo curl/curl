@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o curl_multi_remove_handle() caused use after free
  o TFTP improved error codes
  o TFTP fixed TSIZE handling for uploads
+ o SSL possible double free when reusing curl handle
 
 This release includes the following known bugs:
 
