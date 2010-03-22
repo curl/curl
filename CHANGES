@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Stenberg (22 Mar 2010)
+- Thomas Lopatic fixed the alarm()-based DNS timeout:
+
+  Looking at the code of Curl_resolv_timeout() in hostip.c, I think that in
+  case of a timeout, the signal handler for SIGALRM never gets removed. I
+  think that in my case it gets executed at some point later on when execution
+  has long left Curl_resolv_timeout() or even the cURL library.
+  
+  The code that is jumped to with siglongjmp() simply sets the error message
+  to "name lookup timed out" and then returns with CURLRESOLV_ERROR. I guess
+  that instead of simply returning without cleaning up, the code should have a
+  goto that jumps to the spot right after the call to Curl_resolv().
+
 Kamil Dudka (22 Mar 2010)
 - Douglas Steinwand contributed a patch fixing insufficient initialization in
   Curl_clone_ssl_config()
