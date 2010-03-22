@@ -835,11 +835,11 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
         #
         if test "$want_warnings" = "yes"; then
           dnl All versions of clang support the same warnings as at least
-          dnl gcc 4.2.1.
+          dnl gcc 4.2.1 except -Wunused.
           tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
           tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
-          tmp_CFLAGS="$tmp_CFLAGS -Wunused -Wshadow"
+          tmp_CFLAGS="$tmp_CFLAGS -Wshadow"
           tmp_CFLAGS="$tmp_CFLAGS -Winline -Wnested-externs"
           tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
           tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes"
@@ -853,6 +853,11 @@ AC_DEFUN([CARES_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -Wcast-align"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-system-headers"
           tmp_CFLAGS="$tmp_CFLAGS -Wshorten-64-to-32"
+          #
+          dnl Only clang 1.1 or later
+          if test "$compiler_num" -ge "101"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wunused"
+          fi
         fi
         ;;
         #
