@@ -3338,8 +3338,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              using chunked Transfer-Encoding.
           */
           if(k->chunk)
-            k->size=-1;
-
+            k->maxdownload = k->size = -1;
         }
         if(-1 != k->size) {
           /* We do this operation even if no_body is true, since this

@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (23 Mar 2010)
+- Akos Pasztory filed debian bug report #572276
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572276 mentioning a problem
+  with a resource that returns chunked-encoded _and_ with a Content-Length
+  and libcurl failed to properly ignore the latter information.
+
 - Hauke Duden provided an example program that made the multi interface crash.
   His example simply used the multi interface and did first one FTP transfer
   and after completion it used a second easy handle and did another FTP
