@@ -2416,10 +2416,16 @@ static CURLMcode add_closure(struct Curl_multi *multi,
 
     if(!inuse) {
       /* cl->easy_handle is now killable */
-      infof(data, "Delayed kill of easy handle %p\n", cl->easy_handle);
+
       /* unmark it as not having a connection around that uses it anymore */
       cl->easy_handle->state.shared_conn= NULL;
-      Curl_close(cl->easy_handle);
+
+      if(cl->easy_handle->state.closed) {
+        infof(data, "Delayed kill of easy handle %p\n", cl->easy_handle);
+        /* close handle only if curl_easy_cleanup() already has been called
+           for this easy handle */
+        Curl_close(cl->easy_handle);
+      }
       if(p)
         p->next = n;
       else

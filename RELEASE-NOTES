@@ -36,6 +36,7 @@ This release includes the following bugfixes:
  o TFTP fixed TSIZE handling for uploads
  o SSL possible double free when reusing curl handle
  o alarm()-based DNS timeout bug
+ o re-used FTP connection multi interface crash
 
 This release includes the following known bugs:
 
@@ -47,6 +48,6 @@ advice from friends like these:
  Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
  Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson,
- Constantine Sapuntzakis, Douglas Steinwand, Thomas Lopatic
+ Constantine Sapuntzakis, Douglas Steinwand, Thomas Lopatic, Hauke Duden
 
         Thanks! (and sorry if I forgot to mention someone)

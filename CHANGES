@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (23 Mar 2010)
+- Hauke Duden provided an example program that made the multi interface crash.
+  His example simply used the multi interface and did first one FTP transfer
+  and after completion it used a second easy handle and did another FTP
+  transfer on the same FTP server.
+
+  This triggered a bug in the "delayed easy handle kill" system that curl
+  uses: when an FTP connection is left alive it must keep an easy handle
+  around internally - only for the purpose of having an easy handle when it
+  later disconnects it. The code assumed that when the easy handle was removed
+  and an internal reference was made, that version could be killed later on
+  when a new easy handle came using the same connection. This was wrong as
+  Hauke's example showed that the removed handle wasn't killed for real until
+  later. This caused a double close attempt => segfault.
+
 Daniel Stenberg (22 Mar 2010)
 - Thomas Lopatic fixed the alarm()-based DNS timeout:
 
