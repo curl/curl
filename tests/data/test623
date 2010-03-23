@@ -36,8 +36,6 @@ for ssh upload test
 <errorcode>
 79
 </errorcode>
-<valgrind>
-disable
-</valgrind>
+
 </verify>
 </testcase>
