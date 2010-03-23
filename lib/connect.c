@@ -574,6 +574,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     int error;
     if(verifyconnect(sockfd, &error)) {
       /* we are connected, awesome! */
+      conn->bits.tcpconnect = TRUE;
       *connected = TRUE;
       return CURLE_OK;
     }

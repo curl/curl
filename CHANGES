@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel Stenberg (23 Mar 2010)
+- Kenny To filed the bug report #2963679 with patch to fix a problem he
+  experienced with doing multi interface HTTP POST over a proxy using
+  PROXYTUNNEL. He found a case where it would connect fine but bits.tcpconnect
+  was not set correct so libcurl didn't work properly.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2963679)
+
 - Akos Pasztory filed debian bug report #572276
   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572276 mentioning a problem
   with a resource that returns chunked-encoded _and_ with a Content-Length
