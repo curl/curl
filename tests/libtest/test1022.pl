@@ -12,7 +12,7 @@ my $what=$ARGV[2];
 open(CURL, "$ARGV[1]") || die "Can't open curl --version list in $ARGV[1]\n";
 $_ = <CURL>;
 chomp;
-/libcurl\/([\.\d]+(-CVS)?)/;
+/libcurl\/([\.\d]+(-DEV)?)/;
 my $version = $1;
 close CURL;
 
