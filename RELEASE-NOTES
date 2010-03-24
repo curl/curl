@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o chunked-encoding with Content-Length: header problem
  o multi interface HTTP POST over a proxy using PROXYTUNNEL
  o RTSP GET_PARAMETER
+ o timeout after last data chunk was handled
 
 This release includes the following known bugs:
 
@@ -52,6 +53,7 @@ advice from friends like these:
  Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
  Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson,
  Constantine Sapuntzakis, Douglas Steinwand, Thomas Lopatic, Hauke Duden,
- Akos Pasztory, Kenny To, Christopher Conroy, Massimo Callegari
+ Akos Pasztory, Kenny To, Christopher Conroy, Massimo Callegari,
+ Bob Richmond
 
         Thanks! (and sorry if I forgot to mention someone)

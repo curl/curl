@@ -1060,21 +1060,22 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(result)
     return result;
 
-  if(data->set.timeout &&
-     (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
-    if(k->size != -1) {
-      failf(data, "Operation timed out after %ld milliseconds with %"
-            FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-            Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
-    } else {
-      failf(data, "Operation timed out after %ld milliseconds with %"
-            FORMAT_OFF_T " bytes received",
-            Curl_tvdiff(k->now, k->start), k->bytecount);
+  if(k->keepon) {
+    if(data->set.timeout &&
+       (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
+      if(k->size != -1) {
+        failf(data, "Operation timed out after %ld milliseconds with %"
+              FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
+              Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
+      } else {
+        failf(data, "Operation timed out after %ld milliseconds with %"
+              FORMAT_OFF_T " bytes received",
+              Curl_tvdiff(k->now, k->start), k->bytecount);
+      }
+      return CURLE_OPERATION_TIMEDOUT;
     }
-    return CURLE_OPERATION_TIMEDOUT;
   }
-
-  if(!k->keepon) {
+  else {
     /*
      * The transfer has been performed. Just make some general checks before
      * returning.

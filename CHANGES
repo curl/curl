@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel Stenberg (24 Mar 2010)
+- Bob Richmond: There's an annoying situation where libcurl will read new HTTP
+  response data from a socket, then check if it's a timeout if one is set. If
+  the last packet received constitutes the end of the response body, libcurl
+  still treats it as a timeout condition and reports a message like:
+
+  "Operation timed out after 3000 milliseconds with 876 out of 876 bytes 
+  received"
+
+  It should only a timeout if the timer lapsed and we DIDN'T receive the end
+  of the response body yet.
+
 - Christopher Conroy fixed a problem with RTSP and GET_PARAMETER reported
   to us by Massimo Callegari. There's a new test case 572 that verifies this
   now.
