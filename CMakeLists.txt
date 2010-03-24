@@ -25,16 +25,16 @@ project( CURL C )
 
 
 file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
-string (REGEX MATCH "LIBCURL_VERSION_MAJOR[ \t]+([0-9]+)" 
+string (REGEX MATCH "LIBCURL_VERSION_MAJOR[ \t]+([0-9]+)"
   LIBCURL_VERSION_MJ ${CURL_VERSION_H_CONTENTS})
-string (REGEX MATCH "([0-9]+)" 
+string (REGEX MATCH "([0-9]+)"
   LIBCURL_VERSION_MJ ${LIBCURL_VERSION_MJ})
-string (REGEX MATCH 
+string (REGEX MATCH
   "LIBCURL_VERSION_MINOR[ \t]+([0-9]+)"
   LIBCURL_VERSION_MI ${CURL_VERSION_H_CONTENTS})
 string (REGEX MATCH "([0-9]+)" LIBCURL_VERSION_MI ${LIBCURL_VERSION_MI})
-string (REGEX MATCH 
-  "LIBCURL_VERSION_PATCH[ \t]+([0-9]+)" 
+string (REGEX MATCH
+  "LIBCURL_VERSION_PATCH[ \t]+([0-9]+)"
   LIBCURL_VERSION_PT ${CURL_VERSION_H_CONTENTS})
 string (REGEX MATCH "([0-9]+)" LIBCURL_VERSION_PT ${LIBCURL_VERSION_PT})
 set (CURL_MAJOR_VERSION ${LIBCURL_VERSION_MJ})
@@ -55,10 +55,7 @@ message(STATUS "curl version=[${CURL_VERSION}]")
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 
-# Make the base headers visible to everything
-# IF(NOT ${PROJECT_BINARY_DIR} EQUAL ${PROJECT_SOURCE_DIR})
-# INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-# ENDIF()
+include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
 
 if(WIN32)
@@ -74,7 +71,7 @@ set(CURL_LIBS "")
 
 if(CURL_USE_ARES)
   set(USE_ARES ${CURL_USE_ARES})
-  find_package(CARES REQUIRED) 
+  find_package(CARES REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARY} )
   set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
 endif()
@@ -119,7 +116,7 @@ option(CURL_DISABLE_LDAPS "to disable LDAPS" OFF)
 mark_as_advanced(CURL_DISABLE_LDAPS)
 if(WIN32)
   set(CURL_DEFAULT_DISABLE_LDAP OFF)
-  # some windows compilers do not have wldap32 
+  # some windows compilers do not have wldap32
   if( NOT HAVE_WLDAP32)
     set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
     message(STATUS "wldap32 not found CURL_DISABLE_LDAP set ON")
@@ -193,7 +190,7 @@ include (CheckLibraryExists)
 include (CheckSymbolExists)
 # if crosscompiling is on, the CHECK_TYPE_SIZE macro coming with cmake uses
 # TRY_COMPILE instead of TRY_RUN which makes crosscompiling easier, Alex
-if(CMAKE_CROSSCOMPILING)  
+if(CMAKE_CROSSCOMPILING)
   include ("${CMAKE_MODULE_PATH}/CheckTypeSize.cmake")
 else(CMAKE_CROSSCOMPILING)
   include (CheckTypeSize)
@@ -207,7 +204,7 @@ endif(WIN32)
 # This macro checks if the symbol exists in the library and if it
 # does, it appends library to the list.
 macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
-  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "" 
+  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} ""
     ${VARIABLE})
   if(${VARIABLE})
     set(CURL_LIBS ${CURL_LIBS} ${LIBRARY})
@@ -216,7 +213,6 @@ endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check for all needed libraries
 check_library_exists_concat("dl"     dlopen       HAVE_LIBDL)
-#CHECK_LIBRARY_EXISTS_CONCAT("ucb"    gethostname  HAVE_LIBUCB)
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_library_exists("c" gethostbyname "" NOT_NEED_LIBNSL)
 
@@ -248,9 +244,10 @@ if(CMAKE_USE_OPENSSL)
       set(USE_SSLEAY TRUE)
       set(USE_OPENSSL TRUE)
       list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} )
+    else()
+      set(CMAKE_USE_OPENSSL FALSE)
+      message(STATUS "OpenSSL NOT Found, disabling CMAKE_USE_OPENSSL")
     endif()
-    #FIND_LIBRARY(LIBEAY NAMES libeay32)
-    #LIST(APPEND CURL_LIBS ${LIBEAY} )
   else(WIN32)
     check_library_exists_concat("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
     check_library_exists_concat("ssl"    SSL_connect  HAVE_LIBSSL)
@@ -400,6 +397,7 @@ check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
 check_type_size("long long"  SIZEOF_LONG_LONG)
 check_type_size("long"  SIZEOF_LONG)
+check_type_size("short"  SIZEOF_SHORT)
 check_type_size("int"  SIZEOF_INT)
 check_type_size("__int64"  SIZEOF___INT64)
 check_type_size("long double"  SIZEOF_LONG_DOUBLE)
@@ -504,7 +502,7 @@ if(CMAKE_USE_OPENSSL)
   check_symbol_exists(RAND_status   "${CURL_INCLUDES}" HAVE_RAND_STATUS)
   check_symbol_exists(RAND_screen   "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
   check_symbol_exists(RAND_egd      "${CURL_INCLUDES}" HAVE_RAND_EGD)
-  check_symbol_exists(CRYPTO_cleanup_all_ex_data "${CURL_INCLUDES}" 
+  check_symbol_exists(CRYPTO_cleanup_all_ex_data "${CURL_INCLUDES}"
     HAVE_CRYPTO_CLEANUP_ALL_EX_DATA)
   if(HAVE_LIBCRYPTO AND HAVE_LIBSSL)
     set(USE_OPENSSL 1)
@@ -570,7 +568,7 @@ endif(NOT HAVE_STRICMP)
 # For other curl specific tests, use this macro.
 macro(CURL_INTERNAL_TEST CURL_TEST)
   if("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
-    set(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${CURL_TEST} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_TEST_ADD_LIBRARIES
@@ -587,22 +585,22 @@ macro(CURL_INTERNAL_TEST CURL_TEST)
     if(${CURL_TEST})
       set(${CURL_TEST} 1 CACHE INTERNAL "Curl test ${FUNCTION}")
       message(STATUS "Performing Curl Test ${CURL_TEST} - Success")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing Curl Test ${CURL_TEST} passed with the following output:\n"
         "${OUTPUT}\n")
     else(${CURL_TEST})
       message(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       set(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}\n")
     endif(${CURL_TEST})
   endif("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
-endmacro(CURL_INTERNAL_TEST) 
+endmacro(CURL_INTERNAL_TEST)
 
 macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
   if("${CURL_TEST}_COMPILE" MATCHES "^${CURL_TEST}_COMPILE$")
-    set(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${CURL_TEST} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_TEST_ADD_LIBRARIES
@@ -626,18 +624,18 @@ macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}")
       if(${CURL_TEST}_COMPILE)
-        file(APPEND 
-          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log" 
+        file(APPEND
+          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
           "There was a problem running this test\n")
       endif(${CURL_TEST}_COMPILE)
-      file(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log" 
+      file(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
         "\n\n")
     endif(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
   endif("${CURL_TEST}_COMPILE" MATCHES "^${CURL_TEST}_COMPILE$")
-endmacro(CURL_INTERNAL_TEST_RUN) 
+endmacro(CURL_INTERNAL_TEST_RUN)
 
 # Do curl specific tests
-foreach(CURL_TEST 
+foreach(CURL_TEST
     HAVE_FCNTL_O_NONBLOCK
     HAVE_IOCTLSOCKET
     HAVE_IOCTLSOCKET_CAMEL
@@ -676,7 +674,7 @@ endforeach(CURL_TEST)
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
 endif(HAVE_FILE_OFFSET_BITS)
-foreach(CURL_TEST 
+foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
@@ -749,12 +747,12 @@ set(CMAKE_REQUIRED_FLAGS)
 
 # Check for nonblocking
 set(HAVE_DISABLED_NONBLOCKING 1)
-if(HAVE_FIONBIO OR 
+if(HAVE_FIONBIO OR
     HAVE_IOCTLSOCKET OR
     HAVE_IOCTLSOCKET_CASE OR
     HAVE_O_NONBLOCK)
   set(HAVE_DISABLED_NONBLOCKING)
-endif(HAVE_FIONBIO OR 
+endif(HAVE_FIONBIO OR
   HAVE_IOCTLSOCKET OR
   HAVE_IOCTLSOCKET_CASE OR
   HAVE_O_NONBLOCK)
@@ -836,38 +834,6 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
   string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace @@ with ${}, even if that may not be read by CMake scripts.
   file(WRITE ${OUTPUT_FILE} ${MAKEFILE_INC_TEXT})
 
-  ### BUGGY METHOD 1
-  # FILE(STRINGS Makefile.inc MAKEFILE_INC_TEXT)
-  # STRING(REPLACE "# ./lib/Makefile.inc" "" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # STRING(REPLACE "  " " " MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace tabs with spaces
-
-  # #STRING(REGEX MATCH "CSOURCES *=" AAA ${MAKEFILE_INC_TEXT})
-  # #MESSAGE(STATUS ${AAA})
-
-  # STRING(REPLACE "CSOURCES =" "" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # STRING(REPLACE "HHEADERS =" "" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-
-  # STRING(REGEX REPLACE "[^ ]+\\.c" "" ${HEADERS_VAR} ${MAKEFILE_INC_TEXT})    # Remove source files and store into headers var
-  # STRING(REGEX REPLACE "  +" " " ${HEADERS_VAR} ${${HEADERS_VAR}})
-  # STRING(REGEX REPLACE " " ";" ${HEADERS_VAR} ${${HEADERS_VAR}})
-
-  # STRING(REGEX REPLACE "[^ ]+\\.h" "" ${SOURCES_VAR} ${MAKEFILE_INC_TEXT})    # Remove headers and store into source files var
-  # STRING(REGEX REPLACE "  +" " " ${SOURCES_VAR} ${${SOURCES_VAR}})
-  # STRING(REGEX REPLACE " " ";" ${SOURCES_VAR} ${${SOURCES_VAR}})
-
-  # SET(${HEADERS_VAR} ${${HEADERS_VAR}} PARENT_SCOPE)
-  # SET(${SOURCES_VAR} ${${SOURCES_VAR}} PARENT_SCOPE)
-
-  ### BUGGY METHOD 2
-  # FILE(READ Makefile.inc MAKEFILE_INC_TEXT)
-  # #STRING(REPLACE "\t" " " MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace tabs with spaces
-  # #STRING(REGEX REPLACE "\n+" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Remove empty lines (allow a simplification in the script)
-  # STRING(REGEX REPLACE "([A-Z]+)[\t ]*=[\t ]*" "SET(\\1 " MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # #STRING(REGEX REPLACE "^(.*)[\t ]*[^\\]$" ")" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # STRING(REGEX REPLACE "([^\\])\n" "\\1)\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # # STRING(REGEX REPLACE "CSOURCES *=" "SET(libCurl_SRCS " MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # # STRING(REGEX REPLACE "HHEADERS *=" "SET(libCurl_HEADERS " MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  # FILE(WRITE Makefile.inc.cmake ${MAKEFILE_INC_TEXT})
 endfunction()
 
 add_subdirectory(lib)

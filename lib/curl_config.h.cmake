@@ -853,6 +853,9 @@
 /* The size of `int', as computed by sizeof. */
 #cmakedefine SIZEOF_INT ${SIZEOF_INT}
 
+/* The size of `short', as computed by sizeof. */
+#cmakedefine SIZEOF_SHORT ${SIZEOF_SHORT}
+
 /* The size of `long', as computed by sizeof. */
 #cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
 
