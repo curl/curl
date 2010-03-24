@@ -1,5 +1,4 @@
 #################################################################
-# $Id$
 #
 ## Makefile for building curl.nlm (NetWare version - gnu make)
 ## Use: make -f Makefile.netware

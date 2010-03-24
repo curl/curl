@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * This test case is supposed to be identical to 547 except that this uses the
  * multi interface and 547 is easy interface.

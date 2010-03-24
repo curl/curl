@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * Example source code to show one way to set the necessary OpenSSL locking
  * callbacks if you want to do multi-threaded transfers with HTTPS/FTPS with

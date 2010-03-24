@@ -2,7 +2,6 @@
 #
 #       tests compilation script for the OS/400.
 #
-# $Id$
 
 
 SCRIPTDIR=`dirname "${0}"`

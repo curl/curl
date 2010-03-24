@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 
 PKGADD_PKG="@PKGADD_PKG@"

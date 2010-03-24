@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * Example source code to show how the callback function can be used to
  * download data into a chunk of memory instead of storing it in a file.

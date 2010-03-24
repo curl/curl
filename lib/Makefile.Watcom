@@ -2,7 +2,6 @@
 #  Watcom / OpenWatcom / Win32 makefile for libcurl.
 #  G. Vanem <gvanem@broadpark.no>
 #
-# $Id$
 
 TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
 

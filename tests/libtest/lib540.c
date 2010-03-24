@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * This is the 'proxyauth.c' test app posted by Shmulik Regev on the libcurl
  * mailing list on 10 Jul 2007, converted to a test case.

@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# $Id$
 
 case "${SCRIPTDIR}" in
 /*)     ;;

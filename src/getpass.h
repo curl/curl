@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 #ifndef HAVE_GETPASS_R
 /* If there's a system-provided function named like this, we trust it is

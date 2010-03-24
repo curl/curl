@@ -19,7 +19,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id$
 #***************************************************************************
 
 # This is the HTTPS, FTPS, POP3S, IMAPS, SMTPS, server used for curl test

@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * An example source code that issues a HTTP POST and we provide the actual
  * data through a read callback.

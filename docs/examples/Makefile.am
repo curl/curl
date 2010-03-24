@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 
 AUTOMAKE_OPTIONS = foreign nostdinc

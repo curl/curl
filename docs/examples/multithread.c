@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  */
 
 /* A multi-threaded example that uses pthreads extensively to fetch

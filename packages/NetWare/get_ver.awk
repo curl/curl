@@ -18,7 +18,6 @@
 # * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # * KIND, either express or implied.
 # *
-# * $Id$
 # ***************************************************************************
 # awk script which fetches curl / ares version number and string from input
 # file and writes them to STDOUT. Here you can get an awk version for Win32:

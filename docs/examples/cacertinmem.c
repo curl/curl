@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * Example using a "in core" PEM certificate to retrieve a https page.
  * Written by Theo Borm

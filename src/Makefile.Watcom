@@ -2,7 +2,6 @@
 #  Watcom / OpenWatcom / Win32 makefile for cURL.
 #  G. Vanem <gvanem@broadpark.no>
 #
-# $Id$
 
 CC = wcc386
 

@@ -1,4 +1,3 @@
-$! $Id$
 $! BUILD_VMS.COM
 $!
 $! I've taken the original build_vms.com, supplied by Nico Baggus, if

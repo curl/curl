@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * This is a multi threaded application that uses a progress bar to show
  * status.  It uses Gtk+ to make a smooth pulse.

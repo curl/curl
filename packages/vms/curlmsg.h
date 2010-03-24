@@ -4,7 +4,6 @@
 #pragma __member_alignment __save
 #pragma __nomember_alignment
 
-/* $Id$ */
 /*                                                                          */
 /* CURLMSG.H                                                                */
 /*                                                                          */

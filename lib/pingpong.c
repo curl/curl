@@ -21,7 +21,6 @@
  *   'pingpong' is for generic back-and-forth support functions used by FTP,
  *   IMAP, POP3, SMTP and whatever more that likes them.
  *
- * $Id$
  ***************************************************************************/
 
 #include "setup.h"

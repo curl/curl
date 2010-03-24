@@ -1,7 +1,6 @@
 #ifndef HEADER_CONFIG_DOS_H
 #define HEADER_CONFIG_DOS_H
 
-/* $Id$ */
 
 /* ================================================================ */
 /*        lib/config.dos - Hand crafted config file for DOS         */

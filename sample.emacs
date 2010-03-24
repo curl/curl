@@ -1,4 +1,3 @@
-;; $Id$ -*- emacs-lisp -*-
 
 ;; This file was contributed by Mats Lidell
 

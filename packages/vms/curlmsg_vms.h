@@ -1,7 +1,6 @@
 #ifndef HEADER_CURLMSG_VMS_H
 #define HEADER_CURLMSG_VMS_H
 
-/* $Id$ */
 /*                                                                          */
 /* CURLMSG_VMS.H                                                            */
 /*                                                                          */

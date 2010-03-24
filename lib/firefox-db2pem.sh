@@ -19,7 +19,6 @@
 # * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # * KIND, either express or implied.
 # *
-# * $Id$
 # ***************************************************************************
 # This shell script creates a fresh ca-bundle.crt file for use with libcurl.
 # It extracts all ca certs it finds in the local Firefox database and converts

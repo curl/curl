@@ -1,6 +1,5 @@
 @echo off
 REM
-REM $Id$
 REM
 REM This batch file must be used to set up a CVS tree to build on
 REM systems where there is no autotools support (i.e. Microsoft).

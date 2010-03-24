@@ -2,7 +2,6 @@
 #
 #       Installation of the include files in the OS/400 library.
 #
-# $Id$
 
 SCRIPTDIR=`dirname "${0}"`
 . "${SCRIPTDIR}/initscript.sh"

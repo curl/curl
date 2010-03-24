@@ -1,7 +1,6 @@
 #ifndef HEADER_CONFIG_VMS_H
 #define HEADER_CONFIG_VMS_H
 
-/* $Id$ */
 /*                                                                         */
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */

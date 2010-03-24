@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * This test case and code is based on the bug recipe Joe Malicki provided for
  * bug report #1871269, fixed on Jan 14 2008 before the 7.18.0 release.

@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  */
 
 /* Now include the setup.h file from libcurl's private libdir (the source

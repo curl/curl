@@ -2,7 +2,6 @@
 #
 #       curl compilation script for the OS/400.
 #
-# $Id$
 #
 #       This is a shell script since make is not a standard component of OS/400.
 

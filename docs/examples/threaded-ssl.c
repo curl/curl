@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id$
  *
  * A multi-threaded example that uses pthreads and fetches 4 remote files at
  * once over HTTPS. The lock callbacks and stuff assume OpenSSL or GnuTLS

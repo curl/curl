@@ -1,5 +1,4 @@
 #########################################################################
-# $Id$
 #
 ## Makefile for building curl examples with MingW32
 ## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)

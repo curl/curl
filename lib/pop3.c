@@ -22,7 +22,6 @@
  * RFC2384 POP URL Scheme
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  *
- * $Id$
  ***************************************************************************/
 
 #include "setup.h"
