@@ -13,7 +13,8 @@ macro(CHECK_TYPE_SIZE TYPE VARIABLE)
       set(CHECK_TYPE_SIZE_TYPE "${TYPE}")
       set(MACRO_CHECK_TYPE_SIZE_FLAGS
         "${CMAKE_REQUIRED_FLAGS}")
-      foreach(def HAVE_SYS_TYPES_H HAVE_STDINT_H HAVE_STDDEF_H)
+      foreach(def HAVE_SYS_TYPES_H 
+         HAVE_STDINT_H HAVE_STDDEF_H HAVE_SYS_SOCKET_H)
         if("${def}")
           set(MACRO_CHECK_TYPE_SIZE_FLAGS
             "${MACRO_CHECK_TYPE_SIZE_FLAGS} -D${def}")

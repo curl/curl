@@ -6,6 +6,9 @@
 #  include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
 
 #ifdef _WIN32
 #  include <winsock2.h>
