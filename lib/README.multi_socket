@@ -49,9 +49,8 @@ Implementation of the curl_multi_socket API
   conversion from sockets to fd_sets for that function is only done in the
   last step before the data is returned. I also had to extend c-ares to get a
   function that can return plain sockets, as that library too returned only
-  fd_sets and that is no longer good enough. The changes done to c-ares have
-  been committed and are available in the c-ares CVS repository destined to be
-  included in the c-ares 1.3.1 release.
+  fd_sets and that is no longer good enough. The changes done to c-ares are
+  available in c-ares 1.3.1 and later.
 
   We have done a test runs with up to 9000 connections (with a single active
   one). The curl_multi_socket_action() invoke then takes less than 10

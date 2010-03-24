@@ -2,7 +2,6 @@
 #  Adapted for djgpp2 / Watt-32 / DOS by
 #  Gisle Vanem <giva@bgnett.no>
 #
-# $Id$
 
 DEPEND_PREREQ = curl_config.h
 TOPDIR = ..
@@ -15,7 +14,7 @@ OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CSOURCES)))
 CURL_LIB = libcurl.a
 
 # NOTE: if ../include/curl/curlbuild.h is missing, you're probably building
-# this from a CVS checkout and then you need to run buildconf.bat first.
+# this from a git checkout and then you need to run buildconf.bat first.
 
 all: $(OBJ_DIR) curl_config.h $(CURL_LIB)
 

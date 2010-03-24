@@ -14,9 +14,12 @@ that you can with the autotools version of the build, and there have already
 been bugs filed against the CMake build system that haven't been addressed -
 due to lack of maintainers.
 
-We keep the files included in release archives and CVS for now in the hope
+We keep the files included in release archives and git for now in the hope
 that people will appreciate it and help us keep them in shape, and even
-improve them to become on par with the main build system. If not, we might
-remove them again in a future version.
+improve them to become on par with the main build system.
 
 Daniel, November 2009 just before the 7.19.7 release
+
+March 2010: The cmake build support is now completely broken and unless
+someone steps forward to help improving it, we will remove the cmake build
+support before the next release.
