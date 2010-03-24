@@ -624,9 +624,9 @@ int Curl_resolv_timeout(struct connectdata *conn,
    */
   rc = Curl_resolv(conn, hostname, port, entry);
 
+#ifdef USE_ALARM_TIMEOUT
 clean_up:
 
-#ifdef USE_ALARM_TIMEOUT
   if (timeout > 0) {
 
 #ifdef HAVE_SIGACTION
