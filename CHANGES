@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel Stenberg (24 Mar 2010)
+- Christopher Conroy fixed a problem with RTSP and GET_PARAMETER reported
+  to us by Massimo Callegari. There's a new test case 572 that verifies this
+  now.
+
 - The 'ares' subtree has been removed from the source repository. It was
   always a separate project that sort of piggybacked on the curl project since
   the dawn of times and now the time has come for it to go stand on its own
