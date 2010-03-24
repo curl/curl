@@ -234,8 +234,8 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
     p_request = "TEARDOWN";
     break;
   case RTSPREQ_GET_PARAMETER:
+    /* GET_PARAMETER's no_body status is determined later */
     p_request = "GET_PARAMETER";
-    data->set.opt_no_body = FALSE;
     break;
   case RTSPREQ_SET_PARAMETER:
     p_request = "SET_PARAMETER";
@@ -319,12 +319,6 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
 
       p_accept_encoding = conn->allocptr.accept_encoding;
     }
-  }
-
-  /* Default to text/parameters for GET_PARAMETER */
-  if(rtspreq == RTSPREQ_GET_PARAMETER) {
-    p_accept = Curl_checkheaders(data, "Accept:")?
-      NULL:"Accept: text/parameters\r\n";
   }
 
   /* The User-Agent string might have been allocated in url.c already, because
@@ -433,7 +427,10 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if(rtspreq == RTSPREQ_ANNOUNCE || rtspreq == RTSPREQ_SET_PARAMETER) {
+  if(rtspreq == RTSPREQ_ANNOUNCE ||
+     rtspreq == RTSPREQ_SET_PARAMETER ||
+     rtspreq == RTSPREQ_GET_PARAMETER) {
+
     if(data->set.upload) {
       putsize = data->set.infilesize;
       data->set.httpreq = HTTPREQ_PUT;
@@ -446,37 +443,43 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
       data->set.httpreq = HTTPREQ_POST;
     }
 
-    /* As stated in the http comments, it is probably not wise to
-     * actually set a custom Content-Length in the headers */
-    if(!Curl_checkheaders(data, "Content-Length:")) {
-      result = Curl_add_bufferf(req_buffer,
-                                "Content-Length: %" FORMAT_OFF_T"\r\n",
-                                (data->set.upload ? putsize : postsize));
-      if(result)
-        return result;
-    }
-
-    if(rtspreq == RTSPREQ_SET_PARAMETER) {
-      if(!Curl_checkheaders(data, "Content-Type:")) {
+    if(putsize > 0 || postsize > 0) {
+      /* As stated in the http comments, it is probably not wise to
+       * actually set a custom Content-Length in the headers */
+      if(!Curl_checkheaders(data, "Content-Length:")) {
         result = Curl_add_bufferf(req_buffer,
-                                  "Content-Type: text/parameters\r\n");
+            "Content-Length: %" FORMAT_OFF_T"\r\n",
+            (data->set.upload ? putsize : postsize));
         if(result)
           return result;
       }
-    }
 
-    if(rtspreq == RTSPREQ_ANNOUNCE) {
-      if(!Curl_checkheaders(data, "Content-Type:")) {
-        result = Curl_add_bufferf(req_buffer,
-                                  "Content-Type: application/sdp\r\n");
-        if(result)
-          return result;
+      if(rtspreq == RTSPREQ_SET_PARAMETER ||
+         rtspreq == RTSPREQ_GET_PARAMETER) {
+        if(!Curl_checkheaders(data, "Content-Type:")) {
+          result = Curl_add_bufferf(req_buffer,
+              "Content-Type: text/parameters\r\n");
+          if(result)
+            return result;
+        }
       }
-    }
+
+      if(rtspreq == RTSPREQ_ANNOUNCE) {
+        if(!Curl_checkheaders(data, "Content-Type:")) {
+          result = Curl_add_bufferf(req_buffer,
+              "Content-Type: application/sdp\r\n");
+          if(result)
+            return result;
+        }
+      }
 
     data->state.expect100header = FALSE; /* RTSP posts are simple/small */
+    } else if(rtspreq == RTSPREQ_GET_PARAMETER) {
+      /* Check for an empty GET_PARAMETER (heartbeat) request */
+      data->set.httpreq = HTTPREQ_HEAD;
+      data->set.opt_no_body = TRUE;
+    }
   }
-
 
   /* RTSP never allows chunked transfer */
   data->req.forbidchunk = TRUE;

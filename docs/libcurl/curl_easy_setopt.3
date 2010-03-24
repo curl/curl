@@ -1345,7 +1345,9 @@ terminate the RTSP session since it is valid to control an RTSP session over
 different connections.  (Added in 7.20.0)
 .IP CURL_RTSPREQ_GET_PARAMETER
 Retrieve a parameter from the server. By default, libcurl will automatically
-include an \fIAccept: text/parameters\fP header unless a custom one is set.
+include a \fIContent-Type: text/parameters\fP header on all non-empty requests
+unless a custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST
+(see \fICURL_RTSPREQ_SET_PARAMETER\fP).
 Applications wishing to send a heartbeat message (e.g. in the presence of a
 server-specified timeout) should send use an empty GET_PARAMETER request.
 (Added in 7.20.0)
