@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Mar 2010)
+- The 'ares' subtree has been removed from the source repository. It was
+  always a separate project that sort of piggybacked on the curl project since
+  the dawn of times and now the time has come for it to go stand on its own
+  legs and continue living its own life. All details on c-ares and its new
+  source code repository is found at http://c-ares.haxx.se/
+
 Daniel Stenberg (23 Mar 2010)
 - Kenny To filed the bug report #2963679 with patch to fix a problem he
   experienced with doing multi interface HTTP POST over a proxy using
