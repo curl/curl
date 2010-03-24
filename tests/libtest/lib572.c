@@ -69,9 +69,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_TRANSPORT, "Planes/Trains/Automobiles");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
   res = curl_easy_perform(curl);
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
   if(res)
     goto test_cleanup;
 
@@ -82,7 +80,6 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   free(stream_uri);
   stream_uri = NULL;
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
 
   /* PUT style GET_PARAMETERS */
   params = open("log/file572.txt", O_RDONLY);
@@ -101,7 +98,6 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t) file_info.st_size);
 
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
   res = curl_easy_perform(curl);
   if(res)
     goto test_cleanup;
@@ -109,7 +105,6 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
   fclose(paramsf);
   paramsf = NULL;
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
 
   /* Heartbeat GET_PARAMETERS */
   if((stream_uri = suburl(URL, request++)) == NULL) {
@@ -120,7 +115,6 @@ int test(char *URL)
   free(stream_uri);
   stream_uri = NULL;
 
-  fprintf(stderr, "CPC: %s:%d\n", __FILE__, __LINE__);
   res = curl_easy_perform(curl);
   if(res)
     goto test_cleanup;
