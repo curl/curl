@@ -23,7 +23,7 @@ open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config --$what l
 $_ = <CURLCONFIG>;
 chomp;
 if ( $what eq "version" ) {
-    /^libcurl ([\.\d]+(-CVS)?)$/ ;
+    /^libcurl ([\.\d]+(-DEV)?)$/ ;
     $curlconfigversion = $1;
 }
 else {
@@ -31,8 +31,8 @@ else {
     /^(..)(..)(..)$/ ;
     $curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
 
-    # Strip off the -CVS from the curl version if it's there
-    $version =~ s/-CVS$//;
+    # Strip off the -DEV from the curl version if it's there
+    $version =~ s/-DEV$//;
 }
 close CURLCONFIG;
 
