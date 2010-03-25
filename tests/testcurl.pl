@@ -404,7 +404,7 @@ if ($git) {
   }
 
   # get the last 5 commits for show (even if no pull was made)
-  my @commits=`git log --oneline -5`;
+  my @commits=`git log --pretty=oneline --abbrev-commit -5`;
   logit "The most recent git commits:";
   for my $l (@commits) {
       logit "  $l";
