@@ -401,13 +401,13 @@ if ($git) {
   elsif (!$nogitpull) {
     # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC";
+  }
 
-    # get the last 5 commits for show
-    my @commits=`git log --oneline -5`;
-    logit "The most recent git commits:";
-    for my $l (@commits) {
+  # get the last 5 commits for show (even if no pull was made)
+  my @commits=`git log --oneline -5`;
+  logit "The most recent git commits:";
+  for my $l (@commits) {
       logit "  $l";
-    }
   }
 
   if($nobuildconf) {
