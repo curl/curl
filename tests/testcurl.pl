@@ -407,6 +407,7 @@ if ($git) {
   my @commits=`git log --pretty=oneline --abbrev-commit -5`;
   logit "The most recent git commits:";
   for my $l (@commits) {
+      chomp ($l);
       logit "  $l";
   }
 
