@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -25,7 +25,8 @@
 #  What is This Script?
 ###########################
 
-# testcurl.pl is the master script to use for automatic testing of CVS-curl.
+# testcurl.pl is the master script to use for automatic testing of curl
+# directly off its source repository.
 # This is written for the purpose of being run from a crontab job or similar
 # at a regular interval. The output is suitable to be mailed to
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
@@ -45,13 +46,14 @@
 # --extvercmd=[command]    Command to use for displaying version with cross compiles.
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
-# --nocvsup                Don't update from CVS even though it is a CVS tree
+# --nocvsup                Don't pull from git even though it is a git tree
+# --nogitpull              Don't pull from git even though it is a git tree
 # --nobuildconf            Don't run buildconf
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
-# if [curl-daily-name] is omitted, a 'curl' CVS directory is assumed.
+# if [curl-daily-name] is omitted, a 'curl' git directory is assumed.
 #
 
 use strict;
@@ -61,20 +63,22 @@ use Cwd;
 # Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
 
-use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
+use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confsuffix $binext
             $libext);
+
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
-            $extvercmd $nocvsup $nobuildconf $crosscompile $timestamp);
+            $extvercmd $nogitpull $nobuildconf $crosscompile
+            $timestamp);
 
 # version of this script
-$version='$Revision$';
+$version='2010-03-24';
 $fixed=0;
 
-# Determine if we're running from CVS or a canned copy of curl,
+# Determine if we're running from git or a canned copy of curl,
 # or if we got a specific target option or setup file option.
 $CURLDIR="curl";
-$CVS=1;
+$git=1;
 $setupfile = 'setup';
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
@@ -101,8 +105,8 @@ while ($ARGV[0]) {
   elsif ($ARGV[0] =~ /--configure=/) {
     $confopts = (split(/=/, shift @ARGV))[1];
   }
-  elsif ($ARGV[0] =~ /--nocvsup/) {
-    $nocvsup=1;
+  elsif (($ARGV[0] eq "--nocvsup") || ($ARGV[0] eq "--nogitpull")) {
+    $nogitpull=1;
     shift @ARGV;
   }
   elsif ($ARGV[0] =~ /--nobuildconf/) {
@@ -118,7 +122,7 @@ while ($ARGV[0]) {
   }
   else {
     $CURLDIR=shift @ARGV;
-    $CVS=0;
+    $git=0; # a given dir, assume not using git
   }
 }
 
@@ -333,15 +337,15 @@ $str1066os = undef;
 $pwd = getcwd();
 
 if (-d $CURLDIR) {
-  if ($CVS && -d "$CURLDIR/CVS") {
-    logit "$CURLDIR is verified to be a fine source dir";
+  if ($git && -d "$CURLDIR/.git") {
+    logit "$CURLDIR is verified to be a fine git source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
     unlink "$CURLDIR/src/hugehelp.c";
-  } elsif (!$CVS && -f "$CURLDIR/tests/testcurl.pl") {
+  } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
     logit "$CURLDIR is verified to be a fine daily source dir"
   } else {
-    mydie "$CURLDIR is not a daily source dir or checked out from CVS!"
+    mydie "$CURLDIR is not a daily source dir or checked out from git!"
   }
 }
 $build="build-$$";
@@ -367,25 +371,25 @@ if (-d $build) {
 # get in the curl source tree root
 chdir $CURLDIR;
 
-# Do the CVS thing, or not...
-if ($CVS) {
+# Do the git thing, or not...
+if ($git) {
 
   # this is a temporary fix to make things work again, remove later
   logit "remove ares/aclocal.m4";
   unlink "ares/aclocal.m4";
 
-  logit "update from CVS";
+  logit "update from git";
   my $cvsstat;
 
-  sub cvsup() {
-    # update quietly to the latest CVS
-    if($nocvsup) {
-        logit "Skipping CVS update (--nocvsup)";
+  sub gitpull() {
+    # update quietly to the latest git
+    if($nogitpull) {
+        logit "Skipping git pull (--nogitpull)";
         return 1;
     }
     else {
-        logit "run cvs up";
-        system("cvs -Q up -dP 2>&1");
+        logit "run git pull";
+        system("git pull 2>&1");
     }
 
     $cvsstat=$?;
@@ -395,22 +399,11 @@ if ($CVS) {
     return !$cvsstat;
   }
 
-  my $att=0;
-  while (!cvsup()) {
-    $att++;
-    logit "failed CVS update attempt number $att.";
-    if ($att > 20) {
-      $cvsstat=111;
-      last; # get out of the loop
-    }
-    sleep 5;
-  }
-
   if ($cvsstat != 0) {
-    mydie "failed to update from CVS ($cvsstat), exiting";
+    mydie "failed to update from git ($cvsstat), exiting";
   }
-  elsif (!$nocvsup) {
-    # Set timestamp to the UTC the CVS update took place.
+  elsif (!$nogitpull) {
+    # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC";
   }
 
@@ -446,14 +439,14 @@ if ($CVS) {
   }
 }
 
-# Set timestamp to the one in curlver.h if this isn't a CVS test build.
+# Set timestamp to the one in curlver.h if this isn't a git test build.
 if ((-f "include/curl/curlver.h") &&
     (open(F, "<include/curl/curlver.h"))) {
   while (<F>) {
     chomp;
     if ($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
       my $stampstring = $1;
-      if ($stampstring !~ /CVS/) {
+      if ($stampstring !~ /DEV/) {
           $stampstring =~ s/\s+UTC//;
           $timestamp = $stampstring." UTC";
       }
