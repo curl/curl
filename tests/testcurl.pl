@@ -374,11 +374,6 @@ chdir $CURLDIR;
 # Do the git thing, or not...
 if ($git) {
 
-  # this is a temporary fix to make things work again, remove later
-  logit "remove ares/aclocal.m4";
-  unlink "ares/aclocal.m4";
-
-  logit "update from git";
   my $cvsstat;
 
   sub gitpull() {
@@ -388,6 +383,7 @@ if ($git) {
         return 1;
     }
     else {
+
         logit "run git pull";
         system("git pull 2>&1");
     }
@@ -405,6 +401,13 @@ if ($git) {
   elsif (!$nogitpull) {
     # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC";
+
+    # get the last 5 commits for show
+    my @commits=`git log --oneline -5`;
+    logit "The most recent git commits:";
+    for my $l (@commits) {
+      logit "  $l";
+    }
   }
 
   if($nobuildconf) {
