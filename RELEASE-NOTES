@@ -10,6 +10,7 @@ Curl and libcurl 7.20.1
 This release includes the following changes:
 
  o The 'ares' subtree has been removed from the source repository
+ o smoother rate limiting
 
 This release includes the following bugfixes:
 

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Mar 2010)
+- Ben Greear brought code that makes the rate limiting code for the easy
+  interface a bit smoother as it introduces sub-second sleeps during it and it
+  also takes the buffer sizes into account.
+
 Daniel Stenberg (24 Mar 2010)
 - Bob Richmond: There's an annoying situation where libcurl will read new HTTP
   response data from a socket, then check if it's a timeout if one is set. If
