@@ -267,7 +267,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     state->retry_max=50;
 
   /* Compute the re-ACK interval to suit the timeout */
-  state->retry_time = timeout/state->retry_max;
+  state->retry_time = (int)(timeout/state->retry_max);
   if(state->retry_time<1)
     state->retry_time=1;
 
@@ -1177,36 +1177,6 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
   }
 }
 
-static long sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
-                       int pkt_size)
-{
-  curl_off_t min_sleep = 0;
-  curl_off_t rv = 0;
-
-  if (rate_bps == 0)
-    return 0;
-
-  if (cur_rate_bps > (rate_bps + (rate_bps >> 10))) {
-    /* running too fast */
-    rate_bps -= rate_bps >> 6;
-    min_sleep = 1;
-  }
-  else if (cur_rate_bps < (rate_bps - (rate_bps >> 10))) {
-    /* running too slow */
-    rate_bps += rate_bps >> 6;
-  }
-
-  rv = ((curl_off_t)((pkt_size * 8) * 1000) / rate_bps);
-
-  if (rv < min_sleep)
-    rv = min_sleep;
-
-  if(rv > 0x7fffffff)
-    rv = 0x7fffffff;
-
-  return (long)rv;
-}
-
 
 /**********************************************************
  *
@@ -1239,8 +1209,8 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
       if (data->set.max_send_speed &&
           (data->progress.ulspeed > data->set.max_send_speed)) {
         fd_read = CURL_SOCKET_BAD;
-        timeout_ms = sleep_time(data->set.max_send_speed,
-                                data->progress.ulspeed, state->blksize);
+        timeout_ms = Curl_sleep_time(data->set.max_send_speed,
+                                     data->progress.ulspeed, state->blksize);
       }
       else {
         fd_read = state->sockfd;
@@ -1250,8 +1220,8 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
       if (data->set.max_recv_speed &&
           (data->progress.dlspeed > data->set.max_recv_speed)) {
         fd_read = CURL_SOCKET_BAD;
-        timeout_ms = sleep_time(data->set.max_recv_speed,
-                                data->progress.dlspeed, state->blksize);
+        timeout_ms = Curl_sleep_time(data->set.max_recv_speed,
+                                     data->progress.dlspeed, state->blksize);
       }
       else {
         fd_read = state->sockfd;
@@ -1268,7 +1238,7 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
 
 
     /* Wait until ready to read or timeout occurs */
-    rc=Curl_socket_ready(fd_read, CURL_SOCKET_BAD, timeout_ms);
+    rc = Curl_socket_ready(fd_read, CURL_SOCKET_BAD, (int)(timeout_ms));
 
     k->now = Curl_tvnow();
 
