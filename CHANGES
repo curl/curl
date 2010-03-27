@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (27 Mar 2010)
+- Ben Greear brought a patch that from now on allows all protocols to specify
+  name and user within the URL, in the same manner HTTP and FTP have been
+  allowed to in the past - although far from all of the libcurl supported
+  protocls actually have that feature in their URL definition spec.
+
 Daniel Stenberg (26 Mar 2010)
 - Ben Greear brought code that makes the rate limiting code for the easy
   interface a bit smoother as it introduces sub-second sleeps during it and it
