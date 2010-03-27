@@ -11,7 +11,7 @@ This release includes the following changes:
 
  o The 'ares' subtree has been removed from the source repository
  o smoother rate limiting
- o allow user+password in URL for all protocols
+ o allow user+password in the URL for all protocols
 
 This release includes the following bugfixes:
 
