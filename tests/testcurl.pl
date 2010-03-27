@@ -371,32 +371,30 @@ if (-d $build) {
 # get in the curl source tree root
 chdir $CURLDIR;
 
-# Do the git thing, or not...
-if ($git) {
-
-  my $cvsstat;
-
-  sub gitpull() {
+sub gitpull() {
     # update quietly to the latest git
     if($nogitpull) {
         logit "Skipping git pull (--nogitpull)";
         return 1;
     }
     else {
-
         logit "run git pull";
         system("git pull 2>&1");
     }
 
-    $cvsstat=$?;
+    my $stat=$?;
 
-    # return !RETURNVALUE so that errors return 0 while goodness
-    # returns 1
-    return !$cvsstat;
-  }
+    return $stat;
+}
+
+# Do the git thing, or not...
+if ($git) {
+
+  my $cvsstat = gitpull();
 
   if ($cvsstat != 0) {
-    mydie "failed to update from git ($cvsstat), exiting";
+    # update failure is not lethal
+    logit "failed to update from git ($cvsstat), continue anyway";
   }
   elsif (!$nogitpull) {
     # Set timestamp to the UTC the git update took place.
