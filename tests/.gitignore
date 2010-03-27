@@ -8,3 +8,5 @@ curl_sftp_cmds
 curl_sftp_config
 curl_ssh_config
 curl_sshd_config
+*pid
+stunnel.conf
