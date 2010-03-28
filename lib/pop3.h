@@ -32,6 +32,7 @@ typedef enum {
   POP3_USER,
   POP3_PASS,
   POP3_STARTTLS,
+  POP3_LIST,
   POP3_RETR,
   POP3_QUIT,
   POP3_LAST  /* never used */
