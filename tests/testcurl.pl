@@ -78,6 +78,10 @@ $fixed=0;
 # Determine if we're running from git or a canned copy of curl,
 # or if we got a specific target option or setup file option.
 $CURLDIR="curl";
+if (-f ".git/config") {
+  $CURLDIR = "./";
+}
+
 $git=1;
 $setupfile = 'setup';
 while ($ARGV[0]) {
