@@ -12,6 +12,7 @@ This release includes the following changes:
  o The 'ares' subtree has been removed from the source repository
  o smoother rate limiting
  o allow user+password in the URL for all protocols
+ o POP3: Get message listing if no mailbox in URL
 
 This release includes the following bugfixes:
 

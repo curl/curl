@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel Stenberg (28 Mar 2010)
+- Ben Greear: If you pass a URL to pop3 that does not contain a message ID as
+  part of the URL, it would previously ask for 'INBOX' which just causes the
+  pop3 server to return an error.
+    
+  Now libcurl treats en empty message ID as a request for LIST (list of pop3
+  message IDs).  User's code could then parse this and download individual
+  messages as desired.
+
 Daniel Stenberg (27 Mar 2010)
 - Ben Greear brought a patch that from now on allows all protocols to specify
   name and user within the URL, in the same manner HTTP and FTP have been
