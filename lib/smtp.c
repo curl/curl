@@ -1039,7 +1039,7 @@ static CURLcode smtp_setup_connection(struct connectdata * conn)
   return CURLE_OK;
 }
 
-CURLcode Curl_smtp_escape_eob(struct connectdata *conn, int nread)
+CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
 {
   /* When sending SMTP payload, we must detect CRLF.CRLF sequences in
    * the data and make sure it is sent as CRLF..CRLF instead, as
