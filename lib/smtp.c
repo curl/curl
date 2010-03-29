@@ -1059,7 +1059,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
   for(i = 0, si = 0; i < nread; i++, si++) {
-    int left = nread - i;
+    ssize_t left = nread - i;
 
     if(left>= (SMTP_EOB_LEN-smtpc->eob)) {
       if(!memcmp(SMTP_EOB+smtpc->eob, &data->req.upload_fromhere[i],

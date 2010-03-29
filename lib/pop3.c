@@ -990,9 +990,9 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
      0d 0a 2e 0d 0a. This marker can of course be spread out
      over up to 5 different data chunks. Deal with it! */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  int checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
-  int checkleft = POP3_EOB_LEN-pop3c->eob;
-  int check = (checkmax >= checkleft?checkleft:checkmax);
+  size_t checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
+  size_t checkleft = POP3_EOB_LEN-pop3c->eob;
+  size_t check = (checkmax >= checkleft?checkleft:checkmax);
 
   if(!memcmp(POP3_EOB, &str[nread - check], check)) {
     /* substring match */
