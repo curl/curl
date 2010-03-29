@@ -4169,7 +4169,7 @@ static char *get_url_file_name(const char *url)
 }
 
 static char*
-parse_filename(char *ptr, int len)
+parse_filename(char *ptr, size_t len)
 {
   char* copy;
   char* p;
