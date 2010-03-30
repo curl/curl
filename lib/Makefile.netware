@@ -3,7 +3,7 @@
 ## Makefile for building libcurl.nlm (NetWare version - gnu make)
 ## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf http://www.gknw.de/phpbb
+## Comments to: Guenter Knauf http://www.gknw.net/phpbb
 #
 #################################################################
 
@@ -14,22 +14,27 @@ endif
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.3
+ZLIB_PATH = ../../zlib-1.2.4
 endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8k
+OPENSSL_PATH = ../../openssl-0.9.8n
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.1
+LIBSSH2_PATH = ../../libssh2-1.2.4
 endif
 
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.13
+LIBIDN_PATH = ../../libidn-1.18
+endif
+
+# Edit the path below to point to the base of your c-ares package.
+ifndef LIBCARES_PATH
+LIBCARES_PATH = ../ares
 endif
 
 ifndef INSTDIR
@@ -154,13 +159,12 @@ SDK_LIBC = $(NDK_ROOT)/libc
 SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
 CURL_INC = ../include
 CURL_LIB = ../lib
-ARES_LIB = ../ares
 
 INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
 
 ifdef WITH_ARES
-	INCLUDES += -I$(ARES_LIB)
-	LDLIBS += $(ARES_LIB)/libcares.$(LIBEXT)
+	INCLUDES += -I$(LIBCARES_PATH)
+	LDLIBS += $(LIBCARES_PATH)/libcares.$(LIBEXT)
 endif
 ifdef WITH_SSH2
 	INCLUDES += -I$(LIBSSH2_PATH)/include
@@ -599,8 +603,8 @@ else
 	@echo ipv6 support:    no
 endif
 
-$(ARES_LIB)/libcares.$(LIBEXT):
-	$(MAKE) -C $(ARES_LIB) -f Makefile.netware lib
+$(LIBCARES_PATH)/libcares.$(LIBEXT):
+	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.netware lib
 
 ca-bundle.crt: mk-ca-bundle.pl
 	@echo Creating $@

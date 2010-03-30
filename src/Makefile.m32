@@ -16,26 +16,29 @@
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.3
+ZLIB_PATH = ../../zlib-1.2.4
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8k
+OPENSSL_PATH = ../../openssl-0.9.8n
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.1
+LIBSSH2_PATH = ../../libssh2-1.2.4
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.13
+LIBIDN_PATH = ../../libidn-1.18
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
 LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 
-ARES_LIB = ../ares
+# Edit the path below to point to the base of your c-ares package.
+ifndef LIBCARES_PATH
+LIBCARES_PATH = ../ares
+endif
 
 CC = gcc
 CFLAGS = -g -O2
@@ -67,10 +70,10 @@ else
 endif
 ifdef ARES
   ifndef DYN
-    curl_DEPENDENCIES += $(ARES_LIB)/libcares.a
+    curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
   endif
   CFLAGS += -DUSE_ARES
-  curl_LDADD += -L$(ARES_LIB) -lcares
+  curl_LDADD += -L$(LIBCARES_PATH) -lcares
 endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
