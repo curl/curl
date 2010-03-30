@@ -51,9 +51,10 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* the point here being that there must not run anything on the given
+  /* The point here is that there must not be anything running on the given
      proxy port */
-  test_setopt(c, CURLOPT_PROXY, libtest_arg2);
+  if (libtest_arg2)
+    test_setopt(c, CURLOPT_PROXY, libtest_arg2);
   test_setopt(c, CURLOPT_URL, URL);
   test_setopt(c, CURLOPT_VERBOSE, 1L);
 
