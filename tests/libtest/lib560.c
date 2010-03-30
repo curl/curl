@@ -99,6 +99,7 @@ test_cleanup:
     curl_multi_cleanup(multi_handle);
 
   curl_easy_cleanup(http_handle);
+  curl_global_cleanup();
 
   return res;
 }
