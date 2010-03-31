@@ -1282,7 +1282,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   SSL_SetURL(connssl->handle, conn->host.name);
 
   /* Force the handshake now */
-  timeout = PR_MillisecondsToInterval(Curl_timeleft(conn, NULL, TRUE));
+  timeout = PR_MillisecondsToInterval((PRUint32)Curl_timeleft(conn, NULL, TRUE));
   if(SSL_ForceHandshakeWithTimeout(connssl->handle, timeout) != SECSuccess) {
     if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
       curlerr = CURLE_PEER_FAILED_VERIFICATION;
