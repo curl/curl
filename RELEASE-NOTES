@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o multi interface HTTP POST over a proxy using PROXYTUNNEL
  o RTSP GET_PARAMETER
  o timeout after last data chunk was handled
+ o SFTP download hang
 
 This release includes the following known bugs:
 
@@ -57,6 +58,6 @@ advice from friends like these:
  Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson,
  Constantine Sapuntzakis, Douglas Steinwand, Thomas Lopatic, Hauke Duden,
  Akos Pasztory, Kenny To, Christopher Conroy, Massimo Callegari,
- Bob Richmond
+ Bob Richmond, Matt Wixson
 
         Thanks! (and sorry if I forgot to mention someone)

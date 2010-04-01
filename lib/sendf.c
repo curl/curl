@@ -549,7 +549,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
     else if(conn->protocol & PROT_SFTP)
       nread = Curl_sftp_recv(conn, num, buffertofill, bytesfromsocket);
 #ifdef LIBSSH2CHANNEL_EAGAIN
-    if((nread == LIBSSH2CHANNEL_EAGAIN) || (nread == 0))
+    if(nread == LIBSSH2CHANNEL_EAGAIN)
       /* EWOULDBLOCK */
       return -1;
 #endif

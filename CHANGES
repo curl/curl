@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (1 Apr 2010)
+- Matt Wixson found and fixed a bug in the SCP/SFTP area where the code
+  treated a 0 return code from libssh2 to be the same as EAGAIN while in
+  reality it isn't. The problem caused a hang in SFTP transfers from a
+  MessageWay server.
+
 Daniel Stenberg (28 Mar 2010)
 - Ben Greear: If you pass a URL to pop3 that does not contain a message ID as
   part of the URL, it would previously ask for 'INBOX' which just causes the
