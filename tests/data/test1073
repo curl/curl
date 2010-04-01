@@ -15,7 +15,7 @@ chunked Transfer-Encoding
 # Server-side
 <reply>
 <data>
-HTTP/1.0 301 Authorization Required swsclose
+HTTP/1.0 301 Redirect swsclose
 Server: testcurl
 Content-Type: text/plain
 Location: /newlocation/10730002
