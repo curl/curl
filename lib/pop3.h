@@ -43,8 +43,8 @@ typedef enum {
 struct pop3_conn {
   struct pingpong pp;
   char *mailbox;     /* what to RETR */
-  int eob;        /* number of bytes of the EOB (End Of Body) that has been
-                     received thus far */
+  size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
+                        received thus far */
   pop3state state; /* always use pop3.c:state() to change state! */
 };
 

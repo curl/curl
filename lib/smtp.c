@@ -1045,8 +1045,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
    * the data and make sure it is sent as CRLF..CRLF instead, as
    * otherwise it will wrongly be detected as end of data by the server.
    */
-  int i;
-  int si;
+  ssize_t i;
+  ssize_t si;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data = conn->data;
 
@@ -1061,7 +1061,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   for(i = 0, si = 0; i < nread; i++, si++) {
     ssize_t left = nread - i;
 
-    if(left>= (SMTP_EOB_LEN-smtpc->eob)) {
+    if(left>= (ssize_t)(SMTP_EOB_LEN-smtpc->eob)) {
       if(!memcmp(SMTP_EOB+smtpc->eob, &data->req.upload_fromhere[i],
                  SMTP_EOB_LEN-smtpc->eob)) {
         /* It matched, copy the replacement data to the target buffer
