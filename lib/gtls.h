@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,14 +35,14 @@ void Curl_gtls_close_all(struct SessionHandle *data);
  /* close a SSL connection */
 void Curl_gtls_close(struct connectdata *conn, int sockindex);
 
-/* return number of sent (non-SSL) bytes */
+/* for documentation see Curl_ssl_send() in sslgen.h */
 ssize_t Curl_gtls_send(struct connectdata *conn, int sockindex,
-                       const void *mem, size_t len);
-ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       bool *wouldblock);
+                       const void *mem, size_t len, int *curlcode);
+
+/* for documentation see Curl_ssl_recv() in sslgen.h */
+ssize_t Curl_gtls_recv(struct connectdata *conn, int num, char *buf,
+                       size_t buffersize, int *curlcode);
+
 void Curl_gtls_session_free(void *ptr);
 size_t Curl_gtls_version(char *buffer, size_t size);
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);

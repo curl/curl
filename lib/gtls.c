@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -638,18 +638,21 @@ Curl_gtls_connect(struct connectdata *conn,
 }
 
 
-/* return number of sent (non-SSL) bytes */
+/* for documentation see Curl_ssl_send() in sslgen.h */
 ssize_t Curl_gtls_send(struct connectdata *conn,
                        int sockindex,
                        const void *mem,
-                       size_t len)
+                       size_t len,
+                       int *curlcode)
 {
   ssize_t rc = gnutls_record_send(conn->ssl[sockindex].session, mem, len);
 
   if(rc < 0 ) {
-    if(rc == GNUTLS_E_AGAIN)
-      return 0; /* EWOULDBLOCK equivalent */
-    rc = -1; /* generic error code for send failure */
+    *curlcode = (rc == GNUTLS_E_AGAIN)
+      ? /* EWOULDBLOCK */ -1
+      : CURLE_SEND_ERROR;
+
+    rc = -1;
   }
 
   return rc;
@@ -748,22 +751,18 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-/*
- * If the read would block we return -1 and set 'wouldblock' to TRUE.
- * Otherwise we return the amount of data read. Other errors should return -1
- * and set 'wouldblock' to FALSE.
- */
+/* for documentation see Curl_ssl_recv() in sslgen.h */
 ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
                        int num,                  /* socketindex */
                        char *buf,                /* store read data here */
                        size_t buffersize,        /* max amount to read */
-                       bool *wouldblock)
+                       int *curlcode)
 {
   ssize_t ret;
 
   ret = gnutls_record_recv(conn->ssl[num].session, buf, buffersize);
   if((ret == GNUTLS_E_AGAIN) || (ret == GNUTLS_E_INTERRUPTED)) {
-    *wouldblock = TRUE;
+    *curlcode = -1;
     return -1;
   }
 
@@ -773,20 +772,22 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
     CURLcode rc = handshake(conn, conn->ssl[num].session, num, FALSE);
     if(rc)
       /* handshake() writes error message on its own */
-      return rc;
-    *wouldblock = TRUE; /* then return as if this was a wouldblock */
+      *curlcode = rc;
+    else
+      *curlcode = -1; /* then return as if this was a wouldblock */
     return -1;
   }
 
-  *wouldblock = FALSE;
   if(!ret) {
     failf(conn->data, "Peer closed the TLS connection");
+    *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
 
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
           (int)ret, gnutls_strerror((int)ret));
+    *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
 

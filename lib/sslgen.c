@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -408,38 +408,22 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
   return curlssl_engines_list(data);
 }
 
-/* return number of sent (non-SSL) bytes; -1 on error */
 ssize_t Curl_ssl_send(struct connectdata *conn,
                       int sockindex,
                       const void *mem,
-                      size_t len)
+                      size_t len,
+                      int *curlcode)
 {
-  return curlssl_send(conn, sockindex, mem, len);
+  return curlssl_send(conn, sockindex, mem, len, curlcode);
 }
 
-/* return number of received (decrypted) bytes */
-
-/*
- * If the read would block (EWOULDBLOCK) we return -1. If an error occurs during
- * the read, we return -2. Otherwise we return the count of bytes transfered.
- */
-ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
-                      int sockindex,            /* socketindex */
-                      char *mem,                /* store read data here */
-                      size_t len)               /* max amount to read */
+ssize_t Curl_ssl_recv(struct connectdata *conn,
+                      int sockindex,
+                      char *mem,
+                      size_t len,
+                      int *curlcode)
 {
-  ssize_t nread;
-  bool block = FALSE;
-
-  nread = curlssl_recv(conn, sockindex, mem, len, &block);
-  if(nread == -1) {
-    if(!block)
-      return -2; /* this is a true error, not EWOULDBLOCK */
-    else
-      return -1; /* EWOULDBLOCK */
-  }
-
-  return nread;
+  return curlssl_recv(conn, sockindex, mem, len, curlcode);
 }
 
 

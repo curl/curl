@@ -268,6 +268,9 @@ static ssize_t send_plain(struct connectdata *conn,
 /*
  * Curl_write() is an internal write function that sends data to the
  * server. Works with plain sockets, SCP, SSL or kerberos.
+ *
+ * If the write would block (EWOULDBLOCK), we return CURLE_OK and
+ * (*written == 0). Otherwise we return regular CURLcode value.
  */
 CURLcode Curl_write(struct connectdata *conn,
                     curl_socket_t sockfd,
@@ -276,11 +279,11 @@ CURLcode Curl_write(struct connectdata *conn,
                     ssize_t *written)
 {
   ssize_t bytes_written;
-  CURLcode retcode;
+  int curlcode = CURLE_OK;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   if(conn->ssl[num].state == ssl_connection_complete)
-    bytes_written = Curl_ssl_send(conn, num, mem, len);
+    bytes_written = Curl_ssl_send(conn, num, mem, len, &curlcode);
   else if(Curl_ssh_enabled(conn, PROT_SCP))
     bytes_written = Curl_scp_send(conn, num, mem, len);
   else if(Curl_ssh_enabled(conn, PROT_SFTP))
@@ -291,9 +294,24 @@ CURLcode Curl_write(struct connectdata *conn,
     bytes_written = send_plain(conn, num, mem, len);
 
   *written = bytes_written;
-  retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
+  if(-1 != bytes_written)
+    /* we completely ignore the curlcode value when -1 is not returned */
+    return CURLE_OK;
 
-  return retcode;
+  /* handle EWOULDBLOCK or a send failure */
+  switch(curlcode) {
+  case /* EWOULDBLOCK */ -1:
+    *written = /* EWOULDBLOCK */ 0;
+    return CURLE_OK;
+
+  case CURLE_OK:
+    /* general send failure */
+    return CURLE_SEND_ERROR;
+
+  default:
+    /* we got a specific curlcode, forward it */
+    return (CURLcode)curlcode;
+  }
 }
 
 /*
@@ -535,13 +553,11 @@ int Curl_read(struct connectdata *conn, /* connection data */
   }
 
   if(conn->ssl[num].state == ssl_connection_complete) {
-    nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket);
+    int curlcode;
+    nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket, &curlcode);
 
     if(nread == -1)
-      return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
-    else if(nread == -2)
-      /* -2 from Curl_ssl_recv() means a true error, not EWOULDBLOCK */
-      return CURLE_RECV_ERROR;
+      return curlcode;
   }
   else if(Curl_ssh_enabled(conn, (PROT_SCP|PROT_SFTP))) {
     if(conn->protocol & PROT_SCP)

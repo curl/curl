@@ -1340,47 +1340,50 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   return curlerr;
 }
 
-/* return number of sent (non-SSL) bytes */
+/* for documentation see Curl_ssl_send() in sslgen.h */
 int Curl_nss_send(struct connectdata *conn,  /* connection data */
                   int sockindex,             /* socketindex */
                   const void *mem,           /* send this data */
-                  size_t len)                /* amount to write */
+                  size_t len,                /* amount to write */
+                  int *curlcode)
 {
   int rc;
 
   rc = PR_Send(conn->ssl[sockindex].handle, mem, (int)len, 0, -1);
 
   if(rc < 0) {
-    failf(conn->data, "SSL write: error %d", PR_GetError());
+    PRInt32 err = PR_GetError();
+    if(err == PR_WOULD_BLOCK_ERROR)
+      *curlcode = -1; /* EWOULDBLOCK */
+    else {
+      failf(conn->data, "SSL write: error %d", err);
+      *curlcode = CURLE_SEND_ERROR;
+    }
     return -1;
   }
   return rc; /* number of bytes */
 }
 
-/*
- * If the read would block we return -1 and set 'wouldblock' to TRUE.
- * Otherwise we return the amount of data read. Other errors should return -1
- * and set 'wouldblock' to FALSE.
- */
+/* for documentation see Curl_ssl_recv() in sslgen.h */
 ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
                       int num,                   /* socketindex */
                       char *buf,                 /* store read data here */
                       size_t buffersize,         /* max amount to read */
-                      bool * wouldblock)
+                      int *curlcode)
 {
   ssize_t nread;
 
   nread = PR_Recv(conn->ssl[num].handle, buf, (int)buffersize, 0, -1);
-  *wouldblock = FALSE;
   if(nread < 0) {
     /* failed SSL read */
     PRInt32 err = PR_GetError();
 
-    if(err == PR_WOULD_BLOCK_ERROR) {
-      *wouldblock = TRUE;
-      return -1; /* basically EWOULDBLOCK */
+    if(err == PR_WOULD_BLOCK_ERROR)
+      *curlcode = -1; /* EWOULDBLOCK */
+    else {
+      failf(conn->data, "SSL read: errno %d", err);
+      *curlcode = CURLE_RECV_ERROR;
     }
-    failf(conn->data, "SSL read: errno %d", err);
     return -1;
   }
   return nread;
