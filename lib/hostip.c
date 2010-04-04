@@ -628,6 +628,9 @@ int Curl_resolv_timeout(struct connectdata *conn,
 clean_up:
 
   if (timeout > 0) {
+    if(!prev_alarm)
+      /* deactivate a possibly active alarm before uninstalling the handler */
+      alarm(0);
 
 #ifdef HAVE_SIGACTION
     if(keep_copysig) {
@@ -664,8 +667,6 @@ clean_up:
       else
         alarm((unsigned int)alarm_set);
     }
-    else
-      alarm(0); /* just shut it off */
   }
 #endif /* USE_ALARM_TIMEOUT */
 
