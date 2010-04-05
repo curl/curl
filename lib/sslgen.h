@@ -101,8 +101,8 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 #define Curl_ssl_set_engine(x,y) CURLE_FAILED_INIT
 #define Curl_ssl_set_engine_default(x) CURLE_FAILED_INIT
 #define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_send(a,b,c,d) -1
-#define Curl_ssl_recv(a,b,c,d) -1
+#define Curl_ssl_send(a,b,c,d,e) -1
+#define Curl_ssl_recv(a,b,c,d,e) -1
 #define Curl_ssl_initsessions(x,y) CURLE_OK
 #define Curl_ssl_version(x,y) 0
 #define Curl_ssl_data_pending(x,y) 0
