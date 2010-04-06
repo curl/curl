@@ -11,6 +11,9 @@ Kamil Dudka (4 Apr 2010)
 
 - Refactorized interface of Curl_ssl_recv()/Curl_ssl_send().
 
+- libcurl-NSS now provides more accurate messages and error codes in case of
+  client certificate problem.  Either during connection, or transfer phase.
+
 Daniel Stenberg (1 Apr 2010)
 - Matt Wixson found and fixed a bug in the SCP/SFTP area where the code
   treated a 0 return code from libssh2 to be the same as EAGAIN while in

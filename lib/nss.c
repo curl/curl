@@ -989,6 +989,27 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
+/* handle client certificate related errors if any; return false otherwise */
+static bool handle_cc_error(PRInt32 err, struct SessionHandle *data)
+{
+  switch(err) {
+  case SSL_ERROR_BAD_CERT_ALERT:
+    failf(data, "SSL error: SSL_ERROR_BAD_CERT_ALERT");
+    return true;
+
+  case SSL_ERROR_REVOKED_CERT_ALERT:
+    failf(data, "SSL error: SSL_ERROR_REVOKED_CERT_ALERT");
+    return true;
+
+  case SSL_ERROR_EXPIRED_CERT_ALERT:
+    failf(data, "SSL error: SSL_ERROR_EXPIRED_CERT_ALERT");
+    return true;
+
+  default:
+    return false;
+  }
+}
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
@@ -1326,7 +1347,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   data->state.ssl_connect_retry = FALSE;
 
   err = PR_GetError();
-  infof(data, "NSS error %d\n", err);
+  if(handle_cc_error(err, data))
+    curlerr = CURLE_SSL_CERTPROBLEM;
+  else
+    infof(data, "NSS error %d\n", err);
+
   if(model)
     PR_Close(model);
 
@@ -1355,6 +1380,8 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
     PRInt32 err = PR_GetError();
     if(err == PR_WOULD_BLOCK_ERROR)
       *curlcode = -1; /* EWOULDBLOCK */
+    else if(handle_cc_error(err, conn->data))
+      *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
       failf(conn->data, "SSL write: error %d", err);
       *curlcode = CURLE_SEND_ERROR;
@@ -1380,6 +1407,8 @@ ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
 
     if(err == PR_WOULD_BLOCK_ERROR)
       *curlcode = -1; /* EWOULDBLOCK */
+    else if(handle_cc_error(err, conn->data))
+      *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
       failf(conn->data, "SSL read: errno %d", err);
       *curlcode = CURLE_RECV_ERROR;
