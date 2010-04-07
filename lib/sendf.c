@@ -553,7 +553,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
   }
 
   if(conn->ssl[num].state == ssl_connection_complete) {
-    int curlcode;
+    int curlcode = CURLE_RECV_ERROR;
     nread = Curl_ssl_recv(conn, num, buffertofill, bytesfromsocket, &curlcode);
 
     if(nread == -1)

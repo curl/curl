@@ -36,15 +36,19 @@ void Curl_qsossl_close(struct connectdata *conn, int sockindex);
 int Curl_qsossl_close_all(struct SessionHandle * data);
 int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex);
 
+/* for documentation see Curl_ssl_send() in sslgen.h */
 ssize_t Curl_qsossl_send(struct connectdata * conn,
                          int sockindex,
                          const void * mem,
-                         size_t len);
+                         size_t len,
+                         int * curlcode);
+
+/* for documentation see Curl_ssl_recv() in sslgen.h */
 ssize_t Curl_qsossl_recv(struct connectdata * conn, /* connection data */
                          int num,                   /* socketindex */
                          char * buf,                /* store read data here */
                          size_t buffersize,         /* max amount to read */
-                         bool * wouldblock);
+                         int * curlcode);
 
 size_t Curl_qsossl_version(char * buffer, size_t size);
 int Curl_qsossl_check_cxn(struct connectdata * cxn);
