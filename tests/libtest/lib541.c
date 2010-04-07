@@ -46,25 +46,6 @@ int test(char *URL)
     return -1;
   }
 
-  /* get the file size of the local file */
-  hd = stat(libtest_arg2, &file_info);
-  if(hd == -1) {
-    /* can't open file, bail out */
-    error = ERRNO;
-    fprintf(stderr, "stat() failed with error: %d %s\n",
-            error, strerror(error));
-    fprintf(stderr, "WARNING: cannot open file %s\n", libtest_arg2);
-    return -1;
-  }
-
-  if(! file_info.st_size) {
-    fprintf(stderr, "WARNING: file %s has no size!\n", libtest_arg2);
-    return -4;
-  }
-
-  /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just
-     an example! */
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
     error = ERRNO;
@@ -72,6 +53,24 @@ int test(char *URL)
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
     return -2; /* if this happens things are major weird */
+  }
+
+  /* get the file size of the local file */
+  hd = fstat(fileno(hd_src), &file_info);
+  if(hd == -1) {
+    /* can't open file, bail out */
+    error = ERRNO;
+    fprintf(stderr, "fstat() failed with error: %d %s\n",
+            error, strerror(error));
+    fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
+    fclose(hd_src);
+    return -1;
+  }
+
+  if(! file_info.st_size) {
+    fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
+    fclose(hd_src);
+    return -4;
   }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
