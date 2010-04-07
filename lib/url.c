@@ -4707,7 +4707,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     proxy = NULL;
   }
   /* proxy must be freed later unless NULL */
-  if(proxy && *proxy) {
+  if(proxy) {
     long bits = conn->protocol & (PROT_HTTPS|PROT_SSL);
 
     if((conn->proxytype == CURLPROXY_HTTP) ||
