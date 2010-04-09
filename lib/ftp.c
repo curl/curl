@@ -1424,6 +1424,12 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
     break;
   }
 
+  /*
+   * This state uses:
+   * 'count1' to iterate over the commands to send
+   * 'count2' to store wether to allow commands to fail
+   */
+
   if(init)
     ftpc->count1 = 0;
   else
@@ -1438,7 +1444,15 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       i++;
     }
     if(item) {
-      PPSENDF(&ftpc->pp, "%s", item->data);
+      char *cmd = item->data;
+      if(cmd[0] == '*') {
+        cmd++;
+        ftpc->count2 = 1; /* the sent command is allowed to fail */
+      }
+      else
+        ftpc->count2 = 0; /* failure means cancel operation */
+
+      PPSENDF(&ftpc->pp, "%s", cmd);
       state(conn, instate);
       quote = TRUE;
     }
@@ -2658,7 +2672,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_POSTQUOTE:
     case FTP_RETR_PREQUOTE:
     case FTP_STOR_PREQUOTE:
-      if(ftpcode >= 400) {
+      if((ftpcode >= 400) && !ftpc->count2) {
+        /* failure reponse code, and not allowed to fail */
         failf(conn->data, "QUOT command failed with %03d", ftpcode);
         return CURLE_QUOTE_ERROR;
       }

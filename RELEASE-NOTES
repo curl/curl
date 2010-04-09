@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o RTSP GET_PARAMETER
  o timeout after last data chunk was handled
  o SFTP download hang
+ o FTP quote commands prefixed with '*' now can fail without aborting
 
 This release includes the following known bugs:
 

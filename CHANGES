@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (9 Apr 2010)
+- Prefixing the FTP quote commands with an asterisk really only worked for the
+  postquote actions. This is now fixed and test case 227 has been extended to
+  verify.
+
 Kamil Dudka (4 Apr 2010)
 - Eliminated a race condition in Curl_resolv_timeout().
 
