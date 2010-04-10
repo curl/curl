@@ -154,6 +154,9 @@ socks4
 socks5
 rtsp
 rtsp-ipv6
+imap
+pop3
+smtp
 
 Give only one per line.  This subsection is mandatory.
 </server>
