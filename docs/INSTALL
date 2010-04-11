@@ -632,7 +632,7 @@ NetWare
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...
    Any help in testing appreciated!
-   Builds automatically created 8 times a day from current CVS are here:
+   Builds automatically created 8 times a day from current git are here:
    http://www.gknw.net/mirror/curl/autobuilds/
    the status of these builds can be viewed at the autobuild table:
    http://curl.haxx.se/auto/
