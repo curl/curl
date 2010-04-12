@@ -187,7 +187,28 @@
 
 3.2 How To Make a Patch with git
 
- TODO
+ You need to first checkout the respository:
+
+     git clone git://github.com/bagder/curl.git
+
+ You then proceed and edit all the files you like and you commit them to your
+ local repository:
+
+     git commit [file]
+
+ As usual, group your commits so that you commit all changes that at once that
+ constitutes a logical change.
+
+ Once you have done all your commits and you're happy with what you see, you
+ can make patches out of your changes that are suitable for mailing:
+
+     git format-patch remotes/origin/master
+
+ This creates files in your local directory named NNNN-[name].patch for each
+ commit.
+
+ Now send those patches off to the curl-library list. You can of course opt to
+ do that with the 'get send-email' command.
 
 3.3 How To Make a Patch without git
 
