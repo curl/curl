@@ -22,6 +22,10 @@ of milliseconds at this very moment. If 0, it means you should proceed
 immediately without waiting for anything. If it returns -1, there's no timeout
 at all set.
 
+An application that uses the multi_socket API SHOULD not use this function, but
+SHOULD instead use \fIcurl_multi_setopt(3)\fP and its
+\fPCURLMOPT_TIMERFUNCTION\fP option for proper and desired behavior.
+
 Note: if libcurl returns a -1 timeout here, it just means that libcurl
 currently has no stored timeout value. You must not wait too long (more than a
 few seconds perhaps) before you call curl_multi_perform() again.
@@ -34,7 +38,6 @@ by a previous call to \fBcurl_multi_socket(3)\fP.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4.
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
-.BR curl_multi_socket "(3) "
+.BR curl_multi_socket "(3), " curl_multi_setopt "(3) "
 
