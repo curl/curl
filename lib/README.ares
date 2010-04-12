@@ -8,7 +8,7 @@
           ===========================================================
 
 c-ares:
-  http://daniel.haxx.se/projects/c-ares/
+  http://c-ares.haxx.se/
 
 NOTE
   The latest libcurl version requires c-ares 1.4.0 or later.
@@ -23,6 +23,7 @@ Build c-ares
 2. cd c-ares-dir
 3. ./configure
 4. make
+5. make install
 
 Build libcurl to use c-ares in the curl source tree
 ===================================================
@@ -41,12 +42,6 @@ Build libcurl to use an installed c-ares
 
 1. ./configure --enable-ares=/path/to/ares/install
 2. make
-
-c-ares and ipv6
-===============
-
-If the configure script enables IPv6 support you need to explicitly disable
-that (--disable-ipv6) since c-ares isn't IPv6 compatible (yet).
 
 c-ares on win32
 ===============
