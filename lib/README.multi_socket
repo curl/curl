@@ -16,28 +16,16 @@ Implementation of the curl_multi_socket API
   information about what socket to wait for what action on, and the callback
   only gets called if the status of that socket has changed.
 
-  In the API draft from before, we have a timeout argument on a per socket
-  basis and we also allowed curl_multi_socket_action() to pass in an 'easy
-  handle' instead of socket to allow libcurl to shortcut a lookup and work on
-  the affected easy handle right away. Both these turned out to be bad ideas.
-
-  The timeout argument was removed from the socket callback since after much
-  thinking I came to the conclusion that we really don't want to handle
-  timeouts on a per socket basis. We need it on a per transfer (easy handle)
-  basis and thus we can't provide it in the callbacks in a nice way. Instead,
-  we have to offer a curl_multi_timeout() that returns the largest amount of
-  time we should wait before we call the "timeout action" of libcurl, to
-  trigger the proper internal timeout action on the affected transfer. To get
-  this to work, I added a struct to each easy handle in which we store an
-  "expire time" (if any). The structs are then "splay sorted" so that we can
-  add and remove times from the linked list and yet somewhat swiftly figure
-  out 1 - how long time there is until the next timer expires and 2 - which
-  timer (handle) should we take care of now. Of course, the upside of all this
-  is that we get a curl_multi_timeout() that should also work with old-style
-  applications that use curl_multi_perform().
-
   We also added a timer callback that makes libcurl call the application when
-  the timeout value changes, and you set that with curl_multi_setopt().
+  the timeout value changes, and you set that with curl_multi_setopt() and the
+  CURLMOPT_TIMERFUNCTION option. To get this to work, Internally, there's an
+  added a struct to each easy handle in which we store an "expire time" (if
+  any). The structs are then "splay sorted" so that we can add and remove
+  times from the linked list and yet somewhat swiftly figure out both how long
+  time there is until the next nearest timer expires and which timer (handle)
+  we should take care of now. Of course, the upside of all this is that we get
+  a curl_multi_timeout() that should also work with old-style applications
+  that use curl_multi_perform().
 
   We created an internal "socket to easy handles" hash table that given
   a socket (file descriptor) return the easy handle that waits for action on
