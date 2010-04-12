@@ -243,7 +243,7 @@ static const char *getcmdid(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   /* get the next id, but wrap at end of table */
-  imapc->cmdid = (imapc->cmdid+1)% (sizeof(ids)/sizeof(ids[0]));
+  imapc->cmdid = (int)((imapc->cmdid+1) % (sizeof(ids)/sizeof(ids[0])));
 
   return ids[imapc->cmdid];
 }
