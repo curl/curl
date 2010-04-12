@@ -378,17 +378,14 @@ chdir $CURLDIR;
 sub gitpull() {
     # update quietly to the latest git
     if($nogitpull) {
-        logit "Skipping git pull (--nogitpull)";
+        logit "skipping git pull (--nogitpull)";
         return 1;
     }
     else {
         logit "run git pull";
         system("git pull 2>&1");
+        return $?;
     }
-
-    my $stat=$?;
-
-    return $stat;
 }
 
 # Do the git thing, or not...
