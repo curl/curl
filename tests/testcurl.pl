@@ -72,7 +72,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp);
 
 # version of this script
-$version='2010-04-12';
+$version='2010-04-13';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -375,33 +375,28 @@ if (-d $build) {
 # get in the curl source tree root
 chdir $CURLDIR;
 
-sub gitpull() {
-    # update quietly to the latest git
-    if($nogitpull) {
-        logit "skipping git pull (--nogitpull)";
-        return 1;
-    }
-    else {
-        logit "run git pull";
-        system("git pull 2>&1");
-        return $?;
-    }
-}
-
 # Do the git thing, or not...
 if ($git) {
-
-  my $cvsstat = gitpull();
-
-  if ($cvsstat != 0) {
-    # update failure is not lethal
-    logit "failed to update from git ($cvsstat), continue anyway";
-  }
-  elsif (!$nogitpull) {
+  # update quietly to the latest git
+  if($nogitpull) {
+    logit "skipping git pull (--nogitpull)";
+  } else {
+    my $gitstat = 0;
+    logit "run git pull in curl";
+    system("git pull 2>&1");
+    $gitstat += $?;
+    logit "failed to update from curl git ($?), continue anyway" if ($?);
+    if (-d "$CURLDIR/ares/.git") {
+      chdir "$CURLDIR/ares";
+      logit "run git pull in ares";
+      system("git pull 2>&1");
+      $gitstat += $?;
+      logit "failed to update from ares git ($?), continue anyway" if ($?);
+      chdir $CURLDIR;
+    }
     # Set timestamp to the UTC the git update took place.
-    $timestamp = scalar(gmtime)." UTC";
+    $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
   }
-
   # get the last 5 commits for show (even if no pull was made)
   my @commits=`git log --pretty=oneline --abbrev-commit -5`;
   logit "The most recent git commits:";
@@ -411,7 +406,7 @@ if ($git) {
   }
 
   if($nobuildconf) {
-      logit "told to not run buildconf";
+    logit "told to not run buildconf";
   }
   elsif ($configurebuild) {
     # remove possible left-overs from the past
