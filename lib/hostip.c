@@ -542,7 +542,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
-  bool keep_copysig=FALSE;        /* did copy it? */
+  volatile bool keep_copysig = FALSE; /* wether old sigact has been saved */
   struct sigaction sigact;
 #else
 #ifdef HAVE_SIGNAL
@@ -550,7 +550,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGNAL */
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
-  unsigned int prev_alarm=0;
+  volatile unsigned int prev_alarm = 0;
   struct SessionHandle *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   int rc;
