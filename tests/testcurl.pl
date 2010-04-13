@@ -382,27 +382,35 @@ if ($git) {
     logit "skipping git pull (--nogitpull)";
   } else {
     my $gitstat = 0;
+    my @commits;
     logit "run git pull in curl";
     system("git pull 2>&1");
     $gitstat += $?;
     logit "failed to update from curl git ($?), continue anyway" if ($?);
+    # get the last 5 commits for show (even if no pull was made)
+    @commits=`git log --pretty=oneline --abbrev-commit -5`;
+    logit "The most recent curl git commits:";
+    for (@commits) {
+      chomp ($_);
+      logit "  $_";
+    }
     if (-d "$CURLDIR/ares/.git") {
       chdir "$CURLDIR/ares";
       logit "run git pull in ares";
       system("git pull 2>&1");
       $gitstat += $?;
       logit "failed to update from ares git ($?), continue anyway" if ($?);
+      # get the last 5 commits for show (even if no pull was made)
+      @commits=`git log --pretty=oneline --abbrev-commit -5`;
+      logit "The most recent ares git commits:";
+      for (@commits) {
+        chomp ($_);
+        logit "  $_";
+      }
       chdir $CURLDIR;
     }
     # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
-  }
-  # get the last 5 commits for show (even if no pull was made)
-  my @commits=`git log --pretty=oneline --abbrev-commit -5`;
-  logit "The most recent git commits:";
-  for my $l (@commits) {
-      chomp ($l);
-      logit "  $l";
   }
 
   if($nobuildconf) {
