@@ -394,8 +394,8 @@ if ($git) {
       chomp ($_);
       logit "  $_";
     }
-    if (-d "$CURLDIR/ares/.git") {
-      chdir "$CURLDIR/ares";
+    if (-d "ares/.git") {
+      chdir "ares";
       logit "run git pull in ares";
       system("git pull 2>&1");
       $gitstat += $?;
@@ -407,7 +407,7 @@ if ($git) {
         chomp ($_);
         logit "  $_";
       }
-      chdir $CURLDIR;
+      chdir "$pwd/$CURLDIR";
     }
     # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
