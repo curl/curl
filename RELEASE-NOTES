@@ -1,6 +1,6 @@
-Curl and libcurl 7.20.1
+Curl and libcurl 7.20.2
 
- Public curl releases:         115
+ Public curl releases:         116
  Command line options:         136
  curl_easy_setopt() options:   174
  Public functions in libcurl:  58
@@ -9,43 +9,11 @@ Curl and libcurl 7.20.1
 
 This release includes the following changes:
 
- o The 'ares' subtree has been removed from the source repository
- o smoother rate limiting
- o allow user+password in the URL for all protocols
- o POP3: Get message listing if no mailbox in URL
+ o 
 
 This release includes the following bugfixes:
 
- o VMS builder bad behavior when used in a batch job
- o multiple recepients with SMTP
- o fixed the CURL_FORMAT_* defines when building with cmake
- o missing quote in libcurl.m4
- o SMTP: now waits for 250 after the DATA transfer
- o SMTP: use angle brackets in RCPT TO
- o curl --trace-time not using local time
- o off-by-one in the chunked encoding trailer parser
- o superfluous blocking for OpenSSL-based SSL connects and multi interface
- o TFTP upload
- o FTP timeouts after file transferred completely
- o skip poll() on Interix
- o CURLOPT_CERTINFO memory leak
- o sub-second timeouts improvements
- o configure fixes for GSSAPI
- o threaded resolver double free when closing curl handle
- o configure fixes for building with the clang compiler
- o easy interix rate limiting logic
- o curl_multi_remove_handle() caused use after free
- o TFTP improved error codes
- o TFTP fixed TSIZE handling for uploads
- o SSL possible double free when reusing curl handle
- o alarm()-based DNS timeout bug
- o re-used FTP connection multi interface crash
- o chunked-encoding with Content-Length: header problem
- o multi interface HTTP POST over a proxy using PROXYTUNNEL
- o RTSP GET_PARAMETER
- o timeout after last data chunk was handled
- o SFTP download hang
- o FTP quote commands prefixed with '*' now can fail without aborting
+ o 
 
 This release includes the following known bugs:
 
@@ -54,11 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steven M. Schweda, Yang Tse, Jack Zhang, Tom Donovan, Martin Hager,
- Daniel Fandrich, Patrick Monnerat, Pat Ray, Wesley Miaw, Ben Greear,
- Ryan Chan, Markus Duft, Andrei Benea, Jacob Moshenko, Daniel Johnson,
- Constantine Sapuntzakis, Douglas Steinwand, Thomas Lopatic, Hauke Duden,
- Akos Pasztory, Kenny To, Christopher Conroy, Massimo Callegari,
- Bob Richmond, Matt Wixson
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
