@@ -5,6 +5,7 @@
 *.dll
 *.exe
 *.obj
+*.asc
 .*.swp
 Debug
 Release
@@ -26,6 +27,9 @@ curl-config
 libcurl.pc
 missing
 curl-*.tar.gz
+curl-*.tar.bz2
+curl-*.tar.lzma
+curl-*.zip
 INSTALL
 install-sh
 *.o

@@ -3,3 +3,6 @@ curl_config.h
 curl_config.h.in
 hugehelp.c
 stamp-h2
+Makefile.vc8.dist
+Makefile.vc9.dist
+version.h.dist

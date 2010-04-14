@@ -10,3 +10,7 @@ curl_ssh_config
 curl_sshd_config
 *pid
 stunnel.conf
+runtests.html
+runtests.pdf
+testcurl.html
+testcurl.pdf
