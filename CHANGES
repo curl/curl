@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel Stenberg (15 Apr 2010)
+- Rainer Canavan filed bug report #2987196 that identified libcurl doing
+  unnecesary reverse name lookups in many cases when built to use IPv4 and
+  getaddrinfo(). The logic for ipv6 is now used for ipv4 too.
+
+  (http://curl.haxx.se/bug/view.cgi?id=2963679)
+
 Version 7.20.1 (14 April 2010)
 
 Daniel Stenberg (9 Apr 2010)
