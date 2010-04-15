@@ -160,7 +160,12 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       snprintf(sbuf, sizeof(sbuf), "%d", port);
       sbufptr = sbuf;
     }
-    hints.ai_flags = AI_CANONNAME;
+#ifdef HAVE_GSSAPI
+  if(conn->data->set.krb)
+    /* if krb is used, we (might) need the canonical host name */
+    hints.ai_flags |= AI_CANONNAME;
+#endif
+
     (void)Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
 
 #elif defined(HAVE_GETHOSTBYNAME_R)
