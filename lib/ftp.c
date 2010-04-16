@@ -820,7 +820,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* resolv ip/host to ip */
   rc = Curl_resolv(conn, host, 0, &h);
   if(rc == CURLRESOLV_PENDING)
-    rc = Curl_wait_for_resolv(conn, &h);
+    (void)Curl_wait_for_resolv(conn, &h);
   if(h) {
     res = h->addr;
     /* when we return from this function, we can forget about this entry
