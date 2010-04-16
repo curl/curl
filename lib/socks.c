@@ -172,8 +172,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       return CURLE_COULDNT_RESOLVE_PROXY;
 
     if(rc == CURLRESOLV_PENDING)
-      /* this requires that we're in "wait for resolve" state */
-      rc = Curl_wait_for_resolv(conn, &dns);
+      /* ignores the return code, but 'dns' remains NULL on failure */
+      (void)Curl_wait_for_resolv(conn, &dns);
 
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
