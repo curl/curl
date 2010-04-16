@@ -778,12 +778,6 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
     return -1;
   }
 
-  if(!ret) {
-    failf(conn->data, "Peer closed the TLS connection");
-    *curlcode = CURLE_RECV_ERROR;
-    return -1;
-  }
-
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
           (int)ret, gnutls_strerror((int)ret));
