@@ -3285,7 +3285,6 @@ ftp_pasv_verbose(struct connectdata *conn,
 static CURLcode ftp_range(struct connectdata *conn)
 {
   curl_off_t from, to;
-  curl_off_t totalsize=-1;
   char *ptr;
   char *ptr2;
   struct SessionHandle *data = conn->data;
@@ -3308,16 +3307,14 @@ static CURLcode ftp_range(struct connectdata *conn)
     }
     else if(from < 0) {
       /* -Y */
-      totalsize = -from;
       data->req.maxdownload = -from;
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n",
-                   totalsize));
+                   -from));
     }
     else {
       /* X-Y */
-      totalsize = to-from;
-      data->req.maxdownload = totalsize+1; /* include last byte */
+      data->req.maxdownload = (to-from)+1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE from %" FORMAT_OFF_T
                    " getting %" FORMAT_OFF_T " bytes\n",
