@@ -1378,7 +1378,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         infof(data, "File already completely uploaded\n");
 
         /* no data to transfer */
-        result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+        Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
@@ -1974,7 +1974,7 @@ static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
 
     if(ftp->downloadsize == 0) {
       /* no data to transfer */
-      result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
       infof(data, "File already completely downloaded\n");
 
       /* Set ->transfer so that we won't get any error in ftp_done()
@@ -2116,8 +2116,8 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
   /* set the SO_SNDBUF for the secondary socket for those who need it */
   Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
-  result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                               SECONDARYSOCKET, ftp->bytecountp);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                      SECONDARYSOCKET, ftp->bytecountp);
   state(conn, FTP_STOP);
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect a server response */
@@ -2230,11 +2230,8 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       infof(data, "Getting file with size: %" FORMAT_OFF_T "\n", size);
 
     /* FTP download: */
-    result=Curl_setup_transfer(conn, SECONDARYSOCKET, size, FALSE,
-                               ftp->bytecountp,
-                               -1, NULL); /* no upload here */
-    if(result)
-      return result;
+    Curl_setup_transfer(conn, SECONDARYSOCKET, size, FALSE,
+                        ftp->bytecountp, -1, NULL); /* no upload here */
 
     conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
     state(conn, FTP_STOP);
@@ -3391,7 +3388,7 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
   if((result == CURLE_OK) && (ftp->transfer != FTPTRANSFER_BODY))
     /* no data to transfer. FIX: it feels like a kludge to have this here
        too! */
-    result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
   DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
@@ -3818,7 +3815,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 
   if(ftp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   else if(!connected)
     /* since we didn't connect now, we want do_more to get called */
     conn->bits.do_more = TRUE;

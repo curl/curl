@@ -4779,9 +4779,8 @@ static CURLcode create_conn(struct SessionHandle *data,
         return result;
       }
 
-      result = Curl_setup_transfer(conn, -1, -1, FALSE,
-                                   NULL, /* no download */
-                                   -1, NULL); /* no upload */
+      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                          -1, NULL); /* no upload */
     }
 
     return result;

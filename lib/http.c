@@ -2653,14 +2653,13 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
 
       result = Curl_add_buffer_send(req_buffer, conn,
-                               &data->info.request_size, 0, FIRSTSOCKET);
+                                    &data->info.request_size, 0, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
       else
         /* setup variables for the upcoming transfer */
-        result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                     &http->readbytecount,
-                                     -1, NULL);
+        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
+                            -1, NULL);
       break;
     }
 
@@ -2728,10 +2727,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending POST request");
     else
       /* setup variables for the upcoming transfer */
-      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                   &http->readbytecount,
-                                   FIRSTSOCKET,
-                                   &http->writebytecount);
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                          &http->readbytecount, FIRSTSOCKET,
+                          &http->writebytecount);
 
     if(result) {
       Curl_formclean(&http->sendit); /* free that whole lot */
@@ -2781,10 +2779,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending PUT request");
     else
       /* prepare for transfer */
-      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                   &http->readbytecount,
-                                   postsize?FIRSTSOCKET:-1,
-                                   postsize?&http->writebytecount:NULL);
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                          &http->readbytecount, postsize?FIRSTSOCKET:-1,
+                          postsize?&http->writebytecount:NULL);
     if(result)
       return result;
     break;
@@ -2931,11 +2928,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(result)
       failf(data, "Failed sending HTTP POST request");
     else
-      result =
-        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                            &http->readbytecount,
-                            http->postdata?FIRSTSOCKET:-1,
-                            http->postdata?&http->writebytecount:NULL);
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                          &http->readbytecount, http->postdata?FIRSTSOCKET:-1,
+                          http->postdata?&http->writebytecount:NULL);
     break;
 
   default:
@@ -2951,10 +2946,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending HTTP request");
     else
       /* HTTP GET/HEAD download: */
-      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                                   &http->readbytecount,
-                                   http->postdata?FIRSTSOCKET:-1,
-                                   http->postdata?&http->writebytecount:NULL);
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
+                          http->postdata?FIRSTSOCKET:-1,
+                          http->postdata?&http->writebytecount:NULL);
   }
   if(result)
     return result;

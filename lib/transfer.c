@@ -2169,7 +2169,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
  * Curl_setup_transfer() is called to setup some basic properties for the
  * upcoming transfer.
  */
-CURLcode
+void
 Curl_setup_transfer(
   struct connectdata *conn, /* connection data */
   int sockindex,            /* socket index to read from or -1 */
@@ -2214,9 +2214,8 @@ Curl_setup_transfer(
   /* we want header and/or body, if neither then don't do this! */
   if(k->getheader || !data->set.opt_no_body) {
 
-    if(conn->sockfd != CURL_SOCKET_BAD) {
+    if(conn->sockfd != CURL_SOCKET_BAD)
       k->keepon |= KEEP_RECV;
-    }
 
     if(conn->writesockfd != CURL_SOCKET_BAD) {
       /* HTTP 1.1 magic:
@@ -2246,5 +2245,4 @@ Curl_setup_transfer(
     } /* if(conn->writesockfd != CURL_SOCKET_BAD) */
   } /* if(k->getheader || !data->set.opt_no_body) */
 
-  return CURLE_OK;
 }

@@ -465,7 +465,6 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
                                      int smtpcode,
                                      smtpstate instate)
 {
-  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *smtp = data->state.proto.smtp;
 
@@ -477,11 +476,11 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
   }
 
   /* SMTP upload */
-  result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                               FIRSTSOCKET, smtp->bytecountp);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                      FIRSTSOCKET, smtp->bytecountp);
 
   state(conn, SMTP_STOP);
-  return result;
+  return CURLE_OK;
 }
 
 /* for the POSTDATA response, which is received after the entire DATA
@@ -934,18 +933,17 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
 static CURLcode smtp_dophase_done(struct connectdata *conn,
                                   bool connected)
 {
-  CURLcode result = CURLE_OK;
   struct FTP *smtp = conn->data->state.proto.smtp;
   struct smtp_conn *smtpc= &conn->proto.smtpc;
   (void)connected;
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   free(smtpc->domain);
 
-  return result;
+  return CURLE_OK;
 }
 
 /* called from multi.c while DOing */
