@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel Stenberg (16 Apr 2010)
+- The recent overhaul of the SSL recv function made the GnuTLS specific code
+  treat a zero returned from gnutls_record_recv() as an error, and this caused
+  our HTTPS test cases to fail. We leave it to upper layer code to detect if
+  an EOF is a problem or not.
+
+- I reverted the resolver fix from yesterday and instead removed all uses of
+  AI_CANONNAME all over libcurl and made the only user of that info (krb5.c)
+  use the host name from the URL instead. No reverse resolving is a good
+  thing.
+
+- Paul Howarth made configure properly detect GSS "on ancient Linux distros"
+  by editing in which order we use headers to detect GSS.
+
 Daniel Stenberg (15 Apr 2010)
 - Rainer Canavan filed bug report #2987196 that identified libcurl doing
   unnecesary reverse name lookups in many cases when built to use IPv4 and
