@@ -963,7 +963,6 @@ static int dprintf_formatf(
           /* RECURSIVE USAGE */
           len = curl_msnprintf(fptr, left, ".%ld", prec);
           fptr += len;
-          left -= len;
         }
         if(p->flags & FLAGS_LONG)
           *fptr++ = 'l';
