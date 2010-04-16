@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel Stenberg (16 Apr 2010)
+- Jerome Vouillon made the GnuTLS SSL handshake phase non-blocking.
+
 - The recent overhaul of the SSL recv function made the GnuTLS specific code
   treat a zero returned from gnutls_record_recv() as an error, and this caused
   our HTTPS test cases to fail. We leave it to upper layer code to detect if
