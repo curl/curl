@@ -1648,7 +1648,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     rc = Curl_resolv(conn, newhost, newport, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
-      rc = Curl_wait_for_resolv(conn, &addr);
+      (void)Curl_wait_for_resolv(conn, &addr);
 
     connectport = newport; /* we connect to the remote port */
 
