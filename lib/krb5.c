@@ -163,7 +163,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
 {
   int ret;
   char *p;
-  const char *host = conn->dns_entry->addr->ai_canonname;
+  const char *host = conn->host->name;
   ssize_t nread;
   curl_socklen_t l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
