@@ -659,7 +659,6 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       4, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
-      /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
@@ -670,10 +669,10 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_ERROR:
     setpacketevent(&state->spacket, TFTP_EVENT_ERROR);
     setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
+    (void)sendto(state->sockfd, (void *)state->spacket.data,
+                 4, SEND_4TH_ARG,
+                 (struct sockaddr *)&state->remote_addr,
+                 state->remote_addrlen);
     /* don't bother with the return code, but if the socket is still up we
      * should be a good TFTP client and let the server know we're done */
     state->state = TFTP_STATE_FIN;
