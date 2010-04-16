@@ -1817,9 +1817,9 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 }
 #endif
 
-#ifdef USE_SSLEAY
-/* This function is OpenSSL-specific. It should be made to query the generic
-   SSL layer instead. */
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS)
+/* This function is for OpenSSL and GnuTLS only. It should be made to query
+   the generic SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
@@ -1844,17 +1844,6 @@ static int https_getsock(struct connectdata *conn,
   return CURLE_OK;
 }
 #else
-#ifdef USE_GNUTLS
-static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-#else
 #ifdef USE_NSS
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
@@ -1876,7 +1865,6 @@ static int https_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-#endif
 #endif
 #endif
 #endif

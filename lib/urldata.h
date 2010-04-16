@@ -231,6 +231,7 @@ struct ssl_connect_data {
 #ifdef USE_GNUTLS
   gnutls_session session;
   gnutls_certificate_credentials cred;
+  ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_NSS
   PRFileDesc *handle;

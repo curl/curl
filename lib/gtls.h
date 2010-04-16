@@ -27,6 +27,9 @@
 int Curl_gtls_init(void);
 int Curl_gtls_cleanup(void);
 CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
+CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
+                                       int sockindex,
+                                       bool *done);
 
 /* tell GnuTLS to close down all open information regarding connections (and
    thus session ID caching etc) */
@@ -52,6 +55,7 @@ int Curl_gtls_seed(struct SessionHandle *data);
 #define curlssl_init Curl_gtls_init
 #define curlssl_cleanup Curl_gtls_cleanup
 #define curlssl_connect Curl_gtls_connect
+#define curlssl_connect_nonblocking Curl_gtls_connect_nonblocking
 #define curlssl_session_free(x)  Curl_gtls_session_free(x)
 #define curlssl_close_all Curl_gtls_close_all
 #define curlssl_close Curl_gtls_close
