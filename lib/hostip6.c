@@ -213,11 +213,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
-#ifdef HAVE_GSSAPI
-  if(conn->data->set.krb)
-    /* if krb is used, we (might) need the canonical host name */
-    hints.ai_flags |= AI_CANONNAME;
-#endif
 
   if(port) {
     snprintf(sbuf, sizeof(sbuf), "%d", port);
