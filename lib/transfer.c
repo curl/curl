@@ -2113,9 +2113,9 @@ CURLcode Curl_perform(struct SessionHandle *data)
         /* Curl_do() failed, clean up left-overs in the done-call, but note
            that at some cases the conn pointer is NULL when Curl_do() failed
            and the connection cache is very small so only call Curl_done() if
-           conn is still "alive".
-        */
-        res2 = Curl_done(&conn, res, FALSE);
+           conn is still "alive". */
+        /* ignore return code since we already have an error to return */
+        (void)Curl_done(&conn, res, FALSE);
 
       /*
        * Important: 'conn' cannot be used here, since it may have been closed
