@@ -3293,7 +3293,7 @@ static CURLcode ftp_range(struct connectdata *conn)
 
   if(data->state.use_range && data->state.range) {
     from=curlx_strtoofft(data->state.range, &ptr, 0);
-    while(ptr && *ptr && (ISSPACE(*ptr) || (*ptr=='-')))
+    while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
       ptr++;
     to=curlx_strtoofft(ptr, &ptr2, 0);
     if(ptr == ptr2) {
