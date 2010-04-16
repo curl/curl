@@ -1630,8 +1630,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
-      /* BLOCKING */
-      rc = Curl_wait_for_resolv(conn, &addr);
+      /* BLOCKING, ignores the return code but 'addr' will be NULL in
+         case of failure */
+      (void)Curl_wait_for_resolv(conn, &addr);
 
     connectport =
       (unsigned short)conn->port; /* we connect to the proxy's port */
