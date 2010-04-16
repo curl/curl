@@ -311,10 +311,10 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
   }
-
-  /* send PASS */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
-                         pop3->passwd?pop3->passwd:"");
+  else
+    /* send PASS */
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
+                           pop3->passwd?pop3->passwd:"");
   if(result)
     return result;
 
