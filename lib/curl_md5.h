@@ -25,7 +25,7 @@
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 #include "curl_hmac.h"
 
-const HMAC_params Curl_HMAC_MD5[1];
+extern const HMAC_params Curl_HMAC_MD5[1];
 
 void Curl_md5it(unsigned char *output,
                 const unsigned char *input);
