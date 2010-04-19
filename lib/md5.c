@@ -33,7 +33,7 @@
 
 #include <gcrypt.h>
 
-typedef struct gcry_md_hd_t MD5_CTX;
+typedef gcry_md_hd_t MD5_CTX;
 
 static void MD5_Init(MD5_CTX * ctx)
 {
