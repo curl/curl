@@ -371,13 +371,15 @@ static void Decode (UINT4 *output,
 
 #endif /* USE_GNUTLS */
 
-const HMAC_params Curl_HMAC_MD5[1] = {
-  (HMAC_hinit_func) MD5_Init,           /* Hash initialization function. */
-  (HMAC_hupdate_func) MD5_Update,       /* Hash update function. */
-  (HMAC_hfinal_func) MD5_Final,         /* Hash computation end function. */
-  sizeof(MD5_CTX),                      /* Size of hash context structure. */
-  64,                                   /* Maximum key length. */
-  16                                    /* Result size. */
+const HMAC_params Curl_HMAC_MD5[] = {
+  {
+    (HMAC_hinit_func) MD5_Init,           /* Hash initialization function. */
+    (HMAC_hupdate_func) MD5_Update,       /* Hash update function. */
+    (HMAC_hfinal_func) MD5_Final,         /* Hash computation end function. */
+    sizeof(MD5_CTX),                      /* Size of hash context structure. */
+    64,                                   /* Maximum key length. */
+    16                                    /* Result size. */
+  }
 };
 
 
