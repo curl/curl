@@ -17,6 +17,7 @@ This release includes the following bugfixes:
  o detect GSS on ancient Linux distros
  o GnuTLS: EOF caused error when it wasn't
  o GnuTLS: SSL handshake phase is non-blocking
+ o -J/--remote-header-name strips CRLF
 
 This release includes the following known bugs:
 

@@ -4200,9 +4200,26 @@ parse_filename(char *ptr, size_t len)
     }
   }
 
-  q = strrchr(p, quote);
-  if (q)
-    *q = 0;
+  if(quote) {
+    /* if the file name started with a quote, then scan for the end quote and
+       stop there */
+    q = strrchr(p, quote);
+    if (q)
+      *q = 0;
+  }
+  else
+    q = NULL; /* no start quote, so no end has been found */
+
+  if(!q) {
+    /* make sure the file name doesn't end in \r or \n */
+    q = strchr(p, '\r');
+    if(q)
+      *q  = 0;
+
+    q = strchr(p, '\n');
+    if(q)
+      *q  = 0;
+  }
 
   if (copy!=p)
     memmove(copy, p, strlen(p)+1);
