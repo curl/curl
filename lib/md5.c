@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,19 +27,30 @@
 #include <string.h>
 
 #include "curl_md5.h"
+#include "curl_hmac.h"
 
 #ifdef USE_GNUTLS
 
 #include <gcrypt.h>
 
-void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
-                const unsigned char *input)
+typedef struct gcry_md_hd_t MD5_CTX;
+
+static void MD5_Init(MD5_CTX * ctx)
 {
-  gcry_md_hd_t ctx;
-  gcry_md_open(&ctx, GCRY_MD_MD5, 0);
-  gcry_md_write(ctx, input, (unsigned int)strlen((char *)input));
-  memcpy (outbuffer, gcry_md_read (ctx, 0), 16);
-  gcry_md_close(ctx);
+  gcry_md_open(ctx, GCRY_MD_MD5, 0);
+}
+
+static void MD5_Update(MD5_CTX * ctx,
+                       const unsigned char * input,
+                       unsigned int inputLen)
+{
+  gcry_md_write(*ctx, input, inputLen);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+{
+  memcpy(digest, gcry_md_read(*ctx, 0), 16);
+  gcry_md_close(*ctx);
 }
 
 #else
@@ -358,6 +369,18 @@ static void Decode (UINT4 *output,
 
 #endif /* USE_SSLEAY */
 
+#endif /* USE_GNUTLS */
+
+const HMAC_params Curl_HMAC_MD5[1] = {
+  (HMAC_hinit_func) MD5_Init,           /* Hash initialization function. */
+  (HMAC_hupdate_func) MD5_Update,       /* Hash update function. */
+  (HMAC_hfinal_func) MD5_Final,         /* Hash computation end function. */
+  sizeof(MD5_CTX),                      /* Size of hash context structure. */
+  64,                                   /* Maximum key length. */
+  16                                    /* Result size. */
+};
+
+
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 const unsigned char *input)
 {
@@ -366,7 +389,5 @@ void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
   MD5_Update(&ctx, input, (unsigned int)strlen((char *)input));
   MD5_Final(outbuffer, &ctx);
 }
-
-#endif /* USE_GNUTLS */
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */

@@ -755,7 +755,6 @@ sub verifyftp {
         # has _no_ output!
         $extra .= "--mail-rcpt verifiedserver ";
         $extra .= "--mail-from fake ";
-        $extra .= "--user localhost:unused ";
         $extra .= "--upload /dev/null ";
         $extra .= "--stderr - "; # move stderr to parse the verbose stuff
     }

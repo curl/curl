@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+SMTP AUTH CRAM-MD5
+RFC2195
+RFC4954
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY EHLO 220 AUTH CRAM-MD5
+REPLY AUTH 334 PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+
+REPLY dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw 235 Authenticated
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+crypto
+</features>
+ <name>
+SMTP CRAM-MD5 authentication
+ </name>
+<stdin>
+mail body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 807@foo --mail-from 807@from -u tim:tanstaaftanstaaf -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO user
+AUTH CRAM-MD5
+dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
+MAIL FROM:807@from
+RCPT TO:<807@foo>
+DATA
+QUIT
+</protocol>
+<upload>
+mail body
+
+.
+</upload>
+</verify>
+</testcase>

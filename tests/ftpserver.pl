@@ -1118,7 +1118,7 @@ sub customize {
     logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
     while(<CUSTOM>) {
-        if($_ =~ /REPLY ([A-Z]+) (.*)/) {
+        if($_ =~ /REPLY ([A-Za-z0-9+\/=]+) (.*)/) {
             $customreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
@@ -1380,13 +1380,18 @@ while(1) {
             $FTPCMD=$2;
             $FTPARG=$3;
         }
-        else {
-            unless (m/^([A-Z]{3,4})\s?(.*)/i) {
-                sendcontrol "500 '$_': command not understood.\r\n";
-                last;
-            }
+        elsif (m/^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
-            $FTPARG=$2;
+            $FTPARG=$3;
+        }
+        elsif($proto eq "smtp" && m/^[A-Z0-9+\/]{0,512}={0,2}$/i) {
+            # SMTP long "commands" are base64 authentication data.
+            $FTPCMD=$_;
+            $FTPARG="";
+        }
+        else {
+            sendcontrol "500 '$_': command not understood.\r\n";
+            last;
         }
 
         logmsg "< \"$full\"\n";

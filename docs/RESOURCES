@@ -32,11 +32,15 @@ This document lists documents and standards used by curl.
 
   RFC 2068 - HTTP 1.1 (obsoleted by RFC 2616)
 
+  RFC 2104 - Keyed-Hashing for Message Authentication
+
   RFC 2109 - HTTP State Management Mechanism (cookie stuff)
            - Also, read Netscape's specification at
              http://curl.haxx.se/rfc/cookie_spec.html
 
   RFC 2183 - The Content-Disposition Header Field
+
+  RFC 2195 - CRAM-MD5 authentication
 
   RFC 2229 - A Dictionary Server Protocol
 
@@ -73,3 +77,7 @@ This document lists documents and standards used by curl.
   RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 
   RFC 3207 - SMTP over TLS
+
+  RFC 4616 - PLAIN authentication
+
+  RFC 4954 - SMTP Authentication
