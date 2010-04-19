@@ -255,7 +255,6 @@ static enum {
       return GZIP_UNDERFLOW;
 
     len -= 2;
-    data += 2;
   }
 
   *headerlen = totallen - len;

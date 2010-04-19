@@ -659,7 +659,6 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
                       4, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
-      /* Check all sbytes were sent */
       if(sbytes<0) {
         failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
         return CURLE_SEND_ERROR;
@@ -670,10 +669,10 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_ERROR:
     setpacketevent(&state->spacket, TFTP_EVENT_ERROR);
     setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
+    (void)sendto(state->sockfd, (void *)state->spacket.data,
+                 4, SEND_4TH_ARG,
+                 (struct sockaddr *)&state->remote_addr,
+                 state->remote_addrlen);
     /* don't bother with the return code, but if the socket is still up we
      * should be a good TFTP client and let the server know we're done */
     state->state = TFTP_STATE_FIN;
@@ -798,10 +797,9 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     state->state = TFTP_STATE_FIN;
     setpacketevent(&state->spacket, TFTP_EVENT_ERROR);
     setpacketblock(&state->spacket, state->block);
-    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                    4, SEND_4TH_ARG,
-                    (struct sockaddr *)&state->remote_addr,
-                    state->remote_addrlen);
+    (void)sendto(state->sockfd, (void *)state->spacket.data, 4, SEND_4TH_ARG,
+                 (struct sockaddr *)&state->remote_addr,
+                 state->remote_addrlen);
     /* don't bother with the return code, but if the socket is still up we
      * should be a good TFTP client and let the server know we're done */
     state->state = TFTP_STATE_FIN;
@@ -1296,7 +1294,7 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
   }
 
   /* Tell curl we're done */
-  result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   return(result);
 }
@@ -1330,7 +1328,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
     *done = (bool)(state->state == TFTP_STATE_FIN);
     if(*done)
       /* Tell curl we're done */
-      result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   }
   else {
     /* no timeouts to handle, check our socket */
@@ -1352,7 +1350,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
       *done = (bool)(state->state == TFTP_STATE_FIN);
       if(*done)
         /* Tell curl we're done */
-        result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+        Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     }
     /* if rc == 0, then select() timed out */
   }

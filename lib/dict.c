@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -217,13 +217,12 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
 
     free(eword);
 
-    if(result)
+    if(result) {
       failf(data, "Failed sending DICT request");
-    else
-      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                                   -1, NULL); /* no upload */
-    if(result)
       return result;
+    }
+    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
+                        -1, NULL); /* no upload */
   }
   else if(Curl_raw_nequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
            Curl_raw_nequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
@@ -265,15 +264,12 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
 
     free(eword);
 
-    if(result)
+    if(result) {
       failf(data, "Failed sending DICT request");
-    else
-      result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                                   -1, NULL); /* no upload */
-
-    if(result)
       return result;
-
+    }
+    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
+                        -1, NULL); /* no upload */
   }
   else {
 
@@ -290,13 +286,12 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
                           "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                           "%s\r\n"
                           "QUIT\r\n", ppath);
-      if(result)
+      if(result) {
         failf(data, "Failed sending DICT request");
-      else
-        result = Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                                     -1, NULL);
-      if(result)
         return result;
+      }
+
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount, -1, NULL);
     }
   }
 

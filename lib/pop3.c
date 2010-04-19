@@ -311,10 +311,10 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
   }
-
-  /* send PASS */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
-                         pop3->passwd?pop3->passwd:"");
+  else
+    /* send PASS */
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
+                           pop3->passwd?pop3->passwd:"");
   if(result)
     return result;
 
@@ -359,9 +359,8 @@ static CURLcode pop3_state_retr_resp(struct connectdata *conn,
   }
 
   /* POP3 download */
-  result=Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
-                             pop3->bytecountp,
-                             -1, NULL); /* no upload here */
+  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
+                      pop3->bytecountp, -1, NULL); /* no upload here */
 
   if(pp->cache) {
     /* At this point there is a bunch of data in the header "cache" that is
@@ -403,9 +402,8 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
   }
 
   /* POP3 download */
-  result=Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
-                             pop3->bytecountp,
-                             -1, NULL); /* no upload here */
+  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
+                      -1, NULL); /* no upload here */
 
   if(pp->cache) {
     /* cache holds the email ID listing */
@@ -863,18 +861,17 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 static CURLcode pop3_dophase_done(struct connectdata *conn,
                                   bool connected)
 {
-  CURLcode result = CURLE_OK;
   struct FTP *pop3 = conn->data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
- (void)connected;
+  (void)connected;
 
   if(pop3->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   free(pop3c->mailbox);
 
-  return result;
+  return CURLE_OK;
 }
 
 /* called from multi.c while DOing */

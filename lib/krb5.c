@@ -1,6 +1,6 @@
 /* GSSAPI/krb5 support for FTP - loosely based on old krb4.c
  *
- * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1995, 1996, 1997, 1998, 1999, 2010 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * Copyright (c) 2004 - 2009 Daniel Stenberg
  * All rights reserved.
@@ -163,7 +163,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
 {
   int ret;
   char *p;
-  const char *host = conn->host->name;
+  const char *host = conn->host.name;
   ssize_t nread;
   curl_socklen_t l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;

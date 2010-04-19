@@ -820,7 +820,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* resolv ip/host to ip */
   rc = Curl_resolv(conn, host, 0, &h);
   if(rc == CURLRESOLV_PENDING)
-    rc = Curl_wait_for_resolv(conn, &h);
+    (void)Curl_wait_for_resolv(conn, &h);
   if(h) {
     res = h->addr;
     /* when we return from this function, we can forget about this entry
@@ -1378,7 +1378,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         infof(data, "File already completely uploaded\n");
 
         /* no data to transfer */
-        result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+        Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
@@ -1630,8 +1630,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
-      /* BLOCKING */
-      rc = Curl_wait_for_resolv(conn, &addr);
+      /* BLOCKING, ignores the return code but 'addr' will be NULL in
+         case of failure */
+      (void)Curl_wait_for_resolv(conn, &addr);
 
     connectport =
       (unsigned short)conn->port; /* we connect to the proxy's port */
@@ -1647,7 +1648,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     rc = Curl_resolv(conn, newhost, newport, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
-      rc = Curl_wait_for_resolv(conn, &addr);
+      (void)Curl_wait_for_resolv(conn, &addr);
 
     connectport = newport; /* we connect to the remote port */
 
@@ -1973,7 +1974,7 @@ static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
 
     if(ftp->downloadsize == 0) {
       /* no data to transfer */
-      result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
       infof(data, "File already completely downloaded\n");
 
       /* Set ->transfer so that we won't get any error in ftp_done()
@@ -2115,8 +2116,8 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
   /* set the SO_SNDBUF for the secondary socket for those who need it */
   Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
-  result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                               SECONDARYSOCKET, ftp->bytecountp);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                      SECONDARYSOCKET, ftp->bytecountp);
   state(conn, FTP_STOP);
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect a server response */
@@ -2229,11 +2230,8 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       infof(data, "Getting file with size: %" FORMAT_OFF_T "\n", size);
 
     /* FTP download: */
-    result=Curl_setup_transfer(conn, SECONDARYSOCKET, size, FALSE,
-                               ftp->bytecountp,
-                               -1, NULL); /* no upload here */
-    if(result)
-      return result;
+    Curl_setup_transfer(conn, SECONDARYSOCKET, size, FALSE,
+                        ftp->bytecountp, -1, NULL); /* no upload here */
 
     conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
     state(conn, FTP_STOP);
@@ -3285,7 +3283,6 @@ ftp_pasv_verbose(struct connectdata *conn,
 static CURLcode ftp_range(struct connectdata *conn)
 {
   curl_off_t from, to;
-  curl_off_t totalsize=-1;
   char *ptr;
   char *ptr2;
   struct SessionHandle *data = conn->data;
@@ -3293,7 +3290,7 @@ static CURLcode ftp_range(struct connectdata *conn)
 
   if(data->state.use_range && data->state.range) {
     from=curlx_strtoofft(data->state.range, &ptr, 0);
-    while(ptr && *ptr && (ISSPACE(*ptr) || (*ptr=='-')))
+    while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
       ptr++;
     to=curlx_strtoofft(ptr, &ptr2, 0);
     if(ptr == ptr2) {
@@ -3308,16 +3305,14 @@ static CURLcode ftp_range(struct connectdata *conn)
     }
     else if(from < 0) {
       /* -Y */
-      totalsize = -from;
       data->req.maxdownload = -from;
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n",
-                   totalsize));
+                   -from));
     }
     else {
       /* X-Y */
-      totalsize = to-from;
-      data->req.maxdownload = totalsize+1; /* include last byte */
+      data->req.maxdownload = (to-from)+1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE from %" FORMAT_OFF_T
                    " getting %" FORMAT_OFF_T " bytes\n",
@@ -3393,7 +3388,7 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
   if((result == CURLE_OK) && (ftp->transfer != FTPTRANSFER_BODY))
     /* no data to transfer. FIX: it feels like a kludge to have this here
        too! */
-    result = Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   /* end of transfer */
   DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
@@ -3820,7 +3815,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 
   if(ftp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   else if(!connected)
     /* since we didn't connect now, we want do_more to get called */
     conn->bits.do_more = TRUE;

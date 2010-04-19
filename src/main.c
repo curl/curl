@@ -3247,7 +3247,7 @@ static int parseconfig(const char *filename,
           break;
         }
         alloced_param=TRUE;
-        line = (char*) unslashquote(line, param);
+        (void)unslashquote(line, param);
       }
       else {
         param=line; /* parameter starts here */

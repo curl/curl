@@ -16,6 +16,7 @@ This release includes the following bugfixes:
  o prevent needless reverse name lookups
  o detect GSS on ancient Linux distros
  o GnuTLS: EOF caused error when it wasn't
+ o GnuTLS: SSL handshake phase is non-blocking
 
 This release includes the following known bugs:
 
@@ -24,6 +25,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Rainer Canavan, Paul Howarth
+ Rainer Canavan, Paul Howarth, Jerome Vouillon
 
         Thanks! (and sorry if I forgot to mention someone)

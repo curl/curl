@@ -436,12 +436,11 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
 
     if(!filesize)
       /* the entire data is already transfered! */
-      result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
-      result=Curl_setup_transfer(conn, FIRSTSOCKET, filesize, FALSE,
-                                 imap->bytecountp,
-                                 -1, NULL); /* no upload here */
+      Curl_setup_transfer(conn, FIRSTSOCKET, filesize, FALSE,
+                          imap->bytecountp, -1, NULL); /* no upload here */
 
     data->req.maxdownload = filesize;
   }
@@ -924,15 +923,14 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 static CURLcode imap_dophase_done(struct connectdata *conn,
                                   bool connected)
 {
-  CURLcode result = CURLE_OK;
   struct FTP *imap = conn->data->state.proto.imap;
   (void)connected;
 
   if(imap->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    result=Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
-  return result;
+  return CURLE_OK;
 }
 
 /* called from multi.c while DOing */

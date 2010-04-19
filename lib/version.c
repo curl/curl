@@ -107,9 +107,15 @@ char *curl_version(void)
   ptr += len;
 #endif
 #ifdef USE_LIBSSH2
+  (void)snprintf(ptr, left, " libssh2/%s", CURL_LIBSSH2_VERSION);
+/*
+  If another lib version is added below libssh2, this code would instead
+  have to do:
+
   len = snprintf(ptr, left, " libssh2/%s", CURL_LIBSSH2_VERSION);
   left -= len;
   ptr += len;
+*/
 #endif
 
   return version;
