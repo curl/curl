@@ -676,7 +676,6 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   }
 
   /* Compute digest. */
-  strlen(conn->passwd);
   ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
    (const unsigned char *) conn->passwd, strlen(conn->passwd));
 
