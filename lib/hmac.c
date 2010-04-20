@@ -22,9 +22,10 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
-#include "setup.h"
 #include "curl_hmac.h"
 
 /*
@@ -120,4 +121,4 @@ int Curl_HMAC_final(HMAC_context * ctxt, unsigned char * result)
   return 0;
 }
 
-#endif
+#endif /* CURL_DISABLE_CRYPTO_AUTH */
