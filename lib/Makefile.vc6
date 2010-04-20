@@ -517,6 +517,7 @@ X_OBJS= \
 	$(DIROBJ)\url.obj \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\warnless.obj \
+	$(DIROBJ)\hmac.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
