@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Yang Tse (20 Apr 2010)
+- Ruslan Gazizov detected that MSVC makefiles were using wsock32.lib instead
+  of ws2_32.lib, this generated linking issues on MSVC IPv6 enabled builds
+  that were done using those makefiles.
+
 Daniel Stenberg (19 Apr 2010)
 - -J/--remote-header-name didn't strip trailing carriage returns or linefeeds
   properly, so they could be used in the file name.
