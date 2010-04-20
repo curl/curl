@@ -463,6 +463,7 @@ X_OBJS= \
 	$(DIROBJ)\getinfo.obj \
 	$(DIROBJ)\gtls.obj \
 	$(DIROBJ)\hash.obj \
+	$(DIROBJ)\hmac.obj \
 	$(DIROBJ)\hostares.obj \
 	$(DIROBJ)\hostasyn.obj \
 	$(DIROBJ)\hostip.obj \
@@ -517,7 +518,6 @@ X_OBJS= \
 	$(DIROBJ)\url.obj \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\warnless.obj \
-	$(DIROBJ)\hmac.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

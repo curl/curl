@@ -49,6 +49,7 @@ C_SRC += getenv.c
 C_SRC += getinfo.c
 C_SRC += gtls.c
 C_SRC += hash.c
+C_SRC += hmac.c
 C_SRC += hostares.c
 C_SRC += hostasyn.c
 C_SRC += hostip.c

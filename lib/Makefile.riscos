@@ -15,7 +15,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
 	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp \
-	o.curl_threads o.warnless o.hmac
+	o.curl_threads o.warnless o.hmac o.md5
 
 
 # Compile options:
@@ -78,6 +78,9 @@ o.getinfo:	c.getinfo
 o.getpass:	c.getpass
 		gcc $(compileropts) -c -o getpass.o c.getpass
 
+o.hmac:		c.hmac
+		gcc $(compileropts) -c -o hmac.o c.hmac
+
 o.hostip:	c.hostip
 		gcc $(compileropts) -c -o hostip.o c.hostip
 
@@ -110,6 +113,9 @@ o.krb4:	c.krb4
 
 o.ldap:	c.ldap
 		gcc $(compileropts) -IOpenLDAP: -c -o ldap.o c.ldap
+
+o.md5:		c.md5
+		gcc $(compileropts) -c -o md5.o c.md5
 
 o.memdebug:	c.memdebug
 		gcc $(compileropts) -c -o memdebug.o c.memdebug
@@ -195,5 +201,3 @@ o.version:	c.version
 o.warnless:	c.warnless
 		gcc $(compileropts) -c -o warnless.o c.warnless
 
-o.hmac:	c.hmac
-		gcc $(compileropts) -c -o hmac.o c.hmac
