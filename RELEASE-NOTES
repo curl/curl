@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o GnuTLS: SSL handshake phase is non-blocking
  o -J/--remote-header-name strips CRLF
  o MSVC makefiles now use ws2_32.lib instead of wsock32.lib
+ o -O crash on windows
 
 This release includes the following known bugs:
 

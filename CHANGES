@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (21 Apr 2010)
+- The -O option caused curl to crash on windows and DOS due to the tool
+  writing out of boundary memory.
+
 Yang Tse (20 Apr 2010)
 - Ruslan Gazizov detected that MSVC makefiles were using wsock32.lib instead
   of ws2_32.lib, this generated linking issues on MSVC IPv6 enabled builds

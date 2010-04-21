@@ -5839,7 +5839,8 @@ rename_if_dos_device_name (char *file_name)
 static char *sanitize_dos_name(char *fn)
 {
   char tmpfn[PATH_MAX];
-  fn[PATH_MAX-1]=0; /* ensure fn is not too long by possibly truncating it */
+  if(strlen(fn) >= PATH_MAX)
+    fn[PATH_MAX-1]=0; /* truncate it */
   strcpy(tmpfn, msdosify(fn));
   free(fn);
   return strdup(rename_if_dos_device_name(tmpfn));
