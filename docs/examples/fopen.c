@@ -131,7 +131,6 @@ fill_buffer(URL_FILE *file,int want,int waittime)
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcep;
-    int maxfd;
     struct timeval timeout;
     int rc;
 
@@ -144,6 +143,7 @@ fill_buffer(URL_FILE *file,int want,int waittime)
     /* attempt to fill buffer */
     do
     {
+        int maxfd = -1;
         FD_ZERO(&fdread);
         FD_ZERO(&fdwrite);
         FD_ZERO(&fdexcep);
@@ -156,8 +156,10 @@ fill_buffer(URL_FILE *file,int want,int waittime)
         curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
         /* In a real-world program you OF COURSE check the return code of the
-           function calls, *and* you make sure that maxfd is bigger than -1
-           so that the call to select() below makes sense! */
+           function calls.  On success, the value of maxfd is guaranteed to be
+           greater or equal than -1.  We call select(maxfd + 1, ...), specially
+           in case of (maxfd == -1), we call select(0, ...), which is basically
+           equal to sleep. */
 
         rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 

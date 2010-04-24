@@ -21,7 +21,7 @@
 
 static CURLMcode perform(CURLM * multi)
 {
-  int handles, maxfd;
+  int handles;
   CURLMcode code;
   fd_set fdread, fdwrite, fdexcep;
   struct timeval mp_start;
@@ -31,6 +31,9 @@ static CURLMcode perform(CURLM * multi)
   mp_start = tutil_tvnow();
 
   for (;;) {
+    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
+    int maxfd = -1;
+
     code = curl_multi_perform(multi, &handles);
     if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
@@ -53,9 +56,14 @@ static CURLMcode perform(CURLM * multi)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
     curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
-    if (maxfd < 0)
-      return (CURLMcode) ~CURLM_OK;
-    if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, 0) == -1)
+
+    /* In a real-world program you OF COURSE check the return code of the
+       function calls.  On success, the value of maxfd is guaranteed to be
+       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
+       case of (maxfd == -1), we call select(0, ...), which is basically equal
+       to sleep. */
+
+    if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout) == -1)
       return (CURLMcode) ~CURLM_OK;
   }
 
