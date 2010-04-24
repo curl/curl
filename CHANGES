@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (24 Apr 2010)
+- Alex Bligh introduced the --proto and -proto-redir options that limit what
+  protocols curl accepts for the requests and when following redirects.
+
 Kamil Dudka (24 Apr 2010)
 - Fixed test536 in order to not fail with threaded DNS resolver and tweaked
   comments in certain examples using curl_multi_fdset().
