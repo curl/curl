@@ -247,7 +247,6 @@ static enum {
 
     /* Skip over the NUL */
     --len;
-    ++data;
   }
 
   if(flags & HEAD_CRC) {
