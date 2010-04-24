@@ -478,6 +478,10 @@ struct Configurable {
   bool disable_epsv;
   bool disable_eprt;
   bool ftp_pret;
+  long proto;
+  bool proto_present;
+  long proto_redir;
+  bool proto_redir_present;
   curl_off_t resume_from;
   char *postfields;
   curl_off_t postfieldsize;
@@ -841,6 +845,8 @@ static void help(void)
     "    --post301       Do not switch to GET after following a 301 redirect (H)",
     "    --post302       Do not switch to GET after following a 302 redirect (H)",
     " -#/--progress-bar  Display transfer progress as a progress bar",
+    "    --proto <protocols>       Enable/disable specified protocols",
+    "    --proto-redir <protocols> Enable/disable specified protocols on redirect",
     " -x/--proxy <host[:port]> Use HTTP proxy on given port",
     "    --proxy-anyauth Pick \"any\" proxy authentication method (H)",
     "    --proxy-basic   Use Basic authentication on the proxy (H)",
@@ -1492,6 +1498,109 @@ static int str2num(long *val, const char *str)
   return retcode;
 }
 
+/*
+ * Parse the string and modify the long in the given address. Return
+ * non-zero on failure, zero on success.
+ *
+ * The string is a list of protocols
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+static long proto2num(struct Configurable *config, long *val, const char *str)
+{
+  char *buffer;
+  const char *sep = ",";
+  char *token;
+
+  static struct sprotos {
+    const char *name;
+    long bit;
+  } const protos[] = {
+    { "all", CURLPROTO_ALL },
+    { "http", CURLPROTO_HTTP },
+    { "https", CURLPROTO_HTTPS },
+    { "ftp", CURLPROTO_FTP },
+    { "ftps", CURLPROTO_FTPS },
+    { "scp", CURLPROTO_SCP },
+    { "sftp", CURLPROTO_SFTP },
+    { "telnet", CURLPROTO_TELNET },
+    { "ldap", CURLPROTO_LDAP },
+    { "ldaps", CURLPROTO_LDAPS },
+    { "dict", CURLPROTO_DICT },
+    { "file", CURLPROTO_FILE },
+    { "tftp", CURLPROTO_TFTP },
+    { "imap", CURLPROTO_IMAP },
+    { "imaps", CURLPROTO_IMAPS },
+    { "pop3", CURLPROTO_POP3 },
+    { "pop3s", CURLPROTO_POP3S },
+    { "smtp", CURLPROTO_SMTP },
+    { "smtps", CURLPROTO_SMTPS },
+    { "rtsp", CURLPROTO_RTSP },
+    { NULL, 0 }
+  };
+
+  if(!str)
+    return 1;
+
+  buffer = strdup(str); /* because strtok corrupts it */
+
+  for (token = strtok(buffer, sep);
+       token;
+       token = strtok(NULL, sep)) {
+    enum e_action { allow, deny, set } action = allow;
+
+    struct sprotos const *pp;
+
+    /* Process token modifiers */
+    while (!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
+      switch (*token++) {
+      case '=':
+        action = set;
+        break;
+      case '-':
+        action = deny;
+        break;
+      case '+':
+        action = allow;
+        break;
+      default: /* Includes case of terminating NULL */
+        free(buffer);
+        return 1;
+      }
+    }
+
+    for (pp=protos; pp->name; pp++) {
+      if (curlx_raw_equal(token, pp->name)) {
+        switch (action) {
+        case deny:
+          *val &= ~(pp->bit);
+          break;
+        case allow:
+          *val |= pp->bit;
+          break;
+        case set:
+          *val = pp->bit;
+          break;
+        }
+        break;
+      }
+    }
+
+    if (!(pp->name)) { /* unknown protocol */
+      /* If they have specified only this protocol, we say treat it as
+         if no protocols are allowed */
+      if (action == set)
+        *val = 0;
+      warnf(config, "unrecognized protocol '%s'\n", token);
+    }
+  }
+  free(buffer);
+  return 0;
+}
+
 /**
  * Parses the given string looking for an offset (which may be
  * a larger-than-integer value).
@@ -1752,6 +1861,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$A", "mail-from", TRUE},
     {"$B", "mail-rcpt", TRUE},
     {"$C", "ftp-pret",   FALSE},
+    {"$D", "proto",      TRUE},
+    {"$E", "proto-redir", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2293,6 +2404,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'C': /* --ftp-pret */
         config->ftp_pret = toggle;
+        break;
+      case 'D': /* --proto */
+        config->proto_present = 1;
+        if(proto2num(config, &config->proto, nextarg))
+          return PARAM_BAD_USE;
+        break;
+      case 'E': /* --proto-redir */
+        config->proto_redir_present = 1;
+        if(proto2num(config, &config->proto_redir, nextarg))
+          return PARAM_BAD_USE;
         break;
       }
       break;
@@ -4362,6 +4483,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
+  config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
+  config->proto_present = FALSE;
+  config->proto_redir =
+    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+  config->proto_redir_present = FALSE;
 
   if(argc>1 &&
      (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -5199,6 +5325,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* curl 7.20.x */
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
+
+        if (config->proto_present)
+          my_setopt(curl, CURLOPT_PROTOCOLS, config->proto);
+        if (config->proto_redir_present)
+          my_setopt(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if ((urlnode->flags & GETOUT_USEREMOTE)
             && config->content_disposition) {
