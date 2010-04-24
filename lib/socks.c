@@ -511,11 +511,13 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
      */
     len = 0;
     socksreq[len++] = 1;    /* username/pw subnegotiation version */
-    socksreq[len++] = (char) userlen;
-    memcpy(socksreq + len, proxy_name, userlen);
+    socksreq[len++] = (unsigned char) userlen;
+    if(proxy_name && userlen)
+      memcpy(socksreq + len, proxy_name, userlen);
     len += (int)userlen;
-    socksreq[len++] = (char) pwlen;
-    memcpy(socksreq + len, proxy_password, pwlen);
+    socksreq[len++] = (unsigned char) pwlen;
+    if(proxy_password && pwlen)
+      memcpy(socksreq + len, proxy_password, pwlen);
     len += (int)pwlen;
 
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
