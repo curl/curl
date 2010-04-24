@@ -14,6 +14,9 @@ Kamil Dudka (24 Apr 2010)
 - Fixed test536 in order to not fail with threaded DNS resolver and tweaked
   comments in certain examples using curl_multi_fdset().
 
+- Fixed SSL handshake timeout underflow in libcurl-NSS, which caused test405
+  to hang on a slow machine.
+
 Daniel Stenberg (21 Apr 2010)
 - The -O option caused curl to crash on windows and DOS due to the tool
   writing out of boundary memory.

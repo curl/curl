@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o -J/--remote-header-name strips CRLF
  o MSVC makefiles now use ws2_32.lib instead of wsock32.lib
  o -O crash on windows
+ o SSL handshake timeout underflow in libcurl-NSS
 
 This release includes the following known bugs:
 

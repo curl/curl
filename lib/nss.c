@@ -1025,6 +1025,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   int curlerr;
   const int *cipher_to_enable;
   PRSocketOptionData sock_opt;
+  long time_left;
   PRUint32 timeout;
 
   curlerr = CURLE_SSL_CONNECT_ERROR;
@@ -1302,8 +1303,15 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   SSL_SetURL(connssl->handle, conn->host.name);
 
+  /* check timeout situation */
+  time_left = Curl_timeleft(conn, NULL, TRUE);
+  if(time_left < 0L) {
+    failf(data, "timed out before SSL handshake");
+    goto error;
+  }
+  timeout = PR_MillisecondsToInterval((PRUint32) time_left);
+
   /* Force the handshake now */
-  timeout = PR_MillisecondsToInterval((PRUint32)Curl_timeleft(conn, NULL, TRUE));
   if(SSL_ForceHandshakeWithTimeout(connssl->handle, timeout) != SECSuccess) {
     if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
       curlerr = CURLE_PEER_FAILED_VERIFICATION;
