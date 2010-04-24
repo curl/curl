@@ -16,7 +16,7 @@
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.4
+ZLIB_PATH = ../../zlib-1.2.5
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
@@ -24,7 +24,7 @@ OPENSSL_PATH = ../../openssl-0.9.8n
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.4
+LIBSSH2_PATH = ../../libssh2-1.2.5
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
