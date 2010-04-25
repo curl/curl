@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel Stenberg (26 Apr 2010)
+- Make use of the libssh2_init/exit functions that libssh2 added in version
+  1.2.5. Using them will improve how libcurl works in threaded situations when
+  SCP and SFTP are transfered.
+
 Daniel Stenberg (25 Apr 2010)
 - Based on work by Kamil Dudka, I've introduced the new configure option
   --enable-threaded-resolver. When used, the configure script will check for

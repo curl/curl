@@ -287,6 +287,13 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
+#if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_INIT)
+  if(libssh2_init(0)) {
+    DEBUGF(fprintf(stderr, "Error: libssh2_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
+
   init_flags  = flags;
 
   /* Preset pseudo-random number sequence. */
@@ -353,6 +360,10 @@ void curl_global_cleanup(void)
 
 #ifdef __AMIGA__
   amiga_cleanup();
+#endif
+
+#if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_EXIT)
+  (void)libssh2_exit();
 #endif
 
   init_flags  = 0;
