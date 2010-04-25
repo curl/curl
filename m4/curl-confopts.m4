@@ -21,8 +21,33 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 11
+# serial 12
 
+dnl CURL_CHECK_OPTION_THREADED_RESOLVER
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-threaded-resolver or --disable-threaded-resover, and
+dnl set shell variable want_thres as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_THREADED_RESOLVER], [
+  AC_MSG_CHECKING([whether to enable the threaded resolver])
+  OPT_THRES="default"
+  AC_ARG_ENABLE(threaded_resolver,
+AC_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
+AC_HELP_STRING([--disable-threaded-resover],[Disable threaded resolver]),
+  OPT_THRES=$enableval)
+  case "$OPT_THRES" in
+    yes)
+      dnl --enable-threaded-resolver option used
+      want_thres="yes"
+      ;;
+    *)
+      dnl configure option not specified
+      want_thres="no"
+      ;;
+  esac
+  AC_MSG_RESULT([$want_thres])
+])
 
 dnl CURL_CHECK_OPTION_ARES
 dnl -------------------------------------------------
@@ -433,7 +458,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       dnl finally c-ares will be used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       AC_SUBST([USE_ARES], [1])
-      curl_ares_msg="enabled"
+      curl_res_msg="c-ares"
     fi
   fi
 ])

@@ -127,7 +127,7 @@ dnl initialize all the info variables
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
-   curl_ares_msg="no      (--enable-ares)"
+    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
@@ -2290,6 +2290,28 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
+CURL_CHECK_OPTION_THREADED_RESOLVER
+
+if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
+  AC_MSG_ERROR(
+[Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
+fi
+
+if test "$want_thres" = "yes"; then
+  AC_CHECK_HEADER(pthread.h,
+    [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
+      save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS -pthread"
+      AC_CHECK_LIB(pthread, pthread_create,
+        [ AC_MSG_NOTICE([using POSIX threaded DNS lookup])
+          AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
+          USE_THREADS_POSIX=1
+          curl_res_msg="threaded"
+        ],
+        [ CFLAGS="$save_CFLAGS"])
+  ])
+fi
+
 dnl ************************************************************
 dnl disable verbose text strings
 dnl
@@ -2483,7 +2505,7 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
-if test "x$USE_ARES" = "x1"; then
+if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
@@ -2625,7 +2647,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
   SPNEGO support:  ${curl_spnego_msg}
-  c-ares support:  ${curl_ares_msg}
+  resolver:        ${curl_res_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static}

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel Stenberg (25 Apr 2010)
+- Based on work by Kamil Dudka, I've introduced the new configure option
+  --enable-threaded-resolver. When used, the configure script will check for
+  pthreads and if around, it will build libcurl to use pthreads to do name
+  resolving in a threaded manner. Note that this is just a fix to offer an
+  option that can enable the code that already included. The threader resolver
+  code was mostly added on Jan 26 2010.
+
 Daniel Stenberg (24 Apr 2010)
 - Alex Bligh introduced the --proto and -proto-redir options that limit what
   protocols curl accepts for the requests and when following redirects.

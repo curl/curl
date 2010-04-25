@@ -10,6 +10,7 @@ Curl and libcurl 7.20.2
 This release includes the following changes:
 
  o added the --proto and -proto-redir options
+ o new configure option --enable-threaded-resolver
 
 This release includes the following bugfixes:
 
