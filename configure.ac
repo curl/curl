@@ -1889,7 +1889,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl to prevent further configure tests to fail due to this
 
        dnl libssh2_version is a post 1.0 addition
-       AC_CHECK_FUNCS( libssh2_version )
+       dnl libssh2_init and libssh2_exit were added in 1.2.5
+       AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit)
 
        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
        export LD_LIBRARY_PATH
