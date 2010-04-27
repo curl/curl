@@ -17,7 +17,8 @@ lib513
  <name>
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT
  </name>
- <command>
+# the 1s post-command delay helps to prevent a spurious failure on s390
+ <command delay="1">
 http://%HOSTIP:%HTTPPORT/513
 </command>
 </client>
