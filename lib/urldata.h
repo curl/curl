@@ -1235,6 +1235,8 @@ struct UserDefined {
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
   curl_read_callback fread_func;     /* function that reads the input */
+  int is_fread_set; /* boolean, has read callback been set to non-NULL? */
+  int is_fwrite_set; /* boolean, has write callback been set to non-NULL? */
   curl_progress_callback fprogress;  /* function for progress information */
   curl_debug_callback fdebug;      /* function that write informational data */
   curl_ioctl_callback ioctl_func;  /* function for I/O control */

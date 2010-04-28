@@ -690,6 +690,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   /* use fread as default function to read input */
   set->fread_func = (curl_read_callback)fread;
+  set->is_fread_set = 0;
+  set->is_fwrite_set = 0;
 
   set->seek_func = ZERO_NULL;
   set->seek_client = ZERO_NULL;
@@ -1825,18 +1827,26 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set data write callback
      */
     data->set.fwrite_func = va_arg(param, curl_write_callback);
-    if(!data->set.fwrite_func)
+    if(!data->set.fwrite_func) {
+      data->set.is_fwrite_set = 0;
       /* When set to NULL, reset to our internal default function */
       data->set.fwrite_func = (curl_write_callback)fwrite;
+    }
+    else
+      data->set.is_fwrite_set = 0;
     break;
   case CURLOPT_READFUNCTION:
     /*
      * Read data callback
      */
     data->set.fread_func = va_arg(param, curl_read_callback);
-    if(!data->set.fread_func)
+    if(!data->set.fread_func) {
+      data->set.is_fread_set = 0;
       /* When set to NULL, reset to our internal default function */
       data->set.fread_func = (curl_read_callback)fread;
+    }
+    else
+      data->set.is_fread_set = 1;
     break;
   case CURLOPT_SEEKFUNCTION:
     /*

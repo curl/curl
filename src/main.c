@@ -4987,7 +4987,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         input.config = config;
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
-        my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
+        if ((outfile && !curlx_strequal("-", outfile)) ||
+            !curlx_strnequal(url, "telnet:", 7))
+          my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
            CURLOPT_IOCTLFUNCTION/DATA pair previously provided for seeking */
