@@ -356,7 +356,7 @@ multi interface/non-blocking
 
  The FTP and the SFTP/SCP protocols are thus perfect examples of how we adapt
  and adjust the code to allow non-blocking operations even on multi-stage
- protocols. The DICT, TELNET and TFTP are crappy examples and they are subject
+ protocols. The DICT, LDAP and TELNET are crappy examples and they are subject
  for rewrite in the future to better fit the libcurl protocol family.
 
 SSL libraries
