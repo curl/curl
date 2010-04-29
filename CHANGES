@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel Stenberg (29 Apr 2010)
+- Ben Greear made telnet a lot better/easier to use by an application:
+
+  The main change is to allow input from user-specified methods, when they are
+  specified with CURLOPT_READFUNCTION.  All calls to fflush(stdout) in
+  telnet.c were removed, which makes using 'curl telnet://foo.com' painful
+  since prompts and other data are not always returned to the user promptly.
+  Use 'curl --no-buffer telnet://foo.com' instead.  In general, the user
+  should have their CURLOPT_WRITEFUNCTION do a fflush for interactive use.
+
+  Also fix assumption that reading from stdin never returns < 0.
+  Old code could crash in that case.
+
+  Call progress functions in telnet main loop.
+
 Daniel Stenberg (26 Apr 2010)
 - Make use of the libssh2_init/exit functions that libssh2 added in version
   1.2.5. Using them will improve how libcurl works in threaded situations when
