@@ -1865,6 +1865,18 @@ static int https_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
+#else
+#ifdef USE_POLARSSL
+static int https_getsock(struct connectdata *conn,
+                         curl_socket_t *socks,
+                         int numsocks)
+{
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+}
+#endif
 #endif
 #endif
 #endif

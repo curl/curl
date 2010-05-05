@@ -202,6 +202,7 @@ my $has_openssl; # built with a lib using an OpenSSL-like API
 my $has_gnutls;  # built with GnuTLS
 my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
+my $has_polarssl;# built with polarssl
 
 my $ssllib;      # name of the lib we use (for human presentation)
 my $has_crypto;  # set if libcurl is built with cryptographic support
@@ -1929,6 +1930,11 @@ sub checksystem {
                $has_openssl=1;
                $ssllib="yassl";
            }
+           elsif ($libcurl =~ /polarssl/i) {
+               $has_polarssl=1;
+               $has_openssl=1;
+               $ssllib="polarssl";
+           } 
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl

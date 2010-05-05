@@ -102,6 +102,11 @@
 #include <gnutls/gnutls.h>
 #endif
 
+#ifdef USE_POLARSSL
+#include <polarssl/havege.h>
+#include <polarssl/ssl.h>
+#endif
+
 #ifdef USE_NSS
 #include <nspr.h>
 #include <pk11pub.h>
@@ -233,6 +238,18 @@ struct ssl_connect_data {
   gnutls_certificate_credentials cred;
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
+#ifdef USE_POLARSSL
+  havege_state hs;
+  ssl_context ssl;
+  ssl_session ssn;
+  int server_fd;
+  x509_cert cacert;
+  x509_cert clicert;
+#if defined(HAVE_POLARSSL_GPL)
+  x509_crl crl;
+#endif
+  rsa_context rsa;
+#endif /* USE_POLARSSL */
 #ifdef USE_NSS
   PRFileDesc *handle;
   char *client_nickname;

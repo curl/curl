@@ -889,6 +889,9 @@
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS ${USE_GNUTLS}
 
+/* if PolarSSL is enabled */
+#cmakedefine USE_POLARSSL ${USE_POLARSSL}
+
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 ${USE_LIBSSH2}
 
