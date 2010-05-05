@@ -12,6 +12,7 @@ This release includes the following changes:
  o added the --proto and -proto-redir options
  o new configure option --enable-threaded-resolver
  o improve TELNET ability with libcurl
+ o added support for PolarSSL
 
 This release includes the following bugfixes:
 
@@ -32,6 +33,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
- Kamil Dudka, Alex Bligh, Ben Greear
+ Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan
 
         Thanks! (and sorry if I forgot to mention someone)

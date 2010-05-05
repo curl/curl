@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (5 May 2010)
+- Hoi-Ho Chan introduced support for using the PolarSSL library. You control
+  this with the new configure option --with-polarssl.
+
 Daniel Stenberg (29 Apr 2010)
 - Ben Greear made telnet a lot better/easier to use by an application:
 
