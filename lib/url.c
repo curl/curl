@@ -154,7 +154,6 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 #define verboseconnect(x)  do { } while (0)
 #endif
 
-
 /*
  * Protocol table.
  */
@@ -3181,9 +3180,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void verboseconnect(struct connectdata *conn)
 {
-  infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
-        conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
-        conn->ip_addr_str, conn->port, conn->connectindex);
+  if(conn->data->set.verbose)
+    infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
+          conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
+          conn->ip_addr_str, conn->port, conn->connectindex);
 }
 #endif
 
@@ -3275,8 +3275,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 
     Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
-    if(data->set.verbose)
-      verboseconnect(conn);
+    verboseconnect(conn);
   }
 
   if(!conn->bits.protoconnstart) {
@@ -4998,8 +4997,7 @@ static CURLcode setup_conn(struct connectdata *conn,
       Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
       conn->bits.tcpconnect = TRUE;
       *protocol_done = TRUE;
-      if(data->set.verbose)
-        verboseconnect(conn);
+      verboseconnect(conn);
     }
     /* Stop the loop now */
     break;
