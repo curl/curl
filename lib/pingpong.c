@@ -340,8 +340,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
       conn->data_prot = prot;
 #endif
-      if(res < 0)
-        /* EWOULDBLOCK */
+      if(res == CURLE_AGAIN)
         return CURLE_OK; /* return */
 
 #ifdef CURL_DOES_CONVERSIONS

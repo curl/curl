@@ -76,6 +76,9 @@ static void polarssl_debug(void *context, int level, char *line)
 #else
 #endif
 
+static Curl_recv polarssl_recv;
+static Curl_send polarssl_send;
+
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -299,6 +302,8 @@ Curl_polarssl_connect(struct connectdata *conn,
   }
 
   conn->ssl[sockindex].state = ssl_connection_complete;
+  conn->recv = polarssl_recv;
+  conn->send = polarssl_send;
 
   /* Save the current session data for possible re-use */
   {
@@ -319,12 +324,11 @@ Curl_polarssl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_polarssl_send(struct connectdata *conn,
-                           int sockindex,
-                           const void *mem,
-                           size_t len,
-                           int *curlcode)
+static ssize_t polarssl_send(struct connectdata *conn,
+                             int sockindex,
+                             const void *mem,
+                             size_t len,
+                             CURLcode *curlcode)
 {
   int ret = -1;
 
@@ -332,7 +336,8 @@ ssize_t Curl_polarssl_send(struct connectdata *conn,
                   (unsigned char *)mem, len);
 
   if(ret < 0) {
-    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ? -1 : CURLE_SEND_ERROR;
+    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ?
+      CURLE_AGAIN : CURLE_SEND_ERROR;
     ret = -1;
   }
 
@@ -355,12 +360,11 @@ void Curl_polarssl_close(struct connectdata *conn, int sockindex)
   ssl_free(&conn->ssl[sockindex].ssl);
 }
 
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_polarssl_recv(struct connectdata *conn,
-                           int num,
-                           char *buf,
-                           size_t buffersize,
-                           int *curlcode)
+static ssize_t polarssl_recv(struct connectdata *conn,
+                             int num,
+                             char *buf,
+                             size_t buffersize,
+                             CURLcode *curlcode)
 {
   int ret = -1;
   ssize_t len = -1;
@@ -369,7 +373,8 @@ ssize_t Curl_polarssl_recv(struct connectdata *conn,
   ret = ssl_read(&conn->ssl[num].ssl, (unsigned char *)buf, buffersize);
 
   if(ret <= 0) {
-    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ? -1 : CURLE_RECV_ERROR;
+    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ?
+      CURLE_AGAIN : CURLE_RECV_ERROR;
     return -1;
   }
 

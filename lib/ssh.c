@@ -2464,6 +2464,9 @@ static CURLcode ssh_init(struct connectdata *conn)
   return CURLE_OK;
 }
 
+static Curl_recv scp_recv, sftp_recv;
+static Curl_send scp_send, sftp_send;
+
 /*
  * Curl_ssh_connect() gets called from Curl_protocol_connect() to allow us to
  * do protocol-specific actions at connect-time.
@@ -2489,6 +2492,13 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
+  if(conn->protocol & PROT_SCP) {
+    conn->recv = scp_recv;
+    conn->send = scp_send;
+  } else {
+    conn->recv = sftp_recv;
+    conn->send = sftp_send;
+  }
   ssh = &conn->proto.sshc;
 
 #ifdef CURL_LIBSSH2_DEBUG
@@ -2703,8 +2713,8 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 }
 
 /* return number of received (decrypted) bytes */
-ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
-                      const void *mem, size_t len)
+static ssize_t scp_send(struct connectdata *conn, int sockindex,
+                        const void *mem, size_t len, CURLcode *err)
 {
   ssize_t nwrite;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
@@ -2715,8 +2725,10 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
 
   ssh_block2waitfor(conn, (nwrite == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
 
-  if(nwrite == LIBSSH2_ERROR_EAGAIN)
-    return 0;
+  if(nwrite == LIBSSH2_ERROR_EAGAIN) {
+    *err = CURLE_AGAIN;
+    nwrite = 0;
+  }
 
   return nwrite;
 }
@@ -2725,8 +2737,8 @@ ssize_t Curl_scp_send(struct connectdata *conn, int sockindex,
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
  */
-ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
-                      char *mem, size_t len)
+static ssize_t scp_recv(struct connectdata *conn, int sockindex,
+                        char *mem, size_t len, CURLcode *err)
 {
   ssize_t nread;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
@@ -2736,6 +2748,10 @@ ssize_t Curl_scp_recv(struct connectdata *conn, int sockindex,
     libssh2_channel_read(conn->proto.sshc.ssh_channel, mem, len);
 
   ssh_block2waitfor(conn, (nread == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
+  if (nread == LIBSSH2_ERROR_EAGAIN) {
+    *err = CURLE_AGAIN;
+    nread = -1;
+  }
 
   return nread;
 }
@@ -2840,8 +2856,8 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
 }
 
 /* return number of sent bytes */
-ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
-                       const void *mem, size_t len)
+static ssize_t sftp_send(struct connectdata *conn, int sockindex,
+                         const void *mem, size_t len, CURLcode *err)
 {
   ssize_t nwrite;   /* libssh2_sftp_write() used to return size_t in 0.14
                        but is changed to ssize_t in 0.15. These days we don't
@@ -2852,8 +2868,10 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
 
   ssh_block2waitfor(conn, (nwrite == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
 
-  if(nwrite == LIBSSH2_ERROR_EAGAIN)
-    return 0;
+  if(nwrite == LIBSSH2_ERROR_EAGAIN) {
+    *err = CURLE_AGAIN;
+    nwrite = 0;
+  }
 
   return nwrite;
 }
@@ -2861,8 +2879,8 @@ ssize_t Curl_sftp_send(struct connectdata *conn, int sockindex,
 /*
  * Return number of received (decrypted) bytes
  */
-ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
-                       char *mem, size_t len)
+static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
+                         char *mem, size_t len, CURLcode *err)
 {
   ssize_t nread;
   (void)sockindex;
@@ -2871,6 +2889,10 @@ ssize_t Curl_sftp_recv(struct connectdata *conn, int sockindex,
 
   ssh_block2waitfor(conn, (nread == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
 
+  if(nread == LIBSSH2_ERROR_EAGAIN) {
+    *err = CURLE_AGAIN;
+    nread = -1;
+  }
   return nread;
 }
 

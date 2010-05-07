@@ -56,20 +56,6 @@ struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data);
 int Curl_ossl_init(void);
 void Curl_ossl_cleanup(void);
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_ossl_send(struct connectdata *conn,
-                       int sockindex,
-                       const void *mem,
-                       size_t len,
-                       int *curlcode);
-
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       int *curlcode);
-
 size_t Curl_ossl_version(char *buffer, size_t size);
 int Curl_ossl_check_cxn(struct connectdata *cxn);
 int Curl_ossl_seed(struct SessionHandle *data);
@@ -90,8 +76,6 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
 #define curlssl_set_engine(x,y) Curl_ossl_set_engine(x,y)
 #define curlssl_set_engine_default(x) Curl_ossl_set_engine_default(x)
 #define curlssl_engines_list(x) Curl_ossl_engines_list(x)
-#define curlssl_send Curl_ossl_send
-#define curlssl_recv Curl_ossl_recv
 #define curlssl_version Curl_ossl_version
 #define curlssl_check_cxn Curl_ossl_check_cxn
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)

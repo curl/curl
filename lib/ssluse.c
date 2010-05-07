@@ -2352,6 +2352,9 @@ ossl_connect_step3(struct connectdata *conn,
   return retcode;
 }
 
+static Curl_recv ossl_recv;
+static Curl_send ossl_send;
+
 static CURLcode
 ossl_connect_common(struct connectdata *conn,
                     int sockindex,
@@ -2437,6 +2440,8 @@ ossl_connect_common(struct connectdata *conn,
 
   if(ssl_connect_done==connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
+    conn->recv = ossl_recv;
+    conn->send = ossl_send;
     *done = TRUE;
   }
   else
@@ -2482,12 +2487,11 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
     return FALSE;
 }
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_ossl_send(struct connectdata *conn,
-                       int sockindex,
-                       const void *mem,
-                       size_t len,
-                       int *curlcode)
+static ssize_t ossl_send(struct connectdata *conn,
+                         int sockindex,
+                         const void *mem,
+                         size_t len,
+                         CURLcode *curlcode)
 {
   /* SSL_write() is said to return 'int' while write() and send() returns
      'size_t' */
@@ -2510,7 +2514,7 @@ ssize_t Curl_ossl_send(struct connectdata *conn,
       /* The operation did not complete; the same TLS/SSL I/O function
          should be called again later. This is basicly an EWOULDBLOCK
          equivalent. */
-      *curlcode = /* EWOULDBLOCK */ -1;
+      *curlcode = CURLE_AGAIN;
       return -1;
     case SSL_ERROR_SYSCALL:
       failf(conn->data, "SSL_write() returned SYSCALL, errno = %d",
@@ -2534,12 +2538,11 @@ ssize_t Curl_ossl_send(struct connectdata *conn,
   return (ssize_t)rc; /* number of bytes */
 }
 
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       int *curlcode)
+static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
+                         int num,                  /* socketindex */
+                         char *buf,                /* store read data here */
+                         size_t buffersize,        /* max amount to read */
+                         CURLcode *curlcode)
 {
   char error_buffer[120]; /* OpenSSL documents that this must be at
                              least 120 bytes long. */
@@ -2560,7 +2563,7 @@ ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_read() */
-      *curlcode = -1;  /* EWOULDBLOCK */
+      *curlcode = CURLE_AGAIN;
       return -1;
     default:
       /* openssl/ssl.h says "look at error stack/return value/errno" */

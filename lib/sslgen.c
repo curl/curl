@@ -410,25 +410,6 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
   return curlssl_engines_list(data);
 }
 
-ssize_t Curl_ssl_send(struct connectdata *conn,
-                      int sockindex,
-                      const void *mem,
-                      size_t len,
-                      int *curlcode)
-{
-  return curlssl_send(conn, sockindex, mem, len, curlcode);
-}
-
-ssize_t Curl_ssl_recv(struct connectdata *conn,
-                      int sockindex,
-                      char *mem,
-                      size_t len,
-                      int *curlcode)
-{
-  return curlssl_recv(conn, sockindex, mem, len, curlcode);
-}
-
-
 /*
  * This sets up a session ID cache to the specified size. Make sure this code
  * is agnostic to what underlying SSL technology we use.

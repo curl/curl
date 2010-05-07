@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -101,20 +101,6 @@ static const struct Curl_sec_client_mech * const mechs[] = {
   NULL
 };
 
-/* TODO: This function isn't actually used anywhere and should be removed */
-int
-Curl_sec_getc(struct connectdata *conn, FILE *F)
-{
-  if(conn->sec_complete && conn->data_prot) {
-    char c;
-    if(Curl_sec_read(conn, fileno(F), &c, 1) <= 0)
-      return EOF;
-    return c;
-  }
-  else
-    return getc(F);
-}
-
 static int
 block_read(int fd, void *buf, size_t len)
 {
@@ -189,35 +175,16 @@ buffer_read(struct krb4buffer *buf, void *data, size_t len)
   return len;
 }
 
-static size_t
-buffer_write(struct krb4buffer *buf, void *data, size_t len)
-{
-  if(buf->index + len > buf->size) {
-    void *tmp;
-    if(buf->data == NULL)
-      tmp = malloc(1024);
-    else
-      tmp = realloc(buf->data, buf->index + len);
-    if(tmp == NULL)
-      return -1;
-    buf->data = tmp;
-    buf->size = buf->index + len;
-  }
-  memcpy((char*)buf->data + buf->index, data, len);
-  buf->index += len;
-  return len;
-}
-
-int
-Curl_sec_read(struct connectdata *conn, int fd, void *buffer, int length)
+static ssize_t sec_read(struct connectdata *conn, int num,
+                        char *buffer, size_t length, CURLcode *err)
 {
   size_t len;
   int rx = 0;
+  curl_socket_t fd = conn->sock[num];
 
-  if(conn->sec_complete == 0 || conn->data_prot == 0)
-    return read(fd, buffer, length);
+  *err = CURLE_OK;
 
-  if(conn->in_buffer.eof_flag){
+  if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
     return 0;
   }
@@ -284,28 +251,11 @@ sec_send(struct connectdata *conn, int fd, const char *from, int length)
   return length;
 }
 
-int
-Curl_sec_fflush_fd(struct connectdata *conn, int fd)
-{
-  if(conn->data_prot != prot_clear) {
-    if(conn->out_buffer.index > 0){
-      Curl_sec_write(conn, fd,
-                     conn->out_buffer.data, conn->out_buffer.index);
-      conn->out_buffer.index = 0;
-    }
-    sec_send(conn, fd, NULL, 0);
-  }
-  return 0;
-}
-
-int
-Curl_sec_write(struct connectdata *conn, int fd, const char *buffer, int length)
+static ssize_t sec_write(struct connectdata *conn, int fd,
+                         const char *buffer, int length)
 {
   int len = conn->buffer_size;
   int tx = 0;
-
-  if(conn->data_prot == prot_clear)
-    return write(fd, buffer, length);
 
   len -= (conn->mech->overhead)(conn->app_data, conn->data_prot, len);
   if(len <= 0)
@@ -321,27 +271,25 @@ Curl_sec_write(struct connectdata *conn, int fd, const char *buffer, int length)
   return tx;
 }
 
-ssize_t
-Curl_sec_send(struct connectdata *conn, int num, const char *buffer, int length)
+int
+Curl_sec_fflush_fd(struct connectdata *conn, int fd)
 {
-  curl_socket_t fd = conn->sock[num];
-  return (ssize_t)Curl_sec_write(conn, fd, buffer, length);
+  if(conn->data_prot != prot_clear) {
+    if(conn->out_buffer.index > 0){
+      sec_write(conn, fd, conn->out_buffer.data, conn->out_buffer.index);
+      conn->out_buffer.index = 0;
+    }
+    sec_send(conn, fd, NULL, 0);
+  }
+  return 0;
 }
 
-int
-Curl_sec_putc(struct connectdata *conn, int c, FILE *F)
+static ssize_t _sec_send(struct connectdata *conn, int num,
+                         const void *buffer, size_t length, CURLcode *err)
 {
-  char ch = (char)c;
-  if(conn->data_prot == prot_clear)
-    return putc(c, F);
-
-  buffer_write(&conn->out_buffer, &ch, 1);
-  if(c == '\n' || conn->out_buffer.index >= 1024 /* XXX */) {
-    Curl_sec_write(conn, fileno(F), conn->out_buffer.data,
-                   conn->out_buffer.index);
-    conn->out_buffer.index = 0;
-  }
-  return c;
+  curl_socket_t fd = conn->sock[num];
+  *err = CURLE_OK;
+  return sec_write(conn, fd, buffer, length);
 }
 
 int
@@ -517,6 +465,10 @@ Curl_sec_login(struct connectdata *conn)
     }
     conn->mech = *m;
     conn->sec_complete = 1;
+    if (conn->data_prot != prot_clear) {
+      conn->recv = sec_read;
+      conn->send = _sec_send;
+    }
     conn->command_prot = prot_safe;
     /* Set the requested protection level */
     /* BLOCKING */

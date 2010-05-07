@@ -34,14 +34,6 @@ void Curl_polarssl_close_all(struct SessionHandle *data);
  /* close a SSL connection */
 void Curl_polarssl_close(struct connectdata *conn, int sockindex);
 
-/* return number of sent (non-SSL) bytes */
-ssize_t Curl_polarssl_send(struct connectdata *conn, int sockindex,
-                       const void *mem, size_t len, int *curlcode);
-ssize_t Curl_polarssl_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       int *curlcode);
 void Curl_polarssl_session_free(void *ptr);
 size_t Curl_polarssl_version(char *buffer, size_t size);
 int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
@@ -57,8 +49,6 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
 #define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
-#define curlssl_send Curl_polarssl_send
-#define curlssl_recv Curl_polarssl_recv
 #define curlssl_version Curl_polarssl_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)

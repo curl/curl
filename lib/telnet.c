@@ -1209,7 +1209,6 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   struct pollfd pfd[2];
   int poll_cnt;
 #endif
-  int ret;
   ssize_t nread;
   struct timeval now;
   bool keepon = TRUE;
@@ -1383,14 +1382,13 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        ret = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
-        /* returned sub-zero, this would've blocked. Loop again */
-        if(ret < 0)
+        code = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        /* read would've blocked. Loop again */
+        if(code == CURLE_AGAIN)
           break;
         /* returned not-zero, this an error */
-        else if(ret) {
+        else if(code) {
           keepon = FALSE;
-          code = (CURLcode)ret;
           break;
         }
         /* returned zero but actually received 0 or less here,
@@ -1472,14 +1470,13 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        ret = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
-        /* returned sub-zero, this would've blocked. Loop again */
-        if(ret < 0)
+        code = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        /* read would've blocked. Loop again */
+        if(code == CURLE_AGAIN)
           break;
         /* returned not-zero, this an error */
-        else if(ret) {
+        else if(code) {
           keepon = FALSE;
-          code = (CURLcode)ret;
           break;
         }
         /* returned zero but actually received 0 or less here,

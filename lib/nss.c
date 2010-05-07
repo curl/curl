@@ -1010,6 +1010,9 @@ static bool handle_cc_error(PRInt32 err, struct SessionHandle *data)
   }
 }
 
+static Curl_recv nss_recv;
+static Curl_send nss_send;
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
@@ -1321,6 +1324,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
   connssl->state = ssl_connection_complete;
+  conn->recv = nss_recv;
+  conn->send = nss_send;
 
   display_conn_info(conn, connssl->handle);
 
@@ -1373,12 +1378,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   return curlerr;
 }
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-int Curl_nss_send(struct connectdata *conn,  /* connection data */
-                  int sockindex,             /* socketindex */
-                  const void *mem,           /* send this data */
-                  size_t len,                /* amount to write */
-                  int *curlcode)
+static ssize_t nss_send(struct connectdata *conn,  /* connection data */
+                        int sockindex,             /* socketindex */
+                        const void *mem,           /* send this data */
+                        size_t len,                /* amount to write */
+                        CURLcode *curlcode)
 {
   int rc;
 
@@ -1387,7 +1391,7 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
   if(rc < 0) {
     PRInt32 err = PR_GetError();
     if(err == PR_WOULD_BLOCK_ERROR)
-      *curlcode = -1; /* EWOULDBLOCK */
+      *curlcode = CURLE_AGAIN;
     else if(handle_cc_error(err, conn->data))
       *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
@@ -1399,12 +1403,11 @@ int Curl_nss_send(struct connectdata *conn,  /* connection data */
   return rc; /* number of bytes */
 }
 
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
-                      int num,                   /* socketindex */
-                      char *buf,                 /* store read data here */
-                      size_t buffersize,         /* max amount to read */
-                      int *curlcode)
+static ssize_t nss_recv(struct connectdata * conn, /* connection data */
+                        int num,                   /* socketindex */
+                        char *buf,                 /* store read data here */
+                        size_t buffersize,         /* max amount to read */
+                        CURLcode *curlcode)
 {
   ssize_t nread;
 
@@ -1414,7 +1417,7 @@ ssize_t Curl_nss_recv(struct connectdata * conn, /* connection data */
     PRInt32 err = PR_GetError();
 
     if(err == PR_WOULD_BLOCK_ERROR)
-      *curlcode = -1; /* EWOULDBLOCK */
+      *curlcode = CURLE_AGAIN;
     else if(handle_cc_error(err, conn->data))
       *curlcode = CURLE_SSL_CERTPROBLEM;
     else {

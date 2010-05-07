@@ -242,6 +242,9 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
 }
 
 
+static Curl_recv qsossl_recv;
+static Curl_send qsossl_send;
+
 CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
 
 {
@@ -263,8 +266,11 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
       connssl->state = ssl_connection_none;
     }
   }
-  if (rc == CURLE_OK)
+  if (rc == CURLE_OK) {
     connssl->state = ssl_connection_complete;
+    conn->recv = qsossl_recv;
+    conn->send = qsossl_send;
+  }
 
   return rc;
 }
@@ -374,9 +380,8 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
 }
 
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex,
-                         const void * mem, size_t len, int * curlcode)
+static ssize_t qsossl_send(struct connectdata * conn, int sockindex,
+                           const void * mem, size_t len, CURLcode * curlcode)
 
 {
   /* SSL_Write() is said to return 'int' while write() and send() returns
@@ -392,14 +397,14 @@ ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex,
       /* The operation did not complete; the same SSL I/O function
          should be called again later. This is basicly an EWOULDBLOCK
          equivalent. */
-      *curlcode = -1; /* EWOULDBLOCK */
+      *curlcode = CURLE_AGAIN;
       return -1;
 
     case SSL_ERROR_IO:
       switch (errno) {
       case EWOULDBLOCK:
       case EINTR:
-        *curlcode = -1; /* EWOULDBLOCK */
+        *curlcode = CURLE_AGAIN;
         return -1;
         }
 
@@ -419,9 +424,8 @@ ssize_t Curl_qsossl_send(struct connectdata * conn, int sockindex,
 }
 
 
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_qsossl_recv(struct connectdata * conn, int num, char * buf,
-                         size_t buffersize, int * curlcode)
+static ssize_t qsossl_recv(struct connectdata * conn, int num, char * buf,
+                           size_t buffersize, CURLcode * curlcode)
 
 {
   char error_buffer[120]; /* OpenSSL documents that this must be at
@@ -440,13 +444,13 @@ ssize_t Curl_qsossl_recv(struct connectdata * conn, int num, char * buf,
 
     case SSL_ERROR_BAD_STATE:
       /* there's data pending, re-invoke SSL_Read(). */
-      *curlcode = -1; /* EWOULDBLOCK */
+      *curlcode = CURLE_AGAIN;
       return -1;
 
     case SSL_ERROR_IO:
       switch (errno) {
       case EWOULDBLOCK:
-        *curlcode = -1; /* EWOULDBLOCK */
+        *curlcode = CURLE_AGAIN;
         return -1;
         }
 

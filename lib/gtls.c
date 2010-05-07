@@ -419,6 +419,9 @@ gtls_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static Curl_recv gtls_recv;
+static Curl_send gtls_send;
+
 static CURLcode
 gtls_connect_step3(struct connectdata *conn,
                    int sockindex)
@@ -630,6 +633,8 @@ gtls_connect_step3(struct connectdata *conn,
   infof(data, "\t MAC: %s\n", ptr);
 
   conn->ssl[sockindex].state = ssl_connection_complete;
+  conn->recv = gtls_recv;
+  conn->send = gtls_send;
 
   {
     /* we always unconditionally get the session id here, as even if we
@@ -730,18 +735,17 @@ Curl_gtls_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_gtls_send(struct connectdata *conn,
-                       int sockindex,
-                       const void *mem,
-                       size_t len,
-                       int *curlcode)
+static ssize_t gtls_send(struct connectdata *conn,
+                         int sockindex,
+                         const void *mem,
+                         size_t len,
+                         CURLcode *curlcode)
 {
   ssize_t rc = gnutls_record_send(conn->ssl[sockindex].session, mem, len);
 
   if(rc < 0 ) {
     *curlcode = (rc == GNUTLS_E_AGAIN)
-      ? /* EWOULDBLOCK */ -1
+      ? CURLE_AGAIN
       : CURLE_SEND_ERROR;
 
     rc = -1;
@@ -843,18 +847,17 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       int *curlcode)
+static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
+                         int num,                  /* socketindex */
+                         char *buf,                /* store read data here */
+                         size_t buffersize,        /* max amount to read */
+                         CURLcode *curlcode)
 {
   ssize_t ret;
 
   ret = gnutls_record_recv(conn->ssl[num].session, buf, buffersize);
   if((ret == GNUTLS_E_AGAIN) || (ret == GNUTLS_E_INTERRUPTED)) {
-    *curlcode = -1;
+    *curlcode = CURLE_AGAIN;
     return -1;
   }
 
@@ -866,7 +869,7 @@ ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
       /* handshake() writes error message on its own */
       *curlcode = rc;
     else
-      *curlcode = -1; /* then return as if this was a wouldblock */
+      *curlcode = CURLE_AGAIN; /* then return as if this was a wouldblock */
     return -1;
   }
 

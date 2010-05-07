@@ -4760,6 +4760,9 @@ static CURLcode create_conn(struct SessionHandle *data,
     return result;
   }
 
+  conn->recv = Curl_recv_plain;
+  conn->send = Curl_send_plain;
+
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/

@@ -38,14 +38,6 @@ void Curl_gtls_close_all(struct SessionHandle *data);
  /* close a SSL connection */
 void Curl_gtls_close(struct connectdata *conn, int sockindex);
 
-/* for documentation see Curl_ssl_send() in sslgen.h */
-ssize_t Curl_gtls_send(struct connectdata *conn, int sockindex,
-                       const void *mem, size_t len, int *curlcode);
-
-/* for documentation see Curl_ssl_recv() in sslgen.h */
-ssize_t Curl_gtls_recv(struct connectdata *conn, int num, char *buf,
-                       size_t buffersize, int *curlcode);
-
 void Curl_gtls_session_free(void *ptr);
 size_t Curl_gtls_version(char *buffer, size_t size);
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
@@ -63,8 +55,6 @@ int Curl_gtls_seed(struct SessionHandle *data);
 #define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
 #define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
-#define curlssl_send Curl_gtls_send
-#define curlssl_recv Curl_gtls_recv
 #define curlssl_version Curl_gtls_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)

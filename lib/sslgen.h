@@ -45,28 +45,6 @@ CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine);
 CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data);
 struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data);
 
-/* If the write would block (EWOULDBLOCK) or fail, we we return -1.
- * The error or -1 (for EWOULDBLOCK) is then stored in *curlcode.
- * Otherwise we return the count of (non-SSL) bytes transfered.
- */
-ssize_t Curl_ssl_send(struct connectdata *conn, /* connection data */
-                      int sockindex,            /* socketindex */
-                      const void *mem,          /* data to write */
-                      size_t len,               /* max amount to write */
-                      int *curlcode);           /* error to return,
-                                                   -1 means EWOULDBLOCK */
-
-/* If the read would block (EWOULDBLOCK) or fail, we we return -1.
- * The error or -1 (for EWOULDBLOCK) is then stored in *curlcode.
- * Otherwise we return the count of (non-SSL) bytes transfered.
- */
-ssize_t Curl_ssl_recv(struct connectdata *conn, /* connection data */
-                      int sockindex,            /* socketindex */
-                      char *mem,                /* store read data here */
-                      size_t len,               /* max amount to read */
-                      int *curlcode);           /* error to return,
-                                                   -1 means EWOULDBLOCK */
-
 /* init the SSL session ID cache */
 CURLcode Curl_ssl_initsessions(struct SessionHandle *, long);
 size_t Curl_ssl_version(char *buffer, size_t size);

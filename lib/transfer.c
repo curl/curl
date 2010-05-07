@@ -376,12 +376,11 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   *done = FALSE;
 
   /* This is where we loop until we have read everything there is to
-     read or we get a EWOULDBLOCK */
+     read or we get a CURLE_AGAIN */
   do {
     size_t buffersize = data->set.buffer_size?
       data->set.buffer_size : BUFSIZE;
     size_t bytestoread = buffersize;
-    int readrc;
 
     if(k->size != -1 && !k->header) {
       /* make sure we don't read "too much" if we can help it since we
@@ -394,14 +393,11 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
     if(bytestoread) {
       /* receive data from the network! */
-      readrc = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
+      result = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
 
-      /* subzero, this would've blocked */
-      if(0 > readrc)
+      /* read would've blocked */
+      if(CURLE_AGAIN == result)
         break; /* get out of loop */
-
-      /* get the CURLcode from the int */
-      result = (CURLcode)readrc;
 
       if(result>0)
         return result;

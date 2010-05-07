@@ -650,6 +650,20 @@ struct Curl_handler {
   long protocol;      /* PROT_* flags concerning the protocol set */
 };
 
+/* return the count of bytes sent, or -1 on error */
+typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            const void *buf,          /* data to write */
+                            size_t len,               /* max amount to write */
+                            CURLcode *err);           /* error to return */
+
+/* return the count of bytes read, or -1 on error */
+typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            char *buf,                /* store data here */
+                            size_t len,               /* max amount to read */
+                            CURLcode *err);           /* error to return */
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -745,6 +759,9 @@ struct connectdata {
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
+
+  Curl_recv *recv;
+  Curl_send *send;
 
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;

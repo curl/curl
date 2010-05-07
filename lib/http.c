@@ -1283,7 +1283,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   struct SessionHandle *data=conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
-  int res;
   long timeout =
     data->set.timeout?data->set.timeout:PROXY_TIMEOUT; /* in milliseconds */
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -1467,11 +1466,10 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           break;
         default:
           DEBUGASSERT(ptr+BUFSIZE-nread <= data->state.buffer+BUFSIZE+1);
-          res = Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
-          if(res< 0)
-            /* EWOULDBLOCK */
+          result = Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
+          if(result==CURLE_AGAIN)
             continue; /* go loop yourself */
-          else if(res)
+          else if(result)
             keepon = FALSE;
           else if(gotbytes <= 0) {
             keepon = FALSE;

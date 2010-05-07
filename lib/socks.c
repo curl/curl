@@ -77,7 +77,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
     conntime = Curl_tvdiff(tvnow, conn->created);
     if(conntime > conn_timeout) {
       /* we already got the timeout */
-      result = ~CURLE_OK;
+      result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
     if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD,
@@ -86,7 +86,9 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
       break;
     }
     result = Curl_read_plain(sockfd, buf, buffersize, &nread);
-    if(result)
+    if(CURLE_AGAIN == result)
+      continue;
+    else if(result)
       break;
 
     if(buffersize == nread) {
