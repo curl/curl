@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel Stenberg (7 May 2010)
+- Howard Chu split the I/O handling functions into private handlers.
+    
+  Howard Chu brought the bulk work of this patch that properly moves out the
+  sending and recving of data to the parts of the code that are properly
+  responsible for the various ways of doing so.
+  
+  Daniel Stenberg assisted with polishing a few bits and fixed some minor
+  flaws in the original patch.
+  
+  Another upside of this patch is that we now abuse CURLcodes less with the
+  "magic" -1 return codes and instead use CURLE_AGAIN more consistently.
+
 Daniel Stenberg (5 May 2010)
 - Hoi-Ho Chan introduced support for using the PolarSSL library. You control
   this with the new configure option --with-polarssl.
