@@ -575,6 +575,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       /* we are connected, awesome! */
       conn->bits.tcpconnect = TRUE;
       *connected = TRUE;
+      Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+      Curl_verboseconnect(conn);
       return CURLE_OK;
     }
     /* nope, not connected for real */

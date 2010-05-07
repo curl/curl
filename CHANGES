@@ -7,6 +7,18 @@
                                   Changelog
 
 Daniel Stenberg (7 May 2010)
+- Dirk Manske reported a regression. When connecting with the multi interface,
+  there were situations where libcurl wouldn't store connect time correctly as
+  it used to (and is documented to) do.
+
+  Using his fine sample program we could repeat it, and I wrote up test case
+  573 using that code. The problem does not easily show itself using the local
+  test suite though.
+
+  The fix, also as suggested by Dirk, is a bit on the ugly side as it adds yet
+  another call to Curl_verboseconnect() and setting the TIMER_CONNECT time.
+  That situation is subject for some closer inspection in the future.
+
 - Howard Chu split the I/O handling functions into private handlers.
     
   Howard Chu brought the bulk work of this patch that properly moves out the

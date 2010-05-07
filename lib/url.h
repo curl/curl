@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,5 +85,12 @@ void Curl_reset_reqproto(struct connectdata *conn);
 #define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi service */
 
 CURLcode Curl_connected_proxy(struct connectdata *conn);
+
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#define Curl_verboseconnect(x)  do { } while (0)
+#else
+void Curl_verboseconnect(struct connectdata *conn);
+#endif
+
 
 #endif

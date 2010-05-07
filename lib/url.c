@@ -150,10 +150,6 @@ static long ConnectionKillOne(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define verboseconnect(x)  do { } while (0)
-#endif
-
 /*
  * Protocol table.
  */
@@ -3178,7 +3174,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
  * verboseconnect() displays verbose information after a connect
  */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void verboseconnect(struct connectdata *conn)
+void Curl_verboseconnect(struct connectdata *conn)
 {
   if(conn->data->set.verbose)
     infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
@@ -3274,8 +3270,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   if(!conn->bits.tcpconnect) {
 
     Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
-
-    verboseconnect(conn);
+    Curl_verboseconnect(conn);
   }
 
   if(!conn->bits.protoconnstart) {
@@ -4997,7 +4992,7 @@ static CURLcode setup_conn(struct connectdata *conn,
       Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
       conn->bits.tcpconnect = TRUE;
       *protocol_done = TRUE;
-      verboseconnect(conn);
+      Curl_verboseconnect(conn);
     }
     /* Stop the loop now */
     break;

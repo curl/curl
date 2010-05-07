@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o MSVC makefiles now use ws2_32.lib instead of wsock32.lib
  o -O crash on windows
  o SSL handshake timeout underflow in libcurl-NSS
+ o multi interface missed storing connection time
 
 This release includes the following known bugs:
 
@@ -33,6 +34,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
- Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu
+ Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske
 
         Thanks! (and sorry if I forgot to mention someone)
