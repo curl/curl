@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,9 +33,15 @@ die(){
 findtool(){
   file="$1"
 
-  if test -f "$file"; then
-    echo "$file"
-    return
+  if { echo $file | grep "/" >/dev/null 2>&1; } then
+    # we only check for the explicit file name if the file is given
+    # including a slash. Use ./ for current dir. Previously this would
+    # otherwise always cause findtool to search the local dir first, which
+    # is wrong.
+    if test -f "$file"; then
+      echo "$file"
+      return
+    fi
   fi
 
   old_IFS=$IFS; IFS=':'
