@@ -1785,10 +1785,6 @@ if test "$OPENSSL_ENABLED" != "1"; then
         AC_MSG_NOTICE([Added $polarssllib to LD_LIBRARY_PATH])
       fi
 
-      AC_CHECK_LIB(polarssl, x509parse_crl,
-                   [AC_DEFINE(HAVE_POLARSSL_GPL, 1, [if GPL version of PolarSSL is detected])
-                    AC_SUBST(HAVE_POLARSSL_GPL, [1])
-                   ])
     fi
 
   fi dnl PolarSSL not disabled

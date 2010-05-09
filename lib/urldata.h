@@ -249,9 +249,7 @@ struct ssl_connect_data {
   int server_fd;
   x509_cert cacert;
   x509_cert clicert;
-#if defined(HAVE_POLARSSL_GPL)
   x509_crl crl;
-#endif
   rsa_context rsa;
 #endif /* USE_POLARSSL */
 #ifdef USE_NSS

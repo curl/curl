@@ -97,9 +97,7 @@ Curl_polarssl_connect(struct connectdata *conn,
 #endif
   void *old_session = NULL;
   size_t old_session_size = 0;
-#if defined(HAVE_POLARSSL_GPL)
   char buffer[1024];
-#endif
 
   if(conn->ssl[sockindex].state == ssl_connection_complete)
     return CURLE_OK;
@@ -134,11 +132,6 @@ Curl_polarssl_connect(struct connectdata *conn,
   memset(&conn->ssl[sockindex].clicert, 0, sizeof(x509_cert));
 
   if(data->set.str[STRING_CERT]) {
-#if !defined(HAVE_POLARSSL_GPL)
-    /* FIXME: PolarSSL has a bug where we need to import it twice */
-    ret = x509parse_crtfile(&conn->ssl[sockindex].clicert,
-                            data->set.str[STRING_CERT]);
-#endif
     ret = x509parse_crtfile(&conn->ssl[sockindex].clicert,
                             data->set.str[STRING_CERT]);
 
@@ -162,7 +155,6 @@ Curl_polarssl_connect(struct connectdata *conn,
     }
   }
 
-#if defined(HAVE_POLARSSL_GPL)
   /* Load the CRL */
   memset(&conn->ssl[sockindex].crl, 0, sizeof(x509_crl));
 
@@ -177,7 +169,6 @@ Curl_polarssl_connect(struct connectdata *conn,
     }
   }
 
-#endif
   infof(data, "PolarSSL: Connected to %s:%d\n",
         conn->host.name, conn->remote_port);
 
@@ -208,13 +199,9 @@ Curl_polarssl_connect(struct connectdata *conn,
                   &conn->ssl[sockindex].ssn);
 
   ssl_set_ca_chain(&conn->ssl[sockindex].ssl,
-#if defined(HAVE_POLARSSL_GPL)
                    &conn->ssl[sockindex].cacert,
                    &conn->ssl[sockindex].crl,
                    conn->host.name);
-#else
-                   &conn->ssl[sockindex].cacert, conn->host.name);
-#endif
 
   ssl_set_own_cert(&conn->ssl[sockindex].ssl,
                    &conn->ssl[sockindex].clicert, &conn->ssl[sockindex].rsa);
@@ -288,16 +275,10 @@ Curl_polarssl_connect(struct connectdata *conn,
 
   if(conn->ssl[sockindex].ssl.peer_cert) {
     /* If the session was resumed, there will be no peer certs */
-#if !defined(HAVE_POLARSSL_GPL)
-    char *buffer = x509parse_cert_info("* ", conn->ssl[sockindex].ssl.peer_cert);
-
-    if(buffer)
-#else
     memset(buffer, 0, sizeof(buffer));
 
     if(x509parse_cert_info(buffer, sizeof(buffer), (char *)"* ",
                            conn->ssl[sockindex].ssl.peer_cert) != -1)
-#endif
       infof(data, "Dumping cert info:\n%s\n", buffer);
   }
 
@@ -354,9 +335,7 @@ void Curl_polarssl_close(struct connectdata *conn, int sockindex)
   rsa_free(&conn->ssl[sockindex].rsa);
   x509_free(&conn->ssl[sockindex].clicert);
   x509_free(&conn->ssl[sockindex].cacert);
-#if defined(HAVE_POLARSSL_GPL)
   x509_crl_free(&conn->ssl[sockindex].crl);
-#endif
   ssl_free(&conn->ssl[sockindex].ssl);
 }
 
