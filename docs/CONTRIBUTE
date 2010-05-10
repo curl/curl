@@ -29,9 +29,11 @@
  2.11 Test Cases
 
  3. Pushing Out Your Changes
+ 3.1 Write Access to git Repository
  3.2 How To Make a Patch with git
  3.3 How To Make a Patch without git
  3.4 How to get your changes into the main sources
+ 3.5 Write good commit messages
 
 ==============================================================================
 
@@ -114,7 +116,7 @@
 
 2.4 Line Lengths
 
- We try to keep source lines shorter than 80 columns.
+ We write source lines shorter than 80 columns.
 
 2.5 General Style
 
@@ -197,7 +199,8 @@
      git commit [file]
 
  As usual, group your commits so that you commit all changes that at once that
- constitutes a logical change.
+ constitutes a logical change. See also section "3.5 Write good commit
+ messages".
 
  Once you have done all your commits and you're happy with what you see, you
  can make patches out of your changes that are suitable for mailing:
@@ -255,3 +258,22 @@
  5. If you've followed the above mentioned paragraphs and your patch still
     hasn't been incorporated after some weeks, consider resubmitting it to the
     list.
+
+3.5 Write good commit messages
+
+  A short guide to how to do fine commit messages in the curl project.
+
+  ---- start ----
+  [area]: [short line describing the main effect]
+
+  [separate the above single line from the rest with an empty line]
+
+  [full description, no wider than 65 columns that describe as much as
+  possible as to why this change is made, and possibly what things
+  it fixes and everything else that is related]
+   ---- stop ----
+
+  Don't forget to use commit --author="" if you commit someone else's work,
+  and make sure that you have your own user and email setup correctly in git
+  before you commit
+
