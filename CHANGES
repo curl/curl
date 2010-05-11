@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Kamil Dudka (11 May 2010)
+- CRL support in libcurl-NSS has been completely broken. Now it works. Original
+  bug report: https://bugzilla.redhat.com/581926
+
 Daniel Stenberg (7 May 2010)
 - Dirk Manske reported a regression. When connecting with the multi interface,
   there were situations where libcurl wouldn't store connect time correctly as

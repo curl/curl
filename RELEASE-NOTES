@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o -O crash on windows
  o SSL handshake timeout underflow in libcurl-NSS
  o multi interface missed storing connection time
+ o broken CRL support in libcurl-NSS
 
 This release includes the following known bugs:
 
