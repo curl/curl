@@ -421,6 +421,7 @@ static SECStatus nss_cache_crl(SECItem *crlDER)
   if(crl) {
     /* CRL already cached */
     SEC_DestroyCrl(crl);
+    SECITEM_FreeItem(crlDER, PR_FALSE);
     return SECSuccess;
   }
 
@@ -429,6 +430,7 @@ static SECStatus nss_cache_crl(SECItem *crlDER)
   if(SECSuccess != CERT_CacheCRL(db, crlDER)) {
     /* unable to cache CRL */
     PR_Unlock(nss_crllock);
+    SECITEM_FreeItem(crlDER, PR_FALSE);
     return SECFailure;
   }
 
@@ -438,67 +440,63 @@ static SECStatus nss_cache_crl(SECItem *crlDER)
   return SECSuccess;
 }
 
-static int nss_load_crl(const char* crlfilename, PRBool ascii)
+static SECStatus nss_load_crl(const char* crlfilename)
 {
   PRFileDesc *infile;
-  PRStatus    prstat;
   PRFileInfo  info;
-  PRInt32     nb;
-  int rv;
-  SECItem crlDER;
+  SECItem filedata = { 0, NULL, 0 };
+  SECItem crlDER = { 0, NULL, 0 };
+  char *body;
 
-  infile = PR_Open(crlfilename,PR_RDONLY,0);
-  if (!infile) {
-    return 0;
-  }
-  crlDER.data = NULL;
-  prstat = PR_GetOpenFileInfo(infile,&info);
-  if (prstat!=PR_SUCCESS)
-    return 0;
-  if (ascii) {
-    SECItem filedata;
-    char *asc,*body;
-    filedata.data = NULL;
-    if (!SECITEM_AllocItem(NULL,&filedata,info.size))
-      return 0;
-    nb = PR_Read(infile,filedata.data,info.size);
-    if (nb!=info.size)
-      return 0;
-    asc = (char*)filedata.data;
-    if (!asc)
-      return 0;
+  infile = PR_Open(crlfilename, PR_RDONLY, 0);
+  if(!infile)
+    return SECFailure;
 
-    body=strstr(asc,"-----BEGIN");
-    if (body != NULL) {
-      char *trailer=NULL;
-      asc = body;
-      body = PORT_Strchr(asc,'\n');
-      if (!body)
-        body = PORT_Strchr(asc,'\r');
-      if (body)
-        trailer = strstr(++body,"-----END");
-      if (trailer!=NULL)
-        *trailer='\0';
-      else
-        return 0;
-    }
-    else {
-      body = asc;
-    }
-    rv = ATOB_ConvertAsciiToItem(&crlDER,body);
-    PORT_Free(filedata.data);
-    if (rv)
-      return 0;
-  }
-  else {
-    if (!SECITEM_AllocItem(NULL,&crlDER,info.size))
-      return 0;
-    nb = PR_Read(infile,crlDER.data,info.size);
-    if (nb!=info.size)
-      return 0;
-  }
+  if(PR_SUCCESS != PR_GetOpenFileInfo(infile, &info))
+    goto fail;
 
-  return (SECSuccess == nss_cache_crl(&crlDER));
+  if(!SECITEM_AllocItem(NULL, &filedata, info.size + /* zero ended */ 1))
+    goto fail;
+
+  if(info.size != PR_Read(infile, filedata.data, info.size))
+    goto fail;
+
+  /* place a trailing zero right after the visible data */
+  body = (char*)filedata.data;
+  body[--filedata.len] = '\0';
+
+  body = strstr(body, "-----BEGIN");
+  if(body) {
+    /* assume ASCII */
+    char *trailer;
+    char *begin = PORT_Strchr(body, '\n');
+    if(!begin)
+      begin = PORT_Strchr(body, '\r');
+    if(!begin)
+      goto fail;
+
+    trailer = strstr(++begin, "-----END");
+    if(!trailer)
+      goto fail;
+
+    /* retrieve DER from ASCII */
+    *trailer = '\0';
+    if(ATOB_ConvertAsciiToItem(&crlDER, begin))
+      goto fail;
+
+    SECITEM_FreeItem(&filedata, PR_FALSE);
+  }
+  else
+    /* assume DER */
+    crlDER = filedata;
+
+  PR_Close(infile);
+  return nss_cache_crl(&crlDER);
+
+fail:
+  PR_Close(infile);
+  SECITEM_FreeItem(&filedata, PR_FALSE);
+  return SECFailure;
 }
 
 static int nss_load_key(struct connectdata *conn, int sockindex,
@@ -1265,8 +1263,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         data->set.ssl.CApath ? data->set.ssl.CApath : "none");
 
   if (data->set.ssl.CRLfile) {
-    int rc = nss_load_crl(data->set.ssl.CRLfile, PR_FALSE);
-    if (!rc) {
+    if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {
       curlerr = CURLE_SSL_CRL_BADFILE;
       goto error;
     }
