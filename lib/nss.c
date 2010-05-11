@@ -63,6 +63,7 @@
 #include <secport.h>
 #include <certdb.h>
 #include <base64.h>
+#include <cert.h>
 
 #include "curl_memory.h"
 #include "rawstr.h"
@@ -79,6 +80,7 @@
 PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 
 PRLock * nss_initlock = NULL;
+PRLock * nss_crllock = NULL;
 
 volatile int initialized = 0;
 
@@ -411,6 +413,31 @@ static int nss_load_cert(struct ssl_connect_data *ssl,
   return 1;
 }
 
+/* add given CRL to cache if it is not already there */
+static SECStatus nss_cache_crl(SECItem *crlDER)
+{
+  CERTCertDBHandle *db = CERT_GetDefaultCertDB();
+  CERTSignedCrl *crl = SEC_FindCrlByDERCert(db, crlDER, 0);
+  if(crl) {
+    /* CRL already cached */
+    SEC_DestroyCrl(crl);
+    return SECSuccess;
+  }
+
+  /* acquire lock before call of CERT_CacheCRL() */
+  PR_Lock(nss_crllock);
+  if(SECSuccess != CERT_CacheCRL(db, crlDER)) {
+    /* unable to cache CRL */
+    PR_Unlock(nss_crllock);
+    return SECFailure;
+  }
+
+  /* we need to clear session cache, so that the CRL could take effect */
+  SSL_ClearSessionCache();
+  PR_Unlock(nss_crllock);
+  return SECSuccess;
+}
+
 static int nss_load_crl(const char* crlfilename, PRBool ascii)
 {
   PRFileDesc *infile;
@@ -419,8 +446,6 @@ static int nss_load_crl(const char* crlfilename, PRBool ascii)
   PRInt32     nb;
   int rv;
   SECItem crlDER;
-  CERTSignedCrl *crl=NULL;
-  PK11SlotInfo *slot=NULL;
 
   infile = PR_Open(crlfilename,PR_RDONLY,0);
   if (!infile) {
@@ -473,16 +498,7 @@ static int nss_load_crl(const char* crlfilename, PRBool ascii)
       return 0;
   }
 
-  slot = PK11_GetInternalKeySlot();
-  crl  = PK11_ImportCRL(slot,&crlDER,
-                        NULL,SEC_CRL_TYPE,
-                        NULL,CRL_IMPORT_DEFAULT_OPTIONS,
-                        NULL,(CRL_DECODE_DEFAULT_OPTIONS|
-                              CRL_DECODE_DONT_COPY_DER));
-  if (slot) PK11_FreeSlot(slot);
-  if (!crl) return 0;
-  SEC_DestroyCrl(crl);
-  return 1;
+  return (SECSuccess == nss_cache_crl(&crlDER));
 }
 
 static int nss_load_key(struct connectdata *conn, int sockindex,
@@ -889,6 +905,7 @@ int Curl_nss_init(void)
   if (nss_initlock == NULL) {
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 256);
     nss_initlock = PR_NewLock();
+    nss_crllock = PR_NewLock();
   }
 
   /* We will actually initialize NSS later */
@@ -918,6 +935,7 @@ void Curl_nss_cleanup(void)
   PR_Unlock(nss_initlock);
 
   PR_DestroyLock(nss_initlock);
+  PR_DestroyLock(nss_crllock);
   nss_initlock = NULL;
 
   initialized = 0;
