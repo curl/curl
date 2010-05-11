@@ -1339,8 +1339,8 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
   connssl->state = ssl_connection_complete;
-  conn->recv = nss_recv;
-  conn->send = nss_send;
+  conn->recv[sockindex] = nss_recv;
+  conn->send[sockindex] = nss_send;
 
   display_conn_info(conn, connssl->handle);
 

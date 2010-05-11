@@ -2440,8 +2440,8 @@ ossl_connect_common(struct connectdata *conn,
 
   if(ssl_connect_done==connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv = ossl_recv;
-    conn->send = ossl_send;
+    conn->recv[sockindex] = ossl_recv;
+    conn->send[sockindex] = ossl_send;
     *done = TRUE;
   }
   else

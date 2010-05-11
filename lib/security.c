@@ -466,8 +466,10 @@ Curl_sec_login(struct connectdata *conn)
     conn->mech = *m;
     conn->sec_complete = 1;
     if (conn->data_prot != prot_clear) {
-      conn->recv = sec_read;
-      conn->send = _sec_send;
+      conn->recv[FIRSTSOCKET] = sec_read;
+      conn->send[FIRSTSOCKET] = _sec_send;
+      conn->recv[SECONDARYSOCKET] = sec_read;
+      conn->send[SECONDARYSOCKET] = _sec_send;
     }
     conn->command_prot = prot_safe;
     /* Set the requested protection level */

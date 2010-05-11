@@ -633,8 +633,8 @@ gtls_connect_step3(struct connectdata *conn,
   infof(data, "\t MAC: %s\n", ptr);
 
   conn->ssl[sockindex].state = ssl_connection_complete;
-  conn->recv = gtls_recv;
-  conn->send = gtls_send;
+  conn->recv[sockindex] = gtls_recv;
+  conn->send[sockindex] = gtls_send;
 
   {
     /* we always unconditionally get the session id here, as even if we

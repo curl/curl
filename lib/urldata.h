@@ -760,8 +760,8 @@ struct connectdata {
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
 
-  Curl_recv *recv;
-  Curl_send *send;
+  Curl_recv *recv[2];
+  Curl_send *send[2];
 
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;

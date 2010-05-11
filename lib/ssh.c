@@ -2493,11 +2493,11 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     return result;
 
   if(conn->protocol & PROT_SCP) {
-    conn->recv = scp_recv;
-    conn->send = scp_send;
+    conn->recv[FIRSTSOCKET] = scp_recv;
+    conn->send[FIRSTSOCKET] = scp_send;
   } else {
-    conn->recv = sftp_recv;
-    conn->send = sftp_send;
+    conn->recv[FIRSTSOCKET] = sftp_recv;
+    conn->send[FIRSTSOCKET] = sftp_send;
   }
   ssh = &conn->proto.sshc;
 

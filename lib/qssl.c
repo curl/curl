@@ -268,8 +268,8 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
   }
   if (rc == CURLE_OK) {
     connssl->state = ssl_connection_complete;
-    conn->recv = qsossl_recv;
-    conn->send = qsossl_send;
+    conn->recv[sockindex] = qsossl_recv;
+    conn->send[sockindex] = qsossl_send;
   }
 
   return rc;

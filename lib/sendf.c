@@ -251,7 +251,7 @@ CURLcode Curl_write(struct connectdata *conn,
   CURLcode curlcode = CURLE_OK;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  bytes_written = conn->send(conn, num, mem, len, &curlcode);
+  bytes_written = conn->send[num](conn, num, mem, len, &curlcode);
 
   *written = bytes_written;
   if(-1 != bytes_written)
@@ -576,7 +576,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     buffertofill = buf;
   }
 
-  nread = conn->recv(conn, num, buffertofill, bytesfromsocket, &curlcode);
+  nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &curlcode);
   if(nread == -1)
     return curlcode;
 

@@ -302,8 +302,8 @@ Curl_polarssl_connect(struct connectdata *conn,
   }
 
   conn->ssl[sockindex].state = ssl_connection_complete;
-  conn->recv = polarssl_recv;
-  conn->send = polarssl_send;
+  conn->recv[sockindex] = polarssl_recv;
+  conn->send[sockindex] = polarssl_send;
 
   /* Save the current session data for possible re-use */
   {
