@@ -2,7 +2,7 @@
 #
 # Place the curl source (including this makefile) into external/curl/ in the
 # Android source tree.  Then build them with 'make curl' or just 'make libcurl'
-# from the Android root. Tested with Android 1.5
+# from the Android root. Tested with Android 1.5 and 2.1
 #
 # Note: you must first create a curl_config.h file by running configure in the
 # Android environment. The only way I've found to do this is tricky. Perform a
@@ -26,12 +26,15 @@
 #  PATH="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/bin:$PATH" \
 #  ./configure --host=arm-linux CC=arm-eabi-gcc \
 #  CPPFLAGS="-I $A/system/core/include ..." \
-#  CFLAGS="-fno-exceptions -Wno-multichar ..." \
+#  CFLAGS="-nostdlib -fno-exceptions -Wno-multichar ..." \
 #  LIB="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/lib/gcc/arm-eabi/X\
 #  /interwork/libgcc.a ..." \
 #
+# Finally, copy the file COPYING to NOTICE so that the curl license gets put
+# into the right place (see the note about this below).
+#
 # Dan Fandrich
-# September 2009
+# May 2010
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -63,6 +66,14 @@ LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
 
 LOCAL_MODULE:= libcurl
 
+# Copy the licence to a place where Android will find it.
+# Actually, this doesn't quite work because the build system searches
+# for NOTICE files before it gets to this point, so it will only be seen
+# on subsequent builds.
+ALL_PREBUILT += $(LOCAL_PATH)/NOTICE
+$(LOCAL_PATH)/NOTICE: $(LOCAL_PATH)/COPYING | $(ACP)
+	$(copy-file-to-target)
+
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -79,8 +90,8 @@ LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 
-# This will also need to include $(CURLX_ONES) in order to correctly build
-# a dynamic library
+# This will also need to include $(CURLX_ONES) in order to correctly link
+# against a dynamic library
 LOCAL_CFLAGS += $(common_CFLAGS)
 
 include $(BUILD_EXECUTABLE)
