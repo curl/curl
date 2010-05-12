@@ -2005,12 +2005,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/*
- * Curl_perform() is the internal high-level function that gets called by the
- * external curl_easy_perform() function. It inits, performs and cleans up a
- * single file transfer.
- */
-CURLcode Curl_perform(struct SessionHandle *data)
+static CURLcode Curl_do_perform(struct SessionHandle *data)
 {
   CURLcode res;
   CURLcode res2;
@@ -2045,6 +2040,15 @@ CURLcode Curl_perform(struct SessionHandle *data)
       res = Curl_do(&conn, &do_done);
 
       if(res == CURLE_OK) {
+        if(conn->data->set.wildcardmatch) {
+          if(conn->data->wildcard.state == CURLWC_DONE ||
+             conn->data->wildcard.state == CURLWC_SKIP) {
+            /* keep connection open for application to use the socket */
+            conn->bits.close = FALSE;
+            res = Curl_done(&conn, CURLE_OK, FALSE);
+            break;
+          }
+        }
         res = Transfer(conn); /* now fetch that URL please */
         if((res == CURLE_OK) || (res == CURLE_RECV_ERROR)) {
           bool retry = FALSE;
@@ -2158,6 +2162,39 @@ CURLcode Curl_perform(struct SessionHandle *data)
   if(!res && res2)
     res = res2;
 
+  return res;
+}
+
+/*
+ * Curl_perform() is the internal high-level function that gets called by the
+ * external curl_easy_perform() function. It inits, performs and cleans up a
+ * single file transfer.
+ */
+CURLcode Curl_perform(struct SessionHandle *data)
+{
+  CURLcode res;
+  if(!data->set.wildcardmatch)
+    return Curl_do_perform(data);
+
+  /* init main wildcard structures */
+  res = Curl_wildcard_init(&data->wildcard);
+  if(res)
+    return res;
+
+  res = Curl_do_perform(data);
+  if(res) {
+    Curl_wildcard_dtor(&data->wildcard);
+    return res;
+  }
+
+  /* wildcard loop */
+  while(!res && data->wildcard.state != CURLWC_DONE)
+    res = Curl_do_perform(data);
+
+  Curl_wildcard_dtor(&data->wildcard);
+
+  /* wildcard download finished or failed */
+  data->wildcard.state = CURLWC_INIT;
   return res;
 }
 

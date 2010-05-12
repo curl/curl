@@ -156,6 +156,7 @@
 #include "ssh.h"
 #include "http.h"
 #include "rtsp.h"
+#include "wildcard.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -1419,6 +1420,12 @@ struct UserDefined {
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
+  bool wildcardmatch; /* enable wildcard matching */
+  curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer starts */
+  curl_chunk_end_callback chunk_end; /* called after part transferring
+                                        stopped */
+  curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
+                                    to pattern (e.g. if WILDCARDMATCH is on) */
 };
 
 struct Names {
@@ -1460,6 +1467,7 @@ struct SessionHandle {
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
+  struct WildcardData wildcard; /* wildcard download state info */
   struct PureInfo info;        /* stats, reports and info data */
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   iconv_t outbound_cd;         /* for translating to the network encoding */

@@ -1,0 +1,79 @@
+<testcase>
+<info>
+<keywords>
+FTP
+multi
+wildcardmatch
+ftplistparser
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib575
+</tool>
+ <name>
+FTP wildcard download - dup_handle && multi interface
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
+</command>
+</client>
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^RETR.*
+^EPSV.*
+^CWD.*
+^PWD.*
+^TYPE.*
+</strip>
+<strippart>
+s/^USER.*/USER/
+s/^PASS.*/PASS/
+s/^LIST.*/LIST/
+s/^QUIT.*/QUIT/
+</strippart>
+<errorcode>
+0
+</errorcode>
+<protocol>
+USER
+PASS
+LIST
+LIST
+QUIT
+USER
+PASS
+LIST
+QUIT
+</protocol>
+<stdout mode="text">
+This file should have permissions 444
+This file should have permissions 666
+This file should have permissions 777
+This is content of file "file.txt"
+Some junk ;-) This file does not really exist.
+This file should have permissions 444
+This file should have permissions 666
+This file should have permissions 777
+This is content of file "file.txt"
+Some junk ;-) This file does not really exist.
+This file should have permissions 444
+This file should have permissions 666
+This file should have permissions 777
+This is content of file "file.txt"
+Some junk ;-) This file does not really exist.
+</stdout>
+</verify>
+</testcase>

@@ -45,7 +45,7 @@ EPSV
 TYPE I
 SIZE 146
 RETR 146
-CWD /nowhere/anywhere
+CWD /
 EPSV
 SIZE 146
 RETR 146

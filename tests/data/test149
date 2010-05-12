@@ -34,7 +34,7 @@ CWD dir1
 EPSV
 TYPE I
 STOR 149
-CWD /nowhere/anywhere
+CWD /
 CWD dir2
 EPSV
 STOR 149

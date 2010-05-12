@@ -218,6 +218,16 @@ return code is only returned from \fIcurl_easy_recv(3)\fP and
 Failed to load CRL file (Added in 7.19.0)
 .IP "CURLE_SSL_ISSUER_ERROR (83)"
 Issuer check failed (Added in 7.19.0)
+.IP "CURLE_FTP_PRET_FAILED (84)"
+PRET command failed
+.IP "CURLE_RTSP_CSEQ_ERROR (85)"
+Mismatch of RTSP CSeq numbers.
+.IP "CURLE_RTSP_SESSION_ERROR (86)"
+Mismatch of RTSP Session Identifiers.
+.IP "CURLE_FTP_BAD_FILE_LIST (87)"
+Unable to parse FTP file list (during FTP wildcard downloading).
+.IP "CURLE_CHUNK_FAILED (88)"
+Chunk callback reported error.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.

@@ -79,6 +79,17 @@ typedef enum {
   FTP_LAST  /* never used */
 } ftpstate;
 
+struct ftp_parselist_data; /* defined later in ftplistparser.c */
+
+struct ftp_wc_tmpdata {
+  struct ftp_parselist_data *parser;
+
+  struct {
+    curl_write_callback write_function;
+    FILE *file_descriptor;
+  } backup;
+};
+
 typedef enum {
   FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */
   FTPFILE_NOCWD     = 2, /* use SIZE / RETR / STOR on the full path */
@@ -135,6 +146,8 @@ struct ftp_conn {
   int count3; /* general purpose counter for the state machine */
   ftpstate state; /* always use ftp.c:state() to change state! */
   char * server_os;     /* The target server operating system. */
+  curl_off_t known_filesize; /* file size is different from -1, if wildcard
+                                LIST parsing was done and wc_statemach set it */
 };
 
 #endif /* HEADER_CURL_FTP_H */

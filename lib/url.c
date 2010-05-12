@@ -770,6 +770,10 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   res = setstropt(&set->str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
 #endif
 
+  set->wildcardmatch  = 0L;
+  set->chunk_bgn      = ZERO_NULL;
+  set->chunk_end      = ZERO_NULL;
+
   return res;
 }
 
@@ -838,6 +842,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
 
+    data->wildcard.state = CURLWC_INIT;
+    data->wildcard.filelist = NULL;
+    data->set.fnmatch = ZERO_NULL;
     /* This no longer creates a connection cache here. It is instead made on
        the first call to curl_easy_perform() or when the handle is added to a
        multi stack. */
@@ -2455,6 +2462,23 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /* Set the user defined RTP write function */
     data->set.fwrite_rtp = va_arg(param, curl_write_callback);
     break;
+
+  case CURLOPT_WILDCARDMATCH:
+    data->set.wildcardmatch = va_arg(param, long);
+    break;
+  case CURLOPT_CHUNK_BGN_FUNCTION:
+    data->set.chunk_bgn = va_arg(param, curl_chunk_bgn_callback);
+    break;
+  case CURLOPT_CHUNK_END_FUNCTION:
+    data->set.chunk_end = va_arg(param, curl_chunk_end_callback);
+    break;
+  case CURLOPT_FNMATCH_FUNCTION:
+    data->set.fnmatch = va_arg(param, curl_fnmatch_callback);
+    break;
+  case CURLOPT_CHUNK_DATA:
+    data->wildcard.customptr = va_arg(param, void *);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

@@ -54,6 +54,7 @@ use IPC::Open2;
 
 require "getpart.pm";
 require "ftp.pm";
+require "directories.pm";
 
 use serverhelp qw(
     servername_str
@@ -135,6 +136,13 @@ my $nosave;       # set if ftp server should not save uploaded data
 my %customreply;  #
 my %customcount;  #
 my %delayreply;   #
+
+#**********************************************************************
+# global variables for to test ftp wildcardmatching or other test that
+# need flexible LIST responses.. and corresponding files.
+# $ftptargetdir is keeping the fake "name" of LIST directory.
+my $ftplistparserstate;
+my $ftptargetdir;
 
 #**********************************************************************
 # global vars used for signal handling
@@ -344,6 +352,8 @@ sub protocolsetup {
             'LIST' => \&LIST_ftp,
             'NLST' => \&NLST_ftp,
             'PASV' => \&PASV_ftp,
+            'CWD'  => \&CWD_ftp,
+            'PWD'  => \&PWD_ftp,
             'EPSV' => \&PASV_ftp,
             'RETR' => \&RETR_ftp,
             'SIZE' => \&SIZE_ftp,
@@ -362,7 +372,6 @@ sub protocolsetup {
             'CWD'  => '250 CWD command successful.',
             'SYST' => '215 UNIX Type: L8', # just fake something
             'QUIT' => '221 bye bye baby', # just reply something
-            'PWD'  => '257 "/nowhere/anywhere" is current directory',
             'MKD'  => '257 Created your requested directory',
             'REST' => '350 Yeah yeah we set it there for you',
             'DELE' => '200 OK OK OK whatever you say',
@@ -683,6 +692,64 @@ sub REST_ftp {
     logmsg "Set REST position to $rest\n"
 }
 
+sub switch_directory_goto {
+  my $target_dir = $_;
+
+  if(!$ftptargetdir) {
+    $ftptargetdir = "/";
+  }
+
+  if($target_dir eq "") {
+    $ftptargetdir = "/";
+  }
+  elsif($target_dir eq "..") {
+    if($ftptargetdir eq "/") {
+      $ftptargetdir = "/";
+    }
+    else {
+      $ftptargetdir =~ s/[[:alnum:]]+\/$//;
+    }
+  }
+  else {
+    $ftptargetdir .= $target_dir . "/";
+  }
+}
+
+sub switch_directory {
+    my $target_dir = $_[0];
+
+    if($target_dir eq "/") {
+        $ftptargetdir = "/";
+    }
+    else {
+        my @dirs = split("/", $target_dir);
+        for(@dirs) {
+          switch_directory_goto($_);
+        }
+    }
+}
+
+sub CWD_ftp {
+  my ($folder, $fullcommand) = $_[0];
+  switch_directory($folder);
+  if($ftptargetdir =~ /^\/fully_simulated/) {
+    $ftplistparserstate = "enabled";
+  }
+  else {
+    undef $ftplistparserstate;
+  }
+}
+
+sub PWD_ftp {
+    my $mydir;
+    $mydir = $ftptargetdir ? $ftptargetdir : "/";
+
+    if($mydir ne "/") {
+        $mydir =~ s/\/$//;
+    }
+    sendcontrol "257 \"$mydir\" is current directory\r\n";
+}
+
 sub LIST_ftp {
   #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
@@ -698,6 +765,10 @@ my @ftpdir=("total 20\r\n",
 "dr-xr-xr-x   2 0        1            512 Nov 30  1995 etc\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
+
+    if($ftplistparserstate) {
+      @ftpdir = ftp_contentlist($ftptargetdir);
+    }
 
     logmsg "pass LIST data on data connection\n";
     for(@ftpdir) {
@@ -748,6 +819,16 @@ sub MDTM_ftp {
 
 sub SIZE_ftp {
     my $testno = $_[0];
+    if($ftplistparserstate) {
+        my $size = wildcard_filesize($ftptargetdir, $testno);
+        if($size == -1) {
+            sendcontrol "550 $testno: No such file or directory.\r\n";
+        }
+        else {
+            sendcontrol "213 $size\r\n";
+        }
+        return 0;
+    }
 
     if($testno =~ /^verifiedserver$/) {
         my $response = "WE ROOLZ: $$\r\n";
@@ -802,6 +883,21 @@ sub SIZE_ftp {
 
 sub RETR_ftp {
     my ($testno) = @_;
+
+    if($ftplistparserstate) {
+        my @content = wildcard_getfile($ftptargetdir, $testno);
+        if($content[0] == -1) {
+            #file not found
+        }
+        else {
+            my $size = length $content[1];
+            sendcontrol "150 Binary data connection for $testno ($size bytes).\r\n",
+            senddata $content[1];
+            close_dataconn(0);
+            sendcontrol "226 File transfer complete\r\n";
+        }
+        return 0;
+    }
 
     if($testno =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
@@ -1326,6 +1422,15 @@ while(1) {
     &customize(); # read test control instructions
 
     sendcontrol @welcome;
+
+    #remove global variables from last connection
+    if($ftplistparserstate) {
+      undef $ftplistparserstate;
+    }
+    if($ftptargetdir) {
+      undef $ftptargetdir;
+    }
+
     if($verbose) {
         for(@welcome) {
             print STDERR "OUT: $_";

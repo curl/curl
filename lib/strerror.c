@@ -275,6 +275,12 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RTSP_SESSION_ERROR:
     return "RTSP session error";
 
+  case CURLE_FTP_BAD_FILE_LIST:
+    return "Unable to parse FTP file list";
+
+  case CURLE_CHUNK_FAILED:
+    return "Chunk callback failed";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:

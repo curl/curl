@@ -1,0 +1,136 @@
+<testcase>
+<info>
+<keywords>
+FTP
+wildcardmatch
+ftplistparser
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib576
+</tool>
+ <name>
+FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (DOS)
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/*
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+=============================================================
+Remains:      12
+Filename:     .
+Size:         0B
+Time:         04-27-10  05:12AM
+Filetype:     directory
+=============================================================
+Remains:      11
+Filename:     ..
+Size:         0B
+Time:         04-23-10  03:12AM
+Filetype:     directory
+=============================================================
+Remains:      10
+Filename:     chmod1
+Size:         38B
+Time:         01-11-10  10:00AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 444
+-------------------------------------------------------------
+=============================================================
+Remains:      9
+Filename:     chmod2
+Size:         38B
+Time:         02-01-10  08:00AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 666
+-------------------------------------------------------------
+=============================================================
+Remains:      8
+Filename:     chmod3
+Size:         38B
+Time:         02-01-10  08:00AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 777
+-------------------------------------------------------------
+=============================================================
+Remains:      7
+Filename:     chmod4
+Size:         0B
+Time:         05-04-10  04:31AM
+Filetype:     directory
+=============================================================
+Remains:      6
+Filename:     chmod5
+Size:         0B
+Time:         05-04-10  04:31AM
+Filetype:     directory
+=============================================================
+Remains:      5
+Filename:     empty_file.dat
+Size:         0B
+Time:         04-27-10  11:01AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+-------------------------------------------------------------
+=============================================================
+Remains:      4
+Filename:     file.txt
+Size:         35B
+Time:         04-27-10  11:01AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This is content of file "file.txt"
+-------------------------------------------------------------
+=============================================================
+Remains:      3
+Filename:     .NeXT
+Size:         0B
+Time:         01-23-05  02:05AM
+Filetype:     directory
+=============================================================
+Remains:      2
+Filename:     someothertext.txt
+Size:         47B
+Time:         04-27-10  11:01AM
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #
+-------------------------------------------------------------
+=============================================================
+Remains:      1
+Filename:     weirddir.txt
+Size:         0B
+Time:         04-23-10  03:12AM
+Filetype:     directory
+=============================================================
+</stdout>
+</verify>
+</testcase>

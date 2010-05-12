@@ -1128,6 +1128,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(CURLE_OK == easy->result) {
           if(!dophase_done) {
+            /* some steps needed for wildcard matching */
+            if(easy->easy_handle->set.wildcardmatch) {
+              struct WildcardData *wc = &easy->easy_handle->wildcard;
+              if(wc->state == CURLWC_DONE || wc->state == CURLWC_SKIP) {
+                /* skip some states if it is important */
+                Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
+                multistate(easy, CURLM_STATE_DONE);
+                result = CURLM_CALL_MULTI_PERFORM;
+                break;
+              }
+            }
             /* DO was not completed in one function call, we must continue
                DOING... */
             multistate(easy, CURLM_STATE_DOING);
@@ -1338,7 +1349,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->easy_conn->writechannel_inuse = FALSE;
       }
 
-      if(easy->result)  {
+      if(easy->result) {
         /* The transfer phase returned error, we mark the connection to get
          * closed to prevent being re-used. This is because we can't possibly
          * know if the connection is in a good shape or not now.  Unless it is
@@ -1449,6 +1460,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           easy->easy_conn = NULL;
       }
 
+      if(easy->easy_handle->set.wildcardmatch) {
+        if(easy->easy_handle->wildcard.state != CURLWC_DONE) {
+          /* if a wildcard is set and we are not ending -> lets start again
+             with CURLM_STATE_INIT */
+          result = CURLM_CALL_MULTI_PERFORM;
+          multistate(easy, CURLM_STATE_INIT);
+          break;
+        }
+      }
+
       /* after we have DONE what we're supposed to do, go COMPLETED, and
          it doesn't matter what the Curl_done() returned! */
       multistate(easy, CURLM_STATE_COMPLETED);
@@ -1550,10 +1571,25 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   easy=multi->easy.next;
   while(easy != &multi->easy) {
     CURLMcode result;
+    struct WildcardData *wc = &easy->easy_handle->wildcard;
+
+    if(easy->easy_handle->set.wildcardmatch) {
+      if(!wc->filelist) {
+        CURLcode ret = Curl_wildcard_init(wc); /* init wildcard structures */
+        if(ret)
+          return CURLM_OUT_OF_MEMORY;
+      }
+    }
 
     do
       result = multi_runsingle(multi, easy);
     while (CURLM_CALL_MULTI_PERFORM == result);
+
+    if(easy->easy_handle->set.wildcardmatch) {
+      /* destruct wildcard structures if it is needed */
+      if(wc->state == CURLWC_DONE || result)
+        Curl_wildcard_dtor(wc);
+    }
 
     if(result)
       returncode = result;
