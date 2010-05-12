@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel Stenberg (12 May 2010)
+- Howard Chu brought support for RTMP. This is powered by the underlying
+  librtmp library. It supports a range of variations and "sub-protocols"
+  within the RTMP family.
+
+- Pavel Raiskup brought support for FTP directory wildcard matching to allow
+  selective downloading. To provide that, a set of new options were added:
+
+   CURLOPT_WILDCARDMATCH
+   CURLOPT_CHUNK_BGN_FUNCTION
+   CURLOPT_CHUNK_END_FUNCTION
+   CURLOPT_CHUNK_DATA
+   CURLOPT_FNMATCH_FUNCTION
+
+  There were also a set of new tests added (574 - 577) to verify this.
+
 Kamil Dudka (11 May 2010)
 - CRL support in libcurl-NSS has been completely broken. Now it works. Original
   bug report: https://bugzilla.redhat.com/581926

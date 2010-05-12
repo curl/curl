@@ -1,8 +1,8 @@
-Curl and libcurl 7.20.2
+Curl and libcurl 7.21.0
 
  Public curl releases:         116
  Command line options:         138
- curl_easy_setopt() options:   174
+ curl_easy_setopt() options:   179
  Public functions in libcurl:  58
  Known libcurl bindings:       39
  Contributors:                 794
@@ -13,6 +13,8 @@ This release includes the following changes:
  o new configure option --enable-threaded-resolver
  o improve TELNET ability with libcurl
  o added support for PolarSSL
+ o added support for FTP wildcard matching and downloads
+ o added support for RTMP
 
 This release includes the following bugfixes:
 
@@ -35,6 +37,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
- Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske
+ Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
+ Pavel Raiskup
 
         Thanks! (and sorry if I forgot to mention someone)
