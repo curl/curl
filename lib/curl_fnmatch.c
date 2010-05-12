@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,7 +126,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
   register unsigned char c;
   for(;;) {
     c = **p;
-    switch(state){
+    switch(state) {
     case CURLFNM_SCHS_DEFAULT:
       if(ISALNUM(c)) { /* ASCII value */
         rangestart = c;
@@ -200,7 +200,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       }
       break;
     case CURLFNM_SCHS_MAYRANGE:
-      if(c == '-'){
+      if(c == '-') {
         charset[c] = 1;
         (*p)++;
         lastchar = '-';
@@ -274,7 +274,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       else if(c == '\0') {
         return SETCHARSET_FAIL;
       }
-      else if(ISPRINT(c)){
+      else if(ISPRINT(c)) {
         charset[c] = 1;
         (*p)++;
         state = CURLFNM_SCHS_DEFAULT;
