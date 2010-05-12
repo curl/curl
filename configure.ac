@@ -136,6 +136,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
+   curl_rtmp_msg="no      (--with-librtmp)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -1993,6 +1994,79 @@ if test X"$OPT_LIBSSH2" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for the presence of LIBRTMP libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for LIBRTMP files & libraries.
+OPT_LIBRTMP=off
+AC_ARG_WITH(librtmp,dnl
+AC_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to the LIBRTMP installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
+  OPT_LIBRTMP=$withval)
+
+if test X"$OPT_LIBRTMP" != Xno; then
+  dnl backup the pre-librtmp variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBRTMP" in
+  yes)
+    dnl --with-librtmp (without path) used
+    CURL_CHECK_PKGCONFIG(librtmp)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
+      LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
+      CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
+      version=`$PKGCONFIG --modversion librtmp`
+      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-librtmp option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-librtmp spot
+    PREFIX_RTMP=$OPT_LIBRTMP
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_RTMP"; then
+    LD_RTMP=-L${PREFIX_RTMP}/lib$libsuff
+    CPP_RTMP=-I${PREFIX_RTMP}/include
+    DIR_RTMP=${PREFIX_RTMP}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_RTMP"
+  CPPFLAGS="$CPPFLAGS $CPP_RTMP"
+  LIBS="$LIBS $LIB_RTMP"
+
+  AC_CHECK_LIB(rtmp, RTMP_Init)
+
+  AC_CHECK_HEADERS(librtmp/rtmp.h,
+    curl_rtmp_msg="enabled (librtmp)"
+    LIBRTMP_ENABLED=1
+    AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
+    AC_SUBST(USE_LIBRTMP, [1])
+  )
+
+  if test X"$OPT_LIBRTMP" != Xoff &&
+     test "$LIBRTMP_ENABLED" != "1"; then
+    AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
+  fi
+
+  if test "$LIBRTMP_ENABLED" != "1"; then
+    dnl no librtmp, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
+
+dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
 dnl **********************************************************************
 
@@ -2664,6 +2738,9 @@ fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
 fi
+if test "x$USE_LIBRTMP" = "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP RTMPT RTMPE RTMPTE RTMPS RTMPTS"
+fi
 
 dnl replace spaces with newlines
 dnl sort the lines
@@ -2747,6 +2824,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
   RTSP support:    ${curl_rtsp_msg}
+  RTMP support:    ${curl_rtmp_msg}
   Protocols:       ${SUPPORT_PROTOCOLS}
 ])
 

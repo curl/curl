@@ -137,6 +137,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "http_ntlm.h"
 #include "socks.h"
 #include "rtsp.h"
+#include "curl_rtmp.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -224,6 +225,15 @@ static const struct Curl_handler * const protocols[] = {
 
 #ifndef CURL_DISABLE_RTSP
   &Curl_handler_rtsp,
+#endif
+
+#ifdef USE_LIBRTMP
+  &Curl_handler_rtmp,
+  &Curl_handler_rtmpt,
+  &Curl_handler_rtmpe,
+  &Curl_handler_rtmpte,
+  &Curl_handler_rtmps,
+  &Curl_handler_rtmpts,
 #endif
 
   (struct Curl_handler *) NULL

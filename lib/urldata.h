@@ -43,6 +43,9 @@
 #define PORT_SMTP 25
 #define PORT_SMTPS 465 /* sometimes called SSMTP */
 #define PORT_RTSP 554
+#define PORT_RTMP 1935
+#define PORT_RTMPT PORT_HTTP
+#define PORT_RTMPS PORT_HTTPS
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -706,13 +709,19 @@ struct connectdata {
 #define PROT_SMTP    CURLPROTO_SMTP
 #define PROT_SMTPS   CURLPROTO_SMTPS
 #define PROT_RTSP    CURLPROTO_RTSP
+#define PROT_RTMP    CURLPROTO_RTMP
+#define PROT_RTMPT   CURLPROTO_RTMPT
+#define PROT_RTMPE   CURLPROTO_RTMPE
+#define PROT_RTMPTE  CURLPROTO_RTMPTE
+#define PROT_RTMPS   CURLPROTO_RTMPS
+#define PROT_RTMPTS  CURLPROTO_RTMPTS
 
-/* (1<<18) is currently the highest used bit in the public bitmask. We make
+/* (1<<24) is currently the highest used bit in the public bitmask. We make
    sure we use "private bits" above the public ones to make things easier. */
 
-#define PROT_EXTMASK 0xfffff
+#define PROT_EXTMASK 0xffffff
 
-#define PROT_SSL     (1<<25) /* protocol requires SSL */
+#define PROT_SSL     (1<<29) /* protocol requires SSL */
 
 /* these ones need action before socket close */
 #define PROT_CLOSEACTION (PROT_FTP | PROT_IMAP | PROT_POP3)
@@ -864,6 +873,7 @@ struct connectdata {
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
+    void *generic;
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
