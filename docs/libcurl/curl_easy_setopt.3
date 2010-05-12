@@ -474,41 +474,41 @@ This is the stream that will be passed to \fICURLOPT_INTERLEAVEFUNCTION\fP when
 interleaved RTP data is received. (Added in 7.20.0)
 .IP CURLOPT_CHUNK_BGN_FUNCTION
 Function pointer that should match the following prototype: \fBlong function
-(const void *transfer_info, void *ptr, int remains)\fR. This function
-gets called by libcurl before a part of the stream is going to be transferred
-(if the transfer supports chunks).
+(const void *transfer_info, void *ptr, int remains)\fP. This function gets
+called by libcurl before a part of the stream is going to be transferred (if
+the transfer supports chunks).
 
-This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH\fR
+This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH\fP
 option for now.
 
-The target of transfer_info parameter is a "feature depended" structure. For the
-FTP wildcard download, the target is curl_fileinfo structure (see
-\fIcurl/curl.h\fR).
-The parameter ptr is a pointer given by \fICURLOPT_CHUNK_DATA\fR. The parameter
-remains contains number of chunks remaining per the transfer. If the feature is
-not available, the parameter has zero value.
+The target of transfer_info parameter is a "feature depended" structure. For
+the FTP wildcard download, the target is curl_fileinfo structure (see
+\fIcurl/curl.h\fP).  The parameter ptr is a pointer given by
+\fICURLOPT_CHUNK_DATA\fP. The parameter remains contains number of chunks
+remaining per the transfer. If the feature is not available, the parameter has
+zero value.
 
-Return \fICURL_CHUNK_BGN_FUNC_OK\fR if everything is fine,
-\fICURL_CHUNK_BGN_FUNC_SKIP\fR if you want to skip the concrete chunk or
-\fICURL_CHUNK_BGN_FUNC_FAIL\fR to tell libcurl to stop if some error occurred.
+Return \fICURL_CHUNK_BGN_FUNC_OK\fP if everything is fine,
+\fICURL_CHUNK_BGN_FUNC_SKIP\fP if you want to skip the concrete chunk or
+\fICURL_CHUNK_BGN_FUNC_FAIL\fP to tell libcurl to stop if some error occurred.
 .IP CURLOPT_CHUNK_END_FUNCTION
-Function pointer that should match the following prototype:
-\fBlong function(void *ptr)\fR. This function gets called by libcurl as soon as
-a part of the stream has been transferred (or skipped).
+Function pointer that should match the following prototype: \fBlong
+function(void *ptr)\fP. This function gets called by libcurl as soon as a part
+of the stream has been transferred (or skipped).
 
-Return \fICURL_CHUNK_END_FUNC_OK\fR if everything is fine or
-\fBCURL_CHUNK_END_FUNC_FAIL\fR to tell the lib to stop if some error occurred.
+Return \fICURL_CHUNK_END_FUNC_OK\fP if everything is fine or
+\fBCURL_CHUNK_END_FUNC_FAIL\fP to tell the lib to stop if some error occurred.
 .IP CURLOPT_CHUNK_DATA
-Pass a pointer that will be untouched by libcurl and passed as the ptr argument
-to the \fICURL_CHUNK_BGN_FUNTION\fR and \fICURL_CHUNK_END_FUNTION\fR.
+Pass a pointer that will be untouched by libcurl and passed as the ptr
+argument to the \fICURL_CHUNK_BGN_FUNTION\fP and \fICURL_CHUNK_END_FUNTION\fP.
 .IP CURLOPT_FNMATCH_FUNCTION
 Function pointer that should match \fBint function(const char *pattern, const
-char *string)\fR prototype (see \fIcurl/curl.h\fR). It is used internally for
+char *string)\fP prototype (see \fIcurl/curl.h\fP). It is used internally for
 the wildcard matching feature.
 
-Return \fICURL_FNMATCHFUNC_MATCH\fR if pattern matches the string,
-\fICURL_FNMATCHFUNC_NOMATCH\fR if not or \fICURL_FNMATCHFUNC_FAIL\fR if an error
-occurred.
+Return \fICURL_FNMATCHFUNC_MATCH\fP if pattern matches the string,
+\fICURL_FNMATCHFUNC_NOMATCH\fP if not or \fICURL_FNMATCHFUNC_FAIL\fP if an
+error occurred.
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error
