@@ -86,53 +86,55 @@ Consider building libcurl with c-ares support to enable asynchronous DNS
 lookups, which enables nice timeouts for name resolves without signals.
 .IP CURLOPT_WILDCARDMATCH
 Set this option to 1 if you want to transfer multiple files according to a
-file name pattern. The pattern can be specified as part of the \fICURLOPT_URL\fP
-option, using an fnmatch-like pattern (Shell Pattern Matching) in the last part
-of URL (file name).
+file name pattern. The pattern can be specified as part of the
+\fICURLOPT_URL\fP option, using an fnmatch-like pattern (Shell Pattern
+Matching) in the last part of URL (file name).
 
-By default, libcurl uses its internal implementation of fnmatch(). You can
-provide your own matching function by the \fICURLOPT_FNMATCH_FUNCTION\fR option.
+By default, libcurl uses its internal wildcard matching implementation. You
+can provide your own matching function by the \fICURLOPT_FNMATCH_FUNCTION\fP
+option.
 
 This feature is only supported by the FTP download for now.
 
 A brief introduction of its syntax follows:
 .RS
-.IP "\fB*\fR - ASTERISK"
-\&ftp://example.com/some/path/\fB*.txt\fR (for all txt's from the root
+.IP "\fB*\fP - ASTERISK"
+\&ftp://example.com/some/path/\fB*.txt\fP (for all txt's from the root
 directory)
 .RE
 .RS
-.IP "\fB?\fR - QUESTION MARK"
+.IP "\fB?\fP - QUESTION MARK"
 Question mark matches any (exactly one) character.
 
-\&ftp://example.com/some/path/\fBphoto?.jpeg\fR
+\&ftp://example.com/some/path/\fBphoto?.jpeg\fP
 .RE
 .RS
-.IP "\fB[\fR - BRACKET EXPRESSION"
+.IP "\fB[\fP - BRACKET EXPRESSION"
 The left bracket opens a bracket expression. The question mark and asterisk have
 no special meaning in a bracket expression. Each bracket expression ends by the
 right bracket and matches exactly one character. Some examples follow:
 
-\fB[a-zA-Z0\-9]\fR or \fB[f\-gF\-G]\fR \- character interval
+\fB[a-zA-Z0\-9]\fP or \fB[f\-gF\-G]\fP \- character interval
 
-\fB[abc]\fR - character enumeration
+\fB[abc]\fP - character enumeration
 
-\fB[^abc]\fR or \fB[!abc]\fR - negation
+\fB[^abc]\fP or \fB[!abc]\fP - negation
 
-\fB[[:\fR\fIname\fR\fB:]]\fR class expression. Supported classes are
-\fBalnum\fR,\fBlower\fR, \fBspace\fR, \fBalpha\fR, \fBdigit\fR, \fBprint\fR,
-\fBupper\fR, \fBblank\fR, \fBgraph\fR, \fBxdigit\fR.
+\fB[[:\fP\fIname\fP\fB:]]\fP class expression. Supported classes are
+\fBalnum\fP,\fBlower\fP, \fBspace\fP, \fBalpha\fP, \fBdigit\fP, \fBprint\fP,
+\fBupper\fP, \fBblank\fP, \fBgraph\fP, \fBxdigit\fP.
 
-\fB[][-!^]\fR - special case \- matches only '\-', ']', '[', '!' or '^'. These
+\fB[][-!^]\fP - special case \- matches only '\-', ']', '[', '!' or '^'. These
 characters have no special purpose.
 
-\fB[\\[\\]\\\\]\fR - escape syntax. Matches '[', ']' or '\\'.
+\fB[\\[\\]\\\\]\fP - escape syntax. Matches '[', ']' or '\\'.
 
 Using the rules above, a file name pattern can be constructed:
 
-\&ftp://example.com/some/path/\fB[a-z[:upper:]\\\\].jpeg\fR
+\&ftp://example.com/some/path/\fB[a-z[:upper:]\\\\].jpeg\fP
 .RE
 .PP
+(This was added in 7.21.0)
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
@@ -491,6 +493,7 @@ zero value.
 Return \fICURL_CHUNK_BGN_FUNC_OK\fP if everything is fine,
 \fICURL_CHUNK_BGN_FUNC_SKIP\fP if you want to skip the concrete chunk or
 \fICURL_CHUNK_BGN_FUNC_FAIL\fP to tell libcurl to stop if some error occurred.
+(This was added in 7.21.0)
 .IP CURLOPT_CHUNK_END_FUNCTION
 Function pointer that should match the following prototype: \fBlong
 function(void *ptr)\fP. This function gets called by libcurl as soon as a part
@@ -498,9 +501,11 @@ of the stream has been transferred (or skipped).
 
 Return \fICURL_CHUNK_END_FUNC_OK\fP if everything is fine or
 \fBCURL_CHUNK_END_FUNC_FAIL\fP to tell the lib to stop if some error occurred.
+(This was added in 7.21.0)
 .IP CURLOPT_CHUNK_DATA
 Pass a pointer that will be untouched by libcurl and passed as the ptr
 argument to the \fICURL_CHUNK_BGN_FUNTION\fP and \fICURL_CHUNK_END_FUNTION\fP.
+(This was added in 7.21.0)
 .IP CURLOPT_FNMATCH_FUNCTION
 Function pointer that should match \fBint function(const char *pattern, const
 char *string)\fP prototype (see \fIcurl/curl.h\fP). It is used internally for
@@ -508,7 +513,7 @@ the wildcard matching feature.
 
 Return \fICURL_FNMATCHFUNC_MATCH\fP if pattern matches the string,
 \fICURL_FNMATCHFUNC_NOMATCH\fP if not or \fICURL_FNMATCHFUNC_FAIL\fP if an
-error occurred.
+error occurred.  (This was added in 7.21.0)
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error
