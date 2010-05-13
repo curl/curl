@@ -449,6 +449,7 @@ X_OBJS= \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
+	$(DIROBJ)\curl_fnmatch.obj \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_sspi.obj \
@@ -456,8 +457,10 @@ X_OBJS= \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
+	$(DIROBJ)\fileinfo.obj \
 	$(DIROBJ)\file.obj \
 	$(DIROBJ)\formdata.obj \
+	$(DIROBJ)\ftplistparser.obj \
 	$(DIROBJ)\ftp.obj \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\getinfo.obj \
@@ -466,16 +469,16 @@ X_OBJS= \
 	$(DIROBJ)\hmac.obj \
 	$(DIROBJ)\hostares.obj \
 	$(DIROBJ)\hostasyn.obj \
-	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
+	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostsyn.obj \
 	$(DIROBJ)\hostthre.obj \
-	$(DIROBJ)\http.obj \
 	$(DIROBJ)\http_chunks.obj \
 	$(DIROBJ)\http_digest.obj \
 	$(DIROBJ)\http_negotiate.obj \
 	$(DIROBJ)\http_ntlm.obj \
+	$(DIROBJ)\http.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\imap.obj \
 	$(DIROBJ)\inet_ntop.obj \
@@ -499,8 +502,8 @@ X_OBJS= \
 	$(DIROBJ)\share.obj \
 	$(DIROBJ)\slist.obj \
 	$(DIROBJ)\smtp.obj \
-	$(DIROBJ)\socks.obj \
 	$(DIROBJ)\socks_gssapi.obj \
+	$(DIROBJ)\socks.obj \
 	$(DIROBJ)\socks_sspi.obj \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \
@@ -518,6 +521,7 @@ X_OBJS= \
 	$(DIROBJ)\url.obj \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\warnless.obj \
+	$(DIROBJ)\wildcard.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

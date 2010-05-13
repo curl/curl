@@ -9,6 +9,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.getinfo o.getpass o.hostip \
 	o.hostip4 o.hostsyn o.http \
 	o.http_chunks o.inet_ntop o.inet_pton o.if2ip o.krb4 o.ldap \
+	o.curl_fnmatch o.fileinfo o.ftplistparser o.wildcard \
 	o.memdebug o.mprintf o.netrc o.parsedate o.progress \
 	o.security o.select o.sendf o.speedcheck o.ssluse \
 	o.strequal o.strtok o.telnet o.timeval \
@@ -159,7 +160,7 @@ o.smtp:		c.smtp
 o.speedcheck:	c.speedcheck
 		gcc $(compileropts) -c -o speedcheck.o c.speedcheck
 
-o.gtls:	c.gtls
+o.gtls:		c.gtls
 		gcc $(compileropts) -c -o gtls.o c.gtls
 
 o.sslgen:	c.sslgen
@@ -192,7 +193,7 @@ o.timeval:	c.timeval
 o.transfer:	c.transfer
 		gcc $(compileropts) -c -o transfer.o c.transfer
 
-o.url:	c.url
+o.url:		c.url
 		gcc $(compileropts) -c -o url.o c.url
 
 o.version:	c.version
@@ -201,3 +202,14 @@ o.version:	c.version
 o.warnless:	c.warnless
 		gcc $(compileropts) -c -o warnless.o c.warnless
 
+o.curl_fnmatch:	c.curl_fnmatch
+		gcc $(compileropts) -c -o curl_fnmatch.o c.curl_fnmatch
+
+o.fileinfo:	c.fileinfo
+		gcc $(compileropts) -c -o fileinfo.o c.fileinfo
+
+o.ftplistparser:	c.ftplistparser
+		gcc $(compileropts) -c -o ftplistparser.o c.ftplistparser
+
+o.wildcard:	c.wildcard
+		gcc $(compileropts) -c -o wildcard.o c.wildcard
