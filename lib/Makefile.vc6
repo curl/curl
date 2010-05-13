@@ -452,6 +452,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_fnmatch.obj \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_rand.obj \
+	$(DIROBJ)\curl_rtmp.obj \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\dict.obj \
@@ -493,6 +494,7 @@ X_OBJS= \
         $(DIROBJ)\nonblock.obj \
 	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\pingpong.obj \
+	$(DIROBJ)\polarssl.obj \
 	$(DIROBJ)\pop3.obj \
 	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\rawstr.obj \
