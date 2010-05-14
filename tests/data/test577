@@ -18,6 +18,11 @@ none
 <tool>
 lib577
 </tool>
+# precheck is a command line to run before the test,
+# to see if we can execute the test or not
+<precheck>
+./libtest/lib577 check
+</precheck>
 
  <name>
 Curl_fnmatch() testing

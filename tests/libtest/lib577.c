@@ -9,6 +9,25 @@
 
 #include "test.h"
 
+/*
+ * This hacky test bypasses the library external API,
+ * using internal only libcurl functions. So don't be
+ * surprised if we cannot run it when the library has
+ * been built with hidden symbols, exporting only the
+ * ones in the public API.
+ */
+
+#if defined(CURL_HIDDEN_SYMBOLS)
+#  define SKIP_TEST 1
+#elif defined(WIN32) && !defined(CURL_STATICLIB)
+#  define SKIP_TEST 1
+#else
+#  undef  SKIP_TEST
+#endif
+
+
+#if !defined(SKIP_TEST)
+
 #include "memdebug.h"
 
 #include "curl_fnmatch.h"
@@ -204,6 +223,12 @@ int test(char *URL)
   int testnum = sizeof(tests) / sizeof(struct testcase);
   int i, rc;
   (void)URL; /* not used */
+
+  if(!strcmp(URL, "check")) {
+    /* test harness script verifying if this test can run */
+    return 0; /* sure, run this! */
+  }
+
   printf("===========================\n");
   for(i = 0; i < testnum; i++) {
     rc = Curl_fnmatch(tests[i].pattern, tests[i].string);
@@ -215,3 +240,16 @@ int test(char *URL)
   printf("===========================\n");
   return 0;
 }
+
+#else /* !defined(SKIP_TEST) */
+
+
+int test(char *URL)
+{
+  (void)URL;
+  fprintf(stdout, "libcurl built with hidden symbols");
+  return 1; /* skip test */
+}
+
+
+#endif /* !defined(SKIP_TEST) */
