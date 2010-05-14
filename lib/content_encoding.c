@@ -103,7 +103,7 @@ inflate_stream(struct connectdata *conn,
     status = inflate(z, Z_SYNC_FLUSH);
     if(status == Z_OK || status == Z_STREAM_END) {
       allow_restart = 0;
-      if(DSIZ - z->avail_out) {
+      if((DSIZ - z->avail_out) && (!k->ignorebody)) {
         result = Curl_client_write(conn, CLIENTWRITE_BODY, decomp,
                                    DSIZ - z->avail_out);
         /* if !CURLE_OK, clean up, return */

@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (14 May 2010)
+- Sebastian V reported bug #3000056 identifying a problem with redirect
+  following. It showed that when curl followed redirects it didn't properly
+  ignore the response body of the 30X response if that response was using
+  compressed Content-Encoding!
+  
 Daniel Stenberg (12 May 2010)
 - Howard Chu brought support for RTMP. This is powered by the underlying
   librtmp library. It supports a range of variations and "sub-protocols"

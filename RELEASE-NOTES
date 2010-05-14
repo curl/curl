@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o SSL handshake timeout underflow in libcurl-NSS
  o multi interface missed storing connection time
  o broken CRL support in libcurl-NSS
+ o ignore response-body on redirect even if compressed
 
 This release includes the following known bugs:
 
