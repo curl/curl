@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o multi interface missed storing connection time
  o broken CRL support in libcurl-NSS
  o ignore response-body on redirect even if compressed
+ o OpenSSL handshake state-machine for multi interface
 
 This release includes the following known bugs:
 
@@ -39,6 +40,6 @@ advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
  Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
- Pavel Raiskup
+ Pavel Raiskup, John-Mark Bell
 
         Thanks! (and sorry if I forgot to mention someone)

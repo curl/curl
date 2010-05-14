@@ -7,6 +7,27 @@
                                   Changelog
 
 Daniel Stenberg (14 May 2010)
+- John-Mark Bell filed bug #3000052 that identified a problem (with an
+  associated patch) with the OpenSSL handshake state machine when the multi
+  interface is used:
+
+  Performing an https request using a curl multi handle and using select or
+  epoll to wait for events results in a hang. It appears that the cause is the
+  fix for bug #2958179, which makes ossl_connect_common unconditionally return
+  from the step 2 loop when fetching from a multi handle.
+
+  When ossl_connect_step2 has completed, it updates connssl->connecting_state
+  to ssl_connect_3. ossl_connect_common will then return to the caller, as a
+  multi handle is in use. Eventually, the client code will call
+  curl_multi_fdset to obtain an updated fdset to select or epoll on. For https
+  requests, curl_multi_fdset will cause https_getsock to be called.
+  https_getsock will only return a socket handle if the connecting_state is
+  ssl_connect_2_reading or ssl_connect_2_writing.  Therefore, the client will
+  never obtain a valid fdset, and thus not drive the multi handle, resulting
+  in a hang.
+
+  (http://curl.haxx.se/bug/view.cgi?id=3000052)
+
 - Sebastian V reported bug #3000056 identifying a problem with redirect
   following. It showed that when curl followed redirects it didn't properly
   ignore the response body of the 30X response if that response was using
