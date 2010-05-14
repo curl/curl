@@ -27,7 +27,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl valgrind.pm ftp.pm   \
  sshserver.pl sshhelp.pm testcurl.1 runtests.1 $(HTMLPAGES) $(PDFPAGES) \
  CMakeLists.txt certs/scripts/*.sh certs/Server* certs/EdelCurlRoot* \
- serverhelp.pm tftpserver.pl rtspserver.pl
+ serverhelp.pm tftpserver.pl rtspserver.pl directories.pm
 
 SUBDIRS = data server libtest
 
