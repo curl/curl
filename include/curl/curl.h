@@ -231,7 +231,7 @@ struct curl_fileinfo {
   char *filename;
   curlfiletype filetype;
   time_t time;
-  int32_t perm;
+  unsigned int perm;
   int uid;
   int gid;
   curl_off_t size;
@@ -246,7 +246,7 @@ struct curl_fileinfo {
     char *target; /* pointer to the target filename of a symlink */
   } strings;
 
-  int32_t flags;
+  unsigned int flags;
 
   /* used internally */
   char * b_data;

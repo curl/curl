@@ -465,7 +465,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
           }
         }
         else if(parser->item_length == 10) {
-          int32_t perm;
+          unsigned int perm;
           if(c != ' ') {
             PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
             return bufflen;
@@ -560,7 +560,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.group = parser->item_offset;
             parser->state.UNIX.main = PL_UNIX_SIZE;
-            parser->state.UNIX.sub.group = PL_UNIX_SIZE_PRESPACE;
+            parser->state.UNIX.sub.size = PL_UNIX_SIZE_PRESPACE;
             parser->item_offset = 0;
             parser->item_length = 0;
           }
@@ -624,7 +624,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
         case PL_UNIX_TIME_PART1:
           parser->item_length++;
           if(c == ' ') {
-            parser->state.UNIX.sub.size = PL_UNIX_TIME_PREPART2;
+            parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART2;
           }
           else if(!ISALNUM(c) && c != '.') {
             PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
@@ -646,7 +646,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
         case PL_UNIX_TIME_PART2:
           parser->item_length++;
           if(c == ' ') {
-            parser->state.UNIX.sub.size = PL_UNIX_TIME_PREPART3;
+            parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART3;
           }
           else if(!ISALNUM(c) && c != '.') {
             PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
@@ -917,20 +917,12 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
               finfo->size = curlx_strtoofft(finfo->b_data + parser->item_offset,
                                             &endptr, 10);
               if(!*endptr) {
-                if(finfo->size < CURL_LLONG_MAX &&
-                   finfo->size > CURL_LLONG_MIN) {
-
-                }
-                else if(finfo->size == CURL_LLONG_MAX ||
-                        finfo->size == CURL_LLONG_MIN) {
+                if(finfo->size == CURL_LLONG_MAX ||
+                   finfo->size == CURL_LLONG_MIN) {
                   if(errno == ERANGE) {
                     PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                     return bufflen;
                   }
-                }
-                else {
-                  PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
-                  return bufflen;
                 }
               }
               else {
@@ -974,7 +966,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
               return bufflen;
             }
             parser->state.NT.main = PL_WINNT_DATE;
-            parser->state.NT.sub.filename = 0;
+            parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
           }
           break;
         case PL_WINNT_FILENAME_WINEOL:
@@ -986,7 +978,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
               return bufflen;
             }
             parser->state.NT.main = PL_WINNT_DATE;
-            parser->state.NT.sub.filename = 0;
+            parser->state.NT.sub.filename = PL_WINNT_FILENAME_PRESPACE;
           }
           else {
             PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
