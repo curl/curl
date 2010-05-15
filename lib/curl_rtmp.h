@@ -22,7 +22,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_RTMP
+#ifdef USE_LIBRTMP
 extern const struct Curl_handler Curl_handler_rtmp;
 extern const struct Curl_handler Curl_handler_rtmpt;
 extern const struct Curl_handler Curl_handler_rtmpe;
