@@ -44,6 +44,10 @@
 #include <iconv.h>
 #endif
 
+#ifdef USE_LIBRTMP
+#include <librtmp/rtmp.h>
+#endif
+
 #ifdef USE_LIBSSH2
 #include <libssh2.h>
 #endif
@@ -107,15 +111,29 @@ char *curl_version(void)
   ptr += len;
 #endif
 #ifdef USE_LIBSSH2
-  (void)snprintf(ptr, left, " libssh2/%s", CURL_LIBSSH2_VERSION);
-/*
-  If another lib version is added below libssh2, this code would instead
-  have to do:
-
   len = snprintf(ptr, left, " libssh2/%s", CURL_LIBSSH2_VERSION);
   left -= len;
   ptr += len;
+#endif
+#ifdef USE_LIBRTMP
+  {
+    char suff[2];
+    if (RTMP_LIB_VERSION & 0xff) {
+      suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
+      suff[1] = '\0';
+    } else {
+      suff[0] = '\0';
+    }
+    len = snprintf(ptr, left, " librtmp/%d.%d%s",
+      RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff, suff);
+/*
+  If another lib version is added below this one, this code would
+  also have to do:
+
+    left -= len;
+    ptr += len;
 */
+  }
 #endif
 
   return version;
@@ -163,6 +181,9 @@ static const char * const protocols[] = {
 #endif
 #if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
   "pop3s",
+#endif
+#ifdef USE_LIBRTMP
+  "rtmp",
 #endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
