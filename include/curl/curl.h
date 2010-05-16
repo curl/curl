@@ -285,7 +285,8 @@ typedef long (*curl_chunk_end_callback)(void *ptr);
 
 /* callback type for wildcard downloading pattern matching. If the
    string matches the pattern, return CURL_FNMATCHFUNC_MATCH value, etc. */
-typedef int (*curl_fnmatch_callback)(const char *pattern,
+typedef int (*curl_fnmatch_callback)(void *ptr,
+                                     const char *pattern,
                                      const char *string);
 
 /* These are the return codes for the seek callbacks */
@@ -1430,6 +1431,9 @@ typedef enum {
 
   /* Let the application define custom chunk data pointer */
   CINIT(CHUNK_DATA, OBJECTPOINT, 201),
+
+  /* FNMATCH_FUNCTION user pointer */
+  CINIT(FNMATCH_DATA, OBJECTPOINT, 202),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

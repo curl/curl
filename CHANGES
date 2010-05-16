@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Kamil Dudka (16 May 2010)
+- Pavel Raiskup introduced a new option CURLOPT_FNMATCH_DATA in order to pass
+  a custom data pointer to the callback specified by CURLOPT_FNMATCH_FUNCTION.
+
 Daniel Stenberg (14 May 2010)
 - John-Mark Bell filed bug #3000052 that identified a problem (with an
   associated patch) with the OpenSSL handshake state machine when the multi

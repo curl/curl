@@ -330,7 +330,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
-  if(compare(wc->pattern, finfo->filename) == 0) {
+  if(compare(conn->data->set.fnmatch_data, wc->pattern, finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
     if((finfo->filetype == CURLFILETYPE_SYMLINK) &&
        (strstr(finfo->strings.target, " -> "))) {

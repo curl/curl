@@ -231,7 +231,7 @@ int test(char *URL)
 
   printf("===========================\n");
   for(i = 0; i < testnum; i++) {
-    rc = Curl_fnmatch(tests[i].pattern, tests[i].string);
+    rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(rc != tests[i].result) {
       printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)\n",
              tests[i].pattern, tests[i].string, tests[i].result, rc);

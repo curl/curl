@@ -220,6 +220,7 @@ CURLOPT_FAILONERROR             7.1
 CURLOPT_FILE                    7.1           7.9.7
 CURLOPT_FILETIME                7.5
 CURLOPT_FLAGS                   7.1           -           7.9.2
+CURLOPT_FNMATCH_DATA            7.21.0
 CURLOPT_FNMATCH_FUNCTION        7.21.0
 CURLOPT_FOLLOWLOCATION          7.1
 CURLOPT_FORBID_REUSE            7.7

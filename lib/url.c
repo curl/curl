@@ -2478,7 +2478,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   case CURLOPT_CHUNK_DATA:
     data->wildcard.customptr = va_arg(param, void *);
     break;
-
+  case CURLOPT_FNMATCH_DATA:
+    data->set.fnmatch_data = va_arg(param, void *);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
