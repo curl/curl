@@ -273,6 +273,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
 static void state(struct connectdata *conn,
                   smtpstate newstate)
 {
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[]={
@@ -293,9 +294,6 @@ static void state(struct connectdata *conn,
     "QUIT",
     /* LAST */
   };
-#endif
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(smtpc->state != newstate)
     infof(conn->data, "SMTP %p state change from %s to %s\n",
           smtpc, names[smtpc->state], names[newstate]);
@@ -421,8 +419,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
           state(conn, state2);
       }
       else {
-        if(initresp)
-          free(initresp);
+        Curl_safefree(initresp);
 
         result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
 
@@ -1322,6 +1319,10 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
 
   Curl_pp_disconnect(&smtpc->pp);
 
+  /* This won't already be freed in some error cases */
+  Curl_safefree(smtpc->domain);
+  smtpc->domain = NULL;
+
   return CURLE_OK;
 }
 
@@ -1338,6 +1339,7 @@ static CURLcode smtp_dophase_done(struct connectdata *conn,
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   free(smtpc->domain);
+  smtpc->domain = NULL;
 
   return CURLE_OK;
 }
