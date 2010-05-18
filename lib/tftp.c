@@ -87,8 +87,10 @@
 #define TFTP_BLKSIZE_MIN 8
 #define TFTP_BLKSIZE_MAX 65464
 #define TFTP_OPTION_BLKSIZE "blksize"
-#define TFTP_OPTION_TSIZE "tsize"
-#define TFTP_OPTION_INTERVAL "interval"
+
+/* from RFC2349: */
+#define TFTP_OPTION_TSIZE    "tsize"
+#define TFTP_OPTION_INTERVAL "timeout"
 
 typedef enum {
   TFTP_MODE_NETASCII=0,

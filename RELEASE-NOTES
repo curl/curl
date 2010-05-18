@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o broken CRL support in libcurl-NSS
  o ignore response-body on redirect even if compressed
  o OpenSSL handshake state-machine for multi interface
+ o TFTP timeout option sent correctly
 
 This release includes the following known bugs:
 
@@ -40,6 +41,6 @@ advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
  Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
- Pavel Raiskup, John-Mark Bell
+ Pavel Raiskup, John-Mark Bell, Eric Mertens
 
         Thanks! (and sorry if I forgot to mention someone)
