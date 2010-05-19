@@ -35,6 +35,8 @@
  * 01-29-97 11:32PM <DIR> prog
  */
 
+#include "setup.h"
+
 #include <time.h>
 
 #include "ftplistparser.h"

@@ -20,6 +20,8 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #include <stdlib.h>
 #include "strdup.h"
 #include "fileinfo.h"
