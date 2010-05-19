@@ -828,7 +828,8 @@ static CURLcode pop3_disconnect(struct connectdata *conn)
 
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
-  (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
+  if(pop3c->pp.conn)
+    (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
 
 
   Curl_pp_disconnect(&pop3c->pp);
@@ -849,10 +850,11 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct SessionHandle *data = conn->data;
   const char *path = data->state.path;
-  int len;
 
   /* url decode the path and use this mailbox */
-  pop3c->mailbox = curl_easy_unescape(data, path, 0, &len);
+  pop3c->mailbox = curl_easy_unescape(data, path, 0, NULL);
+  if (!pop3c->mailbox)
+    return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
 }
