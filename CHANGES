@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel Stenberg (20 May 2010)
+- Tanguy Fautre brought a fix to allow curl to build with Microsoft VC10.
+
 Daniel Stenberg (18 May 2010)
 - Eric Mertens posted bug report #3003005 pointing out that the libcurl TFTP
   code was not sending the timeout option properly to the server, and
