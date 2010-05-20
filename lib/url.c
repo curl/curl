@@ -1845,7 +1845,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->set.fwrite_func = (curl_write_callback)fwrite;
     }
     else
-      data->set.is_fwrite_set = 0;
+      data->set.is_fwrite_set = 1;
     break;
   case CURLOPT_READFUNCTION:
     /*
