@@ -25,7 +25,7 @@ int test(char *URL)
   CURLM *m = NULL;
   int res = 0;
   int running=1;
-  long connect_time = 0;
+  double connect_time = 0.0;
   struct timeval mp_start;
   char mp_timedout = FALSE;
 
@@ -83,8 +83,8 @@ int test(char *URL)
   }
 
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
-  if (connect_time==0) {
-    fprintf(stderr, "connect time is 0\n");
+  if (connect_time==0.0) {
+    fprintf(stderr, "connect time is 0.0\n");
     res = TEST_ERR_MAJOR_BAD;
   }
 
