@@ -251,7 +251,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
        second is left, otherwise just use 1000ms to make sure the progress
        callback gets called frequent enough */
     if(!tvp->tv_sec)
-      timeout_ms = tvp->tv_usec/1000;
+      timeout_ms = (int)(tvp->tv_usec/1000);
     else
       timeout_ms = 1000;
 

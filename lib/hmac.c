@@ -46,7 +46,7 @@ Curl_HMAC_init(const HMAC_params * hashparams,
                const unsigned char * key,
                unsigned int keylen)
 {
-  unsigned int i;
+  size_t i;
   HMAC_context * ctxt;
   unsigned char * hkey;
   unsigned char b;

@@ -333,11 +333,11 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static int smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
+static size_t smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
 {
   char plainauth[2 * MAX_CURL_USER_LENGTH + MAX_CURL_PASSWORD_LENGTH];
-  unsigned int ulen;
-  unsigned int plen;
+  size_t ulen;
+  size_t plen;
 
   ulen = strlen(conn->user);
   plen = strlen(conn->passwd);
@@ -353,9 +353,9 @@ static int smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
   return Curl_base64_encode(conn->data, plainauth, 2 * ulen + plen + 2, outptr);
 }
 
-static int smtp_auth_login_user(struct connectdata * conn, char * * outptr)
+static size_t smtp_auth_login_user(struct connectdata * conn, char * * outptr)
 {
-  int ulen;
+  size_t ulen;
 
   ulen = strlen(conn->user);
 
@@ -373,7 +373,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   char * initresp;
   const char * mech;
-  int l;
+  size_t l;
   int state1;
   int state2;
 
@@ -527,7 +527,7 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  int l;
+  size_t l;
   char * plainauth;
 
   (void)instate; /* no use for this yet */
@@ -560,7 +560,7 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  int l;
+  size_t l;
   char * authuser;
 
   (void)instate; /* no use for this yet */
@@ -593,8 +593,8 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  int plen;
-  int l;
+  size_t plen;
+  size_t l;
   char * authpasswd;
 
   (void)instate; /* no use for this yet */
@@ -637,8 +637,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   char * chlg64 = data->state.buffer;
   unsigned char * chlg;
-  int chlglen;
-  int l;
+  size_t chlglen;
+  size_t l;
   char * rplyb64;
   HMAC_context * ctxt;
   unsigned char digest[16];
@@ -674,7 +674,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
 
   /* Compute digest. */
   ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
-   (const unsigned char *) conn->passwd, strlen(conn->passwd));
+                        (const unsigned char *) conn->passwd,
+                        (unsigned int)(strlen(conn->passwd)));
 
   if(!ctxt) {
     if(chlg)
@@ -684,7 +685,7 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   }
 
   if(chlglen > 0)
-    Curl_HMAC_update(ctxt, chlg, chlglen);
+    Curl_HMAC_update(ctxt, chlg, (unsigned int)(chlglen));
 
   if(chlg)
     free(chlg);
