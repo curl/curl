@@ -7,11 +7,23 @@
                                   Changelog
 
 Daniel Stenberg (21 May 2010)
+- Eric Mertens posted bug #3003705: when we made TFTP use the correct timeout
+  option when sent to the server (fixed May 18th 2010) it became obvious that
+  libcurl used invalid timeout values (300 by default while the RFC allows
+  nothing above 255). While of course it is obvious that as TFTP has worked
+  thus far without being able to set timeout at all, just removing the setting
+  wouldn't make any difference in behavior. I decided to still keep it (but
+  fix the problem) as it now actually allows for easier (future) customization
+  of the timeout.
+
+  (http://curl.haxx.se/bug/view.cgi?id=3003705)
+
 - Douglas Kilpatrick filed bug report #3004787 and pointed out that the TFTP
   code didn't handle block id wraps correctly. His suggested fix inspired the
   fix I committed.
 
   (http://curl.haxx.se/bug/view.cgi?id=3004787)
+
 Daniel Stenberg (20 May 2010)
 - Tanguy Fautre brought a fix to allow curl to build with Microsoft VC10.
 

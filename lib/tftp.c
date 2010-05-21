@@ -526,8 +526,9 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
                               TFTP_OPTION_BLKSIZE);
     sbytes += tftp_option_add(state, sbytes,
                               (char *)state->spacket.data+sbytes, buf );
-    /* add timeout option, this is the max time the session may live */
-    snprintf( buf, sizeof(buf), "%d", state->retry_time*state->retry_max );
+
+    /* add timeout option */
+    snprintf( buf, sizeof(buf), "%d", state->retry_time);
     sbytes += tftp_option_add(state, sbytes,
                               (char *)state->spacket.data+sbytes,
                               TFTP_OPTION_INTERVAL);
