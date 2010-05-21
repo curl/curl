@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (21 May 2010)
+- Douglas Kilpatrick filed bug report #3004787 and pointed out that the TFTP
+  code didn't handle block id wraps correctly. His suggested fix inspired the
+  fix I committed.
+
+  (http://curl.haxx.se/bug/view.cgi?id=3004787)
 Daniel Stenberg (20 May 2010)
 - Tanguy Fautre brought a fix to allow curl to build with Microsoft VC10.
 

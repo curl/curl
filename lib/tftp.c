@@ -572,6 +572,10 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
   return res;
 }
 
+/* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
+   boundary */
+#define NEXT_BLOCKNUM(x) (((x)+1)&0xffff)
+
 /**********************************************************
  *
  * tftp_rx
@@ -590,14 +594,14 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_DATA:
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
-    if((state->block+1) != rblock) {
+    if(NEXT_BLOCKNUM(state->block) != rblock) {
       /* No, log it, up the retry count and fail if over the limit */
       infof(data,
             "Received unexpected DATA packet block %d\n", rblock);
       state->retries++;
       if(state->retries>state->retry_max) {
         failf(data, "tftp_rx: giving up waiting for block %d",
-              state->block+1);
+              NEXT_BLOCKNUM(state->block));
         return CURLE_TFTP_ILLEGAL;
       }
     }
@@ -650,7 +654,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     state->retries++;
     infof(data,
           "Timeout waiting for block %d ACK.  Retries = %d\n",
-          state->block+1, state->retries);
+          NEXT_BLOCKNUM(state->block), state->retries);
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
@@ -773,7 +777,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     /* Increment the retry counter and log the timeout */
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
-          " Retries = %d\n", state->block+1, state->retries);
+          " Retries = %d\n", NEXT_BLOCKNUM(state->block), state->retries);
     /* Decide if we've had enough */
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -1102,10 +1106,10 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
     case TFTP_EVENT_DATA:
       /* Don't pass to the client empty or retransmitted packets */
       if(state->rbytes > 4 &&
-          ((state->block+1) == getrpacketblock(&state->rpacket))) {
+         (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                 (char *)state->rpacket.data+4,
-                                 state->rbytes-4);
+                                   (char *)state->rpacket.data+4,
+                                   state->rbytes-4);
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;
