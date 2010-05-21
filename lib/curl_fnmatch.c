@@ -344,7 +344,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
       else if(*p == '[') {
         unsigned char *pp = p+1; /* cannot handle with pointer to register */
         if(setcharset(&pp, charset)) {
-          bool found = FALSE;
+          int found = FALSE;
           if(charset[(unsigned int)*s])
             found = TRUE;
           else if(charset[CURLFNM_ALNUM])
