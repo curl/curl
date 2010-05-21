@@ -599,11 +599,12 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
       infof(data,
             "Received unexpected DATA packet block %d\n", rblock);
       state->retries++;
-      if(state->retries>state->retry_max) {
+      if(state->retries > state->retry_max) {
         failf(data, "tftp_rx: giving up waiting for block %d",
               NEXT_BLOCKNUM(state->block));
         return CURLE_TFTP_ILLEGAL;
       }
+      break;
     }
     /* This is the expected block.  Reset counters and ACK it. */
     state->block = (unsigned short)rblock;
