@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel Stenberg (25 May 2010)
+- Howard Chu brought a patch that makes the LDAP code much cleaner, nicer and
+  in general being a better libcurl citizen. If a new enough OpenLDAP version
+  is detect, the new and shiny lib/openldap.c code is then used instead of the
+  old cruft.
+
 Daniel Stenberg (21 May 2010)
 - Eric Mertens posted bug #3003705: when we made TFTP use the correct timeout
   option when sent to the server (fixed May 18th 2010) it became obvious that

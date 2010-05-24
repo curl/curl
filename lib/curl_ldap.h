@@ -22,10 +22,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_LDAP
+#if !defined(CURL_DISABLE_LDAP) || defined(USE_OPENLDAP)
 extern const struct Curl_handler Curl_handler_ldap;
 
-#ifdef HAVE_LDAP_SSL
+#if defined(HAVE_LDAP_SSL) || defined(USE_OPENLDAP)
 extern const struct Curl_handler Curl_handler_ldaps;
 #endif
 

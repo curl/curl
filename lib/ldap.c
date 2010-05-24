@@ -22,7 +22,7 @@
 
 #include "setup.h"
 
-#ifndef CURL_DISABLE_LDAP
+#if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
