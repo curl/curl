@@ -6,6 +6,9 @@
 
                                   Changelog
 
+- Julien Chaffraix fixed the warning seen when compiling lib/rtmp.c: one
+  unused variables, several unused arguments and some missing #include.
+
 - Julien Chaffraix fixed 2 OOM errors: a missing NULL-check in
   lib/http_negociate.c and a potential NULL dereferencing in lib/splay.c
 

@@ -25,6 +25,9 @@
 #ifdef USE_LIBRTMP
 
 #include "urldata.h"
+#include "nonblock.h" /* for curlx_nonblock */
+#include "progress.h" /* for Curl_pgrsSetUploadSize */
+#include "transfer.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
@@ -153,7 +156,6 @@ const struct Curl_handler Curl_handler_rtmpts = {
 
 static CURLcode rtmp_setup(struct connectdata *conn)
 {
-  int rc;
   RTMP *r = RTMP_Alloc();
 
   if (!r)
@@ -220,6 +222,10 @@ static CURLcode rtmp_do(struct connectdata *conn, bool *done)
 static CURLcode rtmp_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
+  (void)conn; /* unused */
+  (void)status; /* unused */
+  (void)premature; /* unused */
+
   return CURLE_OK;
 }
 
@@ -240,6 +246,8 @@ static ssize_t rtmp_recv(struct connectdata *conn, int sockindex, char *buf,
   RTMP *r = conn->proto.generic;
   ssize_t nread;
 
+  (void)sockindex; /* unused */
+
   nread = RTMP_Read(r, buf, len);
   if (nread < 0) {
     if (r->m_read.status == RTMP_READ_COMPLETE ||
@@ -257,6 +265,8 @@ static ssize_t rtmp_send(struct connectdata *conn, int sockindex,
 {
   RTMP *r = conn->proto.generic;
   ssize_t num;
+
+  (void)sockindex; /* unused */
 
   num = RTMP_Write(r, (char *)buf, len);
   if (num < 0) {
