@@ -308,6 +308,8 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
       free(neg_ctx->output_token.value);
       responseToken = NULL;
       neg_ctx->output_token.value = malloc(spnegoTokenLength);
+      if(neg_ctx->output_token.value == NULL)
+        return CURLE_OUT_OF_MEMORY;
       memcpy(neg_ctx->output_token.value, spnegoToken,spnegoTokenLength);
       neg_ctx->output_token.length = spnegoTokenLength;
       free(spnegoToken);

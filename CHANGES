@@ -6,6 +6,9 @@
 
                                   Changelog
 
+- Julien Chaffraix fixed 2 OOM errors: a missing NULL-check in
+  lib/http_negociate.c and a potential NULL dereferencing in lib/splay.c
+
 Daniel Stenberg (25 May 2010)
 - Howard Chu brought a patch that makes the LDAP code much cleaner, nicer and
   in general being a better libcurl citizen. If a new enough OpenLDAP version
