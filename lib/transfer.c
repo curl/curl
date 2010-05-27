@@ -194,7 +194,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       /* \n will become \r\n later on */
       endofline_native  = "\n";
       endofline_network = "\x0a";
-    } else {
+    }
+    else {
       endofline_native  = "\r\n";
       endofline_network = "\x0d\x0a";
     }
@@ -219,21 +220,20 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     if(data->set.prefer_ascii) {
       /* translate the protocol and data */
       length = nread;
-    } else {
+    }
+    else {
       /* just translate the protocol portion */
       length = strlen(hexbuffer);
     }
     res = Curl_convert_to_network(data, data->req.upload_fromhere, length);
     /* Curl_convert_to_network calls failf if unsuccessful */
-    if(res != CURLE_OK) {
+    if(res)
       return(res);
-    }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if((nread - hexlen) == 0) {
+    if((nread - hexlen) == 0)
       /* mark this as done once this chunk is transfered */
       data->req.upload_done = TRUE;
-    }
 
     nread+=(int)strlen(endofline_native); /* for the added end of line */
   }
@@ -340,11 +340,11 @@ static void read_rewind(struct connectdata *conn,
 
     show = CURLMIN(conn->buf_len - conn->read_pos, sizeof(buf)-1);
     if(conn->master_buffer) {
-        memcpy(buf, conn->master_buffer + conn->read_pos, show);
-        buf[show] = '\0';
+      memcpy(buf, conn->master_buffer + conn->read_pos, show);
+      buf[show] = '\0';
     }
     else {
-        buf[0] = '\0';
+      buf[0] = '\0';
     }
 
     DEBUGF(infof(conn->data,
@@ -619,22 +619,22 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             /* The 'excess' amount below can't be more than BUFSIZE which
                always will fit in a size_t */
             infof(data,
-                "Rewinding stream by : %zu"
-                " bytes on url %s (size = %" FORMAT_OFF_T
-                ", maxdownload = %" FORMAT_OFF_T
-                ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
-                excess, data->state.path,
-                k->size, k->maxdownload, k->bytecount, nread);
+                  "Rewinding stream by : %zu"
+                  " bytes on url %s (size = %" FORMAT_OFF_T
+                  ", maxdownload = %" FORMAT_OFF_T
+                  ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
+                  excess, data->state.path,
+                  k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
           }
           else {
             infof(data,
-                "Excess found in a non pipelined read:"
-                " excess = %zu"
-                ", size = %" FORMAT_OFF_T
-                ", maxdownload = %" FORMAT_OFF_T
-                ", bytecount = %" FORMAT_OFF_T "\n",
-                excess, k->size, k->maxdownload, k->bytecount);
+                  "Excess found in a non pipelined read:"
+                  " excess = %zu"
+                  ", size = %" FORMAT_OFF_T
+                  ", maxdownload = %" FORMAT_OFF_T
+                  ", bytecount = %" FORMAT_OFF_T "\n",
+                  excess, k->size, k->maxdownload, k->bytecount);
           }
         }
 
@@ -1063,7 +1063,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         failf(data, "Operation timed out after %ld milliseconds with %"
               FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
               Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
-      } else {
+      }
+      else {
         failf(data, "Operation timed out after %ld milliseconds with %"
               FORMAT_OFF_T " bytes received",
               Curl_tvdiff(k->now, k->start), k->bytecount);
@@ -1221,7 +1222,7 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
    */
   if(rv > 0x7fffffff)
     rv = 0x7fffffff;
-  
+
   return (long)rv;
 }
 
