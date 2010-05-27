@@ -34,7 +34,7 @@
 
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
-#define ERROR   CURL_FNMATCH_FAIL
+#define RE_ERR  CURL_FNMATCH_FAIL
 
 #define MAX_PATTERN_L 100
 #define MAX_STRING_L  100
@@ -48,8 +48,8 @@ struct testcase {
 static const struct testcase tests[] = {
   /* brackets syntax */
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      ERROR },
-  { "[]",                       "[]",                     ERROR },
+  { "[",                        "[",                      RE_ERR },
+  { "[]",                       "[]",                     RE_ERR },
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -177,7 +177,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     ERROR },
+  { "\\",                       "\\",                     RE_ERR },
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
