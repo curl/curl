@@ -67,7 +67,7 @@ static int parsekeyword(unsigned char **pattern, unsigned char *charset)
   char keyword[KEYLEN] = { 0 };
   int found = FALSE;
   int i;
-  register unsigned char *p = *pattern;
+  unsigned char *p = *pattern;
   for(i = 0; !found; i++) {
     char c = *p++;
     if(i >= KEYLEN)
@@ -123,7 +123,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
   unsigned char rangestart = 0;
   unsigned char lastchar   = 0;
   bool something_found = FALSE;
-  register unsigned char c;
+  unsigned char c;
   for(;;) {
     c = **p;
     switch(state) {
@@ -300,8 +300,8 @@ static int setcharset(unsigned char **p, unsigned char *charset)
 static int loop(const unsigned char *pattern, const unsigned char *string)
 {
   loop_state state = CURLFNM_LOOP_DEFAULT;
-  register unsigned char *p = (unsigned char *)pattern;
-  register unsigned char *s = (unsigned char *)string;
+  unsigned char *p = (unsigned char *)pattern;
+  unsigned char *s = (unsigned char *)string;
   unsigned char charset[CURLFNM_CHSET_SIZE] = { 0 };
   int rc = 0;
 
