@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+CRL
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+https Server-localhost-sv.pem
+</server>
+ <name>
+CRL test
+ </name>
+ <command>
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --crlfile %SRCDIR/certs/Server-localhost-sv.crl https://localhost:%HTTPSPORT/313
+</command>
+# Ensure that we're running on localhost because we're checking the host name
+<precheck>
+perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+60
+</errorcode>
+</verify>
+</testcase>

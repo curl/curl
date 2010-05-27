@@ -7,6 +7,8 @@
                                   Changelog
 
 Kamil Dudka (27 May 2010)
+- added a new test for CRL support (test313)
+
 - Tor Arntsen changed the alternative definition of bool to use enum instead
   of unsigned char.
 
