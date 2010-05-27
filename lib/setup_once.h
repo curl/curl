@@ -261,24 +261,42 @@ struct timeval {
 
 
 /*
- * Typedef to 'unsigned char' if bool is not an available 'typedefed' type.
+ * 'bool' exists on platforms with <stdbool.h>, i.e. C99 platforms.
+ * On non-C99 platforms there's no bool, so define an enum for that.
+ * On C99 platforms 'false' and 'true' also exist. Enum uses a
+ * global namespace though, so use bool_false and bool_true.
  */
 
 #ifndef HAVE_BOOL_T
-typedef unsigned char bool;
-#define HAVE_BOOL_T
+  typedef enum {
+      bool_false = 0,
+      bool_true  = 1
+  } bool;
+
+/*
+ * Use a define to let 'true' and 'false' use those enums.  There
+ * are currently no use of true and false in libcurl proper, but
+ * there are some in the examples. This will cater for any later
+ * code happening to use true and false.
+ */
+#  define false bool_false
+#  define true  bool_true
+#  define HAVE_BOOL_T
 #endif
 
 
 /*
- * Default definition of uppercase TRUE and FALSE.
+ * Redefine TRUE and FALSE too, to catch current use. With this
+ * change, 'bool found = 1' will give a warning on MIPSPro, but
+ * 'bool found = TRUE' will not. Change tested on IRIX/MIPSPro,
+ * AIX 5.1/Xlc, Tru64 5.1/cc, w/make test too.
  */
 
 #ifndef TRUE
-#define TRUE 1
+#define TRUE true
 #endif
 #ifndef FALSE
-#define FALSE 0
+#define FALSE false
 #endif
 
 
