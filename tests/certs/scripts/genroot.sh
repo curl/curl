@@ -40,8 +40,11 @@ SERIAL=`/usr/bin/env perl -e "$GETSERIAL"`
 
 echo SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
-echo "openssl req -config $PREFIX-ca.prm -newkey rsa:$KEYSIZE -keyout $PREFIX-ca.key -out $PREFIX-ca.csr"
-$OPENSSL req -config $PREFIX-ca.prm -newkey rsa:$KEYSIZE -keyout $PREFIX-ca.key -out $PREFIX-ca.csr
+echo "openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout XXX"
+openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout pass:secret
+
+echo "openssl req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr"
+$OPENSSL req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret
 
 echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL.ca-cacert -sha1 "
 
