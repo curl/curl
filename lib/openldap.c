@@ -37,6 +37,11 @@
 
 #include "memdebug.h"
 
+#ifndef _LDAP_PVT_H
+extern int ldap_pvt_url_scheme2proto(const char *);
+extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url, LDAP **ld);
+#endif
+
 static CURLcode ldap_setup(struct connectdata *conn);
 static CURLcode ldap_do(struct connectdata *conn, bool *done);
 static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
@@ -293,7 +298,7 @@ static CURLcode ldap_disconnect(struct connectdata *conn)
 
   if (li) {
     if (li->ld) {
-      ldap_unbind(li->ld);
+      ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
     conn->proto.generic = NULL;
@@ -356,7 +361,7 @@ static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
     /* if there was a search in progress, abandon it */
     if (lr->msgid) {
       ldapconninfo *li = conn->proto.generic;
-      ldap_abandon(li->ld, lr->msgid);
+      ldap_abandon_ext(li->ld, lr->msgid, NULL, NULL);
       lr->msgid = 0;
     }
     conn->data->state.proto.generic = NULL;
