@@ -72,6 +72,7 @@ const struct Curl_handler Curl_handler_ldap = {
   PROT_LDAP                             /* protocol */
 };
 
+#ifdef USE_SSL
 /*
  * LDAPS protocol handler.
  */
@@ -92,6 +93,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   PORT_LDAPS,                           /* defport */
   PROT_LDAP | PROT_SSL                  /* protocol */
 };
+#endif
 
 static const char *url_errs[] = {
   "success",
@@ -155,7 +157,9 @@ static CURLcode ldap_setup(struct connectdata *conn)
   return CURLE_OK;
 }
 
+#ifdef USE_SSL
 static Sockbuf_IO ldapsb_tls;
+#endif
 
 static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 {
@@ -180,6 +184,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
   ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
 
+#ifdef USE_SSL
   if (conn->protocol & PROT_SSL) {
     CURLcode res;
     if (data->state.used_interface == Curl_if_easy) {
@@ -193,6 +198,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
         return res;
     }
   }
+#endif
 
   if (data->state.used_interface == Curl_if_easy)
     return ldap_connecting(conn, done);
@@ -209,6 +215,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   int rc, err;
   char *info = NULL;
 
+#ifdef USE_SSL
   if (conn->protocol & PROT_SSL) {
     /* Is the SSL handshake complete yet? */
     if (!li->ssldone) {
@@ -226,6 +233,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
       li->send = conn->send[FIRSTSOCKET];
     }
   }
+#endif
 
   if (data->state.used_interface == Curl_if_easy)
     tvp = NULL;    /* let ldap_result block indefinitely */
@@ -505,6 +513,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
   return ret;
 }
 
+#ifdef USE_SSL
 static int
 ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
 {
@@ -577,5 +586,6 @@ static Sockbuf_IO ldapsb_tls =
   ldapsb_tls_write,
   ldapsb_tls_close
 };
+#endif /* USE_SSL */
 
 #endif  /* USE_OPENLDAP */
