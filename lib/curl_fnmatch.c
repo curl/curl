@@ -280,7 +280,10 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         state = CURLFNM_SCHS_DEFAULT;
       }
       else
-        return SETCHARSET_FAIL;
+        /* used 'goto fail' instead of 'return SETCHARSET_FAIL' to avoid a
+         * nonsense warning 'statement not reached' at end of the fnc when
+         * compiling on Solaris */
+        goto fail;
       break;
     case CURLFNM_SCHS_RIGHTBRLEFTBR:
       if(c == ']') {
@@ -294,6 +297,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       break;
     }
   }
+fail:
   return SETCHARSET_FAIL;
 }
 

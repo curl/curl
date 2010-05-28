@@ -452,7 +452,6 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
         default:
           PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
           return bufflen;
-          break;
         }
         parser->state.UNIX.main = PL_UNIX_PERMISSION;
         parser->item_length = 0;
@@ -993,7 +992,6 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
       break;
     default:
       return bufflen+1;
-      break;
     }
 
     i++;

@@ -3628,10 +3628,8 @@ static CURLcode wc_statemach(struct connectdata *conn)
               finfo->filename);
         wildcard->state = CURLWC_SKIP;
         return wc_statemach(conn);
-        break;
       case CURL_CHUNK_BGN_FUNC_FAIL:
         return CURLE_CHUNK_FAILED;
-        break;
       }
     }
 
