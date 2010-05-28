@@ -70,16 +70,14 @@
  10.2 RTMP
 
  11. Client
- 11.1 Content-Disposition
- 11.2 sync
- 11.3 glob posts
- 11.4 prevent file overwriting
- 11.5 ftp wildcard download
- 11.6 simultaneous parallel transfers
- 11.7 provide formpost headers
- 11.8 url-specific options
- 11.9 metalink support
- 11.10 warning when setting an option
+ 11.1 sync
+ 11.2 glob posts
+ 11.3 prevent file overwriting
+ 11.4 simultaneous parallel transfers
+ 11.5 provide formpost headers
+ 11.6 url-specific options
+ 11.7 metalink support
+ 11.8 warning when setting an option
 
  12. Build
  12.1 roffit
@@ -387,14 +385,7 @@ to provide the data to send.
 
 11. Client
 
-11.1 Content-Disposition
-
- Add option that is similar to -O but that takes the output file name from the
- Content-Disposition: header, and/or uses the local file name used in
- redirections for the cases the server bounces the request further to a
- different file (name): http://curl.haxx.se/bug/feature.cgi?id=1364676
-
-11.2 sync
+11.1 sync
 
  "curl --sync http://example.com/feed[1-100].rss" or
  "curl --sync http://example.net/{index,calendar,history}.html"
@@ -403,12 +394,12 @@ to provide the data to send.
  remote file is newer than the local file. A Last-Modified HTTP date header
  should also be used to set the mod date on the downloaded file.
 
-11.3 glob posts
+11.2 glob posts
 
  Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
  This is easily scripted though.
 
-11.4 prevent file overwriting
+11.3 prevent file overwriting
 
  Add an option that prevents cURL from overwriting existing local files. When
  used, and there already is an existing file with the target file name
@@ -416,18 +407,14 @@ to provide the data to send.
  existing). So that index.html becomes first index.html.1 and then
  index.html.2 etc.
 
-11.5 ftp wildcard download
-
- "curl ftp://site.com/*.txt"
-
-11.6 simultaneous parallel transfers
+11.4 simultaneous parallel transfers
 
  The client could be told to use maximum N simultaneous parallel transfers and
  then just make sure that happens. It should of course not make more than one
  connection to the same remote host. This would require the client to use the
  multi interface. http://curl.haxx.se/bug/feature.cgi?id=1558595
 
-11.7 provide formpost headers
+11.5 provide formpost headers
 
  Extending the capabilities of the multipart formposting. How about leaving
  the ';type=foo' syntax as it is and adding an extra tag (headers) which
@@ -441,7 +428,7 @@ to provide the data to send.
  which should overwrite the program reasonable defaults (plain/text,
  8bit...)
 
-11.8 url-specific options
+11.6 url-specific options
 
  Provide a way to make options bound to a specific URL among several on the
  command line. Possibly by letting ':' separate options between URLs,
@@ -455,12 +442,12 @@ to provide the data to send.
 
  The example would do a POST-GET-POST combination on a single command line.
 
-11.9 metalink support
+11.7 metalink support
 
  Add metalink support to curl (http://www.metalinker.org/). This is most useful
  with simultaneous parallel transfers (11.6) but not necessary.
 
-11.10 warning when setting an option
+11.8 warning when setting an option
 
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
