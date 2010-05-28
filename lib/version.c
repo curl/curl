@@ -172,7 +172,7 @@ static const char * const protocols[] = {
 #endif
 #if !defined(CURL_DISABLE_LDAP) || defined(USE_OPENLDAP)
   "ldap",
-#if defined(HAVE_LDAP_SSL) || defined(USE_OPENLDAP)
+#if defined(HAVE_LDAP_SSL) || (defined(USE_OPENLDAP) && defined(USE_SSL))
   "ldaps",
 #endif
 #endif

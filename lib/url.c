@@ -183,7 +183,7 @@ static const struct Curl_handler * const protocols[] = {
 
 #if !defined(CURL_DISABLE_LDAP) || defined(USE_OPENLDAP)
   &Curl_handler_ldap,
-#if defined(HAVE_LDAP_SSL) || defined(USE_OPENLDAP)
+#if defined(HAVE_LDAP_SSL) || (defined(USE_OPENLDAP) && defined(USE_SSL))
   &Curl_handler_ldaps,
 #endif
 #endif

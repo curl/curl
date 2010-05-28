@@ -864,6 +864,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     curl_ldap_msg="enabled (OpenLDAP)"
     if test "x$ac_cv_func_ldap_init_fd" = x""yes; then
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
+      AC_SUBST(USE_OPENLDAP, [1])
     fi
   fi
 fi
@@ -2700,11 +2701,11 @@ fi
 if test "x$CURL_DISABLE_TELNET" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TELNET"
 fi
-if test "x$CURL_DISABLE_LDAP" != "x1"; then
+if test "x$CURL_DISABLE_LDAP" != "x1" -o "x$USE_OPENLDAP" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
-fi
-if test "x$CURL_DISABLE_LDAPS" != "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+  if test "x$CURL_DISABLE_LDAPS" != "x1" -o "x$USE_OPENLDAP$SSL_ENABLED" = "x11"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+  fi
 fi
 if test "x$CURL_DISABLE_DICT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS DICT"
