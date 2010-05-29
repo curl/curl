@@ -57,7 +57,12 @@
 #  define curlx_strtoofft strtol
 #endif
 
-#define CURL_LLONG_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#if (CURL_SIZEOF_CURL_OFF_T == 4)
+#  define CURL_LLONG_MAX CURL_OFF_T_C(0x7FFFFFFF)
+#else
+   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
+#  define CURL_LLONG_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#endif
 #define CURL_LLONG_MIN (-CURL_LLONG_MAX - CURL_OFF_T_C(1))
 
 #endif /* HEADER_CURL_STRTOOFFT_H */

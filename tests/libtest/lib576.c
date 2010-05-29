@@ -33,7 +33,7 @@ long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
       printf(" (parsed => %o)", finfo->perm);
     printf("\n");
   }
-  printf("Size:         %lldB\n", (long long int)finfo->size);
+  printf("Size:         %ldB\n", (long)finfo->size);
   if(finfo->strings.user)
     printf("User:         %s\n", finfo->strings.user);
   if(finfo->strings.group)
