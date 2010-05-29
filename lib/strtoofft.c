@@ -131,9 +131,9 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
   }
   else {
     if(is_negative)
-      value = CURL_LLONG_MIN;
+      value = CURL_OFF_T_MIN;
     else
-      value = CURL_LLONG_MAX;
+      value = CURL_OFF_T_MAX;
 
     SET_ERRNO(ERANGE);
   }

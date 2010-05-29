@@ -590,8 +590,8 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
             curl_off_t fsize;
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             fsize = curlx_strtoofft(finfo->b_data+parser->item_offset, &p, 10);
-            if(p[0] == '\0' && fsize != CURL_LLONG_MAX &&
-                               fsize != CURL_LLONG_MIN) {
+            if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
+                               fsize != CURL_OFF_T_MIN) {
               parser->file_data->flags |= CURLFINFOFLAG_KNOWN_SIZE;
               parser->file_data->size = fsize;
             }
@@ -918,8 +918,8 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
               finfo->size = curlx_strtoofft(finfo->b_data + parser->item_offset,
                                             &endptr, 10);
               if(!*endptr) {
-                if(finfo->size == CURL_LLONG_MAX ||
-                   finfo->size == CURL_LLONG_MIN) {
+                if(finfo->size == CURL_OFF_T_MAX ||
+                   finfo->size == CURL_OFF_T_MIN) {
                   if(errno == ERANGE) {
                     PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                     return bufflen;
