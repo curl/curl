@@ -374,8 +374,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   char * initresp;
   const char * mech;
   size_t l;
-  int state1;
-  int state2;
+  smtpstate state1;
+  smtpstate state2;
 
   if(!conn->bits.user_passwd)
     state(conn, SMTP_STOP);             /* End of connect phase. */
@@ -386,8 +386,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     /* Check supported authentication mechanisms by decreasing order of
        preference. */
     mech = (const char *) NULL;         /* Avoid compiler warnings. */
-    state1 = 0;
-    state2 = 0;
+    state1 = SMTP_STOP;
+    state2 = SMTP_STOP;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
