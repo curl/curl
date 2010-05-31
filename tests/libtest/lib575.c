@@ -84,6 +84,10 @@ int test(char *URL)
     timeout.tv_usec = 0;
 
     m = curl_multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &max_fdset);
+    if(m != CURLM_OK) {
+      fprintf(stderr, "curl_multi_fdset() error\n");
+      goto test_cleanup;
+    }
     rc = select(max_fdset + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     if(rc == -1) {
       fprintf(stderr, "select() error\n");
