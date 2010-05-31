@@ -16,9 +16,12 @@ typedef struct {
   int print_content;
 } chunk_data_t;
 
+static
 long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains);
+static
 long chunk_end(void *ptr);
 
+static
 long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
 {
   chunk_data_t *ch_d = ptr;
@@ -67,6 +70,7 @@ long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
   return CURL_CHUNK_BGN_FUNC_OK;
 }
 
+static
 long chunk_end(void *ptr)
 {
   chunk_data_t *ch_d = ptr;
@@ -82,7 +86,7 @@ long chunk_end(void *ptr)
 int test(char *URL)
 {
   CURL *handle = NULL;
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   chunk_data_t chunk_data = {0,0};
   curl_global_init(CURL_GLOBAL_ALL);
   handle = curl_easy_init();
