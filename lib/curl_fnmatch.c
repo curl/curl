@@ -169,7 +169,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         if(!something_found) {
           if(charset[CURLFNM_NEGATE]) {
             charset[c] = 1;
-            something_found = 1;
+            something_found = TRUE;
           }
           else
             charset[CURLFNM_NEGATE] = 1; /* negate charset */
