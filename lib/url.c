@@ -769,7 +769,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   res = setstropt(&set->str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
 #endif
 
-  set->wildcardmatch  = 0L;
+  set->wildcardmatch  = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
 
