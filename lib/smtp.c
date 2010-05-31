@@ -385,6 +385,10 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 
     /* Check supported authentication mechanisms by decreasing order of
        preference. */
+    mech = (const char *) NULL;         /* Avoid compiler warnings. */
+    state1 = 0;
+    state2 = 0;
+
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
       mech = "CRAM-MD5";
