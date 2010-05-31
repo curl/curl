@@ -112,7 +112,6 @@
 #define ftp_pasv_verbose(a,b,c,d)  do { } while(0)
 #endif
 
-void Curl_ftp_wc_data_dtor(void *ptr);
 /* Local API functions */
 static CURLcode ftp_sendquote(struct connectdata *conn,
                               struct curl_slist *quote);
@@ -149,6 +148,8 @@ static CURLcode ftp_setup_connection(struct connectdata * conn);
 
 static CURLcode init_wc_data(struct connectdata *conn);
 static CURLcode wc_statemach(struct connectdata *conn);
+
+static void wc_data_dtor(void *ptr);
 
 static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
                                          curl_off_t filesize);
@@ -3469,7 +3470,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   return result;
 }
 
-void Curl_ftp_wc_data_dtor(void *ptr)
+static void wc_data_dtor(void *ptr)
 {
   struct ftp_wc_tmpdata *tmp = ptr;
   if(tmp)
@@ -3529,7 +3530,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   wildcard->tmp = ftp_tmp; /* put it to the WildcardData tmp pointer */
-  wildcard->tmp_dtor = Curl_ftp_wc_data_dtor;
+  wildcard->tmp_dtor = wc_data_dtor;
 
   /* wildcard does not support NOCWD option (assert it?) */
   if(conn->data->set.ftp_filemethod == FTPFILE_NOCWD)
