@@ -4065,8 +4065,8 @@ output_expected(const char* url, const char* uploadfile)
   return FALSE; /* non-HTTP upload, probably no output should be expected */
 }
 
-#define my_setopt(x,y,z) _my_setopt(x, 0, config, #y, y, z)
-#define my_setopt_str(x,y,z) _my_setopt(x, 1, config, #y, y, z)
+#define my_setopt(x,y,z) _my_setopt(x, FALSE, config, #y, y, z)
+#define my_setopt_str(x,y,z) _my_setopt(x, TRUE, config, #y, y, z)
 
 static struct curl_slist *easycode;
 
