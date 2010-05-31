@@ -603,9 +603,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
     if(rc == CURLRESOLV_PENDING) {
       /* this requires that we're in "wait for resolve" state */
-      rc = Curl_wait_for_resolv(conn, &dns);
-      if(rc)
-        return rc;
+      code = Curl_wait_for_resolv(conn, &dns);
+      if(code != CURLE_OK)
+        return code;
     }
 
     /*
