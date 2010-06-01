@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,6 +23,18 @@
 #include "setup.h"
 
 #if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
+
+/*
+ * Notice that USE_OPENLDAP is only a source code selection switch. When
+ * libcurl is built with USE_OPENLDAP defined the libcurl source code that
+ * gets compiled is the code from openldap.c, otherwise the code that gets
+ * compiled is the code from ldap.c.
+ *
+ * When USE_OPENLDAP is defined a recent version of the OpenLDAP library
+ * might be required for compilation and runtime. In order to use ancient
+ * OpenLDAP library versions, USE_OPENLDAP shall not be defined.
+ */
+
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -715,4 +727,4 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp)
   free (ludp);
 }
 #endif  /* !HAVE_LDAP_URL_PARSE */
-#endif  /* CURL_DISABLE_LDAP */
+#endif  /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */

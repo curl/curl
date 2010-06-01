@@ -411,6 +411,7 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        else
                AC_MSG_RESULT(yes)
                AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+               AC_SUBST(HAVE_LDAP_SSL, [1])
                curl_ldaps_msg="enabled"
        fi
        ;;
@@ -2701,10 +2702,13 @@ fi
 if test "x$CURL_DISABLE_TELNET" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TELNET"
 fi
-if test "x$CURL_DISABLE_LDAP" != "x1" -o "x$USE_OPENLDAP" = "x1"; then
+if test "x$CURL_DISABLE_LDAP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
-  if test "x$CURL_DISABLE_LDAPS" != "x1" -o "x$USE_OPENLDAP$SSL_ENABLED" = "x11"; then
-    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+  if test "x$CURL_DISABLE_LDAPS" != "x1"; then
+    if (test "x$USE_OPENLDAP" = "x1" && test "x$SSL_ENABLED" = "x1") ||
+      (test "x$USE_OPENLDAP" != "x1"  && test "x$HAVE_LDAP_SSL" = "x1"); then
+      SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+    fi
   fi
 fi
 if test "x$CURL_DISABLE_DICT" != "x1"; then

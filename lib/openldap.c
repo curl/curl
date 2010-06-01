@@ -22,7 +22,18 @@
 
 #include "setup.h"
 
-#ifdef USE_OPENLDAP
+#if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
+
+/*
+ * Notice that USE_OPENLDAP is only a source code selection switch. When
+ * libcurl is built with USE_OPENLDAP defined the libcurl source code that
+ * gets compiled is the code from openldap.c, otherwise the code that gets
+ * compiled is the code from ldap.c.
+ *
+ * When USE_OPENLDAP is defined a recent version of the OpenLDAP library
+ * might be required for compilation and runtime. In order to use ancient
+ * OpenLDAP library versions, USE_OPENLDAP shall not be defined.
+ */
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -588,4 +599,4 @@ static Sockbuf_IO ldapsb_tls =
 };
 #endif /* USE_SSL */
 
-#endif  /* USE_OPENLDAP */
+#endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
