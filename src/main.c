@@ -2406,12 +2406,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->ftp_pret = toggle;
         break;
       case 'D': /* --proto */
-        config->proto_present = 1;
+        config->proto_present = TRUE;
         if(proto2num(config, &config->proto, nextarg))
           return PARAM_BAD_USE;
         break;
       case 'E': /* --proto-redir */
-        config->proto_redir_present = 1;
+        config->proto_redir_present = TRUE;
         if(proto2num(config, &config->proto_redir, nextarg))
           return PARAM_BAD_USE;
         break;
