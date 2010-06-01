@@ -6,6 +6,26 @@
 
                                   Changelog
 
+Daniel Stenberg (1 June 2010)
+- Igor Novoseltsev reported a problem with the multi socket API and using
+  timeouts and timers. It boiled down to a problem with libcurl's use of
+  GetTickCount() interally to figure out the current time, while Igor's own
+  application code used another function call.
+
+  It made his app call the socket API timeout function a bit _before_ libcurl
+  would consider the timeout to trigger, and that could easily lead to
+  timeouts or stalls in the app. It seems GetTickCount() in general often has
+  no better resolution than 16ms and switching to the alternative function
+  QueryPerformanceCounter has its share of problems:
+      http://www.virtualdub.org/blog/pivot/entry.php?id=106
+
+  We address this problem by simply having libcurl treat timers that already
+  has occured or will occur within 40ms subject for treatment. I'm confident
+  that there are other implementations and operating systems with similarly in
+  accurate timer functions so it makes sense to have applied generically and I
+  don't believe we sacrifice much by adding a 40ms inaccuracy on these
+  timeouts.
+
 Kamil Dudka (27 May 2010)
 - added a new test for CRL support (test313)
 

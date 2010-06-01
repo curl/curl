@@ -1994,9 +1994,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        extracts a matching node if there is one */
 
     now = Curl_tvnow();
-    now.tv_usec += 1000; /* to compensate for the truncating of 999us to 0ms,
-                            we always add time here to make the comparison
-                            below better */
+    now.tv_usec += 40000; /* compensate for bad precision timers */
+    if(now.tv_usec > 1000000) {
+      now.tv_sec++;
+      now.tv_usec -= 1000000;
+    }
 
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {

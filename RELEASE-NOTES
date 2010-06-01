@@ -33,6 +33,7 @@ This release includes the following bugfixes:
  o OpenSSL handshake state-machine for multi interface
  o TFTP timeout option sent correctly
  o TFTP block id wrap
+ o curl_multi_socket_action() timeout handles inaccuracy in timers better
 
 This release includes the following known bugs:
 
@@ -43,6 +44,7 @@ advice from friends like these:
 
  Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
  Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
- Pavel Raiskup, John-Mark Bell, Eric Mertens, Tor Arntsen, Douglas Kilpatrick
+ Pavel Raiskup, John-Mark Bell, Eric Mertens, Tor Arntsen, Douglas Kilpatrick,
+ Igor Novoseltsev
 
         Thanks! (and sorry if I forgot to mention someone)
