@@ -404,21 +404,28 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
        AC_SUBST(CURL_DISABLE_LDAPS, [1])
        ;;
-  *)   if test x$CURL_DISABLE_LDAP = x1 ; then
-               AC_MSG_RESULT(LDAP support needs to be enabled in order to enable LDAPS support!)
-               AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-               AC_SUBST(CURL_DISABLE_LDAPS, [1])
+  *)   if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         AC_MSG_RESULT(LDAP needs to be enabled to support LDAPS)
+         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+         AC_SUBST(CURL_DISABLE_LDAPS, [1])
        else
-               AC_MSG_RESULT(yes)
-               AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
-               AC_SUBST(HAVE_LDAP_SSL, [1])
-               curl_ldaps_msg="enabled"
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+         AC_SUBST(HAVE_LDAP_SSL, [1])
+         curl_ldaps_msg="enabled"
        fi
        ;;
-  esac ],
-       AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-       AC_SUBST(CURL_DISABLE_LDAPS, [1])
+  esac ],[
+       if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         AC_MSG_RESULT(no)
+         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+         AC_SUBST(CURL_DISABLE_LDAPS, [1])
+       else
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+         AC_SUBST(HAVE_LDAP_SSL, [1])
+         curl_ldaps_msg="enabled"
+       fi ]
 )
 
 AC_MSG_CHECKING([whether to support rtsp])
@@ -863,7 +870,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     esac
   else
     curl_ldap_msg="enabled (OpenLDAP)"
-    if test "x$ac_cv_func_ldap_init_fd" = x""yes; then
+    if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
       AC_SUBST(USE_OPENLDAP, [1])
     fi
