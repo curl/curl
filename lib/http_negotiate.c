@@ -305,11 +305,15 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
       infof(conn->data, "Make SPNEGO Initial Token failed\n");
     }
     else {
-      free(neg_ctx->output_token.value);
+      free(responseToken);
       responseToken = NULL;
+      free(neg_ctx->output_token.value);
       neg_ctx->output_token.value = malloc(spnegoTokenLength);
-      if(neg_ctx->output_token.value == NULL)
+      if(neg_ctx->output_token.value == NULL) {
+        free(spnegoToken);
+        spnegoToken = NULL;
         return CURLE_OUT_OF_MEMORY;
+      }
       memcpy(neg_ctx->output_token.value, spnegoToken,spnegoTokenLength);
       neg_ctx->output_token.length = spnegoTokenLength;
       free(spnegoToken);
