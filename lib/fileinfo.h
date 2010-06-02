@@ -1,5 +1,5 @@
-#ifndef __FILEINFO_H
-#define __FILEINFO_H
+#ifndef HEADER_CURL_FILEINFO_H
+#define HEADER_CURL_FILEINFO_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -30,4 +30,4 @@ void Curl_fileinfo_dtor(void *, void *);
 
 struct curl_fileinfo *Curl_fileinfo_dup(const struct curl_fileinfo *src);
 
-#endif /* __FILEINFO_H */
+#endif /* HEADER_CURL_FILEINFO_H */

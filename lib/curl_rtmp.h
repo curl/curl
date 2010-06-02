@@ -1,6 +1,5 @@
-#ifndef __CURL_RTMP_H
-#define __CURL_RTMP_H
-
+#ifndef HEADER_CURL_RTMP_H
+#define HEADER_CURL_RTMP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -31,4 +30,4 @@ extern const struct Curl_handler Curl_handler_rtmps;
 extern const struct Curl_handler Curl_handler_rtmpts;
 #endif
 
-#endif /* __CURL_RTMP_H */
+#endif /* HEADER_CURL_RTMP_H */

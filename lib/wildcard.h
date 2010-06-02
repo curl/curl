@@ -1,5 +1,5 @@
-#ifndef __WILDCARD_H
-#define __WILDCARD_H
+#ifndef HEADER_CURL_WILDCARD_H
+#define HEADER_CURL_WILDCARD_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -55,4 +55,4 @@ void Curl_wildcard_dtor(struct WildcardData *wc);
 
 struct SessionHandle;
 
-#endif /* __WILDCARD_H */
+#endif /* HEADER_CURL_WILDCARD_H */

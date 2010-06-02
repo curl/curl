@@ -26,6 +26,13 @@
 #include "strdup.h"
 #include "fileinfo.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 struct curl_fileinfo *Curl_fileinfo_alloc(void)
 {
   struct curl_fileinfo *tmp = malloc(sizeof(struct curl_fileinfo));

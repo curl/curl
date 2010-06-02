@@ -64,4 +64,4 @@ int Curl_HMAC_final(HMAC_context * context, unsigned char * result);
 
 #endif
 
-#endif
+#endif /* HEADER_CURL_HMAC_H */

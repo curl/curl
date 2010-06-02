@@ -1,5 +1,5 @@
-#ifndef __FTPLISTPARSER_H_
-#define __FTPLISTPARSER_H_
+#ifndef HEADER_CURL_FTPLISTPARSER_H
+#define HEADER_CURL_FTPLISTPARSER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -35,4 +35,4 @@ struct ftp_parselist_data *ftp_parselist_data_alloc(void);
 
 void ftp_parselist_data_free(struct ftp_parselist_data **pl_data);
 
-#endif /* __FTPLISTPARSER_H_ */
+#endif /* HEADER_CURL_FTPLISTPARSER_H */

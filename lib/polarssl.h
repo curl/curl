@@ -1,5 +1,5 @@
-#ifndef __POLARSSL_H
-#define __POLARSSL_H
+#ifndef HEADER_CURL_POLARSSL_H
+#define HEADER_CURL_POLARSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -54,4 +54,4 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 
 #endif /* USE_POLARSSL */
-#endif
+#endif /* HEADER_CURL_POLARSSL_H */
