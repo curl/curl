@@ -22,6 +22,7 @@
  2.2 Remove easy interface internally
  2.3 Avoid having to remove/readd handles
  2.4 Fix HTTP Pipelining for PUT
+ 2.5 Make curl_multi_info_read faster
 
  3. Documentation
  3.1  More and better
@@ -63,7 +64,6 @@
  8.3 check connection
 
  9. Other protocols
- 9.1 ditch ldap-specific select
 
  10. New protocols
  10.1 RSYNC
@@ -185,6 +185,10 @@
  serial requests and currently libcurl only supports that for HEAD and GET
  requests but it should also be possible for PUT.
 
+2.5 Make curl_multi_info_read faster
+
+ When checking if there's info to return, this function scans over ALL added
+ easy handles every time. That makes this function unnecessary heavy and slow.
 
 3. Documentation
 
@@ -363,12 +367,6 @@ to provide the data to send.
  SSL_peak() way we use with OpenSSL.
 
 9. Other protocols
-
-9.1 ditch ldap-specific select
-
- * Look over the implementation. The looping will have to "go away" from the
-   lib/ldap.c source file and get moved to the main network code so that the
-   multi interface and friends will work for LDAP as well.
 
 10. New protocols
 
