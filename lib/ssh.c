@@ -2408,14 +2408,27 @@ static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode ssh_easy_statemach(struct connectdata *conn)
+static CURLcode ssh_easy_statemach(struct connectdata *conn,
+                                   bool duringconnect)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
+    long left;
+
     result = ssh_statemach_act(conn, &block);
+
+    if(Curl_pgrsUpdate(conn))
+      return CURLE_ABORTED_BY_CALLBACK;
+
+    left = Curl_timeleft(conn, NULL, duringconnect);
+    if(left < 0) {
+      failf(data, "Operation timed out\n");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
 
 #ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
     if((CURLE_OK == result) && block) {
@@ -2430,7 +2443,8 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn)
         fd_write = sock;
       }
       /* wait for the socket to become ready */
-      Curl_socket_ready(fd_read, fd_write, 1000); /* ignore result */
+      Curl_socket_ready(fd_read, fd_write,
+                        left>1000?1000:left); /* ignore result */
     }
 #endif
 
@@ -2548,7 +2562,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(data->state.used_interface == Curl_if_multi)
     result = ssh_multi_statemach(conn, done);
   else {
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, TRUE);
     if(!result)
       *done = TRUE;
   }
@@ -2584,7 +2598,7 @@ CURLcode scp_perform(struct connectdata *conn,
     result = ssh_multi_statemach(conn, dophase_done);
   }
   else {
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, FALSE);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
   *connected = conn->bits.tcpconnect;
@@ -2665,7 +2679,7 @@ static CURLcode scp_disconnect(struct connectdata *conn)
 
     state(conn, SSH_SESSION_DISCONNECT);
 
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, FALSE);
   }
 
   return result;
@@ -2686,7 +2700,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, FALSE);
   }
   else
     result = status;
@@ -2788,7 +2802,7 @@ CURLcode sftp_perform(struct connectdata *conn,
     result = ssh_multi_statemach(conn, dophase_done);
   }
   else {
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, FALSE);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
   *connected = conn->bits.tcpconnect;
@@ -2828,7 +2842,7 @@ static CURLcode sftp_disconnect(struct connectdata *conn)
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */
     state(conn, SSH_SFTP_SHUTDOWN);
-    result = ssh_easy_statemach(conn);
+    result = ssh_easy_statemach(conn, FALSE);
   }
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT is done\n"));

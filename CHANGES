@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel Stenberg (2 June 2010)
+- Jason McDonald posted bug report #3006786 when he found that the SFTP code
+  didn't timeout properly in several places in the code even if a timeout was
+  set properly.
+
+  Based on his suggested patch, I wrote a different implementation that I
+  think addressed the issue better and also uses the connect timeout for the
+  initial part of the SSH/SFTP done during the "protocol connect" phase.
+
+  (http://curl.haxx.se/bug/view.cgi?id=3006786)
+
 Yang Tse (2 June 2010)
 - Added missing new libcurl files to non-configure targets. Adjusted
   libcurl standard internal header inclusions in new files. Fixed an
