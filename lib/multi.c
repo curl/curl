@@ -1793,11 +1793,12 @@ static void singlesocket(struct Curl_multi *multi,
         return;
     }
 
+    /* we know (entry != NULL) at this point, see the logic above */
     multi->socket_cb(easy->easy_handle,
                      s,
                      action,
                      multi->socket_userp,
-                     entry ? entry->socketp : NULL);
+                     entry->socketp);
 
     entry->action = action; /* store the current action state */
   }

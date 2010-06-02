@@ -2057,13 +2057,12 @@ static CURLcode Curl_do_perform(struct SessionHandle *data)
           if(rc)
             res = rc;
           else
-            retry = (bool)(newurl?TRUE:FALSE);
+            retry = (newurl?TRUE:FALSE);
 
           if(retry) {
+            /* we know (newurl != NULL) at this point */
             res = CURLE_OK;
             follow = FOLLOW_RETRY;
-            if (!newurl)
-              res = CURLE_OUT_OF_MEMORY;
           }
           else if (res == CURLE_OK) {
             /*
