@@ -20,8 +20,9 @@
  *
  ***************************************************************************/
 
-#include "curl_fnmatch.h"
 #include "setup.h"
+
+#include "curl_fnmatch.h"
 
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)
