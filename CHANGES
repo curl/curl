@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Yang Tse (2 June 2010)
+- Added missing new libcurl files to non-configure targets. Adjusted
+  libcurl standard internal header inclusions in new files. Fixed an
+  SPNEGO related memory leak. Fixed several LDAP related compilation
+  issues, and fixed some compiler warnings.
+
 Daniel Stenberg (1 June 2010)
 - Igor Novoseltsev reported a problem with the multi socket API and using
   timeouts and timers. It boiled down to a problem with libcurl's use of
