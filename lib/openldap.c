@@ -35,12 +35,15 @@
  * OpenLDAP library versions, USE_OPENLDAP shall not be defined.
  */
 
+#include <ldap.h>
+
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"
-#include <ldap.h>
 #include "sslgen.h"
 #include "transfer.h"
+#include "curl_ldap.h"
+#include "curl_memory.h"
 #include "curl_base64.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
