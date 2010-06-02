@@ -1,6 +1,4 @@
 # Makefile for project libcurl
-# Generated on Sun,13 Jan 2002.16:57:00 by EasyGCC (0.1.3 [beta 2] (3 Jan 2002))
-# Contact: easygcc@melotech.co.uk
 
 # Project objects:
 objs =	o.base64 o.connect o.cookie o.dict \
@@ -16,7 +14,8 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
 	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp \
-	o.curl_threads o.warnless o.hmac o.md5
+	o.curl_threads o.warnless o.hmac o.md5 o.curl_rtmp \
+	o.openldap o.polarssl
 
 
 # Compile options:
@@ -45,6 +44,9 @@ o.curl_memrchr:	c.curl_memrchr
 
 o.curl_rand:	c.curl_rand
 		gcc $(compileropts) -c -o curl_rand.o c.curl_rand
+
+o.curl_rtmp:	c.curl_rtmp
+		gcc $(compileropts) -c -o curl_rtmp.o c.curl_rtmp
 
 o.curl_threads:	c.curl_threads
 		gcc $(compileropts) -c -o curl_threads.o c.curl_threads
@@ -127,11 +129,17 @@ o.mprintf:	c.mprintf
 o.netrc:	c.netrc
 		gcc $(compileropts) -c -o netrc.o c.netrc
 
+o.openldap:	c.openldap
+		gcc $(compileropts) -c -o openldap.o c.openldap
+
 o.parsedate:	c.parsedate
 		gcc $(compileropts) -c -o parsedate.o c.parsedate
 
 o.pingpong:	c.pingpong
 		gcc $(compileropts) -c -o pingpong.o c.pingpong
+
+o.polarssl:	c.polarssl
+		gcc $(compileropts) -c -o polarssl.o c.polarssl
 
 o.pop3:		c.pop3
 		gcc $(compileropts) -c -o pop3.o c.pop3

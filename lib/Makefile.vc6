@@ -492,6 +492,7 @@ X_OBJS= \
 	$(DIROBJ)\multi.obj \
 	$(DIROBJ)\netrc.obj \
         $(DIROBJ)\nonblock.obj \
+	$(DIROBJ)\openldap.obj \
 	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\pingpong.obj \
 	$(DIROBJ)\polarssl.obj \

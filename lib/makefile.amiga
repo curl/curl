@@ -1,5 +1,5 @@
 #
-# $VER: LibcURL Makefile for AmigaOS ...
+# libcurl Makefile for AmigaOS ...
 #
 
 # change the follow to where you have the AmiTCP SDK v4.3 includes:
@@ -24,7 +24,7 @@ OBJS = amigaos.c \
   strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c          \
   socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c		\
   curl_memrchr.c imap.c pop3.c smtp.c pingpong.c rtsp.c curl_threads.c	\
-  warnless.c hmac.c polarssl.c curl_rtmp.c
+  warnless.c hmac.c polarssl.c curl_rtmp.c openldap.c
 
 all:	$(OBJS:.c=.o)
 	ar cru libcurl.a $(OBJS:.c=.o)
