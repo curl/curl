@@ -341,7 +341,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   /* filter pattern-corresponding filenames */
   if(compare(conn->data->set.fnmatch_data, wc->pattern, finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
-    if((finfo->filetype == CURLFILETYPE_SYMLINK) &&
+    if((finfo->filetype == CURLFILETYPE_SYMLINK) && finfo->strings.target
        (strstr(finfo->strings.target, " -> "))) {
       add = FALSE;
     }
@@ -424,6 +424,9 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
       else {
         Curl_fileinfo_dtor(NULL, parser->file_data);
         parser->file_data = NULL;
+        parser->error = CURLE_OUT_OF_MEMORY;
+        PL_ERROR(conn, CURLE_OUT_OF_MEMORY);
+        return bufflen;
       }
     }
 
@@ -937,7 +940,7 @@ size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
                 PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                 return bufflen;
               }
-              /* correct file size */
+              /* correct file type */
               parser->file_data->filetype = CURLFILETYPE_FILE;
             }
 
