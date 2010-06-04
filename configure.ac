@@ -371,28 +371,10 @@ AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
        AC_SUBST(CURL_DISABLE_LDAP, [1])
        ;;
   *)
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-           AC_SUBST(CURL_DISABLE_LDAP, [1])
-           AC_MSG_RESULT(no)
-           ;;
-         *)
-           AC_MSG_RESULT(yes)
-       esac
+       AC_MSG_RESULT(yes)
        ;;
   esac ],[
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-           AC_SUBST(CURL_DISABLE_LDAP, [1])
-           AC_MSG_RESULT(no)
-           ;;
-         *)
-           AC_MSG_RESULT(yes)
-       esac ]
+       AC_MSG_RESULT(yes) ]
 )
 AC_MSG_CHECKING([whether to support ldaps])
 AC_ARG_ENABLE(ldaps,
@@ -810,13 +792,11 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   CURL_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME" ; then
-    case $host in
-      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
-        dnl Windows uses a single and unique OpenLDAP DLL name
-        LDAPLIBNAME="wldap32"
-        LBERLIBNAME="no"
-        ;;
-    esac
+    if test "$ac_cv_native_windows" = "yes"; then
+      dnl Windows uses a single and unique LDAP library name
+      LDAPLIBNAME="wldap32"
+      LBERLIBNAME="no"
+    fi
   fi
 
   if test "$LDAPLIBNAME" ; then
@@ -862,12 +842,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
-    AC_DEFINE(CURL_LDAP_WIN, 1, [Use W$ LDAP implementation])
-    case $host in
-      *-*-cygwin* | *-*-pw32*)
-        AC_DEFINE(CURL_LDAP_HYBRID, 1, [W$ LDAP with non-W$ compiler])
-        ;;
-    esac
+    AC_DEFINE(CURL_LDAP_WIN, 1, [Use Windows LDAP implementation])
   else
     curl_ldap_msg="enabled (OpenLDAP)"
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then

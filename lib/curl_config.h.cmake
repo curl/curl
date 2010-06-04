@@ -58,10 +58,7 @@
 /* to enable hidden symbols */
 #cmakedefine CURL_HIDDEN_SYMBOLS ${CURL_HIDDEN_SYMBOLS}
 
-/* W$ LDAP with non-W$ compiler */
-#cmakedefine CURL_LDAP_HYBRID ${CURL_LDAP_HYBRID}
-
-/* Use W$ LDAP implementation */
+/* Use Windows LDAP implementation */
 #cmakedefine CURL_LDAP_WIN ${CURL_LDAP_WIN}
 
 /* when not building a shared library */

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Yang Tse (4 June 2010)
+- Enabled OpenLDAP support for cygwin builds. This support was disabled back
+  in 2008 due to incompatibilities between OpenSSL and OpenLDAP headers.
+  cygwin's OpenSSL 0.9.8l and OpenLDAP 2.3.43 versions on cygwin 1.5.25
+  allow building an OpenLDAP enabled libcurl supporting back to Windows 95.
+
+  Removed the non-functional CURL_LDAP_HYBRID code and references.
+
 Daniel Stenberg (2 June 2010)
 - Jason McDonald posted bug report #3006786 when he found that the SFTP code
   didn't timeout properly in several places in the code even if a timeout was

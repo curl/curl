@@ -48,10 +48,7 @@
 /* to enable hidden symbols */
 /*#define CURL_HIDDEN_SYMBOLS 1*/
 
-/* W$ LDAP with non-W$ compiler */
-/* #undef CURL_LDAP_HYBRID */
-
-/* Use W$ LDAP implementation */
+/* Use Windows LDAP implementation */
 /* #undef CURL_LDAP_WIN */
 
 /* when not building a shared library */

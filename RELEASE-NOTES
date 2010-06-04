@@ -16,6 +16,7 @@ This release includes the following changes:
  o added support for FTP wildcard matching and downloads
  o added support for RTMP
  o introducing new LDAP code for new enough OpenLDAP
+ o OpenLDAP support enabled for cygwin builds
 
 This release includes the following bugfixes:
 

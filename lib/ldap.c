@@ -43,15 +43,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef CURL_LDAP_HYBRID         /* If W$ definitions are needed. */
-# include <windows.h>
-  /* Remember we are NOT in a W$ compiler! */
-# undef WIN32
-# undef _WIN32
-# undef __WIN32__
-#endif
-
-#ifdef CURL_LDAP_WIN            /* Use W$ LDAP implementation. */
+#ifdef CURL_LDAP_WIN            /* Use Windows LDAP implementation. */
 # include <winldap.h>
 # ifndef LDAP_VENDOR_NAME
 #  error Your Platform SDK is NOT sufficient for LDAP support! Update your Platform SDK, or disable LDAP support!
@@ -59,14 +51,14 @@
 #  include <winber.h>
 # endif
 #else
-#define LDAP_DEPRECATED 1       /* Be sure ldap_init() is defined. */
-#ifdef HAVE_LBER_H
-# include <lber.h>
-#endif
+# define LDAP_DEPRECATED 1      /* Be sure ldap_init() is defined. */
+# ifdef HAVE_LBER_H
+#  include <lber.h>
+# endif
 # include <ldap.h>
-#if (defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H))
-# include <ldap_ssl.h>
-#endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
+# if (defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H))
+#  include <ldap_ssl.h>
+# endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
 #ifdef HAVE_UNISTD_H
