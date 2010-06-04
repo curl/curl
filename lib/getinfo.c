@@ -66,6 +66,12 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   info->header_size = 0;
   info->request_size = 0;
   info->numconnects = 0;
+
+  info->ip[0] = 0;
+  info->port = 0;
+  info->localip[0] = 0;
+  info->localport = 0;
+
   return CURLE_OK;
 }
 
@@ -223,6 +229,19 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */
     *param_charp = data->info.ip;
+    break;
+  case CURLINFO_PRIMARY_PORT:
+    /* Return the (remote) port of the most recent (primary) connection */
+    *param_longp = data->info.port;
+    break;
+  case CURLINFO_LOCAL_IP:
+    /* Return the source/local ip address of the most recent (primary)
+       connection */
+    *param_charp = data->info.localip;
+    break;
+  case CURLINFO_LOCAL_PORT:
+    /* Return the local port of the most recent (primary) connection */
+    *param_longp = data->info.localport;
     break;
   case CURLINFO_CERTINFO:
     /* Return the a pointer to the certinfo struct. Not really an slist

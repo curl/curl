@@ -151,11 +151,14 @@ CURLINFO_HTTPAUTH_AVAIL         7.10.8
 CURLINFO_HTTP_CODE              7.4.1         7.10.8
 CURLINFO_HTTP_CONNECTCODE       7.10.7
 CURLINFO_LASTSOCKET             7.15.2
+CURLINFO_LOCAL_IP               7.21.0
+CURLINFO_LOCAL_PORT             7.21.0
 CURLINFO_NAMELOOKUP_TIME        7.4.1
 CURLINFO_NUM_CONNECTS           7.12.3
 CURLINFO_OS_ERRNO               7.12.2
 CURLINFO_PRETRANSFER_TIME       7.4.1
 CURLINFO_PRIMARY_IP             7.19.0
+CURLINFO_PRIMARY_PORT           7.21.0
 CURLINFO_PRIVATE                7.10.3
 CURLINFO_PRIVATE                7.10.3
 CURLINFO_PROXYAUTH_AVAIL        7.10.8
@@ -402,6 +405,12 @@ CURLPROTO_LDAP                  7.19.4
 CURLPROTO_LDAPS                 7.19.4
 CURLPROTO_POP3                  7.20.0
 CURLPROTO_POP3S                 7.20.0
+CURLPROTO_RTMP                  7.21.0
+CURLPROTO_RTMPE                 7.21.0
+CURLPROTO_RTMPS                 7.21.0
+CURLPROTO_RTMPT                 7.21.0
+CURLPROTO_RTMPTE                7.21.0
+CURLPROTO_RTMPTS                7.21.0
 CURLPROTO_RTSP                  7.20.0
 CURLPROTO_SCP                   7.19.4
 CURLPROTO_SFTP                  7.19.4
@@ -415,12 +424,6 @@ CURLPROXY_SOCKS4                7.10
 CURLPROXY_SOCKS4A               7.18.0
 CURLPROXY_SOCKS5                7.10
 CURLPROXY_SOCKS5_HOSTNAME       7.18.0
-CURLPROTO_RTMP                  7.21.0
-CURLPROTO_RTMPT                 7.21.0
-CURLPROTO_RTMPE                 7.21.0
-CURLPROTO_RTMPTE                7.21.0
-CURLPROTO_RTMPS                 7.21.0
-CURLPROTO_RTMPTS                7.21.0
 CURLSSH_AUTH_DEFAULT            7.16.1
 CURLSSH_AUTH_HOST               7.16.1
 CURLSSH_AUTH_KEYBOARD           7.16.1

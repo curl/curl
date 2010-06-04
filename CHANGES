@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel Stenberg (5 June 2010)
+- Frank Meier added CURLINFO_PRIMARY_PORT, CURLINFO_LOCAL_IP and
+  CURLINFO_LOCAL_PORT to curl_easy_getinfo().
+
 Yang Tse (4 June 2010)
 - Enabled OpenLDAP support for cygwin builds. This support was disabled back
   in 2008 due to incompatibilities between OpenSSL and OpenLDAP headers.

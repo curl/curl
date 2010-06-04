@@ -17,6 +17,7 @@ This release includes the following changes:
  o added support for RTMP
  o introducing new LDAP code for new enough OpenLDAP
  o OpenLDAP support enabled for cygwin builds
+ o added CURLINFO_PRIMARY_PORT, CURLINFO_LOCAL_IP and CURLINFO_LOCAL_PORT
 
 This release includes the following bugfixes:
 
@@ -48,6 +49,7 @@ advice from friends like these:
  Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
  Pavel Raiskup, John-Mark Bell, Eric Mertens, Tor Arntsen, Douglas Kilpatrick,
  Igor Novoseltsev, Jason McDonald, Dan Fandrich, Tanguy Fautre, Guenter Knauf,
- Julien Chaffraix, Kalle Vahlman
+ Julien Chaffraix, Kalle Vahlman, Frank Meier
+
 
         Thanks! (and sorry if I forgot to mention someone)

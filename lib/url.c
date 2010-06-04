@@ -5031,6 +5031,7 @@ static CURLcode setup_conn(struct connectdata *conn,
       conn->bits.tcpconnect = TRUE;
       *protocol_done = TRUE;
       Curl_verboseconnect(conn);
+      Curl_updateconninfo(conn->sock[FIRSTSOCKET], &data->info);
     }
     /* Stop the loop now */
     break;

@@ -1883,9 +1883,12 @@ typedef enum {
   CURLINFO_RTSP_CLIENT_CSEQ = CURLINFO_LONG   + 37,
   CURLINFO_RTSP_SERVER_CSEQ = CURLINFO_LONG   + 38,
   CURLINFO_RTSP_CSEQ_RECV   = CURLINFO_LONG   + 39,
+  CURLINFO_PRIMARY_PORT     = CURLINFO_LONG   + 40,
+  CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
+  CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 39
+  CURLINFO_LASTONE          = 42
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

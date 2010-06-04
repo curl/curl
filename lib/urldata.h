@@ -911,6 +911,12 @@ struct PureInfo {
   char ip[MAX_IPADR_LEN]; /* this buffer gets the numerical ip version stored
                              at the connect *attempt* so it will get the last
                              tried connect IP even on failures */
+  long port; /* the remote port the last connection was established to */
+  char localip[MAX_IPADR_LEN]; /* this buffer gets the numerical (local) ip
+                                  stored from where the last connection was
+                                  established */
+  long localport; /* the local (src) port the last connection
+                     originated from */
   struct curl_certinfo certs; /* info about the certs, only populated in
                                  OpenSSL builds. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */

@@ -173,6 +173,17 @@ string holding the IP address of the most recent connection done with this
 \fBcurl\fP handle. This string may be IPv6 if that's enabled. Note that you
 get a pointer to a memory area that will be re-used at next request so you
 need to copy the string if you want to keep the information. (Added in 7.19.0)
+.IP CURLINFO_PRIMARY_PORT
+Pass a pointer to a long to receive the destination port of the most recent
+connection done with this \fBcurl\fP handle. (Added in 7.21.0)
+.IP CURLINFO_LOCAL_IP
+Pass a pointer to a char pointer to receive the pointer to a zero-terminated
+string holding the local (source) IP address of the most recent connection done
+with this \fBcurl\fP handle. This string may be IPv6 if that's enabled. The
+same restrictions apply as to \fICURLINFO_PRIMARY_IP\fP. (Added in 7.21.0)
+.IP CURLINFO_LOCAL_PORT
+Pass a pointer to a long to receive the local (source) port of the most recent
+connection done with this \fBcurl\fP handle. (Added in 7.21.0)
 .IP CURLINFO_COOKIELIST
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies cURL knows (expired ones, too). Don't forget to
