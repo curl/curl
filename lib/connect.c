@@ -558,7 +558,7 @@ void Curl_updateconninfo(curl_socket_t sockfd, struct PureInfo* info)
   struct Curl_sockaddr_storage ssrem;
   struct Curl_sockaddr_storage ssloc;
 
-  socklen_t len = sizeof(struct Curl_sockaddr_storage);
+  curl_socklen_t len = sizeof(struct Curl_sockaddr_storage);
 
   getpeername(sockfd, (struct sockaddr*) &ssrem, &len);
   getsockname(sockfd, (struct sockaddr*) &ssloc, &len);
