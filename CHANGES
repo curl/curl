@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel Stenberg (5 June 2010)
+- Constantine Sapuntzakis fixed a case of spurious SSL connection aborts using
+  libcurl and OpenSSL. "I tracked it down to uncleared error state on the
+  OpenSSL error stack - patch attached deals with that."
+
+Daniel Stenberg (5 June 2010)
 - Frank Meier added CURLINFO_PRIMARY_PORT, CURLINFO_LOCAL_IP and
   CURLINFO_LOCAL_PORT to curl_easy_getinfo().
 

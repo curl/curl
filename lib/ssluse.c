@@ -64,6 +64,7 @@
 #include <openssl/x509v3.h>
 #include <openssl/dsa.h>
 #include <openssl/dh.h>
+#include <openssl/err.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -882,6 +883,8 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
       int what = Curl_socket_ready(conn->sock[sockindex],
                              CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
+        ERR_clear_error();
+
         /* Something to read, let's do it and hope that it is the close
            notify alert from the server */
         nread = (ssize_t)SSL_read(conn->ssl[sockindex].handle, buf,
@@ -1683,6 +1686,8 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
+
+  ERR_clear_error();
 
   err = SSL_connect(connssl->handle);
 
@@ -2512,6 +2517,8 @@ static ssize_t ossl_send(struct connectdata *conn,
   int memlen;
   int rc;
 
+  ERR_clear_error();
+
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   rc = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
@@ -2559,6 +2566,8 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
   unsigned long sslerror;
   ssize_t nread;
   int buffsize;
+
+  ERR_clear_error();
 
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, buffsize);
