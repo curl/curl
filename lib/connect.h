@@ -68,6 +68,6 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #define Curl_sndbufset(y)
 #endif
 
-void Curl_updateconninfo(curl_socket_t sockfd, struct PureInfo* info);
+void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 
 #endif

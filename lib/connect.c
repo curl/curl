@@ -524,9 +524,10 @@ static bool trynextip(struct connectdata *conn,
 }
 
 /* retrieves ip address and port from a sockaddr structure */
-static void getaddressinfo(struct sockaddr* sa, char* addr,
+static bool getaddressinfo(struct sockaddr* sa, char* addr,
                            long* port)
 {
+  unsigned short us_port;
   struct sockaddr_in* si = NULL;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6* si6 = NULL;
@@ -535,36 +536,71 @@ static void getaddressinfo(struct sockaddr* sa, char* addr,
   switch (sa->sa_family) {
     case AF_INET:
       si = (struct sockaddr_in*) sa;
-      Curl_inet_ntop(sa->sa_family, &(si->sin_addr), addr, MAX_IPADR_LEN);
-      *port = ntohs(si->sin_port);
+      if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
+                        addr, MAX_IPADR_LEN) != 0)
+        return FALSE;
+      us_port = ntohs(si->sin_port);
+      *port = us_port;
       break;
 #ifdef ENABLE_IPV6
     case AF_INET6:
       si6 = (struct sockaddr_in6*)sa;
-      Curl_inet_ntop(sa->sa_family, &(si6->sin6_addr), addr, MAX_IPADR_LEN);
-      *port = ntohs(si6->sin6_port);
+      if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
+                        addr, MAX_IPADR_LEN) != 0)
+        return FALSE;
+      us_port = ntohs(si6->sin6_port);
+      *port = us_port;
       break;
 #endif
     default:
       addr[0] = '\0';
       *port = 0;
   }
+  return TRUE;
 }
 
 /* retrieves the start/end point information of a socket of an established
    connection */
-void Curl_updateconninfo(curl_socket_t sockfd, struct PureInfo* info)
+void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 {
+  int error;
+  curl_socklen_t len;
   struct Curl_sockaddr_storage ssrem;
   struct Curl_sockaddr_storage ssloc;
+  struct SessionHandle *data = conn->data;
+  struct PureInfo *info = &conn->data->info;
 
-  curl_socklen_t len = sizeof(struct Curl_sockaddr_storage);
+  len = sizeof(struct Curl_sockaddr_storage);
+  if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
+    error = SOCKERRNO;
+    failf(data, "getpeername() failed with errno %d: %s",
+          error, Curl_strerror(conn, error));
+    return;
+  }
 
-  getpeername(sockfd, (struct sockaddr*) &ssrem, &len);
-  getsockname(sockfd, (struct sockaddr*) &ssloc, &len);
+  len = sizeof(struct Curl_sockaddr_storage);
+  if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
+    error = SOCKERRNO;
+    failf(data, "getsockname() failed with errno %d: %s",
+          error, Curl_strerror(conn, error));
+    return;
+  }
 
-  getaddressinfo((struct sockaddr*)&ssrem, info->ip, &info->port);
-  getaddressinfo((struct sockaddr*)&ssloc, info->localip, &info->localport);
+  if(!getaddressinfo((struct sockaddr*)&ssrem,
+                      info->ip, &info->port)) {
+    error = ERRNO;
+    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+          error, Curl_strerror(conn, error));
+    return;
+  }
+
+  if(!getaddressinfo((struct sockaddr*)&ssloc,
+                     info->localip, &info->localport)) {
+    error = ERRNO;
+    failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+          error, Curl_strerror(conn, error));
+    return;
+  }
 }
 
 /*
@@ -621,7 +657,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       *connected = TRUE;
       Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
       Curl_verboseconnect(conn);
-      Curl_updateconninfo(sockfd, &(data->info));
+      Curl_updateconninfo(conn, sockfd);
 
       return CURLE_OK;
     }
@@ -912,7 +948,7 @@ singleipconnect(struct connectdata *conn,
     /* we are connected, awesome! */
     *connected = TRUE; /* this is a true connect */
     infof(data, "connected\n");
-    Curl_updateconninfo(sockfd, &(data->info));
+    Curl_updateconninfo(conn, sockfd);
     return sockfd;
   }
   else if(WAITCONN_TIMEOUT == rc)
