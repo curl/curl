@@ -537,7 +537,7 @@ static bool getaddressinfo(struct sockaddr* sa, char* addr,
     case AF_INET:
       si = (struct sockaddr_in*) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
-                        addr, MAX_IPADR_LEN) != 0)
+                        addr, MAX_IPADR_LEN) == NULL)
         return FALSE;
       us_port = ntohs(si->sin_port);
       *port = us_port;
@@ -546,7 +546,7 @@ static bool getaddressinfo(struct sockaddr* sa, char* addr,
     case AF_INET6:
       si6 = (struct sockaddr_in6*)sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
-                        addr, MAX_IPADR_LEN) != 0)
+                        addr, MAX_IPADR_LEN) == NULL)
         return FALSE;
       us_port = ntohs(si6->sin6_port);
       *port = us_port;
