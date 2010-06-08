@@ -734,7 +734,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
       /* Parse the excess data */
       k->str += nread;
-      nread = excess;
+      nread = (ssize_t)excess;
 
       result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
       if(result)
