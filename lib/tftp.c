@@ -535,10 +535,12 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     sbytes += tftp_option_add(state, sbytes,
                               (char *)state->spacket.data+sbytes, buf );
 
+    /* the typecase for the 3rd argument is mostly for systems that do
+       not have a size_t argument, like older unixes that want an 'int' */
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
-                    sbytes, 0,
-                    state->conn->ip_addr->ai_addr,
-                    state->conn->ip_addr->ai_addrlen);
+                      (SEND_TYPE_ARG3)sbytes, 0,
+                      state->conn->ip_addr->ai_addr,
+                      state->conn->ip_addr->ai_addrlen);
     if(senddata != (ssize_t)sbytes) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
     }
