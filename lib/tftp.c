@@ -1199,7 +1199,7 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
   CURLcode              result = CURLE_OK;
   struct SessionHandle  *data = conn->data;
   tftp_state_data_t     *state = (tftp_state_data_t *)conn->proto.tftpc;
-  int                   fd_read;
+  curl_socket_t         fd_read;
   long                  timeout_ms;
   struct SingleRequest  *k = &data->req;
   struct timeval        transaction_start = Curl_tvnow();
