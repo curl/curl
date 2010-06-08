@@ -570,6 +570,10 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
   struct SessionHandle *data = conn->data;
   struct PureInfo *info = &conn->data->info;
 
+  if(conn->bits.reuse)
+    /* reusing same connection */
+    return;
+
   len = sizeof(struct Curl_sockaddr_storage);
   if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
     error = SOCKERRNO;
