@@ -759,8 +759,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       state->state = TFTP_STATE_FIN;
       return CURLE_OK;
     }
-    res = Curl_fillreadbuffer(state->conn, (size_t)state->blksize,
-                              &state->sbytes);
+    res = Curl_fillreadbuffer(state->conn, state->blksize, &state->sbytes);
     if(res)
       return res;
     sbytes = sendto(state->sockfd, (void *)state->spacket.data,
