@@ -188,7 +188,7 @@ struct ftp_parselist_data {
   } offsets;
 };
 
-struct ftp_parselist_data *ftp_parselist_data_alloc(void)
+struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
   struct ftp_parselist_data *parselist_data =
       malloc(sizeof(struct ftp_parselist_data));
@@ -199,7 +199,7 @@ struct ftp_parselist_data *ftp_parselist_data_alloc(void)
 }
 
 
-void ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
+void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
 {
   if(*pl_data)
     free(*pl_data);
@@ -207,7 +207,7 @@ void ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
 }
 
 
-CURLcode ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
+CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 {
   return pl_data->error;
 }
@@ -365,7 +365,8 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   return CURLE_OK;
 }
 
-size_t ftp_parselist(char *buffer, size_t size, size_t nmemb, void *connptr)
+size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
+                          void *connptr)
 {
   size_t bufflen = size*nmemb;
   struct connectdata *conn = (struct connectdata *)connptr;

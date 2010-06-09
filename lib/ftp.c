@@ -3474,7 +3474,7 @@ static void wc_data_dtor(void *ptr)
 {
   struct ftp_wc_tmpdata *tmp = ptr;
   if(tmp)
-    ftp_parselist_data_free(&tmp->parser);
+    Curl_ftp_parselist_data_free(&tmp->parser);
   Curl_safefree(tmp);
 }
 
@@ -3525,7 +3525,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
   }
 
   /* INITIALIZE parselist structure */
-  ftp_tmp->parser = ftp_parselist_data_alloc();
+  ftp_tmp->parser = Curl_ftp_parselist_data_alloc();
   if(!ftp_tmp->parser)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3545,7 +3545,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
   /* backup old write_function */
   ftp_tmp->backup.write_function = conn->data->set.fwrite_func;
   /* parsing write function (callback included directly from ftplistparser.c) */
-  conn->data->set.fwrite_func = ftp_parselist;
+  conn->data->set.fwrite_func = Curl_ftp_parselist;
   /* backup old file descriptor */
   ftp_tmp->backup.file_descriptor = conn->data->set.out;
   /* let the writefunc callback know what curl pointer is working with */
@@ -3586,7 +3586,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     conn->data->set.out = ftp_tmp->backup.file_descriptor;
     wildcard->state = CURLWC_DOWNLOADING;
 
-    if(ftp_parselist_geterror(ftp_tmp->parser)) {
+    if(Curl_ftp_parselist_geterror(ftp_tmp->parser)) {
       /* error found in LIST parsing */
       wildcard->state = CURLWC_CLEAN;
       return wc_statemach(conn);
@@ -3670,7 +3670,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
   case CURLWC_CLEAN:
     ret = CURLE_OK;
     if(ftp_tmp) {
-      ret = ftp_parselist_geterror(ftp_tmp->parser);
+      ret = Curl_ftp_parselist_geterror(ftp_tmp->parser);
     }
     wildcard->state = ret ? CURLWC_ERROR : CURLWC_DONE;
     break;
