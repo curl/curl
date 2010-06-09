@@ -48,6 +48,18 @@
      d CURL_SOCKET_TIMEOUT...
      d                 c                   -1
       *
+      /if not defined(CURL_MAX_WRITE_SIZE)
+      /define CURL_MAX_WRITE_SIZE
+     d CURL_MAX_WRITE_SIZE...
+     d                 c                   16384
+      /endif
+      *
+      /if not defined(CURL_MAX_HTTP_HEADER)
+      /define CURL_MAX_HTTP_HEADER
+     d CURL_MAX_HTTP_HEADER...
+     d                 c                   102400
+      /endif
+      *
      d CURLINFO_STRING...
      d                 c                   X'00100000'
      d CURLINFO_LONG   c                   X'00200000'
@@ -231,6 +243,42 @@
      d CURLPAUSE_ALL   c                   X'00000005'
      d CURLPAUSE_CONT  c                   X'00000000'
       *
+     d CURLINFOFLAG_KNOWN_FILENAME...
+     d                 c                   X'00000001'
+     d CURLINFOFLAG_KNOWN_FILETYPE...
+     d                 c                   X'00000002'
+     d CURLINFOFLAG_KNOWN_TIME...
+     d                 c                   X'00000004'
+     d CURLINFOFLAG_KNOWN_PERM...
+     d                 c                   X'00000008'
+     d CURLINFOFLAG_KNOWN_UID...
+     d                 c                   X'00000010'
+     d CURLINFOFLAG_KNOWN_GID...
+     d                 c                   X'00000020'
+     d CURLINFOFLAG_KNOWN_SIZE...
+     d                 c                   X'00000040'
+     d CURLINFOFLAG_KNOWN_HLINKCOUNT...
+     d                 c                   X'00000080'
+      *
+     d CURL_CHUNK_BGN_FUNC_OK...
+     d                 c                   0
+     d CURL_CHUNK_BGN_FUNC_FAIL...
+     d                 c                   1
+     d CURL_CHUNK_BGN_FUNC_SKIP...
+     d                 c                   2
+      *
+     d CURL_CHUNK_END_FUNC_OK...
+     d                 c                   0
+     d CURL_CHUNK_END_FUNC_FAIL...
+     d                 c                   1
+      *
+     d CURL_FNMATCHFUNC_MATCH...
+     d                 c                   0
+     d CURL_FNMATCHFUNC_NOMATCH...
+     d                 c                   1
+     d CURL_FNMATCHFUNC_FAIL...
+     d                 c                   2
+      *
       **************************************************************************
       *                                Types
       **************************************************************************
@@ -413,6 +461,10 @@
      d                 c                   85
      d  CURLE_RTSP_SESSION_ERROR...
      d                 c                   86
+     d  CURLE_FTP_BAD_FILE_LIST...
+     d                 c                   87
+     d  CURLE_CHUNK_FAILED...
+     d                 c                   88
       *
      d curlioerr       s             10i 0 based(######ptr######)               Enum
      d  CURLIOE_OK     c                   0
@@ -420,6 +472,24 @@
      d                 c                   1
      d  CURLIOE_FAILRESTART...
      d                 c                   2
+      *
+     d curlfiletype    s             10i 0 based(######ptr######)               Enum
+     d  CURLFILETYPE_FILE...
+     d                 c                   0
+     d  CURLFILETYPE_DIRECTORY...
+     d                 c                   1
+     d  CURLFILETYPE_SYMLINK...
+     d                 c                   2
+     d  CURLFILETYPE_DEVICE_BLOCK...
+     d                 c                   3
+     d  CURLFILETYPE_DEVICE_CHAR...
+     d                 c                   4
+     d  CURLFILETYPE_NAMEDPIPE...
+     d                 c                   5
+     d  CURLFILETYPE_SOCKET...
+     d                 c                   6
+     d  CURLFILETYPE_DOOR...
+     d                 c                   7
       *
      d curliocmd       s             10i 0 based(######ptr######)               Enum
      d  CURLIOCMD_NOP  c                   0
@@ -563,6 +633,18 @@
      d                 c                   X'00020000'
      d  CURLPROTO_RTSP...
      d                 c                   X'00040000'
+     d  CURLPROTO_RTMP...
+     d                 c                   X'00080000'
+     d  CURLPROTO_RTMPT...
+     d                 c                   X'00100000'
+     d  CURLPROTO_RTMPTE...
+     d                 c                   X'00200000'
+     d  CURLPROTO_RTMPE...
+     d                 c                   X'00400000'
+     d  CURLPROTO_RTMPS...
+     d                 c                   X'00800000'
+     d  CURLPROTO_RTMPTS...
+     d                 c                   X'01000000'
       *
      d CURLoption      s             10i 0 based(######ptr######)               Enum
      d  CURLOPT_FILE   c                   10001
@@ -920,6 +1002,18 @@
      d                 c                   10195
      d  CURLOPT_INTERLEAVEFUNCTION...
      d                 c                   20196
+     d  CURLOPT_WILDCARDMATCH...
+     d                 c                   00197
+     d  CURLOPT_CHUNK_BGN_FUNCTION...
+     d                 c                   20198
+     d  CURLOPT_CHUNK_END_FUNCTION...
+     d                 c                   20199
+     d  CURLOPT_FNMATCH_FUNCTION...
+     d                 c                   20200
+     d  CURLOPT_CHUNK_DATA...
+     d                 c                   10201
+     d  CURLOPT_FNMATCH_DATA...
+     d                 c                   10202
       *
      d  CURLOPT_SERVER_RESPONSE_TIMEOUT...
      d                 c                   00112
@@ -1065,6 +1159,12 @@
      d                 c                   X'00200026'
      d  CURLINFO_RTSP_CSEQ_RECV...                                              CURLINFO_LONG + 39
      d                 c                   X'00200027'
+     d  CURLINFO_PRIMARY_PORT...                                                CURLINFO_LONG + 40
+     d                 c                   X'00200028'
+     d  CURLINFO_LOCAL_IP...                                                    CURLINFO_STRING + 41
+     d                 c                   X'00100029'
+     d  CURLINFO_LOCAL_PORT...                                                  CURLINFO_LONG + 42
+     d                 c                   X'0020002A'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -1318,6 +1418,30 @@
      d  num_of_certs                 10i 0
      d  certinfo                       *                                        struct curl_slist **
       *
+     d curl_fistrgs    ds                  based(######ptr######)
+     d                                     qualified
+     d  time                           *                                        char *
+     d  perm                           *                                        char *
+     d  user                           *                                        char *
+     d  group                          *                                        char *
+     d  target                         *                                        char *
+      *
+     d curl_fileinfo   ds                  based(######ptr######)
+     d                                     qualified
+     d  filename                       *                                        char *
+     d  filetype                           like(curlfiletype)
+     d  time                         10i 0                                      time_t
+     d  perm                         10u 0
+     d  uid                          10i 0
+     d  gid                          10i 0
+     d  size                               like(curl_off_t)
+     d  hardlinks                    10i 0
+     d  strings                            likeds(curl_fistrgs)
+     d  flags                        10u 0
+     d  b_data                         *                                        char *
+     d  b_size                       10u 0                                      size_t
+     d  b_used                       10u 0                                      size_t
+      *
      d curl_formget_callback...
      d                 s               *   based(######ptr######) procptr
       *
@@ -1376,6 +1500,15 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_sshkeycallback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_chunk_bgn_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_chunk_end_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_fnmatch_callback...
      d                 s               *   based(######ptr######) procptr
       *
       **************************************************************************
