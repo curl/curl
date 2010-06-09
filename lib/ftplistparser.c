@@ -190,12 +190,7 @@ struct ftp_parselist_data {
 
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
-  struct ftp_parselist_data *parselist_data =
-      malloc(sizeof(struct ftp_parselist_data));
-  if(!parselist_data)
-    return ZERO_NULL;
-  memset(parselist_data, 0, sizeof(struct ftp_parselist_data));
-  return parselist_data;
+  return calloc(1, sizeof(struct ftp_parselist_data));
 }
 
 
