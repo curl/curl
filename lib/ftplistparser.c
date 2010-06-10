@@ -163,17 +163,6 @@ struct ftp_parselist_data {
     } NT;
   } state;
 
-  struct {
-    char *buffer;
-    size_t bufferlength; /* how many bytes is allocated at *buffer */
-    size_t bufferin; /* how many bytes is in buffer */
-  } tmpdata;
-
-  struct {
-    curl_write_callback old_fwritefunc;
-    FILE *old_file_descriptor;
-  } backup;
-
   CURLcode error;
   struct curl_fileinfo *file_data;
   unsigned int item_length;
