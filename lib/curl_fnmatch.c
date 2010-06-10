@@ -223,7 +223,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       }
       else if(c == '\\') {
         c = *(++(*p));
-        if(isprint(c)) {
+        if(ISPRINT(c)) {
           charset[c] = 1;
           (*p)++;
         }
