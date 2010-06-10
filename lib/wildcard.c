@@ -34,6 +34,7 @@
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc)
 {
+  DEBUGASSERT(wc->filelist == NULL);
   /* now allocate only wc->filelist, everything else
      will be allocated if it is needed. */
   wc->filelist = Curl_llist_alloc(Curl_fileinfo_dtor);
@@ -50,8 +51,10 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
 
   if(wc->tmp_dtor) {
     wc->tmp_dtor(wc->tmp);
+    wc->tmp_dtor = ZERO_NULL;
     wc->tmp = NULL;
   }
+  DEBUGASSERT(wc->tmp == NULL);
 
   if(wc->filelist) {
     Curl_llist_destroy(wc->filelist, NULL);
@@ -67,5 +70,7 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
     free(wc->pattern);
     wc->pattern = NULL;
   }
+
   wc->customptr = NULL;
+  wc->state = CURLWC_INIT;
 }
