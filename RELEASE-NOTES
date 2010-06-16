@@ -1,43 +1,19 @@
-Curl and libcurl 7.21.0
+Curl and libcurl 7.21.1
 
- Public curl releases:         116
+ Public curl releases:         117
  Command line options:         138
  curl_easy_setopt() options:   180
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 794
+ Contributors:                 808
 
 This release includes the following changes:
 
- o added the --proto and -proto-redir options
- o new configure option --enable-threaded-resolver
- o improve TELNET ability with libcurl
- o added support for PolarSSL
- o added support for FTP wildcard matching and downloads
- o added support for RTMP
- o introducing new LDAP code for new enough OpenLDAP
- o OpenLDAP support enabled for cygwin builds
- o added CURLINFO_PRIMARY_PORT, CURLINFO_LOCAL_IP and CURLINFO_LOCAL_PORT
+ o 
 
 This release includes the following bugfixes:
 
- o prevent needless reverse name lookups
- o detect GSS on ancient Linux distros
- o GnuTLS: EOF caused error when it wasn't
- o GnuTLS: SSL handshake phase is non-blocking
- o -J/--remote-header-name strips CRLF
- o MSVC makefiles now use ws2_32.lib instead of wsock32.lib
- o -O crash on windows
- o SSL handshake timeout underflow in libcurl-NSS
- o multi interface missed storing connection time
- o broken CRL support in libcurl-NSS
- o ignore response-body on redirect even if compressed
- o OpenSSL handshake state-machine for multi interface
- o TFTP timeout option sent correctly
- o TFTP block id wrap
- o curl_multi_socket_action() timeout handles inaccuracy in timers better
- o SCP/SFTP failure to respect the timeout
- o spurious SSL connection aborts with OpenSSL
+ o 
 
 This release includes the following known bugs:
 
