@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.21.0 (16 June 2010)
+
 Daniel Stenberg (5 June 2010)
 - Constantine Sapuntzakis fixed a case of spurious SSL connection aborts using
   libcurl and OpenSSL. "I tracked it down to uncleared error state on the
