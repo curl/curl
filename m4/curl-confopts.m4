@@ -26,7 +26,7 @@
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
-dnl --enable-threaded-resolver or --disable-threaded-resover, and
+dnl --enable-threaded-resolver or --disable-threaded-resolver, and
 dnl set shell variable want_thres as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_THREADED_RESOLVER], [
@@ -34,7 +34,7 @@ AC_DEFUN([CURL_CHECK_OPTION_THREADED_RESOLVER], [
   OPT_THRES="default"
   AC_ARG_ENABLE(threaded_resolver,
 AC_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
-AC_HELP_STRING([--disable-threaded-resover],[Disable threaded resolver]),
+AC_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
   OPT_THRES=$enableval)
   case "$OPT_THRES" in
     yes)
