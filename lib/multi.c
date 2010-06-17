@@ -1528,6 +1528,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         multistate(easy, CURLM_STATE_COMPLETED);
       }
+      else
+        Curl_pgrsUpdate(easy->easy_conn);
     }
   } while(0);
   if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
