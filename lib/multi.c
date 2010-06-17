@@ -2169,7 +2169,9 @@ static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
                                               struct connectdata *conn)
 {
   size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  struct curl_llist_element *sendhead = conn->send_pipe->head;
   struct curl_llist *pipeline;
+  CURLcode rc;
 
   if(!Curl_isPipeliningEnabled(handle) ||
      pipeLen == 0)
@@ -2182,7 +2184,17 @@ static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
       pipeline = conn->pend_pipe;
   }
 
-  return Curl_addHandleToPipeline(handle, pipeline);
+  rc = Curl_addHandleToPipeline(handle, pipeline);
+
+  if (pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
+      /* this is a new one as head, expire it */
+      conn->writechannel_inuse = FALSE; /* not in use yet */
+      infof(conn->data, "%p is at send pipe head!\n",
+            conn->send_pipe->head->ptr);
+      Curl_expire(conn->send_pipe->head->ptr, 1);
+  }
+
+  return rc;
 }
 
 static int checkPendPipeline(struct connectdata *conn)
