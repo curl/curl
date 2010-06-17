@@ -3526,8 +3526,10 @@ static CURLcode init_wc_data(struct connectdata *conn)
 
   /* INITIALIZE parselist structure */
   ftp_tmp->parser = Curl_ftp_parselist_data_alloc();
-  if(!ftp_tmp->parser)
+  if(!ftp_tmp->parser) {
+    free(ftp_tmp);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   wildcard->tmp = ftp_tmp; /* put it to the WildcardData tmp pointer */
   wildcard->tmp_dtor = wc_data_dtor;
