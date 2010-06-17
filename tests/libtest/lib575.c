@@ -71,7 +71,7 @@ int test(char *URL)
         curl_multi_perform(mhandle, &still_running));
 
   while(still_running) {
-    struct timeval timeout;
+    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
     int rc;
     fd_set fdread;
     fd_set fdwrite;
@@ -80,21 +80,17 @@ int test(char *URL)
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
-    timeout.tv_sec = 3;
-    timeout.tv_usec = 0;
 
     m = curl_multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &max_fdset);
     if(m != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() error\n");
       goto test_cleanup;
     }
+    /* We call select(max_fdset + 1, ...), specially in case of (maxfd == -1),
+     * we call select(0, ...), which is basically equal to sleep. */
     rc = select(max_fdset + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     if(rc == -1) {
       fprintf(stderr, "select() error\n");
-      goto test_cleanup;
-    }
-    else if(rc == 0) {
-      fprintf(stderr, "select() timeout!\n");
       goto test_cleanup;
     }
     else {

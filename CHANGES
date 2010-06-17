@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Kamil Dudka (17 June 2010)
+- Improve test575 in order to not fail with threaded DNS resolver.
+
 Version 7.21.0 (16 June 2010)
 
 Daniel Stenberg (5 June 2010)
