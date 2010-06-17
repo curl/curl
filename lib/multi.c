@@ -1307,7 +1307,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       /* if both rates are within spec, resume transfer */
-      Curl_pgrsUpdate(easy->easy_conn);
       if( ( ( easy->easy_handle->set.max_send_speed == 0 ) ||
             ( easy->easy_handle->progress.ulspeed <
               easy->easy_handle->set.max_send_speed ) )  &&
@@ -1528,8 +1527,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         multistate(easy, CURLM_STATE_COMPLETED);
       }
-      else
-        Curl_pgrsUpdate(easy->easy_conn);
+      else if(Curl_pgrsUpdate(easy->easy_conn))
+        easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
   } while(0);
   if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
