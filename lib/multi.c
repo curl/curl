@@ -1527,7 +1527,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         multistate(easy, CURLM_STATE_COMPLETED);
       }
-      else if(Curl_pgrsUpdate(easy->easy_conn))
+      /* if there's still a connection to use, call the progress function */
+      else if(easy->easy_conn && Curl_pgrsUpdate(easy->easy_conn))
         easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
   } while(0);
