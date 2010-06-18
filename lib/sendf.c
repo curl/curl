@@ -254,8 +254,8 @@ CURLcode Curl_write(struct connectdata *conn,
   bytes_written = conn->send[num](conn, num, mem, len, &curlcode);
 
   *written = bytes_written;
-  if(-1 != bytes_written)
-    /* we completely ignore the curlcode value when -1 is not returned */
+  if(bytes_written >= 0)
+    /* we completely ignore the curlcode value when subzero is not returned */
     return CURLE_OK;
 
   /* handle CURLE_AGAIN or a send failure */
@@ -577,7 +577,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   }
 
   nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &curlcode);
-  if(nread == -1)
+  if(nread < 0)
     return curlcode;
 
   if(pipelining) {
