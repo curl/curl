@@ -126,6 +126,9 @@ make -s html
 echo "make pdf"
 make -s pdf
 
+echo "produce CHANGES"
+git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./log2changes.pl > CHANGES.dist
+
 ############################################################################
 #
 # Now run make dist to generate a tar.gz archive
