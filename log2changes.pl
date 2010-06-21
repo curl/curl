@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# git log --pretty=fuller --no-color --date=short --decorate
+# git log --pretty=fuller --no-color --date=short --decorate=full
 
 my @mname = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
@@ -32,7 +32,7 @@ while(<STDIN>) {
     if($l =~/^commit ([[:xdigit:]]*) ?(.*)/) {
         $co = $1;
         my $ref = $2;
-        if ($ref =~ /refs\/tags\/curl-(.*)\)/) {
+        if ($ref =~ /refs\/tags\/curl-([0-9_]*)/) {
             $tag = $1;
             $tag =~ tr/_/./; 
         } else {
@@ -50,15 +50,16 @@ while(<STDIN>) {
     }
     elsif($l =~ /^(    )(.*)/) {
         my $extra;
+        if ($tag) {
+            # Version entries have a special format
+            print "\nVersion " . $tag." ($date)\n";
+            $oldc = "";
+        }
         if($a ne $c) {
             $extra=sprintf("\n- [%s brought this change]\n\n  ", $a);
         }
         else {
             $extra="\n- ";
-        }
-        if ($tag) {
-            # Version entries have a special format
-            $c = "Version " . $tag;
         }
         if($co ne $oldco) {
             if($c ne $oldc) {
