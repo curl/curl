@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# git log --pretty=fuller --no-color --date=short
+# git log --pretty=fuller --no-color --date=short --decorate
 
 my @mname = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
@@ -14,12 +14,30 @@ sub nicedate {
     return $date;
 }
 
+print 
+'                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
+
+                                  Changelog
+';
+
 my $line;
+my $tag;
 while(<STDIN>) {
     my $l = $_;
 
-    if($l =~/^commit (.*)/) {
+    if($l =~/^commit ([[:xdigit:]]*) ?(.*)/) {
         $co = $1;
+        my $ref = $2;
+        if ($ref =~ /refs\/tags\/curl-(.*)\)/) {
+            $tag = $1;
+            $tag =~ tr/_/./; 
+        } else {
+            $tag = '';
+        }
     }
     elsif($l =~ /^Author: *(.*) +</) {
         $a = $1;
@@ -37,6 +55,10 @@ while(<STDIN>) {
         }
         else {
             $extra="\n- ";
+        }
+        if ($tag) {
+            # Version entries have a special format
+            $c = "Version " . $tag;
         }
         if($co ne $oldco) {
             if($c ne $oldc) {
