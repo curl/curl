@@ -3509,7 +3509,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
       path[0] = '\0';
     }
     else { /* only list */
-      conn->data->set.wildcardmatch = FALSE;
+      wildcard->state = CURLWC_CLEAN;
       ret = ftp_parse_url_path(conn);
       return ret;
     }
