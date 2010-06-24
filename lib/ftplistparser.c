@@ -61,7 +61,8 @@
 #define FTP_BUFFER_ALLOCSIZE 160
 
 typedef enum {
-  PL_UNIX_FILETYPE = 0,
+  PL_UNIX_TOTALSIZE = 0,
+  PL_UNIX_FILETYPE,
   PL_UNIX_PERMISSION,
   PL_UNIX_HLINKS,
   PL_UNIX_USER,
@@ -73,6 +74,11 @@ typedef enum {
 } pl_unix_mainstate;
 
 typedef union {
+  enum {
+    PL_UNIX_TOTALSIZE_INIT = 0,
+    PL_UNIX_TOTALSIZE_READING
+  } total_dirsize;
+
   enum {
     PL_UNIX_HLINKS_PRESPACE = 0,
     PL_UNIX_HLINKS_NUMBER
@@ -396,7 +402,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
     }
 
     finfo = parser->file_data;
-    finfo->b_data[finfo->b_used++] = buffer[i];
+    finfo->b_data[finfo->b_used++] = c;
 
     if(finfo->b_used >= finfo->b_size - 1) {
       /* if it is important, extend buffer space for file data */
@@ -418,6 +424,49 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
     switch (parser->os_type) {
     case OS_TYPE_UNIX:
       switch (parser->state.UNIX.main) {
+      case PL_UNIX_TOTALSIZE:
+        switch(parser->state.UNIX.sub.total_dirsize) {
+        case PL_UNIX_TOTALSIZE_INIT:
+          if(c == 't') {
+            parser->state.UNIX.sub.total_dirsize = PL_UNIX_TOTALSIZE_READING;
+            parser->item_length++;
+          }
+          else {
+            parser->state.UNIX.main = PL_UNIX_FILETYPE;
+            /* start FSM again not considering size of directory */
+            finfo->b_used = 0;
+            i--;
+          }
+          break;
+        case PL_UNIX_TOTALSIZE_READING:
+          parser->item_length++;
+          if(c == '\r') {
+            parser->item_length--;
+            finfo->b_used--;
+          }
+          else if(c == '\n') {
+            finfo->b_data[parser->item_length - 1] = 0;
+            if(strncmp("total ", finfo->b_data, 6) == 0) {
+              char *endptr = NULL;
+              /* here we can deal with directory size */
+              curlx_strtoofft(finfo->b_data+6, &endptr, 10);
+              if(*endptr != 0) {
+                PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
+                return bufflen;
+              }
+              else {
+                parser->state.UNIX.main = PL_UNIX_FILETYPE;
+                finfo->b_used = 0;
+              }
+            }
+            else {
+              PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
+              return bufflen;
+            }
+          }
+          break;
+        }
+        break;
       case PL_UNIX_FILETYPE:
         switch (c) {
         case '-':
