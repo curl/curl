@@ -499,13 +499,18 @@ static bool trynextip(struct connectdata *conn,
   curl_socket_t sockfd;
   Curl_addrinfo *ai;
 
-  /* first close the failed socket */
-  sclose(conn->sock[sockindex]);
+  /* First clean up after the failed socket.
+     Don't close it yet to ensure that the next IP's socket gets a different
+     file descriptor, which can prevent bugs when the curl_multi_socket_action
+     interface is used with certain select() replacements such as kqueue. */
+  curl_socket_t fd_to_close = conn->sock[sockindex];
   conn->sock[sockindex] = CURL_SOCKET_BAD;
   *connected = FALSE;
 
-  if(sockindex != FIRSTSOCKET)
+  if(sockindex != FIRSTSOCKET) {
+    sclose(fd_to_close);
     return TRUE; /* no next */
+  }
 
   /* try the next address */
   ai = conn->ip_addr->ai_next;
@@ -516,10 +521,12 @@ static bool trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
+      sclose(fd_to_close);
       return FALSE;
     }
     ai = ai->ai_next;
   }
+  sclose(fd_to_close);
   return TRUE;
 }
 
