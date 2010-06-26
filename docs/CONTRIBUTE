@@ -268,7 +268,7 @@
 
   [separate the above single line from the rest with an empty line]
 
-  [full description, no wider than 65 columns that describe as much as
+  [full description, no wider than 72 columns that describe as much as
   possible as to why this change is made, and possibly what things
   it fixes and everything else that is related]
    ---- stop ----
