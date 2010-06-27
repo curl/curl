@@ -46,6 +46,9 @@ size_t Curl_nss_version(char *buffer, size_t size);
 int Curl_nss_check_cxn(struct connectdata *cxn);
 int Curl_nss_seed(struct SessionHandle *data);
 
+/* initialize NSS library if not already */
+CURLcode Curl_nss_force_init(struct SessionHandle *data);
+
 /* API setup for NSS */
 #define curlssl_init Curl_nss_init
 #define curlssl_cleanup Curl_nss_cleanup

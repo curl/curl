@@ -10,6 +10,7 @@ Curl and libcurl 7.21.1
 This release includes the following changes:
 
  o maketgz: produce CHANGES automatically
+ o added support for NTLM authentication when compiled with NSS
 
 This release includes the following bugfixes:
 
