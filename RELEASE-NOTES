@@ -9,11 +9,17 @@ Curl and libcurl 7.21.1
 
 This release includes the following changes:
 
- o 
+ o maketgz: produce CHANGES automatically
 
 This release includes the following bugfixes:
 
- o 
+ o configure: spell --disable-threaded-resolver correctly
+ o multi: call the progress callback in all states
+ o multi: unmark handle as used when no longer head of pipeline
+ o sendrecv: treat all negative values from send/recv as errors
+ o ftp-wildcard: avoid tight loop when used without any pattern
+ o multi_socket: re-use of same socket without notifying app
+ o ftp wildcard: FTP LIST parser FIX
 
 This release includes the following known bugs:
 
@@ -22,11 +28,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Rainer Canavan, Paul Howarth, Jerome Vouillon, Ruslan Gazizov, Yang Tse,
- Kamil Dudka, Alex Bligh, Ben Greear, Hoi-Ho Chan, Howard Chu, Dirk Manske,
- Pavel Raiskup, John-Mark Bell, Eric Mertens, Tor Arntsen, Douglas Kilpatrick,
- Igor Novoseltsev, Jason McDonald, Dan Fandrich, Tanguy Fautre, Guenter Knauf,
- Julien Chaffraix, Kalle Vahlman, Frank Meier, Constantine Sapuntzakis
+ Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup,
 
 
         Thanks! (and sorry if I forgot to mention someone)
