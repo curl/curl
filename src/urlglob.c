@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,8 +75,6 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   ++glob->size;
 
   while (!done) {
-    bool skip;
-
     switch (*pattern) {
     case '\0':                  /* URL ended while set was still open */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
@@ -127,24 +125,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       return GLOB_ERROR;
 
     case '\\':                          /* escaped character, skip '\' */
-      switch(pattern[1]) {
-      case '[':
-      case ']':
-      case '{':
-      case '}':
-      case ',':
-        skip = TRUE;
-        break;
-      default:
-        skip = FALSE;
-        break;
-      }
-      if(skip) {
-        if (*(buf+1) == '\0') {           /* but no escaping of '\0'! */
-          snprintf(glob->errormsg, sizeof(glob->errormsg),
-                   "illegal pattern at pos %zu\n", pos);
-          return GLOB_ERROR;
-        }
+      if(pattern[1]) {
         ++pattern;
         ++pos;
       }

@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o ftp-wildcard: avoid tight loop when used without any pattern
  o multi_socket: re-use of same socket without notifying app
  o ftp wildcard: FTP LIST parser FIX
+ o urlglobbing backslash escaping bug
 
 This release includes the following known bugs:
 
@@ -29,6 +30,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup,
+ Jon Sargeant
 
 
         Thanks! (and sorry if I forgot to mention someone)
