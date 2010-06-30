@@ -109,6 +109,10 @@ CFGSET     = FALSE
 CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
+!IFDEF USE_IPV6
+CFLAGS = $(CFLAGS) /DUSE_IPV6
+!ENDIF
+
 ##############################################################
 # Runtime library configuration
 

@@ -569,7 +569,7 @@
 /* Name of package */
 #define PACKAGE "curl"
 
-#if defined(__POCC__)
+#if defined(__POCC__) || (USE_IPV6)
 #  define ENABLE_IPV6 1
 #endif
 
