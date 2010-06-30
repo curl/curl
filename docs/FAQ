@@ -1,4 +1,4 @@
-Updated: Nov 7, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: June 30, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -1100,10 +1100,10 @@ FAQ
     Using this offers asynchronous name resolves but it currently has no IPv6
     support.
 
-  - The Windows threaded resolver. It use:
+  - The threaded resolver (default option on Windows). It uses:
 
-    A - gethostbyname() on plain ipv4 windows hosts
-    B - getaddrinfo() on ipv6-enabled windows hosts
+    A - gethostbyname() on plain ipv4 hosts
+    B - getaddrinfo() on ipv6-enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.
