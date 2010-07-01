@@ -656,6 +656,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
          to that since we're not part of that handle anymore */
       easy->easy_handle->state.connc = NULL;
 
+      /* Since we return the connection back to the communal connection pool
+         we mark the last connection as inaccessible */
+      easy->easy_handle->state.lastconnect = -1;
+
       /* Modify the connectindex since this handle can't point to the
          connection cache anymore.
 
