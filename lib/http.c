@@ -2222,7 +2222,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if((conn->protocol&PROT_HTTP) &&
         data->set.upload &&
         (data->set.infilesize == -1)) {
-      if (use_http_1_1(data, conn)) {
+      if(conn->bits.authneg)
+        /* don't enable chunked during auth neg */
+        ;
+      else if(use_http_1_1(data, conn)) {
         /* HTTP, upload, unknown file size and not HTTP 1.0 */
         data->req.upload_chunky = TRUE;
       }
