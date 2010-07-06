@@ -4081,6 +4081,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
   char *bufp;
   char value[256];
   bool remark=FALSE;
+  bool skip=FALSE;
 
   va_start(arg, tag);
 
@@ -4088,7 +4089,8 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
     long lval = va_arg(arg, long);
     snprintf(value, sizeof(value), "%ld", lval);
     ret = curl_easy_setopt(curl, tag, lval);
-
+    if(!lval)
+      skip = TRUE;
   }
   else if(tag < CURLOPTTYPE_OFF_T) {
     void *pval = va_arg(arg, void *);
@@ -4097,32 +4099,36 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
     /* function pointers are never printable */
     if (tag >= CURLOPTTYPE_FUNCTIONPOINT) {
       if (pval) {
-        snprintf(value, sizeof(value), "%p", pval);
+        strcpy(value, "functionpointer"); /* 'value' fits 256 bytes */
         remark = TRUE;
       }
       else
-        strcpy(value, "NULL");
+        skip = TRUE;
     }
 
     else if(pval && str)
       snprintf(value, sizeof(value), "\"%s\"", (char *)ptr);
     else if(pval) {
-      snprintf(value, sizeof(value), "%p", pval);
+      strcpy(value, "objectpointer"); /* 'value' fits 256 bytes */
       remark = TRUE;
     }
-    else {
-      strcpy(value, "NULL"); /* value fits more than 5 bytes */
-    }
+    else
+      skip = TRUE;
+
     ret = curl_easy_setopt(curl, tag, pval);
 
   }
   else {
     curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(value, sizeof(value), "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
+    snprintf(value, sizeof(value),
+             "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
     ret = curl_easy_setopt(curl, tag, oval);
+
+    if(!oval)
+      skip = TRUE;
   }
 
-  if(config->libcurl) {
+  if(config->libcurl && !skip) {
     /* we only use this for real if --libcurl was used */
 
     bufp = curlx_maprintf("%scurl_easy_setopt(hnd, %s, %s);%s",
@@ -5002,7 +5008,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_BUFFERSIZE, config->recvpersecond);
 
         /* size of uploaded file: */
-        my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
+        if(uploadfilesize != -1)
+          my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt_str(curl, CURLOPT_URL, url);     /* what to fetch */
         my_setopt_str(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
         if(config->proxy)
