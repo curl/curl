@@ -5088,7 +5088,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                       config->hostpubmd5);
 
         /* default to strict verifyhost */
-        my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
+        /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2); */
         if(config->cacert || config->capath) {
           if (config->cacert)
             my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
@@ -5302,8 +5302,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                   config->ftp_alternative_to_user);
 
         /* curl 7.16.0 */
-        my_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE,
-                  !config->disable_sessionid);
+        if(config->disable_sessionid)
+          my_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE,
+                    !config->disable_sessionid);
 
         /* curl 7.16.2 */
         if(config->raw) {
