@@ -4118,7 +4118,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
   }
   else {
     curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(value, sizeof(value), "%" CURL_FORMAT_CURL_OFF_T, oval);
+    snprintf(value, sizeof(value), "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
     ret = curl_easy_setopt(curl, tag, oval);
   }
 
