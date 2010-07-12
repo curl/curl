@@ -221,6 +221,9 @@ case $host in
 esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
+
+dnl 'STATICLIB' is, in spite of its name, not generic but only for static-only
+dnl builds on Windows
 AM_CONDITIONAL(STATICLIB, false)
 
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
