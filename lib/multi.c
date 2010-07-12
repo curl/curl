@@ -1570,6 +1570,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_one_easy *easy;
   CURLMcode returncode=CURLM_OK;
   struct Curl_tree *t;
+  struct timeval now = Curl_tvnow();
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1607,10 +1608,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
    * Simply remove all expired timers from the splay since handles are dealt
    * with unconditionally by this function and curl_multi_timeout() requires
    * that already passed/handled expire times are removed from the splay.
+   *
+   * It is important that the 'now' value is set at the entry of this function
+   * and not for the current time as it may have ticked a little while since
+   * then and then we risk this loop to remove timers that actually have not
+   * been handled!
    */
   do {
-    struct timeval now = Curl_tvnow();
-
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {
       struct SessionHandle *d = t->payload;
