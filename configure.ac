@@ -53,31 +53,40 @@ AC_SUBST(CONFIGURE_OPTIONS)
 
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-AC_PATH_PROG([SED], [sed], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$SED" || test "$SED" = "not_found"; then
-  AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
+if test -z "$SED"; then
+  dnl allow it to be overridden
+  AC_PATH_PROG([SED], [sed], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$SED" || test "$SED" = "not_found"; then
+    AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
+  fi
 fi
 AC_SUBST([SED])
 
 dnl GREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-AC_PATH_PROG([GREP], [grep], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$GREP" || test "$GREP" = "not_found"; then
-  AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
+if test -z "$GREP"; then
+  dnl allow it to be overridden
+  AC_PATH_PROG([GREP], [grep], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$GREP" || test "$GREP" = "not_found"; then
+    AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
+  fi
 fi
 AC_SUBST([GREP])
 
 dnl EGREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
-  AC_MSG_CHECKING([for egrep])
-  EGREP="$GREP -E"
-  AC_MSG_RESULT([$EGREP])
-else
-  AC_PATH_PROG([EGREP], [egrep], [not_found],
-    [$PATH:/usr/bin:/usr/local/bin])
+if test -z "$EGREP"; then
+  dnl allow it to be overridden
+  if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
+    AC_MSG_CHECKING([for egrep])
+    EGREP="$GREP -E"
+    AC_MSG_RESULT([$EGREP])
+  else
+    AC_PATH_PROG([EGREP], [egrep], [not_found],
+      [$PATH:/usr/bin:/usr/local/bin])
+  fi
 fi
 if test -z "$EGREP" || test "$EGREP" = "not_found"; then
   AC_MSG_ERROR([egrep not found in PATH. Cannot continue without egrep.])
@@ -86,10 +95,13 @@ AC_SUBST([EGREP])
 
 dnl AR is mandatory for configure process and libtool.
 dnl This is target dependent, so check it as a tool.
-AC_PATH_TOOL([AR], [ar], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$AR" || test "$AR" = "not_found"; then
-  AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+if test -z "$AR"; then
+  dnl allow it to be overridden
+  AC_PATH_TOOL([AR], [ar], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$AR" || test "$AR" = "not_found"; then
+    AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+  fi
 fi
 AC_SUBST([AR])
 
