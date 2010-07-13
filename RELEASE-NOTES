@@ -22,6 +22,18 @@ This release includes the following bugfixes:
  o multi_socket: re-use of same socket without notifying app
  o ftp wildcard: FTP LIST parser FIX
  o urlglobbing backslash escaping bug
+ o build: add enable IPV6 option for the VC makefiles
+ o multi: CURLINFO_LASTSOCKET doesn't work after remove_handle
+ o --libcurl: use *_LARGE options with typecasted constants
+ o --libcurl: hide setopt() calls setting default options
+ o curl: avoid setting libcurl options to its default
+ o --libcurl: list the tricky options instead of using [REMARK]
+ o http: don't enable chunked during authentication negotiations
+ o upload: warn users trying to upload from stdin with anyauth
+ o configure: allow environments variable to override internals
+ o threaded resolver: fix timeout issue
+ o multi: fix condition that remove timers before trigger
+ o examples: add curl_multi_timeout
 
 This release includes the following known bugs:
 
@@ -30,8 +42,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup,
- Jon Sargeant
+ Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup, Jon Sargeant,
+ Pierre Joye, Tor Arntsen, Constantine Sapuntzakis, Sidney San Martin
 
 
         Thanks! (and sorry if I forgot to mention someone)
