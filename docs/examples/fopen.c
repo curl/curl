@@ -144,6 +144,8 @@ fill_buffer(URL_FILE *file,int want,int waittime)
     do
     {
         int maxfd = -1;
+        long curl_timeo = -1;
+
         FD_ZERO(&fdread);
         FD_ZERO(&fdwrite);
         FD_ZERO(&fdexcep);
@@ -151,6 +153,15 @@ fill_buffer(URL_FILE *file,int want,int waittime)
         /* set a suitable timeout to fail on */
         timeout.tv_sec = 60; /* 1 minute */
         timeout.tv_usec = 0;
+
+        curl_multi_timeout(multi_handle, &curl_timeo);
+        if(curl_timeo >= 0) {
+          timeout.tv_sec = curl_timeo / 1000;
+          if(timeout.tv_sec > 1)
+            timeout.tv_sec = 1;
+          else
+            timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        }
 
         /* get file descriptors from the transfers */
         curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);

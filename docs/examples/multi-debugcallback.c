@@ -142,6 +142,8 @@ int main(int argc, char **argv)
     fd_set fdexcep;
     int maxfd = -1;
 
+    long curl_timeo = -1;
+
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
@@ -149,6 +151,15 @@ int main(int argc, char **argv)
     /* set a suitable timeout to play around with */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
+
+    curl_multi_timeout(multi_handle, &curl_timeo);
+    if(curl_timeo >= 0) {
+      timeout.tv_sec = curl_timeo / 1000;
+      if(timeout.tv_sec > 1)
+        timeout.tv_sec = 1;
+      else
+        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+    }
 
     /* get file descriptors from the transfers */
     curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
