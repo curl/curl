@@ -3464,6 +3464,7 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   const size_t err_rc = (sz * nmemb) ? 0 : 1;
 
   if(!out->stream) {
+    out->bytes = 0; /* nothing written yet */
     if (!out->filename) {
       warnf(config, "Remote filename has no length!\n");
       return err_rc; /* Failure */
@@ -3491,10 +3492,9 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 
   rc = fwrite(buffer, sz, nmemb, out->stream);
 
-  if((sz * nmemb) == rc) {
+  if((sz * nmemb) == rc)
     /* we added this amount of data to the output */
     out->bytes += (sz * nmemb);
-  }
 
   if(config->readbusy) {
     config->readbusy = FALSE;
@@ -4864,6 +4864,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
           else {
             outs.stream = NULL; /* open when needed */
+            outs.bytes = 0;     /* reset byte counter */
           }
         }
         infdopen=FALSE;

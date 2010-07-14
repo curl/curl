@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o threaded resolver: fix timeout issue
  o multi: fix condition that remove timers before trigger
  o examples: add curl_multi_timeout
+ o --retry: access violation with URL part sets continued
 
 This release includes the following known bugs:
 
