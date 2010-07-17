@@ -4388,6 +4388,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   const char* str = (char*)ptr;
   const size_t cb = size*nmemb;
   const char* end = (char*)ptr + cb;
+  size_t len;
 
   if (cb > 20 && curlx_strnequal(str, "Content-disposition:", 20)) {
     char *p = (char*)str + 20;
@@ -4396,6 +4397,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
        (encoded filenames (*=) are not supported) */
     for(;;) {
       char *filename;
+      char *semi;
 
       while (*p && (p < end) && !ISALPHA(*p))
         p++;
@@ -4409,7 +4411,13 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
         continue;
       }
       p+=9;
-      filename = parse_filename(p, cb - (p - str));
+      semi = strchr(p, ';');
+
+      /* this expression below typecasts 'cb' only to avoid
+         warning: signed and unsigned type in conditional expression
+      */
+      len = semi ? (semi - p) : (ssize_t)cb - (p - str);
+      filename = parse_filename(p, len);
       if (filename) {
         outs->filename = filename;
         break;
