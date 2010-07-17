@@ -3203,6 +3203,8 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
   ssize_t nread;
   int ftpcode;
   CURLcode result;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
+  struct pingpong *pp = &ftpc->pp;
 
   item = quote;
   while(item) {
@@ -3221,6 +3223,8 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       }
 
       FTPSENDF(conn, "%s", cmd);
+
+      pp->response = Curl_tvnow(); /* timeout relative now */
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
       if(result)
