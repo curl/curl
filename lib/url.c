@@ -1404,19 +1404,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpversion = va_arg(param, long);
     break;
 
-  case CURLOPT_CUSTOMREQUEST:
-    /*
-     * Set a custom string to use as request
-     */
-    result = setstropt(&data->set.str[STRING_CUSTOMREQUEST],
-                       va_arg(param, char *));
-
-    /* we don't set
-       data->set.httpreq = HTTPREQ_CUSTOM;
-       here, we continue as if we were using the already set type
-       and this just changes the actual request keyword */
-    break;
-
   case CURLOPT_HTTPAUTH:
     /*
      * Set HTTP Authentication type BITMASK.
@@ -1447,6 +1434,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpauth = auth;
   }
   break;
+
+#endif   /* CURL_DISABLE_HTTP */
+
+  case CURLOPT_CUSTOMREQUEST:
+    /*
+     * Set a custom string to use as request
+     */
+    result = setstropt(&data->set.str[STRING_CUSTOMREQUEST],
+                       va_arg(param, char *));
+
+    /* we don't set
+       data->set.httpreq = HTTPREQ_CUSTOM;
+       here, we continue as if we were using the already set type
+       and this just changes the actual request keyword */
+    break;
 
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_HTTPPROXYTUNNEL:
@@ -1492,7 +1494,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.proxyauth = auth;
   }
   break;
-#endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_PROXY:
     /*
@@ -1532,7 +1533,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       break;
     }
     break;
-#endif
+#endif   /* CURL_DISABLE_PROXY */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
