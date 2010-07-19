@@ -44,6 +44,9 @@ CLEANFILES = $(DSP) $(VCPROJ)
 lib_LTLIBRARIES = libcurl.la
 LIBCURL_LIBS = @LIBCURL_LIBS@
 
+# This might hold -Werror
+CFLAGS += @CURL_CFLAG_EXTRAS@
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which

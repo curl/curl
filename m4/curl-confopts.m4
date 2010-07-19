@@ -339,6 +339,38 @@ AC_HELP_STRING([--disable-warnings],[Disable strict compiler warnings]),
   AC_MSG_RESULT([$want_warnings])
 ])
 
+dnl CURL_CHECK_OPTION_WERROR
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-werror or --disable-werror, and set
+dnl shell variable want_werror as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_WERROR], [
+  AC_REQUIRE([CURL_CHECK_OPTION_WARNINGS])dnl
+  AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
+  AC_MSG_CHECKING([whether to enable compiler warnings as errors])
+  OPT_COMPILER_WERROR="default"
+  AC_ARG_ENABLE(werror,
+AC_HELP_STRING([--enable-werror],[Enable compiler warnings as errors])
+AC_HELP_STRING([--disable-werror],[Disable compiler warnings as errors]),
+  OPT_COMPILER_WERROR=$enableval)
+  case "$OPT_COMPILER_WERROR" in
+    no)
+      dnl --disable-werror option used
+      want_werror="no"
+      ;;
+    default)
+      dnl --disable-werror option not specified, default to off
+      want_werror="no"
+      ;;
+    *)
+      dnl --enable-werror option used
+      want_werror="yes"
+      ;;
+  esac
+  AC_MSG_RESULT([$want_werror])
+])
+
 
 dnl CURL_CHECK_NONBLOCKING_SOCKET
 dnl -------------------------------------------------

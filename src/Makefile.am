@@ -46,6 +46,9 @@ bin_PROGRAMS = curl
 
 include Makefile.inc
 
+# This might hold -Werror
+CFLAGS += @CURL_CFLAG_EXTRAS@
+
 curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
