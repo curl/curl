@@ -386,8 +386,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           if(!conn->sec_complete)
 #endif
             if(data->set.verbose)
-            Curl_debug(data, CURLINFO_HEADER_IN,
-                       pp->linestart_resp, (size_t)perline, conn);
+              Curl_debug(data, CURLINFO_HEADER_IN,
+                         pp->linestart_resp, (size_t)perline, conn);
 
           /*
            * We pass all response-lines to the callback function registered
