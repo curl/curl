@@ -2444,7 +2444,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
       }
       /* wait for the socket to become ready */
       Curl_socket_ready(fd_read, fd_write,
-                        left>1000?1000:left); /* ignore result */
+                        (int)(left>1000?1000:left)); /* ignore result */
     }
 #endif
 
