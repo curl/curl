@@ -74,6 +74,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -944,6 +945,31 @@ FAQ
 
   In either case, cURL should now be looking for the correct file.
 
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+
+  Unplugging the cable is not an error situation. The TCP/IP protocol stack
+  was designed to be fault tolerant, so even though there may be a physical
+  break somewhere the connection shouldn't be affected, just possibly
+  delayed.  Eventually, the physical break will be fixed or the data will be
+  re-routed around the physical problem.
+
+  In such cases, the TCP/IP stack is responsible for detecting when the
+  network connection is irrevocably lost. Since with some protocols it is
+  perfectly legal for the client wait indefinitely for data, the stack may
+  never report a problem, and even when it does, it can take up to 20 minutes
+  for it to detect an issue.  The curl option --keepalive-time enables
+  keep-alive support in the TCP/IP stack which makes it periodically probe the
+  connection to make sure it is still available to send data. That should
+  reliably detect any TCP/IP network failure.
+
+  But even that won't detect the network going down before the TCP/IP
+  connection is established (e.g. during a DNS lookup) or using protocols that
+  don't use TCP.  To handle those situations, curl offers a number of timeouts
+  on its own. --speed-limit/--speed-time will abort if the data transfer rate
+  falls too low, and --connect-timeout and --max-time can be used to put an
+  overall timeout on the connection phase or the entire transfer.
+
+
 5. libcurl Issues
 
   5.1 Is libcurl thread-safe?
@@ -1182,7 +1208,9 @@ FAQ
   to do "LIST -a" or similar to see them.
 
   The application thus needs to parse the LIST output. One such existing
-  list parser is available at http://cr.yp.to/ftpparse.html
+  list parser is available at http://cr.yp.to/ftpparse.html  Versions of
+  libcurl since 7.21.0 also provide the ability to specify a wildcard to
+  download multiple files from one FTP directory.
 
 
 6. License Issues
