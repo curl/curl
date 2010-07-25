@@ -2653,6 +2653,10 @@ LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
+dnl yes or no
+ENABLE_SHARED="$enable_shared"
+AC_SUBST(ENABLE_SHARED)
+
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
 dnl since it is more cross-compile frient than curl-config

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,6 +32,7 @@ Usage: curl-config [OPTION]
 
 Available values for OPTION include:
 
+  --built-shared says 'yes' if libcurl was built shared
   --ca        ca bundle install path
   --cc        compiler
   --cflags    pre-processor and compiler flags
@@ -64,6 +65,10 @@ while test $# -gt 0; do
     esac
 
     case "$1" in
+    --built-shared)
+        echo @ENABLE_SHARED@
+        ;;
+
     --ca)
 	echo "@CURL_CA_BUNDLE@"
 	;;
@@ -87,6 +92,7 @@ while test $# -gt 0; do
             echo "$protocol"
         done
 	;;
+
     --version)
 	echo libcurl @VERSION@
 	exit 0
