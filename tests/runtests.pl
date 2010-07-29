@@ -148,6 +148,7 @@ my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
+my $CURLCONFIG="../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -203,6 +204,8 @@ my $has_gnutls;  # built with GnuTLS
 my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
+
+my $has_shared;  # built shared
 
 my $ssllib;      # name of the lib we use (for human presentation)
 my $has_crypto;  # set if libcurl is built with cryptographic support
@@ -436,7 +439,8 @@ sub startnew {
 sub checkcmd {
     my ($cmd)=@_;
     my @paths=(split(":", $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-               "/sbin", "/usr/bin", "/usr/local/bin" );
+               "/sbin", "/usr/bin", "/usr/local/bin",
+               "./libtest/.libs", "./libtest");
     for(@paths) {
         if( -x "$_/$cmd" && ! -d "$_/$cmd") {
             # executable bit but not a directory!
@@ -2042,6 +2046,9 @@ sub checksystem {
         die "can't run torture tests since curl was not built with curldebug";
     }
 
+    $has_shared = `sh $CURLCONFIG --built-shared`;
+    chomp $has_shared;
+
     # curl doesn't list cryptographic support separately, so assume it's
     # always available
     $has_crypto=1;
@@ -2064,8 +2071,9 @@ sub checksystem {
     logmsg sprintf("  HTTP IPv6     %s\n", $http_ipv6?"ON ":"OFF");
     logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
     logmsg sprintf("  Libtool lib:  %s\n", $libtool?"ON ":"OFF");
+    logmsg sprintf("* Shared build:      %s\n", $has_shared);
     if($ssl_version) {
-        logmsg sprintf("* SSL library:       %s\n", $ssllib);
+        logmsg sprintf("* SSL library: %13s\n", $ssllib);
     }
 
     logmsg "* Ports:\n";
@@ -2350,13 +2358,59 @@ sub singletest {
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
 
+    # test definition may instruct to (un)set environment vars
+    # this is done this early, so that the precheck can use environment
+    # variables and still bail out fine on errors
+    my %oldenv;
+    my @setenv = getpart("client", "setenv");
+    if(@setenv) {
+        foreach my $s (@setenv) {
+            chomp $s;
+            subVariables \$s;
+            if($s =~ /([^=]*)=(.*)/) {
+                my ($var, $content) = ($1, $2);
+                # remember current setting, to restore it once test runs
+                $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
+                # set new value
+                if(!$content) {
+                    delete $ENV{$var} if($ENV{$var});
+                }
+                else {
+                    if(($has_shared ne "yes") && ($var =~ /^LD_PRELOAD/)) {
+                        # print "Skipping LD_PRELOAD due to no shared build\n";
+                        next;
+                    }
+                    $ENV{$var} = "$content";
+                }
+            }
+        }
+    }
+
     if(!$why) {
+        # TODO:
+        # Add a precheck cache. If a precheck command was already invoked
+        # exactly like this, then use the previous result to speed up
+        # successive test invokes!
+
         my @precheck = getpart("client", "precheck");
         if(@precheck) {
             $cmd = $precheck[0];
             chomp $cmd;
             subVariables \$cmd;
             if($cmd) {
+                my @p = split(/ /, $cmd);
+                if($p[0] !~ /\//) {
+                    # the first word, the command, does not contain a slash so
+                    # we will scan the "improved" PATH to find the command to
+                    # be able to run it
+                    my $fullp = checktestcmd($p[0]);
+
+                    if($fullp) {
+                        $p[0] = $fullp;
+                    }
+                    $cmd = join(" ", @p);
+                }
+
                 my @o = `$cmd 2>/dev/null`;
                 if($o[0]) {
                     $why = $o[0];
@@ -2451,28 +2505,6 @@ sub singletest {
     if(@ftpservercmd) {
         # write the instructions to file
         writearray($FTPDCMD, \@ftpservercmd);
-    }
-
-    # test definition may instruct to (un)set environment vars
-    my %oldenv;
-    my @setenv = getpart("client", "setenv");
-    if(@setenv) {
-        foreach my $s (@setenv) {
-            chomp $s;
-            subVariables \$s;
-            if($s =~ /([^=]*)=(.*)/) {
-                my ($var, $content) = ($1, $2);
-                # remember current setting, to restore it once test runs
-                $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
-                # set new value
-                if(!$content) {
-                    delete $ENV{$var} if($ENV{$var});
-                }
-                else {
-                    $ENV{$var} = "$content";
-                }
-            }
-        }
     }
 
     # get the command line options to use

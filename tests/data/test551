@@ -75,11 +75,6 @@ http://test.remote.haxx.se/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 <strip>
 ^User-Agent: curl/.*
 </strip>
-# We strip off a large chunk of the type-2 NTLM message since it depends on
-# the local host name and thus differs on different machines!
-<strippart>
-s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
-</strippart>
 <protocol>
 POST http://test.remote.haxx.se/path/551 HTTP/1.1
 Host: test.remote.haxx.se

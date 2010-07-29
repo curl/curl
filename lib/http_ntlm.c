@@ -58,6 +58,7 @@
 #include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
+#include "curl_gethostname.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -994,7 +995,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       user = userp;
     userlen = strlen(user);
 
-    if(gethostname(host, HOSTNAME_MAX)) {
+    if(Curl_gethostname(host, HOSTNAME_MAX)) {
       infof(conn->data, "gethostname() failed, continuing without!");
       hostlen = 0;
     }

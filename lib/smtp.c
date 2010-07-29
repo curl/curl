@@ -91,6 +91,7 @@
 #include "curl_base64.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"
+#include "curl_gethostname.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1110,12 +1111,10 @@ static CURLcode smtp_connect(struct connectdata *conn,
   pp->conn = conn;
 
   if(!*path) {
-#ifdef HAVE_GETHOSTNAME
-    if(!gethostname(localhost, sizeof localhost))
+    if(!Curl_gethostname(localhost, sizeof localhost))
       path = localhost;
     else
-#endif
-    path = "localhost";
+      path = "localhost";
   }
 
   /* url decode the path and use it as domain with EHLO */

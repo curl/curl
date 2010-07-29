@@ -53,6 +53,16 @@ endif
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
 test1022.pl Makefile.inc
 
+if STATICLIB
+# this means no shared option is enabled so we can disable the LD_PRELOAD
+# attempt
+libhostname_la_CFLAGS = -DDISABLE_PRELOAD
+endif
+
+# we force our own host name, in order to make some tests machine independent
+lib_LTLIBRARIES = libhostname.la
+libhostname_la_SOURCES = sethostname.c
+
 # Dependencies (may need to be overriden)
 LDADD = $(top_builddir)/lib/libcurl.la
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
