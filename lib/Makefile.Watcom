@@ -3,38 +3,76 @@
 #  G. Vanem <gvanem@broadpark.no>
 #
 
+!ifndef %watcom
+!error WATCOM environment variable not set!
+!else
+SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
+SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
+!endif
+
 TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
 
 CC = wcc386
+LD = wlink
+RC = wrc
+AR = wlib
 
-CFLAGS = -3s -mf -d3 -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
-         -bd -d+ -dWIN32 -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE")                 &
-         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -dENABLE_IPV6                          &
-         -dDEBUG=1 -dDEBUGBUILD -d_WIN32_WINNT=0x0501 -dWINBERAPI=__declspec(cdecl) &
-         -dWINLDAPAPI=__declspec(cdecl) -I. -I..\include
+!ifdef __LOADDLL__
+!  loaddll wcc386  wccd386
+!  loaddll wpp386  wppd386
+!  loaddll wlink   wlinkd
+!  loaddll wlib    wlibd
+!endif
+
+MD = mkdir
+RM = del /q /f >NUL 2>&1
+RD = rmdir /q /s >NUL 2>&1
+CP = copy
+
+CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
+         -wcd=201 -bt=nt -bd -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV     &
+         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I..\include $(SYS_INCL)
+#CFLAGS += -dWINBERAPI=__declspec(cdecl) -dWINLDAPAPI=__declspec(cdecl)
+
+!ifdef %debug
+DEBUG  = -dDEBUG=1 -dDEBUGBUILD
+CFLAGS += -d3 $(DEBUG)
+!else
+CFLAGS += -d0
+!endif
+
+!ifdef %use_ipv6
+CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
+!endif
 
 #
 # Change to suite.
 #
-ZLIB_ROOT  = ..\..\..\zlib-1.2.3
-USE_ZLIB   = 0
-USE_ARES   = 0
-USE_WATT32 = 0
+!ifdef %zlib_root
+ZLIB_ROOT  = $(%zlib_root)
+!else
+ZLIB_ROOT  = ..\..\zlib-1.2.5
+!endif
 
-!ifeq USE_ZLIB 1
+!ifdef %ares_root
+ARES_ROOT  = $(%ares_root)
+!else
+ARES_ROOT  = ..\ares
+!endif
+
+!ifdef %use_zlib
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
 !endif
 
-!ifeq USE_ARES 1
-CFLAGS += -dUSE_ARES -I..\ares
+!ifdef %use_ares
+CFLAGS += -dUSE_ARES -I$(ARES_ROOT)
 !endif
 
-!ifeq USE_WATT32 1
+!ifdef %use_watt32
 CFLAGS += -dUSE_WATT32 -I$(%watt_root)\inc
 !endif
 
 OBJ_BASE = WC_Win32.obj
-C_ARG    = $(OBJ_BASE)\wcc386.arg
 LINK_ARG = $(OBJ_BASE)\dyn\wlink.arg
 LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 
@@ -50,7 +88,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	&
   http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	&
   hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c	&
   inet_ntop.c parsedate.c select.c gtls.c sslgen.c tftp.c splay.c	&
-  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c          &
+  strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c		&
   socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c		&
   curl_memrchr.c imap.c pop3.c smtp.c pingpong.c rtsp.c curl_threads.c	&
   warnless.c hmac.c polarssl.c curl_rtmp.c openldap.c
@@ -69,67 +107,66 @@ OBJS_DYN = $+ $(OBJS) $-
 
 RESOURCE = $(OBJ_BASE)\dyn\libcurl.res
 
-all: $(OBJ_BASE) $(C_ARG) $(TARGETS) .SYMBOLIC
+all: $(OBJ_BASE) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
 $(OBJ_BASE):
-	- mkdir $(OBJ_BASE)
-	- mkdir $(OBJ_BASE)\stat
-	- mkdir $(OBJ_BASE)\dyn
+	-$(MD) $^@
+	-$(MD) $^@\stat
+	-$(MD) $^@\dyn
 
 libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
-	wlink name libcurl_wc.dll @$(LINK_ARG)
+	$(LD) name libcurl_wc.dll @$(LINK_ARG)
 
 libcurl_wc.lib: $(OBJS_STAT) $(LIB_ARG)
-	wlib -q -b- c $@ @$(LIB_ARG)
+	$(AR) -q -b- c $^@ @$(LIB_ARG)
 
 clean: .SYMBOLIC
-	- rm -f $(OBJS_STAT) $(OBJS_DYN) $(RESOURCE) $(C_ARG) $(LINK_ARG) $(LIB_ARG)
+	-$(RM) $(OBJS_STAT)
+	-$(RM) $(OBJS_DYN)
+	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
 
 vclean realclean: clean .SYMBOLIC
-	- rm -f $(TARGETS) libcurl_wc.map
-	- rmdir $(OBJ_BASE)\stat
-	- rmdir $(OBJ_BASE)\dyn
-	- rmdir $(OBJ_BASE)
+	-$(RM) $(TARGETS) libcurl_wc.map
+	-$(RD) $(OBJ_BASE)\stat
+	-$(RD) $(OBJ_BASE)\dyn
+	-$(RD) $(OBJ_BASE)
 
 .ERASE
 $(RESOURCE): libcurl.rc
-        wrc -dDEBUGBUILD=1 -q -r -zm -I..\include -fo=$@ libcurl.rc
+	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
 
 .ERASE
 .c{$(OBJ_BASE)\dyn}.obj:
-	$(CC) $[@ @$(C_ARG) -fo=$@
+	$(CC) $(CFLAGS) $[@ -fo=$^@
 
 .ERASE
 .c{$(OBJ_BASE)\stat}.obj:
-	$(CC) $[@ @$(C_ARG) -DCURL_STATICLIB -fo=$@
-
-$(C_ARG): $(__MAKEFILES__)
-	%create $^@
-	%append $^@ $(CFLAGS)
+	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
 
 $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt dll
 	@%append $^@ file { $(OBJS_DYN) }
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
-	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
-	@%append $^@ library clib3s.lib, wldap32.lib
-!ifeq USE_WATT32 1
+	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
+#	@%append $^@ library clib3r.lib
+	@%append $^@ library wldap32.lib
+!ifdef %use_watt32
 	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
 !else
 	@%append $^@ library ws2_32.lib
 !endif
-!ifeq USE_ZLIB 1
+!ifdef %use_zlib
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
-!ifeq USE_ARES 1
-	@%append $^@ library ..\ares\cares.lib
+!ifdef %use_ares
+	@%append $^@ library $(ARES_ROOT)\cares.lib
 !endif
 
 $(LIB_ARG): $(__MAKEFILES__)
 	%create $^@
-	for %f in ($(OBJS_STAT)) do @%append $^@ +- %f
+	@for %f in ($(OBJS_STAT)) do @%append $^@ +- %f
 
 #
 # Dependencies based on "gcc -MM .."
@@ -564,3 +601,4 @@ $(OBJ_DIR)\pingpong.obj: pingpong.c setup.h config-win32.h &
   ..\include\curl\curlrules.h ..\include\curl\easy.h &
   ..\include\curl\multi.h ..\include\curl\curl.h pingpong.h &
   ..\include\curl\mprintf.h curl_memory.h memdebug.h
+
