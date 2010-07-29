@@ -1,4 +1,11 @@
 # ./src/Makefile.inc
+# Using the backslash as line continuation character might be problematic
+# with some make flavours, as Watcom's wmake showed us already. If we
+# ever want to change this in a portable manner then we should consider
+# this idea (posted to the libcurl list by Adam Kellas):
+# CSRC1 = file1.c file2.c file3.c
+# CSRC2 = file4.c file5.c file6.c
+# CSOURCES = $(CSRC1) $(CSRC2)
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
@@ -15,5 +22,4 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h
 
 curl_SOURCES = $(CURL_SOURCES) $(CURLX_ONES) $(CURL_HFILES)
-
 
