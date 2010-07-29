@@ -576,7 +576,7 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
   else {
     l = smtp_auth_login_user(conn, &authuser);
 
-    if(l <= 0)
+    if(!l)
       result = CURLE_OUT_OF_MEMORY;
     else {
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
