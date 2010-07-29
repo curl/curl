@@ -47,6 +47,12 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 OBJ_DIR  = WC_Win32.obj
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
+# In order to process Makefile.inc wmake must be called with -u switch!
+!ifneq __MAKEOPTS__ -u
+!error You MUST call wmake with the -u switch!
+!else
+!include Makefile.inc
+!endif
 # Unfortunately, we can't include Makefile.inc here because wmake doesn't
 # use backslash as the line continuation character by default
 CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c &

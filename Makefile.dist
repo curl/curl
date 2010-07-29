@@ -54,17 +54,23 @@ borland-clean:
 	cd ..\src
 	make -f Makefile.b32 clean
 
-watcom:
+watcom: .SYMBOLIC
 	cd lib
-	wmake -f Makefile.Watcom
+	wmake -u -f Makefile.Watcom
 	cd ..\src
-	wmake -f Makefile.Watcom
+	wmake -u -f Makefile.Watcom
 
-watcom-clean:
+watcom-clean: .SYMBOLIC
 	cd lib
-	wmake -f Makefile.Watcom clean
+	wmake -u -f Makefile.Watcom clean
 	cd ..\src
-	wmake -f Makefile.Watcom clean
+	wmake -u -f Makefile.Watcom clean
+
+watcom-vclean: .SYMBOLIC
+	cd lib
+	wmake -u -f Makefile.Watcom vclean
+	cd ..\src
+	wmake -u -f Makefile.Watcom vclean
 
 mingw32:
 	$(MAKE) -C lib -f Makefile.m32
