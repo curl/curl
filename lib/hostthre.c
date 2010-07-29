@@ -487,8 +487,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct hostent *h = NULL;
-  struct SessionHandle *data = conn->data;
   struct in_addr in;
 
   *waitp = 0; /* default to synchronous response */
