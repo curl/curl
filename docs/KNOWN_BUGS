@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+76. The SOCKET type in Win64 is 64 bits large (and thus so is curl_socket_t on
+  that platform), and long is only 32 bits. It makes it impossible for
+  curl_easy_getinfo() to return a socket properly with the CURLINFO_LASTSOCKET
+  option as for all other operating systems.
+
 75. NTLM authentication involving unicode user name or password.
   http://curl.haxx.se/mail/lib-2009-10/0024.html
   http://curl.haxx.se/bug/view.cgi?id=2944325
