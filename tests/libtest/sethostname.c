@@ -25,4 +25,4 @@ int gethostname(char *name, size_t namelen) {
 
   /* LD_PRELOAD used, but no hostname set, we'll just return a failure */
   return -1;
-};
+}
