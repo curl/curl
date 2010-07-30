@@ -151,7 +151,10 @@ Curl_getaddrinfo_ex(const char *nodename,
     ca->ai_next      = NULL;
 
     if((ai->ai_addrlen > 0) && (ai->ai_addr != NULL)) {
-      ca->ai_addrlen  = ai->ai_addrlen;
+      /* typecast below avoid warning on at least win64:
+         conversion from 'size_t' to 'curl_socklen_t', possible loss of data
+      */
+      ca->ai_addrlen  = (curl_socklen_t)ai->ai_addrlen;
       if((ca->ai_addr = malloc(ca->ai_addrlen)) == NULL) {
         error = EAI_MEMORY;
         free(ca);
