@@ -30,7 +30,7 @@ RD = rmdir /q /s >NUL 2>&1
 CP = copy
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
-         -wcd=201 -bt=nt -bd -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV     &
+         -wcd=201 -bt=nt -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV         &
          -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I..\include $(SYS_INCL)
 #CFLAGS += -dWINBERAPI=__declspec(cdecl) -dWINLDAPAPI=__declspec(cdecl)
 
@@ -49,15 +49,15 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 # Change to suite.
 #
 !ifdef %zlib_root
-ZLIB_ROOT  = $(%zlib_root)
+ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT  = ..\..\zlib-1.2.5
+ZLIB_ROOT = ..\..\zlib-1.2.5
 !endif
 
 !ifdef %ares_root
-ARES_ROOT  = $(%ares_root)
+ARES_ROOT = $(%ares_root)
 !else
-ARES_ROOT  = ..\ares
+ARES_ROOT = ..\ares
 !endif
 
 !ifdef %use_zlib
@@ -109,7 +109,7 @@ libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
 	$(LD) name libcurl_wc.dll @$(LINK_ARG)
 
 libcurl_wc.lib: $(OBJS_STAT) $(LIB_ARG)
-	$(AR) -q -b- c $^@ @$(LIB_ARG)
+	$(AR) -q -b -c $^@ @$(LIB_ARG)
 
 clean: .SYMBOLIC
 	-$(RM) $(OBJS_STAT)
@@ -128,7 +128,7 @@ $(RESOURCE): libcurl.rc
 
 .ERASE
 .c{$(OBJ_BASE)\dyn}.obj:
-	$(CC) $(CFLAGS) $[@ -fo=$^@
+	$(CC) $(CFLAGS) -bd $[@ -fo=$^@
 
 .ERASE
 .c{$(OBJ_BASE)\stat}.obj:

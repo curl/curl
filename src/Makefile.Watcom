@@ -30,7 +30,7 @@ RD = rmdir /q /s >NUL 2>&1
 CP = copy
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
-         -wcd=201 -bt=nt -d+ -dWIN32 -dHAVE_STRTOLL                 &
+         -wcd=201 -bt=nt -bc -d+ -dWIN32 -dHAVE_STRTOLL             &
          -I..\include -I..\lib $(SYS_INCL)
 
 !ifdef %debug
@@ -61,8 +61,9 @@ CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c &
 CURLX_SOURCES = rawstr.c nonblock.c
 
 OBJS = $(CURL_SOURCES:.c=.obj)
-!ifndef %curl_static
+!ifdef %curl_static
 CFLAGS += -DCURL_STATICLIB
+!else
 OBJS += $(CURLX_SOURCES:.c=.obj)
 !endif
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
@@ -92,6 +93,7 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
 #	@%append $^@ library clib3r.lib
 !ifdef %curl_static
+	@%append $^@ library wldap32.lib
 	@%append $^@ library ..\lib\libcurl_wc.lib
 !else
 	@%append $^@ library ..\lib\libcurl_wc_imp.lib
