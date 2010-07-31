@@ -44,6 +44,21 @@ CFLAGS += -d0
 CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !endif
 
+#
+# Change to suite.
+#
+!ifdef %zlib_root
+ZLIB_ROOT = $(%zlib_root)
+!else
+ZLIB_ROOT = ..\..\zlib-1.2.5
+!endif
+
+!ifdef %ares_root
+ARES_ROOT = $(%ares_root)
+!else
+ARES_ROOT = ..\ares
+!endif
+
 OBJ_DIR  = WC_Win32.obj
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
@@ -95,6 +110,12 @@ $(LINK_ARG): $(__MAKEFILES__)
 !ifdef %curl_static
 	@%append $^@ library wldap32.lib
 	@%append $^@ library ..\lib\libcurl_wc.lib
+!ifdef %use_zlib
+	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+!endif
+!ifdef %use_ares
+	@%append $^@ library $(ARES_ROOT)\cares.lib
+!endif
 !else
 	@%append $^@ library ..\lib\libcurl_wc_imp.lib
 !endif
