@@ -106,8 +106,8 @@ $(OBJ_BASE):
 	-$(MD) $^@\stat
 	-$(MD) $^@\dyn
 
-$(CURLBUILDH): $(CURLBUILDH).dist  .EXISTSONLY
-	$(CP) $[@ $^@
+$(CURLBUILDH): .EXISTSONLY
+	$(CP) $^@.dist $^@
 
 libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
 	$(LD) name libcurl_wc.dll @$(LINK_ARG)
