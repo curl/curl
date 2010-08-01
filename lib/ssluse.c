@@ -2430,15 +2430,14 @@ ossl_connect_common(struct connectdata *conn,
       /* socket is readable or writable */
     }
 
-    /* Run transaction, and return to the caller if it failed or if
-     * this connection is part of a multi handle and this loop would
-     * execute again. This permits the owner of a multi handle to
-     * abort a connection attempt before step2 has completed while
-     * ensuring that a client using select() or epoll() will always
-     * have a valid fdset to wait on.
+    /* Run transaction, and return to the caller if it failed or if this
+     * connection is done nonblocking and this loop would execute again. This
+     * permits the owner of a multi handle to abort a connection attempt
+     * before step2 has completed while ensuring that a client using select()
+     * or epoll() will always have a valid fdset to wait on.
      */
     retcode = ossl_connect_step2(conn, sockindex);
-    if(retcode || (data->state.used_interface == Curl_if_multi &&
+    if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
                     ssl_connect_2_writing == connssl->connecting_state)))
