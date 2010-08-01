@@ -17,7 +17,7 @@ endif()
 
 add_executable(
   ${EXE_NAME}
-  ${curl_SOURCES}
+  ${CURL_ALLFILES}
   )
 
 source_group("cURLX source files" FILES ${CURLX_ONES})
