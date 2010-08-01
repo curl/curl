@@ -20,7 +20,6 @@ AR = wlib
 !ifdef __LOADDLL__
 !  loaddll wcc386  wccd386
 !  loaddll wpp386  wppd386
-!  loaddll wlink   wlinkd
 !  loaddll wlib    wlibd
 !endif
 
