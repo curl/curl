@@ -550,6 +550,13 @@
 #define CURL_LDAP_WIN 1
 #endif
 
+#if defined(__WATCOMC__) && defined(CURL_LDAP_WIN)
+#if __WATCOMC__ < 1280
+#define WINBERAPI  __declspec(cdecl)
+#define WINLDAPAPI __declspec(cdecl)
+#endif
+#endif
+
 #if defined(__POCC__) && defined(CURL_LDAP_WIN)
 #  define CURL_DISABLE_LDAP 1
 #endif
