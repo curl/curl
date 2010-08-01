@@ -89,21 +89,25 @@ OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
 #
-OBJ_DIR   = $(OBJ_BASE)\stat
-OBJS_STAT = $+ $(OBJS) $-
+OBJ_DIR    = $(OBJ_BASE)\stat
+OBJS_STAT  = $+ $(OBJS) $-
 
-OBJ_DIR  = $(OBJ_BASE)\dyn
-OBJS_DYN = $+ $(OBJS) $-
+OBJ_DIR    = $(OBJ_BASE)\dyn
+OBJS_DYN   = $+ $(OBJS) $-
 
-RESOURCE = $(OBJ_BASE)\dyn\libcurl.res
+CURLBUILDH = ..\include\curl\curlbuild.h
+RESOURCE   = $(OBJ_BASE)\dyn\libcurl.res
 
-all: $(OBJ_BASE) $(TARGETS) .SYMBOLIC
+all: $(CURLBUILDH) $(OBJ_BASE) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
 $(OBJ_BASE):
 	-$(MD) $^@
 	-$(MD) $^@\stat
 	-$(MD) $^@\dyn
+
+$(CURLBUILDH): $(CURLBUILDH).dist  .EXISTSONLY
+	$(CP) $[@ $^@
 
 libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
 	$(LD) name libcurl_wc.dll @$(LINK_ARG)
