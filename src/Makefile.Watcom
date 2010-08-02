@@ -132,16 +132,11 @@ vclean realclean: clean .SYMBOLIC
 $(RESOURCE): curl.rc
 	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
 
+# suffix search path - vpath-like hack
+.c: ..\lib
+
 .ERASE
 .c{$(OBJ_DIR)}.obj:
-	$(CC) $(CFLAGS) $[@ -fo=$^@
-
-.ERASE
-$(OBJ_DIR)\rawstr.obj: ..\lib\rawstr.c
-	$(CC) $(CFLAGS) $[@ -fo=$^@
-
-.ERASE
-$(OBJ_DIR)\nonblock.obj: ..\lib\nonblock.c
 	$(CC) $(CFLAGS) $[@ -fo=$^@
 
 #
