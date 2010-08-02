@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -230,6 +230,12 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_SSH_PRIVATE_KEYFILE ||                                 \
    (option) == CURLOPT_CRLFILE ||                                             \
    (option) == CURLOPT_ISSUERCERT ||                                          \
+   (option) == CURLOPT_SOCKS5_GSSAPI_SERVICE ||                               \
+   (option) == CURLOPT_SSH_KNOWNHOSTS ||                                      \
+   (option) == CURLOPT_MAIL_FROM ||                                           \
+   (option) == CURLOPT_RTSP_SESSION_ID ||                                     \
+   (option) == CURLOPT_RTSP_STREAM_URI ||                                     \
+   (option) == CURLOPT_RTSP_TRANSPORT ||                                      \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */
@@ -256,6 +262,10 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
    (option) == CURLOPT_SEEKDATA ||                                            \
    (option) == CURLOPT_PRIVATE ||                                             \
+   (option) == CURLOPT_SSH_KEYDATA ||                                         \
+   (option) == CURLOPT_INTERLEAVEDATA ||                                      \
+   (option) == CURLOPT_CHUNK_DATA ||                                          \
+   (option) == CURLOPT_FNMATCH_DATA ||                                        \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
@@ -272,6 +282,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_POSTQUOTE ||                                           \
    (option) == CURLOPT_PREQUOTE ||                                            \
    (option) == CURLOPT_TELNETOPTIONS ||                                       \
+   (option) == CURLOPT_MAIL_RCPT ||                                           \
    0)
 
 /* groups of curl_easy_getinfo infos that take the same type of argument */
