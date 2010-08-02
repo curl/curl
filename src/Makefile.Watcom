@@ -67,11 +67,8 @@ LINK_ARG = $(OBJ_DIR)\wlink.arg
 !else
 !include Makefile.inc
 !endif
-# Unfortunately, we can't include Makefile.inc here because wmake doesn't
-# use backslash as the line continuation character by default
-CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c &
-	getpass.c homedir.c curlutil.c os-specific.c
-
+# For now we still define the CURLX_ONES sources here unless we know how
+# to split off the prefixed path.
 CURLX_SOURCES = rawstr.c nonblock.c
 
 OBJS = $(CURL_SOURCES:.c=.obj)
