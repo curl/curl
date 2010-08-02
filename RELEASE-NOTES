@@ -11,6 +11,8 @@ This release includes the following changes:
 
  o maketgz: produce CHANGES automatically
  o added support for NTLM authentication when compiled with NSS
+ o build: Enable configure --enable-werror
+ o curl-config: --built-shared returns shared info
 
 This release includes the following bugfixes:
 
@@ -35,6 +37,16 @@ This release includes the following bugfixes:
  o multi: fix condition that remove timers before trigger
  o examples: add curl_multi_timeout
  o --retry: access violation with URL part sets continued
+ o ssh: Fix compile error on 64-bit systems.
+ o remote-header-name: chop filename at next semicolon
+ o ftp: response timeout bug in "quote" sending
+ o CUSTOMREQUEST: shouldn't be disabled when HTTP is disabled
+ o Watcom makefiles overhaul.
+ o NTLM tests: boost coverage by forcing the hostname
+ o multi: fix FTPS connecting the data connection with OpenSSL
+ o retry: consider retrying even if -f is used
+ o fix SOCKS problem when using multi interface
+ o typecheck-gcc: add checks for recently added options
 
 This release includes the following known bugs:
 
@@ -44,7 +56,9 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup, Jon Sargeant,
- Pierre Joye, Tor Arntsen, Constantine Sapuntzakis, Sidney San Martin
+ Pierre Joye, Tor Arntsen, Constantine Sapuntzakis, Sidney San Martin,
+ Jeff Pohlmeyer, Jan Van Boghout, Ben Greear, Guenter Knauf, Adam Light,
+ Georg Lippitsch, Mike Power, Robin Cornelius
 
 
         Thanks! (and sorry if I forgot to mention someone)
