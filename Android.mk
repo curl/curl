@@ -90,7 +90,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/src/Makefile.inc
-LOCAL_SRC_FILES := $(addprefix src/,$(CURL_SOURCES))
+LOCAL_SRC_FILES := $(addprefix src/,$(CURL_CFILES))
 
 LOCAL_MODULE := curl
 LOCAL_STATIC_LIBRARIES := libcurl

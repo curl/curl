@@ -71,7 +71,7 @@ LINK_ARG = $(OBJ_DIR)\wlink.arg
 # to split off the prefixed path.
 CURLX_SOURCES = rawstr.c nonblock.c
 
-OBJS = $(CURL_SOURCES:.c=.obj)
+OBJS = $(CURL_CFILES:.c=.obj)
 !ifdef %curl_static
 CFLAGS += -DCURL_STATICLIB
 !else

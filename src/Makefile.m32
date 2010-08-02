@@ -121,7 +121,7 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
+curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
 ifdef DYN
 curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
 curl_OBJECTS += $(curlx_OBJECTS)
