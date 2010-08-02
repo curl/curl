@@ -17,8 +17,10 @@
  *
  * Since some systems think this prototype doesn't match the system provided
  * function, we AVOID including unistd.h or other headers that may include the
- * original prototype!
+ * original prototype! We provide our own instead (to avoid warnings).
  */
+int gethostname(char *name, size_t namelen);
+
 int gethostname(char *name, size_t namelen)
 {
   const char *force_hostname = getenv(GETHOSTNAME_ENV_VAR);
