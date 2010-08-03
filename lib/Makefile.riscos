@@ -15,7 +15,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.rawstr o.curl_addrinfo o.slist o.nonblock o.curl_rand \
 	o.curl_memrchr o.imap o.pop3 o.smtp o.pingpong o.rtsp \
 	o.curl_threads o.warnless o.hmac o.md5 o.curl_rtmp \
-	o.openldap o.polarssl
+	o.openldap o.polarssl o.md4 o.curl_gethostname
 
 
 # Compile options:
@@ -38,6 +38,9 @@ o.cookie:	c.cookie
 
 o.curl_addrinfo:	c.curl_addrinfo
 		gcc $(compileropts) -c -o curl_addrinfo.o c.curl_addrinfo
+
+o.curl_gethostname:	c.curl_gethostname
+		gcc $(compileropts) -c -o curl_gethostname.o c.curl_gethostname
 
 o.curl_memrchr:	c.curl_memrchr
 		gcc $(compileropts) -c -o curl_memrchr.o c.curl_memrchr
@@ -116,6 +119,9 @@ o.krb4:	c.krb4
 
 o.ldap:	c.ldap
 		gcc $(compileropts) -IOpenLDAP: -c -o ldap.o c.ldap
+
+o.md4:		c.md4
+		gcc $(compileropts) -c -o md4.o c.md4
 
 o.md5:		c.md5
 		gcc $(compileropts) -c -o md5.o c.md5
