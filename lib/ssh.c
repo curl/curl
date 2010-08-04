@@ -486,6 +486,17 @@ static int sshkeycallback(CURL *easy,
 #endif
 
 /*
+ * Earlier libssh2 versions didn't do SCP properly beyond 32bit sizes on 32bit
+ * architectures so we check of the necessary function is present.
+ */
+#ifdef HAVE_LIBSSH2_SCP_SEND64
+#define SCP_SEND(a,b,c,d) libssh2_scp_send_ex(a, b, (int)(c), (size_t)d, 0, 0)
+#else
+#define SCP_SEND(a,b,c,d) libssh2_scp_send64(a, b, (int)(c),            \
+                                             (libssh2_uint64_t)d, 0, 0)
+#endif
+
+/*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end.  The data the pointer 'block' points
  * to will be set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
@@ -2083,9 +2094,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        * directory in the path.
        */
       sshc->ssh_channel =
-        libssh2_scp_send_ex(sshc->ssh_session, sftp_scp->path,
-                            (int)(data->set.new_file_perms),
-                            (size_t)data->set.infilesize, 0, 0);
+        SCP_SEND(sshc->ssh_session, sftp_scp->path, data->set.new_file_perms,
+                 data->set.infilesize);
       if(!sshc->ssh_channel) {
         if(libssh2_session_last_errno(sshc->ssh_session) ==
            LIBSSH2_ERROR_EAGAIN) {
