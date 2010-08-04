@@ -205,7 +205,7 @@ static void MD5_Update (struct md5_ctx *context,    /* context */
 
   /* Transform as many times as possible. */
   if(inputLen >= partLen) {
-    memcpy((void *)&context->buffer[bufindex], (void *)input, partLen);
+    memcpy(&context->buffer[bufindex], input, partLen);
     MD5Transform(context->state, context->buffer);
 
     for (i = partLen; i + 63 < inputLen; i += 64)
@@ -217,7 +217,7 @@ static void MD5_Update (struct md5_ctx *context,    /* context */
     i = 0;
 
   /* Buffer remaining input */
-  memcpy((void *)&context->buffer[bufindex], (void *)&input[i], inputLen-i);
+  memcpy(&context->buffer[bufindex], &input[i], inputLen-i);
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
