@@ -489,7 +489,7 @@ static int sshkeycallback(CURL *easy,
  * Earlier libssh2 versions didn't do SCP properly beyond 32bit sizes on 32bit
  * architectures so we check of the necessary function is present.
  */
-#ifdef HAVE_LIBSSH2_SCP_SEND64
+#ifndef HAVE_LIBSSH2_SCP_SEND64
 #define SCP_SEND(a,b,c,d) libssh2_scp_send_ex(a, b, (int)(c), (size_t)d, 0, 0)
 #else
 #define SCP_SEND(a,b,c,d) libssh2_scp_send64(a, b, (int)(c),            \

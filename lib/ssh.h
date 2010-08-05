@@ -151,8 +151,6 @@ struct ssh_conn {
 #endif
 
 #if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010000)
-/* libssh2_sftp_seek64() has only ever been provided by libssh2 1.0 or
-   later */
 #  define HAVE_LIBSSH2_SFTP_SEEK64 1
 #else
 #  undef HAVE_LIBSSH2_SFTP_SEEK64
@@ -161,7 +159,7 @@ struct ssh_conn {
 #if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010206)
 #  define HAVE_LIBSSH2_SCP_SEND64 1
 #else
-#  undef HAVE_LIBSSH2_SFTP_SEEK64
+#  undef HAVE_LIBSSH2_SCP_SEND64
 #endif
 
 
