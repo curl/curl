@@ -84,6 +84,14 @@ RESOURCE = $(OBJ_DIR)\curl.res
 all: hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
 	@echo Welcome to cURL
 
+clean: .SYMBOLIC
+	-$(RM) $(OBJS)
+	-$(RM) $(RESOURCE) $(LINK_ARG)
+
+vclean realclean: clean .SYMBOLIC
+	-$(RD) $(OBJ_DIR)
+	-$(RM) curl.exe curl.map hugehelp.c
+
 hugehelp.c: hugehelp.c.cvs
 	$(CP) $[@ $^@
 
@@ -94,7 +102,17 @@ $(OBJ_DIR):
 	-$(MD) $^@
 
 curl.exe: $(OBJS) $(RESOURCE) $(LINK_ARG)
-	$(LD) name $^@ @$(LINK_ARG)
+	$(LD) name $^@ @$]@
+
+$(RESOURCE): curl.rc
+	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
+
+# suffix search path - vpath-like hack
+.c: ..\lib
+
+.ERASE
+.c{$(OBJ_DIR)}.obj:
+	$(CC) $(CFLAGS) $[@ -fo=$^@
 
 $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
@@ -105,7 +123,7 @@ $(LINK_ARG): $(__MAKEFILES__)
 #	@%append $^@ library clib3r.lib
 !ifdef %curl_static
 	@%append $^@ library wldap32.lib
-	@%append $^@ library ..\lib\libcurl_wc.lib
+	@%append $^@ library ..\lib\libcurl.lib
 !ifdef %use_zlib
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
@@ -113,29 +131,11 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ library $(ARES_ROOT)\cares.lib
 !endif
 !else
-	@%append $^@ library ..\lib\libcurl_wc_imp.lib
+	@%append $^@ library ..\lib\libcurl_imp.lib
 !endif
 !ifeq USE_WATT32 1
 	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
 !else
 	@%append $^@ library ws2_32.lib
 !endif
-
-clean: .SYMBOLIC
-	-$(RM) $(OBJS)
-	-$(RM) $(RESOURCE) $(LINK_ARG)
-
-vclean realclean: clean .SYMBOLIC
-	-$(RD) $(OBJ_DIR)
-	-$(RM) curl.exe curl.map hugehelp.c
-
-$(RESOURCE): curl.rc
-	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
-
-# suffix search path - vpath-like hack
-.c: ..\lib
-
-.ERASE
-.c{$(OBJ_DIR)}.obj: .AUTODEPEND
-	$(CC) $(CFLAGS) $[@ -fo=$^@
 

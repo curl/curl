@@ -10,7 +10,10 @@ SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
 SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
 !endif
 
-TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
+!ifndef %libname
+LIBNAME = libcurl
+!endif
+TARGETS = $(LIBNAME).dll $(LIBNAME)_imp.lib $(LIBNAME).lib
 
 CC = wcc386
 LD = wlink
@@ -99,6 +102,17 @@ RESOURCE   = $(OBJ_BASE)\dyn\libcurl.res
 all: $(CURLBUILDH) $(OBJ_BASE) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
+clean: .SYMBOLIC
+	-$(RM) $(OBJS_STAT)
+	-$(RM) $(OBJS_DYN)
+	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
+
+vclean realclean: clean .SYMBOLIC
+	-$(RM) $(TARGETS) $(LIBNAME).map
+	-$(RD) $(OBJ_BASE)\stat
+	-$(RD) $(OBJ_BASE)\dyn
+	-$(RD) $(OBJ_BASE)
+
 $(OBJ_BASE):
 	-$(MD) $^@
 	-$(MD) $^@\stat
@@ -107,40 +121,29 @@ $(OBJ_BASE):
 $(CURLBUILDH): .EXISTSONLY
 	$(CP) $^@.dist $^@
 
-libcurl_wc.dll libcurl_wc_imp.lib: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
-	$(LD) name libcurl_wc.dll @$(LINK_ARG)
+$(LIBNAME).dll: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
+	$(LD) name $^@ @$]@
 
-libcurl_wc.lib: $(OBJS_STAT) $(LIB_ARG)
-	$(AR) -q -b -c $^@ @$(LIB_ARG)
-
-clean: .SYMBOLIC
-	-$(RM) $(OBJS_STAT)
-	-$(RM) $(OBJS_DYN)
-	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
-
-vclean realclean: clean .SYMBOLIC
-	-$(RM) $(TARGETS) libcurl_wc.map
-	-$(RD) $(OBJ_BASE)\stat
-	-$(RD) $(OBJ_BASE)\dyn
-	-$(RD) $(OBJ_BASE)
+$(LIBNAME).lib: $(OBJS_STAT) $(LIB_ARG)
+	$(AR) -q -b -c $^@ @$]@
 
 .ERASE
 $(RESOURCE): libcurl.rc
 	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
 
 .ERASE
-.c{$(OBJ_BASE)\dyn}.obj: .AUTODEPEND
+.c{$(OBJ_BASE)\dyn}.obj:
 	$(CC) $(CFLAGS) -bd $[@ -fo=$^@
 
 .ERASE
-.c{$(OBJ_BASE)\stat}.obj: .AUTODEPEND
+.c{$(OBJ_BASE)\stat}.obj:
 	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
 
 $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt dll
 	@%append $^@ file { $(OBJS_DYN) }
-	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
+	@%append $^@ option quiet, map, caseexact, eliminate, implib=$(LIBNAME)_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
 #	@%append $^@ library clib3r.lib
 	@%append $^@ library wldap32.lib
