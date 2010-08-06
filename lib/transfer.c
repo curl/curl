@@ -811,6 +811,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           k->keepon &= ~KEEP_SEND;         /* disable writing */
           k->start100 = Curl_tvnow();       /* timeout count starts now */
           *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
+
+          /* set a timeout for the multi interface */
+          Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
           break;
         }
 
@@ -2265,6 +2268,9 @@ Curl_setup_transfer(
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
         k->start100 = k->start;
+
+        /* set a timeout for the multi interface */
+        Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
       }
       else {
         if(data->state.expect100header)
