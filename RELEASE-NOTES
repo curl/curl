@@ -47,6 +47,8 @@ This release includes the following bugfixes:
  o retry: consider retrying even if -f is used
  o fix SOCKS problem when using multi interface
  o typecheck-gcc: add checks for recently added options
+ o SCP: send large files properly with new enough libssh2
+ o multi_socket: set timeout for 100-continue
 
 This release includes the following known bugs:
 
@@ -58,7 +60,8 @@ advice from friends like these:
  Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup, Jon Sargeant,
  Pierre Joye, Tor Arntsen, Constantine Sapuntzakis, Sidney San Martin,
  Jeff Pohlmeyer, Jan Van Boghout, Ben Greear, Guenter Knauf, Adam Light,
- Georg Lippitsch, Mike Power, Robin Cornelius
+ Georg Lippitsch, Mike Power, Robin Cornelius, Mikael Johansson,
+ Yang Tse, Ben Darnell
 
 
         Thanks! (and sorry if I forgot to mention someone)
