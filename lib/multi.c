@@ -61,7 +61,6 @@
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
-  struct Curl_message *next;
 };
 
 /* NOTE: if you add a state here, add the name to the statename[] array as
@@ -110,12 +109,8 @@ struct Curl_one_easy {
   CURLMstate state;  /* the handle's state */
   CURLcode result;   /* previous result */
 
-  struct Curl_message *msg; /* A pointer to one single posted message.
-                               Cleanup should be done on this pointer NOT on
-                               the linked list in Curl_multi.  This message
-                               will be deleted when this handle is removed
-                               from the multi-handle */
-  int msg_num; /* number of messages left in 'msg' to return */
+  struct Curl_message msg; /* A single posted message. */
+  int msg_stored; /* a message is stored in 'msg' to return */
 
   /* Array with the plain socket numbers this handle takes care of, in no
      particular order. Note that all sockets are added to the sockhash, where
@@ -697,8 +692,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
-    if(easy->msg)
-      free(easy->msg);
     free(easy);
 
     multi->num_easy--; /* one less to care about now */
@@ -1536,26 +1529,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
   } while(0);
-  if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
+  if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg_stored) {
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->dns.hostcache = NULL;
       easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
     }
 
-    /* now add a node to the Curl_message linked list with this info */
-    msg = malloc(sizeof(struct Curl_message));
-
-    if(!msg)
-      return CURLM_OUT_OF_MEMORY;
+    /* now fill in the Curl_message with this info */
+    msg = &easy->msg;
 
     msg->extmsg.msg = CURLMSG_DONE;
     msg->extmsg.easy_handle = easy->easy_handle;
     msg->extmsg.data.result = easy->result;
-    msg->next = NULL;
 
-    easy->msg = msg;
-    easy->msg_num = 1; /* there is one unread message here */
+    easy->msg_stored = 1; /* there is an unread message here */
 
     multi->num_msgs++; /* increase message counter */
   }
@@ -1699,8 +1687,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
       Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association */
 
-      if(easy->msg)
-        free(easy->msg);
       free(easy);
       easy = nexteasy;
     }
@@ -1727,8 +1713,8 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 
     easy=multi->easy.next;
     while(easy != &multi->easy) {
-      if(easy->msg_num) {
-        easy->msg_num--;
+      if(easy->msg_stored) {
+        easy->msg_stored = 0;;
         break;
       }
       easy = easy->next;
@@ -1739,7 +1725,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     multi->num_msgs--;
     *msgs_in_queue = multi->num_msgs;
 
-    return &easy->msg->extmsg;
+    return &easy->msg.extmsg;
   }
   else
     return NULL;
