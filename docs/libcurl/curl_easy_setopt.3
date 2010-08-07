@@ -138,7 +138,7 @@ Using the rules above, a file name pattern can be constructed:
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
-function( void *ptr, size_t size, size_t nmemb, void *stream);\fP This
+function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP This
 function gets called by libcurl as soon as there is data received that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
@@ -157,7 +157,7 @@ Set this option to NULL to get the internal default function. The internal
 default function will write the data to the FILE * given with
 \fICURLOPT_WRITEDATA\fP.
 
-Set the \fIstream\fP argument with the \fICURLOPT_WRITEDATA\fP option.
+Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA\fP option.
 
 The callback function will be passed as much data as possible in all invokes,
 but you cannot possibly make any assumptions. It may be one byte, it may be
@@ -180,7 +180,7 @@ This option is also known with the older name \fICURLOPT_FILE\fP, the name
 \fICURLOPT_WRITEDATA\fP was introduced in 7.9.7.
 .IP CURLOPT_READFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
-function( void *ptr, size_t size, size_t nmemb, void *stream);\fP This
+function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP This
 function gets called by libcurl as soon as it needs to read data in order to
 send it to the peer. The data area pointed at by the pointer \fIptr\fP may be
 filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
@@ -201,9 +201,9 @@ From 7.18.0, the function can return CURL_READFUNC_PAUSE which then will cause
 reading from this connection to become paused. See \fIcurl_easy_pause(3)\fP
 for further details.
 
-If you set the callback pointer to NULL, or don't set it at all, the default
-internal read function will be used. It is simply doing an fread() on the FILE
-* stream set with \fICURLOPT_READDATA\fP.
+If you set this callback pointer to NULL, or don't set it at all, the default
+internal read function will be used. It is doing an fread() on the FILE *
+userdata set with \fICURLOPT_READDATA\fP.
 .IP CURLOPT_READDATA
 Data pointer to pass to the file read function. If you use the
 \fICURLOPT_READFUNCTION\fP option, this is the pointer you'll get as input. If
@@ -313,13 +313,13 @@ Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 .IP CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
-function( void *ptr, size_t size, size_t nmemb, void *stream);\fP. This
+function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP. This
 function gets called by libcurl as soon as it has received header data. The
 header callback will be called once for each header and only complete header
 lines are passed on to the callback. Parsing headers should be easy enough
 using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP. Do not assume that the header line is zero
-terminated! The pointer named \fIstream\fP is the one you set with the
+terminated! The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
@@ -452,7 +452,7 @@ You will need to override these definitions if they are different on your
 system.
 .IP CURLOPT_INTERLEAVEFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
-function( void *ptr, size_t size, size_t nmemb, void *stream)\fP. This
+function( void *ptr, size_t size, size_t nmemb, void *userdata)\fP. This
 function gets called by libcurl as soon as it has received interleaved RTP
 data. This function gets called for each $ block and therefore contains
 exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl writes the
@@ -472,8 +472,9 @@ request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
 process any pending RTP data before marking the request as finished.  (Added
 in 7.20.0)
 .IP CURLOPT_INTERLEAVEDATA
-This is the stream that will be passed to \fICURLOPT_INTERLEAVEFUNCTION\fP when
-interleaved RTP data is received. (Added in 7.20.0)
+This is the userdata pointer that will be passed to
+\fICURLOPT_INTERLEAVEFUNCTION\fP when interleaved RTP data is received. (Added
+in 7.20.0)
 .IP CURLOPT_CHUNK_BGN_FUNCTION
 Function pointer that should match the following prototype: \fBlong function
 (const void *transfer_info, void *ptr, int remains)\fP. This function gets
