@@ -10,15 +10,17 @@ SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
 SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
 !endif
 
-!ifndef %libname
+!ifdef %libname
+LIBNAME = $(%libname)
+!else
 LIBNAME = libcurl
 !endif
 TARGETS = $(LIBNAME).dll $(LIBNAME)_imp.lib $(LIBNAME).lib
 
 CC = wcc386
 LD = wlink
-RC = wrc
 AR = wlib
+RC = wrc
 
 !ifdef __LOADDLL__
 !  loaddll wcc386  wccd386

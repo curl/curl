@@ -10,12 +10,17 @@ SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
 SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
 !endif
 
-TARGETS = libcurl_wc.dll libcurl_wc_imp.lib libcurl_wc.lib
+!ifdef %libname
+LIBNAME = $(%libname)
+!else
+LIBNAME = libcurl
+!endif
+TARGETS = $(LIBNAME).dll $(LIBNAME)_imp.lib $(LIBNAME).lib
 
 CC = wcc386
 LD = wlink
-RC = wrc
 AR = wlib
+RC = wrc
 
 !ifdef __LOADDLL__
 !  loaddll wcc386  wccd386
@@ -123,7 +128,7 @@ $(LINK_ARG): $(__MAKEFILES__)
 #	@%append $^@ library clib3r.lib
 !ifdef %curl_static
 	@%append $^@ library wldap32.lib
-	@%append $^@ library ..\lib\libcurl.lib
+	@%append $^@ library ..\lib\$(LIBNAME).lib
 !ifdef %use_zlib
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
 !endif
@@ -131,7 +136,7 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ library $(ARES_ROOT)\cares.lib
 !endif
 !else
-	@%append $^@ library ..\lib\libcurl_imp.lib
+	@%append $^@ library ..\lib\$(LIBNAME)_imp.lib
 !endif
 !ifeq USE_WATT32 1
 	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
