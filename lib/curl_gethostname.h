@@ -22,13 +22,6 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
-
-/* wrapper around gethostname(), which makes it possible to override the
- * returned value during testing.  It reads the value of CURL_GETHOSTNAME
- * environment variable when built with --enable-curldebug.  The function always
- * returns -1, if gethostname() is not available on system.
- */
-int Curl_gethostname(char *name, size_t namelen);
+int Curl_gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen);
 
 #endif /* HEADER_CURL_GETHOSTNAME_H */

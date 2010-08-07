@@ -2376,8 +2376,9 @@ sub singletest {
                     delete $ENV{$var} if($ENV{$var});
                 }
                 else {
-                    if(($has_shared ne "yes") && ($var =~ /^LD_PRELOAD/)) {
-                        # print "Skipping LD_PRELOAD due to no shared build\n";
+                    if(($var =~ /^LD_PRELOAD/) &&
+                       ($debug_build || ($has_shared ne "yes"))) {
+                        # print "Skipping LD_PRELOAD due to no release shared build\n";
                         next;
                     }
                     $ENV{$var} = "$content";
