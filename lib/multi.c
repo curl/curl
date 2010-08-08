@@ -1714,7 +1714,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     easy=multi->easy.next;
     while(easy != &multi->easy) {
       if(easy->msg_stored) {
-        easy->msg_stored = 0;;
+        easy->msg_stored = 0;
         break;
       }
       easy = easy->next;
