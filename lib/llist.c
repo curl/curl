@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,8 @@
 /* this must be the last include file */
 #include "memdebug.h"
 
-void
-Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
+static void
+llist_init(struct curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -49,7 +49,7 @@ Curl_llist_alloc(curl_llist_dtor dtor)
   if(NULL == list)
     return NULL;
 
-  Curl_llist_init(list, dtor);
+  llist_init(list, dtor);
 
   return list;
 }
