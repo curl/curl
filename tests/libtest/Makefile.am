@@ -71,7 +71,7 @@ if NO_UNDEFINED
 UNDEF = -no-undefined
 endif
 
-libhostname_la_SOURCES = sethostname.c
+libhostname_la_SOURCES = sethostname.c sethostname.h
 
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =

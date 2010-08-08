@@ -9,11 +9,11 @@
 
 #include "setup.h"
 
+#include "sethostname.h"
+
 /*
  * we force our own host name, in order to make some tests machine independent
  */
-
-int gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen);
 
 int gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen)
 {
