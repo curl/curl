@@ -110,7 +110,6 @@ struct Curl_one_easy {
   CURLcode result;   /* previous result */
 
   struct Curl_message msg; /* A single posted message. */
-  int msg_stored; /* a message is stored in 'msg' to return */
 
   /* Array with the plain socket numbers this handle takes care of, in no
      particular order. Note that all sockets are added to the sockhash, where
@@ -137,9 +136,10 @@ struct Curl_multi {
   struct Curl_one_easy easy;
 
   int num_easy; /* amount of entries in the linked list above. */
-  int num_msgs; /* amount of messages in the easy handles */
   int num_alive; /* amount of easy handles that are added but have not yet
                     reached COMPLETE state */
+
+  struct curl_llist *msglist; /* a list of messages from completed transfers */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
@@ -355,6 +355,33 @@ static struct curl_hash *sh_init(void)
                          sh_freeentry);
 }
 
+/*
+ * multi_addmsg()
+ *
+ * Called when a transfer is completed. Adds the given msg pointer to
+ * the list kept in the multi handle.
+ */
+static CURLMcode multi_addmsg(struct Curl_multi *multi,
+                              struct Curl_message *msg)
+{
+  if(!Curl_llist_insert_next(multi->msglist, multi->msglist->tail, msg))
+    return CURLM_OUT_OF_MEMORY;
+
+  return CURLM_OK;
+}
+
+/*
+ * multi_freeamsg()
+ *
+ * Callback used by the llist system when a single list entry is destroyed.
+ */
+static void multi_freeamsg(void *a, void *b)
+{
+  (void)a;
+  (void)b;
+}
+
+
 CURLM *curl_multi_init(void)
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
@@ -365,27 +392,20 @@ CURLM *curl_multi_init(void)
   multi->type = CURL_MULTI_HANDLE;
 
   multi->hostcache = Curl_mk_dnscache();
-  if(!multi->hostcache) {
-    /* failure, free mem and bail out */
-    free(multi);
-    return NULL;
-  }
+  if(!multi->hostcache)
+    goto error;
 
   multi->sockhash = sh_init();
-  if(!multi->sockhash) {
-    /* failure, free mem and bail out */
-    Curl_hash_destroy(multi->hostcache);
-    free(multi);
-    return NULL;
-  }
+  if(!multi->sockhash)
+    goto error;
 
   multi->connc = Curl_mk_connc(CONNCACHE_MULTI, -1L);
-  if(!multi->connc) {
-    Curl_hash_destroy(multi->sockhash);
-    Curl_hash_destroy(multi->hostcache);
-    free(multi);
-    return NULL;
-  }
+  if(!multi->connc)
+    goto error;
+
+  multi->msglist = Curl_llist_alloc(multi_freeamsg);
+  if(!multi->msglist)
+    goto error;
 
   /* Let's make the doubly-linked list a circular list.  This makes
      the linked list code simpler and allows inserting at the end
@@ -394,6 +414,17 @@ CURLM *curl_multi_init(void)
   multi->easy.prev = &multi->easy;
 
   return (CURLM *) multi;
+
+  error:
+  if(multi->sockhash)
+    Curl_hash_destroy(multi->sockhash);
+  if(multi->hostcache)
+    Curl_hash_destroy(multi->hostcache);
+  if(multi->connc)
+    Curl_rm_connc(multi->connc);
+
+  free(multi);
+  return NULL;
 }
 
 CURLMcode curl_multi_add_handle(CURLM *multi_handle,
@@ -677,6 +708,22 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association
                                                     to this multi handle */
+
+    {
+      /* make sure there's no pending message in the queue sent from this easy
+         handle */
+      struct curl_llist_element *e;
+
+      for(e = multi->msglist->head; e; e = e->next) {
+        struct Curl_message *msg = e->ptr;
+
+        if(msg->extmsg.easy_handle == easy->easy_handle) {
+          Curl_llist_remove(multi->msglist, e, NULL);
+          /* there can only be one from this specific handle */
+          break;
+        }
+      }
+    }
 
     /* make the previous node point to our next */
     if(easy->prev)
@@ -1529,7 +1576,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
   } while(0);
-  if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg_stored) {
+
+  if(CURLM_STATE_COMPLETED == easy->state) {
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->dns.hostcache = NULL;
@@ -1543,9 +1591,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     msg->extmsg.easy_handle = easy->easy_handle;
     msg->extmsg.data.result = easy->result;
 
-    easy->msg_stored = 1; /* there is an unread message here */
-
-    multi->num_msgs++; /* increase message counter */
+    result = multi_addmsg(multi, msg);
   }
 
   return result;
@@ -1672,6 +1718,9 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     Curl_rm_connc(multi->connc);
 
+    /* remove the pending list of messages */
+    Curl_llist_destroy(multi->msglist, NULL);
+
     /* remove all easy handles */
     easy = multi->easy.next;
     while(easy != &multi->easy) {
@@ -1699,33 +1748,38 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     return CURLM_BAD_HANDLE;
 }
 
+/*
+ * curl_multi_info_read()
+ *
+ * This function is the primary way for a multi/multi_socket application to
+ * figure out if a transfer has ended. We MUST make this function as fast as
+ * possible as it will be polled frequently and we MUST NOT scan any lists in
+ * here to figure out things. We must scale fine to thousands of handles and
+ * beyond. The current design is fully O(1).
+ */
+
 CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_message *msg;
 
   *msgs_in_queue = 0; /* default to none */
 
-  if(GOOD_MULTI_HANDLE(multi)) {
-    struct Curl_one_easy *easy;
+  if(GOOD_MULTI_HANDLE(multi) && Curl_llist_count(multi->msglist)) {
+    /* there is one or more messages in the list */
+    struct curl_llist_element *e;
 
-    if(!multi->num_msgs)
-      return NULL; /* no messages left to return */
+    /* extract the head of the list to return */
+    e = multi->msglist->head;
 
-    easy=multi->easy.next;
-    while(easy != &multi->easy) {
-      if(easy->msg_stored) {
-        easy->msg_stored = 0;
-        break;
-      }
-      easy = easy->next;
-    }
-    if(!easy)
-      return NULL; /* this means internal count confusion really */
+    msg = e->ptr;
 
-    multi->num_msgs--;
-    *msgs_in_queue = multi->num_msgs;
+    /* remove the extracted entry */
+    Curl_llist_remove(multi->msglist, e, NULL);
 
-    return &easy->msg.extmsg;
+    *msgs_in_queue = Curl_llist_count(multi->msglist);
+
+    return &msg->extmsg;
   }
   else
     return NULL;
