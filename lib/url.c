@@ -4259,18 +4259,23 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     if(conn->bits.httpproxy) {
       /* we need to create new URL with the new port number */
       char *url;
-      /* FTPS connections have the FTP bit set too, so they match as well */
-      bool isftp = (bool)(0 != (conn->protocol & PROT_FTP));
+      char type[12]="";
+
+      if(conn->bits.type_set)
+        snprintf(type, sizeof(type), ";type=%c",
+                 data->set.prefer_ascii?'A':
+                 (data->set.ftp_list_only?'D':'I'));
 
       /*
-       * This synthesized URL isn't always right--suffixes like ;type=A
-       * are stripped off. It would be better to work directly from the
-       * original URL and simply replace the port part of it.
+       * This synthesized URL isn't always right--suffixes like ;type=A are
+       * stripped off. It would be better to work directly from the original
+       * URL and simply replace the port part of it.
        */
-      url = aprintf("%s://%s%s%s:%hu%s%s", conn->handler->scheme,
+      url = aprintf("%s://%s%s%s:%hu%s%s%s", conn->handler->scheme,
                     conn->bits.ipv6_ip?"[":"", conn->host.name,
                     conn->bits.ipv6_ip?"]":"", conn->remote_port,
-                    isftp?"/":"", data->state.path);
+                    data->state.slash_removed?"/":"", data->state.path,
+                    type);
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 

@@ -418,6 +418,7 @@ struct ConnectBits {
                                 that libcurl should reconnect and continue. */
   bool bound; /* set true if bind() has already been done on this socket/
                  connection */
+  bool type_set;  /* type= was used in the URL */
 };
 
 struct hostname {
@@ -1127,7 +1128,8 @@ struct UrlState {
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
                       area */
-
+  bool slash_removed; /* set TRUE if the 'path' points to a path where the
+                         initial URL slash separator has been taken off */
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
 

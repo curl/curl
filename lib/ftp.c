@@ -4178,6 +4178,7 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
   }
 
   data->state.path++;   /* don't include the initial slash */
+  data->state.slash_removed = TRUE; /* we've skipped the slash */
 
   /* FTP URLs support an extension like ";type=<typecode>" that
    * we'll try to get now! */
@@ -4189,6 +4190,7 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
   if(type) {
     *type = 0;                     /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
+    conn->bits.type_set = TRUE;
 
     switch (command) {
     case 'A': /* ASCII mode */
