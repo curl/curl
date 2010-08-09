@@ -64,7 +64,11 @@ include Makefile.inc
 # Preloading of libhostname allows host name overriding,
 # this is used to make some tests machine independent.
 
+if BUILD_LIBHOSTNAME
 noinst_LTLIBRARIES = libhostname.la
+else
+noinst_LTLIBRARIES =
+endif
 
 if NO_UNDEFINED
 # The -no-undefined flag is crucial to build fine on some platforms

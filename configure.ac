@@ -2461,6 +2461,13 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
+if test "x$enable_shared" = "xyes"; then
+  build_libhostname=yes
+else
+  build_libhostname=no
+fi
+AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$tests_use_libhostname = xyes)
+
 CURL_CHECK_OPTION_THREADED_RESOLVER
 
 if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
