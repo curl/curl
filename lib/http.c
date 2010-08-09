@@ -2536,7 +2536,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   /* url */
   if (paste_ftp_userpwd)
     result = Curl_add_bufferf(req_buffer, "ftp://%s:%s@%s",
-        conn->user, conn->passwd, ppath + sizeof("ftp://") - 1);
+                              conn->user, conn->passwd,
+                              ppath + sizeof("ftp://") - 1);
   else
     result = Curl_add_buffer(req_buffer, ppath, strlen(ppath));
   if (result)
@@ -2741,7 +2742,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     /* fire away the whole request to the server */
     result = Curl_add_buffer_send(req_buffer, conn,
-                             &data->info.request_size, 0, FIRSTSOCKET);
+                                  &data->info.request_size, 0, FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending POST request");
     else
@@ -2793,7 +2794,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     /* this sends the buffer and frees all the buffer resources */
     result = Curl_add_buffer_send(req_buffer, conn,
-                             &data->info.request_size, 0, FIRSTSOCKET);
+                                  &data->info.request_size, 0, FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending PUT request");
     else
@@ -2942,7 +2943,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
     /* issue the request */
     result = Curl_add_buffer_send(req_buffer, conn, &data->info.request_size,
-                             (size_t)included_body, FIRSTSOCKET);
+                                  (size_t)included_body, FIRSTSOCKET);
 
     if(result)
       failf(data, "Failed sending HTTP POST request");
@@ -2959,7 +2960,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     /* issue the request */
     result = Curl_add_buffer_send(req_buffer, conn,
-                             &data->info.request_size, 0, FIRSTSOCKET);
+                                  &data->info.request_size, 0, FIRSTSOCKET);
 
     if(result)
       failf(data, "Failed sending HTTP request");
