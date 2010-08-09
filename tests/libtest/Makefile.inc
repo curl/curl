@@ -15,7 +15,7 @@ noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
   lib568 lib569 lib570 lib571 lib572 lib573 chkhostname
 
 chkhostname_SOURCES = chkhostname.c $(top_srcdir)/lib/curl_gethostname.c
-chkhostname_LDADD =
+chkhostname_LDADD = @CURL_NETWORK_LIBS@
 chkhostname_DEPENDENCIES =
 chkhostname_CFLAGS = $(AM_CFLAGS)
 

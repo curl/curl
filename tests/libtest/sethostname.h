@@ -21,5 +21,12 @@
 #  endif
 #endif
 
-LIBHOSTNAME_EXTERN int gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen);
+#ifdef USE_WINSOCK
+#  define FUNCALLCONV __stdcall
+#else
+#  define FUNCALLCONV
+#endif
+
+LIBHOSTNAME_EXTERN int FUNCALLCONV
+  gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen);
 

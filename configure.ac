@@ -764,6 +764,8 @@ ac_cv_func_strcasecmp="no"
 
 CURL_CHECK_LIBS_CONNECT
 
+CURL_NETWORK_LIBS=$LIBS
+
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
 dnl check for additional required libraries.
@@ -2651,6 +2653,7 @@ LIBCURL_LIBS=$LIBS
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_LIBS)
 AC_SUBST(TEST_SERVER_LIBS)
+AC_SUBST(CURL_NETWORK_LIBS)
 LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
@@ -2775,6 +2778,7 @@ squeeze LIBS
 squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze TEST_SERVER_LIBS
+squeeze CURL_NETWORK_LIBS
 
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
