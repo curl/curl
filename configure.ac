@@ -2466,7 +2466,7 @@ if test "x$enable_shared" = "xyes"; then
 else
   build_libhostname=no
 fi
-AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$tests_use_libhostname = xyes)
+AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
 CURL_CHECK_OPTION_THREADED_RESOLVER
 
