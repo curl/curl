@@ -1171,17 +1171,18 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
                  (long)current, (long)state->max_time));
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
-    return(0);
+    return 0;
   }
   else if (current > state->rx_time+state->retry_time) {
     if (event)
       *event = TFTP_EVENT_TIMEOUT;
     time(&state->rx_time); /* update even though we received nothing */
-    return(state->max_time-current);
   }
-  else {
-    return(state->max_time-current);
-  }
+
+  /* there's a typecast below here since 'time_t' may in fact be larger than
+     'long', but we estimate that a 'long' will still be able to hold number
+     of seconds even if "only" 32 bit */
+  return (long) state->max_time-current;
 }
 
 
