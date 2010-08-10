@@ -26,6 +26,11 @@ RC = wrc
 !  loaddll wcc386  wccd386
 !  loaddll wpp386  wppd386
 !  loaddll wlib    wlibd
+!  if $(__VERSION__) < 1280
+!    loaddll wlink   wlinkd
+!  else
+!    loaddll wlink   wlink
+!  endif
 !endif
 
 MD = mkdir
@@ -80,6 +85,7 @@ OBJS = $(CURL_CFILES:.c=.obj)
 !ifdef %curl_static
 CFLAGS += -DCURL_STATICLIB
 !else
+CFLAGS += -br
 OBJS += $(CURLX_SOURCES:.c=.obj)
 !endif
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
@@ -95,7 +101,7 @@ clean: .SYMBOLIC
 
 vclean realclean: clean .SYMBOLIC
 	-$(RD) $(OBJ_DIR)
-	-$(RM) curl.exe curl.map hugehelp.c
+	-$(RM) curl.exe curl.map curl.sym hugehelp.c
 
 hugehelp.c: hugehelp.c.cvs
 	$(CP) $[@ $^@
@@ -123,9 +129,12 @@ $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt
 	@%append $^@ file { $(OBJS) }
+!ifdef %debug
+	@%append $^@ debug all
+	@%append $^@ option symfile
+!endif
 	@%append $^@ option quiet, map, caseexact, eliminate,
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
-#	@%append $^@ library clib3r.lib
 !ifdef %curl_static
 	@%append $^@ library wldap32.lib
 	@%append $^@ library ..\lib\$(LIBNAME).lib

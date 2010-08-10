@@ -26,6 +26,11 @@ RC = wrc
 !  loaddll wcc386  wccd386
 !  loaddll wpp386  wppd386
 !  loaddll wlib    wlibd
+!  if $(__VERSION__) < 1280
+!    loaddll wlink   wlinkd
+!  else
+!    loaddll wlink   wlink
+!  endif
 !endif
 
 MD = mkdir
@@ -110,7 +115,7 @@ clean: .SYMBOLIC
 	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
 
 vclean realclean: clean .SYMBOLIC
-	-$(RM) $(TARGETS) $(LIBNAME).map
+	-$(RM) $(TARGETS) $(LIBNAME).map $(LIBNAME).sym
 	-$(RD) $(OBJ_BASE)\stat
 	-$(RD) $(OBJ_BASE)\dyn
 	-$(RD) $(OBJ_BASE)
@@ -135,7 +140,7 @@ $(RESOURCE): libcurl.rc
 
 .ERASE
 .c{$(OBJ_BASE)\dyn}.obj:
-	$(CC) $(CFLAGS) -bd $[@ -fo=$^@
+	$(CC) $(CFLAGS) -bd -br $[@ -fo=$^@
 
 .ERASE
 .c{$(OBJ_BASE)\stat}.obj:
@@ -145,9 +150,12 @@ $(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt dll
 	@%append $^@ file { $(OBJS_DYN) }
+!ifdef %debug
+	@%append $^@ debug all
+	@%append $^@ option symfile
+!endif
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=$(LIBNAME)_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
-#	@%append $^@ library clib3r.lib
 	@%append $^@ library wldap32.lib
 !ifdef %use_watt32
 	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
