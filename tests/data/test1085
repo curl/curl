@@ -42,7 +42,7 @@ HTTP-IPv6 GET with invalid --interface
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-7
+45
 </errorcode>
 </verify>
 </testcase>

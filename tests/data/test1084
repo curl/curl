@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/1084 --interface non-existing-host.haxx.se.
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-7
+45
 </errorcode>
 </verify>
 </testcase>
