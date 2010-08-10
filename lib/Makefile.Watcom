@@ -26,15 +26,19 @@ RC = wrc
 !  loaddll wcc386  wccd386
 !  loaddll wpp386  wppd386
 !  loaddll wlib    wlibd
-!  if $(__VERSION__) < 1280
-!    loaddll wlink   wlink
-!  else
+!  if $(__VERSION__) > 1270
 !    loaddll wlink   wlinkd
+!  else
+!    loaddll wlink   wlink
 !  endif
 !endif
 
-MD = mkdir
+!if $(__VERSION__) < 1250                                                                                                           
 RM = del /q /f >NUL 2>&1
+!else                                                                                                                               
+RM = rm -f                                                                                                                          
+!endif
+MD = mkdir
 RD = rmdir /q /s >NUL 2>&1
 CP = copy
 
