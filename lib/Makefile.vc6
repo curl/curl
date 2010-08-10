@@ -54,11 +54,11 @@ IMPLIB_NAME       = libcurl_imp
 IMPLIB_NAME_DEBUG = libcurld_imp
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8g
+OPENSSL_PATH   = ../../openssl-0.9.8o
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.3
+ZLIB_PATH  = ../../zlib-1.2.5
 !ENDIF
 
 !IFNDEF MACHINE
