@@ -27,9 +27,9 @@ RC = wrc
 !  loaddll wpp386  wppd386
 !  loaddll wlib    wlibd
 !  if $(__VERSION__) < 1280
-!    loaddll wlink   wlinkd
-!  else
 !    loaddll wlink   wlink
+!  else
+!    loaddll wlink   wlinkd
 !  endif
 !endif
 
