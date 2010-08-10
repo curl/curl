@@ -80,7 +80,7 @@ LINK_ARG = $(OBJ_BASE)\dyn\wlink.arg
 LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 
 # In order to process Makefile.inc wmake must be called with -u switch!
-!ifneq __MAKEOPTS__ -u
+!ifndef %MAKEFLAGS
 !error You MUST call wmake with the -u switch!
 !else
 !include Makefile.inc

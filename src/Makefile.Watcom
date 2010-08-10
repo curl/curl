@@ -67,7 +67,7 @@ OBJ_DIR  = WC_Win32.obj
 LINK_ARG = $(OBJ_DIR)\wlink.arg
 
 # In order to process Makefile.inc wmake must be called with -u switch!
-!ifneq __MAKEOPTS__ -u
+!ifndef %MAKEFLAGS
 !error You MUST call wmake with the -u switch!
 !else
 !include Makefile.inc
