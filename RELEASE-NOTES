@@ -49,6 +49,9 @@ This release includes the following bugfixes:
  o typecheck-gcc: add checks for recently added options
  o SCP: send large files properly with new enough libssh2
  o multi_socket: set timeout for 100-continue
+ o ";type=" URL suffix over HTTP proxy
+ o acknowledge progress callback error returns during connect
+ o Watcom makefile fixes
 
 This release includes the following known bugs:
 
