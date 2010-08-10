@@ -55,7 +55,13 @@ Curl_llist_alloc(curl_llist_dtor dtor)
 }
 
 /*
- * Curl_llist_insert_next() returns 1 on success and 0 on failure.
+ * Curl_llist_insert_next()
+ *
+ * Inserts a new list element after the given one 'e'. If the given existing
+ * entry is NULL and the list already has elements, the new one will be
+ * inserted first in the list.
+ *
+ * Returns: 1 on success and 0 on failure.
  */
 int
 Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
@@ -73,15 +79,21 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
     list->tail = ne;
   }
   else {
-    ne->next = e->next;
+    /* if 'e' is NULL here, we insert the new element first in the list */
+    ne->next = e?e->next:list->head;
     ne->prev = e;
-    if(e->next) {
+    if(!e) {
+      list->head->prev = ne;
+      list->head = ne;
+    }
+    else if(e->next) {
       e->next->prev = ne;
     }
     else {
       list->tail = ne;
     }
-    e->next = ne;
+    if(e)
+      e->next = ne;
   }
 
   ++list->size;
