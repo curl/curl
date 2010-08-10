@@ -479,7 +479,15 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(m)
     /* This handle is still part of a multi handle, take care of this first
        and detach this handle from there. */
-    Curl_multi_rmeasy(data->multi, data);
+    curl_multi_remove_handle(data->multi, data);
+
+  /* Destroy the timeout list that is held in the easy handle. It is
+     /normally/ done by curl_multi_remove_handle() but this is "just in
+     case" */
+  if(data->state.timeoutlist) {
+    Curl_llist_destroy(data->state.timeoutlist, NULL);
+    data->state.timeoutlist = NULL;
+  }
 
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic

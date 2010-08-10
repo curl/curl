@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,8 +26,6 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 void Curl_expire(struct SessionHandle *data, long milli);
-
-void Curl_multi_rmeasy(void *multi, CURL *data);
 
 bool Curl_multi_canPipeline(const struct Curl_multi* multi);
 void Curl_multi_handlePipeBreak(struct SessionHandle *data);

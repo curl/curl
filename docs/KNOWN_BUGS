@@ -54,11 +54,6 @@ may have been fixed since this was written!
   handle with curl_easy_cleanup() and create a new. Some more details:
   http://curl.haxx.se/mail/lib-2009-04/0300.html
 
-62. CURLOPT_TIMEOUT does not work properly with the regular multi and
-  multi_socket interfaces. The work-around for apps is to simply remove the
-  easy handle once the time is up. See also:
-  http://curl.haxx.se/bug/view.cgi?id=2501457
-
 61. If an upload using Expect: 100-continue receives an HTTP 417 response,
   it ought to be automatically resent without the Expect:.  A workaround is
   for the client application to redo the transfer after disabling Expect:.

@@ -214,6 +214,8 @@ static const char * const statename[]={
 };
 #endif
 
+static void multi_freetimeout(void *a, void *b);
+
 /* always use this function to change state, to make debugging easier */
 static void multistate(struct Curl_one_easy *easy, CURLMstate state)
 {
@@ -434,6 +436,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   struct Curl_one_easy *easy;
   struct closure *cl;
   struct closure *prev=NULL;
+  struct SessionHandle *data = easy_handle;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -447,6 +450,10 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(((struct SessionHandle *)easy_handle)->multi)
     /* possibly we should create a new unique error code for this condition */
     return CURLM_BAD_EASY_HANDLE;
+
+  data->state.timeoutlist = Curl_llist_alloc(multi_freetimeout);
+  if(!data->state.timeoutlist)
+    return CURLM_OUT_OF_MEMORY;
 
   /* Now, time to add an easy handle to the multi stack */
   easy = calloc(1, sizeof(struct Curl_one_easy));
@@ -601,6 +608,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
+  struct SessionHandle *data = curl_handle;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -611,7 +619,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     return CURLM_BAD_EASY_HANDLE;
 
   /* pick-up from the 'curl_handle' the kept position in the list */
-  easy = ((struct SessionHandle *)curl_handle)->multi_pos;
+  easy = data->multi_pos;
 
   if(easy) {
     bool premature = (bool)(easy->state != CURLM_STATE_COMPLETED);
@@ -643,6 +651,12 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        else the timenode will remain in the splay tree after
        curl_easy_cleanup is called. */
     Curl_expire(easy->easy_handle, 0);
+
+    /* destroy the timeout list that is held in the easy handle */
+    if(data->state.timeoutlist) {
+      Curl_llist_destroy(data->state.timeoutlist, NULL);
+      data->state.timeoutlist = NULL;
+    }
 
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */
@@ -1652,12 +1666,34 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {
       struct SessionHandle *d = t->payload;
-      struct timeval* tv = &d->state.expiretime;
+      struct timeval *tv = &d->state.expiretime;
+      struct curl_llist *list = d->state.timeoutlist;
+      struct curl_llist_element *e;
 
-      /* clear the expire times within the handles that we remove from the
-         splay tree */
-      tv->tv_sec = 0;
-      tv->tv_usec = 0;
+      /* move over the timeout list for this specific handle and remove all
+         timeouts that are now passed tense and store the next pending
+         timeout in *tv */
+      for(e = list->head; e; ) {
+        struct curl_llist_element *n = e->next;
+        if(curlx_tvdiff(*(struct timeval *)e->ptr, now) < 0)
+          /* remove outdated entry */
+          Curl_llist_remove(list, e, NULL);
+        e = n;
+      }
+      if(!list->size)  {
+        /* clear the expire times within the handles that we remove from the
+           splay tree */
+        tv->tv_sec = 0;
+        tv->tv_usec = 0;
+      }
+      else {
+        e = list->head;
+        /* copy the first entry to 'tv' */
+        memcpy(tv, e->ptr, sizeof(*tv));
+
+        /* remove first entry from list */
+        Curl_llist_remove(list, e, NULL);
+      }
     }
 
   } while(t);
@@ -1669,14 +1705,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   return returncode;
 }
-
-/* This is called when an easy handle is cleanup'ed that is part of a multi
-   handle */
-void Curl_multi_rmeasy(void *multi_handle, CURL *easy_handle)
-{
-  curl_multi_remove_handle(multi_handle, easy_handle);
-}
-
 
 CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 {
@@ -2343,10 +2371,72 @@ static bool isHandleAtHead(struct SessionHandle *handle,
   return FALSE;
 }
 
-/* given a number of milliseconds from now to use to set the 'act before
-   this'-time for the transfer, to be extracted by curl_multi_timeout()
+/*
+ * multi_freetimeout()
+ *
+ * Callback used by the llist system when a single timeout list entry is
+ * destroyed.
+ */
+static void multi_freetimeout(void *user, void *entryptr)
+{
+  (void)user;
 
-   Pass zero to clear the timeout value for this handle.
+  /* the entry was plain malloc()'ed */
+  free(entryptr);
+}
+
+/*
+ * multi_addtimeout()
+ *
+ * Add a timestamp to the list of timeouts. Keep the list sorted so that head
+ * of list is always the timeout nearest in time.
+ *
+ */
+static CURLMcode
+multi_addtimeout(struct curl_llist *timeoutlist,
+                 struct timeval *stamp)
+{
+  struct curl_llist_element *e;
+  struct timeval *timedup;
+  struct curl_llist_element *prev = NULL;
+
+  timedup = malloc(sizeof(*timedup));
+  if(!timedup)
+    return CURLM_OUT_OF_MEMORY;
+
+  /* copy the timestamp */
+  memcpy(timedup, stamp, sizeof(*timedup));
+
+  if(Curl_llist_count(timeoutlist)) {
+    /* find the correct spot in the list */
+    for(e = timeoutlist->head; e; e = e->next) {
+      struct timeval *checktime = e->ptr;
+      long diff = curlx_tvdiff(*checktime, *timedup);
+      if(diff > 0)
+        break;
+      prev = e;
+    }
+
+  }
+  /* else
+     this is the first timeout on the list */
+
+  if(!Curl_llist_insert_next(timeoutlist, prev, timedup))
+    return CURLM_OUT_OF_MEMORY;
+
+  return CURLM_OK;
+}
+
+/*
+ * Curl_expire()
+ *
+ * given a number of milliseconds from now to use to set the 'act before
+ * this'-time for the transfer, to be extracted by curl_multi_timeout()
+ *
+ * Note that the timeout will be added to a queue of timeouts if it defines a
+ * moment in time that is later than the current head of queue.
+ *
+ * Pass zero to clear all timeout values for this handle.
 */
 void Curl_expire(struct SessionHandle *data, long milli)
 {
@@ -2364,11 +2454,18 @@ void Curl_expire(struct SessionHandle *data, long milli)
     if(nowp->tv_sec || nowp->tv_usec) {
       /* Since this is an cleared time, we must remove the previous entry from
          the splay tree */
+      struct curl_llist *list = data->state.timeoutlist;
+
       rc = Curl_splayremovebyaddr(multi->timetree,
                                   &data->state.timenode,
                                   &multi->timetree);
       if(rc)
         infof(data, "Internal error clearing splay node = %d\n", rc);
+
+      /* flush the timeout list too */
+      while(list->size > 0)
+        Curl_llist_remove(list, list->tail, NULL);
+
       infof(data, "Expire cleared\n");
       nowp->tv_sec = 0;
       nowp->tv_usec = 0;
@@ -2394,9 +2491,16 @@ void Curl_expire(struct SessionHandle *data, long milli)
          Compare if the new time is earlier, and only remove-old/add-new if it
          is. */
       long diff = curlx_tvdiff(set, *nowp);
-      if(diff > 0)
-        /* the new expire time was later so we don't change this */
+      if(diff > 0) {
+        /* the new expire time was later so just add it to the queue
+           and get out */
+        multi_addtimeout(data->state.timeoutlist, &set);
         return;
+      }
+
+      /* the new time is newer than the presently set one, so add the current
+         to the queue and update the head */
+      multi_addtimeout(data->state.timeoutlist, nowp);
 
       /* Since this is an updated time, we must remove the previous entry from
          the splay tree first and then re-add the new value */

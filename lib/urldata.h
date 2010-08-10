@@ -1094,6 +1094,7 @@ struct UrlState {
 #endif /* USE_SSLEAY */
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
+  struct curl_llist *timeoutlist; /* list of pending timeouts */
 
   /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;
