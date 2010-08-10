@@ -72,7 +72,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp);
 
 # version of this script
-$version='2010-04-13';
+$version='2010-10-10';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -140,7 +140,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
-  if ($targetos =~ /vc/ || $targetos =~ /borland/) {
+  if ($targetos =~ /vc/ || $targetos =~ /borland/ || $targetos =~ /watcom/) {
     $binext = '.exe';
     $libext = '.lib';
   }
@@ -163,7 +163,8 @@ if ($^O eq 'MSWin32' || $targetos) {
 }
 
 if (($^O eq 'MSWin32') &&
-    ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/)) {
+    ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
+     $targetos =~ /borland/ || $targetos =~ /watcom/)) {
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
@@ -497,6 +498,8 @@ if(!$make) {
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if ($targetos =~ /vc/);
+# force to 'wmake' for Watcom builds
+$make = "wmake" if ($targetos =~ /watcom/);
 logit "going with $make as make";
 
 # change to build dir
@@ -571,7 +574,7 @@ while (<F>) {
 }
 close(F);
 
-if (grepfile("define USE_ARES", "lib/curl_config$confsuffix.h")) {
+if (grepfile("^#define USE_ARES", "lib/curl_config$confsuffix.h")) {
   print "\n";
   logit "setup to build ares";
 
