@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 12
+# serial 13
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -314,6 +314,7 @@ dnl shell variable want_warnings as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_WARNINGS], [
   AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
+  AC_BEFORE([$0],[CURL_CHECK_OPTION_WERROR])dnl
   AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable strict compiler warnings])
   OPT_COMPILER_WARNINGS="default"
@@ -346,8 +347,7 @@ dnl --enable-werror or --disable-werror, and set
 dnl shell variable want_werror as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_WERROR], [
-  AC_REQUIRE([CURL_CHECK_OPTION_WARNINGS])dnl
-  AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER])dnl
   AC_MSG_CHECKING([whether to enable compiler warnings as errors])
   OPT_COMPILER_WERROR="default"
   AC_ARG_ENABLE(werror,
@@ -360,7 +360,7 @@ AC_HELP_STRING([--disable-werror],[Disable compiler warnings as errors]),
       want_werror="no"
       ;;
     default)
-      dnl --disable-werror option not specified, default to off
+      dnl configure option not specified
       want_werror="no"
       ;;
     *)
