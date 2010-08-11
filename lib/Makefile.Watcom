@@ -66,6 +66,12 @@ ZLIB_ROOT = $(%zlib_root)
 ZLIB_ROOT = ..\..\zlib-1.2.5
 !endif
 
+!ifdef %openssl_root
+OPENSSL_ROOT = $(%openssl_root)
+!else
+OPENSSL_ROOT = ..\..\openssl-0.9.8o
+!endif
+
 !ifdef %ares_root
 ARES_ROOT = $(%ares_root)
 !else
@@ -74,6 +80,10 @@ ARES_ROOT = ..\ares
 
 !ifdef %use_zlib
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
+!endif
+
+!ifdef %use_ssl
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)\inc32
 !endif
 
 !ifdef %use_ares
@@ -168,6 +178,9 @@ $(LINK_ARG): $(__MAKEFILES__)
 !endif
 !ifdef %use_zlib
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+!endif
+!ifdef %use_ssl
+	@%append $^@ library $(OPENSSL_ROOT)\out32\libeay32.lib, $(OPENSSL_ROOT)\out32\ssleay32.lib
 !endif
 !ifdef %use_ares
 	@%append $^@ library $(ARES_ROOT)\cares.lib
