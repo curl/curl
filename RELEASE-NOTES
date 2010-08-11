@@ -52,6 +52,7 @@ This release includes the following bugfixes:
  o ";type=" URL suffix over HTTP proxy
  o acknowledge progress callback error returns during connect
  o Watcom makefile fixes
+ o runtests: clear old setenv remainders before test
 
 This release includes the following known bugs:
 
