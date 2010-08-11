@@ -35,14 +35,14 @@
 #  ./configure --host=arm-linux CC=arm-eabi-gcc \
 #  CPPFLAGS="-I $A/system/core/include ..." \
 #  CFLAGS="-nostdlib -fno-exceptions -Wno-multichar ..." \
-#  LIB="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/lib/gcc/arm-eabi/X\
-#  /interwork/libgcc.a ..." \
+#  LIBS="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/lib/gcc/arm-eabi/X\
+#  /interwork/libgcc.a ..."
 #
 # Finally, copy the file COPYING to NOTICE so that the curl license gets put
-# into the right place (see the note about this below).
+# into the right place (but see the note about this below).
 #
 # Dan Fandrich
-# July 2010
+# August 2010
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -98,8 +98,8 @@ LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 
-# This will also need to include $(CURLX_ONES) in order to correctly link
-# if libcurl is changed to be a dynamic library
+# This may also need to include $(CURLX_ONES) in order to correctly link
+# if libcurl is changed to be built as a dynamic library
 LOCAL_CFLAGS += $(common_CFLAGS)
 
 include $(BUILD_EXECUTABLE)
