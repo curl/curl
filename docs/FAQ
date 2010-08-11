@@ -84,7 +84,7 @@ FAQ
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
   5.9 How does libcurl resolve host names?
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
@@ -1084,13 +1084,14 @@ FAQ
   Borland:         libcurl.lib   libcurl_imp.lib
 
 
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
 
   This is an error message you might get when you try to run a program linked
   with a shared version of libcurl and your run-time linker (ld.so) couldn't
-  find the shared library named libcurl.so.3.
+  find the shared library named libcurl.so.X. (Where X is the number of the
+  current libcurl ABI, typically 3 or 4).
 
-  You need to make sure that ld.so finds libcurl.so.3. You can do that
+  You need to make sure that ld.so finds libcurl.so.X. You can do that
   multiple ways, and it differs somewhat between different operating systems,
   but they are usually:
 
