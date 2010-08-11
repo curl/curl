@@ -238,6 +238,7 @@ my %timesrvrlog; # timestamp for each test server logs lock removal
 my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
+my %oldenv;
 
 #######################################################################
 # variables the command line options may set
@@ -2361,7 +2362,18 @@ sub singletest {
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
     # variables and still bail out fine on errors
-    my %oldenv;
+
+    # restore environment variables that were modified in a previous run
+    foreach my $var (keys %oldenv) {
+        if($oldenv{$var} eq 'notset') {
+            delete $ENV{$var} if($ENV{$var});
+        }
+        else {
+            $ENV{$var} = $oldenv{$var};
+        }
+        delete $oldenv{$var};
+    }
+
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
         foreach my $s (@setenv) {
