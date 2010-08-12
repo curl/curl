@@ -9,7 +9,7 @@ Curl and libcurl 7.21.2
 
 This release includes the following changes:
 
- o 
+ o curl -T: ignore file size of special files
 
 This release includes the following bugfixes:
 

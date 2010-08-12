@@ -4925,7 +4925,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             goto quit_urls;
           }
           infdopen=TRUE;
-          uploadfilesize=fileinfo.st_size;
+
+          /* we ignore file size for char/block devices, sockets, etc. */
+          if(S_IFREG == (fileinfo.st_mode & S_IFMT))
+            uploadfilesize=fileinfo.st_size;
 
         }
         else if(uploadfile && stdin_upload(uploadfile)) {
