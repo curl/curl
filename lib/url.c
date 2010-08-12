@@ -3487,11 +3487,8 @@ static CURLcode findprotocol(struct SessionHandle *data,
     if(Curl_raw_equal(p->scheme, protostr)) {
       /* Protocol found in table. Check if allowed */
       if(!(data->set.allowed_protocols & p->protocol))
-{
         /* nope, get out */
-	fprintf(stderr, "well, shit\n");
         break;
-}
 
       /* it is allowed for "normal" request, now do an extra check if this is
          the result of a redirect */
