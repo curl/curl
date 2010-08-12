@@ -25,10 +25,15 @@
 /* wraps curl_easy_setopt() with typechecking */
 
 /* To add a new kind of warning, add an
- *   if(_curl_is_sometype_option(_curl_opt) && ! _curl_is_sometype(value))
- *     _curl_easy_setopt_err_sometype();
+ *   if(_curl_is_sometype_option(_curl_opt))
+ *     if(!_curl_is_sometype(value))
+ *       _curl_easy_setopt_err_sometype();
  * block and define _curl_is_sometype_option, _curl_is_sometype and
  * _curl_easy_setopt_err_sometype below
+ *
+ * NOTE: We use two nested 'if' statements here instead of the && operator, in
+ *       order to work around gcc bug #32061.  It affects only gcc 4.3.x/4.4.x
+ *       when compiling with -Wlogical-op.
  *
  * To add an option that uses the same type as an existing option, you'll just
  * need to extend the appropriate _curl_*_option macro
@@ -37,51 +42,66 @@
 __extension__ ({                                                              \
   __typeof__ (option) _curl_opt = option;                                     \
   if (__builtin_constant_p(_curl_opt)) {                                      \
-    if (_curl_is_long_option(_curl_opt) && !_curl_is_long(value))             \
-      _curl_easy_setopt_err_long();                                           \
-    if (_curl_is_off_t_option(_curl_opt) && !_curl_is_off_t(value))           \
-      _curl_easy_setopt_err_curl_off_t();                                     \
-    if (_curl_is_string_option(_curl_opt) && !_curl_is_string(value))         \
-      _curl_easy_setopt_err_string();                                         \
-    if (_curl_is_write_cb_option(_curl_opt) && !_curl_is_write_cb(value))     \
-      _curl_easy_setopt_err_write_callback();                                 \
-    if ((_curl_opt) == CURLOPT_READFUNCTION && !_curl_is_read_cb(value))      \
-      _curl_easy_setopt_err_read_cb();                                        \
-    if ((_curl_opt) == CURLOPT_IOCTLFUNCTION && !_curl_is_ioctl_cb(value))    \
-      _curl_easy_setopt_err_ioctl_cb();                                       \
-    if ((_curl_opt) == CURLOPT_SOCKOPTFUNCTION && !_curl_is_sockopt_cb(value))\
-      _curl_easy_setopt_err_sockopt_cb();                                     \
-    if ((_curl_opt) == CURLOPT_OPENSOCKETFUNCTION &&                          \
-            !_curl_is_opensocket_cb(value))                                   \
-      _curl_easy_setopt_err_opensocket_cb();                                  \
-    if ((_curl_opt) == CURLOPT_PROGRESSFUNCTION &&                            \
-            !_curl_is_progress_cb(value))                                     \
-      _curl_easy_setopt_err_progress_cb();                                    \
-    if ((_curl_opt) == CURLOPT_DEBUGFUNCTION && !_curl_is_debug_cb(value))    \
-      _curl_easy_setopt_err_debug_cb();                                       \
-    if ((_curl_opt) == CURLOPT_SSL_CTX_FUNCTION &&                            \
-            !_curl_is_ssl_ctx_cb(value))                                      \
-      _curl_easy_setopt_err_ssl_ctx_cb();                                     \
-    if (_curl_is_conv_cb_option(_curl_opt) && !_curl_is_conv_cb(value))       \
-      _curl_easy_setopt_err_conv_cb();                                        \
-    if ((_curl_opt) == CURLOPT_SEEKFUNCTION && !_curl_is_seek_cb(value))      \
-      _curl_easy_setopt_err_seek_cb();                                        \
-    if (_curl_is_cb_data_option(_curl_opt) && !_curl_is_cb_data(value))       \
-      _curl_easy_setopt_err_cb_data();                                        \
-    if ((_curl_opt) == CURLOPT_ERRORBUFFER && !_curl_is_error_buffer(value))  \
-      _curl_easy_setopt_err_error_buffer();                                   \
-    if ((_curl_opt) == CURLOPT_STDERR && !_curl_is_FILE(value))               \
-      _curl_easy_setopt_err_FILE();                                           \
-    if (_curl_is_postfields_option(_curl_opt) && !_curl_is_postfields(value)) \
-      _curl_easy_setopt_err_postfields();                                     \
-    if ((_curl_opt) == CURLOPT_HTTPPOST &&                                    \
-            !_curl_is_arr((value), struct curl_httppost))                     \
-      _curl_easy_setopt_err_curl_httpost();                                   \
-    if (_curl_is_slist_option(_curl_opt) &&                                   \
-            !_curl_is_arr((value), struct curl_slist))                        \
-      _curl_easy_setopt_err_curl_slist();                                     \
-    if ((_curl_opt) == CURLOPT_SHARE && !_curl_is_ptr((value), CURLSH))       \
-      _curl_easy_setopt_err_CURLSH();                                         \
+    if (_curl_is_long_option(_curl_opt))                                      \
+      if (!_curl_is_long(value))                                              \
+        _curl_easy_setopt_err_long();                                         \
+    if (_curl_is_off_t_option(_curl_opt))                                     \
+      if (!_curl_is_off_t(value))                                             \
+        _curl_easy_setopt_err_curl_off_t();                                   \
+    if (_curl_is_string_option(_curl_opt))                                    \
+      if (!_curl_is_string(value))                                            \
+        _curl_easy_setopt_err_string();                                       \
+    if (_curl_is_write_cb_option(_curl_opt))                                  \
+      if (!_curl_is_write_cb(value))                                          \
+        _curl_easy_setopt_err_write_callback();                               \
+    if ((_curl_opt) == CURLOPT_READFUNCTION)                                  \
+      if (!_curl_is_read_cb(value))                                           \
+        _curl_easy_setopt_err_read_cb();                                      \
+    if ((_curl_opt) == CURLOPT_IOCTLFUNCTION)                                 \
+      if (!_curl_is_ioctl_cb(value))                                          \
+        _curl_easy_setopt_err_ioctl_cb();                                     \
+    if ((_curl_opt) == CURLOPT_SOCKOPTFUNCTION)                               \
+      if (!_curl_is_sockopt_cb(value))                                        \
+        _curl_easy_setopt_err_sockopt_cb();                                   \
+    if ((_curl_opt) == CURLOPT_OPENSOCKETFUNCTION)                            \
+      if (!_curl_is_opensocket_cb(value))                                     \
+        _curl_easy_setopt_err_opensocket_cb();                                \
+    if ((_curl_opt) == CURLOPT_PROGRESSFUNCTION)                              \
+      if (!_curl_is_progress_cb(value))                                       \
+        _curl_easy_setopt_err_progress_cb();                                  \
+    if ((_curl_opt) == CURLOPT_DEBUGFUNCTION)                                 \
+      if (!_curl_is_debug_cb(value))                                          \
+        _curl_easy_setopt_err_debug_cb();                                     \
+    if ((_curl_opt) == CURLOPT_SSL_CTX_FUNCTION)                              \
+      if (!_curl_is_ssl_ctx_cb(value))                                        \
+        _curl_easy_setopt_err_ssl_ctx_cb();                                   \
+    if (_curl_is_conv_cb_option(_curl_opt))                                   \
+      if (!_curl_is_conv_cb(value))                                           \
+        _curl_easy_setopt_err_conv_cb();                                      \
+    if ((_curl_opt) == CURLOPT_SEEKFUNCTION)                                  \
+      if (!_curl_is_seek_cb(value))                                           \
+        _curl_easy_setopt_err_seek_cb();                                      \
+    if (_curl_is_cb_data_option(_curl_opt))                                   \
+      if (!_curl_is_cb_data(value))                                           \
+        _curl_easy_setopt_err_cb_data();                                      \
+    if ((_curl_opt) == CURLOPT_ERRORBUFFER)                                   \
+      if (!_curl_is_error_buffer(value))                                      \
+        _curl_easy_setopt_err_error_buffer();                                 \
+    if ((_curl_opt) == CURLOPT_STDERR)                                        \
+      if (!_curl_is_FILE(value))                                              \
+        _curl_easy_setopt_err_FILE();                                         \
+    if (_curl_is_postfields_option(_curl_opt))                                \
+      if (!_curl_is_postfields(value))                                        \
+        _curl_easy_setopt_err_postfields();                                   \
+    if ((_curl_opt) == CURLOPT_HTTPPOST)                                      \
+      if (!_curl_is_arr((value), struct curl_httppost))                       \
+        _curl_easy_setopt_err_curl_httpost();                                 \
+    if (_curl_is_slist_option(_curl_opt))                                     \
+      if (!_curl_is_arr((value), struct curl_slist))                          \
+        _curl_easy_setopt_err_curl_slist();                                   \
+    if ((_curl_opt) == CURLOPT_SHARE)                                         \
+      if (!_curl_is_ptr((value), CURLSH))                                     \
+        _curl_easy_setopt_err_CURLSH();                                       \
   }                                                                           \
   curl_easy_setopt(handle, _curl_opt, value);                                 \
 })
@@ -92,15 +112,18 @@ __extension__ ({                                                              \
 __extension__ ({                                                              \
   __typeof__ (info) _curl_info = info;                                        \
   if (__builtin_constant_p(_curl_info)) {                                     \
-    if (_curl_is_string_info(_curl_info) && !_curl_is_arr((arg), char *))     \
-      _curl_easy_getinfo_err_string();                                        \
-    if (_curl_is_long_info(_curl_info) && !_curl_is_arr((arg), long))         \
-      _curl_easy_getinfo_err_long();                                          \
-    if (_curl_is_double_info(_curl_info) && !_curl_is_arr((arg), double))     \
-      _curl_easy_getinfo_err_double();                                        \
-    if (_curl_is_slist_info(_curl_info) &&                                    \
-           !_curl_is_arr((arg), struct curl_slist *))                         \
-      _curl_easy_getinfo_err_curl_slist();                                    \
+    if (_curl_is_string_info(_curl_info))                                     \
+      if (!_curl_is_arr((arg), char *))                                       \
+        _curl_easy_getinfo_err_string();                                      \
+    if (_curl_is_long_info(_curl_info))                                       \
+      if (!_curl_is_arr((arg), long))                                         \
+        _curl_easy_getinfo_err_long();                                        \
+    if (_curl_is_double_info(_curl_info))                                     \
+      if (!_curl_is_arr((arg), double))                                       \
+        _curl_easy_getinfo_err_double();                                      \
+    if (_curl_is_slist_info(_curl_info))                                      \
+      if (!_curl_is_arr((arg), struct curl_slist *))                          \
+        _curl_easy_getinfo_err_curl_slist();                                  \
   }                                                                           \
   curl_easy_getinfo(handle, _curl_info, arg);                                 \
 })
