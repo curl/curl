@@ -20,7 +20,8 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   strdup.c socks.c ssh.c nss.c qssl.c rawstr.c curl_addrinfo.c		\
   socks_gssapi.c socks_sspi.c curl_sspi.c slist.c nonblock.c		\
   curl_memrchr.c imap.c pop3.c smtp.c pingpong.c rtsp.c curl_threads.c	\
-  warnless.c hmac.c polarssl.c curl_rtmp.c openldap.c curl_gethostname.c
+  warnless.c hmac.c polarssl.c curl_rtmp.c openldap.c curl_gethostname.c\
+  gopher.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\

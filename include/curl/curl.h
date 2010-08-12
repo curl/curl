@@ -722,6 +722,7 @@ typedef enum {
 #define CURLPROTO_RTMPTE (1<<22)
 #define CURLPROTO_RTMPS  (1<<23)
 #define CURLPROTO_RTMPTS (1<<24)
+#define CURLPROTO_GOPHER (1<<25)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else

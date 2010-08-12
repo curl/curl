@@ -570,6 +570,22 @@ AC_HELP_STRING([--disable-smtp],[Disable SMTP support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support gopher])
+AC_ARG_ENABLE(gopher,
+AC_HELP_STRING([--enable-gopher],[Enable Gopher support])
+AC_HELP_STRING([--disable-gopher],[Disable Gopher support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable Gopher])
+       AC_SUBST(CURL_DISABLE_GOPHER, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 
 dnl **********************************************************************
 dnl Check for built-in manual
@@ -2737,6 +2753,9 @@ if test "x$CURL_DISABLE_DICT" != "x1"; then
 fi
 if test "x$CURL_DISABLE_TFTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
+fi
+if test "x$CURL_DISABLE_GOPHER" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
 fi
 if test "x$CURL_DISABLE_POP3" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"

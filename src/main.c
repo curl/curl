@@ -1552,6 +1552,7 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
     { "smtp", CURLPROTO_SMTP },
     { "smtps", CURLPROTO_SMTPS },
     { "rtsp", CURLPROTO_RTSP },
+    { "gopher", CURLPROTO_GOPHER },
     { NULL, 0 }
   };
 

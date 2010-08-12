@@ -138,6 +138,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "socks.h"
 #include "rtsp.h"
 #include "curl_rtmp.h"
+#include "gopher.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -225,6 +226,10 @@ static const struct Curl_handler * const protocols[] = {
 
 #ifndef CURL_DISABLE_RTSP
   &Curl_handler_rtsp,
+#endif
+
+#ifndef CURL_DISABLE_GOPHER
+  &Curl_handler_gopher,
 #endif
 
 #ifdef USE_LIBRTMP
@@ -3482,8 +3487,11 @@ static CURLcode findprotocol(struct SessionHandle *data,
     if(Curl_raw_equal(p->scheme, protostr)) {
       /* Protocol found in table. Check if allowed */
       if(!(data->set.allowed_protocols & p->protocol))
+{
         /* nope, get out */
+	fprintf(stderr, "well, shit\n");
         break;
+}
 
       /* it is allowed for "normal" request, now do an extra check if this is
          the result of a redirect */

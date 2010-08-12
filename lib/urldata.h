@@ -46,6 +46,7 @@
 #define PORT_RTMP 1935
 #define PORT_RTMPT PORT_HTTP
 #define PORT_RTMPS PORT_HTTPS
+#define PORT_GOPHER 70
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -712,11 +713,13 @@ struct connectdata {
 #define PROT_RTMPTE  CURLPROTO_RTMPTE
 #define PROT_RTMPS   CURLPROTO_RTMPS
 #define PROT_RTMPTS  CURLPROTO_RTMPTS
+#define PROT_GOPHER  CURLPROTO_GOPHER
 
-/* (1<<24) is currently the highest used bit in the public bitmask. We make
-   sure we use "private bits" above the public ones to make things easier. */
+/* (1<<25) is currently the highest used bit in the public bitmask. We make
+   sure we use "private bits" above the public ones to make things easier;
+   Gopher will not conflict with the current bit 25. */
 
-#define PROT_EXTMASK 0xffffff
+#define PROT_EXTMASK 0x03ffffff
 
 #define PROT_SSL     (1<<29) /* protocol requires SSL */
 
