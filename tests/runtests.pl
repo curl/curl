@@ -2349,16 +2349,6 @@ sub singletest {
         }
     }
 
-    # timestamp required servers verification start
-    $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
-
-    if(!$why) {
-        $why = serverfortest($testnum);
-    }
-
-    # timestamp required servers verification end
-    $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
-
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
     # variables and still bail out fine on errors
@@ -2373,6 +2363,16 @@ sub singletest {
         }
         delete $oldenv{$var};
     }
+
+    # timestamp required servers verification start
+    $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
+
+    if(!$why) {
+        $why = serverfortest($testnum);
+    }
+
+    # timestamp required servers verification end
+    $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
 
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
