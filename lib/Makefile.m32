@@ -148,12 +148,11 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 clean:
 	-$(RM) $(libcurl_a_OBJECTS) $(RESOURCE)
 
-distrib: clean
+distclean vclean: clean
 	-$(RM) $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY)
 
 FORCE: ;
 
 $(LIBCARES_PATH)/libcares.a:
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.m32
-
 

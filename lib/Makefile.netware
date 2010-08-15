@@ -84,14 +84,14 @@ else
 	CC = gcc
 endif
 PERL	= perl
-# a native win32 awk can be downloaded from here:
+# Here you can find a native Win32 binary of the original awk:
 # http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
 YACC	= bison -y
 CP	= cp -afv
 MKDIR	= mkdir
 # RM	= rm -f
-# if you want to mark the target as MTSAFE you will need a tool for
+# If you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
 # http://www.gknw.net/development/prgtools/mkxdc.zip
 MPKXDC	= mkxdc
@@ -269,7 +269,7 @@ clean:
 	-$(RM) curl_config.h
 	-$(RM) -r $(OBJDIR)
 
-distclean: clean
+distclean vclean: clean
 	-$(RM) $(TARGET).$(LIBEXT) $(TARGET).nlm
 	-$(RM) certdata.txt ca-bundle.crt
 

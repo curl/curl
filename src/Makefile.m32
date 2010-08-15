@@ -159,7 +159,6 @@ ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
 endif
 	-$(RM) $(curl_OBJECTS) $(RESOURCE)
 
-distrib: clean
+distclean vclean: clean
 	-$(RM) $(curl_PROGRAMS)
-
 

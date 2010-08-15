@@ -128,7 +128,7 @@ clean: .SYMBOLIC
 	-$(RM) $(OBJS_DYN)
 	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
 
-vclean realclean: clean .SYMBOLIC
+vclean distclean: clean .SYMBOLIC
 	-$(RM) $(TARGETS) $(LIBNAME).map $(LIBNAME).sym
 	-$(RD) $(OBJ_BASE)\stat
 	-$(RD) $(OBJ_BASE)\dyn

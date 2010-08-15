@@ -113,7 +113,7 @@ clean: .SYMBOLIC
 	-$(RM) $(OBJS)
 	-$(RM) $(RESOURCE) $(LINK_ARG)
 
-vclean realclean: clean .SYMBOLIC
+vclean distclean: clean .SYMBOLIC
 	-$(RD) $(OBJ_DIR)
 	-$(RM) curl.exe curl.map curl.sym hugehelp.c
 
