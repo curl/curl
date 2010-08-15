@@ -13,7 +13,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o multi: support the timeouts correctly, fixes known bug #62
+ o multi: use timeouts properly for MAX_RECV/SEND_SPEED
 
 This release includes the following known bugs:
 
@@ -22,6 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)
