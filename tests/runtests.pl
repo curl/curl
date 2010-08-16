@@ -2627,7 +2627,7 @@ sub singletest {
         }
     }
 
-    $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
+    $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
 
     if($verbose) {
         logmsg "$CMDLINE\n";
