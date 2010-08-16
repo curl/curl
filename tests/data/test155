@@ -79,7 +79,7 @@ HTTP PUT with --anyauth authorization (picking NTLM)
 # we force our own host name, in order to make the test machine independent
 CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=./libtest/.libs/libhostname.so
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/155 -T log/put155 -u testuser:testpass --anyauth

@@ -66,7 +66,7 @@ HTTP with NTLM authorization and wrong password
 # we force our own host name, in order to make the test machine independent
 CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=./libtest/.libs/libhostname.so
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/68 -u testuser:testpass --ntlm

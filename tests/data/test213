@@ -83,7 +83,7 @@ HTTP 1.0 proxy CONNECT auth NTLM and then POST
 # we force our own host name, in order to make the test machine independent
 CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=./libtest/.libs/libhostname.so
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
 http://test.remote.haxx.se:213/path/2130002 --proxy1.0 http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
