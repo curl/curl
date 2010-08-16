@@ -2894,6 +2894,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         }
         if(result)
           return result;
+        /* Make sure the progress information is accurate */
+        Curl_pgrsSetUploadSize(data, postsize);
       }
       else {
         /* A huge POST coming up, do data separate from the request */
