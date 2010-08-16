@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -277,6 +277,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     &conn->data->state.negotiate;
   char *encoded = NULL;
   size_t len;
+  char *userp;
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
   if(checkprefix("Negotiate", neg_ctx->protocol)) {
@@ -330,12 +331,16 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   if(len == 0)
     return CURLE_OUT_OF_MEMORY;
 
-  conn->allocptr.userpwd =
-    aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
-            neg_ctx->protocol, encoded);
+  userp = aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
+                  neg_ctx->protocol, encoded);
+
+  if(proxy)
+    conn->allocptr.proxyuserpwd = userp;
+  else
+    conn->allocptr.userpwd = userp;
   free(encoded);
   Curl_cleanup_negotiate (conn->data);
-  return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
+  return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
 static void cleanup(struct negotiatedata *neg_ctx)
