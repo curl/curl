@@ -83,7 +83,7 @@ typedef enum {
   CURLM_STATE_TOOFAST,     /* wait because limit-rate exceeded */
   CURLM_STATE_DONE,        /* post data transfer operation */
   CURLM_STATE_COMPLETED,   /* operation complete */
-
+  CURLM_STATE_MSGSENT,     /* the operation complete message is sent */
   CURLM_STATE_LAST /* not a true state, never use this */
 } CURLMstate;
 
@@ -211,6 +211,7 @@ static const char * const statename[]={
   "TOOFAST",
   "DONE",
   "COMPLETED",
+  "MSGSENT",
 };
 #endif
 
@@ -622,7 +623,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   easy = data->multi_pos;
 
   if(easy) {
-    bool premature = (bool)(easy->state != CURLM_STATE_COMPLETED);
+    bool premature = (bool)(easy->state < CURLM_STATE_COMPLETED);
     bool easy_owns_conn = (bool)(easy->easy_conn &&
                                  (easy->easy_conn->data == easy->easy_handle));
 
@@ -837,6 +838,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
          to be present */
   case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
   case CURLM_STATE_COMPLETED:
+  case CURLM_STATE_MSGSENT:
   case CURLM_STATE_INIT:
   case CURLM_STATE_CONNECT:
   case CURLM_STATE_WAITDO:
@@ -952,7 +954,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       infof(data, "Pipe broke: handle 0x%p, url = %s\n",
             easy, data->state.path);
 
-      if(easy->state != CURLM_STATE_COMPLETED) {
+      if(easy->state < CURLM_STATE_COMPLETED) {
         /* Head back to the CONNECT state */
         multistate(easy, CURLM_STATE_CONNECT);
         result = CURLM_CALL_MULTI_PERFORM;
@@ -1563,11 +1565,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       easy->easy_conn = NULL;
       break;
 
+    case CURLM_STATE_MSGSENT:
+      return CURLM_OK; /* do nothing */
+
     default:
       return CURLM_INTERNAL_ERROR;
     }
 
-    if(CURLM_STATE_COMPLETED != easy->state) {
+    if(CURLM_STATE_COMPLETED > easy->state) {
       if(CURLE_OK != easy->result) {
         /*
          * If an error was returned, and we aren't in completed state now,
@@ -1625,6 +1630,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     msg->extmsg.data.result = easy->result;
 
     result = multi_addmsg(multi, msg);
+
+    multistate(easy, CURLM_STATE_MSGSENT);
   }
 
   return result;
@@ -2686,7 +2693,7 @@ void Curl_multi_dump(const struct Curl_multi *multi_handle)
   fprintf(stderr, "* Multi status: %d handles, %d alive\n",
           multi->num_easy, multi->num_alive);
   for(easy=multi->easy.next; easy != &multi->easy; easy = easy->next) {
-    if(easy->state != CURLM_STATE_COMPLETED) {
+    if(easy->state < CURLM_STATE_COMPLETED) {
       /* only display handles that are not completed */
       fprintf(stderr, "handle %p, state %s, %d sockets\n",
               (void *)easy->easy_handle,
