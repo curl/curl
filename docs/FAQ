@@ -1,4 +1,4 @@
-Updated: June 30, 2010 (http://curl.haxx.se/docs/faq.html)
+Updated: August 18, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -20,6 +20,7 @@ FAQ
   1.10 How many are using curl?
   1.11 Why don't you update ca-bundle.crt
   1.12 I have a problem who can I chat with?
+  1.13 curl's ECCN number?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -357,6 +358,26 @@ FAQ
   There's a bunch of friendly people hanging out in the #curl channel on the
   IRC network irc.freenode.net. If you're polite and nice, chances are big
   that you can get -- or provide -- help instantly.
+
+  1.13 curl's ECCN number?
+
+  The US government restricts exports of software that contains or uses
+  cryptography. When doing so, the Export Control Classification Number (ECCN)
+  is used to identify the level of export control etc.
+
+  ASF gives a good explanation at http://www.apache.org/dev/crypto.html
+
+  We believe curl's number might be ECCN 5D002, another possibility is
+  5D992. It seems necessary to write them, asking to confirm.
+
+  Comprehensible explanations of the meaning of such numbers and how to
+  obtain them (resp.) are here
+
+  http://www.bis.doc.gov/licensing/exportingbasics.htm
+  http://www.bis.doc.gov/licensing/do_i_needaneccn.html
+
+  An incomprehensible description of the two numbers above is here
+  http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
 
 
 2. Install Related Problems
