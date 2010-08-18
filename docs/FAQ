@@ -125,7 +125,9 @@ FAQ
   libcurl
 
     A free and easy-to-use client-side URL transfer library, supporting FTP,
-    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, FILE, LDAP and LDAPS.
+    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, IMAP,
+    SMTP, POP3, RTMP and RTSP.
+
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     kerberos, HTTP form based upload, proxies, cookies, user+password
     authentication, file transfer resume, http proxy tunneling and more!
@@ -143,9 +145,8 @@ FAQ
 
     A command line tool for getting or sending files using URL syntax.
 
-    Since curl uses libcurl, it supports a range of common Internet protocols,
-    currently including HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, LDAP, LDAPS,
-    DICT, TELNET and FILE.
+    Since curl uses libcurl, curl supports the same wide range of common
+    Internet protocols that libcurl does.
 
   We pronounce curl and cURL with an initial k sound: [kurl].
 
