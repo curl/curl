@@ -57,6 +57,10 @@ CFLAGS += -d0
 CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !endif
 
+!ifdef %use_sspi
+CFLAGS += -dUSE_WINDOWS_SSPI
+!endif
+
 #
 # Change to suite.
 #
