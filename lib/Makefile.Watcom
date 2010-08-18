@@ -34,12 +34,12 @@ RC = wrc
 !endif
 
 !if $(__VERSION__) < 1250                                                                                                           
-RM = del /q /f >NUL 2>&1
+RM = del /q /f 2>NUL
 !else                                                                                                                               
 RM = rm -f                                                                                                                          
 !endif
 MD = mkdir
-RD = rmdir /q /s >NUL 2>&1
+RD = rmdir /q /s 2>NUL
 CP = copy
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &

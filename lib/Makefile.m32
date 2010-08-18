@@ -47,7 +47,7 @@ LDFLAGS = -s
 RANLIB = ranlib
 RC = windres
 RCFLAGS = --include-dir=../include -DDEBUGBUILD=0 -O COFF -i
-RM = del /q /f > NUL 2>&1
+RM = del /q /f 2>NUL
 STRIP = strip -g
 
 ########################################################

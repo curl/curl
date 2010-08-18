@@ -46,7 +46,7 @@ CFLAGS = -g -O2
 LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
-RM = del /q /f > NUL 2>&1
+RM = del /q /f 2>NUL
 CP = copy
 
 # We may need these someday
