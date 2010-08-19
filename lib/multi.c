@@ -2447,8 +2447,10 @@ multi_addtimeout(struct curl_llist *timeoutlist,
   /* else
      this is the first timeout on the list */
 
-  if(!Curl_llist_insert_next(timeoutlist, prev, timedup))
+  if(!Curl_llist_insert_next(timeoutlist, prev, timedup)) {
+    free(timedup);
     return CURLM_OUT_OF_MEMORY;
+  }
 
   return CURLM_OK;
 }
