@@ -4927,7 +4927,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           infdopen=TRUE;
 
           /* we ignore file size for char/block devices, sockets, etc. */
-          if(S_IFREG == (fileinfo.st_mode & S_IFMT))
+          if(S_ISREG(fileinfo.st_mode))
             uploadfilesize=fileinfo.st_size;
 
         }
