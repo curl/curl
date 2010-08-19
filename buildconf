@@ -248,7 +248,7 @@ fi
 #--------------------------------------------------------------------------
 # m4 check
 #
-m4=`${M4:-m4} --version 2>/dev/null|head -n 1`;
+m4=`${M4:-m4} --version 2>/dev/null || ${M4:-gm4} --version 2>/dev/null | head -n 1`;
 m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 
 if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
