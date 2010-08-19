@@ -254,7 +254,11 @@ m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
   echo "buildconf: GNU m4 version $m4_version (ok)"
 else
-  echo "buildconf: m4 version $m4 found. You need a GNU m4 installed!"
+  if test -z "$m4"; then
+    echo "buildconf: m4 version not recognized. You need a GNU m4 installed!"
+  else
+    echo "buildconf: m4 version $m4 found. You need a GNU m4 installed!"
+  fi
   exit 1
 fi
 
