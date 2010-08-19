@@ -11,7 +11,7 @@
 
 #include "memdebug.h"
 
-static const char *post[]={
+static const char * const post[]={
   "one",
   "two",
   "three",
@@ -28,11 +28,11 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
                              double ultotal, double ulnow)
 {
   FILE *moo;
+  static int prev_ultotal = -1;
+  static int prev_ulnow = -1;
   (void)clientp; /* UNUSED */
   (void)dltotal; /* UNUSED */
   (void)dlnow; /* UNUSED */
-  static int prev_ultotal = -1;
-  static int prev_ulnow = -1;
 
   /* to avoid depending on timing, which will cause this progress function to
      get called a different number of times depending on circumstances, we
