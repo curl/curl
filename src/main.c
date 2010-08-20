@@ -1202,8 +1202,16 @@ static int formparse(struct Configurable *config,
                 FreeMultiInfo (multi_start);
                 return 2; /* illegal content-type syntax! */
               }
+
               /* now point beyond the content-type specifier */
               sep = (char *)type + strlen(major)+strlen(minor)+1;
+
+              /* there's a semicolon following - we check if it is a filename
+                 specified and if not we simply assume that it is text that
+                 the user wants included in the type and include that too up
+                 to the next zero or semicolon. */
+              if((*sep==';') && !curlx_strnequal(";filname=", sep, 9))
+                sep = strchr(sep+1, ';');
 
               if(*sep) {
                 *sep=0; /* zero terminate type string */
