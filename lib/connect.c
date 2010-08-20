@@ -627,6 +627,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   CURLcode code = CURLE_OK;
   curl_socket_t sockfd = conn->sock[sockindex];
   long allow = DEFAULT_CONNECT_TIMEOUT;
+  int error = 0;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
@@ -658,9 +659,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   /* check for connect without timeout as we want to return immediately */
   rc = waitconnect(conn, sockfd, 0);
+  if(WAITCONN_TIMEOUT == rc)
+    /* not an error, but also no connection yet */
+    return code;
 
   if(WAITCONN_CONNECTED == rc) {
-    int error;
     if(verifyconnect(sockfd, &error)) {
       /* we are connected, awesome! */
       conn->bits.tcpconnect = TRUE;
@@ -672,38 +675,34 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OK;
     }
     /* nope, not connected for real */
-    data->state.os_errno = error;
-    infof(data, "Connection failed\n");
-    code = trynextip(conn, sockindex, connected);
-    if(code)
-      failf(data, "Failed connect to %s:%ld; %s",
-            conn->host.name, conn->port, Curl_strerror(conn, error));
   }
-  else if(WAITCONN_TIMEOUT != rc) {
-    int error = 0;
-
+  else {
     /* nope, not connected  */
     if(WAITCONN_FDSET_ERROR == rc) {
       (void)verifyconnect(sockfd, &error);
-      data->state.os_errno = error;
-      infof(data, "%s\n",Curl_strerror(conn,error));
+      infof(data, "%s\n",Curl_strerror(conn, error));
     }
     else
       infof(data, "Connection failed\n");
-
-    code = trynextip(conn, sockindex, connected);
-
-    if(code) {
-      error = SOCKERRNO;
-      data->state.os_errno = error;
-      failf(data, "Failed connect to %s:%ld; %s",
-            conn->host.name, conn->port, Curl_strerror(conn, error));
-    }
   }
+
   /*
-   * If the connection failed here, we should attempt to connect to the "next
-   * address" for the given host.
+   * The connection failed here, we should attempt to connect to the "next
+   * address" for the given host. But first remember the latest error.
    */
+  if(error) {
+    data->state.os_errno = error;
+    SET_SOCKERRNO(error);
+  }
+
+  code = trynextip(conn, sockindex, connected);
+
+  if(code) {
+    error = SOCKERRNO;
+    data->state.os_errno = error;
+    failf(data, "Failed connect to %s:%ld; %s",
+          conn->host.name, conn->port, Curl_strerror(conn, error));
+  }
 
   return code;
 }
