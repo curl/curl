@@ -980,10 +980,17 @@ PORTS
 Useful URLs
 ===========
 
-OpenSSL   http://www.openssl.org
-MingW     http://www.mingw.org
-OpenLDAP  http://www.openldap.org
-Zlib      http://www.gzip.org/zlib/
+c-ares    http://daniel.haxx.se/projects/c-ares/license.html
+GNU GSS   http://www.gnu.org/software/gss/
+GnuTLS    http://www.gnu.org/software/gnutls/
+Heimdal   http://www.pdc.kth.se/heimdal/
+libidn    http://www.gnu.org/software/libidn/
 libssh2   http://www.libssh2.org
-
-
+MingW     http://www.mingw.org
+MIT Kerberos http://web.mit.edu/kerberos/www/dist/
+NSS       http://www.mozilla.org/projects/security/pki/nss/
+OpenLDAP  http://www.openldap.org
+OpenSSL   http://www.openssl.org
+PolarSSL  http://polarssl.org
+yassl     http://www.yassl.com/
+Zlib      http://www.gzip.org/zlib/
