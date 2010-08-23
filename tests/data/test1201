@@ -1,0 +1,40 @@
+# Gopher selector fetch
+<testcase>
+<info>
+<keywords>
+GOPHER
+SELECTOR
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<datacheck>
+iMenu results		error.host	1
+0Selector /selector/SELECTOR	/bar	bar.foo.invalid	70
+.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+gopher
+</server>
+ <name>
+Gopher selector
+ </name>
+ <command>
+gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+/selector/SELECTOR
+</protocol>
+</verify>
+</testcase>

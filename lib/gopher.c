@@ -121,8 +121,8 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   curl_off_t *bytecount = &data->req.bytecount;
   char *path = data->state.path;
-
   char *sel;
+  ssize_t amount, k;
 
   *done = TRUE; /* unconditionally */
 
@@ -149,12 +149,29 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  result = Curl_sendf(sockfd, conn, "%s\r\n", sel);
-
-  if(result) {
+  /* We use Curl_write instead of Curl_sendf to make sure the entire buffer
+     is sent, which could be sizeable with long selectors. */
+  k = strlen(sel);
+  for(;;) {
+    result = Curl_write(conn, sockfd, sel, k, &amount);
+    if (CURLE_OK == result) { /* Which may not have written it all! */
+      k -= amount;
+      sel += amount;
+      if (k < 1)
+        break; /* but it did write it all */
+    } else {
+      failf(data, "Failed sending Gopher request");
+      return result;
+    }
+  }
+  /* We can use Curl_sendf to send the terminal \r\n relatively safely and
+     save allocing another string/doing another _write loop. */
+  result = Curl_sendf(sockfd, conn, "\r\n");
+  if (result != CURLE_OK) {
     failf(data, "Failed sending Gopher request");
     return result;
   }
+
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
   return CURLE_OK;

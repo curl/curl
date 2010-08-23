@@ -133,6 +133,8 @@ my $SMTPPORT; # SMTP
 my $SMTP6PORT; # SMTP IPv6 server port
 my $RTSPPORT; # RTSP
 my $RTSP6PORT; # RTSP IPv6 server port
+my $GOPHERPORT; # Gopher
+my $GOPHER6PORT; # Gopher IPv6 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -193,6 +195,7 @@ my $has_idn;     # set if libcurl is built with IDN support
 my $http_ipv6;   # set if HTTP server has IPv6 support
 my $ftp_ipv6;    # set if FTP server has IPv6 support
 my $tftp_ipv6;   # set if TFTP server has IPv6 support
+my $gopher_ipv6; # set if Gopher server has IPv6 support
 my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
@@ -329,7 +332,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp')) {
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -988,7 +991,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks);
+                 'socks' => \&verifysocks,
+                 'gopher' => \&verifyftp);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -1180,7 +1184,7 @@ sub runhttpsserver {
 }
 
 #######################################################################
-# start the pingpong server (FTP, POP3, IMAP, SMTP)
+# start the pingpong server (FTP, POP3, IMAP, SMTP, GOPHER)
 #
 sub runpingpongserver {
     my ($proto, $id, $verbose, $ipv6) = @_;
@@ -1210,6 +1214,9 @@ sub runpingpongserver {
     }
     elsif($proto eq "smtp") {
         $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
+    }
+    elsif($proto eq "gopher") {
+        $port = ($ipvnum==6) ? $GOPHER6PORT : $GOPHERPORT;
     }
     else {
         print STDERR "Unsupported protocol $proto!!\n";
@@ -1263,6 +1270,7 @@ sub runpingpongserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+
     $pid2 = $pid3;
 
     if($verbose) {
@@ -2039,7 +2047,9 @@ sub checksystem {
         @sws = `server/sockfilt --version`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has ipv6 support!
+            # and since the Gopher server descends from it, we have it too!
             $ftp_ipv6 = 1;
+            $gopher_ipv6 = 1;
         }
     }
 
@@ -2098,6 +2108,10 @@ sub checksystem {
     if($tftp_ipv6) {
         logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
     }
+    logmsg sprintf("\n*   GOPHER/%d ", $GOPHERPORT);
+    if($gopher_ipv6) {
+        logmsg sprintf("GOPHER-IPv6/%d", $GOPHERPORT);
+    }
     logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
     logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
     logmsg sprintf("POP3/%d ", $POP3PORT);
@@ -2147,6 +2161,8 @@ sub subVariables {
   $$thing =~ s/%CLIENT6IP/$CLIENT6IP/g;
   $$thing =~ s/%RTSPPORT/$RTSPPORT/g;
   $$thing =~ s/%RTSP6PORT/$RTSP6PORT/g;
+  $$thing =~ s/%GOPHERPORT/$GOPHERPORT/g;
+  $$thing =~ s/%GOPHER6PORT/$GOPHER6PORT/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -3211,6 +3227,7 @@ sub startservers {
         if(($what eq "pop3") ||
            ($what eq "ftp") ||
            ($what eq "imap") ||
+           ($what eq "gopher") ||
            ($what eq "smtp")) {
             if(!$run{$what}) {
                 ($pid, $pid2) = runpingpongserver($what, "", $verbose);
@@ -3240,6 +3257,17 @@ sub startservers {
                 logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
                        $pid2) if($verbose);
                 $run{'ftp-ipv6'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "gopher-ipv6") {
+            if(!$run{'gopher-ipv6'}) {
+                ($pid, $pid2) = runpingpongserver("gopher","",$verbose,"ipv6");
+                if($pid <= 0) {
+                    return "failed starting GOPHER-IPv6 server";
+                }
+                logmsg sprintf("* pid gopher-ipv6 => %d %d\n", $pid,
+                       $pid2) if($verbose);
+                $run{'gopher-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "http") {
@@ -3821,6 +3849,8 @@ $SMTPPORT =  $base++;
 $SMTP6PORT = $base++;
 $RTSPPORT =  $base++;
 $RTSP6PORT = $base++;
+$GOPHERPORT =$base++;
+$GOPHER6PORT=$base++;
 
 #######################################################################
 # clear and create logging directory:

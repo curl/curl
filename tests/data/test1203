@@ -1,0 +1,41 @@
+# Gopher IPv6 connectivity test
+<testcase>
+<info>
+<keywords>
+GOPHER-ipv6
+IPv6
+INDEX
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<datacheck>
+iMenu results		error.host	1
+0Selector 	/bar	bar.foo.invalid	70
+.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+gopher-ipv6
+</server>
+ <name>
+Gopher IPv6 index
+ </name>
+ <command>
+-g "gopher://%HOSTIP:%GOPHER6PORT"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+
+</protocol>
+</verify>
+</testcase>

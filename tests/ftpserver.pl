@@ -29,6 +29,9 @@
 # protocol per invoke. You need to start mulitple servers to support multiple
 # protocols simultaneously.
 #
+# The gopher protocol test server also lives here, borrowing some of the
+# routines.
+#
 # It is meant to exercise curl, it is not meant to be a fully working
 # or even very standard compliant server.
 #
@@ -341,6 +344,7 @@ sub senddata {
 # for the given protocol. References to protocol command callbacks are
 # stored in 'commandfunc' hash, and text which will be returned to the
 # client before the command callback runs is stored in 'displaytext'.
+# Gopher is not handled here, however (it has a separate routine).
 #
 sub protocolsetup {
     my $proto = $_[0];
@@ -1294,7 +1298,7 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0] eq '--proto') {
-        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/)) {
+        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|smtp|gopher)$/)) {
             $proto = $1;
             shift @ARGV;
         }
@@ -1421,7 +1425,7 @@ while(1) {
 
     &customize(); # read test control instructions
 
-    sendcontrol @welcome;
+    sendcontrol @welcome unless ($proto eq 'gopher');
 
     #remove global variables from last connection
     if($ftplistparserstate) {
@@ -1474,7 +1478,39 @@ while(1) {
         my $FTPCMD;
         my $FTPARG;
         my $full=$_;
-        if($proto eq "imap") {
+
+        if($proto eq 'gopher') {
+          # Gopher protocol support lives right here and we handle it
+          # right here and now, since there will only ever be one selector
+          # and no other commands.
+
+          my $sel = $_;
+          my $query = '';
+          my @response = ();
+          ($sel, $query) = split(/\x09/, $_) if (/\x09/);
+
+          if($sel eq 'erifiedserver') {
+            # NOT verifiedserver, the first character is the item type in
+            # a Gopher URL!
+            push(@response, "iWE ROOLZ: $$\x09\x09error.host\x091\r\n");
+          }
+          if (length($query)) { # fake Veronica, gin up search results
+            push(@response, "iSearch results\x09\x09error.host\x091\r\n");
+            push(@response,
+                 "0Query $query\x09/foo\x09foo.bar.invalid\x0970\r\n");
+          } else { # fake selector, gin up a menu
+            push(@response, "iMenu results\x09\x09error.host\x091\r\n");
+          }
+          push(@response,
+               "0Selector $sel\x09/bar\x09bar.foo.invalid\x0970\r\n");
+          push(@response, ".\r\n");
+          sendcontrol @response;
+
+          # disconnect the client now, no command.
+          $FTPCMD = $FTPARG = '';
+          print SFWRITE "DISC\n";
+        }
+        elsif($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
             unless (m/^([^ ]+) ([^ ]+) (.*)/ ||
                     m/^([^ ]+) ([^ ]+)/) {
@@ -1550,7 +1586,7 @@ while(1) {
             }
         }
 
-        if($check) {
+        if($check && $proto ne 'gopher') {
             logmsg "$FTPCMD wasn't handled!\n";
             sendcontrol "500 $FTPCMD is not dealt with!\r\n";
         }
