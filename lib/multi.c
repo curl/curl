@@ -1831,7 +1831,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     /* remove the extracted entry */
     Curl_llist_remove(multi->msglist, e, NULL);
 
-    *msgs_in_queue = Curl_llist_count(multi->msglist);
+    *msgs_in_queue = (int)Curl_llist_count(multi->msglist);
 
     return &msg->extmsg;
   }
