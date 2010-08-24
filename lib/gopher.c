@@ -76,6 +76,8 @@
 #include "strequal.h"
 #include "gopher.h"
 #include "rawstr.h"
+#include "select.h"
+#include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -122,6 +124,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   curl_off_t *bytecount = &data->req.bytecount;
   char *path = data->state.path;
   char *sel;
+  char *sel_org = NULL;
   ssize_t amount, k;
 
   *done = TRUE; /* unconditionally */
@@ -139,19 +142,21 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
     /* ... then turn ? into TAB for search servers, Veronica, etc. ... */
     j = strlen(newp);
-    if (j)
-      for(i=0; i<j; i++)
-        newp[i] = ((newp[i] == '?') ? '\x09' : newp[i]);
+    for(i=0; i<j; i++)
+      if(newp[i] == '?')
+        newp[i] = '\x09';
 
     /* ... and finally unescape */
     sel = curl_easy_unescape(data, newp, 0, &len);
     if (!sel)
       return CURLE_OUT_OF_MEMORY;
+    sel_org = sel;
   }
 
-  /* We use Curl_write instead of Curl_sendf to make sure the entire buffer
-     is sent, which could be sizeable with long selectors. */
+  /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
+     sent, which could be sizeable with long selectors. */
   k = strlen(sel);
+
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);
     if (CURLE_OK == result) { /* Which may not have written it all! */
@@ -159,11 +164,26 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
       sel += amount;
       if (k < 1)
         break; /* but it did write it all */
-    } else {
+    }
+    else {
       failf(data, "Failed sending Gopher request");
+      Curl_safefree(sel_org);
       return result;
     }
+    /* Don't busyloop. The entire loop thing is a work-around as it causes a
+       BLOCKING behavior which is a NO-NO. This function should rather be
+       split up in a do and a doing piece where the pieces that aren't
+       possible to send now will be sent in the doing function repeatedly
+       until the entire request is sent.
+
+       Wait a while for the socket to be writable. Note that this doesn't
+       acknowledge the timeout.
+    */
+    Curl_socket_ready(CURL_SOCKET_BAD, sockfd, 100);
   }
+
+  Curl_safefree(sel_org);
+
   /* We can use Curl_sendf to send the terminal \r\n relatively safely and
      save allocing another string/doing another _write loop. */
   result = Curl_sendf(sockfd, conn, "\r\n");
