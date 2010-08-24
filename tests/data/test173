@@ -1,4 +1,11 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data>
@@ -21,7 +28,7 @@ http
 HTTP RFC1867-formpost a file from stdin with "faked" filename
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/173 -F field1=contents1 -F "fileupload=@-;filename=/dev/null"
+http://%HOSTIP:%HTTPPORT/we/want/173 -F field1=contents1 -F "fileupload=@-;filename=/dev/null;type=text/x-null;format=x-curl"
 </command>
 
 <stdin>
@@ -46,7 +53,7 @@ POST /we/want/173 HTTP/1.1
 User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 359
+Content-Length: 360
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------5dbea401cd8c
 
@@ -56,7 +63,7 @@ Content-Disposition: form-data; name="field1"
 contents1
 ------------------------------5dbea401cd8c
 Content-Disposition: form-data; name="fileupload"; filename="/dev/null"
-Content-Type: application/octet-stream
+Content-Type: text/x-null;format=x-curl
 
 line1
 line2

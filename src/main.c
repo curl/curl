@@ -1210,8 +1210,13 @@ static int formparse(struct Configurable *config,
                  specified and if not we simply assume that it is text that
                  the user wants included in the type and include that too up
                  to the next zero or semicolon. */
-              if((*sep==';') && !curlx_strnequal(";filname=", sep, 9))
-                sep = strchr(sep+1, ';');
+              if((*sep==';') && !curlx_strnequal(";filename=", sep, 10)) {
+                sep2 = strchr(sep+1, ';');
+                if (sep2)
+                  sep = sep2;
+                else
+                  sep = sep+strlen(sep); /* point to end of string */
+              }
 
               if(*sep) {
                 *sep=0; /* zero terminate type string */
