@@ -10,12 +10,12 @@ QUERY
 #
 # Server-side
 <reply>
-<datacheck>
+<data>
 iSearch results		error.host	1
 0Query query succeeded	/foo	foo.bar.invalid	70
 0Selector /the/search/engine	/bar	bar.foo.invalid	70
 .
-</datacheck>
+</data>
 </reply>
 
 # Client-side
@@ -27,7 +27,7 @@ gopher
 Gopher query
  </name>
  <command>
-gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine?query%20succeeded
+gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine?query%20succeeded/1202
 </command>
 </client>
 
@@ -35,7 +35,7 @@ gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine?query%20succeeded
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/the/search/engine	query succeeded
+/the/search/engine	query succeeded/1202
 </protocol>
 </verify>
 </testcase>

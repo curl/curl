@@ -10,11 +10,11 @@ INDEX
 #
 # Server-side
 <reply>
-<datacheck>
+<data>
 iMenu results		error.host	1
 0Selector 	/bar	bar.foo.invalid	70
 .
-</datacheck>
+</data>
 </reply>
 
 # Client-side
@@ -26,7 +26,7 @@ gopher
 Gopher index
  </name>
  <command>
-gopher://%HOSTIP:%GOPHERPORT
+gopher://%HOSTIP:%GOPHERPORT/1/1200
 </command>
 </client>
 
@@ -34,7 +34,7 @@ gopher://%HOSTIP:%GOPHERPORT
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-
+/1200
 </protocol>
 </verify>
 </testcase>

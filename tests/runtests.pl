@@ -676,6 +676,7 @@ sub verifyhttp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pid = 0;
+    my $bonus;
 
     my $verifyout = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
@@ -685,13 +686,18 @@ sub verifyhttp {
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
+    if($proto eq "gopher") {
+        # gopher is funny
+        $bonus="1/";
+    }
+
     my $flags = "--max-time $server_response_maxtime ";
     $flags .= "--output $verifyout ";
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
     $flags .= "--insecure " if($proto eq 'https');
-    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
+    $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
 
@@ -732,8 +738,8 @@ sub verifyhttp {
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
-    elsif($data || ($res != 7)) {
-        logmsg "RUN: Unknown server on our $server port: $port\n";
+    elsif($data || ($res && ($res != 7))) {
+        logmsg "RUN: Unknown server on our $server port: $port ($res)\n";
         return -1;
     }
     return $pid;
@@ -992,7 +998,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
                  'socks' => \&verifysocks,
-                 'gopher' => \&verifyftp);
+                 'gopher' => \&verifyhttp);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -1023,10 +1029,8 @@ sub verifyserver {
 # start the http server
 #
 sub runhttpserver {
-    my ($verbose, $ipv6) = @_;
-    my $port = $HTTPPORT;
+    my ($proto, $verbose, $ipv6, $port) = @_;
     my $ip = $HOSTIP;
-    my $proto = 'http';
     my $ipvnum = 4;
     my $idnum = 1;
     my $server;
@@ -1035,10 +1039,10 @@ sub runhttpserver {
     my $logfile;
     my $flags = "";
 
+
     if($ipv6) {
         # if IPv6, use a different setup
         $ipvnum = 6;
-        $port = $HTTP6PORT;
         $ip = $HOST6IP;
     }
 
@@ -1062,6 +1066,7 @@ sub runhttpserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--fork " if($forkserver);
+    $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
@@ -1184,7 +1189,7 @@ sub runhttpsserver {
 }
 
 #######################################################################
-# start the pingpong server (FTP, POP3, IMAP, SMTP, GOPHER)
+# start the pingpong server (FTP, POP3, IMAP, SMTP)
 #
 sub runpingpongserver {
     my ($proto, $id, $verbose, $ipv6) = @_;
@@ -1214,9 +1219,6 @@ sub runpingpongserver {
     }
     elsif($proto eq "smtp") {
         $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
-    }
-    elsif($proto eq "gopher") {
-        $port = ($ipvnum==6) ? $GOPHER6PORT : $GOPHERPORT;
     }
     else {
         print STDERR "Unsupported protocol $proto!!\n";
@@ -2041,15 +2043,14 @@ sub checksystem {
         if($sws[0] =~ /IPv6/) {
             # HTTP server has ipv6 support!
             $http_ipv6 = 1;
+            $gopher_ipv6 = 1;
         }
 
         # check if the FTP server has it!
         @sws = `server/sockfilt --version`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has ipv6 support!
-            # and since the Gopher server descends from it, we have it too!
             $ftp_ipv6 = 1;
-            $gopher_ipv6 = 1;
         }
     }
 
@@ -3227,7 +3228,6 @@ sub startservers {
         if(($what eq "pop3") ||
            ($what eq "ftp") ||
            ($what eq "imap") ||
-           ($what eq "gopher") ||
            ($what eq "smtp")) {
             if(!$run{$what}) {
                 ($pid, $pid2) = runpingpongserver($what, "", $verbose);
@@ -3259,20 +3259,33 @@ sub startservers {
                 $run{'ftp-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "gopher") {
+            if(!$run{'gopher'}) {
+                ($pid, $pid2) = runhttpserver("gopher", $verbose, 0,
+                                              $GOPHERPORT);
+                if($pid <= 0) {
+                    return "failed starting GOPHER server";
+                }
+                printf ("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'gopher'}="$pid $pid2";
+            }
+        }
         elsif($what eq "gopher-ipv6") {
             if(!$run{'gopher-ipv6'}) {
-                ($pid, $pid2) = runpingpongserver("gopher","",$verbose,"ipv6");
+                ($pid, $pid2) = runhttpserver("gopher", $verbose, "ipv6",
+                                              $GOPHER6PORT);
                 if($pid <= 0) {
                     return "failed starting GOPHER-IPv6 server";
                 }
                 logmsg sprintf("* pid gopher-ipv6 => %d %d\n", $pid,
-                       $pid2) if($verbose);
+                               $pid2) if($verbose);
                 $run{'gopher-ipv6'}="$pid $pid2";
             }
         }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
+                                              $HTTPPORT);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
@@ -3282,7 +3295,8 @@ sub startservers {
         }
         elsif($what eq "http-ipv6") {
             if(!$run{'http-ipv6'}) {
-                ($pid, $pid2) = runhttpserver($verbose, "IPv6");
+                ($pid, $pid2) = runhttpserver("http", $verbose, "IPv6",
+                                              $HTTP6PORT);
                 if($pid <= 0) {
                     return "failed starting HTTP-IPv6 server";
                 }
@@ -3361,7 +3375,8 @@ sub startservers {
                 stopserver('https');
             }
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
+                                              $HTTPPORT);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }

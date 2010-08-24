@@ -10,11 +10,11 @@ SELECTOR
 #
 # Server-side
 <reply>
-<datacheck>
+<data>
 iMenu results		error.host	1
 0Selector /selector/SELECTOR	/bar	bar.foo.invalid	70
 .
-</datacheck>
+</data>
 </reply>
 
 # Client-side
@@ -26,7 +26,7 @@ gopher
 Gopher selector
  </name>
  <command>
-gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR
+gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR/1201
 </command>
 </client>
 
@@ -34,7 +34,7 @@ gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/selector/SELECTOR
+/selector/SELECTOR/1201
 </protocol>
 </verify>
 </testcase>
