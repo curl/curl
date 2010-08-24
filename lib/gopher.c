@@ -160,6 +160,11 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);
     if (CURLE_OK == result) { /* Which may not have written it all! */
+      result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
+      if(result) {
+        Curl_safefree(sel_org);
+        return result;
+      }
       k -= amount;
       sel += amount;
       if (k < 1)
@@ -191,6 +196,9 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     failf(data, "Failed sending Gopher request");
     return result;
   }
+  result = Curl_client_write(conn, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  if(result)
+    return result;
 
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
