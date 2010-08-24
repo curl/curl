@@ -148,8 +148,7 @@ sub server_pidfilename {
 sub server_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.log';
-    $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|http|imap|pop3|smtp)s$/||
-                                 lc($proto) eq 'gopher');
+    $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|http|imap|pop3|smtp)s$/);
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
@@ -190,7 +189,7 @@ sub server_outputfilename {
 sub mainsockf_pidfilename {
     my ($proto, $ipver, $idnum) = @_;
     die "unsupported protocol: $proto" unless($proto &&
-        ((lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/) || lc($proto) eq 'gopher'));
+        (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
     return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
@@ -202,7 +201,7 @@ sub mainsockf_pidfilename {
 sub mainsockf_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: $proto" unless($proto &&
-        ((lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/) || lc($proto) eq 'gopher'));
+        (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log':'_sockfilt.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }

@@ -181,7 +181,7 @@ sub killsockfilters {
     my $pidfile;
     my $pid;
 
-    return if($proto !~ /^(ftp|imap|pop3|smtp|gopher)$/);
+    return if($proto !~ /^(ftp|imap|pop3|smtp)$/);
 
     die "unsupported sockfilter: $which"
         if($which && ($which !~ /^(main|data)$/));
