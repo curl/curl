@@ -10,11 +10,21 @@ Curl and libcurl 7.21.2
 This release includes the following changes:
 
  o curl -T: ignore file size of special files
+ o Added GOPHER protocol support
+ o Added mk-ca-bundle.vbs script
 
 This release includes the following bugfixes:
 
  o multi: support the timeouts correctly, fixes known bug #62
  o multi: use timeouts properly for MAX_RECV/SEND_SPEED
+ o negotiation: Wrong proxy authorization
+ o multi: avoid sending multiple complete messages
+ o cmdline: make -F type= accept ;charset=
+ o RESUME_FROM: clarify what ftp uploads do
+ o http: handle trailer headers in all chunked responses
+ o Curl_is_connected: use correct errno
+ o Added SSPI build to Watcom makefile
+ o progress: callback for POSTs less than MAX_INITIAL_POST_SIZE
 
 This release includes the following known bugs:
 
@@ -23,6 +33,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Kamil Dudka
+ Kamil Dudka, Ben Greear, Cameron Kaiser, Dan Fandrich, Dirk Manske,
+ Guenter Knauf, Julien Chaffraix, Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)
