@@ -3,7 +3,7 @@
 # Project objects:
 objs =	o.base64 o.connect o.cookie o.dict \
 	o.dllinit o.easy o.escape o.file \
-	o.formdata o.ftp o.getenv \
+	o.formdata o.ftp o.getenv o.gopher \
 	o.getinfo o.getpass o.hostip \
 	o.hostip4 o.hostsyn o.http \
 	o.http_chunks o.inet_ntop o.inet_pton o.if2ip o.krb4 o.ldap \
@@ -83,6 +83,9 @@ o.getinfo:	c.getinfo
 
 o.getpass:	c.getpass
 		gcc $(compileropts) -c -o getpass.o c.getpass
+
+o.gopher:	c.gopher
+		gcc $(compileropts) -c -o gopher.o c.gopher
 
 o.hmac:		c.hmac
 		gcc $(compileropts) -c -o hmac.o c.hmac
