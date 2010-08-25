@@ -161,6 +161,12 @@ December 2005:
 
  security vulnerability: libcurl URL Buffer Overflow
 
+January 2006:
+
+ We dropped support for Gopher. We found bugs in the implementation that
+ turned out having been introduced years ago, so with the conclusion that
+ nobody had found out in all this time we removed it instead of fixing it.
+
 March 2006:
 
  security vulnerability: libcurl TFTP Packet Buffer Overflow
@@ -235,3 +241,4 @@ August 2010:
  Known libcurl bindings:       39
  Contributors:                 808
 
+ Gopher support added (re-added actually)
