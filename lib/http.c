@@ -3647,20 +3647,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       /* init our chunky engine */
       Curl_httpchunk_init(conn);
     }
-
-    else if(checkprefix("Trailer:", k->p) ||
-            checkprefix("Trailers:", k->p)) {
-      /*
-       * This test helps Curl_httpchunk_read() to determine to look
-       * for well formed trailers after the zero chunksize record. In
-       * this case a CRLF is required after the zero chunksize record
-       * when no trailers are sent, or after the last trailer record.
-       *
-       * It seems both Trailer: and Trailers: occur in the wild.
-       */
-      k->trailerhdrpresent = TRUE;
-    }
-
     else if(checkprefix("Content-Encoding:", k->p) &&
             data->set.str[STRING_ENCODING]) {
       /*

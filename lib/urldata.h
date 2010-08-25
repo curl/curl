@@ -588,9 +588,6 @@ struct SingleRequest {
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
                          http.c for details. */
-  bool trailerhdrpresent; /* Set when Trailer: header found in HTTP response.
-                             Required to determine whether to look for trailers
-                             in case of Transfer-Encoding: chunking */
 };
 
 /*

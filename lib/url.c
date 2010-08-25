@@ -5300,10 +5300,8 @@ static CURLcode do_init(struct connectdata *conn)
 static void do_complete(struct connectdata *conn)
 {
   conn->data->req.chunk=FALSE;
-  conn->data->req.trailerhdrpresent=FALSE;
-
   conn->data->req.maxfd = (conn->sockfd>conn->writesockfd?
-                               conn->sockfd:conn->writesockfd)+1;
+                           conn->sockfd:conn->writesockfd)+1;
 }
 
 CURLcode Curl_do(struct connectdata **connp, bool *done)

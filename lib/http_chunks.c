@@ -184,22 +184,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       if(*datap == 0x0a) {
         /* we're now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
-          if(k->trailerhdrpresent!=TRUE) {
-            /* No Trailer: header found - revert to original Curl processing */
-            ch->state = CHUNK_STOPCR;
-
-            /* We need to increment the datap here since we bypass the
-               increment below with the immediate break */
-            length--;
-            datap++;
-
-            /* This is the final byte, continue to read the final CRLF */
-            break;
-          }
-          else {
-            ch->state = CHUNK_TRAILER; /* attempt to read trailers */
-            conn->trlPos=0;
-          }
+          ch->state = CHUNK_TRAILER; /* now check for trailers */
+          conn->trlPos=0;
         }
         else {
           ch->state = CHUNK_DATA;
@@ -280,9 +266,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         datap++;
         length--;
       }
-      else {
+      else
         return CHUNKE_BAD_CHUNK;
-      }
+
       break;
 
     case CHUNK_POSTLF:
@@ -295,44 +281,76 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         datap++;
         length--;
       }
-      else {
+      else
         return CHUNKE_BAD_CHUNK;
-      }
 
       break;
 
     case CHUNK_TRAILER:
-      /* conn->trailer is assumed to be freed in url.c on a
-         connection basis */
-      if(conn->trlPos >= conn->trlMax) {
-        /* in this logic we always allocate one byte more than trlMax
-           contains, just because CHUNK_TRAILER_POSTCR will append two bytes
-           so we need to make sure we have room for an extra byte */
-        char *ptr;
-        if(conn->trlMax) {
-          conn->trlMax *= 2;
-          ptr = realloc(conn->trailer, conn->trlMax + 1);
+      if(*datap == 0x0d) {
+        /* this is the end of a trailer, but if the trailer was zero bytes
+           there was no trailer and we move on */
+
+        if(conn->trlPos) {
+          /* we allocate trailer with 3 bytes extra room to fit this */
+          conn->trailer[conn->trlPos++]=0x0d;
+          conn->trailer[conn->trlPos++]=0x0a;
+          conn->trailer[conn->trlPos]=0;
+
+#ifdef CURL_DOES_CONVERSIONS
+          /* Convert to host encoding before calling Curl_client_write */
+          result = Curl_convert_from_network(conn->data,
+                                             conn->trailer,
+                                             conn->trlPos);
+          if(result != CURLE_OK)
+            /* Curl_convert_from_network calls failf if unsuccessful */
+            /* Treat it as a bad chunk */
+            return CHUNKE_BAD_CHUNK;
+
+#endif /* CURL_DOES_CONVERSIONS */
+          if(!data->set.http_te_skip) {
+            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
+                                       conn->trailer, conn->trlPos);
+            if(result)
+              return CHUNKE_WRITE_ERROR;
+          }
+          conn->trlPos=0;
+          ch->state = CHUNK_TRAILER_CR;
         }
         else {
-          conn->trlMax=128;
-          ptr = malloc(conn->trlMax + 1);
+          /* no trailer, we're on the final CRLF pair */
+          ch->state = CHUNK_TRAILER_POSTCR;
+          break; /* don't advance the pointer */
         }
-        if(!ptr)
-          return CHUNKE_OUT_OF_MEMORY;
-        conn->trailer = ptr;
       }
-      conn->trailer[conn->trlPos++]=*datap;
-
-      if(*datap == 0x0d)
-        ch->state = CHUNK_TRAILER_CR;
       else {
-        datap++;
-        length--;
+        /* conn->trailer is assumed to be freed in url.c on a
+           connection basis */
+        if(conn->trlPos >= conn->trlMax) {
+          /* we always allocate three extra bytes, just because when the full
+             header has been received we append CRLF\0 */
+          char *ptr;
+          if(conn->trlMax) {
+            conn->trlMax *= 2;
+            ptr = realloc(conn->trailer, conn->trlMax + 3);
+          }
+          else {
+            conn->trlMax=128;
+            ptr = malloc(conn->trlMax + 3);
+          }
+          if(!ptr)
+            return CHUNKE_OUT_OF_MEMORY;
+          conn->trailer = ptr;
+        }
+        fprintf(stderr, "MOO: %c\n", *datap);
+        conn->trailer[conn->trlPos++]=*datap;
       }
+      datap++;
+      length--;
       break;
 
     case CHUNK_TRAILER_CR:
-      if(*datap == 0x0d) {
+      if(*datap == 0x0a) {
         ch->state = CHUNK_TRAILER_POSTCR;
         datap++;
         length--;
@@ -342,48 +360,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       break;
 
     case CHUNK_TRAILER_POSTCR:
-      if(*datap == 0x0a) {
-        conn->trailer[conn->trlPos++]=0x0a;
-        conn->trailer[conn->trlPos]=0;
-        if(conn->trlPos==2) {
-          ch->state = CHUNK_STOP;
-          length--;
-
-          /*
-           * Note that this case skips over the final STOP states since we've
-           * already read the final CRLF and need to return
-           */
-
-          ch->dataleft = length;
-
-          return CHUNKE_STOP; /* return stop */
-        }
-        else {
-#ifdef CURL_DOES_CONVERSIONS
-          /* Convert to host encoding before calling Curl_client_write */
-          result = Curl_convert_from_network(conn->data,
-                                             conn->trailer,
-                                             conn->trlPos);
-          if(result != CURLE_OK) {
-            /* Curl_convert_from_network calls failf if unsuccessful */
-            /* Treat it as a bad chunk */
-            return(CHUNKE_BAD_CHUNK);
-          }
-#endif /* CURL_DOES_CONVERSIONS */
-          if(!data->set.http_te_skip) {
-            result = Curl_client_write(conn, CLIENTWRITE_HEADER,
-                                       conn->trailer, conn->trlPos);
-            if(result)
-              return CHUNKE_WRITE_ERROR;
-          }
-        }
+      /* We enter this state when a CR should arrive so we expect to
+         have to first pass a CR before we wait for LF */
+      if(*datap != 0x0d) {
+        /* not a CR then it must be another header in the trailer */
         ch->state = CHUNK_TRAILER;
-        conn->trlPos=0;
-        datap++;
-        length--;
+        break;
       }
-      else
-        return CHUNKE_BAD_CHUNK;
+      datap++;
+      length--;
+      /* now wait for the final LF */
+      ch->state = CHUNK_STOP;
       break;
 
     case CHUNK_STOPCR:
@@ -394,9 +381,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         datap++;
         length--;
       }
-      else {
+      else
         return CHUNKE_BAD_CHUNK;
-      }
       break;
 
     case CHUNK_STOP:
@@ -409,9 +395,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         ch->dataleft = length;
         return CHUNKE_STOP; /* return stop */
       }
-      else {
+      else
         return CHUNKE_BAD_CHUNK;
-      }
 
     default:
       return CHUNKE_STATE_ERROR;
