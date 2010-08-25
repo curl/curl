@@ -65,7 +65,6 @@
 
  10. New protocols
  10.1 RSYNC
- 10.2 RTMP
 
  11. Client
  11.1 sync
@@ -359,12 +358,6 @@ to provide the data to send.
 
  There's no RFC for protocol nor URI/URL format.  An implementation should
  most probably use an existing rsync library, such as librsync.
-
-10.2 RTMP
-
- There exists a patch that claims to introduce this protocol:
- http://osdir.com/ml/gnu.gnash.devel2/2006-11/msg00278.html, further details
- in the feature-request: http://curl.haxx.se/bug/feature.cgi?id=1843469
 
 11. Client
 
