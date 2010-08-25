@@ -22,7 +22,6 @@
  2.2 Remove easy interface internally
  2.3 Avoid having to remove/readd handles
  2.4 Fix HTTP Pipelining for PUT
- 2.5 Make curl_multi_info_read faster
 
  3. Documentation
  3.1  More and better
@@ -184,11 +183,6 @@
  HTTP Pipelining can be a way to greatly enhance performance for multiple
  serial requests and currently libcurl only supports that for HEAD and GET
  requests but it should also be possible for PUT.
-
-2.5 Make curl_multi_info_read faster
-
- When checking if there's info to return, this function scans over ALL added
- easy handles every time. That makes this function unnecessary heavy and slow.
 
 3. Documentation
 
