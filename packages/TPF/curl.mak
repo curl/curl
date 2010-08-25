@@ -52,6 +52,7 @@ C_SRC += ftp.c
 C_SRC += ftplistparser.c
 C_SRC += getenv.c
 C_SRC += getinfo.c
+C_SRC += gopher.c
 C_SRC += gtls.c
 C_SRC += hash.c
 C_SRC += hmac.c
