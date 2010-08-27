@@ -124,9 +124,9 @@ FAQ
 
   libcurl
 
-    A free and easy-to-use client-side URL transfer library, supporting FTP,
-    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, IMAP,
-    SMTP, POP3, RTMP and RTSP.
+    A free and easy-to-use client-side URL transfer library, supporting DICT,
+    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
+    POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
 
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     kerberos, HTTP form based upload, proxies, cookies, user+password
