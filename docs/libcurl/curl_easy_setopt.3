@@ -1259,9 +1259,12 @@ A parameter set to 1 tells the library to just list the names of files in a
 directory, instead of doing a full directory listing that would include file
 sizes, dates etc. This works for FTP and SFTP URLs.
 
-This causes an FTP NLST command to be sent on an FTP server.  Beware
-that some FTP servers list only files in their response to NLST; they
-might not include subdirectories and symbolic links.
+This causes an FTP NLST command to be sent on an FTP server.  Beware that some
+FTP servers list only files in their response to NLST; they might not include
+subdirectories and symbolic links.
+
+Do NOT use this option if you also use \fICURLOPT_WILDCARDMATCH\fP as it will
+effectively break that feature then.
 
 (This option was known as CURLOPT_FTPLISTONLY up to 7.16.4)
 .IP CURLOPT_APPEND
