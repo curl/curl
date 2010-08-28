@@ -1433,6 +1433,12 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   Curl_initinfo(data); /* reset session-specific information "variables" */
   Curl_pgrsStartNow(data);
 
+  if(data->set.timeout)
+    Curl_expire(data, data->set.timeout);
+
+  if(data->set.connecttimeout)
+    Curl_expire(data, data->set.connecttimeout);
+
   return CURLE_OK;
 }
 
