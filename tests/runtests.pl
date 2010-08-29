@@ -163,6 +163,9 @@ my $SMBSPORT=$noport;    # SMBS server port
 my $TELNETPORT=$noport;  # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
+my $use_external_proxy = 0;
+my $proxy_address;
+
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 my $VERSION;             # curl's reported version number
 
@@ -841,6 +844,13 @@ sub stopserver {
 }
 
 #######################################################################
+# Return flags to let curl use an external HTTP proxy
+#
+sub getexternalproxyflags {
+    return " --proxy $proxy_address ";
+}
+
+#######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
 # server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
@@ -874,6 +884,9 @@ sub verifyhttp {
     $flags .= "--globoff ";
     $flags .= "--unix-socket '$port_or_path' " if $ipvnum eq "unix";
     $flags .= "--insecure " if($proto eq 'https');
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -948,6 +961,9 @@ sub verifyftp {
     $flags .= "--verbose ";
     $flags .= "--globoff ";
     $flags .= $extra;
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -1010,6 +1026,9 @@ sub verifyrtsp {
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
@@ -1151,6 +1170,9 @@ sub verifyhttptls {
     $flags .= "--tlsauthtype SRP ";
     $flags .= "--tlsuser jsmith ";
     $flags .= "--tlspassword abc ";
+    if($use_external_proxy) {
+        $flags .= getexternalproxyflags();
+    }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -3660,6 +3682,10 @@ sub singletest {
             }
         }
     }
+    if($use_external_proxy) {
+        $ENV{http_proxy} = $proxy_address;
+        $ENV{HTTPS_PROXY} = $proxy_address;
+    }
 
     if(!$why) {
         my @precheck = getpart("client", "precheck");
@@ -3906,6 +3932,9 @@ sub singletest {
             $fail_due_event_based--;
         }
         $cmdargs .= $cmd;
+        if ($use_external_proxy) {
+            $cmdargs .= " --proxy $proxy_address ";
+        }
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
@@ -5355,6 +5384,11 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-p") {
         $postmortem=1;
     }
+    elsif($ARGV[0] eq "-P") {
+        shift @ARGV;
+        $use_external_proxy=1;
+        $proxy_address=$ARGV[0];
+    }
     elsif($ARGV[0] eq "-l") {
         # lists the test case names only
         $listonly=1;
@@ -5406,6 +5440,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
   -n       no valgrind
+  -P proxy use the specified proxy
   -p       print log file contents when a test fails
   -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
