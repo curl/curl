@@ -192,6 +192,9 @@ static void moveHandleFromRecvToDonePipeline(struct SessionHandle *handle,
                                              struct connectdata *conn);
 static bool isHandleAtHead(struct SessionHandle *handle,
                            struct curl_llist *pipeline);
+static CURLMcode add_next_timeout(struct timeval now,
+                                  struct Curl_multi *multi,
+                                  struct SessionHandle *d);
 
 #ifdef DEBUGBUILD
 static const char * const statename[]={
@@ -1690,37 +1693,9 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
    */
   do {
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
-    if(t) {
-      struct SessionHandle *d = t->payload;
-      struct timeval *tv = &d->state.expiretime;
-      struct curl_llist *list = d->state.timeoutlist;
-      struct curl_llist_element *e;
-
-      /* move over the timeout list for this specific handle and remove all
-         timeouts that are now passed tense and store the next pending
-         timeout in *tv */
-      for(e = list->head; e; ) {
-        struct curl_llist_element *n = e->next;
-        if(curlx_tvdiff(*(struct timeval *)e->ptr, now) < 0)
-          /* remove outdated entry */
-          Curl_llist_remove(list, e, NULL);
-        e = n;
-      }
-      if(!list->size)  {
-        /* clear the expire times within the handles that we remove from the
-           splay tree */
-        tv->tv_sec = 0;
-        tv->tv_usec = 0;
-      }
-      else {
-        e = list->head;
-        /* copy the first entry to 'tv' */
-        memcpy(tv, e->ptr, sizeof(*tv));
-
-        /* remove first entry from list */
-        Curl_llist_remove(list, e, NULL);
-      }
-    }
+    if(t)
+      /* the removed may have another timeout in queue */
+      (void)add_next_timeout(now, multi, t->payload);
 
   } while(t);
 
@@ -1992,6 +1967,62 @@ static void singlesocket(struct Curl_multi *multi,
   easy->numsocks = num;
 }
 
+/*
+ * add_next_timeout()
+ *
+ * Each SessionHandle has a list of timeouts. The add_next_timeout() is called
+ * when it has just been removed from the splay tree because the timeout has
+ * expired. This function is then to advance in the list to pick the next
+ * timeout to use (skip the already expired ones) and add this node back to
+ * the splay tree again.
+ *
+ * The splay tree only has each sessionhandle as a single node and the nearest
+ * timeout is used to sort it on.
+ */
+static CURLMcode add_next_timeout(struct timeval now,
+                                  struct Curl_multi *multi,
+                                  struct SessionHandle *d)
+{
+  struct timeval *tv = &d->state.expiretime;
+  struct curl_llist *list = d->state.timeoutlist;
+  struct curl_llist_element *e;
+
+  /* move over the timeout list for this specific handle and remove all
+     timeouts that are now passed tense and store the next pending
+     timeout in *tv */
+  for(e = list->head; e; ) {
+    struct curl_llist_element *n = e->next;
+    long diff = curlx_tvdiff(*(struct timeval *)e->ptr, now);
+    if(diff <= 0)
+      /* remove outdated entry */
+      Curl_llist_remove(list, e, NULL);
+    else
+      /* the list is sorted so get out on the first mismatch */
+      break;
+    e = n;
+  }
+  if(!list->size)  {
+    /* clear the expire times within the handles that we remove from the
+       splay tree */
+    tv->tv_sec = 0;
+    tv->tv_usec = 0;
+  }
+  else {
+    e = list->head;
+    /* copy the first entry to 'tv' */
+    memcpy(tv, e->ptr, sizeof(*tv));
+
+    /* remove first entry from list */
+    Curl_llist_remove(list, e, NULL);
+
+    /* insert this node again into the splay */
+    multi->timetree = Curl_splayinsert(*tv, multi->timetree,
+                                       &d->state.timenode);
+  }
+  return CURLM_OK;
+}
+
+
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
                               curl_socket_t s,
@@ -2106,15 +2137,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
 
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
-    if(t) {
-      /* assign 'data' to be the easy handle we just removed from the splay
-         tree */
-      data = t->payload;
-      /* clear the expire time within the handle we removed from the
-         splay tree */
-      data->state.expiretime.tv_sec = 0;
-      data->state.expiretime.tv_usec = 0;
-    }
+    if(t)
+      (void)add_next_timeout(now, multi, t->payload);
 
   } while(t);
 
