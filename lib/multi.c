@@ -929,6 +929,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
+                                 struct timeval now,
                                  struct Curl_one_easy *easy)
 {
   struct Curl_message *msg = NULL;
@@ -940,6 +941,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct SingleRequest *k;
   struct SessionHandle *data;
+  long timeout_ms;
 
   if(!GOOD_EASY_HANDLE(easy->easy_handle))
     return CURLM_BAD_EASY_HANDLE;
@@ -973,6 +975,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        easy->state < CURLM_STATE_COMPLETED)
       /* Make sure we set the connection's current owner */
       easy->easy_conn->data = data;
+
+    if(easy->easy_conn && (easy->state >= CURLM_STATE_CONNECT)) {
+      /* we need to wait for the connect state as only then is the
+         start time stored */
+
+      timeout_ms = Curl_timeleft(easy->easy_conn, &now,
+                                 easy->state <= CURLM_STATE_WAITDO);
+
+      if(timeout_ms < 0) {
+        /* Handle timed out */
+        easy->result = CURLE_OPERATION_TIMEDOUT;
+        multistate(easy, CURLM_STATE_COMPLETED);
+        break;
+      }
+    }
 
     switch(easy->state) {
     case CURLM_STATE_INIT:
@@ -1385,7 +1402,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if( (data->set.max_send_speed > 0) &&
           (data->progress.ulspeed > data->set.max_send_speed) ) {
         int buffersize;
-        long timeout_ms;
 
         multistate(easy, CURLM_STATE_TOOFAST);
 
@@ -1402,7 +1418,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if( (data->set.max_recv_speed > 0) &&
           (data->progress.dlspeed > data->set.max_recv_speed) ) {
         int buffersize;
-        long timeout_ms;
 
         multistate(easy, CURLM_STATE_TOOFAST);
 
@@ -1666,7 +1681,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     }
 
     do
-      result = multi_runsingle(multi, easy);
+      result = multi_runsingle(multi, now, easy);
     while (CURLM_CALL_MULTI_PERFORM == result);
 
     if(easy->easy_handle->set.wildcardmatch) {
@@ -2032,6 +2047,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct SessionHandle *data = NULL;
   struct Curl_tree *t;
+  struct timeval now = Curl_tvnow();
 
   if(checkall) {
     struct Curl_one_easy *easyp;
@@ -2086,7 +2102,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
 
       do
-        result = multi_runsingle(multi, data->set.one_easy);
+        result = multi_runsingle(multi, now, data->set.one_easy);
       while (CURLM_CALL_MULTI_PERFORM == result);
 
       if(data->set.one_easy->easy_conn)
@@ -2106,18 +2122,23 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
   }
 
+  now.tv_usec += 40000; /* compensate for bad precision timers that might've
+                           triggered too early */
+  if(now.tv_usec > 1000000) {
+    now.tv_sec++;
+    now.tv_usec -= 1000000;
+  }
+
   /*
    * The loop following here will go on as long as there are expire-times left
    * to process in the splay and 'data' will be re-assigned for every expired
    * handle we deal with.
    */
   do {
-    struct timeval now;
-
     /* the first loop lap 'data' can be NULL */
     if(data) {
       do
-        result = multi_runsingle(multi, data->set.one_easy);
+        result = multi_runsingle(multi, now, data->set.one_easy);
       while (CURLM_CALL_MULTI_PERFORM == result);
 
       if(CURLM_OK >= result)
@@ -2129,16 +2150,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* Check if there's one (more) expired timer to deal with! This function
        extracts a matching node if there is one */
 
-    now = Curl_tvnow();
-    now.tv_usec += 40000; /* compensate for bad precision timers */
-    if(now.tv_usec > 1000000) {
-      now.tv_sec++;
-      now.tv_usec -= 1000000;
-    }
-
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
-    if(t)
+    if(t) {
+      data = t->payload; /* assign this for next loop */
       (void)add_next_timeout(now, multi, t->payload);
+    }
 
   } while(t);
 
@@ -2273,12 +2289,22 @@ CURLMcode curl_multi_timeout(CURLM *multi_handle,
 static int update_timer(struct Curl_multi *multi)
 {
   long timeout_ms;
+
   if(!multi->timer_cb)
     return 0;
-  if( multi_timeout(multi, &timeout_ms) != CURLM_OK )
+  if(multi_timeout(multi, &timeout_ms)) {
     return -1;
-  if( timeout_ms < 0 )
+  }
+  if( timeout_ms < 0 ) {
+    static const struct timeval none={0,0};
+    if(Curl_splaycomparekeys(none, multi->timer_lastcall)) {
+      multi->timer_lastcall = none;
+      /* there's no timeout now but there was one previously, tell the app to
+         disable it */
+      return multi->timer_cb((CURLM*)multi, -1, multi->timer_userp);
+    }
     return 0;
+  }
 
   /* When multi_timeout() is done, multi->timetree points to the node with the
    * timeout we got the (relative) time-out time for. We can thus easily check
@@ -2564,10 +2590,6 @@ void Curl_expire(struct SessionHandle *data, long milli)
     }
 
     *nowp = set;
-#if 0
-    infof(data, "Expire at %ld / %ld (%ldms) %p\n",
-          (long)nowp->tv_sec, (long)nowp->tv_usec, milli, data);
-#endif
     data->state.timenode.payload = data;
     multi->timetree = Curl_splayinsert(*nowp,
                                        multi->timetree,
