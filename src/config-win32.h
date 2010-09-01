@@ -272,6 +272,11 @@
 /* Windows should not have HAVE_GMTIME_R defined */
 /* #undef HAVE_GMTIME_R */
 
+/* Define S_ISREG if not defined by system headers */                                                                               
+#ifndef S_ISREG
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+
 /* Define if the compiler supports C99 variadic macro style. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #define HAVE_VARIADIC_MACROS_C99 1
