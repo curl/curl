@@ -4400,30 +4400,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-  long shortest = 0; /* default to no timeout */
-
-  /*************************************************************
-   * Set timeout if that is being used
-   *************************************************************/
-  if(data->set.timeout || data->set.connecttimeout) {
-
-    /* We set the timeout on the name resolving phase first, separately from
-     * the download/upload part to allow a maximum time on everything. This is
-     * a signal-based timeout, why it won't work and shouldn't be used in
-     * multi-threaded environments. */
-
-    shortest = data->set.timeout; /* default to this timeout value */
-    if(shortest && data->set.connecttimeout &&
-       (data->set.connecttimeout < shortest))
-      /* if both are set, pick the shortest */
-      shortest = data->set.connecttimeout;
-    else if(!shortest)
-      /* if timeout is not set, use the connect timeout */
-      shortest = data->set.connecttimeout;
-  /* We can expect the conn->created time to be "now", as that was just
-     recently set in the beginning of this function and nothing slow
-     has been done since then until now. */
-  }
+  long timeout_ms = Curl_timeleft(conn, NULL, TRUE);
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -4450,7 +4427,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
 
       /* Resolve target host right on */
       rc = Curl_resolv_timeout(conn, conn->host.name, (int)conn->port,
-                               &hostaddr, shortest);
+                               &hostaddr, timeout_ms);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
 
@@ -4471,7 +4448,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
 
       /* resolve proxy */
       rc = Curl_resolv_timeout(conn, conn->proxy.name, (int)conn->port,
-                               &hostaddr, shortest);
+                               &hostaddr, timeout_ms);
 
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
