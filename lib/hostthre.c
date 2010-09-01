@@ -419,8 +419,6 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if (done) {
     getaddrinfo_complete(conn);
-    if (td->poll_interval != 0)
-        Curl_expire(conn->data, 0);
     Curl_destroy_thread_data(&conn->async);
 
     if(!conn->async.dns) {
@@ -431,29 +429,21 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
     *entry = conn->async.dns;
   } else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    int elapsed;
-
-    elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-    if (elapsed < 0) {
+    int elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    if (elapsed < 0)
       elapsed = 0;
-    }
 
-    if (td->poll_interval == 0) {
+    if (td->poll_interval == 0)
       /* Start at 1ms poll interval */
       td->poll_interval = 1;
-    } else if (elapsed >= td->interval_end) {
+    else if (elapsed >= td->interval_end)
       /* Back-off exponentially if last interval expired  */
       td->poll_interval *= 2;
-    }
 
     if (td->poll_interval > 250)
       td->poll_interval = 250;
 
     td->interval_end = elapsed + td->poll_interval;
-
-    /* Reset old timer so we can set a new one further in the future */
-    Curl_expire(conn->data, 0);
-
     Curl_expire(conn->data, td->poll_interval);
   }
 
