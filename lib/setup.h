@@ -552,6 +552,11 @@ int netware_init(void);
 #define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")
 #endif
 
+/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+
 /*
  * Include macros and defines that should only be processed once.
  */
