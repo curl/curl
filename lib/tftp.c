@@ -1182,7 +1182,7 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
   /* there's a typecast below here since 'time_t' may in fact be larger than
      'long', but we estimate that a 'long' will still be able to hold number
      of seconds even if "only" 32 bit */
-  return (long) state->max_time-current;
+  return (long)(state->max_time - current);
 }
 
 
