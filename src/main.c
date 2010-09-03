@@ -1190,7 +1190,7 @@ static int formparse(struct Configurable *config,
             while(ISSPACE(*ptr))
               ptr++;
 
-            if(curlx_strnequal("type=", ptr, 5)) {
+            if(checkprefix("type=", ptr)) {
               /* set type pointer */
               type = &ptr[5];
 
@@ -1210,7 +1210,7 @@ static int formparse(struct Configurable *config,
                  specified and if not we simply assume that it is text that
                  the user wants included in the type and include that too up
                  to the next zero or semicolon. */
-              if((*sep==';') && !curlx_strnequal(";filename=", sep, 10)) {
+              if((*sep==';') && !checkprefix(";filename=", sep)) {
                 sep2 = strchr(sep+1, ';');
                 if (sep2)
                   sep = sep2;
@@ -1226,7 +1226,7 @@ static int formparse(struct Configurable *config,
               else
                 ptr = NULL; /* end */
             }
-            else if(curlx_strnequal("filename=", ptr, 9)) {
+            else if(checkprefix("filename=", ptr)) {
               filename = &ptr[9];
               ptr=strchr(filename, FORM_TYPE_SEPARATOR);
               if(!ptr) {
@@ -4404,7 +4404,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   const char* end = (char*)ptr + cb;
   size_t len;
 
-  if (cb > 20 && curlx_strnequal(str, "Content-disposition:", 20)) {
+  if (cb > 20 && checkprefix("Content-disposition:", str)) {
     char *p = (char*)str + 20;
 
     /* look for the 'filename=' parameter
@@ -5072,7 +5072,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
         if ((outfile && !curlx_strequal("-", outfile)) ||
-            !curlx_strnequal(url, "telnet:", 7))
+            !checkprefix("telnet:", url))
           my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
@@ -5465,7 +5465,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               char *this_url=NULL;
               curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &this_url);
               if(this_url &&
-                 curlx_strnequal(this_url, "http", 4)) {
+                 checkprefix("http", this_url)) {
                 /* This was HTTP(S) */
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
