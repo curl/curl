@@ -83,6 +83,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   char **param_charp=NULL;
   struct curl_slist **param_slistp=NULL;
   int type;
+  curl_socket_t sockfd;
 
   union {
     struct curl_certinfo * to_certinfo;
@@ -219,7 +220,16 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_charp = data->state.most_recent_ftp_entrypath;
     break;
   case CURLINFO_LASTSOCKET:
-    (void)Curl_getconnectinfo(data, param_longp, NULL);
+    sockfd = Curl_getconnectinfo(data, NULL);
+
+    /* note: this is not a good conversion for systems with 64 bit sockets and
+       32 bit longs */
+    if(sockfd != CURL_SOCKET_BAD)
+      *param_longp = (long)sockfd;
+    else
+      /* this interface is documented to return -1 in case of badness, which
+         may not be the same as the CURL_SOCKET_BAD value */
+      *param_longp = -1;
     break;
   case CURLINFO_REDIRECT_URL:
     /* Return the URL this request would have been redirected to if that

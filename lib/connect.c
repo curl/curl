@@ -1093,12 +1093,12 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given SessionHandle.
  *
- * The socket 'long' will be -1 in case of failure!
+ * The returned socket will be CURL_SOCKET_BAD in case of failure!
  */
-CURLcode Curl_getconnectinfo(struct SessionHandle *data,
-                             long *param_longp,
-                             struct connectdata **connp)
+curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
+                                  struct connectdata **connp)
 {
+  curl_socket_t sockfd;
   if((data->state.lastconnect != -1) &&
      (data->state.connc->connects[data->state.lastconnect] != NULL)) {
     struct connectdata *c =
@@ -1106,13 +1106,13 @@ CURLcode Curl_getconnectinfo(struct SessionHandle *data,
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;
-    *param_longp = c->sock[FIRSTSOCKET];
+    sockfd = c->sock[FIRSTSOCKET];
     /* we have a socket connected, let's determine if the server shut down */
     /* determine if ssl */
     if(c->ssl[FIRSTSOCKET].use) {
       /* use the SSL context */
       if(!Curl_ssl_check_cxn(c))
-        *param_longp = -1;   /* FIN received */
+        return CURL_SOCKET_BAD;   /* FIN received */
     }
 /* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
 #ifdef MSG_PEEK
@@ -1121,13 +1121,13 @@ CURLcode Curl_getconnectinfo(struct SessionHandle *data,
       char buf;
       if(recv((RECV_TYPE_ARG1)c->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
               (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
-        *param_longp = -1;   /* FIN received */
+        return CURL_SOCKET_BAD;   /* FIN received */
       }
     }
 #endif
   }
   else
-    *param_longp = -1;
+    return CURL_SOCKET_BAD;
 
-  return CURLE_OK;
+  return sockfd;
 }

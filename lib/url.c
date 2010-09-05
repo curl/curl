@@ -2698,11 +2698,10 @@ static bool RTSPConnIsDead(struct connectdata *check)
   }
   else if (sval & CURL_CSELECT_IN) {
     /* readable with no error. could be closed or could be alive */
-    long connectinfo = 0;
-    Curl_getconnectinfo(check->data, &connectinfo, &check);
-    if(connectinfo != -1) {
+    curl_socket_t connectinfo =
+      Curl_getconnectinfo(check->data, &check);
+    if(connectinfo != CURL_SOCKET_BAD)
       ret_val = FALSE;
-    }
   }
 
   return ret_val;

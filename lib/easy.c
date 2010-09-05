@@ -1072,9 +1072,6 @@ static CURLcode easy_connection(struct SessionHandle *data,
                                 curl_socket_t *sfd,
                                 struct connectdata **connp)
 {
-  CURLcode ret;
-  long sockfd;
-
   if(data == NULL)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -1084,17 +1081,12 @@ static CURLcode easy_connection(struct SessionHandle *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  ret = Curl_getconnectinfo(data, &sockfd, connp);
-  if(ret != CURLE_OK)
-    return ret;
+  *sfd = Curl_getconnectinfo(data, connp);
 
-  if(sockfd == -1) {
+  if(*sfd == CURL_SOCKET_BAD) {
     failf(data, "Failed to get recent socket");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-
-  *sfd = (curl_socket_t)sockfd; /* we know that this is actually a socket
-                                   descriptor so the typecast is fine here */
 
   return CURLE_OK;
 }
