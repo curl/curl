@@ -134,7 +134,8 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     sel = (char *)"";
   else {
     char *newp;
-    int i, j, len;
+    size_t j, i;
+    int len;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = path;
