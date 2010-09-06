@@ -706,7 +706,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
 
     /* Find the first non-space letter */
     start = header + 9;
-    while(*start && ISSPACE(*start))
+    while(start && ISSPACE(*start))
       start++;
 
     if(!start) {
