@@ -594,9 +594,12 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
-            infof(conn->data, "Leftovers after chunking. "
-                  " Rewinding %zu bytes\n",dataleft);
-            read_rewind(conn, dataleft);
+            infof(conn->data, "Leftovers after chunking: %zu bytes", dataleft);
+            if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+              /* only attempt the rewind if we truly are pipelining */
+              infof(conn->data, "Rewinding %zu bytes\n",dataleft);
+              read_rewind(conn, dataleft);
+            }
           }
         }
         /* If it returned OK, we just keep going */
