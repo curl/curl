@@ -1,4 +1,4 @@
-Updated: August 18, 2010 (http://curl.haxx.se/docs/faq.html)
+Updated: September 7, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -49,6 +49,7 @@ FAQ
   3.16 What certificates do I need when I use SSL?
   3.17 How do I list the root dir of an FTP server?
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
+  3.19 How do I get HTTP from a host using a specific IP address?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -310,9 +311,9 @@ FAQ
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 90 known named companies use curl in commercial environments and
-  products. More than 100 known named open source projects depend on
-  (lib)curl.
+  More than a hundred known named companies use curl in commercial
+  environments and products and more than a hundred known named open source
+  projects depend on (lib)curl.
 
   In a poll on the curl web site mid-2005, more than 50% of the 300+ answers
   estimated a user base of one million users or more.
@@ -637,6 +638,9 @@ FAQ
     provide this in order to prove that you actually are who you claim to be.
     If the server doesn't require this, you don't need a client certificate.
 
+    A client certificate is always used together with a private key, and the
+    private key has a pass phrase that protects it.
+
   - Server certificate. The server you communicate with has a server
     certificate. You can and should verify this certificate to make sure that
     you are truly talking to the real server and not a server impersonating
@@ -644,8 +648,9 @@ FAQ
 
   - Certificate Authority certificate ("CA cert"). You often have several CA
     certs in a CA cert bundle that can be used to verify a server certificate
-    that was signed by one of the authorities in the bundle. curl comes with a
-    default CA cert bundle. You can override the default.
+    that was signed by one of the authorities in the bundle. curl does not
+    come with a CA cert bundle but most curl installs provide one. You can
+    also override the default.
 
     The server certificate verification process is made by using a Certificate
     Authority certificate ("CA cert") that was used to sign the server
@@ -675,6 +680,17 @@ FAQ
   No.
 
   But you could easily write your own program using libcurl to do such stunts.
+
+  3.19 How do I get HTTP from a host using a specific IP address?
+
+  For example, you may be trying out a web site installation that isn't yet in
+  the DNS. Or you have a site using multiple IP addresses for a given host
+  name and you want to address a specific one out of the set.
+
+  Set a custom Host: header that identifies the server name you want to reach
+  but use the target IP address in the URL:
+
+    curl --header "Host: www.example.com" http://127.0.0.1/
 
 
 4. Running Problems
@@ -824,10 +840,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  This is supported in curl 7.10.6 or later. No earlier curl version knows
-  of this magic. Later versions require the OpenSSL, GnuTLS or Microsoft
-  Windows libraries to provide this functionality. Using the NSS library
-  will not provide NTLM authentication functionality in curl.
+  NTLM support requires OpenSSL, GnuTLS, NSS or Microsoft Windows libraries at
+  build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
