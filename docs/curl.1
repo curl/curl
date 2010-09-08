@@ -29,8 +29,9 @@ curl \- transfer a URL
 .SH DESCRIPTION
 .B curl
 is a tool to transfer data from or to a server, using one of the supported
-protocols (HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, DICT, TELNET, LDAP or
-FILE).  The command is designed to work without user interaction.
+protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP,
+LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP).  The
+command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer
@@ -55,16 +56,16 @@ or you can get sequences of alphanumeric series by using [] as in:
  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
  ftp://ftp.letters.com/file[a-z].txt
 
-No nesting of the sequences is supported at the moment, but you can use
-several ones next to each other:
+Nested sequences are not supported, but you can use several ones next to each
+other:
 
  http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
 
-Since curl 7.15.1 you can also specify a step counter for the ranges, so that
-you can get every Nth number or letter:
+You can specify a step counter for the ranges to get every Nth number or
+letter:
 
  http://www.numericals.com/file[1-100:10].txt
  http://www.letters.com/file[a-z:2].txt
@@ -87,8 +88,8 @@ invokes.
 curl normally displays a progress meter during operations, indicating the amount
 of transferred data, transfer speeds and estimated time left, etc.
 
-However, since curl displays this data to the terminal by default, if you invoke
-curl to do an operation and it is about to write data to the terminal, it
+curl displays this data to the terminal by default, so if you invoke curl to
+do an operation and it is about to write data to the terminal, it
 \fIdisables\fP the progress meter as otherwise it would mess up the output
 mixing progress meter and response data.
 
@@ -300,8 +301,8 @@ away. EPRT and LPRT are extensions to the original FTP protocol, and may not wor
 on all servers, but they enable more functionality in a better way than the
 traditional PORT command.
 
-Since curl 7.19.0, \fB--eprt\fP can be used to explicitly enable EPRT again
-and \fB--no-eprt\fP is an alias for \fB--disable-eprt\fP.
+\fB--eprt\fP can be used to explicitly enable EPRT again and \fB--no-eprt\fP
+is an alias for \fB--disable-eprt\fP.
 
 Disabling EPRT only changes the active behavior. If you want to switch to
 passive mode you need to not use \fI-P/--ftp-port\fP or force it with
@@ -311,8 +312,8 @@ passive mode you need to not use \fI-P/--ftp-port\fP or force it with
 transfers. Curl will normally always first attempt to use EPSV before PASV,
 but with this option, it will not try using EPSV.
 
-Since curl 7.19.0, \fB--epsv\fP can be used to explicitly enable EPRT again
-and \fB--no-epsv\fP is an alias for \fB--disable-epsv\fP.
+\fB--epsv\fP can be used to explicitly enable EPRT again and \fB--no-epsv\fP
+is an alias for \fB--disable-epsv\fP.
 
 Disabling EPSV only changes the passive behavior. If you want to switch to
 active mode you need to use \fI-P/--ftp-port\fP.
