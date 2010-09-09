@@ -74,7 +74,7 @@ http://%HOSTIP:%HTTPPORT/565
 <verify>
 <protocol>
 POST /565 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
@@ -84,7 +84,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /565 HTTP/1.1
 Authorization: Digest username="foo", realm="testrealm", nonce="1053604144", uri="/565", response="877424f750af047634dbd94f9933217b"
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
