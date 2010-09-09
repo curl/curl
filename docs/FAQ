@@ -323,6 +323,12 @@ FAQ
   based web servers. A guess is that a fair amount of these Linux
   installations have curl installed.
 
+  The Debian project maintains statistics on packages installed by people
+  who have voluntarily run their package counting application.  In mid-2010,
+  libcurl3 was installed on over 55000 such systems (62% of reporting systems)
+  and was one of the 320 most popular installed packages (out of about 107000
+  possible packages).
+
   All this taken together, there is no doubt that there are millions of
   (lib)curl users.
 
@@ -331,6 +337,7 @@ FAQ
   http://curl.haxx.se/libcurl/using/apps.html
   http://counter.li.org/estimates.php
   http://news.netcraft.com/archives/2005/03/14/fedora_makes_rapid_progress.html
+  http://qa.debian.org/popcon.php?package=curl
 
   1.11 Why don't you update ca-bundle.crt
 
