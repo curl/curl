@@ -127,21 +127,30 @@ socket_read(curl_socket_t fd, void *to, size_t len)
   return CURLE_OK;
 }
 
-static int
-block_write(int fd, const void *buf, size_t len)
+
+/* Write |len| bytes from the buffer |to| to the socket |fd|. Return a
+   CURLcode saying whether an error occured or CURLE_OK if |len| was written. */
+static CURLcode
+socket_write(struct connectdata *conn, curl_socket_t fd, const void *to, size_t len)
 {
-  const unsigned char *p = buf;
-  int b;
-  while(len) {
-    b = write(fd, p, len);
-    if(b < 0 && (errno == EINTR || errno == EAGAIN))
-      continue;
-    else if(b < 0)
-      return -1;
-    len -= b;
-    p += b;
+  const char *to_p = to;
+  CURLcode code;
+  ssize_t written;
+
+  while(len > 0) {
+    code = Curl_write_plain(conn, fd, to_p, len, &written);
+    if(code == CURLE_OK) {
+      len -= written;
+      to_p += written;
+    }
+    else {
+      /* FIXME: We are doing a busy wait */
+      if(code == CURLE_AGAIN)
+        continue;
+      return code;
+    }
   }
-  return p - (unsigned char*)buf;
+  return CURLE_OK;
 }
 
 static CURLcode read_data(struct connectdata *conn,
@@ -237,11 +246,11 @@ sec_send(struct connectdata *conn, int fd, const char *from, int length)
     bytes = Curl_base64_encode(conn->data, (char *)buf, bytes, &cmdbuf);
     if(bytes > 0) {
       if(protlevel == prot_private)
-        block_write(fd, "ENC ", 4);
+        socket_write(conn, fd, "ENC ", 4);
       else
-        block_write(fd, "MIC ", 4);
-      block_write(fd, cmdbuf, bytes);
-      block_write(fd, "\r\n", 2);
+        socket_write(conn, fd, "MIC ", 4);
+      socket_write(conn, fd, cmdbuf, bytes);
+      socket_write(conn, fd, "\r\n", 2);
       Curl_infof(conn->data, "%s %s\n",
                  protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
       free(cmdbuf);
@@ -249,8 +258,8 @@ sec_send(struct connectdata *conn, int fd, const char *from, int length)
   }
   else {
     bytes = htonl(bytes);
-    block_write(fd, &bytes, sizeof(bytes));
-    block_write(fd, buf, ntohl(bytes));
+    socket_write(conn, fd, &bytes, sizeof(bytes));
+    socket_write(conn, fd, buf, ntohl(bytes));
   }
   free(buf);
   return length;
