@@ -92,10 +92,10 @@ name_to_level(const char *name)
 }
 
 static const struct Curl_sec_client_mech * const mechs[] = {
-#ifdef HAVE_GSSAPI
+#if defined(HAVE_GSSAPI)
   &Curl_krb5_client_mech,
 #endif
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4)
   &Curl_krb4_client_mech,
 #endif
   NULL
@@ -496,5 +496,6 @@ Curl_sec_end(struct connectdata *conn)
   conn->mech=NULL;
 }
 
-#endif /* HAVE_KRB4 */
+#endif /* HAVE_KRB4 || HAVE_GSSAPI */
+
 #endif /* CURL_DISABLE_FTP */
