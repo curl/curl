@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -129,7 +129,6 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
                              const char *header) /* rest of the *-authenticate:
                                                     header */
 {
-  bool more = TRUE;
   char *token = NULL;
   char *tmp = NULL;
   bool foundAuth = FALSE;
@@ -159,7 +158,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     /* clear off any former leftovers and init to defaults */
     Curl_digest_cleanup_one(d);
 
-    while(more) {
+    while(1) {
       char value[MAX_VALUE_LENGTH];
       char content[MAX_CONTENT_LENGTH];
 
