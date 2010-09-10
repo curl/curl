@@ -1595,10 +1595,8 @@ ossl_connect_step1(struct connectdata *conn,
     if ( !lookup ||
          (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                               X509_FILETYPE_PEM)) ) {
-      failf(data,"error loading CRL file :\n"
-            "  CRLfile: %s\n",
-            data->set.str[STRING_SSL_CRLFILE]?
-            data->set.str[STRING_SSL_CRLFILE]: "none");
+      failf(data,"error loading CRL file: %s\n",
+            data->set.str[STRING_SSL_CRLFILE]);
       return CURLE_SSL_CRL_BADFILE;
     }
     else {
