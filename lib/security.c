@@ -101,24 +101,30 @@ static const struct Curl_sec_client_mech * const mechs[] = {
   NULL
 };
 
-static int
-block_read(int fd, void *buf, size_t len)
+
+/* Read |len| from the socket |fd| and store it in |to|. Return a
+   CURLcode saying whether an error occured or CURLE_OK if |len| was read. */
+static CURLcode
+socket_read(curl_socket_t fd, void *to, size_t len)
 {
-  unsigned char *p = buf;
-  int b;
-  while(len) {
-    b = read(fd, p, len);
-    if(b == 0)
-      return 0;
-    else if(b < 0 && (errno == EINTR || errno == EAGAIN))
-      /* TODO: this will busy loop in the EAGAIN case */
-      continue;
-    else if(b < 0)
-      return -1;
-    len -= b;
-    p += b;
+  char *to_p = to;
+  CURLcode code;
+  ssize_t nread;
+
+  while(len > 0) {
+    code = Curl_read_plain(fd, to_p, len, &nread);
+    if(code == CURLE_OK) {
+      len -= nread;
+      to_p += nread;
+    }
+    else {
+      /* FIXME: We are doing a busy wait */
+      if(code == CURLE_AGAIN)
+        continue;
+      return code;
+    }
   }
-  return p - (unsigned char*)buf;
+  return CURLE_OK;
 }
 
 static int
@@ -138,31 +144,30 @@ block_write(int fd, const void *buf, size_t len)
   return p - (unsigned char*)buf;
 }
 
-static int
-sec_get_data(struct connectdata *conn,
-             int fd, struct krb4buffer *buf)
+static CURLcode read_data(struct connectdata *conn,
+                          curl_socket_t fd,
+                          struct krb4buffer *buf)
 {
   int len;
-  int b;
+  void* tmp;
+  CURLcode ret;
 
-  b = block_read(fd, &len, sizeof(len));
-  if(b == 0)
-    return 0;
-  else if(b < 0)
-    return -1;
+  ret = socket_read(fd, &len, sizeof(len));
+  if (ret != CURLE_OK)
+    return ret;
+
   len = ntohl(len);
-  /* TODO: This realloc will cause a memory leak in an out of memory
-   * condition */
-  buf->data = realloc(buf->data, len);
-  b = buf->data ? block_read(fd, buf->data, len) : -1;
-  if(b == 0)
-    return 0;
-  else if(b < 0)
-    return -1;
+  tmp = realloc(buf->data, len);
+  if (tmp == NULL)
+    return CURLE_OUT_OF_MEMORY;
+
+  ret = socket_read(fd, buf->data, len);
+  if (ret != CURLE_OK)
+    return ret;
   buf->size = (conn->mech->decode)(conn->app_data, buf->data, len,
                                    conn->data_prot, conn);
   buf->index = 0;
-  return 0;
+  return CURLE_OK;
 }
 
 static size_t
@@ -195,7 +200,7 @@ static ssize_t sec_read(struct connectdata *conn, int num,
   buffer = (char*)buffer + len;
 
   while(length) {
-    if(sec_get_data(conn, fd, &conn->in_buffer) < 0)
+    if(read_data(conn, fd, &conn->in_buffer) != CURLE_OK)
       return -1;
     if(conn->in_buffer.size == 0) {
       if(rx)
