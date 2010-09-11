@@ -101,6 +101,27 @@ static const struct Curl_sec_client_mech * const mechs[] = {
   NULL
 };
 
+/* Send an FTP command defined by |message| and the optional arguments. The
+   function returns the ftp_code. If an error occurs, -1 is returned. */
+static int ftp_send_command(struct connectdata *conn, const char *message, ...)
+{
+  int ftp_code;
+  ssize_t nread;
+  va_list args;
+
+  va_start(args, message);
+  if(Curl_ftpsendf(conn, message, args) != CURLE_OK) {
+    ftp_code = -1;
+  }
+  else {
+    if(Curl_GetFTPResponse(&nread, conn, &ftp_code) != CURLE_OK)
+      ftp_code = -1;
+  }
+
+  (void)nread; /* Unused */
+  va_end(args);
+  return ftp_code;
+}
 
 /* Read |len| from the socket |fd| and store it in |to|. Return a
    CURLcode saying whether an error occured or CURLE_OK if |len| was read. */
@@ -416,66 +437,76 @@ Curl_sec_request_prot(struct connectdata *conn, const char *level)
   return 0;
 }
 
-int
-Curl_sec_login(struct connectdata *conn)
+static CURLcode choose_mech(struct connectdata *conn)
 {
   int ret;
-  const struct Curl_sec_client_mech * const *m;
-  ssize_t nread;
-  struct SessionHandle *data=conn->data;
-  int ftpcode;
+  struct SessionHandle *data = conn->data;
+  const struct Curl_sec_client_mech * const *mech;
+  void *tmp_allocation;
+  const char *mech_name;
 
-  for(m = mechs; *m && (*m)->name; m++) {
-    void *tmp;
-
-    tmp = realloc(conn->app_data, (*m)->size);
-    if(tmp == NULL) {
-      failf (data, "realloc %u failed", (*m)->size);
-      return -1;
-    }
-    conn->app_data = tmp;
-
-    if((*m)->init && (*(*m)->init)(conn->app_data) != 0) {
-      infof(data, "Skipping %s...\n", (*m)->name);
+  for(mech = mechs; (*mech); ++mech) {
+    mech_name = (*mech)->name;
+    /* We have no mechanism with a NULL name but keep this check */
+    DEBUGASSERT(mech_name != NULL);
+    if(mech_name == NULL) {
+      infof(data, "Skipping mechanism with empty name (%p)", mech);
       continue;
     }
-    infof(data, "Trying %s...\n", (*m)->name);
+    tmp_allocation = realloc(conn->app_data, (*mech)->size);
+    if(tmp_allocation == NULL) {
+      failf(data, "Failed realloc of size %u", (*mech)->size);
+      mech = NULL;
+      return CURLE_OUT_OF_MEMORY;
+    }
+    conn->app_data = tmp_allocation;
 
-    if(Curl_ftpsendf(conn, "AUTH %s", (*m)->name))
-      return -1;
+    if((*mech)->init) {
+      ret = (*mech)->init(conn);
+      if(ret != 0) {
+        infof(data, "Failed initialization for %s. Skipping it.", mech_name);
+        continue;
+      }
+    }
 
-    if(Curl_GetFTPResponse(&nread, conn, &ftpcode))
-      return -1;
+    infof(data, "Trying mechanism %s...", mech_name);
+    ret = ftp_send_command(conn, "AUTH %s", mech_name);
+    if(ret < 0)
+      /* FIXME: This error is too generic but it is OK for now. */
+      return CURLE_COULDNT_CONNECT;
 
-    if(conn->data->state.buffer[0] != '3'){
-      switch(ftpcode) {
+    if(ret/100 != 3) {
+      switch(ret) {
       case 504:
-        infof(data,
-              "%s is not supported by the server.\n", (*m)->name);
+        infof(data, "Mechanism %s is not supported by the server (server "
+                    "returned ftp code: 504).", mech_name);
         break;
       case 534:
-        infof(data, "%s rejected as security mechanism.\n", (*m)->name);
+        infof(data, "Mechanism %s was rejected by the server (server returned "
+                    "ftp code: 534).", mech_name);
         break;
       default:
-        if(conn->data->state.buffer[0] == '5') {
-          infof(data, "The server doesn't support the FTP "
-                "security extensions.\n");
-          return -1;
+        if(ret/100 == 5) {
+          infof(data, "The server does not support the security extensions.");
+          return CURLE_USE_SSL_FAILED;
         }
         break;
       }
       continue;
     }
 
-    ret = (*(*m)->auth)(conn->app_data, conn);
+    /* Authenticate */
+    ret = ((*mech)->auth)(conn->app_data, conn);
 
     if(ret == AUTH_CONTINUE)
       continue;
-    else if(ret != AUTH_OK){
-      /* mechanism is supposed to output error string */
+    else if(ret != AUTH_OK) {
+      /* Mechanism has dumped the error to stderr, don't error here. */
       return -1;
     }
-    conn->mech = *m;
+    DEBUGASSERT(ret == AUTH_OK);
+
+    conn->mech = *mech;
     conn->sec_complete = 1;
     if (conn->data_prot != prot_clear) {
       conn->recv[FIRSTSOCKET] = sec_read;
@@ -490,8 +521,16 @@ Curl_sec_login(struct connectdata *conn)
     break;
   }
 
-  return *m == NULL;
+  return mech != NULL ? CURLE_OK : CURLE_FAILED_INIT;
 }
+
+int
+Curl_sec_login(struct connectdata *conn)
+{
+  CURLcode code = choose_mech(conn);
+  return code == CURLE_OK;
+}
+
 
 void
 Curl_sec_end(struct connectdata *conn)
