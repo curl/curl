@@ -348,40 +348,48 @@ static ssize_t _sec_send(struct connectdata *conn, int num,
   return sec_write(conn, fd, buffer, length);
 }
 
-int
-Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
+/* FIXME: |level| should not be an int but a struct protection_level */
+int Curl_sec_read_msg(struct connectdata *conn, char *buffer, int level)
 {
-  int len;
-  unsigned char *buf;
-  int code;
+  /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
+     int */
+  int decoded_len;
+  char *buf;
+  int ret_code;
 
-  len = Curl_base64_decode(s + 4, &buf); /* XXX */
-  if(len > 0)
-    len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
-  else
+  decoded_len = Curl_base64_decode(buffer + 4, (unsigned char **)&buf);
+  if(decoded_len <= 0) {
+    free(buf);
     return -1;
+  }
 
-  if(len < 0) {
+  decoded_len = (conn->mech->decode)(conn->app_data, buf, decoded_len,
+                                     level, conn);
+  if(decoded_len <= 0) {
     free(buf);
     return -1;
   }
 
   if(conn->data->set.verbose) {
-    buf[len] = '\n';
-    Curl_debug(conn->data, CURLINFO_HEADER_IN, (char *)buf, len + 1, conn);
+    buf[decoded_len] = '\n';
+    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1, conn);
   }
 
-  buf[len] = '\0';
-
+  buf[decoded_len] = '\0';
+  DEBUGASSERT(decoded_len > 3);
   if(buf[3] == '-')
-    code = 0;
-  else
-    sscanf((char *)buf, "%d", &code);
-  if(buf[len-1] == '\n')
-    buf[len-1] = '\0';
-  strcpy(s, (char *)buf);
+    ret_code = 0;
+  else {
+    /* Check for error? */
+    sscanf(buf, "%d", &ret_code);
+  }
+
+  if(buf[decoded_len - 1] == '\n')
+    buf[decoded_len - 1] = '\0';
+  /* FIXME: Is |buffer| length always greater than |decoded_len|? */
+  strcpy(buffer, buf);
   free(buf);
-  return code;
+  return ret_code;
 }
 
 enum protection_level
