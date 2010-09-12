@@ -54,7 +54,7 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
 test1022.pl Makefile.inc
 
 # Dependencies (may need to be overriden)
-LDADD = $(top_builddir)/lib/libcurl.la
+LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,

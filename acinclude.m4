@@ -2145,6 +2145,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         else
           LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
         fi
+        CURL_LIBS="$CURL_LIBS $curl_cv_gclk_LIBS"
         AC_MSG_RESULT([$curl_cv_gclk_LIBS])
         ac_cv_func_clock_gettime="yes"
         ;;

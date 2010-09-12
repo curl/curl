@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o Curl_is_connected: use correct errno
  o Added SSPI build to Watcom makefile
  o progress: callback for POSTs less than MAX_INITIAL_POST_SIZE
+ o linking problem on Fedora 13
 
 This release includes the following known bugs:
 
@@ -34,6 +35,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Kamil Dudka, Ben Greear, Cameron Kaiser, Dan Fandrich, Dirk Manske,
- Guenter Knauf, Julien Chaffraix, Kamil Dudka
+ Guenter Knauf, Julien Chaffraix, Kamil Dudka, Quanah Gibson-Mount
 
         Thanks! (and sorry if I forgot to mention someone)
