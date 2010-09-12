@@ -91,6 +91,29 @@ name_to_level(const char *name)
   return (enum protection_level)-1;
 }
 
+/* Convert a protocol |level| to its char representation.
+   We take an int to catch programming mistakes. */
+static char level_to_char(int level) {
+  switch(level) {
+  case prot_clear:
+    return 'C';
+  case prot_safe:
+    return 'S';
+  case prot_confidential:
+    return 'E';
+  case prot_private:
+    return 'P';
+  case prot_cmd:
+    /* Fall through */
+  default:
+    /* Those 2 cases should not be reached! */
+    break;
+  }
+  DEBUGASSERT(0);
+  /* Default to the most secure alternative. */
+  return 'P';
+}
+
 static const struct Curl_sec_client_mech * const mechs[] = {
 #if defined(HAVE_GSSAPI)
   &Curl_krb5_client_mech,
@@ -369,63 +392,61 @@ Curl_set_command_prot(struct connectdata *conn, enum protection_level level)
   return old;
 }
 
-static int
-sec_prot_internal(struct connectdata *conn, int level)
+/* FIXME: The error code returned here is never checked. */
+int Curl_sec_set_protection_level(struct connectdata *conn)
 {
-  char *p;
-  unsigned int s = 1048576;
-  ssize_t nread;
+  int code;
+  char* pbsz;
+  static unsigned int buffer_size = 1 << 20; /* 1048576 */
+  enum protection_level level = conn->request_data_prot;
 
-  if(!conn->sec_complete){
-    infof(conn->data, "No security data exchange has taken place.\n");
+  if(!conn->sec_complete) {
+    infof(conn->data, "Trying to change the protection level after the"
+                      "completion of the data exchange.");
     return -1;
   }
 
-  if(level){
-    int code;
-    if(Curl_ftpsendf(conn, "PBSZ %u", s))
+  /* Bail out if we try to set up the same level */
+  if(conn->data_prot == level)
+    return 0;
+
+  if(level) {
+    code = ftp_send_command(conn, "PSBZ %u", buffer_size);
+    if(code < 0)
       return -1;
 
-    if(Curl_GetFTPResponse(&nread, conn, &code))
-      return -1;
-
-    if(code/100 != 2){
-      failf(conn->data, "Failed to set protection buffer size.");
+    if(code/100 != 2) {
+      failf(conn->data, "Failed to set the protection's buffer size.");
       return -1;
     }
-    conn->buffer_size = s;
+    conn->buffer_size = buffer_size;
 
-    p = strstr(conn->data->state.buffer, "PBSZ=");
-    if(p)
-      sscanf(p, "PBSZ=%u", &s);
-    if(s < conn->buffer_size)
-      conn->buffer_size = s;
+    pbsz = strstr(conn->data->state.buffer, "PBSZ=");
+    if(pbsz) {
+      /* FIXME: Checks for errors in sscanf? */
+      sscanf(pbsz, "PBSZ=%u", &buffer_size);
+      if(buffer_size < conn->buffer_size)
+        conn->buffer_size = buffer_size;
+    }
   }
 
-  if(Curl_ftpsendf(conn, "PROT %c", level["CSEP"]))
+  /* Now try to negiociate the protection level. */
+  code = ftp_send_command(conn, "PROT %c", level_to_char(level));
+
+  if(code < 0)
     return -1;
 
-  if(Curl_GetFTPResponse(&nread, conn, NULL))
-    return -1;
-
-  if(conn->data->state.buffer[0] != '2'){
-    failf(conn->data, "Failed to set protection level.");
+  if(code/100 != 2) {
+    failf(conn->data, "Failed to set the protection level.");
     return -1;
   }
 
-  conn->data_prot = (enum protection_level)level;
+  conn->data_prot = level;
   if(level == prot_private)
-    conn->command_prot = (enum protection_level)level;
+    conn->command_prot = level;
+
   return 0;
 }
-
-void
-Curl_sec_set_protection_level(struct connectdata *conn)
-{
-  if(conn->sec_complete && conn->data_prot != conn->request_data_prot)
-    sec_prot_internal(conn, conn->request_data_prot);
-}
-
 
 int
 Curl_sec_request_prot(struct connectdata *conn, const char *level)
