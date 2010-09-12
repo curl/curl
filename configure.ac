@@ -53,7 +53,7 @@ CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
 CURL_CFLAG_EXTRAS=""
-if test X"$want_werror" == Xyes; then
+if test X"$want_werror" = Xyes; then
   CURL_CFLAG_EXTRAS="-Werror"
 fi
 AC_SUBST(CURL_CFLAG_EXTRAS)
