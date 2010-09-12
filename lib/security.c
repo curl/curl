@@ -349,12 +349,13 @@ int Curl_sec_fflush_fd(struct connectdata *conn, int fd)
   return 0;
 }
 
-static ssize_t _sec_send(struct connectdata *conn, int num,
-                         const void *buffer, size_t length, CURLcode *err)
+/* Matches Curl_send signature */
+static ssize_t sec_send(struct connectdata *conn, int sockindex,
+                        const void *buffer, size_t len, CURLcode *err)
 {
-  curl_socket_t fd = conn->sock[num];
+  curl_socket_t fd = conn->sock[sockindex];
   *err = CURLE_OK;
-  return sec_write(conn, fd, buffer, length);
+  return sec_write(conn, fd, buffer, len);
 }
 
 /* FIXME: |level| should not be an int but a struct protection_level */
@@ -548,9 +549,9 @@ static CURLcode choose_mech(struct connectdata *conn)
     conn->sec_complete = 1;
     if (conn->data_prot != prot_clear) {
       conn->recv[FIRSTSOCKET] = sec_recv;
-      conn->send[FIRSTSOCKET] = _sec_send;
+      conn->send[FIRSTSOCKET] = sec_send;
       conn->recv[SECONDARYSOCKET] = sec_recv;
-      conn->send[SECONDARYSOCKET] = _sec_send;
+      conn->send[SECONDARYSOCKET] = sec_send;
     }
     conn->command_prot = prot_safe;
     /* Set the requested protection level */
