@@ -273,8 +273,6 @@ static GlobCode glob_word(URLGlob *glob, char *pattern,
       /* escape character, skip '\' */
       ++pattern;
       ++pos;
-      if (*pattern == '\0')             /* but no escaping of '\0'! */
-        return GLOB_ERROR;
     }
     *buf++ = *pattern++;                /* copy character to literal */
     ++pos;
