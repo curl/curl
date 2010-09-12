@@ -318,18 +318,21 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
   free(buffer);
 }
 
-static ssize_t sec_write(struct connectdata *conn, int fd,
-                         const char *buffer, int length)
+static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
+                         const char *buffer, size_t length)
 {
-  int len = conn->buffer_size;
+  /* FIXME: Check for overflow */
+  ssize_t len = conn->buffer_size;
   int tx = 0;
 
   len -= (conn->mech->overhead)(conn->app_data, conn->data_prot, len);
   if(len <= 0)
     len = length;
-  while(length){
-    if(length < len)
+  while(length) {
+    if(len >= 0 || length < (size_t)len) {
+      /* FIXME: Check for overflow. */
       len = length;
+    }
     do_sec_send(conn, fd, buffer, len);
     length -= len;
     buffer += len;
@@ -577,13 +580,14 @@ Curl_sec_end(struct connectdata *conn)
   if(conn->mech != NULL) {
     if(conn->mech->end)
       (conn->mech->end)(conn->app_data);
+    /* FIXME: Why do we zero'd it before free'ing it? */
     memset(conn->app_data, 0, conn->mech->size);
     free(conn->app_data);
     conn->app_data = NULL;
   }
   conn->sec_complete = 0;
   conn->data_prot = (enum protection_level)0;
-  conn->mech=NULL;
+  conn->mech = NULL;
 }
 
 #endif /* HAVE_KRB4 || HAVE_GSSAPI */
