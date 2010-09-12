@@ -270,45 +270,50 @@ static ssize_t sec_read(struct connectdata *conn, int num,
   return rx;
 }
 
-static int
-sec_send(struct connectdata *conn, int fd, const char *from, int length)
+/* Send |length| bytes from |from| to the |fd| socket taking care of encoding
+   and negociating with the server. |from| can be NULL. */
+/* FIXME: We don't check for errors nor report any! */
+static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
+                        const char *from, int length)
 {
-  int bytes;
-  void *buf;
-  enum protection_level protlevel = conn->data_prot;
-  int iscmd = protlevel == prot_cmd;
+  size_t bytes;
+  size_t htonl_bytes;
+  char *buffer;
+  char *cmd_buffer;
+  enum protection_level prot_level = conn->data_prot;
+  bool iscmd = prot_level == prot_cmd;
 
   if(iscmd) {
     if(!strncmp(from, "PASS ", 5) || !strncmp(from, "ACCT ", 5))
-      protlevel = prot_private;
+      prot_level = prot_private;
     else
-      protlevel = conn->command_prot;
+      prot_level = conn->command_prot;
   }
-  bytes = (conn->mech->encode)(conn->app_data, from, length, protlevel,
-                               &buf, conn);
+  bytes = (conn->mech->encode)(conn->app_data, from, length, prot_level,
+                               (void**)&buffer, conn);
   if(iscmd) {
-    char *cmdbuf;
-
-    bytes = Curl_base64_encode(conn->data, (char *)buf, bytes, &cmdbuf);
+    bytes = Curl_base64_encode(conn->data, buffer, bytes, &cmd_buffer);
     if(bytes > 0) {
-      if(protlevel == prot_private)
-        socket_write(conn, fd, "ENC ", 4);
+      static const char *enc = "ENC ";
+      static const char *mic = "MIC ";
+      if(prot_level == prot_private)
+        socket_write(conn, fd, enc, 4);
       else
-        socket_write(conn, fd, "MIC ", 4);
-      socket_write(conn, fd, cmdbuf, bytes);
+        socket_write(conn, fd, mic, 4);
+
+      socket_write(conn, fd, cmd_buffer, bytes);
       socket_write(conn, fd, "\r\n", 2);
-      Curl_infof(conn->data, "%s %s\n",
-                 protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
-      free(cmdbuf);
+      infof(conn->data, "Send: %s%s", prot_level == prot_private?enc:mic,
+            cmd_buffer);
+      free(cmd_buffer);
     }
   }
   else {
-    bytes = htonl(bytes);
-    socket_write(conn, fd, &bytes, sizeof(bytes));
-    socket_write(conn, fd, buf, ntohl(bytes));
+    htonl_bytes = htonl(bytes);
+    socket_write(conn, fd, &htonl_bytes, sizeof(htonl_bytes));
+    socket_write(conn, fd, buffer, bytes);
   }
-  free(buf);
-  return length;
+  free(buffer);
 }
 
 static ssize_t sec_write(struct connectdata *conn, int fd,
@@ -323,7 +328,7 @@ static ssize_t sec_write(struct connectdata *conn, int fd,
   while(length){
     if(length < len)
       len = length;
-    sec_send(conn, fd, buffer, len);
+    do_sec_send(conn, fd, buffer, len);
     length -= len;
     buffer += len;
     tx += len;
@@ -335,7 +340,7 @@ int
 Curl_sec_fflush_fd(struct connectdata *conn, int fd)
 {
   if(conn->data_prot != prot_clear) {
-    sec_send(conn, fd, NULL, 0);
+    do_sec_send(conn, fd, NULL, 0);
   }
   return 0;
 }
