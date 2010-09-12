@@ -235,12 +235,13 @@ buffer_read(struct krb4buffer *buf, const char *data, size_t len)
   return len;
 }
 
-static ssize_t sec_read(struct connectdata *conn, int num,
-                        char *buffer, size_t length, CURLcode *err)
+/* Matches Curl_recv signature */
+static ssize_t sec_recv(struct connectdata *conn, int sockindex,
+                        char *buffer, size_t len, CURLcode *err)
 {
-  size_t len;
-  int rx = 0;
-  curl_socket_t fd = conn->sock[num];
+  size_t bytes_read;
+  size_t total_read = 0;
+  curl_socket_t fd = conn->sock[sockindex];
 
   *err = CURLE_OK;
 
@@ -249,25 +250,26 @@ static ssize_t sec_read(struct connectdata *conn, int num,
     return 0;
   }
 
-  len = buffer_read(&conn->in_buffer, buffer, length);
-  length -= len;
-  rx += len;
-  buffer = (char*)buffer + len;
+  bytes_read = buffer_read(&conn->in_buffer, buffer, len);
+  len -= bytes_read;
+  total_read += bytes_read;
+  buffer += bytes_read;
 
-  while(length) {
+  while(len > 0) {
     if(read_data(conn, fd, &conn->in_buffer) != CURLE_OK)
       return -1;
     if(conn->in_buffer.size == 0) {
-      if(rx)
+      if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
-      return rx;
+      return bytes_read;
     }
-    len = buffer_read(&conn->in_buffer, buffer, length);
-    length -= len;
-    rx += len;
-    buffer = (char*)buffer + len;
+    bytes_read = buffer_read(&conn->in_buffer, buffer, len);
+    len -= bytes_read;
+    total_read += bytes_read;
+    buffer += bytes_read;
   }
-  return rx;
+  /* FIXME: Check for overflow */
+  return total_read;
 }
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
@@ -545,9 +547,9 @@ static CURLcode choose_mech(struct connectdata *conn)
     conn->mech = *mech;
     conn->sec_complete = 1;
     if (conn->data_prot != prot_clear) {
-      conn->recv[FIRSTSOCKET] = sec_read;
+      conn->recv[FIRSTSOCKET] = sec_recv;
       conn->send[FIRSTSOCKET] = _sec_send;
-      conn->recv[SECONDARYSOCKET] = sec_read;
+      conn->recv[SECONDARYSOCKET] = sec_recv;
       conn->send[SECONDARYSOCKET] = _sec_send;
     }
     conn->command_prot = prot_safe;
