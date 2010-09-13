@@ -46,10 +46,7 @@
 #ifndef CURL_DISABLE_FTP
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 
-#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
-#include <curl/mprintf.h>
-
-#include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #ifdef HAVE_NETDB_H
@@ -61,11 +58,11 @@
 #endif
 
 #include "urldata.h"
-#include "krb4.h"
 #include "curl_base64.h"
-#include "sendf.h"
-#include "ftp.h"
 #include "curl_memory.h"
+#include "krb4.h"
+#include "ftp.h"
+#include "sendf.h"
 #include "rawstr.h"
 
 /* The last #include file should be: */
