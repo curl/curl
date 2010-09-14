@@ -635,13 +635,6 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   if(conn->bits.tcpconnect) {
     /* we are connected already! */
-    long allow_total = 0;
-
-    /* subtract the most strict timeout of the ones */
-    if(data->set.timeout)
-      allow_total = data->set.timeout;
-
-    Curl_expire(data, allow_total);
     *connected = TRUE;
     return CURLE_OK;
   }
@@ -654,8 +647,6 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
-
-  Curl_expire(data, allow);
 
   /* check for connect without timeout as we want to return immediately */
   rc = waitconnect(conn, sockfd, 0);
@@ -1028,7 +1019,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
-  Curl_expire(data, timeout_ms);
 
   /* Max time for each address */
   num_addr = Curl_num_addresses(remotehost->addr);
