@@ -5436,7 +5436,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             break;
           }
 
-          if (config->content_disposition && outs.stream && !config->mute)
+          if(config->content_disposition && outs.stream && !config->mute &&
+             outs.filename)
             printf("curl: Saved to filename '%s'\n", outs.filename);
 
           /* if retry-max-time is non-zero, make sure we haven't exceeded the
