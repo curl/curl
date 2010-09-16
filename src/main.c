@@ -148,13 +148,13 @@ static int vms_show = 0;
 #define DEFAULT_MAXREDIRS  50L
 
 #if defined(O_BINARY) && defined(HAVE_SETMODE)
-  #ifdef __HIGHC__
-    #define SET_BINMODE(file) _setmode(file,O_BINARY)
-  #else
-    #define SET_BINMODE(file) setmode(fileno(file),O_BINARY)
-  #endif
+#ifdef __HIGHC__
+#define SET_BINMODE(file) _setmode(file,O_BINARY)
 #else
-  #define SET_BINMODE(file)   ((void)0)
+#define SET_BINMODE(file) setmode(fileno(file),O_BINARY)
+#endif
+#else
+#define SET_BINMODE(file)   ((void)0)
 #endif
 
 #ifndef O_BINARY
@@ -331,8 +331,8 @@ convert_to_network(char *buffer, size_t length)
   input_ptr = output_ptr = buffer;
   in_bytes = out_bytes = length;
   rc = iconv(outbound_cd, &input_ptr,  &in_bytes,
-                          &output_ptr, &out_bytes);
-  if ((rc == -1) || (in_bytes != 0)) {
+             &output_ptr, &out_bytes);
+  if((rc == -1) || (in_bytes != 0)) {
     return CURLE_CONV_FAILED;
   }
 
@@ -364,8 +364,8 @@ convert_from_network(char *buffer, size_t length)
   input_ptr = output_ptr = buffer;
   in_bytes = out_bytes = length;
   rc = iconv(inbound_cd, &input_ptr,  &in_bytes,
-                         &output_ptr, &out_bytes);
-  if ((rc == -1) || (in_bytes != 0)) {
+             &output_ptr, &out_bytes);
+  if((rc == -1) || (in_bytes != 0)) {
     return CURLE_CONV_FAILED;
   }
 
@@ -383,7 +383,7 @@ char convert_char(curl_infotype infotype, char this_char)
   case CURLINFO_SSL_DATA_IN:
   case CURLINFO_SSL_DATA_OUT:
     /* data, treat as ASCII */
-    if ((this_char >= 0x20) && (this_char < 0x7f)) {
+    if((this_char >= 0x20) && (this_char < 0x7f)) {
       /* printable ASCII hex value: convert to host encoding */
       convert_from_network(&this_char, 1);
     }
@@ -394,10 +394,10 @@ char convert_char(curl_infotype infotype, char this_char)
     /* fall through to default */
   default:
     /* treat as host encoding */
-    if (ISPRINT(this_char)
-        &&  (this_char != '\t')
-        &&  (this_char != '\r')
-        &&  (this_char != '\n')) {
+    if(ISPRINT(this_char)
+       &&  (this_char != '\t')
+       &&  (this_char != '\r')
+       &&  (this_char != '\n')) {
       /* printable characters excluding tabs and line end characters */
       return this_char;
     }
@@ -411,13 +411,13 @@ char convert_char(curl_infotype infotype, char this_char)
 #ifdef WIN32
 
 #ifdef __BORLANDC__
-   /* 64-bit lseek-like function unavailable */
+/* 64-bit lseek-like function unavailable */
 #  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
 #endif
 
 #ifdef __POCC__
-#  if (__POCC__ < 450)
-     /* 64-bit lseek-like function unavailable */
+#  if(__POCC__ < 450)
+/* 64-bit lseek-like function unavailable */
 #    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
 #  else
 #    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
@@ -432,7 +432,7 @@ char convert_char(curl_infotype infotype, char this_char)
  * Truncate a file handle at a 64-bit position 'where'.
  */
 
-static int ftruncate64 (int fd, curl_off_t where)
+static int ftruncate64(int fd, curl_off_t where)
 {
   if(_lseeki64(fd, where, SEEK_SET) < 0)
     return -1;
@@ -912,7 +912,7 @@ static void help(void)
   for(i=0; helptext[i]; i++) {
     puts(helptext[i]);
 #ifdef PRINT_LINES_PAUSE
-    if (i && ((i % PRINT_LINES_PAUSE) == 0))
+    if(i && ((i % PRINT_LINES_PAUSE) == 0))
       pressanykey();
 #endif
   }
@@ -986,7 +986,7 @@ static struct getout *new_getout(struct Configurable *config)
 
 /* Structure for storing the information needed to build a multiple files
  * section
-*/
+ */
 struct multi_files {
   struct curl_forms   form;
   struct multi_files *next;
@@ -995,17 +995,17 @@ struct multi_files {
 /* Add a new list entry possibly with a type_name
  */
 static struct multi_files *
-AddMultiFiles (const char *file_name,
-               const char *type_name,
-               const char *show_filename,
-               struct multi_files **multi_start,
-               struct multi_files **multi_current)
+AddMultiFiles(const char *file_name,
+              const char *type_name,
+              const char *show_filename,
+              struct multi_files **multi_start,
+              struct multi_files **multi_current)
 {
   struct multi_files *multi;
   struct multi_files *multi_type = NULL;
   struct multi_files *multi_name = NULL;
   multi = malloc(sizeof(struct multi_files));
-  if (multi) {
+  if(multi) {
     memset(multi, 0, sizeof(struct multi_files));
     multi->form.option = CURLFORM_FILE;
     multi->form.value = file_name;
@@ -1013,12 +1013,12 @@ AddMultiFiles (const char *file_name,
   else
     return NULL;
 
-  if (!*multi_start)
+  if(!*multi_start)
     *multi_start = multi;
 
-  if (type_name) {
+  if(type_name) {
     multi_type = malloc(sizeof(struct multi_files));
-    if (multi_type) {
+    if(multi_type) {
       memset(multi_type, 0, sizeof(struct multi_files));
       multi_type->form.option = CURLFORM_CONTENTTYPE;
       multi_type->form.value = type_name;
@@ -1027,13 +1027,13 @@ AddMultiFiles (const char *file_name,
       multi = multi_type;
     }
     else {
-      free (multi);
+      free(multi);
       return NULL;
     }
   }
-  if (show_filename) {
+  if(show_filename) {
     multi_name = malloc(sizeof(struct multi_files));
-    if (multi_name) {
+    if(multi_name) {
       memset(multi_name, 0, sizeof(struct multi_files));
       multi_name->form.option = CURLFORM_FILENAME;
       multi_name->form.value = show_filename;
@@ -1042,12 +1042,12 @@ AddMultiFiles (const char *file_name,
       multi = multi_name;
     }
     else {
-      free (multi);
+      free(multi);
       return NULL;
     }
   }
 
-  if (*multi_current)
+  if(*multi_current)
     (*multi_current)->next = multi;
 
   *multi_current = multi;
@@ -1057,27 +1057,27 @@ AddMultiFiles (const char *file_name,
 
 /* Free the items of the list.
  */
-static void FreeMultiInfo (struct multi_files *multi_start)
+static void FreeMultiInfo(struct multi_files *multi_start)
 {
   struct multi_files *multi;
-  while (multi_start) {
+  while(multi_start) {
     multi = multi_start;
     multi_start = multi_start->next;
-    free (multi);
+    free(multi);
   }
 }
 
 /* Print list of OpenSSL engines supported.
  */
-static void list_engines (const struct curl_slist *engines)
+static void list_engines(const struct curl_slist *engines)
 {
-  puts ("Build-time engines:");
-  if (!engines) {
-    puts ("  <none>");
+  puts("Build-time engines:");
+  if(!engines) {
+    puts("  <none>");
     return;
   }
-  for ( ; engines; engines = engines->next)
-    printf ("  %s\n", engines->data);
+  for( ; engines; engines = engines->next)
+    printf("  %s\n", engines->data);
 }
 
 /***************************************************************************
@@ -1199,7 +1199,7 @@ static int formparse(struct Configurable *config,
                              major, minor)) {
                 warnf(config, "Illegally formatted content-type field!\n");
                 free(contents);
-                FreeMultiInfo (multi_start);
+                FreeMultiInfo(multi_start);
                 return 2; /* illegal content-type syntax! */
               }
 
@@ -1212,7 +1212,7 @@ static int formparse(struct Configurable *config,
                  to the next zero or semicolon. */
               if((*sep==';') && !checkprefix(";filename=", sep)) {
                 sep2 = strchr(sep+1, ';');
-                if (sep2)
+                if(sep2)
                   sep = sep2;
                 else
                   sep = sep+strlen(sep); /* point to end of string */
@@ -1257,11 +1257,11 @@ static int formparse(struct Configurable *config,
         }
         /* if type == NULL curl_formadd takes care of the problem */
 
-        if (!AddMultiFiles (contp, type, filename, &multi_start,
-                            &multi_current)) {
+        if(!AddMultiFiles(contp, type, filename, &multi_start,
+                          &multi_current)) {
           warnf(config, "Error building form post!\n");
           free(contents);
-          FreeMultiInfo (multi_start);
+          FreeMultiInfo(multi_start);
           return 3;
         }
         contp = sep; /* move the contents pointer to after the separator */
@@ -1269,32 +1269,32 @@ static int formparse(struct Configurable *config,
       } while(sep && *sep); /* loop if there's another file name */
 
       /* now we add the multiple files section */
-      if (multi_start) {
+      if(multi_start) {
         struct curl_forms *forms = NULL;
         struct multi_files *ptr = multi_start;
         unsigned int i, count = 0;
-        while (ptr) {
+        while(ptr) {
           ptr = ptr->next;
           ++count;
         }
         forms = malloc((count+1)*sizeof(struct curl_forms));
-        if (!forms)
+        if(!forms)
         {
           fprintf(config->errors, "Error building form post!\n");
           free(contents);
-          FreeMultiInfo (multi_start);
+          FreeMultiInfo(multi_start);
           return 4;
         }
-        for (i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next)
+        for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next)
         {
           forms[i].option = ptr->form.option;
           forms[i].value = ptr->form.value;
         }
         forms[count].option = CURLFORM_END;
-        FreeMultiInfo (multi_start);
-        if (curl_formadd(httppost, last_post,
-                         CURLFORM_COPYNAME, name,
-                         CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
+        FreeMultiInfo(multi_start);
+        if(curl_formadd(httppost, last_post,
+                        CURLFORM_COPYNAME, name,
+                        CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
           warnf(config, "curl_formadd failed!\n");
           free(forms);
           free(contents);
@@ -1325,8 +1325,8 @@ static int formparse(struct Configurable *config,
         i++;
         info[i].option = CURLFORM_END;
 
-        if (curl_formadd(httppost, last_post,
-                         CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
+        if(curl_formadd(httppost, last_post,
+                        CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
           warnf(config, "curl_formadd failed, possibly the file %s is bad!\n",
                 contp+1);
           free(contents);
@@ -1341,8 +1341,8 @@ static int formparse(struct Configurable *config,
         info[i].value = contp;
         i++;
         info[i].option = CURLFORM_END;
-        if (curl_formadd(httppost, last_post,
-                         CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
+        if(curl_formadd(httppost, last_post,
+                        CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
           warnf(config, "curl_formadd failed!\n");
           free(contents);
           return 7;
@@ -1481,7 +1481,7 @@ static void cleanarg(char *str)
   /* now that GetStr has copied the contents of nextarg, wipe the next
    * argument out so that the username:password isn't displayed in the
    * system process list */
-  if (str) {
+  if(str) {
     size_t len = strlen(str);
     memset(str, ' ', len);
   }
@@ -1561,15 +1561,15 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
 
   buffer = strdup(str); /* because strtok corrupts it */
 
-  for (token = strtok(buffer, sep);
-       token;
-       token = strtok(NULL, sep)) {
+  for(token = strtok(buffer, sep);
+      token;
+      token = strtok(NULL, sep)) {
     enum e_action { allow, deny, set } action = allow;
 
     struct sprotos const *pp;
 
     /* Process token modifiers */
-    while (!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
+    while(!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
       switch (*token++) {
       case '=':
         action = set;
@@ -1586,8 +1586,8 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
       }
     }
 
-    for (pp=protos; pp->name; pp++) {
-      if (curlx_raw_equal(token, pp->name)) {
+    for(pp=protos; pp->name; pp++) {
+      if(curlx_raw_equal(token, pp->name)) {
         switch (action) {
         case deny:
           *val &= ~(pp->bit);
@@ -1603,10 +1603,10 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
       }
     }
 
-    if (!(pp->name)) { /* unknown protocol */
+    if(!(pp->name)) { /* unknown protocol */
       /* If they have specified only this protocol, we say treat it as
          if no protocols are allowed */
-      if (action == set)
+      if(action == set)
         *val = 0;
       warnf(config, "unrecognized protocol '%s'\n", token);
     }
@@ -1625,13 +1625,13 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
  */
 static int str2offset(curl_off_t *val, const char *str)
 {
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
   *val = curlx_strtoofft(str, NULL, 0);
   if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (ERRNO == ERANGE))
     return 1;
 #else
   *val = strtol(str, NULL, 0);
-  if ((*val == LONG_MIN || *val == LONG_MAX) && ERRNO == ERANGE)
+  if((*val == LONG_MIN || *val == LONG_MAX) && ERRNO == ERANGE)
     return 1;
 #endif
   return 0;
@@ -1655,8 +1655,8 @@ static void checkpasswd(const char *kind, /* for what purpose */
 
     /* build a nice-looking prompt */
     curlx_msnprintf(prompt, sizeof(prompt),
-                   "Enter %s password for user '%s':",
-                   kind, *userpwd);
+                    "Enter %s password for user '%s':",
+                    kind, *userpwd);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
@@ -1721,7 +1721,7 @@ static int sockoptcallback(void *clientp, curl_socket_t curlfd,
   int keepidle = (int)config->alivetime;
 #endif
 
-  switch (purpose) {
+  switch(purpose) {
   case CURLSOCKTYPE_IPCXN:
     if(setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&onoff,
                   sizeof(onoff)) < 0) {
@@ -1731,7 +1731,7 @@ static int sockoptcallback(void *clientp, curl_socket_t curlfd,
       return 0;
     }
     else {
-      if (config->alivetime) {
+      if(config->alivetime) {
 #ifdef TCP_KEEPIDLE
         if(setsockopt(curlfd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)&keepidle,
                       sizeof(keepidle)) < 0) {
@@ -1783,7 +1783,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   /* single-letter,
      long-name,
      boolean whether it takes an additional argument
-     */
+  */
   static const struct LongShort aliases[]= {
     /* all these ones, starting with "*" or "$" as a short-option have *no*
        short option to mention. */
@@ -2079,41 +2079,41 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->tracetype = TRACE_ASCII;
         break;
       case 'i': /* --limit-rate */
-        {
-          /* We support G, M, K too */
-          char *unit;
-          curl_off_t value = curlx_strtoofft(nextarg, &unit, 0);
+      {
+        /* We support G, M, K too */
+        char *unit;
+        curl_off_t value = curlx_strtoofft(nextarg, &unit, 0);
 
-          if(!*unit)
-            unit=(char *)"b";
-          else if(strlen(unit) > 1)
-            unit=(char *)"w"; /* unsupported */
+        if(!*unit)
+          unit=(char *)"b";
+        else if(strlen(unit) > 1)
+          unit=(char *)"w"; /* unsupported */
 
-          switch(*unit) {
-          case 'G':
-          case 'g':
-            value *= 1024*1024*1024;
-            break;
-          case 'M':
-          case 'm':
-            value *= 1024*1024;
-            break;
-          case 'K':
-          case 'k':
-            value *= 1024;
-            break;
-          case 'b':
-          case 'B':
-            /* for plain bytes, leave as-is */
-            break;
-          default:
-            warnf(config, "unsupported rate unit. Use G, M, K or B!\n");
-            return PARAM_BAD_USE;
-          }
-          config->recvpersecond = value;
-          config->sendpersecond = value;
+        switch(*unit) {
+        case 'G':
+        case 'g':
+          value *= 1024*1024*1024;
+          break;
+        case 'M':
+        case 'm':
+          value *= 1024*1024;
+          break;
+        case 'K':
+        case 'k':
+          value *= 1024;
+          break;
+        case 'b':
+        case 'B':
+          /* for plain bytes, leave as-is */
+          break;
+        default:
+          warnf(config, "unsupported rate unit. Use G, M, K or B!\n");
+          return PARAM_BAD_USE;
         }
-        break;
+        config->recvpersecond = value;
+        config->sendpersecond = value;
+      }
+      break;
 
       case 'j': /* --compressed */
         config->encoding = toggle;
@@ -2206,7 +2206,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
         else
           config->errors = stdout;
-      break;
+        break;
       case 'w': /* --interface */
         /* interface */
         GetStr(&config->iface, nextarg);
@@ -2231,30 +2231,30 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       default: /* the URL! */
-        {
-          struct getout *url;
-          if(config->url_get || (config->url_get=config->url_list)) {
-            /* there's a node here, if it already is filled-in continue to find
-               an "empty" node */
-            while(config->url_get && (config->url_get->flags&GETOUT_URL))
-              config->url_get = config->url_get->next;
-          }
-
-          /* now there might or might not be an available node to fill in! */
-
-          if(config->url_get)
-            /* existing node */
-            url = config->url_get;
-          else
-            /* there was no free node, create one! */
-            url=new_getout(config);
-
-          if(url) {
-            /* fill in the URL */
-            GetStr(&url->url, nextarg);
-            url->flags |= GETOUT_URL;
-          }
+      {
+        struct getout *url;
+        if(config->url_get || (config->url_get=config->url_list)) {
+          /* there's a node here, if it already is filled-in continue to find
+             an "empty" node */
+          while(config->url_get && (config->url_get->flags&GETOUT_URL))
+            config->url_get = config->url_get->next;
         }
+
+        /* now there might or might not be an available node to fill in! */
+
+        if(config->url_get)
+          /* existing node */
+          url = config->url_get;
+        else
+          /* there was no free node, create one! */
+          url=new_getout(config);
+
+        if(url) {
+          /* fill in the URL */
+          GetStr(&url->url, nextarg);
+          url->flags |= GETOUT_URL;
+        }
+      }
       }
       break;
     case '$': /* more options without a short option */
@@ -2362,7 +2362,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'y': /* --ftp-ssl-ccc */
         config->ftp_ssl_ccc = toggle;
         if(!config->ftp_ssl_ccc_mode)
-            config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
+          config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
         break;
       case 'j': /* --ftp-ssl-ccc-mode */
         config->ftp_ssl_ccc = TRUE;
@@ -2504,179 +2504,179 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'd':
       /* postfield data */
-      {
-        char *postdata=NULL;
-        FILE *file;
+    {
+      char *postdata=NULL;
+      FILE *file;
 
-        if(subletter == 'e') { /* --data-urlencode*/
-          /* [name]=[content], we encode the content part only
-           * [name]@[file name]
-           *
-           * Case 2: we first load the file using that name and then encode
-           * the content.
-           */
-          const char *p = strchr(nextarg, '=');
-          size_t size = 0;
-          size_t nlen;
-          char is_file;
-          if(!p)
-            /* there was no '=' letter, check for a '@' instead */
-            p = strchr(nextarg, '@');
-          if (p) {
-            nlen = p - nextarg; /* length of the name part */
-            is_file = *p++; /* pass the separator */
-          }
-          else {
-            /* neither @ nor =, so no name and it isn't a file */
-            nlen = is_file = 0;
-            p = nextarg;
-          }
-          if('@' == is_file) {
-            /* a '@' letter, it means that a file name or - (stdin) follows */
-
-            if(curlx_strequal("-", p)) {
-              file = stdin;
-              SET_BINMODE(stdin);
-            }
-            else {
-              file = fopen(p, "rb");
-              if(!file)
-                warnf(config,
-                      "Couldn't read data from file \"%s\", this makes "
-                      "an empty POST.\n", nextarg);
-            }
-
-            err = file2memory(&postdata, &size, file);
-
-            if(file && (file != stdin))
-              fclose(file);
-            if(err)
-              return err;
-          }
-          else {
-            GetStr(&postdata, p);
-            size = strlen(postdata);
-          }
-
-          if(!postdata) {
-            /* no data from the file, point to a zero byte string to make this
-               get sent as a POST anyway */
-            postdata=strdup("");
-          }
-          else {
-            char *enc = curl_easy_escape(config->easy, postdata, (int)size);
-            free(postdata); /* no matter if it worked or not */
-            if(enc) {
-              /* now make a string with the name from above and append the
-                 encoded string */
-              size_t outlen = nlen + strlen(enc) + 2;
-              char *n = malloc(outlen);
-              if(!n) {
-                curl_free(enc);
-                return PARAM_NO_MEM;
-              }
-              if (nlen > 0) /* only append '=' if we have a name */
-                snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
-              else
-                strcpy(n, enc);
-              curl_free(enc);
-              postdata = n;
-            }
-            else
-              return PARAM_NO_MEM;
-          }
+      if(subletter == 'e') { /* --data-urlencode*/
+        /* [name]=[content], we encode the content part only
+         * [name]@[file name]
+         *
+         * Case 2: we first load the file using that name and then encode
+         * the content.
+         */
+        const char *p = strchr(nextarg, '=');
+        size_t size = 0;
+        size_t nlen;
+        char is_file;
+        if(!p)
+          /* there was no '=' letter, check for a '@' instead */
+          p = strchr(nextarg, '@');
+        if(p) {
+          nlen = p - nextarg; /* length of the name part */
+          is_file = *p++; /* pass the separator */
         }
-        else if('@' == *nextarg) {
-          size_t size = 0;
-          /* the data begins with a '@' letter, it means that a file name
-             or - (stdin) follows */
-          nextarg++; /* pass the @ */
+        else {
+          /* neither @ nor =, so no name and it isn't a file */
+          nlen = is_file = 0;
+          p = nextarg;
+        }
+        if('@' == is_file) {
+          /* a '@' letter, it means that a file name or - (stdin) follows */
 
-          if(curlx_strequal("-", nextarg)) {
+          if(curlx_strequal("-", p)) {
             file = stdin;
-            if(subletter == 'b') /* forced data-binary */
-              SET_BINMODE(stdin);
+            SET_BINMODE(stdin);
           }
           else {
-            file = fopen(nextarg, "rb");
+            file = fopen(p, "rb");
             if(!file)
-              warnf(config, "Couldn't read data from file \"%s\", this makes "
+              warnf(config,
+                    "Couldn't read data from file \"%s\", this makes "
                     "an empty POST.\n", nextarg);
           }
 
-          if(subletter == 'b') {
-            /* forced binary */
-            err = file2memory(&postdata, &size, file);
-            config->postfieldsize = (curl_off_t)size;
-          }
-          else
-            err = file2string(&postdata, file);
+          err = file2memory(&postdata, &size, file);
 
           if(file && (file != stdin))
             fclose(file);
           if(err)
             return err;
-
-          if(!postdata) {
-            /* no data from the file, point to a zero byte string to make this
-               get sent as a POST anyway */
-            postdata=strdup("");
-          }
         }
         else {
-          GetStr(&postdata, nextarg);
+          GetStr(&postdata, p);
+          size = strlen(postdata);
         }
 
-#ifdef CURL_DOES_CONVERSIONS
-        if(subletter != 'b') { /* NOT forced binary, convert to ASCII */
-          convert_to_network(postdata, strlen(postdata));
+        if(!postdata) {
+          /* no data from the file, point to a zero byte string to make this
+             get sent as a POST anyway */
+          postdata=strdup("");
         }
-#endif
-
-        if(config->postfields) {
-          /* we already have a string, we append this one
-             with a separating &-letter */
-          char *oldpost=config->postfields;
-          size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
-          config->postfields=malloc(newlen);
-          if(!config->postfields) {
-            free(postdata);
-            return PARAM_NO_MEM;
+        else {
+          char *enc = curl_easy_escape(config->easy, postdata, (int)size);
+          free(postdata); /* no matter if it worked or not */
+          if(enc) {
+            /* now make a string with the name from above and append the
+               encoded string */
+            size_t outlen = nlen + strlen(enc) + 2;
+            char *n = malloc(outlen);
+            if(!n) {
+              curl_free(enc);
+              return PARAM_NO_MEM;
+            }
+            if(nlen > 0) /* only append '=' if we have a name */
+              snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+            else
+              strcpy(n, enc);
+            curl_free(enc);
+            postdata = n;
           }
-          /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
-          snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
-          free(oldpost);
-          free(postdata);
+          else
+            return PARAM_NO_MEM;
+        }
+      }
+      else if('@' == *nextarg) {
+        size_t size = 0;
+        /* the data begins with a '@' letter, it means that a file name
+           or - (stdin) follows */
+        nextarg++; /* pass the @ */
+
+        if(curlx_strequal("-", nextarg)) {
+          file = stdin;
+          if(subletter == 'b') /* forced data-binary */
+            SET_BINMODE(stdin);
+        }
+        else {
+          file = fopen(nextarg, "rb");
+          if(!file)
+            warnf(config, "Couldn't read data from file \"%s\", this makes "
+                  "an empty POST.\n", nextarg);
+        }
+
+        if(subletter == 'b') {
+          /* forced binary */
+          err = file2memory(&postdata, &size, file);
+          config->postfieldsize = (curl_off_t)size;
         }
         else
-          config->postfields=postdata;
-      }
-      /*
-        We can't set the request type here, as this data might be used in
-        a simple GET if -G is used. Already or soon.
+          err = file2string(&postdata, file);
 
-        if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-          return PARAM_BAD_USE;
-      */
-      break;
+        if(file && (file != stdin))
+          fclose(file);
+        if(err)
+          return err;
+
+        if(!postdata) {
+          /* no data from the file, point to a zero byte string to make this
+             get sent as a POST anyway */
+          postdata=strdup("");
+        }
+      }
+      else {
+        GetStr(&postdata, nextarg);
+      }
+
+#ifdef CURL_DOES_CONVERSIONS
+      if(subletter != 'b') { /* NOT forced binary, convert to ASCII */
+        convert_to_network(postdata, strlen(postdata));
+      }
+#endif
+
+      if(config->postfields) {
+        /* we already have a string, we append this one
+           with a separating &-letter */
+        char *oldpost=config->postfields;
+        size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
+        config->postfields=malloc(newlen);
+        if(!config->postfields) {
+          free(postdata);
+          return PARAM_NO_MEM;
+        }
+        /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
+        snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
+        free(oldpost);
+        free(postdata);
+      }
+      else
+        config->postfields=postdata;
+    }
+    /*
+      We can't set the request type here, as this data might be used in
+      a simple GET if -G is used. Already or soon.
+
+      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+      return PARAM_BAD_USE;
+    */
+    break;
     case 'D':
       /* dump-header to given file name */
       GetStr(&config->headerfile, nextarg);
       break;
     case 'e':
-      {
-        char *ptr = strstr(nextarg, ";auto");
-        if(ptr) {
-          /* Automatic referer requested, this may be combined with a
-             set initial one */
-          config->autoreferer = TRUE;
-          *ptr = 0; /* zero terminate here */
-        }
-        else
-          config->autoreferer = FALSE;
-        GetStr(&config->referer, nextarg);
+    {
+      char *ptr = strstr(nextarg, ";auto");
+      if(ptr) {
+        /* Automatic referer requested, this may be combined with a
+           set initial one */
+        config->autoreferer = TRUE;
+        *ptr = 0; /* zero terminate here */
       }
-      break;
+      else
+        config->autoreferer = FALSE;
+      GetStr(&config->referer, nextarg);
+    }
+    break;
     case 'E':
       switch(subletter) {
       case 'a': /* CA info PEM file */
@@ -2698,8 +2698,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
-        if (config->engine && curlx_raw_equal(config->engine,"list"))
-           config->list_engines = TRUE;
+        if(config->engine && curlx_raw_equal(config->engine,"list"))
+          config->list_engines = TRUE;
         break;
       case 'g': /* CA info PEM file */
         /* CA cert directory */
@@ -2710,41 +2710,41 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'i': /* --hostpubmd5 md5 of the host public key */
         GetStr(&config->hostpubmd5, nextarg);
-        if (!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
-           return PARAM_BAD_USE;
+        if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
+          return PARAM_BAD_USE;
         break;
       case 'j': /* CRL info PEM file */
         /* CRL file */
         GetStr(&config->crlfile, nextarg);
         break;
       default: /* certificate file */
-        {
-          char *ptr = strchr(nextarg, ':');
-          /* Since we live in a world of weirdness and confusion, the win32
-             dudes can use : when using drive letters and thus
-             c:\file:password needs to work. In order not to break
-             compatibility, we still use : as separator, but we try to detect
-             when it is used for a file name! On windows. */
+      {
+        char *ptr = strchr(nextarg, ':');
+        /* Since we live in a world of weirdness and confusion, the win32
+           dudes can use : when using drive letters and thus
+           c:\file:password needs to work. In order not to break
+           compatibility, we still use : as separator, but we try to detect
+           when it is used for a file name! On windows. */
 #ifdef WIN32
-          if(ptr &&
-             (ptr == &nextarg[1]) &&
-             (nextarg[2] == '\\' || nextarg[2] == '/') &&
-             (ISALPHA(nextarg[0])) )
-             /* colon in the second column, followed by a backslash, and the
-                first character is an alphabetic letter:
+        if(ptr &&
+           (ptr == &nextarg[1]) &&
+           (nextarg[2] == '\\' || nextarg[2] == '/') &&
+           (ISALPHA(nextarg[0])) )
+          /* colon in the second column, followed by a backslash, and the
+             first character is an alphabetic letter:
 
-                this is a drive letter colon */
-            ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
+             this is a drive letter colon */
+          ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
 #endif
-          if(ptr) {
-            /* we have a password too */
-            *ptr=0;
-            ptr++;
-            GetStr(&config->key_passwd, ptr);
-          }
-          GetStr(&config->cert, nextarg);
-          cleanarg(nextarg);
+        if(ptr) {
+          /* we have a password too */
+          *ptr=0;
+          ptr++;
+          GetStr(&config->key_passwd, ptr);
         }
+        GetStr(&config->cert, nextarg);
+        cleanarg(nextarg);
+      }
       }
       break;
     case 'f':
@@ -2803,7 +2803,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         return PARAM_BAD_USE;
       break;
     case 'J': /* --remote-header-name */
-      if (config->include_headers) {
+      if(config->include_headers) {
         warnf(config,
               "--include and --remote-header-name cannot be combined.\n");
         return PARAM_BAD_USE;
@@ -2874,50 +2874,50 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
         break;
       }
-    /* fall-through! */
+      /* fall-through! */
     case 'o': /* --output */
       /* output file */
-      {
-        struct getout *url;
-        if(config->url_out || (config->url_out=config->url_list)) {
-          /* there's a node here, if it already is filled-in continue to find
-             an "empty" node */
-          while(config->url_out && (config->url_out->flags&GETOUT_OUTFILE))
-            config->url_out = config->url_out->next;
-        }
-
-        /* now there might or might not be an available node to fill in! */
-
-        if(config->url_out)
-          /* existing node */
-          url = config->url_out;
-        else
-          /* there was no free node, create one! */
-          url=new_getout(config);
-
-        if(url) {
-          /* fill in the outfile */
-          if('o' == letter) {
-            GetStr(&url->outfile, nextarg);
-            url->flags &= ~GETOUT_USEREMOTE; /* switch off */
-          }
-          else {
-            url->outfile=NULL; /* leave it */
-            if(toggle)
-              url->flags |= GETOUT_USEREMOTE;  /* switch on */
-            else
-              url->flags &= ~GETOUT_USEREMOTE; /* switch off */
-          }
-          url->flags |= GETOUT_OUTFILE;
-        }
+    {
+      struct getout *url;
+      if(config->url_out || (config->url_out=config->url_list)) {
+        /* there's a node here, if it already is filled-in continue to find
+           an "empty" node */
+        while(config->url_out && (config->url_out->flags&GETOUT_OUTFILE))
+          config->url_out = config->url_out->next;
       }
-      break;
+
+      /* now there might or might not be an available node to fill in! */
+
+      if(config->url_out)
+        /* existing node */
+        url = config->url_out;
+      else
+        /* there was no free node, create one! */
+        url=new_getout(config);
+
+      if(url) {
+        /* fill in the outfile */
+        if('o' == letter) {
+          GetStr(&url->outfile, nextarg);
+          url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+        }
+        else {
+          url->outfile=NULL; /* leave it */
+          if(toggle)
+            url->flags |= GETOUT_USEREMOTE;  /* switch on */
+          else
+            url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+        }
+        url->flags |= GETOUT_OUTFILE;
+      }
+    }
+    break;
     case 'P':
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
          NOTE: this is a changed behaviour since the released 4.1!
-         */
+      */
       GetStr(&config->ftpport, nextarg);
       break;
     case 'p':
@@ -3005,35 +3005,35 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'T':
       /* we are uploading */
-      {
-        struct getout *url;
-        if(config->url_out || (config->url_out=config->url_list)) {
-          /* there's a node here, if it already is filled-in continue to find
-             an "empty" node */
-          while(config->url_out && (config->url_out->flags&GETOUT_UPLOAD))
-            config->url_out = config->url_out->next;
-        }
+    {
+      struct getout *url;
+      if(config->url_out || (config->url_out=config->url_list)) {
+        /* there's a node here, if it already is filled-in continue to find
+           an "empty" node */
+        while(config->url_out && (config->url_out->flags&GETOUT_UPLOAD))
+          config->url_out = config->url_out->next;
+      }
 
-        /* now there might or might not be an available node to fill in! */
+      /* now there might or might not be an available node to fill in! */
 
-        if(config->url_out)
-          /* existing node */
-          url = config->url_out;
-        else
-          /* there was no free node, create one! */
-          url=new_getout(config);
+      if(config->url_out)
+        /* existing node */
+        url = config->url_out;
+      else
+        /* there was no free node, create one! */
+        url=new_getout(config);
 
-        if(url) {
-          url->flags |= GETOUT_UPLOAD; /* mark -T used */
-          if(!*nextarg)
-            url->flags |= GETOUT_NOUPLOAD;
-          else {
-            /* "-" equals stdin, but keep the string around for now */
-            GetStr(&url->infile, nextarg);
-          }
+      if(url) {
+        url->flags |= GETOUT_UPLOAD; /* mark -T used */
+        if(!*nextarg)
+          url->flags |= GETOUT_NOUPLOAD;
+        else {
+          /* "-" equals stdin, but keep the string around for now */
+          GetStr(&url->infile, nextarg);
         }
       }
-      break;
+    }
+    break;
     case 'u':
       /* user:password  */
       GetStr(&config->userpwd, nextarg);
@@ -3068,9 +3068,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       printf(CURL_ID "%s\n", curl_version());
-      if (curlinfo->protocols) {
+      if(curlinfo->protocols) {
         printf("Protocols: ");
-        for (proto=curlinfo->protocols; *proto; ++proto) {
+        for(proto=curlinfo->protocols; *proto; ++proto) {
           printf("%s ", *proto);
         }
         puts(""); /* newline */
@@ -3274,7 +3274,7 @@ static int parseconfig(const char *filename,
          * directory as our executable
          */
         file = fopen(filebuffer, "r");
-        if (file != NULL) {
+        if(file != NULL) {
           fclose(file);
           filename = filebuffer;
         }
@@ -3284,15 +3284,15 @@ static int parseconfig(const char *filename,
            * We assume that we are using the ASCII version here.
            */
           int n = GetModuleFileName(0, filebuffer, sizeof(filebuffer));
-          if (n > 0 && n < (int)sizeof(filebuffer)) {
+          if(n > 0 && n < (int)sizeof(filebuffer)) {
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
-            if (lastdirchar) {
+            if(lastdirchar) {
               size_t remaining;
               *lastdirchar = 0;
               /* If we have enough space, build the RC filename */
               remaining = sizeof(filebuffer) - strlen(filebuffer);
-              if (strlen(CURLRC) < remaining - 1) {
+              if(strlen(CURLRC) < remaining - 1) {
                 snprintf(lastdirchar, remaining,
                          "%s%s", DIR_CHAR, CURLRC);
                 /* Don't bother checking if it exists - we do
@@ -3311,9 +3311,9 @@ static int parseconfig(const char *filename,
     }
 
 # else /* __AMIGA__ */
-  /* On AmigaOS all the config files are into env:
-   */
-  filename = "ENV:" CURLRC;
+    /* On AmigaOS all the config files are into env:
+     */
+    filename = "ENV:" CURLRC;
 
 #endif
   }
@@ -3333,7 +3333,7 @@ static int parseconfig(const char *filename,
 
 #define ISSEP(x) (((x)=='=') || ((x) == ':'))
 
-    while (NULL != (aline = my_get_line(file))) {
+    while(NULL != (aline = my_get_line(file))) {
       lineno++;
       line = aline;
       alloced_param=FALSE;
@@ -3375,7 +3375,7 @@ static int parseconfig(const char *filename,
         /* quoted parameter, do the quote dance */
         line++;
         param=malloc(strlen(line)+1); /* parameter */
-        if (!param) {
+        if(!param) {
           /* out of memory */
           free(aline);
           rc = 1;
@@ -3391,10 +3391,10 @@ static int parseconfig(const char *filename,
         *line=0; /* zero terminate */
       }
 
-      if (param && !*param) {
+      if(param && !*param) {
         /* do this so getparameter can check for required parameters.
            Otherwise it always thinks there's a parameter. */
-        if (alloced_param)
+        if(alloced_param)
           free(param);
         param = NULL;
       }
@@ -3404,7 +3404,7 @@ static int parseconfig(const char *filename,
 #endif
       res = getparameter(option, param, &usedarg, config);
 
-      if (param && *param && !usedarg)
+      if(param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
@@ -3479,15 +3479,15 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 
   if(!out->stream) {
     out->bytes = 0; /* nothing written yet */
-    if (!out->filename) {
+    if(!out->filename) {
       warnf(config, "Remote filename has no length!\n");
       return err_rc; /* Failure */
     }
 
-    if (config->content_disposition) {
+    if(config->content_disposition) {
       /* don't overwrite existing files */
       FILE* f = fopen(out->filename, "r");
-      if (f) {
+      if(f) {
         fclose(f);
         warnf(config, "Refusing to overwrite %s: %s\n", out->filename,
               strerror(EEXIST));
@@ -3541,7 +3541,7 @@ static int my_seek(void *stream, curl_off_t offset, int whence)
 {
   struct InStruct *in=(struct InStruct *)stream;
 
-#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+#if(CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the WIN32 large file support
      macros that provide the support to do 64bit seeks correctly */
@@ -3639,7 +3639,7 @@ static int myprogress (void *clientp,
   if(total < 1) {
     curl_off_t prevblock = bar->prev / 1024;
     curl_off_t thisblock = point / 1024;
-    while ( thisblock > prevblock ) {
+    while( thisblock > prevblock ) {
       fprintf( bar->out, "#" );
       prevblock++;
     }
@@ -3649,7 +3649,7 @@ static int myprogress (void *clientp,
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
-    for ( i = 0; i < num; i++ ) {
+    for( i = 0; i < num; i++ ) {
       line[i] = '#';
     }
     line[i] = '\0';
@@ -3678,17 +3678,17 @@ void progressbarinit(struct ProgressData *bar,
   /* pass this through to progress function so
    * it can display progress towards total file
    * not just the part that's left. (21-may-03, dbyron) */
-  if (config->use_resume)
+  if(config->use_resume)
     bar->initial_size = config->resume_from;
 
 /* TODO: get terminal width through ansi escapes or something similar.
-         try to update width when xterm is resized... - 19990617 larsa */
+   try to update width when xterm is resized... - 19990617 larsa */
 #ifndef __EMX__
   /* 20000318 mgs
    * OS/2 users most likely won't have this env var set, and besides that
    * we're using our own way to determine screen width */
   colp = curlx_getenv("COLUMNS");
-  if (colp != NULL) {
+  if(colp != NULL) {
     bar->width = atoi(colp);
     curl_free(colp);
   }
@@ -3740,15 +3740,15 @@ void dump(const char *timebuf, const char *text,
 
     for(c = 0; (c < width) && (i+c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if ((tracetype == TRACE_ASCII) &&
-          (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
+      if((tracetype == TRACE_ASCII) &&
+         (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
         i+=(c+2-width);
         break;
       }
 #ifdef CURL_DOES_CONVERSIONS
       /* repeat the 0D0A check above but use the host encoding for CRLF */
-      if ((tracetype == TRACE_ASCII) &&
-          (i+c+1 < size) && ptr[i+c]=='\r' && ptr[i+c+1]=='\n') {
+      if((tracetype == TRACE_ASCII) &&
+         (i+c+1 < size) && ptr[i+c]=='\r' && ptr[i+c+1]=='\n') {
         i+=(c+2-width);
         break;
       }
@@ -3760,8 +3760,8 @@ void dump(const char *timebuf, const char *text,
               (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:UNPRINTABLE_CHAR);
 #endif /* CURL_DOES_CONVERSIONS */
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if ((tracetype == TRACE_ASCII) &&
-          (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
+      if((tracetype == TRACE_ASCII) &&
+         (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
         i+=(c+3-width);
         break;
       }
@@ -3980,11 +3980,11 @@ static void free_config_fields(struct Configurable *config)
     free(config->writeout);
   if(config->httppost)
     curl_formfree(config->httppost);
-  if (config->cert)
+  if(config->cert)
     free(config->cert);
   if(config->cacert)
     free(config->cacert);
-  if (config->cert_type)
+  if(config->cert_type)
     free(config->cert_type);
   if(config->capath)
     free(config->capath);
@@ -4002,17 +4002,17 @@ static void free_config_fields(struct Configurable *config)
     free(config->socksproxy);
   if(config->libcurl)
     free(config->libcurl);
-  if (config->key_passwd)
+  if(config->key_passwd)
     free(config->key_passwd);
-  if (config->key)
+  if(config->key)
     free(config->key);
-  if (config->key_type)
+  if(config->key_type)
     free(config->key_type);
-  if (config->pubkey)
+  if(config->pubkey)
     free(config->pubkey);
-  if (config->referer)
+  if(config->referer)
     free(config->referer);
-  if (config->hostpubmd5)
+  if(config->hostpubmd5)
     free(config->hostpubmd5);
   if(config->mail_from)
     free(config->mail_from);
@@ -4052,11 +4052,11 @@ static void FindWin32CACert(struct Configurable *config,
     DWORD buflen;
     char *ptr = NULL;
     char *retval = malloc(sizeof (TCHAR) * (MAX_PATH + 1));
-    if (!retval)
+    if(!retval)
       return;
     retval[0] = '\0';
     buflen = SearchPathA(NULL, bundle_file, NULL, MAX_PATH+2, retval, &ptr);
-    if (buflen > 0) {
+    if(buflen > 0) {
       GetStr(&config->cacert, retval);
     }
     free(retval);
@@ -4112,8 +4112,8 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
     unsigned char *ptr = (unsigned char *)pval;
 
     /* function pointers are never printable */
-    if (tag >= CURLOPTTYPE_FUNCTIONPOINT) {
-      if (pval) {
+    if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
+      if(pval) {
         strcpy(value, "functionpointer"); /* 'value' fits 256 bytes */
         remark = TRUE;
       }
@@ -4151,7 +4151,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
     else
       bufp = curlx_maprintf("curl_easy_setopt(hnd, %s, %s);", name, value);
 
-    if (!bufp)
+    if(!bufp)
       ret = CURLE_OUT_OF_MEMORY;
     else {
       struct curl_slist *list =
@@ -4162,7 +4162,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
       else
         easycode = list;
     }
-    if (bufp)
+    if(bufp)
       curl_free(bufp);
   }
   va_end(arg);
@@ -4346,13 +4346,13 @@ parse_filename(char *ptr, size_t len)
 
   /* simple implementation of strndup() */
   copy = malloc(len+1);
-  if (!copy)
+  if(!copy)
     return NULL;
   strncpy(copy, ptr, len);
   copy[len] = 0;
 
   p = copy;
-  if (*p == '\'' || *p == '"') {
+  if(*p == '\'' || *p == '"') {
     /* store the starting quote */
     quote = *p;
     p++;
@@ -4360,9 +4360,9 @@ parse_filename(char *ptr, size_t len)
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(copy, '/');
-  if (q) {
+  if(q) {
     p=q+1;
-    if (!*p) {
+    if(!*p) {
       free(copy);
       return NULL;
     }
@@ -4372,7 +4372,7 @@ parse_filename(char *ptr, size_t len)
     /* if the file name started with a quote, then scan for the end quote and
        stop there */
     q = strrchr(p, quote);
-    if (q)
+    if(q)
       *q = 0;
   }
   else
@@ -4389,7 +4389,7 @@ parse_filename(char *ptr, size_t len)
       *q  = 0;
   }
 
-  if (copy!=p)
+  if(copy!=p)
     memmove(copy, p, strlen(p)+1);
 
   return copy;
@@ -4404,7 +4404,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   const char* end = (char*)ptr + cb;
   size_t len;
 
-  if (cb > 20 && checkprefix("Content-disposition:", str)) {
+  if(cb > 20 && checkprefix("Content-disposition:", str)) {
     char *p = (char*)str + 20;
 
     /* look for the 'filename=' parameter
@@ -4413,14 +4413,14 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
       char *filename;
       char *semi;
 
-      while (*p && (p < end) && !ISALPHA(*p))
+      while(*p && (p < end) && !ISALPHA(*p))
         p++;
-      if (p > end-9)
+      if(p > end-9)
         break;
 
-      if (memcmp(p, "filename=", 9)) {
+      if(memcmp(p, "filename=", 9)) {
         /* no match, find next parameter */
-        while ((p < end) && (*p != ';'))
+        while((p < end) && (*p != ';'))
           p++;
         continue;
       }
@@ -4432,7 +4432,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
       */
       len = semi ? (semi - p) : (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
-      if (filename) {
+      if(filename) {
         outs->filename = filename;
         break;
       }
@@ -4501,8 +4501,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   /* Initialize curl library - do not call any libcurl functions before.
      Note that the CURLDEBUG magic above is an exception, but then that's not
      part of the official public API.
-   */
-  if (main_init() != CURLE_OK) {
+  */
+  if(main_init() != CURLE_OK) {
     helpf(config->errors, "error initializing curl library\n");
     return CURLE_FAILED_INIT;
   }
@@ -4557,13 +4557,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     parseconfig(NULL, config); /* ignore possible failure */
   }
 
-  if ((argc < 2)  && !config->url_list) {
+  if((argc < 2)  && !config->url_list) {
     helpf(config->errors, NULL);
     return CURLE_FAILED_INIT;
   }
 
   /* Parse options */
-  for (i = 1; i < argc; i++) {
+  for(i = 1; i < argc; i++) {
     if(stillflags &&
        ('-' == argv[i][0])) {
       char *nextarg;
@@ -4631,9 +4631,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
-  if (!config->cacert &&
-      !config->capath &&
-      !config->insecure_ok) {
+  if(!config->cacert &&
+     !config->capath &&
+     !config->insecure_ok) {
     env = curlx_getenv("CURL_CA_BUNDLE");
     if(env)
       GetStr(&config->cacert, env);
@@ -4656,8 +4656,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
   }
 
-  if (config->postfields) {
-    if (config->use_httpget) {
+  if(config->postfields) {
+    if(config->use_httpget) {
       /* Use the postfields data for a http get */
       httpgetfields = strdup(config->postfields);
       free(config->postfields);
@@ -4683,7 +4683,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     goto quit_curl;
   }
 
-  if (config->list_engines) {
+  if(config->list_engines) {
     struct curl_slist *engines = NULL;
 
     curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
@@ -4739,9 +4739,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     outs.bytes = 0; /* nothing written yet */
 
     /* save outfile pattern before expansion */
-    if (urlnode->outfile) {
+    if(urlnode->outfile) {
       outfiles = strdup(urlnode->outfile);
-      if (!outfiles) {
+      if(!outfiles) {
         clean_getout(config);
         break;
       }
@@ -4793,7 +4793,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
           i++) {
         /* NOTE: In the condition expression in the for() statement above, the
-           'url' variable is only ever strdup()ed if (i == 0) and thus never
+           'url' variable is only ever strdup()ed if(i == 0) and thus never
            when this loops later on. Further down in this function we call
            free(url) and then the code loops. Static code parsers may thus get
            tricked into believing that we have a potential access-after-free
@@ -4824,7 +4824,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             }
 #if defined(MSDOS) || defined(WIN32)
             /* For DOS and WIN32, we do some major replacing of
-             bad characters in the file name before using it */
+               bad characters in the file name before using it */
             outfile = sanitize_dos_name(outfile);
             if(!outfile) {
               res = CURLE_OUT_OF_MEMORY;
@@ -4877,7 +4877,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outs.init = config->resume_from;
             /* open file for output: */
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
-            if (!outs.stream) {
+            if(!outs.stream) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
               free(url);
               res = CURLE_WRITE_ERROR;
@@ -4918,7 +4918,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
 
           infd= open(uploadfile, O_RDONLY | O_BINARY);
-          if ((infd == -1) || fstat(infd, &fileinfo)) {
+          if((infd == -1) || fstat(infd, &fileinfo)) {
             helpf(config->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1)
               close(infd);
@@ -4973,8 +4973,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           SET_BINMODE(stdin);
           infd = STDIN_FILENO;
-          if (curlx_strequal(uploadfile, ".")) {
-            if (curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
+          if(curlx_strequal(uploadfile, ".")) {
+            if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
               warnf(config,
                     "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
           }
@@ -4989,13 +4989,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
              meter */
           config->noprogress = config->isatty = TRUE;
 
-        if (urlnum > 1 && !(config->mute)) {
+        if(urlnum > 1 && !(config->mute)) {
           fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
                   i+1, urlnum, url, outfile ? outfile : "<stdout>");
-          if (separator)
+          if(separator)
             printf("%s%s\n", CURLseparator, url);
         }
-        if (httpgetfields) {
+        if(httpgetfields) {
           char *urlbuffer;
           /* Find out whether the url contains a file name */
           const char *pc =strstr(url, "://");
@@ -5037,7 +5037,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             res = CURLE_OUT_OF_MEMORY;
             goto quit_urls;
           }
-          if (pc)
+          if(pc)
             sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
           else
             /* Append  / before the ? to create a well-formed url
@@ -5071,8 +5071,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         input.config = config;
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
-        if ((outfile && !curlx_strequal("-", outfile)) ||
-            !checkprefix("telnet:", url))
+        if((outfile && !curlx_strequal("-", outfile)) ||
+           !checkprefix("telnet:", url))
           my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
@@ -5105,9 +5105,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
         my_setopt(curl, CURLOPT_APPEND, config->ftp_append);
 
-        if (config->netrc_opt)
+        if(config->netrc_opt)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
-        else if (config->netrc)
+        else if(config->netrc)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
         else
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
@@ -5168,14 +5168,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* default to strict verifyhost */
         /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2); */
         if(config->cacert || config->capath) {
-          if (config->cacert)
+          if(config->cacert)
             my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
 
-          if (config->capath)
+          if(config->capath)
             my_setopt_str(curl, CURLOPT_CAPATH, config->capath);
           my_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         }
-        if (config->crlfile)
+        if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
         if(config->insecure_ok) {
           /* new stuff needed for libcurl 7.10 */
@@ -5286,17 +5286,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         res = CURLE_OK;
 
         /* new in curl ?? */
-        if (config->engine) {
+        if(config->engine) {
           res = my_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
           my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
         }
 
-        if (res != CURLE_OK)
-           goto show_error;
+        if(res != CURLE_OK)
+          goto show_error;
 
         /* new in curl 7.10 */
         my_setopt_str(curl, CURLOPT_ENCODING,
-                  (config->encoding) ? "" : NULL);
+                      (config->encoding) ? "" : NULL);
 
         /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
@@ -5315,7 +5315,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* new in curl 7.10.8 */
         if(config->max_filesize)
           my_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
-                           config->max_filesize);
+                    config->max_filesize);
 
         if(4 == config->ip_version)
           my_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -5338,7 +5338,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)
-            my_setopt(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
+          my_setopt(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
         /* new in curl 7.11.1, modified in 7.15.2 */
         if(config->socksproxy) {
@@ -5350,7 +5350,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* new in curl 7.19.4 */
         if(config->socks5_gssapi_service)
           my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
-                    config->socks5_gssapi_service);
+                        config->socks5_gssapi_service);
 
         /* new in curl 7.19.4 */
         if(config->socks5_gssapi_nec)
@@ -5372,12 +5372,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->localport) {
           my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
           my_setopt_str(curl, CURLOPT_LOCALPORTRANGE,
-                    config->localportrange);
+                        config->localportrange);
         }
 
         /* curl 7.15.5 */
         my_setopt_str(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER,
-                  config->ftp_alternative_to_user);
+                      config->ftp_alternative_to_user);
 
         /* curl 7.16.0 */
         if(config->disable_sessionid)
@@ -5391,7 +5391,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         /* curl 7.17.1 */
-        if (!config->nokeepalive) {
+        if(!config->nokeepalive) {
           my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockoptcallback);
           my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
         }
@@ -5414,13 +5414,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
 
-        if (config->proto_present)
+        if(config->proto_present)
           my_setopt(curl, CURLOPT_PROTOCOLS, config->proto);
-        if (config->proto_redir_present)
+        if(config->proto_redir_present)
           my_setopt(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
-        if ((urlnode->flags & GETOUT_USEREMOTE)
-            && config->content_disposition) {
+        if((urlnode->flags & GETOUT_USEREMOTE)
+           && config->content_disposition) {
           my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
           my_setopt(curl, CURLOPT_HEADERDATA, &outs);
         }
@@ -5431,7 +5431,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         for(;;) {
           res = curl_easy_perform(curl);
-          if (!curl_slist_append(easycode, "ret = curl_easy_perform(hnd);")) {
+          if(!curl_slist_append(easycode, "ret = curl_easy_perform(hnd);")) {
             res = CURLE_OUT_OF_MEMORY;
             break;
           }
@@ -5567,11 +5567,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->writeout)
           ourWriteOut(curl, config->writeout);
 #ifdef USE_ENVIRONMENT
-        if (config->writeenv)
+        if(config->writeenv)
           ourWriteEnv(curl);
 #endif
 
-show_error:
+        show_error:
 
 #ifdef __VMS
         if(is_vms_shell()) {
@@ -5588,20 +5588,20 @@ show_error:
                     errorbuffer[0]? errorbuffer:
                     curl_easy_strerror((CURLcode)res));
             if(CURLE_SSL_CACERT == res) {
-#define CURL_CA_CERT_ERRORMSG1 \
-"More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
-"curl performs SSL certificate verification by default, using a \"bundle\"\n" \
-" of Certificate Authority (CA) public keys (CA certs). If the default\n" \
-" bundle file isn't adequate, you can specify an alternate file\n" \
-" using the --cacert option.\n"
+#define CURL_CA_CERT_ERRORMSG1                                          \
+              "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
+                "curl performs SSL certificate verification by default, using a \"bundle\"\n" \
+                " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
+                " bundle file isn't adequate, you can specify an alternate file\n" \
+                " using the --cacert option.\n"
 
-#define CURL_CA_CERT_ERRORMSG2 \
-"If this HTTPS server uses a certificate signed by a CA represented in\n" \
-" the bundle, the certificate verification probably failed due to a\n" \
-" problem with the certificate (it might be expired, or the name might\n" \
-" not match the domain name in the URL).\n" \
-"If you'd like to turn off curl's verification of the certificate, use\n" \
-" the -k (or --insecure) option.\n"
+#define CURL_CA_CERT_ERRORMSG2                                          \
+              "If this HTTPS server uses a certificate signed by a CA represented in\n" \
+                " the bundle, the certificate verification probably failed due to a\n" \
+                " problem with the certificate (it might be expired, or the name might\n" \
+                " not match the domain name in the URL).\n"             \
+                "If you'd like to turn off curl's verification of the certificate, use\n" \
+                " the -k (or --insecure) option.\n"
 
               fprintf(config->errors, "%s%s",
                       CURL_CA_CERT_ERRORMSG1,
@@ -5610,7 +5610,7 @@ show_error:
           }
         }
 
-        if (outfile && !curlx_strequal(outfile, "-") && outs.stream) {
+        if(outfile && !curlx_strequal(outfile, "-") && outs.stream) {
           int rc = fclose(outs.stream);
           if(!res && rc) {
             /* something went wrong in the writing process */
@@ -5643,7 +5643,7 @@ show_error:
         SetComment( outs.filename, url);
 #endif
 
-quit_urls:
+        quit_urls:
         if(url)
           free(url);
 
@@ -5689,17 +5689,17 @@ quit_urls:
 
   } /* while-loop through all URLs */
 
-quit_curl:
-  if (httpgetfields)
+  quit_curl:
+  if(httpgetfields)
     free(httpgetfields);
 
-  if (config->engine)
+  if(config->engine)
     free(config->engine);
 
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
   config->easy = NULL; /* cleanup now */
-  if (easycode)
+  if(easycode)
     curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
 
   if(heads.stream && (heads.stream != stdout))
@@ -5739,7 +5739,7 @@ static void checkfds(void)
          fd[1] == STDIN_FILENO ||
          fd[1] == STDOUT_FILENO ||
          fd[1] == STDERR_FILENO )
-    if (pipe(fd) < 0)
+    if(pipe(fd) < 0)
       return;   /* Out of handles. This isn't really a big problem now, but
                    will be when we try to create a socket later. */
   close(fd[0]);
@@ -5762,13 +5762,13 @@ int main(int argc, char *argv[])
 
   res = operate(&config, argc, argv);
 #ifdef __SYMBIAN32__
-  if (config.showerror)
+  if(config.showerror)
     pressanykey();
 #endif
   free_config_fields(&config);
 
 #ifdef __NOVELL_LIBC__
-  if (getenv("_IN_NETWARE_BASH_") == NULL)
+  if(getenv("_IN_NETWARE_BASH_") == NULL)
     pressanykey();
 #endif
 #ifdef __VMS
@@ -5785,35 +5785,35 @@ int main(int argc, char *argv[])
  */
 static char *my_get_line(FILE *fp)
 {
-   char buf[4096];
-   char *nl = NULL;
-   char *retval = NULL;
+  char buf[4096];
+  char *nl = NULL;
+  char *retval = NULL;
 
-   do {
-     if (NULL == fgets(buf, sizeof(buf), fp))
-       break;
-     if (NULL == retval) {
-       retval = strdup(buf);
-       if(!retval)
-         return NULL;
-     }
-     else {
-       char *ptr;
-       ptr = realloc(retval, strlen(retval) + strlen(buf) + 1);
-       if (NULL == ptr) {
-         free(retval);
-         return NULL;
-       }
-       retval = ptr;
-       strcat(retval, buf);
-     }
-   }
-   while (NULL == (nl = strchr(retval, '\n')));
+  do {
+    if(NULL == fgets(buf, sizeof(buf), fp))
+      break;
+    if(NULL == retval) {
+      retval = strdup(buf);
+      if(!retval)
+        return NULL;
+    }
+    else {
+      char *ptr;
+      ptr = realloc(retval, strlen(retval) + strlen(buf) + 1);
+      if(NULL == ptr) {
+        free(retval);
+        return NULL;
+      }
+      retval = ptr;
+      strcat(retval, buf);
+    }
+  }
+  while(NULL == (nl = strchr(retval, '\n')));
 
-   if (NULL != nl)
-     *nl = '\0';
+  if(NULL != nl)
+    *nl = '\0';
 
-   return retval;
+  return retval;
 }
 
 static void show_dir_errno(FILE *errors, const char *name)
@@ -5878,23 +5878,23 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
 
   tempdir = strtok(outdup, DIR_CHAR);
 
-  while (tempdir != NULL) {
+  while(tempdir != NULL) {
     tempdir2 = strtok(NULL, DIR_CHAR);
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
-    if (tempdir2 != NULL) {
+    if(tempdir2 != NULL) {
       size_t dlen = strlen(dirbuildup);
-      if (dlen)
+      if(dlen)
         sprintf(&dirbuildup[dlen], "%s%s", DIR_CHAR, tempdir);
       else {
-        if (0 != strncmp(outdup, DIR_CHAR, 1))
+        if(0 != strncmp(outdup, DIR_CHAR, 1))
           strcpy(dirbuildup, tempdir);
         else
           sprintf(dirbuildup, "%s%s", DIR_CHAR, tempdir);
       }
-      if (access(dirbuildup, F_OK) == -1) {
+      if(access(dirbuildup, F_OK) == -1) {
         result = mkdir(dirbuildup,(mode_t)0000750);
-        if (-1 == result) {
+        if(-1 == result) {
           show_dir_errno(errors, dirbuildup);
           break; /* get out of loop */
         }
@@ -5945,7 +5945,7 @@ msdosify (const char *file_name)
 {
   static char dos_name[PATH_MAX];
   static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
-                                       "|<>\\\":?*"; /* illegal in DOS & W95 */
+    "|<>\\\":?*"; /* illegal in DOS & W95 */
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
@@ -5955,36 +5955,36 @@ msdosify (const char *file_name)
   size_t len = sizeof (illegal_chars_dos) - 1;
 
   /* Support for Windows 9X VFAT systems, when available. */
-  if (_use_lfn (file_name)) {
+  if(_use_lfn (file_name)) {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }
 
   /* Get past the drive letter, if any. */
-  if (s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
+  if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
     *d++ = *s++;
     *d++ = *s++;
   }
 
-  for (idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
-    if (memchr (illegal_aliens, *s, len)) {
+  for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
+    if(memchr (illegal_aliens, *s, len)) {
       /* Dots are special: DOS doesn't allow them as the leading character,
          and a file name cannot have more than a single dot.  We leave the
          first non-leading dot alone, unless it comes too close to the
          beginning of the name: we want sh.lex.c to become sh_lex.c, not
          sh.lex-c.  */
-      if (*s == '.') {
-        if (idx == 0 && (s[1] == '/' || (s[1] == '.' && s[2] == '/'))) {
+      if(*s == '.') {
+        if(idx == 0 && (s[1] == '/' || (s[1] == '.' && s[2] == '/'))) {
           /* Copy "./" and "../" verbatim.  */
           *d++ = *s++;
-          if (*s == '.')
+          if(*s == '.')
             *d++ = *s++;
           *d = *s;
         }
-        else if (idx == 0)
+        else if(idx == 0)
           *d = '_';
-        else if (dot_idx >= 0) {
-          if (dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
+        else if(dot_idx >= 0) {
+          if(dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
             d[dot_idx - idx] = '_'; /* replace previous dot */
             *d = '.';
           }
@@ -5994,11 +5994,11 @@ msdosify (const char *file_name)
         else
           *d = '.';
 
-        if (*s == '.')
+        if(*s == '.')
           dot_idx = idx;
       }
-      else if (*s == '+' && s[1] == '+') {
-        if (idx - 2 == dot_idx) { /* .c++, .h++ etc. */
+      else if(*s == '+' && s[1] == '+') {
+        if(idx - 2 == dot_idx) { /* .c++, .h++ etc. */
           *d++ = 'x';
           *d   = 'x';
         }
@@ -6015,7 +6015,7 @@ msdosify (const char *file_name)
     }
     else
       *d = *s;
-    if (*s == '/') {
+    if(*s == '/') {
       idx = 0;
       dot_idx = -1;
     }
@@ -6040,10 +6040,10 @@ rename_if_dos_device_name (char *file_name)
   strncpy(fname, file_name, PATH_MAX-1);
   fname[PATH_MAX-1] = 0;
   base = basename(fname);
-  if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
+  if(((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen (base);
 
-    if (strlen(fname) >= PATH_MAX-1) {
+    if(strlen(fname) >= PATH_MAX-1) {
       /* Make room for the '_' */
       blen--;
       base[blen] = 0;
