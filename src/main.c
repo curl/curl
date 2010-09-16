@@ -4368,6 +4368,18 @@ parse_filename(char *ptr, size_t len)
     }
   }
 
+  /* If the filename contains a backslash, only use filename portion. The idea
+     is that even systems that don't handle backslashes as path separators
+     probably want the path removed for convenience. */
+  q = strrchr(p, '\\');
+  if (q) {
+    p = q+1;
+    if (!*p) {
+      free(copy);
+      return NULL;
+    }
+  }
+
   if(quote) {
     /* if the file name started with a quote, then scan for the end quote and
        stop there */
