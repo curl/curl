@@ -174,6 +174,9 @@ long Curl_timeleft(struct connectdata *conn,
 
   /* substract elapsed time */
   timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+  if(!timeout_ms)
+    /* avoid returning 0 as that means no timeout! */
+    return -1;
 
   return timeout_ms;
 }
