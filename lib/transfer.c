@@ -103,6 +103,7 @@
 #include "multiif.h"
 #include "easyif.h" /* for Curl_convert_to_network prototype */
 #include "rtsp.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1063,17 +1064,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     return result;
 
   if(k->keepon) {
-    if(data->set.timeout &&
-       (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
+    if(0 > Curl_timeleft(conn, &k->now, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %ld milliseconds with %"
               FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-              Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
+              Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount,
+              k->size);
       }
       else {
         failf(data, "Operation timed out after %ld milliseconds with %"
               FORMAT_OFF_T " bytes received",
-              Curl_tvdiff(k->now, k->start), k->bytecount);
+              Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount);
       }
       return CURLE_OPERATION_TIMEDOUT;
     }
@@ -1346,12 +1347,10 @@ Transfer(struct connectdata *conn)
          to work with, skip the timeout */
       timeout_ms = 0;
     else {
-      if(data->set.timeout) {
-        totmp = (int)(data->set.timeout - Curl_tvdiff(k->now, k->start));
-        if(totmp < 0)
-          return CURLE_OPERATION_TIMEDOUT;
-      }
-      else
+      totmp = Curl_timeleft(conn, &k->now, FALSE);
+      if(totmp < 0)
+        return CURLE_OPERATION_TIMEDOUT;
+      else if(!totmp)
         totmp = 1000;
 
       if (totmp < timeout_ms)
