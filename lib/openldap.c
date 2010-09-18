@@ -165,7 +165,7 @@ static CURLcode ldap_setup(struct connectdata *conn)
   li = calloc(1, sizeof(ldapconninfo));
   li->proto = proto;
   conn->proto.generic = li;
-  conn->bits.close = bool_false;
+  conn->bits.close = FALSE;
   /* TODO:
    * - provide option to choose SASL Binds instead of Simple
    */
