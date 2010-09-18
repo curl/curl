@@ -178,7 +178,6 @@ static Sockbuf_IO ldapsb_tls;
 
 static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 {
-  CURLcode result;
   ldapconninfo *li = conn->proto.generic;
   struct SessionHandle *data=conn->data;
   int rc, proto = LDAP_VERSION3;
@@ -205,6 +204,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
     /* for LDAP over HTTP proxy */
     struct HTTP http_proxy;
     ldapconninfo *li_save;
+    CURLcode result;
 
     /* BLOCKING */
     /* We want "seamless" LDAP operations through HTTP proxy tunnel */
