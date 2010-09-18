@@ -26,6 +26,17 @@ This release includes the following bugfixes:
  o Added SSPI build to Watcom makefile
  o progress: callback for POSTs less than MAX_INITIAL_POST_SIZE
  o linking problem on Fedora 13
+ o Link curl and the test apps with -lrt explicitly when necessary
+ o chunky parser: only rewind stream internally if needed
+ o remote-header-name: don't output filename when NULL
+ o Curl_timeleft: avoid returning "no timeout" by mistake
+ o timeout: use the correct start value as offset
+ o FTP: fix wrong timeout trigger
+ o buildconf got better output on failures
+ o rtsp: avoid SIGSEGV on malformed header
+ o LDAP: Support for tunnelling queries through HTTP proxy
+ o configure's --enable-werror had a bashism
+ o test565: Don't hardcode IP:PORT
 
 This release includes the following known bugs:
 
@@ -35,6 +46,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Kamil Dudka, Ben Greear, Cameron Kaiser, Dan Fandrich, Dirk Manske,
- Guenter Knauf, Julien Chaffraix, Kamil Dudka, Quanah Gibson-Mount
+ Guenter Knauf, Julien Chaffraix, Kamil Dudka, Quanah Gibson-Mount,
+ Tor Arntsen, Peter Pentchev, James Bursa, Fabian Keil
 
         Thanks! (and sorry if I forgot to mention someone)
