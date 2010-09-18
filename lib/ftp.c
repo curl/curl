@@ -324,7 +324,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   for(;;) {
     timeout_ms = Curl_timeleft(conn, NULL, TRUE);
 
-    if(timeout_ms <= 0) {
+    if(timeout_ms < 0) {
       /* if a timeout was already reached, bail out */
       failf(data, "Timeout while waiting for server connect");
       return CURLE_OPERATION_TIMEDOUT;
