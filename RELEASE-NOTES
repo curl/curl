@@ -37,6 +37,8 @@ This release includes the following bugfixes:
  o LDAP: Support for tunnelling queries through HTTP proxy
  o configure's --enable-werror had a bashism
  o test565: Don't hardcode IP:PORT
+ o configure: check for gcrypt if using GnuTLS
+ o configure: don't enable RTMP if the lib detect fails
 
 This release includes the following known bugs:
 
@@ -46,7 +48,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Kamil Dudka, Ben Greear, Cameron Kaiser, Dan Fandrich, Dirk Manske,
- Guenter Knauf, Julien Chaffraix, Kamil Dudka, Quanah Gibson-Mount,
- Tor Arntsen, Peter Pentchev, James Bursa, Fabian Keil
+ Guenter Knauf, Julien Chaffraix, Quanah Gibson-Mount, Tor Arntsen,
+ Peter Pentchev, James Bursa, Fabian Keil, Michal Gorny
 
         Thanks! (and sorry if I forgot to mention someone)
