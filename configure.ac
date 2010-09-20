@@ -2065,6 +2065,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
     ;;
   off)
     dnl no --with-librtmp option given, just check default places
+    LIB_RTMP="-lrtmp"
     ;;
   *)
     dnl use the given --with-librtmp spot
@@ -2083,13 +2084,19 @@ if test X"$OPT_LIBRTMP" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_RTMP"
   LIBS="$LIBS $LIB_RTMP"
 
-  AC_CHECK_LIB(rtmp, RTMP_Init)
-
-  AC_CHECK_HEADERS(librtmp/rtmp.h,
-    curl_rtmp_msg="enabled (librtmp)"
-    LIBRTMP_ENABLED=1
-    AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-    AC_SUBST(USE_LIBRTMP, [1])
+  AC_CHECK_LIB(rtmp, RTMP_Init,
+    [
+     AC_CHECK_HEADERS(librtmp/rtmp.h,
+        curl_rtmp_msg="enabled (librtmp)"
+        LIBRTMP_ENABLED=1
+        AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
+        AC_SUBST(USE_LIBRTMP, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
   )
 
   if test X"$OPT_LIBRTMP" != Xoff &&
@@ -2097,12 +2104,6 @@ if test X"$OPT_LIBRTMP" != Xno; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi
 
-  if test "$LIBRTMP_ENABLED" != "1"; then
-    dnl no librtmp, revert back to clean variables
-    LDFLAGS=$CLEANLDFLAGS
-    CPPFLAGS=$CLEANCPPFLAGS
-    LIBS=$CLEANLIBS
-  fi
 fi
 
 dnl **********************************************************************
