@@ -1734,6 +1734,20 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1
 
+dnl ---
+dnl If GnuTLS is enabled, we MUST verify that it uses libgcrypt since
+dnl curl code relies on that but recent GnuTLS versions can in fact build
+dnl with different crypto libraries which curl right now cannot handle
+dnl ---
+
+if test "$GNUTLS_ENABLED" = "1"; then
+  AC_CHECK_LIB(gcrypt,
+               gcry_control, ,
+    [
+      AC_MSG_ERROR([need GnuTLS built with gcrypt to function with GnuTLS])
+    ])
+fi
+
 dnl ----------------------------------------------------
 dnl check for PolarSSL
 dnl ----------------------------------------------------
