@@ -60,6 +60,7 @@
  8.1 SSL engine stuff
  8.2 SRP
  8.3 check connection
+ 8.4 non-gcrypt
 
  9. Other protocols
 
@@ -349,6 +350,17 @@ to provide the data to send.
 
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
+
+8.4 non-gcrypt
+
+ libcurl assumes that there are gcrypt functions available when
+ GnuTLS is.
+
+ GnuTLS can be built to use libnettle instead as crypto library,
+ which breaks the previously mentioned assumption
+
+ The correct fix would be to detect which crypto layer that is in use and
+ adapt our code to use that instead of blindly assuming gcrypt.
 
 9. Other protocols
 
