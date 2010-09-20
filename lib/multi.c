@@ -985,6 +985,19 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(timeout_ms < 0) {
         /* Handle timed out */
+        if(easy->state == CURLM_STATE_WAITRESOLVE)
+          failf(data, "Resolving timed out after %ld milliseconds",
+                Curl_tvdiff(now, data->progress.t_startsingle));
+        else if(easy->state == CURLM_STATE_WAITCONNECT)
+          failf(data, "Connection timed out after %ld milliseconds",
+                Curl_tvdiff(now, data->progress.t_startsingle));
+        else {
+          k = &data->req;
+          failf(data, "Operation timed out after %ld milliseconds with %"
+                FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
+                Curl_tvdiff(now, data->progress.t_startsingle), k->bytecount,
+                k->size);
+        }
         easy->result = CURLE_OPERATION_TIMEDOUT;
         multistate(easy, CURLM_STATE_COMPLETED);
         break;
