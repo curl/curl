@@ -12,6 +12,7 @@ This release includes the following changes:
  o curl -T: ignore file size of special files
  o Added GOPHER protocol support
  o Added mk-ca-bundle.vbs script
+ o c-ares build now requires c-ares >= 1.6.0
 
 This release includes the following bugfixes:
 
@@ -41,6 +42,7 @@ This release includes the following bugfixes:
  o configure: don't enable RTMP if the lib detect fails
  o curl_easy_duphandle: clone the c-ares handle correctly
  o MacOSX-Framework: updates for Snowleopard
+ o support URL containing colon without trailing port number
 
 This release includes the following known bugs:
 
