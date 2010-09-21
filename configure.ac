@@ -416,7 +416,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi
        ;;
   esac ],[
@@ -428,7 +427,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi ]
 )
 
@@ -890,6 +888,10 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
       AC_SUBST(USE_OPENLDAP, [1])
     fi
   fi
+fi
+
+if test x$CURL_DISABLE_LDAPS != x1 ; then
+    curl_ldaps_msg="enabled"
 fi
 
 dnl **********************************************************************
