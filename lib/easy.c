@@ -700,8 +700,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
     }
 
 #ifdef USE_ARES
-    /* If we use ares, we setup a new ares channel for the new handle */
-    if(ARES_SUCCESS != ares_init(&outcurl->state.areschannel))
+    /* If we use ares, we clone the ares channel for the new handle */
+    if(ARES_SUCCESS != ares_dup(&outcurl->state.areschannel,
+                                data->state.areschannel))
       break;
 #endif
 
