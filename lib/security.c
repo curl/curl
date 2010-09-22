@@ -143,8 +143,8 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   return ftp_code;
 }
 
-/* Read |len| from the socket |fd| and store it in |to|. Return a
-   CURLcode saying whether an error occured or CURLE_OK if |len| was read. */
+/* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
+   saying whether an error occured or CURLE_OK if |len| was read. */
 static CURLcode
 socket_read(curl_socket_t fd, void *to, size_t len)
 {
@@ -170,9 +170,11 @@ socket_read(curl_socket_t fd, void *to, size_t len)
 
 
 /* Write |len| bytes from the buffer |to| to the socket |fd|. Return a
-   CURLcode saying whether an error occured or CURLE_OK if |len| was written. */
+   CURLcode saying whether an error occured or CURLE_OK if |len| was
+   written. */
 static CURLcode
-socket_write(struct connectdata *conn, curl_socket_t fd, const void *to, size_t len)
+socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
+             size_t len)
 {
   const char *to_p = to;
   CURLcode code;
@@ -214,8 +216,8 @@ static CURLcode read_data(struct connectdata *conn,
   ret = socket_read(fd, buf->data, len);
   if (ret != CURLE_OK)
     return ret;
-  buf->size = (conn->mech->decode)(conn->app_data, buf->data, len,
-                                   conn->data_prot, conn);
+  buf->size = conn->mech->decode(conn->app_data, buf->data, len,
+                                 conn->data_prot, conn);
   buf->index = 0;
   return CURLE_OK;
 }
@@ -288,8 +290,8 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
     else
       prot_level = conn->command_prot;
   }
-  bytes = (conn->mech->encode)(conn->app_data, from, length, prot_level,
-                               (void**)&buffer, conn);
+  bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
+                             (void**)&buffer, conn);
   if(iscmd) {
     bytes = Curl_base64_encode(conn->data, buffer, bytes, &cmd_buffer);
     if(bytes > 0) {
@@ -322,7 +324,7 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
   ssize_t len = conn->buffer_size;
   int tx = 0;
 
-  len -= (conn->mech->overhead)(conn->app_data, conn->data_prot, len);
+  len -= conn->mech->overhead(conn->app_data, conn->data_prot, len);
   if(len <= 0)
     len = length;
   while(length) {
@@ -373,8 +375,8 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer, int level)
     return -1;
   }
 
-  decoded_len = (conn->mech->decode)(conn->app_data, buf, decoded_len,
-                                     level, conn);
+  decoded_len = conn->mech->decode(conn->app_data, buf, decoded_len,
+                                   level, conn);
   if(decoded_len <= 0) {
     free(buf);
     return -1;
@@ -535,7 +537,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     }
 
     /* Authenticate */
-    ret = ((*mech)->auth)(conn->app_data, conn);
+    ret = (*mech)->auth(conn->app_data, conn);
 
     if(ret == AUTH_CONTINUE)
       continue;
@@ -576,9 +578,7 @@ Curl_sec_end(struct connectdata *conn)
 {
   if(conn->mech != NULL) {
     if(conn->mech->end)
-      (conn->mech->end)(conn->app_data);
-    /* FIXME: Why do we zero'd it before free'ing it? */
-    memset(conn->app_data, 0, conn->mech->size);
+      conn->mech->end(conn->app_data);
     free(conn->app_data);
     conn->app_data = NULL;
   }
