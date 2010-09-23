@@ -223,13 +223,11 @@ static CURLcode read_data(struct connectdata *conn,
 }
 
 static size_t
-buffer_read(struct krb4buffer *buf, const char *data, size_t len)
+buffer_read(struct krb4buffer *buf, void *data, size_t len)
 {
-  size_t buf_capacity = buf->size - buf->index;
-  DEBUGASSERT(buf->size > buf->index);
-  if(buf_capacity < len)
-    len = buf_capacity;
-  memcpy(buf, data, len);
+  if(buf->size - buf->index < len)
+    len = buf->size - buf->index;
+  memcpy(data, (char*)buf->data + buf->index, len);
   buf->index += len;
   return len;
 }
