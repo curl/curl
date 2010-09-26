@@ -128,9 +128,13 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   int ftp_code;
   ssize_t nread;
   va_list args;
+  char print_buffer[50];
 
   va_start(args, message);
-  if(Curl_ftpsendf(conn, message, args) != CURLE_OK) {
+  vsnprintf(print_buffer, sizeof(print_buffer), message, args);
+  va_end(args);
+
+  if(Curl_ftpsendf(conn, print_buffer) != CURLE_OK) {
     ftp_code = -1;
   }
   else {
@@ -139,7 +143,6 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   }
 
   (void)nread; /* Unused */
-  va_end(args);
   return ftp_code;
 }
 
