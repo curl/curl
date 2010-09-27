@@ -305,7 +305,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
 
       socket_write(conn, fd, cmd_buffer, bytes);
       socket_write(conn, fd, "\r\n", 2);
-      infof(conn->data, "Send: %s%s", prot_level == prot_private?enc:mic,
+      infof(conn->data, "Send: %s%s\n", prot_level == prot_private?enc:mic,
             cmd_buffer);
       free(cmd_buffer);
     }
@@ -423,7 +423,7 @@ int Curl_sec_set_protection_level(struct connectdata *conn)
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
-                      "completion of the data exchange.");
+                      "completion of the data exchange.\n");
     return -1;
   }
 
@@ -492,7 +492,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     /* We have no mechanism with a NULL name but keep this check */
     DEBUGASSERT(mech_name != NULL);
     if(mech_name == NULL) {
-      infof(data, "Skipping mechanism with empty name (%p)", mech);
+      infof(data, "Skipping mechanism with empty name (%p)\n", mech);
       continue;
     }
     tmp_allocation = realloc(conn->app_data, (*mech)->size);
@@ -506,12 +506,12 @@ static CURLcode choose_mech(struct connectdata *conn)
     if((*mech)->init) {
       ret = (*mech)->init(conn);
       if(ret != 0) {
-        infof(data, "Failed initialization for %s. Skipping it.", mech_name);
+        infof(data, "Failed initialization for %s. Skipping it.\n", mech_name);
         continue;
       }
     }
 
-    infof(data, "Trying mechanism %s...", mech_name);
+    infof(data, "Trying mechanism %s...\n", mech_name);
     ret = ftp_send_command(conn, "AUTH %s", mech_name);
     if(ret < 0)
       /* FIXME: This error is too generic but it is OK for now. */
@@ -521,15 +521,15 @@ static CURLcode choose_mech(struct connectdata *conn)
       switch(ret) {
       case 504:
         infof(data, "Mechanism %s is not supported by the server (server "
-                    "returned ftp code: 504).", mech_name);
+                    "returned ftp code: 504).\n", mech_name);
         break;
       case 534:
         infof(data, "Mechanism %s was rejected by the server (server returned "
-                    "ftp code: 534).", mech_name);
+                    "ftp code: 534).\n", mech_name);
         break;
       default:
         if(ret/100 == 5) {
-          infof(data, "The server does not support the security extensions.");
+          infof(data, "The server does not support the security extensions.\n");
           return CURLE_USE_SSL_FAILED;
         }
         break;
