@@ -371,6 +371,12 @@ int Curl_parsedate(const char *date, time_t *output)
         /* time stamp! */
         date += 8;
       }
+      else if((secnum == -1) &&
+              (2 == sscanf(date, "%02d:%02d", &hournum, &minnum))) {
+        /* time stamp without seconds */
+        date += 5;
+        secnum = 0;
+      }
       else {
         val = (int)strtol(date, &end, 10);
 

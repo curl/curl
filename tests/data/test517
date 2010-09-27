@@ -103,6 +103,7 @@ nothing
 74: Thu, 999999999999-Aug-2007 20:49:07 GMT => -1
 75: Thu, 12-Aug-2007 20:61:99999999999 GMT => -1
 76: IAintNoDateFool => -1
+77: Thu Apr 18 22:50 2007 GMT => 1176936600
 </stdout>
 
 # This test case previously testes an overflow case ("2094 Nov 6 =>
