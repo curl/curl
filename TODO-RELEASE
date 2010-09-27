@@ -1,4 +1,20 @@
 To be addressed in 7.XX.X
 =========================
 
-261 - 
+261 -  configure and libidn
+
+262 - Manual setting of TLS Server Name Indication
+
+263 - Support binding DNS to local interface/IP
+
+264 - libcurl + libevent2: Stalling
+
+265 - 1. FTP cmd channel and data channel validation
+
+266 - Bug in ftp_nextconnect? version: libcurl 7.21.1
+
+267 - 2. Cert chain for data channel
+
+268 - 3076430 SFTP resume with 4GB file does not work
+
+269 -
