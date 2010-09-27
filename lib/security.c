@@ -432,7 +432,7 @@ int Curl_sec_set_protection_level(struct connectdata *conn)
     return 0;
 
   if(level) {
-    code = ftp_send_command(conn, "PSBZ %u", buffer_size);
+    code = ftp_send_command(conn, "PBSZ %u", buffer_size);
     if(code < 0)
       return -1;
 
