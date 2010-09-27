@@ -245,6 +245,10 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
 
   *err = CURLE_OK;
 
+  /* Handle clear text response. */
+  if(conn->sec_complete == 0 || conn->data_prot == prot_clear)
+      return read(fd, buffer, len);
+
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
     return 0;
@@ -550,12 +554,10 @@ static CURLcode choose_mech(struct connectdata *conn)
 
     conn->mech = *mech;
     conn->sec_complete = 1;
-    if (conn->data_prot != prot_clear) {
-      conn->recv[FIRSTSOCKET] = sec_recv;
-      conn->send[FIRSTSOCKET] = sec_send;
-      conn->recv[SECONDARYSOCKET] = sec_recv;
-      conn->send[SECONDARYSOCKET] = sec_send;
-    }
+    conn->recv[FIRSTSOCKET] = sec_recv;
+    conn->send[FIRSTSOCKET] = sec_send;
+    conn->recv[SECONDARYSOCKET] = sec_recv;
+    conn->send[SECONDARYSOCKET] = sec_send;
     conn->command_prot = prot_safe;
     /* Set the requested protection level */
     /* BLOCKING */
