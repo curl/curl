@@ -3076,10 +3076,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   /* free the dir tree and file parts */
   freedirs(ftpc);
 
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-  Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
-#endif
-
   /* shut down the socket to inform the server we're done */
 
 #ifdef _WIN32_WCE

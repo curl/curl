@@ -345,17 +345,6 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
   return tx;
 }
 
-/* FIXME: fd should be a curl_socket_t */
-int Curl_sec_fflush_fd(struct connectdata *conn, int fd)
-{
-  if(conn->data_prot == prot_clear)
-    return 0;
-
-  /* Force a flush by trying to send no data */
-  do_sec_send(conn, fd, NULL, 0);
-  return 0;
-}
-
 /* Matches Curl_send signature */
 static ssize_t sec_send(struct connectdata *conn, int sockindex,
                         const void *buffer, size_t len, CURLcode *err)

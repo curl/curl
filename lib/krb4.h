@@ -47,7 +47,6 @@ extern struct Curl_sec_client_mech Curl_krb5_client_mech;
 #endif
 
 CURLcode Curl_krb_kauth(struct connectdata *conn);
-int Curl_sec_fflush_fd(struct connectdata *conn, int fd);
 int Curl_sec_fprintf (struct connectdata *, FILE *, const char *, ...);
 int Curl_sec_getc (struct connectdata *conn, FILE *);
 int Curl_sec_putc (struct connectdata *conn, int, FILE *);
