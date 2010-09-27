@@ -566,11 +566,10 @@ static CURLcode choose_mech(struct connectdata *conn)
   return mech != NULL ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-int
+CURLcode
 Curl_sec_login(struct connectdata *conn)
 {
-  CURLcode code = choose_mech(conn);
-  return code == CURLE_OK;
+  return choose_mech(conn);
 }
 
 
