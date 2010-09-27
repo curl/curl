@@ -1,0 +1,80 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Range
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Date: Thu, 09 Sep 2010 14:49:00 GMT
+Accept-Ranges: bytes
+Content-Length: 6
+
+Error
+</data>
+
+<data1>
+HTTP/1.1 206 Partial Content
+Date: Thu, 09 Sep 2010 14:49:01 GMT
+Accept-Ranges: bytes
+Content-Range: bytes 10-18/155
+Content-Length: 13
+Content-Type: text/plain
+
+partial body
+</data1>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with invalid range then another URL
+ </name>
+ <command>
+-r 10-22 http://%HOSTIP:%HTTPPORT/want/1204 http://%HOSTIP:%HTTPPORT/wantmore/12040001
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+HTTP/1.1 416 Requested Range Not Satisfiable
+Date: Thu, 09 Sep 2010 14:49:00 GMT
+Accept-Ranges: bytes
+Content-Length: 6
+
+HTTP/1.1 206 Partial Content
+Date: Thu, 09 Sep 2010 14:49:01 GMT
+Accept-Ranges: bytes
+Content-Range: bytes 10-18/155
+Content-Length: 13
+Content-Type: text/plain
+
+partial body
+</stdout>
+
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/1204 HTTP/1.1
+Range: bytes=10-22
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /wantmore/12040001 HTTP/1.1
+Range: bytes=10-22
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
