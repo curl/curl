@@ -216,6 +216,7 @@ static CURLcode read_data(struct connectdata *conn,
   if (tmp == NULL)
     return CURLE_OUT_OF_MEMORY;
 
+  buf->data = tmp;
   ret = socket_read(fd, buf->data, len);
   if (ret != CURLE_OK)
     return ret;
@@ -567,11 +568,19 @@ Curl_sec_login(struct connectdata *conn)
 void
 Curl_sec_end(struct connectdata *conn)
 {
-  if(conn->mech != NULL) {
-    if(conn->mech->end)
-      conn->mech->end(conn->app_data);
+  if(conn->mech != NULL && conn->mech->end)
+    conn->mech->end(conn->app_data);
+  if(conn->app_data) {
     free(conn->app_data);
     conn->app_data = NULL;
+  }
+  if(conn->in_buffer.data) {
+    free(conn->in_buffer.data);
+    conn->in_buffer.data = NULL;
+    conn->in_buffer.size = 0;
+    conn->in_buffer.index = 0;
+    /* FIXME: Is this really needed? */
+    conn->in_buffer.eof_flag = 0;
   }
   conn->sec_complete = 0;
   conn->data_prot = (enum protection_level)0;

@@ -218,8 +218,8 @@ krb5_auth(void *app_data, struct connectdata *conn)
       continue;
     }
     {
-      gss_OID t;
-      gss_display_name(&min, gssname, &gssbuf, &t);
+      /* We pass NULL as |output_name_type| to avoid a leak. */
+      gss_display_name(&min, gssname, &gssbuf, NULL);
       Curl_infof(data, "Trying against %s\n", gssbuf.value);
       gss_release_buffer(&min, &gssbuf);
     }
