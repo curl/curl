@@ -39,7 +39,7 @@ a few bytes
 ^User-Agent:.*
 </strip>
 <protocol>
-PUT /we/want/58te%5B%5Dst%2Etxt HTTP/1.1
+PUT /we/want/58te%5B%5Dst.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 12

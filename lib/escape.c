@@ -43,8 +43,10 @@
 #include "memdebug.h"
 
 /* Portable character check (remember EBCDIC). Do not use isalnum() because
-its behavior is altered by the current locale. */
-static bool Curl_isalnum(unsigned char in)
+   its behavior is altered by the current locale.
+   See http://tools.ietf.org/html/rfc3986#section-2.3
+*/
+static bool Curl_isunreserved(unsigned char in)
 {
   switch (in) {
     case '0': case '1': case '2': case '3': case '4':
@@ -59,6 +61,7 @@ static bool Curl_isalnum(unsigned char in)
     case 'K': case 'L': case 'M': case 'N': case 'O':
     case 'P': case 'Q': case 'R': case 'S': case 'T':
     case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
+    case '-': case '.': case '_': case '~':
       return TRUE;
     default:
       break;
@@ -100,7 +103,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   while(length--) {
     in = *string;
 
-    if (Curl_isalnum(in)) {
+    if (Curl_isunreserved(in)) {
       /* just copy this */
       ns[strindex++]=in;
     }
