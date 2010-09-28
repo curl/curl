@@ -1,13 +1,9 @@
-To be addressed in 7.XX.X
+To be addressed in 7.21.2
 =========================
 
 261 -  configure and libidn
 
 262 - Manual setting of TLS Server Name Indication
-
-263 - Support binding DNS to local interface/IP
-
-264 - libcurl + libevent2: Stalling
 
 265 - 1. FTP cmd channel and data channel validation
 
@@ -17,4 +13,14 @@ To be addressed in 7.XX.X
 
 268 - 3076430 SFTP resume with 4GB file does not work
 
-269 -
+269 - 3076808 Requests fail silently following a 416 error
+
+271 -
+
+To be addressed in 7.21.3
+=========================
+
+263 - Support binding DNS to local interface/IP
+
+270 - 3077599 Add curl_easy_setoptv
+
