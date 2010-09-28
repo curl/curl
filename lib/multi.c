@@ -1594,6 +1594,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* Important: reset the conn pointer so that we don't point to memory
          that could be freed anytime */
       easy->easy_conn = NULL;
+
+      Curl_expire(data, 0); /* stop all timers */
       break;
 
     case CURLM_STATE_MSGSENT:

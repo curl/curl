@@ -481,6 +481,8 @@ CURLcode Curl_close(struct SessionHandle *data)
   }
 #endif
 
+  Curl_expire(data, 0); /* shut off timers */
+
   if(m)
     /* This handle is still part of a multi handle, take care of this first
        and detach this handle from there. */
@@ -2579,7 +2581,6 @@ CURLcode Curl_disconnect(struct connectdata *conn)
                   NULL, Curl_scan_cache_used);
 #endif
 
-  Curl_expire(data, 0); /* shut off timers */
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
   {
@@ -5130,8 +5131,6 @@ CURLcode Curl_done(struct connectdata **connp,
 
   conn = *connp;
   data = conn->data;
-
-  Curl_expire(data, 0); /* stop timer */
 
   if(conn->bits.done)
     /* Stop if Curl_done() has already been called */
