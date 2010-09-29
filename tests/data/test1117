@@ -39,7 +39,7 @@ http
 HTTP with invalid range then another URL
  </name>
  <command>
--r 10-22 http://%HOSTIP:%HTTPPORT/want/1204 http://%HOSTIP:%HTTPPORT/wantmore/12040001
+-r 10-22 http://%HOSTIP:%HTTPPORT/want/1117 http://%HOSTIP:%HTTPPORT/wantmore/11170001
 </command>
 </client>
 
@@ -65,12 +65,12 @@ partial body
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /want/1204 HTTP/1.1
+GET /want/1117 HTTP/1.1
 Range: bytes=10-22
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /wantmore/12040001 HTTP/1.1
+GET /wantmore/11170001 HTTP/1.1
 Range: bytes=10-22
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
