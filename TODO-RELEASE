@@ -21,6 +21,3 @@ To be addressed in 7.21.3
 =========================
 
 263 - Support binding DNS to local interface/IP
-
-270 - 3077599 Add curl_easy_setoptv
-
