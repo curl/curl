@@ -1911,9 +1911,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         data->req.maxdownload = -1;
       }
       else {
-        curl_off_t size;
+        curl_off_t size = attrs.filesize;
 
-        size = attrs.filesize;
+        if(size < 0) {
+          failf(data, "Bad file size (%" FORMAT_OFF_T ")", size);
+          return CURLE_BAD_DOWNLOAD_RESUME;
+        }
         if(conn->data->state.use_range) {
           curl_off_t from, to;
           char *ptr;
