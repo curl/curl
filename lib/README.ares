@@ -11,7 +11,7 @@ c-ares:
   http://c-ares.haxx.se/
 
 NOTE
-  The latest libcurl version requires c-ares 1.4.0 or later.
+  The latest libcurl version requires c-ares 1.6.0 or later.
 
   Once upon the time libcurl built fine with the "original" ares. That is no
   longer true. You need to use c-ares.
