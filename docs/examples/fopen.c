@@ -184,12 +184,7 @@ fill_buffer(URL_FILE *file,int want,int waittime)
 
         default:
             /* timeout or readable/writable sockets */
-            /* note we *could* be more efficient and not wait for
-             * CURLM_CALL_MULTI_PERFORM to clear here and check it on re-entry
-             * but that gets messy */
-            while(curl_multi_perform(multi_handle, &file->still_running) ==
-                  CURLM_CALL_MULTI_PERFORM);
-
+            curl_multi_perform(multi_handle, &file->still_running);
             break;
         }
     } while(file->still_running && (file->buffer_pos < want));
@@ -260,8 +255,7 @@ url_fopen(const char *url,const char *operation)
         curl_multi_add_handle(multi_handle, file->handle.curl);
 
         /* lets start the fetch */
-        while(curl_multi_perform(multi_handle, &file->still_running) ==
-              CURLM_CALL_MULTI_PERFORM );
+        curl_multi_perform(multi_handle, &file->still_running);
 
         if((file->buffer_pos == 0) && (!file->still_running))
         {

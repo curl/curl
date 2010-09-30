@@ -56,8 +56,7 @@ int main(int argc, char **argv)
       curl_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
-  while(CURLM_CALL_MULTI_PERFORM ==
-        curl_multi_perform(multi_handle, &still_running));
+  curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -108,8 +107,7 @@ int main(int argc, char **argv)
     default:
       /* one or more of curl's file descriptors say there's data to read
          or write */
-      while(CURLM_CALL_MULTI_PERFORM ==
-            curl_multi_perform(multi_handle, &still_running));
+      curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }
