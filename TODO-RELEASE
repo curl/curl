@@ -3,9 +3,6 @@ To be addressed in 7.21.2
 
 261 -  configure and libidn
 
-266 - Bug in ftp_nextconnect? version: libcurl 7.21.1
-      Bug in code or lack of clarity in docs?
-
 268 - 3076430 SFTP resume with 4GB file does not work
 
 269 - 3076808 Requests fail silently following a 416 error
