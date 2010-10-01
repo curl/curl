@@ -73,10 +73,11 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
      _libcurl_try_link=yes
 
      if test -d "$_libcurl_with" ; then
-        LIBCURL_CPPFLAGS="-I$withval/include"
-        _libcurl_ldflags="-L$withval/lib"
-        AC_PATH_PROG([_libcurl_config],[curl-config],["$withval/bin"],
-                     ["$withval/bin"])
+	libcurl_with_prefix=`dirname $withval`
+        LIBCURL_CPPFLAGS="-I$libcurl_with_prefix/include"
+        _libcurl_ldflags="-L$withval"
+        AC_PATH_PROG([_libcurl_config],[curl-config],["$libcurl_with_prefix/bin"],
+                     ["$libcurl_with_prefix/bin"])
      else
         AC_PATH_PROG([_libcurl_config],[curl-config])
      fi
