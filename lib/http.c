@@ -3293,13 +3293,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       data->req.deductheadercount =
         (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
 
-      if(data->state.resume_from &&
-         (data->set.httpreq==HTTPREQ_GET) &&
-         (k->httpcode == 416)) {
-        /* "Requested Range Not Satisfiable" */
-        *stop_reading = TRUE;
-      }
-
       if(!*stop_reading) {
         /* Curl_http_auth_act() checks what authentication methods
          * that are available and decides which one (if any) to
@@ -3512,9 +3505,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
            * message-body, and thus is always terminated by the first
            * empty line after the header fields. */
           /* FALLTHROUGH */
-        case 416: /* Requested Range Not Satisfiable, it has the
-                     Content-Length: set as the "real" document but no
-                     actual response is sent. */
         case 304:
           /* (quote from RFC2616, section 10.3.5): The 304 response
            * MUST NOT contain a message-body, and thus is always
@@ -3546,10 +3536,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
     /* Curl_convert_from_network calls failf if unsuccessful */
 #endif /* CURL_DOES_CONVERSIONS */
 
-    /* Check for Content-Length: header lines to get size. Ignore
-       the header completely if we get a 416 response as then we're
-       resuming a document that we don't get, and this header contains
-       info about the true size of the document we didn't get now. */
+    /* Check for Content-Length: header lines to get size */
     if(!k->ignorecl && !data->set.ignorecl &&
        checkprefix("Content-Length:", k->p)) {
       curl_off_t contentlength = curlx_strtoofft(k->p+15, NULL, 10);
