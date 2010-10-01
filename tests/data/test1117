@@ -13,9 +13,10 @@ Range
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Thu, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
-Content-Length: 6
+Content-Length: 115
 
-Error
+This is a long error message that is large enough that the test server is
+guaranteed to split it into two packets.
 </data>
 
 <data1>
@@ -28,6 +29,10 @@ Content-Type: text/plain
 
 partial body
 </data1>
+
+<servercmd>
+writedelay: 1
+</servercmd>
 </reply>
 
 # Client-side
@@ -49,8 +54,10 @@ HTTP with invalid range then another URL
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Thu, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
-Content-Length: 6
+Content-Length: 115
 
+This is a long error message that is large enough that the test server is
+guaranteed to split it into two packets.
 HTTP/1.1 206 Partial Content
 Date: Thu, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes

@@ -105,6 +105,8 @@ struct httprequest {
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
+  int writedelay; /* if non-zero, delay this number of seconds between
+		      writes in the response */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
@@ -435,6 +437,10 @@ static int ProcessRequest(struct httprequest *req)
             logmsg("instructed to skip this number of bytes %d", num);
             req->skip = num;
           }
+          else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+            logmsg("instructed to delay %d secs between packets", num);
+            req->writedelay = num;
+          }
           else {
             logmsg("funny instruction found: %s", cmd);
           }
@@ -745,6 +751,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->ntlm = FALSE;
   req->pipe = 0;
   req->skip = 0;
+  req->writedelay = 0;
   req->rcmd = RCMD_NORMALREQ;
   req->prot_version = 0;
   req->pipelining = FALSE;
@@ -1014,6 +1021,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
     else {
       logmsg("Sent off %zd bytes", written);
+    }
+    if (req->writedelay) {
+      logmsg("Pausing %d seconds", req->writedelay);
+      sleep(req->writedelay);
     }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
