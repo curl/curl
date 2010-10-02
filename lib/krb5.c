@@ -178,7 +178,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   CURLcode result;
   const char *service = "ftp", *srv_host = "host";
-  gss_buffer_desc gssbuf, _gssresp, *gssresp;
+  gss_buffer_desc input_buffer, output_buffer, _gssresp, *gssresp;
   OM_uint32 maj, min;
   gss_name_t gssname;
   gss_ctx_id_t *context = app_data;
@@ -214,28 +214,31 @@ krb5_auth(void *app_data, struct connectdata *conn)
         return -1;
     }
 
-    gssbuf.value = data->state.buffer;
-    gssbuf.length = snprintf(gssbuf.value, BUFSIZE, "%s@%s", service, host);
-    maj = gss_import_name(&min, &gssbuf, GSS_C_NT_HOSTBASED_SERVICE, &gssname);
+    input_buffer.value = data->state.buffer;
+    input_buffer.length = snprintf(input_buffer.value, BUFSIZE, "%s@%s",
+                                   service, host);
+    maj = gss_import_name(&min, &input_buffer, GSS_C_NT_HOSTBASED_SERVICE,
+                          &gssname);
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
-        Curl_failf(data, "Error importing service name %s", gssbuf.value);
+        Curl_failf(data, "Error importing service name %s", input_buffer.value);
         return AUTH_ERROR;
       }
       service = srv_host;
       continue;
     }
-    {
-      /* We pass NULL as |output_name_type| to avoid a leak. */
-      gss_display_name(&min, gssname, &gssbuf, NULL);
-      Curl_infof(data, "Trying against %s\n", gssbuf.value);
-      gss_release_buffer(&min, &gssbuf);
-    }
+    /* We pass NULL as |output_name_type| to avoid a leak. */
+    gss_display_name(&min, gssname, &output_buffer, NULL);
+    Curl_infof(data, "Trying against %s\n", output_buffer.value);
     gssresp = GSS_C_NO_BUFFER;
     *context = GSS_C_NO_CONTEXT;
 
     do {
+      /* Release the buffer at each iteration to avoid leaking: the first time
+         we are releasing the memory from gss_display_name. The last item is
+         taken care by a final gss_release_buffer. */
+      gss_release_buffer(&min, &output_buffer);
       ret = AUTH_OK;
       maj = gss_init_sec_context(&min,
                                  GSS_C_NO_CREDENTIAL,
@@ -247,7 +250,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
                                  &chan,
                                  gssresp,
                                  NULL,
-                                 &gssbuf,
+                                 &output_buffer,
                                  NULL,
                                  NULL);
 
@@ -262,9 +265,9 @@ krb5_auth(void *app_data, struct connectdata *conn)
         break;
       }
 
-      if(gssbuf.length != 0) {
-        if(Curl_base64_encode(data, (char *)gssbuf.value, gssbuf.length, &p)
-           < 1) {
+      if(output_buffer.length != 0) {
+        if(Curl_base64_encode(data, (char *)output_buffer.value,
+                              output_buffer.length, &p) < 1) {
           Curl_infof(data, "Out of memory base64-encoding");
           ret = AUTH_CONTINUE;
           break;
@@ -307,6 +310,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
     } while(maj == GSS_S_CONTINUE_NEEDED);
 
     gss_release_name(&min, &gssname);
+    gss_release_buffer(&min, &output_buffer);
 
     if(gssresp)
       free(_gssresp.value);
