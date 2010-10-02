@@ -5,8 +5,6 @@ To be addressed in 7.21.2
 
 268 - 3076430 SFTP resume with 4GB file does not work
 
-269 - 3076808 Requests fail silently following a 416 error
-
 271 -
 
 To be addressed in 7.21.3
