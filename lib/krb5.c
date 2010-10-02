@@ -170,7 +170,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to,
 static int
 krb5_auth(void *app_data, struct connectdata *conn)
 {
-  int ret;
+  int ret = AUTH_OK;
   char *p;
   const char *host = conn->host.name;
   ssize_t nread;
@@ -316,6 +316,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
 
     service = srv_host;
   }
+  return ret;
 }
 
 static void krb5_end(void *app_data)
