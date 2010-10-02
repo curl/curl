@@ -3860,6 +3860,10 @@ static CURLcode ftp_disconnect(struct connectdata *conn)
 
   Curl_pp_disconnect(pp);
 
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  Curl_sec_end(conn);
+#endif
+
   return CURLE_OK;
 }
 

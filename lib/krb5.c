@@ -76,9 +76,18 @@
 #define REMOTE_ADDR conn->ip_addr->ai_addr
 
 static int
+krb5_init(void *app_data)
+{
+  gss_ctx_id_t *context = app_data;
+  /* Make sure our context is initialized for krb5_end. */
+  *context = GSS_C_NO_CONTEXT;
+  return 0;
+}
+
+static int
 krb5_check_prot(void *app_data, int level)
 {
-  app_data = NULL; /* prevent compiler warning */
+  (void)app_data; /* unused */
   if(level == prot_confidential)
     return -1;
   return 0;
@@ -309,12 +318,22 @@ krb5_auth(void *app_data, struct connectdata *conn)
   }
 }
 
+static void krb5_end(void *app_data)
+{
+    OM_uint32 maj, min;
+    gss_ctx_id_t *context = app_data;
+    if (*context != GSS_C_NO_CONTEXT) {
+      maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
+      DEBUGASSERT(maj == GSS_S_COMPLETE);
+    }
+}
+
 struct Curl_sec_client_mech Curl_krb5_client_mech = {
     "GSSAPI",
     sizeof(gss_ctx_id_t),
-    NULL, /* init */
+    krb5_init,
     krb5_auth,
-    NULL, /* end */
+    krb5_end,
     krb5_check_prot,
     krb5_overhead,
     krb5_encode,
