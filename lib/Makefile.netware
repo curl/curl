@@ -24,7 +24,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.6
+LIBSSH2_PATH = ../../libssh2-1.2.7
 endif
 
 # Edit the path below to point to the base of your libidn package.
@@ -87,7 +87,6 @@ PERL	= perl
 # Here you can find a native Win32 binary of the original awk:
 # http://www.gknw.net/development/prgtools/awk-20070501.zip
 AWK	= awk
-YACC	= bison -y
 CP	= cp -afv
 MKDIR	= mkdir
 # RM	= rm -f
@@ -117,13 +116,13 @@ CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
 ifeq ($(LIBARCH),LIBC)
 ifeq ($(POSIXFL),1)
-	PRELUDE = $(SDK_LIBC)/imports/posixpre.o
+	PRELUDE = $(NDK_LIBC)/imports/posixpre.o
 else
-	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
+	PRELUDE = $(NDK_LIBC)/imports/libcpre.o
 endif
 	CFLAGS += -align 4
 else
-	# PRELUDE = $(SDK_CLIB)/imports/clibpre.o
+	# PRELUDE = $(NDK_CLIB)/imports/clibpre.o
 	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
 	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
 	# CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
@@ -140,12 +139,12 @@ CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 ifeq ($(POSIXFL),1)
-	PRELUDE = $(SDK_LIBC)/imports/posixpre.gcc.o
+	PRELUDE = $(NDK_LIBC)/imports/posixpre.gcc.o
 else
-	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
+	PRELUDE = $(NDK_LIBC)/imports/libcpre.gcc.o
 endif
 else
-	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	PRELUDE = $(NDK_CLIB)/imports/clibpre.gcc.o
 	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
 	# http://www.gknw.net/development/mk_nlm/gcc_pre.zip
 	# PRELUDE = $(NDK_ROOT)/pre/prelude.o
@@ -154,9 +153,15 @@ endif
 endif
 
 NDK_ROOT = $(NDKBASE)/ndk
-SDK_CLIB = $(NDK_ROOT)/nwsdk
-SDK_LIBC = $(NDK_ROOT)/libc
-SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
+ifndef NDK_CLIB
+NDK_CLIB = $(NDK_ROOT)/nwsdk
+endif
+ifndef NDK_LIBC
+NDK_LIBC = $(NDK_ROOT)/libc
+endif
+ifndef NDK_LDAP
+NDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
+endif
 CURL_INC = ../include
 CURL_LIB = ../lib
 
@@ -197,17 +202,17 @@ ifdef WITH_IDN
 endif
 
 ifeq ($(LIBARCH),LIBC)
-	INCLUDES += -I$(SDK_LIBC)/include
-	# INCLUDES += -I$(SDK_LIBC)/include/nks
-	# INCLUDES += -I$(SDK_LIBC)/include/winsock
+	INCLUDES += -I$(NDK_LIBC)/include
+	# INCLUDES += -I$(NDK_LIBC)/include/nks
+	# INCLUDES += -I$(NDK_LIBC)/include/winsock
 	CFLAGS += -D_POSIX_SOURCE
 else
-	INCLUDES += -I$(SDK_CLIB)/include/nlm
-	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
-	# INCLUDES += -I$(SDK_CLIB)/include
+	INCLUDES += -I$(NDK_CLIB)/include/nlm
+	# INCLUDES += -I$(NDK_CLIB)/include/nlm/obsolete
+	# INCLUDES += -I$(NDK_CLIB)/include
 endif
 ifndef DISABLE_LDAP
-	INCLUDES += -I$(SDK_LDAP)/$(LIBARCH_L)/inc
+	INCLUDES += -I$(NDK_LDAP)/$(LIBARCH_L)/inc
 endif
 CFLAGS	+= $(INCLUDES)
 
@@ -323,15 +328,15 @@ endif
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)start _Prelude$(DL) >> $@
 	@echo $(DL)exit _Stop$(DL) >> $@
-	@echo $(DL)import @$(SDK_CLIB)/imports/clib.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_CLIB)/imports/clib.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_CLIB)/imports/threads.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_CLIB)/imports/socklib.imp$(DL) >> $@
 	@echo $(DL)module clib$(DL) >> $@
 ifndef DISABLE_LDAP
-	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
+#	@echo $(DL)import @$(NDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
 	@echo $(DL)module ldapsdk ldapssl$(DL) >> $@
 endif
 else
@@ -348,13 +353,13 @@ else
 	@echo $(DL)exit _LibCPostlude$(DL) >> $@
 	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
 endif
-	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LIBC)/imports/libc.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LIBC)/imports/netware.imp$(DL) >> $@
 	@echo $(DL)module libc$(DL) >> $@
 ifndef DISABLE_LDAP
-	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(NDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
+#	@echo $(DL)import @$(NDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
 	@echo $(DL)module lldapsdk lldapssl$(DL) >> $@
 endif
 endif
@@ -425,13 +430,6 @@ else
 	@echo $(DL)#define HAVE_SYS_PARAM_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SELECT_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TERMIOS_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
-	@echo $(DL)#define HAVE_FREEADDRINFO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_GETADDRINFO 1$(DL) >> $@
-	@echo $(DL)#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG1 int$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG2 void *$(DL) >> $@
 	@echo $(DL)#define RECV_TYPE_ARG3 size_t$(DL) >> $@
@@ -451,11 +449,19 @@ else
 	@echo $(DL)#define SEND_TYPE_ARG3 size_t$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_ARG4 int$(DL) >> $@
 	@echo $(DL)#define SEND_TYPE_RETV ssize_t$(DL) >> $@
-	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 	@echo $(DL)#define SIZEOF_OFF_T 8$(DL) >> $@
 	@echo $(DL)#define _LARGEFILE 1$(DL) >> $@
 ifdef ENABLE_IPV6
 	@echo $(DL)#define ENABLE_IPV6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_PF_INET6 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FREEADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_GETADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_STRUCT_SOCKADDR_IN6 1$(DL) >> $@
+	@echo $(DL)#define SIZEOF_STRUCT_IN6_ADDR 16$(DL) >> $@
 endif
 endif
 	@echo $(DL)#define USE_MANUAL 1$(DL) >> $@
@@ -491,7 +497,6 @@ endif
 	@echo $(DL)#define HAVE_STRFTIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRING_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRSTR 1$(DL) >> $@
-	@echo $(DL)#define HAVE_STRUCT_ADDRINFO 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_TIMEVAL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_IOCTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_STAT_H 1$(DL) >> $@
