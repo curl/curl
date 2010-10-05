@@ -32,7 +32,8 @@ int __cdecl _snscanf(const char * input, size_t length, const char * format, ...
 
 
 /* parse headers for Content-Length */
-size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream) {
+size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+{
   int r;
   long len = 0;
 
@@ -46,7 +47,8 @@ size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream) 
 }
 
 /* discard downloaded data */
-size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream) {
+size_t discardfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+{
   return size * nmemb;
 }
 
@@ -143,13 +145,14 @@ int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
   }
 }
 
-int main(int c, char **argv) {
+int main(int c, char **argv)
+{
   CURL *curlhandle = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curlhandle = curl_easy_init();
 
-  upload(curlhandle, "ftp://user:pass@host/path/file", "C:\\file", 0, 3);
+  upload(curlhandle, "ftp://user:pass@example.com/path/file", "C:\\file", 0, 3);
 
   curl_easy_cleanup(curlhandle);
   curl_global_cleanup();

@@ -28,8 +28,7 @@ static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(void)
 {
-  /* Check for binutils 2.19.1 from ftp.gnu.org's FTP site. */
-  char ftpurl[] = "ftp://ftp.gnu.org/gnu/binutils/binutils-2.19.1.tar.bz2";
+  char ftpurl[] = "ftp://ftp.example.com/gnu/binutils/binutils-2.19.1.tar.bz2";
   CURL *curl;
   CURLcode res;
   const time_t filetime;

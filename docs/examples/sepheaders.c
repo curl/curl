@@ -35,7 +35,7 @@ int main(int argc, char **argv)
   curl_handle = curl_easy_init();
 
   /* set URL to get */
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://curl.haxx.se");
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://example.com");
 
   /* no progress meter please */
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);

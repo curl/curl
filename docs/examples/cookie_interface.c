@@ -53,7 +53,7 @@ main(void)
   if (curl) {
     char nline[256];
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/"); /* google.com sets "PREF" cookie */
+    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, ""); /* just to start the cookie engine */
     res = curl_easy_perform(curl);

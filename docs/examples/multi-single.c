@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.haxx.se/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
 
   /* init a multi stack */
   multi_handle = curl_multi_init();

@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   curl_handle = curl_easy_init();
 
   /* specify URL to get */
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://cool.haxx.se/");
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.example.com/");
 
   /* send all data to this function  */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);

@@ -67,8 +67,7 @@ int main(int argc, char **argv)
   if(argc == 2)
     curl_easy_setopt(handle, CURLOPT_URL, argv[1]);
   else
-    curl_easy_setopt(handle, CURLOPT_URL,
-      "ftp://curltest.howto.cz:123456@curltest.howto.cz/test/*");
+    curl_easy_setopt(handle, CURLOPT_URL, "ftp://example.com/test/*");
 
   /* and start transfer! */
   rc = curl_easy_perform(handle);

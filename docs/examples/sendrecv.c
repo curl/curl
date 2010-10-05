@@ -48,13 +48,13 @@ int main(void)
   CURL *curl;
   CURLcode res;
   /* Minimalistic http request */
-  const char *request = "GET / HTTP/1.0\r\nHost: curl.haxx.se\r\n\r\n";
+  const char *request = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
   int sockfd; /* socket */
   size_t iolen;
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "curl.haxx.se");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
     /* Do not do the transfer - only connect to host */
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
     res = curl_easy_perform(curl);

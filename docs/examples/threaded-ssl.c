@@ -91,10 +91,10 @@ void init_locks(void)
 
 /* List of URLs to fetch.*/
 const char * const urls[]= {
-  "https://www.sf.net/",
-  "https://www.openssl.org/",
-  "https://www.sf.net/",
-  "https://www.openssl.org/",
+  "https://www.example.com/",
+  "https://www2.example.com/",
+  "https://www3.example.com/",
+  "https://www4.example.com/",
 };
 
 static void *pull_one_url(void *url)

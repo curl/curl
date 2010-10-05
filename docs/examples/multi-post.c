@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
   if(curl && multi_handle) {
 
     /* what URL that receives this POST */
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     "http://www.fillinyoururl.com/upload.cgi");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/upload.cgi");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);

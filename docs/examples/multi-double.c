@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   http_handle2 = curl_easy_init();
 
   /* set options */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.haxx.se/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
 
   /* set options */
   curl_easy_setopt(http_handle2, CURLOPT_URL, "http://localhost/");

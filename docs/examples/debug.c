@@ -118,7 +118,7 @@ int main(void)
     /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "curl.haxx.se");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
     res = curl_easy_perform(curl);
 
     /* always cleanup */
