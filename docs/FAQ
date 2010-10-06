@@ -1,4 +1,4 @@
-Updated: September 7, 2010 (http://curl.haxx.se/docs/faq.html)
+Updated: October 6, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -21,6 +21,7 @@ FAQ
   1.11 Why don't you update ca-bundle.crt
   1.12 I have a problem who can I chat with?
   1.13 curl's ECCN number?
+  1.14 How do I submit my patch?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -387,6 +388,21 @@ FAQ
 
   An incomprehensible description of the two numbers above is here
   http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
+
+  1.14 How do I submit my patch?
+
+  When you have made a patch or a change of whatever sort, and want to submit
+  that to the project, there are a few different ways we prefer:
+
+  o send a patch to the curl-library mailing list. We're many subscribers
+    there and there are lots of people who can review patches, comment on them
+    and "receive" them properly.
+
+  o if your patch changes or fixes a bug, you can also opt to submit a bug
+    report in the bug tracker and attach your patch there. There are less
+    people involved there.
+
+  Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
 
 
 2. Install Related Problems
