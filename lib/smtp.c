@@ -237,7 +237,8 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
 
     for (;;) {
       while (len &&
-       (*line == ' ' || *line == '\t' || *line == '\r' || *line == '\n')) {
+             (*line == ' ' || *line == '\t' ||
+              *line == '\r' || *line == '\n')) {
         line++;
         len--;
       }
@@ -246,7 +247,8 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
         break;
 
       for (wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-       line[wordlen] != '\t' && line[wordlen] != '\r' && line[wordlen] != '\n';)
+             line[wordlen] != '\t' && line[wordlen] != '\r' &&
+             line[wordlen] != '\n';)
         wordlen++;
 
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
@@ -409,8 +411,10 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
       state2 = SMTP_AUTHPASSWD;
       l = smtp_auth_login_user(conn, &initresp);
     }
-    else
+    else {
+      infof(conn->data, "No known auth mechanisms supported!\n");
       result = CURLE_LOGIN_DENIED;      /* Other mechanisms not supported. */
+    }
 
     if(!result) {
       if(!l)
