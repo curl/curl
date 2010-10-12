@@ -70,6 +70,18 @@ ZLIB_ROOT = $(%zlib_root)
 ZLIB_ROOT = ..\..\zlib-1.2.5
 !endif
 
+!ifdef %libssh2_root
+LIBSSH2_ROOT = $(%libssh2_root)
+!else
+LIBSSH2_ROOT = ..\..\libssh2-1.2.7
+!endif
+
+!ifdef %librtmp_root
+LIBRTMP_ROOT = $(%librtmp_root)
+!else
+LIBRTMP_ROOT = ..\..\librtmp-2.3
+!endif
+
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
@@ -85,6 +97,14 @@ ARES_ROOT = ..\ares
 !ifdef %use_zlib
 CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
 !endif
+
+!ifdef %use_rtmp
+CFLAGS += -dUSE_LIBRTMP -I$(LIBRTMP_ROOT)
+!endif
+
+!ifdef %use_ssh2
+CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)\include -I$(LIBSSH2_ROOT)\win32
+endif
 
 !ifdef %use_ssl
 CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)\inc32
@@ -182,6 +202,12 @@ $(LINK_ARG): $(__MAKEFILES__)
 !endif
 !ifdef %use_zlib
 	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+!endif
+!ifdef %use_rtmp
+	@%append $^@ library $(LIBRTMP_ROOT)\librtmp\librtmp.lib
+!endif
+!ifdef %use_ssh2
+	@%append $^@ library $(LIBSSH2_ROOT)\win32\libssh2.lib
 !endif
 !ifdef %use_ssl
 	@%append $^@ library $(OPENSSL_ROOT)\out32\libeay32.lib, $(OPENSSL_ROOT)\out32\ssleay32.lib
