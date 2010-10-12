@@ -32,6 +32,11 @@ ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
 endif
 
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../librtmp-2.3
+endif
+
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
 LIBCARES_PATH = ../ares
@@ -179,6 +184,10 @@ else
 	MODULES += libssh2.nlm
 	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
 endif
+endif
+ifdef WITH_RTMP
+	INCLUDES += -I$(LIBRTMP_PATH)
+	LDLIBS += $(LIBRTMP_PATH)/librtmp/librtmp.$(LIBEXT)
 endif
 ifdef WITH_SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
@@ -560,6 +569,9 @@ endif
 ifdef WITH_IDN
 	@echo $(DL)#define HAVE_LIBIDN 1$(DL) >> $@
 	@echo $(DL)#define HAVE_TLD_H 1$(DL) >> $@
+endif
+ifdef WITH_RTMP
+	@echo $(DL)#define USE_LIBRTMP 1$(DL) >> $@
 endif
 	@echo $(DL)#ifdef __GNUC__$(DL) >> $@
 	@echo $(DL)#define HAVE_VARIADIC_MACROS_GCC 1$(DL) >> $@
