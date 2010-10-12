@@ -14,11 +14,14 @@ MANPAGE =	../docs/curl.1
 README	=	../docs/MANUAL
 MKHELP	=	../src/mkhelp.pl
 
-OBJS	=	getpass.c hugehelp.c main.c urlglob.c writeenv.c writeout.c curlutil.c os-specific.c ../lib/rawstr.c ../lib/nonblock.c
+top_srcdir = ..
 
+include Makefile.inc
 
-all:	hugehelp.c $(OBJS:.c=.o)
-	$(CC) $(CFLAGS) -o cURL $(OBJS:.c=.o) $(LIBS) -Wl,-Map,cURL.map,--cref
+OBJS = $(CURL_CFILES:.c=.o) $(CURLX_ONES:.c=.o)
+
+all:	hugehelp.c $(OBJS)
+	$(CC) $(CFLAGS) -o cURL $(OBJS) $(LIBS) -Wl,-Map,cURL.map,--cref
 
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 	rm -f hugehelp.c
