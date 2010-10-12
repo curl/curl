@@ -5,7 +5,7 @@ Curl and libcurl 7.21.2
  curl_easy_setopt() options:   180
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 808
+ Contributors:                 817
 
 This release includes the following changes:
 
@@ -15,6 +15,9 @@ This release includes the following changes:
  o c-ares build now requires c-ares >= 1.6.0
 
 This release includes the following bugfixes:
+
+ o --remote-header-name security vulnerability fixed:
+   http://curl.haxx.se/docs/adv_20101013.html
 
  o multi: support the timeouts correctly, fixes known bug #62
  o multi: use timeouts properly for MAX_RECV/SEND_SPEED
@@ -52,6 +55,7 @@ This release includes the following bugfixes:
  o HTTP: remove special case for 416
  o examples: use example.com in example URLs
  o globbing: fix crash on unballanced open brace
+ o cmake: build fixed
 
 This release includes the following known bugs:
 
@@ -64,6 +68,6 @@ advice from friends like these:
  Guenter Knauf, Julien Chaffraix, Quanah Gibson-Mount, Tor Arntsen,
  Peter Pentchev, James Bursa, Fabian Keil, Michal Gorny, Mauro Iorio,
  Hendrik Visage, Ning Dong, David McCreedy, Patrick Monnerat,
- Tim Newsome, Dan Locks, Vlad Ureche
+ Tim Newsome, Dan Locks, Vlad Ureche, Dimitre Dimitrov
 
         Thanks! (and sorry if I forgot to mention someone)
