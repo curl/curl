@@ -104,7 +104,7 @@ CFLAGS += -dUSE_LIBRTMP -I$(LIBRTMP_ROOT)
 
 !ifdef %use_ssh2
 CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)\include -I$(LIBSSH2_ROOT)\win32
-endif
+!endif
 
 !ifdef %use_ssl
 CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)\inc32
