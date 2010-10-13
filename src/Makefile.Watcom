@@ -125,6 +125,7 @@ OBJS += $(CURLX_SOURCES:.c=.obj)
 !endif
 !ifdef __LINUX__
 OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+
 !else
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 !endif

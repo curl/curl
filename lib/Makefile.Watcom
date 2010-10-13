@@ -112,7 +112,7 @@ CFLAGS += -dUSE_LIBRTMP -I$(LIBRTMP_ROOT)
 !endif
 
 !ifdef %use_ssh2
-CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)\include -I$(LIBSSH2_ROOT)\win32
+CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)$(DS)include -I$(LIBSSH2_ROOT)$(DS)win32
 !endif
 
 !ifdef %use_ssl
@@ -141,6 +141,7 @@ LIB_ARG  = $(OBJ_BASE)$(DS)stat$(DS)wlib.arg
 OBJS = $(CSOURCES:.c=.obj)
 !ifdef __LINUX__
 OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+
 !else
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 !endif
