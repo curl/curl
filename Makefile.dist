@@ -55,22 +55,16 @@ borland-clean:
 	make -f Makefile.b32 clean
 
 watcom: .SYMBOLIC
-	cd lib
-	wmake -u -f Makefile.Watcom
-	cd ..\src
-	wmake -u -f Makefile.Watcom
+	cd lib && $(MAKE) -u -f Makefile.Watcom
+	cd src && $(MAKE) -u -f Makefile.Watcom
 
 watcom-clean: .SYMBOLIC
-	cd lib
-	wmake -u -f Makefile.Watcom clean
-	cd ..\src
-	wmake -u -f Makefile.Watcom clean
+	cd lib && $(MAKE) -u -f Makefile.Watcom clean
+	cd src && $(MAKE) -u -f Makefile.Watcom clean
 
 watcom-vclean: .SYMBOLIC
-	cd lib
-	wmake -u -f Makefile.Watcom vclean
-	cd ..\src
-	wmake -u -f Makefile.Watcom vclean
+	cd lib && $(MAKE) -u -f Makefile.Watcom vclean
+	cd src && $(MAKE) -u -f Makefile.Watcom vclean
 
 mingw32:
 	$(MAKE) -C lib -f Makefile.m32
@@ -91,6 +85,10 @@ mingw32-ssh2-ssl-zlib:
 mingw32-ssh2-ssl-sspi-zlib:
 	$(MAKE) -C lib -f Makefile.m32 SSH2=1 SSL=1 SSPI=1 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 SSH2=1 SSL=1 SSPI=1 ZLIB=1
+
+mingw32-rtmp-ssh2-ssl-sspi-zlib:
+	$(MAKE) -C lib -f Makefile.m32 RTMP=1 SSH2=1 SSL=1 SSPI=1 ZLIB=1
+	$(MAKE) -C src -f Makefile.m32 RTMP=1 SSH2=1 SSL=1 SSPI=1 ZLIB=1
 
 mingw32-clean:
 	$(MAKE) -C lib -f Makefile.m32 clean
