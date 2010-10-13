@@ -5,9 +5,6 @@
 
 !ifndef %watcom
 !error WATCOM environment variable not set!
-!else
-SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
-SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
 !endif
 
 !ifdef %libname
@@ -33,18 +30,30 @@ RC = wrc
 !  endif
 !endif
 
-!if $(__VERSION__) < 1250                                                                                                           
-RM = del /q /f 2>NUL
-!else                                                                                                                               
-RM = rm -f                                                                                                                          
-!endif
+!ifdef __LINUX__
+DS = /
+CP = cp
+MD = mkdir -p
+RD = rmdir -p
+RM = rm -f
+!else
+DS = $(X)\$(X)
+CP = copy 2>NUL
 MD = mkdir
 RD = rmdir /q /s 2>NUL
-CP = copy
+!if $(__VERSION__) < 1250
+RM = del /q /f 2>NUL
+!else
+RM = rm -f
+!endif
+!endif
+
+SYS_INCL = -I$(%watcom)$(DS)h$(DS)nt -I$(%watcom)$(DS)h
+SYS_LIBS = $(%watcom)$(DS)lib386$(DS)nt;$(%watcom)$(DS)lib386
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
          -wcd=201 -bt=nt -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV         &
-         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I..\include $(SYS_INCL)
+         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I..$(DS)include $(SYS_INCL)
 
 !ifdef %debug
 DEBUG  = -dDEBUG=1 -dDEBUGBUILD
@@ -67,31 +76,31 @@ CFLAGS += -dUSE_WINDOWS_SSPI
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..\..\zlib-1.2.5
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
 !endif
 
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..\..\libssh2-1.2.7
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.7
 !endif
 
 !ifdef %librtmp_root
 LIBRTMP_ROOT = $(%librtmp_root)
 !else
-LIBRTMP_ROOT = ..\..\librtmp-2.3
+LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !endif
 
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..\..\openssl-0.9.8o
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8o
 !endif
 
 !ifdef %ares_root
 ARES_ROOT = $(%ares_root)
 !else
-ARES_ROOT = ..\ares
+ARES_ROOT = ..$(DS)ares
 !endif
 
 !ifdef %use_zlib
@@ -107,7 +116,7 @@ CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)\include -I$(LIBSSH2_R
 !endif
 
 !ifdef %use_ssl
-CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)\inc32
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)$(DS)inc32
 !endif
 
 !ifdef %use_ares
@@ -115,12 +124,12 @@ CFLAGS += -dUSE_ARES -I$(ARES_ROOT)
 !endif
 
 !ifdef %use_watt32
-CFLAGS += -dUSE_WATT32 -I$(%watt_root)\inc
+CFLAGS += -dUSE_WATT32 -I$(%watt_root)$(DS)inc
 !endif
 
 OBJ_BASE = WC_Win32.obj
-LINK_ARG = $(OBJ_BASE)\dyn\wlink.arg
-LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
+LINK_ARG = $(OBJ_BASE)$(DS)dyn$(DS)wlink.arg
+LIB_ARG  = $(OBJ_BASE)$(DS)stat$(DS)wlib.arg
 
 # In order to process Makefile.inc wmake must be called with -u switch!
 !ifndef %MAKEFLAGS
@@ -130,19 +139,23 @@ LIB_ARG  = $(OBJ_BASE)\stat\wlib.arg
 !endif
 
 OBJS = $(CSOURCES:.c=.obj)
+!ifdef __LINUX__
+OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+!else
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
+!endif
 
 #
 # Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
 #
-OBJ_DIR    = $(OBJ_BASE)\stat
+OBJ_DIR    = $(OBJ_BASE)$(DS)stat
 OBJS_STAT  = $+ $(OBJS) $-
 
-OBJ_DIR    = $(OBJ_BASE)\dyn
+OBJ_DIR    = $(OBJ_BASE)$(DS)dyn
 OBJS_DYN   = $+ $(OBJS) $-
 
-CURLBUILDH = ..\include\curl\curlbuild.h
-RESOURCE   = $(OBJ_BASE)\dyn\libcurl.res
+CURLBUILDH = ..$(DS)include$(DS)curl$(DS)curlbuild.h
+RESOURCE   = $(OBJ_BASE)$(DS)dyn$(DS)libcurl.res
 
 all: $(CURLBUILDH) $(OBJ_BASE) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
@@ -154,14 +167,14 @@ clean: .SYMBOLIC
 
 vclean distclean: clean .SYMBOLIC
 	-$(RM) $(TARGETS) $(LIBNAME).map $(LIBNAME).sym
-	-$(RD) $(OBJ_BASE)\stat
-	-$(RD) $(OBJ_BASE)\dyn
+	-$(RD) $(OBJ_BASE)$(DS)stat
+	-$(RD) $(OBJ_BASE)$(DS)dyn
 	-$(RD) $(OBJ_BASE)
 
 $(OBJ_BASE):
 	-$(MD) $^@
-	-$(MD) $^@\stat
-	-$(MD) $^@\dyn
+	-$(MD) $^@$(DS)stat
+	-$(MD) $^@$(DS)dyn
 
 $(CURLBUILDH): .EXISTSONLY
 	$(CP) $^@.dist $^@
@@ -174,14 +187,14 @@ $(LIBNAME).lib: $(OBJS_STAT) $(LIB_ARG)
 
 .ERASE
 $(RESOURCE): libcurl.rc
-	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
+	$(RC) $(DEBUG) -q -r -zm -bt=nt -I..$(DS)include $(SYS_INCL) $[@ -fo=$^@
 
 .ERASE
-.c{$(OBJ_BASE)\dyn}.obj:
+.c{$(OBJ_BASE)$(DS)dyn}.obj:
 	$(CC) $(CFLAGS) -bd -br $[@ -fo=$^@
 
 .ERASE
-.c{$(OBJ_BASE)\stat}.obj:
+.c{$(OBJ_BASE)$(DS)stat}.obj:
 	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
 
 $(LINK_ARG): $(__MAKEFILES__)
@@ -196,24 +209,24 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
 	@%append $^@ library wldap32.lib
 !ifdef %use_watt32
-	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
+	@%append $^@ library $(%watt_root)$(DS)lib$(DS)wattcpw_imp.lib
 !else
 	@%append $^@ library ws2_32.lib
 !endif
 !ifdef %use_zlib
-	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+	@%append $^@ library $(ZLIB_ROOT)$(DS)zlib.lib
 !endif
 !ifdef %use_rtmp
-	@%append $^@ library $(LIBRTMP_ROOT)\librtmp\librtmp.lib
+	@%append $^@ library $(LIBRTMP_ROOT)$(DS)librtmp$(DS)librtmp.lib
 !endif
 !ifdef %use_ssh2
-	@%append $^@ library $(LIBSSH2_ROOT)\win32\libssh2.lib
+	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib
 !endif
 !ifdef %use_ssl
-	@%append $^@ library $(OPENSSL_ROOT)\out32\libeay32.lib, $(OPENSSL_ROOT)\out32\ssleay32.lib
+	@%append $^@ library $(OPENSSL_ROOT)$(DS)out32$(DS)libeay32.lib, $(OPENSSL_ROOT)$(DS)out32$(DS)ssleay32.lib
 !endif
 !ifdef %use_ares
-	@%append $^@ library $(ARES_ROOT)\cares.lib
+	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
 !endif
 
 $(LIB_ARG): $(__MAKEFILES__)

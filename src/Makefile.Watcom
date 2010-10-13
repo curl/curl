@@ -5,9 +5,6 @@
 
 !ifndef %watcom
 !error WATCOM environment variable not set!
-!else
-SYS_INCL = -I$(%watcom)\h\nt -I$(%watcom)\h
-SYS_LIBS = $(%watcom)\lib386\nt;$(%watcom)\lib386
 !endif
 
 !ifdef %libname
@@ -33,18 +30,30 @@ RC = wrc
 !  endif
 !endif
 
+!ifdef __LINUX__
+DS = /
+CP = cp
+MD = mkdir -p
+RD = rmdir -p
+RM = rm -f
+!else
+DS = $(X)\$(X)
+CP = copy 2>NUL
+MD = mkdir
+RD = rmdir /q /s 2>NUL
 !if $(__VERSION__) < 1250
 RM = del /q /f 2>NUL
 !else
 RM = rm -f
 !endif
-MD = mkdir
-RD = rmdir /q /s 2>NUL
-CP = copy
+!endif
+
+SYS_INCL = -I$(%watcom)$(DS)h$(DS)nt -I$(%watcom)$(DS)h
+SYS_LIBS = $(%watcom)$(DS)lib386$(DS)nt;$(%watcom)$(DS)lib386
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
          -wcd=201 -bt=nt -bc -d+ -dWIN32 -dHAVE_STRTOLL             &
-         -I..\include -I..\lib $(SYS_INCL)
+         -I..$(DS)include -I..$(DS)lib $(SYS_INCL)
 
 !ifdef %debug
 DEBUG  = -dDEBUG=1 -dDEBUGBUILD
@@ -63,39 +72,39 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..\..\zlib-1.2.5
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
 !endif
 
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..\..\libssh2-1.2.7
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.7
 !endif
 
 !ifdef %librtmp_root
 LIBRTMP_ROOT = $(%librtmp_root)
 !else
-LIBRTMP_ROOT = ..\..\librtmp-2.3
+LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !endif
 
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..\..\openssl-0.9.8o
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8o
 !endif
 
 !ifdef %ares_root
 ARES_ROOT = $(%ares_root)
 !else
-ARES_ROOT = ..\ares
+ARES_ROOT = ..$(DS)ares
 !endif
 
 !ifdef %use_ssl
-CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)\inc32
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)$(DS)inc32
 !endif
 
 OBJ_DIR  = WC_Win32.obj
-LINK_ARG = $(OBJ_DIR)\wlink.arg
+LINK_ARG = $(OBJ_DIR)$(DS)wlink.arg
 
 # In order to process Makefile.inc wmake must be called with -u switch!
 !ifndef %MAKEFLAGS
@@ -114,9 +123,13 @@ CFLAGS += -DCURL_STATICLIB
 CFLAGS += -br
 OBJS += $(CURLX_SOURCES:.c=.obj)
 !endif
+!ifdef __LINUX__
+OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+!else
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
+!endif
 
-RESOURCE = $(OBJ_DIR)\curl.res
+RESOURCE = $(OBJ_DIR)$(DS)curl.res
 
 all: hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
 	@echo Welcome to cURL
@@ -142,10 +155,10 @@ curl.exe: $(OBJS) $(RESOURCE) $(LINK_ARG)
 	$(LD) name $^@ @$]@
 
 $(RESOURCE): curl.rc
-	$(RC) $(DEBUG) -q -r -zm -I..\include $(SYS_INCL) $[@ -fo=$^@
+	$(RC) $(DEBUG) -q -r -zm -bt=nt -I..$(DS)include $(SYS_INCL) $[@ -fo=$^@
 
 # suffix search path - vpath-like hack
-.c: ..\lib
+.c: ..$(DS)lib
 
 .ERASE
 .c{$(OBJ_DIR)}.obj:
@@ -163,27 +176,27 @@ $(LINK_ARG): $(__MAKEFILES__)
 	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
 !ifdef %curl_static
 	@%append $^@ library wldap32.lib
-	@%append $^@ library ..\lib\$(LIBNAME).lib
+	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME).lib
 !ifdef %use_zlib
-	@%append $^@ library $(ZLIB_ROOT)\zlib.lib
+	@%append $^@ library $(ZLIB_ROOT)$(DS)zlib.lib
 !endif
 !ifdef %use_rtmp
-	@%append $^@ library $(LIBRTMP_ROOT)\librtmp\librtmp.lib, winmm.lib
+	@%append $^@ library $(LIBRTMP_ROOT)$(DS)librtmp$(DS)librtmp.lib, winmm.lib
 !endif
 !ifdef %use_ssh2                                                                                                                    
-	@%append $^@ library $(LIBSSH2_ROOT)\win32\libssh2.lib                                                                      
+	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib                                                                      
 !endif
 !ifdef %use_ssl
-	@%append $^@ library $(OPENSSL_ROOT)\out32\libeay32.lib, $(OPENSSL_ROOT)\out32\ssleay32.lib
+	@%append $^@ library $(OPENSSL_ROOT)$(DS)out32$(DS)libeay32.lib, $(OPENSSL_ROOT)$(DS)out32$(DS)ssleay32.lib
 !endif
 !ifdef %use_ares
-	@%append $^@ library $(ARES_ROOT)\cares.lib
+	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
 !endif
 !else
-	@%append $^@ library ..\lib\$(LIBNAME)_imp.lib
+	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME)_imp.lib
 !endif
 !ifeq USE_WATT32 1
-	@%append $^@ library $(%watt_root)\lib\wattcpw_imp.lib
+	@%append $^@ library $(%watt_root)$(DS)lib$(DS)wattcpw_imp.lib
 !else
 	@%append $^@ library ws2_32.lib
 !endif
