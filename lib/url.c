@@ -2166,13 +2166,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.max_filesize = va_arg(param, long);
     break;
 
+#ifdef USE_SSL
   case CURLOPT_USE_SSL:
     /*
      * Make transfers attempt to use SSL/TLS.
      */
     data->set.ftp_ssl = (curl_usessl)va_arg(param, long);
     break;
-
+#endif
   case CURLOPT_FTPSSLAUTH:
     /*
      * Set a specific auth for FTP-SSL transfers.
