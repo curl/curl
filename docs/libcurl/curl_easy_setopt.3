@@ -1524,7 +1524,9 @@ to 0 (zero, the default), \fICURLOPT_TRANSFERTEXT\fP has no effect when doing
 FTP via a proxy. Beware that not all proxies support this feature.  (Added in
 7.18.0)
 .IP CURLOPT_CRLF
-Convert Unix newlines to CRLF newlines on transfers.
+Pass a long. If the value is set to 1 (one), libcurl converts Unix newlines to
+CRLF newlines on transfers. Disable this option again by setting the value to
+0 (zero).
 .IP CURLOPT_RANGE
 Pass a char * as parameter, which should contain the specified range you
 want. It should be in the format "X-Y", where X or Y may be left out. HTTP
