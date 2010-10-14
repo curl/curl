@@ -2116,6 +2116,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
 
       case 'j': /* --compressed */
+        if(toggle && !(curlinfo->features & CURL_VERSION_LIBZ))
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
         break;
 
@@ -2260,6 +2262,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case '$': /* more options without a short option */
       switch(subletter) {
       case 'a': /* --ftp-ssl */
+        if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl = toggle;
         break;
       case 'b': /* --ftp-pasv */
@@ -2351,12 +2355,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
       case 'v': /* --ftp-ssl-reqd */
+        if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl_reqd = toggle;
         break;
       case 'w': /* --no-sessionid */
         config->disable_sessionid = (bool)(!toggle);
         break;
       case 'x': /* --ftp-ssl-control */
+        if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl_control = toggle;
         break;
       case 'y': /* --ftp-ssl-ccc */
