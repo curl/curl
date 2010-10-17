@@ -1,10 +1,3 @@
-To be addressed in 7.21.2
-=========================
-
-268 - 3076430 SFTP resume with 4GB file does not work
-
-271 -
-
 To be addressed in 7.21.3
 =========================
 
@@ -15,3 +8,5 @@ To be addressed in 7.21.3
 265 - 1. FTP cmd channel and data channel validation
 
 267 - 2. Cert chain for data channel
+
+271 -
