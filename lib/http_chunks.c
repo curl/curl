@@ -342,7 +342,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
             return CHUNKE_OUT_OF_MEMORY;
           conn->trailer = ptr;
         }
-        fprintf(stderr, "MOO: %c\n", *datap);
         conn->trailer[conn->trlPos++]=*datap;
       }
       datap++;
