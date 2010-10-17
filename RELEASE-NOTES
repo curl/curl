@@ -5,15 +5,17 @@ Curl and libcurl 7.21.3
  curl_easy_setopt() options:   180
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 817
+ Contributors:                 827
 
 This release includes the following changes:
 
- o 
+ o Added --noconfigure switch to testcurl.pl.
 
 This release includes the following bugfixes:
 
- o 
+ o check for libcurl features for some command line options
+ o Curl_setopt: disallow CURLOPT_USE_SSL without SSL support
+ o http_chunks: remove debug output
 
 This release includes the following known bugs:
 
@@ -22,6 +24,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Dan Fandrich, Guenter Knauf, Pat Ray
 
         Thanks! (and sorry if I forgot to mention someone)
