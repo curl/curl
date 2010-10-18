@@ -60,11 +60,6 @@ void Curl_sec_end (struct connectdata *);
 CURLcode Curl_sec_login (struct connectdata *);
 void Curl_sec_prot (int, char **);
 int Curl_sec_request_prot (struct connectdata *conn, const char *level);
-int Curl_sec_set_protection_level(struct connectdata *conn);
 void Curl_sec_status (void);
-
-enum protection_level Curl_set_command_prot(struct connectdata *,
-                                            enum protection_level);
-
 
 #endif

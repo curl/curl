@@ -7,7 +7,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2009 Daniel Stenberg
+ * Copyright (c) 2004 - 2010 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -315,6 +315,14 @@ struct Curl_sec_client_mech Curl_krb4_client_mech = {
     krb4_decode
 };
 
+static enum protection_level
+krb4_set_command_prot(struct connectdata *conn, enum protection_level level)
+{
+  enum protection_level old = conn->command_prot;
+  conn->command_prot = level;
+  return old;
+}
+
 CURLcode Curl_krb_kauth(struct connectdata *conn)
 {
   des_cblock key;
@@ -329,7 +337,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   CURLcode result;
   unsigned char *ptr;
 
-  save = Curl_set_command_prot(conn, prot_private);
+  save = krb4_set_command_prot(conn, prot_private);
 
   result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->user);
 
@@ -341,14 +349,14 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
     return result;
 
   if(conn->data->state.buffer[0] != '3'){
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   p = strstr(conn->data->state.buffer, "T=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
@@ -360,7 +368,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
   if(!tmp || !ptr) {
     Curl_failf(conn->data, "Failed to decode base64 in reply");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   memcpy((char *)tkt.dat, ptr, tmp);
@@ -371,7 +379,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   p = strstr(conn->data->state.buffer, "P=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   name = p + 2;
@@ -400,7 +408,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   if(Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length, &p)
      < 1) {
     failf(conn->data, "Out of memory base64-encoding.");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_OUT_OF_MEMORY;
   }
   memset (tktcopy.dat, 0, tktcopy.length);
@@ -413,7 +421,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   result = Curl_GetFTPResponse(&nread, conn, NULL);
   if(result)
     return result;
-  Curl_set_command_prot(conn, save);
+  krb4_set_command_prot(conn, save);
 
   return CURLE_OK;
 }

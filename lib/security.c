@@ -399,16 +399,8 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer, int level)
   return ret_code;
 }
 
-enum protection_level
-Curl_set_command_prot(struct connectdata *conn, enum protection_level level)
-{
-  enum protection_level old = conn->command_prot;
-  conn->command_prot = level;
-  return old;
-}
-
 /* FIXME: The error code returned here is never checked. */
-int Curl_sec_set_protection_level(struct connectdata *conn)
+static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
   char* pbsz;
@@ -551,7 +543,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     conn->command_prot = prot_safe;
     /* Set the requested protection level */
     /* BLOCKING */
-    Curl_sec_set_protection_level(conn);
+    (void)sec_set_protection_level(conn);
     break;
   }
 
