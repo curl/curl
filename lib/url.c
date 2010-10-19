@@ -3597,7 +3597,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     path[0]=0;
 
     if(2 > sscanf(data->change.url,
-                   "%15[^\n:]://%[^\n/]%[^\n]",
+                   "%15[^\n:]://%[^\n/?]%[^\n]",
                    protobuf,
                    conn->host.name, path)) {
 
@@ -3605,7 +3605,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      rc = sscanf(data->change.url, "%[^\n/]%[^\n]", conn->host.name, path);
+      rc = sscanf(data->change.url, "%[^\n/?]%[^\n]", conn->host.name, path);
       if(1 > rc) {
         /*
          * We couldn't even get this format.
