@@ -116,9 +116,9 @@
 
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);
-static LIBSSH2_ALLOC_FUNC(libssh2_malloc);
-static LIBSSH2_REALLOC_FUNC(libssh2_realloc);
-static LIBSSH2_FREE_FUNC(libssh2_free);
+static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
+static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
+static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
 static CURLcode get_pathname(const char **cpp, char **path);
 
@@ -301,19 +301,19 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
-static LIBSSH2_ALLOC_FUNC(libssh2_malloc)
+static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc)
 {
   (void)abstract; /* arg not used */
   return malloc(count);
 }
 
-static LIBSSH2_REALLOC_FUNC(libssh2_realloc)
+static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
 {
   (void)abstract; /* arg not used */
   return realloc(ptr, count);
 }
 
-static LIBSSH2_FREE_FUNC(libssh2_free)
+static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
   (void)abstract; /* arg not used */
   free(ptr);
@@ -2543,8 +2543,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   sock = conn->sock[FIRSTSOCKET];
 #endif /* CURL_LIBSSH2_DEBUG */
 
-  ssh->ssh_session = libssh2_session_init_ex(libssh2_malloc, libssh2_free,
-                                             libssh2_realloc, conn);
+  ssh->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
+                                             my_libssh2_free,
+                                             my_libssh2_realloc, conn);
   if(ssh->ssh_session == NULL) {
     failf(data, "Failure initialising ssh session");
     return CURLE_FAILED_INIT;
