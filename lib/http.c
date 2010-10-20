@@ -2375,18 +2375,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #endif /* CURL_DISABLE_PROXY */
 
   if(HTTPREQ_POST_FORM == httpreq) {
-    /* we must build the whole darned post sequence first, so that we have
-       a size of the whole shebang before we start to send it */
-     result = Curl_getFormData(&http->sendit, data->set.httppost,
-                               Curl_checkheaders(data, "Content-Type:"),
-                               &http->postsize);
-     if(CURLE_OK != result) {
-       /* Curl_getFormData() doesn't use failf() */
-       failf(data, "failed creating formpost data");
-       return result;
-     }
+    /* we must build the whole post sequence first, so that we have a size of
+       the whole transfer before we start to send it */
+    result = Curl_getformdata(data, &http->sendit, data->set.httppost,
+                              Curl_checkheaders(data, "Content-Type:"),
+                              &http->postsize);
+    if(result)
+      return result;
   }
-
 
   http->p_accept = Curl_checkheaders(data, "Accept:")?NULL:"Accept: */*\r\n";
 
