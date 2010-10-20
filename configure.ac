@@ -2019,8 +2019,9 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl libssh2_version is a post 1.0 addition
        dnl libssh2_init and libssh2_exit were added in 1.2.5
        dnl libssh2_scp_send64 was added in 1.2.6
+       dnl libssh2_session_handshake was added in 1.2.8
        AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit \
-                       libssh2_scp_send64 )
+                       libssh2_scp_send64 libssh2_session_handshake)
 
        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
        export LD_LIBRARY_PATH

@@ -497,6 +497,13 @@ static int sshkeycallback(CURL *easy,
 #endif
 
 /*
+ * libssh2 1.2.8 fixed the problem with 32bit ints used for sockets on win64.
+ */
+#ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
+#define libssh2_session_startup(x,y) libssh2_session_handshake(x,y)
+#endif
+
+/*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end.  The data the pointer 'block' points
  * to will be set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
