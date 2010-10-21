@@ -30,7 +30,7 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
+EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
  vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h            \
  config-mac.h curl_config.h.in makefile.dj config.dos libcurl.plist        \
  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga		   \

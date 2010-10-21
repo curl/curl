@@ -58,7 +58,7 @@ CLEANFILES = hugehelp.c
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 
 EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32 Makefile.m32 \
-	Makefile.riscos curl_config.h.in macos/curl.mcp.xml.sit.hqx	  \
+	curl_config.h.in macos/curl.mcp.xml.sit.hqx			  \
 	macos/MACINSTALL.TXT macos/src/curl_GUSIConfig.cpp vc6curlsrc.dsp \
 	macos/src/macos_main.cpp config-amigaos.h makefile.amiga curl.rc  \
 	Makefile.netware Makefile.inc Makefile.Watcom vc6curlsrc.dsw      \
