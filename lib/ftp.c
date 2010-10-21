@@ -3562,14 +3562,12 @@ static CURLcode init_wc_data(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/* This is called recursively */
 static CURLcode wc_statemach(struct connectdata *conn)
 {
-  struct ftp_conn *ftpc = &conn->proto.ftpc;
-  struct WildcardData *wildcard = &(conn->data->wildcard);
-  struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
-  char *tmp_path;
+  struct WildcardData * const wildcard = &(conn->data->wildcard);
   CURLcode ret = CURLE_OK;
-  long userresponse = 0;
+
   switch (wildcard->state) {
   case CURLWC_INIT:
     ret = init_wc_data(conn);
@@ -3580,10 +3578,10 @@ static CURLcode wc_statemach(struct connectdata *conn)
       wildcard->state = ret ? CURLWC_ERROR : CURLWC_MATCHING;
     break;
 
-  case CURLWC_MATCHING:
+  case CURLWC_MATCHING: {
     /* In this state is LIST response successfully parsed, so lets restore
        previous WRITEFUNCTION callback and WRITEDATA pointer */
-    ftp_tmp = wildcard->tmp;
+    struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
     conn->data->set.fwrite_func = ftp_tmp->backup.write_function;
     conn->data->set.out = ftp_tmp->backup.file_descriptor;
     wildcard->state = CURLWC_DOWNLOADING;
@@ -3598,13 +3596,14 @@ static CURLcode wc_statemach(struct connectdata *conn)
       wildcard->state = CURLWC_CLEAN;
       return CURLE_REMOTE_FILE_NOT_FOUND;
     }
-    ret = wc_statemach(conn);
-    break;
+    return wc_statemach(conn);
+  } break;
 
   case CURLWC_DOWNLOADING: {
     /* filelist has at least one file, lets get first one */
+    struct ftp_conn *ftpc = &conn->proto.ftpc;
     struct curl_fileinfo *finfo = wildcard->filelist->head->ptr;
-    tmp_path = malloc(strlen(conn->data->state.path) +
+    char *tmp_path = malloc(strlen(conn->data->state.path) +
                       strlen(finfo->filename) + 1);
     if(!tmp_path) {
       return CURLE_OUT_OF_MEMORY;
@@ -3623,7 +3622,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
 
     infof(conn->data, "Wildcard - START of \"%s\"\n", finfo->filename);
     if(conn->data->set.chunk_bgn) {
-      userresponse = conn->data->set.chunk_bgn(
+      long userresponse = conn->data->set.chunk_bgn(
           finfo, wildcard->customptr, (int)wildcard->filelist->size);
       switch(userresponse) {
       case CURL_CHUNK_BGN_FUNC_SKIP:
@@ -3666,16 +3665,17 @@ static CURLcode wc_statemach(struct connectdata *conn)
     Curl_llist_remove(wildcard->filelist, wildcard->filelist->head, NULL);
     wildcard->state = (wildcard->filelist->size == 0) ?
                       CURLWC_CLEAN : CURLWC_DOWNLOADING;
-    ret = wc_statemach(conn);
+    return wc_statemach(conn);
   } break;
 
-  case CURLWC_CLEAN:
+  case CURLWC_CLEAN: {
+    struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
     ret = CURLE_OK;
     if(ftp_tmp) {
       ret = Curl_ftp_parselist_geterror(ftp_tmp->parser);
     }
     wildcard->state = ret ? CURLWC_ERROR : CURLWC_DONE;
-    break;
+  } break;
 
   case CURLWC_DONE:
   case CURLWC_ERROR:
