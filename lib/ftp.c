@@ -3083,6 +3083,11 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 #endif
 
   if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
+    if(!result && ftpc->dont_check)
+      /* prevent some FTP servers (namely Pure-ftpd) from hanging if we close
+       * the data channel before transferring all data */
+      result = Curl_pp_sendf(&ftpc->pp, "ABOR");
+
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* The secondary socket is using SSL so we must close down that part
          first before we close the socket for real */
@@ -3097,7 +3102,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     }
   }
 
-  if((ftp->transfer == FTPTRANSFER_BODY) && ftpc->ctl_valid &&
+  if(!result && (ftp->transfer == FTPTRANSFER_BODY) && ftpc->ctl_valid &&
      pp->pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we just performed,

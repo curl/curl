@@ -45,6 +45,7 @@ TYPE I
 SIZE 1057
 REST 52
 RETR 1057
+ABOR
 QUIT
 </protocol>
 </verify>

@@ -39,6 +39,7 @@ EPSV
 PASV
 TYPE I
 SIZE 122
+ABOR
 QUIT
 </protocol>
 </verify>

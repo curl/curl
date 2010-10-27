@@ -50,6 +50,7 @@ TYPE I
 SIZE 1036
 REST 20
 RETR 1036
+ABOR
 QUIT
 </protocol>
 <file name="log/curl1036.out">
