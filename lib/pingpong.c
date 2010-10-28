@@ -362,7 +362,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
     else if(gotbytes <= 0) {
       keepon = FALSE;
       result = CURLE_RECV_ERROR;
-      failf(data, "FTP response reading failed");
+      failf(data, "response reading failed");
     }
     else {
       /* we got a whole chunk of data, which can be anything from one
