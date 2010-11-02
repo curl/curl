@@ -12,7 +12,7 @@ noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
   lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542 lib543 \
   lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 \
   lib539 lib557 lib558 lib559 lib560 lib562 lib564 lib565 lib566 lib567 \
-  lib568 lib569 lib570 lib571 lib572 lib573 chkhostname
+  lib568 lib569 lib570 lib571 lib572 lib573 chkhostname lib580
 
 chkhostname_SOURCES = chkhostname.c $(top_srcdir)/lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
@@ -164,3 +164,8 @@ lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL)
 lib578_SOURCES = lib578.c $(SUPPORTFILES)
 
 lib579_SOURCES = lib579.c $(SUPPORTFILES)
+
+lib580_SOURCES = lib580.c $(SUPPORTFILES)
+
+lib580.c: mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions
+	$(PERL) mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions > $@
