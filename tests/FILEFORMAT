@@ -224,7 +224,7 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output"] [timeout="secs"] [delay="secs"]>
+<command [option="no-output"] [timeout="secs"] [delay="secs"] [type="perl"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -236,6 +236,9 @@ data that is defined within the <reply><data></data></reply> section.
 If a CONNECT is used to the server (to emulate HTTPS etc over proxy), the port
 number given in the CONNECT request will be used to identify which test that
 is being run, if the proxy host name is said to start with 'test'.
+
+Set type="perl" to write the test case as a perl script. It implies that
+there's no memory debugging and valgrind gets shut off for this test.
 
 Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if

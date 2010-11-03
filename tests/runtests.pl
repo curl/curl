@@ -2246,6 +2246,7 @@ sub singletest {
     my $why;
     my %feature;
     my $cmd;
+    my $disablevalgrind;
 
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
@@ -2485,9 +2486,6 @@ sub singletest {
         @reply=@replycheck;
     }
 
-    # curl command to run
-    my @curlcmd= fixarray ( getpart("client", "command") );
-
     # this is the valid protocol blurb curl should generate
     my @protocol= fixarray ( getpart("verify", "protocol") );
 
@@ -2541,12 +2539,12 @@ sub singletest {
     my @blaha;
     ($cmd, @blaha)= getpart("client", "command");
 
-    # make some nice replace operations
-    $cmd =~ s/\n//g; # no newlines please
-
-    # substitute variables in the command line
-    subVariables \$cmd;
-
+    if($cmd) {
+        # make some nice replace operations
+        $cmd =~ s/\n//g; # no newlines please
+        # substitute variables in the command line
+        subVariables \$cmd;
+    }
     if($curl_debug) {
         unlink($memdump);
     }
@@ -2597,14 +2595,31 @@ sub singletest {
         }
     }
 
+    my $CMDLINE;
     my $cmdargs;
-    if(!$tool) {
+    my $cmdtype = $cmdhash{'type'} || "default";
+    if($cmdtype eq "perl") {
+        # run the command line prepended with "perl"
+        $cmdargs ="$cmd";
+        $CMDLINE = "perl ";
+        $tool=$CMDLINE;
+        $disablevalgrind=1;
+    }
+    elsif(!$tool) {
         # run curl, add --verbose for debug information output
         $cmdargs ="$out --include --verbose --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
         $CURLOUT = $STDOUT; # sends received data to stdout
+
+        $CMDLINE="$LIBDIR/$tool";
+        if(! -f $CMDLINE) {
+            print "The tool set in the test case for this: '$tool' does not exist\n";
+            timestampskippedevents($testnum);
+            return -1;
+        }
+        $DBGCURL=$CMDLINE;
     }
 
     my @stdintest = getpart("client", "stdin");
@@ -2615,23 +2630,13 @@ sub singletest {
 
         $cmdargs .= " <$stdinfile";
     }
-    my $CMDLINE;
 
     if(!$tool) {
         $CMDLINE="$CURL";
     }
-    else {
-        $CMDLINE="$LIBDIR/$tool";
-        if(! -f $CMDLINE) {
-            print "The tool set in the test case for this: '$tool' does not exist\n";
-            timestampskippedevents($testnum);
-            return -1;
-        }
-        $DBGCURL=$CMDLINE;
-    }
 
     my $usevalgrind;
-    if($valgrind) {
+    if($valgrind && !$disablevalgrind) {
         my @valgrindoption = getpart("verify", "valgrind");
         if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
             $usevalgrind = 1;
@@ -3069,7 +3074,8 @@ sub singletest {
 
     if($curl_debug) {
         if(! -f $memdump) {
-            logmsg "\n** ALERT! memory debugging with no output file?\n";
+            logmsg "\n** ALERT! memory debugging with no output file?\n"
+                if(!$cmdtype eq "perl");
         }
         else {
             my @memdata=`$memanalyze $memdump`;
@@ -3131,7 +3137,7 @@ sub singletest {
             $ok .= "v";
         }
         else {
-            if(!$short) {
+            if(!$short && !$disablevalgrind) {
                 logmsg " valgrind SKIPPED\n";
             }
             $ok .= "-"; # skipped
