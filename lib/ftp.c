@@ -3083,10 +3083,9 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 #endif
 
   if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
-    if(!result && ftpc->dont_check)
-      /* prevent some FTP servers (namely Pure-ftpd) from hanging if we close
-       * the data channel before transferring all data */
-      result = Curl_pp_sendf(&ftpc->pp, "ABOR");
+    if(!result && ftpc->dont_check && data->req.maxdownload > 0)
+      /* partial download completed */
+      result = Curl_pp_sendf(pp, "ABOR");
 
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* The secondary socket is using SSL so we must close down that part
@@ -3127,6 +3126,14 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
     if(result)
       return result;
+
+    if(ftpc->dont_check && data->req.maxdownload > 0) {
+      /* we have just sent ABOR and there is no reliable way to check if it was
+       * successful or not; we have to close the connection now */
+      infof(data, "partial download completed, closing connection\n");
+      conn->bits.close = TRUE; /* mark for closure */
+      return result;
+    }
 
     if(!ftpc->dont_check) {
       /* 226 Transfer complete, 250 Requested file action okay, completed. */

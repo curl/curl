@@ -46,7 +46,6 @@ TYPE I
 SIZE 110
 REST 20
 RETR 110
-ABOR
 QUIT
 </protocol>
 </verify>
