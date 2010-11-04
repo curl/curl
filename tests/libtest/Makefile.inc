@@ -167,5 +167,5 @@ lib579_SOURCES = lib579.c $(SUPPORTFILES)
 
 lib580_SOURCES = lib580.c $(SUPPORTFILES)
 
-lib580.c: mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions
-	$(PERL) mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions > $@
+lib580.c: $(top_srcdir)/tests/libtest/mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions
+	$(PERL) $(top_srcdir)/tests/libtest/mk580.pl $(top_srcdir)/docs/libcurl/symbols-in-versions > $@
