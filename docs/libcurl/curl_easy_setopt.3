@@ -84,6 +84,13 @@ If this option is set and libcurl has been built with the standard name
 resolver, timeouts will not occur while the name resolve takes place.
 Consider building libcurl with c-ares support to enable asynchronous DNS
 lookups, which enables nice timeouts for name resolves without signals.
+
+Setting \fICURLOPT_NOSIGNAL\fP to 1 makes libcurl NOT ask the system to ignore
+SIGPIPE signals, which otherwise are sent by the system when trying to send
+data to a socket which is closed in the other end. libcurl makes an effort to
+never cause such SIGPIPEs to trigger, but some operating systems have no way
+to avoid them and even on those that have there are some corner cases when
+they may still happen, contrary to our desire.
 .IP CURLOPT_WILDCARDMATCH
 Set this option to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the
