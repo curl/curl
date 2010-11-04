@@ -1,8 +1,6 @@
 To be addressed in 7.21.3
 =========================
 
-262 - Manual setting of TLS Server Name Indication - use Host:
-
 263 - Support binding DNS to local interface/IP
 
 265 - 1. FTP cmd channel and data channel validation
