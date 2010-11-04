@@ -2534,7 +2534,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.rangeline);
   Curl_safefree(conn->allocptr.ref);
   Curl_safefree(conn->allocptr.host);
-  Curl_safefree(conn->allocptr.cookiehost);
+  Curl_safefree(conn->allocptr.customhost);
   Curl_safefree(conn->allocptr.rtsp_transport);
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
