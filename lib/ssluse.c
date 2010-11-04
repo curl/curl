@@ -1642,12 +1642,8 @@ ossl_connect_step1(struct connectdata *conn,
   connssl->server_cert = 0x0;
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  if((!data->state.this_is_a_follow ||
-      Curl_raw_equal(data->state.first_host, conn->host.name)) &&
-     conn->allocptr.customhost)
-    hostname = conn->allocptr.customhost;
-  else
-    hostname = conn->host.name;
+  hostname = conn->allocptr.customhost?conn->allocptr.customhost:
+    conn->host.name;
 
   if ((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
 #ifdef ENABLE_IPV6
