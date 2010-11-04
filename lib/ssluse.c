@@ -1429,6 +1429,8 @@ ossl_connect_step1(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+  const char *hostname;
+  bool hostname_static;
   bool sni;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
@@ -1641,14 +1643,28 @@ ossl_connect_step1(struct connectdata *conn,
   connssl->server_cert = 0x0;
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  if ((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
+  hostname = Curl_checkheaders(data, "Host:");
+  if(hostname && (!data->state.this_is_a_follow ||
+                  Curl_raw_equal(data->state.first_host, conn->host.name))) {
+    hostname_static = FALSE;
+    hostname = Curl_copy_header_value(hostname);
+    if(!hostname) {
+      return CURLE_OUT_OF_MEMORY;
+    }
+  } else {
+    hostname_static = TRUE;
+    hostname = conn->host.name;
+  }
+  if ((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
 #ifdef ENABLE_IPV6
-      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
+      (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
 #endif
       sni &&
-      !SSL_set_tlsext_host_name(connssl->handle, conn->host.name))
+      !SSL_set_tlsext_host_name(connssl->handle, hostname))
     infof(data, "WARNING: failed to configure server name indication (SNI) "
           "TLS extension\n");
+  if(!hostname_static)
+    free((char *) hostname);
 #endif
 
   /* Check if there's a cached ID we can/should use here! */
