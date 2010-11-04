@@ -112,7 +112,6 @@ int main(int argc, char *argv[])
         /* select error */
         break;
       case 0:
-        printf("timeout!\n");
       default:
         /* timeout or readable/writable sockets */
         printf("perform!\n");

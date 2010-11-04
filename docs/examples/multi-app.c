@@ -101,12 +101,8 @@ int main(int argc, char **argv)
     case -1:
       /* select error */
       break;
-    case 0:
-      /* timeout, do something else */
-      break;
-    default:
-      /* one or more of curl's file descriptors say there's data to read
-         or write */
+    case 0: /* timeout */
+    default: /* action */
       curl_multi_perform(multi_handle, &still_running);
       break;
     }

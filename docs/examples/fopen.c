@@ -180,12 +180,9 @@ fill_buffer(URL_FILE *file,int want,int waittime)
             break;
 
         case 0:
-            break;
-
-        default:
-            /* timeout or readable/writable sockets */
-            curl_multi_perform(multi_handle, &file->still_running);
-            break;
+          /* timeout or readable/writable sockets */
+          curl_multi_perform(multi_handle, &file->still_running);
+          break;
         }
     } while(file->still_running && (file->buffer_pos < want));
     return 1;
