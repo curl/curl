@@ -16,6 +16,13 @@ This release includes the following bugfixes:
  o check for libcurl features for some command line options
  o Curl_setopt: disallow CURLOPT_USE_SSL without SSL support
  o http_chunks: remove debug output
+ o URL-parsing: consider ? a divider
+ o SSH: avoid using the libssh2_ prefix
+ o SSH: use libssh2_session_handshake() to work on win64
+ o TLS SNI: set name to custom Host header
+ o TLS certcheck: use the custom Host: name for checks
+ o ftp: prevent server from hanging on closed data connection when stopping
+   a transfer before the end of the full transfer (ranges)
 
 This release includes the following known bugs:
 
@@ -24,6 +31,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Guenter Knauf, Pat Ray
+ Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)
