@@ -499,6 +499,8 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
       if (bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
         binary = 1;
+      else
+        binary = 0;
 
       for (i=0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
