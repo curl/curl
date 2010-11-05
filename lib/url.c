@@ -1750,6 +1750,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.quote = va_arg(param, struct curl_slist *);
     break;
+  case CURLOPT_RESOLVE:
+    /*
+     * List of NAME:[address] names to populate the DNS cache with
+     * Prefix the NAME with dash (-) to _remove_ the name from the cache.
+     *
+     * Names added with this API will remain in the cache until explicitly
+     * removed or the handle is cleaned up.
+     *
+     * This API can remove any name from the DNS cache, but only entries
+     * that aren't actually in use right now will be pruned immediately.
+     */
+    data->set.resolve = va_arg(param, struct curl_slist *);
+    data->change.resolve = data->set.resolve;
+    break;
   case CURLOPT_PROGRESSFUNCTION:
     /*
      * Progress callback function

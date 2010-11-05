@@ -1436,6 +1436,9 @@ typedef enum {
   /* FNMATCH_FUNCTION user pointer */
   CINIT(FNMATCH_DATA, OBJECTPOINT, 202),
 
+  /* send linked-list of name:port:address sets */
+  CINIT(RESOLVE, OBJECTPOINT, 203),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -421,6 +421,9 @@ int Curl_resolv(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
+  /* free the allocated entry_id again */
+  free(entry_id);
+
   /* See whether the returned entry is stale. Done before we release lock */
   if( remove_entry_if_stale(data, dns) )
     dns = NULL; /* the memory deallocation is being handled by the hash */
@@ -432,9 +435,6 @@ int Curl_resolv(struct connectdata *conn,
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-  /* free the allocated entry_id again */
-  free(entry_id);
 
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */

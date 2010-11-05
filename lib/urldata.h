@@ -1186,6 +1186,8 @@ struct DynamicStatic {
   bool referer_alloc; /* referer sting is malloc()ed */
   struct curl_slist *cookielist; /* list of cookie files set by
                                     curl_easy_setopt(COOKIEFILE) calls */
+  struct curl_slist *resolve; /* set to point to the set.resolve list when
+                                 this should be dealt with in pretransfer */
 };
 
 /*
@@ -1332,6 +1334,8 @@ struct UserDefined {
   struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
                                           the transfer on source host */
   struct curl_slist *telnet_options; /* linked list of telnet options */
+  struct curl_slist *resolve;     /* list of names to add/remove from
+                                     DNS cache */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
   Curl_HttpReq httpreq;   /* what kind of HTTP request (if any) is this */

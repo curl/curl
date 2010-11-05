@@ -581,6 +581,7 @@ struct Configurable {
   struct curl_httppost *httppost;
   struct curl_httppost *last_post;
   struct curl_slist *telnet_options;
+  struct curl_slist *resolve;
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
@@ -869,6 +870,7 @@ static void help(void)
     "    --remote-name-all Use the remote file name for all URLs",
     " -R/--remote-time   Set the remote file's time on the local output",
     " -X/--request <command> Specify request command to use",
+    "    --resolve <host:port:address> Force resolve of HOST:PORT to ADDRESS",
     "    --retry <num>   Retry request <num> times if transient problems occur",
     "    --retry-delay <seconds> When retrying, wait this many seconds between each",
     "    --retry-max-time <seconds> Retry only within this period",
@@ -1881,6 +1883,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$C", "ftp-pret",   FALSE},
     {"$D", "proto",      TRUE},
     {"$E", "proto-redir", TRUE},
+    {"$F", "resolve",    TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2441,6 +2444,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->proto_redir_present = TRUE;
         if(proto2num(config, &config->proto_redir, nextarg))
           return PARAM_BAD_USE;
+        break;
+      case 'F': /* --resolve */
+        err = add2list(&config->resolve, nextarg);
         break;
       }
       break;
@@ -4043,6 +4049,7 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->telnet_options);
   curl_slist_free_all(config->mail_rcpt);
+  curl_slist_free_all(config->resolve);
 
   if(config->easy)
     curl_easy_cleanup(config->easy);
@@ -5437,6 +5444,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
           my_setopt(curl, CURLOPT_HEADERDATA, &outs);
         }
+
+        if(config->resolve)
+          /* new in 7.21.3 */
+          my_setopt(curl, CURLOPT_RESOLVE, config->resolve);
 
         retry_numretries = config->req_retry;
 
