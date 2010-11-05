@@ -796,7 +796,7 @@ struct connectdata {
     char *rangeline; /* free later if not NULL! */
     char *ref; /* free later if not NULL! */
     char *host; /* free later if not NULL */
-    char *customhost; /* free later if not NULL */
+    char *cookiehost; /* free later if not NULL */
     char *rtsp_transport; /* free later if not NULL */
   } allocptr;
 

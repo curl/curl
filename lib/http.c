@@ -2254,25 +2254,26 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   ptr = Curl_checkheaders(data, "Host:");
   if(ptr && (!data->state.this_is_a_follow ||
              Curl_raw_equal(data->state.first_host, conn->host.name))) {
-
+#if !defined(CURL_DISABLE_COOKIES)
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
-    char *chost = Curl_copy_header_value(ptr);
-    if (!chost)
+    char *cookiehost = Curl_copy_header_value(ptr);
+    if (!cookiehost)
       return CURLE_OUT_OF_MEMORY;
-    if (!*chost)
+    if (!*cookiehost)
       /* ignore empty data */
-      free(chost);
+      free(cookiehost);
     else {
-      char *colon = strchr(chost, ':');
+      char *colon = strchr(cookiehost, ':');
       if (colon)
         *colon = 0; /* The host must not include an embedded port number */
-      Curl_safefree(conn->allocptr.customhost);
-      conn->allocptr.customhost = chost;
+      Curl_safefree(conn->allocptr.cookiehost);
+      conn->allocptr.cookiehost = cookiehost;
     }
+#endif
 
     conn->allocptr.host = NULL;
   }
@@ -2596,8 +2597,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(data->cookies) {
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       co = Curl_cookie_getlist(data->cookies,
-                               conn->allocptr.customhost?
-                               conn->allocptr.customhost:host,
+                               conn->allocptr.cookiehost?
+                               conn->allocptr.cookiehost:host,
                                data->state.path,
                                (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
@@ -3688,8 +3689,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                       data->cookies, TRUE, k->p+11,
                       /* If there is a custom-set Host: name, use it
                          here, or else use real peer host name. */
-                      conn->allocptr.customhost?
-                      conn->allocptr.customhost:conn->host.name,
+                      conn->allocptr.cookiehost?
+                      conn->allocptr.cookiehost:conn->host.name,
                       data->state.path);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }

@@ -1125,20 +1125,16 @@ static CURLcode verifyhost(struct connectdata *conn,
   struct in_addr addr;
 #endif
   CURLcode res = CURLE_OK;
-  char *hostname;
-
-  hostname = conn->allocptr.customhost?conn->allocptr.customhost:
-    conn->host.name;
 
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
-     Curl_inet_pton(AF_INET6, hostname, &addr)) {
+     Curl_inet_pton(AF_INET6, conn->host.name, &addr)) {
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
   }
   else
 #endif
-    if(Curl_inet_pton(AF_INET, hostname, &addr)) {
+    if(Curl_inet_pton(AF_INET, conn->host.name, &addr)) {
       target = GEN_IPADD;
       addrlen = sizeof(struct in_addr);
     }
@@ -1180,7 +1176,7 @@ static CURLcode verifyhost(struct connectdata *conn,
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
-             cert_hostcheck(altptr, hostname))
+             cert_hostcheck(altptr, conn->host.name))
             matched = 1;
           else
             matched = 0;
@@ -1282,7 +1278,7 @@ static CURLcode verifyhost(struct connectdata *conn,
             "SSL: unable to obtain common name from peer certificate");
       res = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!cert_hostcheck((const char *)peer_CN, hostname)) {
+    else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'", peer_CN, conn->host.dispname);
@@ -1433,7 +1429,6 @@ ossl_connect_step1(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  const char *hostname;
   bool sni;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
@@ -1646,15 +1641,12 @@ ossl_connect_step1(struct connectdata *conn,
   connssl->server_cert = 0x0;
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  hostname = conn->allocptr.customhost?conn->allocptr.customhost:
-    conn->host.name;
-
-  if ((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
+  if ((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
 #ifdef ENABLE_IPV6
-      (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
+      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
 #endif
       sni &&
-      !SSL_set_tlsext_host_name(connssl->handle, hostname))
+      !SSL_set_tlsext_host_name(connssl->handle, conn->host.name))
     infof(data, "WARNING: failed to configure server name indication (SNI) "
           "TLS extension\n");
 #endif
