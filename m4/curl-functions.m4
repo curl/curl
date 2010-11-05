@@ -5903,3 +5903,87 @@ AC_DEFUN([CURL_CHECK_FUNC_WRITEV], [
     ac_cv_func_writev="no"
   fi
 ])
+
+dnl CURL_CHECK_FUNC_SETXATTR
+dnl -------------------------------------------------
+dnl Verify if setxattr is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_setxattr, then
+dnl HAVE_SETXATTR will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
+  AC_REQUIRE([CURL_INCLUDES_SYS_UIO])dnl
+  #
+  tst_links_setxattr="unknown"
+  tst_proto_setxattr="unknown"
+  tst_compi_setxattr="unknown"
+  tst_allow_setxattr="unknown"
+  #
+  AC_MSG_CHECKING([if setxattr can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([setxattr])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_setxattr="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_setxattr="no"
+  ])
+  #
+  if test "$tst_links_setxattr" = "yes"; then
+    AC_MSG_CHECKING([if setxattr is prototyped])
+    AC_EGREP_CPP([setxattr],[
+      $curl_includes_sys_uio
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_setxattr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_setxattr="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_setxattr" = "yes"; then
+    AC_MSG_CHECKING([if setxattr is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_sys_uio
+      ]],[[
+        if(0 != setxattr(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_setxattr="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_setxattr="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_setxattr" = "yes"; then
+    AC_MSG_CHECKING([if setxattr usage allowed])
+    if test "x$curl_disallow_setxattr" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_setxattr="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_setxattr="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if setxattr might be used])
+  if test "$tst_links_setxattr" = "yes" &&
+     test "$tst_proto_setxattr" = "yes" &&
+     test "$tst_compi_setxattr" = "yes" &&
+     test "$tst_allow_setxattr" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SETXATTR, 1,
+      [Define to 1 if you have the setxattr function.])
+    ac_cv_func_setxattr="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_setxattr="no"
+  fi
+])

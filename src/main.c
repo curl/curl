@@ -5648,12 +5648,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         if(config->xattr && outs.filename) {
-          char *url = NULL;
-          curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
-          int err = write_xattr( curl, outs.filename );
-          if (err) {
-            warnf( config, "Error setting extended attributes: %s\n", strerror(errno) );
-          }
+          int err = write_xattr(curl, outs.filename );
+          if(err)
+            warnf( config, "Error setting extended attributes: %s\n",
+                   strerror(errno) );
         }
 
 #ifdef HAVE_UTIME
