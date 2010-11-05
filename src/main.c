@@ -51,6 +51,8 @@
 #endif
 #include "rawstr.h"
 
+#include "xattr.h"
+
 #define CURLseparator   "--_curl_--"
 
 #ifdef NETWARE
@@ -621,6 +623,7 @@ struct Configurable {
   int default_node_flags; /* default flags to seach for each 'node', which is
                              basically each given URL to transfer */
   struct OutStruct *outs;
+  bool xattr; /* store metadata in extended attributes */
 };
 
 #define WARN_PREFIX "Warning: "
@@ -906,6 +909,7 @@ static void help(void)
     "    --wdebug        Turn on Watt-32 debugging",
 #endif
     " -w/--write-out <format> What to output after completion",
+    " --xattr            Store metadata in extended file attributes",
     " -q                 If used as the first parameter disables .curlrc",
     NULL
   };
@@ -1953,6 +1957,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"y", "speed-time", TRUE},
     {"z", "time-cond",   TRUE},
     {"#", "progress-bar",FALSE},
+    {"~", "xattr",FALSE},
   };
 
   if(('-' != flag[0]) ||
@@ -2444,6 +2449,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->progressmode = CURL_PROGRESS_BAR;
       else
         config->progressmode = CURL_PROGRESS_STATS;
+      break;
+    case '~': /* --xattr */
+      config->xattr = toggle;
       break;
     case '0':
       /* HTTP version 1.0 */
@@ -5636,6 +5644,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
             fprintf(config->errors, "(%d) Failed writing body\n", res);
+          }
+        }
+
+        if(config->xattr && outs.filename) {
+          char *url = NULL;
+          curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
+          int err = write_xattr( curl, outs.filename );
+          if (err) {
+            warnf( config, "Error setting extended attributes: %s\n", strerror(errno) );
           }
         }
 
