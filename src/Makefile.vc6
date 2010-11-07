@@ -91,31 +91,33 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
 RELEASE_OBJS= \
-	hugehelpr.obj \
-	writeoutr.obj \
-	urlglobr.obj \
+	curlutilr.obj \
 	getpassr.obj \
 	homedirr.obj \
-	curlutilr.obj \
-	os-specificr.obj \
+	hugehelpr.obj \
+	mainr.obj \
 	nonblockr.obj \
+	os-specificr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
-	mainr.obj \
+	urlglobr.obj \
+	writeoutr.obj \
+	xattrr.obj \
 	curlr.res
 
 DEBUG_OBJS= \
-	hugehelpd.obj \
-	writeoutd.obj \
-	urlglobd.obj \
+	curlutild.obj \
 	getpassd.obj \
 	homedird.obj \
-	curlutild.obj \
-	os-specificd.obj \
+	hugehelpd.obj \
+	maind.obj \
 	nonblockd.obj \
+	os-specificd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
-	maind.obj \
+	urlglobd.obj \
+	writeoutd.obj \
+	xattrd.obj \
 	curld.res
 
 #################################################

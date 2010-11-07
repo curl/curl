@@ -185,6 +185,10 @@ SOURCE=.\writeenv.c
 
 SOURCE=.\writeout.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\xattr.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -244,6 +248,10 @@ SOURCE=.\writeenv.h
 # Begin Source File
 
 SOURCE=.\writeout.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xattr.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
