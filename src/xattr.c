@@ -25,7 +25,7 @@
 #include <curl/curl.h>
 #include "xattr.h"
 
-#ifdef HAVE_SETXATTR
+#ifdef HAVE_FSETXATTR
 #include <sys/types.h>
 #include <string.h>
 #include <sys/xattr.h> /* include header from libc, not from libattr */
@@ -46,7 +46,7 @@ static const struct xattr_mapping {
 /* store metadata from the curl request alongside the downloaded
  * file using extended attributes
  */
-int write_xattr(CURL *curl, const char *filename)
+int fwrite_xattr(CURL *curl, int fd)
 {
   int i = 0;
   int err = 0;
@@ -55,17 +55,17 @@ int write_xattr(CURL *curl, const char *filename)
     char *value = NULL;
     CURLcode rc = curl_easy_getinfo(curl, mappings[i].info, &value);
     if ( rc == CURLE_OK && value ) {
-      err = setxattr( filename, mappings[i].attr, value, strlen(value), 0 );
+      err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0 );
     }
     i++;
   }
   return err;
 }
 #else
-int write_xattr(CURL *curl, const char *filename)
+int fwrite_xattr(CURL *curl, int fd)
 {
   (void)curl;
-  (void)filename;
+  (void)fd;
   return 0;
 }
 #endif

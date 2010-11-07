@@ -5633,21 +5633,20 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             }
           }
         }
-
         if(outfile && !curlx_strequal(outfile, "-") && outs.stream) {
+          if(config->xattr) {
+            int err = fwrite_xattr(curl, fileno(outs.stream) );
+            if(err)
+              warnf( config, "Error setting extended attributes: %s\n",
+                     strerror(errno) );
+          }
+
           int rc = fclose(outs.stream);
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
             fprintf(config->errors, "(%d) Failed writing body\n", res);
           }
-        }
-
-        if(config->xattr && outs.filename) {
-          int err = write_xattr(curl, outs.filename );
-          if(err)
-            warnf( config, "Error setting extended attributes: %s\n",
-                   strerror(errno) );
         }
 
 #ifdef HAVE_UTIME
