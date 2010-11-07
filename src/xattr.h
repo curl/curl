@@ -21,6 +21,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-int write_xattr( CURL *curl, const char *filename );
+int fwrite_xattr(CURL *curl, int fd);
 
 #endif

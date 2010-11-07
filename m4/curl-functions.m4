@@ -5924,86 +5924,86 @@ AC_DEFUN([CURL_CHECK_FUNC_WRITEV], [
   fi
 ])
 
-dnl CURL_CHECK_FUNC_SETXATTR
+dnl CURL_CHECK_FUNC_FSETXATTR
 dnl -------------------------------------------------
-dnl Verify if setxattr is available, prototyped, and
+dnl Verify if fsetxattr is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_setxattr, then
-dnl HAVE_SETXATTR will be defined.
+dnl shell variable curl_disallow_fsetxattr, then
+dnl HAVE_FSETXATTR will be defined.
 
-AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
+AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
   AC_REQUIRE([CURL_INCLUDES_SYS_XATTR])dnl
   #
-  tst_links_setxattr="unknown"
-  tst_proto_setxattr="unknown"
-  tst_compi_setxattr="unknown"
-  tst_allow_setxattr="unknown"
+  tst_links_fsetxattr="unknown"
+  tst_proto_fsetxattr="unknown"
+  tst_compi_fsetxattr="unknown"
+  tst_allow_fsetxattr="unknown"
   #
-  AC_MSG_CHECKING([if setxattr can be linked])
+  AC_MSG_CHECKING([if fsetxattr can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([setxattr])
+    AC_LANG_FUNC_LINK_TRY([fsetxattr])
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_setxattr="yes"
+    tst_links_fsetxattr="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_setxattr="no"
+    tst_links_fsetxattr="no"
   ])
   #
-  if test "$tst_links_setxattr" = "yes"; then
-    AC_MSG_CHECKING([if setxattr is prototyped])
-    AC_EGREP_CPP([setxattr],[
+  if test "$tst_links_fsetxattr" = "yes"; then
+    AC_MSG_CHECKING([if fsetxattr is prototyped])
+    AC_EGREP_CPP([fsetxattr],[
       $curl_includes_sys_xattr
     ],[
       AC_MSG_RESULT([yes])
-      tst_proto_setxattr="yes"
+      tst_proto_fsetxattr="yes"
     ],[
       AC_MSG_RESULT([no])
-      tst_proto_setxattr="no"
+      tst_proto_fsetxattr="no"
     ])
   fi
   #
-  if test "$tst_proto_setxattr" = "yes"; then
-    AC_MSG_CHECKING([if setxattr is compilable])
+  if test "$tst_proto_fsetxattr" = "yes"; then
+    AC_MSG_CHECKING([if fsetxattr is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_sys_xattr
       ]],[[
-        if(0 != setxattr(0, 0, 0, 0, 0))
+        if(0 != fsetxattr("", "", "", 0, 0))
           return 1;
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      tst_compi_setxattr="yes"
+      tst_compi_fsetxattr="yes"
     ],[
       AC_MSG_RESULT([no])
-      tst_compi_setxattr="no"
+      tst_compi_fsetxattr="no"
     ])
   fi
   #
-  if test "$tst_compi_setxattr" = "yes"; then
-    AC_MSG_CHECKING([if setxattr usage allowed])
-    if test "x$curl_disallow_setxattr" != "xyes"; then
+  if test "$tst_compi_fsetxattr" = "yes"; then
+    AC_MSG_CHECKING([if fsetxattr usage allowed])
+    if test "x$curl_disallow_fsetxattr" != "xyes"; then
       AC_MSG_RESULT([yes])
-      tst_allow_setxattr="yes"
+      tst_allow_fsetxattr="yes"
     else
       AC_MSG_RESULT([no])
-      tst_allow_setxattr="no"
+      tst_allow_fsetxattr="no"
     fi
   fi
   #
-  AC_MSG_CHECKING([if setxattr might be used])
-  if test "$tst_links_setxattr" = "yes" &&
-     test "$tst_proto_setxattr" = "yes" &&
-     test "$tst_compi_setxattr" = "yes" &&
-     test "$tst_allow_setxattr" = "yes"; then
+  AC_MSG_CHECKING([if fsetxattr might be used])
+  if test "$tst_links_fsetxattr" = "yes" &&
+     test "$tst_proto_fsetxattr" = "yes" &&
+     test "$tst_compi_fsetxattr" = "yes" &&
+     test "$tst_allow_fsetxattr" = "yes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SETXATTR, 1,
-      [Define to 1 if you have the setxattr function.])
-    ac_cv_func_setxattr="yes"
+    AC_DEFINE_UNQUOTED(HAVE_FSETXATTR, 1,
+      [Define to 1 if you have the fsetxattr function.])
+    ac_cv_func_fsetxattr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setxattr="no"
+    ac_cv_func_fsetxattr="no"
   fi
 ])
