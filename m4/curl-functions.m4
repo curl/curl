@@ -416,6 +416,26 @@ curl_includes_sys_uio="\
 ])
 
 
+dnl CURL_INCLUDES_SYS_XATTR
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when sys/uio.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_SYS_XATTR], [
+curl_includes_sys_xattr="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_XATTR_H
+#  include <sys/xattr.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h sys/xattr.h,
+    [], [], [$curl_includes_sys_xattr])
+])
+
 dnl CURL_INCLUDES_TIME
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -5913,7 +5933,7 @@ dnl shell variable curl_disallow_setxattr, then
 dnl HAVE_SETXATTR will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_UIO])dnl
+  AC_REQUIRE([CURL_INCLUDES_SYS_XATTR])dnl
   #
   tst_links_setxattr="unknown"
   tst_proto_setxattr="unknown"
@@ -5934,7 +5954,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
   if test "$tst_links_setxattr" = "yes"; then
     AC_MSG_CHECKING([if setxattr is prototyped])
     AC_EGREP_CPP([setxattr],[
-      $curl_includes_sys_uio
+      $curl_includes_sys_xattr
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_setxattr="yes"
@@ -5948,9 +5968,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
     AC_MSG_CHECKING([if setxattr is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_sys_uio
+        $curl_includes_sys_xattr
       ]],[[
-        if(0 != setxattr(0, 0, 0))
+        if(0 != setxattr("", "", "", 0, 0))
           return 1;
       ]])
     ],[
