@@ -32,7 +32,7 @@
 
 /* mapping table of curl metadata to extended attribute names */
 static struct xattr_mapping {
-  char *attr; /* name of the xattr */
+  const char *attr; /* name of the xattr */
   CURLINFO info;
 } mappings[] = {
   /* mappings proposed by
