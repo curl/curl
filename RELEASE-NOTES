@@ -1,15 +1,17 @@
 Curl and libcurl 7.21.3
 
  Public curl releases:         119
- Command line options:         138
- curl_easy_setopt() options:   180
+ Command line options:         143
+ curl_easy_setopt() options:   185
  Public functions in libcurl:  58
  Known libcurl bindings:       39
  Contributors:                 827
 
 This release includes the following changes:
 
- o Added --noconfigure switch to testcurl.pl.
+ o Added --noconfigure switch to testcurl.pl
+ o Added --xattr option
+ o Added CURLOPT_RESOLVE and --resolve
 
 This release includes the following bugfixes:
 
@@ -19,10 +21,9 @@ This release includes the following bugfixes:
  o URL-parsing: consider ? a divider
  o SSH: avoid using the libssh2_ prefix
  o SSH: use libssh2_session_handshake() to work on win64
- o TLS SNI: set name to custom Host header
- o TLS certcheck: use the custom Host: name for checks
  o ftp: prevent server from hanging on closed data connection when stopping
    a transfer before the end of the full transfer (ranges)
+ o LDAP: detect non-binary attributes properly
 
 This release includes the following known bugs:
 
@@ -31,6 +32,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka
+ Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka,
+ Stefan Tomanek, Alfred Gebert, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)
