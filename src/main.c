@@ -911,7 +911,7 @@ static void help(void)
     "    --wdebug        Turn on Watt-32 debugging",
 #endif
     " -w/--write-out <format> What to output after completion",
-    " --xattr            Store metadata in extended file attributes",
+    "    --xattr         Store metadata in extended file attributes",
     " -q                 If used as the first parameter disables .curlrc",
     NULL
   };
