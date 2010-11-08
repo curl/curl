@@ -419,7 +419,7 @@ curl_includes_sys_uio="\
 dnl CURL_INCLUDES_SYS_XATTR
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
-dnl included when sys/uio.h is to be included.
+dnl included when sys/xattr.h is to be included.
 
 AC_DEFUN([CURL_INCLUDES_SYS_XATTR], [
 curl_includes_sys_xattr="\
