@@ -1049,7 +1049,7 @@ static int asn1_output(const ASN1_UTCTIME *tm,
 
 static int hostmatch(const char *hostname, const char *pattern)
 {
-  while(1) {
+  for(;;) {
     char c = *pattern++;
 
     if(c == '\0')

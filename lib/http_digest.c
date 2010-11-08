@@ -158,7 +158,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     /* clear off any former leftovers and init to defaults */
     Curl_digest_cleanup_one(d);
 
-    while(1) {
+    for(;;) {
       char value[MAX_VALUE_LENGTH];
       char content[MAX_CONTENT_LENGTH];
 

@@ -634,7 +634,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
   if(NULL == outcurl)
     return NULL; /* failure */
 
-  do {
+  for(;;) {
 
     /*
      * We setup a few buffers we need. We should probably make them
@@ -720,8 +720,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
     outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
     fail = FALSE; /* we reach this point and thus we are OK */
+    break;
 
-  } while(0);
+  }
 
   if(fail) {
     if(outcurl) {

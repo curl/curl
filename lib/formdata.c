@@ -1647,14 +1647,14 @@ int main(int argc, argv_item_t argv[])
 
   Curl_FormInit(&formread, form);
 
-  do {
+  for(;;) {
     nread = Curl_FormReader(buffer, 1, sizeof(buffer),
                             (FILE *)&formread);
 
     if(nread < 1)
       break;
     fwrite(buffer, nread, 1, stdout);
-  } while(1);
+  }
 
   fprintf(stdout, "size: ");
   fprintf(stdout, "%" FORMAT_OFF_T, size);

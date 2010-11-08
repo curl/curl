@@ -196,7 +196,7 @@ static CURLcode handshake(struct connectdata *conn,
   int rc;
   int what;
 
-  while(1) {
+  for(;;) {
     /* check allowed time left */
     timeout_ms = Curl_timeleft(conn, NULL, duringconnect);
 

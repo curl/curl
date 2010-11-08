@@ -234,7 +234,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
   /* Wait for the name resolve query to complete. */
-  while(1) {
+  for(;;) {
     struct timeval *tvp, tv, store;
     long timediff;
     int itimeout;
