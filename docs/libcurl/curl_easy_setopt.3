@@ -1774,6 +1774,29 @@ Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
 .IP CURLUSESSL_ALL
 Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
 .RE
+.IP CURLOPT_RESOLVE
+Pass a pointer to a linked list of strings with host name resolve information
+to use for requests with this handle. The linked list should be a fully valid
+list of \fBstruct curl_slist\fP structs properly filled in. Use
+\fIcurl_slist_append(3)\fP to create the list and \fIcurl_slist_free_all(3)\fP
+to clean up an entire list.
+
+Each single name resolve string should be written using the format
+HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve, PORT is
+the port number of the service where libcurl wants to connect to the HOST and
+ADDRESS is the numerical IP address. If libcurl is built to support IPv6,
+ADDRESS can of course be either IPv4 or IPv6 style addressing.
+
+This option effectively pre-populates the DNS cache with entries for the
+host+port pair so redirects and everything that operations against the
+HOST+PORT will instead use your provided ADDRESS.
+
+You can remove names from the DNS cache again, to stop providing these fake
+resolves, by including a string in the linked list that uses the format
+\&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
+and port number must exactly match what was already added previously.
+
+(Added in 7.12.3)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
