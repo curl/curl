@@ -1142,6 +1142,18 @@ encodings and instead makes them passed on unaltered, raw. (Added in 7.16.2)
 When used, this will make libcurl attempt to figure out the timestamp of the
 remote file, and if that is available make the local file get that same
 timestamp.
+.IP "--resolve <host:port:address>"
+Provide a custom address for a specific host and port pair. Using this, you
+can make the curl requests(s) use a specified address and prevent the
+otherwise normally resolved address to be used. Consider it a sort of
+/etc/hosts alternative provided on the command line. The port number should be
+the number used for the specific protocol the host will be used for. It means
+you need several entries if you want to provide address for the same host but
+different ports.
+
+This option can be used many times to add many host names to resolve.
+
+(Added in 7.21.3)
 .IP "--retry <num>"
 If a transient error is returned when curl tries to perform a transfer, it
 will retry this number of times before giving up. Setting the number to 0
