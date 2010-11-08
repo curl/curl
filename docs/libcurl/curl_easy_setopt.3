@@ -1344,24 +1344,6 @@ it already uses for the control connection. But it will use the port number
 from the 227-response. (Added in 7.14.2)
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
-.IP CURLOPT_USE_SSL
-Pass a long using one of the values from below, to make libcurl use your
-desired level of SSL for the transfer. (Added in 7.11.0)
-
-This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
-
-(This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the constants
-were known as CURLFTPSSL_*)
-.RS
-.IP CURLUSESSL_NONE
-Don't attempt to use SSL.
-.IP CURLUSESSL_TRY
-Try using SSL, proceed as normal otherwise.
-.IP CURLUSESSL_CONTROL
-Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
-.IP CURLUSESSL_ALL
-Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
-.RE
 .IP CURLOPT_FTPSSLAUTH
 Pass a long using one of the values from below, to alter how libcurl issues
 \&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated (see
@@ -1774,6 +1756,24 @@ This option is useful with the \fICURLINFO_LASTSOCKET\fP option to
 \fIcurl_easy_getinfo(3)\fP. The library can set up the connection and then the
 application can obtain the most recently used socket for special data
 transfers. (Added in 7.15.2)
+.IP CURLOPT_USE_SSL
+Pass a long using one of the values from below, to make libcurl use your
+desired level of SSL for the transfer. (Added in 7.11.0)
+
+This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
+
+(This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the constants
+were known as CURLFTPSSL_*)
+.RS
+.IP CURLUSESSL_NONE
+Don't attempt to use SSL.
+.IP CURLUSESSL_TRY
+Try using SSL, proceed as normal otherwise.
+.IP CURLUSESSL_CONTROL
+Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
+.IP CURLUSESSL_ALL
+Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
+.RE
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
