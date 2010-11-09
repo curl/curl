@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 64
+# serial 65
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -5970,7 +5970,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETXATTR], [
       AC_LANG_PROGRAM([[
         $curl_includes_sys_xattr
       ]],[[
-        if(0 != setxattr("", "", "", 0, 0))
+        if(0 != setxattr(0, 0, 0, 0, 0))
           return 1;
       ]])
     ],[
