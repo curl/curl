@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o ftp: prevent server from hanging on closed data connection when stopping
    a transfer before the end of the full transfer (ranges)
  o LDAP: detect non-binary attributes properly
+ o ftp: treat server's response 421 as CURLE_OPERATION_TIMEDOUT
 
 This release includes the following known bugs:
 
