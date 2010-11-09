@@ -77,7 +77,18 @@ close S;
 
 my $ignored=0;
 for my $e (sort @syms) {
-    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURL_SOCKET_BAD|_LAST\z|_LASTENTRY\z)/) {
+    # OBSOLETE - names that are just placeholders for a position where we
+    # previously had a name, that is now removed. The OBSOLETE names should
+    # never be used for anything.
+    #
+    # CURL_EXTERN - is a define used for libcurl functions that are external,
+    # public. No app or other code should ever use it.
+    #
+    # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
+    # last entry in many enum series.
+    #
+    
+    if($e =~ /(OBSOLETE|^CURL_EXTERN|_LAST\z|_LASTENTRY\z)/) {
         $ignored++;
         next;
     }
