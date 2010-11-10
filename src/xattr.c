@@ -55,7 +55,11 @@ int fwrite_xattr(CURL *curl, int fd)
     char *value = NULL;
     CURLcode rc = curl_easy_getinfo(curl, mappings[i].info, &value);
     if ( rc == CURLE_OK && value ) {
+#ifdef HAVE_FSETXATTR_6
+      err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0, 0 );
+#elif defined(HAVE_FSETXATTR_5)
       err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0 );
+#endif
     }
     i++;
   }
