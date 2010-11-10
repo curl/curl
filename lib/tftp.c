@@ -738,7 +738,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
         }
         else {
           /* Re-send the data packet */
-          sbytes = sendto(state->sockfd, (void *)&state->spacket,
+          sbytes = sendto(state->sockfd, (void *)&state->spacket.data,
                           4+state->sbytes, SEND_4TH_ARG,
                           (struct sockaddr *)&state->remote_addr,
                           state->remote_addrlen);
