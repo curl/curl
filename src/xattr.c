@@ -31,7 +31,7 @@
 #include <sys/xattr.h> /* include header from libc, not from libattr */
 
 /* mapping table of curl metadata to extended attribute names */
-static struct xattr_mapping {
+static const struct xattr_mapping {
   const char *attr; /* name of the xattr */
   CURLINFO info;
 } mappings[] = {
@@ -50,11 +50,11 @@ int write_xattr(CURL *curl, const char *filename)
 {
   int i = 0;
   int err = 0;
-  /* loop through all xattr-curlinfo pairs and abort on error */
+  /* loop through all xattr-curlinfo pairs and abort on a set error */
   while ( err == 0 && mappings[i].attr != NULL ) {
     char *value = NULL;
-    curl_easy_getinfo(curl, mappings[i].info, &value);
-    if (value) {
+    CURLcode rc = curl_easy_getinfo(curl, mappings[i].info, &value);
+    if ( rc == CURLE_OK && value ) {
       err = setxattr( filename, mappings[i].attr, value, strlen(value), 0 );
     }
     i++;
