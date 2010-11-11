@@ -364,6 +364,12 @@ if test ! -f ./config.guess; then
 else
   buildhost=`./config.guess 2>/dev/null|head -n 1`
   case $buildhost in
+    *-*-darwin*)
+      need_lt_major=1
+      need_lt_minor=5
+      need_lt_patch=26
+      need_lt_check="yes"
+      ;;
     *-*-hpux*)
       need_lt_major=1
       need_lt_minor=5
