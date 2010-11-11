@@ -865,6 +865,10 @@ secure.
 This is a convenience macro that sets all bits except Basic and thus makes
 libcurl pick any it finds suitable. libcurl will automatically select the one
 it finds most secure.
+.IP CURLAUTH_ONLY
+This is a meta symbol. Or this value together with a single specific auth
+value to force libcurl to probe for un-restricted auth and if not, only that
+single auth algorithm is acceptable. (Added in 7.21.3)
 .RE
 .IP CURLOPT_PROXYAUTH
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
