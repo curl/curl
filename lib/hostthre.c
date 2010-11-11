@@ -518,7 +518,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   /*
    * Check if a limited name resolve has been requested.
    */
-  switch(data->set.ip_version) {
+  switch(conn->ip_version) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
     break;

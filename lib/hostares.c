@@ -378,7 +378,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     return Curl_ip2addr(AF_INET6, &in6, hostname, port);
   }
 
-  switch(data->set.ip_version) {
+  switch(conn->ip_version) {
   default:
 #if ARES_VERSION >= 0x010601
     family = PF_UNSPEC; /* supported by c-ares since 1.6.1, so for older

@@ -779,6 +779,8 @@ struct connectdata {
 
   const struct Curl_handler * handler;  /* Connection's protocol handler. */
 
+  long ip_version; /* copied from the SessionHandle at creation time */
+
   /**** curl_get() phase fields */
 
   curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
@@ -1355,8 +1357,8 @@ struct UserDefined {
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
-  long ip_version; /* the CURL_IPRESOLVE_* defines in the public header file
-                      0 - whatever, 1 - v2, 2 - v6 */
+  long ipver; /* the CURL_IPRESOLVE_* defines in the public header file
+                 0 - whatever, 1 - v2, 2 - v6 */
 
   curl_off_t max_filesize; /* Maximum file size to download */
 

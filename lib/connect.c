@@ -310,20 +310,20 @@ static CURLcode bindlocal(struct connectdata *conn,
        * of the connection. The resolve functions should really be changed
        * to take a type parameter instead.
        */
-      long ipver = data->set.ip_version;
+      long ipver = conn->ip_version;
       int rc;
 
       if (af == AF_INET)
-        data->set.ip_version = CURL_IPRESOLVE_V4;
+        conn->ip_version = CURL_IPRESOLVE_V4;
 #ifdef ENABLE_IPV6
       else if (af == AF_INET6)
-        data->set.ip_version = CURL_IPRESOLVE_V6;
+        conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
 
       rc = Curl_resolv(conn, dev, 0, &h);
       if(rc == CURLRESOLV_PENDING)
         (void)Curl_wait_for_resolv(conn, &h);
-      data->set.ip_version = ipver;
+      conn->ip_version = ipver;
 
       if(h) {
         /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */

@@ -444,7 +444,7 @@ int Curl_resolv(struct connectdata *conn,
 
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
-    if(!Curl_ipvalid(data))
+    if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a

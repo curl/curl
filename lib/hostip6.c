@@ -112,9 +112,9 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct SessionHandle *data)
+bool Curl_ipvalid(struct connectdata *conn)
 {
-  if(data->set.ip_version == CURL_IPRESOLVE_V6) {
+  if(conn->ip_version == CURL_IPRESOLVE_V6) {
     /* see if we have an IPv6 stack */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
@@ -174,7 +174,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   /*
    * Check if a limited name resolve has been requested.
    */
-  switch(data->set.ip_version) {
+  switch(conn->ip_version) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
     break;

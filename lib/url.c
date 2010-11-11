@@ -2196,7 +2196,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_IPRESOLVE:
-    data->set.ip_version = va_arg(param, long);
+    data->set.ipver = va_arg(param, long);
     break;
 
   case CURLOPT_MAXFILESIZE_LARGE:
@@ -3455,14 +3455,19 @@ static void fix_hostname(struct SessionHandle *data,
 #endif
 }
 
+static void llist_dtor(void *user, void *element)
+{
+  (void)user;
+  (void)element;
+  /* Do nothing */
+}
+
 /*
  * Allocate and initialize a new connectdata object.
  */
-static struct connectdata *allocate_conn(void)
+static struct connectdata *allocate_conn(struct SessionHandle *data)
 {
-  struct connectdata *conn;
-
-  conn = calloc(1, sizeof(struct connectdata));
+  struct connectdata *conn = calloc(1, sizeof(struct connectdata));
   if(!conn)
     return NULL;
 
@@ -3485,7 +3490,66 @@ static struct connectdata *allocate_conn(void)
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
+  conn->data = data; /* Setup the association between this connection
+                        and the SessionHandle */
+
+  conn->proxytype = data->set.proxytype; /* type */
+
+#ifdef CURL_DISABLE_PROXY
+
+  conn->bits.proxy = FALSE;
+  conn->bits.httpproxy = FALSE;
+  conn->bits.proxy_user_passwd = FALSE;
+  conn->bits.tunnel_proxy = FALSE;
+
+#else /* CURL_DISABLE_PROXY */
+
+  conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
+                            *data->set.str[STRING_PROXY]);
+  conn->bits.httpproxy = (bool)(conn->bits.proxy &&
+                                (conn->proxytype == CURLPROXY_HTTP ||
+                                 conn->proxytype == CURLPROXY_HTTP_1_0));
+  conn->bits.proxy_user_passwd =
+    (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
+  conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
+
+#endif /* CURL_DISABLE_PROXY */
+
+  conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
+  conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
+  conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
+
+  conn->verifypeer = data->set.ssl.verifypeer;
+  conn->verifyhost = data->set.ssl.verifyhost;
+
+  conn->ip_version = data->set.ipver;
+
+  if(data->multi && Curl_multi_canPipeline(data->multi) &&
+      !conn->master_buffer) {
+    /* Allocate master_buffer to be used for pipelining */
+    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
+    if(!conn->master_buffer)
+      goto error;
+  }
+
+  /* Initialize the pipeline lists */
+  conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  conn->pend_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  conn->done_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
+  if(!conn->send_pipe || !conn->recv_pipe || !conn->pend_pipe ||
+     !conn->done_pipe)
+    goto error;
+
   return conn;
+  error:
+  Curl_llist_destroy(conn->send_pipe, NULL);
+  Curl_llist_destroy(conn->recv_pipe, NULL);
+  Curl_llist_destroy(conn->pend_pipe, NULL);
+  Curl_llist_destroy(conn->done_pipe, NULL);
+  Curl_safefree(conn->master_buffer);
+  Curl_safefree(conn);
+  return NULL;
 }
 
 static CURLcode findprotocol(struct SessionHandle *data,
@@ -3749,13 +3813,6 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
    */
 
   return findprotocol(data, conn, protop);
-}
-
-static void llist_dtor(void *user, void *element)
-{
-  (void)user;
-  (void)element;
-  /* Do nothing */
 }
 
 /*
@@ -4595,65 +4652,15 @@ static CURLcode create_conn(struct SessionHandle *data,
      parts for checking against the already present connections. In order
      to not have to modify everything at once, we allocate a temporary
      connection data struct and fill in for comparison purposes. */
+  conn = allocate_conn(data);
 
-  conn = allocate_conn();
+  if(!conn)
+    return CURLE_OUT_OF_MEMORY;
 
   /* We must set the return variable as soon as possible, so that our
      parent can cleanup any possible allocs we may have done before
      any failure */
   *in_connect = conn;
-
-  if(!conn)
-    return CURLE_OUT_OF_MEMORY;
-
-  conn->data = data; /* Setup the association between this connection
-                        and the SessionHandle */
-
-  conn->proxytype = data->set.proxytype; /* type */
-
-#ifdef CURL_DISABLE_PROXY
-
-  conn->bits.proxy = FALSE;
-  conn->bits.httpproxy = FALSE;
-  conn->bits.proxy_user_passwd = FALSE;
-  conn->bits.tunnel_proxy = FALSE;
-
-#else /* CURL_DISABLE_PROXY */
-
-  conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
-                            *data->set.str[STRING_PROXY]);
-  conn->bits.httpproxy = (bool)(conn->bits.proxy &&
-                                (conn->proxytype == CURLPROXY_HTTP ||
-                                 conn->proxytype == CURLPROXY_HTTP_1_0));
-  conn->bits.proxy_user_passwd =
-    (bool)(NULL != data->set.str[STRING_PROXYUSERNAME]);
-  conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
-
-#endif /* CURL_DISABLE_PROXY */
-
-  conn->bits.user_passwd = (bool)(NULL != data->set.str[STRING_USERNAME]);
-  conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
-  conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
-
-  conn->verifypeer = data->set.ssl.verifypeer;
-  conn->verifyhost = data->set.ssl.verifyhost;
-
-  if(data->multi && Curl_multi_canPipeline(data->multi) &&
-      !conn->master_buffer) {
-    /* Allocate master_buffer to be used for pipelining */
-    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
-    if(!conn->master_buffer)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  /* Initialize the pipeline lists */
-  conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  conn->pend_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  conn->done_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  if(!conn->send_pipe || !conn->recv_pipe || !conn->pend_pipe ||
-    !conn->done_pipe)
-    return CURLE_OUT_OF_MEMORY;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
