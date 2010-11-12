@@ -259,8 +259,8 @@ krb5_auth(void *app_data, struct connectdata *conn)
         gssresp = NULL;
       }
 
-      if(maj != GSS_S_COMPLETE && maj != GSS_S_CONTINUE_NEEDED) {
-        Curl_infof(data, "Error creating security context");
+      if(GSS_ERROR(maj)) {
+        Curl_infof(data, "Error creating security context\n");
         ret = AUTH_ERROR;
         break;
       }
@@ -268,7 +268,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
       if(output_buffer.length != 0) {
         if(Curl_base64_encode(data, (char *)output_buffer.value,
                               output_buffer.length, &p) < 1) {
-          Curl_infof(data, "Out of memory base64-encoding");
+          Curl_infof(data, "Out of memory base64-encoding\n");
           ret = AUTH_CONTINUE;
           break;
         }
@@ -299,7 +299,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
           _gssresp.length = Curl_base64_decode(p + 5, (unsigned char **)
                                                &_gssresp.value);
           if(_gssresp.length < 1) {
-            Curl_failf(data, "Out of memory base64-encoding");
+            Curl_failf(data, "Out of memory base64-encoding\n");
             ret = AUTH_CONTINUE;
             break;
           }
