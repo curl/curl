@@ -490,7 +490,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     conn->app_data = tmp_allocation;
 
     if((*mech)->init) {
-      ret = (*mech)->init(conn);
+      ret = (*mech)->init(conn->app_data);
       if(ret != 0) {
         infof(data, "Failed initialization for %s. Skipping it.\n", mech_name);
         continue;
