@@ -260,6 +260,8 @@ rawstrr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+xattrr.obj: xattr.c
+	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
 mainr.obj: main.c
 	$(CCR) $(CFLAGS) /Fo"$@" main.c
 curlr.res : curl.rc
@@ -286,6 +288,8 @@ rawstrd.obj: ../lib/rawstr.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+xattrd.obj: xattr.c
+	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) /Fo"$@" main.c
 curld.res : curl.rc
