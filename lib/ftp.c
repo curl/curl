@@ -3784,11 +3784,13 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
   for(;;) {
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+    DEBUGASSERT(prot_cmd > prot_none && prot_cmd < prot_last);
     conn->data_prot = prot_cmd;
 #endif
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+    DEBUGASSERT(data_sec > prot_none && data_sec < prot_last);
     conn->data_prot = data_sec;
 #endif
 

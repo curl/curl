@@ -319,6 +319,7 @@ static enum protection_level
 krb4_set_command_prot(struct connectdata *conn, enum protection_level level)
 {
   enum protection_level old = conn->command_prot;
+  DEBUGASSERT(level > prot_none && level < prot_last);
   conn->command_prot = level;
   return old;
 }
@@ -333,7 +334,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   char passwd[100];
   size_t tmp;
   ssize_t nread;
-  int save;
+  enum protection_level save;
   CURLcode result;
   unsigned char *ptr;
 

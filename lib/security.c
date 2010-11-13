@@ -85,7 +85,7 @@ name_to_level(const char *name)
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
     if(checkprefix(name, level_names[i].name))
       return level_names[i].level;
-  return (enum protection_level)-1;
+  return prot_none;
 }
 
 /* Convert a protocol |level| to its char representation.
@@ -290,6 +290,8 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
   enum protection_level prot_level = conn->data_prot;
   bool iscmd = prot_level == prot_cmd;
 
+  DEBUGASSERT(prot_level > prot_none && prot_level < prot_last);
+
   if(iscmd) {
     if(!strncmp(from, "PASS ", 5) || !strncmp(from, "ACCT ", 5))
       prot_level = prot_private;
@@ -355,14 +357,16 @@ static ssize_t sec_send(struct connectdata *conn, int sockindex,
   return sec_write(conn, fd, buffer, len);
 }
 
-/* FIXME: |level| should not be an int but a struct protection_level */
-int Curl_sec_read_msg(struct connectdata *conn, char *buffer, int level)
+int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
+                      enum protection_level level)
 {
   /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
      int */
   int decoded_len;
   char *buf;
   int ret_code;
+
+  DEBUGASSERT(level > prot_none && level < prot_last);
 
   decoded_len = Curl_base64_decode(buffer + 4, (unsigned char **)&buf);
   if(decoded_len <= 0) {
@@ -406,6 +410,8 @@ static int sec_set_protection_level(struct connectdata *conn)
   char* pbsz;
   static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
+
+  DEBUGASSERT(level > prot_none && level < prot_last);
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
@@ -458,10 +464,11 @@ static int sec_set_protection_level(struct connectdata *conn)
 int
 Curl_sec_request_prot(struct connectdata *conn, const char *level)
 {
-  int l = name_to_level(level);
-  if(l == -1)
+  enum protection_level l = name_to_level(level);
+  if(l == prot_none)
     return -1;
-  conn->request_data_prot = (enum protection_level)l;
+  DEBUGASSERT(l > prot_none && l < prot_last);
+  conn->request_data_prot = l;
   return 0;
 }
 
@@ -575,7 +582,7 @@ Curl_sec_end(struct connectdata *conn)
     conn->in_buffer.eof_flag = 0;
   }
   conn->sec_complete = 0;
-  conn->data_prot = (enum protection_level)0;
+  conn->data_prot = prot_clear;
   conn->mech = NULL;
 }
 

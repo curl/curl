@@ -3541,6 +3541,10 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
      !conn->done_pipe)
     goto error;
 
+#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  conn->data_prot = prot_clear;
+#endif
+
   return conn;
   error:
   Curl_llist_destroy(conn->send_pipe, NULL);
