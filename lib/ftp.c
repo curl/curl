@@ -405,13 +405,13 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
-    code = Curl_sec_read_msg(conn, buf, prot_safe);
+    code = Curl_sec_read_msg(conn, buf, PROT_SAFE);
     break;
   case 632:
-    code = Curl_sec_read_msg(conn, buf, prot_private);
+    code = Curl_sec_read_msg(conn, buf, PROT_PRIVATE);
     break;
   case 633:
-    code = Curl_sec_read_msg(conn, buf, prot_confidential);
+    code = Curl_sec_read_msg(conn, buf, PROT_CONFIDENTIAL);
     break;
   default:
     /* normal ftp stuff we pass through! */
@@ -3784,13 +3784,12 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
   for(;;) {
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-    DEBUGASSERT(prot_cmd > prot_none && prot_cmd < prot_last);
-    conn->data_prot = prot_cmd;
+    conn->data_prot = PROT_CMD;
 #endif
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-    DEBUGASSERT(data_sec > prot_none && data_sec < prot_last);
+    DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
     conn->data_prot = data_sec;
 #endif
 

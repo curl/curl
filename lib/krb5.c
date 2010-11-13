@@ -88,7 +88,7 @@ static int
 krb5_check_prot(void *app_data, int level)
 {
   (void)app_data; /* unused */
-  if(level == prot_confidential)
+  if(level == PROT_CONFIDENTIAL)
     return -1;
   return 0;
 }
@@ -150,7 +150,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to,
   dec.value = (void*)from;
   dec.length = length;
   maj = gss_seal(&min, *context,
-                 level == prot_private,
+                 level == PROT_PRIVATE,
                  GSS_C_QOP_DEFAULT,
                  &dec, &state, &enc);
 

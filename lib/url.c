@@ -3542,7 +3542,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
     goto error;
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-  conn->data_prot = prot_clear;
+  conn->data_prot = PROT_CLEAR;
 #endif
 
   return conn;

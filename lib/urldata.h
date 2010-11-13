@@ -199,14 +199,15 @@ struct krb4buffer {
   size_t index;
   int eof_flag;
 };
+
 enum protection_level {
-  prot_none, /* first in list */
-  prot_clear,
-  prot_safe,
-  prot_confidential,
-  prot_private,
-  prot_cmd,
-  prot_last /* last in list */
+  PROT_NONE, /* first in list */
+  PROT_CLEAR,
+  PROT_SAFE,
+  PROT_CONFIDENTIAL,
+  PROT_PRIVATE,
+  PROT_CMD,
+  PROT_LAST /* last in list */
 };
 #endif
 

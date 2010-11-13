@@ -72,10 +72,10 @@ static const struct {
   enum protection_level level;
   const char *name;
 } level_names[] = {
-  { prot_clear, "clear" },
-  { prot_safe, "safe" },
-  { prot_confidential, "confidential" },
-  { prot_private, "private" }
+  { PROT_CLEAR, "clear" },
+  { PROT_SAFE, "safe" },
+  { PROT_CONFIDENTIAL, "confidential" },
+  { PROT_PRIVATE, "private" }
 };
 
 static enum protection_level
@@ -85,22 +85,22 @@ name_to_level(const char *name)
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
     if(checkprefix(name, level_names[i].name))
       return level_names[i].level;
-  return prot_none;
+  return PROT_NONE;
 }
 
 /* Convert a protocol |level| to its char representation.
    We take an int to catch programming mistakes. */
 static char level_to_char(int level) {
   switch(level) {
-  case prot_clear:
+  case PROT_CLEAR:
     return 'C';
-  case prot_safe:
+  case PROT_SAFE:
     return 'S';
-  case prot_confidential:
+  case PROT_CONFIDENTIAL:
     return 'E';
-  case prot_private:
+  case PROT_PRIVATE:
     return 'P';
-  case prot_cmd:
+  case PROT_CMD:
     /* Fall through */
   default:
     /* Those 2 cases should not be reached! */
@@ -247,7 +247,7 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
   *err = CURLE_OK;
 
   /* Handle clear text response. */
-  if(conn->sec_complete == 0 || conn->data_prot == prot_clear)
+  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
       return read(fd, buffer, len);
 
   if(conn->in_buffer.eof_flag) {
@@ -288,13 +288,13 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
   char *buffer;
   char *cmd_buffer;
   enum protection_level prot_level = conn->data_prot;
-  bool iscmd = prot_level == prot_cmd;
+  bool iscmd = prot_level == PROT_CMD;
 
-  DEBUGASSERT(prot_level > prot_none && prot_level < prot_last);
+  DEBUGASSERT(prot_level > PROT_NONE && prot_level < PROT_LAST);
 
   if(iscmd) {
     if(!strncmp(from, "PASS ", 5) || !strncmp(from, "ACCT ", 5))
-      prot_level = prot_private;
+      prot_level = PROT_PRIVATE;
     else
       prot_level = conn->command_prot;
   }
@@ -305,14 +305,14 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
     if(bytes > 0) {
       static const char *enc = "ENC ";
       static const char *mic = "MIC ";
-      if(prot_level == prot_private)
+      if(prot_level == PROT_PRIVATE)
         socket_write(conn, fd, enc, 4);
       else
         socket_write(conn, fd, mic, 4);
 
       socket_write(conn, fd, cmd_buffer, bytes);
       socket_write(conn, fd, "\r\n", 2);
-      infof(conn->data, "Send: %s%s\n", prot_level == prot_private?enc:mic,
+      infof(conn->data, "Send: %s%s\n", prot_level == PROT_PRIVATE?enc:mic,
             cmd_buffer);
       free(cmd_buffer);
     }
@@ -366,7 +366,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
   char *buf;
   int ret_code;
 
-  DEBUGASSERT(level > prot_none && level < prot_last);
+  DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
   decoded_len = Curl_base64_decode(buffer + 4, (unsigned char **)&buf);
   if(decoded_len <= 0) {
@@ -411,7 +411,7 @@ static int sec_set_protection_level(struct connectdata *conn)
   static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
 
-  DEBUGASSERT(level > prot_none && level < prot_last);
+  DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
@@ -455,7 +455,7 @@ static int sec_set_protection_level(struct connectdata *conn)
   }
 
   conn->data_prot = level;
-  if(level == prot_private)
+  if(level == PROT_PRIVATE)
     conn->command_prot = level;
 
   return 0;
@@ -465,9 +465,9 @@ int
 Curl_sec_request_prot(struct connectdata *conn, const char *level)
 {
   enum protection_level l = name_to_level(level);
-  if(l == prot_none)
+  if(l == PROT_NONE)
     return -1;
-  DEBUGASSERT(l > prot_none && l < prot_last);
+  DEBUGASSERT(l > PROT_NONE && l < PROT_LAST);
   conn->request_data_prot = l;
   return 0;
 }
@@ -547,7 +547,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     conn->send[FIRSTSOCKET] = sec_send;
     conn->recv[SECONDARYSOCKET] = sec_recv;
     conn->send[SECONDARYSOCKET] = sec_send;
-    conn->command_prot = prot_safe;
+    conn->command_prot = PROT_SAFE;
     /* Set the requested protection level */
     /* BLOCKING */
     (void)sec_set_protection_level(conn);
@@ -582,7 +582,7 @@ Curl_sec_end(struct connectdata *conn)
     conn->in_buffer.eof_flag = 0;
   }
   conn->sec_complete = 0;
-  conn->data_prot = prot_clear;
+  conn->data_prot = PROT_CLEAR;
   conn->mech = NULL;
 }
 
