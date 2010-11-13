@@ -955,16 +955,19 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-AC_CACHE_VAL(curl_cv_writable_argv, [
-AC_RUN_IFELSE([[
+AC_RUN_IFELSE([
+  AC_LANG_SOURCE([[
 int main(int argc, char ** argv) {
-        argv[0][0] = ' ';
-        return (argv[0][0] == ' ')?0:1;
+    argv[0][0] = ' ';
+    return (argv[0][0] == ' ')?0:1;
 }
-        ]],
-        curl_cv_writable_argv=yes,
-        curl_cv_writable_argv=no,
-        curl_cv_writable_argv=cross)
+  ]])
+],[
+  curl_cv_writable_argv=yes
+],[
+  curl_cv_writable_argv=no
+],[
+  curl_cv_writable_argv=cross
 ])
 case $curl_cv_writable_argv in
 yes)
@@ -2278,11 +2281,17 @@ AC_CHECK_TYPE(long long,
 
 if test "xyes" = "x$longlong"; then
   AC_MSG_CHECKING([if numberLL works])
-  AC_COMPILE_IFELSE([long long val = 1000LL;],
-   [AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])]
-   AC_MSG_RESULT(yes),
-   AC_MSG_RESULT(no)
-  )
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      long long val = 1000LL;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 
