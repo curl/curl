@@ -216,19 +216,18 @@ static CURLcode handshake(struct connectdata *conn,
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_ready(readfd, writefd,
-                               nonblocking?0:(int)timeout_ms);
+                               nonblocking?0:(int)timeout_ms?1000:timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         return CURLE_SSL_CONNECT_ERROR;
       }
       else if(0 == what) {
-        if(nonblocking) {
+        if(nonblocking)
           return CURLE_OK;
-        }
-        else {
+        else if(timeout_ms) {
           /* timeout */
-          failf(data, "SSL connection timeout");
+          failf(data, "SSL connection timeout at %ld", timeout_ms);
           return CURLE_OPERATION_TIMEDOUT;
         }
       }
@@ -241,12 +240,14 @@ static CURLcode handshake(struct connectdata *conn,
       connssl->connecting_state =
         gnutls_record_get_direction(session)?
         ssl_connect_2_writing:ssl_connect_2_reading;
-      if(nonblocking) {
+      if(nonblocking)
         return CURLE_OK;
-      }
-    } else if (rc < 0) {
+    }
+    else if (rc < 0) {
       failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
-    } else {
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    else {
       /* Reset our connect state machine */
       connssl->connecting_state = ssl_connect_1;
       return CURLE_OK;
