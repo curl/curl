@@ -12,6 +12,7 @@ This release includes the following changes:
  o Added --noconfigure switch to testcurl.pl
  o Added --xattr option
  o Added CURLOPT_RESOLVE and --resolve
+ o Added CURLAUTH_ONLY
 
 This release includes the following bugfixes:
 
@@ -25,6 +26,11 @@ This release includes the following bugfixes:
    a transfer before the end of the full transfer (ranges)
  o LDAP: detect non-binary attributes properly
  o ftp: treat server's response 421 as CURLE_OPERATION_TIMEDOUT
+ o gnutls->handshake: improved timeout handling
+ o security: Pass the right parameter to init
+ o krb5: Use GSS_ERROR to check for error
+ o TFTP: resend the correct data
+ o configure: fix autoconf 2.68 warning: no AC_LANG_SOURCE call detected
 
 This release includes the following known bugs:
 
@@ -34,6 +40,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka,
- Stefan Tomanek, Alfred Gebert, Yang Tse
+ Stefan Tomanek, Alfred Gebert, Yang Tse, Julien Chaffraix, Adam Light,
+ Rutger Hofman
 
         Thanks! (and sorry if I forgot to mention someone)
