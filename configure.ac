@@ -2066,6 +2066,10 @@ if test X"$OPT_LIBRTMP" != Xno; then
       CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
       version=`$PKGCONFIG --modversion librtmp`
       DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+    else
+      dnl To avoid link errors, we do not allow --librtmp without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
     fi
 
     ;;
