@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o krb5: Use GSS_ERROR to check for error
  o TFTP: resend the correct data
  o configure: fix autoconf 2.68 warning: no AC_LANG_SOURCE call detected
+ o GnuTLS: now detects socket errors on Windows
 
 This release includes the following known bugs:
 
@@ -41,6 +42,6 @@ advice from friends like these:
 
  Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka,
  Stefan Tomanek, Alfred Gebert, Yang Tse, Julien Chaffraix, Adam Light,
- Rutger Hofman
+ Rutger Hofman, Matthias Bolte
 
         Thanks! (and sorry if I forgot to mention someone)

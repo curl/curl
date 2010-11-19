@@ -85,15 +85,52 @@ static bool gtls_inited = FALSE;
  * We use custom functions rather than the GNU TLS defaults because it allows
  * us to get specific about the fourth "flags" argument, and to use arbitrary
  * private data with gnutls_transport_set_ptr if we wish.
+ *
+ * On Windows translate WSAGetLastError() to errno values as GNU TLS does it
+ * internally too. This is necessary because send() and recv() on Windows
+ * don't set errno when they fail but GNU TLS expects a proper errno value.
+ *
+ * Use gnutls_transport_set_global_errno() like the GNU TLS documentation
+ * suggests to avoid problems with different errno variables when GNU TLS and
+ * curl are linked to different versions of msvcrt.dll.
  */
+#ifdef USE_WINSOCK
+static void translate_wsa_to_errno(void)
+{
+  switch(WSAGetLastError()) {
+  case WSAEWOULDBLOCK:
+    gnutls_transport_set_global_errno(EAGAIN);
+    break;
+  case WSAEINTR:
+    gnutls_transport_set_global_errno(EINTR);
+    break;
+  default:
+    gnutls_transport_set_global_errno(EIO);
+    break;
+  }
+}
+#endif
+
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
-  return swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+  ssize_t ret = swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+#ifdef USE_WINSOCK
+  if(ret < 0) {
+    translate_wsa_to_errno();
+  }
+#endif
+  return ret;
 }
 
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
-  return sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+  ssize_t ret = sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+#ifdef USE_WINSOCK
+  if(ret < 0) {
+    translate_wsa_to_errno();
+  }
+#endif
+  return ret;
 }
 
 /* Curl_gtls_init()
