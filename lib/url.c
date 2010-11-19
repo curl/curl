@@ -651,7 +651,7 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
        close handles not in use.
     */
     for(i=newamount; i< c->num; i++)
-      Curl_disconnect(c->connects[i]);
+      Curl_disconnect(c->connects[i], /* dead_connection */ FALSE);
 
     /* If the most recent connection is no longer valid, mark it
        invalid. */
@@ -2587,7 +2587,7 @@ static void conn_free(struct connectdata *conn)
   free(conn); /* free all the connection oriented data */
 }
 
-CURLcode Curl_disconnect(struct connectdata *conn)
+CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct SessionHandle *data;
   if(!conn)
@@ -2647,7 +2647,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
-    conn->handler->disconnect(conn);
+    conn->handler->disconnect(conn, dead_connection);
 
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
@@ -2915,7 +2915,8 @@ ConnectionExists(struct SessionHandle *data,
         check->data = data;
         infof(data, "Connection #%ld seems to be dead!\n", i);
 
-        Curl_disconnect(check); /* disconnect resources */
+        /* disconnect resources */
+        Curl_disconnect(check, /* dead_connection */ TRUE);
         data->state.connc->connects[i]=NULL; /* nothing here */
 
         continue;
@@ -3102,7 +3103,7 @@ ConnectionKillOne(struct SessionHandle *data)
     conn->data = data;
 
     /* the winner gets the honour of being disconnected */
-    (void)Curl_disconnect(conn);
+    (void)Curl_disconnect(conn, /* dead_connection */ FALSE);
 
     /* clean the array entry */
     data->state.connc->connects[connindex] = NULL;
@@ -5116,7 +5117,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
   if(code && *in_connect) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
-    Curl_disconnect(*in_connect); /* close the connection */
+    Curl_disconnect(*in_connect, FALSE); /* close the connection */
     *in_connect = NULL;           /* return a NULL */
   }
 
@@ -5236,7 +5237,7 @@ CURLcode Curl_done(struct connectdata **connp,
   */
   if(data->set.reuse_forbid || conn->bits.close || premature ||
      (-1 == conn->connectindex)) {
-    CURLcode res2 = Curl_disconnect(conn); /* close the connection */
+    CURLcode res2 = Curl_disconnect(conn, FALSE); /* close the connection */
 
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */

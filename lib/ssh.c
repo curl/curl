@@ -135,13 +135,13 @@ static CURLcode scp_done(struct connectdata *conn,
                          CURLcode, bool premature);
 static CURLcode scp_doing(struct connectdata *conn,
                           bool *dophase_done);
-static CURLcode scp_disconnect(struct connectdata *conn);
+static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection);
 
 static CURLcode sftp_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode sftp_doing(struct connectdata *conn,
                            bool *dophase_done);
-static CURLcode sftp_disconnect(struct connectdata *conn);
+static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection);
 static
 CURLcode sftp_perform(struct connectdata *conn,
                       bool *connected,
@@ -2689,10 +2689,11 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
 /* BLOCKING, but the function is using the state machine so the only reason
    this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
-static CURLcode scp_disconnect(struct connectdata *conn)
+static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
 {
   CURLcode result = CURLE_OK;
   struct ssh_conn *ssh = &conn->proto.sshc;
+  (void) dead_connection;
 
   Curl_safefree(conn->data->state.proto.ssh);
   conn->data->state.proto.ssh = NULL;
@@ -2853,9 +2854,10 @@ static CURLcode sftp_doing(struct connectdata *conn,
 /* BLOCKING, but the function is using the state machine so the only reason
    this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
-static CURLcode sftp_disconnect(struct connectdata *conn)
+static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection)
 {
   CURLcode result = CURLE_OK;
+  (void) dead_connection;
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
 

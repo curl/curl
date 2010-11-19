@@ -1959,7 +1959,7 @@ connect_host(struct SessionHandle *data,
       res = Curl_async_resolved(*conn, &protocol_done);
     else
       /* if we can't resolve, we kill this "connection" now */
-      (void)Curl_disconnect(*conn);
+      (void)Curl_disconnect(*conn, /* dead_connection */ FALSE);
   }
 
   return res;

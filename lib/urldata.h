@@ -646,9 +646,11 @@ struct Curl_handler {
                          int numsocks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
-   * by the curl_disconnect(), as a step in the disconnection.
+   * by the curl_disconnect(), as a step in the disconnection.  If the handler
+   * is called because the connection has been considered dead, dead_connection
+   * is set to TRUE.
    */
-  CURLcode (*disconnect)(struct connectdata *);
+  CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
 
   long defport;       /* Default port. */
   long protocol;      /* PROT_* flags concerning the protocol set */

@@ -107,7 +107,7 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done);
 static CURLcode smtp_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode smtp_connect(struct connectdata *conn, bool *done);
-static CURLcode smtp_disconnect(struct connectdata *conn);
+static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection);
 static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done);
 static int smtp_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
@@ -1310,7 +1310,7 @@ static CURLcode smtp_quit(struct connectdata *conn)
  * Disconnect from an SMTP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode smtp_disconnect(struct connectdata *conn)
+static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct smtp_conn *smtpc= &conn->proto.smtpc;
 
@@ -1321,7 +1321,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn)
 
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
-  if(smtpc->pp.conn)
+  if(!dead_connection && smtpc->pp.conn)
     (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&smtpc->pp);

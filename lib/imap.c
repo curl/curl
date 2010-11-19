@@ -100,7 +100,7 @@ static CURLcode imap_do(struct connectdata *conn, bool *done);
 static CURLcode imap_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode imap_connect(struct connectdata *conn, bool *done);
-static CURLcode imap_disconnect(struct connectdata *conn);
+static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection);
 static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done);
 static int imap_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
@@ -877,13 +877,13 @@ static CURLcode imap_logout(struct connectdata *conn)
  * Disconnect from an IMAP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode imap_disconnect(struct connectdata *conn)
+static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct imap_conn *imapc= &conn->proto.imapc;
 
   /* The IMAP session may or may not have been allocated/setup at this
      point! */
-  if (imapc->pp.conn)
+  if(!dead_connection && imapc->pp.conn)
     (void)imap_logout(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&imapc->pp);

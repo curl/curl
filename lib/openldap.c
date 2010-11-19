@@ -61,7 +61,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done);
 static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
 static CURLcode ldap_connect(struct connectdata *conn, bool *done);
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done);
-static CURLcode ldap_disconnect(struct connectdata *conn);
+static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection);
 
 static Curl_recv ldap_recv;
 
@@ -344,9 +344,10 @@ retry:
   return CURLE_OK;
 }
 
-static CURLcode ldap_disconnect(struct connectdata *conn)
+static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
 {
   ldapconninfo *li = conn->proto.generic;
+  (void) dead_connection;
 
   if (li) {
     if (li->ld) {

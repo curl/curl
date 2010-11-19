@@ -1634,7 +1634,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
 
         if(disconnect_conn) {
-          Curl_disconnect(easy->easy_conn); /* disconnect properly */
+          /* disconnect properly */
+          Curl_disconnect(easy->easy_conn, /* dead_connection */ FALSE);
 
           /* This is where we make sure that the easy_conn pointer is reset.
              We don't have to do this in every case block above where a
@@ -1759,7 +1760,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
          multi->connc->connects[i]->protocol & PROT_CLOSEACTION) {
-        Curl_disconnect(multi->connc->connects[i]);
+        Curl_disconnect(multi->connc->connects[i], /* dead_connection */ FALSE);
         multi->connc->connects[i] = NULL;
       }
     }
@@ -2665,7 +2666,7 @@ static void multi_connc_remove_handle(struct Curl_multi *multi,
           data->state.shared_conn = multi;
         else {
           /* out of memory - so much for graceful shutdown */
-          Curl_disconnect(conn);
+          Curl_disconnect(conn, /* dead_connection */ FALSE);
           multi->connc->connects[i] = NULL;
         }
       }

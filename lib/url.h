@@ -42,7 +42,7 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 CURLcode Curl_do(struct connectdata **, bool *done);
 CURLcode Curl_do_more(struct connectdata *);
 CURLcode Curl_done(struct connectdata **, CURLcode, bool premature);
-CURLcode Curl_disconnect(struct connectdata *);
+CURLcode Curl_disconnect(struct connectdata *, bool dead_connection);
 CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);

@@ -117,7 +117,9 @@ CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done)
   return httpStatus;
 }
 
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn) {
+CURLcode Curl_rtsp_disconnect(struct connectdata *conn, bool dead_connection)
+{
+  (void) dead_connection;
   Curl_safefree(conn->proto.rtspc.rtp_buf);
   return CURLE_OK;
 }
