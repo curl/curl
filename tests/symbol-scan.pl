@@ -35,7 +35,7 @@ my $verbose=0;
 my $summary=0;
 my $misses=0;
 
-open H_IN, "-|", "cpp", $h;
+open H_IN, "-|", "cpp " . $h;
 while ( <H_IN> ) {
     if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
         s/^\s+//;
