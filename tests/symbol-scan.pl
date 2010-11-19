@@ -28,6 +28,10 @@
 # we may get the dir root pointed out
 my $root=$ARGV[0] || ".";
 
+# need an include directory when building out-of-tree
+my $i=$ARGV[1];
+$i="-I$i " if $i;
+
 my $h = "$root/include/curl/curl.h";
 my $mh = "$root/include/curl/multi.h";
 
@@ -35,7 +39,7 @@ my $verbose=0;
 my $summary=0;
 my $misses=0;
 
-open H_IN, "-|", "cpp " . $h;
+open H_IN, "-|", "cpp $i$h" || die "Cannot preprocess curl.h";
 while ( <H_IN> ) {
     if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
         s/^\s+//;
@@ -45,7 +49,8 @@ while ( <H_IN> ) {
         push @syms, $_;
     }
 }
-close H_IN;
+close H_IN || die "Error preprocessing curl.h";
+
 sub scanheader {
     my ($f)=@_;
     open H, "<$f";
