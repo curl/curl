@@ -78,6 +78,7 @@ static void tls_log_func(int level, const char *str)
 }
 #endif
 static bool gtls_inited = FALSE;
+
 /*
  * Custom push and pull callback functions used by GNU TLS to read and write
  * to the socket.  These functions are simple wrappers to send() and recv()
@@ -86,28 +87,32 @@ static bool gtls_inited = FALSE;
  * us to get specific about the fourth "flags" argument, and to use arbitrary
  * private data with gnutls_transport_set_ptr if we wish.
  *
- * On Windows translate WSAGetLastError() to errno values as GNU TLS does it
- * internally too. This is necessary because send() and recv() on Windows
- * don't set errno when they fail but GNU TLS expects a proper errno value.
- *
- * Use gnutls_transport_set_global_errno() like the GNU TLS documentation
- * suggests to avoid problems with different errno variables when GNU TLS and
- * curl are linked to different versions of msvcrt.dll.
+ * When these custom push and pull callbacks fail, GNU TLS checks its own
+ * session-specific error variable, and when not set also its own global
+ * errno variable, in order to take appropriate action. GNU TLS does not
+ * require that the transport is actually a socket. This implies that for
+ * Windows builds these callbacks should ideally set the session-specific
+ * error variable using function gnutls_transport_set_errno or as a last
+ * resort global errno variable using gnutls_transport_set_global_errno,
+ * with a transport agnostic error value. This implies that some winsock
+ * error translation must take place in these callbacks.
  */
+
 #ifdef USE_WINSOCK
-static void translate_wsa_to_errno(void)
+#  define gtls_EINTR  4
+#  define gtls_EIO    5
+#  define gtls_EAGAIN 11
+static int gtls_mapped_sockerrno(void)
 {
-  switch(WSAGetLastError()) {
+  switch(SOCKERRNO) {
   case WSAEWOULDBLOCK:
-    gnutls_transport_set_global_errno(EAGAIN);
-    break;
+    return gtls_EAGAIN;
   case WSAEINTR:
-    gnutls_transport_set_global_errno(EINTR);
-    break;
+    return gtls_EINTR;
   default:
-    gnutls_transport_set_global_errno(EIO);
     break;
   }
+  return gtls_EIO;
 }
 #endif
 
@@ -115,9 +120,8 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
   ssize_t ret = swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
 #ifdef USE_WINSOCK
-  if(ret < 0) {
-    translate_wsa_to_errno();
-  }
+  if(ret < 0)
+    gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
   return ret;
 }
@@ -126,9 +130,8 @@ static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
   ssize_t ret = sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
 #ifdef USE_WINSOCK
-  if(ret < 0) {
-    translate_wsa_to_errno();
-  }
+  if(ret < 0)
+    gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
   return ret;
 }
