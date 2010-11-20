@@ -10,4 +10,5 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
 # available on POSIX systems, so don't bother attempting to compile them here.
 COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cc cacertinmem.c	   \
   ftpuploadresume.c ghiper.c hiperfifo.c htmltidy.c multithread.c	   \
-  opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c
+  opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
+  smooth-gtk-thread.c version-check.pl
