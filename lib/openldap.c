@@ -188,7 +188,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   if (conn->protocol & PROT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
-    conn->host.name, conn->port);
+    conn->host.name, conn->remote_port);
 
   rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
   if (rc) {
