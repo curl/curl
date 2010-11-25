@@ -41,6 +41,7 @@
 #include "sendf.h"
 #include "timeval.h"
 #include "http.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1836,7 +1837,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     /* remove the extracted entry */
     Curl_llist_remove(multi->msglist, e, NULL);
 
-    *msgs_in_queue = (int)Curl_llist_count(multi->msglist);
+    *msgs_in_queue = curlx_uztosi(Curl_llist_count(multi->msglist));
 
     return &msg->extmsg;
   }
