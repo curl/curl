@@ -3246,3 +3246,44 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
       fi
     fi
 ])
+
+
+dnl CURL_GENERATE_CONFIGUREHELP_PM
+dnl -------------------------------------------------
+dnl Generate test harness configurehelp.pm module, defining and
+dnl initializing some perl variables with values which are known
+dnl when the configure script runs. For portability reasons, test
+dnl harness needs information on how to run the C preprocessor.
+
+AC_DEFUN([CURL_GENERATE_CONFIGUREHELP_PM], [
+  AC_REQUIRE([AC_PROG_CPP])dnl
+  tmp_cpp=`eval echo "$ac_cpp" 2>/dev/null`
+  if test -z "$tmp_cpp"; then
+    tmp_cpp='cpp'
+  fi
+  cat >./tests/configurehelp.pm <<_EOF
+[@%:@] This is a generated file.  Do not edit.
+
+package configurehelp;
+
+use strict;
+use warnings;
+use Exporter;
+
+use vars qw(
+    @ISA
+    @EXPORT_OK
+    \$Cpreprocessor
+    );
+
+@ISA = qw(Exporter);
+
+@EXPORT_OK = qw(
+    \$Cpreprocessor
+    );
+
+\$Cpreprocessor = '$tmp_cpp';
+
+1;
+_EOF
+])

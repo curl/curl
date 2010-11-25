@@ -2873,6 +2873,8 @@ AC_CONFIG_FILES([Makefile \
 ])
 AC_OUTPUT
 
+CURL_GENERATE_CONFIGUREHELP_PM
+
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
   curl version:    ${VERSION}

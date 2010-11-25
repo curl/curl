@@ -293,6 +293,7 @@ for fname in .deps \
     config.status \
     config.sub \
     configure \
+    configurehelp.pm \
     curl-config \
     curlbuild.h \
     depcomp \
