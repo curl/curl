@@ -366,7 +366,7 @@ Curl_cache_addr(struct SessionHandle *data,
   dns = dns2;
   dns->inuse++;         /* mark entry as in-use */
 
-  /* free the allocated entry_id again */
+  /* free the allocated entry_id */
   free(entry_id);
 
   return dns;
