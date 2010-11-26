@@ -3978,9 +3978,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     else {
       /* parse the URL path into separate path components */
       while((slash_pos = strchr(cur_pos, '/')) != NULL) {
-        /* 1 or 0 to indicate absolute directory */
-        bool absolute_dir = (bool)((cur_pos - data->state.path > 0) &&
-                                   (ftpc->dirdepth == 0));
+        /* 1 or 0 pointer offset to indicate absolute directory */
+        ssize_t absolute_dir = ((cur_pos - data->state.path > 0) &&
+                                (ftpc->dirdepth == 0))?1:0;
 
         /* seek out the next path component */
         if(slash_pos-cur_pos) {
