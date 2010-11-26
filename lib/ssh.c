@@ -1935,7 +1935,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           char *ptr2;
 
           from=curlx_strtoofft(conn->data->state.range, &ptr, 0);
-          while(*ptr && (isspace((int)*ptr) || (*ptr=='-')))
+          while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
             ptr++;
           to=curlx_strtoofft(ptr, &ptr2, 0);
           if((ptr == ptr2) /* no "to" value given */

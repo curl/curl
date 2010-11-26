@@ -511,14 +511,14 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
         if (!binary) {
           /* check for leading or trailing whitespace */
-          if (isspace(bvals[i].bv_val[0]) ||
-              isspace(bvals[i].bv_val[bvals[i].bv_len-1])) {
+          if (ISSPACE(bvals[i].bv_val[0]) ||
+              ISSPACE(bvals[i].bv_val[bvals[i].bv_len-1])) {
             binval = 1;
           } else {
             /* check for unprintable characters */
             unsigned int j;
             for (j=0; j<bvals[i].bv_len; j++)
-              if (!isprint(bvals[i].bv_val[j])) {
+              if (!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;
               }
