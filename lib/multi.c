@@ -2568,15 +2568,12 @@ void Curl_expire(struct SessionHandle *data, long milli)
   }
   else {
     struct timeval set;
-    int rest;
 
     set = Curl_tvnow();
     set.tv_sec += milli/1000;
     set.tv_usec += (milli%1000)*1000;
 
-    rest = (int)(set.tv_usec - 1000000);
-    if(rest > 0) {
-      /* bigger than a full microsec */
+    if(set.tv_usec > 1000000) {
       set.tv_sec++;
       set.tv_usec -= 1000000;
     }
