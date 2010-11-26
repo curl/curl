@@ -982,7 +982,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          start time stored */
 
       timeout_ms = Curl_timeleft(easy->easy_conn, &now,
-                                 easy->state <= CURLM_STATE_WAITDO);
+                                 (easy->state <= CURLM_STATE_WAITDO)?
+                                 TRUE:FALSE);
 
       if(timeout_ms < 0) {
         /* Handle timed out */
