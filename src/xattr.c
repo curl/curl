@@ -40,7 +40,7 @@ static const struct xattr_mapping {
    */
   { "user.xdg.origin.url", CURLINFO_EFFECTIVE_URL },
   { "user.mime_type", CURLINFO_CONTENT_TYPE },
-  { NULL, 0 } /* last element, abort loop here */
+  { NULL, CURLINFO_NONE } /* last element, abort loop here */
 };
 
 /* store metadata from the curl request alongside the downloaded
