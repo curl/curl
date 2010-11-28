@@ -2141,7 +2141,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
   now.tv_usec += 40000; /* compensate for bad precision timers that might've
                            triggered too early */
-  if(now.tv_usec > 1000000) {
+  if(now.tv_usec >= 1000000) {
     now.tv_sec++;
     now.tv_usec -= 1000000;
   }
@@ -2573,7 +2573,7 @@ void Curl_expire(struct SessionHandle *data, long milli)
     set.tv_sec += milli/1000;
     set.tv_usec += (milli%1000)*1000;
 
-    if(set.tv_usec > 1000000) {
+    if(set.tv_usec >= 1000000) {
       set.tv_sec++;
       set.tv_usec -= 1000000;
     }
