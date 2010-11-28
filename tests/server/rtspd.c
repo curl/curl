@@ -531,8 +531,8 @@ static int ProcessRequest(struct httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp)
-            req->testno = atoi(portp+1);
+          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
+            req->testno = strtol(portp+1, NULL, 10);
           else
             req->testno = DOCNUMBER_CONNECT;
         }

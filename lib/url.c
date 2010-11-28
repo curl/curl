@@ -4155,7 +4155,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     *prox_portno = 0x0; /* cut off number from host name */
     prox_portno ++;
     /* now set the local port number */
-    conn->port = atoi(prox_portno);
+    conn->port = strtol(prox_portno, NULL, 10);
   }
   else {
     /* without a port number after the host name, some people seem to use

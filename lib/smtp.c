@@ -226,7 +226,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
     return FALSE;       /* Nothing for us. */
 
   if((result = line[3] == ' '))
-    *resp = atoi(line);
+    *resp = strtol(line, NULL, 10);
 
   line += 4;
   len -= 4;

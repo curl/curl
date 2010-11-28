@@ -1509,12 +1509,15 @@ static void cleanarg(char *str)
 
 static int str2num(long *val, const char *str)
 {
-  int retcode = 0;
-  if(str && ISDIGIT(*str))
-    *val = atoi(str);
-  else
-    retcode = 1; /* badness */
-  return retcode;
+  if(str && ISDIGIT(*str)) {
+    char *endptr;
+    long num = strtol(str, &endptr, 10);
+    if((endptr != str) && (endptr == str + strlen(str))) {
+      *val = num;
+      return 0;  /* Ok */
+    }
+  }
+  return 1; /* badness */
 }
 
 /*
@@ -3711,7 +3714,12 @@ void progressbarinit(struct ProgressData *bar,
    * we're using our own way to determine screen width */
   colp = curlx_getenv("COLUMNS");
   if(colp != NULL) {
-    bar->width = atoi(colp);
+    char *endptr;
+    long num = strtol(colp, &endptr, 10);
+    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 0))
+      bar->width = (int)num;
+    else
+      bar->width = 79;
     curl_free(colp);
   }
   else
@@ -4513,7 +4521,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   }
   env = curlx_getenv("CURL_MEMLIMIT");
   if(env) {
-    curl_memlimit(atoi(env));
+    char *endptr;
+    long num = strtol(env, &endptr, 10);
+    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+      curl_memlimit(num);
     curl_free(env);
   }
 #endif

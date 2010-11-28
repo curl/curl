@@ -379,7 +379,7 @@ static int ftp_endofresp(struct pingpong *pp,
   size_t len = pp->nread_resp;
 
   if((len > 3) && LASTLINE(line)) {
-    *code = atoi(line);
+    *code = strtol(line, NULL, 10);
     return 1;
   }
   return 0;

@@ -59,7 +59,10 @@ int main(int argc, char **argv)
   /* this enables the fail-on-alloc-number-N functionality */
   env = curl_getenv("CURL_MEMLIMIT");
   if(env) {
-    curl_memlimit(atoi(env));
+    char *endptr;
+    long num = strtol(env, &endptr, 10);
+    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+      curl_memlimit(num);
     curl_free(env);
   }
 #endif

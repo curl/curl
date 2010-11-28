@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         } else if (strncasecmp(*argv, "-T", 2) == 0) {
           prttime = 1;
         } else if (strncasecmp(*argv, "-M=", 3) == 0) {
-          int m = atoi(*argv + 3);
+          long m = strtol(argv+3, NULL, 10);
           switch(m) {
             case   1: url = URL_1M;
                       break;

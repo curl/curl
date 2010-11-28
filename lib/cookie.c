@@ -353,8 +353,8 @@ Curl_cookie_add(struct SessionHandle *data,
               break;
             }
             co->expires =
-              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) +
-              (long)now;
+              strtol((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0],NULL,10)
+                + (long)now;
           }
           else if(Curl_raw_equal("expires", name)) {
             strstore(&co->expirestr, whatptr);
