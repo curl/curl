@@ -914,15 +914,24 @@ struct PureInfo {
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
-  char ip[MAX_IPADR_LEN]; /* this buffer gets the numerical ip version stored
-                             at the connect *attempt* so it will get the last
-                             tried connect IP even on failures */
-  long port; /* the remote port the last connection was established to */
-  char localip[MAX_IPADR_LEN]; /* this buffer gets the numerical (local) ip
-                                  stored from where the last connection was
-                                  established */
-  long localport; /* the local (src) port the last connection
-                     originated from */
+
+  /* 'primary_ip' and 'primary_port' get filled with peer's numerical
+     ip address and port number whenever an outgoing connection is
+     *attemted* from the primary socket to a remote address. When more
+     than one address is tried for a connection these will hold data
+     for the last attempt. When the connection is actualy established
+     these are updated with data which comes directly from the socket. */
+
+  char primary_ip[MAX_IPADR_LEN];
+  long primary_port;
+
+  /* 'local_ip' and 'local_port' get filled with local's numerical
+     ip address and port number whenever an outgoing connection is
+     **established** from the primary socket to a remote address. */
+
+  char local_ip[MAX_IPADR_LEN];
+  long local_port;
+
   struct curl_certinfo certs; /* info about the certs, only populated in
                                  OpenSSL builds. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
