@@ -4599,6 +4599,8 @@ static void reuse_conn(struct connectdata *old_conn,
   else
     free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
+  strcpy(conn->ip_addr_str, old_conn->ip_addr_str);
+
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */
 
@@ -4925,12 +4927,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
           conn->proxy.name?conn->proxy.dispname:conn->host.dispname);
-    /* copy this IP address to the common buffer for the easy handle so that
-       the address can actually survice the removal of this connection. strcpy
-       is safe since the target buffer is big enough to hold the largest
-       possible IP address */
-    strcpy(data->info.ip, conn->ip_addr_str);
-
   }
   else {
     /*
