@@ -4599,7 +4599,8 @@ static void reuse_conn(struct connectdata *old_conn,
   else
     free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
-  strcpy(conn->ip_addr_str, old_conn->ip_addr_str);
+  /* persist connection info in session handle */
+  Curl_persistconninfo(conn);
 
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */

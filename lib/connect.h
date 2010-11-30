@@ -69,4 +69,6 @@ void Curl_sndbufset(curl_socket_t sockfd);
 
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 
+void Curl_persistconninfo(struct connectdata *conn);
+
 #endif

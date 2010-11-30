@@ -757,6 +757,23 @@ struct connectdata {
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
 
+  /* 'primary_ip' and 'primary_port' get filled with peer's numerical
+     ip address and port number whenever an outgoing connection is
+     *attemted* from the primary socket to a remote address. When more
+     than one address is tried for a connection these will hold data
+     for the last attempt. When the connection is actualy established
+     these are updated with data which comes directly from the socket. */
+
+  char primary_ip[MAX_IPADR_LEN];
+  long primary_port;
+
+  /* 'local_ip' and 'local_port' get filled with local's numerical
+     ip address and port number whenever an outgoing connection is
+     **established** from the primary socket to a remote address. */
+
+  char local_ip[MAX_IPADR_LEN];
+  long local_port;
+
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
 
@@ -915,22 +932,19 @@ struct PureInfo {
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
 
-  /* 'primary_ip' and 'primary_port' get filled with peer's numerical
-     ip address and port number whenever an outgoing connection is
-     *attemted* from the primary socket to a remote address. When more
-     than one address is tried for a connection these will hold data
-     for the last attempt. When the connection is actualy established
-     these are updated with data which comes directly from the socket. */
+  /* PureInfo members 'conn_primary_ip', 'conn_primary_port', 'conn_local_ip'
+     and, 'conn_local_port' are copied over from the connectdata struct in
+     order to allow curl_easy_getinfo() to return this information even when
+     the session handle is no longer associated with a connection, and also
+     allow curl_easy_reset() to clear this information from the session handle
+     without disturbing information which is still alive, and that might be
+     reused, in the connection cache. */
 
-  char primary_ip[MAX_IPADR_LEN];
-  long primary_port;
+  char conn_primary_ip[MAX_IPADR_LEN];
+  long conn_primary_port;
 
-  /* 'local_ip' and 'local_port' get filled with local's numerical
-     ip address and port number whenever an outgoing connection is
-     **established** from the primary socket to a remote address. */
-
-  char local_ip[MAX_IPADR_LEN];
-  long local_port;
+  char conn_local_ip[MAX_IPADR_LEN];
+  long conn_local_port;
 
   struct curl_certinfo certs; /* info about the certs, only populated in
                                  OpenSSL builds. Asked for with

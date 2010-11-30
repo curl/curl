@@ -532,6 +532,16 @@ static CURLcode trynextip(struct connectdata *conn,
   return CURLE_COULDNT_CONNECT;
 }
 
+/* Copies connection info into the session handle to make it available
+   when the session handle is no longer associated with a connection. */
+void Curl_persistconninfo(struct connectdata *conn)
+{
+  memcpy(conn->data->info.conn_primary_ip, conn->primary_ip, MAX_IPADR_LEN);
+  memcpy(conn->data->info.conn_local_ip, conn->local_ip, MAX_IPADR_LEN);
+  conn->data->info.conn_primary_port = conn->primary_port;
+  conn->data->info.conn_local_port = conn->local_port;
+}
+
 /* retrieves ip address and port from a sockaddr structure */
 static bool getaddressinfo(struct sockaddr* sa, char* addr,
                            long* port)
@@ -587,43 +597,45 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
   struct Curl_sockaddr_storage ssrem;
   struct Curl_sockaddr_storage ssloc;
   struct SessionHandle *data = conn->data;
-  struct PureInfo *info = &conn->data->info;
 
-  if(conn->bits.reuse)
-    /* reusing same connection */
-    return;
+  if(!conn->bits.reuse) {
 
-  len = sizeof(struct Curl_sockaddr_storage);
-  if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
-    error = SOCKERRNO;
-    failf(data, "getpeername() failed with errno %d: %s",
-          error, Curl_strerror(conn, error));
-    return;
+    len = sizeof(struct Curl_sockaddr_storage);
+    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
+      error = SOCKERRNO;
+      failf(data, "getpeername() failed with errno %d: %s",
+            error, Curl_strerror(conn, error));
+      return;
+    }
+
+    len = sizeof(struct Curl_sockaddr_storage);
+    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
+      error = SOCKERRNO;
+      failf(data, "getsockname() failed with errno %d: %s",
+            error, Curl_strerror(conn, error));
+      return;
+    }
+
+    if(!getaddressinfo((struct sockaddr*)&ssrem,
+                        conn->primary_ip, &conn->primary_port)) {
+      error = ERRNO;
+      failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+            error, Curl_strerror(conn, error));
+      return;
+    }
+
+    if(!getaddressinfo((struct sockaddr*)&ssloc,
+                       conn->local_ip, &conn->local_port)) {
+      error = ERRNO;
+      failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+            error, Curl_strerror(conn, error));
+      return;
+    }
+
   }
 
-  len = sizeof(struct Curl_sockaddr_storage);
-  if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
-    error = SOCKERRNO;
-    failf(data, "getsockname() failed with errno %d: %s",
-          error, Curl_strerror(conn, error));
-    return;
-  }
-
-  if(!getaddressinfo((struct sockaddr*)&ssrem,
-                      info->primary_ip, &info->primary_port)) {
-    error = ERRNO;
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          error, Curl_strerror(conn, error));
-    return;
-  }
-
-  if(!getaddressinfo((struct sockaddr*)&ssloc,
-                     info->local_ip, &info->local_port)) {
-    error = ERRNO;
-    failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-          error, Curl_strerror(conn, error));
-    return;
-  }
+  /* persist connection info in session handle */
+  Curl_persistconninfo(conn);
 }
 
 /*
@@ -865,13 +877,15 @@ singleipconnect(struct connectdata *conn,
 
   /* store remote address and port used in this connection attempt */
   if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
-                     data->info.primary_ip, &data->info.primary_port)) {
+                     conn->primary_ip, &conn->primary_port)) {
     error = ERRNO;
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           error, Curl_strerror(conn, error));
   }
-  strcpy(conn->ip_addr_str, data->info.primary_ip);
+  memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
   infof(data, "  Trying %s... ", conn->ip_addr_str);
+
+  Curl_persistconninfo(conn);
 
 #ifdef ENABLE_IPV6
   if(addr.family == AF_INET6)
