@@ -812,6 +812,9 @@ singleipconnect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
   CURLcode res = CURLE_OK;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 * const sa6 = (void *)&addr.sa_addr;
+#endif
 
   *sockp = CURL_SOCKET_BAD;
 
