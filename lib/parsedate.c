@@ -83,6 +83,7 @@
 
 #include <curl/curl.h>
 #include "rawstr.h"
+#include "warnless.h"
 #include "parsedate.h"
 
 const char * const Curl_wkday[] =
@@ -378,7 +379,7 @@ int Curl_parsedate(const char *date, time_t *output)
         secnum = 0;
       }
       else {
-        val = (int)strtol(date, &end, 10);
+        val = curlx_sltosi(strtol(date, &end, 10));
 
         if((tzoff == -1) &&
            ((end - date) == 4) &&

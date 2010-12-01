@@ -125,3 +125,57 @@ int curlx_uztosi(size_t uznum)
 #  pragma warning(pop)
 #endif
 }
+
+/*
+** signed long to signed int
+*/
+
+int curlx_sltosi(long slnum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  return (int)(slnum & (long) CURL_MASK_SINT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** signed long to unsigned int
+*/
+
+unsigned int curlx_sltoui(long slnum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  return (unsigned int)(slnum & (long) CURL_MASK_UINT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** signed long to unsigned short
+*/
+
+unsigned short curlx_sltous(long slnum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  return (unsigned short)(slnum & (long) CURL_MASK_USHORT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}

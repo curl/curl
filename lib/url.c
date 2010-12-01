@@ -1006,7 +1006,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * An FTP option that modifies an upload to create missing directories on
      * the server.
      */
-    data->set.ftp_create_missing_dirs = (int)va_arg(param, long);
+    switch(va_arg(param, long)) {
+    case 0:
+      data->set.ftp_create_missing_dirs = 0;
+      break;
+    case 1:
+      data->set.ftp_create_missing_dirs = 1;
+      break;
+    case 2:
+      data->set.ftp_create_missing_dirs = 2;
+      break;
+    default:
+      /* reserve other values for future use */
+      result = CURLE_FAILED_INIT;
+      break;
+    }
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     /*
@@ -2001,13 +2015,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set what local port to bind the socket to when performing an operation.
      */
-    data->set.localport = (unsigned short) va_arg(param, long);
+    data->set.localport = curlx_sltous(va_arg(param, long));
     break;
   case CURLOPT_LOCALPORTRANGE:
     /*
      * Set number of local ports to try, starting with CURLOPT_LOCALPORT.
      */
-    data->set.localportrange = (int) va_arg(param, long);
+    data->set.localportrange = curlx_sltosi(va_arg(param, long));
     break;
   case CURLOPT_KRBLEVEL:
     /*
@@ -2356,7 +2370,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * know that an unsigned int will always hold the value so we blindly
      * typecast to this type
      */
-    data->set.scope = (unsigned int) va_arg(param, long);
+    data->set.scope = curlx_sltoui(va_arg(param, long));
     break;
 
   case CURLOPT_PROTOCOLS:

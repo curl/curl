@@ -28,4 +28,10 @@ unsigned char curlx_ultouc(unsigned long ulnum);
 
 int curlx_uztosi(size_t uznum);
 
+int curlx_sltosi(long slnum);
+
+unsigned int curlx_sltoui(long slnum);
+
+unsigned short curlx_sltous(long slnum);
+
 #endif /* HEADER_CURL_WARNLESS_H */

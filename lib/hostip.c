@@ -67,6 +67,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -597,7 +598,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
   /* alarm() makes a signal get sent when the timeout fires off, and that
      will abort system calls */
-  prev_alarm = alarm((unsigned int) (timeout/1000L));
+  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
 
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.

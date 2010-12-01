@@ -92,6 +92,7 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curl_gethostname.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -226,7 +227,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
     return FALSE;       /* Nothing for us. */
 
   if((result = line[3] == ' '))
-    *resp = strtol(line, NULL, 10);
+    *resp = curlx_sltosi(strtol(line, NULL, 10));
 
   line += 4;
   len -= 4;
