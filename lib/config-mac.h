@@ -61,6 +61,7 @@
 
 #define SIZEOF_INT              4
 #define SIZEOF_SHORT            2
+#define SIZEOF_SIZE_T           4
 
 #define HAVE_GETNAMEINFO 1
 #define GETNAMEINFO_QUAL_ARG1 const
