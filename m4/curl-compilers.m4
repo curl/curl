@@ -935,11 +935,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             dnl Also, on gcc 4.0.X it is totally unbearable and complains all
             dnl over making it unusable for generic purposes. Let's not use it.
             tmp_CFLAGS="$tmp_CFLAGS"
-            dnl When cross-compiling with gcc 3.0 or later,
-            dnl enable strict aliasing rules and warnings.
-            if test "x$cross_compiling" = "xyes"; then
-              tmp_CFLAGS="$tmp_CFLAGS -fstrict-aliasing -Wstrict-aliasing=2"
-            fi
           fi
           #
           dnl Only gcc 3.3 or later
