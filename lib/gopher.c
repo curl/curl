@@ -78,6 +78,7 @@
 #include "rawstr.h"
 #include "select.h"
 #include "url.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -156,7 +157,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
      sent, which could be sizeable with long selectors. */
-  k = strlen(sel);
+  k = curlx_uztosz(strlen(sel));
 
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);

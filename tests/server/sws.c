@@ -762,7 +762,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   while(!done_processing && (req->offset < REQBUFSIZ-1)) {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
-      got = pipereq_length;
+      got = curlx_uztosz(pipereq_length);
       pipereq_length = 0;
     }
     else {
