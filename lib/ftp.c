@@ -3615,7 +3615,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
       return CURLE_REMOTE_FILE_NOT_FOUND;
     }
     return wc_statemach(conn);
-  } break;
+  }
 
   case CURLWC_DOWNLOADING: {
     /* filelist has at least one file, lets get first one */
@@ -3684,7 +3684,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     wildcard->state = (wildcard->filelist->size == 0) ?
                       CURLWC_CLEAN : CURLWC_DOWNLOADING;
     return wc_statemach(conn);
-  } break;
+  }
 
   case CURLWC_CLEAN: {
     struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;

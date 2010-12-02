@@ -642,10 +642,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
      * the likeliness of us forgetting to init a buffer here in the future.
      */
     outcurl->state.headerbuff = malloc(HEADERSIZE);
-    if(!outcurl->state.headerbuff) {
+    if(!outcurl->state.headerbuff)
       break;
-    }
-    outcurl->state.headersize=HEADERSIZE;
+    outcurl->state.headersize = HEADERSIZE;
 
     /* copy all userdefined values */
     if(Curl_dupset(outcurl, data) != CURLE_OK)
@@ -667,9 +666,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
                                           data->cookies->filename,
                                           outcurl->cookies,
                                           data->set.cookiesession);
-      if(!outcurl->cookies) {
+      if(!outcurl->cookies)
         break;
-      }
     }
 #endif   /* CURL_DISABLE_HTTP */
 
@@ -721,7 +719,6 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
     fail = FALSE; /* we reach this point and thus we are OK */
     break;
-
   }
 
   if(fail) {
