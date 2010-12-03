@@ -426,7 +426,7 @@ $ define curl 'top_dev_dir'.include.curl]
 $!
 $! Copy the VMS-specific config file into the product directory.
 $!
-$ call MoveIfDiff 'proc_dev_dir'config-vms.h 'objdir'curl_config.h
+$ call MoveIfDiff 'top_dev_dir'.lib]config-vms.h 'objdir'curl_config.h
 $!
 $ on control_y then goto Common_Exit
 $!

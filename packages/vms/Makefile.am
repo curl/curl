@@ -1,5 +1,4 @@
 EXTRA_DIST = build_vms.com \
- config-vms.h \
  curlmsg.h \
  curlmsg.msg \
  curlmsg.sdl \
