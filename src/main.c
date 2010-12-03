@@ -1144,7 +1144,7 @@ static int formparse(struct Configurable *config,
   char *sep2;
 
   if((1 == sscanf(input, "%255[^=]=", name)) &&
-     (contp = strchr(input, '='))) {
+     ((contp = strchr(input, '=')) != NULL)) {
     /* the input was using the correct format */
 
     /* Allocate the contents */
@@ -2246,7 +2246,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       default: /* the URL! */
       {
         struct getout *url;
-        if(config->url_get || (config->url_get=config->url_list)) {
+        if(config->url_get || ((config->url_get = config->url_list) != NULL)) {
           /* there's a node here, if it already is filled-in continue to find
              an "empty" node */
           while(config->url_get && (config->url_get->flags&GETOUT_URL))
@@ -2904,7 +2904,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* output file */
     {
       struct getout *url;
-      if(config->url_out || (config->url_out=config->url_list)) {
+      if(config->url_out || ((config->url_out = config->url_list) != NULL)) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_out && (config->url_out->flags&GETOUT_OUTFILE))
@@ -3032,7 +3032,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* we are uploading */
     {
       struct getout *url;
-      if(config->url_out || (config->url_out=config->url_list)) {
+      if(config->url_out || ((config->url_out = config->url_list) != NULL)) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_out && (config->url_out->flags&GETOUT_UPLOAD))
@@ -4234,7 +4234,7 @@ static void dumpeasycode(struct Configurable *config)
       int i;
       const char *c;
 
-      for(i=0; (c = srchead[i]); i++)
+      for(i=0; ((c = srchead[i]) != '\0'); i++)
         fprintf(out, "%s\n", c);
 
       ptr = easycode;
@@ -4796,9 +4796,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
        single globbed string. If no upload, we enter the loop once anyway. */
     for(up = 0;
         (!up && !infiles) ||
-          (uploadfile = inglob?
+          ((uploadfile = inglob?
            glob_next_url(inglob):
-           (!up?strdup(infiles):NULL));
+           (!up?strdup(infiles):NULL)) != NULL);
         up++) {
       int separator = 0;
       long retry_numretries;
@@ -4821,7 +4821,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
       /* Here's looping around each globbed URL */
       for(i = 0;
-          (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
+          ((url = urls?glob_next_url(urls):(i?NULL:strdup(url))) != NULL);
           i++) {
         /* NOTE: In the condition expression in the for() statement above, the
            'url' variable is only ever strdup()ed if(i == 0) and thus never

@@ -226,7 +226,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   if(len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
     return FALSE;       /* Nothing for us. */
 
-  if((result = line[3] == ' '))
+  if((result = (line[3] == ' ')) != 0)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
   line += 4;
@@ -677,7 +677,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
     if(++l) {
       chlg64[l] = '\0';
 
-      if(!(chlglen = Curl_base64_decode(chlg64, &chlg)))
+      chlglen = Curl_base64_decode(chlg64, &chlg);
+      if(!chlglen)
         return CURLE_OUT_OF_MEMORY;
     }
   }
