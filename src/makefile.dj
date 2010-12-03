@@ -46,9 +46,9 @@ $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 
 curl_config.h:
 ifeq ($(IS_UNIX_SHELL),1)
-	@echo '#include "../lib/config.dos"' > $@
+	@echo '#include "../lib/config-dos.h"' > $@
 else
-	@echo #include "../lib/config.dos" > $@
+	@echo #include "../lib/config-dos.h" > $@
 endif
 
 #

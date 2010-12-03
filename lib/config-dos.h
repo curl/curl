@@ -3,7 +3,7 @@
 
 
 /* ================================================================ */
-/*        lib/config.dos - Hand crafted config file for DOS         */
+/*       lib/config-dos.h - Hand crafted config file for DOS        */
 /* ================================================================ */
 
 #if defined(DJGPP)
