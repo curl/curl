@@ -140,7 +140,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,axtls} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -156,6 +156,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
+    init_ssl_msg=${curl_ssl_msg}
 
 dnl
 dnl Save anything in $LIBS for later
@@ -1933,7 +1934,60 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED" = "x"; then
+OPT_AXTLS=off
+
+AC_ARG_WITH(axtls,dnl
+AC_HELP_STRING([--with-axtls=PATH],[Where to look for axTLS, PATH points to the axTLS installation (default: /usr/local/lib).  Ignored if another SSL engine is selected.])
+AC_HELP_STRING([--without-axtls], [disable axTLS]),
+  OPT_AXTLS=$withval)
+
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test X"$OPT_AXTLS" != Xno; then
+    dnl backup the pre-axtls variables
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+    CLEANLIBS="$LIBS"
+
+    case "$OPT_AXTLS" in
+    yes)
+      dnl --with-axtls (without path) used
+      PREFIX_AXTLS=/usr/local/lib
+      LIB_AXTLS="$PREFIX_AXTLS"
+      ;;
+    off)
+      dnl no --with-axtls option given, just check default places
+      PREFIX_AXTLS=
+      ;;
+    *)
+      dnl check the given --with-axtls spot
+      PREFIX_AXTLS=$OPT_AXTLS
+      LIB_AXTLS="$PREFIX_AXTLS"
+      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
+      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/ssl"
+      ;;
+    esac
+
+    AC_CHECK_LIB(axtls, ssl_version,[
+      LIBS="-laxtls $LIBS"
+      AC_DEFINE(USE_AXTLS, 1, [if axTLS is enabled])
+      AC_SUBST(USE_AXTLS, [1])
+      AXTLS_ENABLED=1
+      USE_AXTLS="yes"
+      curl_ssl_msg="enabled (axTLS)"
+
+
+      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+      export LD_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $LIB_AXTLS to LD_LIBRARY_PATH])
+      ],[
+      LDFLAGS="$CLEANLDFLAGS"
+      CPPFLAGS="$CLEANCPPFLAGS"
+      LIBS="$CLEANLIBS"
+    ])
+  fi
+fi
+
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this.])
 else

@@ -120,6 +120,10 @@
 #include <qsossl.h>
 #endif
 
+#ifdef USE_AXTLS
+#include <axTLS/ssl.h>
+#endif /* USE_AXTLS */
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -268,6 +272,10 @@ struct ssl_connect_data {
 #ifdef USE_QSOSSL
   SSLHandle *handle;
 #endif /* USE_QSOSSL */
+#ifdef USE_AXTLS
+  SSL_CTX* ssl_ctx;
+  SSL*     ssl;
+#endif /* USE_AXTLS */
 };
 
 struct ssl_config_data {

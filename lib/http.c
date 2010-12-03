@@ -1881,10 +1881,22 @@ static int https_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-#endif
-#endif
-#endif
-#endif
+#else
+#ifdef USE_AXTLS
+static int https_getsock(struct connectdata *conn,
+                         curl_socket_t *socks,
+                         int numsocks)
+{
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+}
+#endif /* USE_AXTLS */
+#endif /* USE_POLARSSL */
+#endif /* USE_QSOSSL */
+#endif /* USE_NSS */
+#endif /* USE_SSLEAY || USE_GNUTLS */
 
 /*
  * Curl_http_done() gets called from Curl_done() after a single HTTP request
