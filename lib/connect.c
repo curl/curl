@@ -559,19 +559,21 @@ static bool getaddressinfo(struct sockaddr* sa, char* addr,
     case AF_INET:
       si = (struct sockaddr_in*) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
-                        addr, MAX_IPADR_LEN) == NULL)
-        return FALSE;
-      us_port = ntohs(si->sin_port);
-      *port = us_port;
+                        addr, MAX_IPADR_LEN)) {
+        us_port = ntohs(si->sin_port);
+        *port = us_port;
+        return TRUE;
+      }
       break;
 #ifdef ENABLE_IPV6
     case AF_INET6:
       si6 = (struct sockaddr_in6*)sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
-                        addr, MAX_IPADR_LEN) == NULL)
-        return FALSE;
-      us_port = ntohs(si6->sin6_port);
-      *port = us_port;
+                        addr, MAX_IPADR_LEN)) {
+        us_port = ntohs(si6->sin6_port);
+        *port = us_port;
+        return TRUE;
+      }
       break;
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
@@ -579,13 +581,16 @@ static bool getaddressinfo(struct sockaddr* sa, char* addr,
       su = (struct sockaddr_un*)sa;
       snprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       *port = 0;
-      break;
+      return TRUE;
 #endif
     default:
-      addr[0] = '\0';
-      *port = 0;
+      break;
   }
-  return TRUE;
+
+  addr[0] = '\0';
+  *port = 0;
+
+  return FALSE;
 }
 
 /* retrieves the start/end point information of a socket of an established
@@ -817,7 +822,6 @@ singleipconnect(struct connectdata *conn,
                 bool *connected)
 {
   struct Curl_sockaddr_ex addr;
-  char addr_buf[128];
   int rc;
   int error;
   bool isconnected;
@@ -878,9 +882,12 @@ singleipconnect(struct connectdata *conn,
   /* store remote address and port used in this connection attempt */
   if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
                      conn->primary_ip, &conn->primary_port)) {
+    /* malformed address or bug in inet_ntop, try next address */
     error = ERRNO;
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           error, Curl_strerror(conn, error));
+    sclose(sockfd);
+    return CURLE_OK;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
   infof(data, "  Trying %s... ", conn->ip_addr_str);
@@ -950,7 +957,7 @@ singleipconnect(struct connectdata *conn,
     default:
       /* unknown error, fallthrough and try another address! */
       failf(data, "Failed to connect to %s: %s",
-            addr_buf, Curl_strerror(conn,error));
+            conn->ip_addr_str, Curl_strerror(conn,error));
       data->state.os_errno = error;
       break;
     }
