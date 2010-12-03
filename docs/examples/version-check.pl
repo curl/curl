@@ -1,4 +1,40 @@
 #!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+# This script accepts a source file as input on the command line.
+#
+# It first loads the 'symbols-in-versions' document and stores a lookup
+# table for all known symbols for which version they were introduced.
+#
+# It then scans the given source file to dig up all symbols starting with CURL.
+# Finally, it sorts the internal list of found symbols (using the version
+# number as sort key) and then it outputs the most recent version number and
+# the symbols from that version that are used.
+#
+# Usage:
+#
+#    version-check.pl [source file]
+#
 
 open(S, "<../libcurl/symbols-in-versions") || die;
 
