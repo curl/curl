@@ -36,4 +36,6 @@ unsigned short curlx_sltous(long slnum);
 
 ssize_t curlx_uztosz(size_t uznum);
 
+size_t curlx_sotouz(curl_off_t sonum);
+
 #endif /* HEADER_CURL_WARNLESS_H */

@@ -98,6 +98,7 @@
 #include "rawstr.h"
 #include "content_encoding.h"
 #include "rtsp.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -2424,27 +2425,25 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
         else {
           curl_off_t passed=0;
-
           do {
-            size_t readthisamountnow = (size_t)(data->state.resume_from -
-                                                passed);
-            size_t actuallyread;
+            size_t readthisamountnow =
+              (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
+              BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
-            if(readthisamountnow > BUFSIZE)
-              readthisamountnow = BUFSIZE;
-
-            actuallyread = data->set.fread_func(data->state.buffer, 1,
-                                                (size_t)readthisamountnow,
-                                                data->set.in);
+            size_t actuallyread =
+              data->set.fread_func(data->state.buffer, 1, readthisamountnow,
+                                   data->set.in);
 
             passed += actuallyread;
-            if(actuallyread != readthisamountnow) {
+            if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
+              /* this checks for greater-than only to make sure that the
+                 CURL_READFUNC_ABORT return code still aborts */
               failf(data, "Could only read %" FORMAT_OFF_T
                     " bytes from the input",
                     passed);
               return CURLE_READ_ERROR;
             }
-          } while(passed != data->state.resume_from); /* loop until done */
+          } while(passed < data->state.resume_from);
         }
       }
 
