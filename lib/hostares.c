@@ -224,13 +224,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   long timeout;
   struct timeval now = Curl_tvnow();
 
-  /* now, see if there's a connect timeout or a regular timeout to
-     use instead of the default one */
-  if(conn->data->set.connecttimeout)
-    timeout = conn->data->set.connecttimeout;
-  else if(conn->data->set.timeout)
-    timeout = conn->data->set.timeout;
-  else
+  timeout = Curl_timeleft(conn, &now, TRUE);
+  if(!timeout)
     timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
   /* Wait for the name resolve query to complete. */
@@ -265,8 +260,10 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       timeout = -1; /* trigger the cancel below */
     }
     else {
-      timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
+      struct timeval now2 = Curl_tvnow();
+      timediff = Curl_tvdiff(now2, now); /* spent time */
       timeout -= timediff?timediff:1; /* always deduct at least 1 */
+      now = now2; /* for next loop */
     }
     if(timeout < 0) {
       /* our timeout, so we cancel the ares operation */
