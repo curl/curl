@@ -301,6 +301,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
     } else {
       failf(conn->data, "Send failure: %s",
             Curl_strerror(conn, err));
+      conn->data->state.os_errno = err;
       *code = CURLE_SEND_ERROR;
     }
   }
@@ -355,6 +356,7 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
     } else {
       failf(conn->data, "Recv failure: %s",
             Curl_strerror(conn, err));
+      conn->data->state.os_errno = err;
       *code = CURLE_RECV_ERROR;
     }
   }
