@@ -1439,7 +1439,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       if(data->state.resume_from != 0) {
         LIBSSH2_SFTP_ATTRIBUTES attrs;
-        if(data->state.resume_from< 0) {
+        if(data->state.resume_from < 0) {
           rc = libssh2_sftp_stat_ex(sshc->sftp_session, sftp_scp->path,
                                     (unsigned int)strlen(sftp_scp->path),
                                     LIBSSH2_SFTP_STAT, &attrs);
@@ -1563,7 +1563,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
 
         /* now, decrease the size of the read */
-        if(data->set.infilesize>0) {
+        if(data->set.infilesize > 0) {
           data->set.infilesize -= data->state.resume_from;
           data->req.size = data->set.infilesize;
           Curl_pgrsSetUploadSize(data, data->set.infilesize);
@@ -1571,7 +1571,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
-      if(data->set.infilesize>0) {
+      if(data->set.infilesize > 0) {
         data->req.size = data->set.infilesize;
         Curl_pgrsSetUploadSize(data, data->set.infilesize);
       }
@@ -1966,7 +1966,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* We can resume if we can seek to the resume position */
       if(data->state.resume_from) {
-        if(data->state.resume_from< 0) {
+        if(data->state.resume_from < 0) {
           /* We're supposed to download the last abs(from) bytes */
           if((curl_off_t)attrs.filesize < -data->state.resume_from) {
             failf(data, "Offset (%"
@@ -1975,7 +1975,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           /* download from where? */
-          data->state.resume_from = attrs.filesize - data->state.resume_from;
+          data->state.resume_from += attrs.filesize;
         }
         else {
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
