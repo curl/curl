@@ -51,7 +51,7 @@ static CURLcode rtmp_setup(struct connectdata *conn);
 static CURLcode rtmp_do(struct connectdata *conn, bool *done);
 static CURLcode rtmp_done(struct connectdata *conn, CURLcode, bool premature);
 static CURLcode rtmp_connect(struct connectdata *conn, bool *done);
-static CURLcode rtmp_disconnect(struct connectdata *conn);
+static CURLcode rtmp_disconnect(struct connectdata *conn, bool dead_connection);
 
 static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
@@ -236,9 +236,11 @@ static CURLcode rtmp_done(struct connectdata *conn, CURLcode status,
   return CURLE_OK;
 }
 
-static CURLcode rtmp_disconnect(struct connectdata *conn)
+static CURLcode rtmp_disconnect(struct connectdata *conn,
+                                bool dead_connection)
 {
   RTMP *r = conn->proto.generic;
+  (void)dead_connection;
   if (r) {
     conn->proto.generic = NULL;
     RTMP_Close(r);
