@@ -163,7 +163,7 @@ enum {
   DOCNUMBER_404     = -1
 };
 
-const char *end_of_headers = END_OF_HEADERS;
+static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
 static const char *docquit =
