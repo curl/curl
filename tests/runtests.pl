@@ -207,6 +207,7 @@ my $has_gnutls;  # built with GnuTLS
 my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
+my $has_axtls;   # built with axTLS
 
 my $has_shared;  # built shared
 
@@ -696,6 +697,7 @@ sub verifyhttp {
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
+    $flags .= "-1 "         if($has_axtls == 1);
     $flags .= "--insecure " if($proto eq 'https');
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
@@ -1950,6 +1952,10 @@ sub checksystem {
                $has_openssl=1;
                $ssllib="polarssl";
            } 
+	   elsif ($libcurl =~ /axtls/i) {
+	       $has_axtls=1;
+	       $ssllib="axTLS";
+	   }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2297,6 +2303,11 @@ sub singletest {
                 next;
             }
         }
+	elsif($f eq "axTLS") {
+	    if($has_axtls) {
+		next;
+	    }
+	}
         elsif($f eq "netrc_debug") {
             if($debug_build) {
                 next;
@@ -2548,6 +2559,7 @@ sub singletest {
     if($curl_debug) {
         unlink($memdump);
     }
+    $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && $has_axtls == 1);
 
     # create a (possibly-empty) file before starting the test
     my @inputfile=getpart("client", "file");

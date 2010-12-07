@@ -38,14 +38,6 @@ void Curl_axtls_close_all(struct SessionHandle *data);
  /* close a SSL connection */
 void Curl_axtls_close(struct connectdata *conn, int sockindex);
 
-/* return number of sent (non-SSL) bytes */
-ssize_t Curl_axtls_send(struct connectdata *conn, int sockindex,
-                       const void *mem, size_t len);
-ssize_t Curl_axtls_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       bool *wouldblock);
 void Curl_axtls_session_free(void *ptr);
 size_t Curl_axtls_version(char *buffer, size_t size);
 int Curl_axtls_shutdown(struct connectdata *conn, int sockindex);
@@ -62,8 +54,6 @@ int Curl_axtls_check_cxn(struct connectdata *conn);
 #define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
 #define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
-#define curlssl_send Curl_axtls_send
-#define curlssl_recv Curl_axtls_recv
 #define curlssl_version Curl_axtls_version
 #define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
