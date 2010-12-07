@@ -1989,7 +1989,7 @@ fi
 
 if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-nss or --with-axtls to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
