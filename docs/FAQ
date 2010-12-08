@@ -1284,7 +1284,10 @@ FAQ
   this section was much enhanced by Bjorn Reese.)
 
   We are not lawyers and this is not legal advice. You should probably consult
-  one if you want true and accurate legal insights without our prejudice.
+  one if you want true and accurate legal insights without our prejudice. Note
+  especially that this section concerns the libcurl license only; compiling in
+  features of libcurl that depend on other libraries (e.g. OpenSSL) may affect
+  the licensing obligations of your application.
 
   6.1 I have a GPL program, can I use the libcurl library?
 
