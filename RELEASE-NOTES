@@ -13,6 +13,7 @@ This release includes the following changes:
  o Added --xattr option
  o Added CURLOPT_RESOLVE and --resolve
  o Added CURLAUTH_ONLY
+ o Added version-check.pl to the examples dir
 
 This release includes the following bugfixes:
 
@@ -32,6 +33,17 @@ This release includes the following bugfixes:
  o TFTP: resend the correct data
  o configure: fix autoconf 2.68 warning: no AC_LANG_SOURCE call detected
  o GnuTLS: now detects socket errors on Windows
+ o symbols-in-versions: updated en masse
+ o added a couple examples that were missing from the tar ball
+ o Curl_send/recv_plain: return errno on failure
+ o Curl_wait_for_resolv (for c-ares): correct timeout
+ o ossl_connect_common: detect connection re-use
+ o configure: Prevent link errors with --librtmp
+ o openldap: use remote port in URL passed to ldap_init_fd()
+ o url: provide dead_connection flag in Curl_handler::disconnect
+ o lots of compiler warning fixes
+ o ssh: fix a download resume point calculation
+ o fix getinfo CURLINFO_LOCAL* for reused connections
 
 This release includes the following known bugs:
 
@@ -42,6 +54,6 @@ advice from friends like these:
 
  Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka,
  Stefan Tomanek, Alfred Gebert, Yang Tse, Julien Chaffraix, Adam Light,
- Rutger Hofman, Matthias Bolte
+ Rutger Hofman, Matthias Bolte, Heinrich Ko
 
         Thanks! (and sorry if I forgot to mention someone)
