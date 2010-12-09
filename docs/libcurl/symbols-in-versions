@@ -367,7 +367,7 @@ CURLOPT_IOCTLDATA               7.12.3
 CURLOPT_IOCTLFUNCTION           7.12.3
 CURLOPT_IPRESOLVE               7.10.8
 CURLOPT_ISSUERCERT              7.19.0
-CURLOPT_KEYPASSWD               -             7.17.0
+CURLOPT_KEYPASSWD               7.17.0
 CURLOPT_KRB4LEVEL               7.3           7.17.0
 CURLOPT_KRBLEVEL                7.17.0
 CURLOPT_LOCALPORT               7.15.2
