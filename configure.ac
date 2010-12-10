@@ -1937,7 +1937,7 @@ fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
 OPT_AXTLS=off
 
 AC_ARG_WITH(axtls,dnl
-AC_HELP_STRING([--with-axtls=PATH],[Where to look for axTLS, PATH points to the axTLS installation (default: /usr/local/lib).  Ignored if another SSL engine is selected.])
+AC_HELP_STRING([--with-axtls=PATH],[Where to look for axTLS, PATH points to the axTLS installation prefix (default: /usr/local).  Ignored if another SSL engine is selected.])
 AC_HELP_STRING([--without-axtls], [disable axTLS]),
   OPT_AXTLS=$withval)
 
@@ -1951,8 +1951,10 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     case "$OPT_AXTLS" in
     yes)
       dnl --with-axtls (without path) used
-      PREFIX_AXTLS=/usr/local/lib
-      LIB_AXTLS="$PREFIX_AXTLS"
+      PREFIX_AXTLS=/usr/local
+      LIB_AXTLS="$PREFIX_AXTLS/lib"
+      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
+      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
       ;;
     off)
       dnl no --with-axtls option given, just check default places
@@ -1961,9 +1963,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     *)
       dnl check the given --with-axtls spot
       PREFIX_AXTLS=$OPT_AXTLS
-      LIB_AXTLS="$PREFIX_AXTLS"
+      LIB_AXTLS="$PREFIX_AXTLS/lib"
       LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
-      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/ssl"
+      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
       ;;
     esac
 
