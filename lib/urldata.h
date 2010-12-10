@@ -122,6 +122,9 @@
 
 #ifdef USE_AXTLS
 #include <axTLS/ssl.h>
+#undef malloc
+#undef calloc
+#undef realloc
 #endif /* USE_AXTLS */
 
 #ifdef HAVE_NETINET_IN_H
