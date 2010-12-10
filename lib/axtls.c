@@ -55,7 +55,7 @@ static int SSL_read(SSL *ssl, void *buf, int num)
 {
   uint8_t *read_buf;
   int ret;
-  
+
   while((ret = ssl_read(ssl, &read_buf)) == SSL_OK);
 
   if(ret > SSL_OK){
@@ -182,13 +182,13 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* Load the trusted CA cert bundle file */
   if(data->set.ssl.CAfile) {
-    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, data->set.ssl.CAfile, NULL) \
+    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, data->set.ssl.CAfile, NULL)
        != SSL_OK){
       infof(data, "error reading ca cert file %s \n",
-	    data->set.ssl.CAfile);
+            data->set.ssl.CAfile);
       if(data->set.ssl.verifypeer){
-	Curl_axtls_close(conn, sockindex);	   
-	return CURLE_SSL_CACERT_BADFILE;
+        Curl_axtls_close(conn, sockindex);
+        return CURLE_SSL_CACERT_BADFILE;
       }
     }
     else
@@ -199,7 +199,7 @@ Curl_axtls_connect(struct connectdata *conn,
    * 1) certificate revocation list checking
    * 2) dns name assignment to host
    * 3) set protocol priority.  axTLS is TLSv1 only, so can probably ignore
-   * 4) set certificate priority.  axTLS ignores type and sends certs in 
+   * 4) set certificate priority.  axTLS ignores type and sends certs in
    *  order added.  can probably ignore this.
    */
 
@@ -208,20 +208,20 @@ Curl_axtls_connect(struct connectdata *conn,
     i=0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
     while(cert_types[i] != 0){
-      ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],		\
-				    data->set.str[STRING_CERT], NULL);
+      ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
+                                    data->set.str[STRING_CERT], NULL);
       if(ssl_fcn_return == SSL_OK){
-	infof(data, "successfully read cert file %s \n",	\
-	      data->set.str[STRING_CERT]);
-	break;
+        infof(data, "successfully read cert file %s \n",
+              data->set.str[STRING_CERT]);
+        break;
       }
       i++;
     }
     /* Tried all cert types, none worked. */
     if(cert_types[i] == 0){
-      failf(data, "%s is not x509 or pkcs12 format",	\
-	    data->set.str[STRING_CERT]);
-      Curl_axtls_close(conn, sockindex);	   
+      failf(data, "%s is not x509 or pkcs12 format",
+            data->set.str[STRING_CERT]);
+      Curl_axtls_close(conn, sockindex);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -233,20 +233,20 @@ Curl_axtls_connect(struct connectdata *conn,
     i=0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
     while(key_types[i] != 0){
-      ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i], \
-				     data->set.str[STRING_KEY], NULL);
+      ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
+                                    data->set.str[STRING_KEY], NULL);
       if(ssl_fcn_return == SSL_OK){
-	infof(data, "successfully read key file %s \n", \
-	      data->set.str[STRING_KEY]);
-	break;
+        infof(data, "successfully read key file %s \n",
+              data->set.str[STRING_KEY]);
+        break;
       }
       i++;
     }
     /* Tried all key types, none worked. */
     if(key_types[i] == 0){
-      failf(data, "Failure: %s is not a supported key file",	\
-	    data->set.str[STRING_KEY]);
-      Curl_axtls_close(conn, sockindex);	   
+      failf(data, "Failure: %s is not a supported key file",
+            data->set.str[STRING_KEY]);
+      Curl_axtls_close(conn, sockindex);
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -258,11 +258,11 @@ Curl_axtls_connect(struct connectdata *conn,
    */
 
   /* In axTLS, handshaking happens inside ssl_client_new. */
-  if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)){
+  if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)) {
     /* we got a session id, use it! */
     infof (data, "SSL re-using session ID\n");
-    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], \
-			 ssl_sessionid, ssl_idsize);
+    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
+                         ssl_sessionid, (uint8_t)ssl_idsize);
   }
   else
     ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0);
@@ -270,20 +270,20 @@ Curl_axtls_connect(struct connectdata *conn,
   /* Check to make sure handshake was ok. */
   ssl_fcn_return = ssl_handshake_status(ssl);
   if(ssl_fcn_return != SSL_OK){
-    Curl_axtls_close(conn, sockindex);	   
+    Curl_axtls_close(conn, sockindex);
     ssl_display_error(ssl_fcn_return); /* goes to stdout. */
     return map_error_to_curl(ssl_fcn_return);
   }
   infof (data, "handshake completed successfully\n");
 
-  /* Here, gtls.c gets the peer certificates and fails out depending on 
+  /* Here, gtls.c gets the peer certificates and fails out depending on
    * settings in "data."  axTLS api doesn't have get cert chain fcn, so omit?
    */
 
   /* Verify server's certificate */
   if(data->set.ssl.verifypeer){
     if(ssl_verify_cert(ssl) != SSL_OK){
-      Curl_axtls_close(conn, sockindex);	   
+      Curl_axtls_close(conn, sockindex);
       failf(data, "server cert verify failed");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -296,11 +296,11 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* See if common name was set in server certificate */
   x509 = ssl_get_cert_dn(ssl, SSL_X509_CERT_COMMON_NAME);
-  if(x509 == NULL) 
+  if(x509 == NULL)
     infof(data, "error fetching CN from cert\n");
 
   /* Here, gtls.c does the following
-   * 1) x509 hostname checking per RFC2818.  axTLS doesn't support this, but 
+   * 1) x509 hostname checking per RFC2818.  axTLS doesn't support this, but
    *    it seems useful.  Omitting for now.
    * 2) checks cert validity based on time.  axTLS does this in ssl_verify_cert
    * 3) displays a bunch of cert information.  axTLS doesn't support most of
@@ -317,7 +317,7 @@ Curl_axtls_connect(struct connectdata *conn,
   /* Put our freshly minted SSL session in cache */
   ssl_idsize = ssl_get_session_id_size(ssl);
   ssl_sessionid = ssl_get_session_id(ssl);
-  if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize) \
+  if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize)
      != CURLE_OK)
     infof (data, "failed to add session to cache\n");
 
@@ -327,15 +327,12 @@ Curl_axtls_connect(struct connectdata *conn,
 
 /* return number of sent (non-SSL) bytes */
 static ssize_t axtls_send(struct connectdata *conn,
-			  int sockindex,
-			  const void *mem,
-			  size_t len,   
-			  CURLcode *err)
+                          int sockindex,
+                          const void *mem,
+                          size_t len,
+                          CURLcode *err)
 {
-  /* ssl_write() returns 'int' while write() and send() returns
-     'size_t' */
-  char error_buffer[120]; /* Comply with OpenSSL, which documents that this 
-			     must be at least 120 bytes long. */
+  /* ssl_write() returns 'int' while write() and send() returns 'size_t' */
   int rc = ssl_write(conn->ssl[sockindex].ssl, mem, (int)len);
 
   infof(conn->data, "  axtls_send\n");
@@ -407,16 +404,16 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 
   if(connssl->ssl) {
     int what = Curl_socket_ready(conn->sock[sockindex],
-				 CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+                                 CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
     if(what > 0) {
       /* Something to read, let's do it and hope that it is the close
-	 notify alert from the server */
+         notify alert from the server */
       nread = (ssize_t)SSL_read(conn->ssl[sockindex].ssl, buf,
-				sizeof(buf));
+                                sizeof(buf));
 
       if (nread < SSL_OK){
-	failf(data, "close notify alert not received during shutdown");
-	retval = -1;
+        failf(data, "close notify alert not received during shutdown");
+        retval = -1;
       }
     }
     else if(0 == what) {
@@ -436,10 +433,10 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 }
 
 static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
-			  int num,                  /* socketindex */
-			  char *buf,                /* store read data here */
-			  size_t buffersize,        /* max amount to read */
-			  CURLcode *err)
+                          int num,                  /* socketindex */
+                          char *buf,                /* store read data here */
+                          size_t buffersize,        /* max amount to read */
+                          CURLcode *err)
 {
   struct ssl_connect_data *connssl = &conn->ssl[num];
   ssize_t ret = 0;
@@ -475,7 +472,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 int Curl_axtls_check_cxn(struct connectdata *conn)
 {
   /* ssluse.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
-     axTLS compat layer always returns the last argument, so connection is 
+     axTLS compat layer always returns the last argument, so connection is
      always alive? */
 
   infof(conn->data, "  Curl_axtls_check_cxn\n");
@@ -484,6 +481,7 @@ int Curl_axtls_check_cxn(struct connectdata *conn)
 
 void Curl_axtls_session_free(void *ptr)
 {
+  (void)ptr;
   /* free the ID */
   /* both ssluse.c and gtls.c do something here, but axTLS's OpenSSL
      compatibility layer does nothing, so we do nothing too. */
