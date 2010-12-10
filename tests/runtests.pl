@@ -2559,7 +2559,6 @@ sub singletest {
     if($curl_debug) {
         unlink($memdump);
     }
-    $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && $has_axtls == 1);
 
     # create a (possibly-empty) file before starting the test
     my @inputfile=getpart("client", "file");
@@ -2619,6 +2618,7 @@ sub singletest {
     }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
+	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && $has_axtls == 1);
         $cmdargs ="$out --include --verbose --trace-time $cmd";
     }
     else {

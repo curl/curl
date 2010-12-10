@@ -131,7 +131,6 @@ static CURLcode map_error_to_curl(int axtls_err)
     return CURLE_SSL_CONNECT_ERROR;
     break;
   }
-  return CURLE_SSL_CONNECT_ERROR; /* catch-all for non-easily-mapped errors */
 }
 
 static Curl_recv axtls_recv;
@@ -339,6 +338,8 @@ static ssize_t axtls_send(struct connectdata *conn,
 			     must be at least 120 bytes long. */
   int rc = ssl_write(conn->ssl[sockindex].ssl, mem, (int)len);
 
+  infof(conn->data, "  axtls_send\n");
+
   if(rc < 0 ) {
     *err = map_error_to_curl(rc);
     rc = -1; /* generic error code for send failure */
@@ -351,12 +352,14 @@ static ssize_t axtls_send(struct connectdata *conn,
 void Curl_axtls_close_all(struct SessionHandle *data)
 {
   (void)data;
+  infof(data, "  Curl_axtls_close_all\n");
 }
 
 void Curl_axtls_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
+  infof(conn->data, "  Curl_axtls_close\n");
   if(connssl->ssl) {
     /* line from ssluse.c: (void)SSL_shutdown(connssl->ssl);
        axTLS compat layer does nothing for SSL_shutdown */
@@ -389,6 +392,8 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
   char buf[120]; /* We will use this for the OpenSSL error buffer, so it has
                     to be at least 120 bytes long. */
   ssize_t nread;
+
+  infof(conn->data, "  Curl_axtls_shutdown\n");
 
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
@@ -430,25 +435,31 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-/*
- * If the read would block we return -1 and set 'wouldblock' to TRUE.
- * Otherwise we return the amount of data read. Other errors should return -1
- * and set 'wouldblock' to FALSE.
- */
 static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 			  int num,                  /* socketindex */
 			  char *buf,                /* store read data here */
 			  size_t buffersize,        /* max amount to read */
 			  CURLcode *err)
 {
-  ssize_t ret = (ssize_t)SSL_read(conn->ssl[num].ssl, buf,
-                                    (int)buffersize);
+  struct ssl_connect_data *connssl = &conn->ssl[num];
+  ssize_t ret = 0;
 
-  /* axTLS isn't terribly generous about error reporting */
-  if(ret < 0) {
-    failf(conn->data, "axTLS recv error (%d)", (int)ret);
-    *err = map_error_to_curl(ret);
-    return -1;
+  infof(conn->data, "  axtls_recv\n");
+
+  if(connssl){
+    ret = (ssize_t)SSL_read(conn->ssl[num].ssl, buf, (int)buffersize);
+
+    /* axTLS isn't terribly generous about error reporting */
+    /* With patched axTLS, SSL_CLOSE_NOTIFY=-3.  Hard-coding until axTLS
+       team approves proposed fix. */
+    if(ret == -3 ){
+      Curl_axtls_close(conn, num);
+    }
+    else if(ret < 0) {
+      failf(conn->data, "axTLS recv error (%d)", (int)ret);
+      *err = map_error_to_curl(ret);
+      return -1;
+    }
   }
 
   *err = CURLE_OK;
@@ -456,8 +467,6 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 }
 
 /*
- * This function uses SSL_peek to determine connection status.
- *
  * Return codes:
  *     1 means the connection is still in place
  *     0 means the connection has been closed
@@ -469,6 +478,7 @@ int Curl_axtls_check_cxn(struct connectdata *conn)
      axTLS compat layer always returns the last argument, so connection is 
      always alive? */
 
+  infof(conn->data, "  Curl_axtls_check_cxn\n");
    return 1; /* connection still in place */
 }
 
