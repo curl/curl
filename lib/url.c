@@ -2738,12 +2738,14 @@ static bool RTSPConnIsDead(struct connectdata *check)
 }
 #endif /* CURL_DISABLE_RTSP */
 
-static bool IsPipeliningPossible(const struct SessionHandle *handle)
+static bool IsPipeliningPossible(const struct SessionHandle *handle,
+                                 const struct connectdata *conn)
 {
-  if(handle->multi && Curl_multi_canPipeline(handle->multi) &&
-      (handle->set.httpreq == HTTPREQ_GET ||
-       handle->set.httpreq == HTTPREQ_HEAD) &&
-      handle->set.httpversion != CURL_HTTP_VERSION_1_0)
+  if((conn->handler->protocol & PROT_HTTP) &&
+     handle->multi && Curl_multi_canPipeline(handle->multi) &&
+     (handle->set.httpreq == HTTPREQ_GET ||
+      handle->set.httpreq == HTTPREQ_HEAD) &&
+     handle->set.httpversion != CURL_HTTP_VERSION_1_0)
     return TRUE;
 
   return FALSE;
@@ -2760,13 +2762,6 @@ bool Curl_isPipeliningEnabled(const struct SessionHandle *handle)
 CURLcode Curl_addHandleToPipeline(struct SessionHandle *data,
                                   struct curl_llist *pipeline)
 {
-#ifdef DEBUGBUILD
-  if(!IsPipeliningPossible(data)) {
-    /* when not pipelined, there MUST be no handle in the list already */
-    if(pipeline->head)
-      infof(data, "PIPE when no PIPE supposed!\n");
-  }
-#endif
   if(!Curl_llist_insert_next(pipeline, pipeline->tail, data))
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
@@ -2876,7 +2871,7 @@ ConnectionExists(struct SessionHandle *data,
 {
   long i;
   struct connectdata *check;
-  bool canPipeline = IsPipeliningPossible(data);
+  bool canPipeline = IsPipeliningPossible(data, needle);
 
   for(i=0; i< data->state.connc->num; i++) {
     bool match = FALSE;
@@ -2928,11 +2923,11 @@ ConnectionExists(struct SessionHandle *data,
       struct SessionHandle* sh = gethandleathead(check->send_pipe);
       struct SessionHandle* rh = gethandleathead(check->recv_pipe);
       if(sh) {
-        if(!IsPipeliningPossible(sh))
+        if(!IsPipeliningPossible(sh, check))
           continue;
       }
       else if(rh) {
-        if(!IsPipeliningPossible(rh))
+        if(!IsPipeliningPossible(rh, check))
           continue;
       }
 
