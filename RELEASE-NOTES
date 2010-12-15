@@ -44,6 +44,8 @@ This release includes the following bugfixes:
  o lots of compiler warning fixes
  o ssh: fix a download resume point calculation
  o fix getinfo CURLINFO_LOCAL* for reused connections
+ o multi: the returned running handles conuter could turn negative
+ o multi: only ever consider pipelining for connections doing HTTP(S)
 
 This release includes the following known bugs:
 
@@ -54,6 +56,6 @@ advice from friends like these:
 
  Dan Fandrich, Guenter Knauf, Pat Ray, Hongli Lai, Kamil Dudka,
  Stefan Tomanek, Alfred Gebert, Yang Tse, Julien Chaffraix, Adam Light,
- Rutger Hofman, Matthias Bolte, Heinrich Ko
+ Rutger Hofman, Matthias Bolte, Heinrich Ko, Dmitri Shubin
 
         Thanks! (and sorry if I forgot to mention someone)
