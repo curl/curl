@@ -164,7 +164,12 @@ Curl_axtls_connect(struct connectdata *conn,
     return CURLE_OK;
 
   /* axTLS only supports TLSv1 */
-  if(data->set.ssl.version != CURL_SSLVERSION_TLSv1) {
+  /* check to see if we've been told to use an explicit SSL/TLS version */
+  switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+    break;
+  default:
     failf(data, "axTLS only supports TLSv1");
     return CURLE_SSL_CONNECT_ERROR;
   }
