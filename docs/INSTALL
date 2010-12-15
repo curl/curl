@@ -142,6 +142,9 @@ UNIX
      To build with PolarSSL support instead of OpenSSL for SSL/TLS, note that
      you need to use both --without-ssl and --with-polarssl.
 
+     To build with axTLS support instead of OpenSSL for TLS, note that you
+     need to use both --without-ssl and --with-axtls.
+
      To get GSSAPI support, build with --with-gssapi and have the MIT or
      Heimdal Kerberos 5 packages installed.
 

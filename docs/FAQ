@@ -446,10 +446,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS or PolarSSL,
-  although there should not be many problems using a different library. If
-  anyone does "port" curl to use a different SSL library, we are of course
-  very interested in getting the patch!
+  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS, PolarSSL, axTLS or
+  qssl, although there should not be many problems using a different
+  library. If anyone does "port" curl to use a different SSL library, we are
+  of course very interested in getting the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
