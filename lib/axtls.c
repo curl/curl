@@ -156,7 +156,7 @@ Curl_axtls_connect(struct connectdata *conn,
   const char *x509;
 
   /* Assuming users will not compile in custom key/cert to axTLS */
-  uint32_t client_option = SSL_NO_DEFAULT_KEY;
+  uint32_t client_option = SSL_NO_DEFAULT_KEY|SSL_SERVER_VERIFY_LATER;
 
   if(conn->ssl[sockindex].state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
