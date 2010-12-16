@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+GOPHER-ipv6
+IPv6
+INDEX
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+iMenu results		error.host	1
+0Selector 	/bar	bar.foo.invalid	70
+.
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+ipv6
+</features>
+<server>
+gopher-ipv6
+</server>
+ <name>
+Gopher IPv6 index
+ </name>
+ <command>
+-g gopher://%HOST6IP:%GOPHER6PORT/1/moo/1203
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+/moo/1203
+</protocol>
+</verify>
+</testcase>

@@ -111,7 +111,7 @@ int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct SessionHandle *data);
+bool Curl_ipvalid(struct connectdata *conn);
 
 /*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this

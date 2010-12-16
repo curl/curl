@@ -356,6 +356,18 @@
 #  endif
 #endif
 
+/*
+ * Arg 2 type for gethostname in case it hasn't been defined in config file.
+ */
+
+#ifndef GETHOSTNAME_TYPE_ARG2
+#  ifdef USE_WINSOCK
+#    define GETHOSTNAME_TYPE_ARG2 int
+#  else
+#    define GETHOSTNAME_TYPE_ARG2 size_t
+#  endif
+#endif
+
 /* Below we define some functions. They should
 
    4. set the SIGALRM signal timeout
@@ -525,12 +537,12 @@ int netware_init(void);
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
-#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL) || defined(USE_POLARSSL)
+#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || defined(USE_GNUTLS)
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || defined(USE_GNUTLS) || defined(USE_NSS)
 #define USE_NTLM
 #endif
 #endif
@@ -538,6 +550,11 @@ int netware_init(void);
 /* non-configure builds may define CURL_WANTS_CA_BUNDLE_ENV */
 #if defined(CURL_WANTS_CA_BUNDLE_ENV) && !defined(CURL_CA_BUNDLE)
 #define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")
+#endif
+
+/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
 /*

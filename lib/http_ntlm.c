@@ -58,6 +58,7 @@
 #include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
+#include "curl_gethostname.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -115,6 +116,15 @@
 
 #define MD5_DIGEST_LENGTH 16
 #define MD4_DIGEST_LENGTH 16
+
+#elif defined(USE_NSS)
+
+#include "curl_md4.h"
+#include "nssg.h"
+#include <nss.h>
+#include <pk11pub.h>
+#include <hasht.h>
+#define MD5_DIGEST_LENGTH MD5_LENGTH
 
 #elif defined(USE_WINDOWS_SSPI)
 
@@ -250,6 +260,11 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
 #endif
 
+#ifdef USE_NSS
+  if(CURLE_OK != Curl_nss_force_init(conn->data))
+    return CURLNTLM_BAD;
+#endif
+
   ntlm = proxy?&conn->proxyntlm:&conn->ntlm;
 
   /* skip initial whitespaces */
@@ -351,16 +366,14 @@ static void setup_des_key(const unsigned char *key_56,
   DES_set_odd_parity(&key);
   DES_set_key(&key, ks);
 }
-#elif defined(USE_GNUTLS)
+
+#else /* defined(USE_SSLEAY) */
 
 /*
- * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
+ * Turns a 56 bit key into the 64 bit, odd parity key.  Used by GnuTLS and NSS.
  */
-static void setup_des_key(const unsigned char *key_56,
-                          gcry_cipher_hd_t *des)
+static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 {
-  char key[8];
-
   key[0] = key_56[0];
   key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
   key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
@@ -369,10 +382,84 @@ static void setup_des_key(const unsigned char *key_56,
   key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
   key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+}
 
+#if defined(USE_GNUTLS)
+
+/*
+ * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
+ */
+static void setup_des_key(const unsigned char *key_56,
+                          gcry_cipher_hd_t *des)
+{
+  char key[8];
+  extend_key_56_to_64(key_56, key);
   gcry_cipher_setkey(*des, key, 8);
 }
-#endif
+
+#elif defined(USE_NSS)
+
+/*
+ * Expands a 56 bit key KEY_56 to 64 bit and encrypts 64 bit of data, using
+ * the expanded key.  The caller is responsible for giving 64 bit of valid
+ * data is IN and (at least) 64 bit large buffer as OUT.
+ */
+static bool encrypt_des(const unsigned char *in, unsigned char *out,
+                        const unsigned char *key_56)
+{
+  const CK_MECHANISM_TYPE mech = CKM_DES_ECB; /* DES cipher in ECB mode */
+  PK11SlotInfo *slot = NULL;
+  char key[8];                                /* expanded 64 bit key */
+  SECItem key_item;
+  PK11SymKey *symkey = NULL;
+  SECItem *param = NULL;
+  PK11Context *ctx = NULL;
+  int out_len;                                /* not used, required by NSS */
+  bool rv = FALSE;
+
+  /* use internal slot for DES encryption (requires NSS to be initialized) */
+  slot = PK11_GetInternalKeySlot();
+  if(!slot)
+    return FALSE;
+
+  /* expand the 56 bit key to 64 bit and wrap by NSS */
+  extend_key_56_to_64(key_56, key);
+  key_item.data = (unsigned char *)key;
+  key_item.len = /* hard-wired */ 8;
+  symkey = PK11_ImportSymKey(slot, mech, PK11_OriginUnwrap, CKA_ENCRYPT,
+                             &key_item, NULL);
+  if(!symkey)
+    goto fail;
+
+  /* create DES encryption context */
+  param = PK11_ParamFromIV(mech, /* no IV in ECB mode */ NULL);
+  if(!param)
+    goto fail;
+  ctx = PK11_CreateContextBySymKey(mech, CKA_ENCRYPT, symkey, param);
+  if(!ctx)
+    goto fail;
+
+  /* perform the encryption */
+  if(SECSuccess == PK11_CipherOp(ctx, out, &out_len, /* outbuflen */ 8,
+                                 (unsigned char *)in, /* inbuflen */ 8)
+      && SECSuccess == PK11_Finalize(ctx))
+    rv = /* all OK */ TRUE;
+
+fail:
+  /* cleanup */
+  if(ctx)
+    PK11_DestroyContext(ctx, PR_TRUE);
+  if(symkey)
+    PK11_FreeSymKey(symkey);
+  if(param)
+    SECITEM_FreeItem(param, PR_TRUE);
+  PK11_FreeSlot(slot);
+  return rv;
+}
+
+#endif /* defined(USE_NSS) */
+
+#endif /* defined(USE_SSLEAY) */
 
  /*
   * takes a 21 byte array and treats it as 3 56-bit DES keys. The
@@ -414,6 +501,10 @@ static void lm_resp(const unsigned char *keys,
   setup_des_key(keys+14, &des);
   gcry_cipher_encrypt(des, results+16, 8, plaintext, 8);
   gcry_cipher_close(des);
+#elif defined(USE_NSS)
+  encrypt_des(plaintext, results,    keys);
+  encrypt_des(plaintext, results+8,  keys+7);
+  encrypt_des(plaintext, results+16, keys+14);
 #endif
 }
 
@@ -470,11 +561,14 @@ static void mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw+7, &des);
     gcry_cipher_encrypt(des, lmbuffer+8, 8, magic, 8);
     gcry_cipher_close(des);
+#elif defined(USE_NSS)
+    encrypt_des(magic, lmbuffer,   pw);
+    encrypt_des(magic, lmbuffer+8, pw+7);
 #endif
 
     memset(lmbuffer + 16, 0, 21 - 16);
   }
-  }
+}
 
 #if USE_NTRESPONSES
 static void ascii_to_unicode_le(unsigned char *dest, const char *src,
@@ -525,6 +619,8 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
     gcry_md_write(MD4pw, pw, 2*len);
     memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
+#elif defined(USE_NSS)
+    Curl_md4it(ntbuffer, pw, 2*len);
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
@@ -598,6 +694,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->data);
+
+#ifdef USE_NSS
+  if(CURLE_OK != Curl_nss_force_init(conn->data))
+    return CURLE_OUT_OF_MEMORY;
+#endif
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
@@ -894,7 +995,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       user = userp;
     userlen = strlen(user);
 
-    if(gethostname(host, HOSTNAME_MAX)) {
+    if(Curl_gethostname(host, HOSTNAME_MAX)) {
       infof(conn->data, "gethostname() failed, continuing without!");
       hostlen = 0;
     }
@@ -926,6 +1027,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       gcry_md_hd_t MD5pw;
       Curl_gtls_seed(conn->data); /* Initiate the seed if not already done */
       gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
+#elif defined(USE_NSS)
+      PK11Context *MD5pw;
+      unsigned int outlen;
+      Curl_nss_seed(conn->data);  /* Initiate the seed if not already done */
+      PK11_GenerateRandom(entropy, 8);
 #endif
 
       /* 8 bytes random data as challenge in lmresp */
@@ -946,6 +1052,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       gcry_md_write(MD5pw, tmp, MD5_DIGEST_LENGTH);
       memcpy(md5sum, gcry_md_read (MD5pw, 0), MD5_DIGEST_LENGTH);
       gcry_md_close(MD5pw);
+#elif defined(USE_NSS)
+      MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
+      PK11_DigestOp(MD5pw, tmp, 16);
+      PK11_DigestFinal(MD5pw, md5sum, &outlen, MD5_DIGEST_LENGTH);
+      PK11_DestroyContext(MD5pw, PR_TRUE);
 #endif
 
       /* We shall only use the first 8 bytes of md5sum,

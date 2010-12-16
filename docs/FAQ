@@ -1,4 +1,4 @@
-Updated: Nov 7, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: October 6, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -20,6 +20,8 @@ FAQ
   1.10 How many are using curl?
   1.11 Why don't you update ca-bundle.crt
   1.12 I have a problem who can I chat with?
+  1.13 curl's ECCN number?
+  1.14 How do I submit my patch?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -48,6 +50,7 @@ FAQ
   3.16 What certificates do I need when I use SSL?
   3.17 How do I list the root dir of an FTP server?
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
+  3.19 How do I get HTTP from a host using a specific IP address?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -74,6 +77,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -83,7 +87,7 @@ FAQ
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
   5.9 How does libcurl resolve host names?
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
@@ -122,8 +126,10 @@ FAQ
 
   libcurl
 
-    A free and easy-to-use client-side URL transfer library, supporting FTP,
-    FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, FILE, LDAP and LDAPS.
+    A free and easy-to-use client-side URL transfer library, supporting DICT,
+    FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
+    POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     kerberos, HTTP form based upload, proxies, cookies, user+password
     authentication, file transfer resume, http proxy tunneling and more!
@@ -141,9 +147,8 @@ FAQ
 
     A command line tool for getting or sending files using URL syntax.
 
-    Since curl uses libcurl, it supports a range of common Internet protocols,
-    currently including HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, LDAP, LDAPS,
-    DICT, TELNET and FILE.
+    Since curl uses libcurl, curl supports the same wide range of common
+    Internet protocols that libcurl does.
 
   We pronounce curl and cURL with an initial k sound: [kurl].
 
@@ -307,9 +312,9 @@ FAQ
   as used by numerous applications that include libcurl binaries in their
   distribution packages (like Adobe Acrobat Reader and Google Earth).
 
-  More than 90 known named companies use curl in commercial environments and
-  products. More than 100 known named open source projects depend on
-  (lib)curl.
+  More than a hundred known named companies use curl in commercial
+  environments and products and more than a hundred known named open source
+  projects depend on (lib)curl.
 
   In a poll on the curl web site mid-2005, more than 50% of the 300+ answers
   estimated a user base of one million users or more.
@@ -319,6 +324,12 @@ FAQ
   based web servers. A guess is that a fair amount of these Linux
   installations have curl installed.
 
+  The Debian project maintains statistics on packages installed by people
+  who have voluntarily run their package counting application.  In mid-2010,
+  libcurl3 was installed on over 55000 such systems (62% of reporting systems)
+  and was one of the 320 most popular installed packages (out of about 107000
+  possible packages).
+
   All this taken together, there is no doubt that there are millions of
   (lib)curl users.
 
@@ -327,6 +338,7 @@ FAQ
   http://curl.haxx.se/libcurl/using/apps.html
   http://counter.li.org/estimates.php
   http://news.netcraft.com/archives/2005/03/14/fedora_makes_rapid_progress.html
+  http://qa.debian.org/popcon.php?package=curl
 
   1.11 Why don't you update ca-bundle.crt
 
@@ -356,6 +368,41 @@ FAQ
   There's a bunch of friendly people hanging out in the #curl channel on the
   IRC network irc.freenode.net. If you're polite and nice, chances are big
   that you can get -- or provide -- help instantly.
+
+  1.13 curl's ECCN number?
+
+  The US government restricts exports of software that contains or uses
+  cryptography. When doing so, the Export Control Classification Number (ECCN)
+  is used to identify the level of export control etc.
+
+  ASF gives a good explanation at http://www.apache.org/dev/crypto.html
+
+  We believe curl's number might be ECCN 5D002, another possibility is
+  5D992. It seems necessary to write them, asking to confirm.
+
+  Comprehensible explanations of the meaning of such numbers and how to
+  obtain them (resp.) are here
+
+  http://www.bis.doc.gov/licensing/exportingbasics.htm
+  http://www.bis.doc.gov/licensing/do_i_needaneccn.html
+
+  An incomprehensible description of the two numbers above is here
+  http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
+
+  1.14 How do I submit my patch?
+
+  When you have made a patch or a change of whatever sort, and want to submit
+  that to the project, there are a few different ways we prefer:
+
+  o send a patch to the curl-library mailing list. We're many subscribers
+    there and there are lots of people who can review patches, comment on them
+    and "receive" them properly.
+
+  o if your patch changes or fixes a bug, you can also opt to submit a bug
+    report in the bug tracker and attach your patch there. There are less
+    people involved there.
+
+  Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
 
 
 2. Install Related Problems
@@ -399,10 +446,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS, yassl or NSS, although there
-  should not be many problems using a different library. If anyone does "port"
-  curl to use a different SSL library, we are of course very interested in
-  getting the patch!
+  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS, PolarSSL, axTLS or
+  qssl, although there should not be many problems using a different
+  library. If anyone does "port" curl to use a different SSL library, we are
+  of course very interested in getting the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -614,6 +661,9 @@ FAQ
     provide this in order to prove that you actually are who you claim to be.
     If the server doesn't require this, you don't need a client certificate.
 
+    A client certificate is always used together with a private key, and the
+    private key has a pass phrase that protects it.
+
   - Server certificate. The server you communicate with has a server
     certificate. You can and should verify this certificate to make sure that
     you are truly talking to the real server and not a server impersonating
@@ -621,8 +671,9 @@ FAQ
 
   - Certificate Authority certificate ("CA cert"). You often have several CA
     certs in a CA cert bundle that can be used to verify a server certificate
-    that was signed by one of the authorities in the bundle. curl comes with a
-    default CA cert bundle. You can override the default.
+    that was signed by one of the authorities in the bundle. curl does not
+    come with a CA cert bundle but most curl installs provide one. You can
+    also override the default.
 
     The server certificate verification process is made by using a Certificate
     Authority certificate ("CA cert") that was used to sign the server
@@ -652,6 +703,17 @@ FAQ
   No.
 
   But you could easily write your own program using libcurl to do such stunts.
+
+  3.19 How do I get HTTP from a host using a specific IP address?
+
+  For example, you may be trying out a web site installation that isn't yet in
+  the DNS. Or you have a site using multiple IP addresses for a given host
+  name and you want to address a specific one out of the set.
+
+  Set a custom Host: header that identifies the server name you want to reach
+  but use the target IP address in the URL:
+
+    curl --header "Host: www.example.com" http://127.0.0.1/
 
 
 4. Running Problems
@@ -801,10 +863,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  This is supported in curl 7.10.6 or later. No earlier curl version knows
-  of this magic. Later versions require the OpenSSL, GnuTLS or Microsoft
-  Windows libraries to provide this functionality. Using the NSS library
-  will not provide NTLM authentication functionality in curl.
+  NTLM support requires OpenSSL, GnuTLS, NSS or Microsoft Windows libraries at
+  build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
@@ -944,6 +1004,31 @@ FAQ
 
   In either case, cURL should now be looking for the correct file.
 
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+
+  Unplugging the cable is not an error situation. The TCP/IP protocol stack
+  was designed to be fault tolerant, so even though there may be a physical
+  break somewhere the connection shouldn't be affected, just possibly
+  delayed.  Eventually, the physical break will be fixed or the data will be
+  re-routed around the physical problem.
+
+  In such cases, the TCP/IP stack is responsible for detecting when the
+  network connection is irrevocably lost. Since with some protocols it is
+  perfectly legal for the client wait indefinitely for data, the stack may
+  never report a problem, and even when it does, it can take up to 20 minutes
+  for it to detect an issue.  The curl option --keepalive-time enables
+  keep-alive support in the TCP/IP stack which makes it periodically probe the
+  connection to make sure it is still available to send data. That should
+  reliably detect any TCP/IP network failure.
+
+  But even that won't detect the network going down before the TCP/IP
+  connection is established (e.g. during a DNS lookup) or using protocols that
+  don't use TCP.  To handle those situations, curl offers a number of timeouts
+  on its own. --speed-limit/--speed-time will abort if the data transfer rate
+  falls too low, and --connect-timeout and --max-time can be used to put an
+  overall timeout on the connection phase or the entire transfer.
+
+
 5. libcurl Issues
 
   5.1 Is libcurl thread-safe?
@@ -1044,11 +1129,14 @@ FAQ
 
   When building an application that uses the static libcurl library, you must
   add -DCURL_STATICLIB to your CFLAGS. Otherwise the linker will look for
-  dynamic import symbols. If you get linker error like "unknown symbol
-  __imp__curl_easy_init ..." you have linked against the wrong (static)
-  library.  If you want to use the libcurl.dll and import lib, you don't need
-  any extra CFLAGS, but use one of the import libraries below. These are the
-  libraries produced by the various lib/Makefile.* files:
+  dynamic import symbols. If you're using Visual Studio, you need to instead
+  add CURL_STATICLIB in the "Preprocessor Definitions" section.
+
+  If you get linker error like "unknown symbol __imp__curl_easy_init ..." you
+  have linked against the wrong (static) library.  If you want to use the
+  libcurl.dll and import lib, you don't need any extra CFLAGS, but use one of
+  the import libraries below. These are the libraries produced by the various
+  lib/Makefile.* files:
 
   Target:          static lib.   import lib for libcurl*.dll.
   -----------------------------------------------------------
@@ -1058,13 +1146,14 @@ FAQ
   Borland:         libcurl.lib   libcurl_imp.lib
 
 
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
 
   This is an error message you might get when you try to run a program linked
   with a shared version of libcurl and your run-time linker (ld.so) couldn't
-  find the shared library named libcurl.so.3.
+  find the shared library named libcurl.so.X. (Where X is the number of the
+  current libcurl ABI, typically 3 or 4).
 
-  You need to make sure that ld.so finds libcurl.so.3. You can do that
+  You need to make sure that ld.so finds libcurl.so.X. You can do that
   multiple ways, and it differs somewhat between different operating systems,
   but they are usually:
 
@@ -1100,10 +1189,10 @@ FAQ
     Using this offers asynchronous name resolves but it currently has no IPv6
     support.
 
-  - The Windows threaded resolver. It use:
+  - The threaded resolver (default option on Windows). It uses:
 
-    A - gethostbyname() on plain ipv4 windows hosts
-    B - getaddrinfo() on ipv6-enabled windows hosts
+    A - gethostbyname() on plain ipv4 hosts
+    B - getaddrinfo() on ipv6-enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.
@@ -1182,7 +1271,9 @@ FAQ
   to do "LIST -a" or similar to see them.
 
   The application thus needs to parse the LIST output. One such existing
-  list parser is available at http://cr.yp.to/ftpparse.html
+  list parser is available at http://cr.yp.to/ftpparse.html  Versions of
+  libcurl since 7.21.0 also provide the ability to specify a wildcard to
+  download multiple files from one FTP directory.
 
 
 6. License Issues
@@ -1193,7 +1284,10 @@ FAQ
   this section was much enhanced by Bjorn Reese.)
 
   We are not lawyers and this is not legal advice. You should probably consult
-  one if you want true and accurate legal insights without our prejudice.
+  one if you want true and accurate legal insights without our prejudice. Note
+  especially that this section concerns the libcurl license only; compiling in
+  features of libcurl that depend on other libraries (e.g. OpenSSL) may affect
+  the licensing obligations of your application.
 
   6.1 I have a GPL program, can I use the libcurl library?
 

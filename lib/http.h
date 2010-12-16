@@ -56,11 +56,10 @@ Curl_send_buffer *Curl_add_buffer_init(void);
 CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...);
 CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size);
 CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
-                         struct connectdata *conn,
-                         long *bytes_written,
-                         size_t included_body_bytes,
-                         int socketindex);
-
+                              struct connectdata *conn,
+                              long *bytes_written,
+                              size_t included_body_bytes,
+                              int socketindex);
 
 CURLcode Curl_add_timecondition(struct SessionHandle *data,
                                 Curl_send_buffer *buf);

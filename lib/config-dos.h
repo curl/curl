@@ -3,7 +3,7 @@
 
 
 /* ================================================================ */
-/*        lib/config.dos - Hand crafted config file for DOS         */
+/*       lib/config-dos.h - Hand crafted config file for DOS        */
 /* ================================================================ */
 
 #if defined(DJGPP)
@@ -67,6 +67,7 @@
 #define SIZEOF_INT             4
 #define SIZEOF_LONG_DOUBLE     16
 #define SIZEOF_SHORT           2
+#define SIZEOF_SIZE_T          4
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

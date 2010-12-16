@@ -67,6 +67,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -366,7 +367,7 @@ Curl_cache_addr(struct SessionHandle *data,
   dns = dns2;
   dns->inuse++;         /* mark entry as in-use */
 
-  /* free the allocated entry_id again */
+  /* free the allocated entry_id */
   free(entry_id);
 
   return dns;
@@ -421,6 +422,9 @@ int Curl_resolv(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
+  /* free the allocated entry_id again */
+  free(entry_id);
+
   /* See whether the returned entry is stale. Done before we release lock */
   if( remove_entry_if_stale(data, dns) )
     dns = NULL; /* the memory deallocation is being handled by the hash */
@@ -433,9 +437,6 @@ int Curl_resolv(struct connectdata *conn,
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-  /* free the allocated entry_id again */
-  free(entry_id);
-
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
 
@@ -444,7 +445,7 @@ int Curl_resolv(struct connectdata *conn,
 
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
-    if(!Curl_ipvalid(data))
+    if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
@@ -597,7 +598,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
   /* alarm() makes a signal get sent when the timeout fires off, and that
      will abort system calls */
-  prev_alarm = alarm((unsigned int) (timeout/1000L));
+  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
 
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.

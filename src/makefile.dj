@@ -12,7 +12,7 @@ TOPDIR = ..
 include ../packages/DOS/common.dj
 include Makefile.inc
 
-CSOURCES = $(CURL_SOURCES)
+CSOURCES = $(CURL_CFILES)
 
 ifeq ($(USE_SSL),1)
   EX_LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
@@ -46,9 +46,9 @@ $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 
 curl_config.h:
 ifeq ($(IS_UNIX_SHELL),1)
-	@echo '#include "../lib/config.dos"' > $@
+	@echo '#include "../lib/config-dos.h"' > $@
 else
-	@echo #include "../lib/config.dos" > $@
+	@echo #include "../lib/config-dos.h" > $@
 endif
 
 #

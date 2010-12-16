@@ -275,6 +275,10 @@ NSS
 
  is claimed to be thread-safe already without anything required.
 
+PolarSSL
+
+ Required actions unknown.
+
 yassl
 
  Required actions unknown.
@@ -1232,6 +1236,15 @@ CURLOPT_USERAGENT, CURLOPT_HTTPHEADER, CURLOPT_POSTFIELDS and others that
 are used to generate structured data. Characters like embedded carriage
 returns or ampersands could allow the user to create additional headers or
 fields that could cause malicious transactions.
+
+.IP "Server-supplied Names"
+A server can supply data which the application may, in some cases, use as
+a file name. The curl command-line tool does this with --remote-header-name,
+using the Content-disposition: header to generate a file name.  An application
+could also use CURLINFO_EFFECTIVE_URL to generate a file name from a
+server-supplied redirect URL. Special care must be taken to sanitize such
+names to avoid the possibility of a malicious server supplying one like
+"/etc/passwd", "\autoexec.bat" or even ".bashrc".
 
 .IP "Server Certificates"
 A secure application should never use the CURLOPT_SSL_VERIFYPEER option to

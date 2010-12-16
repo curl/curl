@@ -2,6 +2,8 @@
 <info>
 <keywords>
 FTP
+LIST
+RETR
 wildcardmatch
 ftplistparser
 </keywords>
@@ -36,23 +38,48 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*.txt
 <errorcode>
 0
 </errorcode>
-<strip>
-^RETR.*
-^EPSV.*
-^PWD.*
-^CWD.*
-^TYPE.*
-^LIST.*
-</strip>
-<strippart>
-s/USER.*/USER/
-s/PASS.*/PASS/
-s/QUIT.*/QUIT/
-</strippart>
-# THERE SHOULD NOT BE "SIZE"! and once "USER && PASS"
+# THERE SHOULD NOT BE "SIZE"! and one "USER/PASS"
 <protocol>
-USER
-PASS
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
+LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
+CWD /
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
+LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
 QUIT
 </protocol>
 <stdout mode="text">

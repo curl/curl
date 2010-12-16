@@ -85,9 +85,18 @@ NTLM
  <name>
 HTTP proxy auth NTLM with POST data from read callback multi-if
  </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
  <command>
 http://test.remote.haxx.se/path/555 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 </command>
+<precheck>
+chkhostname curlhost
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -95,10 +104,7 @@ http://test.remote.haxx.se/path/555 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 <strip>
 ^User-Agent: curl/.*
 </strip>
-# We strip off a large chunk of the type-2 NTLM message since it depends on
-# the local host name and thus differs on different machines!
 <strippart>
-s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
 # remove CR that CURLOPT_TRANSFERTEXT added, when CharConv enabled:
 s/^(this is the blurb we want to upload)\r\n/$1\n/ if($has_charconv)
 </strippart>
@@ -122,7 +128,7 @@ Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
 POST http://test.remote.haxx.se/path/555 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAIYrD1xJmhNBNL9fLzuk9PV9436GAxPu0EKWzqQ/sZDVLXnp1JrySgl8A+cibE6z4HMxbGx5Y3VybGhvc3Q=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: test.remote.haxx.se
 Accept: */*

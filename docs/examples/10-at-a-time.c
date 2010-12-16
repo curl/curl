@@ -119,7 +119,7 @@ int main(void)
   }
 
   while (U) {
-    while (CURLM_CALL_MULTI_PERFORM == curl_multi_perform(cm, &U));
+    curl_multi_perform(cm, &U);
 
     if (U) {
       FD_ZERO(&R);

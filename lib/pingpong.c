@@ -217,11 +217,12 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 #endif /* CURL_DOES_CONVERSIONS */
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-  conn->data_prot = prot_cmd;
+  conn->data_prot = PROT_CMD;
 #endif
   res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                    &bytes_written);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+  DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
   conn->data_prot = data_sec;
 #endif
 
@@ -322,7 +323,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        */
       DEBUGASSERT((ptr+pp->cache_size) <= (buf+BUFSIZE+1));
       memcpy(ptr, pp->cache, pp->cache_size);
-      gotbytes = pp->cache_size;
+      gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
       pp->cache = NULL;   /* clear the pointer */
       pp->cache_size = 0; /* zero the size just in case */
@@ -331,13 +332,13 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       int res;
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
       enum protection_level prot = conn->data_prot;
-
-      conn->data_prot = 0;
+      conn->data_prot = PROT_CLEAR;
 #endif
       DEBUGASSERT((ptr+BUFSIZE-pp->nread_resp) <= (buf+BUFSIZE+1));
       res = Curl_read(conn, sockfd, ptr, BUFSIZE-pp->nread_resp,
                       &gotbytes);
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+      DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
       conn->data_prot = prot;
 #endif
       if(res == CURLE_AGAIN)
@@ -362,7 +363,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
     else if(gotbytes <= 0) {
       keepon = FALSE;
       result = CURLE_RECV_ERROR;
-      failf(data, "FTP response reading failed");
+      failf(data, "response reading failed");
     }
     else {
       /* we got a whole chunk of data, which can be anything from one
@@ -386,8 +387,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           if(!conn->sec_complete)
 #endif
             if(data->set.verbose)
-            Curl_debug(data, CURLINFO_HEADER_IN,
-                       pp->linestart_resp, (size_t)perline, conn);
+              Curl_debug(data, CURLINFO_HEADER_IN,
+                         pp->linestart_resp, (size_t)perline, conn);
 
           /*
            * We pass all response-lines to the callback function registered

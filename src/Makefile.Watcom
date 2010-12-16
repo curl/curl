@@ -3,127 +3,202 @@
 #  G. Vanem <gvanem@broadpark.no>
 #
 
+!ifndef %watcom
+!error WATCOM environment variable not set!
+!endif
+
+!ifdef %libname
+LIBNAME = $(%libname)
+!else
+LIBNAME = libcurl
+!endif
+TARGETS = $(LIBNAME).dll $(LIBNAME)_imp.lib $(LIBNAME).lib
+
 CC = wcc386
+LD = wlink
+AR = wlib
+RC = wrc
 
-CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
-         -bt=nt -d+ -dWIN32 -dHAVE_STRTOLL -dDEBUGBUILD -dENABLE_IPV6    &
-         -dHAVE_WINSOCK2_H -I..\include -I..\lib
+!ifdef __LOADDLL__
+!  loaddll wcc386  wccd386
+!  loaddll wpp386  wppd386
+!  loaddll wlib    wlibd
+!  if $(__VERSION__) > 1270
+!    loaddll wlink   wlinkd
+!  else
+!    loaddll wlink   wlink
+!  endif
+!endif
 
-OBJ_DIR = WC_Win32.obj
+!ifdef __LINUX__
+DS = /
+CP = cp
+MD = mkdir -p
+RD = rmdir -p
+RM = rm -f
+!else
+DS = $(X)\$(X)
+CP = copy 2>NUL
+MD = mkdir
+RD = rmdir /q /s 2>NUL
+!if $(__VERSION__) < 1250
+RM = del /q /f 2>NUL
+!else
+RM = rm -f
+!endif
+!endif
 
-# Unfortunately, we can't include Makefile.inc here because wmake doesn't
-# use backslash as the line continuation character by default
-CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c &
-	getpass.c homedir.c curlutil.c os-specific.c
+SYS_INCL = -I$(%watcom)$(DS)h$(DS)nt -I$(%watcom)$(DS)h
+SYS_LIBS = $(%watcom)$(DS)lib386$(DS)nt;$(%watcom)$(DS)lib386
 
-CURLX_SOURCES = rawstr.c
+CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
+         -wcd=201 -bt=nt -bc -d+ -dWIN32 -dHAVE_STRTOLL             &
+         -I..$(DS)include -I..$(DS)lib $(SYS_INCL)
 
-OBJS = $(CURL_SOURCES:.c=.obj) $(CURLX_SOURCES:.c=.obj)
+!ifdef %debug
+DEBUG  = -dDEBUG=1 -dDEBUGBUILD
+CFLAGS += -d3 $(DEBUG)
+!else
+CFLAGS += -d0
+!endif
+
+!ifdef %use_ipv6
+CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
+!endif
+
+#
+# Change to suite.
+#
+!ifdef %zlib_root
+ZLIB_ROOT = $(%zlib_root)
+!else
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
+!endif
+
+!ifdef %libssh2_root
+LIBSSH2_ROOT = $(%libssh2_root)
+!else
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.7
+!endif
+
+!ifdef %librtmp_root
+LIBRTMP_ROOT = $(%librtmp_root)
+!else
+LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
+!endif
+
+!ifdef %openssl_root
+OPENSSL_ROOT = $(%openssl_root)
+!else
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8q
+!endif
+
+!ifdef %ares_root
+ARES_ROOT = $(%ares_root)
+!else
+ARES_ROOT = ..$(DS)ares
+!endif
+
+!ifdef %use_ssl
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)$(DS)inc32
+!endif
+
+OBJ_DIR  = WC_Win32.obj
+LINK_ARG = $(OBJ_DIR)$(DS)wlink.arg
+
+# In order to process Makefile.inc wmake must be called with -u switch!
+!ifndef %MAKEFLAGS
+!error You MUST call wmake with the -u switch!
+!else
+!include Makefile.inc
+!endif
+# For now we still define the CURLX_ONES sources here unless we know how
+# to split off the prefixed path.
+CURLX_SOURCES = rawstr.c nonblock.c
+
+OBJS = $(CURL_CFILES:.c=.obj)
+!ifdef %curl_static
+CFLAGS += -DCURL_STATICLIB
+!else
+CFLAGS += -br
+OBJS += $(CURLX_SOURCES:.c=.obj)
+!endif
+!ifdef __LINUX__
+OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+
+!else
 OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
+!endif
 
-RESOURCE = $(OBJ_DIR)\curl.res
+RESOURCE = $(OBJ_DIR)$(DS)curl.res
 
 all: hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
 	@echo Welcome to cURL
 
+clean: .SYMBOLIC
+	-$(RM) $(OBJS)
+	-$(RM) $(RESOURCE) $(LINK_ARG)
+
+vclean distclean: clean .SYMBOLIC
+	-$(RD) $(OBJ_DIR)
+	-$(RM) curl.exe curl.map curl.sym hugehelp.c
+
 hugehelp.c: hugehelp.c.cvs
-	copy hugehelp.c.cvs hugehelp.c
+	$(CP) $[@ $^@
+
+hugehelp.c.cvs: .EXISTSONLY
+	$(CP) hugehelp.c $^@
 
 $(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+	-$(MD) $^@
 
-curl.exe: $(OBJS) $(RESOURCE)
-	wlink name $@ system nt file { $(OBJS) }                   &
-	  option quiet, map, caseexact, eliminate, res=$(RESOURCE) &
-	  libpath $(%watcom)\lib386;$(%watcom)\lib386\nt           &
-	  library ..\lib\libcurl_wc_imp.lib, clib3r.lib, ws2_32.lib
-
-clean: .SYMBOLIC
-	- rm -f $(OBJS) $(RESOURCE)
-
-vclean realclean: clean .SYMBOLIC
- 	- rm -f curl.exe curl.map hugehelp.c
-	- rmdir $(OBJ_DIR)
+curl.exe: $(OBJS) $(RESOURCE) $(LINK_ARG)
+	$(LD) name $^@ @$]@
 
 $(RESOURCE): curl.rc
-	wrc -dDEBUGBUILD=1 -q -r -zm -I..\include -fo=$@ curl.rc
+	$(RC) $(DEBUG) -q -r -zm -bt=nt -I..$(DS)include $(SYS_INCL) $[@ -fo=$^@
+
+# suffix search path - vpath-like hack
+.c: ..$(DS)lib
 
 .ERASE
 .c{$(OBJ_DIR)}.obj:
-	$(CC) $[@ $(CFLAGS) -fo=$@
+	$(CC) $(CFLAGS) $[@ -fo=$^@
 
-.ERASE
-$(OBJ_DIR)\rawstr.obj: ..\lib\rawstr.c
-	$(CC) $[@ $(CFLAGS) -fo=$@
+$(LINK_ARG): $(__MAKEFILES__)
+	%create $^@
+	@%append $^@ system nt
+	@%append $^@ file { $(OBJS) }
+!ifdef %debug
+	@%append $^@ debug all
+	@%append $^@ option symfile
+!endif
+	@%append $^@ option quiet, map, caseexact, eliminate,
+	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
+!ifdef %curl_static
+	@%append $^@ library wldap32.lib
+	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME).lib
+!ifdef %use_zlib
+	@%append $^@ library $(ZLIB_ROOT)$(DS)zlib.lib
+!endif
+!ifdef %use_rtmp
+	@%append $^@ library $(LIBRTMP_ROOT)$(DS)librtmp$(DS)librtmp.lib, winmm.lib
+!endif
+!ifdef %use_ssh2                                                                                                                    
+	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib                                                                      
+!endif
+!ifdef %use_ssl
+	@%append $^@ library $(OPENSSL_ROOT)$(DS)out32$(DS)libeay32.lib, $(OPENSSL_ROOT)$(DS)out32$(DS)ssleay32.lib
+!endif
+!ifdef %use_ares
+	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
+!endif
+!else
+	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME)_imp.lib
+!endif
+!ifeq USE_WATT32 1
+	@%append $^@ library $(%watt_root)$(DS)lib$(DS)wattcpw_imp.lib
+!else
+	@%append $^@ library ws2_32.lib
+!endif
 
-.ERASE
-$(OBJ_DIR)\nonblock.obj: ..\lib\nonblock.c
-	$(CC) $[@ $(CFLAGS) -fo=$@
-
-#
-# Dependencies based on "gcc -MM .."
-#
-$(OBJ_DIR)\getpass.obj: getpass.c setup.h config-win32.h ..\lib\setup_once.h getpass.h &
-  ..\lib\memdebug.h ..\lib\setup.h ..\lib\config-win32.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h &
-  ..\include\curl\curlrules.h ..\include\curl\easy.h &
-  ..\include\curl\multi.h ..\include\curl\curl.h
-
-$(OBJ_DIR)\homedir.obj: homedir.c setup.h config-win32.h ..\lib\setup_once.h homedir.h &
-  ..\lib\memdebug.h ..\lib\setup.h ..\lib\config-win32.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h &
-  ..\include\curl\curlrules.h ..\include\curl\easy.h &
-  ..\include\curl\multi.h ..\include\curl\curl.h
-
-$(OBJ_DIR)\hugehelp.obj: hugehelp.c
-
-$(OBJ_DIR)\main.obj: main.c setup.h config-win32.h ..\lib\setup_once.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h &
-  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
-  urlglob.h writeout.h getpass.h homedir.h curlutil.h hugehelp.h &
-  version.h ..\include\curl\curlver.h ..\lib\curlx.h &
-  ..\include\curl\mprintf.h ..\lib\strequal.h ..\lib\strtoofft.h &
-  ..\lib\setup.h ..\lib\config-win32.h ..\include\curl\curlbuild.h &
-  ..\include\curl\curlrules.h ..\lib\timeval.h ..\lib\memdebug.h &
-  os-specific.h
-
-$(OBJ_DIR)\urlglob.obj: urlglob.c setup.h config-win32.h ..\lib\setup_once.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h &
-  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
-  ..\include\curl\mprintf.h urlglob.h ..\lib\memdebug.h ..\lib\setup.h &
-  ..\lib\config-win32.h ..\include\curl\curlbuild.h &
-  ..\include\curl\curlrules.h os-specific.h
-
-$(OBJ_DIR)\writeenv.obj: writeenv.c setup.h config-win32.h ..\lib\setup_once.h
-
-$(OBJ_DIR)\writeout.obj: writeout.c setup.h config-win32.h ..\lib\setup_once.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h &
-  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
-  ..\include\curl\mprintf.h writeout.h
-
-$(OBJ_DIR)\curlutil.obj: curlutil.c setup.h config-win32.h ..\lib\setup_once.h &
-  curlutil.h
-
-$(OBJ_DIR)\os-specific.obj: os-specific.c os-specific.h setup.h config-win32.h &
-  ..\lib\setup_once.h
-
-$(OBJ_DIR)\rawstr.obj: ..\lib\rawstr.c ..\lib\setup.h ..\lib\config-win32.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h ..\lib\setup_once.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\curlrules.h &
-  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
-  ..\lib\strerror.h ..\lib\urldata.h ..\lib\cookie.h ..\lib\formdata.h &
-  ..\lib\timeval.h ..\lib\http_chunks.h ..\lib\hostip.h ..\lib\hash.h &
-  ..\lib\llist.h ..\lib\splay.h ..\include\curl\mprintf.h
-
-$(OBJ_DIR)\nonblock.obj: ..\lib\nonblock.c ..\lib\setup.h ..\lib\config-win32.h &
-  ..\include\curl\curlbuild.h ..\include\curl\curlrules.h ..\lib\setup_once.h &
-  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\curlrules.h &
-  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
-  ..\lib\strerror.h ..\lib\urldata.h ..\lib\cookie.h ..\lib\formdata.h &
-  ..\lib\timeval.h ..\lib\http_chunks.h ..\lib\hostip.h ..\lib\hash.h &
-  ..\lib\llist.h ..\lib\splay.h ..\include\curl\mprintf.h ..\lib\nonblock.h

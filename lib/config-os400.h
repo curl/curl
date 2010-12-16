@@ -364,6 +364,9 @@
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT            2
 
+/* The size of `size_t', as computed by sizeof. */
+#define SIZEOF_SIZE_T           8
+
 /* Whether long long constants must be suffixed by LL. */
 
 #define HAVE_LL

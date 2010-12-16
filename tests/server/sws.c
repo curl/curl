@@ -59,6 +59,7 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
+#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -75,6 +76,7 @@
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
+static bool use_gopher = FALSE;
 static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
 
@@ -104,6 +106,8 @@ struct httprequest {
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
+  int writedelay; /* if non-zero, delay this number of seconds between
+		      writes in the response */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
@@ -159,6 +163,7 @@ enum {
   DOCNUMBER_404     = -1
 };
 
+static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
 static const char *docquit =
@@ -307,13 +312,22 @@ static int ProcessRequest(struct httprequest *req)
   int prot_major, prot_minor;
   char *end;
   int error;
-  end = strstr(line, END_OF_HEADERS);
+  end = strstr(line, end_of_headers);
 
   logmsg("ProcessRequest() called");
 
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
-  if((req->testno == DOCNUMBER_NOTHING) &&
+
+  if(use_gopher &&
+     (req->testno == DOCNUMBER_NOTHING) &&
+     !strncmp("/verifiedserver", line, 15)) {
+    logmsg("Are-we-friendly question received");
+    req->testno = DOCNUMBER_WERULEZ;
+    return 1; /* done */
+  }
+
+  else if((req->testno == DOCNUMBER_NOTHING) &&
      sscanf(line,
             "%" REQUEST_KEYWORD_SIZE_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
             request,
@@ -424,6 +438,10 @@ static int ProcessRequest(struct httprequest *req)
             logmsg("instructed to skip this number of bytes %d", num);
             req->skip = num;
           }
+          else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+            logmsg("instructed to delay %d secs between packets", num);
+            req->writedelay = num;
+          }
           else {
             logmsg("funny instruction found: %s", cmd);
           }
@@ -449,8 +467,8 @@ static int ProcessRequest(struct httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp)
-            req->testno = atoi(portp+1);
+          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
+            req->testno = strtol(portp+1, NULL, 10);
           else
             req->testno = DOCNUMBER_CONNECT;
         }
@@ -471,10 +489,40 @@ static int ProcessRequest(struct httprequest *req)
   }
   logmsg("ProcessRequest found a complete request");
 
+  if(use_gopher) {
+    /* when using gopher we cannot check the request until the entire
+       thing has been received */
+    char *ptr;
+
+    /* find the last slash in the line */
+    ptr = strrchr(line, '/');
+
+    if(ptr) {
+      ptr++; /* skip the slash */
+
+      /* skip all non-numericals following the slash */
+      while(*ptr && !ISDIGIT(*ptr))
+        ptr++;
+
+      req->testno = strtol(ptr, &ptr, 10);
+
+      if(req->testno > 10000) {
+        req->partno = req->testno % 10000;
+        req->testno /= 10000;
+      }
+      else
+        req->partno = 0;
+
+      sprintf(logbuf, "Requested GOPHER test number %ld part %ld",
+              req->testno, req->partno);
+      logmsg("%s", logbuf);
+    }
+  }
+
   if(req->pipe)
     /* we do have a full set, advance the checkindex to after the end of the
        headers, for the pipelining case mostly */
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + strlen(end_of_headers);
 
   /* **** Persistence ****
    *
@@ -582,12 +630,12 @@ static int ProcessRequest(struct httprequest *req)
      req->open &&
      req->prot_version >= 11 &&
      end &&
-     req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
+     req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
       !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
-    req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
+    req->checkindex = (end - req->reqbuf) + strlen(end_of_headers);
     req->pipelining = TRUE;
   }
 
@@ -596,10 +644,10 @@ static int ProcessRequest(struct httprequest *req)
       return 1; /* done */
     /* scan for more header ends within this chunk */
     line = &req->reqbuf[req->checkindex];
-    end = strstr(line, END_OF_HEADERS);
+    end = strstr(line, end_of_headers);
     if(!end)
       break;
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + strlen(end_of_headers);
     req->pipe--;
   }
 
@@ -611,7 +659,7 @@ static int ProcessRequest(struct httprequest *req)
     return 1; /* done */
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
+    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(end_of_headers))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -704,6 +752,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->ntlm = FALSE;
   req->pipe = 0;
   req->skip = 0;
+  req->writedelay = 0;
   req->rcmd = RCMD_NORMALREQ;
   req->prot_version = 0;
   req->pipelining = FALSE;
@@ -713,7 +762,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   while(!done_processing && (req->offset < REQBUFSIZ-1)) {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
-      got = pipereq_length;
+      got = curlx_uztosz(pipereq_length);
       pipereq_length = 0;
     }
     else {
@@ -842,8 +891,11 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("Identifying ourselves as friends");
       sprintf(msgbuf, "WE ROOLZ: %ld\r\n", (long)getpid());
       msglen = strlen(msgbuf);
-      sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-              msglen, msgbuf);
+      if(use_gopher)
+        sprintf(weare, "%s", msgbuf);
+      else
+        sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
+                msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_INTERNAL:
@@ -971,6 +1023,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     else {
       logmsg("Sent off %zd bytes", written);
     }
+    if (req->writedelay) {
+      logmsg("Pausing %d seconds", req->writedelay);
+      sleep(req->writedelay);
+    }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
     if(got_exit_signal)
@@ -1050,7 +1106,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(cmd)
     free(cmd);
 
-  req->open = persistant;
+  req->open = use_gopher?FALSE:persistant;
 
   prevtestno = req->testno;
   prevpartno = req->partno;
@@ -1061,10 +1117,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
 int main(int argc, char *argv[])
 {
-  struct sockaddr_in me;
-#ifdef ENABLE_IPV6
-  struct sockaddr_in6 me6;
-#endif /* ENABLE_IPV6 */
+  srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
@@ -1105,6 +1158,11 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg)
         serverlogfile = argv[arg++];
+    }
+    else if(!strcmp("--gopher", argv[arg])) {
+      arg++;
+      use_gopher = TRUE;
+      end_of_headers = "\r\n"; /* gopher style is much simpler */
     }
     else if(!strcmp("--ipv4", argv[arg])) {
 #ifdef ENABLE_IPV6
@@ -1157,6 +1215,7 @@ int main(int argc, char *argv[])
            " --ipv6\n"
            " --port [port]\n"
            " --srcdir [path]\n"
+           " --gopher\n"
            " --fork");
       return 0;
     }
@@ -1199,19 +1258,19 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   if(!use_ipv6) {
 #endif
-    memset(&me, 0, sizeof(me));
-    me.sin_family = AF_INET;
-    me.sin_addr.s_addr = INADDR_ANY;
-    me.sin_port = htons(port);
-    rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
+    memset(&me.sa4, 0, sizeof(me.sa4));
+    me.sa4.sin_family = AF_INET;
+    me.sa4.sin_addr.s_addr = INADDR_ANY;
+    me.sa4.sin_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa4));
 #ifdef ENABLE_IPV6
   }
   else {
-    memset(&me6, 0, sizeof(me6));
-    me6.sin6_family = AF_INET6;
-    me6.sin6_addr = in6addr_any;
-    me6.sin6_port = htons(port);
-    rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
+    memset(&me.sa6, 0, sizeof(me.sa6));
+    me.sa6.sin6_family = AF_INET6;
+    me.sa6.sin6_addr = in6addr_any;
+    me.sa6.sin6_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
 #endif /* ENABLE_IPV6 */
   if(0 != rc) {
@@ -1221,7 +1280,8 @@ int main(int argc, char *argv[])
     goto sws_cleanup;
   }
 
-  logmsg("Running %s version on port %d", ipv_inuse, (int)port);
+  logmsg("Running %s %s version on port %d",
+         use_gopher?"GOPHER":"HTTP", ipv_inuse, (int)port);
 
   /* start accepting connections */
   rc = listen(sock, 5);

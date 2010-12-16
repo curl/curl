@@ -139,6 +139,12 @@ UNIX
      To build with NSS support instead of OpenSSL for SSL/TLS, note that
      you need to use both --without-ssl and --with-nss.
 
+     To build with PolarSSL support instead of OpenSSL for SSL/TLS, note that
+     you need to use both --without-ssl and --with-polarssl.
+
+     To build with axTLS support instead of OpenSSL for TLS, note that you
+     need to use both --without-ssl and --with-axtls.
+
      To get GSSAPI support, build with --with-gssapi and have the MIT or
      Heimdal Kerberos 5 packages installed.
 
@@ -779,6 +785,11 @@ VxWorks
    To clean the build results type 'make -f ./Makefile.vxworks clean'.
 
 
+Android
+=======
+   See the build notes in the Android.mk file.
+
+
 CROSS COMPILE
 =============
    (This section was graciously brought to us by Jim Duey, with additions by
@@ -908,7 +919,7 @@ PORTS
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
         - AVR32 Linux
-        - ARM Android 1.5
+        - ARM Android 1.5, 2.1
         - ARM INTEGRITY
         - ARM iPhone OS
         - Cell Linux
@@ -972,10 +983,17 @@ PORTS
 Useful URLs
 ===========
 
-OpenSSL   http://www.openssl.org
-MingW     http://www.mingw.org
-OpenLDAP  http://www.openldap.org
-Zlib      http://www.gzip.org/zlib/
+c-ares    http://daniel.haxx.se/projects/c-ares/license.html
+GNU GSS   http://www.gnu.org/software/gss/
+GnuTLS    http://www.gnu.org/software/gnutls/
+Heimdal   http://www.pdc.kth.se/heimdal/
+libidn    http://www.gnu.org/software/libidn/
 libssh2   http://www.libssh2.org
-
-
+MingW     http://www.mingw.org
+MIT Kerberos http://web.mit.edu/kerberos/www/dist/
+NSS       http://www.mozilla.org/projects/security/pki/nss/
+OpenLDAP  http://www.openldap.org
+OpenSSL   http://www.openssl.org
+PolarSSL  http://polarssl.org
+yassl     http://www.yassl.com/
+Zlib      http://www.gzip.org/zlib/

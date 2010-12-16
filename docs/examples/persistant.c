@@ -24,12 +24,12 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
     /* get the first document */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://curl.haxx.se/");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
     res = curl_easy_perform(curl);
 
     /* get another document from the same server using the same
        connection */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://curl.haxx.se/docs/");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/docs/");
     res = curl_easy_perform(curl);
 
     /* always cleanup */

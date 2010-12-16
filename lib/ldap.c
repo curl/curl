@@ -473,7 +473,7 @@ static void _ldap_trace (const char *fmt, ...)
 
   if(do_trace == -1) {
     const char *env = getenv("CURL_TRACE");
-    do_trace = (env && atoi(env) > 0);
+    do_trace = (env && strtol(env, NULL, 10) > 0);
   }
   if(!do_trace)
     return;

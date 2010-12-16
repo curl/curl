@@ -75,7 +75,7 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "curl.haxx.se");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
     /* use platform-specific functions for codeset conversions */
     curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION,

@@ -41,6 +41,9 @@
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
+/* The size of `size_t', as computed by sizeof. */
+#define SIZEOF_SIZE_T 4
+
 /* Define if you have the alarm function.  */
 #define HAVE_ALARM 1
 

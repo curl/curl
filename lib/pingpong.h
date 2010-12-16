@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ struct pingpong {
   struct timeval response; /* set to Curl_tvnow() when a command has been sent
                               off, used to time-out response reading */
   long response_time; /* When no timeout is given, this is the amount of
-                         seconds we await for a server response. */
+                         milliseconds we await for a server response. */
 
   struct connectdata *conn; /* points to the connectdata struct that this
                                belongs to */

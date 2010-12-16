@@ -157,6 +157,20 @@ September 2005:
 
  More than 100,000 unique visitors of the curl web site. 25 mirrors.
 
+December 2005:
+
+ security vulnerability: libcurl URL Buffer Overflow
+
+January 2006:
+
+ We dropped support for Gopher. We found bugs in the implementation that
+ turned out having been introduced years ago, so with the conclusion that
+ nobody had found out in all this time we removed it instead of fixing it.
+
+March 2006:
+
+ security vulnerability: libcurl TFTP Packet Buffer Overflow
+
 April 2006:
 
  Added the multi_socket() API
@@ -174,6 +188,10 @@ February 2007:
 
  Added support for the Mozilla NSS library to do the SSL/TLS stuff
 
+July 2007:
+
+ security vulnerability: libcurl GnuTLS insufficient cert verification
+
 November 2008:
 
  Command line options:         128
@@ -184,3 +202,43 @@ November 2008:
 
  145,000 unique visitors. >100 GB downloaded.
 
+March 2009:
+
+ security vulnerability: libcurl Arbitrary File Access
+
+August 2009:
+
+ security vulnerability: libcurl embedded zero in cert name
+
+December 2009:
+
+ Added support for IMAP, POP3 and SMTP
+
+January 2010:
+
+ Added support for RTSP
+
+February 2010:
+
+ security vulnerability: libcurl data callback excessive length
+
+March 2010:
+
+ The project switched over to use git instead of CVS for source code control
+
+May 2010:
+
+ Added support for RTMP
+
+ Added support for PolarSSL to do the SSL/TLS stuff
+
+August 2010:
+
+ Public curl releases:         117
+ Command line options:         138
+ curl_easy_setopt() options:   180
+ Public functions in libcurl:  58
+ Known libcurl bindings:       39
+ Contributors:                 808
+
+ Gopher support added (re-added actually)

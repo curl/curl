@@ -419,8 +419,6 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if (done) {
     getaddrinfo_complete(conn);
-    if (td->poll_interval != 0)
-        Curl_expire(conn->data, 0);
     Curl_destroy_thread_data(&conn->async);
 
     if(!conn->async.dns) {
@@ -431,26 +429,21 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
     *entry = conn->async.dns;
   } else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    int elapsed;
-
-    elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-    if (elapsed < 0) {
+    int elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    if (elapsed < 0)
       elapsed = 0;
-    }
 
-    if (td->poll_interval == 0) {
+    if (td->poll_interval == 0)
       /* Start at 1ms poll interval */
       td->poll_interval = 1;
-    } else if (elapsed >= td->interval_end) {
+    else if (elapsed >= td->interval_end)
       /* Back-off exponentially if last interval expired  */
       td->poll_interval *= 2;
-    }
 
     if (td->poll_interval > 250)
       td->poll_interval = 250;
 
     td->interval_end = elapsed + td->poll_interval;
-
     Curl_expire(conn->data, td->poll_interval);
   }
 
@@ -484,8 +477,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct hostent *h = NULL;
-  struct SessionHandle *data = conn->data;
   struct in_addr in;
 
   *waitp = 0; /* default to synchronous response */
@@ -527,7 +518,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   /*
    * Check if a limited name resolve has been requested.
    */
-  switch(data->set.ip_version) {
+  switch(conn->ip_version) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
     break;

@@ -70,9 +70,18 @@ http
  <name>
 HTTP POST with NTLM authorization and following a 302 redirect
  </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/1100 -u testuser:testpass --ntlm -L -d "stuff to send away" 
 </command>
+<precheck>
+chkhostname curlhost
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -80,11 +89,6 @@ http://%HOSTIP:%HTTPPORT/1100 -u testuser:testpass --ntlm -L -d "stuff to send a
 <strip>
 ^User-Agent:.*
 </strip>
-# We strip off a large chunk of the type-2 NTLM message since it depends on
-# the local host name and thus differs on different machines!
-<strippart>
-s/^(Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA).*/$1/
-</strippart>
 <protocol>
 POST /1100 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
@@ -95,7 +99,7 @@ Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
 POST /1100 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAA
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoKBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

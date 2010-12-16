@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -151,11 +151,15 @@ struct ssh_conn {
 #endif
 
 #if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010000)
-/* libssh2_sftp_seek64() has only ever been provided by libssh2 1.0 or
-   later */
 #  define HAVE_LIBSSH2_SFTP_SEEK64 1
 #else
 #  undef HAVE_LIBSSH2_SFTP_SEEK64
+#endif
+
+#if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010206)
+#  define HAVE_LIBSSH2_SCP_SEND64 1
+#else
+#  undef HAVE_LIBSSH2_SCP_SEND64
 #endif
 
 

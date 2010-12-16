@@ -26,7 +26,7 @@ http
 HTTP RFC1867-type formposting with filename= and type=
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/39 -F name=daniel -F tool=curl --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@log/test39.txt;filename=fakerfile;type=moo/foobar" -F file2=@log/test39.txt
+http://%HOSTIP:%HTTPPORT/we/want/39 -F name=daniel -F tool=curl --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@log/test39.txt;type=moo/foobar;filename=fakerfile" -F file2=@log/test39.txt
 </command>
 # We create this file before the command is invoked!
 <file name="log/test39.txt">

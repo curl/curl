@@ -248,13 +248,17 @@ fi
 #--------------------------------------------------------------------------
 # m4 check
 #
-m4=`${M4:-m4} --version 2>/dev/null|head -n 1`;
+m4=`(${M4:-m4} --version || ${M4:-gm4} --version) 2>/dev/null | head -n 1`;
 m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 
 if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
   echo "buildconf: GNU m4 version $m4_version (ok)"
 else
-  echo "buildconf: m4 version $m4 found. You need a GNU m4 installed!"
+  if test -z "$m4"; then
+    echo "buildconf: m4 version not recognized. You need a GNU m4 installed!"
+  else
+    echo "buildconf: m4 version $m4 found. You need a GNU m4 installed!"
+  fi
   exit 1
 fi
 
@@ -289,6 +293,7 @@ for fname in .deps \
     config.status \
     config.sub \
     configure \
+    configurehelp.pm \
     curl-config \
     curlbuild.h \
     depcomp \
@@ -360,6 +365,12 @@ if test ! -f ./config.guess; then
 else
   buildhost=`./config.guess 2>/dev/null|head -n 1`
   case $buildhost in
+    *-*-darwin*)
+      need_lt_major=1
+      need_lt_minor=5
+      need_lt_patch=26
+      need_lt_check="yes"
+      ;;
     *-*-hpux*)
       need_lt_major=1
       need_lt_minor=5

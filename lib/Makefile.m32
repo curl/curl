@@ -1,13 +1,13 @@
 #########################################################################
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-3.2 or later)
-## and optionally OpenSSL (0.9.8), libssh2 (1.1), zlib (1.2.3)
+## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5)
 ##
 ## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [DYN=1]
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [RTMP=1] [DYN=1]
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
-## set ZLIB_PATH=c:/zlib-1.2.3
+## set ZLIB_PATH=c:/zlib-1.2.5
 ## set ZLIB=1
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
@@ -20,15 +20,19 @@ ZLIB_PATH = ../../zlib-1.2.5
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8n
+OPENSSL_PATH = ../../openssl-0.9.8q
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.5
+LIBSSH2_PATH = ../../libssh2-1.2.7
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
+endif
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../librtmp-2.3
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -47,7 +51,7 @@ LDFLAGS = -s
 RANLIB = ranlib
 RC = windres
 RCFLAGS = --include-dir=../include -DDEBUGBUILD=0 -O COFF -i
-RM = del /q /f > NUL 2>&1
+RM = del /q /f 2>NUL
 STRIP = strip -g
 
 ########################################################
@@ -60,6 +64,11 @@ ifdef ARES
   CFLAGS += -DUSE_ARES
   DLL_LIBS += -L$(LIBCARES_PATH) -lcares
   libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
+endif
+ifdef RTMP
+  INCLUDES += -I"$(LIBRTMP_PATH)"
+  CFLAGS += -DUSE_LIBRTMP
+  DLL_LIBS += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
@@ -148,12 +157,11 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 clean:
 	-$(RM) $(libcurl_a_OBJECTS) $(RESOURCE)
 
-distrib: clean
+distclean vclean: clean
 	-$(RM) $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY)
 
 FORCE: ;
 
 $(LIBCARES_PATH)/libcares.a:
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.m32
-
 

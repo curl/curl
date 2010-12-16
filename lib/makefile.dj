@@ -21,7 +21,7 @@ all: $(OBJ_DIR) curl_config.h $(CURL_LIB)
 $(CURL_LIB): $(OBJECTS)
 	ar rs $@ $?
 
-curl_config.h: config.dos
+curl_config.h: config-dos.h
 	$(COPY) $^ $@
 
 # clean generated files

@@ -43,7 +43,7 @@ CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
 CURLcode Curl_rtsp(struct connectdata *conn, bool *done);
 CURLcode Curl_rtsp_done(struct connectdata *conn, CURLcode, bool premature);
 CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn);
+CURLcode Curl_rtsp_disconnect(struct connectdata *conn, bool dead_connection);
 
 CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
 

@@ -54,11 +54,11 @@ IMPLIB_NAME       = libcurl_imp
 IMPLIB_NAME_DEBUG = libcurld_imp
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8g
+OPENSSL_PATH   = ../../openssl-0.9.8o
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.3
+ZLIB_PATH  = ../../zlib-1.2.5
 !ENDIF
 
 !IFNDEF MACHINE
@@ -454,6 +454,7 @@ X_OBJS= \
 	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
 	$(DIROBJ)\curl_fnmatch.obj \
+	$(DIROBJ)\curl_gethostname.obj \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
@@ -470,6 +471,7 @@ X_OBJS= \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\getinfo.obj \
 	$(DIROBJ)\gtls.obj \
+	$(DIROBJ)\gopher.obj \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\hmac.obj \
 	$(DIROBJ)\hostares.obj \
@@ -490,6 +492,7 @@ X_OBJS= \
 	$(DIROBJ)\inet_pton.obj \
 	$(DIROBJ)\ldap.obj \
 	$(DIROBJ)\llist.obj \
+	$(DIROBJ)\md4.obj \
 	$(DIROBJ)\md5.obj \
 	$(DIROBJ)\memdebug.obj \
 	$(DIROBJ)\mprintf.obj \

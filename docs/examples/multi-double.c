@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   http_handle2 = curl_easy_init();
 
   /* set options */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.haxx.se/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
 
   /* set options */
   curl_easy_setopt(http_handle2, CURLOPT_URL, "http://localhost/");
@@ -47,8 +47,7 @@ int main(int argc, char **argv)
   curl_multi_add_handle(multi_handle, http_handle2);
 
   /* we start some action by calling perform right away */
-  while(CURLM_CALL_MULTI_PERFORM ==
-        curl_multi_perform(multi_handle, &still_running));
+  curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -59,6 +58,8 @@ int main(int argc, char **argv)
     fd_set fdexcep;
     int maxfd = -1;
 
+    long curl_timeo = -1;
+
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
@@ -66,6 +67,15 @@ int main(int argc, char **argv)
     /* set a suitable timeout to play around with */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
+
+    curl_multi_timeout(multi_handle, &curl_timeo);
+    if(curl_timeo >= 0) {
+      timeout.tv_sec = curl_timeo / 1000;
+      if(timeout.tv_sec > 1)
+        timeout.tv_sec = 1;
+      else
+        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+    }
 
     /* get file descriptors from the transfers */
     curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
@@ -85,8 +95,7 @@ int main(int argc, char **argv)
     case 0:
     default:
       /* timeout or readable/writable sockets */
-      while(CURLM_CALL_MULTI_PERFORM ==
-            curl_multi_perform(multi_handle, &still_running));
+      curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }

@@ -24,7 +24,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT([curl], [-], [a suitable curl mailing list => http://curl.haxx.se/mail/])
+AC_INIT([curl], [-], [a suitable curl mailing list: http://curl.haxx.se/mail/])
 
 CURL_OVERRIDE_AUTOCONF
 
@@ -40,6 +40,7 @@ AM_MAINTAINER_MODE
 CURL_CHECK_OPTION_DEBUG
 CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
+CURL_CHECK_OPTION_WERROR
 CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_ARES
 
@@ -51,33 +52,48 @@ CURL_CHECK_PATH_SEPARATOR_REQUIRED
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
+CURL_CFLAG_EXTRAS=""
+if test X"$want_werror" = Xyes; then
+  CURL_CFLAG_EXTRAS="-Werror"
+fi
+AC_SUBST(CURL_CFLAG_EXTRAS)
+
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-AC_PATH_PROG([SED], [sed], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$SED" || test "$SED" = "not_found"; then
-  AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
+if test -z "$SED"; then
+  dnl allow it to be overridden
+  AC_PATH_PROG([SED], [sed], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$SED" || test "$SED" = "not_found"; then
+    AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
+  fi
 fi
 AC_SUBST([SED])
 
 dnl GREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-AC_PATH_PROG([GREP], [grep], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$GREP" || test "$GREP" = "not_found"; then
-  AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
+if test -z "$GREP"; then
+  dnl allow it to be overridden
+  AC_PATH_PROG([GREP], [grep], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$GREP" || test "$GREP" = "not_found"; then
+    AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
+  fi
 fi
 AC_SUBST([GREP])
 
 dnl EGREP is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
-if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
-  AC_MSG_CHECKING([for egrep])
-  EGREP="$GREP -E"
-  AC_MSG_RESULT([$EGREP])
-else
-  AC_PATH_PROG([EGREP], [egrep], [not_found],
-    [$PATH:/usr/bin:/usr/local/bin])
+if test -z "$EGREP"; then
+  dnl allow it to be overridden
+  if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
+    AC_MSG_CHECKING([for egrep])
+    EGREP="$GREP -E"
+    AC_MSG_RESULT([$EGREP])
+  else
+    AC_PATH_PROG([EGREP], [egrep], [not_found],
+      [$PATH:/usr/bin:/usr/local/bin])
+  fi
 fi
 if test -z "$EGREP" || test "$EGREP" = "not_found"; then
   AC_MSG_ERROR([egrep not found in PATH. Cannot continue without egrep.])
@@ -86,10 +102,13 @@ AC_SUBST([EGREP])
 
 dnl AR is mandatory for configure process and libtool.
 dnl This is target dependent, so check it as a tool.
-AC_PATH_TOOL([AR], [ar], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$AR" || test "$AR" = "not_found"; then
-  AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+if test -z "$AR"; then
+  dnl allow it to be overridden
+  AC_PATH_TOOL([AR], [ar], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$AR" || test "$AR" = "not_found"; then
+    AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+  fi
 fi
 AC_SUBST([AR])
 
@@ -121,7 +140,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,axtls} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -137,6 +156,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
+    init_ssl_msg=${curl_ssl_msg}
 
 dnl
 dnl Save anything in $LIBS for later
@@ -209,6 +229,9 @@ case $host in
 esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
+
+dnl 'STATICLIB' is, in spite of its name, not generic but only for static-only
+dnl builds on Windows
 AM_CONDITIONAL(STATICLIB, false)
 
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
@@ -394,7 +417,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi
        ;;
   esac ],[
@@ -406,7 +428,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi ]
 )
 
@@ -541,6 +562,22 @@ AC_HELP_STRING([--disable-smtp],[Disable SMTP support]),
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_SMTP, 1, [to disable SMTP])
        AC_SUBST(CURL_DISABLE_SMTP, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+AC_MSG_CHECKING([whether to support gopher])
+AC_ARG_ENABLE(gopher,
+AC_HELP_STRING([--enable-gopher],[Enable Gopher support])
+AC_HELP_STRING([--disable-gopher],[Disable Gopher support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable Gopher])
+       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -742,6 +779,8 @@ ac_cv_func_strcasecmp="no"
 
 CURL_CHECK_LIBS_CONNECT
 
+CURL_NETWORK_LIBS=$LIBS
+
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
 dnl check for additional required libraries.
@@ -852,6 +891,10 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   fi
 fi
 
+if test x$CURL_DISABLE_LDAPS != x1 ; then
+    curl_ldaps_msg="enabled"
+fi
+
 dnl **********************************************************************
 dnl Checks for IPv6
 dnl **********************************************************************
@@ -913,16 +956,19 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-AC_CACHE_VAL(curl_cv_writable_argv, [
-AC_RUN_IFELSE([[
+AC_RUN_IFELSE([
+  AC_LANG_SOURCE([[
 int main(int argc, char ** argv) {
-        argv[0][0] = ' ';
-        return (argv[0][0] == ' ')?0:1;
+    argv[0][0] = ' ';
+    return (argv[0][0] == ' ')?0:1;
 }
-        ]],
-        curl_cv_writable_argv=yes,
-        curl_cv_writable_argv=no,
-        curl_cv_writable_argv=cross)
+  ]])
+],[
+  curl_cv_writable_argv=yes
+],[
+  curl_cv_writable_argv=no
+],[
+  curl_cv_writable_argv=cross
 ])
 case $curl_cv_writable_argv in
 yes)
@@ -1694,6 +1740,20 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1
 
+dnl ---
+dnl If GnuTLS is enabled, we MUST verify that it uses libgcrypt since
+dnl curl code relies on that but recent GnuTLS versions can in fact build
+dnl with different crypto libraries which curl right now cannot handle
+dnl ---
+
+if test "$GNUTLS_ENABLED" = "1"; then
+  AC_CHECK_LIB(gcrypt,
+               gcry_control, ,
+    [
+      AC_MSG_ERROR([need GnuTLS built with gcrypt to function with GnuTLS])
+    ])
+fi
+
 dnl ----------------------------------------------------
 dnl check for PolarSSL
 dnl ----------------------------------------------------
@@ -1874,9 +1934,64 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED" = "x"; then
+OPT_AXTLS=off
+
+AC_ARG_WITH(axtls,dnl
+AC_HELP_STRING([--with-axtls=PATH],[Where to look for axTLS, PATH points to the axTLS installation prefix (default: /usr/local).  Ignored if another SSL engine is selected.])
+AC_HELP_STRING([--without-axtls], [disable axTLS]),
+  OPT_AXTLS=$withval)
+
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test X"$OPT_AXTLS" != Xno; then
+    dnl backup the pre-axtls variables
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+    CLEANLIBS="$LIBS"
+
+    case "$OPT_AXTLS" in
+    yes)
+      dnl --with-axtls (without path) used
+      PREFIX_AXTLS=/usr/local
+      LIB_AXTLS="$PREFIX_AXTLS/lib"
+      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
+      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
+      ;;
+    off)
+      dnl no --with-axtls option given, just check default places
+      PREFIX_AXTLS=
+      ;;
+    *)
+      dnl check the given --with-axtls spot
+      PREFIX_AXTLS=$OPT_AXTLS
+      LIB_AXTLS="$PREFIX_AXTLS/lib"
+      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
+      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
+      ;;
+    esac
+
+    AC_CHECK_LIB(axtls, ssl_version,[
+      LIBS="-laxtls $LIBS"
+      AC_DEFINE(USE_AXTLS, 1, [if axTLS is enabled])
+      AC_SUBST(USE_AXTLS, [1])
+      AXTLS_ENABLED=1
+      USE_AXTLS="yes"
+      curl_ssl_msg="enabled (axTLS)"
+
+
+      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+      export LD_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $LIB_AXTLS to LD_LIBRARY_PATH])
+      ],[
+      LDFLAGS="$CLEANLDFLAGS"
+      CPPFLAGS="$CLEANCPPFLAGS"
+      LIBS="$CLEANLIBS"
+    ])
+  fi
+fi
+
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-nss or --with-axtls to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
@@ -1962,7 +2077,10 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
        dnl libssh2_version is a post 1.0 addition
        dnl libssh2_init and libssh2_exit were added in 1.2.5
-       AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit)
+       dnl libssh2_scp_send64 was added in 1.2.6
+       dnl libssh2_session_handshake was added in 1.2.8
+       AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit \
+                       libssh2_scp_send64 libssh2_session_handshake)
 
        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
        export LD_LIBRARY_PATH
@@ -2004,11 +2122,16 @@ if test X"$OPT_LIBRTMP" != Xno; then
       CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
       version=`$PKGCONFIG --modversion librtmp`
       DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+    else
+      dnl To avoid link errors, we do not allow --librtmp without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
     fi
 
     ;;
   off)
     dnl no --with-librtmp option given, just check default places
+    LIB_RTMP="-lrtmp"
     ;;
   *)
     dnl use the given --with-librtmp spot
@@ -2027,13 +2150,19 @@ if test X"$OPT_LIBRTMP" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_RTMP"
   LIBS="$LIBS $LIB_RTMP"
 
-  AC_CHECK_LIB(rtmp, RTMP_Init)
-
-  AC_CHECK_HEADERS(librtmp/rtmp.h,
-    curl_rtmp_msg="enabled (librtmp)"
-    LIBRTMP_ENABLED=1
-    AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-    AC_SUBST(USE_LIBRTMP, [1])
+  AC_CHECK_LIB(rtmp, RTMP_Init,
+    [
+     AC_CHECK_HEADERS(librtmp/rtmp.h,
+        curl_rtmp_msg="enabled (librtmp)"
+        LIBRTMP_ENABLED=1
+        AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
+        AC_SUBST(USE_LIBRTMP, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
   )
 
   if test X"$OPT_LIBRTMP" != Xoff &&
@@ -2041,12 +2170,6 @@ if test X"$OPT_LIBRTMP" != Xno; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi
 
-  if test "$LIBRTMP_ENABLED" != "1"; then
-    dnl no librtmp, revert back to clean variables
-    LDFLAGS=$CLEANLDFLAGS
-    CPPFLAGS=$CLEANCPPFLAGS
-    LIBS=$CLEANLIBS
-  fi
 fi
 
 dnl **********************************************************************
@@ -2218,11 +2341,17 @@ AC_CHECK_TYPE(long long,
 
 if test "xyes" = "x$longlong"; then
   AC_MSG_CHECKING([if numberLL works])
-  AC_COMPILE_IFELSE([long long val = 1000LL;],
-   [AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])]
-   AC_MSG_RESULT(yes),
-   AC_MSG_RESULT(no)
-  )
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+    ]],[[
+      long long val = 1000LL;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 
@@ -2269,6 +2398,7 @@ CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FDOPEN
 CURL_CHECK_FUNC_FREEADDRINFO
 CURL_CHECK_FUNC_FREEIFADDRS
+CURL_CHECK_FUNC_FSETXATTR
 CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
 CURL_CHECK_FUNC_GETHOSTBYADDR
@@ -2309,10 +2439,6 @@ CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
 CURL_CHECK_FUNC_WRITEV
 
-dnl Checks for library functions.
-dnl AC_PROG_GCC_TRADITIONAL
-
-dnl AC_FUNC_VPRINTF
 case $host in
   *msdosdjgpp)
      ac_cv_func_pipe=no
@@ -2434,6 +2560,13 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
+
+if test "x$enable_shared" = "xyes"; then
+  build_libhostname=yes
+else
+  build_libhostname=no
+fi
+AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
 CURL_CHECK_OPTION_THREADED_RESOLVER
 
@@ -2627,9 +2760,14 @@ LIBCURL_LIBS=$LIBS
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_LIBS)
 AC_SUBST(TEST_SERVER_LIBS)
+AC_SUBST(CURL_NETWORK_LIBS)
 LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
+
+dnl yes or no
+ENABLE_SHARED="$enable_shared"
+AC_SUBST(ENABLE_SHARED)
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
@@ -2659,7 +2797,8 @@ fi
 if test "x$USE_WINDOWS_SSPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
 fi
-if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" -o "x$GNUTLS_ENABLED" = "x1"; then
+if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
+    -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 fi
 
@@ -2698,6 +2837,9 @@ if test "x$CURL_DISABLE_DICT" != "x1"; then
 fi
 if test "x$CURL_DISABLE_TFTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
+fi
+if test "x$CURL_DISABLE_GOPHER" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
 fi
 if test "x$CURL_DISABLE_POP3" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"
@@ -2746,6 +2888,7 @@ squeeze LIBS
 squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze TEST_SERVER_LIBS
+squeeze CURL_NETWORK_LIBS
 
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
@@ -2785,6 +2928,8 @@ AC_CONFIG_FILES([Makefile \
            libcurl.pc
 ])
 AC_OUTPUT
+
+CURL_GENERATE_CONFIGUREHELP_PM
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 

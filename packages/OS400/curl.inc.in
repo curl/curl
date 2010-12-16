@@ -645,6 +645,8 @@
      d                 c                   X'00800000'
      d  CURLPROTO_RTMPTS...
      d                 c                   X'01000000'
+     d  CURLPROTO_GOPHER...
+     d                 c                   X'02000000'
       *
      d CURLoption      s             10i 0 based(######ptr######)               Enum
      d  CURLOPT_FILE   c                   10001

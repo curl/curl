@@ -1,0 +1,24 @@
+<testcase>
+<info>
+<keywords>
+symbols-in-versions
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Verify that symbols-in-versions and headers are in sync
+ </name>
+
+<command type="perl">
+%SRCDIR/symbol-scan.pl %SRCDIR/.. ../include/curl
+</command>
+</client>
+
+</testcase>

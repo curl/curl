@@ -1,13 +1,13 @@
 #########################################################################
 #
 ## Makefile for building curl.exe with MingW32 (GCC-3.2 or later)
-## and optionally OpenSSL (0.9.8), libssh2 (1.1), zlib (1.2.3)
+## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5)
 ##
 ## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [DYN=1]
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [RTMP=1] [DYN=1]
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
-## set ZLIB_PATH=c:/zlib-1.2.3
+## set ZLIB_PATH=c:/zlib-1.2.5
 ## set ZLIB=1
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
@@ -20,15 +20,19 @@ ZLIB_PATH = ../../zlib-1.2.5
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8n
+OPENSSL_PATH = ../../openssl-0.9.8q
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.5
+LIBSSH2_PATH = ../../libssh2-1.2.7
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
+endif
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../librtmp-2.3
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -46,7 +50,7 @@ CFLAGS = -g -O2
 LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=../include -O COFF -i
-RM = del /q /f > NUL 2>&1
+RM = del /q /f 2>NUL
 CP = copy
 
 # We may need these someday
@@ -74,6 +78,10 @@ ifdef ARES
   endif
   CFLAGS += -DUSE_ARES
   curl_LDADD += -L$(LIBCARES_PATH) -lcares
+endif
+ifdef RTMP
+  CFLAGS += -DUSE_LIBRTMP
+  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
 endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
@@ -121,7 +129,7 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
+curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
 ifdef DYN
 curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
 curl_OBJECTS += $(curlx_OBJECTS)
@@ -159,7 +167,6 @@ ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
 endif
 	-$(RM) $(curl_OBJECTS) $(RESOURCE)
 
-distrib: clean
+distclean vclean: clean
 	-$(RM) $(curl_PROGRAMS)
-
 

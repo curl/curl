@@ -58,6 +58,7 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
+#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -530,8 +531,8 @@ static int ProcessRequest(struct httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp)
-            req->testno = atoi(portp+1);
+          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
+            req->testno = strtol(portp+1, NULL, 10);
           else
             req->testno = DOCNUMBER_CONNECT;
         }
@@ -797,7 +798,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   while(!done_processing && (req->offset < REQBUFSIZ-1)) {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
-      got = pipereq_length;
+      got = curlx_uztosz(pipereq_length);
       pipereq_length = 0;
     }
     else {
@@ -1169,10 +1170,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
 int main(int argc, char *argv[])
 {
-  struct sockaddr_in me;
-#ifdef ENABLE_IPV6
-  struct sockaddr_in6 me6;
-#endif /* ENABLE_IPV6 */
+  srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
@@ -1294,19 +1292,19 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_IPV6
   if(!use_ipv6) {
 #endif
-    memset(&me, 0, sizeof(me));
-    me.sin_family = AF_INET;
-    me.sin_addr.s_addr = INADDR_ANY;
-    me.sin_port = htons(port);
-    rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
+    memset(&me.sa4, 0, sizeof(me.sa4));
+    me.sa4.sin_family = AF_INET;
+    me.sa4.sin_addr.s_addr = INADDR_ANY;
+    me.sa4.sin_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa4));
 #ifdef ENABLE_IPV6
   }
   else {
-    memset(&me6, 0, sizeof(me6));
-    me6.sin6_family = AF_INET6;
-    me6.sin6_addr = in6addr_any;
-    me6.sin6_port = htons(port);
-    rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
+    memset(&me.sa6, 0, sizeof(me.sa6));
+    me.sa6.sin6_family = AF_INET6;
+    me.sa6.sin6_addr = in6addr_any;
+    me.sa6.sin6_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
 #endif /* ENABLE_IPV6 */
   if(0 != rc) {

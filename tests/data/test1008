@@ -86,9 +86,18 @@ NTLM
  <name>
 HTTP proxy CONNECT auth NTLM with chunked-encoded 407 response
  </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
  <command>
 http://test.remote.haxx.se:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel
 </command>
+<precheck>
+chkhostname curlhost
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -96,11 +105,6 @@ http://test.remote.haxx.se:1008/path/10080002 --proxy http://%HOSTIP:%HTTPPORT -
 <strip>
 ^User-Agent: curl/.*
 </strip>
-# We strip off a large chunk of the type-2 NTLM message since it depends on
-# the local host name and thus differs on different machines!
-<strippart>
-s/^(Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA).*/$1/
-</strippart>
 <protocol>
 CONNECT test.remote.haxx.se:1008 HTTP/1.1
 Host: test.remote.haxx.se:1008
@@ -109,7 +113,7 @@ Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.haxx.se:1008 HTTP/1.1
 Host: test.remote.haxx.se:1008
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAA
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAKAeQjzKtCQ7ubW8S6MN7B59436GAxPu0CVROwwNBsgxML49gcbAXLT/bU+H5wrS9XNpbGx5Y3VybGhvc3Q=
 Proxy-Connection: Keep-Alive
 
 GET /path/10080002 HTTP/1.1

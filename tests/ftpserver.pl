@@ -26,7 +26,7 @@
 # In December 2009 we started remaking the server to support more protocols
 # that are similar in spirit. Like POP3, IMAP and SMTP in addition to the FTP
 # it already supported since a long time. Note that it still only supports one
-# protocol per invoke. You need to start mulitple servers to support multiple
+# protocol per invoke. You need to start multiple servers to support multiple
 # protocols simultaneously.
 #
 # It is meant to exercise curl, it is not meant to be a fully working

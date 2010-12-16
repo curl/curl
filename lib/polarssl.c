@@ -221,7 +221,7 @@ Curl_polarssl_connect(struct connectdata *conn,
   ssl_set_dbg(&conn->ssl[sockindex].ssl, polarssl_debug, data);
 #endif
 
-  do {
+  for(;;) {
     if (!(ret = ssl_handshake(&conn->ssl[sockindex].ssl))) {
       break;
     } else if(ret != POLARSSL_ERR_NET_TRY_AGAIN) {
@@ -250,7 +250,7 @@ Curl_polarssl_connect(struct connectdata *conn,
         break;
       }
     }
-  } while (1);
+  }
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
         ssl_get_cipher(&conn->ssl[sockindex].ssl));

@@ -9,3 +9,4 @@ Makefile.vc9.dist
 libcurl.plist.dist
 libcurl.vcproj
 vc6libcurl.dsp
+Makefile.vc10.dist

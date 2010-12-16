@@ -2,6 +2,7 @@
 <info>
 <keywords>
 FTP
+RETR
 multi
 wildcardmatch
 ftplistparser
@@ -23,7 +24,7 @@ ftp
 lib575
 </tool>
  <name>
-FTP wildcard download - dup_handle && multi interface
+FTP wildcard download - dup_handle and multi interface
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
@@ -31,31 +32,72 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
 </client>
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^RETR.*
-^EPSV.*
-^CWD.*
-^PWD.*
-^TYPE.*
-</strip>
-<strippart>
-s/^USER.*/USER/
-s/^PASS.*/PASS/
-s/^LIST.*/LIST/
-s/^QUIT.*/QUIT/
-</strippart>
 <errorcode>
 0
 </errorcode>
 <protocol>
-USER
-PASS
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
 LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
+CWD /
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
 LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
 QUIT
-USER
-PASS
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
 LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
 QUIT
 </protocol>
 <stdout mode="text">

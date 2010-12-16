@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,8 @@
 /* this must be the last include file */
 #include "memdebug.h"
 
-void
-Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
+static void
+llist_init(struct curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -49,13 +49,19 @@ Curl_llist_alloc(curl_llist_dtor dtor)
   if(NULL == list)
     return NULL;
 
-  Curl_llist_init(list, dtor);
+  llist_init(list, dtor);
 
   return list;
 }
 
 /*
- * Curl_llist_insert_next() returns 1 on success and 0 on failure.
+ * Curl_llist_insert_next()
+ *
+ * Inserts a new list element after the given one 'e'. If the given existing
+ * entry is NULL and the list already has elements, the new one will be
+ * inserted first in the list.
+ *
+ * Returns: 1 on success and 0 on failure.
  */
 int
 Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
@@ -73,15 +79,21 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
     list->tail = ne;
   }
   else {
-    ne->next = e->next;
+    /* if 'e' is NULL here, we insert the new element first in the list */
+    ne->next = e?e->next:list->head;
     ne->prev = e;
-    if(e->next) {
+    if(!e) {
+      list->head->prev = ne;
+      list->head = ne;
+    }
+    else if(e->next) {
       e->next->prev = ne;
     }
     else {
       list->tail = ne;
     }
-    e->next = ne;
+    if(e)
+      e->next = ne;
   }
 
   ++list->size;

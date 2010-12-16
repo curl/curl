@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 12
+# serial 14
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -314,6 +314,7 @@ dnl shell variable want_warnings as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_WARNINGS], [
   AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
+  AC_BEFORE([$0],[CURL_CHECK_OPTION_WERROR])dnl
   AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable strict compiler warnings])
   OPT_COMPILER_WARNINGS="default"
@@ -337,6 +338,37 @@ AC_HELP_STRING([--disable-warnings],[Disable strict compiler warnings]),
       ;;
   esac
   AC_MSG_RESULT([$want_warnings])
+])
+
+dnl CURL_CHECK_OPTION_WERROR
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-werror or --disable-werror, and set
+dnl shell variable want_werror as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_WERROR], [
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER])dnl
+  AC_MSG_CHECKING([whether to enable compiler warnings as errors])
+  OPT_COMPILER_WERROR="default"
+  AC_ARG_ENABLE(werror,
+AC_HELP_STRING([--enable-werror],[Enable compiler warnings as errors])
+AC_HELP_STRING([--disable-werror],[Disable compiler warnings as errors]),
+  OPT_COMPILER_WERROR=$enableval)
+  case "$OPT_COMPILER_WERROR" in
+    no)
+      dnl --disable-werror option used
+      want_werror="no"
+      ;;
+    default)
+      dnl configure option not specified
+      want_werror="no"
+      ;;
+    *)
+      dnl --enable-werror option used
+      want_werror="yes"
+      ;;
+  esac
+  AC_MSG_RESULT([$want_werror])
 ])
 
 
@@ -440,6 +472,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
           ares_channel channel;
           ares_cancel(channel); /* added in 1.2.0 */
           ares_process_fd(channel, 0, 0); /* added in 1.4.0 */
+          ares_dup(&channel, channel); /* added in 1.6.0 */
         ]])
       ],[
         AC_MSG_RESULT([yes])

@@ -891,6 +891,57 @@ isTLSIntoleranceError(PRInt32 err)
   }
 }
 
+static CURLcode init_nss(struct SessionHandle *data)
+{
+  char *cert_dir;
+  struct_stat st;
+  if(initialized)
+    return CURLE_OK;
+
+  /* First we check if $SSL_DIR points to a valid dir */
+  cert_dir = getenv("SSL_DIR");
+  if(cert_dir) {
+    if((stat(cert_dir, &st) != 0) ||
+        (!S_ISDIR(st.st_mode))) {
+      cert_dir = NULL;
+    }
+  }
+
+  /* Now we check if the default location is a valid dir */
+  if(!cert_dir) {
+    if((stat(SSL_DIR, &st) == 0) &&
+        (S_ISDIR(st.st_mode))) {
+      cert_dir = (char *)SSL_DIR;
+    }
+  }
+
+  if(!NSS_IsInitialized()) {
+    SECStatus rv;
+    initialized = 1;
+    infof(data, "Initializing NSS with certpath: %s\n",
+          cert_dir ? cert_dir : "none");
+    if(!cert_dir) {
+      rv = NSS_NoDB_Init(NULL);
+    }
+    else {
+      char *certpath =
+        PR_smprintf("%s%s", NSS_VersionCheck("3.12.0") ? "sql:" : "", cert_dir);
+      rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
+      PR_smprintf_free(certpath);
+    }
+    if(rv != SECSuccess) {
+      infof(data, "Unable to initialize NSS database\n");
+      initialized = 0;
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+
+  if(num_enabled_ciphers() == 0)
+    NSS_SetDomesticPolicy();
+
+  return CURLE_OK;
+}
+
 /**
  * Global SSL init
  *
@@ -909,6 +960,21 @@ int Curl_nss_init(void)
   /* We will actually initialize NSS later */
 
   return 1;
+}
+
+CURLcode Curl_nss_force_init(struct SessionHandle *data)
+{
+  CURLcode rv;
+  if(!nss_initlock) {
+    failf(data, "unable to initialize NSS, curl_global_init() should have been "
+                "called with CURL_GLOBAL_SSL or CURL_GLOBAL_ALL");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  PR_Lock(nss_initlock);
+  rv = init_nss(data);
+  PR_Unlock(nss_initlock);
+  return rv;
 }
 
 /* Global cleanup */
@@ -1039,15 +1105,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  SECStatus rv;
-  char *certDir = NULL;
   int curlerr;
   const int *cipher_to_enable;
   PRSocketOptionData sock_opt;
   long time_left;
   PRUint32 timeout;
-
-  curlerr = CURLE_SSL_CONNECT_ERROR;
 
   if (connssl->state == ssl_connection_complete)
     return CURLE_OK;
@@ -1062,76 +1124,36 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
-  if(!initialized) {
-    struct_stat st;
+  curlerr = init_nss(conn->data);
+  if(CURLE_OK != curlerr) {
+    PR_Unlock(nss_initlock);
+    goto error;
+  }
 
-    /* First we check if $SSL_DIR points to a valid dir */
-    certDir = getenv("SSL_DIR");
-    if(certDir) {
-      if((stat(certDir, &st) != 0) ||
-         (!S_ISDIR(st.st_mode))) {
-        certDir = NULL;
-      }
-    }
-
-    /* Now we check if the default location is a valid dir */
-    if(!certDir) {
-      if((stat(SSL_DIR, &st) == 0) &&
-         (S_ISDIR(st.st_mode))) {
-        certDir = (char *)SSL_DIR;
-      }
-    }
-
-    if (!NSS_IsInitialized()) {
-      initialized = 1;
-      infof(conn->data, "Initializing NSS with certpath: %s\n",
-            certDir ? certDir : "none");
-      if(!certDir) {
-        rv = NSS_NoDB_Init(NULL);
-      }
-      else {
-        char *certpath = PR_smprintf("%s%s",
-                                     NSS_VersionCheck("3.12.0") ? "sql:" : "",
-                                     certDir);
-        rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
-        PR_smprintf_free(certpath);
-      }
-      if(rv != SECSuccess) {
-        infof(conn->data, "Unable to initialize NSS database\n");
-        curlerr = CURLE_SSL_CACERT_BADFILE;
-        initialized = 0;
-        PR_Unlock(nss_initlock);
-        goto error;
-      }
-    }
-
-    if(num_enabled_ciphers() == 0)
-      NSS_SetDomesticPolicy();
+  curlerr = CURLE_SSL_CONNECT_ERROR;
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-    if(!mod) {
-      char *configstring = aprintf("library=%s name=PEM", pem_library);
-      if(!configstring) {
-        PR_Unlock(nss_initlock);
-        goto error;
-      }
-      mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
-      free(configstring);
-
-      if(!mod || !mod->loaded) {
-        if(mod) {
-          SECMOD_DestroyModule(mod);
-          mod = NULL;
-        }
-        infof(data, "WARNING: failed to load NSS PEM library %s. Using "
-              "OpenSSL PEM certificates will not work.\n", pem_library);
-      }
+  if(!mod) {
+    char *configstring = aprintf("library=%s name=PEM", pem_library);
+    if(!configstring) {
+      PR_Unlock(nss_initlock);
+      goto error;
     }
+    mod = SECMOD_LoadUserModule(configstring, NULL, PR_FALSE);
+    free(configstring);
+
+    if(!mod || !mod->loaded) {
+      if(mod) {
+        SECMOD_DestroyModule(mod);
+        mod = NULL;
+      }
+      infof(data, "WARNING: failed to load NSS PEM library %s. Using "
+            "OpenSSL PEM certificates will not work.\n", pem_library);
+    }
+  }
 #endif
 
-    PK11_SetPasswordFunc(nss_get_password);
-
-  }
+  PK11_SetPasswordFunc(nss_get_password);
   PR_Unlock(nss_initlock);
 
   model = PR_NewTCPSocket();
@@ -1448,4 +1470,12 @@ size_t Curl_nss_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "NSS/%s", NSS_VERSION);
 }
+
+int Curl_nss_seed(struct SessionHandle *data)
+{
+  /* TODO: implement? */
+  (void) data;
+  return 0;
+}
+
 #endif /* USE_NSS */

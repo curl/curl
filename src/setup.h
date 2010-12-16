@@ -207,6 +207,11 @@ int fileno( FILE *stream);
 #define strdup(ptr) curlx_strdup(ptr)
 #endif
 
+/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+
 /*
  * Include macros and defines that should only be processed once.
  */

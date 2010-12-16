@@ -49,6 +49,7 @@
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
 # --nobuildconf            Don't run buildconf
+# --noconfigure            Don't run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
@@ -64,7 +65,7 @@ use Cwd;
 #BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
-            $buildlogname $configurebuild $targetos $confsuffix $binext
+            $buildlogname $configurebuild $targetos $confheader $binext
             $libext);
 
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
@@ -72,7 +73,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp);
 
 # version of this script
-$version='2010-04-13';
+$version='2010-08-20';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -84,6 +85,7 @@ if (-f ".git/config") {
 
 $git=1;
 $setupfile = 'setup';
+$configurebuild = 1;
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
     $targetos = (split(/=/, shift @ARGV))[1];
@@ -117,6 +119,10 @@ while ($ARGV[0]) {
     $nobuildconf=1;
     shift @ARGV;
   }
+  elsif ($ARGV[0] =~ /--noconfigure/) {
+    $configurebuild=0;
+    shift @ARGV;
+  }
   elsif ($ARGV[0] =~ /--crosscompile/) {
     $crosscompile=1;
     shift @ARGV;
@@ -131,8 +137,7 @@ while ($ARGV[0]) {
 }
 
 # Do the platform-specific stuff here
-$configurebuild = 1;
-$confsuffix = '';
+$confheader = 'curl_config.h';
 $binext = '';
 $libext = '.la'; # .la since both libcurl and libcares are made with libtool
 if ($^O eq 'MSWin32' || $targetos) {
@@ -140,7 +145,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
-  if ($targetos =~ /vc/ || $targetos =~ /borland/) {
+  if ($targetos =~ /vc/ || $targetos =~ /borland/ || $targetos =~ /watcom/) {
     $binext = '.exe';
     $libext = '.lib';
   }
@@ -162,15 +167,16 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if (($^O eq 'MSWin32') &&
-    ($targetos =~ /vc/ || $targetos =~ /mingw32/ || $targetos =~ /borland/)) {
+if (($^O eq 'MSWin32' || $^O eq 'msys') &&
+    ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
+     $targetos =~ /borland/ || $targetos =~ /watcom/)) {
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
-  # Windows builds still default to configure-style builds with no confsuffix.
+  # Windows builds still default to configure-style builds with curl_config.h.
 
   $configurebuild = 0;
-  $confsuffix = '-win32';
+  $confheader = 'config-win32.h';
 }
 
 $ENV{LC_ALL}="C" if (($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
@@ -497,6 +503,8 @@ if(!$make) {
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if ($targetos =~ /vc/);
+# force to 'wmake' for Watcom builds
+$make = "wmake" if ($targetos =~ /watcom/);
 logit "going with $make as make";
 
 # change to build dir
@@ -564,14 +572,14 @@ else {
   mydie "no curlbuild.h created/found";
 }
 
-logit_spaced "display lib/curl_config$confsuffix.h";
-open(F, "lib/curl_config$confsuffix.h") or die "lib/curl_config$confsuffix.h: $!";
+logit_spaced "display lib/$confheader";
+open(F, "lib/$confheader") or die "lib/$confheader: $!";
 while (<F>) {
   print if /^ *#/;
 }
 close(F);
 
-if (grepfile("define USE_ARES", "lib/curl_config$confsuffix.h")) {
+if (grepfile("^#define USE_ARES", "lib/$confheader")) {
   print "\n";
   logit "setup to build ares";
 
@@ -600,8 +608,9 @@ if (grepfile("define USE_ARES", "lib/curl_config$confsuffix.h")) {
     mydie "no ares_build.h created/found";
   }
 
-  logit_spaced "display ares/ares_config$confsuffix.h";
-  if(open(F, "ares/ares_config$confsuffix.h")) {
+  $confheader =~ s/curl/ares/;
+  logit_spaced "display ares/$confheader";
+  if(open(F, "ares/$confheader")) {
       while (<F>) {
           print if /^ *#/;
       }

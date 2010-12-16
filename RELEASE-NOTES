@@ -1,26 +1,20 @@
-Curl and libcurl 7.21.1
+Curl and libcurl 7.21.4
 
- Public curl releases:         117
- Command line options:         138
- curl_easy_setopt() options:   180
+ Public curl releases:         120
+ Command line options:         143
+ curl_easy_setopt() options:   185
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 808
+ Contributors:                 834
 
 This release includes the following changes:
 
- o maketgz: produce CHANGES automatically
+ o 
 
 This release includes the following bugfixes:
 
- o configure: spell --disable-threaded-resolver correctly
- o multi: call the progress callback in all states
- o multi: unmark handle as used when no longer head of pipeline
- o sendrecv: treat all negative values from send/recv as errors
- o ftp-wildcard: avoid tight loop when used without any pattern
- o multi_socket: re-use of same socket without notifying app
- o ftp wildcard: FTP LIST parser FIX
- o urlglobbing backslash escaping bug
+ o 
+
 
 This release includes the following known bugs:
 
@@ -29,8 +23,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Kamil Dudka, Krister Johansen, Pavel Raiskup,
- Jon Sargeant
-
+ 
 
         Thanks! (and sorry if I forgot to mention someone)

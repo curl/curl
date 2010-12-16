@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+76. The SOCKET type in Win64 is 64 bits large (and thus so is curl_socket_t on
+  that platform), and long is only 32 bits. It makes it impossible for
+  curl_easy_getinfo() to return a socket properly with the CURLINFO_LASTSOCKET
+  option as for all other operating systems.
+
 75. NTLM authentication involving unicode user name or password.
   http://curl.haxx.se/mail/lib-2009-10/0024.html
   http://curl.haxx.se/bug/view.cgi?id=2944325
@@ -49,11 +54,6 @@ may have been fixed since this was written!
   handle with curl_easy_cleanup() and create a new. Some more details:
   http://curl.haxx.se/mail/lib-2009-04/0300.html
 
-62. CURLOPT_TIMEOUT does not work properly with the regular multi and
-  multi_socket interfaces. The work-around for apps is to simply remove the
-  easy handle once the time is up. See also:
-  http://curl.haxx.se/bug/view.cgi?id=2501457
-
 61. If an upload using Expect: 100-continue receives an HTTP 417 response,
   it ought to be automatically resent without the Expect:.  A workaround is
   for the client application to redo the transfer after disabling Expect:.
@@ -62,10 +62,6 @@ may have been fixed since this was written!
 60. libcurl closes the connection if an HTTP 401 reply is received while it
   is waiting for the the 100-continue response.
   http://curl.haxx.se/mail/lib-2008-08/0462.html
-
-59. If the CURLOPT_PORT option is used on an FTP URL like
-  "ftp://example.com/file;type=A" using a proxy, the ";type=A" is stripped off.
-  See the comment in parse_remote_port()
 
 58. It seems sensible to be able to use CURLOPT_NOBODY and
   CURLOPT_FAILONERROR with FTP to detect if a file exists or not, but it is
@@ -91,7 +87,7 @@ may have been fixed since this was written!
 
 52. Gautam Kachroo's issue that identifies a problem with the multi interface
   where a connection can be re-used without actually being properly
-  SSL-negoatiated:
+  SSL-negotiated:
   http://curl.haxx.se/mail/lib-2008-01/0277.html
 
 49. If using --retry and the transfer timeouts (possibly due to using -m or
@@ -141,12 +137,13 @@ may have been fixed since this was written!
 30. You need to use -g to the command line tool in order to use RFC2732-style
   IPv6 numerical addresses in URLs.
 
-29. IPv6 URLs with zone ID is not supported.
+29. IPv6 URLs with zone ID is not nicely supported.
   http://www.ietf.org/internet-drafts/draft-fenner-literal-zone-02.txt (expired)
   specifies the use of a plus sign instead of a percent when specifying zone
   IDs in URLs to get around the problem of percent signs being
   special. According to the reporter, Firefox deals with the URL _with_ a
   percent letter (which seems like a blatant URL spec violation).
+  libcurl supports zone IDs where the percent sign is URL-escaped (i.e. %25).
 
    See http://curl.haxx.se/bug/view.cgi?id=1371118
 
@@ -189,7 +186,7 @@ may have been fixed since this was written!
   would not meaningfully support NUL characters within RFC 959 <string>,
   anyway (e.g., UNIX pathnames may not contain NUL).
 
-14. Test case 165 might fail on system which has libidn present, but with an
+14. Test case 165 might fail on a system which has libidn present, but with an
   old iconv version (2.1.3 is a known bad version), since it doesn't recognize
   the charset when named ISO8859-1. Changing the name to ISO-8859-1 makes the
   test pass, but instead makes it fail on Solaris hosts that use its native

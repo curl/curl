@@ -44,7 +44,6 @@ perl %SRCDIR/libtest/test75.pl http://%HOSTIP:%HTTPPORT/ 22
 </errorcode>
 <stdout mode="text">
 curl: (3) [globbing] error: bad range specification after pos 24
-
 </stdout>
 </verify>
 </testcase>

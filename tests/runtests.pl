@@ -133,6 +133,8 @@ my $SMTPPORT; # SMTP
 my $SMTP6PORT; # SMTP IPv6 server port
 my $RTSPPORT; # RTSP
 my $RTSP6PORT; # RTSP IPv6 server port
+my $GOPHERPORT; # Gopher
+my $GOPHER6PORT; # Gopher IPv6 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -148,6 +150,7 @@ my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
+my $CURLCONFIG="../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -192,6 +195,7 @@ my $has_idn;     # set if libcurl is built with IDN support
 my $http_ipv6;   # set if HTTP server has IPv6 support
 my $ftp_ipv6;    # set if FTP server has IPv6 support
 my $tftp_ipv6;   # set if TFTP server has IPv6 support
+my $gopher_ipv6; # set if Gopher server has IPv6 support
 my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
@@ -203,6 +207,9 @@ my $has_gnutls;  # built with GnuTLS
 my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
+my $has_axtls;   # built with axTLS
+
+my $has_shared;  # built shared
 
 my $ssllib;      # name of the lib we use (for human presentation)
 my $has_crypto;  # set if libcurl is built with cryptographic support
@@ -235,6 +242,7 @@ my %timesrvrlog; # timestamp for each test server logs lock removal
 my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
+my %oldenv;
 
 #######################################################################
 # variables the command line options may set
@@ -325,7 +333,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp')) {
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -436,7 +444,8 @@ sub startnew {
 sub checkcmd {
     my ($cmd)=@_;
     my @paths=(split(":", $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-               "/sbin", "/usr/bin", "/usr/local/bin" );
+               "/sbin", "/usr/bin", "/usr/local/bin",
+               "./libtest/.libs", "./libtest");
     for(@paths) {
         if( -x "$_/$cmd" && ! -d "$_/$cmd") {
             # executable bit but not a directory!
@@ -668,6 +677,7 @@ sub verifyhttp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pid = 0;
+    my $bonus="";
 
     my $verifyout = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
@@ -677,13 +687,19 @@ sub verifyhttp {
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
+    if($proto eq "gopher") {
+        # gopher is funny
+        $bonus="1/";
+    }
+
     my $flags = "--max-time $server_response_maxtime ";
     $flags .= "--output $verifyout ";
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
+    $flags .= "-1 "         if($has_axtls == 1);
     $flags .= "--insecure " if($proto eq 'https');
-    $flags .= "\"$proto://$ip:$port/verifiedserver\"";
+    $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
 
@@ -724,8 +740,8 @@ sub verifyhttp {
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
-    elsif($data || ($res != 7)) {
-        logmsg "RUN: Unknown server on our $server port: $port\n";
+    elsif($data || ($res && ($res != 7))) {
+        logmsg "RUN: Unknown server on our $server port: $port ($res)\n";
         return -1;
     }
     return $pid;
@@ -983,7 +999,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks);
+                 'socks' => \&verifysocks,
+                 'gopher' => \&verifyhttp);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -1014,10 +1031,8 @@ sub verifyserver {
 # start the http server
 #
 sub runhttpserver {
-    my ($verbose, $ipv6) = @_;
-    my $port = $HTTPPORT;
+    my ($proto, $verbose, $ipv6, $port) = @_;
     my $ip = $HOSTIP;
-    my $proto = 'http';
     my $ipvnum = 4;
     my $idnum = 1;
     my $server;
@@ -1026,10 +1041,10 @@ sub runhttpserver {
     my $logfile;
     my $flags = "";
 
+
     if($ipv6) {
         # if IPv6, use a different setup
         $ipvnum = 6;
-        $port = $HTTP6PORT;
         $ip = $HOST6IP;
     }
 
@@ -1053,6 +1068,7 @@ sub runhttpserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--fork " if($forkserver);
+    $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
@@ -1258,6 +1274,7 @@ sub runpingpongserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+
     $pid2 = $pid3;
 
     if($verbose) {
@@ -1935,6 +1952,10 @@ sub checksystem {
                $has_openssl=1;
                $ssllib="polarssl";
            } 
+	   elsif ($libcurl =~ /axtls/i) {
+	       $has_axtls=1;
+	       $ssllib="axTLS";
+	   }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2028,6 +2049,7 @@ sub checksystem {
         if($sws[0] =~ /IPv6/) {
             # HTTP server has ipv6 support!
             $http_ipv6 = 1;
+            $gopher_ipv6 = 1;
         }
 
         # check if the FTP server has it!
@@ -2041,6 +2063,9 @@ sub checksystem {
     if(!$curl_debug && $torture) {
         die "can't run torture tests since curl was not built with curldebug";
     }
+
+    $has_shared = `sh $CURLCONFIG --built-shared`;
+    chomp $has_shared;
 
     # curl doesn't list cryptographic support separately, so assume it's
     # always available
@@ -2064,8 +2089,9 @@ sub checksystem {
     logmsg sprintf("  HTTP IPv6     %s\n", $http_ipv6?"ON ":"OFF");
     logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
     logmsg sprintf("  Libtool lib:  %s\n", $libtool?"ON ":"OFF");
+    logmsg sprintf("* Shared build:      %s\n", $has_shared);
     if($ssl_version) {
-        logmsg sprintf("* SSL library:       %s\n", $ssllib);
+        logmsg sprintf("* SSL library: %13s\n", $ssllib);
     }
 
     logmsg "* Ports:\n";
@@ -2088,6 +2114,10 @@ sub checksystem {
     }
     if($tftp_ipv6) {
         logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
+    }
+    logmsg sprintf("\n*   GOPHER/%d ", $GOPHERPORT);
+    if($gopher_ipv6) {
+        logmsg sprintf("GOPHER-IPv6/%d", $GOPHERPORT);
     }
     logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
     logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
@@ -2138,6 +2168,8 @@ sub subVariables {
   $$thing =~ s/%CLIENT6IP/$CLIENT6IP/g;
   $$thing =~ s/%RTSPPORT/$RTSPPORT/g;
   $$thing =~ s/%RTSP6PORT/$RTSP6PORT/g;
+  $$thing =~ s/%GOPHERPORT/$GOPHERPORT/g;
+  $$thing =~ s/%GOPHER6PORT/$GOPHER6PORT/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -2220,6 +2252,7 @@ sub singletest {
     my $why;
     my %feature;
     my $cmd;
+    my $disablevalgrind;
 
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
@@ -2270,6 +2303,11 @@ sub singletest {
                 next;
             }
         }
+	elsif($f eq "axTLS") {
+	    if($has_axtls) {
+		next;
+	    }
+	}
         elsif($f eq "netrc_debug") {
             if($debug_build) {
                 next;
@@ -2340,6 +2378,21 @@ sub singletest {
         }
     }
 
+    # test definition may instruct to (un)set environment vars
+    # this is done this early, so that the precheck can use environment
+    # variables and still bail out fine on errors
+
+    # restore environment variables that were modified in a previous run
+    foreach my $var (keys %oldenv) {
+        if($oldenv{$var} eq 'notset') {
+            delete $ENV{$var} if($ENV{$var});
+        }
+        else {
+            $ENV{$var} = $oldenv{$var};
+        }
+        delete $oldenv{$var};
+    }
+
     # timestamp required servers verification start
     $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
 
@@ -2350,13 +2403,56 @@ sub singletest {
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
 
+    my @setenv = getpart("client", "setenv");
+    if(@setenv) {
+        foreach my $s (@setenv) {
+            chomp $s;
+            subVariables \$s;
+            if($s =~ /([^=]*)=(.*)/) {
+                my ($var, $content) = ($1, $2);
+                # remember current setting, to restore it once test runs
+                $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
+                # set new value
+                if(!$content) {
+                    delete $ENV{$var} if($ENV{$var});
+                }
+                else {
+                    if(($var =~ /^LD_PRELOAD/) &&
+                       ($debug_build || ($has_shared ne "yes"))) {
+                        # print "Skipping LD_PRELOAD due to no release shared build\n";
+                        next;
+                    }
+                    $ENV{$var} = "$content";
+                }
+            }
+        }
+    }
+
     if(!$why) {
+        # TODO:
+        # Add a precheck cache. If a precheck command was already invoked
+        # exactly like this, then use the previous result to speed up
+        # successive test invokes!
+
         my @precheck = getpart("client", "precheck");
         if(@precheck) {
             $cmd = $precheck[0];
             chomp $cmd;
             subVariables \$cmd;
             if($cmd) {
+                my @p = split(/ /, $cmd);
+                if($p[0] !~ /\//) {
+                    # the first word, the command, does not contain a slash so
+                    # we will scan the "improved" PATH to find the command to
+                    # be able to run it
+                    my $fullp = checktestcmd($p[0]);
+
+                    if($fullp) {
+                        $p[0] = $fullp;
+                    }
+                    $cmd = join(" ", @p);
+                }
+
                 my @o = `$cmd 2>/dev/null`;
                 if($o[0]) {
                     $why = $o[0];
@@ -2400,9 +2496,6 @@ sub singletest {
 
         @reply=@replycheck;
     }
-
-    # curl command to run
-    my @curlcmd= fixarray ( getpart("client", "command") );
 
     # this is the valid protocol blurb curl should generate
     my @protocol= fixarray ( getpart("verify", "protocol") );
@@ -2453,38 +2546,16 @@ sub singletest {
         writearray($FTPDCMD, \@ftpservercmd);
     }
 
-    # test definition may instruct to (un)set environment vars
-    my %oldenv;
-    my @setenv = getpart("client", "setenv");
-    if(@setenv) {
-        foreach my $s (@setenv) {
-            chomp $s;
-            subVariables \$s;
-            if($s =~ /([^=]*)=(.*)/) {
-                my ($var, $content) = ($1, $2);
-                # remember current setting, to restore it once test runs
-                $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
-                # set new value
-                if(!$content) {
-                    delete $ENV{$var} if($ENV{$var});
-                }
-                else {
-                    $ENV{$var} = "$content";
-                }
-            }
-        }
-    }
-
     # get the command line options to use
     my @blaha;
     ($cmd, @blaha)= getpart("client", "command");
 
-    # make some nice replace operations
-    $cmd =~ s/\n//g; # no newlines please
-
-    # substitute variables in the command line
-    subVariables \$cmd;
-
+    if($cmd) {
+        # make some nice replace operations
+        $cmd =~ s/\n//g; # no newlines please
+        # substitute variables in the command line
+        subVariables \$cmd;
+    }
     if($curl_debug) {
         unlink($memdump);
     }
@@ -2535,14 +2606,32 @@ sub singletest {
         }
     }
 
+    my $CMDLINE;
     my $cmdargs;
-    if(!$tool) {
+    my $cmdtype = $cmdhash{'type'} || "default";
+    if($cmdtype eq "perl") {
+        # run the command line prepended with "perl"
+        $cmdargs ="$cmd";
+        $CMDLINE = "perl ";
+        $tool=$CMDLINE;
+        $disablevalgrind=1;
+    }
+    elsif(!$tool) {
         # run curl, add --verbose for debug information output
+	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && $has_axtls == 1);
         $cmdargs ="$out --include --verbose --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
         $CURLOUT = $STDOUT; # sends received data to stdout
+
+        $CMDLINE="$LIBDIR/$tool";
+        if(! -f $CMDLINE) {
+            print "The tool set in the test case for this: '$tool' does not exist\n";
+            timestampskippedevents($testnum);
+            return -1;
+        }
+        $DBGCURL=$CMDLINE;
     }
 
     my @stdintest = getpart("client", "stdin");
@@ -2553,23 +2642,13 @@ sub singletest {
 
         $cmdargs .= " <$stdinfile";
     }
-    my $CMDLINE;
 
     if(!$tool) {
         $CMDLINE="$CURL";
     }
-    else {
-        $CMDLINE="$LIBDIR/$tool";
-        if(! -f $CMDLINE) {
-            print "The tool set in the test case for this: '$tool' does not exist\n";
-            timestampskippedevents($testnum);
-            return -1;
-        }
-        $DBGCURL=$CMDLINE;
-    }
 
     my $usevalgrind;
-    if($valgrind) {
+    if($valgrind && !$disablevalgrind) {
         my @valgrindoption = getpart("verify", "valgrind");
         if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
             $usevalgrind = 1;
@@ -2582,7 +2661,7 @@ sub singletest {
         }
     }
 
-    $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
+    $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
 
     if($verbose) {
         logmsg "$CMDLINE\n";
@@ -3007,7 +3086,8 @@ sub singletest {
 
     if($curl_debug) {
         if(! -f $memdump) {
-            logmsg "\n** ALERT! memory debugging with no output file?\n";
+            logmsg "\n** ALERT! memory debugging with no output file?\n"
+                if(!$cmdtype eq "perl");
         }
         else {
             my @memdata=`$memanalyze $memdump`;
@@ -3069,7 +3149,7 @@ sub singletest {
             $ok .= "v";
         }
         else {
-            if(!$short) {
+            if(!$short && !$disablevalgrind) {
                 logmsg " valgrind SKIPPED\n";
             }
             $ok .= "-"; # skipped
@@ -3197,9 +3277,33 @@ sub startservers {
                 $run{'ftp-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "gopher") {
+            if(!$run{'gopher'}) {
+                ($pid, $pid2) = runhttpserver("gopher", $verbose, 0,
+                                              $GOPHERPORT);
+                if($pid <= 0) {
+                    return "failed starting GOPHER server";
+                }
+                printf ("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'gopher'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "gopher-ipv6") {
+            if(!$run{'gopher-ipv6'}) {
+                ($pid, $pid2) = runhttpserver("gopher", $verbose, "ipv6",
+                                              $GOPHER6PORT);
+                if($pid <= 0) {
+                    return "failed starting GOPHER-IPv6 server";
+                }
+                logmsg sprintf("* pid gopher-ipv6 => %d %d\n", $pid,
+                               $pid2) if($verbose);
+                $run{'gopher-ipv6'}="$pid $pid2";
+            }
+        }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
+                                              $HTTPPORT);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
@@ -3209,7 +3313,8 @@ sub startservers {
         }
         elsif($what eq "http-ipv6") {
             if(!$run{'http-ipv6'}) {
-                ($pid, $pid2) = runhttpserver($verbose, "IPv6");
+                ($pid, $pid2) = runhttpserver("http", $verbose, "IPv6",
+                                              $HTTP6PORT);
                 if($pid <= 0) {
                     return "failed starting HTTP-IPv6 server";
                 }
@@ -3288,7 +3393,8 @@ sub startservers {
                 stopserver('https');
             }
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver($verbose);
+                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
+                                              $HTTPPORT);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
@@ -3776,6 +3882,8 @@ $SMTPPORT =  $base++;
 $SMTP6PORT = $base++;
 $RTSPPORT =  $base++;
 $RTSP6PORT = $base++;
+$GOPHERPORT =$base++;
+$GOPHER6PORT=$base++;
 
 #######################################################################
 # clear and create logging directory:

@@ -1049,7 +1049,7 @@ static int asn1_output(const ASN1_UTCTIME *tm,
 
 static int hostmatch(const char *hostname, const char *pattern)
 {
-  while(1) {
+  for(;;) {
     char c = *pattern++;
 
     if(c == '\0')
@@ -1595,10 +1595,8 @@ ossl_connect_step1(struct connectdata *conn,
     if ( !lookup ||
          (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                               X509_FILETYPE_PEM)) ) {
-      failf(data,"error loading CRL file :\n"
-            "  CRLfile: %s\n",
-            data->set.str[STRING_SSL_CRLFILE]?
-            data->set.str[STRING_SSL_CRLFILE]: "none");
+      failf(data,"error loading CRL file: %s\n",
+            data->set.str[STRING_SSL_CRLFILE]);
       return CURLE_SSL_CRL_BADFILE;
     }
     else {
@@ -2373,6 +2371,12 @@ ossl_connect_common(struct connectdata *conn,
   long timeout_ms;
   int what;
 
+  /* check if the connection has already been established */
+  if(ssl_connection_complete == connssl->state) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
   if(ssl_connect_1==connssl->connecting_state) {
     /* Find out how much more time we're allowed */
     timeout_ms = Curl_timeleft(conn, NULL, TRUE);
@@ -2430,15 +2434,14 @@ ossl_connect_common(struct connectdata *conn,
       /* socket is readable or writable */
     }
 
-    /* Run transaction, and return to the caller if it failed or if
-     * this connection is part of a multi handle and this loop would
-     * execute again. This permits the owner of a multi handle to
-     * abort a connection attempt before step2 has completed while
-     * ensuring that a client using select() or epoll() will always
-     * have a valid fdset to wait on.
+    /* Run transaction, and return to the caller if it failed or if this
+     * connection is done nonblocking and this loop would execute again. This
+     * permits the owner of a multi handle to abort a connection attempt
+     * before step2 has completed while ensuring that a client using select()
+     * or epoll() will always have a valid fdset to wait on.
      */
     retcode = ossl_connect_step2(conn, sockindex);
-    if(retcode || (data->state.used_interface == Curl_if_multi &&
+    if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
                     ssl_connect_2_writing == connssl->connecting_state)))

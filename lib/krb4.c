@@ -7,7 +7,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2009 Daniel Stenberg
+ * Copyright (c) 2004 - 2010 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ static int
 krb4_check_prot(void *app_data, int level)
 {
   app_data = NULL; /* prevent compiler warning */
-  if(level == prot_confidential)
+  if(level == PROT_CONFIDENTIAL)
     return -1;
   return 0;
 }
@@ -119,7 +119,7 @@ krb4_decode(void *app_data, void *buf, int len, int level,
   int e;
   struct krb4_data *d = app_data;
 
-  if(level == prot_safe)
+  if(level == PROT_SAFE)
     e = krb_rd_safe(buf, len, &d->key,
                     (struct sockaddr_in *)REMOTE_ADDR,
                     (struct sockaddr_in *)LOCAL_ADDR, &m);
@@ -154,14 +154,14 @@ krb4_encode(void *app_data, const void *from, int length, int level, void **to,
   *to = malloc(length + 31);
   if(!*to)
     return -1;
-  if(level == prot_safe)
+  if(level == PROT_SAFE)
     /* NOTE that the void* cast is safe, krb_mk_safe/priv don't modify the
      * input buffer
      */
     return krb_mk_safe((void*)from, *to, length, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
-  else if(level == prot_private)
+  else if(level == PROT_PRIVATE)
     return krb_mk_priv((void*)from, *to, length, d->schedule, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
@@ -315,6 +315,15 @@ struct Curl_sec_client_mech Curl_krb4_client_mech = {
     krb4_decode
 };
 
+static enum protection_level
+krb4_set_command_prot(struct connectdata *conn, enum protection_level level)
+{
+  enum protection_level old = conn->command_prot;
+  DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
+  conn->command_prot = level;
+  return old;
+}
+
 CURLcode Curl_krb_kauth(struct connectdata *conn)
 {
   des_cblock key;
@@ -325,11 +334,11 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   char passwd[100];
   size_t tmp;
   ssize_t nread;
-  int save;
+  enum protection_level save;
   CURLcode result;
   unsigned char *ptr;
 
-  save = Curl_set_command_prot(conn, prot_private);
+  save = krb4_set_command_prot(conn, PROT_PRIVATE);
 
   result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->user);
 
@@ -341,14 +350,14 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
     return result;
 
   if(conn->data->state.buffer[0] != '3'){
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   p = strstr(conn->data->state.buffer, "T=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
@@ -360,7 +369,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
   if(!tmp || !ptr) {
     Curl_failf(conn->data, "Failed to decode base64 in reply");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   memcpy((char *)tkt.dat, ptr, tmp);
@@ -371,7 +380,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   p = strstr(conn->data->state.buffer, "P=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   name = p + 2;
@@ -400,7 +409,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   if(Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length, &p)
      < 1) {
     failf(conn->data, "Out of memory base64-encoding.");
-    Curl_set_command_prot(conn, save);
+    krb4_set_command_prot(conn, save);
     return CURLE_OUT_OF_MEMORY;
   }
   memset (tktcopy.dat, 0, tktcopy.length);
@@ -413,7 +422,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   result = Curl_GetFTPResponse(&nread, conn, NULL);
   if(result)
     return result;
-  Curl_set_command_prot(conn, save);
+  krb4_set_command_prot(conn, save);
 
   return CURLE_OK;
 }

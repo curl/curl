@@ -123,7 +123,9 @@ inflate_stream(struct connectdata *conn,
       }
 
       /* Done with these bytes, exit */
-      if(status == Z_OK && z->avail_in == 0) {
+
+      /* status is always Z_OK at this point! */
+      if(z->avail_in == 0) {
         free(decomp);
         return result;
       }

@@ -54,8 +54,30 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
 test1022.pl Makefile.inc
 
 # Dependencies (may need to be overriden)
-LDADD = $(top_builddir)/lib/libcurl.la
+LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
-# Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES, noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
+# Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
+# noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
+
+# Preloading of libhostname allows host name overriding,
+# this is used to make some tests machine independent.
+
+if BUILD_LIBHOSTNAME
+noinst_LTLIBRARIES = libhostname.la
+else
+noinst_LTLIBRARIES =
+endif
+
+if NO_UNDEFINED
+# The -no-undefined flag is crucial to build fine on some platforms
+UNDEF = -no-undefined
+endif
+
+libhostname_la_SOURCES = sethostname.c sethostname.h
+
+libhostname_la_LIBADD =
+libhostname_la_DEPENDENCIES =
+libhostname_la_LDFLAGS = -module -avoid-version $(UNDEF) -rpath /nowhere
+

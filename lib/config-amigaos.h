@@ -86,6 +86,7 @@
 
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
+#define SIZEOF_SIZE_T 4
 
 #define USE_OPENSSL 1
 #define USE_SSLEAY 1

@@ -97,6 +97,8 @@ static const char *dates[]={
   "Thu, 999999999999-Aug-2007 20:49:07 GMT",
   "Thu, 12-Aug-2007 20:61:99999999999 GMT",
   "IAintNoDateFool",
+  "Thu Apr 18 22:50 2007 GMT", /* without seconds */
+
   NULL
 };
 

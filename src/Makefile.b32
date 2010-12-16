@@ -65,7 +65,7 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/l
 top_srcdir = ..
 !include Makefile.inc
 
-CSOURCES = $(CURL_SOURCES) $(CURLX_ONES)
+CSOURCES = $(CURL_CFILES) $(CURLX_ONES)
 OBJECTS  = $(CSOURCES:.c=.obj)
 
 .c.obj:

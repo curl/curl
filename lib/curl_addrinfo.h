@@ -80,6 +80,8 @@ Curl_he2ai(const struct hostent *he, int port);
 Curl_addrinfo *
 Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
 
+Curl_addrinfo *Curl_str2addr(char *dotted, int port);
+
 #if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
 void
 curl_dofreeaddrinfo(struct addrinfo *freethis,

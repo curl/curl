@@ -38,10 +38,10 @@ Date:    May 28, 2008
  request a particular action, and then the server replies a few text lines
  before the actual requested content is sent to the client.
 
- Using curl's option -v will display what kind of commands curl sends to the
- server, as well as a few other informational texts. -v is the single most
- useful option when it comes to debug or even understand the curl<->server
- interaction.
+ Using curl's option --verbose (-v as a short option) will display what kind of
+ commands curl sends to the server, as well as a few other informational texts. 
+ --verbose is the single most useful option when it comes to debug or even
+ understand the curl<->server interaction.
 
 2. URL
 
@@ -62,9 +62,9 @@ Date:    May 28, 2008
  that that URL holds.
 
  All HTTP replies contain a set of headers that are normally hidden, use
- curl's -i option to display them as well as the rest of the document. You can
- also ask the remote server for ONLY the headers by using the -I option (which
- will make curl issue a HEAD request).
+ curl's --include (-i) option to display them as well as the rest of the
+ document. You can also ask the remote server for ONLY the headers by using the
+ --head (-I) option (which will make curl issue a HEAD request).
 
 4. Forms
 
@@ -103,7 +103,7 @@ Date:    May 28, 2008
   To make curl do the GET form post for you, just enter the expected created
   URL:
 
-        curl "www.hotmail.com/when/junk.cgi?birthyear=1905&press=OK"
+        curl "http://www.hotmail.com/when/junk.cgi?birthyear=1905&press=OK"
 
  4.2 POST
 
@@ -127,7 +127,7 @@ Date:    May 28, 2008
   And to use curl to post this form with the same data filled in as before, we
   could do it like:
 
-        curl -d "birthyear=1905&press=%20OK%20" www.hotmail.com/when/junk.cgi
+        curl --data "birthyear=1905&press=%20OK%20" http://www.hotmail.com/when/junk.cgi
 
   This kind of POST will use the Content-Type
   application/x-www-form-urlencoded and is the most widely used POST kind.
@@ -139,7 +139,7 @@ Date:    May 28, 2008
 
   Recent curl versions can in fact url-encode POST data for you, like this:
 
-        curl --data-urlencode "name=I am Daniel" www.example.com
+        curl --data-urlencode "name=I am Daniel" http://www.example.com
 
  4.3 File Upload POST
 
@@ -160,7 +160,7 @@ Date:    May 28, 2008
 
   To post to a form like this with curl, you enter a command line like:
 
-        curl -F upload=@localfilename -F press=OK [URL]
+        curl --form upload=@localfilename --form press=OK [URL]
 
  4.4 Hidden Fields
 
@@ -181,7 +181,7 @@ Date:    May 28, 2008
   To post this with curl, you won't have to think about if the fields are
   hidden or not. To curl they're all the same:
 
-        curl -d "birthyear=1905&press=OK&person=daniel" [URL]
+        curl --data "birthyear=1905&press=OK&person=daniel" [URL]
 
  4.5 Figure Out What A POST Looks Like
 
@@ -204,7 +204,7 @@ Date:    May 28, 2008
 
  Put a file to a HTTP server with curl:
 
-        curl -T uploadfile www.uploadhttp.com/receive.cgi
+        curl --upload-file uploadfile http://www.uploadhttp.com/receive.cgi
 
 6. HTTP Authentication
 
@@ -217,7 +217,7 @@ Date:    May 28, 2008
 
  To tell curl to use a user and password for authentication:
 
-        curl -u name:password www.secrets.com
+        curl --user name:password http://www.secrets.com
 
  The site might require a different authentication method (check the headers
  returned by the server), and then --ntlm, --digest, --negotiate or even
@@ -228,7 +228,7 @@ Date:    May 28, 2008
  may require its own user and password to allow the client to get through to
  the Internet. To specify those with curl, run something like:
 
-        curl -U proxyuser:proxypassword curl.haxx.se
+        curl --proxy-user proxyuser:proxypassword curl.haxx.se
 
  If your proxy requires the authentication to be done using the NTLM method,
  use --proxy-ntlm, if it requires Digest use --proxy-digest.
@@ -257,7 +257,7 @@ Date:    May 28, 2008
 
  Use curl to set the referer field with:
 
-        curl -e http://curl.haxx.se daniel.haxx.se
+        curl --referer http://curl.haxx.se http://daniel.haxx.se
 
 8. User Agent
 
@@ -275,11 +275,11 @@ Date:    May 28, 2008
 
  To make curl look like Internet Explorer on a Windows 2000 box:
 
-        curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
+        curl --user-agent "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
 
  Or why not look like you're using Netscape 4.73 on a Linux (PIII) box:
 
-        curl -A "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
+        curl --user-agent "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
 
 9. Redirects
 
@@ -294,11 +294,12 @@ Date:    May 28, 2008
 
  To tell curl to follow a Location:
 
-        curl -L www.sitethatredirects.com
+        curl --location http://www.sitethatredirects.com
 
  If you use curl to POST to a site that immediately redirects you to another
- page, you can safely use -L and -d/-F together. Curl will only use POST in
- the first request, and then revert to GET in the following operations.
+ page, you can safely use --location (-L) and --data/--form together. Curl will
+ only use POST in the first request, and then revert to GET in the following
+ operations.
 
 10. Cookies
 
@@ -320,16 +321,16 @@ Date:    May 28, 2008
  The simplest way to send a few cookies to the server when getting a page with
  curl is to add them on the command line like:
 
-        curl -b "name=Daniel" www.cookiesite.com
+        curl --cookie "name=Daniel" http://www.cookiesite.com
 
  Cookies are sent as common HTTP headers. This is practical as it allows curl
  to record cookies simply by recording headers. Record cookies with curl by
- using the -D option like:
+ using the --dump-header (-D) option like:
 
-        curl -D headers_and_cookies www.cookiesite.com
+        curl --dump-header headers_and_cookies http://www.cookiesite.com
 
- (Take note that the -c option described below is a better way to store
- cookies.)
+ (Take note that the --cookie-jar option described below is a better way to
+ store cookies.)
 
  Curl has a full blown cookie parsing engine built-in that comes to use if you
  want to reconnect to a server and use cookies that were stored from a
@@ -337,24 +338,24 @@ Date:    May 28, 2008
  believing you had a previous connection). To use previously stored cookies,
  you run curl like:
 
-        curl -b stored_cookies_in_file www.cookiesite.com
+        curl --cookie stored_cookies_in_file http://www.cookiesite.com
 
- Curl's "cookie engine" gets enabled when you use the -b option. If you only
- want curl to understand received cookies, use -b with a file that doesn't
- exist. Example, if you want to let curl understand cookies from a page and
- follow a location (and thus possibly send back cookies it received), you can
- invoke it like:
+ Curl's "cookie engine" gets enabled when you use the --cookie option. If you
+ only want curl to understand received cookies, use --cookie with a file that
+ doesn't exist. Example, if you want to let curl understand cookies from a page 
+ and follow a location (and thus possibly send back cookies it received), you
+ can invoke it like:
 
-        curl -b nada -L www.cookiesite.com
+        curl --cookie nada --location http://www.cookiesite.com
 
  Curl has the ability to read and write cookie files that use the same file
  format that Netscape and Mozilla do. It is a convenient way to share cookies
- between browsers and automatic scripts. The -b switch automatically detects
- if a given file is such a cookie file and parses it, and by using the
- -c/--cookie-jar option you'll make curl write a new cookie file at the end of
+ between browsers and automatic scripts. The --cookie (-b) switch automatically
+ detects if a given file is such a cookie file and parses it, and by using the
+ --cookie-jar (-c) option you'll make curl write a new cookie file at the end of
  an operation:
 
-        curl -b cookies.txt -c newcookies.txt www.cookiesite.com
+        curl --cookie cookies.txt --cookie-jar newcookies.txt http://www.cookiesite.com
 
 11. HTTPS
 
@@ -381,13 +382,13 @@ Date:    May 28, 2008
   can be specified on the command line or if not, entered interactively when
   curl queries for it. Use a certificate with curl on a HTTPS server like:
 
-        curl -E mycert.pem https://that.secure.server.com
+        curl --cert mycert.pem https://that.secure.server.com
 
   curl also tries to verify that the server is who it claims to be, by
   verifying the server's certificate against a locally stored CA cert
   bundle. Failing the verification will cause curl to deny the connection. You
-  must then use -k in case you want to tell curl to ignore that the server
-  can't be verified.
+  must then use --insecure (-k) in case you want to tell curl to ignore that
+  the server can't be verified.
 
   More about server certificate verification and ca cert bundles can be read
   in the SSLCERTS document, available online here:
@@ -402,17 +403,17 @@ Date:    May 28, 2008
  For example, you can change the POST request to a PROPFIND and send the data
  as "Content-Type: text/xml" (instead of the default Content-Type) like this:
 
-        curl -d "<xml>" -H "Content-Type: text/xml" -X PROPFIND url.com
+        curl --data "<xml>" --header "Content-Type: text/xml" --request PROPFIND url.com
 
  You can delete a default header by providing one without content. Like you
  can ruin the request by chopping off the Host: header:
 
-        curl -H "Host:" http://mysite.com
+        curl --header "Host:" http://mysite.com
 
  You can add headers the same way. Your server may want a "Destination:"
  header, and you can add it:
 
-        curl -H "Destination: http://moo.com/nowhere" http://url.com
+        curl --header "Destination: http://moo.com/nowhere" http://url.com
 
 13. Web Login
 
@@ -456,8 +457,8 @@ Date:    May 28, 2008
  * Use the --trace-ascii option to store fully detailed logs of the requests
    for easier analyzing and better understanding
 
- * Make sure you check for and use cookies when needed (both reading with -b
-   and writing with -c)
+ * Make sure you check for and use cookies when needed (both reading with
+   --cookie and writing with --cookie-jar)
 
  * Set user-agent to one like a recent popular browser does
 

@@ -42,6 +42,7 @@ my $pidfile;         # http server pid file
 my $logfile;         # http server log file
 my $srcdir;
 my $fork;
+my $gopher = 0;
 
 my $flags  = "";
 my $path   = '.';
@@ -71,6 +72,9 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--ipv6') {
         $ipvnum = 6;
+    }
+    elsif($ARGV[0] eq '--gopher') {
+        $gopher = 1;
     }
     elsif($ARGV[0] eq '--port') {
         if($ARGV[1] =~ /^(\d+)$/) {
@@ -106,6 +110,7 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
+$flags .= "--gopher " if($gopher);
 $flags .= "--fork " if(defined($fork));
 $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";

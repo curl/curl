@@ -345,6 +345,13 @@
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
+/* The size of `size_t', as computed by sizeof. */
+#if defined(_WIN64)
+#  define SIZEOF_SIZE_T 8
+#else
+#  define SIZEOF_SIZE_T 4
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
@@ -504,6 +511,10 @@
 #  define USE_WIN32_LARGE_FILES
 #endif
 
+#if defined(__WATCOMC__) && !defined(USE_WIN32_LARGE_FILES)
+#  define USE_WIN32_LARGE_FILES
+#endif
+
 #if defined(__POCC__)
 #  undef USE_WIN32_LARGE_FILES
 #endif
@@ -544,6 +555,13 @@
 #else
 #undef HAVE_LDAP_URL_PARSE
 #define CURL_LDAP_WIN 1
+#endif
+
+#if defined(__WATCOMC__) && defined(CURL_LDAP_WIN)
+#if __WATCOMC__ < 1280
+#define WINBERAPI  __declspec(cdecl)
+#define WINLDAPAPI __declspec(cdecl)
+#endif
 #endif
 
 #if defined(__POCC__) && defined(CURL_LDAP_WIN)

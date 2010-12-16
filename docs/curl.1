@@ -29,8 +29,9 @@ curl \- transfer a URL
 .SH DESCRIPTION
 .B curl
 is a tool to transfer data from or to a server, using one of the supported
-protocols (HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, DICT, TELNET, LDAP or
-FILE).  The command is designed to work without user interaction.
+protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP,
+LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP).  The
+command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer
@@ -55,16 +56,16 @@ or you can get sequences of alphanumeric series by using [] as in:
  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
  ftp://ftp.letters.com/file[a-z].txt
 
-No nesting of the sequences is supported at the moment, but you can use
-several ones next to each other:
+Nested sequences are not supported, but you can use several ones next to each
+other:
 
  http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
 
-Since curl 7.15.1 you can also specify a step counter for the ranges, so that
-you can get every Nth number or letter:
+You can specify a step counter for the ranges to get every Nth number or
+letter:
 
  http://www.numericals.com/file[1-100:10].txt
  http://www.letters.com/file[a-z:2].txt
@@ -87,8 +88,8 @@ invokes.
 curl normally displays a progress meter during operations, indicating the amount
 of transferred data, transfer speeds and estimated time left, etc.
 
-However, since curl displays this data to the terminal by default, if you invoke
-curl to do an operation and it is about to write data to the terminal, it
+curl displays this data to the terminal by default, so if you invoke curl to
+do an operation and it is about to write data to the terminal, it
 \fIdisables\fP the progress meter as otherwise it would mess up the output
 mixing progress meter and response data.
 
@@ -300,8 +301,8 @@ away. EPRT and LPRT are extensions to the original FTP protocol, and may not wor
 on all servers, but they enable more functionality in a better way than the
 traditional PORT command.
 
-Since curl 7.19.0, \fB--eprt\fP can be used to explicitly enable EPRT again
-and \fB--no-eprt\fP is an alias for \fB--disable-eprt\fP.
+\fB--eprt\fP can be used to explicitly enable EPRT again and \fB--no-eprt\fP
+is an alias for \fB--disable-eprt\fP.
 
 Disabling EPRT only changes the active behavior. If you want to switch to
 passive mode you need to not use \fI-P/--ftp-port\fP or force it with
@@ -311,8 +312,8 @@ passive mode you need to not use \fI-P/--ftp-port\fP or force it with
 transfers. Curl will normally always first attempt to use EPSV before PASV,
 but with this option, it will not try using EPSV.
 
-Since curl 7.19.0, \fB--epsv\fP can be used to explicitly enable EPRT again
-and \fB--no-epsv\fP is an alias for \fB--disable-epsv\fP.
+\fB--epsv\fP can be used to explicitly enable EPRT again and \fB--no-epsv\fP
+is an alias for \fB--disable-epsv\fP.
 
 Disabling EPSV only changes the passive behavior. If you want to switch to
 active mode you need to use \fI-P/--ftp-port\fP.
@@ -525,8 +526,8 @@ or
 
 \fBcurl\fP -F "name=daniel;type=text/foo" url.com
 
-You can also explicitly change the name field of an file upload part by
-setting filename=, like this:
+You can also explicitly change the name field of a file upload part by setting
+filename=, like this:
 
 \fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
 
@@ -1141,6 +1142,18 @@ encodings and instead makes them passed on unaltered, raw. (Added in 7.16.2)
 When used, this will make libcurl attempt to figure out the timestamp of the
 remote file, and if that is available make the local file get that same
 timestamp.
+.IP "--resolve <host:port:address>"
+Provide a custom address for a specific host and port pair. Using this, you
+can make the curl requests(s) use a specified address and prevent the
+otherwise normally resolved address to be used. Consider it a sort of
+/etc/hosts alternative provided on the command line. The port number should be
+the number used for the specific protocol the host will be used for. It means
+you need several entries if you want to provide address for the same host but
+different ports.
+
+This option can be used many times to add many host names to resolve.
+
+(Added in 7.21.3)
 .IP "--retry <num>"
 If a transient error is returned when curl tries to perform a transfer, it
 will retry this number of times before giving up. Setting the number to 0
@@ -1750,6 +1763,16 @@ Failed to shut down the SSL connection.
 Could not load CRL file, missing or wrong format (added in 7.19.0).
 .IP 83
 Issuer check failed (added in 7.19.0).
+.IP 84
+The FTP PRET command failed
+.IP 85
+RTSP: mismatch of CSeq numbers
+.IP 86
+RTSP: mismatch of Session Identifiers
+.IP 87
+unable to parse FTP file list
+.IP 88
+FTP chunk callback reported error
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.

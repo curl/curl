@@ -61,7 +61,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
   AH_TEMPLATE([LIBCURL_PROTOCOL_SMTP],[Defined if libcurl supports SMTP])
 
   AC_ARG_WITH(libcurl,
-     AC_HELP_STRING([--with-libcurl=DIR],[look for the curl library in DIR]),
+     AC_HELP_STRING([--with-libcurl=PREFIX],[look for the curl library in PREFIX/lib and headers in PREFIX/include]),
      [_libcurl_with=$withval],[_libcurl_with=ifelse([$1],,[yes],[$1])])
 
   if test "$_libcurl_with" != "no" ; then
@@ -75,10 +75,10 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
      if test -d "$_libcurl_with" ; then
         LIBCURL_CPPFLAGS="-I$withval/include"
         _libcurl_ldflags="-L$withval/lib"
-        AC_PATH_PROG([_libcurl_config],[curl-config],["$withval/bin"],
+        AC_PATH_PROG([_libcurl_config],[curl-config],[],
                      ["$withval/bin"])
      else
-        AC_PATH_PROG([_libcurl_config],[curl-config])
+        AC_PATH_PROG([_libcurl_config],[curl-config],[],[$PATH])
      fi
 
      if test x$_libcurl_config != "x" ; then

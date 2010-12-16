@@ -12,29 +12,37 @@
 # shown. Now, from the external/curl/ directory, run curl's normal configure
 # command with flags that match what Android itself uses. This will mean
 # putting the compiler directory into the PATH, putting the -I, -isystem and
-# -D options into CPPFLAGS, putting the -m, -f, -O and -nostdlib options into
-# CFLAGS, and putting the -Wl, -L and -l options into LIBS, along with the path
-# to the files libgcc.a, crtbegin_dynamic.o, and ccrtend_android.o. Remember
-# that the paths must be absolute since you will not be running configure from
-# the same directory as the Android make.  The normal cross-compiler options
-# must also be set.
+# -D options into CPPFLAGS, putting the -W, -m, -f, -O and -nostdlib options
+# into CFLAGS, and putting the -Wl, -L and -l options into LIBS, along with the
+# path to the files libgcc.a, crtbegin_dynamic.o, and ccrtend_android.o.
+# Remember that the paths must be absolute since you will not be running
+# configure from the same directory as the Android make.  The normal
+# cross-compiler options must also be set. Note that the -c, -o, -MD and
+# similar flags must not be set.
+#
+# To see all the LIBS options, you'll need to do the "showcommands" trick on an
+# executable that's already buildable and watch what flags Android uses to link
+# it (dhcpcd is a good choice to watch). You'll also want to add -L options to
+# LIBS that point to the out/.../obj/lib/ and out/.../obj/system/lib/
+# directories so that additional libraries can be found and used by curl.
 #
 # The end result will be a configure command that looks something like this
-# (the environment variable A is set to the Android root path):
+# (the environment variable A is set to the Android root path which makes the
+# command shorter):
 #
 #  A=`realpath ../..` && \
 #  PATH="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/bin:$PATH" \
 #  ./configure --host=arm-linux CC=arm-eabi-gcc \
 #  CPPFLAGS="-I $A/system/core/include ..." \
 #  CFLAGS="-nostdlib -fno-exceptions -Wno-multichar ..." \
-#  LIB="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/lib/gcc/arm-eabi/X\
-#  /interwork/libgcc.a ..." \
+#  LIBS="$A/prebuilt/linux-x86/toolchain/arm-eabi-X/lib/gcc/arm-eabi/X\
+#  /interwork/libgcc.a ..."
 #
 # Finally, copy the file COPYING to NOTICE so that the curl license gets put
-# into the right place (see the note about this below).
+# into the right place (but see the note about this below).
 #
 # Dan Fandrich
-# May 2010
+# August 2010
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -82,7 +90,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/src/Makefile.inc
-LOCAL_SRC_FILES := $(addprefix src/,$(CURL_SOURCES))
+LOCAL_SRC_FILES := $(addprefix src/,$(CURL_CFILES))
 
 LOCAL_MODULE := curl
 LOCAL_STATIC_LIBRARIES := libcurl
@@ -90,8 +98,8 @@ LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 
-# This will also need to include $(CURLX_ONES) in order to correctly link
-# against a dynamic library
+# This may also need to include $(CURLX_ONES) in order to correctly link
+# if libcurl is changed to be built as a dynamic library
 LOCAL_CFLAGS += $(common_CFLAGS)
 
 include $(BUILD_EXECUTABLE)

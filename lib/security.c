@@ -46,10 +46,7 @@
 #ifndef CURL_DISABLE_FTP
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 
-#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
-#include <curl/mprintf.h>
-
-#include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #ifdef HAVE_NETDB_H
@@ -61,11 +58,11 @@
 #endif
 
 #include "urldata.h"
-#include "krb4.h"
 #include "curl_base64.h"
-#include "sendf.h"
-#include "ftp.h"
 #include "curl_memory.h"
+#include "krb4.h"
+#include "ftp.h"
+#include "sendf.h"
 #include "rawstr.h"
 
 /* The last #include file should be: */
@@ -75,10 +72,10 @@ static const struct {
   enum protection_level level;
   const char *name;
 } level_names[] = {
-  { prot_clear, "clear" },
-  { prot_safe, "safe" },
-  { prot_confidential, "confidential" },
-  { prot_private, "private" }
+  { PROT_CLEAR, "clear" },
+  { PROT_SAFE, "safe" },
+  { PROT_CONFIDENTIAL, "confidential" },
+  { PROT_PRIVATE, "private" }
 };
 
 static enum protection_level
@@ -88,81 +85,145 @@ name_to_level(const char *name)
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
     if(checkprefix(name, level_names[i].name))
       return level_names[i].level;
-  return (enum protection_level)-1;
+  return PROT_NONE;
+}
+
+/* Convert a protocol |level| to its char representation.
+   We take an int to catch programming mistakes. */
+static char level_to_char(int level) {
+  switch(level) {
+  case PROT_CLEAR:
+    return 'C';
+  case PROT_SAFE:
+    return 'S';
+  case PROT_CONFIDENTIAL:
+    return 'E';
+  case PROT_PRIVATE:
+    return 'P';
+  case PROT_CMD:
+    /* Fall through */
+  default:
+    /* Those 2 cases should not be reached! */
+    break;
+  }
+  DEBUGASSERT(0);
+  /* Default to the most secure alternative. */
+  return 'P';
 }
 
 static const struct Curl_sec_client_mech * const mechs[] = {
-#ifdef HAVE_GSSAPI
+#if defined(HAVE_GSSAPI)
   &Curl_krb5_client_mech,
 #endif
-#ifdef HAVE_KRB4
+#if defined(HAVE_KRB4)
   &Curl_krb4_client_mech,
 #endif
   NULL
 };
 
-static int
-block_read(int fd, void *buf, size_t len)
+/* Send an FTP command defined by |message| and the optional arguments. The
+   function returns the ftp_code. If an error occurs, -1 is returned. */
+static int ftp_send_command(struct connectdata *conn, const char *message, ...)
 {
-  unsigned char *p = buf;
-  int b;
-  while(len) {
-    b = read(fd, p, len);
-    if(b == 0)
-      return 0;
-    else if(b < 0 && (errno == EINTR || errno == EAGAIN))
-      /* TODO: this will busy loop in the EAGAIN case */
-      continue;
-    else if(b < 0)
-      return -1;
-    len -= b;
-    p += b;
+  int ftp_code;
+  ssize_t nread;
+  va_list args;
+  char print_buffer[50];
+
+  va_start(args, message);
+  vsnprintf(print_buffer, sizeof(print_buffer), message, args);
+  va_end(args);
+
+  if(Curl_ftpsendf(conn, print_buffer) != CURLE_OK) {
+    ftp_code = -1;
   }
-  return p - (unsigned char*)buf;
+  else {
+    if(Curl_GetFTPResponse(&nread, conn, &ftp_code) != CURLE_OK)
+      ftp_code = -1;
+  }
+
+  (void)nread; /* Unused */
+  return ftp_code;
 }
 
-static int
-block_write(int fd, const void *buf, size_t len)
+/* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
+   saying whether an error occured or CURLE_OK if |len| was read. */
+static CURLcode
+socket_read(curl_socket_t fd, void *to, size_t len)
 {
-  const unsigned char *p = buf;
-  int b;
-  while(len) {
-    b = write(fd, p, len);
-    if(b < 0 && (errno == EINTR || errno == EAGAIN))
-      continue;
-    else if(b < 0)
-      return -1;
-    len -= b;
-    p += b;
+  char *to_p = to;
+  CURLcode code;
+  ssize_t nread;
+
+  while(len > 0) {
+    code = Curl_read_plain(fd, to_p, len, &nread);
+    if(code == CURLE_OK) {
+      len -= nread;
+      to_p += nread;
+    }
+    else {
+      /* FIXME: We are doing a busy wait */
+      if(code == CURLE_AGAIN)
+        continue;
+      return code;
+    }
   }
-  return p - (unsigned char*)buf;
+  return CURLE_OK;
 }
 
-static int
-sec_get_data(struct connectdata *conn,
-             int fd, struct krb4buffer *buf)
+
+/* Write |len| bytes from the buffer |to| to the socket |fd|. Return a
+   CURLcode saying whether an error occured or CURLE_OK if |len| was
+   written. */
+static CURLcode
+socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
+             size_t len)
+{
+  const char *to_p = to;
+  CURLcode code;
+  ssize_t written;
+
+  while(len > 0) {
+    code = Curl_write_plain(conn, fd, to_p, len, &written);
+    if(code == CURLE_OK) {
+      len -= written;
+      to_p += written;
+    }
+    else {
+      /* FIXME: We are doing a busy wait */
+      if(code == CURLE_AGAIN)
+        continue;
+      return code;
+    }
+  }
+  return CURLE_OK;
+}
+
+static CURLcode read_data(struct connectdata *conn,
+                          curl_socket_t fd,
+                          struct krb4buffer *buf)
 {
   int len;
-  int b;
+  void* tmp;
+  CURLcode ret;
 
-  b = block_read(fd, &len, sizeof(len));
-  if(b == 0)
-    return 0;
-  else if(b < 0)
-    return -1;
+  ret = socket_read(fd, &len, sizeof(len));
+  if (ret != CURLE_OK)
+    return ret;
+
   len = ntohl(len);
-  /* TODO: This realloc will cause a memory leak in an out of memory
-   * condition */
-  buf->data = realloc(buf->data, len);
-  b = buf->data ? block_read(fd, buf->data, len) : -1;
-  if(b == 0)
-    return 0;
-  else if(b < 0)
-    return -1;
-  buf->size = (conn->mech->decode)(conn->app_data, buf->data, len,
-                                   conn->data_prot, conn);
+  tmp = realloc(buf->data, len);
+  if (tmp == NULL)
+    return CURLE_OUT_OF_MEMORY;
+
+  buf->data = tmp;
+  ret = socket_read(fd, buf->data, len);
+  if (ret != CURLE_OK)
+    return ret;
+  buf->size = conn->mech->decode(conn->app_data, buf->data, len,
+                                 conn->data_prot, conn);
   buf->index = 0;
-  return 0;
+  return CURLE_OK;
 }
 
 static size_t
@@ -175,95 +236,111 @@ buffer_read(struct krb4buffer *buf, void *data, size_t len)
   return len;
 }
 
-static ssize_t sec_read(struct connectdata *conn, int num,
-                        char *buffer, size_t length, CURLcode *err)
+/* Matches Curl_recv signature */
+static ssize_t sec_recv(struct connectdata *conn, int sockindex,
+                        char *buffer, size_t len, CURLcode *err)
 {
-  size_t len;
-  int rx = 0;
-  curl_socket_t fd = conn->sock[num];
+  size_t bytes_read;
+  size_t total_read = 0;
+  curl_socket_t fd = conn->sock[sockindex];
 
   *err = CURLE_OK;
+
+  /* Handle clear text response. */
+  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
+      return read(fd, buffer, len);
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
     return 0;
   }
 
-  len = buffer_read(&conn->in_buffer, buffer, length);
-  length -= len;
-  rx += len;
-  buffer = (char*)buffer + len;
+  bytes_read = buffer_read(&conn->in_buffer, buffer, len);
+  len -= bytes_read;
+  total_read += bytes_read;
+  buffer += bytes_read;
 
-  while(length) {
-    if(sec_get_data(conn, fd, &conn->in_buffer) < 0)
+  while(len > 0) {
+    if(read_data(conn, fd, &conn->in_buffer) != CURLE_OK)
       return -1;
     if(conn->in_buffer.size == 0) {
-      if(rx)
+      if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
-      return rx;
+      return bytes_read;
     }
-    len = buffer_read(&conn->in_buffer, buffer, length);
-    length -= len;
-    rx += len;
-    buffer = (char*)buffer + len;
+    bytes_read = buffer_read(&conn->in_buffer, buffer, len);
+    len -= bytes_read;
+    total_read += bytes_read;
+    buffer += bytes_read;
   }
-  return rx;
+  /* FIXME: Check for overflow */
+  return total_read;
 }
 
-static int
-sec_send(struct connectdata *conn, int fd, const char *from, int length)
+/* Send |length| bytes from |from| to the |fd| socket taking care of encoding
+   and negociating with the server. |from| can be NULL. */
+/* FIXME: We don't check for errors nor report any! */
+static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
+                        const char *from, int length)
 {
-  int bytes;
-  void *buf;
-  enum protection_level protlevel = conn->data_prot;
-  int iscmd = protlevel == prot_cmd;
+  size_t bytes;
+  size_t htonl_bytes;
+  char *buffer;
+  char *cmd_buffer;
+  enum protection_level prot_level = conn->data_prot;
+  bool iscmd = prot_level == PROT_CMD;
+
+  DEBUGASSERT(prot_level > PROT_NONE && prot_level < PROT_LAST);
 
   if(iscmd) {
     if(!strncmp(from, "PASS ", 5) || !strncmp(from, "ACCT ", 5))
-      protlevel = prot_private;
+      prot_level = PROT_PRIVATE;
     else
-      protlevel = conn->command_prot;
+      prot_level = conn->command_prot;
   }
-  bytes = (conn->mech->encode)(conn->app_data, from, length, protlevel,
-                               &buf, conn);
+  bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
+                             (void**)&buffer, conn);
   if(iscmd) {
-    char *cmdbuf;
-
-    bytes = Curl_base64_encode(conn->data, (char *)buf, bytes, &cmdbuf);
+    bytes = Curl_base64_encode(conn->data, buffer, bytes, &cmd_buffer);
     if(bytes > 0) {
-      if(protlevel == prot_private)
-        block_write(fd, "ENC ", 4);
+      static const char *enc = "ENC ";
+      static const char *mic = "MIC ";
+      if(prot_level == PROT_PRIVATE)
+        socket_write(conn, fd, enc, 4);
       else
-        block_write(fd, "MIC ", 4);
-      block_write(fd, cmdbuf, bytes);
-      block_write(fd, "\r\n", 2);
-      Curl_infof(conn->data, "%s %s\n",
-                 protlevel == prot_private ? "ENC" : "MIC", cmdbuf);
-      free(cmdbuf);
+        socket_write(conn, fd, mic, 4);
+
+      socket_write(conn, fd, cmd_buffer, bytes);
+      socket_write(conn, fd, "\r\n", 2);
+      infof(conn->data, "Send: %s%s\n", prot_level == PROT_PRIVATE?enc:mic,
+            cmd_buffer);
+      free(cmd_buffer);
     }
   }
   else {
-    bytes = htonl(bytes);
-    block_write(fd, &bytes, sizeof(bytes));
-    block_write(fd, buf, ntohl(bytes));
+    htonl_bytes = htonl(bytes);
+    socket_write(conn, fd, &htonl_bytes, sizeof(htonl_bytes));
+    socket_write(conn, fd, buffer, bytes);
   }
-  free(buf);
-  return length;
+  free(buffer);
 }
 
-static ssize_t sec_write(struct connectdata *conn, int fd,
-                         const char *buffer, int length)
+static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
+                         const char *buffer, size_t length)
 {
-  int len = conn->buffer_size;
+  /* FIXME: Check for overflow */
+  ssize_t len = conn->buffer_size;
   int tx = 0;
 
-  len -= (conn->mech->overhead)(conn->app_data, conn->data_prot, len);
+  len -= conn->mech->overhead(conn->app_data, conn->data_prot, len);
   if(len <= 0)
     len = length;
-  while(length){
-    if(length < len)
+  while(length) {
+    if(len >= 0 || length < (size_t)len) {
+      /* FIXME: Check for overflow. */
       len = length;
-    sec_send(conn, fd, buffer, len);
+    }
+    do_sec_send(conn, fd, buffer, len);
     length -= len;
     buffer += len;
     tx += len;
@@ -271,230 +348,244 @@ static ssize_t sec_write(struct connectdata *conn, int fd,
   return tx;
 }
 
-int
-Curl_sec_fflush_fd(struct connectdata *conn, int fd)
+/* Matches Curl_send signature */
+static ssize_t sec_send(struct connectdata *conn, int sockindex,
+                        const void *buffer, size_t len, CURLcode *err)
 {
-  if(conn->data_prot != prot_clear) {
-    if(conn->out_buffer.index > 0){
-      sec_write(conn, fd, conn->out_buffer.data, conn->out_buffer.index);
-      conn->out_buffer.index = 0;
-    }
-    sec_send(conn, fd, NULL, 0);
-  }
-  return 0;
-}
-
-static ssize_t _sec_send(struct connectdata *conn, int num,
-                         const void *buffer, size_t length, CURLcode *err)
-{
-  curl_socket_t fd = conn->sock[num];
+  curl_socket_t fd = conn->sock[sockindex];
   *err = CURLE_OK;
-  return sec_write(conn, fd, buffer, length);
+  return sec_write(conn, fd, buffer, len);
 }
 
-int
-Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
+int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
+                      enum protection_level level)
 {
-  int len;
-  unsigned char *buf;
-  int code;
+  /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
+     int */
+  int decoded_len;
+  char *buf;
+  int ret_code;
 
-  len = Curl_base64_decode(s + 4, &buf); /* XXX */
-  if(len > 0)
-    len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
-  else
+  DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
+
+  decoded_len = Curl_base64_decode(buffer + 4, (unsigned char **)&buf);
+  if(decoded_len <= 0) {
+    free(buf);
     return -1;
+  }
 
-  if(len < 0) {
+  decoded_len = conn->mech->decode(conn->app_data, buf, decoded_len,
+                                   level, conn);
+  if(decoded_len <= 0) {
     free(buf);
     return -1;
   }
 
   if(conn->data->set.verbose) {
-    buf[len] = '\n';
-    Curl_debug(conn->data, CURLINFO_HEADER_IN, (char *)buf, len + 1, conn);
+    buf[decoded_len] = '\n';
+    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1, conn);
   }
 
-  buf[len] = '\0';
-
+  buf[decoded_len] = '\0';
+  DEBUGASSERT(decoded_len > 3);
   if(buf[3] == '-')
-    code = 0;
-  else
-    sscanf((char *)buf, "%d", &code);
-  if(buf[len-1] == '\n')
-    buf[len-1] = '\0';
-  strcpy(s, (char *)buf);
+    ret_code = 0;
+  else {
+    /* Check for error? */
+    sscanf(buf, "%d", &ret_code);
+  }
+
+  if(buf[decoded_len - 1] == '\n')
+    buf[decoded_len - 1] = '\0';
+  /* FIXME: Is |buffer| length always greater than |decoded_len|? */
+  strcpy(buffer, buf);
   free(buf);
-  return code;
+  return ret_code;
 }
 
-enum protection_level
-Curl_set_command_prot(struct connectdata *conn, enum protection_level level)
+/* FIXME: The error code returned here is never checked. */
+static int sec_set_protection_level(struct connectdata *conn)
 {
-  enum protection_level old = conn->command_prot;
-  conn->command_prot = level;
-  return old;
-}
+  int code;
+  char* pbsz;
+  static unsigned int buffer_size = 1 << 20; /* 1048576 */
+  enum protection_level level = conn->request_data_prot;
 
-static int
-sec_prot_internal(struct connectdata *conn, int level)
-{
-  char *p;
-  unsigned int s = 1048576;
-  ssize_t nread;
+  DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
-  if(!conn->sec_complete){
-    infof(conn->data, "No security data exchange has taken place.\n");
+  if(!conn->sec_complete) {
+    infof(conn->data, "Trying to change the protection level after the"
+                      "completion of the data exchange.\n");
     return -1;
   }
 
-  if(level){
-    int code;
-    if(Curl_ftpsendf(conn, "PBSZ %u", s))
+  /* Bail out if we try to set up the same level */
+  if(conn->data_prot == level)
+    return 0;
+
+  if(level) {
+    code = ftp_send_command(conn, "PBSZ %u", buffer_size);
+    if(code < 0)
       return -1;
 
-    if(Curl_GetFTPResponse(&nread, conn, &code))
-      return -1;
-
-    if(code/100 != 2){
-      failf(conn->data, "Failed to set protection buffer size.");
+    if(code/100 != 2) {
+      failf(conn->data, "Failed to set the protection's buffer size.");
       return -1;
     }
-    conn->buffer_size = s;
+    conn->buffer_size = buffer_size;
 
-    p = strstr(conn->data->state.buffer, "PBSZ=");
-    if(p)
-      sscanf(p, "PBSZ=%u", &s);
-    if(s < conn->buffer_size)
-      conn->buffer_size = s;
+    pbsz = strstr(conn->data->state.buffer, "PBSZ=");
+    if(pbsz) {
+      /* FIXME: Checks for errors in sscanf? */
+      sscanf(pbsz, "PBSZ=%u", &buffer_size);
+      if(buffer_size < conn->buffer_size)
+        conn->buffer_size = buffer_size;
+    }
   }
 
-  if(Curl_ftpsendf(conn, "PROT %c", level["CSEP"]))
+  /* Now try to negiociate the protection level. */
+  code = ftp_send_command(conn, "PROT %c", level_to_char(level));
+
+  if(code < 0)
     return -1;
 
-  if(Curl_GetFTPResponse(&nread, conn, NULL))
-    return -1;
-
-  if(conn->data->state.buffer[0] != '2'){
-    failf(conn->data, "Failed to set protection level.");
+  if(code/100 != 2) {
+    failf(conn->data, "Failed to set the protection level.");
     return -1;
   }
 
-  conn->data_prot = (enum protection_level)level;
-  if(level == prot_private)
-    conn->command_prot = (enum protection_level)level;
+  conn->data_prot = level;
+  if(level == PROT_PRIVATE)
+    conn->command_prot = level;
+
   return 0;
 }
-
-void
-Curl_sec_set_protection_level(struct connectdata *conn)
-{
-  if(conn->sec_complete && conn->data_prot != conn->request_data_prot)
-    sec_prot_internal(conn, conn->request_data_prot);
-}
-
 
 int
 Curl_sec_request_prot(struct connectdata *conn, const char *level)
 {
-  int l = name_to_level(level);
-  if(l == -1)
+  enum protection_level l = name_to_level(level);
+  if(l == PROT_NONE)
     return -1;
-  conn->request_data_prot = (enum protection_level)l;
+  DEBUGASSERT(l > PROT_NONE && l < PROT_LAST);
+  conn->request_data_prot = l;
   return 0;
 }
 
-int
-Curl_sec_login(struct connectdata *conn)
+static CURLcode choose_mech(struct connectdata *conn)
 {
   int ret;
-  const struct Curl_sec_client_mech * const *m;
-  ssize_t nread;
-  struct SessionHandle *data=conn->data;
-  int ftpcode;
+  struct SessionHandle *data = conn->data;
+  const struct Curl_sec_client_mech * const *mech;
+  void *tmp_allocation;
+  const char *mech_name;
 
-  for(m = mechs; *m && (*m)->name; m++) {
-    void *tmp;
-
-    tmp = realloc(conn->app_data, (*m)->size);
-    if(tmp == NULL) {
-      failf (data, "realloc %u failed", (*m)->size);
-      return -1;
-    }
-    conn->app_data = tmp;
-
-    if((*m)->init && (*(*m)->init)(conn->app_data) != 0) {
-      infof(data, "Skipping %s...\n", (*m)->name);
+  for(mech = mechs; (*mech); ++mech) {
+    mech_name = (*mech)->name;
+    /* We have no mechanism with a NULL name but keep this check */
+    DEBUGASSERT(mech_name != NULL);
+    if(mech_name == NULL) {
+      infof(data, "Skipping mechanism with empty name (%p)\n", mech);
       continue;
     }
-    infof(data, "Trying %s...\n", (*m)->name);
+    tmp_allocation = realloc(conn->app_data, (*mech)->size);
+    if(tmp_allocation == NULL) {
+      failf(data, "Failed realloc of size %u", (*mech)->size);
+      mech = NULL;
+      return CURLE_OUT_OF_MEMORY;
+    }
+    conn->app_data = tmp_allocation;
 
-    if(Curl_ftpsendf(conn, "AUTH %s", (*m)->name))
-      return -1;
+    if((*mech)->init) {
+      ret = (*mech)->init(conn->app_data);
+      if(ret != 0) {
+        infof(data, "Failed initialization for %s. Skipping it.\n", mech_name);
+        continue;
+      }
+    }
 
-    if(Curl_GetFTPResponse(&nread, conn, &ftpcode))
-      return -1;
+    infof(data, "Trying mechanism %s...\n", mech_name);
+    ret = ftp_send_command(conn, "AUTH %s", mech_name);
+    if(ret < 0)
+      /* FIXME: This error is too generic but it is OK for now. */
+      return CURLE_COULDNT_CONNECT;
 
-    if(conn->data->state.buffer[0] != '3'){
-      switch(ftpcode) {
+    if(ret/100 != 3) {
+      switch(ret) {
       case 504:
-        infof(data,
-              "%s is not supported by the server.\n", (*m)->name);
+        infof(data, "Mechanism %s is not supported by the server (server "
+                    "returned ftp code: 504).\n", mech_name);
         break;
       case 534:
-        infof(data, "%s rejected as security mechanism.\n", (*m)->name);
+        infof(data, "Mechanism %s was rejected by the server (server returned "
+                    "ftp code: 534).\n", mech_name);
         break;
       default:
-        if(conn->data->state.buffer[0] == '5') {
-          infof(data, "The server doesn't support the FTP "
-                "security extensions.\n");
-          return -1;
+        if(ret/100 == 5) {
+          infof(data, "The server does not support the security extensions.\n");
+          return CURLE_USE_SSL_FAILED;
         }
         break;
       }
       continue;
     }
 
-    ret = (*(*m)->auth)(conn->app_data, conn);
+    /* Authenticate */
+    ret = (*mech)->auth(conn->app_data, conn);
 
     if(ret == AUTH_CONTINUE)
       continue;
-    else if(ret != AUTH_OK){
-      /* mechanism is supposed to output error string */
+    else if(ret != AUTH_OK) {
+      /* Mechanism has dumped the error to stderr, don't error here. */
       return -1;
     }
-    conn->mech = *m;
+    DEBUGASSERT(ret == AUTH_OK);
+
+    conn->mech = *mech;
     conn->sec_complete = 1;
-    if (conn->data_prot != prot_clear) {
-      conn->recv[FIRSTSOCKET] = sec_read;
-      conn->send[FIRSTSOCKET] = _sec_send;
-      conn->recv[SECONDARYSOCKET] = sec_read;
-      conn->send[SECONDARYSOCKET] = _sec_send;
-    }
-    conn->command_prot = prot_safe;
+    conn->recv[FIRSTSOCKET] = sec_recv;
+    conn->send[FIRSTSOCKET] = sec_send;
+    conn->recv[SECONDARYSOCKET] = sec_recv;
+    conn->send[SECONDARYSOCKET] = sec_send;
+    conn->command_prot = PROT_SAFE;
     /* Set the requested protection level */
     /* BLOCKING */
-    Curl_sec_set_protection_level(conn);
+    (void)sec_set_protection_level(conn);
     break;
   }
 
-  return *m == NULL;
+  return mech != NULL ? CURLE_OK : CURLE_FAILED_INIT;
 }
+
+CURLcode
+Curl_sec_login(struct connectdata *conn)
+{
+  return choose_mech(conn);
+}
+
 
 void
 Curl_sec_end(struct connectdata *conn)
 {
-  if(conn->mech != NULL) {
-    if(conn->mech->end)
-      (conn->mech->end)(conn->app_data);
-    memset(conn->app_data, 0, conn->mech->size);
+  if(conn->mech != NULL && conn->mech->end)
+    conn->mech->end(conn->app_data);
+  if(conn->app_data) {
     free(conn->app_data);
     conn->app_data = NULL;
   }
+  if(conn->in_buffer.data) {
+    free(conn->in_buffer.data);
+    conn->in_buffer.data = NULL;
+    conn->in_buffer.size = 0;
+    conn->in_buffer.index = 0;
+    /* FIXME: Is this really needed? */
+    conn->in_buffer.eof_flag = 0;
+  }
   conn->sec_complete = 0;
-  conn->data_prot = (enum protection_level)0;
-  conn->mech=NULL;
+  conn->data_prot = PROT_CLEAR;
+  conn->mech = NULL;
 }
 
-#endif /* HAVE_KRB4 */
+#endif /* HAVE_KRB4 || HAVE_GSSAPI */
+
 #endif /* CURL_DISABLE_FTP */

@@ -61,7 +61,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done);
 static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
 static CURLcode ldap_connect(struct connectdata *conn, bool *done);
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done);
-static CURLcode ldap_disconnect(struct connectdata *conn);
+static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection);
 
 static Curl_recv ldap_recv;
 
@@ -165,6 +165,7 @@ static CURLcode ldap_setup(struct connectdata *conn)
   li = calloc(1, sizeof(ldapconninfo));
   li->proto = proto;
   conn->proto.generic = li;
+  conn->bits.close = FALSE;
   /* TODO:
    * - provide option to choose SASL Binds instead of Simple
    */
@@ -187,7 +188,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   if (conn->protocol & PROT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
-    conn->host.name, conn->port);
+    conn->host.name, conn->remote_port);
 
   rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
   if (rc) {
@@ -197,6 +198,35 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   }
 
   ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
+  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
+    /* for LDAP over HTTP proxy */
+    struct HTTP http_proxy;
+    ldapconninfo *li_save;
+    CURLcode result;
+
+    /* BLOCKING */
+    /* We want "seamless" LDAP operations through HTTP proxy tunnel */
+
+    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
+     * conn->proto.http; we want LDAP through HTTP and we have to change the
+     * member temporarily for connecting to the HTTP proxy. After
+     * Curl_proxyCONNECT we have to set back the member to the original struct
+     * LDAP pointer
+     */
+    li_save = data->state.proto.generic;
+    memset(&http_proxy, 0, sizeof(http_proxy));
+    data->state.proto.http = &http_proxy;
+    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
+                               conn->host.name, conn->remote_port);
+
+    data->state.proto.generic = li_save;
+
+    if(CURLE_OK != result)
+      return result;
+  }
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
 #ifdef USE_SSL
   if (conn->protocol & PROT_SSL) {
@@ -314,9 +344,10 @@ retry:
   return CURLE_OK;
 }
 
-static CURLcode ldap_disconnect(struct connectdata *conn)
+static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
 {
   ldapconninfo *li = conn->proto.generic;
+  (void) dead_connection;
 
   if (li) {
     if (li->ld) {
@@ -469,6 +500,8 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
       if (bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
         binary = 1;
+      else
+        binary = 0;
 
       for (i=0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
@@ -479,14 +512,14 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
         if (!binary) {
           /* check for leading or trailing whitespace */
-          if (isspace(bvals[i].bv_val[0]) ||
-              isspace(bvals[i].bv_val[bvals[i].bv_len-1])) {
+          if (ISSPACE(bvals[i].bv_val[0]) ||
+              ISSPACE(bvals[i].bv_val[bvals[i].bv_len-1])) {
             binval = 1;
           } else {
             /* check for unprintable characters */
             unsigned int j;
             for (j=0; j<bvals[i].bv_len; j++)
-              if (!isprint(bvals[i].bv_val[j])) {
+              if (!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;
               }

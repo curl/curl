@@ -22,7 +22,6 @@
  2.2 Remove easy interface internally
  2.3 Avoid having to remove/readd handles
  2.4 Fix HTTP Pipelining for PUT
- 2.5 Make curl_multi_info_read faster
 
  3. Documentation
  3.1  More and better
@@ -56,18 +55,17 @@
  7.7 Support other SSL libraries
  7.8  Support SRP on the TLS layer
  7.9 improve configure --with-ssl
- 7.10 Make NTLM work with other crypto functions
 
  8. GnuTLS
  8.1 SSL engine stuff
  8.2 SRP
  8.3 check connection
+ 8.4 non-gcrypt
 
  9. Other protocols
 
  10. New protocols
  10.1 RSYNC
- 10.2 RTMP
 
  11. Client
  11.1 sync
@@ -184,11 +182,6 @@
  HTTP Pipelining can be a way to greatly enhance performance for multiple
  serial requests and currently libcurl only supports that for HEAD and GET
  requests but it should also be possible for PUT.
-
-2.5 Make curl_multi_info_read faster
-
- When checking if there's info to return, this function scans over ALL added
- easy handles every time. That makes this function unnecessary heavy and slow.
 
 3. Documentation
 
@@ -342,14 +335,6 @@ to provide the data to send.
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
  then NSS...
 
-7.10 Make NTLM work with other crypto functions
-
- Get NTLM working using the functions provided by NSS etc. Not strictly
- SSL/TLS related, but hey... Another option is to get available DES and MD4
- source code from the cryptopp library. They are fine license-wise, but are
- C++. NTLM currenly only works when libcurl is built with OpenSSL or GnuTLS
- support.
-
 8. GnuTLS
 
 8.1 SSL engine stuff
@@ -366,6 +351,17 @@ to provide the data to send.
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
 
+8.4 non-gcrypt
+
+ libcurl assumes that there are gcrypt functions available when
+ GnuTLS is.
+
+ GnuTLS can be built to use libnettle instead as crypto library,
+ which breaks the previously mentioned assumption
+
+ The correct fix would be to detect which crypto layer that is in use and
+ adapt our code to use that instead of blindly assuming gcrypt.
+
 9. Other protocols
 
 10. New protocols
@@ -374,12 +370,6 @@ to provide the data to send.
 
  There's no RFC for protocol nor URI/URL format.  An implementation should
  most probably use an existing rsync library, such as librsync.
-
-10.2 RTMP
-
- There exists a patch that claims to introduce this protocol:
- http://osdir.com/ml/gnu.gnash.devel2/2006-11/msg00278.html, further details
- in the feature-request: http://curl.haxx.se/bug/feature.cgi?id=1843469
 
 11. Client
 

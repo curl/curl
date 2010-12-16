@@ -60,7 +60,7 @@ Curl_HMAC_init(const HMAC_params * hashparams,
 
   /* Create HMAC context. */
   i = sizeof *ctxt + 2 * hashparams->hmac_ctxtsize + hashparams->hmac_resultlen;
-  ctxt = (HMAC_context *) malloc(i);
+  ctxt = malloc(i);
 
   if(!ctxt)
     return ctxt;
@@ -85,9 +85,9 @@ Curl_HMAC_init(const HMAC_params * hashparams,
   (*hashparams->hmac_hinit)(ctxt->hmac_hashctxt2);
 
   for (i = 0; i < keylen; i++) {
-    b = *key ^ hmac_ipad;
+    b = (unsigned char)(*key ^ hmac_ipad);
     (*hashparams->hmac_hupdate)(ctxt->hmac_hashctxt1, &b, 1);
-    b = *key++ ^ hmac_opad;
+    b = (unsigned char)(*key++ ^ hmac_opad);
     (*hashparams->hmac_hupdate)(ctxt->hmac_hashctxt2, &b, 1);
   }
 

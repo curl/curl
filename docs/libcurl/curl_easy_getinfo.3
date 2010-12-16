@@ -198,6 +198,9 @@ working with the socket, you must call curl_easy_cleanup() as usual and let
 libcurl close the socket and cleanup other resources associated with the
 handle. This is typically used in combination with \fICURLOPT_CONNECT_ONLY\fP.
 (Added in 7.15.2)
+
+NOTE: this API is not really working on win64, since the SOCKET type on win64
+is 64 bit large while its 'long' is only 32 bits.
 .IP CURLINFO_FTP_ENTRY_PATH
 Pass a pointer to a char pointer to receive a pointer to a string holding the
 path of the entry path. That is the initial path libcurl ended up in when

@@ -51,8 +51,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. */
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     "http://receivingsite.com.pooh/index.cgi");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/index.cgi");
+
     /* Now specify we want to POST data */
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
