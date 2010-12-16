@@ -68,8 +68,8 @@ struct fcurl_data
   } handle;                   /* handle */
 
   char *buffer;               /* buffer to store cached data*/
-  int buffer_len;             /* currently allocated buffers length */
-  int buffer_pos;             /* end of data in buffer*/
+  size_t buffer_len;          /* currently allocated buffers length */
+  size_t buffer_pos;          /* end of data in buffer*/
   int still_running;          /* Is background url fetch still in progress */
 };
 
@@ -80,7 +80,7 @@ URL_FILE *url_fopen(const char *url,const char *operation);
 int url_fclose(URL_FILE *file);
 int url_feof(URL_FILE *file);
 size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file);
-char * url_fgets(char *ptr, int size, URL_FILE *file);
+char * url_fgets(char *ptr, size_t size, URL_FILE *file);
 void url_rewind(URL_FILE *file);
 
 /* we use a global one for convenience */
@@ -93,7 +93,7 @@ static size_t write_callback(char *buffer,
                              void *userp)
 {
   char *newbuff;
-  int rembuff;
+  size_t rembuff;
 
   URL_FILE *url = (URL_FILE *)userp;
   size *= nitems;
@@ -121,7 +121,7 @@ static size_t write_callback(char *buffer,
 }
 
 /* use to attempt to fill the read buffer up to requested number of bytes */
-static int fill_buffer(URL_FILE *file,int want,int waittime)
+static int fill_buffer(URL_FILE *file, size_t want)
 {
   fd_set fdread;
   fd_set fdwrite;
@@ -323,7 +323,7 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
   case CFTYPE_CURL:
     want = nmemb * size;
 
-    fill_buffer(file,want,1);
+    fill_buffer(file,want);
 
     /* check if theres data in the buffer - if not fill_buffer()
      * either errored or EOF */
@@ -351,10 +351,10 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
   return want;
 }
 
-char *url_fgets(char *ptr, int size, URL_FILE *file)
+char *url_fgets(char *ptr, size_t size, URL_FILE *file)
 {
-  int want = size - 1;/* always need to leave room for zero termination */
-  int loop;
+  size_t want = size - 1;/* always need to leave room for zero termination */
+  size_t loop;
 
   switch(file->type) {
   case CFTYPE_FILE:
@@ -362,7 +362,7 @@ char *url_fgets(char *ptr, int size, URL_FILE *file)
     break;
 
   case CFTYPE_CURL:
-    fill_buffer(file,want,1);
+    fill_buffer(file,want);
 
     /* check if theres data in the buffer - if not fill either errored or
      * EOF */
