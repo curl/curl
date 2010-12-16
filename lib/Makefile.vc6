@@ -44,15 +44,24 @@
 #
 # Stem for static libs and DLLs
 #
+!IFNDEF LIB_NAME
 LIB_NAME       = libcurl
-LIB_NAME_DEBUG = libcurld
+!IFNDEF LIB_NAME_DEBUG
+LIB_NAME_DEBUG = $(LIB_NAME)d
+!ENDIF
+!ENDIF
 
 #
 # Stem for DLL import libs
 #
-IMPLIB_NAME       = libcurl_imp
-IMPLIB_NAME_DEBUG = libcurld_imp
+!IFNDEF IMPLIB_NAME
+IMPLIB_NAME       = $(LIB_NAME)_imp
+!IFNDEF IMPLIB_NAME_DEBUG
+IMPLIB_NAME_DEBUG = $(LIB_NAME_DEBUG)_imp
+!ENDIF
+!ENDIF
 
+!IFDEF WITH_DEVEL
 !IFNDEF OPENSSL_PATH
 OPENSSL_PATH   = ../../openssl-0.9.8o
 !ENDIF
@@ -61,6 +70,7 @@ OPENSSL_PATH   = ../../openssl-0.9.8o
 ZLIB_PATH  = ../../zlib-1.2.5
 !ENDIF
 
+!ENDIF
 !IFNDEF MACHINE
 MACHINE  = X86
 !ENDIF
@@ -88,6 +98,20 @@ WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
 #############################################################
 ## Nothing more to do below this line!
 
+!IFDEF WITH_DEVEL
+CCNODBG    = cl.exe /O2 /DNDEBUG
+CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CFLAGSSSL  = /DUSE_SSLEAY /I "$(WITH_DEVEL)/include" /I "$(WITH_DEVEL)/include/openssl"
+CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CFLAGSLIB  = /DCURL_STATICLIB
+LNKDLL     = link.exe /DLL
+LNKLIB     = link.exe /lib
+LFLAGS     = /nologo /machine:$(MACHINE)
+SSLLIBS    = libeay32.lib ssleay32.lib
+ZLIBLIBSDLL= zlib.lib
+ZLIBLIBS   = zlib_a.lib
+!ELSE
 CCNODBG    = cl.exe /O2 /DNDEBUG
 CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
@@ -97,9 +121,11 @@ CFLAGSLIB  = /DCURL_STATICLIB
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 LFLAGS     = /nologo /machine:$(MACHINE)
-SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
+!ENDIF
+
+SSLLIBS    = libeay32.lib ssleay32.lib
 WINLIBS    = ws2_32.lib wldap32.lib
 CFLAGS     = $(CFLAGS)
 
