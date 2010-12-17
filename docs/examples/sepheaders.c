@@ -21,7 +21,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
   return written;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *curl_handle;
   static const char *headerfilename = "head.out";

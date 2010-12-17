@@ -15,7 +15,7 @@
 
 #include <curl/curl.h>
 
-int main(int argc, char *argv[])
+int main(void)
 {
   CURL *curl;
 

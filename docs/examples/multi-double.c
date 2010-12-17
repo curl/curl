@@ -22,7 +22,7 @@
 /*
  * Simply download two HTTP files!
  */
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *http_handle;
   CURL *http_handle2;

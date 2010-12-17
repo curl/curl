@@ -22,7 +22,7 @@
 /*
  * Simply download a HTTP file.
  */
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *http_handle;
   CURLM *multi_handle;

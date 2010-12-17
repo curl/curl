@@ -43,7 +43,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 }
 
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *curl_handle;
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
    * you're done with it, you should free() it as a nice application.
    */
 
-  printf("%lu bytes retrieved\n", chunk.size);
+  printf("%lu bytes retrieved\n", (long)chunk.size);
 
   if(chunk.memory)
     free(chunk.memory);
