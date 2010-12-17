@@ -697,7 +697,7 @@ sub verifyhttp {
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
-    $flags .= "-1 "         if($has_axtls == 1);
+    $flags .= "-1 "         if($has_axtls);
     $flags .= "--insecure " if($proto eq 'https');
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
@@ -2618,7 +2618,7 @@ sub singletest {
     }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
-	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && $has_axtls == 1);
+	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
         $cmdargs ="$out --include --verbose --trace-time $cmd";
     }
     else {
