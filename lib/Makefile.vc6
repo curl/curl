@@ -97,29 +97,47 @@ WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
 
 #############################################################
 ## Nothing more to do below this line!
-
-CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
-
-!IFDEF WITH_DEVEL
-CFLAGSSSL  = /DUSE_SSLEAY /I "$(WITH_DEVEL)/include" /I "$(WITH_DEVEL)/include/openssl"
-ZLIBLIBSDLL= zlib.lib
-ZLIBLIBS   = zlib_a.lib
-!ELSE
-CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGSZLIB = $(CFLAGSZLIB) /I "$(ZLIB_PATH)"
-ZLIBLIBSDLL= zdll.lib
-ZLIBLIBS   = zlib.lib
-!ENDIF
-
-CFLAGSLIB  = /DCURL_STATICLIB
-CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 CCNODBG    = cl.exe /O2 /DNDEBUG
 CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
+
+CFLAGSLIB  = /DCURL_STATICLIB
+CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+
+CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+
+CFLAGSSSH   = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
 SSLLIBS    = libeay32.lib ssleay32.lib
+
 WINLIBS    = ws2_32.lib wldap32.lib
+
+!IFDEF WITH_DEVEL
+# we only need one lib/include path, ingore the LFLAG<libname>
+LFLAGS=$(LFLAGS) "/LIBPATH:$(WITH_DEVEL)\lib"
+CFLAGS=$(CFLAGS) /I "$(WITH_DEVEL)\include"
+
+# curl uses non standard include path, w/o openssl prefix
+CFLAGSSSL  = /DUSE_SSLEAY /I "$(WITH_DEVEL)\include\openssl"
+
+ZLIBLIBSDLL= zlib.lib
+ZLIBLIBS   = zlib_a.lib
+
+SSH2LIBSDLL = libssh2.lib
+SSH2LIBS    = libssh2_a.lib
+
+CFLAGSSH=/I$(WITH_DEVEL)/include/libssh2
+
+!ELSE
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\lib"
+CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+CFLAGSZLIB = $(CFLAGSZLIB) /I "$(ZLIB_PATH)"
+ZLIBLIBSDLL= zdll.lib
+ZLIBLIBS   = zlib.lib
+!ENDIF
 
 CFGSET     = FALSE
 
@@ -141,7 +159,6 @@ RTLIBD  = /MDd
 RTLIB  = /MT
 RTLIBD = /MTd
 !ENDIF
-
 
 ######################
 # release
@@ -278,6 +295,18 @@ LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZ
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+
+######################
+# release-ssh2-ssl-dll-zlib
+
+!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
+TARGET   = $(LIB_NAME).lib
+DIROBJ   = $(CFG)
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(LFLAGSSSL) $(LFLAGSZLIB) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)  $(CFLAGSSSH2)
+CFGSET   = TRUE
 !ENDIF
 
 ######################
@@ -434,6 +463,7 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !MESSAGE   release-dll-ssl-dll          - release dynamic library with dynamic ssl
 !MESSAGE   release-dll-zlib-dll         - release dynamic library with dynamic zlib
 !MESSAGE   release-dll-ssl-dll-zlib-dll - release dynamic library with dynamic ssl and dynamic zlib
+!MESSAGE   release-ssh2-ssl-dll-zlib    - release static library with dynamic ssl, static zlib and static ssh2
 !MESSAGE   debug                        - debug static library
 !MESSAGE   debug-ssl                    - debug static library with ssl
 !MESSAGE   debug-zlib                   - debug static library with zlib
