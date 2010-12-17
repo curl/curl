@@ -449,7 +449,7 @@ RESOURCE = $(DIROBJ)\libcurl.res
 #######################
 # Usage
 #
-!IF "$(CFGSET)" == "FALSE" && "$(CFG)" != ""
+!IF ("$(CFGSET)" == "FALSE" && "$(CFG)" != "") || "$(CFG)"== ""
 !MESSAGE Usage: nmake /f makefile.vc6 CFG=<config> <target>
 !MESSAGE where <config> is one of:
 !MESSAGE   release                      - release static library
