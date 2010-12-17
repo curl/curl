@@ -34,4 +34,4 @@ LDADD = $(LIBDIR)/libcurl.la
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
 
-
+all: $(check_PROGRAMS)
