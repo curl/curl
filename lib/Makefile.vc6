@@ -98,36 +98,28 @@ WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
 #############################################################
 ## Nothing more to do below this line!
 
-!IFDEF WITH_DEVEL
-CCNODBG    = cl.exe /O2 /DNDEBUG
-CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGSSSL  = /DUSE_SSLEAY /I "$(WITH_DEVEL)/include" /I "$(WITH_DEVEL)/include/openssl"
 CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
-CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
-CFLAGSLIB  = /DCURL_STATICLIB
-LNKDLL     = link.exe /DLL
-LNKLIB     = link.exe /lib
-LFLAGS     = /nologo /machine:$(MACHINE)
-SSLLIBS    = libeay32.lib ssleay32.lib
+
+!IFDEF WITH_DEVEL
+CFLAGSSSL  = /DUSE_SSLEAY /I "$(WITH_DEVEL)/include" /I "$(WITH_DEVEL)/include/openssl"
 ZLIBLIBSDLL= zlib.lib
 ZLIBLIBS   = zlib_a.lib
 !ELSE
-CCNODBG    = cl.exe /O2 /DNDEBUG
-CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
-CFLAGSLIB  = /DCURL_STATICLIB
-LNKDLL     = link.exe /DLL
-LNKLIB     = link.exe /lib
-LFLAGS     = /nologo /machine:$(MACHINE)
+CFLAGSZLIB = $(CFLAGSZLIB) /I "$(ZLIB_PATH)"
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
 !ENDIF
 
+CFLAGSLIB  = /DCURL_STATICLIB
+CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CCNODBG    = cl.exe /O2 /DNDEBUG
+CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+LFLAGS     = /nologo /machine:$(MACHINE)
+LNKDLL     = link.exe /DLL
+LNKLIB     = link.exe /lib
 SSLLIBS    = libeay32.lib ssleay32.lib
 WINLIBS    = ws2_32.lib wldap32.lib
-CFLAGS     = $(CFLAGS)
 
 CFGSET     = FALSE
 
