@@ -41,59 +41,7 @@
 #
 ##############################################################
 
-#
-# Stem for static libs and DLLs
-#
-!IFNDEF LIB_NAME
-LIB_NAME       = libcurl
-!IFNDEF LIB_NAME_DEBUG
-LIB_NAME_DEBUG = $(LIB_NAME)d
-!ENDIF
-!ENDIF
-
-#
-# Stem for DLL import libs
-#
-!IFNDEF IMPLIB_NAME
-IMPLIB_NAME       = $(LIB_NAME)_imp
-!IFNDEF IMPLIB_NAME_DEBUG
-IMPLIB_NAME_DEBUG = $(LIB_NAME_DEBUG)_imp
-!ENDIF
-!ENDIF
-
-!IFDEF WITH_DEVEL
-!IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8o
-!ENDIF
-
-!IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.5
-!ENDIF
-
-!ENDIF
-!IFNDEF MACHINE
-MACHINE  = X86
-!ENDIF
-
-# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
-# without an openssl installation and offers the ability to authenticate
-# using the "current logged in user". Since at least with MSVC6 the sspi.h
-# header is broken it is either required to install the Windows SDK,
-# or to fix sspi.h with adding this define at the beginning of sspi.h:
-# #define FreeCredentialHandle FreeCredentialsHandle
-#
-# If, for some reason the Windows SDK is installed but not installed
-# in the default location, you can specify WINDOWS_SDK_PATH.
-# It can be downloaded from:
-# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
-
-# WINDOWS_SSPI = 1
-
-!IFDEF WINDOWS_SSPI
-!IFNDEF WINDOWS_SDK_PATH
-WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
-!ENDIF
-!ENDIF
+!include "../Makefile.inc.vc"
 
 #############################################################
 ## Nothing more to do below this line!
@@ -106,7 +54,7 @@ LNKLIB     = link.exe /lib
 CFLAGSLIB  = /DCURL_STATICLIB
 CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 
-CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 
 CFLAGSSSH   = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
 SSLLIBS    = libeay32.lib ssleay32.lib
@@ -132,9 +80,8 @@ CFLAGSSH=/I$(WITH_DEVEL)/include/libssh2
 !ELSE
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\lib"
 CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-CFLAGSZLIB = $(CFLAGSZLIB) /I "$(ZLIB_PATH)"
+ZLIB_LFLAGS = "/LIBPATH:$(ZLIB_PATH)"
+ZLIB_CFLAGS = $(ZLIB_CFLAGS) /I "$(ZLIB_PATH)"
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
 !ENDIF
@@ -177,9 +124,8 @@ CFGSET = TRUE
 !IF "$(CFG)" == "release-zlib"
 TARGET   = $(LIB_NAME).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -226,9 +172,8 @@ CFGSET   = TRUE
 TARGET   = $(LIB_NAME).lib
 DIROBJ   = $(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(LFLAGSSSL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -251,9 +196,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !IF "$(CFG)" == "release-zlib-dll"
 TARGET   = $(LIB_NAME).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -263,10 +207,9 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "release-ssl-dll-zlib-dll"
 TARGET   = $(LIB_NAME).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
-LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -276,9 +219,8 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "release-dll-zlib-dll"
 TARGET   = $(LIB_NAME).dll
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSZLIB)
+LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
@@ -289,10 +231,9 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
 TARGET   = $(LIB_NAME).dll
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
-LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB)
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(ZLIB_CFLAGS)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
@@ -304,8 +245,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
 TARGET   = $(LIB_NAME).lib
 DIROBJ   = $(CFG)
-LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(LFLAGSSSL) $(LFLAGSZLIB) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)  $(CFLAGSSSH2)
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(LFLAGSSSL) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(CFLAGSSSH2)
 CFGSET   = TRUE
 !ENDIF
 
@@ -338,9 +279,8 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "debug-zlib"
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -362,10 +302,9 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "debug-ssl-zlib"
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -375,9 +314,8 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "debug-zlib-dll"
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -387,10 +325,9 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "debug-ssl-dll-zlib-dll"
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
-LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(ZLIB_CFLAGS) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -425,9 +362,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !IF "$(CFG)" == "debug-dll-zlib-dll"
 TARGET   = $(LIB_NAME_DEBUG).dll
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(LFLAGSZLIB) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).lib /PDB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).pdb
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSZLIB)
+LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).lib /PDB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).pdb
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
@@ -438,10 +374,9 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !IF "$(CFG)" == "debug-dll-ssl-dll-zlib-dll"
 TARGET   = $(LIB_NAME_DEBUG).dll
 DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
-LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZLIB) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).lib /PDB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).pdb
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSZLIB)
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(ZLIB_LFLAGS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).lib /PDB:$(DIROBJ)\$(IMPLIB_NAME_DEBUG).pdb
+CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(ZLIB_CFLAGS)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF

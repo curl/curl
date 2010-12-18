@@ -14,37 +14,7 @@
 
 PROGRAM_NAME = curl.exe
 
-!IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8o
-!ENDIF
-
-!IFNDEF ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.5
-!ENDIF
-
-!IFNDEF MACHINE
-MACHINE  = X86
-!ENDIF
-
-# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
-# without an openssl installation and offers the ability to authenticate
-# using the "current logged in user". Since at least with MSVC6 the sspi.h
-# header is broken it is either required to install the Windows SDK,
-# or to fix sspi.h with adding this define at the beginning of sspi.h:
-# #define FreeCredentialHandle FreeCredentialsHandle
-#
-# If, for some reason the Windows SDK is installed but not installed
-# in the default location, you can specify WINDOWS_SDK_PATH.
-# It can be downloaded from:
-# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
-
-# WINDOWS_SSPI = 1
-
-!IFDEF WINDOWS_SSPI
-!IFNDEF WINDOWS_SDK_PATH
-WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
-!ENDIF
-!ENDIF
+!include "../Makefile.inc.vc"
 
 ########################################################
 ## Nothing more to do below this line!
@@ -57,15 +27,6 @@ SSL_CFLAGS     = /DUSE_SSLEAY
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
-
-# Runtime library configuration
-RTLIB   = /MD
-RTLIBD  = /MDd
-
-!IF "$(RTLIBCFG)" == "static"
-RTLIB  = /MT
-RTLIBD = /MTd
-!ENDIF
 
 ## Release
 CCR   = cl.exe $(RTLIB) /O2 /DNDEBUG
@@ -87,7 +48,11 @@ RESFLAGS = /i../include
 #MANIFESTTOOL = mt -manifest $(PROGRAM_NAME).manifest -outputresource:$(PROGRAM_NAME);1
 
 !IFDEF WINDOWS_SSPI
-CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
+CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI 
+!ENDIF
+
+!IFDEF WINDOWS_SDK_PATH
+CFLAGS = $(CFLAGS) /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
 RELEASE_OBJS= \
