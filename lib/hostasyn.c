@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,6 +95,20 @@ CURLcode Curl_addrinfo_callback(struct connectdata * conn,
     if(ai) {
       struct SessionHandle *data = conn->data;
 
+#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
+      Curl_addrinfo *ai_tail = ai;
+
+      while (ai_tail->ai_next)
+        ai_tail = ai_tail->ai_next;
+
+      /* Add the new results to the list of old results. */
+      ai_tail->ai_next = conn->async.temp_ai;
+      conn->async.temp_ai = ai;
+
+      if(--conn->async.num_pending > 0)
+        /* We are not done yet. Just return. */
+        return CURLE_OK;
+#endif
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
@@ -110,9 +124,48 @@ CURLcode Curl_addrinfo_callback(struct connectdata * conn,
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
-    else
+    else {
+#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
+      if(--conn->async.num_pending > 0) {
+        /* We are not done yet. Clean up and return.
+	   This function will be called again. */
+        if(conn->async.temp_ai)
+          Curl_freeaddrinfo(conn->async.temp_ai);
+        return CURLE_OUT_OF_MEMORY;
+      }
+#endif
       rc = CURLE_OUT_OF_MEMORY;
+    }
   }
+#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
+  else
+  {
+      if(--conn->async.num_pending > 0)
+        /* We are not done yet. Just return. */
+        return CURLE_OK;
+
+      if(conn->async.temp_ai) {
+        /* We are done, and while this latest request
+           failed, some previous results exist. */
+        struct SessionHandle *data = conn->data;
+
+        if(data->share)
+          Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+        dns = Curl_cache_addr(data, conn->async.temp_ai,
+                              conn->async.hostname,
+                              conn->async.port);
+        if(!dns) {
+          /* failed to store, cleanup and return error */
+          Curl_freeaddrinfo(conn->async.temp_ai);
+          rc = CURLE_OUT_OF_MEMORY;
+        }
+
+        if(data->share)
+          Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+      }
+  }
+#endif
 
   conn->async.dns = dns;
 
