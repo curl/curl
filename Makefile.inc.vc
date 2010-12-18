@@ -1,0 +1,66 @@
+
+#
+# Stem for static libs and DLLs
+#
+!IFNDEF LIB_NAME
+LIB_NAME       = libcurl
+!IFNDEF LIB_NAME_DEBUG
+LIB_NAME_DEBUG = $(LIB_NAME)d
+!ENDIF
+!ENDIF
+
+#
+# Stem for DLL import libs
+#
+!IFNDEF LIB_NAME
+LIB_NAME_IMP       = $(LIB_NAME)_imp
+!IFNDEF LIB_NAME_DEBUG
+LIB_NAME_IMP_DEBUG = $(LIB_NAME_DEBUG)_imp
+!ENDIF
+!ENDIF
+
+!IFDEF WITH_DEVEL
+!IFNDEF OPENSSL_PATH
+OPENSSL_PATH   = ../../openssl-0.9.8o
+!ENDIF
+
+!IFNDEF ZLIB_PATH
+ZLIB_PATH  = ../../zlib-1.2.5
+!ENDIF
+!ENDIF
+
+!IFNDEF MACHINE
+MACHINE  = X86
+!ENDIF
+
+# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
+# without an openssl installation and offers the ability to authenticate
+# using the "current logged in user". Since at least with MSVC6 the sspi.h
+# header is broken it is either required to install the Windows SDK,
+# or to fix sspi.h with adding this define at the beginning of sspi.h:
+# #define FreeCredentialHandle FreeCredentialsHandle
+#
+# If, for some reason the Windows SDK is installed but not installed
+# in the default location, you can specify WINDOWS_SDK_PATH.
+# It can be downloaded from:
+# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+
+# WINDOWS_SSPI = 1
+
+!IFDEF WINDOWS_SSPI
+!IFNDEF WINDOWS_SDK_PATH
+WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
+!ENDIF
+!ENDIF
+
+#############################################################
+## Nothing more to do below this line!
+
+# Runtime library configuration
+RTLIB   = /MD
+RTLIBD  = /MDd
+
+!IF "$(RTLIBCFG)" == "static"
+RTLIB  = /MT
+RTLIBD = /MTd
+!ENDIF

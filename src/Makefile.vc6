@@ -89,15 +89,15 @@ DEBUG_OBJS= \
 # If CFG not specified, use static libs
 
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib
-LINKLIBS_DEBUG = libcurld.lib
+LINKLIBS       = $(LIB_NAME).lib
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib
 
 #################################################
 # release dynamic library
 
 !IF "$(CFG)" == "release-dll"
-LINKLIBS       = libcurl_imp.lib
-LINKLIBS_DEBUG = libcurld_imp.lib
+LINKLIBS       = $(LIB_NAME_IMP).lib
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib
 !ENDIF
 
 #################################################
@@ -105,8 +105,8 @@ LINKLIBS_DEBUG = libcurld_imp.lib
 
 !IF "$(CFG)" == "release-zlib"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(ZLIB_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(ZLIB_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -115,8 +115,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 !ENDIF
 
@@ -125,8 +125,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP).lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -135,8 +135,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-zlib"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -145,8 +145,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -155,8 +155,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -165,8 +165,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP).lib  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -175,8 +175,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -185,11 +185,10 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP).lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
-
 
 LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib
 LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib
