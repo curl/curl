@@ -447,9 +447,10 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             finfo->b_data[parser->item_length - 1] = 0;
             if(strncmp("total ", finfo->b_data, 6) == 0) {
-              char *endptr = NULL;
+              char *endptr = finfo->b_data+6;
               /* here we can deal with directory size */
-              curlx_strtoofft(finfo->b_data+6, &endptr, 10);
+              while(ISSPACE(*endptr))
+                endptr++;
               if(*endptr != 0) {
                 PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                 return bufflen;
