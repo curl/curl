@@ -25,6 +25,7 @@
 #include "setup.h"
 
 #ifdef USE_LIBSSH2
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
