@@ -16,6 +16,9 @@ PROGRAM_NAME = curl.exe
 
 !include "../Makefile.inc.vc"
 
+DIROBJ = ..\builds\curl-$(CFG)-obj
+DIRDIST = ..\builds\curl-$(CFG)\
+
 ########################################################
 ## Nothing more to do below this line!
 ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
@@ -28,18 +31,20 @@ SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
 
+LIBCURL_PATH=..\builds\lib-$(CFG)
+
 ## Release
 CCR   = cl.exe $(RTLIB) /O2 /DNDEBUG
-LINKR = link.exe /incremental:no /libpath:"../lib"
+LINKR = link.exe /incremental:no /libpath:"$(LIBCURL_PATH)"
 RCR   = rc.exe /dDEBUGBUILD=0
 
 ## Debug
 CCD   = cl.exe $(RTLIBD) /Gm /ZI /Od /D_DEBUG /GZ
-LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
+LINKD = link.exe /incremental:yes /debug /libpath:"$(LIBCURL_PATH)"
 RCD   = rc.exe /dDEBUGBUILD=1
 
 CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
-LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
+LFLAGS   = /nologo /out:$(DIRDIST)\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 RESFLAGS = /i../include
 
 # This manifest thing is for VC8, enabled by the maketgz script that
@@ -55,49 +60,34 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI
 CFLAGS = $(CFLAGS) /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
-RELEASE_OBJS= \
-	curlutilr.obj \
-	getpassr.obj \
-	homedirr.obj \
-	hugehelpr.obj \
-	mainr.obj \
-	nonblockr.obj \
-	os-specificr.obj \
-	rawstrr.obj \
-	strtoofftr.obj \
-	urlglobr.obj \
-	writeoutr.obj \
-	xattrr.obj \
-	curlr.res
-
-DEBUG_OBJS= \
-	curlutild.obj \
-	getpassd.obj \
-	homedird.obj \
-	hugehelpd.obj \
-	maind.obj \
-	nonblockd.obj \
-	os-specificd.obj \
-	rawstrd.obj \
-	strtoofftd.obj \
-	urlglobd.obj \
-	writeoutd.obj \
-	xattrd.obj \
-	curld.res
+OBJS= \
+	$(DIROBJ)\curlutil.obj \
+	$(DIROBJ)\getpass.obj \
+	$(DIROBJ)\homedir.obj \
+	$(DIROBJ)\hugehelp.obj \
+	$(DIROBJ)\main.obj \
+	$(DIROBJ)\nonblock.obj \
+	$(DIROBJ)\os-specific.obj \
+	$(DIROBJ)\rawstr.obj \
+	$(DIROBJ)\strtoofft.obj \
+	$(DIROBJ)\urlglob.obj \
+	$(DIROBJ)\writeout.obj \
+	$(DIROBJ)\xattr.obj \
+	$(DIROBJ)\curl.res
 
 #################################################
 # If CFG not specified, use static libs
 
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib
+LINKLIBS       = $(LIB_NAME_STATIC)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG)
 
 #################################################
 # release dynamic library
 
 !IF "$(CFG)" == "release-dll"
-LINKLIBS       = $(LIB_NAME_IMP).lib
-LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib
+LINKLIBS       = $(LIB_NAME_IMP)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG)
 !ENDIF
 
 #################################################
@@ -105,8 +95,8 @@ LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib
 
 !IF "$(CFG)" == "release-zlib"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(ZLIB_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(ZLIB_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -115,8 +105,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 !ENDIF
 
@@ -125,8 +115,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS)
-LINKLIBS       = $(LIB_NAME_IMP).lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP)  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -135,8 +125,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-zlib"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS) $(ZLIB_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -145,8 +135,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -155,8 +145,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -165,8 +155,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = $(LIB_NAME_IMP).lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP)  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -175,8 +165,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = $(LIB_NAME).lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_DEBUG).lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_STATIC)  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_STATIC_DEBUG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -185,8 +175,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = $(LIB_NAME_IMP).lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG).lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIB_NAME_IMP)  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIB_NAME_IMP_DEBUG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -195,69 +185,46 @@ LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib
 
 all : release
 
-release: $(RELEASE_OBJS)
-	$(LINKR) $(LFLAGS) $(LINKLIBS) $(RELEASE_OBJS)
+release: $(DIRDIST) $(DIROBJ)  $(OBJS)
+	$(LINKR) $(LFLAGS) $(LINKLIBS) $(OBJS)
         $(MANIFESTTOOL)
 
-debug: $(DEBUG_OBJS)
-	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(DEBUG_OBJS)
+debug: $(DIRDIST) $(DIROBJ) $(OBJS)
+	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(OBJS)
         $(MANIFESTTOOL)
 
-## Release
-hugehelpr.obj: hugehelp.c
+$(DIROBJ)\hugehelp.obj: hugehelp.c
 	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
-writeoutr.obj: writeout.c
+$(DIROBJ)\writeout.obj: writeout.c
 	$(CCR) $(CFLAGS) /Fo"$@" writeout.c
-urlglobr.obj: urlglob.c
+$(DIROBJ)\urlglob.obj: urlglob.c
 	$(CCR) $(CFLAGS) /Fo"$@" urlglob.c
-getpassr.obj: getpass.c
+$(DIROBJ)\getpass.obj: getpass.c
 	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
-homedirr.obj: homedir.c
+$(DIROBJ)\homedir.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
-curlutilr.obj: curlutil.c
+$(DIROBJ)\curlutil.obj: curlutil.c
 	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
-os-specificr.obj: os-specific.c
+$(DIROBJ)\os-specific.obj: os-specific.c
 	$(CCR) $(CFLAGS) /Fo"$@" os-specific.c
-nonblockr.obj: ../lib/nonblock.c
+$(DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrr.obj: ../lib/rawstr.c
+$(DIROBJ)\rawstr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
-strtoofftr.obj: ../lib/strtoofft.c
+$(DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
-xattrr.obj: xattr.c
+$(DIROBJ)\xattr.obj: xattr.c
 	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
-mainr.obj: main.c
+$(DIROBJ)\main.obj: main.c
 	$(CCR) $(CFLAGS) /Fo"$@" main.c
-curlr.res : curl.rc
+$(DIROBJ)\curl.res : curl.rc
 	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
-## Debug
-hugehelpd.obj: hugehelp.c
-	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
-writeoutd.obj: writeout.c
-	$(CCD) $(CFLAGS) /Fo"$@" writeout.c
-urlglobd.obj: urlglob.c
-	$(CCD) $(CFLAGS) /Fo"$@" urlglob.c
-getpassd.obj: getpass.c
-	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
-homedird.obj: homedir.c
-	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
-curlutild.obj: curlutil.c
-	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
-os-specificd.obj: os-specific.c
-	$(CCD) $(CFLAGS) /Fo"$@" os-specific.c
-nonblockd.obj: ../lib/nonblock.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrd.obj: ../lib/rawstr.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
-strtoofftd.obj: ../lib/strtoofft.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
-xattrd.obj: xattr.c
-	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
-maind.obj: main.c
-	$(CCD) $(CFLAGS) /Fo"$@" main.c
-curld.res : curl.rc
-	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
+$(DIRDIST):
+	@if not exist "$(DIRDIST)" mkdir $(DIRDIST)
+
+$(DIROBJ):
+	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
 
 clean:
 	@-erase $(PROGRAM_NAME) 2> NUL
