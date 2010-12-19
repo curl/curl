@@ -229,10 +229,13 @@ $(DIROBJ):
 	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
 
 clean:
-	@-erase $(PROGRAM_NAME) 2> NUL
-	@-erase $(RELEASE_OBJS) 2> NUL
-	@-erase $(DEBUG_OBJS) 2> NUL
-	@-erase *.idb 2> NUL
-	@-erase *.pdb 2> NUL
-	@-erase *.pch 2> NUL
-	@-erase *.ilk 2> NUL
+!IF "$(CFG)" != ""
+	@-erase /q $(DIROBJ)\* >nul 2<&1
+	@-erase /q $(DIRDIST)\* >nul 2<&1
+!ELSE
+	@for /d %a IN (..\builds\*) do @erase /S /Q %a
+!ENDIF
+	@-erase /q *.idb 2> NUL
+	@-erase /q *.pdb 2> NUL
+	@-erase /q *.pch 2> NUL
+	@-erase /q *.ilk 2> NUL
