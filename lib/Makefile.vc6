@@ -499,22 +499,25 @@ X_OBJS= \
 
 all : $(TARGET)
 
-$(TARGET): $(X_OBJS)
+$(TARGET): $(X_OBJS) $(DIROBJ) $(DIRDIST)
 	$(LNK) $(LFLAGS) $(X_OBJS)
 	@echo Copying libs...
-	@-copy $(DIROBJ)\$(LIB_NAME).dll       $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).dll $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).lib $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_IMP).lib   $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\ /y >nul 2<&1
-	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME).dll       $(DIRDIST)\bin\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).dll $(DIRDIST)\bin\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).lib $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_IMP).lib   $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
+	@-xcopy /E /I ..\include\curl\*.h      $(DIRDIST)\include\curl /y
 
 $(X_OBJS): $(DIROBJ) $(DIRDIST)
 
 $(DIRDIST):
-	@if not exist "$(DIRDIST)" mkdir $(DIRDIST)
+	if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
+	if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
+	if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
 
 $(DIROBJ):
 	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
