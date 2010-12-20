@@ -45,6 +45,7 @@
 
 #############################################################
 ## Nothing more to do below this line!
+ZIP        = zip.exe
 CCNODBG    = cl.exe /O2 /DNDEBUG
 CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -497,6 +498,9 @@ X_OBJS= \
 	$(DIROBJ)\wildcard.obj \
 	$(RESOURCE)
 
+package: $(TARGET)
+	-$(ZIP) -9 -q -r libcurl-devel.zip $(DISTDIR)
+
 all : $(TARGET)
 
 $(TARGET): $(X_OBJS) $(DIROBJ) $(DIRDIST)
@@ -510,7 +514,7 @@ $(TARGET): $(X_OBJS) $(DIROBJ) $(DIRDIST)
 	@-copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib $(DIRDIST)\lib /y >nul 2<&1
 	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
 	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
-	@-xcopy /E /I ..\include\curl\*.h      $(DIRDIST)\include\curl /y
+	@-xcopy /Y /E /I ..\include\curl\*.h      $(DIRDIST)\include\curl /y >nul 2<&1
 
 $(X_OBJS): $(DIROBJ) $(DIRDIST)
 
