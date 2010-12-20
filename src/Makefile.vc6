@@ -1,3 +1,25 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1999 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #############################################################
 #
 ## Makefile for building curl.exe with MSVC6
@@ -6,13 +28,28 @@
 ## "nmake -f makefile.vc6 CFG=release-ssl" statically links OpenSSL
 ## into curl.exe producing a standalone SSL-enabled executable.
 ##
-## Comments to: Troy Engel <tengel@sonic.net>
-## Updated by: Craig Davison <cd@securityfocus.com>
-## release-ssl added by Miklos Nemeth <mnemeth@kfkisystems.com>
 #
 #############################################################
 
 PROGRAM_NAME = curl.exe
+
+# -------------------------------------------
+# Verify that current subdir is curl's 'src'
+# -------------------------------------------
+
+!IF ! EXIST(.\main.c)
+!  MESSAGE Can not process this makefile from outside of curl's 'src' subdirectory.
+!  MESSAGE Change to curl's 'src' subdirectory, and try again.
+!  ERROR   See previous message.
+!ENDIF
+
+# ------------------------------------------------
+# Makefile.msvc.names provides libcurl file names
+# ------------------------------------------------
+
+!INCLUDE ..\Makefile.msvc.names
+
+
 
 !IFNDEF OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8o
@@ -124,15 +161,15 @@ DEBUG_OBJS= \
 # If CFG not specified, use static libs
 
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib
-LINKLIBS_DEBUG = libcurld.lib
+LINKLIBS       = $(LIBCURL_STA_LIB_REL)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG)
 
 #################################################
 # release dynamic library
 
 !IF "$(CFG)" == "release-dll"
-LINKLIBS       = libcurl_imp.lib
-LINKLIBS_DEBUG = libcurld_imp.lib
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG)
 !ENDIF
 
 #################################################
@@ -140,8 +177,8 @@ LINKLIBS_DEBUG = libcurld_imp.lib
 
 !IF "$(CFG)" == "release-zlib"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(ZLIB_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(ZLIB_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -150,8 +187,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 !ENDIF
 
@@ -160,8 +197,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -170,8 +207,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-zlib"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -180,8 +217,8 @@ LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 !ENDIF
 
@@ -190,8 +227,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
 
 !IF "$(CFG)" == "release-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -200,8 +237,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -210,8 +247,8 @@ LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
@@ -220,8 +257,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 
 !IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
 CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
-LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
