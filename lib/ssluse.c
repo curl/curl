@@ -685,13 +685,6 @@ int Curl_ossl_init(void)
 
   OpenSSL_add_all_algorithms();
 
-#ifdef HAVE_RAND_SCREEN
-  /* This one gets a random value by reading the currently shown screen.
-     RAND_screen() is not thread-safe according to OpenSSL devs - although not
-     mentioned in documentation. */
-  RAND_screen();
-#endif
-
   return 1;
 }
 
