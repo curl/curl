@@ -5347,12 +5347,13 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
 
           if(result == CURLE_OK) {
             /* ... finally back to actually retry the DO phase */
+            conn = *connp; /* re-assign conn since Curl_reconnect_request
+                              creates a new connection */
             result = conn->handler->do_it(conn, done);
           }
         }
-        else {
+        else
           return result;
-        }
     }
 
     if((result == CURLE_OK) && *done)

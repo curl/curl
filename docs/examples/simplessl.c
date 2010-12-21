@@ -32,7 +32,7 @@
 
 */
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *curl;
   CURLcode res;
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
   const char *pEngine;
 
-#if USE_ENGINE
+#ifdef USE_ENGINE
   pKeyName  = "rsa_test";
   pKeyType  = "ENG";
   pEngine   = "chil";            /* for nChiper HSM... */

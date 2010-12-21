@@ -27,7 +27,7 @@
 #define HTTP_HANDLE 0   /* Index for the HTTP transfer */
 #define FTP_HANDLE 1    /* Index for the FTP transfer */
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURL *handles[HANDLECOUNT];
   CURLM *multi_handle;

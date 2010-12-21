@@ -367,7 +367,7 @@ static int init_fifo (GlobalInfo *g)
 {
   struct stat st;
   static const char *fifo = "hiper.fifo";
-  int sockfd;
+  curl_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
   if ( lstat (fifo, &st) == 0 )

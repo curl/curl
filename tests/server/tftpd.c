@@ -1291,9 +1291,11 @@ static void nak(int error)
     pe->e_msg = strerror(error - 100);
     tp->th_code = EUNDEF;   /* set 'undef' errorcode */
   }
-  strcpy(tp->th_msg, pe->e_msg);
   length = (int)strlen(pe->e_msg);
-  tp->th_msg[length] = '\0';
+
+  /* we use memcpy() instead of strcpy() in order to avoid buffer overflow
+   * report from glibc with FORTIFY_SOURCE */
+  memcpy(tp->th_msg, pe->e_msg, length + 1);
   length += 5;
   if (swrite(peer, &buf.storage[0], length) != length)
     logmsg("nak: fail\n");

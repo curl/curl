@@ -9,9 +9,12 @@
 
 static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
 {
+  (void)stream;
+  (void)ptr;
   return size * nmemb;
 }
-int main(int argc, char **argv)
+
+int main(void)
 {
   CURL *curl;
   CURLcode res;

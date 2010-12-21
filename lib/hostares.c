@@ -398,13 +398,30 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     Curl_safefree(conn->async.hostname);
     conn->async.hostname = bufp;
     conn->async.port = port;
-    conn->async.done = FALSE; /* not done */
-    conn->async.status = 0;   /* clear */
-    conn->async.dns = NULL;   /* clear */
+    conn->async.done = FALSE;   /* not done */
+    conn->async.status = 0;     /* clear */
+    conn->async.dns = NULL;     /* clear */
+    conn->async.temp_ai = NULL; /* clear */
 
-    /* areschannel is already setup in the Curl_open() function */
-    ares_gethostbyname(data->state.areschannel, hostname, family,
-                       (ares_host_callback)ares_query_completed_cb, conn);
+#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+    if(family == PF_UNSPEC) {
+      conn->async.num_pending = 2;
+
+      /* areschannel is already setup in the Curl_open() function */
+      ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
+                         ares_query_completed_cb, conn);
+      ares_gethostbyname(data->state.areschannel, hostname, PF_INET6,
+                         ares_query_completed_cb, conn);
+    }
+    else
+#endif /* CURLRES_IPV6 */
+    {
+      conn->async.num_pending = 1;
+
+      /* areschannel is already setup in the Curl_open() function */
+      ares_gethostbyname(data->state.areschannel, hostname, family,
+                         ares_query_completed_cb, conn);
+    }
 
     *waitp = 1; /* expect asynchronous response */
   }

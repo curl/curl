@@ -29,4 +29,7 @@ sendrecv
 sepheaders
 simple
 simplepost
+simplesmtp
 simplessl
+smtp-multi
+smtp-tls

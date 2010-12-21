@@ -1382,7 +1382,7 @@ Transfer(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static void loadhostpairs(struct SessionHandle *data)
+static CURLcode loadhostpairs(struct SessionHandle *data)
 {
   struct curl_slist *hostp;
   char hostname[256];
@@ -1393,7 +1393,7 @@ static void loadhostpairs(struct SessionHandle *data)
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      /* mark an entry for removal */
+      /* TODO: mark an entry for removal */
     }
     else if(3 == sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
                         address)) {
@@ -1416,9 +1416,14 @@ static void loadhostpairs(struct SessionHandle *data)
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+      if(!dns)
+        return CURLE_OUT_OF_MEMORY;
     }
   }
   data->change.resolve = NULL; /* dealt with now */
+
+  return CURLE_OK;
 }
 
 
@@ -1460,31 +1465,33 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   /* If there is a list of host pairs to deal with */
   if(data->change.resolve)
-    loadhostpairs(data);
+    res = loadhostpairs(data);
 
- /* Allow data->set.use_port to set which port to use. This needs to be
-  * disabled for example when we follow Location: headers to URLs using
-  * different ports! */
-  data->state.allow_port = TRUE;
+  if(!res) {
+    /* Allow data->set.use_port to set which port to use. This needs to be
+     * disabled for example when we follow Location: headers to URLs using
+     * different ports! */
+    data->state.allow_port = TRUE;
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
-  /*************************************************************
-   * Tell signal handler to ignore SIGPIPE
-   *************************************************************/
-  if(!data->set.no_signal)
-    data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
+    /*************************************************************
+     * Tell signal handler to ignore SIGPIPE
+     *************************************************************/
+    if(!data->set.no_signal)
+      data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
 #endif
 
-  Curl_initinfo(data); /* reset session-specific information "variables" */
-  Curl_pgrsStartNow(data);
+    Curl_initinfo(data); /* reset session-specific information "variables" */
+    Curl_pgrsStartNow(data);
 
-  if(data->set.timeout)
-    Curl_expire(data, data->set.timeout);
+    if(data->set.timeout)
+      Curl_expire(data, data->set.timeout);
 
-  if(data->set.connecttimeout)
-    Curl_expire(data, data->set.connecttimeout);
+    if(data->set.connecttimeout)
+      Curl_expire(data, data->set.connecttimeout);
+  }
 
-  return CURLE_OK;
+  return res;
 }
 
 /*

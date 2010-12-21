@@ -21,6 +21,8 @@
 
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 {
+  (void)ptr;
+  (void)data;
   /* we are not interested in the headers itself,
      so we only return the size we would have saved ... */
   return (size_t)(size * nmemb);
@@ -58,7 +60,7 @@ int main(void)
       if((CURLE_OK == res) && filetime)
         printf("filetime %s: %s", filename, ctime(&filetime));
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &filesize);
-      if((CURLE_OK == res) && filesize)
+      if((CURLE_OK == res) && (filesize>0))
         printf("filesize %s: %0.0f bytes\n", filename, filesize);
     } else {
       /* we failed */

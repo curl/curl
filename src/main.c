@@ -2450,6 +2450,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'F': /* --resolve */
         err = add2list(&config->resolve, nextarg);
+        if(err)
+          return err;
         break;
       }
       break;

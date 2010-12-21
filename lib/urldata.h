@@ -479,6 +479,8 @@ struct Curl_async {
   bool done;  /* set TRUE when the lookup is complete */
   int status; /* if done is TRUE, this is the status from the callback */
   void *os_specific;  /* 'struct thread_data' for Windows */
+  int num_pending; /* number of ares_gethostbyname() requests */
+  Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares parts */
 };
 #endif
 
