@@ -46,8 +46,8 @@
 #!include "Makefile.inc.vc"
 WINBUILD_DIR=`cd`
 ZIP        = zip.exe
-CCNODBG    = cl.exe /O2 /DNDEBUG
-CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /RTC1
+CC_NODEBUG    = cl.exe /O2 /DNDEBUG
+CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /RTC1
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
@@ -59,7 +59,7 @@ LIB_NAME_STATIC_DEBUG  = libname_a_debug.lib
 LIB_NAME_DLL           = libcurl.dll
 LIB_NAME_IMP           = libcurl.lib
 LIB_NAME_DLL_DEBUG     = libcurl_debug.dll
-LIB_NAME_IMP_DEBUG     = libcurl_debug.imp
+LIB_NAME_IMP_DEBUG     = libcurl_debug.lib
 
 #############################################################
 ## Nothing more to do below this line!
@@ -80,9 +80,11 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 !IF "$(WITH_SSL)"=="dll"
 SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
+SSL=dll
 !ELSEIF "$(WITH_SSL)"=="static"
 SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
+SSL=dll
 !ENDIF
 
 !IFDEF USE_SSL
@@ -93,10 +95,12 @@ SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 ZLIB_LIBS   = zlib.lib
 ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB     = true
+zlib=dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 ZLIB_LIBS   = zlib_a.lib
 ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
+ZLIB=static
 !ENDIF
 
 !IFDEF USE_ZLIB
@@ -106,9 +110,11 @@ ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 !IF "$(WITH_SSH2)"=="dll"
 SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
+SSH2=dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 SSH2_LIBS = libssh2_a.lib
 USE_SSH2      = true
+SSH2=static
 !ENDIF
 
 !IFDEF USE_SSH2
@@ -476,35 +482,60 @@ RESOURCE = $(DIROBJ)\libcurl.res
 
 CONFIG_NAME_LIB = libcurl
 
+!IF "$(DEBUG)"=="yes"
+RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+CC = $(CC_DEBUG) $(RTLIB_DEBUG)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
+!ELSE
+RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+CC = $(CC_NODEBUG) $(RTLIB)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release
+!ENDIF
+
 !IF "$(AS_DLL)" == "true"
-TARGET   = $(LIB_NAME_DLL)
+
 LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB)
+!IF "$(DEBUG)"=="yes"
+TARGET   = $(LIB_NAME_DLL_DEBUG)
+LNK      = $(LNK) /DEBUG /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+!ELSE
+TARGET   = $(LIB_NAME_DLL)
+LNK      = $(LNK)  /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP)
+!ENDIF
 RESOURCE = $(DIROBJ)\libcurl.res
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
+
+# AS_DLL
+!ELSE
+
+!IF "$(DEBUG)"=="yes"
+TARGET   = $(LIB_NAME_STATIC_DEBUG)
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
+!ENDIF
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGS_LIBCURL_STATIC)
+CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
+
+# AS_DLL
 !ENDIF
 
 !IF "$(USE_SSL)"=="true"
 CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSL_LFLAGS) $(SSL_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl-$(SSL)
 !ENDIF
 
 !IF "$(USE_ZLIB)"=="true"
 CFLAGS = $(CFLAGS) $(ZLIB_CFLAGS)
 LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS) $(ZLIB_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib-$(ZLIB)
 !ENDIF
 
 !IF "$(USE_SSH2)"=="true"
 CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssh2
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssh2-$(SSH2)
 !ENDIF
 
 !IF "$(USE_IPV6)"=="true"
@@ -516,13 +547,6 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
 CFLAGS = $(CFLAGS) $(CFLAGS_SSPI)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
-
-!IF "$(DEBUG)"=="yes"
-RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-!ELSE
-RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-!ENDIF
-
 
 DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
@@ -656,7 +680,7 @@ $(TARGET): $(X_OBJS) $(DIROBJ) $(DISTDIR)
 	@echo Copying libs...
 	@if exist $(DIROBJ)\$(LIB_NAME_DLL) copy $(DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
 	@if exist $(DIROBJ)\$(LIB_NAME_STATIC) copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(DIROBJ)\$(LIB_NAME_DEBUG_DLL) $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) $(DIRDIST)\bin\ /y >nul 2<&1
 	@if exist $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) copy $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) $(DIRDIST)\lib\ /y >nul 2<&1
 	@if exist $(DIROBJ)\$(LIB_NAME_IMP) copy $(DIROBJ)\$(LIB_NAME_IMP)       $(DIRDIST)\lib\ /y >nul 2<&1
 	@if exist $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
