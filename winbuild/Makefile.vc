@@ -53,7 +53,7 @@ CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
 CC_NODEBUG  = cl.exe /O2 /DNDEBUG
-CC_DEBUG    = cl.exe /Od /Gm /ZI /D_DEBUG /RTC1
+CC_DEBUG    = cl.exe /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
 CFLAGS      = /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
@@ -62,21 +62,29 @@ LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
 CFLAGS_PDB = /Zi
-LFLAGS_PDB = /incremental:no /debug /opt:ref,icf
+LFLAGS_PDB = /incremental:no /opt:ref,icf
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
 LIB_NAME_STATIC        = libcurl_a.lib
-LIB_NAME_STATIC_DEBUG  = libname_a_debug.lib
+LIB_NAME_STATIC_DEBUG  = libcurl_a_debug.lib
 LIB_NAME_DLL           = libcurl.dll
 LIB_NAME_IMP           = libcurl.lib
 LIB_NAME_DLL_DEBUG     = libcurl_debug.dll
 LIB_NAME_IMP_DEBUG     = libcurl_debug.lib
 
+# CURL Command section
+PROGRAM_NAME = curl.exe
+CFLAGS   =
+LFLAGS   = 
+CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c
+CURL_LFLAGS   = /nologo /out:$(DIRDIST)\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
+CURL_RESFLAGS = /i../include
+
 #############################################################
 ## Nothing more to do below this line!
 LIBCURL_SRC_DIR = ..\lib
-CURL_SRC_DIR = ..\
+CURL_SRC_DIR = ..\src
 
 !IFNDEF WITH_DEVEL
 WITH_DEVEL          = ../../deps
@@ -210,25 +218,33 @@ CONFIG_NAME_LIB = libcurl
 
 !IF "$(DEBUG)"=="yes"
 RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC = $(CC_DEBUG) $(RTLIB_DEBUG)
+CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
+CURL_CC         = $(CC)
+CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 !ELSE
 RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC = $(CC_NODEBUG) $(RTLIB)
+CC              = $(CC_NODEBUG) $(RTLIB)
+CURL_CC         = $(CC)
+CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release
 !ENDIF
 
+CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
+
 !IF "$(AS_DLL)" == "true"
 
-LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
-TARGET   = $(LIB_NAME_DLL_DEBUG)
-LNK      = $(LNK) /DEBUG /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+TARGET    = $(LIB_NAME_DLL_DEBUG)
+LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 !ELSE
-TARGET   = $(LIB_NAME_DLL)
-LNK      = $(LNK)  /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP)
+TARGET    = $(LIB_NAME_DLL)
+LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
-RESOURCE = $(DIROBJ)\libcurl.res
+RESOURCE = $(LIB_DIROBJ)\libcurl.res
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
 
 # AS_DLL
@@ -239,7 +255,7 @@ TARGET   = $(LIB_NAME_STATIC_DEBUG)
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
 !ENDIF
-LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 
@@ -279,16 +295,21 @@ CFLAGS = $(CFLAGS) $(CFLAGS_PDB)
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
 !ENDIF
 
-DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj
+LIB_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
+CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
+
+#
+# curl.exe
+#
+CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib" $(TARGET)
 
 #!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
 #TARGET   = $(LIB_NAME_STATIC)
-#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
+#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(LIB_DIROBJ)\$(TARGET)
 #CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
 #CFGSET   = TRUE
 #!ENDIF
-
 
 #######################
 # Only the clean target can be used if a config was not provided.
@@ -306,122 +327,138 @@ clean:
 !ELSE
 # A config was provided, so the library can be built.
 #
-X_OBJS= \
-	$(DIROBJ)\base64.obj \
-	$(DIROBJ)\connect.obj \
-	$(DIROBJ)\content_encoding.obj \
-	$(DIROBJ)\cookie.obj \
-	$(DIROBJ)\curl_addrinfo.obj \
-	$(DIROBJ)\curl_fnmatch.obj \
-	$(DIROBJ)\curl_gethostname.obj \
-	$(DIROBJ)\curl_memrchr.obj \
-	$(DIROBJ)\curl_rand.obj \
-	$(DIROBJ)\curl_rtmp.obj \
-	$(DIROBJ)\curl_sspi.obj \
-	$(DIROBJ)\curl_threads.obj \
-	$(DIROBJ)\dict.obj \
-	$(DIROBJ)\easy.obj \
-	$(DIROBJ)\escape.obj \
-	$(DIROBJ)\fileinfo.obj \
-	$(DIROBJ)\file.obj \
-	$(DIROBJ)\formdata.obj \
-	$(DIROBJ)\ftplistparser.obj \
-	$(DIROBJ)\ftp.obj \
-	$(DIROBJ)\getenv.obj \
-	$(DIROBJ)\getinfo.obj \
-	$(DIROBJ)\gtls.obj \
-	$(DIROBJ)\gopher.obj \
-	$(DIROBJ)\hash.obj \
-	$(DIROBJ)\hmac.obj \
-	$(DIROBJ)\hostares.obj \
-	$(DIROBJ)\hostasyn.obj \
-	$(DIROBJ)\hostip4.obj \
-	$(DIROBJ)\hostip6.obj \
-	$(DIROBJ)\hostip.obj \
-	$(DIROBJ)\hostsyn.obj \
-	$(DIROBJ)\hostthre.obj \
-	$(DIROBJ)\http_chunks.obj \
-	$(DIROBJ)\http_digest.obj \
-	$(DIROBJ)\http_negotiate.obj \
-	$(DIROBJ)\http_ntlm.obj \
-	$(DIROBJ)\http.obj \
-	$(DIROBJ)\if2ip.obj \
-	$(DIROBJ)\imap.obj \
-	$(DIROBJ)\inet_ntop.obj \
-	$(DIROBJ)\inet_pton.obj \
-	$(DIROBJ)\ldap.obj \
-	$(DIROBJ)\llist.obj \
-	$(DIROBJ)\md4.obj \
-	$(DIROBJ)\md5.obj \
-	$(DIROBJ)\memdebug.obj \
-	$(DIROBJ)\mprintf.obj \
-	$(DIROBJ)\multi.obj \
-	$(DIROBJ)\netrc.obj \
-	$(DIROBJ)\nonblock.obj \
-	$(DIROBJ)\openldap.obj \
-	$(DIROBJ)\parsedate.obj \
-	$(DIROBJ)\pingpong.obj \
-	$(DIROBJ)\polarssl.obj \
-	$(DIROBJ)\pop3.obj \
-	$(DIROBJ)\progress.obj \
-	$(DIROBJ)\rawstr.obj \
-	$(DIROBJ)\rtsp.obj \
-	$(DIROBJ)\select.obj \
-	$(DIROBJ)\sendf.obj \
-	$(DIROBJ)\share.obj \
-	$(DIROBJ)\slist.obj \
-	$(DIROBJ)\smtp.obj \
-	$(DIROBJ)\socks_gssapi.obj \
-	$(DIROBJ)\socks.obj \
-	$(DIROBJ)\socks_sspi.obj \
-	$(DIROBJ)\speedcheck.obj \
-	$(DIROBJ)\splay.obj \
-	$(DIROBJ)\ssh.obj \
-	$(DIROBJ)\sslgen.obj \
-	$(DIROBJ)\ssluse.obj \
-	$(DIROBJ)\strequal.obj \
-	$(DIROBJ)\strerror.obj \
-	$(DIROBJ)\strtok.obj \
-	$(DIROBJ)\strtoofft.obj \
-	$(DIROBJ)\telnet.obj \
-	$(DIROBJ)\tftp.obj \
-	$(DIROBJ)\timeval.obj \
-	$(DIROBJ)\transfer.obj \
-	$(DIROBJ)\url.obj \
-	$(DIROBJ)\version.obj \
-	$(DIROBJ)\warnless.obj \
-	$(DIROBJ)\wildcard.obj \
+LIB_OBJS= \
+	$(LIB_DIROBJ)\base64.obj \
+	$(LIB_DIROBJ)\connect.obj \
+	$(LIB_DIROBJ)\content_encoding.obj \
+	$(LIB_DIROBJ)\cookie.obj \
+	$(LIB_DIROBJ)\curl_addrinfo.obj \
+	$(LIB_DIROBJ)\curl_fnmatch.obj \
+	$(LIB_DIROBJ)\curl_gethostname.obj \
+	$(LIB_DIROBJ)\curl_memrchr.obj \
+	$(LIB_DIROBJ)\curl_rand.obj \
+	$(LIB_DIROBJ)\curl_rtmp.obj \
+	$(LIB_DIROBJ)\curl_sspi.obj \
+	$(LIB_DIROBJ)\curl_threads.obj \
+	$(LIB_DIROBJ)\dict.obj \
+	$(LIB_DIROBJ)\easy.obj \
+	$(LIB_DIROBJ)\escape.obj \
+	$(LIB_DIROBJ)\fileinfo.obj \
+	$(LIB_DIROBJ)\file.obj \
+	$(LIB_DIROBJ)\formdata.obj \
+	$(LIB_DIROBJ)\ftplistparser.obj \
+	$(LIB_DIROBJ)\ftp.obj \
+	$(LIB_DIROBJ)\getenv.obj \
+	$(LIB_DIROBJ)\getinfo.obj \
+	$(LIB_DIROBJ)\gtls.obj \
+	$(LIB_DIROBJ)\gopher.obj \
+	$(LIB_DIROBJ)\hash.obj \
+	$(LIB_DIROBJ)\hmac.obj \
+	$(LIB_DIROBJ)\hostares.obj \
+	$(LIB_DIROBJ)\hostasyn.obj \
+	$(LIB_DIROBJ)\hostip4.obj \
+	$(LIB_DIROBJ)\hostip6.obj \
+	$(LIB_DIROBJ)\hostip.obj \
+	$(LIB_DIROBJ)\hostsyn.obj \
+	$(LIB_DIROBJ)\hostthre.obj \
+	$(LIB_DIROBJ)\http_chunks.obj \
+	$(LIB_DIROBJ)\http_digest.obj \
+	$(LIB_DIROBJ)\http_negotiate.obj \
+	$(LIB_DIROBJ)\http_ntlm.obj \
+	$(LIB_DIROBJ)\http.obj \
+	$(LIB_DIROBJ)\if2ip.obj \
+	$(LIB_DIROBJ)\imap.obj \
+	$(LIB_DIROBJ)\inet_ntop.obj \
+	$(LIB_DIROBJ)\inet_pton.obj \
+	$(LIB_DIROBJ)\ldap.obj \
+	$(LIB_DIROBJ)\llist.obj \
+	$(LIB_DIROBJ)\md4.obj \
+	$(LIB_DIROBJ)\md5.obj \
+	$(LIB_DIROBJ)\memdebug.obj \
+	$(LIB_DIROBJ)\mprintf.obj \
+	$(LIB_DIROBJ)\multi.obj \
+	$(LIB_DIROBJ)\netrc.obj \
+	$(LIB_DIROBJ)\nonblock.obj \
+	$(LIB_DIROBJ)\openldap.obj \
+	$(LIB_DIROBJ)\parsedate.obj \
+	$(LIB_DIROBJ)\pingpong.obj \
+	$(LIB_DIROBJ)\polarssl.obj \
+	$(LIB_DIROBJ)\pop3.obj \
+	$(LIB_DIROBJ)\progress.obj \
+	$(LIB_DIROBJ)\rawstr.obj \
+	$(LIB_DIROBJ)\rtsp.obj \
+	$(LIB_DIROBJ)\select.obj \
+	$(LIB_DIROBJ)\sendf.obj \
+	$(LIB_DIROBJ)\share.obj \
+	$(LIB_DIROBJ)\slist.obj \
+	$(LIB_DIROBJ)\smtp.obj \
+	$(LIB_DIROBJ)\socks_gssapi.obj \
+	$(LIB_DIROBJ)\socks.obj \
+	$(LIB_DIROBJ)\socks_sspi.obj \
+	$(LIB_DIROBJ)\speedcheck.obj \
+	$(LIB_DIROBJ)\splay.obj \
+	$(LIB_DIROBJ)\ssh.obj \
+	$(LIB_DIROBJ)\sslgen.obj \
+	$(LIB_DIROBJ)\ssluse.obj \
+	$(LIB_DIROBJ)\strequal.obj \
+	$(LIB_DIROBJ)\strerror.obj \
+	$(LIB_DIROBJ)\strtok.obj \
+	$(LIB_DIROBJ)\strtoofft.obj \
+	$(LIB_DIROBJ)\telnet.obj \
+	$(LIB_DIROBJ)\tftp.obj \
+	$(LIB_DIROBJ)\timeval.obj \
+	$(LIB_DIROBJ)\transfer.obj \
+	$(LIB_DIROBJ)\url.obj \
+	$(LIB_DIROBJ)\version.obj \
+	$(LIB_DIROBJ)\warnless.obj \
+	$(LIB_DIROBJ)\wildcard.obj \
 	$(RESOURCE)
+
+EXE_OBJS= \
+	$(CURL_DIROBJ)\curlutil.obj \
+	$(CURL_DIROBJ)\getpass.obj \
+	$(CURL_DIROBJ)\homedir.obj \
+	$(CURL_DIROBJ)\hugehelp.obj \
+	$(CURL_DIROBJ)\main.obj \
+	$(CURL_DIROBJ)\nonblock.obj \
+	$(CURL_DIROBJ)\os-specific.obj \
+	$(CURL_DIROBJ)\rawstr.obj \
+	$(CURL_DIROBJ)\strtoofft.obj \
+	$(CURL_DIROBJ)\urlglob.obj \
+	$(CURL_DIROBJ)\writeout.obj \
+	$(CURL_DIROBJ)\xattr.obj \
+	$(CURL_DIROBJ)\curl.res
+
 
 package: $(TARGET)
 	@cd $(DIRDIST)
-	@-$(ZIP) -9 -q -r $(CONFIG_NAME_LIB).zip .>nul 2<&1
+	@-$(ZIP) -9 -q -r ..\$(CONFIG_NAME_LIB).zip .>nul 2<&1
 	@cd $(MAKEDIR)
 
-all : $(TARGET)
+all : $(TARGET) $(PROGRAM_NAME)
 
-$(TARGET): $(X_OBJS) $(DIROBJ) $(DISTDIR)
+$(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo $(CONFIG_NAME_LIB)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using SSPI: $(USE_SSPI)
 	@echo Using SSPI: $(LFLAGS)
-	@echo Gen PDB:    $(GEN_PDB) $(CFLAGS)
+	@echo Gen PDB:    $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
-	$(LNK) $(LFLAGS) $(X_OBJS)
+	$(LNK) $(LFLAGS) $(LIB_OBJS)
 	@echo Copying libs...
-	@if exist $(DIROBJ)\$(LIB_NAME_DLL) copy $(DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_STATIC) copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) $(DIRDIST)\bin\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) copy $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) $(DIRDIST)\lib\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_IMP) copy $(DIROBJ)\$(LIB_NAME_IMP)       $(DIRDIST)\lib\ /y >nul 2<&1
-	@if exist $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
-	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
-	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL_DEBUG) $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC_DEBUG) $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP)       $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
+	@-copy $(LIB_DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(LIB_DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
 	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y  >nul 2<&1
 
-$(X_OBJS): $(DIROBJ) $(DIRDIST)
+$(LIB_OBJS): $(LIB_DIROBJ) $(DIRDIST)
 
 $(DIRDIST):
 	@if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
@@ -429,17 +466,56 @@ $(DIRDIST):
 	@if not exist "$(DIRDIST)\include\curl" mkdir $(DIRDIST)\include\curl
 	@if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
 
-$(X_OBJS): $(DIROBJ)
+$(LIB_DIROBJ):
+	@if not exist "$(LIB_DIROBJ)" mkdir $(LIB_DIROBJ)
 
-$(DIROBJ):
-	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
+$(CURL_DIROBJ):
+	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)
 
 .SUFFIXES: .c .obj .res
 
-{$(LIBCURL_SRC_DIR)\}.c{$(DIROBJ)\}.obj:
+{$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
 
-$(DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
+$(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
 	rc $(RC_FLAGS)
+
+
+
+#
+# curl.exe
+#
+$(PROGRAM_NAME): $(CURL_DIROBJ) $(EXE_OBJS)
+	$(CURL_LINK) $(CURL_LFLAGS) $(OBJS) $(EXE_OBJS)
+	$(MANIFESTTOOL)
+
+
+
+$(CURL_DIROBJ)\hugehelp.obj: $(CURL_SRC_DIR)\hugehelp.c
+	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\hugehelp.c
+$(CURL_DIROBJ)\writeout.obj: $(CURL_SRC_DIR)\writeout.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\writeout.c
+$(CURL_DIROBJ)\urlglob.obj: $(CURL_SRC_DIR)\urlglob.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\urlglob.c
+$(CURL_DIROBJ)\getpass.obj: $(CURL_SRC_DIR)\getpass.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\getpass.c
+$(CURL_DIROBJ)\homedir.obj: $(CURL_SRC_DIR)\homedir.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\homedir.c
+$(CURL_DIROBJ)\curlutil.obj: $(CURL_SRC_DIR)\curlutil.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\curlutil.c
+$(CURL_DIROBJ)\os-specific.obj: $(CURL_SRC_DIR)\os-specific.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\os-specific.c
+$(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
+$(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/rawstr.c
+$(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
+$(CURL_DIROBJ)\xattr.obj: $(CURL_SRC_DIR)\xattr.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\xattr.c
+$(CURL_DIROBJ)\main.obj: $(CURL_SRC_DIR)\main.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" $(CURL_SRC_DIR)\main.c
+$(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
+	rc $(CURL_RC_FLAGS)
 
 !ENDIF  # End of case where a config was provided.
