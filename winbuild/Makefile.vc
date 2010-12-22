@@ -44,7 +44,7 @@
 ##############################################################
 
 #!include "Makefile.inc.vc"
-
+WINBUILD_DIR=`cd`
 ZIP        = zip.exe
 CCNODBG    = cl.exe /O2 /DNDEBUG
 CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /RTC1
@@ -55,8 +55,11 @@ LNKLIB     = link.exe /lib
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 CFLAGS                 = /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 LIB_NAME_STATIC        = libcurl_a.lib
+LIB_NAME_STATIC_DEBUG  = libname_a_debug.lib
 LIB_NAME_DLL           = libcurl.dll
-LIB_NAME_DLL_LIB       = libcurl.lib
+LIB_NAME_IMP           = libcurl.lib
+LIB_NAME_DLL_DEBUG     = libcurl_debug.dll
+LIB_NAME_IMP_DEBUG     = libcurl_debug.imp
 
 #############################################################
 ## Nothing more to do below this line!
@@ -125,6 +128,10 @@ USE_IPV6=true
 
 !IFNDEF MACHINE
 MACHINE = X86
+!ENDIF
+
+!IFDEF EMBEND_MANIFEST
+MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
 !ENDIF
 
 # Runtime library configuration
@@ -469,13 +476,16 @@ RESOURCE = $(DIROBJ)\libcurl.res
 
 CONFIG_NAME_LIB = libcurl
 
-!IF "$(AS_DLL)" == "TRUE"
+!IF "$(AS_DLL)" == "true"
+TARGET   = $(LIB_NAME_DLL)
+LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll 
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGS_LIBCURL_STATIC)
-
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll 
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 !ENDIF
 
 !IF "$(USE_SSL)"=="true"
@@ -627,31 +637,33 @@ package: $(TARGET)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using SSPI: $(USE_SSPI)
 	@echo Dist Dir: $(DIRDIST)
-	@echo $(CFLAGS)
-	-$(ZIP) -9 -q -r $(CONFIG_NAME_LIB).zip $(DIRDIST)
+	@echo Dist Dir: $(WINBUILD_DIR)
+	cd $(DIRDIST)
+	-$(ZIP) -9 -q -r $(CONFIG_NAME_LIB).zip .
+	cd $(MAKEDIR)
 
 all : $(TARGET)
 
 $(TARGET): $(X_OBJS) $(DIROBJ) $(DISTDIR)
 	$(LNK) $(LFLAGS) $(X_OBJS)
 	@echo Copying libs...
-	@-copy $(DIROBJ)\$(LIB_NAME).dll       $(DIRDIST)\bin\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).dll $(DIRDIST)\bin\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).lib $(DIRDIST)\lib\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_IMP).lib   $(DIRDIST)\lib\ /y >nul 2<&1
-	@-copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib $(DIRDIST)\lib /y >nul 2<&1
-	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
-	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
-	@-xcopy /Y /E /I ..\include\curl\*.h      $(DIRDIST)\include\curl /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_DLL) copy $(DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_STATIC) copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(DIROBJ)\$(LIB_NAME_DEBUG_DLL) $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) copy $(DIROBJ)\$(LIB_NAME_STATIC_DEBUG) $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_IMP) copy $(DIROBJ)\$(LIB_NAME_IMP)       $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
+	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y
+	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y
+	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y 
 
 $(X_OBJS): $(DIROBJ) $(DIRDIST)
 
 $(DIRDIST):
-	echo $(LIBCURL_SRC_DIR)
-	if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
-	if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
-	if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
+	@if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
+	@if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
+	@if not exist "$(DIRDIST)\include\curl" mkdir $(DIRDIST)\include\curl
+	@if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
 
 $(X_OBJS): $(DIROBJ)
 
@@ -661,7 +673,6 @@ $(DIROBJ):
 .SUFFIXES: .c .obj .res
 
 {$(LIBCURL_SRC_DIR)\}.c{$(DIROBJ)\}.obj:
-	echo ABC;: $@
 	$(CC) $(CFLAGS) /Fo"$@"  $<
  
 debug-dll\libcurl.res \
