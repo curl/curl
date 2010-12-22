@@ -67,8 +67,8 @@ LIB_NAME_IMP_DEBUG     = libcurl_debug.imp
 LIBCURL_SRC_DIR = ..\lib
 CURL_SRC_DIR = ..\
 
-!IFDEF WITH_DEVEL
-DEVEL          = ../deps
+!IFNDEF WITH_DEVEL
+WITH_DEVEL          = ../deps
 !ENDIF
 DEVEL_INCLUDE  = $(WITH_DEVEL)/include
 DEVEL_LIB      = $(WITH_DEVEL)/lib
@@ -480,7 +480,8 @@ CONFIG_NAME_LIB = libcurl
 TARGET   = $(LIB_NAME_DLL)
 LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll 
+RESOURCE = $(DIROBJ)\libcurl.res
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
@@ -516,8 +517,8 @@ CFLAGS = $(CFLAGS) $(CFLAGS_SSPI)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
-DIROBJ = ..\builds\lib-$(CONFIG_NAME_LIB)-obj
-DIRDIST = ..\builds\lib-$(CONFIG_NAME_LIB)\
+DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj
+DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 #!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
 #TARGET   = $(LIB_NAME_STATIC)
@@ -680,9 +681,13 @@ debug-dll-zlib-dll\libcurl.res \
 debug-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
 	rc /dDEBUGBUILD=1 /Fo $@ libcurl.rc
 
-release-dll\libcurl.res \
-release-dll-ssl-dll\libcurl.res \
-release-dll-zlib-dll\libcurl.res \
-release-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
-	rc /dDEBUGBUILD=0 /Fo $@ libcurl.rc
+#release-dll\libcurl.res \
+#release-dll-ssl-dll\libcurl.res \
+#release-dll-zlib-dll\libcurl.res \
+#release-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
+#	rc /dDEBUGBUILD=0 /Fo $@ libcurl.rc
+
+$(DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
+	rc /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+
 !ENDIF  # End of case where a config was provided.
