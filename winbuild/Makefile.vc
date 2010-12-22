@@ -46,8 +46,17 @@
 CFGSET=FALSE
 WINBUILD_DIR=`cd`
 ZIP        = zip.exe
-CC_NODEBUG    = cl.exe /O2 /DNDEBUG
+
+!IF "$(VC)"=="6"
+CC_NODEBUG  = cl.exe /O2 /DNDEBUG
+CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+!ELSE
+CC_NODEBUG  = cl.exe /O2 /DNDEBUG
 CC_DEBUG    = cl.exe /Od /Gm /ZI /D_DEBUG /RTC1
+CFLAGS      = /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+!ENDIF
+
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
@@ -56,7 +65,6 @@ CFLAGS_PDB = /Zi
 LFLAGS_PDB = /incremental:no /debug /opt:ref,icf
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
-CFLAGS                 = /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 
 LIB_NAME_STATIC        = libcurl_a.lib
 LIB_NAME_STATIC_DEBUG  = libname_a_debug.lib
@@ -67,7 +75,6 @@ LIB_NAME_IMP_DEBUG     = libcurl_debug.lib
 
 #############################################################
 ## Nothing more to do below this line!
-
 LIBCURL_SRC_DIR = ..\lib
 CURL_SRC_DIR = ..\
 
@@ -183,6 +190,9 @@ WIN_LIBS    = ws2_32.lib wldap32.lib
 !IF "$(CFGSET)" == "FALSE"
 !MESSAGE Usage: nmake /f makefile.vc9 mode=<static or dll> <options>
 !MESSAGE where <options> is one or many of:
+!MESSAGE   VC=<6,7,8,9,10>              - VC versions
+!MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
+!MESSAGE                                  Libraries can be fetched at 
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
