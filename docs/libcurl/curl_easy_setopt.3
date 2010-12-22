@@ -1189,6 +1189,10 @@ option is set to zero. (added in 7.16.2)
 Pass a pointer to a zero terminated string as parameter. It will be used to
 specify the sender address in a mail when sending an SMTP mail with libcurl.
 
+An originator email address in SMTP lingo is specified within angle brackets
+(<>) which libcurl will not add for you before version 7.21.4. Failing to
+provide such brackets may cause the server to reject your mail.
+
 (Added in 7.20.0)
 .IP CURLOPT_MAIL_RCPT
 Pass a pointer to a linked list of recipients to pass to the server in your
