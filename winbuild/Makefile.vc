@@ -517,6 +517,13 @@ CFLAGS = $(CFLAGS) $(CFLAGS_SSPI)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
+!IF "$(DEBUG)"=="yes"
+RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+!ELSE
+RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+!ENDIF
+
+
 DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
@@ -674,20 +681,8 @@ $(DIROBJ):
 
 {$(LIBCURL_SRC_DIR)\}.c{$(DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
- 
-debug-dll\libcurl.res \
-debug-dll-ssl-dll\libcurl.res \
-debug-dll-zlib-dll\libcurl.res \
-debug-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
-	rc /dDEBUGBUILD=1 /Fo $@ libcurl.rc
-
-#release-dll\libcurl.res \
-#release-dll-ssl-dll\libcurl.res \
-#release-dll-zlib-dll\libcurl.res \
-#release-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
-#	rc /dDEBUGBUILD=0 /Fo $@ libcurl.rc
 
 $(DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
-	rc /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+	rc $(RC_FLAGS)
 
 !ENDIF  # End of case where a config was provided.
