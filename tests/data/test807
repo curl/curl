@@ -45,7 +45,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 807@foo --mail-from 807@from -u tim:ta
 EHLO user
 AUTH CRAM-MD5
 dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
-MAIL FROM:807@from
+MAIL FROM:<807@from>
 RCPT TO:<807@foo>
 DATA
 QUIT

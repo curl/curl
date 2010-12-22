@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 805@foo --mail-from 805@from -u test:1
 <protocol>
 EHLO user
 AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ=
-MAIL FROM:805@from
+MAIL FROM:<805@from>
 RCPT TO:<805@foo>
 DATA
 QUIT
