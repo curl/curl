@@ -1,0 +1,678 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1999 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
+###########################################################################
+#
+# Makefile for building libcurl with MSVC 6, 7, 8 and 9
+#
+# Usage: see usage message below
+#        Should be invoked from winbuild directory
+#        Edit the paths and desired library name
+#        SSL path is only required if you intend compiling
+#        with SSL.
+#
+# This make file leaves the result either a .lib or .dll file
+# in the \lib directory. It should be called from the \lib
+# directory.
+#
+# An option would have been to allow the source directory to
+# be specified, but I saw no requirement.
+#
+# Another option would have been to leave the .lib and .dll
+# files in the "cfg" directory, but then the make file
+# in \src would need to be changed.
+#
+##############################################################
+
+#!include "Makefile.inc.vc"
+
+ZIP        = zip.exe
+CCNODBG    = cl.exe /O2 /DNDEBUG
+CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /RTC1
+LFLAGS     = /nologo /machine:$(MACHINE)
+LNKDLL     = link.exe /DLL
+LNKLIB     = link.exe /lib
+
+CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
+CFLAGS                 = /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+LIB_NAME_STATIC        = libcurl_a.lib
+LIB_NAME_DLL           = libcurl.dll
+LIB_NAME_DLL_LIB       = libcurl.lib
+
+#############################################################
+## Nothing more to do below this line!
+
+LIBCURL_SRC_DIR = ..\lib
+CURL_SRC_DIR = ..\
+
+!IFDEF WITH_DEVEL
+DEVEL          = ../deps
+!ENDIF
+DEVEL_INCLUDE  = $(WITH_DEVEL)/include
+DEVEL_LIB      = $(WITH_DEVEL)/lib
+DEVEL_BIN      = $(WITH_DEVEL)/bin
+
+CFLAGS         = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
+LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
+
+!IF "$(WITH_SSL)"=="dll"
+SSL_LIBS     = libeay32.lib ssleay32.lib
+USE_SSL      = true
+!ELSEIF "$(WITH_SSL)"=="static"
+SSL_LIBS     = libeay32.lib ssleay32.lib
+USE_SSL      = true
+!ENDIF
+
+!IFDEF USE_SSL
+SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
+!ENDIF
+
+!IF "$(WITH_ZLIB)"=="dll"
+ZLIB_LIBS   = zlib.lib
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+USE_ZLIB     = true
+!ELSEIF "$(WITH_ZLIB)"=="static"
+ZLIB_LIBS   = zlib_a.lib
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+USE_ZLIB    = true
+!ENDIF
+
+!IFDEF USE_ZLIB
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+!ENDIF
+
+!IF "$(WITH_SSH2)"=="dll"
+SSH2_LIBS   = libssh2.lib
+USE_SSH2    = true
+!ELSEIF "$(WITH_ZLIB)"=="static"
+ZLIB_LIBS_DLL = libssh2_a.lib
+USE_SSH2      = true
+!ENDIF
+
+!IFDEF USE_SSH2
+SSH2_CFLAGS   = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
+SSH2_CFLAGS   = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
+!ENDIF
+
+!IFDEF WINDOWS_SSPI
+CFLAGS_SSPI = /DUSE_WINDOWS_SSPI
+USE_SSPI=true
+!ENDIF
+
+!IFDEF USE_IPV6
+CFLAGS = $(CFLAGS) /DUSE_IPV6
+USE_IPV6=true
+!ENDIF
+
+!IFNDEF MACHINE
+MACHINE = X86
+!ENDIF
+
+# Runtime library configuration
+!IF "$(RTLIBCFG)" == "static"
+RTLIB  = /MT
+RTLIB_DEBUG = /MTd
+!ELSE
+RTLIB   = /MD
+RTLIB_DEBUG  = /MDd
+!ENDIF
+
+!IF "$(MODE)"=="STATIC"
+TARGET = $(LIB_NAME_STATIC)
+AS_DLL = false
+!ELSEIF "$(MODE)"=="DLL"
+TARGET = $(LIB_NAME_DLL)
+AS_DLL = true
+!ENDIF
+
+WIN_LIBS    = ws2_32.lib wldap32.lib
+
+CFGSET=true
+
+!IFDEF USE_OLD
+######################
+# release
+
+!IF "$(CFG)" == "release"
+TARGET = $(LIB_NAME_STATIC)
+LNK    = $(LNKLIB) /out:$(DIROBJ)\$(TARGET)
+CC     = $(CCNODBG) $(RTLIB) $(CFLAGSLIB)
+CFGSET = TRUE
+!ENDIF
+
+######################
+# release-zlib
+
+!IF "$(CFG)" == "release-zlib"
+TARGET   = $(LIB_NAME_STATIC)
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-dll
+
+!IF "$(CFG)" == "release-dll"
+TARGET = $(LIB_NAME).dll
+LNK    = $(LNKDLL) $(WINLIBS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP).lib
+CC     = $(CCNODBG) $(RTLIB)
+CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# release-ssl
+
+!IF "$(CFG)" == "release-ssl"
+TARGET   = $(LIB_NAME_STATIC)
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LNK      = $(LNKLIB) $(SSL_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(CFLAGSLIB)
+!ENDIF
+
+######################
+# release-zlib
+!IF "$(CFG)" == "release-ssl-dll"
+TARGET   = $(LIB_NAME_STATIC)
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(SSL_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-ssl-zlib
+
+!IF "$(CFG)" == "release-ssl-zlib"
+TARGET   = $(LIB_NAME_STATIC)
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LNK      = $(LNKLIB) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-ssl-dll
+!IF "$(CFG)" == "release-dll-ssl-dll"
+TARGET   = $(LIB_NAME).dll
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(SSL_LFLAGS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP).lib
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-zlib-dll
+
+!IF "$(CFG)" == "release-zlib-dll"
+TARGET   = $(LIB_NAME_STATIC)
+LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-ssl-dll-zlib-dll
+
+!IF "$(CFG)" == "release-ssl-dll-zlib-dll"
+TARGET   = $(LIB_NAME_STATIC)
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-dll
+
+!IF "$(CFG)" == "release-dll"
+TARGET = $(LIBCURL_DYN_LIB_REL)
+DIROBJ = $(CFG)
+LNK    = $(LNKDLL) $(WINLIBS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIBCURL_IMP_LIB_REL)
+CC     = $(CCNODBG) $(RTLIB)
+CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# release-dll-ssl-dll
+
+!IF "$(CFG)" == "release-dll-ssl-dll"
+TARGET   = $(LIBCURL_DYN_LIB_REL)
+DIROBJ   = $(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(LFLAGSSSL) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIBCURL_IMP_LIB_REL)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# release-dll-zlib-dll
+
+!IF "$(CFG)" == "release-dll-zlib-dll"
+TARGET   = $(LIB_NAME).dll
+LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP).lib
+CC       = $(CCNODBG) $(RTLIB) $(ZLIB_CFLAGS)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# release-dll-ssl-dll-zlib-dll
+!IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
+TARGET   = $(LIB_NAME).dll
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP).lib
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+
+######################
+# release-ssh2-ssl-dll-zlib
+
+!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
+TARGET   = $(LIB_NAME_STATIC)
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug
+
+!IF "$(CFG)" == "debug"
+TARGET = $(LIB_NAME_DEBUG).lib
+LNK    = $(LNKLIB) /out:$(DIROBJ)\$(TARGET)
+CC     = $(CCDEBUG) $(RTLIBD) $(CFLAGSLIB)
+CFGSET = TRUE
+!ENDIF
+
+######################
+# debug-ssl
+
+!IF "$(CFG)" == "debug-ssl"
+TARGET   = $(LIB_NAME_DEBUG).lib
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LNK      = $(LNKLIB) $(SSL_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-zlib
+
+!IF "$(CFG)" == "debug-zlib"
+TARGET   = $(LIB_NAME_DEBUG).lib
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-ssl-dll
+
+!IF "$(CFG)" == "debug-ssl-dll"
+TARGET   = $(LIB_NAME_DEBUG).lib
+SSL_LFLAGS = /LIBPATH:$(OPENSSL_PATH)\out32dll
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(SSL_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-ssl-zlib
+
+!IF "$(CFG)" == "debug-ssl-zlib"
+TARGET   = $(LIB_NAME_DEBUG).lib
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-ssl-dll
+
+!IF "$(CFG)" == "debug-ssl-dll"
+TARGET   = $(LIBCURL_STA_LIB_DBG)
+DIROBJ   = $(CFG)
+LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)\out32dll
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(LFLAGSSSL) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-zlib-dll
+
+!IF "$(CFG)" == "debug-zlib-dll"
+TARGET   = $(LIB_NAME_DEBUG).lib
+LNK      = $(LNKLIB) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-ssl-dll-zlib-dll
+
+!IF "$(CFG)" == "debug-ssl-dll-zlib-dll"
+TARGET   = $(LIB_NAME_DEBUG).lib
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-dll
+
+!IF "$(CFG)" == "debug-dll"
+TARGET = $(LIB_NAME_DEBUG).dll
+LNK    = $(LNKDLL) $(WINLIBS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib /PDB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).pdb
+CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# debug-dll-ssl-dll
+
+!IF "$(CFG)" == "debug-dll-ssl-dll"
+TARGET   = $(LIB_NAME_DEBUG).dll
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(SSL_LFLAGS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib /PDB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).pdb
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# debug-dll-zlib-dll
+
+!IF "$(CFG)" == "debug-dll-zlib-dll"
+TARGET   = $(LIB_NAME_DEBUG).dll
+LNK      = $(LNKDLL) $(WINLIBS) $(ZLIBLIBSDLL) $(ZLIB_LFLAGS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib /PDB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).pdb
+CC       = $(CCDEBUG) $(RTLIBD) $(ZLIB_CFLAGS)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# debug-dll-ssl-dll-zlib-dll
+
+!IF "$(CFG)" == "debug-dll-ssl-dll-zlib-dll"
+TARGET   = $(LIB_NAME_DEBUG).dll
+SSL_LFLAGS = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
+LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(SSL_LFLAGS) $(ZLIB_LFLAGS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib /PDB:$(DIROBJ)\$(LIB_NAME_IMP_DEBUG).pdb
+CC       = $(CCDEBUG) $(RTLIBD) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
+CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+#######################
+# Usage
+#
+!IF ("$(CFGSET)" == "FALSE" && "$(CFG)" != "") || "$(CFG)"== ""
+!MESSAGE Usage: nmake /f makefile.vc9 CFG=<config> <target>
+!MESSAGE where <config> is one of:
+!MESSAGE   release                      - release static library
+!MESSAGE   release-ssl                  - release static library with ssl
+!MESSAGE   release-zlib                 - release static library with zlib
+!MESSAGE   release-ssl-zlib             - release static library with ssl and zlib
+!MESSAGE   release-ssl-dll              - release static library with dynamic ssl
+!MESSAGE   release-zlib-dll             - release static library with dynamic zlib
+!MESSAGE   release-ssl-dll-zlib-dll     - release static library with dynamic ssl and dynamic zlib
+!MESSAGE   release-dll                  - release dynamic library
+!MESSAGE   release-dll-ssl-dll          - release dynamic library with dynamic ssl
+!MESSAGE   release-dll-zlib-dll         - release dynamic library with dynamic zlib
+!MESSAGE   release-dll-ssl-dll-zlib-dll - release dynamic library with dynamic ssl and dynamic zlib
+!MESSAGE   release-ssh2-ssl-dll-zlib    - release static library with dynamic ssl, static zlib and static ssh2
+!MESSAGE   debug                        - debug static library
+!MESSAGE   debug-ssl                    - debug static library with ssl
+!MESSAGE   debug-zlib                   - debug static library with zlib
+!MESSAGE   debug-ssl-zlib               - debug static library with ssl and zlib
+!MESSAGE   debug-ssl-dll                - debug static library with dynamic ssl
+!MESSAGE   debug-zlib-dll               - debug static library with dynamic zlib
+!MESSAGE   debug-ssl-dll-zlib-dll       - debug static library with dynamic ssl and dynamic zlib
+!MESSAGE   debug-dll                    - debug dynamic library
+!MESSAGE   debug-dll-ssl-dll            - debug dynamic library with dynamic ssl
+!MESSAGE   debug-dll-zlib-dll           - debug dynamic library with dynamic zlib1
+!MESSAGE   debug-dll-ssl-dll-zlib-dll   - debug dynamic library with dynamic ssl and dynamic zlib
+!MESSAGE <target> can be left blank in which case all is assumed
+!ERROR please choose a valid configuration "$(CFG)"
+!ENDIF
+
+!ENDIF
+# USEOLD
+
+CONFIG_NAME_LIB = libcurl
+
+!IF "$(AS_DLL)" == "TRUE"
+!ELSE
+TARGET   = $(LIB_NAME_STATIC)
+LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGS_LIBCURL_STATIC)
+
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll 
+!ENDIF
+
+!IF "$(USE_SSL)"=="true"
+CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSL_LFLAGS)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl
+!ENDIF
+
+!IF "$(USE_ZLIB)"=="true"
+CFLAGS = $(CFLAGS) $(ZLIB_CFLAGS)
+LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib
+!ENDIF
+
+!IF "$(USE_SSH2)"=="true"
+CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSH_LFLAGS)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssh2
+!ENDIF
+
+!IF "$(USE_IPV6)"=="true"
+CFLAGS = $(CFLAGS) $(CFLAGS_IPV6)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
+!ENDIF
+
+!IF "$(USE_SSPI)"=="true"
+CFLAGS = $(CFLAGS) $(CFLAGS_SSPI)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
+!ENDIF
+
+DIROBJ = ..\builds\lib-$(CONFIG_NAME_LIB)-obj
+DIRDIST = ..\builds\lib-$(CONFIG_NAME_LIB)\
+
+#!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
+#TARGET   = $(LIB_NAME_STATIC)
+#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(DIROBJ)\$(TARGET)
+#CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
+#CFGSET   = TRUE
+#!ENDIF
+
+
+#######################
+# Only the clean target can be used if a config was not provided.
+#
+!IF "$(CFGSET)" == "FALSE"
+clean:
+	@-erase /s *.dll 2> NUL
+	@-erase /s *.exp 2> NUL
+	@-erase /s *.idb 2> NUL
+	@-erase /s *.lib 2> NUL
+	@-erase /s *.obj 2> NUL
+	@-erase /s *.pch 2> NUL
+	@-erase /s *.pdb 2> NUL
+	@-erase /s *.res 2> NUL
+!ELSE
+# A config was provided, so the library can be built.
+#
+X_OBJS= \
+	$(DIROBJ)\base64.obj \
+	$(DIROBJ)\connect.obj \
+	$(DIROBJ)\content_encoding.obj \
+	$(DIROBJ)\cookie.obj \
+	$(DIROBJ)\curl_addrinfo.obj \
+	$(DIROBJ)\curl_fnmatch.obj \
+	$(DIROBJ)\curl_gethostname.obj \
+	$(DIROBJ)\curl_memrchr.obj \
+	$(DIROBJ)\curl_rand.obj \
+	$(DIROBJ)\curl_rtmp.obj \
+	$(DIROBJ)\curl_sspi.obj \
+	$(DIROBJ)\curl_threads.obj \
+	$(DIROBJ)\dict.obj \
+	$(DIROBJ)\easy.obj \
+	$(DIROBJ)\escape.obj \
+	$(DIROBJ)\fileinfo.obj \
+	$(DIROBJ)\file.obj \
+	$(DIROBJ)\formdata.obj \
+	$(DIROBJ)\ftplistparser.obj \
+	$(DIROBJ)\ftp.obj \
+	$(DIROBJ)\getenv.obj \
+	$(DIROBJ)\getinfo.obj \
+	$(DIROBJ)\gtls.obj \
+	$(DIROBJ)\gopher.obj \
+	$(DIROBJ)\hash.obj \
+	$(DIROBJ)\hmac.obj \
+	$(DIROBJ)\hostares.obj \
+	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostip4.obj \
+	$(DIROBJ)\hostip6.obj \
+	$(DIROBJ)\hostip.obj \
+	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\hostthre.obj \
+	$(DIROBJ)\http_chunks.obj \
+	$(DIROBJ)\http_digest.obj \
+	$(DIROBJ)\http_negotiate.obj \
+	$(DIROBJ)\http_ntlm.obj \
+	$(DIROBJ)\http.obj \
+	$(DIROBJ)\if2ip.obj \
+	$(DIROBJ)\imap.obj \
+	$(DIROBJ)\inet_ntop.obj \
+	$(DIROBJ)\inet_pton.obj \
+	$(DIROBJ)\ldap.obj \
+	$(DIROBJ)\llist.obj \
+	$(DIROBJ)\md4.obj \
+	$(DIROBJ)\md5.obj \
+	$(DIROBJ)\memdebug.obj \
+	$(DIROBJ)\mprintf.obj \
+	$(DIROBJ)\multi.obj \
+	$(DIROBJ)\netrc.obj \
+	$(DIROBJ)\nonblock.obj \
+	$(DIROBJ)\openldap.obj \
+	$(DIROBJ)\parsedate.obj \
+	$(DIROBJ)\pingpong.obj \
+	$(DIROBJ)\polarssl.obj \
+	$(DIROBJ)\pop3.obj \
+	$(DIROBJ)\progress.obj \
+	$(DIROBJ)\rawstr.obj \
+	$(DIROBJ)\rtsp.obj \
+	$(DIROBJ)\select.obj \
+	$(DIROBJ)\sendf.obj \
+	$(DIROBJ)\share.obj \
+	$(DIROBJ)\slist.obj \
+	$(DIROBJ)\smtp.obj \
+	$(DIROBJ)\socks_gssapi.obj \
+	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\socks_sspi.obj \
+	$(DIROBJ)\speedcheck.obj \
+	$(DIROBJ)\splay.obj \
+	$(DIROBJ)\ssh.obj \
+	$(DIROBJ)\sslgen.obj \
+	$(DIROBJ)\ssluse.obj \
+	$(DIROBJ)\strequal.obj \
+	$(DIROBJ)\strerror.obj \
+	$(DIROBJ)\strtok.obj \
+	$(DIROBJ)\strtoofft.obj \
+	$(DIROBJ)\telnet.obj \
+	$(DIROBJ)\tftp.obj \
+	$(DIROBJ)\timeval.obj \
+	$(DIROBJ)\transfer.obj \
+	$(DIROBJ)\url.obj \
+	$(DIROBJ)\version.obj \
+	$(DIROBJ)\warnless.obj \
+	$(DIROBJ)\wildcard.obj \
+	$(RESOURCE)
+
+package: $(TARGET)
+	@echo $(CONFIG_NAME_LIB)
+	@echo Using SSL: $(USE_SSL)
+	@echo Using SSH2: $(USE_SSH2)
+	@echo Using ZLIB: $(USE_ZLIB)
+	@echo Using SSPI: $(USE_SSPI)
+	@echo Dist Dir: $(DIRDIST)
+	@echo $(CFLAGS)
+	-$(ZIP) -9 -q -r $(CONFIG_NAME_LIB).zip $(DIRDIST)
+
+all : $(TARGET)
+
+$(TARGET): $(X_OBJS) $(DIROBJ) $(DISTDIR)
+	$(LNK) $(LFLAGS) $(X_OBJS)
+	@echo Copying libs...
+	@-copy $(DIROBJ)\$(LIB_NAME).dll       $(DIRDIST)\bin\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).dll $(DIRDIST)\bin\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_DEBUG).lib $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_IMP).lib   $(DIRDIST)\lib\ /y >nul 2<&1
+	@-copy $(DIROBJ)\$(LIB_NAME_IMP_DEBUG).lib $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
+	@-xcopy /Y /E /I ..\include\curl\*.h      $(DIRDIST)\include\curl /y >nul 2<&1
+
+$(X_OBJS): $(DIROBJ) $(DIRDIST)
+
+$(DIRDIST):
+	echo $(LIBCURL_SRC_DIR)
+	if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
+	if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
+	if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
+
+$(X_OBJS): $(DIROBJ)
+
+$(DIROBJ):
+	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
+
+.SUFFIXES: .c .obj .res
+
+{$(LIBCURL_SRC_DIR)\}.c{$(DIROBJ)\}.obj:
+	echo ABC;: $@
+	$(CC) $(CFLAGS) /Fo"$@"  $<
+ 
+debug-dll\libcurl.res \
+debug-dll-ssl-dll\libcurl.res \
+debug-dll-zlib-dll\libcurl.res \
+debug-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
+	rc /dDEBUGBUILD=1 /Fo $@ libcurl.rc
+
+release-dll\libcurl.res \
+release-dll-ssl-dll\libcurl.res \
+release-dll-zlib-dll\libcurl.res \
+release-dll-ssl-dll-zlib-dll\libcurl.res: libcurl.rc
+	rc /dDEBUGBUILD=0 /Fo $@ libcurl.rc
+!ENDIF  # End of case where a config was provided.
