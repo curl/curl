@@ -225,7 +225,8 @@ static int ossl_seed(struct SessionHandle *data)
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
 #ifdef HAVE_RAND_SCREEN
-  /* if RAND_screen() is present, it was called during global init */
+  /* if RAND_screen() is present, this is windows and thus we assume that the
+     randomness is already taken care of */
   nread = 100; /* just a value */
 #else
   {
@@ -684,13 +685,6 @@ int Curl_ossl_init(void)
     return 0;
 
   OpenSSL_add_all_algorithms();
-
-#ifdef HAVE_RAND_SCREEN
-  /* This one gets a random value by reading the currently shown screen.
-     RAND_screen() is not thread-safe according to OpenSSL devs - although not
-     mentioned in documentation. */
-  RAND_screen();
-#endif
 
   return 1;
 }
