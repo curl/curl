@@ -22,7 +22,7 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC 6, 7, 8 and 9
+# Makefile for building libcurl with MSVC 6, 7, 8, 9 and 10
 #
 # Usage: see usage message below
 #        Should be invoked from winbuild directory
@@ -216,9 +216,12 @@ WIN_LIBS    = ws2_32.lib wldap32.lib
 
 CONFIG_NAME_LIB = libcurl
 
+# CURL_XX macros are for the curl.exe command
+
 !IF "$(DEBUG)"=="yes"
 RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
+
 CURL_CC         = $(CC)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
