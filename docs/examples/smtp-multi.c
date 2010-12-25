@@ -21,7 +21,7 @@
 #define SMTPSERVER "smtp.example.com"
 #define SMTPPORT ":587" /* it is a colon+port string, but you can set it
                            to "" to use the default port */
-#define RECEPIENT "<receipient@example.com>"
+#define RECIPIENT "<recipient@example.com>"
 #define MAILFROM "<realuser@example.com>"
 
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
@@ -99,9 +99,9 @@ int main(void)
    if(!mcurl)
      return 2;
 
-   rcpt_list = curl_slist_append(rcpt_list, RECEPIENT);
+   rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
    /* more addresses can be added here
-      rcpt_list = curl_slist_append(rcpt_list, "others@example.com");
+      rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
    */
 
    curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SMTPSERVER SMTPPORT);
