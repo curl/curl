@@ -270,6 +270,7 @@ Curl_cookie_add(struct SessionHandle *data,
                we don't care about that, we treat the names the same anyway */
 
             const char *domptr=whatptr;
+            const char *nextptr;
             int dotcount=1;
 
             /* Count the dots, we need to make sure that there are enough
@@ -280,12 +281,13 @@ Curl_cookie_add(struct SessionHandle *data,
               domptr++;
 
             do {
-              domptr = strchr(domptr, '.');
-              if(domptr) {
-                domptr++;
-                dotcount++;
+              nextptr = strchr(domptr, '.');
+              if(nextptr) {
+                if(domptr != nextptr)
+                  dotcount++;
+                domptr = nextptr+1;
               }
-            } while(domptr);
+            } while(nextptr);
 
             /* The original Netscape cookie spec defined that this domain name
                MUST have three dots (or two if one of the seven holy TLDs),

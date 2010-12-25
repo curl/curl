@@ -658,6 +658,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   long allow = DEFAULT_CONNECT_TIMEOUT;
   int error = 0;
+  struct timeval now;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
@@ -669,8 +670,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OK;
   }
 
+  now = Curl_tvnow();
+
   /* figure out how long time we have left to connect */
-  allow = Curl_timeleft(conn, NULL, TRUE);
+  allow = Curl_timeleft(conn, &now, TRUE);
 
   if(allow < 0) {
     /* time-out, bail out, go home */
@@ -680,9 +683,16 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   /* check for connect without timeout as we want to return immediately */
   rc = waitconnect(conn, sockfd, 0);
-  if(WAITCONN_TIMEOUT == rc)
+  if(WAITCONN_TIMEOUT == rc) {
+    if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
+      infof(data, "After %ldms connect time, move on!\n",
+            conn->timeoutms_per_addr);
+      goto next;
+    }
+
     /* not an error, but also no connection yet */
     return code;
+  }
 
   if(WAITCONN_CONNECTED == rc) {
     if(verifyconnect(sockfd, &error)) {
@@ -715,6 +725,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     data->state.os_errno = error;
     SET_SOCKERRNO(error);
   }
+  next:
 
   code = trynextip(conn, sockindex, connected);
 
@@ -928,8 +939,12 @@ singleipconnect(struct connectdata *conn,
   curlx_nonblock(sockfd, TRUE);
 
   /* Connect TCP sockets, bind UDP */
-  if(conn->socktype == SOCK_STREAM)
+  if(conn->socktype == SOCK_STREAM) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+    conn->connecttime = Curl_tvnow();
+    if(conn->num_addr > 1)
+      Curl_expire(data, conn->timeoutms_per_addr);
+  }
   else
     rc = 0;
 
@@ -1010,7 +1025,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = CURL_SOCKET_BAD;
   int aliasindex;
-  int num_addr;
   Curl_addrinfo *ai;
   Curl_addrinfo *curr_addr;
 
@@ -1021,7 +1035,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    * Figure out what maximum time we have left
    *************************************************************/
   long timeout_ms;
-  long timeout_per_addr;
 
   DEBUGASSERT(sockconn);
   *connected = FALSE; /* default to not connected */
@@ -1036,18 +1049,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   /* Max time for each address */
-  num_addr = Curl_num_addresses(remotehost->addr);
-  timeout_per_addr = timeout_ms / num_addr;
+  conn->num_addr = Curl_num_addresses(remotehost->addr);
+  conn->timeoutms_per_addr = timeout_ms / conn->num_addr;
 
   ai = remotehost->addr;
 
   /* Below is the loop that attempts to connect to all IP-addresses we
    * know for the given host. One by one until one IP succeeds.
    */
-
-  if(data->state.used_interface == Curl_if_multi)
-    /* don't hang when doing multi */
-    timeout_per_addr = 0;
 
   /*
    * Connecting with a Curl_addrinfo chain
@@ -1057,7 +1066,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
     /* start connecting to the IP curr_addr points to */
     CURLcode res =
-      singleipconnect(conn, curr_addr, timeout_per_addr, &sockfd, connected);
+      singleipconnect(conn, curr_addr,
+                      /* don't hang when doing multi */
+                      (data->state.used_interface == Curl_if_multi)?0:
+                      conn->timeoutms_per_addr, &sockfd, connected);
 
     if(res)
       return res;

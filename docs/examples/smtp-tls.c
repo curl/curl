@@ -25,7 +25,7 @@ static const char *payload_text[]={
   "To: " TO "\n",
   "From: " FROM "(Example User)\n",
   "Cc: " CC "(Another example User)\n",
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\n",
   "Subject: SMTP TLS example message\n",
   "\n", /* empty line to divide headers from body, see RFC5322 */
   "The body of the message starts here.\n",

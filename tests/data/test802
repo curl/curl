@@ -35,7 +35,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 802@foo --mail-rcpt 802@foobar.example
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:802@from
+MAIL FROM:<802@from>
 RCPT TO:<802@foo>
 RCPT TO:<802@foobar.example>
 DATA

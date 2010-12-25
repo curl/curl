@@ -21,7 +21,7 @@
 #define SMTPSERVER "smtp.example.com"
 #define SMTPPORT ":587" /* it is a colon+port string, but you can set it
                            to "" to use the default port */
-#define RECEPIENT "receipient@example.com"
+#define RECEPIENT "<receipient@example.com>"
 #define MAILFROM "<realuser@example.com>"
 
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000

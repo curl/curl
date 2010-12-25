@@ -2363,8 +2363,10 @@ static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
   if (pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
       /* this is a new one as head, expire it */
       conn->writechannel_inuse = FALSE; /* not in use yet */
+#ifdef DEBUGBUILD
       infof(conn->data, "%p is at send pipe head!\n",
             conn->send_pipe->head->ptr);
+#endif
       Curl_expire(conn->send_pipe->head->ptr, 1);
   }
 
@@ -2398,8 +2400,10 @@ static int checkPendPipeline(struct connectdata *conn)
     if(sendhead != conn->send_pipe->head) {
       /* this is a new one as head, expire it */
       conn->writechannel_inuse = FALSE; /* not in use yet */
+#ifdef DEBUGBUILD
       infof(conn->data, "%p is at send pipe head!\n",
             conn->send_pipe->head->ptr);
+#endif
       Curl_expire(conn->send_pipe->head->ptr, 1);
     }
   }
@@ -2428,8 +2432,10 @@ static void moveHandleFromSendToRecvPipeline(struct SessionHandle *handle,
         /* Since there's a new easy handle at the start of the send pipeline,
            set its timeout value to 1ms to make it trigger instantly */
         conn->writechannel_inuse = FALSE; /* not used now */
+#ifdef DEBUGBUILD
         infof(conn->data, "%p is at send pipe head B!\n",
               conn->send_pipe->head->ptr);
+#endif
         Curl_expire(conn->send_pipe->head->ptr, 1);
       }
 
@@ -2565,7 +2571,9 @@ void Curl_expire(struct SessionHandle *data, long milli)
       while(list->size > 0)
         Curl_llist_remove(list, list->tail, NULL);
 
+#ifdef DEBUGBUILD
       infof(data, "Expire cleared\n");
+#endif
       nowp->tv_sec = 0;
       nowp->tv_usec = 0;
     }

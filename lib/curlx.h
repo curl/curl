@@ -89,7 +89,7 @@
 
 #ifdef ENABLE_CURLX_PRINTF
 /* If this define is set, we define all "standard" printf() functions to use
-   the curlx_* version instead. It makes the source code transparant and
+   the curlx_* version instead. It makes the source code transparent and
    easier to understand/patch. Undefine them first in case _MPRINTF_REPLACE
    is set. */
 # undef printf

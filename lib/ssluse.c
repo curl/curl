@@ -225,7 +225,8 @@ static int ossl_seed(struct SessionHandle *data)
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
 #ifdef HAVE_RAND_SCREEN
-  /* if RAND_screen() is present, it was called during global init */
+  /* if RAND_screen() is present, this is windows and thus we assume that the
+     randomness is already taken care of */
   nread = 100; /* just a value */
 #else
   {

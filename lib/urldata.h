@@ -812,6 +812,15 @@ struct connectdata {
 
   struct ConnectBits bits;    /* various state-flags for this connection */
 
+ /* connecttime: when connect() is called on the current IP address. Used to
+    be able to track when to move on to try next IP - but only when the multi
+    interface is used. */
+  struct timeval connecttime;
+  /* The two fields below get set in Curl_connecthost */
+  int num_addr; /* number of addresses to try to connect to */
+  long timeoutms_per_addr; /* how long time in milliseconds to spend on
+                              trying to connect to each IP address */
+
   const struct Curl_handler * handler;  /* Connection's protocol handler. */
 
   long ip_version; /* copied from the SessionHandle at creation time */

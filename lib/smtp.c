@@ -754,9 +754,13 @@ static CURLcode smtp_mail(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
 
-  /* send MAIL */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
-                         data->set.str[STRING_MAIL_FROM]);
+  /* send MAIL FROM */
+  if (data->set.str[STRING_MAIL_FROM][0] == '<')
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
+                           data->set.str[STRING_MAIL_FROM]);
+  else
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<%s>",
+                           data->set.str[STRING_MAIL_FROM]);
   if(result)
     return result;
 
