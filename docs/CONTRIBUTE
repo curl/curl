@@ -189,7 +189,7 @@
 
 3.2 How To Make a Patch with git
 
- You need to first checkout the respository:
+ You need to first checkout the repository:
 
      git clone git://github.com/bagder/curl.git
 
