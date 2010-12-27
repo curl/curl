@@ -152,6 +152,12 @@ USE_SSPI=true
 USE_IPV6=yes
 !ENDIF
 
+!IFNDEF USE_IDN
+USE_IDN   =true
+CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
+LFLAGS    = $(LFLAGS) Normaliz.lib
+!ENDIF
+
 !IF "$(USE_IPV6)"=="yes"
 CFLAGS = $(CFLAGS) /DUSE_IPV6
 USE_IPV6=true
