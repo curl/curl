@@ -23,7 +23,7 @@
  * IDN Implementation using windows native APIs
  * Pierre Joye <pierre@php.net>
  ***************************************************************************/
-#ifdef WIN32
+#if defined(WIN32) && defined(USE_WIN32_IDN)
 #include "windows.h"
 #include <stdio.h>
 #include <tchar.h>
