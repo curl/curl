@@ -33,6 +33,30 @@ USE_IPV6=true
 
 CONFIG_NAME_LIB = libcurl
 
+!IF "$(WITH_SSL)"=="dll"
+USE_SSL      = true
+SSL=dll
+!ELSEIF "$(WITH_SSL)"=="static"
+USE_SSL      = true
+SSL=dll
+!ENDIF
+
+!IF "$(WITH_ZLIB)"=="dll"
+USE_ZLIB     = true
+zlib=dll
+!ELSEIF "$(WITH_ZLIB)"=="static"
+USE_ZLIB    = true
+ZLIB=static
+!ENDIF
+
+!IF "$(WITH_SSH2)"=="dll"
+USE_SSH2    = true
+SSH2=dll
+!ELSEIF "$(WITH_ZLIB)"=="static"
+USE_SSH2      = true
+SSH2=static
+!ENDIF
+
 !IF "$(DEBUG)"=="yes"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 !ELSE
