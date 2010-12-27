@@ -73,6 +73,24 @@
 #ifdef CURLRES_ASYNCH
 
 /*
+ * Cancel all possibly still on-going resolves for this connection.
+ */
+void Curl_async_cancel(struct connectdata *conn)
+{
+  /* If we have a "half" response already received, we first clear that off
+     so that nothing is tempted to use it */
+  if(conn->async.temp_ai) {
+    Curl_freeaddrinfo(conn->async.temp_ai);
+    conn->async.temp_ai = NULL;
+  }
+
+  /* for ares-using, make sure all possible outstanding requests are properly
+     cancelled before we proceed */
+  ares_cancel(conn->data->state.areschannel);
+}
+
+
+/*
  * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
  * or getaddrinfo_thread() when we got the name resolved (or not!).
  *
@@ -82,7 +100,7 @@
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-CURLcode Curl_addrinfo_callback(struct connectdata * conn,
+CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                                 int status,
                                 struct Curl_addrinfo *ai)
 {

@@ -70,6 +70,12 @@ struct hostent;
 struct SessionHandle;
 struct connectdata;
 
+#ifdef CURLRES_ASYNCH
+void Curl_async_cancel(struct connectdata *conn);
+#else
+#define Curl_async_cancel(x) do {} while(0)
+#endif
+
 /*
  * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
  * Global DNS cache is general badness. Do not use. This will be removed in

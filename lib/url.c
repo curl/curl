@@ -5210,10 +5210,6 @@ CURLcode Curl_done(struct connectdata **connp,
     data->state.tempwrite = NULL;
   }
 
-  /* for ares-using, make sure all possible outstanding requests are properly
-     cancelled before we proceed */
-  ares_cancel(data->state.areschannel);
-
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this no matter what we think.
 
