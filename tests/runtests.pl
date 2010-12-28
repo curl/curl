@@ -2417,10 +2417,15 @@ sub singletest {
                     delete $ENV{$var} if($ENV{$var});
                 }
                 else {
-                    if(($var =~ /^LD_PRELOAD/) &&
-                       ($debug_build || ($has_shared ne "yes"))) {
-                        # print "Skipping LD_PRELOAD due to no release shared build\n";
-                        next;
+                    if($var =~ /^LD_PRELOAD/) {
+                        if(exe_ext() && (exe_ext() eq '.exe')) {
+                            # print "Skipping LD_PRELOAD due to lack of OS support\n";
+                            next;
+                        }
+                        if($debug_build || ($has_shared ne "yes")) {
+                            # print "Skipping LD_PRELOAD due to no release shared build\n";
+                            next;
+                        }
                     }
                     $ENV{$var} = "$content";
                 }
