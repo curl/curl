@@ -137,8 +137,7 @@ my $GOPHERPORT; # Gopher
 my $GOPHER6PORT; # Gopher IPv6 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
-#my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
-my $CURL="g:/php-sdk/lib_builds/vc9/x86/curlpierre/builds/libcurl-release-dll-ssl-dll-zlib-static-ssh2-static-ipv6-sspi/bin/curl".exe_ext(); # what curl executable to run on the tests
+my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
 my $VCURL=$CURL;   # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
