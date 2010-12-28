@@ -99,6 +99,11 @@ char *curl_version(void)
     ptr += len;
   }
 #endif
+#ifdef USE_WIN32_IDN
+  len = snprintf(ptr, left, " IDN-Windows-native");
+  left -= len;
+  ptr += len;
+#endif
 #if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
 #ifdef _LIBICONV_VERSION
   len = snprintf(ptr, left, " iconv/%d.%d",
@@ -301,6 +306,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   version_info.libidn = stringprep_check_version(LIBIDN_REQUIRED_VERSION);
   if(version_info.libidn)
     version_info.features |= CURL_VERSION_IDN;
+#elif defined(USE_WIN32_IDN)
+  version_info.features |= CURL_VERSION_IDN;
 #endif
 
 #if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)

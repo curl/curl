@@ -2658,7 +2658,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
       data->state.connc->connects[conn->connectindex] = NULL;
   }
 
-#ifdef USE_LIBIDN
+#if defined(USE_LIBIDN)
   if(conn->host.encalloc)
     idn_free(conn->host.encalloc); /* encoded host name buffer, must be freed
                                       with idn_free() since this was allocated
@@ -2667,6 +2667,14 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     idn_free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
                                        freed with idn_free() since this was
                                        allocated by libidn */
+#elif defined(USE_WIN32_IDN)
+  free(conn->host.encalloc); /* encoded host name buffer, must be freed with
+                                idn_free() since this was allocated by
+                                curl_win32_idn_to_ascii */
+  if(conn->proxy.encalloc)
+    free(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
+                                   with idn_free() since this was allocated by
+                                   curl_win32_idn_to_ascii */
 #endif
 
   Curl_ssl_close(conn, FIRSTSOCKET);
@@ -3368,7 +3376,6 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 /*
  * Helpers for IDNA convertions.
  */
-#ifdef USE_LIBIDN
 static bool is_ASCII_name(const char *hostname)
 {
   const unsigned char *ch = (const unsigned char*)hostname;
@@ -3380,6 +3387,7 @@ static bool is_ASCII_name(const char *hostname)
   return TRUE;
 }
 
+#ifdef USE_LIBIDN
 /*
  * Check if characters in hostname is allowed in Top Level Domain.
  */
@@ -3438,13 +3446,12 @@ static void fix_hostname(struct SessionHandle *data,
 
   /* set the name we use to display the host name */
   host->dispname = host->name;
-
+  if(!is_ASCII_name(host->name)) {
 #ifdef USE_LIBIDN
   /*************************************************************
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
-  if(!is_ASCII_name(host->name) &&
-      stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+  if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
     char *ace_hostname = NULL;
     int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
     infof (data, "Input domain encoded as `%s'\n",
@@ -3462,7 +3469,24 @@ static void fix_hostname(struct SessionHandle *data,
       host->name = host->encalloc;
     }
   }
+#elif defined(USE_WIN32_IDN)
+  /*************************************************************
+   * Check name for non-ASCII and convert hostname to ACE form.
+   *************************************************************/
+    char *ace_hostname = NULL;
+    int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname, 0);
+    if(rc == 0)
+      infof(data, "Failed to convert %s to ACE;\n",
+            host->name);
+    else {
+      host->encalloc = ace_hostname;
+      /* change the name pointer to point to the encoded hostname */
+      host->name = host->encalloc;
+    }
+#else
+    infof (data, "IDN support not present, can't parse Unicode (UTF-8) domains");
 #endif
+  }
 }
 
 static void llist_dtor(void *user, void *element)
