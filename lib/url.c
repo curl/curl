@@ -3376,7 +3376,6 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 /*
  * Helpers for IDNA convertions.
  */
-#if defined(USE_LIBIDN) || defined(USE_WIN32_IDN)
 static bool is_ASCII_name(const char *hostname)
 {
   const unsigned char *ch = (const unsigned char*)hostname;
@@ -3387,7 +3386,6 @@ static bool is_ASCII_name(const char *hostname)
   }
   return TRUE;
 }
-#endif
 
 #ifdef USE_LIBIDN
 /*
@@ -3448,13 +3446,12 @@ static void fix_hostname(struct SessionHandle *data,
 
   /* set the name we use to display the host name */
   host->dispname = host->name;
-
+  if(!is_ASCII_name(host->name)) {
 #ifdef USE_LIBIDN
   /*************************************************************
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
-  if(!is_ASCII_name(host->name) &&
-      stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+  if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
     char *ace_hostname = NULL;
     int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
     infof (data, "Input domain encoded as `%s'\n",
@@ -3476,7 +3473,6 @@ static void fix_hostname(struct SessionHandle *data,
   /*************************************************************
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
-  if(!is_ASCII_name(host->name)) {
     char *ace_hostname = NULL;
     int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname, 0);
     if(rc == 0)
@@ -3487,8 +3483,10 @@ static void fix_hostname(struct SessionHandle *data,
       /* change the name pointer to point to the encoded hostname */
       host->name = host->encalloc;
     }
-  }
+#else
+    infof (data, "IDN support not present, can't parse Unicode (UTF-8) domains");
 #endif
+  }
 }
 
 static void llist_dtor(void *user, void *element)
