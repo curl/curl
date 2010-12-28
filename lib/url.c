@@ -2658,7 +2658,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
       data->state.connc->connects[conn->connectindex] = NULL;
   }
 
-#if defined(USE_LIBIDN) || defined(USE_WIN32_IDN)
+#if defined(USE_LIBIDN)
   if(conn->host.encalloc)
     idn_free(conn->host.encalloc); /* encoded host name buffer, must be freed
                                       with idn_free() since this was allocated
@@ -2667,6 +2667,14 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     idn_free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
                                        freed with idn_free() since this was
                                        allocated by libidn */
+#elif defined(USE_WIN32_IDN)
+    free(conn->host.encalloc); /* encoded host name buffer, must be freed
+                                      with idn_free() since this was allocated
+                                      by curl_win32_idn_to_ascii */
+  if(conn->proxy.encalloc)
+    free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
+                                       freed with idn_free() since this was
+                                       allocated by curl_win32_idn_to_ascii */
 #endif
 
   Curl_ssl_close(conn, FIRSTSOCKET);

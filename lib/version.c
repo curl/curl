@@ -99,6 +99,11 @@ char *curl_version(void)
     ptr += len;
   }
 #endif
+#ifdef USE_WIN32_IDN
+	len = snprintf(ptr, left, " IDN Windows native APIs support");
+	left -= len;
+	ptr += len;
+#endif
 #if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
 #ifdef _LIBICONV_VERSION
   len = snprintf(ptr, left, " iconv/%d.%d",
