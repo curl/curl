@@ -154,6 +154,11 @@ USE_IPV6=yes
 
 !IFNDEF USE_IDN
 USE_IDN   =true
+!ELSEIF "$(USE_IDN)"=="yes"
+USE_IDN   =true
+!ENDIF
+
+!IF "$(USE_IDN)"=="true"
 CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
 LFLAGS    = $(LFLAGS) Normaliz.lib
 !ENDIF
