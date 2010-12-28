@@ -215,6 +215,8 @@ WIN_LIBS    = ws2_32.lib wldap32.lib
 !MESSAGE   USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
 !MESSAGE   USE_IPV6=<yes or no>         - Enable IPV6, default to yes
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
+!MESSAGE   USE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
+!MESSAGE                                  or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols release build)
 !ERROR please choose a valid mode
 !ENDIF
