@@ -128,8 +128,8 @@ ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
 SSH2=dll
-!ELSEIF "$(WITH_ZLIB)"=="static"
-SSH2_LIBS = libssh2_a.lib
+!ELSEIF "$(WITH_SSH2)"=="static"
+SSH2_LIBS = libssh2_a_debug.lib
 USE_SSH2      = true
 SSH2=static
 !ENDIF
@@ -241,6 +241,7 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 !ELSE
 RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CC              = $(CC_NODEBUG) $(RTLIB)
+
 CURL_CC         = $(CC)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release

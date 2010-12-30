@@ -55,7 +55,7 @@ ZLIB=static
 !IF "$(WITH_SSH2)"=="dll"
 USE_SSH2    = true
 SSH2=dll
-!ELSEIF "$(WITH_ZLIB)"=="static"
+!ELSEIF "$(WITH_SSH2)"=="static"
 USE_SSH2      = true
 SSH2=static
 !ENDIF
