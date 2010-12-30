@@ -985,6 +985,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
           break;
         }
+        conn->data->state.most_recent_ftp_entrypath = sshc->homedir;
       }
       else {
         /* Return the error type */
@@ -2072,6 +2073,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_safefree(sshc->homedir);
       sshc->homedir = NULL;
+      conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_DISCONNECT);
       break;
@@ -2290,6 +2292,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_safefree(sshc->homedir);
       sshc->homedir = NULL;
+      conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_FREE);
       break;
