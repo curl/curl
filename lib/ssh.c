@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1046,14 +1046,18 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       if(curl_strequal("pwd", sshc->quote_item->data)) {
         /* output debug output if that is requested */
-        if(data->set.verbose) {
-          char tmp[PATH_MAX+1];
+        char tmp[PATH_MAX+1];
 
+        snprintf(tmp, PATH_MAX, "257 \"%s\" is current directory.\n",
+                 sftp_scp->path);
+        if(data->set.verbose) {
           Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4, conn);
-          snprintf(tmp, PATH_MAX, "257 \"%s\" is current directory.\n",
-                   sftp_scp->path);
           Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
         }
+        /* this sends an FTP-like "header" to the header callback so that the
+           current directory can be read very similar to how it is read when
+           using ordinary FTP. */
+        result = Curl_client_write(conn, CLIENTWRITE_HEADER, tmp, strlen(tmp));
         state(conn, SSH_SFTP_NEXT_QUOTE);
         break;
       }
