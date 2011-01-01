@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+llist unit tests
+ </name>
+<tool>
+unit1300
+</tool>
+<command>
+unit1300
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+
+</verify>
+</testcase>

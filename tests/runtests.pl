@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -145,6 +145,7 @@ my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
+my $UNITDIR="./unit";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
@@ -2630,7 +2631,13 @@ sub singletest {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
         $CURLOUT = $STDOUT; # sends received data to stdout
 
-        $CMDLINE="$LIBDIR/$tool";
+        if($tool =~ /^lib/) {
+            $CMDLINE="$LIBDIR/$tool";
+        }
+        elsif($tool =~ /^unit/) {
+            $CMDLINE="$UNITDIR/$tool";
+        }
+
         if(! -f $CMDLINE) {
             print "The tool set in the test case for this: '$tool' does not exist\n";
             timestampskippedevents($testnum);

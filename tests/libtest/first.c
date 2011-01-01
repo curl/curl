@@ -37,7 +37,7 @@ char *libtest_arg2=NULL;
 char *libtest_arg3=NULL;
 int test_argc;
 char **test_argv;
-
+int unitfail; /* for unittests */
 
 int main(int argc, char **argv)
 {
