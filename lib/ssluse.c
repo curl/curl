@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1840,21 +1840,25 @@ static void pubkey_show(struct SessionHandle *data,
                         unsigned char *raw,
                         int len)
 {
-  char buffer[1024];
-  size_t left = sizeof(buffer);
+  size_t left;
   int i;
-  char *ptr=buffer;
   char namebuf[32];
+  char *buffer;
 
-  snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
-
-  for(i=0; i< len; i++) {
-    snprintf(ptr, left, "%02x:", raw[i]);
-    ptr += 3;
-    left -= 3;
+  left = sizeof(len*3 + 1);
+  buffer = malloc(left);
+  if(buffer) {
+    char *ptr=buffer;
+    snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
+    for(i=0; i< len; i++) {
+      snprintf(ptr, left, "%02x:", raw[i]);
+      ptr += 3;
+      left -= 3;
+    }
+    infof(data, "   %s: %s\n", namebuf, buffer);
+    push_certinfo(data, num, namebuf, buffer);
+    free(buffer);
   }
-  infof(data, "   %s: %s\n", namebuf, buffer);
-  push_certinfo(data, num, namebuf, buffer);
 }
 
 #define print_pubkey_BN(_type, _name, _num)    \
