@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1265,12 +1265,21 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN);
 
         if(entry) {
-          char fullpath[PATH_MAX];
+          char *fullpath;
+          size_t pathlen = strlen(data->set.ssl.CApath) +
+            strlen(entry->name) + 2; /* add two, for slash and trailing zero */
+          fullpath = malloc(pathlen);
+          if(!fullpath) {
+            PR_CloseDir(dir);
+            curlerr = CURLE_OUT_OF_MEMORY;
+            goto error;
+          }
 
-          snprintf(fullpath, sizeof(fullpath), "%s/%s", data->set.ssl.CApath,
+          snprintf(fullpath, pathlen, "%s/%s", data->set.ssl.CApath,
                    entry->name);
           rc = nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE);
           /* FIXME: check this return value! */
+          free(fullpath);
         }
         /* This is purposefully tolerant of errors so non-PEM files
          * can be in the same directory */
