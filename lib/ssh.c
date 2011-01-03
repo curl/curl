@@ -1046,10 +1046,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       if(curl_strequal("pwd", sshc->quote_item->data)) {
         /* output debug output if that is requested */
-        char tmp[PATH_MAX+1];
-
-        snprintf(tmp, PATH_MAX, "257 \"%s\" is current directory.\n",
-                 sftp_scp->path);
+        char *tmp = aprintf("257 \"%s\" is current directory.\n",
+                            sftp_scp->path);
+        if(!tmp) {
+          result = CURLE_OUT_OF_MEMORY;
+          state(conn, SSH_SFTP_CLOSE);
+          break;
+        }
         if(data->set.verbose) {
           Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4, conn);
           Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
@@ -1058,6 +1061,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
            current directory can be read very similar to how it is read when
            using ordinary FTP. */
         result = Curl_client_write(conn, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+        free(tmp);
         state(conn, SSH_SFTP_NEXT_QUOTE);
         break;
       }
