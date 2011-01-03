@@ -2,6 +2,7 @@
 <info>
 <keywords>
 unittest
+llist
 </keywords>
 </info>
 
@@ -11,20 +12,15 @@ unittest
 <server>
 none
 </server>
+<features>
+unittest
+</features>
  <name>
 llist unit tests
  </name>
 <tool>
 unit1300
 </tool>
-<command>
-unit1300
-</command>
 </client>
 
-#
-# Verify data after the test has been "shot"
-<verify>
-
-</verify>
 </testcase>

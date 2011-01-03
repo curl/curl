@@ -2314,6 +2314,11 @@ sub singletest {
                 next;
             }
         }
+        elsif($f eq "unittest") {
+            if($debug_build) {
+                next;
+            }
+        }
         elsif($f eq "large_file") {
             if($large_file) {
                 next;
@@ -2561,6 +2566,10 @@ sub singletest {
         $cmd =~ s/\n//g; # no newlines please
         # substitute variables in the command line
         subVariables \$cmd;
+    }
+    else {
+        # there was no command given, use something silly
+        $cmd="-";
     }
     if($curl_debug) {
         unlink($memdump);
