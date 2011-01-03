@@ -9,6 +9,13 @@
 
 #include "test.h"
 
+#define fail_if(expr, msg)                              \
+  if(expr) {                                            \
+    fprintf(stderr, "%s:%d Assertion '%s' met: %s" ,    \
+            __FILE__, __LINE__, #expr, msg);            \
+    unitfail++;                                         \
+  }
+
 #define fail_unless(expr, msg)                          \
   if(!(expr)) {                                         \
     fprintf(stderr, "%s:%d Assertion '%s' failed: %s" , \
@@ -22,9 +29,11 @@ extern int unitfail;
   int test(char *unused)                        \
   {                                             \
   (void)unused;                                 \
-  unit_setup();
+  unit_setup();                                 \
+  {
 
 #define UNITTEST_STOP                           \
+  }                                             \
   unit_stop();                                  \
   return unitfail;                              \
   }
