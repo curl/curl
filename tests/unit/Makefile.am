@@ -52,11 +52,13 @@ INCLUDES = -I$(top_builddir)/include/curl \
 	   -I$(top_srcdir)/tests/libtest
 endif
 
+if CURLDEBUG
+
 EXTRA_DIST = Makefile.inc
 
-LDADD = $(top_srcdir)/tests/libtest/first.o $(top_builddir)/lib/libcurl.la \
+LDADD = $(top_srcdir)/tests/libtest/first.o $(top_builddir)/lib/libcurlu.la \
 	@CURL_LIBS@
-DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
@@ -65,4 +67,11 @@ include Makefile.inc
 if NO_UNDEFINED
 # The -no-undefined flag is crucial to build fine on some platforms
 UNDEF = -no-undefined
+endif
+
+
+else
+# do nothing if debug was not enabled
+all:
+
 endif
