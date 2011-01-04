@@ -11,16 +11,16 @@
 
 #define fail_if(expr, msg)                              \
   if(expr) {                                            \
-    fprintf(stderr, "%s:%d Assertion '%s' met: %s" ,    \
+    fprintf(stderr, "%s:%d Assertion '%s' met: %s\n" ,  \
             __FILE__, __LINE__, #expr, msg);            \
     unitfail++;                                         \
   }
 
-#define fail_unless(expr, msg)                          \
-  if(!(expr)) {                                         \
-    fprintf(stderr, "%s:%d Assertion '%s' failed: %s" , \
-            __FILE__, __LINE__, #expr, msg);            \
-    unitfail++;                                         \
+#define fail_unless(expr, msg)                           \
+  if(!(expr)) {                                          \
+    fprintf(stderr, "%s:%d Assertion '%s' failed: %s\n", \
+            __FILE__, __LINE__, #expr, msg);             \
+    unitfail++;                                          \
   }
 
 extern int unitfail;
