@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,15 +124,17 @@ singleipconnect(struct connectdata *conn,
  * transfer/connection. If the value is negative, the timeout time has already
  * elapsed.
  *
+ * The start time is stored in progress.t_startsingle - as set with
+ * Curl_pgrsTime(..., TIMER_STARTSINGLE);
+ *
  * If 'nowp' is non-NULL, it points to the current time.
  * 'duringconnect' is FALSE if not during a connect, as then of course the
  * connect timeout is not taken into account!
  */
-long Curl_timeleft(struct connectdata *conn,
+long Curl_timeleft(struct SessionHandle *data,
                    struct timeval *nowp,
                    bool duringconnect)
 {
-  struct SessionHandle *data = conn->data;
   int timeout_set = 0;
   long timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
   struct timeval now;
@@ -673,7 +675,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   now = Curl_tvnow();
 
   /* figure out how long time we have left to connect */
-  allow = Curl_timeleft(conn, &now, TRUE);
+  allow = Curl_timeleft(data, &now, TRUE);
 
   if(allow < 0) {
     /* time-out, bail out, go home */
@@ -1040,7 +1042,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   *connected = FALSE; /* default to not connected */
 
   /* get the timeout left */
-  timeout_ms = Curl_timeleft(conn, &before, TRUE);
+  timeout_ms = Curl_timeleft(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

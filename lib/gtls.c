@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -238,7 +238,7 @@ static CURLcode handshake(struct connectdata *conn,
 
   for(;;) {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(conn, NULL, duringconnect);
+    timeout_ms = Curl_timeleft(data, NULL, duringconnect);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */

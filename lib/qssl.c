@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -175,7 +175,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
     h->exitPgm = Curl_qsossl_trap_cert;
 
   /* figure out how long time we should wait at maximum */
-  timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+  timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */

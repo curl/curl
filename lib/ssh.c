@@ -2457,7 +2457,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
     if(Curl_pgrsUpdate(conn))
       return CURLE_ABORTED_BY_CALLBACK;
 
-    left = Curl_timeleft(conn, NULL, duringconnect);
+    left = Curl_timeleft(data, NULL, duringconnect);
     if(left < 0) {
       failf(data, "Operation timed out\n");
       return CURLE_OPERATION_TIMEDOUT;

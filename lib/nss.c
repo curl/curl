@@ -1361,7 +1361,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   SSL_SetURL(connssl->handle, conn->host.name);
 
   /* check timeout situation */
-  time_left = Curl_timeleft(conn, NULL, TRUE);
+  time_left = Curl_timeleft(data, NULL, TRUE);
   if(time_left < 0L) {
     failf(data, "timed out before SSL handshake");
     goto error;
