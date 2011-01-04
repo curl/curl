@@ -30,6 +30,16 @@
     unitfail++;                                                         \
   }
 
+/* fail() is for when the test case figured out by itself that a check
+   proved a failure */
+#define fail(msg) do {                                                 \
+    fprintf(stderr, "%s:%d test failed: '%s'\n",                       \
+            __FILE__, __LINE__, msg);                                  \
+    unitfail++;                                                        \
+  } while(0)
+
+
+
 extern int unitfail;
 
 #define UNITTEST_START                          \
