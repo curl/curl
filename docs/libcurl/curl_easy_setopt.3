@@ -1811,8 +1811,9 @@ Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your certificate. The default format is "PEM" and can be
 changed with \fICURLOPT_SSLCERTTYPE\fP.
 
-With NSS this is the nickname of the certificate you wish to authenticate
-with.
+With NSS this can also be the nickname of the certificate you wish to
+authenticate with. If you want to use a file from the current directory, please
+precede it with "./" prefix, in order to avoid confusion with a nickname.
 .IP CURLOPT_SSLCERTTYPE
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your certificate. Supported formats are "PEM" and "DER".  (Added

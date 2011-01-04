@@ -358,11 +358,12 @@ this option assumes a \&"certificate" file that is the private key and the
 private certificate concatenated! See \fI--cert\fP and \fI--key\fP to specify
 them independently.
 
-If curl is built against the NSS SSL library then this option tells
+If curl is built against the NSS SSL library then this option can tell
 curl the nickname of the certificate to use within the NSS database defined
 by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
 NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
-loaded.
+loaded. If you want to use a file from the current directory, please precede
+it with "./" prefix, in order to avoid confusion with a nickname.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-type <type>"
