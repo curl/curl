@@ -23,6 +23,13 @@
     unitfail++;                                          \
   }
 
+#define verify_memory(dynamic, check, len)                              \
+  if(memcmp(dynamic, check, len)) {                                     \
+    fprintf(stderr, "%s:%d The dynamic string didn't match '%s'\n",     \
+            __FILE__, __LINE__, check);                                 \
+    unitfail++;                                                         \
+  }
+
 extern int unitfail;
 
 #define UNITTEST_START                          \
