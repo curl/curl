@@ -56,7 +56,7 @@ if CURLDEBUG
 
 EXTRA_DIST = Makefile.inc
 
-LDADD = $(top_srcdir)/tests/libtest/first.o $(top_builddir)/lib/libcurlu.la \
+LDADD = $(top_builddir)/tests/libtest/first.o $(top_builddir)/lib/libcurlu.la \
 	@CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
 
