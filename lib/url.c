@@ -1454,8 +1454,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef HAVE_GSSAPI
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
+#ifndef USE_HTTP_NEGOTIATE
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or WINDOWS_SSPI */
 #endif
     if(!auth)
       return CURLE_FAILED_INIT; /* no supported types left! */
@@ -1514,8 +1514,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef HAVE_GSSAPI
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
+#ifndef USE_HTTP_NEGOTIATE
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or WINDOWS_SSPI */
 #endif
     if(!auth)
       return CURLE_FAILED_INIT; /* no supported types left! */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -243,7 +243,7 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ
 #endif
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
   | CURL_VERSION_GSSNEGOTIATE
 #endif
 #ifdef DEBUGBUILD

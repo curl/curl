@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -520,7 +520,7 @@ output_auth_headers(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   const char *auth=NULL;
   CURLcode result = CURLE_OK;
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
   struct negotiatedata *negdata = proxy?
     &data->state.proxyneg:&data->state.negotiate;
 #endif
@@ -530,7 +530,7 @@ output_auth_headers(struct connectdata *conn,
   (void)path;
 #endif
 
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
   if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
     auth="GSS-Negotiate";
@@ -727,7 +727,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
    *
    */
 
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
   if(checkprefix("GSS-Negotiate", start) ||
       checkprefix("Negotiate", start)) {
     int neg;
