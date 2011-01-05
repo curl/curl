@@ -2453,6 +2453,8 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
     long left;
 
     result = ssh_statemach_act(conn, &block);
+    if(result)
+      break;
 
     if(Curl_pgrsUpdate(conn))
       return CURLE_ABORTED_BY_CALLBACK;
@@ -2460,7 +2462,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
       struct timeval now = Curl_tvnow();
       result = Curl_speedcheck(data, now);
       if(result)
-        return result;
+        break;
     }
 
     left = Curl_timeleft(data, NULL, duringconnect);
