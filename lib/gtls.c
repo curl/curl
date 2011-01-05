@@ -483,6 +483,7 @@ gtls_connect_step3(struct connectdata *conn,
   int rc;
   int incache;
   void *ssl_sessionid;
+  CURLcode result = CURLE_OK;
 
   /* This function will return the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
@@ -701,11 +702,17 @@ gtls_connect_step3(struct connectdata *conn,
       }
 
       /* store this session id */
-      return Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
+      result = Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
+      if(result) {
+        free(connect_sessionid);
+        result = CURLE_OUT_OF_MEMORY;
+      }
     }
+    else
+      result = CURLE_OUT_OF_MEMORY;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 
