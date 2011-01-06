@@ -46,12 +46,13 @@ extern int unitfail;
   int test(char *unused)                        \
   {                                             \
   (void)unused;                                 \
-  unit_setup();                                 \
-  {
+  if (unit_setup()) {                           \
+    fail("unit_setup() failure");               \
+  } else {
 
 #define UNITTEST_STOP                           \
+    unit_stop();                                \
   }                                             \
-  unit_stop();                                  \
   return unitfail;                              \
   }
 

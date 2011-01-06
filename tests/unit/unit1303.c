@@ -9,10 +9,14 @@
 
 static struct SessionHandle *data;
 
-static void unit_setup( void )
+static CURLcode unit_setup( void )
 {
   data = curl_easy_init();
+  if (!data)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
 }
+
 static void unit_stop( void )
 {
   curl_easy_cleanup(data);

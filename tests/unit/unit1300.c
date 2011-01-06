@@ -14,9 +14,12 @@ static void test_curl_llist_dtor(void *key , void *value)
   (void)value;
 }
 
-static void unit_setup( void )
+static CURLcode unit_setup( void )
 {
   llist = Curl_llist_alloc( test_curl_llist_dtor );
+  if (!llist)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
 }
 
 static void unit_stop( void )

@@ -5,7 +5,7 @@
 #include "strequal.h"
 #include "curlcheck.h"
 
-static void unit_setup( void ) {}
+static CURLcode unit_setup( void ) {return CURLE_OK;}
 static void unit_stop( void ) {}
 
 UNITTEST_START
