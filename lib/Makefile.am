@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ lib_LTLIBRARIES = libcurl.la
 LIBCURL_LIBS = @LIBCURL_LIBS@
 
 # This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@
+libcurl_la_CFLAGS = $(CFLAGS) @CURL_CFLAG_EXTRAS@
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -116,12 +116,23 @@ if MIMPURE
 MIMPURE = -mimpure-text
 endif
 
-libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(LIBCURL_LIBS)
+LINKFLAGS=$(UNDEF) $(MIMPURE) $(LIBCURL_LIBS)
+
+libcurl_la_LDFLAGS = $(LINKFLAGS) $(VERSIONINFO)
+
+# as unit testing will compile and link everything an extra time, we only
+# do it if debug is enabled
+if CURLDEBUG
+noinst_LTLIBRARIES = libcurlu.la
+libcurlu_la_CFLAGS = -DUNITTESTS
+libcurlu_la_LDFLAGS = -static $(LINKFLAGS)
+endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
+libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
 WIN32SOURCES = $(CSOURCES)
 WIN32HEADERS = $(HHEADERS) config-win32.h

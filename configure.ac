@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2561,7 +2561,8 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
-if test "x$enable_shared" = "xyes"; then
+if test "x$ac_cv_native_windows" != "xyes" &&
+   test "x$enable_shared" = "xyes"; then
   build_libhostname=yes
 else
   build_libhostname=no
@@ -2910,6 +2911,7 @@ AC_CONFIG_FILES([Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
+           tests/unit/Makefile \
            packages/Makefile \
            packages/Win32/Makefile \
            packages/Win32/cygwin/Makefile \

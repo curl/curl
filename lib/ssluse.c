@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1840,31 +1840,35 @@ static void pubkey_show(struct SessionHandle *data,
                         unsigned char *raw,
                         int len)
 {
-  char buffer[1024];
-  size_t left = sizeof(buffer);
+  size_t left;
   int i;
-  char *ptr=buffer;
   char namebuf[32];
+  char *buffer;
 
-  snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
-
-  for(i=0; i< len; i++) {
-    snprintf(ptr, left, "%02x:", raw[i]);
-    ptr += 3;
-    left -= 3;
+  left = sizeof(len*3 + 1);
+  buffer = malloc(left);
+  if(buffer) {
+    char *ptr=buffer;
+    snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
+    for(i=0; i< len; i++) {
+      snprintf(ptr, left, "%02x:", raw[i]);
+      ptr += 3;
+      left -= 3;
+    }
+    infof(data, "   %s: %s\n", namebuf, buffer);
+    push_certinfo(data, num, namebuf, buffer);
+    free(buffer);
   }
-  infof(data, "   %s: %s\n", namebuf, buffer);
-  push_certinfo(data, num, namebuf, buffer);
 }
 
 #define print_pubkey_BN(_type, _name, _num)    \
 do {                              \
   if (pubkey->pkey._type->_name != NULL) { \
     int len = BN_num_bytes(pubkey->pkey._type->_name); \
-    if(len < (int)sizeof(buf)) {                       \
-      BN_bn2bin(pubkey->pkey._type->_name, (unsigned char*)buf); \
-      buf[len] = 0; \
-      pubkey_show(data, _num, #_type, #_name, (unsigned char*)buf, len); \
+    if(len < CERTBUFFERSIZE) {                       \
+      BN_bn2bin(pubkey->pkey._type->_name, (unsigned char*)bufp); \
+      bufp[len] = 0; \
+      pubkey_show(data, _num, #_type, #_name, (unsigned char*)bufp, len); \
     } \
   } \
 } while (0)
@@ -1980,25 +1984,38 @@ static int init_certinfo(struct SessionHandle *data,
   return 0;
 }
 
+/*
+ * This size was previously 512 which has been reported "too small" without
+ * any specifics, so it was enlarged to allow more data to get shown uncut.
+ * The "perfect" size is yet to figure out.
+ */
+#define CERTBUFFERSIZE 8192
+
 static CURLcode get_cert_chain(struct connectdata *conn,
                                struct ssl_connect_data *connssl)
 
 {
   STACK_OF(X509) *sk;
   int i;
-  char buf[512];
+  char *bufp;
   struct SessionHandle *data = conn->data;
   int numcerts;
 
-  sk = SSL_get_peer_cert_chain(connssl->handle);
-
-  if(!sk)
+  bufp = malloc(CERTBUFFERSIZE);
+  if(!bufp)
     return CURLE_OUT_OF_MEMORY;
+
+  sk = SSL_get_peer_cert_chain(connssl->handle);
+  if(!sk) {
+    free(bufp);
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   numcerts = sk_X509_num(sk);
-
-  if(init_certinfo(data, numcerts))
+  if(init_certinfo(data, numcerts)) {
+    free(bufp);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   infof(data, "--- Certificate chain\n");
   for (i=0; i<numcerts; i++) {
@@ -2018,68 +2035,70 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     int j;
     char *ptr;
 
-    (void)x509_name_oneline(X509_get_subject_name(x), buf, sizeof(buf));
-    infof(data, "%2d Subject: %s\n",i,buf);
-    push_certinfo(data, i, "Subject", buf);
+    (void)x509_name_oneline(X509_get_subject_name(x), bufp, CERTBUFFERSIZE);
+    infof(data, "%2d Subject: %s\n", i, bufp);
+    push_certinfo(data, i, "Subject", bufp);
 
-    (void)x509_name_oneline(X509_get_issuer_name(x), buf, sizeof(buf));
-    infof(data, "   Issuer: %s\n",buf);
-    push_certinfo(data, i, "Issuer", buf);
+    (void)x509_name_oneline(X509_get_issuer_name(x), bufp, CERTBUFFERSIZE);
+    infof(data, "   Issuer: %s\n", bufp);
+    push_certinfo(data, i, "Issuer", bufp);
 
     value = X509_get_version(x);
     infof(data, "   Version: %lu (0x%lx)\n", value+1, value);
-    snprintf(buf, sizeof(buf), "%lx", value);
-    push_certinfo(data, i, "Version", buf); /* hex */
+    snprintf(bufp, CERTBUFFERSIZE, "%lx", value);
+    push_certinfo(data, i, "Version", bufp); /* hex */
 
     num=X509_get_serialNumber(x);
     if (num->length <= 4) {
       value = ASN1_INTEGER_get(num);
       infof(data,"   Serial Number: %ld (0x%lx)\n", value, value);
-      snprintf(buf, sizeof(buf), "%lx", value);
+      snprintf(bufp, CERTBUFFERSIZE, "%lx", value);
     }
     else {
+      int left = CERTBUFFERSIZE;
 
-      ptr = buf;
+      ptr = bufp;
       *ptr++ = 0;
       if(num->type == V_ASN1_NEG_INTEGER)
         *ptr++='-';
 
-      for (j=0; j<num->length; j++) {
+      for (j=0; (j<num->length) && (left>=4); j++) {
         /* TODO: length restrictions */
         snprintf(ptr, 3, "%02x%c",num->data[j],
                  ((j+1 == num->length)?'\n':':'));
         ptr += 3;
+        left-=4;
       }
       if(num->length)
-        infof(data,"   Serial Number: %s\n", buf);
+        infof(data,"   Serial Number: %s\n", bufp);
       else
-        buf[0]=0;
+        bufp[0]=0;
     }
-    if(buf[0])
-      push_certinfo(data, i, "Serial Number", buf); /* hex */
+    if(bufp[0])
+      push_certinfo(data, i, "Serial Number", bufp); /* hex */
 
     cinf = x->cert_info;
 
-    j = asn1_object_dump(cinf->signature->algorithm, buf, sizeof(buf));
+    j = asn1_object_dump(cinf->signature->algorithm, bufp, CERTBUFFERSIZE);
     if(!j) {
-      infof(data, "   Signature Algorithm: %s\n", buf);
-      push_certinfo(data, i, "Signature Algorithm", buf);
+      infof(data, "   Signature Algorithm: %s\n", bufp);
+      push_certinfo(data, i, "Signature Algorithm", bufp);
     }
 
     certdate = X509_get_notBefore(x);
-    asn1_output(certdate, buf, sizeof(buf));
-    infof(data, "   Start date: %s\n", buf);
-    push_certinfo(data, i, "Start date", buf);
+    asn1_output(certdate, bufp, CERTBUFFERSIZE);
+    infof(data, "   Start date: %s\n", bufp);
+    push_certinfo(data, i, "Start date", bufp);
 
     certdate = X509_get_notAfter(x);
-    asn1_output(certdate, buf, sizeof(buf));
-    infof(data, "   Expire date: %s\n", buf);
-    push_certinfo(data, i, "Expire date", buf);
+    asn1_output(certdate, bufp, CERTBUFFERSIZE);
+    infof(data, "   Expire date: %s\n", bufp);
+    push_certinfo(data, i, "Expire date", bufp);
 
-    j = asn1_object_dump(cinf->key->algor->algorithm, buf, sizeof(buf));
+    j = asn1_object_dump(cinf->key->algor->algorithm, bufp, CERTBUFFERSIZE);
     if(!j) {
-      infof(data, "   Public Key Algorithm: %s\n", buf);
-      push_certinfo(data, i, "Public Key Algorithm", buf);
+      infof(data, "   Public Key Algorithm: %s\n", bufp);
+      push_certinfo(data, i, "Public Key Algorithm", bufp);
     }
 
     pubkey = X509_get_pubkey(x);
@@ -2090,8 +2109,8 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       case EVP_PKEY_RSA:
         infof(data,  "   RSA Public Key (%d bits)\n",
               BN_num_bits(pubkey->pkey.rsa->n));
-        snprintf(buf, sizeof(buf), "%d", BN_num_bits(pubkey->pkey.rsa->n));
-        push_certinfo(data, i, "RSA Public Key", buf);
+        snprintf(bufp, CERTBUFFERSIZE, "%d", BN_num_bits(pubkey->pkey.rsa->n));
+        push_certinfo(data, i, "RSA Public Key", bufp);
 
         print_pubkey_BN(rsa, n, i);
         print_pubkey_BN(rsa, e, i);
@@ -2130,6 +2149,8 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
     dumpcert(data, x, i);
   }
+
+  free(bufp);
 
   return CURLE_OK;
 }
@@ -2373,7 +2394,7 @@ ossl_connect_common(struct connectdata *conn,
 
   if(ssl_connect_1==connssl->connecting_state) {
     /* Find out how much more time we're allowed */
-    timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -2390,7 +2411,7 @@ ossl_connect_common(struct connectdata *conn,
         ssl_connect_2_writing == connssl->connecting_state) {
 
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(conn, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */

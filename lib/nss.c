@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -277,22 +277,35 @@ static int is_file(const char *filename)
   return 0;
 }
 
-static char *fmt_nickname(char *str, bool *nickname_alloc)
+/* Return on heap allocated filename/nickname of a certificate.  The returned
+ * string should be later deallocated using free().  *is_nickname is set to TRUE
+ * if the given string is treated as nickname; FALSE if the given string is
+ * treated as file name.
+ */
+static char *fmt_nickname(struct SessionHandle *data, enum dupstring cert_kind,
+                          bool *is_nickname)
 {
-  char *nickname = NULL;
-  *nickname_alloc = FALSE;
+  const char *str = data->set.str[cert_kind];
+  const char *n;
+  *is_nickname = TRUE;
 
-  if(is_file(str)) {
-    char *n = strrchr(str, '/');
-    if(n) {
-      *nickname_alloc = TRUE;
-      n++; /* skip last slash */
-      nickname = aprintf("PEM Token #%d:%s", 1, n);
-    }
-    return nickname;
+  if(!is_file(str))
+    /* no such file exists, use the string as nickname */
+    return strdup(str);
+
+  /* search the last slash; we require at least one slash in a file name */
+  n = strrchr(str, '/');
+  if(!n) {
+    infof(data, "warning: certificate file name \"%s\" handled as nickname; "
+          "please use \"./%s\" to force file name\n", str, str);
+    return strdup(str);
   }
 
-  return str;
+  /* we'll use the PEM reader to read the certificate from file */
+  *is_nickname = FALSE;
+
+  n++; /* skip last slash */
+  return aprintf("PEM Token #%d:%s", 1, n);
 }
 
 static int nss_load_cert(struct ssl_connect_data *ssl,
@@ -1265,12 +1278,21 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
         entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN);
 
         if(entry) {
-          char fullpath[PATH_MAX];
+          char *fullpath;
+          size_t pathlen = strlen(data->set.ssl.CApath) +
+            strlen(entry->name) + 2; /* add two, for slash and trailing zero */
+          fullpath = malloc(pathlen);
+          if(!fullpath) {
+            PR_CloseDir(dir);
+            curlerr = CURLE_OUT_OF_MEMORY;
+            goto error;
+          }
 
-          snprintf(fullpath, sizeof(fullpath), "%s/%s", data->set.ssl.CApath,
+          snprintf(fullpath, pathlen, "%s/%s", data->set.ssl.CApath,
                    entry->name);
           rc = nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE);
           /* FIXME: check this return value! */
+          free(fullpath);
         }
         /* This is purposefully tolerant of errors so non-PEM files
          * can be in the same directory */
@@ -1295,25 +1317,20 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.str[STRING_CERT]) {
-    bool nickname_alloc = FALSE;
-    char *nickname = fmt_nickname(data->set.str[STRING_CERT], &nickname_alloc);
+    bool is_nickname;
+    char *nickname = fmt_nickname(data, STRING_CERT, &is_nickname);
     if(!nickname)
       return CURLE_OUT_OF_MEMORY;
 
-    if(!cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
-                   data->set.str[STRING_KEY])) {
+    if(!is_nickname && !cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
+                                   data->set.str[STRING_KEY])) {
       /* failf() is already done in cert_stuff() */
-      if(nickname_alloc)
-        free(nickname);
+      free(nickname);
       return CURLE_SSL_CERTPROBLEM;
     }
 
-    /* this "takes over" the pointer to the allocated name or makes a
-       dup of it */
-    connssl->client_nickname = nickname_alloc?nickname:strdup(nickname);
-    if(!connssl->client_nickname)
-      return CURLE_OUT_OF_MEMORY;
-
+    /* store the nickname for SelectClientCert() called during handshake */
+    connssl->client_nickname = nickname;
   }
   else
     connssl->client_nickname = NULL;
@@ -1344,7 +1361,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   SSL_SetURL(connssl->handle, conn->host.name);
 
   /* check timeout situation */
-  time_left = Curl_timeleft(conn, NULL, TRUE);
+  time_left = Curl_timeleft(data, NULL, TRUE);
   if(time_left < 0L) {
     failf(data, "timed out before SSL handshake");
     goto error;
@@ -1367,18 +1384,17 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   display_conn_info(conn, connssl->handle);
 
   if (data->set.str[STRING_SSL_ISSUERCERT]) {
-    SECStatus ret;
-    bool nickname_alloc = FALSE;
-    char *nickname = fmt_nickname(data->set.str[STRING_SSL_ISSUERCERT],
-                                  &nickname_alloc);
-
+    SECStatus ret = SECFailure;
+    bool is_nickname;
+    char *nickname = fmt_nickname(data, STRING_SSL_ISSUERCERT, &is_nickname);
     if(!nickname)
       return CURLE_OUT_OF_MEMORY;
 
-    ret = check_issuer_cert(connssl->handle, nickname);
+    if(is_nickname)
+      /* we support only nicknames in case of STRING_SSL_ISSUERCERT for now */
+      ret = check_issuer_cert(connssl->handle, nickname);
 
-    if(nickname_alloc)
-      free(nickname);
+    free(nickname);
 
     if(SECFailure == ret) {
       infof(data,"SSL certificate issuer check failed\n");

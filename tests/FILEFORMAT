@@ -180,6 +180,7 @@ NTLM
 OpenSSL
 SSL
 socks
+unittest
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -208,7 +209,8 @@ to have failed. Variables are substituted as in the <command> section.
 
 <tool>
 Name of tool to use instead of "curl". This tool must be built and exist
-in the libtest/ directory.
+either in the libtest/ directory (if the tool starts with 'lib') or in the
+unit/ directory (if the tool starts with 'unit').
 </tool>
 
 <name>

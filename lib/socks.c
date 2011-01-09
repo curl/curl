@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -137,7 +137,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   struct SessionHandle *data = conn->data;
 
   /* get timeout */
-  timeout = Curl_timeleft(conn, NULL, TRUE);
+  timeout = Curl_timeleft(data, NULL, TRUE);
 
   if(timeout < 0) {
     /* time-out, bail out, go home */
@@ -399,7 +399,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
 
   /* get timeout */
-  timeout = Curl_timeleft(conn, NULL, TRUE);
+  timeout = Curl_timeleft(data, NULL, TRUE);
 
   if(timeout < 0) {
     /* time-out, bail out, go home */

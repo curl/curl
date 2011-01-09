@@ -16,9 +16,9 @@
  * authentication and transport security.
  */
 
-#define FROM    "sender@example.org"
-#define TO      "addressee@example.net"
-#define CC      "info@example.org"
+#define FROM    "<sender@example.org>"
+#define TO      "<addressee@example.net>"
+#define CC      "<info@example.org>"
 
 static const char *payload_text[]={
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\n",

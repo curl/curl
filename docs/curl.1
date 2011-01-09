@@ -358,11 +358,12 @@ this option assumes a \&"certificate" file that is the private key and the
 private certificate concatenated! See \fI--cert\fP and \fI--key\fP to specify
 them independently.
 
-If curl is built against the NSS SSL library then this option tells
+If curl is built against the NSS SSL library then this option can tell
 curl the nickname of the certificate to use within the NSS database defined
 by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
 NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
-loaded.
+loaded. If you want to use a file from the current directory, please precede
+it with "./" prefix, in order to avoid confusion with a nickname.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-type <type>"
@@ -427,7 +428,7 @@ server. The method argument should be one of the following alternatives:
 .RS
 .IP multicwd
 curl does a single CWD operation for each path part in the given URL. For deep
-hierarchies this means very many commands. This is how RFC1738 says it should
+hierarchies this means very many commands. This is how RFC 1738 says it should
 be done. This is the default but the slowest behavior.
 .IP nocwd
 curl does no CWD at all. curl will do SIZE, RETR, STOR etc and give a full
@@ -439,7 +440,7 @@ compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE
 (Added in 7.15.1)
 .IP "--ftp-pasv"
-(FTP) Use passive mode for the data conection. Passive is the internal default
+(FTP) Use passive mode for the data connection. Passive is the internal default
 behavior, but using this option can be used to override a previous
 \fI-P/-ftp-port\fP option. (Added in 7.11.0)
 
@@ -501,7 +502,7 @@ waits for a reply from the server.
 .IP "-F/--form <name=content>"
 (HTTP) This lets curl emulate a filled-in form in which a user has pressed the
 submit button. This causes curl to POST data using the Content-Type
-multipart/form-data according to RFC2388. This enables uploading of binary
+multipart/form-data according to RFC 2388. This enables uploading of binary
 files etc. To force the 'content' part to be a file, prefix the file name
 with an @ sign. To just get the content part from a file, prefix the file name
 with the symbol <. The difference between @ and < is then that @ makes a file
@@ -1051,7 +1052,7 @@ just before the transfer command(s), prefix the command with a '+' (this
 is only supported for FTP). You may specify any number of commands. If
 the server returns failure for one of the commands, the entire operation
 will be aborted. You must send syntactically correct FTP commands as
-RFC959 defines to FTP servers, or one of the commands listed below to
+RFC 959 defines to FTP servers, or one of the commands listed below to
 SFTP servers.  This option can be used multiple times.
 
 SFTP is a binary protocol. Unlike for FTP, libcurl interprets SFTP quote
@@ -1241,7 +1242,7 @@ sockd/proxy-name
 sockd/real-name for cases where the proxy-name does not match the princpal name.
  (Added in 7.19.4).
 .IP "--socks5-gssapi-nec"
-As part of the gssapi negotiation a protection mode is negotiated. The rfc1961
+As part of the gssapi negotiation a protection mode is negotiated. RFC 1961
 says in section 4.3/4.4 it should be protected, but the NEC reference
 implementation does not.  The option \fI--socks5-gssapi-nec\fP allows the
 unprotected exchange of the protection mode negotiation. (Added in 7.19.4).

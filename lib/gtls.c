@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -238,7 +238,7 @@ static CURLcode handshake(struct connectdata *conn,
 
   for(;;) {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(conn, NULL, duringconnect);
+    timeout_ms = Curl_timeleft(data, NULL, duringconnect);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -483,6 +483,7 @@ gtls_connect_step3(struct connectdata *conn,
   int rc;
   int incache;
   void *ssl_sessionid;
+  CURLcode result = CURLE_OK;
 
   /* This function will return the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
@@ -701,11 +702,17 @@ gtls_connect_step3(struct connectdata *conn,
       }
 
       /* store this session id */
-      return Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
+      result = Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
+      if(result) {
+        free(connect_sessionid);
+        result = CURLE_OUT_OF_MEMORY;
+      }
     }
+    else
+      result = CURLE_OUT_OF_MEMORY;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 

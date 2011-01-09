@@ -206,6 +206,8 @@ Pass a pointer to a char pointer to receive a pointer to a string holding the
 path of the entry path. That is the initial path libcurl ended up in when
 logging on to the remote FTP server. This stores a NULL as pointer if
 something is wrong. (Added in 7.15.4)
+
+Also works for SFTP since 7.21.4
 .IP CURLINFO_CERTINFO
 Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
 struct that holds a number of linked lists with info about the certificate

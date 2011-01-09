@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+Curl_timeleft
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+Curl_timeleft unit tests
+ </name>
+<tool>
+unit1303
+</tool>
+</client>
+
+</testcase>

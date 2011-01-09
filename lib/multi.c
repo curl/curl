@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -984,7 +984,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
 
-      timeout_ms = Curl_timeleft(easy->easy_conn, &now,
+      timeout_ms = Curl_timeleft(data, &now,
                                  (easy->state <= CURLM_STATE_WAITDO)?
                                  TRUE:FALSE);
 

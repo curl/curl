@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -985,6 +985,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
           break;
         }
+        conn->data->state.most_recent_ftp_entrypath = sshc->homedir;
       }
       else {
         /* Return the error type */
@@ -1045,14 +1046,22 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       if(curl_strequal("pwd", sshc->quote_item->data)) {
         /* output debug output if that is requested */
+        char *tmp = aprintf("257 \"%s\" is current directory.\n",
+                            sftp_scp->path);
+        if(!tmp) {
+          result = CURLE_OUT_OF_MEMORY;
+          state(conn, SSH_SFTP_CLOSE);
+          break;
+        }
         if(data->set.verbose) {
-          char tmp[PATH_MAX+1];
-
           Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4, conn);
-          snprintf(tmp, PATH_MAX, "257 \"%s\" is current directory.\n",
-                   sftp_scp->path);
           Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
         }
+        /* this sends an FTP-like "header" to the header callback so that the
+           current directory can be read very similar to how it is read when
+           using ordinary FTP. */
+        result = Curl_client_write(conn, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+        free(tmp);
         state(conn, SSH_SFTP_NEXT_QUOTE);
         break;
       }
@@ -2072,6 +2081,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_safefree(sshc->homedir);
       sshc->homedir = NULL;
+      conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_DISCONNECT);
       break;
@@ -2290,6 +2300,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_safefree(sshc->homedir);
       sshc->homedir = NULL;
+      conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_FREE);
       break;
@@ -2442,11 +2453,19 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
     long left;
 
     result = ssh_statemach_act(conn, &block);
+    if(result)
+      break;
 
     if(Curl_pgrsUpdate(conn))
       return CURLE_ABORTED_BY_CALLBACK;
+    else {
+      struct timeval now = Curl_tvnow();
+      result = Curl_speedcheck(data, now);
+      if(result)
+        break;
+    }
 
-    left = Curl_timeleft(conn, NULL, duringconnect);
+    left = Curl_timeleft(data, NULL, duringconnect);
     if(left < 0) {
       failf(data, "Operation timed out\n");
       return CURLE_OPERATION_TIMEDOUT;

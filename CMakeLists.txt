@@ -183,13 +183,7 @@ include (CheckIncludeFile)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckSymbolExists)
-# if crosscompiling is on, the CHECK_TYPE_SIZE macro coming with cmake uses
-# TRY_COMPILE instead of TRY_RUN which makes crosscompiling easier, Alex
-if(CMAKE_CROSSCOMPILING)
-  include ("${CMAKE_MODULE_PATH}/CheckTypeSize.cmake")
-else(CMAKE_CROSSCOMPILING)
-  include (CheckTypeSize)
-endif(CMAKE_CROSSCOMPILING)
+include (CheckTypeSize)
 
 # On windows preload settings
 if(WIN32)
@@ -781,7 +775,13 @@ endif(CMAKE_COMPILER_IS_GNUCC AND APPLE)
 
 if(HAVE_SOCKLEN_T)
   set(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
+  if(WIN32)
+    set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h;ws2tcpip.h")
+  elseif(HAVE_SYS_SOCKET_H)
+    set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
+  endif()
   check_type_size("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
+  set(CMAKE_EXTRA_INCLUDE_FILES)
   if(NOT HAVE_CURL_SIZEOF_CURL_SOCKLEN_T)
     message(FATAL_ERROR 
      "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -358,17 +358,29 @@ struct ntlmdata {
 #endif
 };
 
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
 struct negotiatedata {
   /* when doing Negotiate we first need to receive an auth token and then we
      need to send our header */
   enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT } state;
   bool gss; /* Whether we're processing GSS-Negotiate or Negotiate */
   const char* protocol; /* "GSS-Negotiate" or "Negotiate" */
+#ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
   gss_name_t server_name;
   gss_buffer_desc output_token;
+#else
+#ifdef USE_WINDOWS_SSPI
+  DWORD status;
+  CtxtHandle *context;
+  CredHandle *credentials;
+  char server_name[1024];
+  size_t max_token_length;
+  BYTE *output_token;
+  size_t output_token_length;
+#endif
+#endif
 };
 #endif
 
@@ -1127,7 +1139,7 @@ struct UrlState {
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 
-#ifdef HAVE_GSSAPI
+#ifdef USE_HTTP_NEGOTIATE
   struct negotiatedata negotiate; /* state data for host Negotiate auth */
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
