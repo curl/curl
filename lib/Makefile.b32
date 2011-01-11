@@ -11,14 +11,19 @@
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
+# Check if BCCDIR is set.
+!if !$d(BCCDIR)
+!error BCCDIR isn't defined
+!endif
+
 # Edit the path below to point to the base of your Zlib sources.
 !ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.1
+ZLIB_PATH = ../../zlib-1.2.5
 !endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 !ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7d
+OPENSSL_PATH = ../../openssl-0.9.8q
 !endif
 
 # Set libcurl static lib, dll and import lib
@@ -29,8 +34,8 @@ LIBCURL_IMPLIB = libcurl_imp.lib
 # Setup environment
 CXX      = bcc32
 LD       = bcc32
-CP       = copy
-RM       = del
+CP       = copy 2>NUL
+RM       = del /q /f 2>NUL
 LIB      = tlib
 IMPLIB   = implib
 
