@@ -4,16 +4,12 @@
 #
 #  'lib' directory
 #
-#  'BCCDIR' has to be set up to point to the base directory
-#  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
-#  where c:\Borland\BCC55 is the compiler is installed
-#
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
-# Check if BCCDIR is set.
-!if !$d(BCCDIR)
-!error BCCDIR isn't defined
+# Check if BCCDIR is set and guess if not set.
+!ifndef BCCDIR
+BCCDIR = $(MAKEDIR)/..
 !endif
 
 # Edit the path below to point to the base of your Zlib sources.
