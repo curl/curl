@@ -38,7 +38,6 @@ LDFLAGS  = -q -lq -lap
 INCDIRS  = -I.;../include;../lib
 LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
-# If you build with SSL support, set WITH_SSL=1
 DEFINES  = -DNDEBUG -DWIN32
 
 !ifdef DYNAMIC
@@ -48,12 +47,14 @@ LIBCURL_LIB = ../lib/libcurl.lib
 DEFINES = $(DEFINES) -DCURL_STATICLIB
 !endif
 
+# If you build with ZLIB support, set WITH_ZLIB=1
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
 LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
 !endif
 
+# If you build with SSL support, set WITH_SSL=1
 !ifdef WITH_SSL
 DEFINES  = $(DEFINES) -DUSE_SSLEAY
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl

@@ -42,15 +42,21 @@ LDFLAGS  = -q -lq -laa -tWD
 INCDIRS  = -I.;../include
 LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
-# If you build with SSL support, set WITH_SSL=1
 DEFINES  = -DNDEBUG -DWIN32 -D_CONSOLE -D_MBCS -DBUILDING_LIBCURL
 
+# By default we disable LDAP support here since BCC headers are insufficient.
+!ifndef WITH_LDAP
+DEFINES  = $(DEFINES) -DCURL_DISABLE_LDAP
+!endif
+
+# If you build with ZLIB support, set WITH_ZLIB=1
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
 LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
 !endif
 
+# If you build with SSL support, set WITH_SSL=1
 !ifdef WITH_SSL
 DEFINES  = $(DEFINES) -DUSE_SSLEAY
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
