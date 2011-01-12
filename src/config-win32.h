@@ -228,7 +228,7 @@
 /* ---------------------------------------------------------------- */
 
 /* Define this if you have struct sockaddr_storage */
-#if !(defined(__SALFORDC__) || defined(__BORLANDC__))
+#if !defined(__SALFORDC__) && !defined(__BORLANDC__)
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
 #endif
 
