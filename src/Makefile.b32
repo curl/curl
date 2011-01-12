@@ -10,6 +10,10 @@
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
+!if "$(__MAKE__)" == ""
+!error __MAKE__ not defined. Use Borlands's MAKE to process this makefile.
+!endif
+
 # Borland's $(MAKEDIR) expands to the path where make.exe is located,
 # use this feature to define BCCDIR when user has not defined BCCDIR.
 !if "$(BCCDIR)" == ""
