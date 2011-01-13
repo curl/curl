@@ -55,6 +55,11 @@ INCDIRS  = -I.;..\include
 LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
 DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
 
+# By default SSPI support is enabled for BCC
+!ifndef DISABLE_SSPI
+DEFINES  = $(DEFINES) -DUSE_WINDOWS_SSPI
+!endif
+
 # By default LDAP support is disabled for BCC
 !ifndef WITH_LDAP
 DEFINES  = $(DEFINES) -DCURL_DISABLE_LDAP
