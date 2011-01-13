@@ -16,7 +16,7 @@
 
 # Borland's $(MAKEDIR) expands to the path where make.exe is located,
 # use this feature to define BCCDIR when user has not defined BCCDIR.
-!if "$(BCCDIR)" == ""
+!ifndef BCCDIR
 BCCDIR = $(MAKEDIR)\..
 !endif
 
