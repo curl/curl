@@ -7,7 +7,7 @@
 #  'BCCDIR' has to be set up to point to the base directory
 #  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
 #
-#  Written by Jaepil Kim, pit@paradise.net.nz
+#  Initially written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
 !if "$(__MAKE__)" == ""
@@ -39,9 +39,9 @@ LIBCURL_IMPLIB = libcurl_imp.lib
 PP_CMD   = cpp32 -q -P-
 CC_CMD   = bcc32 -q -c
 LD       = bcc32
-RM       = del
+RM       = del 2>NUL
 MKDIR    = mkdir
-RMDIR    = rmdir /s /q
+RMDIR    = rmdir /s /q 2>NUL
 LIB      = tlib
 IMPLIB   = implib
 
@@ -90,32 +90,32 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 OBJECTS = $(CSOURCES:.c=.obj)
 
 .c.obj:
-	@-$(RM) $(@R).int >NUL 2>&1
+	@-$(RM) $(@R).int
 	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(<)
 	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
 
 all:	$(OBJDIR) $(LIBCURL_LIB) $(LIBCURL_DLL)
 
 clean:
-	@-$(RMDIR) $(OBJDIR) >NUL 2>&1
-	@-$(RM) $(LIBCURL_LIB) >NUL 2>&1
-	@-$(RM) $(LIBCURL_IMPLIB) >NUL 2>&1
-	@-$(RM) libcurl.tds >NUL 2>&1
+	@-$(RMDIR) $(OBJDIR)
+	@-$(RM) $(LIBCURL_LIB)
+	@-$(RM) $(LIBCURL_IMPLIB)
+	@-$(RM) libcurl.tds
 
 $(OBJDIR):
-	@-$(RMDIR) $(OBJDIR) >NUL 2>&1
+	@-$(RMDIR) $(OBJDIR)
 	@-$(MKDIR) $(OBJDIR)
 
 $(LIBCURL_LIB): $(OBJECTS)
-	@-$(RM) $(LIBCURL_LIB) >NUL 2>&1
+	@-$(RM) $(LIBCURL_LIB)
 	$(LIB) $(LIBFLAGS) $@ @&&!
 +$(**: = &^
 +)
 !
 
 $(LIBCURL_DLL) $(LIBCURL_IMPLIB): $(OBJECTS) $(LINKLIB)
-	@-$(RM) $(LIBCURL_DLL) >NUL 2>&1
-	@-$(RM) $(LIBCURL_IMPLIB) >NUL 2>&1
+	@-$(RM) $(LIBCURL_DLL)
+	@-$(RM) $(LIBCURL_IMPLIB)
 	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) $**
 	$(IMPLIB) $(LIBCURL_IMPLIB) $(LIBCURL_DLL)
 
