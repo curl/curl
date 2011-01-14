@@ -135,7 +135,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if (!neg_ctx->max_token_length) {
     PSecPkgInfo SecurityPackage;
-    ret = s_pSecFn->QuerySecurityPackageInfo("Negotiate", &SecurityPackage);
+    ret = s_pSecFn->QuerySecurityPackageInfo((SEC_CHAR *)"Negotiate",
+                                             &SecurityPackage);
     if (ret != SEC_E_OK)
       return -1;
 
@@ -174,7 +175,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
 
     neg_ctx->status =
-      s_pSecFn->AcquireCredentialsHandle(NULL, "Negotiate",
+      s_pSecFn->AcquireCredentialsHandle(NULL, (SEC_CHAR *)"Negotiate",
                                          SECPKG_CRED_OUTBOUND, NULL, NULL,
                                          NULL, NULL, neg_ctx->credentials,
                                          &lifetime);
@@ -242,7 +243,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   char *userp;
 
   len = Curl_base64_encode(conn->data,
-                           neg_ctx->output_token,
+                           (const char*)neg_ctx->output_token,
                            neg_ctx->output_token_length,
                            &encoded);
 
