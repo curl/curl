@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl 1 "28 November 2009" "Curl 7.20.0" "Curl Manual"
+.TH curl 1 "28 November 2009" "Curl 7.21.4" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -515,8 +515,8 @@ input:
 
 \fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
 
-To read the file's content from stdin instead of a file, use - where the file
-name should've been. This goes for both @ and < constructs.
+To read content from stdin instead of a file, use - as the filename. This goes
+for both @ and < constructs.
 
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:
@@ -1235,12 +1235,10 @@ This option (as well as \fI--socks4\fP) does not work with IPV6, FTPS or LDAP.
 The default service name for a socks server is rcmd/server-fqdn. This option
 allows you to change it.
 
-Examples:
- --socks5 proxy-name \fI--socks5-gssapi-service\fP sockd   would use
-sockd/proxy-name
- --socks5 proxy-name \fI--socks5-gssapi-service\fP sockd/real-name   would use
-sockd/real-name for cases where the proxy-name does not match the princpal name.
- (Added in 7.19.4).
+Examples: --socks5 proxy-name \fI--socks5-gssapi-service\fP sockd would use
+sockd/proxy-name --socks5 proxy-name \fI--socks5-gssapi-service\fP
+sockd/real-name would use sockd/real-name for cases where the proxy-name does
+not match the principal name.  (Added in 7.19.4).
 .IP "--socks5-gssapi-nec"
 As part of the gssapi negotiation a protection mode is negotiated. RFC 1961
 says in section 4.3/4.4 it should be protected, but the NEC reference
@@ -1265,7 +1263,7 @@ XDISPLOC=<X display> Sets the X display location.
 NEW_ENV=<var,val> Sets an environment variable.
 .IP "--tftp-blksize <value>"
 (TFTP) Set TFTP BLKSIZE option (must be >512). This is the block size that
-curl will try to use when tranferring data to or from a TFTP server. By
+curl will try to use when transferring data to or from a TFTP server. By
 default 512 bytes will be used.
 
 If this option is used several times, the last one will be used.
@@ -1703,7 +1701,7 @@ Unknown TELNET option specified.
 .IP 49
 Malformed telnet option.
 .IP 51
-The peer's SSL certificate or SSH MD5 fingerprint was not ok.
+The peer's SSL certificate or SSH MD5 fingerprint was not OK.
 .IP 52
 The server didn't reply anything, which here is considered an error.
 .IP 53
