@@ -162,13 +162,27 @@
  */
 
 #ifdef HTTP_ONLY
-#  define CURL_DISABLE_TFTP
-#  define CURL_DISABLE_FTP
-#  define CURL_DISABLE_LDAP
-#  define CURL_DISABLE_TELNET
-#  define CURL_DISABLE_DICT
-#  define CURL_DISABLE_FILE
-#  define CURL_DISABLE_RTSP
+#  ifndef CURL_DISABLE_TFTP
+#    define CURL_DISABLE_TFTP
+#  endif
+#  ifndef CURL_DISABLE_FTP
+#    define CURL_DISABLE_FTP
+#  endif
+#  ifndef CURL_DISABLE_LDAP
+#    define CURL_DISABLE_LDAP
+#  endif
+#  ifndef CURL_DISABLE_TELNET
+#    define CURL_DISABLE_TELNET
+#  endif
+#  ifndef CURL_DISABLE_DICT
+#    define CURL_DISABLE_DICT
+#  endif
+#  ifndef CURL_DISABLE_FILE
+#    define CURL_DISABLE_FILE
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#    define CURL_DISABLE_RTSP
+#  endif
 #endif
 
 /*
