@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o Curl_do: avoid using stale conn pointer
  o tftpd test server: avoid buffer overflow report from glibc
  o nss: avoid CURLE_OUT_OF_MEMORY given a file name without any slash
+ o nss: fix a bug in handling of CURLOPT_CAPATH
 
 This release includes the following known bugs:
 

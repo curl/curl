@@ -394,11 +394,11 @@ may be loaded.
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
 (SSL) Tells curl to use the specified certificate directory to verify the
-peer. The certificates must be in PEM format, and the directory must have been
-processed using the c_rehash utility supplied with openssl. Using
-\fI--capath\fP can allow curl to make SSL-connections much more efficiently
-than using \fI--cacert\fP if the \fI--cacert\fP file contains many CA
-certificates.
+peer. The certificates must be in PEM format, and if curl is built against
+OpenSSL, the directory must have been processed using the c_rehash utility
+supplied with OpenSSL. Using \fI--capath\fP can allow OpenSSL-powered curl to
+make SSL-connections much more efficiently than using \fI--cacert\fP if the
+\fI--cacert\fP file contains many CA certificates.
 
 If this option is used several times, the last one will be used.
 .IP "-f/--fail"

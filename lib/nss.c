@@ -1108,6 +1108,55 @@ static bool handle_cc_error(PRInt32 err, struct SessionHandle *data)
 static Curl_recv nss_recv;
 static Curl_send nss_send;
 
+static CURLcode nss_load_ca_certificates(struct connectdata *conn,
+                                         int sockindex)
+{
+  struct SessionHandle *data = conn->data;
+  const char *cafile = data->set.ssl.CAfile;
+  const char *capath = data->set.ssl.CApath;
+
+  if(cafile && !nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE))
+    return CURLE_SSL_CACERT_BADFILE;
+
+  if(capath) {
+    struct_stat st;
+    if(stat(capath, &st) == -1)
+      return CURLE_SSL_CACERT_BADFILE;
+
+    if(S_ISDIR(st.st_mode)) {
+      PRDirEntry *entry;
+      PRDir *dir = PR_OpenDir(capath);
+      if(!dir)
+        return CURLE_SSL_CACERT_BADFILE;
+
+      while((entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN))) {
+        char *fullpath = aprintf("%s/%s", capath, entry->name);
+        if(!fullpath) {
+          PR_CloseDir(dir);
+          return CURLE_OUT_OF_MEMORY;
+        }
+
+        if(!nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE))
+          /* This is purposefully tolerant of errors so non-PEM files can
+           * be in the same directory */
+          infof(data, "failed to load '%s' from CURLOPT_CAPATH\n", fullpath);
+
+        free(fullpath);
+      }
+
+      PR_CloseDir(dir);
+    }
+    else
+      infof(data, "warning: CURLOPT_CAPATH not a directory (%s)\n", capath);
+  }
+
+  infof(data, "  CAfile: %s\n  CApath: %s\n",
+      cafile ? cafile : "none",
+      capath ? capath : "none");
+
+  return CURLE_OK;
+}
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
@@ -1249,62 +1298,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
                            NULL) != SECSuccess)
     goto error;
 
-  if(!data->set.ssl.verifypeer)
-    /* skip the verifying of the peer */
-    ;
-  else if(data->set.ssl.CAfile) {
-    int rc = nss_load_cert(&conn->ssl[sockindex], data->set.ssl.CAfile,
-                           PR_TRUE);
-    if(!rc) {
-      curlerr = CURLE_SSL_CACERT_BADFILE;
-      goto error;
-    }
-  }
-  else if(data->set.ssl.CApath) {
-    struct_stat st;
-    PRDir      *dir;
-    PRDirEntry *entry;
-
-    if(stat(data->set.ssl.CApath, &st) == -1) {
-      curlerr = CURLE_SSL_CACERT_BADFILE;
-      goto error;
-    }
-
-    if(S_ISDIR(st.st_mode)) {
-      int rc;
-
-      dir = PR_OpenDir(data->set.ssl.CApath);
-      do {
-        entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN);
-
-        if(entry) {
-          char *fullpath;
-          size_t pathlen = strlen(data->set.ssl.CApath) +
-            strlen(entry->name) + 2; /* add two, for slash and trailing zero */
-          fullpath = malloc(pathlen);
-          if(!fullpath) {
-            PR_CloseDir(dir);
-            curlerr = CURLE_OUT_OF_MEMORY;
-            goto error;
-          }
-
-          snprintf(fullpath, pathlen, "%s/%s", data->set.ssl.CApath,
-                   entry->name);
-          rc = nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE);
-          /* FIXME: check this return value! */
-          free(fullpath);
-        }
-        /* This is purposefully tolerant of errors so non-PEM files
-         * can be in the same directory */
-      } while(entry != NULL);
-      PR_CloseDir(dir);
-    }
-  }
-  infof(data,
-        "  CAfile: %s\n"
-        "  CApath: %s\n",
-        data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
-        data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+  if(data->set.ssl.verifypeer && (CURLE_OK !=
+        (curlerr = nss_load_ca_certificates(conn, sockindex))))
+    goto error;
 
   if (data->set.ssl.CRLfile) {
     if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {
