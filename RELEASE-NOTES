@@ -13,6 +13,7 @@ This release includes the following changes:
  o introduced new framework for unit-testing
  o IDN: use win32 API if told to
  o ares: ask for both IPv4 and IPv6 addresses
+ o HTTP: do Negotiate authentication using SSPI on windows
 
 This release includes the following bugfixes:
 
@@ -28,6 +29,12 @@ This release includes the following bugfixes:
  o tftpd test server: avoid buffer overflow report from glibc
  o nss: avoid CURLE_OUT_OF_MEMORY given a file name without any slash
  o nss: fix a bug in handling of CURLOPT_CAPATH
+ o CMake: Use upstream CheckTypeSize module
+ o OpenSSL get_cert_chain: support larger data sets
+ o SCP/SFTP transfers: acknowledge speedcheck
+ o GnuTLS builds: fix memory leak
+ o connect problem: use UDP correctly
+ o Borland C++ makefile tweaks
 
 This release includes the following known bugs:
 
