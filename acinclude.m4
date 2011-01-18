@@ -3181,7 +3181,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       ;;
     win32_small_files)
       AC_MSG_RESULT([yes (large file disabled)])
-      AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
+      AC_DEFINE_UNQUOTED(USE_WIN32_SMALL_FILES, 1,
         [Define to 1 if you are building a Windows target without large file support.])
       ;;
     *)
