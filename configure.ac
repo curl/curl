@@ -2689,6 +2689,7 @@ AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
 
 if test "$want_tls_srp" = "yes" && test "x$HAVE_GNUTLS_SRP" = "x1"; then
    AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
+   USE_TLS_SRP=1
    curl_tls_srp_msg="enabled"
 fi
 
