@@ -158,6 +158,7 @@ rtsp-ipv6
 imap
 pop3
 smtp
+http+tls-srp
 
 Give only one per line.  This subsection is mandatory.
 </server>

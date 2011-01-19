@@ -502,6 +502,7 @@ typedef enum {
   CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Identifiers */
   CURLE_FTP_BAD_FILE_LIST,       /* 87 - unable to parse FTP file list */
   CURLE_CHUNK_FAILED,            /* 88 - chunk callback reported error */
+  CURLE_TLSAUTH_FAILED,          /* 89 - Failed TLS authentication */
 
   CURL_LAST /* never use! */
 } CURLcode;
@@ -1442,6 +1443,15 @@ typedef enum {
   /* send linked-list of name:port:address sets */
   CINIT(RESOLVE, OBJECTPOINT, 203),
 
+  /* Set a username for authenticated TLS */
+  CINIT(TLSAUTH_USERNAME, OBJECTPOINT, 204),
+
+  /* Set a password for authenticated TLS */
+  CINIT(TLSAUTH_PASSWORD, OBJECTPOINT, 205),
+
+  /* Set authentication type for authenticated TLS */
+  CINIT(TLSAUTH_TYPE, OBJECTPOINT, 206),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1536,6 +1546,12 @@ enum {
   CURL_SSLVERSION_SSLv3,
 
   CURL_SSLVERSION_LAST /* never use, keep last */
+};
+
+enum CURL_TLSAUTH {
+  CURL_TLSAUTH_NONE,
+  CURL_TLSAUTH_SRP,
+  CURL_TLSAUTH_LAST /* never use, keep last */
 };
 
 /* symbols to use with CURLOPT_POSTREDIR.
@@ -2043,6 +2059,7 @@ typedef struct {
 #define CURL_VERSION_SSPI      (1<<11) /* SSPI is supported */
 #define CURL_VERSION_CONV      (1<<12) /* character conversions supported */
 #define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
+#define CURL_VERSION_TLSAUTH_SRP (1<<14) /* TLS-SRP auth is supported */
 
 /*
  * NAME curl_version_info()

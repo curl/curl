@@ -100,6 +100,7 @@ use sshhelp qw(
     find_sshd
     find_ssh
     find_sftp
+    find_gnutls_serv
     sshversioninfo
     );
 
@@ -135,6 +136,7 @@ my $RTSPPORT; # RTSP
 my $RTSP6PORT; # RTSP IPv6 server port
 my $GOPHERPORT; # Gopher
 my $GOPHER6PORT; # Gopher IPv6 server port
+my $HTTPTLSSRPPORT; # TLS-SRP HTTP port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -202,6 +204,7 @@ my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_charconv;# set if libcurl is built with CharConv support
+my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 
 my $has_openssl; # built with a lib using an OpenSSL-like API
 my $has_gnutls;  # built with GnuTLS
@@ -334,7 +337,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher')) {
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'http+tls-srp')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -957,6 +960,81 @@ sub verifysftp {
     return $verified;
 }
 
+#######################################################################
+# Verify that the TLS-SRP HTTP server that runs on $ip, $port is our server.
+# This also implies that we can speak with it, as there might be occasions when
+# the server runs fine but we cannot talk to it ("Failed to connect to ::1:
+# Can't assign requested address" #
+
+sub verifyhttptlssrp {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
+    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    my $pid = 0;
+    my $bonus="";
+
+    my $verifyout = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+    unlink($verifyout) if(-f $verifyout);
+
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    unlink($verifylog) if(-f $verifylog);
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--output $verifyout ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    $flags .= "--insecure ";
+    $flags .= "--tlsauthtype SRP --tlsuser jsmith --tlspassword abc ";
+    $flags .= "\"https://$ip:$port/verifiedserver\"";
+
+    my $cmd = "$VCURL $flags 2>$verifylog";
+
+    # verify if our/any server is running on this port
+    logmsg "RUN: $cmd\n" if($verbose);
+    my $res = runclient($cmd);
+
+    $res >>= 8; # rotate the result
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
+
+    if($res && $verbose) {
+        logmsg "RUN: curl command returned $res\n";
+        if(open(FILE, "<$verifylog")) {
+            while(my $string = <FILE>) {
+                logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
+            }
+            close(FILE);
+        }
+    }
+
+    my $data;
+    if(open(FILE, "<$verifyout")) {
+        while(my $string = <FILE>) {
+            $data .= $string;
+        }
+        close(FILE);
+    }
+
+    if($data && ($data =~ /GNUTLS/) && open(FILE, "<$pidfile")) {
+        $pid=0+<FILE>;
+        close(FILE);
+        return $pid;
+    }
+    elsif($res == 6) {
+        # curl: (6) Couldn't resolve host '::1'
+        logmsg "RUN: failed to resolve host (https://$ip:$port/verifiedserver)\n";
+        return -1;
+    }
+    elsif($data || ($res && ($res != 7))) {
+        logmsg "RUN: Unknown server on our $server port: $port ($res)\n";
+        return -1;
+    }
+    return $pid;
+}
 
 #######################################################################
 # STUB for verifying socks
@@ -1001,7 +1079,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
                  'socks' => \&verifysocks,
-                 'gopher' => \&verifyhttp);
+                 'gopher' => \&verifyhttp,
+                 'http+tls-srp' => \&verifyhttptlssrp);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -1189,6 +1268,87 @@ sub runhttpsserver {
     sleep(1);
 
     return ($httpspid, $pid2);
+}
+
+#######################################################################
+# start the TLS-SRP HTTP server
+#
+sub runhttptlssrpserver {
+    my ($verbose) = @_;
+    my $proto = "http+tls-srp";
+    my $ip = $HOSTIP;
+    my $port = $HTTPTLSSRPPORT;
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--fork " if($forkserver);
+    $flags .= "--http ";
+    $flags .= "-d 1 " if($debugprotocol);
+    $flags .= "--port $port ";
+    $flags .= "--srppasswd certs/srp-verifier-db --srppasswdconf certs/srp-verifier-conf ";
+    $flags .=" >log/gnutls.out 2>&1";
+
+    # Find gnutls-serv
+    my $gnutlsserv = find_gnutls_serv();
+    if(!$gnutlsserv) {
+        logmsg "RUN: cannot find gnutls-serv\n";
+        return (0,0);
+    }
+    my $cmd = "$gnutlsserv $flags";
+    my ($httptlssrppid, $pid2) = startnew($cmd, $pidfile, 1, 1);
+
+    if($httptlssrppid <= 0 || !kill(0, $httptlssrppid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+    if(!$pid3) {
+        logmsg "RUN: $srvrname server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver($server, "$httptlssrppid $pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    $pid2 = $pid3;
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $httptlssrppid\n";
+    }
+
+    sleep(1);
+
+    return ($httptlssrppid, $pid2);
 }
 
 #######################################################################
@@ -1967,6 +2127,13 @@ sub checksystem {
             # compiled in because the <features> test will fail.
             push @protocols, map($_ . "-ipv6", @protocols);
 
+            # Hack - we need a different, non-stunnel server to test HTTP
+            # TLS-SRP, but we don't want to add HTTP+TLS-SRP as a protocol
+            # throughout curl
+            if ($has_gnutls) {
+                push @protocols, ('http+tls-srp');
+            }
+
             # 'none' is used in test cases to mean no server
             push @protocols, ('none');
         }
@@ -2007,6 +2174,10 @@ sub checksystem {
             if($feat =~ /CharConv/i) {
                 # CharConv enabled
                 $has_charconv=1;
+            }
+            if($feat =~ /TLS-SRP/i) {
+                # TLS-SRP enabled
+                $has_tls_srp=1;
             }
         }
     }
@@ -2171,6 +2342,7 @@ sub subVariables {
   $$thing =~ s/%RTSP6PORT/$RTSP6PORT/g;
   $$thing =~ s/%GOPHERPORT/$GOPHERPORT/g;
   $$thing =~ s/%GOPHER6PORT/$GOPHER6PORT/g;
+  $$thing =~ s/%HTTPTLSSRPPORT/$HTTPTLSSRPPORT/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that whould work on most hosts as these
@@ -2351,6 +2523,11 @@ sub singletest {
         }
         elsif($f eq "crypto") {
             if($has_crypto) {
+                next;
+            }
+        }
+        elsif($f eq "TLS-SRP") {
+            if($has_tls_srp) {
                 next;
             }
         }
@@ -3257,7 +3434,7 @@ sub startservers {
     for(@what) {
         my (@whatlist) = split(/\s+/,$_);
         my $what = lc($whatlist[0]);
-        $what =~ s/[^a-z0-9-]//g;
+        $what =~ s/[^a-z0-9-+]//g;
 
         my $certfile;
         if($what =~ /^(ftp|http|imap|pop3|smtp)s(.*)$/) {
@@ -3432,6 +3609,20 @@ sub startservers {
                 $run{'https'}="$pid $pid2";
             }
         }
+        elsif($what eq "http+tls-srp") {
+            if(!$has_gnutls) {
+                return "no GnuTLS";
+            }
+            if(!$run{'http+tls-srp'}) {
+                ($pid, $pid2) = runhttptlssrpserver($verbose);
+                if($pid <= 0) {
+                    return "failed starting HTTP+TLS-SRP server (gnutls-serv)";
+                }
+                logmsg sprintf("* pid http+tls-srp => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http+tls-srp'}="$pid $pid2";
+            }
+        }
         elsif($what eq "tftp") {
             if(!$run{'tftp'}) {
                 ($pid, $pid2) = runtftpserver("", $verbose);
@@ -3522,7 +3713,7 @@ sub serverfortest {
         my $proto = lc($_);
         chomp $proto;
         $proto =~ s/\s.*//g;  # take first word
-        if (! grep /^$proto$/, @protocols) {
+        if (! grep /^\Q$proto\E$/, @protocols) {
             if (substr($proto,0,5) ne "socks") {
                 return "curl lacks $proto support";
             }
@@ -3905,6 +4096,7 @@ $RTSPPORT =  $base++;
 $RTSP6PORT = $base++;
 $GOPHERPORT =$base++;
 $GOPHER6PORT=$base++;
+$HTTPTLSSRPPORT=$base++;
 
 #######################################################################
 # clear and create logging directory:
