@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -906,11 +906,9 @@ static void help(void)
     "    --url <URL>     Set URL to work with",
     " -B/--use-ascii     Use ASCII/text transfer",
     " -u/--user <user[:password]> Set server user and password",
-#ifdef USE_TLS_SRP
     "    --tlsuser     <user> Set TLS username",
     "    --tlspassword <string> Set TLS password",
     "    --tlsauthtype <string> Set TLS authentication type (default SRP)",
-#endif
     " -A/--user-agent <string> User-Agent to send to server (H)",
     " -v/--verbose       Make the operation more talkative",
     " -V/--version       Show version number and quit",
@@ -1924,11 +1922,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Eh","pubkey",      TRUE},
     {"Ei", "hostpubmd5", TRUE},
     {"Ej","crlfile",     TRUE},
-#ifdef USE_TLS_SRP
     {"Ek","tlsuser",     TRUE},
     {"El","tlspassword", TRUE},
     {"Em","tlsauthtype", TRUE},
-#endif
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"Fs","form-string", TRUE},
@@ -2757,28 +2753,27 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         /* CRL file */
         GetStr(&config->crlfile, nextarg);
         break;
-#ifdef USE_TLS_SRP
       case 'k': /* TLS username */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
-           GetStr(&config->tls_username, nextarg);
-        } else
+        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
+          GetStr(&config->tls_username, nextarg);
+        else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
 	break;
       case 'l': /* TLS password */
-        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
-           GetStr(&config->tls_password, nextarg);
-        } else
+        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
+          GetStr(&config->tls_password, nextarg);
+        else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
 	break;
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           GetStr(&config->tls_authtype, nextarg);
-          if (strncmp(config->tls_authtype, "SRP", strlen("SRP")) != 0)
+          if (!strequal(config->tls_authtype, "SRP"))
             return PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-        } else
+        }
+        else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
 	break;
-#endif
       default: /* certificate file */
       {
         char *ptr = strchr(nextarg, ':');
