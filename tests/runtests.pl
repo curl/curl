@@ -4335,7 +4335,7 @@ if($all) {
         sprintf("%.0f", $sofar) ." seconds.\n";
 }
 
-if($skipped) {
+if($skipped && !$short) {
     my $s=0;
     logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
 
