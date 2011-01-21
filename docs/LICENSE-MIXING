@@ -55,6 +55,10 @@ NSS     http://www.mozilla.org/projects/security/pki/nss/
         grant you different permissions and impose different obligations. You
         should select the license that best meets your needs.
 
+axTLS   http://axtls.sourceforge.net/
+
+        (May be used for SSL/TLS support) Uses a Modified BSD-style license.
+
 c-ares  http://daniel.haxx.se/projects/c-ares/license.html
 
         (Used for asynchronous name resolves) Uses an MIT license that is very

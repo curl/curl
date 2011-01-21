@@ -44,6 +44,7 @@ Portability
  MIT krb5 lib 1.2.4
  qsossl       V5R2M0
  NSS          3.11.x
+ axTLS        1.2.7
  Heimdal      ?
 
  * = only partly functional, but that's due to bugs in the third party lib, not
