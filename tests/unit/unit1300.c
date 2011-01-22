@@ -97,7 +97,7 @@ UNITTEST_START
     if( curlErrCode == 1 ) {
       fail_unless(llist->head->next->ptr == &unusedData_case2,
                   "the node next to head is not getting set correctly" );
-      //better safe than sorry, check that the tail isn't corrupted
+      /* better safe than sorry, check that the tail isn't corrupted */
       fail_unless(llist->tail->ptr != &unusedData_case2,
                   "the list tail is not getting set correctly" );
     }
