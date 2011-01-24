@@ -13,7 +13,7 @@ CFGSET=true
 # Usage
 #
 
-!MESSAGE Usage: nmake /f makefile.vc9 mode=<static or dll> <options>
+!MESSAGE Usage: nmake /f makefile.vc mode=<static or dll> <options>
 !MESSAGE where <options> is one or many of:
 !MESSAGE   VC=<6,7,8,9,10>              - VC versions
 !MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
