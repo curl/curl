@@ -1,4 +1,4 @@
-Updated: October 6, 2010 (http://curl.haxx.se/docs/faq.html)
+Updated: January 24, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -1224,16 +1224,18 @@ FAQ
 
   5.13 How do I stop an ongoing transfer?
 
-  There are several ways, but none of them are instant. There is no function
-  you can call from another thread or similar that will stop it immediately.
+  With the easy interface you make sure to return the correct error code from
+  one of the callbacks, but none of them are instant. There is no function you
+  can call from another thread or similar that will stop it immediately.
   Instead you need to make sure that one of the callbacks you use return an
   appropriate value that will stop the transfer.
 
   Suitable callbacks that you can do this with include the progress callback,
   the read callback and the write callback.
 
-  If you're using the multi interface, you also stop a transfer by removing
-  the particular easy handle from the multi stack.
+  If you're using the multi interface, you can also stop a transfer by
+  removing the particular easy handle from the multi stack. At any moment you
+  think the transfer is done.
 
   5.14 Using C++ non-static functions for callbacks?
 
