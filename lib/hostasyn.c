@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,10 +83,6 @@ void Curl_async_cancel(struct connectdata *conn)
     Curl_freeaddrinfo(conn->async.temp_ai);
     conn->async.temp_ai = NULL;
   }
-
-  /* for ares-using, make sure all possible outstanding requests are properly
-     cancelled before we proceed */
-  ares_cancel(conn->data->state.areschannel);
 }
 
 
@@ -126,6 +122,10 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
       if(--conn->async.num_pending > 0)
         /* We are not done yet. Just return. */
         return CURLE_OK;
+
+      /* make sure the temp pointer is cleared and isn't pointing to something
+         we take care of below */
+      conn->async.temp_ai = NULL;
 #endif
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -147,8 +147,10 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
       if(--conn->async.num_pending > 0) {
         /* We are not done yet. Clean up and return.
 	   This function will be called again. */
-        if(conn->async.temp_ai)
+        if(conn->async.temp_ai) {
           Curl_freeaddrinfo(conn->async.temp_ai);
+          conn->async.temp_ai = NULL;
+        }
         return CURLE_OUT_OF_MEMORY;
       }
 #endif
@@ -178,9 +180,12 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
           Curl_freeaddrinfo(conn->async.temp_ai);
           rc = CURLE_OUT_OF_MEMORY;
         }
-
         if(data->share)
           Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+        /* make sure the temp pointer is cleared and isn't pointing to
+           something we've taken care of already */
+        conn->async.temp_ai = NULL;
       }
   }
 #endif

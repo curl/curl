@@ -1,5 +1,5 @@
 Online:  http://curl.haxx.se/docs/httpscripting.html
-Date:    May 28, 2008
+Date:    Jan 19, 2011
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -38,10 +38,26 @@ Date:    May 28, 2008
  request a particular action, and then the server replies a few text lines
  before the actual requested content is sent to the client.
 
- Using curl's option --verbose (-v as a short option) will display what kind of
- commands curl sends to the server, as well as a few other informational texts. 
- --verbose is the single most useful option when it comes to debug or even
- understand the curl<->server interaction.
+ The client, curl, sends a HTTP request. The request contains a method (like
+ GET, POST, HEAD etc), a number of request headers and sometimes a request
+ body. The HTTP server responds with a status line (indicating if things went
+ well), response headers and most often also a response body. The "body" part
+ is the plain data you requested, like the actual HTML or the image etc.
+
+ 1.1 See the Protocol
+
+  Using curl's option --verbose (-v as a short option) will display what kind
+  of commands curl sends to the server, as well as a few other informational
+  texts.
+
+  --verbose is the single most useful option when it comes to debug or even
+  understand the curl<->server interaction.
+
+  Sometimes even --verbose is not enough. Then --trace and --trace-ascii offer
+  even more details as they show EVERYTHING curl sends and receives. Use it
+  like this:
+
+      curl --trace-ascii debugdump.txt http://www.example.com/
 
 2. URL
 
@@ -61,10 +77,10 @@ Date:    May 28, 2008
  you get a web page returned in your terminal window. The entire HTML document
  that that URL holds.
 
- All HTTP replies contain a set of headers that are normally hidden, use
- curl's --include (-i) option to display them as well as the rest of the
- document. You can also ask the remote server for ONLY the headers by using the
- --head (-I) option (which will make curl issue a HEAD request).
+ All HTTP replies contain a set of response headers that are normally hidden,
+ use curl's --include (-i) option to display them as well as the rest of the
+ document. You can also ask the remote server for ONLY the headers by using
+ the --head (-I) option (which will make curl issue a HEAD request).
 
 4. Forms
 
@@ -127,7 +143,8 @@ Date:    May 28, 2008
   And to use curl to post this form with the same data filled in as before, we
   could do it like:
 
-        curl --data "birthyear=1905&press=%20OK%20" http://www.hotmail.com/when/junk.cgi
+        curl --data "birthyear=1905&press=%20OK%20" \
+        http://www.example.com/when.cgi
 
   This kind of POST will use the Content-Type
   application/x-www-form-urlencoded and is the most widely used POST kind.
@@ -204,7 +221,7 @@ Date:    May 28, 2008
 
  Put a file to a HTTP server with curl:
 
-        curl --upload-file uploadfile http://www.uploadhttp.com/receive.cgi
+        curl --upload-file uploadfile http://www.example.com/receive.cgi
 
 6. HTTP Authentication
 
@@ -217,7 +234,7 @@ Date:    May 28, 2008
 
  To tell curl to use a user and password for authentication:
 
-        curl --user name:password http://www.secrets.com
+        curl --user name:password http://www.example.com
 
  The site might require a different authentication method (check the headers
  returned by the server), and then --ntlm, --digest, --negotiate or even
@@ -257,7 +274,7 @@ Date:    May 28, 2008
 
  Use curl to set the referer field with:
 
-        curl --referer http://curl.haxx.se http://daniel.haxx.se
+        curl --referer http://www.example.come http://www.example.com
 
 8. User Agent
 
@@ -273,13 +290,13 @@ Date:    May 28, 2008
  is time to set the User Agent field to fool the server into thinking you're
  one of those browsers.
 
- To make curl look like Internet Explorer on a Windows 2000 box:
+ To make curl look like Internet Explorer 5 on a Windows 2000 box:
 
-        curl --user-agent "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
+  curl --user-agent "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
 
- Or why not look like you're using Netscape 4.73 on a Linux (PIII) box:
+ Or why not look like you're using Netscape 4.73 on an old Linux box:
 
-        curl --user-agent "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
+  curl --user-agent "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
 
 9. Redirects
 
@@ -294,7 +311,7 @@ Date:    May 28, 2008
 
  To tell curl to follow a Location:
 
-        curl --location http://www.sitethatredirects.com
+        curl --location http://www.example.com
 
  If you use curl to POST to a site that immediately redirects you to another
  page, you can safely use --location (-L) and --data/--form together. Curl will
@@ -321,13 +338,13 @@ Date:    May 28, 2008
  The simplest way to send a few cookies to the server when getting a page with
  curl is to add them on the command line like:
 
-        curl --cookie "name=Daniel" http://www.cookiesite.com
+        curl --cookie "name=Daniel" http://www.example.com
 
  Cookies are sent as common HTTP headers. This is practical as it allows curl
  to record cookies simply by recording headers. Record cookies with curl by
  using the --dump-header (-D) option like:
 
-        curl --dump-header headers_and_cookies http://www.cookiesite.com
+        curl --dump-header headers_and_cookies http://www.example.com
 
  (Take note that the --cookie-jar option described below is a better way to
  store cookies.)
@@ -338,24 +355,25 @@ Date:    May 28, 2008
  believing you had a previous connection). To use previously stored cookies,
  you run curl like:
 
-        curl --cookie stored_cookies_in_file http://www.cookiesite.com
+        curl --cookie stored_cookies_in_file http://www.example.com
 
  Curl's "cookie engine" gets enabled when you use the --cookie option. If you
  only want curl to understand received cookies, use --cookie with a file that
- doesn't exist. Example, if you want to let curl understand cookies from a page 
- and follow a location (and thus possibly send back cookies it received), you
- can invoke it like:
+ doesn't exist. Example, if you want to let curl understand cookies from a
+ page and follow a location (and thus possibly send back cookies it received),
+ you can invoke it like:
 
-        curl --cookie nada --location http://www.cookiesite.com
+        curl --cookie nada --location http://www.example.com
 
  Curl has the ability to read and write cookie files that use the same file
  format that Netscape and Mozilla do. It is a convenient way to share cookies
- between browsers and automatic scripts. The --cookie (-b) switch automatically
- detects if a given file is such a cookie file and parses it, and by using the
- --cookie-jar (-c) option you'll make curl write a new cookie file at the end of
- an operation:
+ between browsers and automatic scripts. The --cookie (-b) switch
+ automatically detects if a given file is such a cookie file and parses it,
+ and by using the --cookie-jar (-c) option you'll make curl write a new cookie
+ file at the end of an operation:
 
-        curl --cookie cookies.txt --cookie-jar newcookies.txt http://www.cookiesite.com
+        curl --cookie cookies.txt --cookie-jar newcookies.txt \
+        http://www.example.com
 
 11. HTTPS
 
@@ -371,7 +389,7 @@ Date:    May 28, 2008
  Curl supports encrypted fetches thanks to the freely available OpenSSL
  libraries. To get a page from a HTTPS server, simply run curl like:
 
-        curl https://that.secure.server.com
+        curl https://secure.example.com
 
  11.1 Certificates
 
@@ -382,7 +400,7 @@ Date:    May 28, 2008
   can be specified on the command line or if not, entered interactively when
   curl queries for it. Use a certificate with curl on a HTTPS server like:
 
-        curl --cert mycert.pem https://that.secure.server.com
+        curl --cert mycert.pem https://secure.example.com
 
   curl also tries to verify that the server is who it claims to be, by
   verifying the server's certificate against a locally stored CA cert
@@ -403,17 +421,18 @@ Date:    May 28, 2008
  For example, you can change the POST request to a PROPFIND and send the data
  as "Content-Type: text/xml" (instead of the default Content-Type) like this:
 
-        curl --data "<xml>" --header "Content-Type: text/xml" --request PROPFIND url.com
+         curl --data "<xml>" --header "Content-Type: text/xml" \
+              --request PROPFIND url.com
 
  You can delete a default header by providing one without content. Like you
  can ruin the request by chopping off the Host: header:
 
-        curl --header "Host:" http://mysite.com
+        curl --header "Host:" http://www.example.com
 
  You can add headers the same way. Your server may want a "Destination:"
  header, and you can add it:
 
-        curl --header "Destination: http://moo.com/nowhere" http://url.com
+        curl --header "Destination: http://nowhere" http://example.com
 
 13. Web Login
 
@@ -443,7 +462,6 @@ Date:    May 28, 2008
  the HTML code for the login form and extract all the hidden fields to be able
  to do a proper login POST. Remember that the contents need to be URL encoded
  when sent in a normal POST.
-
 
 14. Debug
 
@@ -480,12 +498,10 @@ Date:    May 28, 2008
  RFC 2616 is a must to read if you want in-depth understanding of the HTTP
  protocol.
 
- RFC 2396 explains the URL syntax.
+ RFC 3986 explains the URL syntax.
 
  RFC 2109 defines how cookies are supposed to work.
 
  RFC 1867 defines the HTTP post upload format.
-
- http://www.openssl.org is the home of the OpenSSL project
 
  http://curl.haxx.se is the home of the cURL project

@@ -1872,28 +1872,30 @@ Force SSLv2
 Force SSLv3
 .RE
 .IP CURLOPT_SSL_VERIFYPEER
-Pass a long as parameter.
+Pass a long as parameter. By default, curl assumes a value of 1.
 
 This option determines whether curl verifies the authenticity of the peer's
-certificate. A value of 1 means curl verifies; zero means it doesn't.  The
-default is nonzero, but before 7.10, it was zero.
+certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't.
 
 When negotiating an SSL connection, the server sends a certificate indicating
 its identity.  Curl verifies whether the certificate is authentic, i.e. that
 you can trust that the server is who the certificate says it is.  This trust
 is based on a chain of digital signatures, rooted in certification authority
-(CA) certificates you supply.  As of 7.10, curl installs a default bundle of
-CA certificates and you can specify alternate certificates with the
-\fICURLOPT_CAINFO\fP option or the \fICURLOPT_CAPATH\fP option.
+(CA) certificates you supply.  curl uses a default bundle of CA certificates
+(the path for that is determined at build time) and you can specify alternate
+certificates with the \fICURLOPT_CAINFO\fP option or the \fICURLOPT_CAPATH\fP
+option.
 
 When \fICURLOPT_SSL_VERIFYPEER\fP is nonzero, and the verification fails to
 prove that the certificate is authentic, the connection fails.  When the
-option is zero, the connection succeeds regardless.
+option is zero, the peer certificate verification succeeds regardless.
 
 Authenticating the certificate is not by itself very useful.  You typically
 want to ensure that the server, as authentically identified by its
 certificate, is the server you mean to be talking to.  Use
-\fICURLOPT_SSL_VERIFYHOST\fP to control that.
+\fICURLOPT_SSL_VERIFYHOST\fP to control that. The check that the host name in
+the certificate is valid for the host name you're connecting to is done
+independently of the \fICURLOPT_SSL_VERIFYPEER\fP option.
 .IP CURLOPT_CAINFO
 Pass a char * to a zero terminated string naming a file holding one or more
 certificates to verify the peer with.  This makes sense only when used in
@@ -1924,13 +1926,15 @@ mismatch with the issuer of peer certificate (\fICURLOPT_SSL_VERIFYPEER\fP has
 to be set too for the check to fail). (Added in 7.19.0)
 .IP CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding multiple
-CA certificates to verify the peer with. The certificate directory must be
-prepared using the openssl c_rehash utility. This makes sense only when used
-in combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
-\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_CAPATH\fP need not even
-indicate an accessible path.  The \fICURLOPT_CAPATH\fP function apparently
-does not work in Windows due to some limitation in openssl. This option is
-OpenSSL-specific and does nothing if libcurl is built to use GnuTLS.
+CA certificates to verify the peer with. If libcurl is built against OpenSSL,
+the certificate directory must be prepared using the openssl c_rehash utility.
+This makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER\fP option.  If \fICURLOPT_SSL_VERIFYPEER\fP is zero,
+\fICURLOPT_CAPATH\fP need not even indicate an accessible path.  The
+\fICURLOPT_CAPATH\fP function apparently does not work in Windows due to some
+limitation in openssl. This option is OpenSSL-specific and does nothing if
+libcurl is built to use GnuTLS. NSS-powered libcurl provides the option only
+for backward compatibility.
 .IP CURLOPT_CRLFILE
 Pass a char * to a zero terminated string naming a file with the concatenation
 of CRL (in PEM format) to use in the certificate validation that occurs during
@@ -1949,20 +1953,6 @@ A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It
 is returned when the SSL exchange fails because the CRL file cannot be loaded.
 A failure in certificate verification due to a revocation information found in
 the CRL does not trigger this specific error. (Added in 7.19.0)
-.IP CURLOPT_CERTINFO
-Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl (if built with OpenSSL) will extract lots of information
-and data about the certificates in the certificate chain used in the SSL
-connection. This data is then possible to extract after a transfer using
-\fIcurl_easy_getinfo(3)\fP and its option \fICURLINFO_CERTINFO\fP. (Added in
-7.19.1)
-.IP CURLOPT_RANDOM_FILE
-Pass a char * to a zero terminated file name. The file will be used to read
-from to seed the random engine for SSL. The more random the specified file is,
-the more secure the SSL connection will become.
-.IP CURLOPT_EGDSOCKET
-Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
-socket. It will be used to seed the random engine for SSL.
 .IP CURLOPT_SSL_VERIFYHOST
 Pass a long as parameter.
 
@@ -1986,10 +1976,25 @@ doesn't matter what name it says.  (This is not ordinarily a useful setting).
 When the value is 0, the connection succeeds regardless of the names in the
 certificate.
 
-The default, since 7.10, is 2.
+The default value for this option is 2.
 
-This option controls checking the server's claimed identity.  The server could
-be lying.  To control lying, see \fICURLOPT_SSL_VERIFYPEER\fP.
+This option controls checking the server's certificate's claimed identity.
+The server could be lying.  To control lying, see
+\fICURLOPT_SSL_VERIFYPEER\fP.
+.IP CURLOPT_CERTINFO
+Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
+this enabled, libcurl (if built with OpenSSL) will extract lots of information
+and data about the certificates in the certificate chain used in the SSL
+connection. This data is then possible to extract after a transfer using
+\fIcurl_easy_getinfo(3)\fP and its option \fICURLINFO_CERTINFO\fP. (Added in
+7.19.1)
+.IP CURLOPT_RANDOM_FILE
+Pass a char * to a zero terminated file name. The file will be used to read
+from to seed the random engine for SSL. The more random the specified file is,
+the more secure the SSL connection will become.
+.IP CURLOPT_EGDSOCKET
+Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
+socket. It will be used to seed the random engine for SSL.
 .IP CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
 ciphers to use for the SSL connection. The list must be syntactically correct,

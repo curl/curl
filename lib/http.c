@@ -3723,7 +3723,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         return result;
     }
     else if((k->httpcode >= 300 && k->httpcode < 400) &&
-            checkprefix("Location:", k->p)) {
+            checkprefix("Location:", k->p) &&
+            !data->req.location) {
       /* this is the URL that the server advises us to use instead */
       char *location = Curl_copy_header_value(k->p);
       if (!location)
@@ -3732,7 +3733,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         /* ignore empty data */
         free(location);
       else {
-        DEBUGASSERT(!data->req.location);
         data->req.location = location;
 
         if(data->set.http_follow_location) {

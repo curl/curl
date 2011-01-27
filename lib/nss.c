@@ -42,6 +42,7 @@
 #include "strequal.h"
 #include "select.h"
 #include "sslgen.h"
+#include "llist.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -90,8 +91,12 @@ typedef struct {
   PRInt32 version; /* protocol version valid for this cipher */
 } cipher_s;
 
-#define PK11_SETATTRS(x,id,v,l) (x)->type = (id);       \
-  (x)->pValue=(v); (x)->ulValueLen = (l)
+#define PK11_SETATTRS(_attr, _idx, _type, _val, _len) do {  \
+  CK_ATTRIBUTE *ptr = (_attr) + ((_idx)++);                 \
+  ptr->type = (_type);                                      \
+  ptr->pValue = (_val);                                     \
+  ptr->ulValueLen = (_len);                                 \
+} while(0)
 
 #define CERT_NewTempCertificate __CERT_NewTempCertificate
 
@@ -308,18 +313,73 @@ static char *fmt_nickname(struct SessionHandle *data, enum dupstring cert_kind,
   return aprintf("PEM Token #%d:%s", 1, n);
 }
 
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
+/* Call PK11_CreateGenericObject() with the given obj_class and filename.  If
+ * the call succeeds, append the object handle to the list of objects so that
+ * the object can be destroyed in Curl_nss_close(). */
+static CURLcode nss_create_object(struct ssl_connect_data *ssl,
+                                  CK_OBJECT_CLASS obj_class,
+                                  const char *filename, bool cacert)
+{
+  PK11SlotInfo *slot;
+  PK11GenericObject *obj;
+  CK_BBOOL cktrue = CK_TRUE;
+  CK_BBOOL ckfalse = CK_FALSE;
+  CK_ATTRIBUTE attrs[/* max count of attributes */ 4];
+  int attr_cnt = 0;
+
+  const int slot_id = (cacert) ? 0 : 1;
+  char *slot_name = aprintf("PEM Token #%d", slot_id);
+  if(!slot_name)
+    return CURLE_OUT_OF_MEMORY;
+
+  slot = PK11_FindSlotByName(slot_name);
+  free(slot_name);
+  if(!slot)
+    return CURLE_SSL_CERTPROBLEM;
+
+  PK11_SETATTRS(attrs, attr_cnt, CKA_CLASS, &obj_class, sizeof(obj_class));
+  PK11_SETATTRS(attrs, attr_cnt, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL));
+  PK11_SETATTRS(attrs, attr_cnt, CKA_LABEL, (unsigned char *)filename,
+                strlen(filename) + 1);
+
+  if(CKO_CERTIFICATE == obj_class) {
+    CK_BBOOL *pval = (cacert) ? (&cktrue) : (&ckfalse);
+    PK11_SETATTRS(attrs, attr_cnt, CKA_TRUST, pval, sizeof(*pval));
+  }
+
+  obj = PK11_CreateGenericObject(slot, attrs, attr_cnt, PR_FALSE);
+  PK11_FreeSlot(slot);
+  if(!obj)
+    return CURLE_SSL_CERTPROBLEM;
+
+  if(!Curl_llist_insert_next(ssl->obj_list, ssl->obj_list->tail, obj)) {
+    PK11_DestroyGenericObject(obj);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  return CURLE_OK;
+}
+
+/* Destroy the NSS object whose handle is given by ptr.  This function is
+ * a callback of Curl_llist_alloc() used by Curl_llist_destroy() to destroy
+ * NSS objects in Curl_nss_close() */
+static void nss_destroy_object(void *user, void *ptr)
+{
+  PK11GenericObject *obj = (PK11GenericObject *)ptr;
+  (void) user;
+  PK11_DestroyGenericObject(obj);
+}
+#endif
+
 static int nss_load_cert(struct ssl_connect_data *ssl,
                          const char *filename, PRBool cacert)
 {
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  CK_SLOT_ID slotID;
-  PK11SlotInfo * slot = NULL;
-  CK_ATTRIBUTE *attrs;
-  CK_ATTRIBUTE theTemplate[20];
-  CK_BBOOL cktrue = CK_TRUE;
-  CK_BBOOL ckfalse = CK_FALSE;
-  CK_OBJECT_CLASS objClass = CKO_CERTIFICATE;
-  char slotname[SLOTSIZE];
+  /* All CA and trust objects go into slot 0. Other slots are used
+   * for storing certificates.
+   */
+  const int slot_id = (cacert) ? 0 : 1;
 #endif
   CERTCertificate *cert;
   char *nickname = NULL;
@@ -346,57 +406,15 @@ static int nss_load_cert(struct ssl_connect_data *ssl,
   }
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  attrs = theTemplate;
-
-  /* All CA and trust objects go into slot 0. Other slots are used
-   * for storing certificates. With each new user certificate we increment
-   * the slot count. We only support 1 user certificate right now.
-   */
-  if(cacert)
-    slotID = 0;
-  else
-    slotID = 1;
-
-  snprintf(slotname, SLOTSIZE, "PEM Token #%ld", slotID);
-
-  nickname = aprintf("PEM Token #%ld:%s", slotID, n);
+  nickname = aprintf("PEM Token #%d:%s", slot_id, n);
   if(!nickname)
     return 0;
 
-  slot = PK11_FindSlotByName(slotname);
-
-  if(!slot) {
+  if(CURLE_OK != nss_create_object(ssl, CKO_CERTIFICATE, filename, cacert)) {
     free(nickname);
     return 0;
   }
 
-  PK11_SETATTRS(attrs, CKA_CLASS, &objClass, sizeof(objClass) );
-  attrs++;
-  PK11_SETATTRS(attrs, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL) );
-  attrs++;
-  PK11_SETATTRS(attrs, CKA_LABEL, (unsigned char *)filename,
-                strlen(filename)+1);
-  attrs++;
-  if(cacert) {
-    PK11_SETATTRS(attrs, CKA_TRUST, &cktrue, sizeof(CK_BBOOL) );
-  }
-  else {
-    PK11_SETATTRS(attrs, CKA_TRUST, &ckfalse, sizeof(CK_BBOOL) );
-  }
-  attrs++;
-
-  /* This load the certificate in our PEM module into the appropriate
-   * slot.
-   */
-  ssl->cacert[slotID] = PK11_CreateGenericObject(slot, theTemplate, 4,
-                                                 PR_FALSE /* isPerm */);
-
-  PK11_FreeSlot(slot);
-
-  if(ssl->cacert[slotID] == NULL) {
-    free(nickname);
-    return 0;
-  }
 #else
   /* We don't have PK11_CreateGenericObject but a file-based cert was passed
    * in. We need to fail.
@@ -516,54 +534,27 @@ static int nss_load_key(struct connectdata *conn, int sockindex,
                         char *key_file)
 {
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  PK11SlotInfo * slot = NULL;
-  CK_ATTRIBUTE *attrs;
-  CK_ATTRIBUTE theTemplate[20];
-  CK_BBOOL cktrue = CK_TRUE;
-  CK_OBJECT_CLASS objClass = CKO_PRIVATE_KEY;
-  CK_SLOT_ID slotID;
-  char slotname[SLOTSIZE];
-  struct ssl_connect_data *sslconn = &conn->ssl[sockindex];
+  PK11SlotInfo *slot;
+  SECStatus status;
+  struct ssl_connect_data *ssl = conn->ssl;
 
-  attrs = theTemplate;
-
-  /* FIXME: grok the various file types */
-
-  slotID = 1; /* hardcoded for now */
-
-  snprintf(slotname, sizeof(slotname), "PEM Token #%ld", slotID);
-  slot = PK11_FindSlotByName(slotname);
-
-  if(!slot)
-    return 0;
-
-  PK11_SETATTRS(attrs, CKA_CLASS, &objClass, sizeof(objClass) ); attrs++;
-  PK11_SETATTRS(attrs, CKA_TOKEN, &cktrue, sizeof(CK_BBOOL) ); attrs++;
-  PK11_SETATTRS(attrs, CKA_LABEL, (unsigned char *)key_file,
-                strlen(key_file)+1); attrs++;
-
-  /* When adding an encrypted key the PKCS#11 will be set as removed */
-  sslconn->key = PK11_CreateGenericObject(slot, theTemplate, 3,
-                                          PR_FALSE /* isPerm */);
-  if(sslconn->key == NULL) {
+  if(CURLE_OK != nss_create_object(ssl, CKO_PRIVATE_KEY, key_file, FALSE)) {
     PR_SetError(SEC_ERROR_BAD_KEY, 0);
     return 0;
   }
+
+  slot = PK11_FindSlotByName("PEM Token #1");
+  if(!slot)
+    return 0;
 
   /* This will force the token to be seen as re-inserted */
   SECMOD_WaitForAnyTokenEvent(mod, 0, 0);
   PK11_IsPresent(slot);
 
-  /* parg is initialized in nss_Init_Tokens() */
-  if(PK11_Authenticate(slot, PR_TRUE,
-                       conn->data->set.str[STRING_KEY_PASSWD]) != SECSuccess) {
-
-    PK11_FreeSlot(slot);
-    return 0;
-  }
+  status = PK11_Authenticate(slot, PR_TRUE,
+                             conn->data->set.str[STRING_KEY_PASSWD]);
   PK11_FreeSlot(slot);
-
-  return 1;
+  return (SECSuccess == status) ? 1 : 0;
 #else
   /* If we don't have PK11_CreateGenericObject then we can't load a file-based
    * key.
@@ -1063,12 +1054,8 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
       connssl->client_nickname = NULL;
     }
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-    if(connssl->key)
-      (void)PK11_DestroyGenericObject(connssl->key);
-    if(connssl->cacert[1])
-      (void)PK11_DestroyGenericObject(connssl->cacert[1]);
-    if(connssl->cacert[0])
-      (void)PK11_DestroyGenericObject(connssl->cacert[0]);
+    /* destroy all NSS objects in order to avoid failure of NSS shutdown */
+    Curl_llist_destroy(connssl->obj_list, NULL);
 #endif
     connssl->handle = NULL;
   }
@@ -1108,6 +1095,55 @@ static bool handle_cc_error(PRInt32 err, struct SessionHandle *data)
 static Curl_recv nss_recv;
 static Curl_send nss_send;
 
+static CURLcode nss_load_ca_certificates(struct connectdata *conn,
+                                         int sockindex)
+{
+  struct SessionHandle *data = conn->data;
+  const char *cafile = data->set.ssl.CAfile;
+  const char *capath = data->set.ssl.CApath;
+
+  if(cafile && !nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE))
+    return CURLE_SSL_CACERT_BADFILE;
+
+  if(capath) {
+    struct_stat st;
+    if(stat(capath, &st) == -1)
+      return CURLE_SSL_CACERT_BADFILE;
+
+    if(S_ISDIR(st.st_mode)) {
+      PRDirEntry *entry;
+      PRDir *dir = PR_OpenDir(capath);
+      if(!dir)
+        return CURLE_SSL_CACERT_BADFILE;
+
+      while((entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN))) {
+        char *fullpath = aprintf("%s/%s", capath, entry->name);
+        if(!fullpath) {
+          PR_CloseDir(dir);
+          return CURLE_OUT_OF_MEMORY;
+        }
+
+        if(!nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE))
+          /* This is purposefully tolerant of errors so non-PEM files can
+           * be in the same directory */
+          infof(data, "failed to load '%s' from CURLOPT_CAPATH\n", fullpath);
+
+        free(fullpath);
+      }
+
+      PR_CloseDir(dir);
+    }
+    else
+      infof(data, "warning: CURLOPT_CAPATH not a directory (%s)\n", capath);
+  }
+
+  infof(data, "  CAfile: %s\n  CApath: %s\n",
+      cafile ? cafile : "none",
+      capath ? capath : "none");
+
+  return CURLE_OK;
+}
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRInt32 err;
@@ -1130,9 +1166,10 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   connssl->data = data;
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  connssl->cacert[0] = NULL;
-  connssl->cacert[1] = NULL;
-  connssl->key = NULL;
+  /* list of all NSS objects we need to destroy in Curl_nss_close() */
+  connssl->obj_list = Curl_llist_alloc(nss_destroy_object);
+  if(!connssl->obj_list)
+    return CURLE_OUT_OF_MEMORY;
 #endif
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
@@ -1249,62 +1286,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
                            NULL) != SECSuccess)
     goto error;
 
-  if(!data->set.ssl.verifypeer)
-    /* skip the verifying of the peer */
-    ;
-  else if(data->set.ssl.CAfile) {
-    int rc = nss_load_cert(&conn->ssl[sockindex], data->set.ssl.CAfile,
-                           PR_TRUE);
-    if(!rc) {
-      curlerr = CURLE_SSL_CACERT_BADFILE;
-      goto error;
-    }
-  }
-  else if(data->set.ssl.CApath) {
-    struct_stat st;
-    PRDir      *dir;
-    PRDirEntry *entry;
-
-    if(stat(data->set.ssl.CApath, &st) == -1) {
-      curlerr = CURLE_SSL_CACERT_BADFILE;
-      goto error;
-    }
-
-    if(S_ISDIR(st.st_mode)) {
-      int rc;
-
-      dir = PR_OpenDir(data->set.ssl.CApath);
-      do {
-        entry = PR_ReadDir(dir, PR_SKIP_BOTH | PR_SKIP_HIDDEN);
-
-        if(entry) {
-          char *fullpath;
-          size_t pathlen = strlen(data->set.ssl.CApath) +
-            strlen(entry->name) + 2; /* add two, for slash and trailing zero */
-          fullpath = malloc(pathlen);
-          if(!fullpath) {
-            PR_CloseDir(dir);
-            curlerr = CURLE_OUT_OF_MEMORY;
-            goto error;
-          }
-
-          snprintf(fullpath, pathlen, "%s/%s", data->set.ssl.CApath,
-                   entry->name);
-          rc = nss_load_cert(&conn->ssl[sockindex], fullpath, PR_TRUE);
-          /* FIXME: check this return value! */
-          free(fullpath);
-        }
-        /* This is purposefully tolerant of errors so non-PEM files
-         * can be in the same directory */
-      } while(entry != NULL);
-      PR_CloseDir(dir);
-    }
-  }
-  infof(data,
-        "  CAfile: %s\n"
-        "  CApath: %s\n",
-        data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
-        data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+  if(data->set.ssl.verifypeer && (CURLE_OK !=
+        (curlerr = nss_load_ca_certificates(conn, sockindex))))
+    goto error;
 
   if (data->set.ssl.CRLfile) {
     if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {

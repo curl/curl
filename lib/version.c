@@ -265,6 +265,9 @@ static curl_version_info_data version_info = {
 #if defined(CURL_DOES_CONVERSIONS)
   | CURL_VERSION_CONV
 #endif
+#if defined(USE_TLS_SRP)
+  | CURL_VERSION_TLSAUTH_SRP
+#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */

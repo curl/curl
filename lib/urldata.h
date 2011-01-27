@@ -251,6 +251,9 @@ struct ssl_connect_data {
 #ifdef USE_GNUTLS
   gnutls_session session;
   gnutls_certificate_credentials cred;
+#ifdef USE_TLS_SRP
+  gnutls_srp_client_credentials srp_client_cred;
+#endif
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_POLARSSL
@@ -268,8 +271,7 @@ struct ssl_connect_data {
   char *client_nickname;
   struct SessionHandle *data;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  PK11GenericObject *key;
-  PK11GenericObject *cacert[2];
+  struct curl_llist *obj_list;
 #endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
@@ -300,6 +302,12 @@ struct ssl_config_data {
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
   bool certinfo;         /* gather lots of certificate info */
+
+#ifdef USE_TLS_SRP
+  char *username; /* TLS username (for, e.g., SRP) */
+  char *password; /* TLS password (for, e.g., SRP) */
+  enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
+#endif
 };
 
 /* information stored about one single SSL session */
@@ -1314,6 +1322,11 @@ enum dupstring {
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
   STRING_MAIL_FROM,
+
+#ifdef USE_TLS_SRP
+  STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
+  STRING_TLSAUTH_PASSWORD,     /* TLS auth <password> */
+#endif
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

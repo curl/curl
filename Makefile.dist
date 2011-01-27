@@ -32,27 +32,27 @@ ssl:
 
 borland:
 	cd lib
-	make -f Makefile.b32
+	$(MAKE) -f Makefile.b32
 	cd ..\src
-	make -f Makefile.b32
+	$(MAKE) -f Makefile.b32
 
 borland-ssl:
 	cd lib
-	make -f Makefile.b32 WITH_SSL=1
+	$(MAKE) -f Makefile.b32 WITH_SSL=1
 	cd ..\src
-	make -f Makefile.b32 WITH_SSL=1
+	$(MAKE) -f Makefile.b32 WITH_SSL=1
 
 borland-ssl-zlib:
 	cd lib
-	make -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
+	$(MAKE) -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
 	cd ..\src
-	make -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
+	$(MAKE) -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
 
 borland-clean:
 	cd lib
-	make -f Makefile.b32 clean
+	$(MAKE) -f Makefile.b32 clean
 	cd ..\src
-	make -f Makefile.b32 clean
+	$(MAKE) -f Makefile.b32 clean
 
 watcom: .SYMBOLIC
 	cd lib && $(MAKE) -u -f Makefile.Watcom

@@ -751,6 +751,9 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    */
   set->ssl.verifypeer = TRUE;
   set->ssl.verifyhost = 2;
+#ifdef USE_TLS_SRP
+  set->ssl.authtype = CURL_TLSAUTH_NONE;
+#endif
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                       type */
   set->ssl.sessionid = TRUE; /* session ID caching enabled by default */
@@ -2526,6 +2529,26 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   case CURLOPT_FNMATCH_DATA:
     data->set.fnmatch_data = va_arg(param, void *);
     break;
+#ifdef USE_TLS_SRP
+  case CURLOPT_TLSAUTH_USERNAME:
+    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME],
+                       va_arg(param, char *));
+    if (data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
+      data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    break;
+  case CURLOPT_TLSAUTH_PASSWORD:
+    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD],
+                       va_arg(param, char *));
+    if (data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
+      data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    break;
+  case CURLOPT_TLSAUTH_TYPE:
+    if (strncmp((char *)va_arg(param, char *), "SRP", strlen("SRP")) == 0)
+      data->set.ssl.authtype = CURL_TLSAUTH_SRP;
+    else
+      data->set.ssl.authtype = CURL_TLSAUTH_NONE;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */
@@ -4929,6 +4952,10 @@ static CURLcode create_conn(struct SessionHandle *data,
   data->set.ssl.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.ssl.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.ssl.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
+#ifdef USE_TLS_SRP
+  data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME];
+  data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+#endif
 
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
@@ -5213,6 +5240,8 @@ CURLcode Curl_done(struct connectdata **connp,
     free(data->req.location);
     data->req.location = NULL;
   }
+
+  Curl_async_cancel(conn);
 
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */

@@ -325,9 +325,9 @@ int cert_stuff(struct connectdata *conn,
        * If password has been given, we store that in the global
        * area (*shudder*) for a while:
        */
-      size_t len = strlen(data->set.key_passwd);
+      size_t len = strlen(data->set.str[STRING_KEY_PASSWD]);
       if(len < sizeof(global_passwd))
-        memcpy(global_passwd, data->set.key_passwd, len+1);
+        memcpy(global_passwd, data->set.str[STRING_KEY_PASSWD], len+1);
 #else
       /*
        * We set the password in the callback userdata

@@ -6,19 +6,28 @@
 #
 #  'BCCDIR' has to be set up to point to the base directory
 #  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
-#  where c:\Borland\BCC55 is the compiler is installed
 #
-#  Written by Jaepil Kim, pit@paradise.net.nz
+#  Initially written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
+
+!if "$(__MAKE__)" == ""
+!error __MAKE__ not defined. Use Borlands's MAKE to process this makefile.
+!endif
+
+# Borland's $(MAKEDIR) expands to the path where make.exe is located,
+# use this feature to define BCCDIR when user has not defined BCCDIR.
+!ifndef BCCDIR
+BCCDIR = $(MAKEDIR)\..
+!endif
 
 # Edit the path below to point to the base of your Zlib sources.
 !ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.1
+ZLIB_PATH = ..\..\zlib-1.2.5
 !endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 !ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7d
+OPENSSL_PATH = ..\..\openssl-0.9.8q
 !endif
 
 # Set libcurl static lib, dll and import lib
@@ -27,36 +36,53 @@ LIBCURL_DLL    = libcurl.dll
 LIBCURL_IMPLIB = libcurl_imp.lib
 
 # Setup environment
-CXX      = bcc32
+PP_CMD   = cpp32 -q -P-
+CC_CMD   = bcc32 -q -c
 LD       = bcc32
-CP       = copy
-RM       = del
+RM       = del 2>NUL
+MKDIR    = mkdir
+RMDIR    = rmdir /s /q 2>NUL
 LIB      = tlib
 IMPLIB   = implib
 
-CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -Dinline=__inline
 LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
-INCDIRS  = -I.;../include
-LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
+SRCDIR   = .
+OBJDIR   = .\objs
+INCDIRS  = -I.;..\include
+LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
+DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
 
-# If you build with SSL support, set WITH_SSL=1
-DEFINES  = -DNDEBUG -DWIN32 -D_CONSOLE -D_MBCS -DBUILDING_LIBCURL
+# By default SSPI support is enabled for BCC
+!ifndef DISABLE_SSPI
+DEFINES  = $(DEFINES) -DUSE_WINDOWS_SSPI
+!endif
 
+# By default LDAP support is disabled for BCC
+!ifndef WITH_LDAP
+DEFINES  = $(DEFINES) -DCURL_DISABLE_LDAP
+!endif
+
+# ZLIB support is enabled setting WITH_ZLIB=1
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
-LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
+LINKLIB  = $(LINKLIB) $(ZLIB_PATH)\zlib.lib
 !endif
 
+# SSL support is enabled setting WITH_SSL=1
 !ifdef WITH_SSL
 DEFINES  = $(DEFINES) -DUSE_SSLEAY
-INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
-LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
+INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)\inc32;$(OPENSSL_PATH)\inc32\openssl
+LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\libeay32.lib
 !endif
 
 .autodepend
+
+.path.c   = $(SRCDIR)
+.path.obj = $(OBJDIR)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 !include Makefile.inc
@@ -64,18 +90,24 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/l
 OBJECTS = $(CSOURCES:.c=.obj)
 
 .c.obj:
-	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $<
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(<)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
 
-all:	$(LIBCURL_LIB) $(LIBCURL_DLL)
+all:	$(OBJDIR) $(LIBCURL_LIB) $(LIBCURL_DLL)
 
 clean:
-	-$(RM) $(LIBCURL_LIB)
-	-$(RM) $(LIBCURL_IMPLIB)
-	-$(RM) libcurl.tds
-	-$(RM) *.obj
+	@-$(RMDIR) $(OBJDIR)
+	@-$(RM) $(LIBCURL_LIB)
+	@-$(RM) $(LIBCURL_IMPLIB)
+	@-$(RM) libcurl.tds
+
+$(OBJDIR):
+	@-$(RMDIR) $(OBJDIR)
+	@-$(MKDIR) $(OBJDIR)
 
 $(LIBCURL_LIB): $(OBJECTS)
-	@-$(RM) $@
+	@-$(RM) $(LIBCURL_LIB)
 	$(LIB) $(LIBFLAGS) $@ @&&!
 +$(**: = &^
 +)
@@ -87,3 +119,5 @@ $(LIBCURL_DLL) $(LIBCURL_IMPLIB): $(OBJECTS) $(LINKLIB)
 	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) $**
 	$(IMPLIB) $(LIBCURL_IMPLIB) $(LIBCURL_DLL)
 
+
+# End of Makefile.b32

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -95,6 +95,7 @@ use vars qw(
     find_sftpsrv
     find_sftp
     find_sshkeygen
+    find_gnutls_serv
     logmsg
     sshversioninfo
     );
@@ -290,6 +291,12 @@ sub find_sfile {
     return find_file($filename, @spath);
 }
 
+#***************************************************************************
+# Find gnutls-serv and return canonical filename
+#
+sub find_gnutls_serv {
+    return find_file("gnutls-serv", split(':', $ENV{PATH}));
+}
 
 #***************************************************************************
 # Find ssh daemon and return canonical filename

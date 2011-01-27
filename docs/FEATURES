@@ -125,7 +125,7 @@ FILE
 FOOTNOTES
 =========
 
-  *1 = requires OpenSSL, GnuTLS, NSS, yassl or PolarSSL
+  *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS or PolarSSL
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar.
   *4 = requires FBopenssl

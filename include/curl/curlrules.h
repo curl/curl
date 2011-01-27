@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -216,14 +216,23 @@ typedef char
  * Macros for minimum-width signed and unsigned curl_off_t integer constants.
  */
 
-#ifdef CURL_ISOCPP
-#  define __CURL_OFF_T_C_HELPER2(Val,Suffix) Val ## Suffix
+#if defined(__BORLANDC__) && (__BORLANDC__ == 0x0551)
+#  define __CURL_OFF_T_C_HLPR2(x) x
+#  define __CURL_OFF_T_C_HLPR1(x) __CURL_OFF_T_C_HLPR2(x)
+#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val) ## \
+                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val) ## \
+                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
 #else
-#  define __CURL_OFF_T_C_HELPER2(Val,Suffix) Val/**/Suffix
+#  ifdef CURL_ISOCPP
+#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
+#  else
+#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
+#  endif
+#  define __CURL_OFF_T_C_HLPR1(Val,Suffix) __CURL_OFF_T_C_HLPR2(Val,Suffix)
+#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
 #endif
-#define __CURL_OFF_T_C_HELPER1(Val,Suffix) __CURL_OFF_T_C_HELPER2(Val,Suffix)
-#define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HELPER1(Val,CURL_SUFFIX_CURL_OFF_T)
-#define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HELPER1(Val,CURL_SUFFIX_CURL_OFF_TU)
 
 /*
  * Get rid of macros private to this header file.

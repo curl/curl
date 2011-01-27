@@ -48,6 +48,7 @@ int test(char *URL)
   }
 
   test_setopt(curls, CURLOPT_URL, URL);
+  test_setopt(curls, CURLOPT_HEADER, 1L);
 
   if ((ret = curl_multi_add_handle(multi, curls)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -280,6 +280,9 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_CHUNK_FAILED:
     return "Chunk callback failed";
+
+  case CURLE_TLSAUTH_FAILED:
+    return "TLS Authentication failed";
 
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE4:

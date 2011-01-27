@@ -346,6 +346,29 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+#ifdef USE_TLS_SRP
+  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+    infof(data, "Using TLS-SRP username: %s\n", data->set.ssl.username);
+
+    rc = gnutls_srp_allocate_client_credentials(
+           &conn->ssl[sockindex].srp_client_cred);
+    if(rc != GNUTLS_E_SUCCESS) {
+      failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
+            gnutls_strerror(rc));
+      return CURLE_TLSAUTH_FAILED;
+    }
+
+    rc = gnutls_srp_set_client_credentials(conn->ssl[sockindex].srp_client_cred,
+                                           data->set.ssl.username,
+                                           data->set.ssl.password);
+    if(rc != GNUTLS_E_SUCCESS) {
+      failf(data, "gnutls_srp_set_client_cred() failed: %s",
+            gnutls_strerror(rc));
+      return CURLE_TLSAUTH_FAILED;
+    }
+  }
+#endif
+
   if(data->set.ssl.CAfile) {
     /* set the trusted CA cert bundle file */
     gnutls_certificate_set_verify_flags(conn->ssl[sockindex].cred,
@@ -431,9 +454,18 @@ gtls_connect_step1(struct connectdata *conn,
     }
   }
 
+#ifdef USE_TLS_SRP
   /* put the credentials to the current session */
-  rc = gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE,
-                              conn->ssl[sockindex].cred);
+  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+    rc = gnutls_credentials_set(session, GNUTLS_CRD_SRP,
+                                conn->ssl[sockindex].srp_client_cred);
+    if (rc != GNUTLS_E_SUCCESS) {
+      failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
+    }
+  } else
+#endif
+    rc = gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE,
+                                conn->ssl[sockindex].cred);
 
   /* set the connection handle (file descriptor for the socket) */
   gnutls_transport_set_ptr(session,
@@ -496,8 +528,21 @@ gtls_connect_step3(struct connectdata *conn,
     if(data->set.ssl.verifypeer ||
        data->set.ssl.verifyhost ||
        data->set.ssl.issuercert) {
-      failf(data, "failed to get server cert");
-      return CURLE_PEER_FAILED_VERIFICATION;
+#ifdef USE_TLS_SRP
+      if(data->set.ssl.authtype == CURL_TLSAUTH_SRP
+         && data->set.ssl.username != NULL
+         && !data->set.ssl.verifypeer
+         && gnutls_cipher_get(session)) {
+        /* no peer cert, but auth is ok if we have SRP user and cipher and no
+           peer verify */
+      }
+      else {
+#endif
+        failf(data, "failed to get server cert");
+        return CURLE_PEER_FAILED_VERIFICATION;
+#ifdef USE_TLS_SRP
+      }
+#endif
     }
     infof(data, "\t common name: WARNING couldn't obtain\n");
   }
@@ -530,8 +575,10 @@ gtls_connect_step3(struct connectdata *conn,
     else
       infof(data, "\t server certificate verification OK\n");
   }
-  else
+  else {
     infof(data, "\t server certificate verification SKIPPED\n");
+    goto after_server_cert_verification;
+  }
 
   /* initialize an X.509 certificate structure. */
   gnutls_x509_crt_init(&x509_cert);
@@ -660,6 +707,8 @@ gtls_connect_step3(struct connectdata *conn,
   infof(data, "\t issuer: %s\n", certbuf);
 
   gnutls_x509_crt_deinit(x509_cert);
+
+after_server_cert_verification:
 
   /* compression algorithm (if any) */
   ptr = gnutls_compression_get_name(gnutls_compression_get(session));
@@ -820,6 +869,12 @@ static void close_one(struct connectdata *conn,
     gnutls_certificate_free_credentials(conn->ssl[idx].cred);
     conn->ssl[idx].cred = NULL;
   }
+#ifdef USE_TLS_SRP
+  if (conn->ssl[idx].srp_client_cred) {
+    gnutls_srp_free_client_credentials(conn->ssl[idx].srp_client_cred);
+    conn->ssl[idx].srp_client_cred = NULL;
+  }
+#endif
 }
 
 void Curl_gtls_close(struct connectdata *conn, int sockindex)
@@ -888,6 +943,12 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
     gnutls_deinit(conn->ssl[sockindex].session);
   }
   gnutls_certificate_free_credentials(conn->ssl[sockindex].cred);
+
+#ifdef USE_TLS_SRP
+  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP
+     && data->set.ssl.username != NULL)
+    gnutls_srp_free_client_credentials(conn->ssl[sockindex].srp_client_cred);
+#endif
 
   conn->ssl[sockindex].cred = NULL;
   conn->ssl[sockindex].session = NULL;

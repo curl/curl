@@ -146,6 +146,7 @@ dnl initialize all the info variables
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
+curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
@@ -1754,6 +1755,17 @@ if test "$GNUTLS_ENABLED" = "1"; then
     ])
 fi
 
+dnl ---
+dnl We require GnuTLS with SRP support.
+dnl ---
+if test "$GNUTLS_ENABLED" = "1"; then
+  AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
+   [
+     AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
+     AC_SUBST(HAVE_GNUTLS_SRP, [1])
+   ])
+fi
+
 dnl ----------------------------------------------------
 dnl check for PolarSSL
 dnl ----------------------------------------------------
@@ -2655,6 +2667,33 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
 )
 
 dnl ************************************************************
+dnl disable TLS-SRP authentication
+dnl
+AC_MSG_CHECKING([whether to enable TLS-SRP authentication])
+AC_ARG_ENABLE(tls-srp,
+AC_HELP_STRING([--enable-tls-srp],[Enable TLS-SRP authentication])
+AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_TLS_SRP, 1, [to disable TLS-SRP authentication])
+       want_tls_srp=no
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       want_tls_srp=yes
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+       want_tls_srp=yes
+)
+
+if test "$want_tls_srp" = "yes" && test "x$HAVE_GNUTLS_SRP" = "x1"; then
+   AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
+   USE_TLS_SRP=1
+   curl_tls_srp_msg="enabled"
+fi
+
+dnl ************************************************************
 dnl disable cookies support
 dnl
 AC_MSG_CHECKING([whether to enable support for cookies])
@@ -2802,6 +2841,9 @@ if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
     -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 fi
+if test "x$USE_TLS_SRP" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
+fi
 
 AC_SUBST(SUPPORT_FEATURES)
 
@@ -2945,6 +2987,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
   SPNEGO support:  ${curl_spnego_msg}
+  TLS-SRP support: ${curl_tls_srp_msg}
   resolver:        ${curl_res_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}

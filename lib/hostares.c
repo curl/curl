@@ -332,8 +332,17 @@ static void ares_query_completed_cb(void *arg,  /* (struct connectdata *) */
   (void)timeouts; /* ignored */
 #endif
 
-  if (status == CURL_ASYNC_SUCCESS) {
+  switch(status) {
+  case CURL_ASYNC_SUCCESS:
     ai = Curl_he2ai(hostent, conn->async.port);
+    break;
+  case ARES_EDESTRUCTION:
+    /* this ares handle is getting destroyed, the 'arg' pointer may not be
+       valid! */
+    return;
+  default:
+    /* do nothing */
+    break;
   }
 
   (void)Curl_addrinfo_callback(arg, status, ai);
