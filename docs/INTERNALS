@@ -15,7 +15,7 @@ INTERNALS
 GIT
 ===
  All changes to the sources are committed to the git repository as soon as
- they're somewhat verified to work. Changes shall be commited as independently
+ they're somewhat verified to work. Changes shall be committed as independently
  as possible so that individual changes can be easier spotted and tracked
  afterwards.
 
@@ -91,7 +91,7 @@ Windows vs Unix
    do it etc there might be reasons for applications to alter that behaviour.
 
  3. The file descriptors for network communication and file operations are
-    not easily interchangable as in unix.
+    not easily interchangeable as in unix.
 
    We avoid this by not trying any funny tricks on file descriptors.
 
@@ -183,7 +183,7 @@ Library
 
    Some time during the DO function, the Curl_setup_transfer() function must
    be called with some basic info about the upcoming transfer: what socket(s)
-   to read/write and the expected file tranfer sizes (if known).
+   to read/write and the expected file transfer sizes (if known).
 
  o Transfer()
 
@@ -225,15 +225,15 @@ Library
  A quick roundup on internal function sequences (many of these call
  protocol-specific function-pointers):
 
-  curl_connect - connects to a remote site and does initial connect fluff
+  Curl_connect - connects to a remote site and does initial connect fluff
    This also checks for an existing connection to the requested site and uses
    that one if it is possible.
 
-   curl_do - starts a transfer
-    curl_transfer() - transfers data
-   curl_done - ends a transfer
+   Curl_do - starts a transfer
+    Curl_handler::do_it() - transfers data
+   Curl_done - ends a transfer
 
-  curl_disconnect - disconnects from a remote site. This is called when the
+  Curl_disconnect - disconnects from a remote site. This is called when the
    disconnect is really requested, which doesn't necessarily have to be
    exactly after curl_done in case we want to keep the connection open for
    a while.
@@ -250,13 +250,13 @@ Library
  HTTPS uses in almost every means the same procedure as HTTP, with only two
  exceptions: the connect procedure is different and the function used to read
  or write from the socket is different, although the latter fact is hidden in
- the source by the use of curl_read() for reading and curl_write() for writing
+ the source by the use of Curl_read() for reading and Curl_write() for writing
  data to the remote server.
 
  http_chunks.c contains functions that understands HTTP 1.1 chunked transfer
  encoding.
 
- An interesting detail with the HTTP(S) request, is the add_buffer() series of
+ An interesting detail with the HTTP(S) request, is the Curl_add_buffer() series of
  functions we use. They append data to one single buffer, and when the
  building is done the entire request is sent off in one single write. This is
  done this way to overcome problems with flawed firewalls and lame servers.
@@ -292,7 +292,7 @@ Library
  URL encoding and decoding, called escaping and unescaping in the source code,
  is found in lib/escape.c.
 
- While transfering data in Transfer() a few functions might get used.
+ While transferring data in Transfer() a few functions might get used.
  curl_getdate() in lib/parsedate.c is for HTTP date comparisons (and more).
 
  lib/getenv.c offers curl_getenv() which is for reading environment variables
@@ -304,7 +304,7 @@ Library
  lib/netrc.c holds the .netrc parser
 
  lib/timeval.c features replacement functions for systems that don't have
- gettimeofday() and a few support functions for timeval convertions.
+ gettimeofday() and a few support functions for timeval conversions.
 
  A function named curl_version() that returns the full curl version string is
  found in lib/version.c.
@@ -357,8 +357,10 @@ multi interface/non-blocking
 
  The FTP and the SFTP/SCP protocols are thus perfect examples of how we adapt
  and adjust the code to allow non-blocking operations even on multi-stage
- protocols. The DICT, LDAP and TELNET are crappy examples and they are subject
- for rewrite in the future to better fit the libcurl protocol family.
+ protocols. They are built around state machines that return when they could
+ block waiting for data.  The DICT, LDAP and TELNET protocols are crappy
+ examples and they are subject for rewrite in the future to better fit the
+ libcurl protocol family.
 
 SSL libraries
 =============
@@ -380,7 +382,9 @@ Library Symbols
  All symbols used internally in libcurl must use a 'Curl_' prefix if they're
  used in more than a single file. Single-file symbols must be made static.
  Public ("exported") symbols must use a 'curl_' prefix. (There are exceptions,
- but they are to be changed to follow this pattern in future versions.)
+ but they are to be changed to follow this pattern in future versions.) Public
+ API functions are marked with CURL_EXTERN in the public header files so that
+ all others can be hidden on platforms where this is possible.
 
 Return Codes and Informationals
 ===============================
@@ -463,15 +467,15 @@ Test Suite
  subdirectory directly off the root in the curl archive tree, and it contains
  a bunch of scripts and a lot of test case data.
 
- The main test script is runtests.pl that will invoke the two servers
+ The main test script is runtests.pl that will invoke test servers like
  httpserver.pl and ftpserver.pl before all the test cases are performed. The
  test suite currently only runs on unix-like platforms.
 
- You'll find a complete description of the test case data files in the
- tests/README file.
+ You'll find a description of the test suite in the tests/README file, and the
+ test case data files in the tests/FILEFORMAT file.
 
  The test suite automatically detects if curl was built with the memory
- debugging enabled, and if it was it will detect memory leaks too.
+ debugging enabled, and if it was it will detect memory leaks, too.
 
 Building Releases
 =================
