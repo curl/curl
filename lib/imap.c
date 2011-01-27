@@ -256,7 +256,7 @@ static int imap_getsock(struct connectdata *conn,
   return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
 }
 
-/* fucntion that checks for an imap status code at the start of the
+/* function that checks for an imap status code at the start of the
    given string */
 static int imap_endofresp(struct pingpong *pp, int *resp)
 {
