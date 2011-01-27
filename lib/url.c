@@ -5241,6 +5241,8 @@ CURLcode Curl_done(struct connectdata **connp,
     data->req.location = NULL;
   }
 
+  Curl_async_cancel(conn);
+
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
     conn->dns_entry = NULL;
