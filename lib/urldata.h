@@ -271,8 +271,7 @@ struct ssl_connect_data {
   char *client_nickname;
   struct SessionHandle *data;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
-  PK11GenericObject *key;
-  PK11GenericObject *cacert[2];
+  struct curl_llist *obj_list;
 #endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
