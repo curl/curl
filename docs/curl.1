@@ -1056,7 +1056,8 @@ RFC 959 defines to FTP servers, or one of the commands listed below to
 SFTP servers.  This option can be used multiple times.
 
 SFTP is a binary protocol. Unlike for FTP, libcurl interprets SFTP quote
-commands before sending them to the server.  Following is the list of
+commands itself before sending them to the server.  File names may be quoted
+shell-style to embed spaces or special characters.  Following is the list of
 all supported SFTP quote commands:
 .RS
 .IP "chgrp group file"
