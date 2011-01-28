@@ -50,12 +50,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* Debug this single source file with:
-   'make netrc' then run './netrc'!
-
-   Oh, make sure you have a .netrc file too ;-)
- */
-
 /* Get user and password from .netrc when given a machine name */
 
 enum host_lookup_state {
@@ -230,20 +224,3 @@ int Curl_parsenetrc(const char *host,
 
   return retcode;
 }
-
-#ifdef _NETRC_DEBUG
-int main(int argc, argv_item_t argv[])
-{
-  char login[64]="";
-  char password[64]="";
-
-  if(argc<2)
-    return -1;
-
-  if(0 == ParseNetrc(argv[1], login, password)) {
-    printf("HOST: %s LOGIN: %s PASSWORD: %s\n",
-           argv[1], login, password);
-  }
-}
-
-#endif
