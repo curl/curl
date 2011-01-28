@@ -58,7 +58,7 @@
 
 /* Get user and password from .netrc when given a machine name */
 
-enum {
+enum host_lookup_state {
   NOTHING,
   HOSTFOUND,    /* the 'machine' keyword was found */
   HOSTCOMPLETE, /* the machine name following the keyword was found too */
@@ -83,7 +83,7 @@ int Curl_parsenetrc(const char *host,
   char *home = NULL;
   bool home_alloc = FALSE;
   bool netrc_alloc = FALSE;
-  int state=NOTHING;
+  enum host_lookup_state state=NOTHING;
 
   char state_login=0;      /* Found a login keyword */
   char state_password=0;   /* Found a password keyword */
@@ -210,6 +210,10 @@ int Curl_parsenetrc(const char *host,
             state_our_login = FALSE;
           }
           break;
+        case HOSTCOMPLETE:
+        case HOSTEND:
+            /* Should not be reached. */
+            DEBUGASSERT(0);
         } /* switch (state) */
 
         tok = strtok_r(NULL, " \t\n", &tok_buf);
