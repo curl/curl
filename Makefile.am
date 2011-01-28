@@ -30,10 +30,13 @@ CMake/CurlTests.c CMake/FindOpenSSL.cmake CMake/FindZLIB.cmake		\
 CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
+WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
+winbuild/MakefileBuild.vc winbuild/Makefile.vc
+
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  curl-style.el sample.emacs RELEASE-NOTES buildconf 	\
  libcurl.pc.in vc6curl.dsw MacOSX-Framework Android.mk $(CMAKE_DIST)	\
- Makefile.msvc.names
+ Makefile.msvc.names $(WINBUILD_DIST)
 
 bin_SCRIPTS = curl-config
 

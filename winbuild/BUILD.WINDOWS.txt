@@ -1,0 +1,68 @@
+Building with Visual C++, prerequises
+=====================================
+   This document describes how to compile, build and install curl and libcurl
+   from sources using the Visual C++ build tool. To build with VC++, you will
+   of course have to first install VC++. The minimum required version of
+   VC is 6 (part of Visual Studio 6). However using a more recent version like
+   2008 (vc9) is strongly recommended.
+
+   VC++ is also part of the Windows Platform SDK. You do not have to install
+   the full Visual Studio or Visual C++ if all you want is to build curl.
+
+   The Platform SDK can be fetched here, freely:
+
+    http://msdn.microsoft.com/en-us/windows/bb980924
+
+   If you wish to support zlib, openssl, ssh2, you will have to download
+   them separately and copy them to the deps directory as shown below:
+   
+   somedirectory\
+    |_curl-src
+    | |_winbuild
+    |
+    |_deps
+      |_ lib
+      |_ include
+      |_ bin
+
+   It is also possible to create the deps directory in some other random
+   places and tell the Makefile its location using the WITH_DEVEL option.
+
+Building with Visual C++
+========================
+
+Open a Visual Studio Command prompt or the SDK CMD shell.
+
+    Using the CMD Shell:
+     choose the right environment via the setenv command (see setenv /?)
+     for the full list of options. setenv /xp /x86 /release for example.
+
+    Using the Visual Studio command prompt Shell:
+     Everything is already pre-configured by calling one of the command
+     prompt.
+
+Once you are in the consonle, go to the winbuild directory in the Curl 
+sources:
+    cd curl-src\winbuild
+
+Then you can call nmake /f makefile with the desired options (see below).
+The builds will be in the top src directory, builds\ directory, in 
+a directory named using the options given to the nmake call.
+
+nmake /f makefile.vc mode=<static or dll> <options>
+where <options> is one or many of:
+  VC=<6,7,8,9,10>              - VC versions
+  WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
+                                 Default to sibbling directory deps: ../deps
+                                 Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
+                                 Uncompress them into the deps folder.
+  WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
+  WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
+  USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
+  USE_IPV6=<yes or no>         - Enable IPV6, default to yes
+  DEBUG=<yes or no>            - Debug builds
+  USE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
+                                 or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+  GEN_PDB=<yes or no>          - Generate Program Database (debug symbols release build)
+
