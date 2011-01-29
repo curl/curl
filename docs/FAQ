@@ -1,4 +1,4 @@
-Updated: January 24, 2011 (http://curl.haxx.se/docs/faq.html)
+Updated: January 29, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -1347,12 +1347,16 @@ FAQ
   You do not have to reveal or make public any changes to the libcurl source
   code.
 
-  You do not have to reveal or make public that you are using libcurl within
+  You do not have to broadcast to the world that you are using libcurl within
   your app.
 
-  As can be seen here: http://curl.haxx.se/docs/companies.html and
-  elsewhere, more and more companies are discovering the power
-  of libcurl and take advantage of it even in commercial environments.
+  All we ask is that you disclose "the copyright notice and this permission
+  notice" somewhere. Most probably like in the documentation or in the section
+  where other third party dependencies already are mentioned and acknowledged.
+
+  As can be seen here: http://curl.haxx.se/docs/companies.html and elsewhere,
+  more and more companies are discovering the power of libcurl and take
+  advantage of it even in commercial environments.
 
 
 7. PHP/CURL Issues
