@@ -35,14 +35,6 @@
 #define in_addr_t unsigned long
 #endif
 
-/*
- * Comfortable CURLRES_* definitions are included from setup.h
- */
-
-#ifdef USE_ARES
-#include <ares_version.h>
-#endif
-
 /* Allocate enough memory to hold the full name information structs and
  * everything. OSF1 is known to require at least 8872 bytes. The buffer
  * required for storing all possible aliases and IP numbers is according to
@@ -53,28 +45,12 @@
 #define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
                                     many seconds for a name resolve */
 
-#ifdef CURLRES_ARES
-#define CURL_ASYNC_SUCCESS ARES_SUCCESS
-#if ARES_VERSION >= 0x010500
-/* c-ares 1.5.0 or later, the callback proto is modified */
-#define HAVE_CARES_CALLBACK_TIMEOUTS 1
-#endif
-#else
 #define CURL_ASYNC_SUCCESS CURLE_OK
-#define ares_cancel(x) do {} while(0)
-#define ares_destroy(x) do {} while(0)
-#endif
 
 struct addrinfo;
 struct hostent;
 struct SessionHandle;
 struct connectdata;
-
-#ifdef CURLRES_ASYNCH
-void Curl_async_cancel(struct connectdata *conn);
-#else
-#define Curl_async_cancel(x) do {} while(0)
-#endif
 
 /*
  * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
@@ -129,6 +105,45 @@ bool Curl_ipv6works(void);
 bool Curl_ipvalid(struct connectdata *conn);
 
 /*
+ * Curl_resolver_global_init() - the generic low-level name resolver API.
+ * Called from curl_global_init() to initialize global resolver environment.
+ * Returning anything else than CURLE_OK fails curl_global_init().
+ */
+int Curl_resolver_global_init(void);
+
+/*
+ * Curl_resolver_global_cleanup() - the generic low-level name resolver API.
+ * Called from curl_global_cleanup() to destroy global resolver environment.
+ */
+void Curl_resolver_global_cleanup(void);
+
+/*
+ * Curl_resolver_init() - the generic low-level name resolve API.
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Should fill the passed pointer by the initialized handler.
+ * Returning anything else than CURLE_OK fails curl_easy_init() with the correspondent code.
+ */
+int Curl_resolver_init(void **resolver);
+
+/*
+ * Curl_resolver_cleanup() - the generic low-level name resolve API.
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Should destroy the handler and free all resources connected to it.
+ */
+void Curl_resolver_cleanup(void *resolver);
+
+/*
+ * Curl_resolver_duphandle() - the generic low-level name resolve API.
+ * Called from curl_easy_duphandle() to duplicate resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Should duplicate the 'from' handle and pass the resulting handle to the 'to' pointer.
+ * Returning anything else than CURLE_OK causes failed curl_easy_duphandle() call.
+ */
+int Curl_resolver_duphandle(void **to, void *from);
+
+/*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this
  * source file. There are several versions of this function - for different
  * name resolve layers (selected at build-time). They all take this same set
@@ -138,6 +153,15 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 const char *hostname,
                                 int port,
                                 int *waitp);
+
+#ifdef CURLRES_ASYNCH
+/*
+ * Curl_async_cancel() is the generic low-level asynchronous name resolve API.
+ * It is called from inside other functions to cancel currently performing resolver
+ * request. Should also free any temporary resources allocated to perform a request.
+ */
+void Curl_async_cancel(struct connectdata *conn);
+#endif
 
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns);
@@ -208,13 +232,6 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
 struct Curl_dns_entry *
 Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
                 const char *hostname, int port);
-
-/*
- * Curl_destroy_thread_data() cleans up async resolver data.
- * Complementary of ares_destroy.
- */
-struct Curl_async; /* forward-declaration */
-void Curl_destroy_thread_data(struct Curl_async *async);
 
 #ifndef INADDR_NONE
 #define CURL_INADDR_NONE (in_addr_t) ~0

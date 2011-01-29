@@ -73,20 +73,6 @@
 #ifdef CURLRES_ASYNCH
 
 /*
- * Cancel all possibly still on-going resolves for this connection.
- */
-void Curl_async_cancel(struct connectdata *conn)
-{
-  /* If we have a "half" response already received, we first clear that off
-     so that nothing is tempted to use it */
-  if(conn->async.temp_ai) {
-    Curl_freeaddrinfo(conn->async.temp_ai);
-    conn->async.temp_ai = NULL;
-  }
-}
-
-
-/*
  * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
  * or getaddrinfo_thread() when we got the name resolved (or not!).
  *
@@ -109,24 +95,6 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
     if(ai) {
       struct SessionHandle *data = conn->data;
 
-#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
-      Curl_addrinfo *ai_tail = ai;
-
-      while (ai_tail->ai_next)
-        ai_tail = ai_tail->ai_next;
-
-      /* Add the new results to the list of old results. */
-      ai_tail->ai_next = conn->async.temp_ai;
-      conn->async.temp_ai = ai;
-
-      if(--conn->async.num_pending > 0)
-        /* We are not done yet. Just return. */
-        return CURLE_OK;
-
-      /* make sure the temp pointer is cleared and isn't pointing to something
-         we take care of below */
-      conn->async.temp_ai = NULL;
-#endif
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
@@ -143,52 +111,9 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
     else {
-#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
-      if(--conn->async.num_pending > 0) {
-        /* We are not done yet. Clean up and return.
-	   This function will be called again. */
-        if(conn->async.temp_ai) {
-          Curl_freeaddrinfo(conn->async.temp_ai);
-          conn->async.temp_ai = NULL;
-        }
-        return CURLE_OUT_OF_MEMORY;
-      }
-#endif
       rc = CURLE_OUT_OF_MEMORY;
     }
   }
-#if defined(ENABLE_IPV6) && defined(CURLRES_ARES) /* CURLRES_IPV6 */
-  else
-  {
-      if(--conn->async.num_pending > 0)
-        /* We are not done yet. Just return. */
-        return CURLE_OK;
-
-      if(conn->async.temp_ai) {
-        /* We are done, and while this latest request
-           failed, some previous results exist. */
-        struct SessionHandle *data = conn->data;
-
-        if(data->share)
-          Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
-        dns = Curl_cache_addr(data, conn->async.temp_ai,
-                              conn->async.hostname,
-                              conn->async.port);
-        if(!dns) {
-          /* failed to store, cleanup and return error */
-          Curl_freeaddrinfo(conn->async.temp_ai);
-          rc = CURLE_OUT_OF_MEMORY;
-        }
-        if(data->share)
-          Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-        /* make sure the temp pointer is cleared and isn't pointing to
-           something we've taken care of already */
-        conn->async.temp_ai = NULL;
-      }
-  }
-#endif
 
   conn->async.dns = dns;
 

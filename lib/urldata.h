@@ -145,14 +145,6 @@
 #endif
 #endif
 
-#ifdef USE_ARES
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
-     (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
-#    define CARES_STATICLIB
-#  endif
-#  include <ares.h>
-#endif
-
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */
@@ -508,8 +500,6 @@ struct Curl_async {
   bool done;  /* set TRUE when the lookup is complete */
   int status; /* if done is TRUE, this is the status from the callback */
   void *os_specific;  /* 'struct thread_data' for Windows */
-  int num_pending; /* number of ares_gethostbyname() requests */
-  Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares parts */
 };
 #endif
 
@@ -1153,9 +1143,7 @@ struct UrlState {
 
   bool authproblem; /* TRUE if there's some problem authenticating */
 
-#ifdef USE_ARES
-  ares_channel areschannel; /* for name resolves */
-#endif
+  void *resolver; /* resolver state, if it is used in the URL state - ares_channel f.e. */
 
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;

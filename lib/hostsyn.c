@@ -73,6 +73,61 @@
 #ifdef CURLRES_SYNCH
 
 /*
+ * Curl_resolver_global_init() - the generic low-level name resolve API.
+ * Called from curl_global_init() to initialize global resolver environment.
+ * Does nothing here.
+ */
+int Curl_resolver_global_init()
+{
+  return CURLE_OK;
+}
+
+/*
+ * Curl_resolver_global_cleanup() - the generic low-level name resolve API.
+ * Called from curl_global_cleanup() to destroy global resolver environment.
+ * Does nothing here.
+ */
+void Curl_resolver_global_cleanup()
+{
+}
+
+/*
+ * Curl_resolver_init() - the generic low-level name resolve API.
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+int Curl_resolver_init(void **resolver)
+{
+  (void)resolver;
+  return CURLE_OK;
+}
+
+/*
+ * Curl_resolver_cleanup() - the generic low-level name resolve API.
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+void Curl_resolver_cleanup(void *resolver)
+{
+  (void)resolver;
+}
+
+/*
+ * Curl_resolver_duphandle() - the generic low-level name resolve API.
+ * Called from curl_easy_duphandle() to duplicate resolver URL state-specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+int Curl_resolver_duphandle(void **to, void *from)
+{
+  (void)to;
+  (void)from;
+  return CURLE_OK;
+}
+
+/*
  * Curl_wait_for_resolv() for synch-builds.  Curl_resolv() can never return
  * wait==TRUE, so this function will never be called. If it still gets called,
  * we return failure at once.

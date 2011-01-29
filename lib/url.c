@@ -526,7 +526,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
-  ares_destroy(data->state.areschannel);
+  Curl_resolver_cleanup(data->state.resolver);
 
   Curl_convert_close(data);
 
@@ -766,9 +766,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 {
   CURLcode res = CURLE_OK;
   struct SessionHandle *data;
-#ifdef USE_ARES
   int status;
-#endif
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
   data = calloc(1, sizeof(struct SessionHandle));
@@ -780,18 +778,11 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-#ifdef USE_ARES
-  if((status = ares_init(&data->state.areschannel)) != ARES_SUCCESS) {
-    DEBUGF(fprintf(stderr, "Error: ares_init failed\n"));
+  if( (status=Curl_resolver_init(&data->state.resolver)) != CURLE_OK ) {
+    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
-    if(status == ARES_ENOMEM)
-      return CURLE_OUT_OF_MEMORY;
-    else
-      return CURLE_FAILED_INIT;
+    return status;
   }
-  /* make sure that all other returns from this function should destroy the
-     ares channel before returning error! */
-#endif
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
@@ -823,7 +814,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   }
 
   if(res) {
-    ares_destroy(data->state.areschannel);
+    Curl_resolver_cleanup(data->state.resolver);
     if(data->state.headerbuff)
       free(data->state.headerbuff);
     Curl_freeset(data);
@@ -2521,6 +2512,11 @@ static void conn_free(struct connectdata *conn)
   if(!conn)
     return;
 
+  /* possible left-overs from the async name resolvers */
+#if defined(CURLRES_ASYNCH)
+  Curl_async_cancel(conn);
+#endif
+
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
   Curl_ssl_close(conn, FIRSTSOCKET);
@@ -2564,6 +2560,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->async.os_specific);
 #endif
   Curl_safefree(conn->localdev);
+
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
@@ -5195,7 +5192,9 @@ CURLcode Curl_done(struct connectdata **connp,
     data->req.location = NULL;
   }
 
+#if defined(CURLRES_ASYNCH)
   Curl_async_cancel(conn);
+#endif
 
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */

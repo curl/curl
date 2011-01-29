@@ -88,6 +88,70 @@
  **********************************************************************/
 #ifdef CURLRES_THREADED
 
+/*
+ * Curl_resolver_global_init() - the generic low-level name resolve API.
+ * Called from curl_global_init() to initialize global resolver environment.
+ * Does nothing here.
+ */
+int Curl_resolver_global_init()
+{
+  return CURLE_OK;
+}
+
+/*
+ * Curl_resolver_global_cleanup() - the generic low-level name resolve API.
+ * Called from curl_global_cleanup() to destroy global resolver environment.
+ * Does nothing here.
+ */
+void Curl_resolver_global_cleanup()
+{
+}
+
+/*
+ * Curl_resolver_init() - the generic low-level name resolve API.
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+int Curl_resolver_init(void **resolver)
+{
+  (void)resolver;
+  return CURLE_OK;
+}
+
+/*
+ * Curl_resolver_cleanup() - the generic low-level name resolve API.
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+void Curl_resolver_cleanup(void *resolver)
+{
+  (void)resolver;
+}
+
+/*
+ * Curl_resolver_duphandle() - the generic low-level name resolve API.
+ * Called from curl_easy_duphandle() to duplicate resolver URL state-specific environment
+ * ('resolver' member of the UrlState structure).
+ * Does nothing here.
+ */
+int Curl_resolver_duphandle(void **to, void *from)
+{
+  (void)to;
+  (void)from;
+  return CURLE_OK;
+}
+
+static void destroy_async_data(struct Curl_async *);
+/*
+ * Cancel all possibly still on-going resolves for this connection.
+ */
+void Curl_async_cancel(struct connectdata *conn)
+{
+  destroy_async_data(&conn->async);
+}
+
 /* This function is used to init a threaded resolve */
 static bool init_resolve_thread(struct connectdata *conn,
                                 const char *hostname, int port,
@@ -253,10 +317,9 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
 #endif /* HAVE_GETADDRINFO */
 
 /*
- * Curl_destroy_thread_data() cleans up async resolver data and thread handle.
- * Complementary of ares_destroy.
+ * destroy_async_data() cleans up async resolver data and thread handle.
  */
-void Curl_destroy_thread_data (struct Curl_async *async)
+static void destroy_async_data (struct Curl_async *async)
 {
   if(async->hostname)
     free(async->hostname);
@@ -336,7 +399,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   return TRUE;
 
  err_exit:
-  Curl_destroy_thread_data(&conn->async);
+  destroy_async_data(&conn->async);
 
   SET_ERRNO(err);
 
@@ -386,7 +449,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     }
   }
 
-  Curl_destroy_thread_data(&conn->async);
+  destroy_async_data(&conn->async);
 
   if(!conn->async.dns)
     conn->bits.close = TRUE;
@@ -419,7 +482,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if (done) {
     getaddrinfo_complete(conn);
-    Curl_destroy_thread_data(&conn->async);
+    destroy_async_data(&conn->async);
 
     if(!conn->async.dns) {
       failf(data, "Could not resolve host: %s; %s",

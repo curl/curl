@@ -269,12 +269,10 @@ CURLcode curl_global_init(long flags)
   idna_init();
 #endif
 
-#ifdef CARES_HAVE_ARES_LIBRARY_INIT
-  if(ares_library_init(ARES_LIB_INIT_ALL)) {
-    DEBUGF(fprintf(stderr, "Error: ares_library_init failed\n"));
+  if( Curl_resolver_global_init() != CURLE_OK ) {
+    DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
     return CURLE_FAILED_INIT;
   }
-#endif
 
 #if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_INIT)
   if(libssh2_init(0)) {
@@ -340,9 +338,7 @@ void curl_global_cleanup(void)
   if(init_flags & CURL_GLOBAL_SSL)
     Curl_ssl_cleanup();
 
-#ifdef CARES_HAVE_ARES_LIBRARY_CLEANUP
-  ares_library_cleanup();
-#endif
+  Curl_resolver_global_cleanup();
 
   if(init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();
@@ -676,12 +672,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
     outcurl->change.referer_alloc = TRUE;
   }
 
-#ifdef USE_ARES
-  /* If we use ares, we clone the ares channel for the new handle */
-  if(ARES_SUCCESS != ares_dup(&outcurl->state.areschannel,
-                              data->state.areschannel))
-    goto fail;
-#endif
+  /* Clone the resolver handle, if present, for the new handle */
+  if( Curl_resolver_duphandle(&outcurl->state.resolver, data->state.resolver) != CURLE_OK )
+   goto fail;
 
   Curl_convert_setup(outcurl);
 

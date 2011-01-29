@@ -33,7 +33,7 @@
 #include <curl/mprintf.h>
 
 #ifdef USE_ARES
-#include <ares_version.h>
+#include <ares.h>
 #endif
 
 #ifdef USE_LIBIDN
