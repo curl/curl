@@ -355,6 +355,38 @@ static void read_rewind(struct connectdata *conn,
 #endif
 }
 
+/*
+ * Check to see if CURLOPT_TIMECONDITION was met by comparing the time of the
+ * remote document with the time provided by CURLOPT_TIMEVAL
+ */
+int Curl_meets_timecondition(struct SessionHandle *data, long timeofdoc)
+{
+  if((timeofdoc == 0) || (data->set.timevalue == 0)) {
+    return -1;
+  }
+
+  switch(data->set.timecondition) {
+  case CURL_TIMECOND_IFMODSINCE:
+  default:
+    if(timeofdoc <= data->set.timevalue) {
+      infof(data,
+            "The requested document is not new enough\n");
+      data->info.timecond = TRUE;
+      return 0;
+    }
+    break;
+  case CURL_TIMECOND_IFUNMODSINCE:
+    if(timeofdoc >= data->set.timevalue) {
+      infof(data,
+            "The requested document is not old enough\n");
+      data->info.timecond = TRUE;
+      return 0;
+    }
+    break;
+  }
+
+  return -1;
+}
 
 /*
  * Go ahead and do a read if we have a readable socket or if
