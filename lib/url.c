@@ -778,7 +778,8 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  if( (status=Curl_resolver_init(&data->state.resolver)) != CURLE_OK ) {
+  status = Curl_resolver_init(&data->state.resolver);
+  if(status) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
     return status;

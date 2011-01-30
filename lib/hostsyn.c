@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,29 +73,29 @@
 #ifdef CURLRES_SYNCH
 
 /*
- * Curl_resolver_global_init() - the generic low-level name resolve API.
+ * Curl_resolver_global_init()
  * Called from curl_global_init() to initialize global resolver environment.
  * Does nothing here.
  */
-int Curl_resolver_global_init()
+int Curl_resolver_global_init(void)
 {
   return CURLE_OK;
 }
 
 /*
- * Curl_resolver_global_cleanup() - the generic low-level name resolve API.
+ * Curl_resolver_global_cleanup()
  * Called from curl_global_cleanup() to destroy global resolver environment.
  * Does nothing here.
  */
-void Curl_resolver_global_cleanup()
+void Curl_resolver_global_cleanup(void)
 {
 }
 
 /*
- * Curl_resolver_init() - the generic low-level name resolve API.
- * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_init()
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Does nothing here.
  */
 int Curl_resolver_init(void **resolver)
 {
@@ -104,10 +104,10 @@ int Curl_resolver_init(void **resolver)
 }
 
 /*
- * Curl_resolver_cleanup() - the generic low-level name resolve API.
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_cleanup()
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Does nothing here.
  */
 void Curl_resolver_cleanup(void *resolver)
 {
@@ -115,10 +115,10 @@ void Curl_resolver_cleanup(void *resolver)
 }
 
 /*
- * Curl_resolver_duphandle() - the generic low-level name resolve API.
- * Called from curl_easy_duphandle() to duplicate resolver URL state-specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_duphandle()
+ * Called from curl_easy_duphandle() to duplicate resolver URL state-specific
+ * environment ('resolver' member of the UrlState structure).  Does nothing
+ * here.
  */
 int Curl_resolver_duphandle(void **to, void *from)
 {

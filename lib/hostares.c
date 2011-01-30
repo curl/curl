@@ -104,11 +104,11 @@ struct ResolverResults {
 };
 
 /*
- * Curl_resolver_global_init() - the generic low-level asynchronous name resolve API.
- * Called from curl_global_init() to initialize global resolver environment.
- * Initializes ares library.
+ * Curl_resolver_global_init() - the generic low-level asynchronous name
+ * resolve API.  Called from curl_global_init() to initialize global resolver
+ * environment.  Initializes ares library.
  */
-int Curl_resolver_global_init()
+int Curl_resolver_global_init(void)
 {
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
   if(ares_library_init(ARES_LIB_INIT_ALL)) {
@@ -119,11 +119,12 @@ int Curl_resolver_global_init()
 }
 
 /*
- * Curl_resolver_global_cleanup() - the generic low-level asynchronous name resolve API.
+ * Curl_resolver_global_cleanup()
+ *
  * Called from curl_global_cleanup() to destroy global resolver environment.
  * Deinitializes ares library.
  */
-void Curl_resolver_global_cleanup()
+void Curl_resolver_global_cleanup(void)
 {
 #ifdef CARES_HAVE_ARES_LIBRARY_CLEANUP
   ares_library_cleanup();
@@ -131,10 +132,11 @@ void Curl_resolver_global_cleanup()
 }
 
 /*
- * Curl_resolver_init() - the generic low-level name resolve API.
- * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Fills the passed pointer by the initialized ares_channel.
+ * Curl_resolver_init()
+ *
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Fills the passed pointer by the initialized ares_channel.
  */
 int Curl_resolver_init(void **resolver)
 {
@@ -151,10 +153,11 @@ int Curl_resolver_init(void **resolver)
 }
 
 /*
- * Curl_resolver_cleanup() - the generic low-level name resolve API.
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Destroys the ares channel.
+ * Curl_resolver_cleanup()
+ *
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Destroys the ares channel.
  */
 void Curl_resolver_cleanup(void *resolver)
 {
@@ -162,10 +165,11 @@ void Curl_resolver_cleanup(void *resolver)
 }
 
 /*
- * Curl_resolver_duphandle() - the generic low-level name resolve API.
- * Called from curl_easy_duphandle() to duplicate resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Duplicates the 'from' ares channel and passes the resulting channel to the 'to' pointer.
+ * Curl_resolver_duphandle()
+ *
+ * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
+ * environment ('resolver' member of the UrlState structure).  Duplicates the
+ * 'from' ares channel and passes the resulting channel to the 'to' pointer.
  */
 int Curl_resolver_duphandle(void **to, void *from)
 {
@@ -197,11 +201,11 @@ static void destroy_async_data (struct Curl_async *async)
   if(async->os_specific) {
     struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
     if( res ) {
-        if( res->temp_ai ) {
-            Curl_freeaddrinfo(res->temp_ai);
-            res->temp_ai = NULL;
-        }
-        free(res);
+      if( res->temp_ai ) {
+        Curl_freeaddrinfo(res->temp_ai);
+        res->temp_ai = NULL;
+      }
+      free(res);
     }
     async->os_specific = NULL;
   }
@@ -233,7 +237,8 @@ int Curl_resolv_getsock(struct connectdata *conn,
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
   maxtime.tv_usec = 0;
 
-  timeout = ares_timeout((ares_channel)conn->data->state.resolver, &maxtime, &timebuf);
+  timeout = ares_timeout((ares_channel)conn->data->state.resolver, &maxtime,
+                         &timebuf);
 
   Curl_expire(conn->data,
               (timeout->tv_sec * 1000) + (timeout->tv_usec/1000));
@@ -261,7 +266,8 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
   int i;
   int num = 0;
 
-  bitmask = ares_getsock((ares_channel)data->state.resolver, socks, ARES_GETSOCK_MAXNUM);
+  bitmask = ares_getsock((ares_channel)data->state.resolver, socks,
+                         ARES_GETSOCK_MAXNUM);
 
   for(i=0; i < ARES_GETSOCK_MAXNUM; i++) {
     pfd[i].events = 0;
@@ -288,7 +294,8 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
   if(!nfds)
     /* Call ares_process() unconditonally here, even if we simply timed out
        above, as otherwise the ares name resolve won't timeout! */
-    ares_process_fd((ares_channel)data->state.resolver, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+    ares_process_fd((ares_channel)data->state.resolver, ARES_SOCKET_BAD,
+                    ARES_SOCKET_BAD);
   else {
     /* move through the descriptors and ask for processing on them */
     for(i=0; i < num; i++)
@@ -312,7 +319,8 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns)
 {
   struct SessionHandle *data = conn->data;
-  struct ResolverResults *res = (struct ResolverResults *)conn->async.os_specific;
+  struct ResolverResults *res = (struct ResolverResults *)
+    conn->async.os_specific;
 
   *dns = NULL;
 
@@ -320,7 +328,8 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if( res && !res->num_pending ) {
     (void)Curl_addrinfo_callback(conn, res->last_status, res->temp_ai);
-    /* temp_ai ownership is moved to the connection, so we need not free-up them */
+    /* temp_ai ownership is moved to the connection, so we need not free-up
+       them */
     res->temp_ai = NULL;
     destroy_async_data(&conn->async);
     if(!conn->async.dns) {
@@ -443,19 +452,20 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 }
 
 /* Connects results to the list */
-static void ares_compound_results(struct ResolverResults *res, Curl_addrinfo *ai)
+static void compound_results(struct ResolverResults *res,
+                             Curl_addrinfo *ai)
 {
-      Curl_addrinfo *ai_tail;
-      if( !ai )
-        return;
-      ai_tail = ai;
+  Curl_addrinfo *ai_tail;
+  if(!ai)
+    return;
+  ai_tail = ai;
 
-      while (ai_tail->ai_next)
-        ai_tail = ai_tail->ai_next;
+  while (ai_tail->ai_next)
+    ai_tail = ai_tail->ai_next;
 
-      /* Add the new results to the list of old results. */
-      ai_tail->ai_next = res->temp_ai;
-      res->temp_ai = ai;
+  /* Add the new results to the list of old results. */
+  ai_tail->ai_next = res->temp_ai;
+  res->temp_ai = ai;
 }
 
 /*
@@ -463,50 +473,35 @@ static void ares_compound_results(struct ResolverResults *res, Curl_addrinfo *ai
  * the host query initiated by ares_gethostbyname() from Curl_getaddrinfo(),
  * when using ares, is completed either successfully or with failure.
  */
-static void ares_query_completed_cb(void *arg,  /* (struct connectdata *) */
-                                    int status,
+static void query_completed_cb(void *arg,  /* (struct connectdata *) */
+                               int status,
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
-                                    int timeouts,
+                               int timeouts,
 #endif
-                                    struct hostent *hostent)
+                               struct hostent *hostent)
 {
   struct connectdata *conn = (struct connectdata *)arg;
-  struct ResolverResults *res = (struct ResolverResults *)conn->async.os_specific;
-
-  if( !conn->data ) {
-    /* Immediately return just because the handle is destroying */
-    return;
-  }
-
-  if( !conn->data->magic ) {
-    /* Immediately return just because the handle is destroying */
-    return;
-  }
-
-  if( !res ) {
-    /* Immediately return just because the results are destroyed for some reason */
-    return;
-  }
+  struct ResolverResults *res;
 
 #ifdef HAVE_CARES_CALLBACK_TIMEOUTS
   (void)timeouts; /* ignored */
 #endif
 
+  if(ARES_EDESTRUCTION == status)
+    /* when this ares handle is getting destroyed, the 'arg' pointer may not
+       be valid so only defer it when we know the 'status' says its fine! */
+    return;
+
+  res = (struct ResolverResults *)conn->async.os_specific;
   res->num_pending--;
 
-  switch(status) {
-  case CURL_ASYNC_SUCCESS:
-    ares_compound_results(res,Curl_he2ai(hostent, conn->async.port));
-    break;
-  /* this ares handle is getting destroyed, the 'arg' pointer may not be
-       valid! */
-  /* conn->magic check instead
-  case ARES_EDESTRUCTION:
-    return; */
-  default:
-    break;
+  if(CURL_ASYNC_SUCCESS == status) {
+    Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
+    if(ai) {
+      compound_results(res, ai);
+    }
   }
-  /* The successfull result empties any error */
+  /* A successful result overwrites any previous error */
   if( res->last_status != ARES_SUCCESS )
     res->last_status = status;
 }
@@ -589,9 +584,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
       /* areschannel is already setup in the Curl_open() function */
       ares_gethostbyname((ares_channel)data->state.resolver, hostname, PF_INET,
-                         ares_query_completed_cb, conn);
+                         query_completed_cb, conn);
       ares_gethostbyname((ares_channel)data->state.resolver, hostname, PF_INET6,
-                         ares_query_completed_cb, conn);
+                         query_completed_cb, conn);
     }
     else
 #endif /* CURLRES_IPV6 */
@@ -600,7 +595,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
       /* areschannel is already setup in the Curl_open() function */
       ares_gethostbyname((ares_channel)data->state.resolver, hostname, family,
-                         ares_query_completed_cb, conn);
+                         query_completed_cb, conn);
     }
 
     *waitp = 1; /* expect asynchronous response */

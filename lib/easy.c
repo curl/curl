@@ -269,7 +269,7 @@ CURLcode curl_global_init(long flags)
   idna_init();
 #endif
 
-  if( Curl_resolver_global_init() != CURLE_OK ) {
+  if(Curl_resolver_global_init() != CURLE_OK) {
     DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
     return CURLE_FAILED_INIT;
   }
@@ -673,8 +673,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
   }
 
   /* Clone the resolver handle, if present, for the new handle */
-  if( Curl_resolver_duphandle(&outcurl->state.resolver, data->state.resolver) != CURLE_OK )
-   goto fail;
+  if( Curl_resolver_duphandle(&outcurl->state.resolver,
+                              data->state.resolver) != CURLE_OK )
+    goto fail;
 
   Curl_convert_setup(outcurl);
 

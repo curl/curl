@@ -104,44 +104,52 @@ bool Curl_ipv6works(void);
  */
 bool Curl_ipvalid(struct connectdata *conn);
 
+/********* functions in the internal asynch resolver interface ****** */
+
 /*
- * Curl_resolver_global_init() - the generic low-level name resolver API.
+ * Curl_resolver_global_init()
+ *
  * Called from curl_global_init() to initialize global resolver environment.
  * Returning anything else than CURLE_OK fails curl_global_init().
  */
 int Curl_resolver_global_init(void);
 
 /*
- * Curl_resolver_global_cleanup() - the generic low-level name resolver API.
+ * Curl_resolver_global_cleanup()
  * Called from curl_global_cleanup() to destroy global resolver environment.
  */
 void Curl_resolver_global_cleanup(void);
 
 /*
- * Curl_resolver_init() - the generic low-level name resolve API.
- * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Should fill the passed pointer by the initialized handler.
- * Returning anything else than CURLE_OK fails curl_easy_init() with the correspondent code.
+ * Curl_resolver_init()
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Should fill the passed pointer by the initialized handler.
+ * Returning anything else than CURLE_OK fails curl_easy_init() with the
+ * correspondent code.
  */
 int Curl_resolver_init(void **resolver);
 
 /*
- * Curl_resolver_cleanup() - the generic low-level name resolve API.
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Should destroy the handler and free all resources connected to it.
+ * Curl_resolver_cleanup()
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Should destroy the handler and free all resources connected to
+ * it.
  */
 void Curl_resolver_cleanup(void *resolver);
 
 /*
- * Curl_resolver_duphandle() - the generic low-level name resolve API.
- * Called from curl_easy_duphandle() to duplicate resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Should duplicate the 'from' handle and pass the resulting handle to the 'to' pointer.
- * Returning anything else than CURLE_OK causes failed curl_easy_duphandle() call.
+ * Curl_resolver_duphandle()
+ * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
+ * environment ('resolver' member of the UrlState structure).  Should
+ * duplicate the 'from' handle and pass the resulting handle to the 'to'
+ * pointer.  Returning anything else than CURLE_OK causes failed
+ * curl_easy_duphandle() call.
  */
 int Curl_resolver_duphandle(void **to, void *from);
+
+/********** end of generic resolver interface functions *****************/
 
 /*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this

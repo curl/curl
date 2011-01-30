@@ -89,29 +89,29 @@
 #ifdef CURLRES_THREADED
 
 /*
- * Curl_resolver_global_init() - the generic low-level name resolve API.
+ * Curl_resolver_global_init()
  * Called from curl_global_init() to initialize global resolver environment.
  * Does nothing here.
  */
-int Curl_resolver_global_init()
+int Curl_resolver_global_init(void)
 {
   return CURLE_OK;
 }
 
 /*
- * Curl_resolver_global_cleanup() - the generic low-level name resolve API.
+ * Curl_resolver_global_cleanup()
  * Called from curl_global_cleanup() to destroy global resolver environment.
  * Does nothing here.
  */
-void Curl_resolver_global_cleanup()
+void Curl_resolver_global_cleanup(void)
 {
 }
 
 /*
- * Curl_resolver_init() - the generic low-level name resolve API.
- * Called from curl_easy_init() -> Curl_open() to initialize resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_init()
+ * Called from curl_easy_init() -> Curl_open() to initialize resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Does nothing here.
  */
 int Curl_resolver_init(void **resolver)
 {
@@ -120,10 +120,10 @@ int Curl_resolver_init(void **resolver)
 }
 
 /*
- * Curl_resolver_cleanup() - the generic low-level name resolve API.
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver URL-state specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_cleanup()
+ * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
+ * URL-state specific environment ('resolver' member of the UrlState
+ * structure).  Does nothing here.
  */
 void Curl_resolver_cleanup(void *resolver)
 {
@@ -131,10 +131,10 @@ void Curl_resolver_cleanup(void *resolver)
 }
 
 /*
- * Curl_resolver_duphandle() - the generic low-level name resolve API.
- * Called from curl_easy_duphandle() to duplicate resolver URL state-specific environment
- * ('resolver' member of the UrlState structure).
- * Does nothing here.
+ * Curl_resolver_duphandle()
+ * Called from curl_easy_duphandle() to duplicate resolver URL state-specific
+ * environment ('resolver' member of the UrlState structure).  Does nothing
+ * here.
  */
 int Curl_resolver_duphandle(void **to, void *from)
 {
@@ -181,7 +181,7 @@ struct thread_data {
   struct thread_sync_data tsd;
 };
 
-static struct thread_sync_data * conn_thread_sync_data(struct connectdata *conn)
+static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 {
   return &(((struct thread_data *)conn->async.os_specific)->tsd);
 }
@@ -250,9 +250,9 @@ static int getaddrinfo_complete(struct connectdata *conn)
   int rc;
 
   rc = Curl_addrinfo_callback(conn, tsd->sock_error, tsd->res);
-  /* The tsd->res structure has been copied to async.dns and perhaps the DNS cache.
-     Set our copy to NULL so destroy_thread_sync_data doesn't free it.
-   */
+  /* The tsd->res structure has been copied to async.dns and perhaps the DNS
+     cache.  Set our copy to NULL so destroy_thread_sync_data doesn't free it.
+  */
   tsd->res = NULL;
 
   return rc;
