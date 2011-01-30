@@ -463,6 +463,13 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     fstated = TRUE;
   }
 
+  if(fstated && !data->state.range && data->set.timecondition) {
+    if(Curl_meets_timecondition(data, data->info.filetime) == 0) {
+      *done = TRUE;
+      return CURLE_OK;
+    }
+  }
+
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which for FILE can't be much more than the file size and
      date. */
