@@ -355,6 +355,37 @@ static void read_rewind(struct connectdata *conn,
 #endif
 }
 
+/*
+ * Check to see if CURLOPT_TIMECONDITION was met by comparing the time of the
+ * remote document with the time provided by CURLOPT_TIMEVAL
+ */
+bool Curl_meets_timecondition(struct SessionHandle *data, long timeofdoc)
+{
+  if((timeofdoc == 0) || (data->set.timevalue == 0))
+    return TRUE;
+
+  switch(data->set.timecondition) {
+  case CURL_TIMECOND_IFMODSINCE:
+  default:
+    if(timeofdoc <= data->set.timevalue) {
+      infof(data,
+            "The requested document is not new enough\n");
+      data->info.timecond = TRUE;
+      return FALSE;
+    }
+    break;
+  case CURL_TIMECOND_IFUNMODSINCE:
+    if(timeofdoc >= data->set.timevalue) {
+      infof(data,
+            "The requested document is not old enough\n");
+      data->info.timecond = TRUE;
+      return FALSE;
+    }
+    break;
+  }
+
+  return TRUE;
+}
 
 /*
  * Go ahead and do a read if we have a readable socket or if
@@ -518,29 +549,11 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                requested. This seems to be what chapter 13.3.4 of
                RFC 2616 defines to be the correct action for a
                HTTP/1.1 client */
-            if((k->timeofdoc > 0) && (data->set.timevalue > 0)) {
-              switch(data->set.timecondition) {
-              case CURL_TIMECOND_IFMODSINCE:
-              default:
-                if(k->timeofdoc < data->set.timevalue) {
-                  infof(data,
-                        "The requested document is not new enough\n");
-                  *done = TRUE;
-                  data->info.timecond = TRUE;
-                  return CURLE_OK;
-                }
-                break;
-              case CURL_TIMECOND_IFUNMODSINCE:
-                if(k->timeofdoc > data->set.timevalue) {
-                  infof(data,
-                        "The requested document is not old enough\n");
-                  *done = TRUE;
-                  data->info.timecond = TRUE;
-                  return CURLE_OK;
-                }
-                break;
-              } /* switch */
-            } /* two valid time strings */
+
+            if(!Curl_meets_timecondition(data, k->timeofdoc)) {
+              *done = TRUE;
+              return CURLE_OK;
+            }
           } /* we have a time condition */
 
         } /* this is HTTP */

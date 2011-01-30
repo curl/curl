@@ -47,6 +47,7 @@ CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 CURLcode Curl_reconnect_request(struct connectdata **connp);
 CURLcode Curl_retry_request(struct connectdata *conn, char **url);
+bool Curl_meets_timecondition(struct SessionHandle *data, long timeofdoc);
 
 /* This sets up a forthcoming transfer */
 void
