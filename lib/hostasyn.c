@@ -127,4 +127,43 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
   return rc;
 }
 
+/* Call this function after Curl_connect() has returned async=TRUE and
+   then a successful name resolve has been received.
+
+   Note: this function disconnects and frees the conn data in case of
+   resolve failure */
+CURLcode Curl_async_resolved(struct connectdata *conn,
+                             bool *protocol_done)
+{
+  CURLcode code;
+
+  if(conn->async.dns) {
+    conn->dns_entry = conn->async.dns;
+    conn->async.dns = NULL;
+  }
+
+  code = Curl_setup_conn(conn, protocol_done);
+
+  if(code)
+    /* We're not allowed to return failure with memory left allocated
+       in the connectdata struct, free those here */
+    Curl_disconnect(conn, FALSE); /* close the connection */
+
+  return code;
+}
+
+/*
+ * Curl_getaddrinfo() is the generic low-level name resolve API within this
+ * source file. There are several versions of this function - for different
+ * name resolve layers (selected at build-time). They all take this same set
+ * of arguments
+ */
+Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                const char *hostname,
+                                int port,
+                                int *waitp)
+{
+  return Curl_resolver_getaddrinfo(conn, hostname, port, waitp);
+}
+
 #endif /* CURLRES_ASYNCH */

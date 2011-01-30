@@ -62,6 +62,8 @@
 
 /***********************************************************************
  * Only for ares-enabled builds
+ * And only for functions that fulfill the asynch resolver backend API
+ * as defined in asyn.h, nothing else belongs in this file!
  **********************************************************************/
 
 #ifdef CURLRES_ARES
@@ -180,10 +182,11 @@ int Curl_resolver_duphandle(void **to, void *from)
 }
 
 static void destroy_async_data (struct Curl_async *async);
+
 /*
  * Cancel all possibly still on-going resolves for this connection.
  */
-void Curl_async_cancel(struct connectdata *conn)
+void Curl_resolver_cancel(struct connectdata *conn)
 {
   if( conn && conn->data && conn->data->state.resolver )
     ares_cancel((ares_channel)conn->data->state.resolver);
@@ -214,7 +217,7 @@ static void destroy_async_data (struct Curl_async *async)
 }
 
 /*
- * Curl_resolv_fdset() is called when someone from the outside world (using
+ * Curl_resolver_fdset() is called when someone from the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we're talking with
  * ares. The caller must make sure that this function is only called when we
  * have a working ares channel.
@@ -222,9 +225,9 @@ static void destroy_async_data (struct Curl_async *async)
  * Returns: CURLE_OK always!
  */
 
-int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks)
+int Curl_resolver_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks)
 
 {
   struct timeval maxtime;
@@ -309,14 +312,14 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
 }
 
 /*
- * Curl_is_resolved() is called repeatedly to check if a previous name resolve
- * request has completed. It should also make sure to time-out if the
- * operation seems to take too long.
+ * Curl_resolver_is_resolved() is called repeatedly to check if a previous
+ * name resolve request has completed. It should also make sure to time-out if
+ * the operation seems to take too long.
  *
  * Returns normal CURLcode errors.
  */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **dns)
+CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
+                                   struct Curl_dns_entry **dns)
 {
   struct SessionHandle *data = conn->data;
   struct ResolverResults *res = (struct ResolverResults *)
@@ -344,16 +347,18 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 }
 
 /*
- * Curl_wait_for_resolv() waits for a resolve to finish. This function should
- * be avoided since using this risk getting the multi interface to "hang".
+ * Curl_resolver_wait_resolv()
+ *
+ * waits for a resolve to finish. This function should be avoided since using
+ * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
  */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
+CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
+                                   struct Curl_dns_entry **entry)
 {
   CURLcode rc=CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -388,7 +393,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    Curl_is_resolved(conn,&temp_entry);
+    Curl_resolver_is_resolved(conn,&temp_entry);
 
     if(conn->async.done)
       break;
@@ -507,17 +512,17 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
 }
 
 /*
- * Curl_getaddrinfo() - when using ares
+ * Curl_resolver_getaddrinfo() - when using ares
  *
  * Returns name information about the given hostname and port number. If
  * successful, the 'hostent' is returned and the forth argument will point to
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                         const char *hostname,
+                                         int port,
+                                         int *waitp)
 {
   char *bufp;
   struct SessionHandle *data = conn->data;

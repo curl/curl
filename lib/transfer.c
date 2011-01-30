@@ -1995,7 +1995,7 @@ connect_host(struct SessionHandle *data,
   if((CURLE_OK == res) && async) {
     /* Now, if async is TRUE here, we need to wait for the name
        to resolve */
-    res = Curl_wait_for_resolv(*conn, NULL);
+    res = Curl_resolver_wait_resolv(*conn, NULL);
     if(CURLE_OK == res)
       /* Resolved, continue with the connection */
       res = Curl_async_resolved(*conn, &protocol_done);
@@ -2047,7 +2047,7 @@ Curl_reconnect_request(struct connectdata **connp)
       if(async) {
         /* Now, if async is TRUE here, we need to wait for the name
            to resolve */
-        result = Curl_wait_for_resolv(conn, NULL);
+        result = Curl_resolver_wait_resolv(conn, NULL);
         if(result)
           return result;
 

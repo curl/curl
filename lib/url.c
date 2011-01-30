@@ -2514,9 +2514,7 @@ static void conn_free(struct connectdata *conn)
     return;
 
   /* possible left-overs from the async name resolvers */
-#if defined(CURLRES_ASYNCH)
-  Curl_async_cancel(conn);
-#endif
+  Curl_resolver_cancel(conn);
 
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
@@ -2553,15 +2551,7 @@ static void conn_free(struct connectdata *conn)
   Curl_llist_destroy(conn->pend_pipe, NULL);
   Curl_llist_destroy(conn->done_pipe, NULL);
 
-  /* possible left-overs from the async name resolvers */
-#if defined(CURLRES_THREADED)
-  Curl_destroy_thread_data(&conn->async);
-#elif defined(CURLRES_ASYNCH)
-  Curl_safefree(conn->async.hostname);
-  Curl_safefree(conn->async.os_specific);
-#endif
   Curl_safefree(conn->localdev);
-
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
@@ -2896,16 +2886,16 @@ ConnectionExists(struct SessionHandle *data,
         continue;
       }
 
-#ifdef CURLRES_ASYNCH
-      /* ip_addr_str[0] is NUL only if the resolving of the name hasn't
-         completed yet and until then we don't re-use this connection */
-      if(!check->ip_addr_str[0]) {
-        infof(data,
-              "Connection #%ld hasn't finished name resolve, can't reuse\n",
-              check->connectindex);
-        continue;
+      if(Curl_resolver_asynch()) {
+        /* ip_addr_str[0] is NUL only if the resolving of the name hasn't
+           completed yet and until then we don't re-use this connection */
+        if(!check->ip_addr_str[0]) {
+          infof(data,
+                "Connection #%ld hasn't finished name resolve, can't reuse\n",
+                check->connectindex);
+          continue;
+        }
       }
-#endif
 
       if((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) || check->bits.close) {
         /* Don't pick a connection that hasn't connected yet or that is going
@@ -4633,7 +4623,7 @@ static void reuse_conn(struct connectdata *old_conn,
  * @param data The sessionhandle pointer
  * @param in_connect is set to the next connection data pointer
  * @param async is set TRUE when an async DNS resolution is pending
- * @see setup_conn()
+ * @see Curl_setup_conn()
  *
  * *NOTE* this function assigns the conn->data pointer!
  */
@@ -4976,16 +4966,16 @@ static CURLcode create_conn(struct SessionHandle *data,
   return result;
 }
 
-/* setup_conn() is called after the name resolve initiated in
+/* Curl_setup_conn() is called after the name resolve initiated in
  * create_conn() is all done.
  *
- * setup_conn() also handles reused connections
+ * Curl_setup_conn() also handles reused connections
  *
  * conn->data MUST already have been setup fine (in create_conn)
  */
 
-static CURLcode setup_conn(struct connectdata *conn,
-                           bool *protocol_done)
+CURLcode Curl_setup_conn(struct connectdata *conn,
+                         bool *protocol_done)
 {
   CURLcode result=CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -5108,7 +5098,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
       /* DNS resolution is done: that's either because this is a reused
          connection, in which case DNS was unnecessary, or because DNS
          really did finish already (synch resolver/fast async resolve) */
-      code = setup_conn(*in_connect, protocol_done);
+      code = Curl_setup_conn(*in_connect, protocol_done);
     }
   }
 
@@ -5121,38 +5111,6 @@ CURLcode Curl_connect(struct SessionHandle *data,
 
   return code;
 }
-
-/* Call this function after Curl_connect() has returned async=TRUE and
-   then a successful name resolve has been received.
-
-   Note: this function disconnects and frees the conn data in case of
-   resolve failure */
-CURLcode Curl_async_resolved(struct connectdata *conn,
-                             bool *protocol_done)
-{
-#ifdef CURLRES_ASYNCH
-  CURLcode code;
-
-  if(conn->async.dns) {
-    conn->dns_entry = conn->async.dns;
-    conn->async.dns = NULL;
-  }
-
-  code = setup_conn(conn, protocol_done);
-
-  if(code)
-    /* We're not allowed to return failure with memory left allocated
-       in the connectdata struct, free those here */
-    Curl_disconnect(conn, FALSE); /* close the connection */
-
-  return code;
-#else
-  (void)conn;
-  (void)protocol_done;
-  return CURLE_OK;
-#endif
-}
-
 
 CURLcode Curl_done(struct connectdata **connp,
                    CURLcode status,  /* an error if this is called after an
@@ -5193,9 +5151,7 @@ CURLcode Curl_done(struct connectdata **connp,
     data->req.location = NULL;
   }
 
-#if defined(CURLRES_ASYNCH)
-  Curl_async_cancel(conn);
-#endif
+  Curl_resolver_cancel(conn);
 
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */

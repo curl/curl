@@ -144,10 +144,11 @@ int Curl_resolver_duphandle(void **to, void *from)
 }
 
 static void destroy_async_data(struct Curl_async *);
+
 /*
  * Cancel all possibly still on-going resolves for this connection.
  */
-void Curl_async_cancel(struct connectdata *conn)
+void Curl_resolver_cancel(struct connectdata *conn)
 {
   destroy_async_data(&conn->async);
 }
@@ -374,7 +375,7 @@ static bool init_resolve_thread (struct connectdata *conn,
     goto err_exit;
 
 #ifdef WIN32
-  /* This socket is only to keep Curl_resolv_fdset() and select() happy;
+  /* This socket is only to keep Curl_resolver_fdset() and select() happy;
    * should never become signalled for read since it's unbound but
    * Windows needs at least 1 socket in select().
    */
@@ -408,15 +409,17 @@ static bool init_resolve_thread (struct connectdata *conn,
 
 
 /*
- * Curl_wait_for_resolv() waits for a resolve to finish. This function should
- * be avoided since using this risk getting the multi interface to "hang".
+ * Curl_resolver_wait_resolv()
+ *
+ * waits for a resolve to finish. This function should be avoided since using
+ * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
  * This is the version for resolves-in-a-thread.
  */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
+CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
+                                   struct Curl_dns_entry **entry)
 {
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   struct SessionHandle *data = conn->data;
@@ -458,12 +461,12 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 }
 
 /*
- * Curl_is_resolved() is called repeatedly to check if a previous name resolve
- * request has completed. It should also make sure to time-out if the
- * operation seems to take too long.
+ * Curl_resolver_is_resolved() is called repeatedly to check if a previous
+ * name resolve request has completed. It should also make sure to time-out if
+ * the operation seems to take too long.
  */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **entry)
+CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
+                                   struct Curl_dns_entry **entry)
 {
   struct SessionHandle *data = conn->data;
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
@@ -513,9 +516,9 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   return CURLE_OK;
 }
 
-int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks)
+int Curl_resolver_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks)
 {
   const struct thread_data *td =
     (const struct thread_data *) conn->async.os_specific;
@@ -535,10 +538,10 @@ int Curl_resolv_getsock(struct connectdata *conn,
 /*
  * Curl_getaddrinfo() - for platforms without getaddrinfo
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                         const char *hostname,
+                                         int port,
+                                         int *waitp)
 {
   struct in_addr in;
 
@@ -561,12 +564,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #else /* !HAVE_GETADDRINFO */
 
 /*
- * Curl_getaddrinfo() - for getaddrinfo
+ * Curl_resolver_getaddrinfo() - for getaddrinfo
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                         const char *hostname,
+                                         int port,
+                                         int *waitp)
 {
   struct addrinfo hints;
   Curl_addrinfo *res;

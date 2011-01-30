@@ -855,7 +855,7 @@ static int multi_getsock(struct Curl_one_easy *easy,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolv_getsock(easy->easy_conn, socks, numsocks);
+    return Curl_resolver_getsock(easy->easy_conn, socks, numsocks);
 
   case CURLM_STATE_PROTOCONNECT:
     return Curl_protocol_getsock(easy->easy_conn, socks, numsocks);
@@ -1071,7 +1071,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       struct Curl_dns_entry *dns = NULL;
 
       /* check if we have the name resolved by now */
-      easy->result = Curl_is_resolved(easy->easy_conn, &dns);
+      easy->result = Curl_resolver_is_resolved(easy->easy_conn, &dns);
 
       if(dns) {
         /* Update sockets here. Mainly because the socket(s) may have been

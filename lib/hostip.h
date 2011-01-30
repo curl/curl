@@ -25,6 +25,7 @@
 #include "setup.h"
 #include "hash.h"
 #include "curl_addrinfo.h"
+#include "asyn.h"
 
 #ifdef HAVE_SETJMP_H
 #include <setjmp.h>
@@ -104,52 +105,6 @@ bool Curl_ipv6works(void);
  */
 bool Curl_ipvalid(struct connectdata *conn);
 
-/********* functions in the internal asynch resolver interface ****** */
-
-/*
- * Curl_resolver_global_init()
- *
- * Called from curl_global_init() to initialize global resolver environment.
- * Returning anything else than CURLE_OK fails curl_global_init().
- */
-int Curl_resolver_global_init(void);
-
-/*
- * Curl_resolver_global_cleanup()
- * Called from curl_global_cleanup() to destroy global resolver environment.
- */
-void Curl_resolver_global_cleanup(void);
-
-/*
- * Curl_resolver_init()
- * Called from curl_easy_init() -> Curl_open() to initialize resolver
- * URL-state specific environment ('resolver' member of the UrlState
- * structure).  Should fill the passed pointer by the initialized handler.
- * Returning anything else than CURLE_OK fails curl_easy_init() with the
- * correspondent code.
- */
-int Curl_resolver_init(void **resolver);
-
-/*
- * Curl_resolver_cleanup()
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
- * URL-state specific environment ('resolver' member of the UrlState
- * structure).  Should destroy the handler and free all resources connected to
- * it.
- */
-void Curl_resolver_cleanup(void *resolver);
-
-/*
- * Curl_resolver_duphandle()
- * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
- * environment ('resolver' member of the UrlState structure).  Should
- * duplicate the 'from' handle and pass the resulting handle to the 'to'
- * pointer.  Returning anything else than CURLE_OK causes failed
- * curl_easy_duphandle() call.
- */
-int Curl_resolver_duphandle(void **to, void *from);
-
-/********** end of generic resolver interface functions *****************/
 
 /*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this
@@ -162,29 +117,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp);
 
-#ifdef CURLRES_ASYNCH
-/*
- * Curl_async_cancel() is the generic low-level asynchronous name resolve API.
- * It is called from inside other functions to cancel currently performing resolver
- * request. Should also free any temporary resources allocated to perform a request.
- */
-void Curl_async_cancel(struct connectdata *conn);
-#endif
-
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **dns);
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **dnsentry);
-
-/* Curl_resolv_getsock() is a generic function that exists in multiple
-   versions depending on what name resolve technology we've built to use. The
-   function is called from the multi_getsock() function.  'sock' is a pointer
-   to an array to hold the file descriptors, with 'numsock' being the size of
-   that array (in number of entries). This function is supposed to return
-   bitmask indicating what file descriptors (referring to array indexes in the
-   'sock' array) to wait for, read/write. */
-int Curl_resolv_getsock(struct connectdata *conn, curl_socket_t *sock,
-                        int numsocks);
 
 /* unlock a previously resolved dns entry */
 void Curl_resolv_unlock(struct SessionHandle *data,
