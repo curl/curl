@@ -1408,6 +1408,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       /* if both rates are within spec, resume transfer */
+      Curl_pgrsUpdate(easy->easy_conn);
       if( ( (data->set.max_send_speed == 0) ||
             (data->progress.ulspeed < data->set.max_send_speed ))  &&
           ( (data->set.max_recv_speed == 0) ||
