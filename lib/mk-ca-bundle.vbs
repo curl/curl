@@ -28,7 +28,7 @@
 Option Explicit
 Const myVersion = "0.3.5"
 
-Const myUrl = "http://mxr.mozilla.org/firefox/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
+Const myUrl = "http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
 
 Const myOpenssl = "openssl.exe"
 
