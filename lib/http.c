@@ -2052,9 +2052,17 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
 CURLcode Curl_add_timecondition(struct SessionHandle *data,
                                 Curl_send_buffer *req_buffer)
 {
-  struct tm *tm;
+  const struct tm *tm;
   char *buf = data->state.buffer;
   CURLcode result = CURLE_OK;
+  struct tm keeptime;
+
+  result = Curl_gmtime(data->set.timevalue, &keeptime);
+  if(result) {
+    failf(data, "Invalid TIMEVALUE\n");
+    return result;
+  }
+  tm = &keeptime;
 
   /* The If-Modified-Since header family should have their times set in
    * GMT as RFC2616 defines: "All HTTP date/time stamps MUST be
@@ -2062,14 +2070,6 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
    * purposes of HTTP, GMT is exactly equal to UTC (Coordinated Universal
    * Time)." (see page 20 of RFC2616).
    */
-
-#ifdef HAVE_GMTIME_R
-  /* thread-safe version */
-  struct tm keeptime;
-  tm = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
-#else
-  tm = gmtime(&data->set.timevalue);
-#endif
 
   /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
   snprintf(buf, BUFSIZE-1,
@@ -2654,7 +2654,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #endif
 
   if(data->set.timecondition) {
-      result = Curl_add_timecondition(data, req_buffer);
+    result = Curl_add_timecondition(data, req_buffer);
     if(result)
       return result;
   }

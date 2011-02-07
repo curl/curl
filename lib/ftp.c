@@ -1841,14 +1841,14 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
          ftpc->file &&
          data->set.get_filetime &&
          (data->info.filetime>=0) ) {
-        struct tm *tm;
         time_t filetime = (time_t)data->info.filetime;
-#ifdef HAVE_GMTIME_R
         struct tm buffer;
-        tm = (struct tm *)gmtime_r(&filetime, &buffer);
-#else
-        tm = gmtime(&filetime);
-#endif
+        const struct tm *tm = &buffer;
+
+        result = Curl_gmtime(filetime, &buffer);
+        if(result)
+          return result;
+
         /* format: "Tue, 15 Nov 1994 12:45:26" */
         snprintf(buf, BUFSIZE-1,
                  "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",

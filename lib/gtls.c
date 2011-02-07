@@ -170,13 +170,12 @@ static void showtime(struct SessionHandle *data,
                      const char *text,
                      time_t stamp)
 {
-  struct tm *tm;
-#ifdef HAVE_GMTIME_R
   struct tm buffer;
-  tm = (struct tm *)gmtime_r(&stamp, &buffer);
-#else
-  tm = gmtime(&stamp);
-#endif
+  const struct tm *tm = &buffer;
+  CURLcode result = Curl_gmtime(stamp, &buffer);
+  if(result)
+    return;
+
   snprintf(data->state.buffer,
            BUFSIZE,
            "\t %s: %s, %02d %s %4d %02d:%02d:%02d GMT\n",

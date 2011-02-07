@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -487,14 +487,13 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
       return result;
 
     if(fstated) {
-      const struct tm *tm;
       time_t filetime = (time_t)statbuf.st_mtime;
-#ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (const struct tm *)gmtime_r(&filetime, &buffer);
-#else
-      tm = gmtime(&filetime);
-#endif
+      const struct tm *tm = &buffer;
+      result = Curl_gmtime(filetime, &buffer);
+      if(result)
+        return result;
+
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       snprintf(buf, BUFSIZE-1,
                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -513,4 +513,21 @@ time_t curl_getdate(const char *p, const time_t *now)
   }
   /* everything else is fail */
   return -1;
+}
+
+CURLcode Curl_gmtime(time_t intime, struct tm *store)
+{
+  const struct tm *tm;
+#ifdef HAVE_GMTIME_R
+  /* thread-safe version */
+  tm = (struct tm *)(gmtime_r)(&intime, store);
+#else
+  tm = (gmtime)(&intime);
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+#endif
+
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }
