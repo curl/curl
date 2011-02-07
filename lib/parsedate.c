@@ -515,6 +515,15 @@ time_t curl_getdate(const char *p, const time_t *now)
   return -1;
 }
 
+/*
+ * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
+ * gmtime_r() or gmtime() functions anywhere else but here.
+ *
+ * To make sure no such function calls slip in, we define them to cause build
+ * errors, which is why we use the name within parentheses in this function.
+ *
+ */
+
 CURLcode Curl_gmtime(time_t intime, struct tm *store)
 {
   const struct tm *tm;
