@@ -2487,6 +2487,9 @@ sub singletest {
             }
         }
         elsif($f eq "unittest") {
+            # Unit tests should set the netrc filename directly, thus unset the
+            # environment variable.
+            delete($ENV{'CURL_DEBUG_NETRC'}) if $ENV{'CURL_DEBUG_NETRC'};
             if($debug_build) {
                 next;
             }
