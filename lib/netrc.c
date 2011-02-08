@@ -61,11 +61,6 @@ enum host_lookup_state {
   HOSTEND /* LAST enum */
 };
 
-/* make sure we have room for at least this size: */
-#define LOGINSIZE 64
-#define PASSWORDSIZE 64
-
-/* returns -1 on failure, 0 if the host is found, 1 is the host isn't found */
 int Curl_parsenetrc(const char *host,
                     char *login,
                     char *password,
