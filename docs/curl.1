@@ -1270,6 +1270,19 @@ default 512 bytes will be used.
 If this option is used several times, the last one will be used.
 
 (Added in 7.20.0)
+.IP "--tlsauthtype <authtype>"
+Set TLS authentication type. Currently, the only supported option is "SRP",
+for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
+specified but \fI--tlsauthtype\fP is not, then this option defaults to "SRP".
+(Added in 7.21.4)
+.IP "--tlsuser <user>"
+Set username for use with the TLS authentication method specified with
+\fI--tlsauthtype\fP. Requires that \fI--tlspassword\fP also be set.  (Added in
+7.21.4)
+.IP "--tlspassword <password>"
+Set password for use with the TLS authentication method specified with
+\fI--tlsauthtype\fP. Requires that \fI--tlsuser\fP also be set.  (Added in
+7.21.4)
 .IP "-T/--upload-file <file>"
 This transfers the specified local file to the remote URL. If there is no file
 part in the specified URL, Curl will append the local file name. NOTE that you
@@ -1396,6 +1409,8 @@ This curl supports IDN - international domain names.
 .IP "SSPI"
 SSPI is supported. If you use NTLM and set a blank user name, curl will
 authenticate with your current user and password.
+.IP "TLS-SRP"
+SRP (Secure Remote Password) authentication is supported for TLS.
 .RE
 .IP "-w/--write-out <format>"
 Defines what to display on stdout after a completed and successful
