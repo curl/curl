@@ -926,7 +926,7 @@ singleipconnect(struct connectdata *conn,
                                CURLSOCKTYPE_IPCXN);
     if(error) {
       sclose(sockfd); /* close the socket and bail out */
-      return res;
+      return CURLE_ABORTED_BY_CALLBACK;
     }
   }
 
