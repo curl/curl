@@ -9,7 +9,7 @@ Curl and libcurl 7.21.5
 
 This release includes the following changes:
 
- o 
+ o SOCKOPTFUNCTION: callback can say already-connected
 
 This release includes the following bugfixes:
 

@@ -315,6 +315,13 @@ typedef enum  {
   CURLSOCKTYPE_LAST   /* never use */
 } curlsocktype;
 
+/* The return code from the sockopt_callback can signal information back
+   to libcurl: */
+#define CURL_SOCKOPT_OK 0
+#define CURL_SOCKOPT_ERROR 1 /* causes libcurl to abort and return
+                                CURLE_ABORTED_BY_CALLBACK */
+#define CURL_SOCKOPT_ALREADY_CONNECTED 2
+
 typedef int (*curl_sockopt_callback)(void *clientp,
                                      curl_socket_t curlfd,
                                      curlsocktype purpose);

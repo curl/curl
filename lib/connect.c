@@ -837,7 +837,7 @@ singleipconnect(struct connectdata *conn,
   struct Curl_sockaddr_ex addr;
   int rc;
   int error;
-  bool isconnected;
+  bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
   CURLcode res = CURLE_OK;
@@ -924,7 +924,10 @@ singleipconnect(struct connectdata *conn,
     error = data->set.fsockopt(data->set.sockopt_client,
                                sockfd,
                                CURLSOCKTYPE_IPCXN);
-    if(error) {
+
+    if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
+      isconnected = TRUE;
+    else if(error) {
       sclose(sockfd); /* close the socket and bail out */
       return CURLE_ABORTED_BY_CALLBACK;
     }
@@ -941,7 +944,7 @@ singleipconnect(struct connectdata *conn,
   curlx_nonblock(sockfd, TRUE);
 
   /* Connect TCP sockets, bind UDP */
-  if(conn->socktype == SOCK_STREAM) {
+  if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
     conn->connecttime = Curl_tvnow();
     if(conn->num_addr > 1)
@@ -989,7 +992,8 @@ singleipconnect(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  isconnected = verifyconnect(sockfd, &error);
+  if(!isconnected)
+    isconnected = verifyconnect(sockfd, &error);
 
   if(!rc && isconnected) {
     /* we are connected, awesome! */
