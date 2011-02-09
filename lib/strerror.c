@@ -281,9 +281,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_CHUNK_FAILED:
     return "Chunk callback failed";
 
-  case CURLE_TLSAUTH_FAILED:
-    return "TLS Authentication failed";
-
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:

@@ -354,7 +354,7 @@ gtls_connect_step1(struct connectdata *conn,
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
             gnutls_strerror(rc));
-      return CURLE_TLSAUTH_FAILED;
+      return CURLE_OUT_OF_MEMORY;
     }
 
     rc = gnutls_srp_set_client_credentials(conn->ssl[sockindex].srp_client_cred,
@@ -363,7 +363,7 @@ gtls_connect_step1(struct connectdata *conn,
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_set_client_cred() failed: %s",
             gnutls_strerror(rc));
-      return CURLE_TLSAUTH_FAILED;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
 #endif

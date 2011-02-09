@@ -502,7 +502,6 @@ typedef enum {
   CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Identifiers */
   CURLE_FTP_BAD_FILE_LIST,       /* 87 - unable to parse FTP file list */
   CURLE_CHUNK_FAILED,            /* 88 - chunk callback reported error */
-  CURLE_TLSAUTH_FAILED,          /* 89 - Failed TLS authentication */
 
   CURL_LAST /* never use! */
 } CURLcode;
