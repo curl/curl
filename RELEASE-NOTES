@@ -14,6 +14,8 @@ This release includes the following changes:
  o IDN: use win32 API if told to
  o ares: ask for both IPv4 and IPv6 addresses
  o HTTP: do Negotiate authentication using SSPI on windows
+ o Windows build: alternative makefile
+ o TLS-SRP: support added when using GnuTLS
 
 This release includes the following bugfixes:
 
@@ -35,6 +37,18 @@ This release includes the following bugfixes:
  o GnuTLS builds: fix memory leak
  o connect problem: use UDP correctly
  o Borland C++ makefile tweaks
+ o OpenSSL: improved error message on SSL_CTX_new failures
+ o HTTP: memory leak on multiple Location:
+ o ares_query_completed_cb: don't touch invalid data
+ o ares: memory leak fix
+ o mk-ca-bundle: use new cacert url
+ o Curl_gmtime: added a portable gmtime and check for NULL
+ o curl.1: typo in -v description
+ o CURLOPT_SOCKOPTFUNCTION: return proper error code
+ o --keepalive-time: warn if not supported properly
+ o file: add support for CURLOPT_TIMECONDITION
+ o nss: avoid memory leaks and failure of NSS shutdown
+ o multi: fix CURLM_STATE_TOOFAST for multi_socket
 
 This release includes the following known bugs:
 
