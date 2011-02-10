@@ -1765,6 +1765,10 @@ static int sockoptcallback(void *clientp, curl_socket_t curlfd,
           return 0;
         }
 #endif
+#if !defined(TCP_KEEPIDLE) || !defined(TCP_KEEPINTVL)
+        warnf(clientp, "Keep-alive functionality somewhat crippled due to "
+              "missing support in your operating system!\n");
+#endif
       }
     }
     break;
