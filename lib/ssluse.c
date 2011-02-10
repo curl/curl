@@ -1464,7 +1464,7 @@ ossl_connect_step1(struct connectdata *conn,
 
   if(!connssl->ctx) {
     failf(data, "SSL: couldn't create a context: %s",
-          ERR_error_string(ERR_peek_last_error(), NULL));
+          ERR_error_string(ERR_peek_error(), NULL));
     return CURLE_OUT_OF_MEMORY;
   }
 
