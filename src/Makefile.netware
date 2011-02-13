@@ -140,6 +140,7 @@ else
 LD	= nlmconv
 LDFLAGS	= -T
 LIBEXT	= a
+CFLAGS	+= -m32
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)

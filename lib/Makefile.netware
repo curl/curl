@@ -145,6 +145,7 @@ AR	= ar
 ARFLAGS	= -cq
 LIBEXT	= a
 RANLIB	= ranlib
+CFLAGS  += -m32
 CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
