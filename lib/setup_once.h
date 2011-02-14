@@ -488,8 +488,5 @@ typedef int sig_atomic_t;
 
 #define ZERO_NULL 0
 
-#define gmtime(x) do_not_use_gmtime_use_Curl_gmtime()
-#define gmtime_r(x,y) do_not_use_gmtime_r_use_Curl_gmtime()
-
 #endif /* __SETUP_ONCE_H */
 
