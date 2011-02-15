@@ -108,6 +108,7 @@ static int imap_getsock(struct connectdata *conn,
 static CURLcode imap_doing(struct connectdata *conn,
                            bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata * conn);
+static CURLcode imap_state_upgrade_tls(struct connectdata *conn);
 
 /*
  * IMAP protocol handler.
@@ -342,14 +343,35 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    /* Curl_ssl_connect is BLOCKING */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(CURLE_OK == result) {
-      conn->protocol |= PROT_IMAPS;
-      result = imap_state_login(conn);
+    if(data->state.used_interface == Curl_if_multi) {
+      state(conn, IMAP_UPGRADETLS);
+      return imap_state_upgrade_tls(conn);
+    }
+    else {
+      result = Curl_ssl_connect(conn, FIRSTSOCKET);
+      if(CURLE_OK == result) {
+        conn->protocol |= PROT_IMAPS;
+        result = imap_state_login(conn);
+      }
     }
   }
   state(conn, IMAP_STOP);
+  return result;
+}
+
+static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
+{
+  struct imap_conn *imapc = &conn->proto.imapc;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
+
+  if(imapc->ssldone) {
+    conn->protocol |= PROT_IMAPS;
+    result = imap_state_login(conn);
+    state(conn, IMAP_STOP);
+  }
+
   return result;
 }
 
@@ -523,6 +545,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
   size_t nread = 0;
+
+  /* busy upgrading the connection; right now all I/O is SSL/TLS, not IMAP */
+  if(imapc->state == IMAP_UPGRADETLS)
+    return imap_state_upgrade_tls(conn);
 
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
