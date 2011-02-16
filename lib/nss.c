@@ -537,6 +537,7 @@ static int nss_load_key(struct connectdata *conn, int sockindex,
   PK11SlotInfo *slot;
   SECStatus status;
   struct ssl_connect_data *ssl = conn->ssl;
+  (void)sockindex; /* unused */
 
   if(CURLE_OK != nss_create_object(ssl, CKO_PRIVATE_KEY, key_file, FALSE)) {
     PR_SetError(SEC_ERROR_BAD_KEY, 0);
@@ -561,6 +562,7 @@ static int nss_load_key(struct connectdata *conn, int sockindex,
    */
   (void)conn; /* unused */
   (void)key_file; /* unused */
+  (void)sockindex; /* unused */
   return 0;
 #endif
 }
