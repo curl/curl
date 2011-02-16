@@ -115,6 +115,7 @@ static int smtp_getsock(struct connectdata *conn,
 static CURLcode smtp_doing(struct connectdata *conn,
                            bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata * conn);
+static CURLcode smtp_state_upgrade_tls(struct connectdata *conn);
 
 
 /*
@@ -290,6 +291,7 @@ static void state(struct connectdata *conn,
     "EHLO",
     "HELO",
     "STARTTLS",
+    "UPGRADETLS",
     "AUTHPLAIN",
     "AUTHLOGIN",
     "AUTHPASSWD",
@@ -481,13 +483,33 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
       result = smtp_authenticate(conn);
   }
   else {
-    /* Curl_ssl_connect is BLOCKING */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(CURLE_OK == result) {
-      smtp_to_smtps(conn);
-      result = smtp_state_ehlo(conn);
+    if(data->state.used_interface == Curl_if_multi) {
+      state(conn, SMTP_UPGRADETLS);
+      return smtp_state_upgrade_tls(conn);
+    }
+    else {
+      result = Curl_ssl_connect(conn, FIRSTSOCKET);
+      if(CURLE_OK == result) {
+        smtp_to_smtps(conn);
+        result = smtp_state_ehlo(conn);
+      }
     }
   }
+  return result;
+}
+
+static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
+{
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
+
+  if(smtpc->ssldone) {
+    smtp_to_smtps(conn);
+    result = smtp_state_ehlo(conn);
+  }
+
   return result;
 }
 
@@ -909,6 +931,9 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
   size_t nread = 0;
+
+  if(smtpc->state == SMTP_UPGRADETLS)
+    return smtp_state_upgrade_tls(conn);
 
   if(pp->sendleft)
     /* we have a piece of a command still left to send */

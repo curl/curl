@@ -34,6 +34,7 @@ typedef enum {
   SMTP_EHLO,
   SMTP_HELO,
   SMTP_STARTTLS,
+  SMTP_UPGRADETLS, /* asynchronously upgrade the connection to SSL/TLS (multi mode only) */
   SMTP_AUTHPLAIN,
   SMTP_AUTHLOGIN,
   SMTP_AUTHPASSWD,
