@@ -57,6 +57,7 @@ struct smtp_conn {
   unsigned int authmechs;       /* Accepted authentication methods. */
   smtpstate state; /* always use smtp.c:state() to change state! */
   struct curl_slist *rcpt;
+  bool ssldone; /* is connect() over SSL done? only relevant in multi mode */
 };
 
 /* Authentication mechanism flags. */

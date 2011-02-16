@@ -999,7 +999,14 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn,
                                      bool *done)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  CURLcode result = Curl_pp_multi_statemach(&smtpc->pp);
+  CURLcode result;
+
+  if((conn->handler->protocol & CURLPROTO_SMTPS) && !smtpc->ssldone) {
+    result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
+  }
+  else {
+    result = Curl_pp_multi_statemach(&smtpc->pp);
+  }
 
   *done = (bool)(smtpc->state == SMTP_STOP);
 
@@ -1114,8 +1121,8 @@ static CURLcode smtp_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & CURLPROTO_SMTPS) {
-    /* BLOCKING */
+  if((conn->handler->protocol & CURLPROTO_SMTPS) &&
+      data->state.used_interface != Curl_if_multi) {
     /* SMTPS is simply smtp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
