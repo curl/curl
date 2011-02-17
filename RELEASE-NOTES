@@ -57,8 +57,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Brad Hards, Guenter Knauf, Luke Amery, Pasha Kuznetsov, Patrick Monnerat,
- Paul Howarth, Pierre Joye, Tommie Gannert, Yang Tse, Brad King,
- Dan Fandrich, Kamil Dudka, Marcel Roelofs, Quinn Slack
+ Amr Shahin, Andreas Olsson, Bjoern Sikora, Brad Hards, Brad King,
+ Dan Fandrich, Daniel Mentz, Darshan Mody, Dave Reisner, Eric Hu,
+ Guenter Knauf, Ian D Allen, John Bradshaw, Julien Chaffraix, Kamil Dudka,
+ Luke Amery, Marcel Roelofs, Martin Lemke, Nicholas Maniscalco,
+ Pasha Kuznetsov, Patrick Monnerat, Paul Howarth, Pedro Larroy, Pierre Joye,
+ Quinn Slack, Samuel Thibault, Tommie Gannert, Vsevolod Novikov, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)
