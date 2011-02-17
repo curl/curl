@@ -1189,7 +1189,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(easy->result) {
         /* failure detected */
         Curl_posttransfer(data);
-        Curl_done(&easy->easy_conn, easy->result, FALSE);
+        Curl_done(&easy->easy_conn, easy->result, TRUE);
         disconnect_conn = TRUE;
       }
       break;

@@ -5281,7 +5281,7 @@ CURLcode Curl_done(struct connectdata **connp,
   */
   if(data->set.reuse_forbid || conn->bits.close || premature ||
      (-1 == conn->connectindex)) {
-    CURLcode res2 = Curl_disconnect(conn, FALSE); /* close the connection */
+    CURLcode res2 = Curl_disconnect(conn, premature); /* close the connection */
 
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */
