@@ -1058,6 +1058,7 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
     /* destroy all NSS objects in order to avoid failure of NSS shutdown */
     Curl_llist_destroy(connssl->obj_list, NULL);
+    connssl->obj_list = NULL;
 #endif
     connssl->handle = NULL;
   }
@@ -1216,7 +1217,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   /* make the socket nonblocking */
   sock_opt.option = PR_SockOpt_Nonblocking;
   sock_opt.value.non_blocking = PR_TRUE;
-  if(PR_SetSocketOption(model, &sock_opt) != SECSuccess)
+  if(PR_SetSocketOption(model, &sock_opt) != PR_SUCCESS)
     goto error;
 
   if(SSL_OptionSet(model, SSL_SECURITY, PR_TRUE) != SECSuccess)
@@ -1406,6 +1407,12 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(model)
     PR_Close(model);
+
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
+    /* cleanup on connection failure */
+    Curl_llist_destroy(connssl->obj_list, NULL);
+    connssl->obj_list = NULL;
+#endif
 
   if (ssl3 && tlsv1 && isTLSIntoleranceError(err)) {
     /* schedule reconnect through Curl_retry_request() */

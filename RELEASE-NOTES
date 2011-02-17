@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o nss: avoid memory leak on SSL connection failure
  o 
 
 This release includes the following known bugs:
