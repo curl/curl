@@ -1,10 +1,4 @@
-To be addressed in 7.21.3
+To be addressed in 7.21.5
 =========================
 
-263 - Support binding DNS to local interface/IP
-
-265 - 1. FTP cmd channel and data channel validation
-
-267 - 2. Cert chain for data channel
-
-271 -
+271 - [blank so far]
