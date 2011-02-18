@@ -352,6 +352,9 @@ static ssize_t polarssl_recv(struct connectdata *conn,
   ret = ssl_read(&conn->ssl[num].ssl, (unsigned char *)buf, buffersize);
 
   if(ret <= 0) {
+    if(ret == POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY)
+      return 0;
+
     *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ?
       CURLE_AGAIN : CURLE_RECV_ERROR;
     return -1;
