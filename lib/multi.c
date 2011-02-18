@@ -1003,6 +1003,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                 Curl_tvdiff(now, data->progress.t_startsingle), k->bytecount,
                 k->size);
         }
+
+        /* Force the connection closed because the server could continue to
+           send us stuff at any time. (The disconnect_conn logic used below
+           doesn't work at this point). */
+        easy->easy_conn->bits.close = TRUE;
         easy->result = CURLE_OPERATION_TIMEDOUT;
         multistate(easy, CURLM_STATE_COMPLETED);
         break;
