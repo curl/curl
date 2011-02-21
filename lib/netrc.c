@@ -142,9 +142,6 @@ int Curl_parsenetrc(const char *host,
           if(Curl_raw_equal(host, tok)) {
             /* and yes, this is our host! */
             state=HOSTVALID;
-#ifdef _NETRC_DEBUG
-            fprintf(stderr, "HOST: %s\n", tok);
-#endif
             retcode=0; /* we did find our host */
           }
           else
@@ -159,18 +156,12 @@ int Curl_parsenetrc(const char *host,
             }
             else {
               strncpy(login, tok, LOGINSIZE-1);
-#ifdef _NETRC_DEBUG
-              fprintf(stderr, "LOGIN: %s\n", login);
-#endif
             }
             state_login=0;
           }
           else if(state_password) {
             if(state_our_login || !specific_login) {
               strncpy(password, tok, PASSWORDSIZE-1);
-#ifdef _NETRC_DEBUG
-              fprintf(stderr, "PASSWORD: %s\n", password);
-#endif
             }
             state_password=0;
           }
