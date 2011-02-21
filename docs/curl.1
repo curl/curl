@@ -815,6 +815,17 @@ to FTP to the machine host.domain.com with user name \&'myself' and password
 .IP "--netrc-optional"
 Very similar to \fI--netrc\fP, but this option makes the .netrc usage
 \fBoptional\fP and not mandatory as the \fI--netrc\fP option does.
+
+.IP "--netrc-file"
+This option is similar to \fI--netrc\fP, except that you provide the path
+(absolute or relative) to the netrc file that Curl should use.
+You can only specify one netrc file per invocation. If several
+\fI--netrc-file\fP options are provided, only the \fBlast one\fP will be used.
+(Added in 7.21.5)
+
+This option overrides any use of \fI--netrc\fP as they are mutually exclusive.
+It will also abide by --netrc-optional if specified.
+
 .IP "--negotiate"
 (HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
 designed by Microsoft and is used in their web applications. It is primarily

@@ -527,6 +527,7 @@ struct Configurable {
                               changed */
   bool netrc_opt;
   bool netrc;
+  char *netrc_file;
   bool noprogress;
   bool isatty;             /* updated internally only if the output is a tty */
   struct getout *url_list; /* point to the first node */
@@ -842,6 +843,7 @@ static void help(void)
     "    --negotiate     Use HTTP Negotiate Authentication (H)",
     " -n/--netrc         Must read .netrc for user name and password",
     "    --netrc-optional Use either .netrc or URL; overrides -n",
+    "    --netrc-file <file> Set up the netrc filename to use",
     " -N/--no-buffer     Disable buffering of the output stream",
     "    --no-keepalive  Disable keepalive use on the connection",
     "    --no-sessionid  Disable SSL session-ID reusing (SSL)",
@@ -1949,6 +1951,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"M", "manual",      FALSE},
     {"n", "netrc",       FALSE},
     {"no", "netrc-optional", FALSE},
+    {"ne", "netrc-file", TRUE},
     {"N", "buffer",   FALSE}, /* listed as --no-buffer in the help */
     {"o", "output",      TRUE},
     {"O",  "remote-name", FALSE},
@@ -2914,6 +2917,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'o': /* CA info PEM file */
         /* use .netrc or URL */
         config->netrc_opt = toggle;
+        break;
+      case 'e': /* netrc-file */
+        GetStr(&config->netrc_file, nextarg);
         break;
       default:
         /* pick info from .netrc, if this is used for http, curl will
@@ -4047,6 +4053,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->writeout);
   if(config->httppost)
     curl_formfree(config->httppost);
+  if(config->netrc_file)
+    free(config->netrc_file);
   if(config->cert)
     free(config->cert);
   if(config->cacert)
@@ -5183,10 +5191,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->netrc_opt)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
-        else if(config->netrc)
+        else if(config->netrc || config->netrc_file)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
         else
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
+
+        if(config->netrc_file)
+          my_setopt(curl, CURLOPT_NETRC_FILE, config->netrc_file);
 
         my_setopt(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
         my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
