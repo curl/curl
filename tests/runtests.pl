@@ -2146,8 +2146,6 @@ sub checksystem {
             if($feat =~ /debug/i) {
                 # curl was built with --enable-debug
                 $debug_build = 1;
-                # set the NETRC debug env
-                $ENV{'CURL_DEBUG_NETRC'} = "$LOGDIR/netrc";
             }
             if($feat =~ /SSL/i) {
                 # ssl enabled
@@ -2476,20 +2474,12 @@ sub singletest {
                 next;
             }
         }
-	elsif($f eq "axTLS") {
-	    if($has_axtls) {
-		next;
-	    }
-	}
-        elsif($f eq "netrc_debug") {
-            if($debug_build) {
+        elsif($f eq "axTLS") {
+            if($has_axtls) {
                 next;
             }
         }
         elsif($f eq "unittest") {
-            # Unit tests should set the netrc filename directly, thus unset the
-            # environment variable.
-            delete($ENV{'CURL_DEBUG_NETRC'}) if $ENV{'CURL_DEBUG_NETRC'};
             if($debug_build) {
                 next;
             }

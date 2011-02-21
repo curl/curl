@@ -30,9 +30,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 #
 # Client-side
 <client>
-<features>
-netrc_debug
-</features>
 <server>
 ftp
 </server>
@@ -40,7 +37,7 @@ ftp
 FTP (optional .netrc; programmatic user/passwd) dir list PASV
  </name>
  <command>
---netrc-optional -u romulus:rhemus ftp://mary:mark@%HOSTIP:%FTPPORT/
+--netrc-optional --netrc-file log/netrc -u romulus:rhemus ftp://mary:mark@%HOSTIP:%FTPPORT/
 </command>
 <file name="log/netrc" >
 # the following two lines were created while testing curl

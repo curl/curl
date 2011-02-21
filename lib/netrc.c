@@ -80,21 +80,6 @@ int Curl_parsenetrc(const char *host,
 
 #define NETRC DOT_CHAR "netrc"
 
-#ifdef DEBUGBUILD
-  {
-    /* This is a hack to allow testing.
-     * If compiled with --enable-debug and CURL_DEBUG_NETRC is defined,
-     * then it's the path to a substitute .netrc for testing purposes *only* */
-
-    char *override = curl_getenv("CURL_DEBUG_NETRC");
-
-    if(override) {
-      fprintf(stderr, "NETRC: overridden " NETRC " file: %s\n", override);
-      netrcfile = override;
-      netrc_alloc = TRUE;
-    }
-  }
-#endif /* DEBUGBUILD */
   if(!netrcfile) {
     home = curl_getenv("HOME"); /* portable environment reader */
     if(home) {
