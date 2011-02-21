@@ -2088,7 +2088,10 @@ behavior on host and key (mis)matching. (Added in 7.19.6)
 .IP CURLOPT_SSH_KEYFUNCTION
 Pass a pointer to a curl_sshkeycallback function. It gets called when the
 known_host matching has been done, to allow the application to act and decide
-for libcurl how to proceed. It gets passed the CURL handle, the key from the
+for libcurl how to proceed. The callback will only be called if
+\fICURLOPT_SSH_KNOWNHOSTS\fP is also set.
+
+The curl_sshkeycallback function gets passed the CURL handle, the key from the
 known_hosts file, the key from the remote site, info from libcurl on the
 matching status and a custom pointer (set with \fICURLOPT_SSH_KEYDATA\fP). It
 MUST return one of the following return codes to tell libcurl how to act:
