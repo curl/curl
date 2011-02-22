@@ -1157,7 +1157,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  int curlerr;
+  CURLcode curlerr;
   const int *cipher_to_enable;
   PRSocketOptionData sock_opt;
   long time_left;
@@ -1289,9 +1289,13 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
                            NULL) != SECSuccess)
     goto error;
 
-  if(data->set.ssl.verifypeer && (CURLE_OK !=
-        (curlerr = nss_load_ca_certificates(conn, sockindex))))
-    goto error;
+  if(data->set.ssl.verifypeer) {
+    const CURLcode rv = nss_load_ca_certificates(conn, sockindex);
+    if(CURLE_OK != rv) {
+      curlerr = rv;
+      goto error;
+    }
+  }
 
   if (data->set.ssl.CRLfile) {
     if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {
