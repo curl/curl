@@ -651,7 +651,9 @@ sub stopserver {
     #
     foreach my $server (@killservers) {
         if($run{$server}) {
-            $pidlist .= "$run{$server} ";
+            # we must prepend a space since $pidlist may already contain
+            # a pid
+            $pidlist .= " $run{$server}";
             $run{$server} = 0;
         }
         $runcert{$server} = 0 if($runcert{$server});
