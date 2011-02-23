@@ -464,7 +464,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   }
 
   if(fstated && !data->state.range && data->set.timecondition) {
-    if(!Curl_meets_timecondition(data, data->info.filetime)) {
+    if(!Curl_meets_timecondition(data, (time_t)data->info.filetime)) {
       *done = TRUE;
       return CURLE_OK;
     }

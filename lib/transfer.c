@@ -359,7 +359,7 @@ static void read_rewind(struct connectdata *conn,
  * Check to see if CURLOPT_TIMECONDITION was met by comparing the time of the
  * remote document with the time provided by CURLOPT_TIMEVAL
  */
-bool Curl_meets_timecondition(struct SessionHandle *data, long timeofdoc)
+bool Curl_meets_timecondition(struct SessionHandle *data, time_t timeofdoc)
 {
   if((timeofdoc == 0) || (data->set.timevalue == 0))
     return TRUE;
