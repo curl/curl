@@ -10,12 +10,18 @@ Curl and libcurl 7.21.5
 This release includes the following changes:
 
  o SOCKOPTFUNCTION: callback can say already-connected
+ o Added --netrc-file
 
 This release includes the following bugfixes:
 
  o nss: avoid memory leak on SSL connection failure
  o nss: do not ignore failure of SSL handshake
- o 
+ o multi: better failed connect handling when using FTP, SMTP, POP3 and IMAP
+ o runtests.pl: fix pid number concatenation that prevented it from killing
+   the correct process at times
+ o PolarSSL: Return 0 on receiving TLS CLOSE_NOTIFY alert
+ o curl_easy_setopt.3: Removed wrong reference to CURLOPT_USERPASSWORD
+ o multi: close connection on timeout
 
 This release includes the following known bugs:
 
@@ -24,6 +30,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan
 
         Thanks! (and sorry if I forgot to mention someone)
