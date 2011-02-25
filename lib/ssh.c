@@ -505,6 +505,23 @@ static int sshkeycallback(CURL *easy,
 #endif
 
 /*
+ * Mark the connection as being available for sending.
+ *
+ * We need to set the socket as being able to send, otherwise the
+ * transfer will stall. It does this because once curl gets to the
+ * CURLM_STATE_PERFORM state, in Curl_readwrite will only attempt to
+ * send when the socket is marked for sending; up to this point it has
+ * only been polled for reading. If it doesn't start to send
+ * immediately, then it will return to the user code without calling
+ * ssh. As we don't call any ssh transfer methods, the sockets will not
+ * be marked for send or receive, and the transfer will stall.
+ */
+static void ssh_reset_connection_sending(struct connectdata *conn)
+{
+  conn->cselect_bits = CURL_CSELECT_IN;
+}
+
+/*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end.  The data the pointer 'block' points
  * to will be set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
@@ -1600,9 +1617,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->orig_waitfor = data->req.keepon;
 
         state(conn, SSH_STOP);
-        /* FIXME: here should be explained why we need it to start the
-         * download */
-        conn->cselect_bits = CURL_CSELECT_IN;
+        ssh_reset_connection_sending(conn);
       }
       break;
     }
@@ -2020,10 +2035,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
-
-      /* FIXME: here should be explained why we need it to start the
-       * download */
-      conn->cselect_bits = CURL_CSELECT_IN;
+      ssh_reset_connection_sending(conn);
     }
     if(result) {
       state(conn, SSH_SFTP_CLOSE);
@@ -2197,10 +2209,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
-
-      /* FIXME: here should be explained why we need it to start the
-       * download */
-      conn->cselect_bits = CURL_CSELECT_IN;
+      ssh_reset_connection_sending(conn);
 
       if(result) {
         state(conn, SSH_SCP_CHANNEL_FREE);
