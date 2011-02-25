@@ -1600,6 +1600,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->orig_waitfor = data->req.keepon;
 
         state(conn, SSH_STOP);
+        /* FIXME: here should be explained why we need it to start the
+         * download */
+        conn->cselect_bits = CURL_CSELECT_IN;
       }
       break;
     }
