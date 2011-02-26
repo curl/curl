@@ -1849,7 +1849,8 @@ static int https_getsock(struct connectdata *conn,
   return CURLE_OK;
 }
 #else
-#ifdef USE_NSS
+#if defined(USE_NSS) || defined(USE_QSOSSL) || \
+    defined(USE_POLARSSL) || defined(USE_AXTLS)
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
@@ -1859,43 +1860,7 @@ static int https_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-#else
-#ifdef USE_QSOSSL
-static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-#else
-#ifdef USE_POLARSSL
-static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-#else
-#ifdef USE_AXTLS
-static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-#endif /* USE_AXTLS */
-#endif /* USE_POLARSSL */
-#endif /* USE_QSOSSL */
-#endif /* USE_NSS */
+#endif /* USE_AXTLS || USE_POLARSSL || USE_QSOSSL || USE_NSS */
 #endif /* USE_SSLEAY || USE_GNUTLS */
 
 /*
