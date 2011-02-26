@@ -1873,7 +1873,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   struct HTTP *http =data->state.proto.http;
-  (void)premature; /* not used */
 
   Curl_unencode_cleanup(conn);
 
