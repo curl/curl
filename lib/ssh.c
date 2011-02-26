@@ -2587,10 +2587,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     rc = libssh2_knownhost_readfile(ssh->kh,
                                     data->set.str[STRING_SSH_KNOWNHOSTS],
                                     LIBSSH2_KNOWNHOST_FILE_OPENSSH);
-    if(rc) {
+    if(rc < 0)
       infof(data, "Failed to read known hosts from %s\n",
             data->set.str[STRING_SSH_KNOWNHOSTS]);
-    }
   }
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
