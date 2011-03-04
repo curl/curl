@@ -9,6 +9,7 @@
 
 #include "test.h"
 
+/* The fail macros mark the current test step as failed, and continue */
 #define fail_if(expr, msg)                              \
   if(expr) {                                            \
     fprintf(stderr, "%s:%d Assertion '%s' met: %s\n" ,  \
@@ -39,6 +40,31 @@
   } while(0)
 
 
+/* The abort macros mark the current test step as failed, and exit the test */
+#define abort_if(expr, msg)                                   \
+  if(expr) {                                                  \
+    fprintf(stderr, "%s:%d Abort assertion '%s' met: %s\n" ,  \
+            __FILE__, __LINE__, #expr, msg);                  \
+    unitfail++;                                               \
+    goto unit_test_abort;                                     \
+  }
+
+#define abort_unless(expr, msg)                                \
+  if(!(expr)) {                                                \
+    fprintf(stderr, "%s:%d Abort assertion '%s' failed: %s\n", \
+            __FILE__, __LINE__, #expr, msg);                   \
+    unitfail++;                                                \
+    goto unit_test_abort;                                      \
+  }
+
+#define abort_test(msg) do {                                  \
+    fprintf(stderr, "%s:%d test aborted: '%s'\n",             \
+            __FILE__, __LINE__, msg);                         \
+    unitfail++;                                               \
+    goto unit_test_abort;                                     \
+  } while(0)
+
+
 
 extern int unitfail;
 
@@ -51,6 +77,8 @@ extern int unitfail;
   } else {
 
 #define UNITTEST_STOP                           \
+    goto unit_test_abort; /* avoid warning */   \
+unit_test_abort:                                \
     unit_stop();                                \
   }                                             \
   return unitfail;                              \
