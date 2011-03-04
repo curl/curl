@@ -128,6 +128,7 @@ UNITTEST_START
    */
 
   head=llist->head;
+  abort_unless(head, "llist->head is NULL");
   element_next = head->next;
   llist_size = Curl_llist_count(llist);
 
@@ -137,6 +138,7 @@ UNITTEST_START
                "llist size not decremented as expected");
   fail_unless(llist->head == element_next,
                "llist new head not modified properly");
+  abort_unless(llist->head, "llist->head is NULL");
   fail_unless(llist->head->prev == NULL,
               "new head previous not set to null");
 
@@ -153,11 +155,13 @@ UNITTEST_START
   Curl_llist_insert_next(llist, llist->head, &unusedData_case3);
   llist_size = Curl_llist_count(llist);
   to_remove = llist->head->next;
+  abort_unless(to_remove, "to_remove is NULL");
   element_next = to_remove->next;
   element_prev = to_remove->prev;
   Curl_llist_remove(llist, to_remove, NULL);
   fail_unless(element_prev->next == element_next,
               "element previous->next is not being adjusted");
+  abort_unless(element_next, "element_next is NULL");
   fail_unless(element_next->prev == element_prev,
               "element next->previous is not being adjusted");
 
