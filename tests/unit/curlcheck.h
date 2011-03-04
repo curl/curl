@@ -69,9 +69,9 @@
 extern int unitfail;
 
 #define UNITTEST_START                          \
-  int test(char *unused)                        \
+  int test(char *arg)                           \
   {                                             \
-  (void)unused;                                 \
+  (void)arg;                                    \
   if (unit_setup()) {                           \
     fail("unit_setup() failure");               \
   } else {
