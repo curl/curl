@@ -1,5 +1,5 @@
 <testcase>
-<!-- This replaces test 558 -->
+<!-- This replaces test 559 -->
 <info>
 <keywords>
 unittest
@@ -17,13 +17,13 @@ none
 unittest
 </features>
  <name>
-internal hash create/destroy testing
+internal hash create/add/destroy testing
  </name>
 <tool>
 unit1305
 </tool>
 <command>
-1305
+1306
 </command>
 </client>
 

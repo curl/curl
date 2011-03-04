@@ -117,15 +117,18 @@ UNITTEST_START
     struct Curl_dns_entry *nodep;
     size_t key_len;
 
-    CURLcode rc = create_node();
-    abort_unless(rc == CURLE_OK, "data node creation failed");
-    key_len = strlen(data_key);
+    /* Test 1305 exits without adding anything to the hash */
+    if (strcmp(arg, "1305") != 0) {
+	CURLcode rc = create_node();
+	abort_unless(rc == CURLE_OK, "data node creation failed");
+	key_len = strlen(data_key);
 
-    nodep = Curl_hash_add(hp, data_key, key_len+1, data_node);
-    abort_unless(nodep, "insertion into hash failed");
-    /* Freeing will now be done by Curl_hash_destroy */
-    data_node = NULL;
+	nodep = Curl_hash_add(hp, data_key, key_len+1, data_node);
+	abort_unless(nodep, "insertion into hash failed");
+	/* Freeing will now be done by Curl_hash_destroy */
+	data_node = NULL;
 
-    /* To do: test retrieval, deletion, edge conditions */
+	/* To do: test retrieval, deletion, edge conditions */
+    }
 
 UNITTEST_STOP
