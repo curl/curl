@@ -44,6 +44,9 @@
 #define test_setopt(A,B,C) \
   if((res = curl_easy_setopt((A),(B),(C))) != CURLE_OK) goto test_cleanup
 
+#define test_multi_setopt(A,B,C) \
+  if((res = curl_multi_setopt((A),(B),(C))) != CURLE_OK) goto test_cleanup
+
 extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
 extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
 
