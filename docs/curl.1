@@ -351,12 +351,12 @@ run curl.
 is used to seed the random engine for SSL connections. See also the
 \fI--random-file\fP option.
 .IP "-E/--cert <certificate[:password]>"
-(SSL) Tells curl to use the specified certificate file when getting a file
-with HTTPS or FTPS. The certificate must be in PEM format.  If the optional
-password isn't specified, it will be queried for on the terminal. Note that
-this option assumes a \&"certificate" file that is the private key and the
-private certificate concatenated! See \fI--cert\fP and \fI--key\fP to specify
-them independently.
+(SSL) Tells curl to use the specified client certificate file when getting a
+file with HTTPS, FTPS or another SSL-based protocol. The certificate must be
+in PEM format.  If the optional password isn't specified, it will be queried
+for on the terminal. Note that this option assumes a \&"certificate" file that
+is the private key and the private certificate concatenated! See \fI--cert\fP
+and \fI--key\fP to specify them independently.
 
 If curl is built against the NSS SSL library then this option can tell
 curl the nickname of the certificate to use within the NSS database defined
