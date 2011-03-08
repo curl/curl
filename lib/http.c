@@ -1850,7 +1850,7 @@ static int https_getsock(struct connectdata *conn,
 }
 #else
 #if defined(USE_NSS) || defined(USE_QSOSSL) || \
-    defined(USE_POLARSSL) || defined(USE_AXTLS)
+  defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_CYASSL)
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)

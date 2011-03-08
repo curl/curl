@@ -111,6 +111,10 @@
 #include <polarssl/ssl.h>
 #endif
 
+#ifdef USE_CYASSL
+#include <openssl/ssl.h>
+#endif
+
 #ifdef USE_NSS
 #include <nspr.h>
 #include <pk11pub.h>
@@ -266,6 +270,11 @@ struct ssl_connect_data {
   x509_crl crl;
   rsa_context rsa;
 #endif /* USE_POLARSSL */
+#ifdef USE_CYASSL
+  SSL_CTX* ctx;
+  SSL*     handle;
+  ssl_connect_state connecting_state;
+#endif /* USE_CYASSL */
 #ifdef USE_NSS
   PRFileDesc *handle;
   char *client_nickname;

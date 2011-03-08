@@ -551,7 +551,7 @@ int netware_init(void);
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
-#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS)
+#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_CYASSL)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 

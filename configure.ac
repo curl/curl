@@ -140,7 +140,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,axtls} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -1851,6 +1851,95 @@ if test "$OPENSSL_ENABLED" != "1"; then
 fi dnl OPENSSL != 1
 
 dnl ----------------------------------------------------
+dnl check for CyaSSL
+dnl ----------------------------------------------------
+
+dnl Default to compiler & linker defaults for CyaSSL files & libraries.
+OPT_CYASSL=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+AC_ARG_WITH(cyassl,dnl
+AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: /usr/local/cyassl)])
+AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
+  OPT_CYASSL=$withval)
+
+if test "$OPENSSL_ENABLED" != "1"; then
+
+  if test X"$OPT_CYASSL" != Xno; then
+
+    if test "$OPT_CYASSL" = "yes"; then
+      OPT_CYASSL=""
+    fi
+
+    if test -z "$OPT_CYASSL" ; then
+      dnl check for lib in default first
+
+      trycyassldir="/usr/local/cyassl"
+
+      LDFLAGS="$LDFLAGS -L$trycyassldir/lib"
+      CPPFLAGS="$CPPFLAGS -I$trycyassldir/include"
+
+      AC_CHECK_LIB(cyassl, InitCyaSSL,
+      dnl libcyassl found, set the variable
+       [
+         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
+         AC_SUBST(USE_CYASSL, [1])
+         CYASSL_ENABLED=1
+         USE_CYASSL="yes"
+         curl_ssl_msg="enabled (CyaSSL)"
+        ])
+    fi
+
+    if test "x$USE_CYASSL" != "xyes"; then
+      dnl add the path and test again
+      addld=-L$OPT_CYASSL/lib$libsuff
+      addcflags=-I$OPT_CYASSL/include
+      cyassllib=$OPT_CYASSL/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      AC_CHECK_LIB(cyassl, InitCyaSSL,
+       [
+       AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
+       AC_SUBST(USE_CYASSL, [1])
+       CYASSL_ENABLED=1
+       USE_CYASSL="yes"
+       curl_ssl_msg="enabled (CyaSSL)"
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ])
+    fi
+
+    if test "x$USE_CYASSL" = "xyes"; then
+      AC_MSG_NOTICE([detected CyaSSL])
+
+      CURL_LIBS="$CURL_LIBS -lcyassl -lm"
+      LIBS="$LIBS -lcyassl -lm"
+
+      if test -n "$cyassllib"; then
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $cyassllib to LD_LIBRARY_PATH])
+      fi
+
+    fi
+
+  fi dnl CyaSSL not disabled
+
+fi dnl OPENSSL != 1
+
+dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
 dnl ----------------------------------------------------
 
@@ -2001,9 +2090,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-nss or --with-axtls to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss or --with-axtls to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
