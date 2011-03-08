@@ -1,4 +1,4 @@
-Updated: March 7, 2011 (http://curl.haxx.se/docs/faq.html)
+Updated: March 8, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -52,6 +52,7 @@ FAQ
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
   3.19 How do I get HTTP from a host using a specific IP address?
   3.20 How to SFTP from my user's home directory?
+  3.21 Protocol xxx not supported or disabled in libcurl
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -471,9 +472,13 @@ FAQ
   3.1 curl: (1) SSL is disabled, https: not supported
 
   If you get this output when trying to get anything from a https:// server,
-  it means that the configure script couldn't find all libs and include files
-  it requires for SSL to work. If the configure script fails to find them,
-  curl is simply built without SSL support.
+  it means that the instance of curl/libcurl that you're using was built
+  without support for this protocol.
+
+  This could've happened if the configure script that was run at build time
+  couldn't find all libs and include files curl requires for SSL to work. If
+  the configure script fails to find them, curl is simply built without SSL
+  support.
 
   To get the https:// support into a curl that was previously built but that
   reports that https:// is not supported, you should dig through the document
@@ -730,6 +735,20 @@ FAQ
   and for SCP it is just a different protocol prefix:
 
     curl -O -u user:password scp://example.com/~/file.txt
+
+  3.21 Protocol xxx not supported or disabled in libcurl
+
+  When passing on a URL to curl to use, it may respond that the particular
+  protocol is not supported or disabled. The particular way this error message
+  is phrased is because curl doesn't make a distinction internally of whether
+  a particular protocol is not supported (ie never got any code added that
+  knows how to speak that protocol) or if it was explicitly disabled. curl can
+  be built to only support a given set of protocols, and the rest would then
+  be disabled or not supported.
+
+  Note that this error will also occur if you pass a wrongly spelled protocol
+  part as in "htpt://example.com" or as in the less evident case if you prefix
+  the protocol part with a space as in " http://example.com/".
 
 
 4. Running Problems
