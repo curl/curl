@@ -77,7 +77,6 @@ static CURLcode
 cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
-  int ret = -1;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
@@ -224,7 +223,6 @@ cyassl_connect_step2(struct connectdata *conn,
   int ret = -1;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
-  curl_socket_t sockfd = conn->sock[sockindex];
 
   infof(data, "CyaSSL: Connecting to %s:%d\n",
         conn->host.name, conn->remote_port);
@@ -382,6 +380,7 @@ static ssize_t cyassl_recv(struct connectdata *conn,
 
 void Curl_cyassl_session_free(void *ptr)
 {
+  (void)ptr;
   /* CyaSSL reuses sessions on own, no free */
 }
 

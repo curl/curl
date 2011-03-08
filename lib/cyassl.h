@@ -38,6 +38,10 @@ void Curl_cyassl_close(struct connectdata *conn, int sockindex);
 void Curl_cyassl_session_free(void *ptr);
 size_t Curl_cyassl_version(char *buffer, size_t size);
 int Curl_cyassl_shutdown(struct connectdata *conn, int sockindex);
+int Curl_cyassl_init(void);
+CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
+                                         int sockindex,
+                                         bool *done);
 
 /* API setup for CyaSSL */
 #define curlssl_init Curl_cyassl_init
