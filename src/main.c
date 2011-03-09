@@ -4186,7 +4186,7 @@ static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
 
   if(tag < CURLOPTTYPE_OBJECTPOINT) {
     long lval = va_arg(arg, long);
-    snprintf(value, sizeof(value), "%ld", lval);
+    snprintf(value, sizeof(value), "%ldL", lval);
     ret = curl_easy_setopt(curl, tag, lval);
     if(!lval)
       skip = TRUE;
