@@ -42,7 +42,7 @@ FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
  </name>
 # first URL then proxy
  <command>
-"ftp://www.haxx.se/moo/561;type=i" http://%HOSTIP:%HTTPPORT ascii
+"ftp://www.example.com/moo/561;type=i" http://%HOSTIP:%HTTPPORT ascii
 </command>
 </client>
 
@@ -53,8 +53,8 @@ FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
 ^User-Agent:.*
 </strip>
 <protocol>
-GET ftp://www.haxx.se/moo/561;type=i HTTP/1.1
-Host: www.haxx.se:21
+GET ftp://www.example.com/moo/561;type=i HTTP/1.1
+Host: www.example.com:21
 Accept: */*
 Proxy-Connection: Keep-Alive
 

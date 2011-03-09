@@ -66,7 +66,7 @@ lib547
 HTTP proxy auth Digest with POST data from read callback
  </name>
  <command>
-http://test.remote.haxx.se/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
+http://test.remote.example.com/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 </command>
 </client>
 
@@ -76,17 +76,17 @@ http://test.remote.haxx.se/path/551 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-POST http://test.remote.haxx.se/path/551 HTTP/1.1
-Host: test.remote.haxx.se
+POST http://test.remote.example.com/path/551 HTTP/1.1
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
 Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
-POST http://test.remote.haxx.se/path/551 HTTP/1.1
+POST http://test.remote.example.com/path/551 HTTP/1.1
 Proxy-Authorization: Digest username="s1lly", realm="something fun to read", nonce="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", uri="/path/551", response="3325240726fbdaf1e61f3a0dd40b930c"
-Host: test.remote.haxx.se
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
