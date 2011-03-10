@@ -1,4 +1,8 @@
 To be addressed in 7.21.5
 =========================
 
-271 - [blank so far]
+271 - fix the IPv6-working probing to only exist at one place in the code and
+      only get done once
+
+272 - 
+
