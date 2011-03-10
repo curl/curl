@@ -4,5 +4,22 @@ To be addressed in 7.21.5
 271 - fix the IPv6-working probing to only exist at one place in the code and
       only get done once
 
-272 - 
+272 - re-using connections bound to local port
 
+273 - Ben Noordhuis' imap + ssl patch
+
+274 - Ben Noordhuis' smtp + ssl patch
+
+275 - avoid sending USER?
+
+276 - Karl M's vc makefile patch
+
+277 - The "Stall when uploading to sftp using multi interface"  bug
+
+278 - "Configure  $as_echo does not work"
+
+279 - curl_multi_remove_handle() crashes
+
+280 - Marcus Sundberg's gss patch
+
+281 - 
