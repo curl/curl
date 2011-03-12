@@ -531,6 +531,7 @@ output_auth_headers(struct connectdata *conn,
 #endif
 
 #ifdef USE_HTTP_NEGOTIATE
+  negdata->state = GSS_AUTHNONE;
   if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
     auth="GSS-Negotiate";
