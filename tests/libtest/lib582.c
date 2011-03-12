@@ -28,7 +28,7 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     10 * 1000
+#define MAIN_LOOP_HANG_TIMEOUT     4 * 1000
 
 struct Sockets
 {
@@ -44,11 +44,12 @@ struct ReadWriteSockets
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void removeFd(struct Sockets* sockets, curl_socket_t fd)
+static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
 {
   int i;
 
-  fprintf(stderr, "Remove socket fd %d\n", (int) fd);
+  if(mention)
+    fprintf(stderr, "Remove socket fd %d\n", (int) fd);
 
   for (i = 0; i < sockets->count; ++i) {
     if (sockets->sockets[i] == fd) {
@@ -62,14 +63,14 @@ static void removeFd(struct Sockets* sockets, curl_socket_t fd)
 /**
  * Add a file descriptor to a sockets array.
  */
-static void addFd(struct Sockets* sockets, curl_socket_t fd)
+static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  fprintf(stderr, "Add socket fd %d\n", (int) fd);
-  removeFd(sockets, fd);
+  fprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
+  removeFd(sockets, fd, 0);
   sockets->sockets = realloc(sockets->sockets,
         sizeof(curl_socket_t) * (sockets->count + 1));
   sockets->sockets[sockets->count] = fd;
@@ -88,14 +89,15 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
   (void)socketp; /* unused */
 
   if (action == CURL_POLL_IN || action == CURL_POLL_INOUT)
-    addFd(&sockets->read, s);
-  else
-    removeFd(&sockets->read, s);
+    addFd(&sockets->read, s, "read");
 
   if (action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
-    addFd(&sockets->write, s);
-  else
-    removeFd(&sockets->write, s);
+    addFd(&sockets->write, s, "write");
+
+  if(action == CURL_POLL_REMOVE) {
+    removeFd(&sockets->read, s, 1);
+    removeFd(&sockets->write, s, 0);
+  }
 
   return 0;
 }
@@ -241,6 +243,7 @@ int test(char *URL)
     fclose(hd_src);
     return -1;
   }
+  fprintf(stderr, "Set to upload %d bytes\n", (int)file_info.st_size);
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -358,8 +361,10 @@ test_cleanup:
   if(m)
     curl_multi_remove_handle(m, curl);
   curl_easy_cleanup(curl);
-  if(m)
+  if(m) {
+    fprintf(stderr, "Now multi-cleanup!\n");
     curl_multi_cleanup(m);
+  }
 
   fclose(hd_src); /* close the local file */
   if (sockets.read.sockets != 0)
