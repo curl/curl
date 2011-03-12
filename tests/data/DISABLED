@@ -3,3 +3,7 @@
 # per line.
 # Lines starting with '#' letters are treated as comments.
 564
+# Disabled due to a bug with uploading to an SFTP server using the multi
+# interface. Easy work around; always pass 0 as the evBitmask to force CURL
+# to re-evaluate the socket status.
+582
