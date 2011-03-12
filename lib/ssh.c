@@ -2047,8 +2047,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
         sshc->sftp_handle = NULL;
       }
-      Curl_safefree(sftp_scp->path);
-      sftp_scp->path = NULL;
+      if(sftp_scp) {
+        Curl_safefree(sftp_scp->path);
+        sftp_scp->path = NULL;
+      }
 
       DEBUGF(infof(data, "SFTP DONE done\n"));
 #if 0 /* PREV */
@@ -2752,8 +2754,10 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   else
     result = status;
 
-  Curl_safefree(sftp_scp->path);
-  sftp_scp->path = NULL;
+  if(sftp_scp) {
+    Curl_safefree(sftp_scp->path);
+    sftp_scp->path = NULL;
+  }
   Curl_pgrsDone(conn);
 
   conn->data->req.keepon = 0; /* clear all bits */
