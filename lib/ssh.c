@@ -1599,6 +1599,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
            figure out a "real" bitmask */
         sshc->orig_waitfor = data->req.keepon;
 
+        /* since we don't really wait for anything at this point, we want the
+           state machine to move on as soon as possible so we set a very short
+           timeout here */
+        Curl_expire(data, 1);
+
         state(conn, SSH_STOP);
       }
       break;
