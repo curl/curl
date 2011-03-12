@@ -946,6 +946,14 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       Curl_debug(data, CURLINFO_DATA_OUT, data->req.upload_fromhere,
                  (size_t)bytes_written, conn);
 
+    k->writebytecount += bytes_written;
+
+    if(k->writebytecount == data->set.infilesize) {
+      /* we have sent all data we were supposed to */
+      k->upload_done = TRUE;
+      infof(data, "We are completely uploaded and fine\n");
+    }
+
     if(data->req.upload_present != bytes_written) {
       /* we only wrote a part of the buffer (if anything), deal with it! */
 
@@ -967,7 +975,6 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       }
     }
 
-    k->writebytecount += bytes_written;
     Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
   } while(0); /* just to break out from! */
