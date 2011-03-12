@@ -12,14 +12,6 @@ To be addressed in 7.21.5
 
 275 - avoid sending USER?
 
-276 - Karl M's vc makefile patch
-
-277 - The "Stall when uploading to sftp using multi interface"  bug
-
 278 - "Configure  $as_echo does not work"
-
-279 - curl_multi_remove_handle() crashes
-
-280 - Marcus Sundberg's gss patch
 
 281 - 
