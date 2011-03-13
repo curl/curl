@@ -2028,8 +2028,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
 
-      /* FIXME: here should be explained why we need it to start the
-       * download */
+      /* we want to use the _receiving_ function even when the socket turns
+         out writableable as the underlying libssh2 recv function will deal
+         with both accordingly */
       conn->cselect_bits = CURL_CSELECT_IN;
     }
     if(result) {
@@ -2161,6 +2162,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = result;
       }
       else {
+        /* we want to use the _sending_ function even when the socket turns
+           out readable as the underlying libssh2 scp send function will deal
+           with both accordingly */
+        conn->cselect_bits = CURL_CSELECT_OUT;
+
         state(conn, SSH_STOP);
       }
       break;
@@ -2207,8 +2213,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
 
-      /* FIXME: here should be explained why we need it to start the
-       * download */
+      /* we want to use the _receiving_ function even when the socket turns
+         out writableable as the underlying libssh2 recv function will deal
+         with both accordingly */
       conn->cselect_bits = CURL_CSELECT_IN;
 
       if(result) {

@@ -775,6 +775,12 @@ struct connectdata {
                           PROT_SFTP | PROT_SCP)
 #define PROT_DUALCHANNEL PROT_FTP /* these protocols use two connections */
 
+/* some protocols will have to call the underlying functions without regard to
+   what exact state the socket signals. IE even if the socket says "readable",
+   the send function might need to be called while uploading, or vice versa.
+*/
+#define PROT_LOCKEDBITS (PROT_SCP | PROT_SFTP)
+
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
      Curl_done(). This entry will be NULL if the connection is re-used as then

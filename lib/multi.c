@@ -2105,35 +2105,41 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          and just move on. */
       ;
     else {
+      struct connectdata *conn;
       data = entry->easy;
 
       if(data->magic != CURLEASY_MAGIC_NUMBER)
         /* bad bad bad bad bad bad bad */
         return CURLM_INTERNAL_ERROR;
 
+      /* note that this can possibly be NULL at this point */
+      conn = data->set.one_easy->easy_conn;
+
       /* If the pipeline is enabled, take the handle which is in the head of
          the pipeline. If we should write into the socket, take the send_pipe
          head.  If we should read from the socket, take the recv_pipe head. */
-      if(data->set.one_easy->easy_conn) {
+      if(conn) {
         if ((ev_bitmask & CURL_POLL_OUT) &&
-            data->set.one_easy->easy_conn->send_pipe &&
-            data->set.one_easy->easy_conn->send_pipe->head)
-          data = data->set.one_easy->easy_conn->send_pipe->head->ptr;
+            conn->send_pipe &&
+            conn->send_pipe->head)
+          data = conn->send_pipe->head->ptr;
         else if ((ev_bitmask & CURL_POLL_IN) &&
-                 data->set.one_easy->easy_conn->recv_pipe &&
-                 data->set.one_easy->easy_conn->recv_pipe->head)
-          data = data->set.one_easy->easy_conn->recv_pipe->head->ptr;
+                 conn->recv_pipe &&
+                 conn->recv_pipe->head)
+          data = conn->recv_pipe->head->ptr;
       }
 
-      if(data->set.one_easy->easy_conn)  /* set socket event bitmask */
-        data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
+      if(conn && !(conn->handler->protocol & PROT_LOCKEDBITS))
+        /* set socket event bitmask if they're not locked */
+        conn->cselect_bits = ev_bitmask;
 
       do
         result = multi_runsingle(multi, now, data->set.one_easy);
       while (CURLM_CALL_MULTI_PERFORM == result);
 
-      if(data->set.one_easy->easy_conn)
-        data->set.one_easy->easy_conn->cselect_bits = 0;
+      if(conn && !(conn->handler->protocol & PROT_LOCKEDBITS))
+        /* clear the bitmask only if not locked */
+        conn->cselect_bits = 0;
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since
