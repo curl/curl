@@ -11,6 +11,7 @@ This release includes the following changes:
 
  o SOCKOPTFUNCTION: callback can say already-connected
  o Added --netrc-file
+ o Added (new) support for cyassl
 
 This release includes the following bugfixes:
 
@@ -22,6 +23,18 @@ This release includes the following bugfixes:
  o PolarSSL: Return 0 on receiving TLS CLOSE_NOTIFY alert
  o curl_easy_setopt.3: Removed wrong reference to CURLOPT_USERPASSWORD
  o multi: close connection on timeout
+ o IMAP in multi mode does SSL connections non-blocking
+ o honours the --disable-ldaps configure option
+ o Force setopt constants written by --libcurl to be long
+ o ssh_connect: treat libssh2 return code better
+ o SFTP upload could stall the state machine when the multi_socket API was
+   used
+ o SFTP and SCP could leak memory when used with the multi interface and 
+   the connection was closed
+ o Added missing file to repair the MSVC makefiles
+ o Fixed detection of recvfrom arguments on Android/bionic
+ o GSS: handle reuse fix
+ o transfer: avoid insane conversion of time_t
 
 This release includes the following known bugs:
 
@@ -30,6 +43,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan
+ Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan, Ben Noordhuis,
+ Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
+ Stefan Krause, Todd A Ouska, Saqib Ali
 
         Thanks! (and sorry if I forgot to mention someone)
