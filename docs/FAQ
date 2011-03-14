@@ -1173,13 +1173,12 @@ FAQ
   the import libraries below. These are the libraries produced by the various
   lib/Makefile.* files:
 
-  Target:          static lib.   import lib for libcurl*.dll.
-  -----------------------------------------------------------
-  MingW:           libcurl.a     libcurldll.a
-  MSVC (release):  libcurl.lib   libcurl_imp.lib
-  MSVC (debug):    libcurld.lib  libcurld_imp.lib
-  Borland:         libcurl.lib   libcurl_imp.lib
-
+       Target:          static lib.   import lib for libcurl*.dll.
+       -----------------------------------------------------------
+       MingW:           libcurl.a     libcurldll.a
+       MSVC (release):  libcurl.lib   libcurl_imp.lib
+       MSVC (debug):    libcurld.lib  libcurld_imp.lib
+       Borland:         libcurl.lib   libcurl_imp.lib
 
   5.8 libcurl.so.X: open failed: No such file or directory
 
@@ -1213,10 +1212,10 @@ FAQ
   - The non-ipv6 resolver that can use one out of four host name resolve calls
     (depending on what your system supports):
 
-    A - gethostbyname()
-    B - gethostbyname_r() with 3 arguments
-    C - gethostbyname_r() with 5 arguments
-    D - gethostbyname_r() with 6 arguments
+      A - gethostbyname()
+      B - gethostbyname_r() with 3 arguments
+      C - gethostbyname_r() with 5 arguments
+      D - gethostbyname_r() with 6 arguments
 
   - The ipv6-resolver that uses getaddrinfo()
 
@@ -1226,8 +1225,8 @@ FAQ
 
   - The threaded resolver (default option on Windows). It uses:
 
-    A - gethostbyname() on plain ipv4 hosts
-    B - getaddrinfo() on ipv6-enabled hosts
+      A - gethostbyname() on plain ipv4 hosts
+      B - getaddrinfo() on ipv6-enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.
@@ -1280,14 +1279,14 @@ FAQ
   member function that is passed a pointer to the class:
 
      // f is the pointer to your object.
-     static YourClass::staticFunction(void *buffer, size_t sz, size_t n, void *f)
+     static YourClass::func(void *buffer, size_t sz, size_t n, void *f)
      {
        // Call non-static member function.
        static_cast<YourClass*>(f)->nonStaticFunction();
      }
 
      // This is how you pass pointer to the static function:
-     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:staticFunction);
+     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:func);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
   5.15 How do I get an FTP directory listing?
