@@ -135,7 +135,7 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   PORT_SMTP,                        /* defport */
-  PROT_SMTP,                        /* protocol */
+  CURLPROTO_SMTP,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
 };
 
@@ -159,7 +159,7 @@ const struct Curl_handler Curl_handler_smtps = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   PORT_SMTPS,                       /* defport */
-  PROT_SMTP | PROT_SMTPS,           /* protocol */
+  CURLPROTO_SMTP | CURLPROTO_SMTPS, /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
 };
 #endif
@@ -183,7 +183,7 @@ static const struct Curl_handler Curl_handler_smtp_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_SMTP,                            /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -207,7 +207,7 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_SMTPS,                           /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 #endif
@@ -1105,7 +1105,7 @@ static CURLcode smtp_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & PROT_SMTPS) {
+  if(conn->handler->protocol & CURLPROTO_SMTPS) {
     /* BLOCKING */
     /* SMTPS is simply smtp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */

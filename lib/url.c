@@ -766,9 +766,9 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   /* for the *protocols fields we don't use the CURLPROTO_ALL convenience
      define since we internally only use the lower 16 bits for the passed
      in bitmask to not conflict with the private bits */
-  set->allowed_protocols = PROT_ALL;
+  set->allowed_protocols = CURLPROTO_ALL;
   set->redir_protocols =
-    PROT_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
@@ -2774,7 +2774,7 @@ static bool RTSPConnIsDead(struct connectdata *check)
 static bool IsPipeliningPossible(const struct SessionHandle *handle,
                                  const struct connectdata *conn)
 {
-  if((conn->handler->protocol & PROT_HTTP) &&
+  if((conn->handler->protocol & CURLPROTO_HTTP) &&
      handle->multi && Curl_multi_canPipeline(handle->multi) &&
      (handle->set.httpreq == HTTPREQ_GET ||
       handle->set.httpreq == HTTPREQ_HEAD) &&
@@ -2932,7 +2932,7 @@ ConnectionExists(struct SessionHandle *data,
          use */
       bool dead;
 #ifndef CURL_DISABLE_RTSP
-      if(check->handler->protocol & PROT_RTSP)
+      if(check->handler->protocol & CURLPROTO_RTSP)
         /* RTSP is a special case due to RTP interleaving */
         dead = RTSPConnIsDead(check);
       else
@@ -3055,8 +3055,8 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        if((needle->handler->protocol & PROT_FTP) ||
-           ((needle->handler->protocol & PROT_HTTP) &&
+        if((needle->handler->protocol & CURLPROTO_FTP) ||
+           ((needle->handler->protocol & CURLPROTO_HTTP) &&
             (data->state.authhost.want==CURLAUTH_NTLM))) {
           /* This is FTP or HTTP+NTLM, verify that we're using the same name
              and password as well */
@@ -4507,7 +4507,7 @@ static CURLcode set_userpass(struct connectdata *conn,
                              const char *user, const char *passwd)
 {
   /* If our protocol needs a password and we have none, use the defaults */
-  if( (conn->handler->protocol & (PROT_FTP|PROT_IMAP)) &&
+  if( (conn->handler->protocol & (CURLPROTO_FTP|CURLPROTO_IMAP)) &&
        !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);
@@ -4879,7 +4879,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/
 #ifndef CURL_DISABLE_FILE
-  if(conn->handler->protocol & PROT_FILE) {
+  if(conn->handler->protocol & CURLPROTO_FILE) {
     bool done;
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
@@ -5039,7 +5039,7 @@ static CURLcode setup_conn(struct connectdata *conn,
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(conn->handler->protocol & PROT_FILE) {
+  if(conn->handler->protocol & CURLPROTO_FILE) {
     /* There's nothing in this function to setup if we're only doing
        a file:// transfer */
     *protocol_done = TRUE;

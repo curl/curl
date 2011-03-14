@@ -196,7 +196,7 @@ const struct Curl_handler Curl_handler_tftp = {
   ZERO_NULL,                            /* perform_getsock */
   tftp_disconnect,                      /* disconnect */
   PORT_TFTP,                            /* defport */
-  PROT_TFTP,                            /* protocol */
+  CURLPROTO_TFTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 

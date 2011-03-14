@@ -128,7 +128,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   PORT_POP3,                        /* defport */
-  PROT_POP3,                        /* protocol */
+  CURLPROTO_POP3,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
 };
 
@@ -152,7 +152,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   PORT_POP3S,                       /* defport */
-  PROT_POP3 | PROT_POP3S,           /* protocol */
+  CURLPROTO_POP3 | CURLPROTO_POP3S, /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
 };
 #endif
@@ -176,7 +176,7 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_POP3,                            /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -200,7 +200,7 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_POP3S,                           /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 #endif
@@ -641,7 +641,7 @@ static CURLcode pop3_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & PROT_POP3S) {
+  if(conn->handler->protocol & CURLPROTO_POP3S) {
     /* BLOCKING */
     /* POP3S is simply pop3 with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */

@@ -695,9 +695,21 @@ struct Curl_handler {
   CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
 
   long defport;           /* Default port. */
-  unsigned int protocol;  /* PROT_* flags concerning the protocol set */
+  unsigned int protocol;  /* See CURLPROTO_*  */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 };
+
+#define PROTOPT_NONE 0             /* nothing extra */
+#define PROTOPT_SSL (1<<0)         /* uses SSL */
+#define PROTOPT_DUAL (1<<1)        /* this protocol uses two connections */
+#define PROTOPT_CLOSEACTION (1<<2) /* need action before socket close */
+/* some protocols will have to call the underlying functions without regard to
+   what exact state the socket signals. IE even if the socket says "readable",
+   the send function might need to be called while uploading, or vice versa.
+*/
+#define PROTOPT_DIRLOCK (1<<3)
+#define PROTOPT_BANPROXY (1<<4)    /* not allowed to use proxy */
+
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
@@ -736,45 +748,6 @@ struct connectdata {
   /**** Fields set when inited and not modified again */
   long connectindex; /* what index in the connection cache connects index this
                         particular struct has */
-
-#define PROT_HTTP    CURLPROTO_HTTP
-#define PROT_HTTPS   CURLPROTO_HTTPS
-#define PROT_FTP     CURLPROTO_FTP
-#define PROT_TELNET  CURLPROTO_TELNET
-#define PROT_DICT    CURLPROTO_DICT
-#define PROT_LDAP    CURLPROTO_LDAP
-#define PROT_FILE    CURLPROTO_FILE
-#define PROT_FTPS    CURLPROTO_FTPS
-#define PROT_TFTP    CURLPROTO_TFTP
-#define PROT_SCP     CURLPROTO_SCP
-#define PROT_SFTP    CURLPROTO_SFTP
-#define PROT_IMAP    CURLPROTO_IMAP
-#define PROT_IMAPS   CURLPROTO_IMAPS
-#define PROT_POP3    CURLPROTO_POP3
-#define PROT_POP3S   CURLPROTO_POP3S
-#define PROT_SMTP    CURLPROTO_SMTP
-#define PROT_SMTPS   CURLPROTO_SMTPS
-#define PROT_RTSP    CURLPROTO_RTSP
-#define PROT_RTMP    CURLPROTO_RTMP
-#define PROT_RTMPT   CURLPROTO_RTMPT
-#define PROT_RTMPE   CURLPROTO_RTMPE
-#define PROT_RTMPTE  CURLPROTO_RTMPTE
-#define PROT_RTMPS   CURLPROTO_RTMPS
-#define PROT_RTMPTS  CURLPROTO_RTMPTS
-#define PROT_GOPHER  CURLPROTO_GOPHER
-
-#define PROT_ALL     ~0
-
-#define PROTOPT_NONE 0             /* nothing extra */
-#define PROTOPT_SSL (1<<0)         /* uses SSL */
-#define PROTOPT_DUAL (1<<1)        /* this protocol uses two connections */
-#define PROTOPT_CLOSEACTION (1<<2) /* need action before socket close */
-/* some protocols will have to call the underlying functions without regard to
-   what exact state the socket signals. IE even if the socket says "readable",
-   the send function might need to be called while uploading, or vice versa.
-*/
-#define PROTOPT_DIRLOCK (1<<3)
-#define PROTOPT_BANPROXY (1<<4)    /* not allowed to use proxy */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in

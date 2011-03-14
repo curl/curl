@@ -179,7 +179,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   PORT_FTP,                        /* defport */
-  PROT_FTP,                        /* protocol */
+  CURLPROTO_FTP,                   /* protocol */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION /* flags */
 };
 
@@ -203,7 +203,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   PORT_FTPS,                       /* defport */
-  PROT_FTP | PROT_FTPS,            /* protocol */
+  CURLPROTO_FTP | CURLPROTO_FTPS,  /* protocol */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION /* flags */
 };
 #endif
@@ -227,7 +227,7 @@ static const struct Curl_handler Curl_handler_ftp_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_FTP,                             /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -251,7 +251,7 @@ static const struct Curl_handler Curl_handler_ftps_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_FTPS,                            /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 #endif
@@ -2952,7 +2952,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & PROT_FTPS) {
+  if(conn->handler->protocol & CURLPROTO_FTPS) {
     /* BLOCKING */
     /* FTPS is simply ftp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */

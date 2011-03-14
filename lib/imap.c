@@ -128,7 +128,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   PORT_IMAP,                        /* defport */
-  PROT_IMAP,                        /* protocol */
+  CURLPROTO_IMAP,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
 };
 
@@ -152,7 +152,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   PORT_IMAPS,                       /* defport */
-  PROT_IMAP | PROT_IMAPS,           /* protocol */
+  CURLPROTO_IMAP | CURLPROTO_IMAPS, /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
 };
 #endif
@@ -176,7 +176,7 @@ static const struct Curl_handler Curl_handler_imap_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_IMAP,                            /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -200,7 +200,7 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_IMAPS,                           /* defport */
-  PROT_HTTP,                            /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 #endif
@@ -621,7 +621,7 @@ static CURLcode imap_multi_statemach(struct connectdata *conn,
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
 
-  if((conn->handler->protocol & PROT_IMAPS) && !imapc->ssldone) {
+  if((conn->handler->protocol & CURLPROTO_IMAPS) && !imapc->ssldone) {
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
   }
   else {
@@ -738,7 +738,7 @@ static CURLcode imap_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if((conn->handler->protocol & PROT_IMAPS) &&
+  if((conn->handler->protocol & CURLPROTO_IMAPS) &&
      data->state.used_interface != Curl_if_multi) {
     /* BLOCKING */
     /* IMAPS is simply imap with SSL for the control channel */

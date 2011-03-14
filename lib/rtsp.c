@@ -96,7 +96,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* perform_getsock */
   Curl_rtsp_disconnect,                 /* disconnect */
   PORT_RTSP,                            /* defport */
-  PROT_RTSP,                            /* protocol */
+  CURLPROTO_RTSP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 

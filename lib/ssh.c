@@ -175,7 +175,7 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_perform_getsock,                  /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   PORT_SSH,                             /* defport */
-  PROT_SCP,                             /* protocol */
+  CURLPROTO_SCP,                        /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION /* flags */
 };
 
@@ -198,7 +198,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_perform_getsock,                  /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   PORT_SSH,                             /* defport */
-  PROT_SFTP,                            /* protocol */
+  CURLPROTO_SFTP,                       /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION /* flags */
 };
 
@@ -413,7 +413,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
 
   /* Check for /~/ , indicating relative to the user's home directory */
-  if(conn->handler->protocol & PROT_SCP) {
+  if(conn->handler->protocol & CURLPROTO_SCP) {
     real_path = malloc(working_path_len+1);
     if(real_path == NULL) {
       free(working_path);
@@ -425,7 +425,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
-  else if(conn->handler->protocol & PROT_SFTP) {
+  else if(conn->handler->protocol & CURLPROTO_SFTP) {
     if((working_path_len > 1) && (working_path[1] == '~')) {
       size_t homelen = strlen(homedir);
       real_path = malloc(homelen + working_path_len + 1);
@@ -933,7 +933,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       conn->sockfd = sock;
       conn->writesockfd = CURL_SOCKET_BAD;
 
-      if(conn->handler->protocol == PROT_SFTP) {
+      if(conn->handler->protocol == CURLPROTO_SFTP) {
         state(conn, SSH_SFTP_INIT);
         break;
       }
@@ -2568,7 +2568,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if(conn->handler->protocol & PROT_SCP) {
+  if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   } else {
@@ -2717,7 +2717,7 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
-  if(conn->handler->protocol & PROT_SCP)
+  if(conn->handler->protocol & CURLPROTO_SCP)
     res = scp_perform(conn, &connected,  done);
   else
     res = sftp_perform(conn, &connected,  done);
