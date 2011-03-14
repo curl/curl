@@ -322,7 +322,7 @@ static int data_pending(const struct connectdata *conn)
 {
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->protocol&(PROT_SCP|PROT_SFTP) ||
+  return conn->handler->protocol&(PROT_SCP|PROT_SFTP) ||
     Curl_ssl_data_pending(conn, FIRSTSOCKET);
 }
 
@@ -469,7 +469,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_RTSP
     /* Check for RTP at the beginning of the data */
-    if(conn->protocol & PROT_RTSP) {
+    if(conn->handler->protocol & PROT_RTSP) {
       result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
       if(result)
         return result;
@@ -490,7 +490,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_RTSP
       /* Check for RTP after the headers if there is no Content */
-      if(k->maxdownload <= 0 && nread > 0 && (conn->protocol & PROT_RTSP)) {
+      if(k->maxdownload <= 0 && nread > 0 &&
+         (conn->handler->protocol & PROT_RTSP)) {
         result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
         if(result)
           return result;
@@ -516,7 +517,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to
            write a piece of the body */
-        if(conn->protocol&(PROT_HTTP|PROT_RTSP)) {
+        if(conn->handler->protocol&(PROT_HTTP|PROT_RTSP)) {
           /* HTTP-only checks */
 
           if(data->req.newurl) {
@@ -703,7 +704,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             if(!k->ignorebody) {
 
 #ifndef CURL_DISABLE_POP3
-              if(conn->protocol&PROT_POP3)
+              if(conn->handler->protocol&PROT_POP3)
                 result = Curl_pop3_write(conn, k->str, nread);
               else
 #endif /* CURL_DISABLE_POP3 */
@@ -746,7 +747,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_RTSP
     if(excess > 0 && !conn->bits.stream_was_rewound &&
-        (conn->protocol & PROT_RTSP)) {
+        (conn->handler->protocol & PROT_RTSP)) {
       /* Check for RTP after the content if there is unrewound excess */
 
       /* Parse the excess data */
@@ -834,7 +835,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           break;
         }
 
-        if(conn->protocol&(PROT_HTTP|PROT_RTSP)) {
+        if(conn->handler->protocol&(PROT_HTTP|PROT_RTSP)) {
           if(data->state.proto.http->sending == HTTPSEND_REQUEST)
             /* We're sending the HTTP request headers, not the data.
                Remember that so we don't change the line endings. */
@@ -872,7 +873,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       data->req.upload_present = nread;
 
 #ifndef CURL_DISABLE_SMTP
-      if(conn->protocol & PROT_SMTP) {
+      if(conn->handler->protocol & PROT_SMTP) {
         result = Curl_smtp_escape_eob(conn, nread);
         if(result)
           return result;
@@ -2059,7 +2060,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
   /* if we're talking upload, we can't do the checks below, unless the protocol
      is HTTP as when uploading over HTTP we will still get a response */
-  if(data->set.upload && !(conn->protocol&(PROT_HTTP|PROT_RTSP)))
+  if(data->set.upload && !(conn->handler->protocol&(PROT_HTTP|PROT_RTSP)))
     return CURLE_OK;
 
   if(/* workaround for broken TLS servers */ data->state.ssl_connect_retry ||

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,6 +97,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   Curl_rtsp_disconnect,                 /* disconnect */
   PORT_RTSP,                            /* defport */
   PROT_RTSP,                            /* protocol */
+  PROTOPT_NONE                          /* flags */
 };
 
 CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done)

@@ -263,7 +263,8 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   0,                                    /* defport */
-  0                                     /* protocol */
+  0,                                    /* protocol */
+  0                                     /* flags */
 };
 
 void Curl_safefree(void *ptr)
@@ -765,9 +766,9 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   /* for the *protocols fields we don't use the CURLPROTO_ALL convenience
      define since we internally only use the lower 16 bits for the passed
      in bitmask to not conflict with the private bits */
-  set->allowed_protocols = PROT_EXTMASK;
+  set->allowed_protocols = PROT_ALL;
   set->redir_protocols =
-    PROT_EXTMASK & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+    PROT_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
@@ -2382,7 +2383,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
        transfer, which thus helps the app which takes URLs from users or other
        external inputs and want to restrict what protocol(s) to deal
        with. Defaults to CURLPROTO_ALL. */
-    data->set.allowed_protocols = va_arg(param, long) & PROT_EXTMASK;
+    data->set.allowed_protocols = va_arg(param, long);
     break;
 
   case CURLOPT_REDIR_PROTOCOLS:
@@ -2390,7 +2391,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
        as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
        to be set in both bitmasks to be allowed to get redirected to. Defaults
        to all protocols except FILE and SCP. */
-    data->set.redir_protocols = va_arg(param, long) & PROT_EXTMASK;
+    data->set.redir_protocols = va_arg(param, long);
     break;
 
   case CURLOPT_MAIL_FROM:
@@ -2931,7 +2932,7 @@ ConnectionExists(struct SessionHandle *data,
          use */
       bool dead;
 #ifndef CURL_DISABLE_RTSP
-      if(check->protocol & PROT_RTSP)
+      if(check->handler->protocol & PROT_RTSP)
         /* RTSP is a special case due to RTP interleaving */
         dead = RTSPConnIsDead(check);
       else
@@ -3003,11 +3004,12 @@ ConnectionExists(struct SessionHandle *data,
       }
     }
 
-    if((needle->protocol&PROT_SSL) != (check->protocol&PROT_SSL))
+    if((needle->handler->flags&PROTOPT_SSL) !=
+       (check->handler->flags&PROTOPT_SSL))
       /* don't do mixed SSL and non-SSL connections */
       continue;
 
-    if(needle->protocol&PROT_SSL) {
+    if(needle->handler->flags&PROTOPT_SSL) {
       if((data->set.ssl.verifypeer != check->verifypeer) ||
          (data->set.ssl.verifyhost != check->verifyhost))
         continue;
@@ -3022,7 +3024,7 @@ ConnectionExists(struct SessionHandle *data,
          in use so we skip it */
       continue;
 
-    if(!needle->bits.httpproxy || needle->protocol&PROT_SSL ||
+    if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
        (needle->bits.httpproxy && check->bits.httpproxy &&
         needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
         Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
@@ -3034,7 +3036,7 @@ ConnectionExists(struct SessionHandle *data,
       if(Curl_raw_equal(needle->handler->scheme, check->handler->scheme) &&
          Curl_raw_equal(needle->host.name, check->host.name) &&
          (needle->remote_port == check->remote_port) ) {
-        if(needle->protocol & PROT_SSL) {
+        if(needle->handler->flags & PROTOPT_SSL) {
           /* This is SSL, verify that we're using the same
              ssl options as well */
           if(!Curl_ssl_config_matches(&needle->ssl_config,
@@ -3053,8 +3055,8 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        if((needle->protocol & PROT_FTP) ||
-           ((needle->protocol & PROT_HTTP) &&
+        if((needle->handler->protocol & PROT_FTP) ||
+           ((needle->handler->protocol & PROT_HTTP) &&
             (data->state.authhost.want==CURLAUTH_NTLM))) {
           /* This is FTP or HTTP+NTLM, verify that we're using the same name
              and password as well */
@@ -3639,8 +3641,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
         break;
 
       /* Perform setup complement if some. */
-      conn->handler = p;
-      conn->protocol |= p->protocol;
+      conn->handler = conn->given = p;
 
       /* 'port' and 'remote_port' are set in setup_connection_internals() */
       return CURLE_OK;
@@ -3938,8 +3939,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
     /* we check for -1 here since if proxy was detected already, this
        was very likely already set to the proxy port */
     conn->port = p->defport;
-  conn->remote_port = (unsigned short)p->defport;
-  conn->protocol |= p->protocol;
+  conn->remote_port = (unsigned short)conn->given->defport;
 
   return CURLE_OK;
 }
@@ -4418,7 +4418,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
        * stripped off. It would be better to work directly from the original
        * URL and simply replace the port part of it.
        */
-      url = aprintf("%s://%s%s%s:%hu%s%s%s", conn->handler->scheme,
+      url = aprintf("%s://%s%s%s:%hu%s%s%s", conn->given->scheme,
                     conn->bits.ipv6_ip?"[":"", conn->host.name,
                     conn->bits.ipv6_ip?"]":"", conn->remote_port,
                     data->state.slash_removed?"/":"", data->state.path,
@@ -4507,7 +4507,7 @@ static CURLcode set_userpass(struct connectdata *conn,
                              const char *user, const char *passwd)
 {
   /* If our protocol needs a password and we have none, use the defaults */
-  if( (conn->protocol & (PROT_FTP|PROT_IMAP)) &&
+  if( (conn->handler->protocol & (PROT_FTP|PROT_IMAP)) &&
        !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);
@@ -4829,13 +4829,11 @@ static CURLcode create_conn(struct SessionHandle *data,
     proxy = NULL;
   }
   /* proxy must be freed later unless NULL */
-  if(proxy) {
-    long bits = conn->protocol & (PROT_HTTPS|PROT_SSL);
-
+  if(proxy && !(conn->handler->flags & PROTOPT_BANPROXY)) {
     if((conn->proxytype == CURLPROXY_HTTP) ||
        (conn->proxytype == CURLPROXY_HTTP_1_0)) {
       /* force this connection's protocol to become HTTP */
-      conn->protocol = PROT_HTTP | bits;
+      conn->handler = &Curl_handler_http;
       conn->bits.httpproxy = TRUE;
     }
     conn->bits.proxy = TRUE;
@@ -4881,7 +4879,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/
 #ifndef CURL_DISABLE_FILE
-  if(conn->protocol & PROT_FILE) {
+  if(conn->handler->protocol & PROT_FILE) {
     bool done;
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
@@ -4918,7 +4916,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * If the protocol is using SSL and HTTP proxy is used, we set
    * the tunnel_proxy bit.
    *************************************************************/
-  if((conn->protocol&PROT_SSL) && conn->bits.httpproxy)
+  if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
     conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
@@ -5041,7 +5039,7 @@ static CURLcode setup_conn(struct connectdata *conn,
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(conn->protocol & PROT_FILE) {
+  if(conn->handler->protocol & PROT_FILE) {
     /* There's nothing in this function to setup if we're only doing
        a file:// transfer */
     *protocol_done = TRUE;

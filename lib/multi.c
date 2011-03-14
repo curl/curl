@@ -1476,7 +1476,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * a protocol which uses two "channels" like FTP, as then the error
          * happened in the data connection.
          */
-        if(!(easy->easy_conn->protocol & PROT_DUALCHANNEL))
+        if(!(easy->easy_conn->handler->flags & PROTOPT_DUAL))
           easy->easy_conn->bits.close = TRUE;
 
         Curl_posttransfer(data);
@@ -1768,7 +1768,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     /* go over all connections that have close actions */
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
-         multi->connc->connects[i]->protocol & PROT_CLOSEACTION) {
+         multi->connc->connects[i]->handler->flags & PROTOPT_CLOSEACTION) {
         Curl_disconnect(multi->connc->connects[i], /* dead_connection */ FALSE);
         multi->connc->connects[i] = NULL;
       }
@@ -2129,7 +2129,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
           data = conn->recv_pipe->head->ptr;
       }
 
-      if(conn && !(conn->handler->protocol & PROT_LOCKEDBITS))
+      if(conn && !(conn->handler->flags & PROTOPT_DIRLOCK))
         /* set socket event bitmask if they're not locked */
         conn->cselect_bits = ev_bitmask;
 
@@ -2137,7 +2137,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         result = multi_runsingle(multi, now, data->set.one_easy);
       while (CURLM_CALL_MULTI_PERFORM == result);
 
-      if(conn && !(conn->handler->protocol & PROT_LOCKEDBITS))
+      if(conn && !(conn->handler->flags & PROTOPT_DIRLOCK))
         /* clear the bitmask only if not locked */
         conn->cselect_bits = 0;
 
@@ -2682,7 +2682,7 @@ static void multi_connc_remove_handle(struct Curl_multi *multi,
          for nice connection closures".
       */
 
-      if(conn->protocol & PROT_CLOSEACTION) {
+      if(conn->handler->flags & PROTOPT_CLOSEACTION) {
         /* this handle is still being used by a shared connection and
            thus we leave it around for now */
         if(add_closure(multi, data) == CURLM_OK)

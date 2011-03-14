@@ -83,7 +83,8 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   PORT_LDAP,                            /* defport */
-  PROT_LDAP                             /* protocol */
+  PROT_LDAP,                            /* protocol */
+  PROTOPT_NONE                          /* flags */
 };
 
 #ifdef USE_SSL
@@ -105,7 +106,8 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   PORT_LDAPS,                           /* defport */
-  PROT_LDAP | PROT_SSL                  /* protocol */
+  PROT_LDAP,                            /* protocol */
+  PROTOPT_SSL                           /* flags */
 };
 #endif
 
@@ -185,7 +187,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
   strcpy(hosturl, "ldap");
   ptr = hosturl+4;
-  if (conn->protocol & PROT_SSL)
+  if (conn->handler->flags & PROTOPT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
     conn->host.name, conn->remote_port);
@@ -229,7 +231,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
 #ifdef USE_SSL
-  if (conn->protocol & PROT_SSL) {
+  if (conn->handler->flags & PROTOPT_SSL) {
     CURLcode res;
     if (data->state.used_interface == Curl_if_easy) {
       res = Curl_ssl_connect(conn, FIRSTSOCKET);
@@ -260,7 +262,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   char *info = NULL;
 
 #ifdef USE_SSL
-  if (conn->protocol & PROT_SSL) {
+  if (conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
     if (!li->ssldone) {
       CURLcode res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);

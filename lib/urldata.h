@@ -694,8 +694,9 @@ struct Curl_handler {
    */
   CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
 
-  long defport;       /* Default port. */
-  long protocol;      /* PROT_* flags concerning the protocol set */
+  long defport;           /* Default port. */
+  unsigned int protocol;  /* PROT_* flags concerning the protocol set */
+  unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 };
 
 /* return the count of bytes sent, or -1 on error */
@@ -735,7 +736,7 @@ struct connectdata {
   /**** Fields set when inited and not modified again */
   long connectindex; /* what index in the connection cache connects index this
                         particular struct has */
-  long protocol; /* PROT_* flags concerning the protocol set */
+
 #define PROT_HTTP    CURLPROTO_HTTP
 #define PROT_HTTPS   CURLPROTO_HTTPS
 #define PROT_FTP     CURLPROTO_FTP
@@ -762,24 +763,18 @@ struct connectdata {
 #define PROT_RTMPTS  CURLPROTO_RTMPTS
 #define PROT_GOPHER  CURLPROTO_GOPHER
 
-/* (1<<25) is currently the highest used bit in the public bitmask. We make
-   sure we use "private bits" above the public ones to make things easier;
-   Gopher will not conflict with the current bit 25. */
+#define PROT_ALL     ~0
 
-#define PROT_EXTMASK 0x03ffffff
-
-#define PROT_SSL     (1<<29) /* protocol requires SSL */
-
-/* these ones need action before socket close */
-#define PROT_CLOSEACTION (PROT_FTP | PROT_IMAP | PROT_POP3 |    \
-                          PROT_SFTP | PROT_SCP)
-#define PROT_DUALCHANNEL PROT_FTP /* these protocols use two connections */
-
+#define PROTOPT_NONE 0             /* nothing extra */
+#define PROTOPT_SSL (1<<0)         /* uses SSL */
+#define PROTOPT_DUAL (1<<1)        /* this protocol uses two connections */
+#define PROTOPT_CLOSEACTION (1<<2) /* need action before socket close */
 /* some protocols will have to call the underlying functions without regard to
    what exact state the socket signals. IE even if the socket says "readable",
    the send function might need to be called while uploading, or vice versa.
 */
-#define PROT_LOCKEDBITS (PROT_SCP | PROT_SFTP)
+#define PROTOPT_DIRLOCK (1<<3)
+#define PROTOPT_BANPROXY (1<<4)    /* not allowed to use proxy */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -857,7 +852,8 @@ struct connectdata {
   long timeoutms_per_addr; /* how long time in milliseconds to spend on
                               trying to connect to each IP address */
 
-  const struct Curl_handler * handler;  /* Connection's protocol handler. */
+  const struct Curl_handler *handler; /* Connection's protocol handler */
+  const struct Curl_handler *given;   /* The protocol first given */
 
   long ip_version; /* copied from the SessionHandle at creation time */
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -128,7 +128,8 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   PORT_POP3,                        /* defport */
-  PROT_POP3                         /* protocol */
+  PROT_POP3,                        /* protocol */
+  PROTOPT_CLOSEACTION               /* flags */
 };
 
 
@@ -151,7 +152,8 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   PORT_POP3S,                       /* defport */
-  PROT_POP3 | PROT_POP3S | PROT_SSL  /* protocol */
+  PROT_POP3 | PROT_POP3S,           /* protocol */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
 };
 #endif
 
@@ -174,7 +176,8 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_POP3,                            /* defport */
-  PROT_HTTP                             /* protocol */
+  PROT_HTTP,                            /* protocol */
+  PROTOPT_NONE                          /* flags */
 };
 
 
@@ -197,7 +200,8 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   PORT_POP3S,                           /* defport */
-  PROT_HTTP                             /* protocol */
+  PROT_HTTP,                            /* protocol */
+  PROTOPT_NONE                          /* flags */
 };
 #endif
 #endif
@@ -288,7 +292,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
     /* Curl_ssl_connect is BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(CURLE_OK == result) {
-      conn->protocol |= PROT_POP3S;
+      conn->handler = &Curl_handler_pop3s;
       result = pop3_state_user(conn);
     }
   }
@@ -637,7 +641,7 @@ static CURLcode pop3_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->protocol & PROT_POP3S) {
+  if(conn->handler->protocol & PROT_POP3S) {
     /* BLOCKING */
     /* POP3S is simply pop3 with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
