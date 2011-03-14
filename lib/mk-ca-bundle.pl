@@ -75,19 +75,21 @@ my $crt = $ARGV[0] || 'ca-bundle.crt';
 my $txt = substr($url, rindex($url, '/') + 1);
 $txt =~ s/\?.*//;
 
-if (!$opt_n || !-e $txt) {
+my $resp;
+
+unless ($opt_n and -e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
+
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
-  my $req = new HTTP::Request('GET', $url);
-  my $res = $ua->request($req);
-  if ($res->is_success) {
-    open(TXT,">$txt") or die "Couldn't open $txt: $!";
-    print TXT $res->content . "\n";
-    close(TXT) or die "Couldn't close $txt: $!";
-  } else {
-    die $res->status_line;
-  }
+  $resp = $ua->mirror($url, 'certdata.txt');
 }
+
+if ($resp && $resp->code eq '304') {
+    print "Not modified\n" unless $opt_q;
+    exit 0;
+}
+
+my $currentdate = scalar gmtime($resp ? $resp->last_modified : (stat($txt))[9]);
 
 if ($opt_b && -e $crt) {
   my $bk = 1;
@@ -98,13 +100,12 @@ if ($opt_b && -e $crt) {
 }
 
 my $format = $opt_t ? "plain text and " : "";
-my $currentdate = scalar gmtime() . " UTC";
 open(CRT,">$crt") or die "Couldn't open $crt: $!";
 print CRT <<EOT;
 ##
 ## $crt -- Bundle of CA Root Certificates
 ##
-## Converted at: ${currentdate}
+## Certificate data from Mozilla as of: ${currentdate}
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
