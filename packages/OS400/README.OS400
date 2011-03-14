@@ -110,6 +110,9 @@ options:
         CURLOPT_RTSP_TRANSPORT
         CURLOPT_SOCKS5_GSSAPI_SERVICE
         CURLOPT_MAIL_FROM
+        CURLOPT_TLSAUTH_USERNAME
+        CURLOPT_TLSAUTH_PASSWORD
+        CURLOPT_TLSAUTH_TYPE
   Else it is the same as for curl_easy_setopt().
   Note that CURLOPT_ERRORBUFFER is not in the list above, since it gives the
 address of an (empty) character buffer, not the address of a string.
