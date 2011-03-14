@@ -1640,7 +1640,7 @@ dnl Default to compiler & linker defaults for GnuTLS files & libraries.
 OPT_GNUTLS=no
 
 AC_ARG_WITH(gnutls,dnl
-AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root])
 AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
   OPT_GNUTLS=$withval)
 
@@ -1776,7 +1776,7 @@ OPT_POLARSSL=no
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 AC_ARG_WITH(polarssl,dnl
-AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points to the installation root])
 AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
   OPT_POLARSSL=$withval)
 
@@ -1947,7 +1947,7 @@ dnl Default to compiler & linker defaults for NSS files & libraries.
 OPT_NSS=no
 
 AC_ARG_WITH(nss,dnl
-AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root])
 AC_HELP_STRING([--without-nss], [disable NSS detection]),
   OPT_NSS=$withval)
 
@@ -2112,7 +2112,7 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for LIBSSH2 files & libraries.
 OPT_LIBSSH2=off
 AC_ARG_WITH(libssh2,dnl
-AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AC_HELP_STRING([--without-libssh2], [disable LIBSSH2]),
   OPT_LIBSSH2=$withval)
 
@@ -2202,7 +2202,7 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for LIBRTMP files & libraries.
 OPT_LIBRTMP=off
 AC_ARG_WITH(librtmp,dnl
-AC_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to the LIBRTMP installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to the LIBRTMP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AC_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
   OPT_LIBRTMP=$withval)
 
