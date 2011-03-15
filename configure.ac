@@ -121,7 +121,7 @@ fi
 
 dnl figure out the libcurl version
 VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
-AM_INIT_AUTOMAKE(curl,$VERSION)
+AM_INIT_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($VERSION)
 
