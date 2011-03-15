@@ -32,7 +32,7 @@
 int test(char *URL)
 {
   CURLMcode retVal;
-  int stillRunning, retValcm;
+  int stillRunning;
   CURLM* multiHandle;
   CURL* curl;
   int res;
