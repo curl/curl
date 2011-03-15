@@ -141,7 +141,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* disconnect */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
-  PROTOPTS_NONE                         /* flags */
+  PROTOPT_NONE                          /* flags */
 };
 
 #ifdef HAVE_LDAP_SSL
