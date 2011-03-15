@@ -622,16 +622,27 @@ static char * nss_get_password(PK11SlotInfo * slot, PRBool retry, void *arg)
     return (char *)PORT_Strdup((char *)arg);
 }
 
+/* bypass the default SSL_AuthCertificate() hook in case we do not want to
+ * verify peer */
+static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
+                                    PRBool isServer)
+{
+  struct connectdata *conn = (struct connectdata *)arg;
+  if(!conn->data->set.ssl.verifypeer) {
+    infof(conn->data, "skipping SSL peer certificate verification\n");
+    return SECSuccess;
+  }
+
+  return SSL_AuthCertificate(arg, fd, checksig, isServer);
+}
+
 static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 {
-  SECStatus success = SECSuccess;
+  SECStatus result = SECFailure;
   struct connectdata *conn = (struct connectdata *)arg;
   PRErrorCode err = PR_GetError();
   CERTCertificate *cert = NULL;
   char *subject, *subject_cn, *issuer;
-
-  if(conn->data->set.ssl.certverifyresult!=0)
-    return success;
 
   conn->data->set.ssl.certverifyresult=err;
   cert = SSL_PeerCertificate(sock);
@@ -643,12 +654,8 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   switch(err) {
   case SEC_ERROR_CA_CERT_INVALID:
     infof(conn->data, "Issuer certificate is invalid: '%s'\n", issuer);
-    if(conn->data->set.ssl.verifypeer)
-      success = SECFailure;
     break;
   case SEC_ERROR_UNTRUSTED_ISSUER:
-    if(conn->data->set.ssl.verifypeer)
-      success = SECFailure;
     infof(conn->data, "Certificate is signed by an untrusted issuer: '%s'\n",
           issuer);
     break;
@@ -656,37 +663,31 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
     if(conn->data->set.ssl.verifyhost) {
       failf(conn->data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", subject_cn, conn->host.dispname);
-      success = SECFailure;
     } else {
+      result = SECSuccess;
       infof(conn->data, "warning: SSL: certificate subject name '%s' does not "
             "match target host name '%s'\n", subject_cn, conn->host.dispname);
     }
     break;
   case SEC_ERROR_EXPIRED_CERTIFICATE:
-    if(conn->data->set.ssl.verifypeer)
-      success = SECFailure;
     infof(conn->data, "Remote Certificate has expired.\n");
     break;
   case SEC_ERROR_UNKNOWN_ISSUER:
-    if(conn->data->set.ssl.verifypeer)
-      success = SECFailure;
     infof(conn->data, "Peer's certificate issuer is not recognized: '%s'\n",
           issuer);
     break;
   default:
-    if(conn->data->set.ssl.verifypeer)
-      success = SECFailure;
     infof(conn->data, "Bad certificate received. Subject = '%s', "
           "Issuer = '%s'\n", subject, issuer);
     break;
   }
-  if(success == SECSuccess)
+  if(result == SECSuccess)
     infof(conn->data, "SSL certificate verify ok.\n");
   PR_Free(subject);
   PR_Free(subject_cn);
   PR_Free(issuer);
 
-  return success;
+  return result;
 }
 
 /**
@@ -1154,6 +1155,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   PRBool ssl2 = PR_FALSE;
   PRBool ssl3 = PR_FALSE;
   PRBool tlsv1 = PR_FALSE;
+  PRBool ssl_no_cache;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1227,6 +1229,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(SSL_OptionSet(model, SSL_HANDSHAKE_AS_CLIENT, PR_TRUE) != SECSuccess)
     goto error;
 
+  /* do not use SSL cache if we are not going to verify peer */
+  ssl_no_cache = (data->set.ssl.verifypeer) ? PR_FALSE : PR_TRUE;
+  if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
+    goto error;
+
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
@@ -1277,8 +1284,15 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     }
   }
 
-  if(data->set.ssl.verifyhost == 1)
+  if(!data->set.ssl.verifypeer && data->set.ssl.verifyhost)
+    infof(data, "warning: ignoring value of ssl.verifyhost\n");
+  else if(data->set.ssl.verifyhost == 1)
     infof(data, "warning: ignoring unsupported value (1) of ssl.verifyhost\n");
+
+  /* bypass the default SSL_AuthCertificate() hook in case we do not want to
+   * verify peer */
+  if(SSL_AuthCertificateHook(model, nss_auth_cert_hook, conn) != SECSuccess)
+    goto error;
 
   data->set.ssl.certverifyresult=0; /* not checked yet */
   if(SSL_BadCertHook(model, (SSLBadCertHandler) BadCertHandler, conn)

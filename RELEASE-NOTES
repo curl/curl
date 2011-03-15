@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o Fixed detection of recvfrom arguments on Android/bionic
  o GSS: handle reuse fix
  o transfer: avoid insane conversion of time_t
+ o nss: do not ignore value of CURLOPT_SSL_VERIFYPEER in certain cases
 
 This release includes the following known bugs:
 

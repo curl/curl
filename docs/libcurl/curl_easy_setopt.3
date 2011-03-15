@@ -2007,7 +2007,10 @@ The default value for this option is 2.
 
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
-\fICURLOPT_SSL_VERIFYPEER\fP.
+\fICURLOPT_SSL_VERIFYPEER\fP.  If libcurl is built against NSS and
+\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_SSL_VERIFYHOST\fP
+is ignored.
+
 .IP CURLOPT_CERTINFO
 Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
 this enabled, libcurl (if built with OpenSSL) will extract lots of information
