@@ -81,7 +81,7 @@ static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
  * Callback invoked by curl to poll reading / writing of a socket.
  */
 static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
-    void *userp, void *socketp)
+                              void *userp, void *socketp)
 {
   struct ReadWriteSockets* sockets = userp;
 
@@ -164,7 +164,8 @@ static int getMicroSecondTimeout(struct timeval* timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void updateFdSet(struct Sockets* sockets, fd_set* fdset, int* maxFd)
+static void updateFdSet(struct Sockets* sockets, fd_set* fdset,
+                        curl_socket_t *maxFd)
 {
   int i;
   for (i = 0; i < sockets->count; ++i) {
@@ -191,7 +192,7 @@ static void notifyCurl(CURL* curl, curl_socket_t s, int evBitmask,
  * Invoke curl when a file descriptor is set.
  */
 static void checkFdSet(CURL* curl, struct Sockets* sockets, fd_set* fdset,
-      int evBitmask, const char* name)
+                       int evBitmask, const char* name)
 {
   int i;
   for (i = 0; i < sockets->count; ++i)
@@ -306,7 +307,7 @@ int test(char *URL)
   while (!checkForCompletion(m, &success))
   {
     fd_set readSet, writeSet;
-    int maxFd = 0;
+    curl_socket_t maxFd = 0;
     struct timeval tv = {10, 0};
 
     if (tutil_tvdiff(tutil_tvnow(), ml_start) >
