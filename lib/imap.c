@@ -334,6 +334,15 @@ static CURLcode imap_state_login(struct connectdata *conn)
   return CURLE_OK;
 }
 
+#ifdef USE_SSL
+static void imap_to_imaps(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_imaps;
+}
+#else
+#define imap_to_imaps(x)
+#endif
+
 /* for STARTTLS responses */
 static CURLcode imap_state_starttls_resp(struct connectdata *conn,
                                          int imapcode,
@@ -355,7 +364,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
     else {
       result = Curl_ssl_connect(conn, FIRSTSOCKET);
       if(CURLE_OK == result) {
-        conn->handler = &Curl_handler_imaps;
+        imap_to_imaps(conn);
         result = imap_state_login(conn);
       }
     }
@@ -372,7 +381,7 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
 
   if(imapc->ssldone) {
-    conn->handler = &Curl_handler_imaps;
+    imap_to_imaps(conn);
     result = imap_state_login(conn);
     state(conn, IMAP_STOP);
   }

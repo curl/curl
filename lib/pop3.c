@@ -275,6 +275,15 @@ static int pop3_getsock(struct connectdata *conn,
   return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
 }
 
+#ifdef USE_SSL
+static void pop3_to_pop3s(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_pop3s;
+}
+#else
+#define pop3_to_pop3s(x)
+#endif
+
 /* for STARTTLS responses */
 static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
                                          int pop3code,
@@ -292,7 +301,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
     /* Curl_ssl_connect is BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(CURLE_OK == result) {
-      conn->handler = &Curl_handler_pop3s;
+      pop3_to_pop3s(conn);
       result = pop3_state_user(conn);
     }
   }

@@ -454,6 +454,15 @@ static int smtp_getsock(struct connectdata *conn,
   return Curl_pp_getsock(&conn->proto.smtpc.pp, socks, numsocks);
 }
 
+#ifdef USE_SSL
+static void smtp_to_smtps(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_smtps;
+}
+#else
+#define smtp_to_smtps(x)
+#endif
+
 /* for STARTTLS responses */
 static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
                                          int smtpcode,
@@ -475,7 +484,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
     /* Curl_ssl_connect is BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(CURLE_OK == result) {
-      conn->handler = &Curl_handler_smtps;
+      smtp_to_smtps(conn);
       result = smtp_state_ehlo(conn);
     }
   }
