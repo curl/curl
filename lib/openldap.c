@@ -465,7 +465,8 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
       char *info = NULL;
       rc = ldap_parse_result(li->ld, ent, &code, NULL, &info, NULL, NULL, 0);
       if (rc) {
-        failf(data, "LDAP local: search ldap_parse_result %s", ldap_err2string(rc));
+        failf(data, "LDAP local: search ldap_parse_result %s",
+              ldap_err2string(rc));
         *err = CURLE_LDAP_SEARCH_FAILED;
       } else if (code && code != LDAP_SIZELIMIT_EXCEEDED) {
         failf(data, "LDAP remote: search failed %s %s", ldap_err2string(rc),
@@ -488,6 +489,12 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
     lr->nument++;
     rc = ldap_get_dn_ber(li->ld, ent, &ber, &bv);
+    if(rc < 0) {
+      /* TODO: verify that this is really how this return code should be
+         handled */
+      *err = CURLE_RECV_ERROR;
+      return -1;
+    }
     Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
     Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val, bv.bv_len);
     Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
