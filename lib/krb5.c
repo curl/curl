@@ -1,8 +1,8 @@
 /* GSSAPI/krb5 support for FTP - loosely based on old krb4.c
  *
- * Copyright (c) 1995, 1996, 1997, 1998, 1999, 2010 Kungliga Tekniska Högskolan
+ * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2009 Daniel Stenberg
+ * Copyright (c) 2004 - 2011 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,10 +124,10 @@ krb5_decode(void *app_data, void *buf, int len, int level,
 static int
 krb5_overhead(void *app_data, int level, int len)
 {
-  /* no arguments are used, just init them to prevent compiler warnings */
-  app_data = NULL;
-  level = 0;
-  len = 0;
+  /* no arguments are used */
+  (void)app_data;
+  (void)level;
+  (void)len;
   return 0;
 }
 
