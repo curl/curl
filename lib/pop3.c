@@ -494,7 +494,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
            to TLS connection now */
-        result = Curl_pp_sendf(&pop3c->pp, "STARTTLS", NULL);
+        result = Curl_pp_sendf(&pop3c->pp, "STLS");
         state(conn, POP3_STARTTLS);
       }
       else
