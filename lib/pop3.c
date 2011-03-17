@@ -436,6 +436,24 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
   return result;
 }
 
+/* for LIST response with a given message */
+static CURLcode pop3_state_list_single_resp(struct connectdata *conn,
+                                     int pop3code,
+                                     pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != 'O') {
+    failf(data, "Invalid message. %c", pop3code);
+    result = CURLE_REMOTE_FILE_NOT_FOUND;
+  }
+
+  state(conn, POP3_STOP);
+  return result;
+}
+
 /* start the DO phase for RETR */
 static CURLcode pop3_retr(struct connectdata *conn)
 {
@@ -460,7 +478,10 @@ static CURLcode pop3_list(struct connectdata *conn)
   if(result)
     return result;
 
-  state(conn, POP3_LIST);
+  if (strlen(pop3c->mailbox))
+    state(conn, POP3_LIST_SINGLE);
+  else
+    state(conn, POP3_LIST);
   return result;
 }
 
@@ -521,6 +542,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_LIST:
       result = pop3_state_list_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_LIST_SINGLE:
+      result = pop3_state_list_single_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_QUIT:
@@ -747,7 +772,7 @@ CURLcode pop3_perform(struct connectdata *conn,
   /* If mailbox is empty, then assume user wants listing for mail IDs,
    * otherwise, attempt to retrieve the mail-id stored in mailbox
    */
-  if (strlen(pop3c->mailbox))
+  if (strlen(pop3c->mailbox) && !conn->data->set.ftp_list_only)
     result = pop3_retr(conn);
   else
     result = pop3_list(conn);

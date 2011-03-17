@@ -392,6 +392,7 @@ sub protocolsetup {
     elsif($proto eq 'pop3') {
         %commandfunc = (
             'RETR' => \&RETR_pop3,
+            'LIST' => \&LIST_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
@@ -678,6 +679,29 @@ sub RETR_pop3 {
      }
 
      # end with the magic 5-byte end of mail marker
+     sendcontrol "\r\n.\r\n";
+
+     return 0;
+}
+
+sub LIST_pop3 {
+
+# this is a built-in fake-message list
+my @pop3list=(
+"1 100\r\n",
+"2 4294967400\r\n",	# > 4 GB
+"4 200\r\n", # Note that message 3 is a simulated "deleted" message
+);
+
+     logmsg "retrieve a message list\n";
+
+     sendcontrol "+OK Listing starts\r\n";
+
+     for my $d (@pop3list) {
+         sendcontrol $d;
+     }
+
+     # end with the magic 5-byte end of listing marker
      sendcontrol "\r\n.\r\n";
 
      return 0;
