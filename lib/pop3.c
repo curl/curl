@@ -109,6 +109,7 @@ static int pop3_getsock(struct connectdata *conn,
 static CURLcode pop3_doing(struct connectdata *conn,
                            bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata * conn);
+static CURLcode pop3_state_upgrade_tls(struct connectdata * conn);
 
 /*
  * POP3 protocol handler.
@@ -236,6 +237,7 @@ static void state(struct connectdata *conn,
     "USER",
     "PASS",
     "STARTTLS",
+    "UPGRADETLS",
     "LIST",
     "RETR",
     "QUIT",
@@ -296,16 +298,37 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   if(pop3code != 'O') {
     failf(data, "STARTTLS denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
+    state(conn, POP3_STOP);
+  }
+  else if(data->state.used_interface == Curl_if_multi) {
+    state(conn, POP3_UPGRADETLS);
+    result = pop3_state_upgrade_tls(conn);
   }
   else {
-    /* Curl_ssl_connect is BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(CURLE_OK == result) {
       pop3_to_pop3s(conn);
       result = pop3_state_user(conn);
     }
+    else {
+      state(conn, POP3_STOP);
+    }
   }
-  state(conn, POP3_STOP);
+  return result;
+}
+
+static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
+{
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+
+  if(pop3c->ssldone) {
+    pop3_to_pop3s(conn);
+    result = pop3_state_user(conn);
+  }
+
   return result;
 }
 
@@ -474,6 +497,9 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
   struct pingpong *pp = &pop3c->pp;
   size_t nread = 0;
 
+  if(pop3c->state == POP3_UPGRADETLS)
+    return pop3_state_upgrade_tls(conn);
+
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
 
@@ -494,7 +520,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
            to TLS connection now */
-        result = Curl_pp_sendf(&pop3c->pp, "STARTTLS", NULL);
+        result = Curl_pp_sendf(&pop3c->pp, "STLS");
         state(conn, POP3_STARTTLS);
       }
       else
