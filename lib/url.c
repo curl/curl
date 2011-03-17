@@ -4832,9 +4832,14 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(proxy && !(conn->handler->flags & PROTOPT_BANPROXY)) {
     if((conn->proxytype == CURLPROXY_HTTP) ||
        (conn->proxytype == CURLPROXY_HTTP_1_0)) {
+#ifdef CURL_DISABLE_HTTP
+      /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
+      return CURLE_UNSUPPORTED_PROTOCOL;
+#else
       /* force this connection's protocol to become HTTP */
       conn->handler = &Curl_handler_http;
       conn->bits.httpproxy = TRUE;
+#endif
     }
     conn->bits.proxy = TRUE;
   }
