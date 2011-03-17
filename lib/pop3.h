@@ -46,6 +46,7 @@ struct pop3_conn {
   size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
                         received thus far */
   pop3state state; /* always use pop3.c:state() to change state! */
+  bool ssldone; /* is connect() over SSL done? only relevant in multi mode */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

@@ -538,7 +538,14 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result = Curl_pp_multi_statemach(&pop3c->pp);
+  CURLcode result;
+
+  if ((conn->handler->protocol & CURLPROTO_POP3S) && !pop3c->ssldone) {
+    result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+  }
+  else {
+    result = Curl_pp_multi_statemach(&pop3c->pp);
+  }
 
   *done = (bool)(pop3c->state == POP3_STOP);
 
@@ -650,8 +657,8 @@ static CURLcode pop3_connect(struct connectdata *conn,
   }
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & CURLPROTO_POP3S) {
-    /* BLOCKING */
+  if((conn->handler->protocol & CURLPROTO_POP3S) &&
+      data->state.used_interface != Curl_if_multi) {
     /* POP3S is simply pop3 with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
