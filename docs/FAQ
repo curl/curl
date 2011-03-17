@@ -109,7 +109,7 @@ FAQ
 
  7. PHP/CURL Issues
   7.1 What is PHP/CURL?
-  7.2 Who write PHP/CURL?
+  7.2 Who wrote PHP/CURL?
   7.3 Can I perform multiple requests using the same handle?
 
 ==============================================================================
@@ -1406,7 +1406,7 @@ FAQ
   CURL (often using all caps) or sometimes ext/curl, but both cause much
   confusion to users which in turn gives us a higher question load.
 
-  7.2 Who write PHP/CURL?
+  7.2 Who wrote PHP/CURL?
 
   PHP/CURL is a module that comes with the regular PHP package. It depends and
   uses libcurl, so you need to have libcurl installed properly first before
