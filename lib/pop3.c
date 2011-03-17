@@ -414,6 +414,16 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
     return CURLE_RECV_ERROR;
   }
 
+  if(pp->linestart_resp &&
+      strncmp(pp->linestart_resp, "+OK 0", sizeof("+OK 0") - 1) == 0) {
+    /*
+     * Curl_pop3_write() expects the response to end in "\r\n.\r\n"
+     * but an empty LIST reply consists of the string ".\r\n" only,
+     * so pretend we've already seen the first "\r\n".
+     */
+    pop3c->eob = 2;
+  }
+
   /* POP3 download */
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
                       -1, NULL); /* no upload here */
@@ -456,7 +466,11 @@ static CURLcode pop3_list(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  if(pop3c->mailbox && *pop3c->mailbox != '\0')
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  else
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST");
+
   if(result)
     return result;
 
@@ -1002,11 +1016,12 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
      0d 0a 2e 0d 0a. This marker can of course be spread out
      over up to 5 different data chunks. Deal with it! */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  size_t checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
-  size_t checkleft = POP3_EOB_LEN-pop3c->eob;
-  size_t check = (checkmax >= checkleft?checkleft:checkmax);
+  size_t check = POP3_EOB_LEN - pop3c->eob;
 
-  if(!memcmp(POP3_EOB, &str[nread - check], check)) {
+  if(check > nread)
+    check = nread;
+
+  if(!memcmp(&POP3_EOB[pop3c->eob], &str[nread - check], check)) {
     /* substring match */
     pop3c->eob += check;
     if(pop3c->eob == POP3_EOB_LEN) {
