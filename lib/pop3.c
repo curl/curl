@@ -690,6 +690,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 {
   struct SessionHandle *data = conn->data;
   struct FTP *pop3 = data->state.proto.pop3;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result=CURLE_OK;
   (void)premature;
 
@@ -705,6 +706,9 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     conn->bits.close = TRUE; /* marked for closure */
     result = status;      /* use the already set error code */
   }
+
+  free(pop3c->mailbox);
+  pop3c->mailbox = NULL;
 
   /* clear these for next connection */
   pop3->transfer = FTPTRANSFER_BODY;
@@ -883,8 +887,6 @@ static CURLcode pop3_dophase_done(struct connectdata *conn,
   if(pop3->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-
-  free(pop3c->mailbox);
 
   return CURLE_OK;
 }
