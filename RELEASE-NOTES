@@ -36,6 +36,9 @@ This release includes the following bugfixes:
  o GSS: handle reuse fix
  o transfer: avoid insane conversion of time_t
  o nss: do not ignore value of CURLOPT_SSL_VERIFYPEER in certain cases
+ o SMTP-multi: non-blocking connect
+ o SFTP-multi: set cselect for sftp and scp to fix "stall" risk
+ o configure: removed wrongly claimed default paths
 
 This release includes the following known bugs:
 
@@ -46,6 +49,7 @@ advice from friends like these:
 
  Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan, Ben Noordhuis,
  Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
- Stefan Krause, Todd A Ouska, Saqib Ali
+ Stefan Krause, Todd A Ouska, Saqib Ali, Andre Guibert de Bruet,
+ Tor Arntsen, Vincent Torri
 
         Thanks! (and sorry if I forgot to mention someone)
