@@ -732,7 +732,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     result = status;      /* use the already set error code */
   }
 
-  free(pop3c->mailbox);
+  Curl_safefree(pop3c->mailbox);
   pop3c->mailbox = NULL;
 
   /* clear these for next connection */
