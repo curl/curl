@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010-2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -82,6 +82,11 @@ open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
     if(/(^CURL[^ \n]*) *(.*)/) {
         my ($sym, $rest)=($1, $2);
+        if($doc{$sym}) {
+            print "Detected duplicate symbol: $sym\n";
+            $misses++;
+            next;
+        }
         $doc{$sym}=$sym;
         my @a=split(/ +/, $rest);
         if($a[2]) {
