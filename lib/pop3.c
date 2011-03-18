@@ -906,7 +906,6 @@ static CURLcode pop3_dophase_done(struct connectdata *conn,
                                   bool connected)
 {
   struct FTP *pop3 = conn->data->state.proto.pop3;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
   (void)connected;
 
   if(pop3->transfer != FTPTRANSFER_BODY)
