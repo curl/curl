@@ -264,7 +264,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* disconnect */
   0,                                    /* defport */
   0,                                    /* protocol */
-  0                                     /* flags */
+  PROTOPT_NONE                          /* flags */
 };
 
 void Curl_safefree(void *ptr)
