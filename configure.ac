@@ -120,10 +120,10 @@ if test -f ${srcdir}/include/curl/curlbuild.h; then
 fi
 
 dnl figure out the libcurl version
-VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
+CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
 AM_INIT_AUTOMAKE
 AC_MSG_CHECKING([curl version])
-AC_MSG_RESULT($VERSION)
+AC_MSG_RESULT($CURLVERSION)
 
 dnl
 dnl we extract the numerical version for curl-config only
@@ -3066,7 +3066,7 @@ CURL_GENERATE_CONFIGUREHELP_PM
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
-  curl version:    ${VERSION}
+  curl version:    ${CURLVERSION}
   Host setup:      ${host}
   Install prefix:  ${prefix}
   Compiler:        ${CC}
