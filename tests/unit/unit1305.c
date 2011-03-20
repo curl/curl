@@ -81,66 +81,66 @@ static void unit_stop( void )
 
 static Curl_addrinfo *fake_ai(void)
 {
-    static Curl_addrinfo *ai;
-    int ss_size;
+  static Curl_addrinfo *ai;
+  int ss_size;
 
-    ss_size = sizeof (struct sockaddr_in);
+  ss_size = sizeof (struct sockaddr_in);
 
-    if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL)
-        return NULL;
+  if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL)
+    return NULL;
 
-    if((ai->ai_canonname = strdup("dummy")) == NULL) {
-        free(ai);
-        return NULL;
-    }
+  if((ai->ai_canonname = strdup("dummy")) == NULL) {
+    free(ai);
+    return NULL;
+  }
 
-    if((ai->ai_addr = calloc(1, ss_size)) == NULL) {
-        free(ai->ai_canonname);
-        free(ai);
-        return NULL;
-    }
+  if((ai->ai_addr = calloc(1, ss_size)) == NULL) {
+    free(ai->ai_canonname);
+    free(ai);
+    return NULL;
+  }
 
-    ai->ai_family = AF_INET;
-    ai->ai_addrlen = ss_size;
+  ai->ai_family = AF_INET;
+  ai->ai_addrlen = ss_size;
 
-    return ai;
+  return ai;
 }
 
 static CURLcode create_node(void)
 {
-    data_key = aprintf("%s:%d", "dummy", 0);
-    if (!data_key)
-        return CURLE_OUT_OF_MEMORY;
+  data_key = aprintf("%s:%d", "dummy", 0);
+  if (!data_key)
+    return CURLE_OUT_OF_MEMORY;
 
-    data_node = calloc(1, sizeof(struct Curl_dns_entry));
-    if (!data_node)
-        return CURLE_OUT_OF_MEMORY;
+  data_node = calloc(1, sizeof(struct Curl_dns_entry));
+  if (!data_node)
+    return CURLE_OUT_OF_MEMORY;
 
-    data_node->addr = fake_ai();
-    if (!data_node->addr)
-        return CURLE_OUT_OF_MEMORY;
+  data_node->addr = fake_ai();
+  if (!data_node->addr)
+    return CURLE_OUT_OF_MEMORY;
 
-    return CURLE_OK;
+  return CURLE_OK;
 }
 
 
 UNITTEST_START
 
-    struct Curl_dns_entry *nodep;
-    size_t key_len;
+  struct Curl_dns_entry *nodep;
+  size_t key_len;
 
-    /* Test 1305 exits without adding anything to the hash */
-    if (strcmp(arg, "1305") != 0) {
-	CURLcode rc = create_node();
-	abort_unless(rc == CURLE_OK, "data node creation failed");
-	key_len = strlen(data_key);
+  /* Test 1305 exits without adding anything to the hash */
+  if (strcmp(arg, "1305") != 0) {
+    CURLcode rc = create_node();
+    abort_unless(rc == CURLE_OK, "data node creation failed");
+    key_len = strlen(data_key);
 
-	nodep = Curl_hash_add(hp, data_key, key_len+1, data_node);
-	abort_unless(nodep, "insertion into hash failed");
-	/* Freeing will now be done by Curl_hash_destroy */
-	data_node = NULL;
+    nodep = Curl_hash_add(hp, data_key, key_len+1, data_node);
+    abort_unless(nodep, "insertion into hash failed");
+    /* Freeing will now be done by Curl_hash_destroy */
+    data_node = NULL;
 
-	/* To do: test retrieval, deletion, edge conditions */
-    }
+    /* To do: test retrieval, deletion, edge conditions */
+  }
 
 UNITTEST_STOP
