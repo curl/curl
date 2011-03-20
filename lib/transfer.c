@@ -2085,6 +2085,9 @@ CURLcode Curl_retry_request(struct connectdata *conn,
                                 prevent i.e HTTP transfers to return
                                 error just because nothing has been
                                 transfered! */
+
+    if(data->state.proto.http->writebytecount)
+      Curl_readrewind(conn);
   }
   return CURLE_OK;
 }
