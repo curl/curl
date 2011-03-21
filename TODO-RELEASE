@@ -6,8 +6,6 @@ To be addressed in 7.21.5
 
 272 - re-using connections bound to local port
 
-274 - Ben Noordhuis' smtp + ssl patch
-
 275 - Introduce a way to avoid sending USER for FTP connections
 
 278 - "Configure  $as_echo does not work"
@@ -18,10 +16,6 @@ To be addressed in 7.21.5
 282 - 100 Continue responses should return the "final" HTTP response code: 
       "Getting the HTTP response code following a 100 Continue"
 
-283 - bug 3208760 "Bad HTTP POST retry with READFUNCTION or READDATA set"
-      http://curl.haxx.se/bug/view.cgi?id=3208760
-      (suggested patch probably the right fix, add test case to make sure)
-
 284 - bug 3172608 "No re-authentication when HTTP connecton is closed"
       http://curl.haxx.se/bug/view.cgi?id=3172608
       Would be nice if someone could verify the suggested patch
@@ -31,5 +25,10 @@ To be addressed in 7.21.5
       Would appreciate a Windows developer to give it a look before we apply
       the suggested patch
 
-286 - 
+286 - bug 3214223 Pipelined HTTP requests with a zero-length body broken
 
+287 - bug 3215314 Post quote operation to rename fails in Windows
+
+288 - bug 3219997 curl rtmp request curl: (55) select/poll returned error
+
+289 -
