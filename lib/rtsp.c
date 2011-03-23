@@ -36,6 +36,8 @@
 #include "rtsp.h"
 #include "rawstr.h"
 #include "curl_memory.h"
+#include "select.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -99,6 +101,39 @@ const struct Curl_handler Curl_handler_rtsp = {
   CURLPROTO_RTSP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
+
+/*
+ * The server may send us RTP data at any point, and RTSPREQ_RECEIVE does not
+ * want to block the application forever while receiving a stream. Therefore,
+ * we cannot assume that an RTSP socket is dead just because it is readable.
+ *
+ * Instead, if it is readable, run Curl_getconnectinfo() to peek at the socket
+ * and distinguish between closed and data.
+ */
+bool Curl_rtsp_connisdead(struct connectdata *check)
+{
+  int sval;
+  bool ret_val = TRUE;
+
+  sval = Curl_socket_ready(check->sock[FIRSTSOCKET], CURL_SOCKET_BAD, 0);
+  if(sval == 0) {
+    /* timeout */
+    ret_val = FALSE;
+  }
+  else if (sval & CURL_CSELECT_ERR) {
+    /* socket is in an error state */
+    ret_val = TRUE;
+  }
+  else if (sval & CURL_CSELECT_IN) {
+    /* readable with no error. could be closed or could be alive */
+    curl_socket_t connectinfo =
+      Curl_getconnectinfo(check->data, &check);
+    if(connectinfo != CURL_SOCKET_BAD)
+      ret_val = FALSE;
+  }
+
+  return ret_val;
+}
 
 CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done)
 {

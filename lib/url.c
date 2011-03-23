@@ -2736,41 +2736,6 @@ static bool SocketIsDead(curl_socket_t sock)
   return ret_val;
 }
 
-#ifndef CURL_DISABLE_RTSP
-/*
- * The server may send us RTP data at any point, and RTSPREQ_RECEIVE does not
- * want to block the application forever while receiving a stream. Therefore,
- * we cannot assume that an RTSP socket is dead just because it is readable.
- *
- * Instead, if it is readable, run Curl_getconnectinfo() to peek at the socket
- * and distinguish between closed and data.
- */
-static bool RTSPConnIsDead(struct connectdata *check)
-{
-  int sval;
-  bool ret_val = TRUE;
-
-  sval = Curl_socket_ready(check->sock[FIRSTSOCKET], CURL_SOCKET_BAD, 0);
-  if(sval == 0) {
-    /* timeout */
-    ret_val = FALSE;
-  }
-  else if (sval & CURL_CSELECT_ERR) {
-    /* socket is in an error state */
-    ret_val = TRUE;
-  }
-  else if (sval & CURL_CSELECT_IN) {
-    /* readable with no error. could be closed or could be alive */
-    curl_socket_t connectinfo =
-      Curl_getconnectinfo(check->data, &check);
-    if(connectinfo != CURL_SOCKET_BAD)
-      ret_val = FALSE;
-  }
-
-  return ret_val;
-}
-#endif /* CURL_DISABLE_RTSP */
-
 static bool IsPipeliningPossible(const struct SessionHandle *handle,
                                  const struct connectdata *conn)
 {
@@ -2931,12 +2896,10 @@ ConnectionExists(struct SessionHandle *data,
          handles in pipeline and the connection isn't already marked in
          use */
       bool dead;
-#ifndef CURL_DISABLE_RTSP
       if(check->handler->protocol & CURLPROTO_RTSP)
         /* RTSP is a special case due to RTP interleaving */
-        dead = RTSPConnIsDead(check);
+        dead = Curl_rtsp_connisdead(check);
       else
-#endif /*CURL_DISABLE_RTSP*/
         dead = SocketIsDead(check->sock[FIRSTSOCKET]);
 
       if(dead) {
