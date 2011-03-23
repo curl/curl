@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,6 +112,15 @@ int Curl_resolv(struct connectdata *conn, const char *hostname,
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
                         long timeoutms);
+
+#ifdef CURLRES_IPV6
+/*
+ * Curl_ipv6works() returns TRUE if ipv6 seems to work.
+ */
+bool Curl_ipv6works(void);
+#else
+#define Curl_ipv6works() FALSE
+#endif
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've

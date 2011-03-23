@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -109,19 +109,36 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO) */
 
 /*
+ * Curl_ipv6works() returns TRUE if ipv6 seems to work.
+ */
+bool Curl_ipv6works(void)
+{
+  /* the nature of most system is that IPv6 status doesn't come and go
+     during a program's lifetime so we only probe the first time and then we
+     have the info kept for fast re-use */
+  static int ipv6_works = -1;
+  if(-1 == ipv6_works) {
+    /* probe to see if we have a working IPv6 stack */
+    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
+    if(s == CURL_SOCKET_BAD)
+      /* an ipv6 address was requested but we can't get/use one */
+      ipv6_works = 0;
+    else {
+      ipv6_works = 1;
+      sclose(s);
+    }
+  }
+  return (ipv6_works>0)?TRUE:FALSE;
+}
+
+/*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
 bool Curl_ipvalid(struct connectdata *conn)
 {
-  if(conn->ip_version == CURL_IPRESOLVE_V6) {
-    /* see if we have an IPv6 stack */
-    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD)
-      /* an ipv6 address was requested and we can't get/use one */
-      return FALSE;
-    sclose(s);
-  }
+  if(conn->ip_version == CURL_IPRESOLVE_V6)
+    return Curl_ipv6works();
   return TRUE;
 }
 
@@ -186,23 +203,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     break;
   }
 
-  if (pf != PF_INET) {
-    /* see if we have an IPv6 stack */
-    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD) {
-      /* Some non-IPv6 stacks have been found to make very slow name resolves
-       * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
-       * the stack seems to be a non-ipv6 one. */
-
-      pf = PF_INET;
-    }
-    else {
-      /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
-       * possible checks. And close the socket again.
-       */
-      sclose(s);
-    }
-  }
+  if((pf != PF_INET) && !Curl_ipv6works())
+    /* the stack seems to be a non-ipv6 one */
+    pf = PF_INET;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
