@@ -7,10 +7,12 @@
 MAIL ETIQUETTE
 
  1. About the lists
-  1.1 Netiquette
-  1.2 Do Not Mail a Single Individual
-  1.3 Subscription Required
-  1.4 Moderation of new posters
+  1.1 Mailing Lists
+  1.2 Netiquette
+  1.3 Do Not Mail a Single Individual
+  1.4 Subscription Required
+  1.5 Moderation of new posters
+  1.6 Handling trolls and spam
 
  2. Sending mail
   2.1 Reply or New Mail
@@ -26,7 +28,19 @@ MAIL ETIQUETTE
 
 1. About the lists
 
-  1.1 Netiquette
+  1.1 Mailing Lists
+
+  The mailing lists we have are all listed and described at
+  http://curl.haxx.se/mail/
+
+  Each mailing list is targeted to a specific set of users and subjects,
+  please use the one or the ones that suit you the most.
+
+  Each mailing list have hundreds up to thousands of readers, meaning that
+  each mail sent will be received and read by a very large amount of people.
+  People from various cultures, regions, religions and continents.
+
+  1.2 Netiquette
 
   Netiquette is a common name for how to behave on the internet. Of course, in
   each particular group and subculture there will be differences in what is
@@ -36,7 +50,7 @@ MAIL ETIQUETTE
   etiquette, and primarily this focus on how to behave on and how to use our
   mailing lists.
 
-  1.2 Do Not Mail a Single Individual
+  1.3 Do Not Mail a Single Individual
 
   Many people send one question to one person. One person gets many mails, and
   there is only one person who can give you a reply. The question may be
@@ -48,7 +62,7 @@ MAIL ETIQUETTE
   services, by all means go ahead, but if it's just another curl question,
   take it to a suitable list instead.
 
-  1.3 Subscription Required
+  1.4 Subscription Required
 
   All curl mailing lists require that you are subscribed to allow a mail to go
   through to all the subscribers.
@@ -60,7 +74,7 @@ MAIL ETIQUETTE
   The reason for this unfortunate and strict subscription policy is of course
   to stop spam from pestering the lists.
 
-  1.4 Moderation of new posters
+  1.5 Moderation of new posters
 
   Several of the curl mailing lists automatically make all posts from new
   subscribers require moderation. This means that after you've subscribed and
@@ -74,6 +88,27 @@ MAIL ETIQUETTE
 
   The reason for this moderation policy is that we do suffer from spammers who
   actually subscribe and send spam to our lists.
+
+  1.6 Handling trolls and spam
+
+  Despite our good intensions and hard work to keep spam off the lists and to
+  maintain a friendly and positive atmosphere, there will be times when spam
+  and or trolls get through.
+
+  Troll - "someone who posts inflammatory, extraneous, or off-topic messages
+  in an online community"
+
+  Spam - "use of electronic messaging systems to send unsolicited bulk
+  messages"
+
+  No matter what, we NEVER EVER respond to trolls or spammers on the list. If
+  you believe the list admin should do something particular, contact him/her
+  off-list. The subject will be taken care of as good as possible to prevent
+  repeated offences, but responding on the list to such messages never lead to
+  anything good and only puts the light even more on the offender: which was
+  the entire purpose of it getting to the list in the first place.
+
+  Don't feed the trolls!
 
 
 2. Sending mail
