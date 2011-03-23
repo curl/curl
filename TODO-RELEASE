@@ -1,9 +1,6 @@
 To be addressed in 7.21.5
 =========================
 
-271 - fix the IPv6-working probing to only exist at one place in the code and
-      only get done once
-
 272 - re-using connections bound to local port
 
 275 - Introduce a way to avoid sending USER for FTP connections
@@ -12,9 +9,6 @@ To be addressed in 7.21.5
 
 281 - Several scan-build warnings have sneaked in:
       http://curl.haxx.se/scans/
-
-282 - 100 Continue responses should return the "final" HTTP response code: 
-      "Getting the HTTP response code following a 100 Continue"
 
 284 - bug 3172608 "No re-authentication when HTTP connecton is closed"
       http://curl.haxx.se/bug/view.cgi?id=3172608
