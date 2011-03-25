@@ -1437,9 +1437,16 @@ ossl_connect_step1(struct connectdata *conn,
   Curl_ossl_seed(data);
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
+
   switch(data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
+#ifdef USE_TLS_SRP
+    if (data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+      infof(data, "Set version TLSv1 for SRP authorisation\n");
+      req_method = TLSv1_client_method() ;
+    } else
+#endif
     /* we try to figure out version */
     req_method = SSLv23_client_method();
     use_sni(TRUE);
@@ -1449,10 +1456,18 @@ ossl_connect_step1(struct connectdata *conn,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv2:
+#ifdef USE_TLS_SRP
+    if (data->set.ssl.authtype == CURL_TLSAUTH_SRP)
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     req_method = SSLv2_client_method();
     use_sni(FALSE);
     break;
   case CURL_SSLVERSION_SSLv3:
+#ifdef USE_TLS_SRP
+    if (data->set.ssl.authtype == CURL_TLSAUTH_SRP)
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     req_method = SSLv3_client_method();
     use_sni(FALSE);
     break;
@@ -1547,6 +1562,28 @@ ossl_connect_step1(struct connectdata *conn,
     }
   }
 
+#ifdef USE_TLS_SRP
+  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+    infof(data, "Using TLS-SRP username: %s\n", data->set.ssl.username);
+
+    if (!SSL_CTX_set_srp_username(connssl->ctx, data->set.ssl.username)) {
+      failf(data, "Unable to set SRP user name");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if (!SSL_CTX_set_srp_password(connssl->ctx,data->set.ssl.password)) {
+      failf(data, "failed setting SRP password");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if(!data->set.str[STRING_SSL_CIPHER_LIST]) {
+      infof(data, "Setting cipher list SRP\n");
+
+      if(!SSL_CTX_set_cipher_list(connssl->ctx, "SRP")) {
+        failf(data, "failed setting SRP cipher list");
+        return CURLE_SSL_CIPHER;
+      }
+    }
+  }
+#endif
   if(data->set.str[STRING_SSL_CAFILE] || data->set.str[STRING_SSL_CAPATH]) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */

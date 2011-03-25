@@ -884,8 +884,8 @@ defined in RFC 5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
 \fICURLOPT_TLSAUTH_USERNAME\fP and \fICURLOPT_TLSAUTH_PASSWORD\fP options.
 
-You need to build libcurl with GnuTLS and with TLS-SRP support for this to
-work. (Added in 7.21.4)
+You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
+to work. (Added in 7.21.4)
 .RE
 .IP CURLOPT_TLSAUTH_USERNAME
 Pass a char * as parameter, which should point to the zero-terminated username

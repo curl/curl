@@ -1632,6 +1632,17 @@ if test X"$OPENSSL_ENABLED" = X"1"; then
   fi
 fi
 
+dnl ---
+dnl We require OpenSSL with SRP support.
+dnl ---
+if test "$OPENSSL_ENABLED" = "1"; then
+  AC_CHECK_LIB(crypto, SRP_Calc_client_key,
+   [
+     AC_DEFINE(HAVE_SSLEAY_SRP, 1, [if you have the function SRP_Calc_client_key])
+     AC_SUBST(HAVE_SSLEAY_SRP, [1])
+   ])
+fi
+
 dnl ----------------------------------------------------
 dnl check for GnuTLS
 dnl ----------------------------------------------------
@@ -2776,7 +2787,7 @@ AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
        want_tls_srp=yes
 )
 
-if test "$want_tls_srp" = "yes" && test "x$HAVE_GNUTLS_SRP" = "x1"; then
+if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_SSLEAY_SRP" = "x1") ; then
    AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
    USE_TLS_SRP=1
    curl_tls_srp_msg="enabled"
