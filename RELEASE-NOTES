@@ -39,6 +39,16 @@ This release includes the following bugfixes:
  o SMTP-multi: non-blocking connect
  o SFTP-multi: set cselect for sftp and scp to fix "stall" risk
  o configure: removed wrongly claimed default paths
+ o pop3: fixed torture tests to succeed
+ o symbols-in-versions: many corrections
+ o if a HTTP request gets retried because the connection was dead, rewind if
+   any data was sent as part of it
+ o only probe for working ipv6 once and then re-use that info for further
+   requests
+ o requests that are asked to bound to a local interface/port will no longer
+   wrongly re-use connections that aren't
+ o libcurl.m4: Add missing quotes in AC_LINK_IFELSE
+ o progress output: don't print the last update on a separate line
 
 This release includes the following known bugs:
 
@@ -50,6 +60,6 @@ advice from friends like these:
  Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan, Ben Noordhuis,
  Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
  Stefan Krause, Todd A Ouska, Saqib Ali, Andre Guibert de Bruet,
- Tor Arntsen, Vincent Torri
+ Tor Arntsen, Vincent Torri, Dave Reisner
 
         Thanks! (and sorry if I forgot to mention someone)
