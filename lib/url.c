@@ -2606,7 +2606,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->async.hostname);
   Curl_safefree(conn->async.os_specific);
 #endif
-
+  Curl_safefree(conn->localdev);
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
@@ -2986,6 +2986,25 @@ ConnectionExists(struct SessionHandle *data,
       /* this request can't be pipelined but the checked connection is already
          in use so we skip it */
       continue;
+
+    if(needle->localdev || needle->localport) {
+      /* If we are bound to a specific local end (IP+port), we must not re-use
+         a random other one, although if we didn't ask for a particular one we
+         can reuse one that was bound.
+
+         This comparison is a bit rough and too strict. Since the input
+         parameters can be specified in numerous ways and still end up the
+         same it would take a lot of processing to make it really accurate.
+         Instead, this matching will assume that re-uses of bound connections
+         will most likely also re-use the exact same binding parameters and
+         missing out a few edge cases shouldn't hurt anyone very much.
+      */
+      if((check->localport != needle->localport) ||
+         (check->localportrange != needle->localportrange) ||
+         !check->localdev ||
+         strcmp(check->localdev, needle->localdev))
+        continue;
+    }
 
     if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
        (needle->bits.httpproxy && check->bits.httpproxy &&
@@ -3568,13 +3587,24 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->data_prot = PROT_CLEAR;
 #endif
 
+  /* Store the local bind parameters that will be used for this connection */
+  if(data->set.str[STRING_DEVICE]) {
+    conn->localdev = strdup(data->set.str[STRING_DEVICE]);
+    if(!conn->localdev)
+      goto error;
+  }
+  conn->localportrange = data->set.localportrange;
+  conn->localport = data->set.localport;
+
   return conn;
   error:
+
   Curl_llist_destroy(conn->send_pipe, NULL);
   Curl_llist_destroy(conn->recv_pipe, NULL);
   Curl_llist_destroy(conn->pend_pipe, NULL);
   Curl_llist_destroy(conn->done_pipe, NULL);
   Curl_safefree(conn->master_buffer);
+  Curl_safefree(conn->localdev);
   Curl_safefree(conn);
   return NULL;
 }

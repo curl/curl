@@ -936,6 +936,16 @@ struct connectdata {
 
   long verifypeer;
   long verifyhost;
+
+  /* When this connection is created, store the conditions for the local end
+     bind. This is stored before the actual bind and before any connection is
+     made and will serve the purpose of being used for comparison reasons so
+     that subsequent bound-requested connections aren't accidentally re-using
+     wrong connections. */
+  char *localdev;
+  unsigned short localport;
+  int localportrange;
+
 };
 
 /* The end of connectdata. */

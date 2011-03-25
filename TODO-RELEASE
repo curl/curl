@@ -1,8 +1,6 @@
 To be addressed in 7.21.5
 =========================
 
-272 - re-using connections bound to local port
-
 275 - Introduce a way to avoid sending USER for FTP connections
 
 278 - "Configure  $as_echo does not work"
