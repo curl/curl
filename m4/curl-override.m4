@@ -2,7 +2,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 3
+# serial 4
 
 dnl CURL_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
@@ -98,4 +98,13 @@ m4_define([$0],[])])
 m4_defun([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
 [CURL_CHECK_PATH_SEPARATOR
 m4_define([$0],[])])
+
+dnl Override Autoconf's AC_CONFIG_MACRO_DIR (DIR)
+dnl -------------------------------------------------
+dnl This is an emulation of Autoconf's 2.61 macro.
+dnl This is done to use fixed macro across Autoconf
+dnl versions, and avoid warnings from modern libtool
+dnl which traces usage of this macro.
+
+AC_DEFUN([AC_CONFIG_MACRO_DIR],[:])
 

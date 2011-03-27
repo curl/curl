@@ -35,6 +35,7 @@ terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/curl_config.h src/curl_config.h include/curl/curlbuild.h)
+AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 
 CURL_CHECK_OPTION_DEBUG
