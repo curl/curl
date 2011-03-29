@@ -125,7 +125,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
-  if((conn->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)) &&
+  if((conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)) &&
      (data->state.proto.http->sending == HTTPSEND_REQUEST)) {
     /* We're sending the HTTP request headers, not the data.
        Remember that so we don't re-translate them into garbage. */
