@@ -208,6 +208,10 @@ From 7.18.0, the function can return CURL_READFUNC_PAUSE which then will cause
 reading from this connection to become paused. See \fIcurl_easy_pause(3)\fP
 for further details.
 
+\fBBugs\fP: when doing TFTP uploads, you must return the exact amount of data
+that the callback wants, or it will be considered the final packet by the
+server end and the transfer will end there.
+
 If you set this callback pointer to NULL, or don't set it at all, the default
 internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA\fP.
