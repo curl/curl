@@ -81,6 +81,7 @@ unless ($opt_n and -e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
 
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
+  $ua->env_proxy();
   $resp = $ua->mirror($url, $txt);
 }
 
