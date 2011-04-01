@@ -81,7 +81,7 @@ unless ($opt_n and -e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
 
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
-  $resp = $ua->mirror($url, 'certdata.txt');
+  $resp = $ua->mirror($url, $txt);
 }
 
 if ($resp && $resp->code eq '304') {
