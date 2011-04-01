@@ -1046,8 +1046,6 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   if(connssl->handle) {
-    PR_Close(connssl->handle);
-
     /* NSS closes the socket we previously handed to it, so we must mark it
        as closed to avoid double close */
     fake_sclose(conn->sock[sockindex]);
@@ -1055,12 +1053,17 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
     if(connssl->client_nickname != NULL) {
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
+
+      /* force NSS to ask again for a client cert when connecting
+       * next time to the same server */
+      SSL_InvalidateSession(connssl->handle);
     }
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
     /* destroy all NSS objects in order to avoid failure of NSS shutdown */
     Curl_llist_destroy(connssl->obj_list, NULL);
     connssl->obj_list = NULL;
 #endif
+    PR_Close(connssl->handle);
     connssl->handle = NULL;
   }
 }

@@ -52,8 +52,8 @@ This release includes the following bugfixes:
  o progress output: don't print the last update on a separate line
  o POP3: the command to send is STLS, not STARTTLS
  o POP3: PASS command was not sent after upgrade to TLS
- o nss: fix a crash within SSL_AuthCertificate()
  o configure: fix libtool warning
+ o nss: allow to use multiple client certificates for a single host
 
 This release includes the following known bugs:
 
