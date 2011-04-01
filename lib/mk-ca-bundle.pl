@@ -40,7 +40,7 @@ my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.14';
+my $version = '1.15';
 
 getopts('bhilnqtuv');
 
