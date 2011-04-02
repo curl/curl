@@ -872,7 +872,8 @@ static int multi_getsock(struct Curl_one_easy *easy,
     return domore_getsock(easy->easy_conn, socks, numsocks);
 
   case CURLM_STATE_DO_DONE: /* since is set after DO is completed, we switch
-                               to waiting for the same as the *PERFORM states */
+                               to waiting for the same as the *PERFORM
+                               states */
   case CURLM_STATE_PERFORM:
   case CURLM_STATE_WAITPERFORM:
     return Curl_single_getsock(easy->easy_conn, socks, numsocks);
@@ -1769,7 +1770,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     for(i=0; i< multi->connc->num; i++) {
       if(multi->connc->connects[i] &&
          multi->connc->connects[i]->handler->flags & PROTOPT_CLOSEACTION) {
-        Curl_disconnect(multi->connc->connects[i], /* dead_connection */ FALSE);
+        Curl_disconnect(multi->connc->connects[i], FALSE);
         multi->connc->connects[i] = NULL;
       }
     }
@@ -2125,7 +2126,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
           data = data->set.one_easy->easy_conn->recv_pipe->head->ptr;
       }
 
-      if(data->set.one_easy->easy_conn && !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
+      if(data->set.one_easy->easy_conn &&
+         !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
         /* set socket event bitmask if they're not locked */
         data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
 
@@ -2133,7 +2135,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         result = multi_runsingle(multi, now, data->set.one_easy);
       while (CURLM_CALL_MULTI_PERFORM == result);
 
-      if(data->set.one_easy->easy_conn && !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
+      if(data->set.one_easy->easy_conn &&
+         !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
         /* clear the bitmask only if not locked */
         data->set.one_easy->easy_conn->cselect_bits = 0;
 
