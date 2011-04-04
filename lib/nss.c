@@ -633,7 +633,7 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
     return SECSuccess;
   }
 
-  return SSL_AuthCertificate(arg, fd, checksig, isServer);
+  return SSL_AuthCertificate(CERT_GetDefaultCertDB(), fd, checksig, isServer);
 }
 
 static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
