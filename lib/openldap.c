@@ -6,6 +6,7 @@
  *                 \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,6 +46,7 @@
 #include "curl_ldap.h"
 #include "curl_memory.h"
 #include "curl_base64.h"
+#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -201,7 +203,6 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
   ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* for LDAP over HTTP proxy */
     struct HTTP http_proxy;
@@ -228,7 +229,6 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
     if(CURLE_OK != result)
       return result;
   }
-#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
 #ifdef USE_SSL
   if (conn->handler->flags & PROTOPT_SSL) {

@@ -86,6 +86,7 @@
 #include "url.h"
 #include "rawstr.h"
 #include "strtoofft.h"
+#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -647,7 +648,6 @@ static CURLcode pop3_connect(struct connectdata *conn,
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* for POP3 over HTTP proxy */
     struct HTTP http_proxy;
@@ -674,7 +674,6 @@ static CURLcode pop3_connect(struct connectdata *conn,
     if(CURLE_OK != result)
       return result;
   }
-#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
 
   if(conn->handler->protocol & CURLPROTO_POP3S) {
     /* BLOCKING */

@@ -496,6 +496,7 @@ X_OBJS= \
         $(DIROBJ)\http_negotiate_sspi.obj \
 	$(DIROBJ)\http_ntlm.obj \
 	$(DIROBJ)\http.obj \
+	$(DIROBJ)\http_proxy.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\imap.obj \
 	$(DIROBJ)\inet_ntop.obj \
