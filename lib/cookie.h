@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,20 +87,24 @@ struct Cookie *Curl_cookie_add(struct SessionHandle *data,
                                struct CookieInfo *, bool header, char *lineptr,
                                const char *domain, const char *path);
 
-struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
-                                    const char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
                                    const char *, bool);
 void Curl_cookie_freelist(struct Cookie *cookies, bool cookiestoo);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
-void Curl_cookie_cleanup(struct CookieInfo *);
 int Curl_cookie_output(struct CookieInfo *, const char *);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
 #define Curl_cookie_loadfiles(x) do { } while (0)
+#define Curl_cookie_init(x,y,z,w) NULL
+#define Curl_cookie_cleanup(x)
+#define Curl_flush_cookies(x,y)
 #else
+void Curl_flush_cookies(struct SessionHandle *data, int cleanup);
+void Curl_cookie_cleanup(struct CookieInfo *);
+struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
+                                    const char *, struct CookieInfo *, bool);
 struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
 void Curl_cookie_loadfiles(struct SessionHandle *data);
 #endif

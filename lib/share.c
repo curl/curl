@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -170,10 +170,8 @@ curl_share_cleanup(CURLSH *sh)
     share->hostcache = NULL;
   }
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(share->cookies)
     Curl_cookie_cleanup(share->cookies);
-#endif   /* CURL_DISABLE_HTTP */
 
   if(share->unlockfunc)
     share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);

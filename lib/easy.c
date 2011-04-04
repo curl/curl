@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -654,7 +654,6 @@ CURL *curl_easy_duphandle(CURL *incurl)
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(data->cookies) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
@@ -665,18 +664,14 @@ CURL *curl_easy_duphandle(CURL *incurl)
     if(!outcurl->cookies)
       goto fail;
   }
-#endif   /* CURL_DISABLE_HTTP */
 
   /* duplicate all values in 'change' */
-
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(data->change.cookielist) {
     outcurl->change.cookielist =
       Curl_slist_duplicate(data->change.cookielist);
     if(!outcurl->change.cookielist)
       goto fail;
   }
-#endif   /* CURL_DISABLE_HTTP */
 
   if(data->change.url) {
     outcurl->change.url = strdup(data->change.url);
@@ -724,10 +719,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
       Curl_rm_connc(outcurl->state.connc);
     if(outcurl->state.headerbuff)
       free(outcurl->state.headerbuff);
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
     if(outcurl->change.cookielist)
       curl_slist_free_all(outcurl->change.cookielist);
-#endif
     if(outcurl->change.url)
       free(outcurl->change.url);
     if(outcurl->change.referer)
