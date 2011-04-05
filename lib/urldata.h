@@ -837,18 +837,19 @@ struct connectdata {
                                 well be the same we read from.
                                 CURL_SOCKET_BAD disables */
 
-  /** Dynamicly allocated strings, may need to be freed before this **/
-  /** struct is killed.                                             **/
+  /** Dynamicly allocated strings, MUST be freed before this **/
+  /** struct is killed.                                      **/
   struct dynamically_allocated_data {
-    char *proxyuserpwd; /* free later if not NULL! */
-    char *uagent; /* free later if not NULL! */
-    char *accept_encoding; /* free later if not NULL! */
-    char *userpwd; /* free later if not NULL! */
-    char *rangeline; /* free later if not NULL! */
-    char *ref; /* free later if not NULL! */
-    char *host; /* free later if not NULL */
-    char *cookiehost; /* free later if not NULL */
-    char *rtsp_transport; /* free later if not NULL */
+    char *proxyuserpwd;
+    char *uagent;
+    char *accept_encoding;
+    char *userpwd;
+    char *rangeline;
+    char *ref;
+    char *host;
+    char *cookiehost;
+    char *rtsp_transport;
+    char *te; /* TE: request header */
   } allocptr;
 
   int sec_complete; /* if kerberos is enabled for this connection */

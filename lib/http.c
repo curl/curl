@@ -1728,6 +1728,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
+#if 0
+  if(!Curl_checkheaders(data, "TE:")) {
+    Curl_safefree(conn->allocptr.te);
+    conn->allocptr.te = aprintf("TE: %s\r\n", "gzip");
+    if(!conn->allocptr.te)
+      return CURLE_OUT_OF_MEMORY;
+  }
+#endif
+
   ptr = Curl_checkheaders(data, "Transfer-Encoding:");
   if(ptr) {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
@@ -2058,6 +2067,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 "%s" /* user agent */
                 "%s" /* host */
                 "%s" /* accept */
+                "%s" /* TE: */
                 "%s" /* accept-encoding */
                 "%s" /* referer */
                 "%s" /* Proxy-Connection */
@@ -2075,6 +2085,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                 conn->allocptr.uagent:"",
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_accept?http->p_accept:"",
+                conn->allocptr.te?conn->allocptr.te:"",
                 (data->set.str[STRING_ENCODING] &&
                  *data->set.str[STRING_ENCODING] &&
                  conn->allocptr.accept_encoding)?
@@ -3127,8 +3138,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        */
       conn->bits.close = TRUE; /* close when done */
     }
-    else if(Curl_compareheader(k->p, "Transfer-Encoding:", "chunked") &&
-            !(conn->handler->protocol & CURLPROTO_RTSP)) {
+    else if(checkprefix("Transfer-Encoding:", k->p)) {
+      /* One or more encodings. We check for chunked and/or a compression
+         algorithm. */
       /*
        * [RFC 2616, section 3.6.1] A 'chunked' transfer encoding
        * means that the server will send a series of "chunks". Each
@@ -3137,10 +3149,60 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * with the previously mentioned size. There can be any amount
        * of chunks, and a chunk-data set to zero signals the
        * end-of-chunks. */
-      k->chunk = TRUE; /* chunks coming our way */
 
-      /* init our chunky engine */
-      Curl_httpchunk_init(conn);
+      char *start;
+
+      /* Find the first non-space letter */
+      start = k->p + 18;
+
+      do {
+        /* skip whitespaces and commas */
+        while(*start && (ISSPACE(*start) || (*start == ',')))
+          start++;
+
+        if(checkprefix("chunked", start)) {
+          k->chunk = TRUE; /* chunks coming our way */
+
+          /* init our chunky engine */
+          Curl_httpchunk_init(conn);
+
+          start += 7;
+        }
+
+        if(k->content_encoding)
+          /* TODO: we only support the first mentioned compression for now */
+          break;
+
+        if(checkprefix("identity", start)) {
+          k->content_encoding = IDENTITY;
+          start += 8;
+        }
+        else if(checkprefix("deflate", start)) {
+          k->content_encoding = DEFLATE;
+          start += 7;
+        }
+        else if(checkprefix("gzip", start)) {
+          k->content_encoding = GZIP;
+          start += 4;
+        }
+        else if(checkprefix("x-gzip", start)) {
+          k->content_encoding = GZIP;
+          start += 6;
+        }
+        else if(checkprefix("compress", start)) {
+          k->content_encoding = COMPRESS;
+          start += 8;
+        }
+        else if(checkprefix("x-compress", start)) {
+          k->content_encoding = COMPRESS;
+          start += 10;
+        }
+        else
+          /* unknown! */
+          break;
+
+      } while(1);
+
     }
     else if(checkprefix("Content-Encoding:", k->p) &&
             data->set.str[STRING_ENCODING]) {

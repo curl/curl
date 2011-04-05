@@ -2549,6 +2549,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.uagent);
   Curl_safefree(conn->allocptr.userpwd);
   Curl_safefree(conn->allocptr.accept_encoding);
+  Curl_safefree(conn->allocptr.te);
   Curl_safefree(conn->allocptr.rangeline);
   Curl_safefree(conn->allocptr.ref);
   Curl_safefree(conn->allocptr.host);
