@@ -988,7 +988,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       break;
     default:
       /* reserve other values for future use */
-      result = CURLE_FAILED_INIT;
+      result = CURLE_UNKNOWN_OPTION;
       break;
     }
     break;
@@ -1428,7 +1428,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or WINDOWS_SSPI */
 #endif
     if(!auth)
-      return CURLE_FAILED_INIT; /* no supported types left! */
+      return CURLE_NOT_BUILT_IN; /* no supported types left! */
 
     data->set.httpauth = auth;
   }
@@ -1488,7 +1488,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or WINDOWS_SSPI */
 #endif
     if(!auth)
-      return CURLE_FAILED_INIT; /* no supported types left! */
+      return CURLE_NOT_BUILT_IN; /* no supported types left! */
 
     data->set.proxyauth = auth;
   }
@@ -1528,7 +1528,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       break;
     default:
       /* reserve other values for future use */
-      result = CURLE_FAILED_INIT;
+      result = CURLE_UNKNOWN_OPTION;
       break;
     }
     break;
@@ -2518,7 +2518,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #endif
   default:
     /* unknown tag and its companion, just ignore: */
-    result = CURLE_FAILED_INIT; /* correct this */
+    result = CURLE_UNKNOWN_OPTION;
     break;
   }
 

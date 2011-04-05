@@ -51,9 +51,9 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 #define curlssl_session_free(x)  Curl_cyassl_session_free(x)
 #define curlssl_close_all Curl_cyassl_close_all
 #define curlssl_close Curl_cyassl_close
-#define curlssl_shutdown(x,y) Curl_cyassl_shutdown(x,y) 
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
-#define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
+#define curlssl_shutdown(x,y) Curl_cyassl_shutdown(x,y)
+#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_cyassl_version
 #define curlssl_check_cxn(x) (x=x, -1)

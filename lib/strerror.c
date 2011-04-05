@@ -65,6 +65,10 @@ curl_easy_strerror(CURLcode error)
   case CURLE_URL_MALFORMAT:
     return "URL using bad/illegal format or missing URL";
 
+  case CURLE_NOT_BUILT_IN:
+    return "A requested feature, protocol or option was not found built-in in"
+      " this libcurl due to a build-time decision.";
+
   case CURLE_COULDNT_RESOLVE_PROXY:
     return "Couldn't resolve proxy name";
 
@@ -167,8 +171,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TOO_MANY_REDIRECTS :
     return "Number of redirects hit maximum amount";
 
-  case CURLE_UNKNOWN_TELNET_OPTION:
-    return "User specified an unknown telnet option";
+  case CURLE_UNKNOWN_OPTION:
+    return "An unknown option was passed in to libcurl";
 
   case CURLE_TELNET_OPTION_SYNTAX :
     return "Malformed telnet option";
@@ -282,7 +286,6 @@ curl_easy_strerror(CURLcode error)
     return "Chunk callback failed";
 
     /* error codes not used by current libcurl */
-  case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:
   case CURLE_OBSOLETE12:
   case CURLE_OBSOLETE16:

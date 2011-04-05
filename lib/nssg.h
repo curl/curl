@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,8 +60,8 @@ CURLcode Curl_nss_force_init(struct SessionHandle *data);
 #define curlssl_close Curl_nss_close
 /* NSS has no shutdown function provided and thus always fail */
 #define curlssl_shutdown(x,y) (x=x, y=y, 1)
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
-#define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
+#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_nss_version
 #define curlssl_check_cxn(x) Curl_nss_check_cxn(x)

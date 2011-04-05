@@ -25,8 +25,8 @@
 #include "setup.h"
 
 #ifdef CURL_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e,f) CURLE_FAILED_INIT
-#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_FAILED_INIT
+#define Curl_SOCKS4(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
 #else
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
