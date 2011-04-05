@@ -12,6 +12,7 @@ This release includes the following changes:
  o SOCKOPTFUNCTION: callback can say already-connected
  o Added --netrc-file
  o Added (new) support for cyassl
+ o TSL-SRP: enabled with OpenSSL
 
 This release includes the following bugfixes:
 
@@ -49,6 +50,10 @@ This release includes the following bugfixes:
    wrongly re-use connections that aren't
  o libcurl.m4: Add missing quotes in AC_LINK_IFELSE
  o progress output: don't print the last update on a separate line
+ o POP3: the command to send is STLS, not STARTTLS
+ o POP3: PASS command was not sent after upgrade to TLS
+ o nss: fix a crash within SSL_AuthCertificate()
+ o configure: fix libtool warning
 
 This release includes the following known bugs:
 
