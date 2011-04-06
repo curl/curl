@@ -29,5 +29,5 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 #define PROXY_TIMEOUT (3600*1000)
 
 #else
-#define Curl_proxyCONNECT(x,y,x,w) CURLE_NOT_BUILT_IN
+#define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #endif
