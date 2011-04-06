@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2004 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,7 +33,7 @@ supported_features="@SUPPORT_FEATURES@"
 Name: libcurl
 URL: http://curl.haxx.se/
 Description: Library to transfer files with ftp, http, etc.
-Version: @VERSION@
+Version: @CURLVERSION@
 Libs: -L${libdir} -lcurl @LIBS@
 Libs.private: @LIBCURL_LIBS@ @LIBS@
 Cflags: -I${includedir}

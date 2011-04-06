@@ -126,6 +126,8 @@ AM_INIT_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
 
+AC_SUBST(CURLVERSION)
+
 dnl
 dnl we extract the numerical version for curl-config only
 VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curlver.h`
