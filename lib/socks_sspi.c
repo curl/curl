@@ -180,7 +180,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   SecPkgCredentials_Names names;
   TimeStamp expiry;
   char *service_name=NULL;
-  u_short us_length;
+  unsigned short us_length;
   ULONG qop;
   unsigned char socksreq[4]; /* room for gssapi exchange header only */
   char *service = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
