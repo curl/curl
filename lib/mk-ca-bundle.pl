@@ -111,7 +111,7 @@ print CRT <<EOT;
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
 ## file (certdata.txt).  This file can be found in the mozilla source tree:
-## '/mozilla/security/nss/lib/ckfw/builtins/certdata.txt'
+## $url
 ##
 ## It contains the certificates in ${format}PEM format and therefore
 ## can be directly used with curl / libcurl / php_curl, or with
