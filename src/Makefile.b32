@@ -34,18 +34,18 @@ OPENSSL_PATH = ..\..\openssl-0.9.8q
 PROGNAME = curl.exe
 
 # Setup environment
-PP_CMD   = cpp32 -q -P-
 CC_CMD   = bcc32 -q -c
 LD       = bcc32
 RM       = del 2>NUL
-MKDIR    = mkdir
-RMDIR    = rmdir /s /q 2>NUL
+MKDIR    = md
+RMDIR    = rd /q 2>nul
+COPY     = $(COMSPEC) /c copy /y
 
-CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -Dinline=__inline
+CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -w-inl -w-pia -w-pin -Dinline=__inline
 LDFLAGS  = -q -lq -lap
 
 SRCDIRS  = .;..\lib
-OBJDIR   = .\objs
+OBJDIR   = .\BCC_objs
 INCDIRS  = -I.;..\include;..\lib
 LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
 DEFINES  = -DNDEBUG -DWIN32
@@ -84,13 +84,14 @@ CSOURCES = $(CURL_CFILES) $(CURLX_ONES:/lib/=)
 OBJECTS  = $(CSOURCES:.c=.obj)
 
 .c.obj:
-	@-$(RM) $(@R).int
-	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(<)
-	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+	$(CC_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$@ $<
 
-all:	$(OBJDIR) $(PROGNAME)
+all:	$(OBJDIR) hugehelp $(PROGNAME)
 
 clean:
+	cd $(OBJDIR)
+	@-$(RM) $(OBJECTS)
+	cd ..
 	@-$(RMDIR) $(OBJDIR)
 	@-$(RM) $(PROGNAME)
 	@-$(RM) curl.tds
@@ -98,6 +99,16 @@ clean:
 $(OBJDIR):
 	@-$(RMDIR) $(OBJDIR)
 	@-$(MKDIR) $(OBJDIR)
+
+!ifdef WITH_ZLIB
+hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
+        groff -Tascii -man -P -c ../docs/curl.1 > hugehelp.tmp
+        perl -w mkhelp.pl -c ../docs/MANUAL < hugehelp.tmp > hugehelp.c
+	@-$(RM) hugehelp.tmp
+!else
+hugehelp:
+	$(COPY) hugehelp.c.cvs hugehelp.c
+!endif
 
 $(PROGNAME): $(OBJECTS) $(LIBCURL_LIB) $(LINKLIB)
 	@-$(RM) $(PROGNAME)
