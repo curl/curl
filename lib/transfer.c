@@ -500,9 +500,28 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       }
 #endif
 
-      if(stop_reading)
+      if(stop_reading) {
         /* We've stopped dealing with input, get out of the do-while loop */
-        break;
+
+        if(nread > 0) {
+          if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+            infof(data,
+                  "Rewinding stream by : %zd"
+                  " bytes on url %s (zero-length body)\n",
+                  nread, data->state.path);
+	    read_rewind(conn, (size_t)nread);
+          }
+	  else {
+            infof(data,
+                  "Excess found in a non pipelined read:"
+                  " excess = %zd"
+		  " url = %s (zero-length body)\n",
+                  nread, data->state.path);
+	  }
+	}
+
+	break;
+      }
     }
 #endif /* CURL_DISABLE_HTTP */
 
