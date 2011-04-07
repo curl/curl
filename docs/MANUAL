@@ -123,7 +123,13 @@ USING PASSWORDS
 
 PROXY
 
- Get an ftp file using a proxy named my-proxy that uses port 888:
+ curl supports both HTTP and SOCKS proxy servers, with optional authentication.
+ It does not have special support for FTP proxy servers since there are no
+ standards for those, but it can still be made to work with many of them. You
+ can also use both HTTP and SOCKS proxies to transfer files to and from FTP
+ servers.
+
+ Get an ftp file using an HTTP proxy named my-proxy that uses port 888:
 
         curl -x my-proxy:888 ftp://ftp.leachsite.com/README
 
@@ -146,8 +152,22 @@ PROXY
 
  curl also supports SOCKS4 and SOCKS5 proxies with --socks4 and --socks5.
 
- See also the environment variables Curl support that offer further proxy
+ See also the environment variables Curl supports that offer further proxy
  control.
+
+ Most FTP proxy servers are set up to appear as a normal FTP server from the
+ client's perspective, with special commands to select the remote FTP server.
+ curl supports the -u, -Q and --ftp-account options that can be used to
+ set up transfers through many FTP proxies. For example, a file can be
+ uploaded to a remote FTP server using a Blue Coat FTP proxy with the
+ options:
+
+   curl -u "Remote-FTP-Username@remote.ftp.server Proxy-Username:Remote-Pass" \
+    --ftp-account Proxy-Password --upload-file local-file \
+    ftp://my-ftp.proxy.server:21/remote/upload/path/
+
+ See the manual for your FTP proxy to determine the form it expects to set up
+ transfers, and curl's -v option to see exactly what curl is sending.
 
 RANGES
 
