@@ -1,10 +1,6 @@
 To be addressed in 7.21.5
 =========================
 
-275 - Introduce a way to avoid sending USER for FTP connections
-
-278 - "Configure  $as_echo does not work"
-
 281 - Several scan-build warnings have sneaked in:
       http://curl.haxx.se/scans/
 
@@ -17,10 +13,6 @@ To be addressed in 7.21.5
       Would appreciate a Windows developer to give it a look before we apply
       the suggested patch
 
-286 - bug 3214223 Pipelined HTTP requests with a zero-length body broken
-
 287 - bug 3215314 Post quote operation to rename fails in Windows
-
-288 - bug 3219997 curl rtmp request curl: (55) select/poll returned error
 
 289 -
