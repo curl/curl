@@ -582,7 +582,7 @@ struct SingleRequest {
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
 
-  int content_encoding;         /* What content encoding. sec 3.5, RFC2616. */
+  int auto_decoding;            /* What content encoding. sec 3.5, RFC2616. */
 
 #define IDENTITY 0              /* No encoding */
 #define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */

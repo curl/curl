@@ -3169,32 +3169,32 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           start += 7;
         }
 
-        if(k->content_encoding)
+        if(k->auto_decoding)
           /* TODO: we only support the first mentioned compression for now */
           break;
 
         if(checkprefix("identity", start)) {
-          k->content_encoding = IDENTITY;
+          k->auto_decoding = IDENTITY;
           start += 8;
         }
         else if(checkprefix("deflate", start)) {
-          k->content_encoding = DEFLATE;
+          k->auto_decoding = DEFLATE;
           start += 7;
         }
         else if(checkprefix("gzip", start)) {
-          k->content_encoding = GZIP;
+          k->auto_decoding = GZIP;
           start += 4;
         }
         else if(checkprefix("x-gzip", start)) {
-          k->content_encoding = GZIP;
+          k->auto_decoding = GZIP;
           start += 6;
         }
         else if(checkprefix("compress", start)) {
-          k->content_encoding = COMPRESS;
+          k->auto_decoding = COMPRESS;
           start += 8;
         }
         else if(checkprefix("x-compress", start)) {
-          k->content_encoding = COMPRESS;
+          k->auto_decoding = COMPRESS;
           start += 10;
         }
         else
@@ -3222,15 +3222,15 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
       /* Record the content-encoding for later use */
       if(checkprefix("identity", start))
-        k->content_encoding = IDENTITY;
+        k->auto_decoding = IDENTITY;
       else if(checkprefix("deflate", start))
-        k->content_encoding = DEFLATE;
+        k->auto_decoding = DEFLATE;
       else if(checkprefix("gzip", start)
               || checkprefix("x-gzip", start))
-        k->content_encoding = GZIP;
+        k->auto_decoding = GZIP;
       else if(checkprefix("compress", start)
               || checkprefix("x-compress", start))
-        k->content_encoding = COMPRESS;
+        k->auto_decoding = COMPRESS;
     }
     else if(checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-

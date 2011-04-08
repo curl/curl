@@ -714,12 +714,12 @@ static CURLcode readwrite_data(struct SessionHandle *data,
              encodings handled here. */
 #ifdef HAVE_LIBZ
           switch (conn->data->set.http_ce_skip ?
-                  IDENTITY : k->content_encoding) {
+                  IDENTITY : k->auto_decoding) {
           case IDENTITY:
 #endif
             /* This is the default when the server sends no
                Content-Encoding header. See Curl_readwrite_init; the
-               memset() call initializes k->content_encoding to zero. */
+               memset() call initializes k->auto_decoding to zero. */
             if(!k->ignorebody) {
 
 #ifndef CURL_DISABLE_POP3
