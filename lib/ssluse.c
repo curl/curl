@@ -1463,10 +1463,11 @@ ossl_connect_step1(struct connectdata *conn,
 #ifdef OPENSSL_NO_SSL2
     failf(data, "openSSL was compiled without SSLv2 support");
     return CURLE_SSL_CONNECT_ERROR;
-#endif
+#else
     req_method = SSLv2_client_method();
     use_sni(FALSE);
     break;
+#endif
   case CURL_SSLVERSION_SSLv3:
 #ifdef USE_TLS_SRP
     if (data->set.ssl.authtype == CURL_TLSAUTH_SRP)
