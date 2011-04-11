@@ -13,6 +13,7 @@ This release includes the following changes:
  o Added --netrc-file
  o Added (new) support for cyassl
  o TSL-SRP: enabled with OpenSSL
+ o Added CURLE_NOT_BUILT_IN and CURLE_UNKNOWN_OPTION
 
 This release includes the following bugfixes:
 
@@ -54,6 +55,12 @@ This release includes the following bugfixes:
  o POP3: PASS command was not sent after upgrade to TLS
  o configure: fix libtool warning
  o nss: allow to use multiple client certificates for a single host
+ o HTTP pipelining: Fix handling of zero-length responses
+ o Don't list NTLM in curl-config when HTTP is disabled
+ o curl_easy_setopt.3: CURLOPT_RESOLVE typo version
+ o OpenSSL: build fine with no-sslv2 versions
+ o checkconnection: don't call with NULL pointer with RTSP and multi interface
+ o Borland makefile updates
 
 This release includes the following known bugs:
 
@@ -65,6 +72,7 @@ advice from friends like these:
  Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan, Ben Noordhuis,
  Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
  Stefan Krause, Todd A Ouska, Saqib Ali, Andre Guibert de Bruet,
- Tor Arntsen, Vincent Torri, Dave Reisner
+ Tor Arntsen, Vincent Torri, Dave Reisner, Chris Smowton, Tinus van den Berg,
+ Hongli Lai, Gisle Vanem
 
         Thanks! (and sorry if I forgot to mention someone)
