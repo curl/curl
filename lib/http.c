@@ -1533,6 +1533,11 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                    we will force length zero then */
                 checkprefix("Content-Length", headers->data))
           ;
+        else if(conn->allocptr.te &&
+                /* when asking for Transfer-Encoding, don't pass on a custom
+                   Connection: */
+                checkprefix("Connection", headers->data))
+          ;
         else {
           CURLcode result = Curl_add_bufferf(req_buffer, "%s\r\n",
                                              headers->data);
@@ -1728,14 +1733,21 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-#if 0
-  if(!Curl_checkheaders(data, "TE:")) {
+  if(Curl_checkheaders(data, "TE:")) {
+    /* When we insert a TE: header in the request, we must also insert TE in a
+       Connection: header, so we need to merge the custom provided Connection:
+       header and prevent the original to get sent */
+    char *cptr = Curl_checkheaders(data, "Connection:");
+
     Curl_safefree(conn->allocptr.te);
-    conn->allocptr.te = aprintf("TE: %s\r\n", "gzip");
+
+    /* Create the (updated) Connection: header */
+    conn->allocptr.te = cptr? aprintf("%s, TE\r\n", cptr):
+      strdup("Connection: TE\r\n");
+
     if(!conn->allocptr.te)
       return CURLE_OUT_OF_MEMORY;
   }
-#endif
 
   ptr = Curl_checkheaders(data, "Transfer-Encoding:");
   if(ptr) {

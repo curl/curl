@@ -192,6 +192,7 @@ http://%HOSTIP:%HTTPPORT/1123 -H "TE: deflate, gzip"
 GET /1123 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Connection: TE
 TE: deflate, gzip
 
 </protocol>

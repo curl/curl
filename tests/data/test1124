@@ -61,6 +61,7 @@ http://%HOSTIP:%HTTPPORT/1124 -H "TE: gzip"
 GET /1124 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Connection: TE
 TE: gzip
 
 </protocol>

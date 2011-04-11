@@ -45,10 +45,10 @@ libz
 http
 </server>
  <name>
-HTTP GET gzip transfer-encoded content
+HTTP GET transfer-encoding with custom Connection:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1122 -H "TE: gzip"
+http://%HOSTIP:%HTTPPORT/1125 -H "TE: gzip" -H "Connection: close"
 </command>
 </client>
 
@@ -59,10 +59,10 @@ http://%HOSTIP:%HTTPPORT/1122 -H "TE: gzip"
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /1122 HTTP/1.1
+GET /1125 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Connection: TE
+Connection: close, TE
 TE: gzip
 
 </protocol>
