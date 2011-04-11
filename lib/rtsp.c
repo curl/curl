@@ -124,10 +124,10 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
     /* socket is in an error state */
     ret_val = TRUE;
   }
-  else if (sval & CURL_CSELECT_IN) {
-    /* readable with no error. could be closed or could be alive */
-    curl_socket_t connectinfo =
-      Curl_getconnectinfo(check->data, &check);
+  else if ((sval & CURL_CSELECT_IN) && check->data) {
+    /* readable with no error. could be closed or could be alive but we can
+       only check if we have a proper SessionHandle for the connection */
+    curl_socket_t connectinfo = Curl_getconnectinfo(check->data, &check);
     if(connectinfo != CURL_SOCKET_BAD)
       ret_val = FALSE;
   }
