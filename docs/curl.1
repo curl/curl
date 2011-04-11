@@ -916,6 +916,10 @@ part of the remote file is used, the path is cut off.)
 The remote file name to use for saving is extracted from the given URL,
 nothing else.
 
+Consequentially, the file will be saved in the current working directory. If
+you want the file saved in a different directory, make sure you change current
+working directory before you invoke curl with the \fB-O/--remote-name\fP flag!
+
 You may use this option as many times as the number of URLs you have.
 .IP "--remote-name-all"
 This option changes the default action for all given URLs to be dealt with as
