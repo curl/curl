@@ -211,7 +211,7 @@ curl_easy_strerror(CURLcode error)
     return "Problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
-    return "Unrecognized HTTP Content-Encoding";
+    return "Unrecognized or bad HTTP Content or Transfer-Encoding";
 
   case CURLE_LDAP_INVALID_URL:
     return "Invalid LDAP URL";
