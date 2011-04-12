@@ -2161,6 +2161,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   dnl if given with a prefix, we set -L and -I based on that
   if test -n "$PREFIX_SSH2"; then
+    LIB_SSH2="-lssh2"
     LD_SSH2=-L${PREFIX_SSH2}/lib$libsuff
     CPP_SSH2=-I${PREFIX_SSH2}/include
     DIR_SSH2=${PREFIX_SSH2}/lib$libsuff
