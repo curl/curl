@@ -696,4 +696,13 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
 #endif /* !HAVE_GETADDRINFO */
 
+CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+                              char *servers)
+{
+  (void)data;
+  (void)servers;
+  return CURLE_NOT_BUILT_IN;
+
+}
+
 #endif /* CURLRES_THREADED */

@@ -1486,6 +1486,9 @@ typedef enum {
   /* allow GSSAPI credential delegation */
   CINIT(GSSAPI_DELEGATION, LONG, 210),
 
+  /* Set the name servers to use for DNS resolution */
+  CINIT(DNS_SERVERS, OBJECTPOINT, 211),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

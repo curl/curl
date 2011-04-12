@@ -2531,6 +2531,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
     break;
 #endif
+  case CURLOPT_DNS_SERVERS:
+    result = Curl_set_dns_servers(data, va_arg(param, char *));
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

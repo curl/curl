@@ -600,4 +600,30 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
   return NULL; /* no struct yet */
 }
+
+CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+                              char *servers)
+{
+  CURLcode result = CURLE_NOT_BUILT_IN;
+#if (ARES_VERSION >= 0x010704)
+  int ares_result = ares_set_servers_csv(data->state.resolver, servers);
+  switch(ares_result) {
+  case ARES_SUCCESS:
+    break;
+  case ARES_ENOMEM:
+    result = CURLE_OUT_OF_MEMORY;
+    break;
+  case ARES_ENOTINITIALIZED:
+  case ARES_ENODATA:
+  case ARES_EBADSTR:
+  default:
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    break;
+  }
+#else /* too old c-ares version! */
+  (void)data;
+  (void)servers;
+#endif
+  return result;
+}
 #endif /* CURLRES_ARES */

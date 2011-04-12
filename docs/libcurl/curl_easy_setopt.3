@@ -2045,6 +2045,20 @@ resolves, by including a string in the linked list that uses the format
 and port number must exactly match what was already added previously.
 
 (Added in 7.21.3)
+.IP CURLOPT_DNS_SERVERS
+Set the list of DNS servers to be used instead of the system default.
+The format of the dns servers option is:
+
+host[:port][,host[:port]]...
+
+For example:
+
+192.168.1.100,192.168.1.101,3.4.5.6
+
+This option requires that libcurl was built with a resolver backend that
+supports this operation. The c-ares backend is the only such one.
+
+(Added in 7.24.0)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be

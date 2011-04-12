@@ -66,5 +66,16 @@
  **********************************************************************/
 #ifdef CURLRES_SYNCH
 
+/*
+ * Function provided by the resolver backend to set DNS servers to use.
+ */
+CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+                              char *servers)
+{
+  (void)data;
+  (void)servers;
+  return CURLE_NOT_BUILT_IN;
+
+}
 
 #endif /* truly sync */
