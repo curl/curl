@@ -904,9 +904,9 @@ REDUCING SIZE
    .comment section).
 
    Using these techniques it is possible to create a basic HTTP-only shared
-   libcurl library for i386 Linux platforms that is only 98 KiB in size, and
-   an FTP-only library that is 94 KiB in size (as of libcurl version 7.20.0,
-   using gcc 4.3.3).
+   libcurl library for i386 Linux platforms that is only 101 KiB in size, and
+   an FTP-only library that is 105 KiB in size (as of libcurl version 7.21.5,
+   using gcc 4.4.3).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size than dynamically linking.
