@@ -1,6 +1,6 @@
 #
 #  Adapted for djgpp2 / Watt-32 / DOS by
-#  Gisle Vanem <giva@bgnett.no>
+#  Gisle Vanem <gvanem@broadpark.no>
 #
 
 DEPEND_PREREQ = curl_config.h
