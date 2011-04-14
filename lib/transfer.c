@@ -509,7 +509,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                   "Rewinding stream by : %zd"
                   " bytes on url %s (zero-length body)\n",
                   nread, data->state.path);
-	    read_rewind(conn, (size_t)nread);
+	          read_rewind(conn, (size_t)nread);
           }
 	  else {
             infof(data,
