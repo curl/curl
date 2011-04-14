@@ -1652,6 +1652,10 @@ Unsupported protocol. This build of curl has no support for this protocol.
 Failed to initialize.
 .IP 3
 URL malformed. The syntax was not correct.
+.IP 4
+A feature or option that was needed to perform the desired request was not
+enabled or was explicitly disabled at build-time. To make curl able to do
+this, you probably need another build of libcurl!
 .IP 5
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP 6
@@ -1728,7 +1732,9 @@ Interface error. A specified outgoing interface could not be used.
 .IP 47
 Too many redirects. When following redirects, curl hit the maximum amount.
 .IP 48
-Unknown TELNET option specified.
+Unknown option specified to libcurl. This indicates that you passed a weird
+option to curl that was passed on to libcurl and rejected. Read up in the
+manual!
 .IP 49
 Malformed telnet option.
 .IP 51
