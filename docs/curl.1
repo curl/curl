@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl 1 "28 November 2009" "Curl 7.21.4" "Curl Manual"
+.TH curl 1 "14 April 2009" "Curl 7.21.6" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -175,8 +175,8 @@ NSS ciphers is in the NSSCipherSuite entry at this URL:
 If this option is used several times, the last one will override the others.
 .IP "--compressed"
 (HTTP) Request a compressed response using one of the algorithms libcurl
-supports, and return the uncompressed document.  If this option is used and
-the server sends an unsupported encoding, curl will report an error.
+supports, and save the uncompressed document.  If this option is used and the
+server sends an unsupported encoding, curl will report an error.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
@@ -1345,6 +1345,11 @@ If this option is used several times, the last one will be used.
 .IP "--trace-time"
 Prepends a time stamp to each trace or verbose line that curl displays.
 (Added in 7.14.0)
+.IP "--tr-encoding"
+(HTTP) Request a compressed Transfer-Encoding response using one of the
+algorithms libcurl supports, and uncompress the data while receiving it.
+
+(Added in 7.21.6)
 .IP "-u/--user <user:password>"
 Specify the user name and password to use for server authentication. Overrides
 \fI-n/--netrc\fP and \fI--netrc-optional\fP.
