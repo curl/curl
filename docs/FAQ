@@ -1220,8 +1220,7 @@ FAQ
   - The ipv6-resolver that uses getaddrinfo()
 
   - The c-ares based name resolver that uses the c-ares library for resolves.
-    Using this offers asynchronous name resolves but it currently has no IPv6
-    support.
+    Using this offers asynchronous name resolves.
 
   - The threaded resolver (default option on Windows). It uses:
 
