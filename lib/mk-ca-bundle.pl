@@ -56,8 +56,7 @@ if ($opt_i) {
   print ("=" x 78 . "\n");
 }
 
-$0 =~ s/\\/\//g;
-$0 = substr($0, rindex($0, '/') + 1);
+$0 =~ s@.*(/|\\)@@;
 if ($opt_h) {
   printf("Usage:\t%s [-b] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", $0);
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
@@ -72,8 +71,7 @@ if ($opt_h) {
 }
 
 my $crt = $ARGV[0] || 'ca-bundle.crt';
-my $txt = substr($url, rindex($url, '/') + 1);
-$txt =~ s/\?.*//;
+(my $txt = $url) =~ s@(.*/|\?.*)@@g;
 
 my $resp;
 
