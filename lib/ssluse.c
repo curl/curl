@@ -1888,7 +1888,7 @@ static void pubkey_show(struct SessionHandle *data,
   char namebuf[32];
   char *buffer;
 
-  left = sizeof(len*3 + 1);
+  left = len*3 + 1;
   buffer = malloc(left);
   if(buffer) {
     char *ptr=buffer;
