@@ -48,7 +48,7 @@ http
 HTTP GET transfer-encoding with custom Connection:
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1125 -H "TE: gzip" -H "Connection: close"
+http://%HOSTIP:%HTTPPORT/1125 --tr-encoding -H "Connection: close"
 </command>
 </client>
 

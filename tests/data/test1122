@@ -48,7 +48,7 @@ http
 HTTP GET gzip transfer-encoded content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1122 -H "TE: gzip"
+http://%HOSTIP:%HTTPPORT/1122 --tr-encoding
 </command>
 </client>
 

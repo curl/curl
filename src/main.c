@@ -474,6 +474,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
+  bool tr_encoding; /* Transfer-Encoding please */
   long authtype;    /* auth bitmask */
   bool use_resume;
   bool resume_from_current;
@@ -904,6 +905,7 @@ static void help(void)
     "    --trace <file>  Write a debug trace to the given file",
     "    --trace-ascii <file> Like --trace but without the hex output",
     "    --trace-time    Add time stamps to trace/verbose output",
+    "    --tr-encoding   Request compressed transfer encoding (H)",
     " -T/--upload-file <file> Transfer <file> to remote site",
     "    --url <URL>     Set URL to work with",
     " -B/--use-ascii     Use ASCII/text transfer",
@@ -1823,7 +1825,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*g", "trace",      TRUE},
     {"*h", "trace-ascii", TRUE},
     {"*i", "limit-rate", TRUE},
-    {"*j", "compressed",  FALSE}, /* might take an arg someday */
+    {"*j", "compressed",  FALSE},
+    {"*J", "tr-encoding",  FALSE},
     {"*k", "digest",     FALSE},
     {"*l", "negotiate",  FALSE},
     {"*m", "ntlm",       FALSE},
@@ -2146,6 +2149,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(toggle && !(curlinfo->features & CURL_VERSION_LIBZ))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
+        break;
+
+      case 'J': /* --tr-encoding */
+        config->tr_encoding = toggle;
         break;
 
       case 'k': /* --digest */
@@ -2765,13 +2772,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           GetStr(&config->tls_username, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-	break;
+        break;
       case 'l': /* TLS password */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
           GetStr(&config->tls_password, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-	break;
+        break;
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           GetStr(&config->tls_authtype, nextarg);
@@ -2780,7 +2787,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-	break;
+        break;
       default: /* certificate file */
       {
         char *ptr = strchr(nextarg, ':');
@@ -5381,9 +5388,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(res != CURLE_OK)
           goto show_error;
 
-        /* new in curl 7.10 */
-        my_setopt_str(curl, CURLOPT_ENCODING,
-                      (config->encoding) ? "" : NULL);
+        if(config->encoding)
+          my_setopt_str(curl, CURLOPT_ACCEPT_ENCODING, "");
+
+        if(config->tr_encoding)
+          my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1);
 
         /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,

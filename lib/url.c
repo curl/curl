@@ -1076,7 +1076,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.http_auto_referer = (bool)(0 != va_arg(param, long));
     break;
 
-  case CURLOPT_ENCODING:
+  case CURLOPT_ACCEPT_ENCODING:
     /*
      * String to use at the value of Accept-Encoding header.
      *
@@ -1090,6 +1090,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_ENCODING],
                        (argptr && !*argptr)?
                        (char *) ALL_CONTENT_ENCODINGS: argptr);
+    break;
+
+  case CURLOPT_TRANSFER_ENCODING:
+    data->set.http_transfer_encoding = (bool)(0 != va_arg(param, long));
     break;
 
   case CURLOPT_FOLLOWLOCATION:

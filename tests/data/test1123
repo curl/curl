@@ -178,7 +178,7 @@ http
 HTTP GET deflate transfer-encoded content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1123 -H "TE: deflate, gzip"
+http://%HOSTIP:%HTTPPORT/1123 --tr-encoding
 </command>
 </client>
 
@@ -193,7 +193,7 @@ GET /1123 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Connection: TE
-TE: deflate, gzip
+TE: gzip
 
 </protocol>
 </verify>

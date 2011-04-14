@@ -47,7 +47,7 @@ http
 HTTP GET gzip+chunked transfer-encoded content
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1124 -H "TE: gzip"
+http://%HOSTIP:%HTTPPORT/1124 --tr-encoding
 </command>
 </client>
 

@@ -517,7 +517,8 @@ typedef enum {
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
-/* Backwards compatibility with older names */
+/*  compatibility with older names */
+#define CURLOPT_ENCODING CURLOPT_ACCEPT_ENCODING
 
 /* The following were added in 7.21.5, April 2011 */
 #define CURLE_UNKNOWN_TELNET_OPTION CURLE_UNKNOWN_OPTION
@@ -1103,8 +1104,9 @@ typedef enum {
   CINIT(PROXYTYPE, LONG, 101),
 
   /* Set the Accept-Encoding string. Use this to tell a server you would like
-     the response to be compressed. */
-  CINIT(ENCODING, OBJECTPOINT, 102),
+     the response to be compressed. Before 7.21.6, this was known as
+     CURLOPT_ENCODING */
+  CINIT(ACCEPT_ENCODING, OBJECTPOINT, 102),
 
   /* Set pointer to private data */
   CINIT(PRIVATE, OBJECTPOINT, 103),
@@ -1461,6 +1463,18 @@ typedef enum {
 
   /* Set authentication type for authenticated TLS */
   CINIT(TLSAUTH_TYPE, OBJECTPOINT, 206),
+
+  /* Set to 1 to enable the "TE:" header in HTTP requests to ask for
+     compressed transfer-encoded responses. Set to 0 to disable the use of TE:
+     in outgoing requests. The current default is 0, but it might change in a
+     future libcurl release.
+
+     libcurl will ask for the compressed methods it knows of, and if that
+     isn't any, it will not ask for transfer-encoding at all even if this
+     option is set to 1.
+
+  */
+  CINIT(TRANSFER_ENCODING, LONG, 207),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

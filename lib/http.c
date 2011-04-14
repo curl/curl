@@ -1733,21 +1733,28 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if(Curl_checkheaders(data, "TE:")) {
-    /* When we insert a TE: header in the request, we must also insert TE in a
-       Connection: header, so we need to merge the custom provided Connection:
-       header and prevent the original to get sent */
+#ifdef HAVE_LIBZ
+  /* we only consider transfer-encoding magic if libz support is built-in */
+
+  if(!Curl_checkheaders(data, "TE:") && data->set.http_transfer_encoding) {
+    /* When we are to insert a TE: header in the request, we must also insert
+       TE in a Connection: header, so we need to merge the custom provided
+       Connection: header and prevent the original to get sent. Note that if
+       the user has inserted his/hers own TE: header we don't do this magic
+       but then assume that the user will handle it all! */
     char *cptr = Curl_checkheaders(data, "Connection:");
+#define TE_HEADER "TE: gzip\r\n"
 
     Curl_safefree(conn->allocptr.te);
 
     /* Create the (updated) Connection: header */
-    conn->allocptr.te = cptr? aprintf("%s, TE\r\n", cptr):
-      strdup("Connection: TE\r\n");
+    conn->allocptr.te = cptr? aprintf("%s, TE\r\n" TE_HEADER, cptr):
+      strdup("Connection: TE\r\n" TE_HEADER);
 
     if(!conn->allocptr.te)
       return CURLE_OUT_OF_MEMORY;
   }
+#endif
 
   ptr = Curl_checkheaders(data, "Transfer-Encoding:");
   if(ptr) {

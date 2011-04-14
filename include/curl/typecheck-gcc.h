@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -224,7 +224,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_PROXYUSERNAME ||                                       \
    (option) == CURLOPT_PROXYPASSWORD ||                                       \
    (option) == CURLOPT_NOPROXY ||                                             \
-   (option) == CURLOPT_ENCODING ||                                            \
+   (option) == CURLOPT_ACCEPT_ENCODING ||                                     \
    (option) == CURLOPT_REFERER ||                                             \
    (option) == CURLOPT_USERAGENT ||                                           \
    (option) == CURLOPT_COOKIE ||                                              \
