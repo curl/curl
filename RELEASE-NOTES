@@ -61,6 +61,9 @@ This release includes the following bugfixes:
  o OpenSSL: build fine with no-sslv2 versions
  o checkconnection: don't call with NULL pointer with RTSP and multi interface
  o Borland makefile updates
+ o configure: libssh2 link fix without pkg-config
+ o certinfo crash
+ o CCC crash
 
 This release includes the following known bugs:
 
@@ -73,6 +76,6 @@ advice from friends like these:
  Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
  Stefan Krause, Todd A Ouska, Saqib Ali, Andre Guibert de Bruet,
  Tor Arntsen, Vincent Torri, Dave Reisner, Chris Smowton, Tinus van den Berg,
- Hongli Lai, Gisle Vanem
+ Hongli Lai, Gisle Vanem, Andrei Benea, Mehmet Bozkurt
 
         Thanks! (and sorry if I forgot to mention someone)
