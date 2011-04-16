@@ -1,8 +1,5 @@
-To be addressed in 7.21.5
+To be addressed in 7.21.6
 =========================
-
-281 - Several scan-build warnings have sneaked in:
-      http://curl.haxx.se/scans/
 
 284 - bug 3172608 "No re-authentication when HTTP connecton is closed"
       http://curl.haxx.se/bug/view.cgi?id=3172608
