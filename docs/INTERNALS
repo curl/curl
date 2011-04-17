@@ -39,7 +39,7 @@ Portability
  libssh2      0.16
  c-ares       1.6.0
  libidn       0.4.1
- *yassl       1.4.0 (http://curl.haxx.se/mail/lib-2008-02/0093.html)
+ cyassl       1.4.0
  openldap     2.0
  MIT krb5 lib 1.2.4
  qsossl       V5R2M0
@@ -256,10 +256,10 @@ Library
  http_chunks.c contains functions that understands HTTP 1.1 chunked transfer
  encoding.
 
- An interesting detail with the HTTP(S) request, is the Curl_add_buffer() series of
- functions we use. They append data to one single buffer, and when the
- building is done the entire request is sent off in one single write. This is
- done this way to overcome problems with flawed firewalls and lame servers.
+ An interesting detail with the HTTP(S) request, is the Curl_add_buffer()
+ series of functions we use. They append data to one single buffer, and when
+ the building is done the entire request is sent off in one single write. This
+ is done this way to overcome problems with flawed firewalls and lame servers.
 
  FTP
 
@@ -285,7 +285,7 @@ Library
 
  LDAP
 
- Everything LDAP is in lib/ldap.c.
+ Everything LDAP is in lib/ldap.c and lib/openldap.c
 
  GENERAL
 
@@ -463,9 +463,9 @@ Memory Debugging
 Test Suite
 ==========
 
- Since November 2000, a test suite has evolved. It is placed in its own
- subdirectory directly off the root in the curl archive tree, and it contains
- a bunch of scripts and a lot of test case data.
+ The test suite is placed in its own subdirectory directly off the root in the
+ curl archive tree, and it contains a bunch of scripts and a lot of test case
+ data.
 
  The main test script is runtests.pl that will invoke test servers like
  httpserver.pl and ftpserver.pl before all the test cases are performed. The
@@ -481,13 +481,25 @@ Building Releases
 =================
 
  There's no magic to this. When you consider everything stable enough to be
- released, run the 'maketgz' script (using 'make distcheck' will give you a
- pretty good view on the status of the current sources). maketgz prompts for
- version number of the client and the library before it creates a release
- archive. maketgz uses 'make dist' for the actual archive building, why you
- need to fill in the Makefile.am files properly for which files that should
- be included in the release archives.
+ released, do this:
 
- NOTE: you need to have curl checked out from git to be able to do a proper
+   1. Tag the source code accordingly.
+
+   2. run the 'maketgz' script (using 'make distcheck' will give you a pretty
+      good view on the status of the current sources). maketgz requires a
+      version number and creates the release archive. maketgz uses 'make dist'
+      for the actual archive building, why you need to fill in the Makefile.am
+      files properly for which files that should be included in the release
+      archives.
+
+   3. When that's complete, sign the output files.
+
+   4. Upload
+
+   5. Update web site and changelog on site
+
+   6. Send announcement to the mailing lists
+
+ NOTE: you must have curl checked out from git to be able to do a proper
  release build. The release tarballs do not have everything setup in order to
  do releases properly.
