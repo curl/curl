@@ -1,6 +1,6 @@
-Curl and libcurl 7.21.5
+Curl and libcurl 7.21.6
 
- Public curl releases:         121
+ Public curl releases:         122
  Command line options:         143
  curl_easy_setopt() options:   185
  Public functions in libcurl:  58
@@ -9,61 +9,11 @@ Curl and libcurl 7.21.5
 
 This release includes the following changes:
 
- o SOCKOPTFUNCTION: callback can say already-connected
- o Added --netrc-file
- o Added (new) support for cyassl
- o TSL-SRP: enabled with OpenSSL
- o Added CURLE_NOT_BUILT_IN and CURLE_UNKNOWN_OPTION
+ o 
 
 This release includes the following bugfixes:
 
- o nss: avoid memory leak on SSL connection failure
- o nss: do not ignore failure of SSL handshake
- o multi: better failed connect handling when using FTP, SMTP, POP3 and IMAP
- o runtests.pl: fix pid number concatenation that prevented it from killing
-   the correct process at times
- o PolarSSL: Return 0 on receiving TLS CLOSE_NOTIFY alert
- o curl_easy_setopt.3: Removed wrong reference to CURLOPT_USERPASSWORD
- o multi: close connection on timeout
- o IMAP in multi mode does SSL connections non-blocking
- o honours the --disable-ldaps configure option
- o Force setopt constants written by --libcurl to be long
- o ssh_connect: treat libssh2 return code better
- o SFTP upload could stall the state machine when the multi_socket API was
-   used
- o SFTP and SCP could leak memory when used with the multi interface and 
-   the connection was closed
- o Added missing file to repair the MSVC makefiles
- o Fixed detection of recvfrom arguments on Android/bionic
- o GSS: handle reuse fix
- o transfer: avoid insane conversion of time_t
- o nss: do not ignore value of CURLOPT_SSL_VERIFYPEER in certain cases
- o SMTP-multi: non-blocking connect
- o SFTP-multi: set cselect for sftp and scp to fix "stall" risk
- o configure: removed wrongly claimed default paths
- o pop3: fixed torture tests to succeed
- o symbols-in-versions: many corrections
- o if a HTTP request gets retried because the connection was dead, rewind if
-   any data was sent as part of it
- o only probe for working ipv6 once and then re-use that info for further
-   requests
- o requests that are asked to bound to a local interface/port will no longer
-   wrongly re-use connections that aren't
- o libcurl.m4: Add missing quotes in AC_LINK_IFELSE
- o progress output: don't print the last update on a separate line
- o POP3: the command to send is STLS, not STARTTLS
- o POP3: PASS command was not sent after upgrade to TLS
- o configure: fix libtool warning
- o nss: allow to use multiple client certificates for a single host
- o HTTP pipelining: Fix handling of zero-length responses
- o Don't list NTLM in curl-config when HTTP is disabled
- o curl_easy_setopt.3: CURLOPT_RESOLVE typo version
- o OpenSSL: build fine with no-sslv2 versions
- o checkconnection: don't call with NULL pointer with RTSP and multi interface
- o Borland makefile updates
- o configure: libssh2 link fix without pkg-config
- o certinfo crash
- o CCC crash
+ o 
 
 This release includes the following known bugs:
 
@@ -72,10 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Mike Crowe, Kamil Dudka, Julien Chaffraix, Hoi-Ho Chan, Ben Noordhuis,
- Dan Fandrich, Henry Ludemann, Karl M, Manuel Massing, Marcus Sundberg,
- Stefan Krause, Todd A Ouska, Saqib Ali, Andre Guibert de Bruet,
- Tor Arntsen, Vincent Torri, Dave Reisner, Chris Smowton, Tinus van den Berg,
- Hongli Lai, Gisle Vanem, Andrei Benea, Mehmet Bozkurt
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
