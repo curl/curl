@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,16 +20,7 @@
  *
  ***************************************************************************/
 
-/* Base64 encoding/decoding
- *
- * Test harnesses down the bottom - compile with -DTEST_ENCODE for
- * a program that will read in raw data from stdin and write out
- * a base64-encoded version to stdout, and the length returned by the
- * encoding function to stderr. Compile with -DTEST_DECODE for a program that
- * will go the other way.
- *
- * This code will break if int is smaller than 32 bits
- */
+/* Base64 encoding/decoding */
 
 #include "setup.h"
 
