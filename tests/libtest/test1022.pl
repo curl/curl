@@ -22,14 +22,23 @@ my $curlconfigversion;
 open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config --$what list\n";
 $_ = <CURLCONFIG>;
 chomp;
+my $filever=$_;
 if ( $what eq "version" ) {
-    /^libcurl ([\.\d]+(-DEV)?)$/ ;
-    $curlconfigversion = $1;
+    if($filever =~ /^libcurl ([\.\d]+(-DEV)?)$/) {
+        $curlconfigversion = $1;
+    }
+    else {
+        $curlconfigversion = "illegal value";
+    }
 }
 else {
     # Convert hex version to decimal for comparison's sake
-    /^(..)(..)(..)$/ ;
-    $curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
+    if($filever =~ /^(..)(..)(..)$/) {
+        $curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
+    }
+    else {
+        $curlconfigversion = "illegal value";
+    }
 
     # Strip off the -DEV from the curl version if it's there
     $version =~ s/-DEV$//;
