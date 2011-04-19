@@ -53,8 +53,8 @@ CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
  *
  * Creates a new curl session handle with the same options set for the handle
  * passed in. Duplicating a handle could only be a matter of cloning data and
- * options, internal state info and things like persistant connections cannot
- * be transfered. It is useful in multithreaded applications when you can run
+ * options, internal state info and things like persistent connections cannot
+ * be transferred. It is useful in multithreaded applications when you can run
  * curl_easy_duphandle() for each new thread to avoid a series of identical
  * curl_easy_setopt() invokes in every thread.
  */
