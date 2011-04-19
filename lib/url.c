@@ -122,6 +122,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "speedcheck.h"
 #include "rawstr.h"
 #include "warnless.h"
+#include "non-ascii.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -527,18 +528,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   /* this destroys the channel and we cannot use it anymore after this */
   ares_destroy(data->state.areschannel);
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-  /* close iconv conversion descriptors */
-  if(data->inbound_cd != (iconv_t)-1) {
-     iconv_close(data->inbound_cd);
-  }
-  if(data->outbound_cd != (iconv_t)-1) {
-     iconv_close(data->outbound_cd);
-  }
-  if(data->utf8_cd != (iconv_t)-1) {
-     iconv_close(data->utf8_cd);
-  }
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+  Curl_convert_close(data);
 
   /* No longer a dirty share, if it exists */
   if(data->share) {
@@ -816,12 +806,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
     data->state.headersize=HEADERSIZE;
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-    /* conversion descriptors for iconv calls */
-    data->outbound_cd = (iconv_t)-1;
-    data->inbound_cd  = (iconv_t)-1;
-    data->utf8_cd     = (iconv_t)-1;
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+    Curl_convert_init(data);
 
     /* most recent connection is not yet defined */
     data->state.lastconnect = -1;

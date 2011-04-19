@@ -101,7 +101,6 @@
 #include "curl_memory.h"
 #include "select.h"
 #include "multiif.h"
-#include "easyif.h" /* for Curl_convert_to_network prototype */
 #include "rtsp.h"
 #include "connect.h"
 

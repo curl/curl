@@ -76,7 +76,6 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-#include "easyif.h" /* for Curl_convert_... prototypes */
 #include "formdata.h"
 #include "progress.h"
 #include "curl_base64.h"
@@ -100,6 +99,7 @@
 #include "rtsp.h"
 #include "http_proxy.h"
 #include "warnless.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1014,17 +1014,15 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 
   DEBUGASSERT(size > included_body_bytes);
 
-#ifdef CURL_DOES_CONVERSIONS
   res = Curl_convert_to_network(conn->data, ptr, headersize);
   /* Curl_convert_to_network calls failf if unsuccessful */
-  if(res != CURLE_OK) {
+  if(res) {
     /* conversion failed, free memory and return to the caller */
     if(in->buffer)
       free(in->buffer);
     free(in);
     return res;
   }
-#endif /* CURL_DOES_CONVERSIONS */
 
   if(conn->handler->protocol & CURLPROTO_HTTPS) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
@@ -2292,14 +2290,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       Curl_formclean(&http->sendit); /* free that whole lot */
       return result;
     }
-#ifdef CURL_DOES_CONVERSIONS
-/* time to convert the form data... */
-    result = Curl_formconvert(data, http->sendit);
+
+    /* convert the form data */
+    result = Curl_convert_form(data, http->sendit);
     if(result) {
       Curl_formclean(&http->sendit); /* free that whole lot */
       return result;
     }
-#endif /* CURL_DOES_CONVERSIONS */
+
     break;
 
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
@@ -2538,13 +2536,13 @@ checkhttpprefix(struct SessionHandle *data,
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
   if(NULL == scratch) {
-     failf (data, "Failed to allocate memory for conversion!");
-     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
+    failf (data, "Failed to allocate memory for conversion!");
+    return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
   if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
     /* Curl_convert_from_network calls failf if unsuccessful */
-     free(scratch);
-     return FALSE; /* can't return CURLE_foobar so return FALSE */
+    free(scratch);
+    return FALSE; /* can't return CURLE_foobar so return FALSE */
   }
   s = scratch;
 #endif /* CURL_DOES_CONVERSIONS */
@@ -2557,9 +2555,8 @@ checkhttpprefix(struct SessionHandle *data,
     head = head->next;
   }
 
-  if((rc != TRUE) && (checkprefix("HTTP/", s))) {
+  if((rc != TRUE) && (checkprefix("HTTP/", s)))
     rc = TRUE;
-  }
 
 #ifdef CURL_DOES_CONVERSIONS
   free(scratch);
@@ -2931,10 +2928,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       res = Curl_convert_from_network(data,
                                       &scratch[0],
                                       SCRATCHSIZE);
-      if(CURLE_OK != res) {
+      if(res)
         /* Curl_convert_from_network calls failf if unsuccessful */
         return res;
-      }
 #else
 #define HEADER1 k->p /* no conversion needed, just use k->p */
 #endif /* CURL_DOES_CONVERSIONS */
@@ -3065,14 +3061,10 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       }
     }
 
-#ifdef CURL_DOES_CONVERSIONS
-    /* convert from the network encoding */
     result = Curl_convert_from_network(data, k->p, strlen(k->p));
-    if(CURLE_OK != result) {
-      return(result);
-    }
     /* Curl_convert_from_network calls failf if unsuccessful */
-#endif /* CURL_DOES_CONVERSIONS */
+    if(result)
+      return result;
 
     /* Check for Content-Length: header lines to get size */
     if(!k->ignorecl && !data->set.ignorecl &&

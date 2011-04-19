@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@
 #include "strtok.h"
 #include "url.h" /* for Curl_safefree() */
 #include "curl_memory.h"
-#include "easyif.h" /* included for Curl_convert_... prototypes */
+#include "non-ascii.h" /* included for Curl_convert_... prototypes */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -294,7 +294,6 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   struct SessionHandle *data = conn->data;
   struct digestdata *d;
-#ifdef CURL_DOES_CONVERSIONS
   CURLcode rc;
 /* The CURL_OUTPUT_DIGEST_CONV macro below is for non-ASCII machines.
    It converts digest text to ASCII so the MD5 will be correct for
@@ -306,9 +305,6 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     free(b); \
     return rc; \
   }
-#else
-#define CURL_OUTPUT_DIGEST_CONV(a, b)
-#endif /* CURL_DOES_CONVERSIONS */
 
   if(proxy) {
     d = &data->state.proxydigest;

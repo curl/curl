@@ -79,8 +79,6 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
-#include "easyif.h" /* for Curl_convert_... prototypes */
-
 #include "hostip.h"
 #include "progress.h"
 #include "transfer.h"

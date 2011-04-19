@@ -71,7 +71,7 @@
 #endif
 
 #include "curl_memory.h"
-#include "easyif.h" /* for Curl_convert_from_utf8 prototype */
+#include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -1251,18 +1251,15 @@ static CURLcode verifyhost(struct connectdata *conn,
 
     if(peer_CN == nulstr)
        peer_CN = NULL;
-#ifdef CURL_DOES_CONVERSIONS
     else {
       /* convert peer_CN from UTF8 */
-      size_t rc;
-      rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
+      size_t rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
-      if(rc != CURLE_OK) {
+      if(rc) {
         OPENSSL_free(peer_CN);
         return rc;
       }
     }
-#endif /* CURL_DOES_CONVERSIONS */
 
     if(res)
       /* error already detected, pass through */

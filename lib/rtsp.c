@@ -28,7 +28,6 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-#include "easyif.h" /* for Curl_convert_... prototypes */
 #include "multiif.h"
 #include "http.h"
 #include "url.h"

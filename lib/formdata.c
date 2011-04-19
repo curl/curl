@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,7 +118,6 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include <libgen.h>
 #endif
 #include "urldata.h" /* for struct SessionHandle */
-#include "easyif.h" /* for Curl_convert_... prototypes */
 #include "formdata.h"
 #include "curl_rand.h"
 #include "strequal.h"
@@ -461,8 +460,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
        */
     case CURLFORM_PTRNAME:
 #ifdef CURL_DOES_CONVERSIONS
-      /* treat CURLFORM_PTR like CURLFORM_COPYNAME so we'll
-         have safe memory for the eventual conversion */
+      /* Treat CURLFORM_PTR like CURLFORM_COPYNAME so that libcurl will copy
+       * the data in all cases so that we'll have safe memory for the eventual
+       * conversion.
+       */
 #else
       current_form->flags |= HTTPPOST_PTRNAME; /* fall through */
 #endif
@@ -933,36 +934,6 @@ void Curl_formclean(struct FormData **form_ptr)
 
   *form_ptr = NULL;
 }
-
-#ifdef CURL_DOES_CONVERSIONS
-/*
- * Curl_formcovert() is used from http.c, this converts any
-   form items that need to be sent in the network encoding.
-   Returns CURLE_OK on success.
- */
-CURLcode Curl_formconvert(struct SessionHandle *data, struct FormData *form)
-{
-  struct FormData *next;
-  CURLcode rc;
-
-  if(!form)
-    return CURLE_OK;
-
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  do {
-    next=form->next;  /* the following form line */
-    if(form->type == FORM_DATA) {
-      rc = Curl_convert_to_network(data, form->line, form->length);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(rc != CURLE_OK)
-        return rc;
-    }
-  } while((form = next) != NULL); /* continue */
-  return CURLE_OK;
-}
-#endif /* CURL_DOES_CONVERSIONS */
 
 /*
  * curl_formget()

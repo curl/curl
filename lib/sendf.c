@@ -43,6 +43,7 @@
 #include "ssh.h"
 #include "multiif.h"
 #include "rtsp.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -58,7 +59,7 @@
 #include <string.h>
 #include "curl_memory.h"
 #include "strerror.h"
-#include "easyif.h" /* for the Curl_convert_from_network prototype */
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -443,14 +444,11 @@ CURLcode Curl_client_write(struct connectdata *conn,
   if(type & CLIENTWRITE_BODY) {
     if((conn->handler->protocol&CURLPROTO_FTP) &&
        conn->proto.ftpc.transfertype == 'A') {
-#ifdef CURL_DOES_CONVERSIONS
       /* convert from the network encoding */
-      size_t rc;
-      rc = Curl_convert_from_network(data, ptr, len);
+      size_t rc = Curl_convert_from_network(data, ptr, len);
       /* Curl_convert_from_network calls failf if unsuccessful */
-      if(rc != CURLE_OK)
+      if(rc)
         return rc;
-#endif /* CURL_DOES_CONVERSIONS */
 
 #ifdef CURL_DO_LINEEND_CONV
       /* convert end-of-line markers */

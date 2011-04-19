@@ -68,7 +68,6 @@
 
 #include "curl_memory.h"
 #include "rawstr.h"
-#include "easyif.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include file should be: */
 #include "memdebug.h"

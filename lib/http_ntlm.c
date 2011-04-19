@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,7 +52,7 @@
 #endif
 
 #include "urldata.h"
-#include "easyif.h"  /* for Curl_convert_... prototypes */
+#include "non-ascii.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
 #include "rawstr.h"
 #include "curl_base64.h"
@@ -525,16 +525,12 @@ static void mk_lm_hash(struct SessionHandle *data,
   Curl_strntoupper((char *)pw, password, len);
   memset(&pw[len], 0, 14-len);
 
-#ifdef CURL_DOES_CONVERSIONS
   /*
    * The LanManager hashed password needs to be created using the
    * password in the network encoding not the host encoding.
    */
-  if(data)
-    Curl_convert_to_network(data, (char *)pw, 14);
-#else
-  (void)data;
-#endif
+  if(Curl_convert_to_network(data, (char *)pw, 14))
+    return;
 
   {
     /* Create LanManager hashed password. */
@@ -590,21 +586,19 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 {
   size_t len = strlen(password);
   unsigned char *pw = malloc(len*2);
+  CURLcode result;
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
   ascii_to_unicode_le(pw, password, len);
 
-#ifdef CURL_DOES_CONVERSIONS
   /*
-   * The NT hashed password needs to be created using the
-   * password in the network encoding not the host encoding.
+   * The NT hashed password needs to be created using the password in the
+   * network encoding not the host encoding.
    */
-  if(data)
-    Curl_convert_to_network(data, (char *)pw, len*2);
-#else
-  (void)data;
-#endif
+  result = Curl_convert_to_network(data, (char *)pw, len*2);
+  if(result)
+    return result;
 
   {
     /* Create NT hashed password. */
@@ -1244,14 +1238,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     memcpy(&ntlmbuf[size], host, hostlen);
     size += hostlen;
 
-#ifdef CURL_DOES_CONVERSIONS
     /* convert domain, user, and host to ASCII but leave the rest as-is */
-    if(CURLE_OK != Curl_convert_to_network(conn->data,
-                                           (char *)&ntlmbuf[domoff],
-                                           size-domoff)) {
+    if(Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
+                               size-domoff))
       return CURLE_CONV_FAILED;
-    }
-#endif /* CURL_DOES_CONVERSIONS */
 
 #endif
 

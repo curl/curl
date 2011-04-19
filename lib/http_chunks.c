@@ -35,7 +35,7 @@
 #include "content_encoding.h"
 #include "http.h"
 #include "curl_memory.h"
-#include "easyif.h" /* for Curl_convert_to_network prototype */
+#include "non-ascii.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -153,17 +153,16 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
         /* length and datap are unmodified */
         ch->hexbuffer[ch->hexindex]=0;
-#ifdef CURL_DOES_CONVERSIONS
+
         /* convert to host encoding before calling strtoul */
-        result = Curl_convert_from_network(conn->data,
-                                           ch->hexbuffer,
+        result = Curl_convert_from_network(conn->data, ch->hexbuffer,
                                            ch->hexindex);
-        if(result != CURLE_OK) {
+        if(result) {
           /* Curl_convert_from_network calls failf if unsuccessful */
           /* Treat it as a bad hex character */
           return(CHUNKE_ILLEGAL_HEX);
         }
-#endif /* CURL_DOES_CONVERSIONS */
+
         ch->datasize=strtoul(ch->hexbuffer, NULL, 16);
         ch->state = CHUNK_POSTHEX;
       }
@@ -297,17 +296,14 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           conn->trailer[conn->trlPos++]=0x0a;
           conn->trailer[conn->trlPos]=0;
 
-#ifdef CURL_DOES_CONVERSIONS
           /* Convert to host encoding before calling Curl_client_write */
-          result = Curl_convert_from_network(conn->data,
-                                             conn->trailer,
+          result = Curl_convert_from_network(conn->data, conn->trailer,
                                              conn->trlPos);
-          if(result != CURLE_OK)
+          if(result)
             /* Curl_convert_from_network calls failf if unsuccessful */
             /* Treat it as a bad chunk */
             return CHUNKE_BAD_CHUNK;
 
-#endif /* CURL_DOES_CONVERSIONS */
           if(!data->set.http_te_skip) {
             result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                        conn->trailer, conn->trlPos);

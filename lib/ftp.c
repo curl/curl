@@ -61,8 +61,6 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
-#include "easyif.h" /* for Curl_convert_... prototypes */
-
 #include "if2ip.h"
 #include "hostip.h"
 #include "progress.h"
@@ -94,6 +92,7 @@
 #include "speedcheck.h"
 #include "warnless.h"
 #include "http_proxy.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -3772,13 +3771,10 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   bytes_written=0;
   write_len = strlen(s);
 
-#ifdef CURL_DOES_CONVERSIONS
   res = Curl_convert_to_network(conn->data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
-  if(res != CURLE_OK) {
+  if(res)
     return(res);
-  }
-#endif /* CURL_DOES_CONVERSIONS */
 
   for(;;) {
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
