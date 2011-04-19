@@ -24,7 +24,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.7
+LIBSSH2_PATH = ../../libssh2-1.2.8
 endif
 
 # Edit the path below to point to the base of your axTLS package.

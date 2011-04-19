@@ -82,7 +82,7 @@ ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.7
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.8
 !endif
 
 !ifdef %librtmp_root
