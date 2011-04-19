@@ -86,14 +86,16 @@
 #ifdef HAVE_IDN_FREE_H
 #include <idn-free.h>
 #else
-void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
-                              libidn 0.4.5's make install! */
+/* prototype from idn-free.h, not provided by libidn 0.4.5's make install! */
+void idn_free (void *ptr);
 #endif
 #ifndef HAVE_IDN_FREE
-/* if idn_free() was not found in this version of libidn, use plain free()
-   instead */
+/* if idn_free() was not found in this version of libidn use free() instead */
 #define idn_free(x) (free)(x)
 #endif
+#elif defined(USE_WIN32_IDN)
+/* prototype for curl_win32_idn_to_ascii() */
+int curl_win32_idn_to_ascii(const char *in, char **out);
 #endif  /* USE_LIBIDN */
 
 #include "urldata.h"
@@ -3452,7 +3454,7 @@ static void fix_hostname(struct SessionHandle *data,
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
     char *ace_hostname = NULL;
-    int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname, 0);
+    int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname);
     if(rc == 0)
       infof(data, "Failed to convert %s to ACE;\n",
             host->name);
