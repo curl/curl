@@ -411,7 +411,7 @@ else
 fi
 
 #--------------------------------------------------------------------------
-# Finished succesfully.
+# Finished successfully.
 #
 
 echo "buildconf: OK"
