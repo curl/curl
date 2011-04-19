@@ -24,7 +24,13 @@
  * Pierre Joye <pierre@php.net>
  ***************************************************************************/
 #if defined(WIN32) && defined(USE_WIN32_IDN)
-#include "windows.h"
+#include <windows.h>
+#ifdef HAVE_NORMALIZATION_H
+#define __in
+#define __in_ecount(x)
+#define __out_ecount(x)
+#include <normalization.h>
+#endif
 #include <stdio.h>
 #include <tchar.h>
 #define IDN_MAX_LENGTH 255
@@ -58,17 +64,19 @@ static const char *_curl_win32_wchar_to_UTF8(const wchar_t *str_w)
   if (str_w) {
     size_t str_utf8_len = WideCharToMultiByte(CP_UTF8, 0, str_w, -1, NULL,
                                               0, NULL, NULL);
-    DWORD err = GetLastError();
     if (str_utf8_len) {
       str_utf8 = (char *) malloc(str_utf8_len * sizeof(wchar_t));
-      if (str_w) {
+      if (str_utf8) {
         if (WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, str_utf8_len,
                                 NULL, FALSE) == 0) {
-          DWORD err = GetLastError();
+          (void) GetLastError();
           free((void *)str_utf8);
           str_utf8 = NULL;
         }
       }
+    }
+    else {
+      (void) GetLastError();
     }
   }
 
