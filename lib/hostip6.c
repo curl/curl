@@ -78,7 +78,7 @@
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't wanna include in memdebug.c
+ * require a bunch of structs I didn't want to include in memdebug.c
  */
 
 /*
