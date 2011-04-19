@@ -61,7 +61,7 @@ while (<STDIN>) {
     }
 
     my $text = $line;
-    $text =~ s/^\s+//g; # cut off preceeding...
+    $text =~ s/^\s+//g; # cut off preceding...
     $text =~ s/\s+$//g; # and trailing whitespaces
 
     $tlen = length($text);

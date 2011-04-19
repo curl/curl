@@ -626,7 +626,7 @@ struct Configurable {
   long alivetime;
   bool content_disposition; /* use Content-disposition filename */
 
-  int default_node_flags; /* default flags to seach for each 'node', which is
+  int default_node_flags; /* default flags to search for each 'node', which is
                              basically each given URL to transfer */
   struct OutStruct *outs;
   bool xattr; /* store metadata in extended attributes */
@@ -2532,7 +2532,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->cookiefile, nextarg);
       break;
     case 'B':
-      /* use ASCII/text when transfering */
+      /* use ASCII/text when transferring */
       config->use_ascii = toggle;
       break;
     case 'c':
@@ -3979,7 +3979,7 @@ int my_trace(CURL *handle, curl_infotype type,
     size_t i;
     for(i = 0; i < size - 4; i++) {
       if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
-        /* dump everthing through the CRLFCRLF as a sent header */
+        /* dump everything through the CRLFCRLF as a sent header */
         text = "=> Send header";
         dump(timebuf, text, output, data, i+4, config->tracetype, type);
         data += i + 3;
@@ -4937,7 +4937,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             }
           }
 
-          /* Create the directory hierarchy, if not pre-existant to a multiple
+          /* Create the directory hierarchy, if not pre-existent to a multiple
              file output call */
 
           if(config->create_dirs &&
