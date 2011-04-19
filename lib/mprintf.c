@@ -124,7 +124,7 @@ typedef enum  {
   FORMAT_WIDTH /* For internal use */
 } FormatType;
 
-/* convertion and display flags */
+/* conversion and display flags */
 enum {
   FLAGS_NEW        = 0,
   FLAGS_SPACE      = 1<<0,
@@ -692,7 +692,7 @@ static int dprintf_formatf(
       continue;
     }
 
-    /* If this is a positional parameter, the position must follow imediately
+    /* If this is a positional parameter, the position must follow immediately
        after the %, thus create a %<num>$ sequence */
     param=dprintf_DollarString(f, &f);
 

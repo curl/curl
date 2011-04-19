@@ -621,7 +621,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
       size_t i;
       for(i = 0; i < size-4; i++) {
         if(memcmp(&buf[i], "\x0d\x0a\x0d\x0a", 4) == 0) {
-          /* convert everthing through this CRLFCRLF but no further */
+          /* convert everything through this CRLFCRLF but no further */
           conv_size = i + 4;
           break;
         }

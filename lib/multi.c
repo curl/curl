@@ -645,7 +645,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        easy->state > CURLM_STATE_WAITDO &&
        easy->state < CURLM_STATE_COMPLETED) {
       /* If the handle is in a pipeline and has started sending off its
-         request but not received its reponse yet, we need to close
+         request but not received its response yet, we need to close
          connection. */
       easy->easy_conn->bits.close = TRUE;
       /* Set connection owner so that Curl_done() closes it.
@@ -1495,7 +1495,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(data);
 
-        /* we're no longer receving */
+        /* we're no longer receiving */
         moveHandleFromRecvToDonePipeline(data,
                                          easy->easy_conn);
 

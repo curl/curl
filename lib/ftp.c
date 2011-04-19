@@ -2162,7 +2162,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     /*
       A;
       150 Opening BINARY mode data connection for /etc/passwd (2241
-      bytes).  (ok, the file is being transfered)
+      bytes).  (ok, the file is being transferred)
 
       B:
       150 Opening ASCII mode data connection for /bin/ls
@@ -2194,7 +2194,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       /*
        * It seems directory listings either don't show the size or very
        * often uses size 0 anyway. ASCII transfers may very well turn out
-       * that the transfered amount of data is not the same as this line
+       * that the transferred amount of data is not the same as this line
        * tells, why using this number in those cases only confuses us.
        *
        * Example D above makes this parsing a little tricky */
@@ -2692,7 +2692,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_RETR_PREQUOTE:
     case FTP_STOR_PREQUOTE:
       if((ftpcode >= 400) && !ftpc->count2) {
-        /* failure reponse code, and not allowed to fail */
+        /* failure response code, and not allowed to fail */
         failf(conn->data, "QUOT command failed with %03d", ftpcode);
         return CURLE_QUOTE_ERROR;
       }
@@ -2913,7 +2913,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
   if(CURLE_OK != result)
     return result;
 
-  /* We always support persistant connections on ftp */
+  /* We always support persistent connections on ftp */
   conn->bits.close = FALSE;
 
   pp->response_time = RESP_TIMEOUT; /* set default response time-out */
@@ -3109,7 +3109,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     /*
      * Let's see what the server says about the transfer we just performed,
      * but lower the timeout as sometimes this connection has died while the
-     * data has been transfered. This happens when doing through NATs etc that
+     * data has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
     long old_time = pp->response_time;
@@ -3981,7 +3981,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         /* seek out the next path component */
         if(slash_pos-cur_pos) {
           /* we skip empty path components, like "x//y" since the FTP command
-             CWD requires a parameter and a non-existant parameter a) doesn't
+             CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           int len = (int)(slash_pos - cur_pos + absolute_dir);
           ftpc->dirs[ftpc->dirdepth] =

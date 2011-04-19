@@ -5,7 +5,7 @@
 #Description: makefile to be used in order to compile libcurl for VxWoorks 6.3.
 #
 #How to use:
-#             1. Adjust environment variables at the file begining
+#             1. Adjust environment variables at the file beginning
 #             2. Open the Command Prompt window and change directory ('cd')
 #                into the 'lib' folder
 #             3. Add <CYGWIN>/bin folder to the PATH environment variable

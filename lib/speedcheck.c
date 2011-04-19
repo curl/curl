@@ -53,7 +53,7 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
       /* we have been this slow for long enough, now die */
       failf(data,
             "Operation too slow. "
-            "Less than %ld bytes/sec transfered the last %ld seconds",
+            "Less than %ld bytes/sec transferred the last %ld seconds",
             data->set.low_speed_limit,
             data->set.low_speed_time);
       return CURLE_OPERATION_TIMEDOUT;

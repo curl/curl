@@ -1200,7 +1200,7 @@ static CURLcode verifyhost(struct connectdata *conn,
     res = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
-    /* we have to look to the last occurence of a commonName in the
+    /* we have to look to the last occurrence of a commonName in the
        distinguished one to get the most significant one. */
     int j,i=-1 ;
 
@@ -2587,7 +2587,7 @@ static ssize_t ossl_send(struct connectdata *conn,
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* The operation did not complete; the same TLS/SSL I/O function
-         should be called again later. This is basicly an EWOULDBLOCK
+         should be called again later. This is basically an EWOULDBLOCK
          equivalent. */
       *curlcode = CURLE_AGAIN;
       return -1;
@@ -2658,7 +2658,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef YASSL_VERSION
-  /* yassl provides an OpenSSL API compatiblity layer so it looks identical
+  /* yassl provides an OpenSSL API compatibility layer so it looks identical
      to OpenSSL in all other aspects */
   return snprintf(buffer, size, "yassl/%s", YASSL_VERSION);
 #else /* YASSL_VERSION */

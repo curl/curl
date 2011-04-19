@@ -218,7 +218,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   if(ldap_ssl) {
 #ifdef HAVE_LDAP_SSL
 #ifdef CURL_LDAP_WIN
-    /* Win32 LDAP SDK doesnt support insecure mode without CA! */
+    /* Win32 LDAP SDK doesn't support insecure mode without CA! */
     server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else

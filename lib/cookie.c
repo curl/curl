@@ -266,7 +266,7 @@ Curl_cookie_add(struct SessionHandle *data,
             }
           }
           else if(Curl_raw_equal("domain", name)) {
-            /* note that this name may or may not have a preceeding dot, but
+            /* note that this name may or may not have a preceding dot, but
                we don't care about that, we treat the names the same anyway */
 
             const char *domptr=whatptr;
@@ -307,7 +307,7 @@ Curl_cookie_add(struct SessionHandle *data,
                  or the given domain is not valid and thus cannot be set. */
 
               if('.' == whatptr[0])
-                whatptr++; /* ignore preceeding dot */
+                whatptr++; /* ignore preceding dot */
 
               if(!domain || tailmatch(whatptr, domain)) {
                 const char *tailptr=whatptr;
@@ -479,7 +479,7 @@ Curl_cookie_add(struct SessionHandle *data,
        marked with httpOnly after the domain name are not accessible
        from javascripts, but since curl does not operate at javascript
        level, we include them anyway. In Firefox's cookie files, these
-       lines are preceeded with #HttpOnly_ and then everything is
+       lines are preceded with #HttpOnly_ and then everything is
        as usual, so we skip 10 characters of the line..
     */
     if (strncmp(lineptr, "#HttpOnly_", 10) == 0) {
@@ -514,7 +514,7 @@ Curl_cookie_add(struct SessionHandle *data,
         ptr=strtok_r(NULL, "\t", &tok_buf), fields++) {
       switch(fields) {
       case 0:
-        if(ptr[0]=='.') /* skip preceeding dots */
+        if(ptr[0]=='.') /* skip preceding dots */
           ptr++;
         co->domain = strdup(ptr);
         if(!co->domain)

@@ -422,7 +422,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
 
   if(result & CURL_CSELECT_ERR) {
-    failf(conn->data, "SOCKS5: error occured during connection");
+    failf(conn->data, "SOCKS5: error occurred during connection");
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -461,7 +461,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
 
   if(result & CURL_CSELECT_ERR) {
-    failf(conn->data, "SOCKS5 read error occured");
+    failf(conn->data, "SOCKS5 read error occurred");
     return CURLE_RECV_ERROR;
   }
 

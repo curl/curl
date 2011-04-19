@@ -296,7 +296,7 @@ Curl_axtls_connect(struct connectdata *conn,
   else
     infof(data, "\t server certificate verification SKIPPED\n");
 
-  /* Here, gtls.c does issuer verfication. axTLS has no straightforward
+  /* Here, gtls.c does issuer verification. axTLS has no straightforward
    * equivalent, so omitting for now.*/
 
   /* See if common name was set in server certificate */

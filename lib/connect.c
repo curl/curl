@@ -174,7 +174,7 @@ long Curl_timeleft(struct SessionHandle *data,
     nowp = &now;
   }
 
-  /* substract elapsed time */
+  /* subtract elapsed time */
   timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */

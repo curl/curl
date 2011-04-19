@@ -186,7 +186,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char * hostname, int port);
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
  * Handles end of async request processing. Inserts ai into hostcache when
  * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
- * request completed wether successfull or failed.
+ * request completed wether successful or failed.
  */
 CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                                 int status,

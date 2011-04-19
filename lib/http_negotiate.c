@@ -167,7 +167,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   if(neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
-    /* We finished succesfully our part of authentication, but server
+    /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
     Curl_cleanup_negotiate(conn->data);

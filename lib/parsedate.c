@@ -387,7 +387,7 @@ int Curl_parsedate(const char *date, time_t *output)
            (indate< date) &&
            ((date[-1] == '+' || date[-1] == '-'))) {
           /* four digits and a value less than or equal to 1400 (to take into
-             account all sorts of funny time zone diffs) and it is preceeded
+             account all sorts of funny time zone diffs) and it is preceded
              with a plus or minus. This is a time zone indication.  1400 is
              picked since +1300 is frequently used and +1400 is mentioned as
              an edge number in the document "ISO C 200X Proposal: Timezone

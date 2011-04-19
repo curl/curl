@@ -470,7 +470,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
     infof(data, "Filesize left: %" FORMAT_OFF_T "\n", filesize);
 
     if(!filesize)
-      /* the entire data is already transfered! */
+      /* the entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
@@ -709,7 +709,7 @@ static CURLcode imap_connect(struct connectdata *conn,
   if(CURLE_OK != result)
     return result;
 
-  /* We always support persistant connections on imap */
+  /* We always support persistent connections on imap */
   conn->bits.close = FALSE;
 
   pp->response_time = RESP_TIMEOUT; /* set default response time-out */

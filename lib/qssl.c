@@ -395,7 +395,7 @@ static ssize_t qsossl_send(struct connectdata * conn, int sockindex,
 
     case SSL_ERROR_BAD_STATE:
       /* The operation did not complete; the same SSL I/O function
-         should be called again later. This is basicly an EWOULDBLOCK
+         should be called again later. This is basically an EWOULDBLOCK
          equivalent. */
       *curlcode = CURLE_AGAIN;
       return -1;

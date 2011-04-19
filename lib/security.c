@@ -147,7 +147,7 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
 }
 
 /* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
-   saying whether an error occured or CURLE_OK if |len| was read. */
+   saying whether an error occurred or CURLE_OK if |len| was read. */
 static CURLcode
 socket_read(curl_socket_t fd, void *to, size_t len)
 {
@@ -173,7 +173,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
 
 
 /* Write |len| bytes from the buffer |to| to the socket |fd|. Return a
-   CURLcode saying whether an error occured or CURLE_OK if |len| was
+   CURLcode saying whether an error occurred or CURLE_OK if |len| was
    written. */
 static CURLcode
 socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,

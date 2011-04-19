@@ -641,7 +641,7 @@ static CURLcode pop3_connect(struct connectdata *conn,
   if(CURLE_OK != result)
     return result;
 
-  /* We always support persistant connections on pop3 */
+  /* We always support persistent connections on pop3 */
   conn->bits.close = FALSE;
 
   pp->response_time = RESP_TIMEOUT; /* set default response time-out */

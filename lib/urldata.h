@@ -551,7 +551,7 @@ struct SingleRequest {
 
   long headerbytecount;         /* only count received headers */
   long deductheadercount; /* this amount of bytes doesn't count when we check
-                             if anything has been transfered at the end of a
+                             if anything has been transferred at the end of a
                              connection. We use this counter to make only a
                              100 reply (without a following second response
                              code) result in a CURLE_GOT_NOTHING error code */
@@ -778,9 +778,9 @@ struct connectdata {
 
   /* 'primary_ip' and 'primary_port' get filled with peer's numerical
      ip address and port number whenever an outgoing connection is
-     *attemted* from the primary socket to a remote address. When more
+     *attempted* from the primary socket to a remote address. When more
      than one address is tried for a connection these will hold data
-     for the last attempt. When the connection is actualy established
+     for the last attempt. When the connection is actually established
      these are updated with data which comes directly from the socket. */
 
   char primary_ip[MAX_IPADR_LEN];
@@ -997,8 +997,8 @@ struct Progress {
                     force redraw at next call */
   curl_off_t size_dl; /* total expected size */
   curl_off_t size_ul; /* total expected size */
-  curl_off_t downloaded; /* transfered so far */
-  curl_off_t uploaded; /* transfered so far */
+  curl_off_t downloaded; /* transferred so far */
+  curl_off_t uploaded; /* transferred so far */
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
 

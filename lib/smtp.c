@@ -1108,7 +1108,7 @@ static CURLcode smtp_connect(struct connectdata *conn,
   if(CURLE_OK != result)
     return result;
 
-  /* We always support persistant connections on smtp */
+  /* We always support persistent connections on smtp */
   conn->bits.close = FALSE;
 
   pp->response_time = RESP_TIMEOUT; /* set default response time-out */

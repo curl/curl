@@ -122,7 +122,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   if(neg_ctx->context && neg_ctx->status == SEC_E_OK) {
-    /* We finished succesfully our part of authentication, but server
+    /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
     Curl_cleanup_negotiate(conn->data);
@@ -165,7 +165,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   if ( !input_token ) {
-    /* first call in a new negotation, we have to require credentials,
+    /* first call in a new negotiation, we have to require credentials,
        and allocate memory for the context */
 
     neg_ctx->credentials = (CredHandle *)malloc(sizeof(CredHandle));

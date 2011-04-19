@@ -1093,7 +1093,7 @@ CURLcode telrcv(struct connectdata *conn,
           {
             /*
              * This is an error.  We only expect to get "IAC IAC" or "IAC SE".
-             * Several things may have happend.  An IAC was not doubled, the
+             * Several things may have happened.  An IAC was not doubled, the
              * IAC SE was left off, or another option got inserted into the
              * suboption are all possibilities.  If we assume that the IAC was
              * not doubled, and really the IAC SE was left off, we could get
