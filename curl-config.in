@@ -113,7 +113,7 @@ while test $# -gt 0; do
 	  # silent success
 	  exit 0
 	else
-	  echo "requested version $checkfor is newer than existing @VERSION@"
+	  echo "requested version $checkfor is newer than existing @CURLVERSION@"
 	  exit 1
 	fi
 	;;
