@@ -26,13 +26,19 @@ endif
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-1.2.8
 endif
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../librtmp-2.3
+endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
 endif
-# Edit the path below to point to the base of your librtmp package.
-ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../librtmp-2.3
+# Edit the path below to point to the base of your MS idndlpackage. 
+# Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
+# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ad6158d7-ddba-416a-9109-07607425a815
+ifndef WINIDN_PATH
+WINIDN_PATH = ../../Microsoft IDN Mitigation APIs
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -45,7 +51,7 @@ LIBCARES_PATH = ../ares
 endif
 
 CC = gcc
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -Wall
 # comment LDFLAGS below to keep debug info
 LDFLAGS = -s
 RC = windres
@@ -100,6 +106,11 @@ ifdef IDN
   INCLUDES += -I"$(LIBIDN_PATH)/include"
   CFLAGS += -DUSE_LIBIDN
   curl_LDADD += -L$(LIBIDN_PATH)/lib -lidn
+else
+ifdef WINIDN
+  CFLAGS += -DUSE_WIN32_IDN
+  DLL_LIBS += -L"$(WINIDN_PATH)" -lnormaliz
+endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI

@@ -4,7 +4,7 @@
 ## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5)
 ##
 ## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [RTMP=1] [DYN=1]
+## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [WINIDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [RTMP=1] [DYN=1]
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.5
@@ -26,13 +26,19 @@ endif
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-1.2.8
 endif
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../librtmp-2.3
+endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
 endif
-# Edit the path below to point to the base of your librtmp package.
-ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../librtmp-2.3
+# Edit the path below to point to the base of your MS idndlpackage. 
+# Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
+# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ad6158d7-ddba-416a-9109-07607425a815
+ifndef WINIDN_PATH
+WINIDN_PATH = ../../Microsoft IDN Mitigation APIs
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -45,9 +51,10 @@ LIBCARES_PATH = ../ares
 endif
 
 CC = gcc
-AR = ar
+CFLAGS = -g -O2 -Wall
 # comment LDFLAGS below to keep debug info
 LDFLAGS = -s
+AR = ar
 RANLIB = ranlib
 RC = windres
 RCFLAGS = --include-dir=../include -DDEBUGBUILD=0 -O COFF -i
@@ -58,7 +65,7 @@ STRIP = strip -g
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I../include
-CFLAGS = -g -O2 -DBUILDING_LIBCURL
+CFLAGS += -DBUILDING_LIBCURL
 ifdef ARES
   INCLUDES += -I$(LIBCARES_PATH)
   CFLAGS += -DUSE_ARES
@@ -91,6 +98,13 @@ ifdef IDN
   INCLUDES += -I"$(LIBIDN_PATH)/include"
   CFLAGS += -DUSE_LIBIDN
   DLL_LIBS += -L$(LIBIDN_PATH)/lib -lidn
+else
+ifdef WINIDN
+  INCLUDES += -I"$(WINIDN_PATH)/include"
+  CFLAGS += -DHAVE_NORMALIZATION_H
+  CFLAGS += -DUSE_WIN32_IDN
+  DLL_LIBS += -L"$(WINIDN_PATH)" -lnormaliz
+endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
