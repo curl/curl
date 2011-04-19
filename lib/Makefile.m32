@@ -1,10 +1,10 @@
 #########################################################################
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-3.2 or later)
-## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5)
+## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5), librtmp (2.3)
 ##
-## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [IDN=1] [WINIDN=1] [SSPI=1] [IPV6=1] [LDAPS=1] [RTMP=1] [DYN=1]
+## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
+## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.5
@@ -63,6 +63,44 @@ STRIP = strip -g
 
 ########################################################
 ## Nothing more to do below this line!
+
+ifeq ($(findstring -dyn,$(CFG)),-dyn)
+DYN = 1
+endif
+ifeq ($(findstring -ares,$(CFG)),-ares)
+ARES = 1
+endif
+ifeq ($(findstring -rtmp,$(CFG)),-rtmp)
+RTMP = 1
+SSL = 1
+ZLIB = 1
+endif
+ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
+SSH2 = 1
+SSL = 1
+ZLIB = 1
+endif
+ifeq ($(findstring -ssl,$(CFG)),-ssl)
+SSL = 1
+endif
+ifeq ($(findstring -zlib,$(CFG)),-zlib)
+ZLIB = 1
+endif
+ifeq ($(findstring -idn,$(CFG)),-idn)
+IDN = 1
+endif
+ifeq ($(findstring -winidn,$(CFG)),-winidn)
+WINIDN = 1
+endif
+ifeq ($(findstring -sspi,$(CFG)),-sspi)
+SSPI = 1
+endif
+ifeq ($(findstring -ldaps,$(CFG)),-ldaps)
+LDAPS = 1
+endif
+ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
+IPV6 = 1
+endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
