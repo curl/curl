@@ -658,6 +658,18 @@ ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 
 #define HOSTNAME_MAX 1024
 
+/* copy the source to the destination and fill in zeroes in every
+   other destination byte! */
+static void unicodecpy(unsigned char *dest,
+                       const char *src, size_t length)
+{
+  size_t i;
+  for(i=0; i<length; i++) {
+    dest[2*i] = (unsigned char)src[i];
+    dest[2*i+1] = '\0';
+  }
+}
+
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
                           bool proxy)
@@ -972,6 +984,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     int ntrespoff;
     unsigned char ntresp[24]; /* fixed-size */
 #endif
+    bool unicode = ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE;
     size_t useroff;
     const char *user;
     size_t userlen;
@@ -1002,6 +1015,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       if(dot)
         *dot = '\0';
       hostlen = strlen(host);
+    }
+
+    if(unicode) {
+      domlen = domlen * 2;
+      userlen = userlen * 2;
+      hostlen = hostlen * 2;
     }
 
 #if USE_NTLM2SESSION
@@ -1092,13 +1111,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
     useroff = domoff + domlen;
     hostoff = useroff + userlen;
-
-    /*
-     * In the case the server sets the flag NTLMFLAG_NEGOTIATE_UNICODE, we
-     * need to filter it off because libcurl doesn't UNICODE encode the
-     * strings it packs into the NTLM authenticate packet.
-     */
-    ntlm->flags &= ~NTLMFLAG_NEGOTIATE_UNICODE;
 
     /* Create the big type-3 message binary blob */
     size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
@@ -1227,15 +1239,27 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
     DEBUGASSERT(size == domoff);
-    memcpy(&ntlmbuf[size], domain, domlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], domain, domlen/2);
+    else
+      memcpy(&ntlmbuf[size], domain, domlen);
+
     size += domlen;
 
     DEBUGASSERT(size == useroff);
-    memcpy(&ntlmbuf[size], user, userlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], user, userlen/2);
+    else
+      memcpy(&ntlmbuf[size], user, userlen);
+
     size += userlen;
 
     DEBUGASSERT(size == hostoff);
-    memcpy(&ntlmbuf[size], host, hostlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], host, hostlen/2);
+    else
+      memcpy(&ntlmbuf[size], host, hostlen);
+
     size += hostlen;
 
     /* convert domain, user, and host to ASCII but leave the rest as-is */
