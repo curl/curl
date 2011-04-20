@@ -103,6 +103,7 @@
 #include "multiif.h"
 #include "rtsp.h"
 #include "connect.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

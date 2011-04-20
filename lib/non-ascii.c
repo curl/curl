@@ -24,6 +24,13 @@
 
 #ifdef CURL_DOES_CONVERSIONS
 
+#include "non-ascii.h"
+#include "formdata.h"
+#include "sendf.h"
+#include "urldata.h"
+
+#include <curl/curl.h>
+
 #ifdef HAVE_ICONV
 #include <iconv.h>
 /* set default codesets for iconv */
@@ -37,10 +44,10 @@
 #endif /* HAVE_ICONV */
 
 /*
- * Curl_convertclone() returns a malloced copy of the source string (if
+ * Curl_convert_clone() returns a malloced copy of the source string (if
  * returning CURLE_OK), with the data converted to network format.
  */
-CURLcode Curl_convertclone(struct SessionHandle *data,
+CURLcode Curl_convert_clone(struct SessionHandle *data,
                            const char *indata,
                            size_t insize,
                            char **outbuf)
@@ -54,7 +61,7 @@ CURLcode Curl_convertclone(struct SessionHandle *data,
 
   memcpy(convbuf, indata, insize);
   result = Curl_convert_to_network(data, convbuf, insize);
-  if(result) {s
+  if(result) {
     free(convbuf);
     return result;
   }
