@@ -1051,6 +1051,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         if(!tmp) {
           result = CURLE_OUT_OF_MEMORY;
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           break;
         }
         if(data->set.verbose) {
@@ -1074,6 +1075,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         if(cp == NULL) {
           failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
@@ -1089,6 +1091,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           else
             failf(data, "Syntax error: Bad first parameter");
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = result;
           break;
         }
@@ -1116,6 +1119,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             Curl_safefree(sshc->quote_path1);
             sshc->quote_path1 = NULL;
             state(conn, SSH_SFTP_CLOSE);
+            sshc->nextstate = SSH_NO_STATE;
             sshc->actualcode = result;
             break;
           }
@@ -1138,6 +1142,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             Curl_safefree(sshc->quote_path1);
             sshc->quote_path1 = NULL;
             state(conn, SSH_SFTP_CLOSE);
+            sshc->nextstate = SSH_NO_STATE;
             sshc->actualcode = result;
             break;
           }
@@ -1162,6 +1167,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             Curl_safefree(sshc->quote_path1);
             sshc->quote_path1 = NULL;
             state(conn, SSH_SFTP_CLOSE);
+            sshc->nextstate = SSH_NO_STATE;
             sshc->actualcode = result;
             break;
           }
@@ -1184,6 +1190,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         Curl_safefree(sshc->quote_path2);
         sshc->quote_path2 = NULL;
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1241,6 +1248,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           failf(data, "Attempt to get SFTP stats failed: %s",
                 sftp_libssh2_strerror(err));
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
@@ -1257,6 +1265,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chgrp gid not a number");
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
@@ -1273,6 +1282,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chmod permissions not a number");
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
@@ -1287,6 +1297,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->quote_path2 = NULL;
           failf(data, "Syntax error: chown uid not a number");
           state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
@@ -1313,6 +1324,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         failf(data, "Attempt to set SFTP stats failed: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1337,6 +1349,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         failf(data, "symlink command failed: %s",
               sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1356,6 +1369,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->quote_path1 = NULL;
         failf(data, "mkdir command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1370,6 +1384,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                   LIBSSH2_SFTP_RENAME_OVERWRITE |
                                   LIBSSH2_SFTP_RENAME_ATOMIC |
                                   LIBSSH2_SFTP_RENAME_NATIVE);
+
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -1381,6 +1396,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->quote_path2 = NULL;
         failf(data, "rename command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1399,6 +1415,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->quote_path1 = NULL;
         failf(data, "rmdir command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -1417,6 +1434,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->quote_path1 = NULL;
         failf(data, "rm command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
@@ -2059,11 +2077,18 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
 
       DEBUGF(infof(data, "SFTP DONE done\n"));
-#if 0 /* PREV */
-      state(conn, SSH_SFTP_SHUTDOWN);
-#endif
-      state(conn, SSH_STOP);
-      result = sshc->actualcode;
+
+      /* Check if nextstate is set and move .nextstate could be POSTQUOTE_INIT
+         After nextstate is executed,the control should come back to
+         SSH_SFTP_CLOSE to pass the correct result back  */
+      if(sshc->nextstate != SSH_NO_STATE) {
+        state(conn, sshc->nextstate);
+        sshc->nextstate = SSH_SFTP_CLOSE;
+      }
+      else {
+        state(conn, SSH_STOP);
+        result = sshc->actualcode;
+      }
       break;
 
     case SSH_SFTP_SHUTDOWN:
@@ -2921,11 +2946,12 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   if(status == CURLE_OK) {
-    /* Before we shut down, see if there are any post-quote commands to
-       send: */
+    /* Post quote commands are executed after the SFTP_CLOSE state to avoid
+       errors that could happen due to open file handles during POSTQUOTE
+       operation */
     if(!status && !premature && conn->data->set.postquote) {
-      sshc->nextstate = SSH_SFTP_CLOSE;
-      state(conn, SSH_SFTP_POSTQUOTE_INIT);
+      sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
+      state(conn, SSH_SFTP_CLOSE);
     }
     else
       state(conn, SSH_SFTP_CLOSE);
