@@ -5,10 +5,20 @@ my $file=$ARGV[0];
 my $max_column = 79;
 my $indent = 2;
 
+my $warnings;
+my $errors;
+
 sub checkwarn {
     my ($num, $col, $file, $line, $msg, $error) = @_;
 
     my $w=$error?"error":"warning";
+
+    if($w) {
+        $warnings++;
+    }
+    else {
+        $errors++;
+    }
 
     $col++;
     print "$file:$num:$col: $w: $msg\n";
@@ -116,3 +126,7 @@ if(!$copyright) {
 }
 
 close(R);
+
+if($errors || $warnings) {
+    exit 5; # return failure
+}
