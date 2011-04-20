@@ -11,7 +11,7 @@ RETR
 <reply>
 <servercmd>
 REPLY CWD 421 Timeout!
-</server>
+</servercmd>
 </reply>
 
 # Client-side
