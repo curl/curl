@@ -1303,7 +1303,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   }
 #endif /* CURL_DISABLE_PROXY */
 
-  if(conn->handler->protocol & CURLPROTO_HTTPS) {
+  if(conn->given->protocol & CURLPROTO_HTTPS) {
     /* perform SSL initialization */
     if(data->state.used_interface == Curl_if_multi) {
       result = https_connecting(conn, done);
