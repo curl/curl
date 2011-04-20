@@ -29,7 +29,8 @@
  * to be locale independent and only compare strings we know are safe for
  * this.
  *
- * The function is capable of comparing a-z case insensitively even for non-ascii.
+ * The function is capable of comparing a-z case insensitively even for
+ * non-ascii.
  */
 int Curl_raw_equal(const char *first, const char *second);
 int Curl_raw_nequal(const char *first, const char *second, size_t max);

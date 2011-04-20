@@ -106,7 +106,7 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done);
 static CURLcode smtp_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode smtp_connect(struct connectdata *conn, bool *done);
-static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection);
+static CURLcode smtp_disconnect(struct connectdata *conn, bool dead);
 static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done);
 static int smtp_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
@@ -240,10 +240,10 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
     line += 5;
     len -= 5;
 
-    for (;;) {
-      while (len &&
-             (*line == ' ' || *line == '\t' ||
-              *line == '\r' || *line == '\n')) {
+    for(;;) {
+      while(len &&
+            (*line == ' ' || *line == '\t' ||
+             *line == '\r' || *line == '\n')) {
         line++;
         len--;
       }
@@ -251,9 +251,9 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
       if(!len)
         break;
 
-      for (wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-             line[wordlen] != '\t' && line[wordlen] != '\r' &&
-             line[wordlen] != '\n';)
+      for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
+            line[wordlen] != '\t' && line[wordlen] != '\r' &&
+            line[wordlen] != '\n';)
         wordlen++;
 
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
@@ -359,7 +359,8 @@ static size_t smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
   memcpy(plainauth + ulen + 1, conn->user, ulen);
   plainauth[2 * ulen + 1] = '\0';
   memcpy(plainauth + 2 * ulen + 2, conn->passwd, plen);
-  return Curl_base64_encode(conn->data, plainauth, 2 * ulen + plen + 2, outptr);
+  return Curl_base64_encode(conn->data, plainauth, 2 * ulen + plen + 2,
+                            outptr);
 }
 
 static size_t smtp_auth_login_user(struct connectdata * conn, char * * outptr)
@@ -696,16 +697,16 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   }
 
   /* Get the challenge. */
-  for (chlg64 += 4; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
+  for(chlg64 += 4; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
     ;
 
   chlg = (unsigned char *) NULL;
   chlglen = 0;
 
   if(*chlg64 != '=') {
-    for (l = strlen(chlg64); l--;)
+    for(l = strlen(chlg64); l--;)
       if(chlg64[l] != '\r' && chlg64[l] != '\n' && chlg64[l] != ' ' &&
-       chlg64[l] != '\t')
+         chlg64[l] != '\t')
         break;
 
     if(++l) {
@@ -740,9 +741,10 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   /* Prepare the reply. */
   snprintf(reply, sizeof reply,
    "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-   conn->user, digest[0], digest[1], digest[2], digest[3], digest[4], digest[5],
-   digest[6], digest[7], digest[8], digest[9], digest[10], digest[11],
-   digest[12], digest[13], digest[14], digest[15]);
+           conn->user, digest[0], digest[1], digest[2], digest[3], digest[4],
+           digest[5],
+           digest[6], digest[7], digest[8], digest[9], digest[10], digest[11],
+           digest[12], digest[13], digest[14], digest[15]);
 
   /* Encode it to base64 and send it. */
   l = Curl_base64_encode(data, reply, 0, &rplyb64);
@@ -789,7 +791,7 @@ static CURLcode smtp_mail(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
 
   /* send MAIL FROM */
-  if (data->set.str[STRING_MAIL_FROM][0] == '<')
+  if(data->set.str[STRING_MAIL_FROM][0] == '<')
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
                            data->set.str[STRING_MAIL_FROM]);
   else
@@ -1217,7 +1219,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = status;      /* use the already set error code */
   }
   else
-    /* TODO: make this work even when the socket is EWOULDBLOCK in this call! */
+    /* TODO: make this work even when the socket is EWOULDBLOCK in this
+       call! */
 
     /* write to socket (send away data) */
     result = Curl_write(conn,

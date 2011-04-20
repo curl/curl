@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,8 +47,10 @@ extern FILE *logfile;
 
 /* memory functions */
 CURL_EXTERN void *curl_domalloc(size_t size, int line, const char *source);
-CURL_EXTERN void *curl_docalloc(size_t elements, size_t size, int line, const char *source);
-CURL_EXTERN void *curl_dorealloc(void *ptr, size_t size, int line, const char *source);
+CURL_EXTERN void *curl_docalloc(size_t elements, size_t size, int line,
+                                const char *source);
+CURL_EXTERN void *curl_dorealloc(void *ptr, size_t size, int line,
+                                 const char *source);
 CURL_EXTERN void curl_dofree(void *ptr, int line, const char *source);
 CURL_EXTERN char *curl_dostrdup(const char *str, int line, const char *source);
 CURL_EXTERN void curl_memdebug(const char *logname);

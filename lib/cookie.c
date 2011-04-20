@@ -84,7 +84,7 @@ Example set of cookies:
 #include <stdlib.h>
 #include <string.h>
 
-#define _MPRINTF_REPLACE /* without this on windows OS we get undefined reference to snprintf */
+#define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 
 #include "urldata.h"
@@ -371,7 +371,7 @@ Curl_cookie_add(struct SessionHandle *data,
             /* Session cookies have expires set to 0 so if we get that back
                from the date parser let's add a second to make it a
                non-session cookie */
-            if (co->expires == 0)
+            if(co->expires == 0)
               co->expires = 1;
             else if( co->expires < 0 )
                 co->expires = 0;
@@ -398,7 +398,7 @@ Curl_cookie_add(struct SessionHandle *data,
           if(Curl_raw_equal("secure", what)) {
             co->secure = TRUE;
           }
-          else if (Curl_raw_equal("httponly", what)) {
+          else if(Curl_raw_equal("httponly", what)) {
             co->httponly = TRUE;
           }
           /* else,
@@ -482,7 +482,7 @@ Curl_cookie_add(struct SessionHandle *data,
        lines are preceded with #HttpOnly_ and then everything is
        as usual, so we skip 10 characters of the line..
     */
-    if (strncmp(lineptr, "#HttpOnly_", 10) == 0) {
+    if(strncmp(lineptr, "#HttpOnly_", 10) == 0) {
       lineptr += 10;
       co->httponly = TRUE;
     }
@@ -531,7 +531,7 @@ Curl_cookie_add(struct SessionHandle *data,
            As far as I can see, it is set to true when the cookie says
            .domain.com and to false when the domain is complete www.domain.com
         */
-        co->tailmatch=(bool)Curl_raw_equal(ptr, "TRUE"); /* store information */
+        co->tailmatch=(bool)Curl_raw_equal(ptr, "TRUE");
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path

@@ -299,7 +299,8 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       /* this is just a case of EWOULDBLOCK */
       bytes_written=0;
       *code = CURLE_AGAIN;
-    } else {
+    }
+    else {
       failf(conn->data, "Send failure: %s",
             Curl_strerror(conn, err));
       conn->data->state.os_errno = err;
@@ -354,7 +355,8 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       ) {
       /* this is just a case of EWOULDBLOCK */
       *code = CURLE_AGAIN;
-    } else {
+    }
+    else {
       failf(conn->data, "Recv failure: %s",
             Curl_strerror(conn, err));
       conn->data->state.os_errno = err;

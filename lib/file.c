@@ -90,7 +90,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || \
+  defined(__SYMBIAN32__)
 #define DOS_FILESYSTEM 1
 #endif
 
@@ -245,18 +246,17 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   actual_path = real_path;
   if((actual_path[0] == '/') &&
       actual_path[1] &&
-      (actual_path[2] == ':' || actual_path[2] == '|'))
-  {
+     (actual_path[2] == ':' || actual_path[2] == '|')) {
     actual_path[2] = ':';
     actual_path++;
   }
 
   /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
-  for (i=0; actual_path[i] != '\0'; ++i)
+  for(i=0; actual_path[i] != '\0'; ++i)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY); /* no CR/LF translation */
+  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
   fd = open_readonly(real_path, O_RDONLY);
@@ -536,7 +536,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   }
 
   /* A high water mark has been specified so we obey... */
-  if (data->req.maxdownload > 0)
+  if(data->req.maxdownload > 0)
     expected_size = data->req.maxdownload;
 
   if(fstated && (expected_size == 0))
@@ -565,7 +565,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     if( nread > 0)
       buf[nread] = 0;
 
-    if (nread <= 0 || expected_size == 0)
+    if(nread <= 0 || expected_size == 0)
       break;
 
     bytecount += nread;

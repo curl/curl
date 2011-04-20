@@ -160,7 +160,8 @@ static const struct tzinfo tz[]= {
   {"G",  +7 * 60},         /* Golf */
   {"H",  +8 * 60},         /* Hotel */
   {"I",  +9 * 60},         /* India */
-  /* "J", Juliet is not used as a timezone, to indicate the observer's local time */
+  /* "J", Juliet is not used as a timezone, to indicate the observer's local
+     time */
   {"K", +10 * 60},         /* Kilo */
   {"L", +11 * 60},         /* Lima */
   {"M", +12 * 60},         /* Mike */
@@ -282,11 +283,11 @@ static time_t my_timegm(struct my_tm *tm)
 
   year = tm->tm_year + 1900;
   month = tm->tm_mon;
-  if (month < 0) {
+  if(month < 0) {
     year += (11 - month) / 12;
     month = 11 - (11 - month) % 12;
   }
-  else if (month >= 12) {
+  else if(month >= 12) {
     year -= month / 12;
     month = month % 12;
   }

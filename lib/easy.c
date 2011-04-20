@@ -147,7 +147,7 @@ static CURLcode win32_init(void)
 #ifdef USE_WINDOWS_SSPI
   {
     CURLcode err = Curl_sspi_global_init();
-    if (err != CURLE_OK)
+    if(err != CURLE_OK)
       return err;
   }
 #endif
@@ -764,8 +764,8 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   k->keepon = newstate;
 
   if(!(newstate & KEEP_RECV_PAUSE) && data->state.tempwrite) {
-    /* we have a buffer for sending that we now seem to be able to deliver since
-       the receive pausing is lifted! */
+    /* we have a buffer for sending that we now seem to be able to deliver
+       since the receive pausing is lifted! */
 
     /* get the pointer, type and length in local copies since the function may
        return PAUSE again and then we'll get a new copy allocted and stored in

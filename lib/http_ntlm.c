@@ -25,10 +25,6 @@
 
    http://davenport.sourceforge.net/ntlm.html
    http://www.innovation.ch/java/ntlm.html
-
-   Another implementation:
-   http://lxr.mozilla.org/mozilla/source/security/manager/ssl/src/nsNTLMAuthModule.cpp
-
 */
 
 #ifndef CURL_DISABLE_HTTP
@@ -137,7 +133,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef USE_NTRESPONSES 
+#ifndef USE_NTRESPONSES
 /* Define this to make the type-3 message include the NT response message */
 #define USE_NTRESPONSES 1
 
@@ -571,7 +567,7 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                size_t srclen)
 {
   size_t i;
-  for (i=0; i<srclen; i++) {
+  for(i=0; i<srclen; i++) {
     dest[2*i]   = (unsigned char)src[i];
     dest[2*i+1] =   '\0';
   }
@@ -732,10 +728,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     passwdp="";
 
 #ifdef USE_WINDOWS_SSPI
-  if (s_hSecDll == NULL) {
+  if(s_hSecDll == NULL) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
-    if (s_hSecDll == NULL)
+    if(s_hSecDll == NULL)
       return err;
   }
 #endif
@@ -889,25 +885,26 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
 
     DEBUG_OUT({
-      fprintf(stderr, "**** TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
-              LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
-                          NTLMFLAG_REQUEST_TARGET|
-                          NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                          NTLM2FLAG|
-                          NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
-              NTLMFLAG_NEGOTIATE_OEM|
-              NTLMFLAG_REQUEST_TARGET|
-              NTLMFLAG_NEGOTIATE_NTLM_KEY|
-              NTLM2FLAG|
-              NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-      print_flags(stderr,
-                  NTLMFLAG_NEGOTIATE_OEM|
-                  NTLMFLAG_REQUEST_TARGET|
-                  NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                  NTLM2FLAG|
-                  NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-      fprintf(stderr, "\n****\n");
-    });
+        fprintf(stderr, "* TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x "
+                "0x%08.8x ",
+                LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
+                            NTLMFLAG_REQUEST_TARGET|
+                            NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                            NTLM2FLAG|
+                            NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
+                NTLMFLAG_NEGOTIATE_OEM|
+                NTLMFLAG_REQUEST_TARGET|
+                NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                NTLM2FLAG|
+                NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+        print_flags(stderr,
+                    NTLMFLAG_NEGOTIATE_OEM|
+                    NTLMFLAG_REQUEST_TARGET|
+                    NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                    NTLM2FLAG|
+                    NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+        fprintf(stderr, "\n****\n");
+      });
 
     /* now size is the size of the base64 encoded package size */
     size = Curl_base64_encode(NULL, (char *)ntlmbuf, size, &base64);
@@ -963,14 +960,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     type_3.pvBuffer   = ntlmbuf;
     type_3.cbBuffer   = sizeof(ntlmbuf);
 
-    status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle, &ntlm->c_handle,
-                                       (char *) host,
-                                       ISC_REQ_CONFIDENTIALITY |
-                                       ISC_REQ_REPLAY_DETECT |
-                                       ISC_REQ_CONNECTION,
-                                       0, SECURITY_NETWORK_DREP, &type_2_desc,
-                                       0, &ntlm->c_handle, &type_3_desc,
-                                       &attrs, &tsDummy);
+    status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle,
+                                                  &ntlm->c_handle,
+                                                  (char *) host,
+                                                  ISC_REQ_CONFIDENTIALITY |
+                                                  ISC_REQ_REPLAY_DETECT |
+                                                  ISC_REQ_CONNECTION,
+                                                  0, SECURITY_NETWORK_DREP,
+                                                  &type_2_desc,
+                                                  0, &ntlm->c_handle,
+                                                  &type_3_desc,
+                                                  &attrs, &tsDummy);
 
     if(status != SEC_E_OK)
       return CURLE_RECV_ERROR;
@@ -1084,7 +1084,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
     else
 #endif
-	{
+        {
 
 #if USE_NTRESPONSES
       unsigned char ntbuffer[0x18];
@@ -1219,14 +1219,14 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
     DEBUG_OUT({
-        fprintf(stderr, "\n                  ntresp=");
+        fprintf(stderr, "\n   ntresp=");
         print_hex(stderr, (char *)&ntlmbuf[ntrespoff], 0x18);
     });
 
 #endif
 
     DEBUG_OUT({
-        fprintf(stderr, "\n                  flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
+        fprintf(stderr, "\n   flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
                 LONGQUARTET(ntlm->flags), ntlm->flags);
         print_flags(stderr, ntlm->flags);
         fprintf(stderr, "\n****\n");

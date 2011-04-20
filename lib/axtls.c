@@ -82,8 +82,7 @@ int Curl_axtls_cleanup(void)
 
 static CURLcode map_error_to_curl(int axtls_err)
 {
-  switch (axtls_err)
-  {
+  switch (axtls_err) {
   case SSL_ERROR_NOT_SUPPORTED:
   case SSL_ERROR_INVALID_VERSION:
   case -70:                       /* protocol version alert from server */
@@ -416,7 +415,7 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
       nread = (ssize_t)SSL_read(conn->ssl[sockindex].ssl, buf,
                                 sizeof(buf));
 
-      if (nread < SSL_OK){
+      if(nread < SSL_OK){
         failf(data, "close notify alert not received during shutdown");
         retval = -1;
       }

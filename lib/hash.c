@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,7 +72,7 @@ Curl_hash_init(struct curl_hash *h,
 
   h->table = malloc(slots * sizeof(struct curl_llist *));
   if(h->table) {
-    for (i = 0; i < slots; ++i) {
+    for(i = 0; i < slots; ++i) {
       h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
       if(!h->table[i]) {
         while(i--)
@@ -148,7 +148,7 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
   struct curl_llist_element *le;
   struct curl_llist *l = FETCH_LIST (h, key, key_len);
 
-  for (le = l->head; le; le = le->next) {
+  for(le = l->head; le; le = le->next) {
     he = (struct curl_hash_element *) le->ptr;
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       Curl_llist_remove(l, le, (void *)h);
@@ -183,7 +183,7 @@ int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
   struct curl_hash_element  *he;
   struct curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = l->head; le; le = le->next) {
+  for(le = l->head; le; le = le->next) {
     he = le->ptr;
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       Curl_llist_remove(l, le, (void *) h);
@@ -200,7 +200,7 @@ Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
   struct curl_hash_element  *he;
   struct curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = l->head; le; le = le->next) {
+  for(le = l->head; le; le = le->next) {
     he = le->ptr;
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       return he->ptr;
@@ -218,10 +218,10 @@ Curl_hash_apply(curl_hash *h, void *user,
   struct curl_llist_element  *le;
   int                  i;
 
-  for (i = 0; i < h->slots; ++i) {
-    for (le = (h->table[i])->head;
-         le;
-         le = le->next) {
+  for(i = 0; i < h->slots; ++i) {
+    for(le = (h->table[i])->head;
+        le;
+        le = le->next) {
       curl_hash_element *el = le->ptr;
       cb(user, el->ptr);
     }
@@ -234,7 +234,7 @@ Curl_hash_clean(struct curl_hash *h)
 {
   int i;
 
-  for (i = 0; i < h->slots; ++i) {
+  for(i = 0; i < h->slots; ++i) {
     Curl_llist_destroy(h->table[i], (void *) h);
     h->table[i] = NULL;
   }
@@ -251,7 +251,7 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
   struct curl_llist *list;
   int i;
 
-  for (i = 0; i < h->slots; ++i) {
+  for(i = 0; i < h->slots; ++i) {
     list = h->table[i];
     le = list->head; /* get first list entry */
     while(le) {
@@ -319,7 +319,7 @@ void Curl_hash_print(struct curl_hash *h,
 
   fprintf(stderr, "=Hash dump=\n");
 
-  for (i = 0; i < h->slots; i++) {
+  for(i = 0; i < h->slots; i++) {
     list = h->table[i];
     le = list->head; /* get first list entry */
     if(le) {

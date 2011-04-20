@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1997 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1997 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ struct Curl_tree *Curl_splay(struct timeval i,
   N.smaller = N.larger = NULL;
   l = r = &N;
 
-  for (;;) {
+  for(;;) {
     comp = compare(i, t->key);
     if(comp < 0) {
       if(t->smaller == NULL)
@@ -98,7 +98,7 @@ struct Curl_tree *Curl_splayinsert(struct timeval i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  static struct timeval KEY_NOTUSED = {-1,-1}; /* key that will *NEVER* appear */
+  static struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
 
   if(node == NULL)
     return t;
@@ -268,7 +268,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
-  static struct timeval KEY_NOTUSED = {-1,-1}; /* key that will *NEVER* appear */
+  static struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t || !removenode)
@@ -342,7 +342,7 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
     return;
 
   Curl_splayprint(t->larger, d+1, output);
-  for (i=0; i<d; i++)
+  for(i=0; i<d; i++)
     if(output)
       fprintf(stderr, "  ");
 
@@ -350,7 +350,8 @@ void Curl_splayprint(struct Curl_tree * t, int d, char output)
 #ifdef TEST_SPLAY
     fprintf(stderr, "%ld[%d]", (long)t->key.tv_usec, i);
 #else
-    fprintf(stderr, "%ld.%ld[%d]", (long)t->key.tv_sec, (long)t->key.tv_usec, i);
+    fprintf(stderr, "%ld.%ld[%d]", (long)t->key.tv_sec,
+            (long)t->key.tv_usec, i);
 #endif
   }
 
@@ -391,7 +392,7 @@ int main(int argc, argv_item_t argv[])
   int i;
   root = NULL;              /* the empty tree */
 
-  for (i = 0; i < MAX; i++) {
+  for(i = 0; i < MAX; i++) {
     struct timeval key;
     ptrs[i] = t = malloc(sizeof(struct Curl_tree));
     if(!t) {
@@ -418,7 +419,7 @@ int main(int argc, argv_item_t argv[])
 #endif
 
 #if 1
-  for (i = 0; i < MAX; i++) {
+  for(i = 0; i < MAX; i++) {
     int rem = (i+7)%MAX;
     struct Curl_tree *r;
     printf("Tree look:\n");

@@ -266,7 +266,7 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
       connssl->state = ssl_connection_none;
     }
   }
-  if (rc == CURLE_OK) {
+  if(rc == CURLE_OK) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = qsossl_recv;
     conn->send[sockindex] = qsossl_send;
@@ -347,7 +347,7 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
   what = Curl_socket_ready(conn->sock[sockindex],
                            CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
 
-  for (;;) {
+  for(;;) {
     if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

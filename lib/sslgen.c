@@ -294,7 +294,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   for(i=0; i< conn->data->set.ssl.numsessions; i++) {
     struct curl_ssl_session *check = &conn->data->state.session[i];
 
-    if (check->sessionid == ssl_sessionid) {
+    if(check->sessionid == ssl_sessionid) {
       kill_session(check);
       break;
     }
@@ -346,7 +346,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->sessionid = ssl_sessionid;
   store->idsize = idsize;
   store->age = data->state.sessionage;    /* set current age */
-  if (store->name)
+  if(store->name)
     /* free it if there's one already present */
     free(store->name);
   store->name = clone_host;               /* clone host name */

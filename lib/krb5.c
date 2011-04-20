@@ -157,7 +157,8 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to,
   if(maj != GSS_S_COMPLETE)
     return -1;
 
-  /* malloc a new buffer, in case gss_release_buffer doesn't work as expected */
+  /* malloc a new buffer, in case gss_release_buffer doesn't work as
+     expected */
   *to = malloc(enc.length);
   if(!*to)
     return -1;
@@ -222,7 +223,8 @@ krb5_auth(void *app_data, struct connectdata *conn)
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
-        Curl_failf(data, "Error importing service name %s", input_buffer.value);
+        Curl_failf(data, "Error importing service name %s",
+                   input_buffer.value);
         return AUTH_ERROR;
       }
       service = srv_host;
@@ -327,7 +329,7 @@ static void krb5_end(void *app_data)
 {
     OM_uint32 maj, min;
     gss_ctx_id_t *context = app_data;
-    if (*context != GSS_C_NO_CONTEXT) {
+    if(*context != GSS_C_NO_CONTEXT) {
       maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
       DEBUGASSERT(maj == GSS_S_COMPLETE);
     }

@@ -180,7 +180,7 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;
       failf(data,
-            "The Curl_convert_from_network iconv call failed with errno %i: %s",
+            "Curl_convert_from_network iconv call failed with errno %i: %s",
             error, strerror(error));
       return CURLE_CONV_FAILED;
     }
@@ -296,13 +296,13 @@ void Curl_convert_close(struct SessionHandle *data)
 #ifdef HAVE_ICONV
   /* close iconv conversion descriptors */
   if(data->inbound_cd != (iconv_t)-1) {
-     iconv_close(data->inbound_cd);
+    iconv_close(data->inbound_cd);
   }
   if(data->outbound_cd != (iconv_t)-1) {
-     iconv_close(data->outbound_cd);
+    iconv_close(data->outbound_cd);
   }
   if(data->utf8_cd != (iconv_t)-1) {
-     iconv_close(data->utf8_cd);
+    iconv_close(data->utf8_cd);
   }
 #else
   (void)data;

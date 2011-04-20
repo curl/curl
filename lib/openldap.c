@@ -55,7 +55,8 @@
 
 #ifndef _LDAP_PVT_H
 extern int ldap_pvt_url_scheme2proto(const char *);
-extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url, LDAP **ld);
+extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
+                        LDAP **ld);
 #endif
 
 static CURLcode ldap_setup(struct connectdata *conn);
@@ -63,7 +64,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done);
 static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
 static CURLcode ldap_connect(struct connectdata *conn, bool *done);
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done);
-static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection);
+static CURLcode ldap_disconnect(struct connectdata *conn, bool dead);
 
 static Curl_recv ldap_recv;
 
@@ -152,11 +153,11 @@ static CURLcode ldap_setup(struct connectdata *conn)
   CURLcode status;
 
   rc = ldap_url_parse(data->change.url, &lud);
-  if (rc != LDAP_URL_SUCCESS) {
+  if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;
-    if (rc > LDAP_URL_SUCCESS && rc <= LDAP_URL_ERR_BADEXTS) {
-      if (rc == LDAP_URL_ERR_MEM)
+    if(rc > LDAP_URL_SUCCESS && rc <= LDAP_URL_ERR_BADEXTS) {
+      if(rc == LDAP_URL_ERR_MEM)
         status = CURLE_OUT_OF_MEMORY;
       msg = url_errs[rc];
     }
@@ -189,13 +190,13 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
   strcpy(hosturl, "ldap");
   ptr = hosturl+4;
-  if (conn->handler->flags & PROTOPT_SSL)
+  if(conn->handler->flags & PROTOPT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
     conn->host.name, conn->remote_port);
 
   rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
-  if (rc) {
+  if(rc) {
     failf(data, "LDAP local: Cannot connect to %s, %s",
           hosturl, ldap_err2string(rc));
     return CURLE_COULDNT_CONNECT;
@@ -231,22 +232,23 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   }
 
 #ifdef USE_SSL
-  if (conn->handler->flags & PROTOPT_SSL) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode res;
-    if (data->state.used_interface == Curl_if_easy) {
+    if(data->state.used_interface == Curl_if_easy) {
       res = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if (res)
+      if(res)
         return res;
       li->ssldone = TRUE;
-    } else {
+    }
+    else {
       res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
-      if (res)
+      if(res)
         return res;
     }
   }
 #endif
 
-  if (data->state.used_interface == Curl_if_easy)
+  if(data->state.used_interface == Curl_if_easy)
     return ldap_connecting(conn, done);
 
   return CURLE_OK;
@@ -262,15 +264,16 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   char *info = NULL;
 
 #ifdef USE_SSL
-  if (conn->handler->flags & PROTOPT_SSL) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
-    if (!li->ssldone) {
-      CURLcode res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
-      if (res || !li->ssldone)
+    if(!li->ssldone) {
+      CURLcode res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                  &li->ssldone);
+      if(res || !li->ssldone)
         return res;
     }
     /* Have we installed the libcurl SSL handlers into the sockbuf yet? */
-    if (!li->sslinst) {
+    if(!li->sslinst) {
       Sockbuf *sb;
       ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, conn);
@@ -281,53 +284,54 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   }
 #endif
 
-  if (data->state.used_interface == Curl_if_easy)
+  if(data->state.used_interface == Curl_if_easy)
     tvp = NULL;    /* let ldap_result block indefinitely */
   else
     tvp = &tv;
 
 retry:
-  if (!li->didbind) {
+  if(!li->didbind) {
     char *binddn;
     struct berval passwd;
 
-    if (conn->bits.user_passwd) {
+    if(conn->bits.user_passwd) {
       binddn = conn->user;
       passwd.bv_val = conn->passwd;
       passwd.bv_len = strlen(passwd.bv_val);
-    } else {
+    }
+    else {
       binddn = NULL;
       passwd.bv_val = NULL;
       passwd.bv_len = 0;
     }
     rc = ldap_sasl_bind(li->ld, binddn, LDAP_SASL_SIMPLE, &passwd,
                         NULL, NULL, &li->msgid);
-    if (rc)
+    if(rc)
       return CURLE_LDAP_CANNOT_BIND;
     li->didbind = TRUE;
-    if (tvp)
+    if(tvp)
       return CURLE_OK;
   }
 
   rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, tvp, &result);
-  if (rc < 0) {
+  if(rc < 0) {
     failf(data, "LDAP local: bind ldap_result %s", ldap_err2string(rc));
     return CURLE_LDAP_CANNOT_BIND;
   }
-  if (rc == 0) {
+  if(rc == 0) {
     /* timed out */
     return CURLE_OK;
   }
   rc = ldap_parse_result(li->ld, result, &err, NULL, &info, NULL, NULL, 1);
-  if (rc) {
+  if(rc) {
     failf(data, "LDAP local: bind ldap_parse_result %s", ldap_err2string(rc));
     return CURLE_LDAP_CANNOT_BIND;
   }
   /* Try to fallback to LDAPv2? */
-  if (err == LDAP_PROTOCOL_ERROR) {
+  if(err == LDAP_PROTOCOL_ERROR) {
     int proto;
     ldap_get_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
-    if (proto == LDAP_VERSION3) {
+    if(proto == LDAP_VERSION3) {
       ldap_memfree(info);
       proto = LDAP_VERSION2;
       ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
@@ -336,7 +340,7 @@ retry:
     }
   }
 
-  if (err) {
+  if(err) {
     failf(data, "LDAP remote: bind failed %s %s", ldap_err2string(rc),
           info ? info : "");
     return CURLE_LOGIN_DENIED;
@@ -351,8 +355,8 @@ static CURLcode ldap_disconnect(struct connectdata *conn, bool dead_connection)
   ldapconninfo *li = conn->proto.generic;
   (void) dead_connection;
 
-  if (li) {
-    if (li->ld) {
+  if(li) {
+    if(li->ld) {
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
@@ -377,11 +381,11 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   infof(data, "LDAP local: %s\n", data->change.url);
 
   rc = ldap_url_parse(data->change.url, &ludp);
-  if (rc != LDAP_URL_SUCCESS) {
+  if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
     status = CURLE_URL_MALFORMAT;
-    if (rc > LDAP_URL_SUCCESS && rc <= LDAP_URL_ERR_BADEXTS) {
-      if (rc == LDAP_URL_ERR_MEM)
+    if(rc > LDAP_URL_SUCCESS && rc <= LDAP_URL_ERR_BADEXTS) {
+      if(rc == LDAP_URL_ERR_MEM)
         status = CURLE_OUT_OF_MEMORY;
       msg = url_errs[rc];
     }
@@ -393,7 +397,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
                        ludp->lud_filter, ludp->lud_attrs, 0,
                        NULL, NULL, NULL, 0, &msgid);
   ldap_free_urldesc(ludp);
-  if (rc != LDAP_SUCCESS) {
+  if(rc != LDAP_SUCCESS) {
     failf(data, "LDAP local: ldap_search_ext %s", ldap_err2string(rc));
     return CURLE_LDAP_SEARCH_FAILED;
   }
@@ -412,9 +416,9 @@ static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
   (void)res;
   (void)premature;
 
-  if (lr) {
+  if(lr) {
     /* if there was a search in progress, abandon it */
-    if (lr->msgid) {
+    if(lr->msgid) {
       ldapconninfo *li = conn->proto.generic;
       ldap_abandon_ext(li->ld, lr->msgid, NULL, NULL);
       lr->msgid = 0;
@@ -441,7 +445,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
   (void)sockindex;
 
   rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_RECEIVED, &tv, &result);
-  if (rc < 0) {
+  if(rc < 0) {
     failf(data, "LDAP local: search ldap_result %s", ldap_err2string(rc));
     *err = CURLE_RECV_ERROR;
     return -1;
@@ -451,30 +455,32 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
   ret = -1;
 
   /* timed out */
-  if (result == NULL)
+  if(result == NULL)
     return ret;
 
-  for (ent = ldap_first_message(li->ld, result); ent;
+  for(ent = ldap_first_message(li->ld, result); ent;
     ent = ldap_next_message(li->ld, ent)) {
     struct berval bv, *bvals, **bvp = &bvals;
     int binary = 0, msgtype;
 
     msgtype = ldap_msgtype(ent);
-    if (msgtype == LDAP_RES_SEARCH_RESULT) {
+    if(msgtype == LDAP_RES_SEARCH_RESULT) {
       int code;
       char *info = NULL;
       rc = ldap_parse_result(li->ld, ent, &code, NULL, &info, NULL, NULL, 0);
-      if (rc) {
+      if(rc) {
         failf(data, "LDAP local: search ldap_parse_result %s",
               ldap_err2string(rc));
         *err = CURLE_LDAP_SEARCH_FAILED;
-      } else if (code && code != LDAP_SIZELIMIT_EXCEEDED) {
+      }
+      else if(code && code != LDAP_SIZELIMIT_EXCEEDED) {
         failf(data, "LDAP remote: search failed %s %s", ldap_err2string(rc),
-          info ? info : "");
+              info ? info : "");
         *err = CURLE_LDAP_SEARCH_FAILED;
-      } else {
+      }
+      else {
         /* successful */
-        if (code == LDAP_SIZELIMIT_EXCEEDED)
+        if(code == LDAP_SIZELIMIT_EXCEEDED)
           infof(data, "There are more than %d entries\n", lr->nument);
         data->req.size = data->req.bytecount;
         *err = CURLE_OK;
@@ -483,9 +489,9 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
       lr->msgid = 0;
       ldap_memfree(info);
       break;
-    } else if (msgtype != LDAP_RES_SEARCH_ENTRY) {
-      continue;
     }
+    else if(msgtype != LDAP_RES_SEARCH_ENTRY)
+      continue;
 
     lr->nument++;
     rc = ldap_get_dn_ber(li->ld, ent, &ber, &bv);
@@ -500,41 +506,42 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
     Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
     data->req.bytecount += bv.bv_len + 5;
 
-    for (rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, bvp);
+    for(rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, bvp);
       rc == LDAP_SUCCESS;
       rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, bvp)) {
       int i;
 
-      if (bv.bv_val == NULL) break;
+      if(bv.bv_val == NULL) break;
 
-      if (bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
+      if(bv.bv_len > 7 && !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7))
         binary = 1;
       else
         binary = 0;
 
-      for (i=0; bvals[i].bv_val != NULL; i++) {
+      for(i=0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
         Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
-        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val, bv.bv_len);
+        Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                          bv.bv_len);
         Curl_client_write(conn, CLIENTWRITE_BODY, (char *)":", 1);
         data->req.bytecount += bv.bv_len + 2;
 
-        if (!binary) {
+        if(!binary) {
           /* check for leading or trailing whitespace */
-          if (ISSPACE(bvals[i].bv_val[0]) ||
-              ISSPACE(bvals[i].bv_val[bvals[i].bv_len-1])) {
+          if(ISSPACE(bvals[i].bv_val[0]) ||
+              ISSPACE(bvals[i].bv_val[bvals[i].bv_len-1]))
             binval = 1;
-          } else {
+          else {
             /* check for unprintable characters */
             unsigned int j;
-            for (j=0; j<bvals[i].bv_len; j++)
-              if (!ISPRINT(bvals[i].bv_val[j])) {
+            for(j=0; j<bvals[i].bv_len; j++)
+              if(!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;
               }
           }
         }
-        if (binary || binval) {
+        if(binary || binval) {
           char *val_b64;
           /* Binary value, encode to base64. */
           size_t val_b64_sz = Curl_base64_encode(data,
@@ -548,7 +555,8 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
             free(val_b64);
             data->req.bytecount += val_b64_sz;
           }
-        } else {
+        }
+        else {
           Curl_client_write(conn, CLIENTWRITE_BODY, (char *)" ", 1);
           Curl_client_write(conn, CLIENTWRITE_BODY, bvals[i].bv_val,
                             bvals[i].bv_len);
@@ -596,7 +604,7 @@ static int
 ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
 {
   (void)arg;
-  if (opt == LBER_SB_OPT_DATA_READY) {
+  if(opt == LBER_SB_OPT_DATA_READY) {
     struct connectdata *conn = sbiod->sbiod_pvt;
     return Curl_ssl_data_pending(conn, FIRSTSOCKET);
   }
@@ -612,7 +620,7 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   CURLcode err = CURLE_RECV_ERROR;
 
   ret = li->recv(conn, FIRSTSOCKET, buf, len, &err);
-  if (ret < 0 && err == CURLE_AGAIN) {
+  if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }
   return ret;
@@ -627,7 +635,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   CURLcode err = CURLE_SEND_ERROR;
 
   ret = li->send(conn, FIRSTSOCKET, buf, len, &err);
-  if (ret < 0 && err == CURLE_AGAIN) {
+  if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }
   return ret;

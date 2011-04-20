@@ -133,11 +133,11 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
      (ret = get_gss_name(conn, proxy, neg_ctx->server_name)))
     return ret;
 
-  if (!neg_ctx->max_token_length) {
+  if(!neg_ctx->max_token_length) {
     PSecPkgInfo SecurityPackage;
     ret = s_pSecFn->QuerySecurityPackageInfo((SEC_CHAR *)"Negotiate",
                                              &SecurityPackage);
-    if (ret != SEC_E_OK)
+    if(ret != SEC_E_OK)
       return -1;
 
     /* Allocate input and output buffers according to the max token size
@@ -164,14 +164,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
   }
 
-  if ( !input_token ) {
-    /* first call in a new negotiation, we have to require credentials,
+  if(!input_token) {
+    /* first call in a new negotation, we have to require credentials,
        and allocate memory for the context */
 
     neg_ctx->credentials = (CredHandle *)malloc(sizeof(CredHandle));
     neg_ctx->context = (CtxtHandle *)malloc(sizeof(CtxtHandle));
 
-    if ( !neg_ctx->credentials || !neg_ctx->context)
+    if( !neg_ctx->credentials || !neg_ctx->context)
       return -1;
 
     neg_ctx->status =
@@ -179,7 +179,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                          SECPKG_CRED_OUTBOUND, NULL, NULL,
                                          NULL, NULL, neg_ctx->credentials,
                                          &lifetime);
-    if ( neg_ctx->status != SEC_E_OK )
+    if( neg_ctx->status != SEC_E_OK )
       return -1;
   }
 
@@ -193,7 +193,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   out_sec_buff.pvBuffer   = neg_ctx->output_token;
 
 
-  if (input_token) {
+  if(input_token) {
     in_buff_desc.ulVersion = 0;
     in_buff_desc.cBuffers  = 1;
     in_buff_desc.pBuffers  = &out_sec_buff;
@@ -217,14 +217,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &context_attributes,
     &lifetime);
 
-  if ( GSS_ERROR(neg_ctx->status) )
+  if( GSS_ERROR(neg_ctx->status) )
     return -1;
 
-  if ( neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
+  if( neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
        neg_ctx->status == SEC_I_COMPLETE_AND_CONTINUE ) {
     neg_ctx->status = s_pSecFn->CompleteAuthToken(neg_ctx->context,
                                                   &out_buff_desc);
-    if ( GSS_ERROR(neg_ctx->status) )
+    if( GSS_ERROR(neg_ctx->status) )
       return -1;
   }
 

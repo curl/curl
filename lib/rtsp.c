@@ -119,11 +119,11 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
     /* timeout */
     ret_val = FALSE;
   }
-  else if (sval & CURL_CSELECT_ERR) {
+  else if(sval & CURL_CSELECT_ERR) {
     /* socket is in an error state */
     ret_val = TRUE;
   }
-  else if ((sval & CURL_CSELECT_IN) && check->data) {
+  else if((sval & CURL_CSELECT_IN) && check->data) {
     /* readable with no error. could be closed or could be alive but we can
        only check if we have a proper SessionHandle for the connection */
     curl_socket_t connectinfo = Curl_getconnectinfo(check->data, &check);
@@ -180,7 +180,8 @@ CURLcode Curl_rtsp_done(struct connectdata *conn,
     CSeq_sent = rtsp->CSeq_sent;
     CSeq_recv = rtsp->CSeq_recv;
     if((data->set.rtspreq != RTSPREQ_RECEIVE) && (CSeq_sent != CSeq_recv)) {
-      failf(data, "The CSeq of this request %ld did not match the response %ld",
+      failf(data,
+            "The CSeq of this request %ld did not match the response %ld",
             CSeq_sent, CSeq_recv);
       return CURLE_RTSP_CSEQ_ERROR;
     }
@@ -510,8 +511,9 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
         }
       }
 
-    data->state.expect100header = FALSE; /* RTSP posts are simple/small */
-    } else if(rtspreq == RTSPREQ_GET_PARAMETER) {
+      data->state.expect100header = FALSE; /* RTSP posts are simple/small */
+    }
+    else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
       data->set.httpreq = HTTPREQ_HEAD;
       data->set.opt_no_body = TRUE;

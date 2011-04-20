@@ -279,7 +279,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       int i;
 
       ppath++;
-      for (i = 0; ppath[i]; i++) {
+      for(i = 0; ppath[i]; i++) {
         if(ppath[i] == ':')
           ppath[i] = ' ';
       }

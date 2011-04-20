@@ -139,7 +139,7 @@ static CURLcode sftp_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode sftp_doing(struct connectdata *conn,
                            bool *dophase_done);
-static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection);
+static CURLcode sftp_disconnect(struct connectdata *conn, bool dead);
 static
 CURLcode sftp_perform(struct connectdata *conn,
                       bool *connected,
@@ -567,9 +567,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* The fingerprint points to static storage (!), don't free() it. */
       infof(data, "Fingerprint: ");
-      for (rc = 0; rc < 16; rc++) {
+      for(rc = 0; rc < 16; rc++)
         infof(data, "%02X ", (unsigned char) fingerprint[rc]);
-      }
       infof(data, "\n");
 #endif /* CURL_LIBSSH2_DEBUG */
 
@@ -582,7 +581,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         char buf[33];
         host_public_key_md5 = libssh2_hostkey_hash(sshc->ssh_session,
                                                    LIBSSH2_HOSTKEY_HASH_MD5);
-        for (i = 0; i < 16; i++)
+        for(i = 0; i < 16; i++)
           snprintf(&buf[i*2], 3, "%02x",
                    (unsigned char) host_public_key_md5[i]);
         if(!strequal(buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5])) {
@@ -1490,7 +1489,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(data->set.ftp_append)
         /* Try to open for append, but create if nonexisting */
         flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
-      else if (data->state.resume_from > 0)
+      else if(data->state.resume_from > 0)
         /* If we have restart position then open for append */
         flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
       else
@@ -2521,12 +2520,10 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
       curl_socket_t sock = conn->sock[FIRSTSOCKET];
       curl_socket_t fd_read = CURL_SOCKET_BAD;
       curl_socket_t fd_write = CURL_SOCKET_BAD;
-      if (LIBSSH2_SESSION_BLOCK_INBOUND & dir) {
+      if(LIBSSH2_SESSION_BLOCK_INBOUND & dir)
         fd_read = sock;
-      }
-      if (LIBSSH2_SESSION_BLOCK_OUTBOUND & dir) {
+      if(LIBSSH2_SESSION_BLOCK_OUTBOUND & dir)
         fd_write = sock;
-      }
       /* wait for the socket to become ready */
       Curl_socket_ready(fd_read, fd_write,
                         (int)(left>1000?1000:left)); /* ignore result */
@@ -2594,7 +2591,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
-  } else {
+  }
+  else {
     conn->recv[FIRSTSOCKET] = sftp_recv;
     conn->send[FIRSTSOCKET] = sftp_send;
   }
@@ -2850,7 +2848,7 @@ static ssize_t scp_recv(struct connectdata *conn, int sockindex,
     libssh2_channel_read(conn->proto.sshc.ssh_channel, mem, len);
 
   ssh_block2waitfor(conn, (nread == LIBSSH2_ERROR_EAGAIN)?TRUE:FALSE);
-  if (nread == LIBSSH2_ERROR_EAGAIN) {
+  if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
   }
@@ -3041,7 +3039,7 @@ get_pathname(const char **cpp, char **path)
     quot = *cp++;
 
     /* Search for terminating quote, unescape some chars */
-    for (i = j = 0; i <= strlen(cp); i++) {
+    for(i = j = 0; i <= strlen(cp); i++) {
       if(cp[i] == quot) {  /* Found quote */
         i++;
         (*path)[j] = '\0';

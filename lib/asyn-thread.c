@@ -193,7 +193,7 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 static
 void destroy_thread_sync_data(struct thread_sync_data * tsd)
 {
-  if (tsd->mtx) {
+  if(tsd->mtx) {
     Curl_mutex_destroy(tsd->mtx);
     free(tsd->mtx);
   }
@@ -201,7 +201,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
   if(tsd->hostname)
     free(tsd->hostname);
 
-  if (tsd->res)
+  if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
   memset(tsd,0,sizeof(*tsd));
@@ -225,7 +225,8 @@ int init_thread_sync_data(struct thread_sync_data * tsd,
 #endif
 
   tsd->mtx = malloc(sizeof(curl_mutex_t));
-  if (tsd->mtx == NULL) goto err_exit;
+  if(tsd->mtx == NULL)
+    goto err_exit;
 
   Curl_mutex_init(tsd->mtx);
 
@@ -235,7 +236,8 @@ int init_thread_sync_data(struct thread_sync_data * tsd,
    * thread during gethostbyname execution.
    */
   tsd->hostname = strdup(hostname);
-  if (!tsd->hostname) goto err_exit;
+  if(!tsd->hostname)
+    goto err_exit;
 
   return 1;
 
@@ -278,9 +280,9 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
 
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
-  if (rc != 0) {
+  if(rc != 0) {
     tsd->sock_error = SOCKERRNO;
-    if (tsd->sock_error == 0)
+    if(tsd->sock_error == 0)
       tsd->sock_error = ENOMEM;
   }
 
@@ -302,9 +304,9 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
 
   tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
 
-  if (!tsd->res) {
+  if(!tsd->res) {
     tsd->sock_error = SOCKERRNO;
-    if (tsd->sock_error == 0)
+    if(tsd->sock_error == 0)
       tsd->sock_error = ENOMEM;
   }
 
@@ -328,10 +330,10 @@ static void destroy_async_data (struct Curl_async *async)
   if(async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
 
-    if (td->dummy_sock != CURL_SOCKET_BAD)
+    if(td->dummy_sock != CURL_SOCKET_BAD)
       sclose(td->dummy_sock);
 
-    if (td->thread_hnd != curl_thread_t_null)
+    if(td->thread_hnd != curl_thread_t_null)
       Curl_thread_join(&td->thread_hnd);
 
     destroy_thread_sync_data(&td->tsd);
@@ -366,7 +368,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->dummy_sock = CURL_SOCKET_BAD;
   td->thread_hnd = curl_thread_t_null;
 
-  if (!init_thread_sync_data(&td->tsd, hostname, port, hints))
+  if(!init_thread_sync_data(&td->tsd, hostname, port, hints))
     goto err_exit;
 
   Curl_safefree(conn->async.hostname);
@@ -380,7 +382,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    * Windows needs at least 1 socket in select().
    */
   td->dummy_sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if (td->dummy_sock == CURL_SOCKET_BAD)
+  if(td->dummy_sock == CURL_SOCKET_BAD)
     goto err_exit;
 #endif
 
@@ -428,11 +430,10 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   DEBUGASSERT(conn && td);
 
   /* wait for the thread to resolve the name */
-  if (Curl_thread_join(&td->thread_hnd)) {
+  if(Curl_thread_join(&td->thread_hnd))
     rc = getaddrinfo_complete(conn);
-  } else {
+  else
     DEBUGASSERT(0);
-  }
 
   conn->async.done = TRUE;
 
@@ -441,11 +442,12 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   if(!conn->async.dns) {
     /* a name was not resolved */
-    if (conn->bits.httpproxy) {
+    if(conn->bits.httpproxy) {
       failf(data, "Could not resolve proxy: %s; %s",
             conn->async.hostname, Curl_strerror(conn, conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_PROXY;
-    } else {
+    }
+    else {
       failf(data, "Could not resolve host: %s; %s",
             conn->async.hostname, Curl_strerror(conn, conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
@@ -474,7 +476,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
   *entry = NULL;
 
-  if (!td) {
+  if(!td) {
     DEBUGASSERT(td);
     return CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -483,7 +485,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   done = td->tsd.done;
   Curl_mutex_release(td->tsd.mtx);
 
-  if (done) {
+  if(done) {
     getaddrinfo_complete(conn);
     destroy_async_data(&conn->async);
 
@@ -493,20 +495,21 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       return CURLE_COULDNT_RESOLVE_HOST;
     }
     *entry = conn->async.dns;
-  } else {
+  }
+  else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     int elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
-    if (elapsed < 0)
+    if(elapsed < 0)
       elapsed = 0;
 
-    if (td->poll_interval == 0)
+    if(td->poll_interval == 0)
       /* Start at 1ms poll interval */
       td->poll_interval = 1;
-    else if (elapsed >= td->interval_end)
+    else if(elapsed >= td->interval_end)
       /* Back-off exponentially if last interval expired  */
       td->poll_interval *= 2;
 
-    if (td->poll_interval > 250)
+    if(td->poll_interval > 250)
       td->poll_interval = 250;
 
     td->interval_end = elapsed + td->poll_interval;

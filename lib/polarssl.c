@@ -106,9 +106,9 @@ Curl_polarssl_connect(struct connectdata *conn,
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "PolarSSL does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
-  } else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3) {
-    sni = FALSE; /* SSLv3 has no SNI */
   }
+  else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
+    sni = FALSE; /* SSLv3 has no SNI */
 
   havege_init(&conn->ssl[sockindex].hs);
 
@@ -222,12 +222,13 @@ Curl_polarssl_connect(struct connectdata *conn,
 #endif
 
   for(;;) {
-    if (!(ret = ssl_handshake(&conn->ssl[sockindex].ssl))) {
+    if(!(ret = ssl_handshake(&conn->ssl[sockindex].ssl)))
       break;
-    } else if(ret != POLARSSL_ERR_NET_TRY_AGAIN) {
+    else if(ret != POLARSSL_ERR_NET_TRY_AGAIN) {
       failf(data, "ssl_handshake returned -0x%04X", -ret);
       return CURLE_SSL_CONNECT_ERROR;
-    } else {
+    }
+    else {
       /* wait for data from server... */
       long timeout_ms = Curl_timeleft(data, NULL, TRUE);
 

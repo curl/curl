@@ -82,7 +82,8 @@ void Curl_close_connections(struct SessionHandle *data);
 void Curl_reset_reqproto(struct connectdata *conn);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
-#define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi service */
+#define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi
+                                                     service */
 
 CURLcode Curl_connected_proxy(struct connectdata *conn);
 

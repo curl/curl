@@ -561,7 +561,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   *entry = NULL;
 
 #ifdef USE_ALARM_TIMEOUT
-  if (data->set.no_signal)
+  if(data->set.no_signal)
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
   else
@@ -691,7 +691,7 @@ void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
   dns->inuse--;
   /* only free if nobody is using AND it is not in hostcache (timestamp ==
      0) */
-  if (dns->inuse == 0 && dns->timestamp == 0) {
+  if(dns->inuse == 0 && dns->timestamp == 0) {
     Curl_freeaddrinfo(dns->addr);
     free(dns);
   }
@@ -709,7 +709,7 @@ static void freednsentry(void *freethis)
 
   /* mark the entry as not in hostcache */
   p->timestamp = 0;
-  if (p->inuse == 0) {
+  if(p->inuse == 0) {
     Curl_freeaddrinfo(p->addr);
     free(p);
   }

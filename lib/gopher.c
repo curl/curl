@@ -132,7 +132,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   *done = TRUE; /* unconditionally */
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if (strlen(path) <= 2)
+  if(strlen(path) <= 2)
     sel = (char *)"";
   else {
     char *newp;
@@ -151,7 +151,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
     /* ... and finally unescape */
     sel = curl_easy_unescape(data, newp, 0, &len);
-    if (!sel)
+    if(!sel)
       return CURLE_OUT_OF_MEMORY;
     sel_org = sel;
   }
@@ -162,7 +162,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);
-    if (CURLE_OK == result) { /* Which may not have written it all! */
+    if(CURLE_OK == result) { /* Which may not have written it all! */
       result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
       if(result) {
         Curl_safefree(sel_org);
@@ -170,7 +170,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
       }
       k -= amount;
       sel += amount;
-      if (k < 1)
+      if(k < 1)
         break; /* but it did write it all */
     }
     else {
@@ -195,7 +195,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   /* We can use Curl_sendf to send the terminal \r\n relatively safely and
      save allocing another string/doing another _write loop. */
   result = Curl_sendf(sockfd, conn, "\r\n");
-  if (result != CURLE_OK) {
+  if(result != CURLE_OK) {
     failf(data, "Failed sending Gopher request");
     return result;
   }

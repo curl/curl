@@ -88,8 +88,8 @@ static int get_pair(const char *str, char *value, char *content,
       break;
     case ',':
       if(!starts_with_quote) {
-        /* this signals the end of the content if we didn't get a starting quote
-           and then we do "sloppy" parsing */
+        /* this signals the end of the content if we didn't get a starting
+           quote and then we do "sloppy" parsing */
         c=0; /* the end */
         continue;
       }

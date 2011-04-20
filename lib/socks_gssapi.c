@@ -148,7 +148,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
    */
 
   /* prepare service name */
-  if (strchr(serviceptr,'/')) {
+  if(strchr(serviceptr,'/')) {
     service.value = malloc(strlen(serviceptr));
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
@@ -438,7 +438,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_COULDNT_CONNECT;
     }
-  } else {
+  }
+  else {
     code = Curl_write_plain(conn, sock, (char *)gss_w_token.value,
                             gss_w_token.length, &written);
     if((code != CURLE_OK) || ((ssize_t)gss_w_token.length != written)) {

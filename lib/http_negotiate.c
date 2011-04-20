@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,8 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
 }
 
 static void
-log_gss_error(struct connectdata *conn, OM_uint32 error_status, const char *prefix)
+log_gss_error(struct connectdata *conn, OM_uint32 error_status,
+              const char *prefix)
 {
   OM_uint32 maj_stat, min_stat;
   OM_uint32 msg_ctx = 0;
@@ -192,47 +193,47 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
     if(checkprefix("Negotiate", header)) {
-        ASN1_OBJECT *   object            = NULL;
-        int             rc                = 1;
-        unsigned char * spnegoToken       = NULL;
-        size_t          spnegoTokenLength = 0;
-        unsigned char * mechToken         = NULL;
-        size_t          mechTokenLength   = 0;
+      ASN1_OBJECT *   object            = NULL;
+      int             rc                = 1;
+      unsigned char * spnegoToken       = NULL;
+      size_t          spnegoTokenLength = 0;
+      unsigned char * mechToken         = NULL;
+      size_t          mechTokenLength   = 0;
 
+      if(input_token.value == NULL)
+        return CURLE_OUT_OF_MEMORY;
+
+      spnegoToken = malloc(input_token.length);
+      if(spnegoToken == NULL)
+        return CURLE_OUT_OF_MEMORY;
+
+      spnegoTokenLength = input_token.length;
+
+      object = OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
+      if(!parseSpnegoTargetToken(spnegoToken,
+                                 spnegoTokenLength,
+                                 NULL,
+                                 NULL,
+                                 &mechToken,
+                                 &mechTokenLength,
+                                 NULL,
+                                 NULL)) {
+        free(spnegoToken);
+        spnegoToken = NULL;
+        infof(conn->data, "Parse SPNEGO Target Token failed\n");
+      }
+      else {
+        free(input_token.value);
+        input_token.value = malloc(mechTokenLength);
         if(input_token.value == NULL)
           return CURLE_OUT_OF_MEMORY;
 
-        spnegoToken = malloc(input_token.length);
-        if(spnegoToken == NULL)
-          return CURLE_OUT_OF_MEMORY;
-
-        spnegoTokenLength = input_token.length;
-
-        object = OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
-        if(!parseSpnegoTargetToken(spnegoToken,
-                                    spnegoTokenLength,
-                                    NULL,
-                                    NULL,
-                                    &mechToken,
-                                    &mechTokenLength,
-                                    NULL,
-                                    NULL)) {
-          free(spnegoToken);
-          spnegoToken = NULL;
-          infof(conn->data, "Parse SPNEGO Target Token failed\n");
-        }
-        else {
-          free(input_token.value);
-          input_token.value = malloc(mechTokenLength);
-          if (input_token.value == NULL)
-            return CURLE_OUT_OF_MEMORY;
-
-          memcpy(input_token.value, mechToken,mechTokenLength);
-          input_token.length = mechTokenLength;
-          free(mechToken);
-          mechToken = NULL;
-          infof(conn->data, "Parse SPNEGO Target Token succeeded\n");
-        }
+        memcpy(input_token.value, mechToken,mechTokenLength);
+        input_token.length = mechTokenLength;
+        free(mechToken);
+        mechToken = NULL;
+        infof(conn->data, "Parse SPNEGO Target Token succeeded\n");
+      }
     }
 #endif
   }

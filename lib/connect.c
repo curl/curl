@@ -263,7 +263,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
-  if ( !dev && !port )
+  if(!dev && !port)
     /* no local kind of binding was requested */
     return CURLE_OK;
 
@@ -315,10 +315,10 @@ static CURLcode bindlocal(struct connectdata *conn,
       long ipver = conn->ip_version;
       int rc;
 
-      if (af == AF_INET)
+      if(af == AF_INET)
         conn->ip_version = CURL_IPRESOLVE_V4;
 #ifdef ENABLE_IPV6
-      else if (af == AF_INET6)
+      else if(af == AF_INET6)
         conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
 
@@ -372,14 +372,14 @@ static CURLcode bindlocal(struct connectdata *conn,
   else {
     /* no device was given, prepare sa to match af's needs */
 #ifdef ENABLE_IPV6
-    if ( af == AF_INET6 ) {
+    if( af == AF_INET6 ) {
       si6->sin6_family = AF_INET6;
       si6->sin6_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in6);
     }
     else
 #endif
-    if ( af == AF_INET ) {
+    if( af == AF_INET ) {
       si4->sin_family = AF_INET;
       si4->sin_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in);
@@ -388,7 +388,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   for(;;) {
     if( bind(sockfd, sock, sizeof_sa) >= 0) {
-    /* we succeeded to bind */
+      /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
@@ -809,8 +809,8 @@ void Curl_sndbufset(curl_socket_t sockfd)
   int curval = 0;
   int curlen = sizeof(curval);
 
-  if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
-    if (curval > val)
+  if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
+    if(curval > val)
       return;
 
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
@@ -888,7 +888,7 @@ singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if (conn->scope && (addr.family == AF_INET6))
+  if(conn->scope && (addr.family == AF_INET6))
     sa6->sin6_scope_id = conn->scope;
 #endif
 
@@ -1067,8 +1067,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with a Curl_addrinfo chain
    */
-  for (curr_addr = ai, aliasindex=0; curr_addr;
-       curr_addr = curr_addr->ai_next, aliasindex++) {
+  for(curr_addr = ai, aliasindex=0; curr_addr;
+      curr_addr = curr_addr->ai_next, aliasindex++) {
 
     /* start connecting to the IP curr_addr points to */
     CURLcode res =

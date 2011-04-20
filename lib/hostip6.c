@@ -148,7 +148,7 @@ bool Curl_ipvalid(struct connectdata *conn)
 static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
-  for ( ; ai; ai = ai->ai_next) {
+  for(; ai; ai = ai->ai_next) {
     char  buf[INET6_ADDRSTRLEN];
 
     printf("    fam %2d, CNAME %s, ",

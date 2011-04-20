@@ -171,7 +171,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
     indata = (char *)convbuf;
 
   while(insize > 0) {
-    for (i = inputparts = 0; i < 3; i++) {
+    for(i = inputparts = 0; i < 3; i++) {
       if(insize > 0) {
         inputparts++;
         ibuf[i] = (unsigned char) *indata;

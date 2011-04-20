@@ -202,10 +202,10 @@ char *Curl_copy_header_value(const char *h)
   DEBUGASSERT(h);
 
   /* Find the end of the header name */
-  while (*h && (*h != ':'))
+  while(*h && (*h != ':'))
     ++h;
 
-  if (*h)
+  if(*h)
     /* Skip over colon */
     ++h;
 
@@ -1485,7 +1485,7 @@ static CURLcode expect100(struct SessionHandle *data,
        100-continue to the headers which actually speeds up post operations
        (as there is one packet coming back from the web server) */
     ptr = Curl_checkheaders(data, "Expect:");
-    if (ptr) {
+    if(ptr) {
       data->state.expect100header =
         Curl_compareheader(ptr, "Expect:", "100-continue");
     }
@@ -1797,14 +1797,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
     char *cookiehost = Curl_copy_header_value(ptr);
-    if (!cookiehost)
+    if(!cookiehost)
       return CURLE_OUT_OF_MEMORY;
-    if (!*cookiehost)
+    if(!*cookiehost)
       /* ignore empty data */
       free(cookiehost);
     else {
       char *colon = strchr(cookiehost, ':');
-      if (colon)
+      if(colon)
         *colon = 0; /* The host must not include an embedded port number */
       Curl_safefree(conn->allocptr.cookiehost);
       conn->allocptr.cookiehost = cookiehost;
@@ -1882,7 +1882,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
     ppath = data->change.url;
     if(checkprefix("ftp://", ppath)) {
-      if (data->set.proxy_transfer_mode) {
+      if(data->set.proxy_transfer_mode) {
         /* when doing ftp, append ;type=<a|i> if not present */
         char *type = strstr(ppath, ";type=");
         if(type && type[6] && type[7] == 0) {
@@ -1899,14 +1899,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           char *p = ftp_typecode;
           /* avoid sending invalid URLs like ftp://example.com;type=i if the
            * user specified ftp://example.com without the slash */
-          if (!*data->state.path && ppath[strlen(ppath) - 1] != '/') {
+          if(!*data->state.path && ppath[strlen(ppath) - 1] != '/') {
             *p++ = '/';
           }
           snprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
                    data->set.prefer_ascii ? 'a' : 'i');
         }
       }
-      if (conn->bits.user_passwd && !conn->bits.userpwd_in_url)
+      if(conn->bits.user_passwd && !conn->bits.userpwd_in_url)
         paste_ftp_userpwd = TRUE;
     }
   }
@@ -2062,17 +2062,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   /* add the main request stuff */
   /* GET/HEAD/POST/PUT */
   result = Curl_add_bufferf(req_buffer, "%s ", request);
-  if (result)
+  if(result)
     return result;
 
   /* url */
-  if (paste_ftp_userpwd)
+  if(paste_ftp_userpwd)
     result = Curl_add_bufferf(req_buffer, "ftp://%s:%s@%s",
                               conn->user, conn->passwd,
                               ppath + sizeof("ftp://") - 1);
   else
     result = Curl_add_buffer(req_buffer, ppath, strlen(ppath));
-  if (result)
+  if(result)
     return result;
 
   result = Curl_add_bufferf(req_buffer,
@@ -2983,8 +2983,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         data->info.httpcode = k->httpcode;
 
         data->info.httpversion = conn->httpversion;
-        if (!data->state.httpversion ||
-            data->state.httpversion > conn->httpversion)
+        if(!data->state.httpversion ||
+           data->state.httpversion > conn->httpversion)
           /* store the lowest server version we encounter */
           data->state.httpversion = conn->httpversion;
 
@@ -3095,9 +3095,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
       char *contenttype = Curl_copy_header_value(k->p);
-      if (!contenttype)
+      if(!contenttype)
         return CURLE_OUT_OF_MEMORY;
-      if (!*contenttype)
+      if(!*contenttype)
         /* ignore empty data */
         free(contenttype);
       else {
@@ -3301,9 +3301,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             !data->req.location) {
       /* this is the URL that the server advises us to use instead */
       char *location = Curl_copy_header_value(k->p);
-      if (!location)
+      if(!location)
         return CURLE_OUT_OF_MEMORY;
-      if (!*location)
+      if(!*location)
         /* ignore empty data */
         free(location);
       else {

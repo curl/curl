@@ -1358,7 +1358,8 @@ struct UserDefined {
   curl_sockopt_callback fsockopt;  /* function for setting socket options */
   void *sockopt_client; /* pointer to pass to the socket options callback */
   curl_opensocket_callback fopensocket; /* function for checking/translating
-                                           the address and opening the socket */
+                                           the address and opening the
+                                           socket */
   void* opensocket_client;
 
   void *seek_client;    /* pointer to pass to the seek callback */
@@ -1380,7 +1381,8 @@ struct UserDefined {
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
   curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */
-  curl_off_t max_recv_speed; /* high speed limit in bytes/second for download */
+  curl_off_t max_recv_speed; /* high speed limit in bytes/second for
+                                download */
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of POST data */
@@ -1494,7 +1496,8 @@ struct UserDefined {
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
   bool wildcardmatch; /* enable wildcard matching */
-  curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer starts */
+  curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
+                                        starts */
   curl_chunk_end_callback chunk_end; /* called after part transferring
                                         stopped */
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds

@@ -98,10 +98,9 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   while(length--) {
     in = *string;
 
-    if (Curl_isunreserved(in)) {
+    if(Curl_isunreserved(in))
       /* just copy this */
       ns[strindex++]=in;
-    }
     else {
       /* encode it */
       newlen += 2; /* the size grows with two, since this'll become a %XX */

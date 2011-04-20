@@ -113,19 +113,19 @@ static void MD4Update(MD4_CTX *context, const unsigned char *input,
   /* Compute number of bytes mod 64 */
   bufindex = (unsigned int)((context->count[0] >> 3) & 0x3F);
   /* Update number of bits */
-  if ((context->count[0] += ((UINT4)inputLen << 3))
-      < ((UINT4)inputLen << 3))
+  if((context->count[0] += ((UINT4)inputLen << 3))
+     < ((UINT4)inputLen << 3))
     context->count[1]++;
   context->count[1] += ((UINT4)inputLen >> 29);
 
   partLen = 64 - bufindex;
   /* Transform as many times as possible.
    */
-  if (inputLen >= partLen) {
+  if(inputLen >= partLen) {
     memcpy(&context->buffer[bufindex], input, partLen);
     MD4Transform (context->state, context->buffer);
 
-    for (i = partLen; i + 63 < inputLen; i += 64)
+    for(i = partLen; i + 63 < inputLen; i += 64)
       MD4Transform (context->state, &input[i]);
 
     bufindex = 0;
@@ -251,7 +251,7 @@ static void Encode(unsigned char *output, UINT4 *input, unsigned int len)
 {
   unsigned int i, j;
 
-  for (i = 0, j = 0; j < len; i++, j += 4) {
+  for(i = 0, j = 0; j < len; i++, j += 4) {
     output[j] = (unsigned char)(input[i] & 0xff);
     output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
     output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
@@ -262,11 +262,12 @@ static void Encode(unsigned char *output, UINT4 *input, unsigned int len)
 /* Decodes input (unsigned char) into output (UINT4). Assumes len is
      a multiple of 4.
  */
-static void Decode (UINT4 *output, const unsigned char *input, unsigned int len)
+static void Decode (UINT4 *output, const unsigned char *input,
+                    unsigned int len)
 {
   unsigned int i, j;
 
-  for (i = 0, j = 0; j < len; i++, j += 4)
+  for(i = 0, j = 0; j < len; i++, j += 4)
     output[i] = ((UINT4)input[j]) | (((UINT4)input[j+1]) << 8) |
       (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
 }

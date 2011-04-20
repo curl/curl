@@ -123,12 +123,13 @@ char *curl_version(void)
 #ifdef USE_LIBRTMP
   {
     char suff[2];
-    if (RTMP_LIB_VERSION & 0xff) {
+    if(RTMP_LIB_VERSION & 0xff) {
       suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
       suff[1] = '\0';
-    } else {
-      suff[0] = '\0';
     }
+    else
+      suff[0] = '\0';
+
     len = snprintf(ptr, left, " librtmp/%d.%d%s",
       RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff, suff);
 /*

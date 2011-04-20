@@ -100,7 +100,7 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done);
 static CURLcode pop3_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode pop3_connect(struct connectdata *conn, bool *done);
-static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection);
+static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
 static int pop3_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
@@ -481,7 +481,7 @@ static CURLcode pop3_list(struct connectdata *conn)
   if(result)
     return result;
 
-  if (strlen(pop3c->mailbox))
+  if(strlen(pop3c->mailbox))
     state(conn, POP3_LIST_SINGLE);
   else
     state(conn, POP3_LIST);
@@ -773,7 +773,7 @@ CURLcode pop3_perform(struct connectdata *conn,
   /* If mailbox is empty, then assume user wants listing for mail IDs,
    * otherwise, attempt to retrieve the mail-id stored in mailbox
    */
-  if (strlen(pop3c->mailbox) && !conn->data->set.ftp_list_only)
+  if(strlen(pop3c->mailbox) && !conn->data->set.ftp_list_only)
     result = pop3_retr(conn);
   else
     result = pop3_list(conn);
@@ -896,7 +896,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 
   /* url decode the path and use this mailbox */
   pop3c->mailbox = curl_easy_unescape(data, path, 0, NULL);
-  if (!pop3c->mailbox)
+  if(!pop3c->mailbox)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;

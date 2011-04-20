@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -115,7 +115,8 @@ Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
       list->tail = NULL;
     else
       e->next->prev = NULL;
-  } else {
+  }
+  else {
     e->prev->next = e->next;
     if(!e->next)
       list->tail = e->prev;
@@ -149,7 +150,8 @@ Curl_llist_count(struct curl_llist *list)
 }
 
 int Curl_llist_move(struct curl_llist *list, struct curl_llist_element *e,
-                    struct curl_llist *to_list, struct curl_llist_element *to_e)
+                    struct curl_llist *to_list,
+                    struct curl_llist_element *to_e)
 {
   /* Remove element from list */
   if(e == NULL || list->size == 0)

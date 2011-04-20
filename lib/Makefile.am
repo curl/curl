@@ -184,3 +184,6 @@ $(VCPROJ): vc8proj.head vc8proj.foot Makefile.am
 	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
 	done; \
 	cat $(srcdir)/vc8proj.foot $(VCPROJOUT) )
+
+all-local:
+	@for i in $(CSOURCES) $(HHEADERS); do $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/lib/$$i; done

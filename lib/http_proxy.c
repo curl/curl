@@ -164,8 +164,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
         if(CURLE_OK == result) {
           /* Now send off the request */
-          result = Curl_add_buffer_send(req_buffer, conn,
-                                        &data->info.request_size, 0, sockindex);
+          result =
+            Curl_add_buffer_send(req_buffer, conn,
+                                 &data->info.request_size, 0, sockindex);
         }
         req_buffer = NULL;
         if(result)

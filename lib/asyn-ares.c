@@ -424,7 +424,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      if (conn->bits.httpproxy) {
+      if(conn->bits.httpproxy) {
         failf(data, "Resolving proxy timed out: %s", conn->proxy.dispname);
         rc = CURLE_COULDNT_RESOLVE_PROXY;
       }
@@ -434,7 +434,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       }
     }
     else if(conn->async.done) {
-      if (conn->bits.httpproxy) {
+      if(conn->bits.httpproxy) {
         failf(data, "Could not resolve proxy: %s (%s)", conn->proxy.dispname,
               ares_strerror(conn->async.status));
         rc = CURLE_COULDNT_RESOLVE_PROXY;
@@ -542,10 +542,9 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
   /* Otherwise, check if this is an IPv6 address string */
-  if (Curl_inet_pton (AF_INET6, hostname, &in6) > 0) {
+  if(Curl_inet_pton (AF_INET6, hostname, &in6) > 0)
     /* This must be an IPv6 address literal.  */
     return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-  }
 
   switch(conn->ip_version) {
   default:
