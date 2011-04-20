@@ -641,6 +641,11 @@ this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
 \fICURLPROXY_SOCKS4\fP (added in 7.15.2), \fICURLPROXY_SOCKS5\fP,
 \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and \fICURLPROXY_SOCKS5_HOSTNAME\fP
 (added in 7.18.0). The HTTP type is default. (Added in 7.10)
+
+If you set \fBCURLOPT_PROXYTYPE\fP to \fICURLPROXY_HTTP_1_0\fP, it will only
+affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
+used for "regular" HTTP requests is instead controled with
+\fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
 Pass a pointer to a zero terminated string. The should be a comma- separated
 list of hosts which do not use a proxy, if one is specified.  The only
