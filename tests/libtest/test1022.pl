@@ -31,7 +31,7 @@ if ( $what eq "version" ) {
         $curlconfigversion = "illegal value";
     }
 }
-else {
+else { # "vernum" case
     # Convert hex version to decimal for comparison's sake
     if($filever =~ /^(..)(..)(..)$/) {
         $curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
@@ -41,7 +41,7 @@ else {
     }
 
     # Strip off the -DEV from the curl version if it's there
-    $version =~ s/-DEV$//;
+    $version =~ s/-\w*$//;
 }
 close CURLCONFIG;
 
