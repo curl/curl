@@ -24,6 +24,9 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "urldata.h"
 #include <curl/curl.h>
 #include "http_proxy.h"
