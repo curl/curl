@@ -16,7 +16,7 @@ This release includes the following bugfixes:
  o curl-config: fix --version
  o curl_easy_setopt.3: CURLOPT_PROXYTYPE clarification
  o use HTTPS properly after CONNECT
- o SFTP: close file before postquote
+ o SFTP: close file before post quote operations
 
 This release includes the following known bugs:
 
@@ -26,6 +26,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Patrick Monnerat, Dan Fandrich, Gisle Vanem, Guenter Knauf,
- Rajesh Naganathan, Josue Andrade Gomes, Ryan Schmidt
+ Rajesh Naganathan, Josue Andrade Gomes, Ryan Schmidt, Fabian Keil,
+ Julien Chaffraix
 
         Thanks! (and sorry if I forgot to mention someone)
