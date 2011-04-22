@@ -372,14 +372,14 @@ static CURLcode bindlocal(struct connectdata *conn,
   else {
     /* no device was given, prepare sa to match af's needs */
 #ifdef ENABLE_IPV6
-    if( af == AF_INET6 ) {
+    if(af == AF_INET6) {
       si6->sin6_family = AF_INET6;
       si6->sin6_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in6);
     }
     else
 #endif
-    if( af == AF_INET ) {
+    if(af == AF_INET) {
       si4->sin_family = AF_INET;
       si4->sin_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in);
@@ -387,7 +387,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   }
 
   for(;;) {
-    if( bind(sockfd, sock, sizeof_sa) >= 0) {
+    if(bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);

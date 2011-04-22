@@ -1913,9 +1913,9 @@ CURLcode Curl_follow(struct SessionHandle *data,
      *
      * This behaviour can be overridden with CURLOPT_POSTREDIR.
      */
-    if( (data->set.httpreq == HTTPREQ_POST
-         || data->set.httpreq == HTTPREQ_POST_FORM)
-        && !data->set.post301) {
+    if((data->set.httpreq == HTTPREQ_POST
+        || data->set.httpreq == HTTPREQ_POST_FORM)
+       && !data->set.post301) {
       infof(data,
             "Violate RFC 2616/10.3.2 and switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
@@ -1941,9 +1941,9 @@ CURLcode Curl_follow(struct SessionHandle *data,
 
     This behaviour can be overriden with CURLOPT_POSTREDIR
     */
-    if( (data->set.httpreq == HTTPREQ_POST
-         || data->set.httpreq == HTTPREQ_POST_FORM)
-        && !data->set.post302) {
+    if((data->set.httpreq == HTTPREQ_POST
+        || data->set.httpreq == HTTPREQ_POST_FORM)
+       && !data->set.post302) {
       infof(data,
             "Violate RFC 2616/10.3.3 and switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;

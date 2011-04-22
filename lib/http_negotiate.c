@@ -290,7 +290,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     size_t          responseTokenLength = 0;
 
     responseToken = malloc(neg_ctx->output_token.length);
-    if( responseToken == NULL)
+    if(responseToken == NULL)
       return CURLE_OUT_OF_MEMORY;
     memcpy(responseToken, neg_ctx->output_token.value,
            neg_ctx->output_token.length);

@@ -133,8 +133,8 @@ static CURLcode win32_init(void)
   /* wVersionRequested in wVersion. wHighVersion contains the */
   /* highest supported version. */
 
-  if( LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) ||
-       HIBYTE( wsaData.wVersion ) != HIBYTE(wVersionRequested) ) {
+  if(LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) ||
+     HIBYTE( wsaData.wVersion ) != HIBYTE(wVersionRequested) ) {
     /* Tell the user that we couldn't find a useable */
 
     /* winsock.dll. */
@@ -305,7 +305,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
     return CURLE_FAILED_INIT;
 
   /* Already initialized, don't do it again */
-  if( initialized )
+  if(initialized)
     return CURLE_OK;
 
   /* Call the actual init function first */
@@ -506,7 +506,7 @@ CURLcode curl_easy_perform(CURL *curl)
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if( ! (data->share && data->share->hostcache) ) {
+  if(! (data->share && data->share->hostcache)) {
     /* this handle is not using a shared dns cache */
 
     if(data->set.global_dns_cache &&
@@ -673,8 +673,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
   }
 
   /* Clone the resolver handle, if present, for the new handle */
-  if( Curl_resolver_duphandle(&outcurl->state.resolver,
-                              data->state.resolver) != CURLE_OK )
+  if(Curl_resolver_duphandle(&outcurl->state.resolver,
+                             data->state.resolver) != CURLE_OK)
     goto fail;
 
   Curl_convert_setup(outcurl);

@@ -373,8 +373,8 @@ Curl_cookie_add(struct SessionHandle *data,
                non-session cookie */
             if(co->expires == 0)
               co->expires = 1;
-            else if( co->expires < 0 )
-                co->expires = 0;
+            else if(co->expires < 0)
+              co->expires = 0;
           }
           else if(!co->name) {
             co->name = strdup(name);
@@ -819,8 +819,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
     /* only process this cookie if it is not expired or had no expire
        date AND that if the cookie requires we're secure we must only
        continue if we are! */
-    if( (!co->expires || (co->expires > now)) &&
-        (co->secure?secure:TRUE) ) {
+    if((!co->expires || (co->expires > now)) &&
+       (co->secure?secure:TRUE)) {
 
       /* now check if the domain is correct */
       if(!co->domain ||

@@ -188,7 +188,7 @@ static void destroy_async_data (struct Curl_async *async);
  */
 void Curl_resolver_cancel(struct connectdata *conn)
 {
-  if( conn && conn->data && conn->data->state.resolver )
+  if(conn && conn->data && conn->data->state.resolver)
     ares_cancel((ares_channel)conn->data->state.resolver);
   destroy_async_data(&conn->async);
 }
@@ -203,8 +203,8 @@ static void destroy_async_data (struct Curl_async *async)
 
   if(async->os_specific) {
     struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
-    if( res ) {
-      if( res->temp_ai ) {
+    if(res) {
+      if(res->temp_ai) {
         Curl_freeaddrinfo(res->temp_ai);
         res->temp_ai = NULL;
       }
@@ -329,7 +329,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
   waitperform(conn, 0);
 
-  if( res && !res->num_pending ) {
+  if(res && !res->num_pending) {
     (void)Curl_addrinfo_callback(conn, res->last_status, res->temp_ai);
     /* temp_ai ownership is moved to the connection, so we need not free-up
        them */
@@ -465,7 +465,7 @@ static void compound_results(struct ResolverResults *res,
     return;
   ai_tail = ai;
 
-  while (ai_tail->ai_next)
+  while(ai_tail->ai_next)
     ai_tail = ai_tail->ai_next;
 
   /* Add the new results to the list of old results. */
@@ -507,7 +507,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
     }
   }
   /* A successful result overwrites any previous error */
-  if( res->last_status != ARES_SUCCESS )
+  if(res->last_status != ARES_SUCCESS)
     res->last_status = status;
 }
 
@@ -573,7 +573,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
     res = (struct ResolverResults *)calloc(sizeof(struct ResolverResults),1);
-    if( !res ) {
+    if(!res) {
       Curl_safefree(conn->async.hostname);
       conn->async.hostname = NULL;
       return NULL;
@@ -587,10 +587,10 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
       res->num_pending = 2;
 
       /* areschannel is already setup in the Curl_open() function */
-      ares_gethostbyname((ares_channel)data->state.resolver, hostname, PF_INET,
-                         query_completed_cb, conn);
-      ares_gethostbyname((ares_channel)data->state.resolver, hostname, PF_INET6,
-                         query_completed_cb, conn);
+      ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+                         PF_INET, query_completed_cb, conn);
+      ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+                         PF_INET6, query_completed_cb, conn);
     }
     else
 #endif /* CURLRES_IPV6 */

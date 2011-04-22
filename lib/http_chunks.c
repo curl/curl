@@ -212,7 +212,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       case IDENTITY:
 #endif
         if(!k->ignorebody) {
-          if( !data->set.http_te_skip )
+          if(!data->set.http_te_skip)
             result = Curl_client_write(conn, CLIENTWRITE_BODY, datap,
                                        piece);
           else

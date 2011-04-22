@@ -377,7 +377,7 @@ static CURLcode file_upload(struct connectdata *conn)
 
     /*skip bytes before resume point*/
     if(data->state.resume_from) {
-      if( (curl_off_t)nread <= data->state.resume_from ) {
+      if((curl_off_t)nread <= data->state.resume_from ) {
         data->state.resume_from -= nread;
         nread = 0;
         buf2 = buf;
@@ -456,7 +456,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   fd = conn->data->state.proto.file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
-  if( -1 != fstat(fd, &statbuf)) {
+  if(-1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;
     /* and store the modification time */
@@ -562,7 +562,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     bytestoread = (expected_size < BUFSIZE-1)?(size_t)expected_size:BUFSIZE-1;
     nread = read(fd, buf, bytestoread);
 
-    if( nread > 0)
+    if(nread > 0)
       buf[nread] = 0;
 
     if(nread <= 0 || expected_size == 0)

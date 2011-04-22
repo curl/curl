@@ -1143,7 +1143,8 @@ struct UrlState {
 
   bool authproblem; /* TRUE if there's some problem authenticating */
 
-  void *resolver; /* resolver state, if it is used in the URL state - ares_channel f.e. */
+  void *resolver; /* resolver state, if it is used in the URL state -
+                     ares_channel f.e. */
 
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;

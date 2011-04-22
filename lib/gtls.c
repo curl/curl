@@ -443,13 +443,13 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
 
   if(data->set.str[STRING_CERT]) {
-    if( gnutls_certificate_set_x509_key_file(
-          conn->ssl[sockindex].cred,
-          data->set.str[STRING_CERT],
-          data->set.str[STRING_KEY] ?
-          data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
-          do_file_type(data->set.str[STRING_CERT_TYPE]) ) !=
-        GNUTLS_E_SUCCESS) {
+    if(gnutls_certificate_set_x509_key_file(
+         conn->ssl[sockindex].cred,
+         data->set.str[STRING_CERT],
+         data->set.str[STRING_KEY] ?
+         data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
+         do_file_type(data->set.str[STRING_CERT_TYPE]) ) !=
+       GNUTLS_E_SUCCESS) {
       failf(data, "error reading X.509 key or certificate file");
       return CURLE_SSL_CONNECT_ERROR;
     }

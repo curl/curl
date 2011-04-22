@@ -851,7 +851,7 @@ static int dprintf_formatf(
         size_t len;
 
         str = (char *) p->data.str;
-        if( str == NULL) {
+        if(str == NULL) {
           /* Write null[] if there's space.  */
           if(prec == -1 || prec >= (long) sizeof(null) - 1) {
             str = null;

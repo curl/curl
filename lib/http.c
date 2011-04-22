@@ -1657,8 +1657,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if( (conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_FTP)) &&
-      data->set.upload) {
+  if((conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_FTP)) &&
+     data->set.upload) {
     httpreq = HTTPREQ_PUT;
   }
 

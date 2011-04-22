@@ -753,11 +753,11 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     }
     else
 #endif
-      if( *string_ftpport == ':') {
+      if(*string_ftpport == ':') {
         /* :port */
         ip_end = string_ftpport;
     }
-    else if( (ip_end = strchr(string_ftpport, ':')) != NULL) {
+    else if((ip_end = strchr(string_ftpport, ':')) != NULL) {
         /* either ipv6 or (ipv4|domain|interface):port(-range) */
 #ifdef ENABLE_IPV6
       if(Curl_inet_pton(AF_INET6, string_ftpport, sa6) == 1) {
@@ -776,7 +776,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       strcpy(addr, string_ftpport);
 
     /* parse the port */
-    if( ip_end != NULL ) {
+    if(ip_end != NULL) {
       if((port_start = strchr(ip_end, ':')) != NULL) {
         port_min = curlx_ultous(strtoul(port_start+1, NULL, 10));
         if((port_sep = strchr(port_start, '-')) != NULL) {
@@ -884,8 +884,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   memcpy(sa, ai->ai_addr, ai->ai_addrlen);
   sslen = ai->ai_addrlen;
 
-  for( port = port_min; port <= port_max; ) {
-    if( sa->sa_family == AF_INET )
+  for(port = port_min; port <= port_max;) {
+    if(sa->sa_family == AF_INET)
       sa4->sin_port = htons(port);
 #ifdef ENABLE_IPV6
     else
@@ -2112,7 +2112,7 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
     /* BLOCKING */
     /* PORT means we are now awaiting the server to connect to us. */
     result = AllowServerConnect(conn);
-    if( result )
+    if(result)
       return result;
   }
 
@@ -2226,7 +2226,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     if(data->set.ftp_use_port) {
       /* BLOCKING */
       result = AllowServerConnect(conn);
-      if( result )
+      if(result)
         return result;
     }
 

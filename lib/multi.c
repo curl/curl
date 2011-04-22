@@ -1415,17 +1415,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       /* if both rates are within spec, resume transfer */
       Curl_pgrsUpdate(easy->easy_conn);
-      if( ( (data->set.max_send_speed == 0) ||
-            (data->progress.ulspeed < data->set.max_send_speed ))  &&
-          ( (data->set.max_recv_speed == 0) ||
-            (data->progress.dlspeed < data->set.max_recv_speed) ) )
+      if(( (data->set.max_send_speed == 0) ||
+           (data->progress.ulspeed < data->set.max_send_speed ))  &&
+         ( (data->set.max_recv_speed == 0) ||
+           (data->progress.dlspeed < data->set.max_recv_speed)))
         multistate(easy, CURLM_STATE_PERFORM);
       break;
 
     case CURLM_STATE_PERFORM:
       /* check if over send speed */
-      if( (data->set.max_send_speed > 0) &&
-          (data->progress.ulspeed > data->set.max_send_speed) ) {
+      if((data->set.max_send_speed > 0) &&
+         (data->progress.ulspeed > data->set.max_send_speed)) {
         int buffersize;
 
         multistate(easy, CURLM_STATE_TOOFAST);
@@ -1440,8 +1440,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       /* check if over recv speed */
-      if( (data->set.max_recv_speed > 0) &&
-          (data->progress.dlspeed > data->set.max_recv_speed) ) {
+      if((data->set.max_recv_speed > 0) &&
+         (data->progress.dlspeed > data->set.max_recv_speed)) {
         int buffersize;
 
         multistate(easy, CURLM_STATE_TOOFAST);
@@ -1744,7 +1744,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   *running_handles = multi->num_alive;
 
-  if( CURLM_OK >= returncode )
+  if(CURLM_OK >= returncode)
     update_timer(multi);
 
   return returncode;
@@ -2327,7 +2327,7 @@ static int update_timer(struct Curl_multi *multi)
   if(multi_timeout(multi, &timeout_ms)) {
     return -1;
   }
-  if( timeout_ms < 0 ) {
+  if(timeout_ms < 0) {
     static const struct timeval none={0,0};
     if(Curl_splaycomparekeys(none, multi->timer_lastcall)) {
       multi->timer_lastcall = none;

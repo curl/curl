@@ -171,7 +171,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     neg_ctx->credentials = (CredHandle *)malloc(sizeof(CredHandle));
     neg_ctx->context = (CtxtHandle *)malloc(sizeof(CtxtHandle));
 
-    if( !neg_ctx->credentials || !neg_ctx->context)
+    if(!neg_ctx->credentials || !neg_ctx->context)
       return -1;
 
     neg_ctx->status =
@@ -179,7 +179,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                          SECPKG_CRED_OUTBOUND, NULL, NULL,
                                          NULL, NULL, neg_ctx->credentials,
                                          &lifetime);
-    if( neg_ctx->status != SEC_E_OK )
+    if(neg_ctx->status != SEC_E_OK)
       return -1;
   }
 
@@ -217,14 +217,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &context_attributes,
     &lifetime);
 
-  if( GSS_ERROR(neg_ctx->status) )
+  if(GSS_ERROR(neg_ctx->status))
     return -1;
 
-  if( neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
-       neg_ctx->status == SEC_I_COMPLETE_AND_CONTINUE ) {
+  if(neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
+     neg_ctx->status == SEC_I_COMPLETE_AND_CONTINUE) {
     neg_ctx->status = s_pSecFn->CompleteAuthToken(neg_ctx->context,
                                                   &out_buff_desc);
-    if( GSS_ERROR(neg_ctx->status) )
+    if(GSS_ERROR(neg_ctx->status))
       return -1;
   }
 

@@ -214,8 +214,8 @@ static int pop3_endofresp(struct pingpong *pp,
   char *line = pp->linestart_resp;
   size_t len = pp->nread_resp;
 
-  if( ((len >= 3) && !memcmp("+OK", line, 3)) ||
-      ((len >= 4) && !memcmp("-ERR", line, 4)) ) {
+  if(((len >= 3) && !memcmp("+OK", line, 3)) ||
+     ((len >= 4) && !memcmp("-ERR", line, 4))) {
     *resp=line[1]; /* O or E */
     return TRUE;
   }
