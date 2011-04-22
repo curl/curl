@@ -188,6 +188,6 @@ $(VCPROJ): vc8proj.head vc8proj.foot Makefile.am
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes
 all-local:
-	@for i in $(CSOURCES) $(HHEADERS); do @PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/lib/$$i; if test $$? != "0"; then exit 1; fi; done
+	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/lib $(CSOURCES) $(HHEADERS)
 endif
 
