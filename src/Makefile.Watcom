@@ -193,6 +193,14 @@ $(LINK_ARG): $(__MAKEFILES__)
 !ifdef %use_ares
 	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
 !endif
+!ifdef %use_winidn
+!  if $(__VERSION__) > 1290
+	@%append $^@ library normaliz.lib
+!  else
+	@%append $^@ import '_IdnToAscii@20' 'NORMALIZ.DLL'.'IdnToAscii'
+	@%append $^@ import '_IdnToUnicode@20' 'NORMALIZ.DLL'.'IdnToUnicode'
+!  endif
+!endif
 !else
 	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME)_imp.lib
 !endif

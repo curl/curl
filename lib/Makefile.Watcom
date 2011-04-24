@@ -70,6 +70,13 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 CFLAGS += -dUSE_WINDOWS_SSPI
 !endif
 
+!ifdef %use_winidn
+CFLAGS += -dWINVER=0x0600 -dUSE_WIN32_IDN
+!  if $(__VERSION__) <= 1290
+CFLAGS += -dWANT_IDN_PROTOTYPES
+!  endif
+!endif
+
 #
 # Change to suite.
 #
@@ -228,6 +235,14 @@ $(LINK_ARG): $(__MAKEFILES__)
 !endif
 !ifdef %use_ares
 	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
+!endif
+!ifdef %use_winidn
+!  if $(__VERSION__) > 1290
+	@%append $^@ library normaliz.lib
+!  else
+	@%append $^@ import '_IdnToAscii@20' 'NORMALIZ.DLL'.'IdnToAscii'
+	@%append $^@ import '_IdnToUnicode@20' 'NORMALIZ.DLL'.'IdnToUnicode'
+!  endif
 !endif
 
 $(LIB_ARG): $(__MAKEFILES__)
