@@ -28,6 +28,7 @@ my $warnings;
 my $errors;
 my $file;
 my $dir=".";
+my $wlist;
 
 sub checkwarn {
     my ($num, $col, $file, $line, $msg, $error) = @_;
@@ -53,21 +54,35 @@ sub checkwarn {
 
 $file = shift @ARGV;
 
-if($file =~ /-D(.*)/) {
-    $dir = $1;
-    $file = shift @ARGV;
+while(1) {
+
+    if($file =~ /-D(.*)/) {
+        $dir = $1;
+        $file = shift @ARGV;
+        next;
+    }
+    elsif($file =~ /-W(.*)/) {
+        $wlist = $1;
+        $file = shift @ARGV;
+        next;
+    }
+
+    last;
 }
 
 if(!$file) {
     print "checksrc.pl [option] <file1> [file2] ...\n";
     print " Options:\n";
     print "  -D[DIR]   Directory to prepend file names\n";
+    print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
     exit;
 }
 
 do {
-    scanfile("$dir/$file");
 
+    if($file ne "$wlist") {
+        scanfile("$dir/$file");
+    }
     $file = shift @ARGV;
 
 } while($file);
