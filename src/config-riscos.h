@@ -1,4 +1,3 @@
-/* curl_config.h.in.  Generated automatically from configure.in by autoheader.  */
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

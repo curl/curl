@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010, 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,10 +51,10 @@ int fwrite_xattr(CURL *curl, int fd)
   int i = 0;
   int err = 0;
   /* loop through all xattr-curlinfo pairs and abort on a set error */
-  while ( err == 0 && mappings[i].attr != NULL ) {
+  while(err == 0 && mappings[i].attr != NULL) {
     char *value = NULL;
     CURLcode rc = curl_easy_getinfo(curl, mappings[i].info, &value);
-    if ( rc == CURLE_OK && value ) {
+    if(rc == CURLE_OK && value) {
 #ifdef HAVE_FSETXATTR_6
       err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0, 0 );
 #elif defined(HAVE_FSETXATTR_5)

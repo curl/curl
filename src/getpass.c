@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -78,7 +78,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
   buffer[0]='\0';
   sts = sys$assign(&ttdesc, &chan,0,0);
-  if (sts & 1) {
+  if(sts & 1) {
     sts = sys$qiow(0, chan,
                    IO$_READPROMPT | IO$M_NOECHO,
                    &iosb, 0, 0, buffer, buflen, 0, 0,
@@ -113,12 +113,12 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
   for(i=0; i<buflen; i++) {
     buffer[i] = (char)getch();
-    if ( buffer[i] == '\r' || buffer[i] == '\n' ) {
+    if(buffer[i] == '\r' || buffer[i] == '\n') {
       buffer[i] = 0;
       break;
     }
     else
-      if ( buffer[i] == '\b')
+      if(buffer[i] == '\b')
         /* remove this letter and if this is not the first key, remove the
            previous one as well */
         i = i - (i>=1?2:1);
@@ -128,7 +128,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   fputs("\n", stderr);
 #endif
   /* if user didn't hit ENTER, terminate buffer */
-  if (i==buflen)
+  if(i==buflen)
     buffer[buflen-1]=0;
 
   return buffer; /* we always return success */
@@ -153,20 +153,22 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   printf("%s", prompt);
   do {
     buffer[i++] = getch();
-    if (buffer[i-1] == '\b') {
+    if(buffer[i-1] == '\b') {
       /* remove this letter and if this is not the first key,
          remove the previous one as well */
-      if (i > 1) {
+      if(i > 1) {
         printf("\b \b");
         i = i - 2;
-      } else {
+      }
+      else {
         RingTheBell();
         i = i - 1;
       }
-    } else if (buffer[i-1] != 13) {
-      putchar('*');
     }
-  } while ((buffer[i-1] != 13) && (i < buflen));
+    else if(buffer[i-1] != 13)
+      putchar('*');
+
+  } while((buffer[i-1] != 13) && (i < buflen));
   buffer[i-1] = 0;
   printf("\r\n");
   return buffer;
@@ -194,8 +196,8 @@ static bool ttyecho(bool enable, int fd)
   static struct_term noecho;
 #endif
   if(!enable) {
-  /* disable echo by extracting the current 'withecho' mode and remove the
-     ECHO bit and set back the struct */
+    /* disable echo by extracting the current 'withecho' mode and remove the
+       ECHO bit and set back the struct */
 #ifdef HAVE_TERMIOS_H
     tcgetattr(fd, &withecho);
     noecho = withecho;

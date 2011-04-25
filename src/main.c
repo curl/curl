@@ -303,6 +303,22 @@ typedef enum {
 #  endif
 #endif
 
+#define CURL_CA_CERT_ERRORMSG1                                          \
+  "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n"       \
+  "curl performs SSL certificate verification by default, "             \
+  "using a \"bundle\"\n"                                                \
+  " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
+  " bundle file isn't adequate, you can specify an alternate file\n"    \
+  " using the --cacert option.\n"
+
+#define CURL_CA_CERT_ERRORMSG2                                          \
+  "If this HTTPS server uses a certificate signed by a CA represented in\n" \
+  " the bundle, the certificate verification probably failed due to a\n" \
+  " problem with the certificate (it might be expired, or the name might\n" \
+  " not match the domain name in the URL).\n"                           \
+  "If you'd like to turn off curl's verification of the certificate, use\n" \
+  " the -k (or --insecure) option.\n"
+
 #ifdef CURL_DOES_CONVERSIONS
 #ifdef HAVE_ICONV
 iconv_t inbound_cd  = (iconv_t)-1;
@@ -778,7 +794,7 @@ static void help(void)
     " -K/--config <file> Specify which config file to read",
     "    --connect-timeout <seconds> Maximum time allowed for connection",
     " -C/--continue-at <offset> Resumed transfer offset",
-    " -b/--cookie <name=string/file> Cookie string or file to read cookies from (H)",
+    " -b/--cookie <name=string/file> String or file to read cookies from (H)",
     " -c/--cookie-jar <file> Write cookies to this file after operation (H)",
     "    --create-dirs   Create necessary local directory hierarchy",
     "    --crlf          Convert LF to CRLF in upload",
@@ -786,21 +802,23 @@ static void help(void)
     " -d/--data <data>   HTTP POST data (H)",
     "    --data-ascii <data>  HTTP POST ASCII data (H)",
     "    --data-binary <data> HTTP POST binary data (H)",
-    "    --data-urlencode <name=data/name@filename> HTTP POST data url encoded (H)",
+    "    --data-urlencode <name=data/name@filename> "
+    "HTTP POST data url encoded (H)",
     "    --digest        Use HTTP Digest Authentication (H)",
     "    --disable-eprt  Inhibit using EPRT or LPRT (F)",
     "    --disable-epsv  Inhibit using EPSV (F)",
     " -D/--dump-header <file> Write the headers to this file",
     "    --egd-file <file> EGD socket path for random data (SSL)",
-    "    --engine <eng>  Crypto engine to use (SSL). \"--engine list\" for list",
+    "    --engine <eng>  Crypto engine (SSL). \"--engine list\" for list",
 #ifdef USE_ENVIRONMENT
     "    --environment   Write results to environment variables (RISC OS)",
 #endif
     " -f/--fail          Fail silently (no output at all) on HTTP errors (H)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     "    --form-string <name=string> Specify HTTP multipart POST data (H)",
-    "    --ftp-account <data> Account data to send when requested by server (F)",
-    "    --ftp-alternative-to-user <cmd> String to replace \"USER [name]\" (F)",
+    "    --ftp-account <data> Account data string (F)",
+    "    --ftp-alternative-to-user <cmd> "
+    "String to replace \"USER [name]\" (F)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
     "    --ftp-method [multicwd/nocwd/singlecwd] Control CWD usage (F)",
     "    --ftp-pasv      Use PASV/EPSV instead of PORT (F)",
@@ -809,13 +827,15 @@ static void help(void)
     "    --ftp-pret      Send PRET before PASV (for drftpd) (F)",
     "    --ftp-ssl-ccc   Send CCC after authenticating (F)",
     "    --ftp-ssl-ccc-mode [active/passive] Set CCC mode (F)",
-    "    --ftp-ssl-control Require SSL/TLS for ftp login, clear for transfer (F)",
+    "    --ftp-ssl-control Require SSL/TLS for ftp login, "
+    "clear for transfer (F)",
     " -G/--get           Send the -d data with a HTTP GET (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
     " -H/--header <line> Custom header to pass to server (H)",
     " -I/--head          Show document info only",
     " -h/--help          This help text",
-    "    --hostpubmd5 <md5> Hex encoded MD5 string of the host public key. (SSH)",
+    "    --hostpubmd5 <md5> "
+    "Hex encoded MD5 string of the host public key. (SSH)",
     " -0/--http1.0       Use HTTP 1.0 (H)",
     "    --ignore-content-length  Ignore the HTTP Content-Length header",
     " -i/--include       Include protocol headers in the output (H/F)",
@@ -852,11 +872,14 @@ static void help(void)
     "    --ntlm          Use HTTP NTLM authentication (H)",
     " -o/--output <file> Write output to <file> instead of stdout",
     "    --pass  <pass>  Pass phrase for the private key (SSL/SSH)",
-    "    --post301       Do not switch to GET after following a 301 redirect (H)",
-    "    --post302       Do not switch to GET after following a 302 redirect (H)",
+    "    --post301       "
+    "Do not switch to GET after following a 301 redirect (H)",
+    "    --post302       "
+    "Do not switch to GET after following a 302 redirect (H)",
     " -#/--progress-bar  Display transfer progress as a progress bar",
     "    --proto <protocols>       Enable/disable specified protocols",
-    "    --proto-redir <protocols> Enable/disable specified protocols on redirect",
+    "    --proto-redir <protocols> "
+    "Enable/disable specified protocols on redirect",
     " -x/--proxy <host[:port]> Use HTTP proxy on given port",
     "    --proxy-anyauth Pick \"any\" proxy authentication method (H)",
     "    --proxy-basic   Use Basic authentication on the proxy (H)",
@@ -867,7 +890,7 @@ static void help(void)
     "    --proxy1.0 <host[:port]> Use HTTP/1.0 proxy on given port",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
     "    --pubkey <key>  Public key file name (SSH)",
-    " -Q/--quote <cmd>   Send command(s) to server before file transfer (F/SFTP)",
+    " -Q/--quote <cmd>   Send command(s) to server before transfer (F/SFTP)",
     "    --random-file <file> File for reading random data from (SSL)",
     " -r/--range <range> Retrieve only the bytes within a range",
     "    --raw           Pass HTTP \"raw\", without any transfer decoding (H)",
@@ -877,21 +900,27 @@ static void help(void)
     " -R/--remote-time   Set the remote file's time on the local output",
     " -X/--request <command> Specify request command to use",
     "    --resolve <host:port:address> Force resolve of HOST:PORT to ADDRESS",
-    "    --retry <num>   Retry request <num> times if transient problems occur",
-    "    --retry-delay <seconds> When retrying, wait this many seconds between each",
+    "    --retry <num>   "
+    "Retry request <num> times if transient problems occur",
+    "    --retry-delay <seconds> "
+    "When retrying, wait this many seconds between each",
     "    --retry-max-time <seconds> Retry only within this period",
-    " -S/--show-error    Show error. With -s, make curl show errors when they occur",
+    " -S/--show-error    "
+    "Show error. With -s, make curl show errors when they occur",
     " -s/--silent        Silent mode. Don't output anything",
     "    --socks4 <host[:port]> SOCKS4 proxy on given host + port",
     "    --socks4a <host[:port]> SOCKS4a proxy on given host + port",
     "    --socks5 <host[:port]> SOCKS5 proxy on given host + port",
-    "    --socks5-hostname <host[:port]> SOCKS5 proxy, pass host name to proxy",
+    "    --socks5-hostname <host[:port]> "
+    "SOCKS5 proxy, pass host name to proxy",
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
     "    --socks5-gssapi-service <name> SOCKS5 proxy service name for gssapi",
     "    --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
 #endif
-    " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs",
-    " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30",
+    " -Y/--speed-limit   "
+    "Stop transfer if below speed-limit for 'speed-time' secs",
+    " -y/--speed-time    "
+    "Time needed to trig speed-limit abort. Defaults to 30",
     "    --ssl           Try SSL/TLS (FTP, IMAP, POP3, SMTP)",
     "    --ssl-reqd      Require SSL/TLS (FTP, IMAP, POP3, SMTP)",
     " -2/--sslv2         Use SSLv2 (SSL)",
@@ -1092,7 +1121,7 @@ static void list_engines(const struct curl_slist *engines)
     puts("  <none>");
     return;
   }
-  for( ; engines; engines = engines->next)
+  for(; engines; engines = engines->next)
     printf("  %s\n", engines->data);
 }
 
@@ -1294,15 +1323,13 @@ static int formparse(struct Configurable *config,
           ++count;
         }
         forms = malloc((count+1)*sizeof(struct curl_forms));
-        if(!forms)
-        {
+        if(!forms) {
           fprintf(config->errors, "Error building form post!\n");
           free(contents);
           FreeMultiInfo(multi_start);
           return 4;
         }
-        for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next)
-        {
+        for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next) {
           forms[i].option = ptr->form.option;
           forms[i].value = ptr->form.value;
         }
@@ -1335,7 +1362,7 @@ static int formparse(struct Configurable *config,
         ct[0]=0; /* zero terminate here */
       }
 
-      if( contp[0]=='<' && !literal_value) {
+      if(contp[0]=='<' && !literal_value) {
         info[i].option = CURLFORM_FILECONTENT;
         info[i].value = contp+1;
         i++;
@@ -2782,7 +2809,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           GetStr(&config->tls_authtype, nextarg);
-          if (!strequal(config->tls_authtype, "SRP"))
+          if(!strequal(config->tls_authtype, "SRP"))
             return PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         }
         else
@@ -3495,8 +3522,7 @@ static int parseconfig(const char *filename,
         }
       }
 
-      if(alloced_param)
-      {
+      if(alloced_param) {
         free(param);
         param = NULL;
       }
@@ -3714,7 +3740,7 @@ static int myprogress (void *clientp,
   if(total < 1) {
     curl_off_t prevblock = bar->prev / 1024;
     curl_off_t thisblock = point / 1024;
-    while( thisblock > prevblock ) {
+    while(thisblock > prevblock) {
       fprintf( bar->out, "#" );
       prevblock++;
     }
@@ -3724,9 +3750,8 @@ static int myprogress (void *clientp,
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
-    for( i = 0; i < num; i++ ) {
+    for(i = 0; i < num; i++)
       line[i] = '#';
-    }
     line[i] = '\0';
     snprintf( format, sizeof(format), "%%-%ds %%5.1f%%%%", barwidth );
     snprintf( outline, sizeof(outline), format, line, percent );
@@ -4448,9 +4473,9 @@ parse_filename(char *ptr, size_t len)
      is that even systems that don't handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if (q) {
+  if(q) {
     p = q+1;
-    if (!*p) {
+    if(!*p) {
       free(copy);
       return NULL;
     }
@@ -5692,21 +5717,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                     errorbuffer[0]? errorbuffer:
                     curl_easy_strerror((CURLcode)res));
             if(CURLE_SSL_CACERT == res) {
-#define CURL_CA_CERT_ERRORMSG1                                          \
-              "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
-                "curl performs SSL certificate verification by default, using a \"bundle\"\n" \
-                " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
-                " bundle file isn't adequate, you can specify an alternate file\n" \
-                " using the --cacert option.\n"
-
-#define CURL_CA_CERT_ERRORMSG2                                          \
-              "If this HTTPS server uses a certificate signed by a CA represented in\n" \
-                " the bundle, the certificate verification probably failed due to a\n" \
-                " problem with the certificate (it might be expired, or the name might\n" \
-                " not match the domain name in the URL).\n"             \
-                "If you'd like to turn off curl's verification of the certificate, use\n" \
-                " the -k (or --insecure) option.\n"
-
               fprintf(config->errors, "%s%s",
                       CURL_CA_CERT_ERRORMSG1,
                       CURL_CA_CERT_ERRORMSG2 );
@@ -5749,7 +5759,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #ifdef __AMIGA__
         /* Set the url as comment for the file. (up to 80 chars are allowed)
          */
-        if( strlen(url) > 78 )
+        if(strlen(url) > 78)
           url[79] = '\0';
 
         SetComment( outs.filename, url);
@@ -5845,12 +5855,12 @@ static void checkfds(void)
 {
 #ifdef HAVE_PIPE
   int fd[2] = { STDIN_FILENO, STDIN_FILENO };
-  while( fd[0] == STDIN_FILENO ||
-         fd[0] == STDOUT_FILENO ||
-         fd[0] == STDERR_FILENO ||
-         fd[1] == STDIN_FILENO ||
-         fd[1] == STDOUT_FILENO ||
-         fd[1] == STDERR_FILENO )
+  while(fd[0] == STDIN_FILENO ||
+        fd[0] == STDOUT_FILENO ||
+        fd[0] == STDERR_FILENO ||
+        fd[1] == STDIN_FILENO ||
+        fd[1] == STDOUT_FILENO ||
+        fd[1] == STDERR_FILENO)
     if(pipe(fd) < 0)
       return;   /* Out of handles. This isn't really a big problem now, but
                    will be when we try to create a socket later. */

@@ -323,7 +323,8 @@
    2000 as a supported build target. VS2008 default installations provide an
    embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
    valid build target for VS2008. Popular belief is that binaries built using
-   Windows SDK versions 6.X and Windows 2000 as a build target are functional */
+   Windows SDK versions 6.X and Windows 2000 as a build target are
+   functional */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #  define VS2008_MINIMUM_TARGET 0x0500
 #endif
@@ -344,7 +345,8 @@
 #  ifndef WINVER
 #    define WINVER VS2008_DEFAULT_TARGET
 #  endif
-#  if (_WIN32_WINNT < VS2008_MINIMUM_TARGET) || (WINVER < VS2008_MINIMUM_TARGET)
+#  if (_WIN32_WINNT < VS2008_MINIMUM_TARGET) || \
+  (WINVER < VS2008_MINIMUM_TARGET)
 #    error VS2008 does not support Windows build targets prior to Windows 2000
 #  endif
 #endif
