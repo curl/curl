@@ -457,6 +457,8 @@ clean:
 # A config was provided, so the library can be built.
 #
 X_OBJS= \
+	$(DIROBJ)\asyn-ares.obj \
+	$(DIROBJ)\asyn-thread.obj \
 	$(DIROBJ)\base64.obj \
 	$(DIROBJ)\connect.obj \
 	$(DIROBJ)\content_encoding.obj \
@@ -479,17 +481,15 @@ X_OBJS= \
 	$(DIROBJ)\ftp.obj \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\getinfo.obj \
-	$(DIROBJ)\gtls.obj \
 	$(DIROBJ)\gopher.obj \
+	$(DIROBJ)\gtls.obj \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\hmac.obj \
-	$(DIROBJ)\hostares.obj \
 	$(DIROBJ)\hostasyn.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
 	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostsyn.obj \
-	$(DIROBJ)\hostthre.obj \
 	$(DIROBJ)\http_chunks.obj \
 	$(DIROBJ)\http_digest.obj \
 	$(DIROBJ)\http_negotiate.obj \
