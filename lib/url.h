@@ -37,8 +37,6 @@ void Curl_freeset(struct SessionHandle * data);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
                       bool *async, bool *protocol_connect);
-CURLcode Curl_async_resolved(struct connectdata *conn,
-                             bool *protocol_connect);
 CURLcode Curl_do(struct connectdata **, bool *done);
 CURLcode Curl_do_more(struct connectdata *);
 CURLcode Curl_done(struct connectdata **, CURLcode, bool premature);

@@ -146,11 +146,18 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 Curl_addrinfo *Curl_ipv4_resolve_r(const char * hostname, int port);
 
+CURLcode Curl_async_resolved(struct connectdata *conn,
+                             bool *protocol_connect);
+
+#ifndef CURLRES_ASYNCH
+#define Curl_async_resolved(x,y) CURLE_OK
+#endif
+
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
  * Handles end of async request processing. Inserts ai into hostcache when
  * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
- * request completed wether successful or failed.
+ * request completed whether successful or failed.
  */
 CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                                 int status,
