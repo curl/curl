@@ -658,6 +658,7 @@ ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 
 #define HOSTNAME_MAX 1024
 
+#ifndef USE_WINDOWS_SSPI
 /* copy the source to the destination and fill in zeroes in every
    other destination byte! */
 static void unicodecpy(unsigned char *dest,
@@ -669,6 +670,7 @@ static void unicodecpy(unsigned char *dest,
     dest[2*i+1] = '\0';
   }
 }
+#endif
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
