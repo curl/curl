@@ -3132,25 +3132,22 @@ ConnectionStore(struct SessionHandle *data,
 */
 CURLcode Curl_connected_proxy(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-
-  switch(data->set.proxytype) {
+  switch(conn->proxytype) {
 #ifndef CURL_DISABLE_PROXY
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
-    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
-                         conn->host.name, conn->remote_port,
-                         FIRSTSOCKET, conn);
-    break;
+    return Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
+                       conn->host.name, conn->remote_port,
+                       FIRSTSOCKET, conn);
+
   case CURLPROXY_SOCKS4:
-    result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                         conn->remote_port, FIRSTSOCKET, conn, FALSE);
-    break;
+    return Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                       conn->remote_port, FIRSTSOCKET, conn, FALSE);
+
   case CURLPROXY_SOCKS4A:
-    result = Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                         conn->remote_port, FIRSTSOCKET, conn, TRUE);
-    break;
+    return Curl_SOCKS4(conn->proxyuser, conn->host.name,
+                       conn->remote_port, FIRSTSOCKET, conn, TRUE);
+
 #endif /* CURL_DISABLE_PROXY */
   case CURLPROXY_HTTP:
   case CURLPROXY_HTTP_1_0:
@@ -3160,7 +3157,7 @@ CURLcode Curl_connected_proxy(struct connectdata *conn)
     break;
   } /* switch proxytype */
 
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode ConnectPlease(struct SessionHandle *data,
@@ -4066,16 +4063,23 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   char *atsign;
 
   /* We do the proxy host string parsing here. We want the host name and the
-   * port name. Accept a protocol:// prefix, even though it should just be
-   * ignored.
+   * port name. Accept a protocol:// prefix
    */
 
-  /* Skip the protocol part if present */
+  /* Parse the protocol part if present */
   endofprot = strstr(proxy, "://");
-  if(endofprot)
+  if(endofprot) {
     proxyptr = endofprot+3;
+    if(checkprefix("socks5", proxy))
+      conn->proxytype = CURLPROXY_SOCKS5;
+    else if(checkprefix("socks4a", proxy))
+      conn->proxytype = CURLPROXY_SOCKS4A;
+    else if(checkprefix("socks4", proxy))
+      conn->proxytype = CURLPROXY_SOCKS4;
+    /* Any other xxx:// : change to http proxy */
+  }
   else
-    proxyptr = proxy;
+    proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
@@ -4763,12 +4767,24 @@ static CURLcode create_conn(struct SessionHandle *data,
   else if(!proxy)
     proxy = detect_proxy(conn);
 
-  if(proxy && !*proxy) {
-    free(proxy);  /* Don't bother with an empty proxy string */
+  if(proxy && (!*proxy || (conn->handler->flags & PROTOPT_BANPROXY))) {
+    free(proxy);  /* Don't bother with an empty proxy string or if the
+                     protocol doesn't work with proxy */
     proxy = NULL;
   }
-  /* proxy must be freed later unless NULL */
-  if(proxy && !(conn->handler->flags & PROTOPT_BANPROXY)) {
+
+  /***********************************************************************
+   * If this is supposed to use a proxy, we need to figure out the proxy host
+   * name, proxy type and port number, so that we can re-use an existing
+   * connection that may exist registered to the same proxy host.
+   ***********************************************************************/
+  if(proxy) {
+    result = parse_proxy(data, conn, proxy);
+
+    /* parse_proxy has freed the proxy string, so don't try to use it again */
+    if(result != CURLE_OK)
+      return result;
+
     if((conn->proxytype == CURLPROXY_HTTP) ||
        (conn->proxytype == CURLPROXY_HTTP_1_0)) {
 #ifdef CURL_DISABLE_HTTP
@@ -4790,18 +4806,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     conn->bits.tunnel_proxy = FALSE;
   }
 
-  /***********************************************************************
-   * If this is supposed to use a proxy, we need to figure out the proxy
-   * host name, so that we can re-use an existing connection
-   * that may exist registered to the same proxy host.
-   ***********************************************************************/
-  if(proxy) {
-    result = parse_proxy(data, conn, proxy);
-    /* parse_proxy has freed the proxy string, so don't try to use it again */
-    proxy = NULL;
-    if(result != CURLE_OK)
-      return result;
-  }
 #endif /* CURL_DISABLE_PROXY */
 
   /*************************************************************

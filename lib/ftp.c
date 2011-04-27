@@ -1554,10 +1554,10 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
           newport = (unsigned short)(num & 0xffff);
 
           if(conn->bits.tunnel_proxy ||
-             data->set.proxytype == CURLPROXY_SOCKS5 ||
-             data->set.proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
-             data->set.proxytype == CURLPROXY_SOCKS4 ||
-             data->set.proxytype == CURLPROXY_SOCKS4A)
+             conn->proxytype == CURLPROXY_SOCKS5 ||
+             conn->proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+             conn->proxytype == CURLPROXY_SOCKS4 ||
+             conn->proxytype == CURLPROXY_SOCKS4A)
             /* proxy tunnel -> use other host info because ip_addr_str is the
                proxy address not the ftp host */
             snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
@@ -1610,10 +1610,10 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
             ip[0], ip[1], ip[2], ip[3],
             conn->ip_addr_str);
       if(conn->bits.tunnel_proxy ||
-          data->set.proxytype == CURLPROXY_SOCKS5 ||
-          data->set.proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
-          data->set.proxytype == CURLPROXY_SOCKS4 ||
-          data->set.proxytype == CURLPROXY_SOCKS4A)
+         conn->proxytype == CURLPROXY_SOCKS5 ||
+         conn->proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+         conn->proxytype == CURLPROXY_SOCKS4 ||
+         conn->proxytype == CURLPROXY_SOCKS4A)
         /* proxy tunnel -> use other host info because ip_addr_str is the
            proxy address not the ftp host */
         snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
@@ -1715,7 +1715,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 
-  switch(data->set.proxytype) {
+  switch(conn->proxytype) {
     /* FIX: this MUST wait for a proper connect first if 'connected' is
      * FALSE */
   case CURLPROXY_SOCKS5:
