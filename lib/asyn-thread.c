@@ -64,6 +64,12 @@
 #define in_addr_t unsigned long
 #endif
 
+#ifdef HAVE_GETADDRINFO
+#  define RESOLVER_ENOMEM  EAI_MEMORY
+#else
+#  define RESOLVER_ENOMEM  ENOMEM
+#endif
+
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -281,9 +287,9 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
   if(rc != 0) {
-    tsd->sock_error = SOCKERRNO;
+    tsd->sock_error = SOCKERRNO?SOCKERRNO:rc;
     if(tsd->sock_error == 0)
-      tsd->sock_error = ENOMEM;
+      tsd->sock_error = RESOLVER_ENOMEM;
   }
 
   Curl_mutex_acquire(tsd->mtx);
@@ -307,7 +313,7 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
   if(!tsd->res) {
     tsd->sock_error = SOCKERRNO;
     if(tsd->sock_error == 0)
-      tsd->sock_error = ENOMEM;
+      tsd->sock_error = RESOLVER_ENOMEM;
   }
 
   Curl_mutex_acquire(tsd->mtx);
@@ -355,7 +361,7 @@ static bool init_resolve_thread (struct connectdata *conn,
                                  const struct addrinfo *hints)
 {
   struct thread_data *td = calloc(1, sizeof(struct thread_data));
-  int err = ENOMEM;
+  int err = RESOLVER_ENOMEM;
 
   conn->async.os_specific = (void*) td;
   if(!td)
@@ -409,6 +415,24 @@ static bool init_resolve_thread (struct connectdata *conn,
   return FALSE;
 }
 
+/*
+ * resolver_error() calls failf() with the appropriate message after a resolve
+ * error
+ */
+
+static void resolver_error(struct connectdata *conn, const char *host_or_proxy)
+{
+  failf(conn->data, "Could not resolve %s: %s; %s", host_or_proxy,
+        conn->async.hostname,
+#ifdef HAVE_GAI_STRERROR
+        /* NetWare doesn't have gai_strerror and on Windows it isn't deemed
+           thread-safe */
+        gai_strerror(conn->async.status)
+#else
+        Curl_strerror(conn, conn->async.status);
+#endif
+    );
+}
 
 /*
  * Curl_resolver_wait_resolv()
@@ -443,13 +467,11 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if(conn->bits.httpproxy) {
-      failf(data, "Could not resolve proxy: %s; %s",
-            conn->async.hostname, Curl_strerror(conn, conn->async.status));
+      resolver_error(conn, "proxy");
       rc = CURLE_COULDNT_RESOLVE_PROXY;
     }
     else {
-      failf(data, "Could not resolve host: %s; %s",
-            conn->async.hostname, Curl_strerror(conn, conn->async.status));
+      resolver_error(conn, "host");
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
   }
@@ -490,8 +512,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     destroy_async_data(&conn->async);
 
     if(!conn->async.dns) {
-      failf(data, "Could not resolve host: %s; %s",
-            conn->host.name, Curl_strerror(conn, conn->async.status));
+      resolver_error(conn, "host");
       return CURLE_COULDNT_RESOLVE_HOST;
     }
     *entry = conn->async.dns;
