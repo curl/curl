@@ -79,9 +79,10 @@ if(!$file) {
 }
 
 do {
-
     if($file ne "$wlist") {
-        scanfile("$dir/$file");
+        my $fullname = $file;
+        $fullname = "$dir/$file" if $fullname !~ '^/';
+        scanfile($fullname);
     }
     $file = shift @ARGV;
 
