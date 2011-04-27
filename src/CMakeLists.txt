@@ -54,3 +54,5 @@ if(MSVC)
 endif()
 
 #INCLUDE(ModuleInstall OPTIONAL)
+
+install(TARGETS ${EXE_NAME} DESTINATION bin)

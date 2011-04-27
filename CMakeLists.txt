@@ -23,7 +23,6 @@ include(Utilities)
 
 project( CURL C )
 
-
 file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
 string (REGEX MATCH "LIBCURL_VERSION_MAJOR[ \t]+([0-9]+)"
   LIBCURL_VERSION_MJ ${CURL_VERSION_H_CONTENTS})
@@ -191,12 +190,12 @@ if(WIN32)
 endif(WIN32)
 
 # This macro checks if the symbol exists in the library and if it
-# does, it appends library to the list.
+# does, it prepends library to the list.
 macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
-  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} ""
+  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
     ${VARIABLE})
   if(${VARIABLE})
-    set(CURL_LIBS ${CURL_LIBS} ${LIBRARY})
+    set(CURL_LIBS ${LIBRARY} ${CURL_LIBS})
   endif(${VARIABLE})
 endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
@@ -223,25 +222,6 @@ check_library_exists("wldap32" cldap_open "" HAVE_WLDAP32)
 # IF(NOT CURL_SPECIAL_LIBZ)
 #  CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
 # ENDIF(NOT CURL_SPECIAL_LIBZ)
-
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
-mark_as_advanced(CMAKE_USE_OPENSSL)
-if(CMAKE_USE_OPENSSL)
-  if(WIN32)
-    find_package(OpenSSL)
-    if(OPENSSL_FOUND)
-      set(USE_SSLEAY TRUE)
-      set(USE_OPENSSL TRUE)
-      list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} )
-    else()
-      set(CMAKE_USE_OPENSSL FALSE)
-      message(STATUS "OpenSSL NOT Found, disabling CMAKE_USE_OPENSSL")
-    endif()
-  else(WIN32)
-    check_library_exists_concat("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
-    check_library_exists_concat("ssl"    SSL_connect  HAVE_LIBSSL)
-  endif(WIN32)
-endif(CMAKE_USE_OPENSSL)
 
 # Check for idn
 check_library_exists_concat("idn" idna_to_ascii_lz HAVE_LIBIDN)
@@ -270,6 +250,25 @@ if(CURL_ZLIB)  # AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE
     set(HAVE_LIBZ ON)
   endif()
 endif()
+
+option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
+mark_as_advanced(CMAKE_USE_OPENSSL)
+if(CMAKE_USE_OPENSSL)
+  if(WIN32)
+    find_package(OpenSSL)
+    if(OPENSSL_FOUND)
+      set(USE_SSLEAY TRUE)
+      set(USE_OPENSSL TRUE)
+      list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} )
+    else()
+      set(CMAKE_USE_OPENSSL FALSE)
+      message(STATUS "OpenSSL NOT Found, disabling CMAKE_USE_OPENSSL")
+    endif()
+  else(WIN32)
+    check_library_exists_concat("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
+    check_library_exists_concat("ssl"    SSL_connect  HAVE_LIBSSL)
+  endif(WIN32)
+endif(CMAKE_USE_OPENSSL)
 
 # If we have features.h, then do the _BSD_SOURCE magic
 check_include_file("features.h"       HAVE_FEATURES_H)
@@ -852,3 +851,14 @@ endif()
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
   set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
 endif()
+
+# Installation.
+# First, install generated curlbuild.h
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/curl/curlbuild.h"
+    DESTINATION include/curl )
+# Next, install other headers excluding curlbuild.h
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN "curlbuild.h" EXCLUDE)
+ 
