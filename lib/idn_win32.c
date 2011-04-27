@@ -25,14 +25,14 @@
  ***************************************************************************/
 #if defined(WIN32) && defined(USE_WIN32_IDN)
 #include <windows.h>
-#ifdef HAVE_NORMALIZATION_H
-#define __in
-#define __in_ecount(x)
-#define __out_ecount(x)
-#include <normalization.h>
-#endif
 #include <stdio.h>
 #include <tchar.h>
+
+#ifdef WANT_IDN_PROTOTYPES
+WINBASEAPI int WINAPI IdnToAscii(DWORD, LPCWSTR, int, LPWSTR, int);
+WINBASEAPI int WINAPI IdnToUnicode(DWORD, LPCWSTR, int, LPWSTR, int);
+#endif
+
 #define IDN_MAX_LENGTH 255
 
 static wchar_t *_curl_win32_UTF8_to_wchar(const char *str_utf8)
