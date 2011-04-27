@@ -96,10 +96,12 @@ $(HUGE):
 	echo "void hugehelp(void) {}" >>$(HUGE)
 endif
 
-if CURLDEBUG
-# for debug builds, we scan the sources on all regular make invokes
 # ignore hugehelp.c since it is generated source code and it plays by slightly
 # different rules!
-all-local:
+checksrc:
 	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/src -Whugehelp.c $(curl_SOURCES)
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
 endif

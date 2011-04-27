@@ -155,3 +155,7 @@ ca-bundle: lib/mk-ca-bundle.pl
 ca-firefox: lib/firefox-db2pem.sh
 	@echo "generate a fresh ca-bundle.crt"
 	./lib/firefox-db2pem.sh lib/ca-bundle.crt
+
+checksrc:
+	cd lib && $(MAKE) checksrc
+	cd src && $(MAKE) checksrc
