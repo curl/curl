@@ -886,16 +886,6 @@ int Curl_http_should_fail(struct connectdata *conn)
   ** the client needs to reauthenticate.  Once that info is
   ** available, use it here.
   */
-#if 0 /* set to 1 when debugging this functionality */
-  infof(data,"%s: authstage = %d\n",__FUNCTION__,data->state.authstage);
-  infof(data,"%s: authwant = 0x%08x\n",__FUNCTION__,data->state.authwant);
-  infof(data,"%s: authavail = 0x%08x\n",__FUNCTION__,data->state.authavail);
-  infof(data,"%s: httpcode = %d\n",__FUNCTION__,k->httpcode);
-  infof(data,"%s: authdone = %d\n",__FUNCTION__,data->state.authdone);
-  infof(data,"%s: newurl = %s\n",__FUNCTION__,data->req.newurl ?
-        data->req.newurl : "(null)");
-  infof(data,"%s: authproblem = %d\n",__FUNCTION__,data->state.authproblem);
-#endif
 
   /*
   ** Either we're not authenticating, or we're supposed to
