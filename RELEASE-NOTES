@@ -9,11 +9,15 @@ Curl and libcurl 7.21.7
 
 This release includes the following changes:
 
- o
+ o recognize the [protocol]:// prefix in proxy hosts where the protocol is one
+   of socks4, socks4a or socks5.
 
 This release includes the following bugfixes:
 
- o 
+ o NTLM: work with unicode
+ o fix connect with SOCKS proxy when using the multi interface
+ o anyauthput.c: stdint.h must not be included unconditionally
+ o CMake: improved build
 
 This release includes the following known bugs:
 
@@ -22,8 +26,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Patrick Monnerat, Dan Fandrich, Gisle Vanem, Guenter Knauf,
- Rajesh Naganathan, Josue Andrade Gomes, Ryan Schmidt, Fabian Keil,
- Julien Chaffraix
+ Dan Fandrich, Guenter Knauf, Vsevolod Novikov, Zmey Petroff,
+ Dagobert Michelsen, Jeff Pohlmeyer, Dmitri Shubin, Matteo Rocco
+
 
         Thanks! (and sorry if I forgot to mention someone)
