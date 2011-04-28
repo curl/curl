@@ -27,7 +27,12 @@
 #  ifdef __VMS
      typedef int intptr_t;
 #  else
-#    include <stdint.h>
+#    ifdef CURL_PULL_STDINT_H
+#      include <stdint.h>
+#    endif
+#    ifdef CURL_PULL_INTTYPES_H
+#      include <inttypes.h>
+#    endif
 #  endif
 #  include <unistd.h>
 #endif
