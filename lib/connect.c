@@ -698,7 +698,13 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   if(WAITCONN_CONNECTED == rc) {
     if(verifyconnect(sockfd, &error)) {
-      /* we are connected, awesome! */
+      /* we are connected with TCP, awesome! */
+
+      /* see if we need to do any proxy magic first once we connected */
+      code = Curl_connected_proxy(conn);
+      if(code)
+        return code;
+
       conn->bits.tcpconnect = TRUE;
       *connected = TRUE;
       Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */

@@ -1141,8 +1141,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                        FIRSTSOCKET,
                                        &connected);
       if(connected) {
-        /* see if we need to do any proxy magic first once we connected */
-        easy->result = Curl_connected_proxy(easy->easy_conn);
 
         if(!easy->result)
           /* if everything is still fine we do the protocol-specific connect
