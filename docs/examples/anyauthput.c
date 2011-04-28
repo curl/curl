@@ -26,8 +26,6 @@
 #else
 #  ifdef __VMS
      typedef int intptr_t;
-#  else
-#    include <stdint.h>
 #  endif
 #  include <unistd.h>
 #endif
