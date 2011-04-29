@@ -467,7 +467,7 @@ static void resolver_error(struct connectdata *conn, const char *host_or_proxy)
            thread-safe */
         gai_strerror(conn->async.status)
 #else
-        Curl_strerror(conn, conn->async.status);
+        Curl_strerror(conn, conn->async.status)
 #endif
     );
 }
