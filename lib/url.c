@@ -2948,6 +2948,7 @@ ConnectionExists(struct SessionHandle *data,
       if((check->localport != needle->localport) ||
          (check->localportrange != needle->localportrange) ||
          !check->localdev ||
+         !needle->localdev ||
          strcmp(check->localdev, needle->localdev))
         continue;
     }
