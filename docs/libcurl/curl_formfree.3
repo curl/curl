@@ -31,6 +31,9 @@ curl_formfree - free a previously build multipart/formdata HTTP POST chain
 curl_formfree() is used to clean up data previously built/appended with
 \fIcurl_formadd(3)\fP. This must be called when the data has been used, which
 typically means after \fIcurl_easy_perform(3)\fP has been called.
+
+\fBform\fP is the pointer as returned from a previous call to
+\fIcurl_formadd(3)\fP and may be NULL.
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"
