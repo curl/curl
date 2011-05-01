@@ -330,6 +330,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
   /* for debug purposes */
   static const char * const names[] = {
     "SSH_STOP",
+    "SSH_INIT",
     "SSH_S_STARTUP",
     "SSH_HOSTKEY",
     "SSH_AUTHLIST",
@@ -653,11 +654,19 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   do {
 
     switch(sshc->state) {
-    case SSH_S_STARTUP:
+    case SSH_INIT:
       sshc->secondCreateDirs = 0;
       sshc->nextstate = SSH_NO_STATE;
       sshc->actualcode = CURLE_OK;
 
+      /* Set libssh2 to non-blocking, since everything internally is
+         non-blocking */
+      libssh2_session_set_blocking(sshc->ssh_session, 0);
+
+      state(conn, SSH_S_STARTUP);
+      /* fall-through */
+
+    case SSH_S_STARTUP:
       rc = libssh2_session_startup(sshc->ssh_session, sock);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -668,10 +677,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = CURLE_FAILED_INIT;
         break;
       }
-
-      /* Set libssh2 to non-blocking, since everything internally is
-         non-blocking */
-      libssh2_session_set_blocking(sshc->ssh_session, 0);
 
       state(conn, SSH_HOSTKEY);
 
@@ -2654,7 +2659,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   infof(data, "SSH socket: %d\n", (int)sock);
 #endif /* CURL_LIBSSH2_DEBUG */
 
-  state(conn, SSH_S_STARTUP);
+  state(conn, SSH_INIT);
 
   if(data->state.used_interface == Curl_if_multi)
     result = ssh_multi_statemach(conn, done);
