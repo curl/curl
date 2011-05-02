@@ -2103,13 +2103,15 @@ libcurl will reject the connection to the host unless the md5sums match. This
 option is only for SCP and SFTP transfers. (Added in 7.17.1)
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
 Pass a char * pointing to a file name for your public key. If not used,
-libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
-(Added in 7.16.1)
+libcurl defaults to \fB$HOME/.ssh/id_dsa.pub\fP if the HOME environment
+variable is set, and just "id_dsa.pub" in the current directory if HOME is not
+set.  (Added in 7.16.1)
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
 Pass a char * pointing to a file name for your private key. If not used,
-libcurl defaults to using \fB~/.ssh/id_dsa\fP.  If the file is
-password-protected, set the password with \fICURLOPT_KEYPASSWD\fP. (Added in
-7.16.1)
+libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
+is set, and just "id_dsa" in the current directory if HOME is not set.  If the
+file is password-protected, set the password with
+\fICURLOPT_KEYPASSWD\fP. (Added in 7.16.1)
 .IP CURLOPT_SSH_KNOWNHOSTS
 Pass a pointer to a zero terminated string holding the file name of the
 known_host file to use.  The known_hosts file should use the OpenSSH file
