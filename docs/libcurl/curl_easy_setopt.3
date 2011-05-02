@@ -632,6 +632,11 @@ use of a proxy, even if there is an environment variable set for it.
 Since 7.14.1, the proxy host string given in environment variables can be
 specified the exact same way as the proxy can be set with \fICURLOPT_PROXY\fP,
 include protocol prefix (http://) and embedded user + password.
+
+Since 7.21.7, the proxy string may be specified with a protocol:// prefix to
+specify alternative proxy protocols. Use socks4://, socks4a:// or socks5:// to
+request the specific SOCKS version to be used. No protocol specified, http://
+and all others will be treated as HTTP proxies.
 .IP CURLOPT_PROXYPORT
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.

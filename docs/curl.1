@@ -1542,22 +1542,27 @@ means the verification was successful. (Added in 7.19.0)
 .RE
 
 If this option is used several times, the last one will be used.
-.IP "-x/--proxy <proxyhost[:port]>"
-Use the specified HTTP proxy. If the port number is not specified, it is assumed
-at port 1080.
+.IP "-x/--proxy <[protocol://][user@password]proxyhost[:port]>"
+Use the specified HTTP proxy. If the port number is not specified, it is
+assumed at port 1080.
 
 This option overrides existing environment variables that set the proxy to
 use. If there's an environment variable setting a proxy, you can set proxy to
 \&"" to override it.
 
-\fBNote\fP that all operations that are performed over a HTTP proxy will
-transparently be converted to HTTP. It means that certain protocol specific
-operations might not be available. This is not the case if you can tunnel
-through the proxy, as done with the \fI-p/--proxytunnel\fP option.
+All operations that are performed over a HTTP proxy will transparently be
+converted to HTTP. It means that certain protocol specific operations might
+not be available. This is not the case if you can tunnel through the proxy, as
+done with the \fI-p/--proxytunnel\fP option.
 
-Starting with 7.14.1, the proxy host can be specified the exact same way as
-the proxy environment variables, including the protocol prefix (http://) and
-the embedded user + password.
+The proxy host can be specified the exact same way as the proxy environment
+variables, including the protocol prefix (http://) and the embedded user +
+password.
+
+From 7.21.7, the proxy string may be specified with a protocol:// prefix to
+specify alternative proxy protocols. Use socks4://, socks4a:// or socks5:// to
+request the specific SOCKS version to be used. No protocol specified, http://
+and all others will be treated as HTTP proxies.
 
 If this option is used several times, the last one will be used.
 .IP "-X/--request <command>"
@@ -1649,6 +1654,11 @@ Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts>"
 list of host names that shouldn't go through any proxy. If set to a asterisk
 \&'*' only, it matches all hosts.
+
+Since 7.21.7, the proxy string may be specified with a protocol:// prefix to
+specify alternative proxy protocols. Use socks4://, socks4a:// or socks5:// to
+request the specific SOCKS version to be used. No protocol specified, http://
+and all others will be treated as HTTP proxies.
 .SH EXIT CODES
 There are a bunch of different error codes and their corresponding error
 messages that may appear during bad conditions. At the time of this writing,
