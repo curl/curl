@@ -40,8 +40,8 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = lib src
-DIST_SUBDIRS = $(SUBDIRS) tests include packages docs
+SUBDIRS = lib src include
+DIST_SUBDIRS = $(SUBDIRS) tests packages docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc

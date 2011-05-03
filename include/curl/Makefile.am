@@ -20,7 +20,7 @@
 #
 ###########################################################################
 pkginclude_HEADERS = \
-	curl.h curlver.h easy.h mprintf.h stdcheaders.h types.h multi.h \
+	curl.h curlver.h easy.h mprintf.h stdcheaders.h multi.h \
 	typecheck-gcc.h curlbuild.h curlrules.h
 
 pkgincludedir= $(includedir)/curl
@@ -44,3 +44,10 @@ EXTRA_DIST = curlbuild.h.in
 
 DISTCLEANFILES = curlbuild.h
 
+checksrc:
+	@@PERL@ $(top_srcdir)/lib/checksrc.pl -Wcurlbuild.h -D$(top_srcdir)/include/curl $(pkginclude_HEADERS) $(EXTRA_DIST)
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
+endif

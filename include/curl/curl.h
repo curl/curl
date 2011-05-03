@@ -507,7 +507,7 @@ typedef enum {
                                     7.19.0) */
   CURLE_FTP_PRET_FAILED,         /* 84 - a PRET command failed */
   CURLE_RTSP_CSEQ_ERROR,         /* 85 - mismatch of RTSP CSeq numbers */
-  CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Identifiers */
+  CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Ids */
   CURLE_FTP_BAD_FILE_LIST,       /* 87 - unable to parse FTP file list */
   CURLE_CHUNK_FAILED,            /* 88 - chunk callback reported error */
 
@@ -755,7 +755,7 @@ typedef enum {
 #endif
 
 #ifdef CURL_ISOCPP
-#define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
+#define CINIT(na,t,nu) CURLOPT_ ## na = CURLOPTTYPE_ ## t + nu
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
@@ -924,7 +924,7 @@ typedef enum {
   CINIT(FAILONERROR, LONG, 45),  /* no output on http error codes >= 300 */
   CINIT(UPLOAD, LONG, 46),       /* this is an upload */
   CINIT(POST, LONG, 47),         /* HTTP POST method */
-  CINIT(DIRLISTONLY, LONG, 48),  /* return bare names when listing directories */
+  CINIT(DIRLISTONLY, LONG, 48),  /* bare names when listing directories */
 
   CINIT(APPEND, LONG, 50),       /* Append instead of overwrite on upload! */
 
@@ -1118,8 +1118,8 @@ typedef enum {
      and password to whatever host the server decides. */
   CINIT(UNRESTRICTED_AUTH, LONG, 105),
 
-  /* Specifically switch on or off the FTP engine's use of the EPRT command ( it
-     also disables the LPRT attempt). By default, those ones will always be
+  /* Specifically switch on or off the FTP engine's use of the EPRT command (
+     it also disables the LPRT attempt). By default, those ones will always be
      attempted before the good old traditional PORT command. */
   CINIT(FTP_USE_EPRT, LONG, 106),
 
@@ -1703,7 +1703,8 @@ CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
  * Should return the buffer length passed to it as the argument "len" on
  *   success.
  */
-typedef size_t (*curl_formget_callback)(void *arg, const char *buf, size_t len);
+typedef size_t (*curl_formget_callback)(void *arg, const char *buf,
+                                        size_t len);
 
 /*
  * NAME curl_formget()
