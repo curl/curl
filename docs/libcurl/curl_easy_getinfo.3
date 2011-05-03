@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -80,12 +80,13 @@ waits in line for the pipeline and more. (Added in 7.19.0)
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the file transfer is just about to begin. This includes all
 pre-transfer commands and negotiations that are specific to the particular
-protocol(s) involved.
+protocol(s) involved. It does \fInot\fP involve the sending of the protocol-
+specific request that triggers a transfer.
 .IP CURLINFO_STARTTRANSFER_TIME
 Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the first byte is just about to be transferred. This includes
-CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate
-the result.
+start until the first byte is received by libcurl. This includes
+CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate the
+result.
 .IP CURLINFO_REDIRECT_TIME
 Pass a pointer to a double to receive the total time, in seconds, it took for
 all redirection steps include name lookup, connect, pretransfer and transfer
@@ -275,7 +276,7 @@ file transfer is just about to begin. This includes all pre-transfer commands
 and negotiations that are specific to the particular protocol(s) involved.
 .IP STARTTRANSFER
 \fICURLINFO_STARTTRANSFER_TIME\fP. The time it took from the start until the
-first byte is just about to be transferred.
+first byte is received by libcurl.
 .IP TOTAL
 \fICURLINFO_TOTAL_TIME\fP. Total time of the previous request.
 .IP REDIRECT
