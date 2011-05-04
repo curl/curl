@@ -697,12 +697,12 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           /* Don't let excess data pollute body writes */
           if(k->maxdownload == -1 || (curl_off_t)k->hbuflen <= k->maxdownload)
             result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                data->state.headerbuff,
-                k->hbuflen);
+                                       data->state.headerbuff,
+                                       k->hbuflen);
           else
             result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                data->state.headerbuff,
-                (size_t)k->maxdownload);
+                                       data->state.headerbuff,
+                                       (size_t)k->maxdownload);
 
           if(result)
             return result;
@@ -729,8 +729,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
               else
 #endif /* CURL_DISABLE_POP3 */
 
-              result = Curl_client_write(conn, CLIENTWRITE_BODY, k->str,
-                                         nread);
+                result = Curl_client_write(conn, CLIENTWRITE_BODY, k->str,
+                                           nread);
             }
 #ifdef HAVE_LIBZ
             break;
@@ -767,7 +767,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_RTSP
     if(excess > 0 && !conn->bits.stream_was_rewound &&
-        (conn->handler->protocol & CURLPROTO_RTSP)) {
+       (conn->handler->protocol & CURLPROTO_RTSP)) {
       /* Check for RTP after the content if there is unrewound excess */
 
       /* Parse the excess data */
@@ -780,7 +780,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
       if(readmore)
         k->keepon |= KEEP_RECV; /* we're not done reading */
-        break;
+      break;
     }
 #endif
 
