@@ -3085,9 +3085,8 @@ ConnectionDone(struct connectdata *conn)
  * The given connection should be unique. That must've been checked prior to
  * this call.
  */
-static long
-ConnectionStore(struct SessionHandle *data,
-                struct connectdata *conn)
+static void ConnectionStore(struct SessionHandle *data,
+                            struct connectdata *conn)
 {
   long i;
   for(i=0; i< data->state.connc->num; i++) {
@@ -3121,8 +3120,6 @@ ConnectionStore(struct SessionHandle *data,
     data->state.connc->connects[i] = conn; /* fill in this */
     conn->data = data;
   }
-
-  return i;
 }
 
 /* after a TCP connection to the proxy has been verified, this function does
