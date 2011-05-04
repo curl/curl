@@ -3025,9 +3025,10 @@ ConnectionExists(struct SessionHandle *data,
 
 
 /*
- * This function frees/closes a connection in the connection cache. This
- * should take the previously set policy into account when deciding which
- * of the connections to kill.
+ * This function kills and removes an existing connection in the connection
+ * cache. The connection that has been unused for the longest time.
+ *
+ * Returns -1 if it can't find any unused connection to kill.
  */
 static long
 ConnectionKillOne(struct SessionHandle *data)
@@ -3078,9 +3079,9 @@ ConnectionDone(struct connectdata *conn)
 }
 
 /*
- * The given input connection struct pointer is to be stored. If the "cache"
- * is already full, we must clean out the most suitable using the previously
- * set policy.
+ * The given input connection struct pointer is to be stored in the connection
+ * cache. If the cache is already full, least interesting existing connection
+ * (if any) gets closed.
  *
  * The given connection should be unique. That must've been checked prior to
  * this call.

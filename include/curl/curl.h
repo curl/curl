@@ -991,8 +991,7 @@ typedef enum {
   /* Max amount of cached alive connections */
   CINIT(MAXCONNECTS, LONG, 71),
 
-  /* What policy to use when closing connections when the cache is filled
-     up */
+  /* 72 - DEPRECATED */
   CINIT(CLOSEPOLICY, LONG, 72),
 
   /* 73 = OBSOLETE */
