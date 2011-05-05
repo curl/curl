@@ -1013,7 +1013,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     return res;
   }
 
-  if(conn->handler->protocol & CURLPROTO_HTTPS) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
        needs to fit into the normal read-callback buffer later on and that
@@ -1292,7 +1292,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   }
 #endif /* CURL_DISABLE_PROXY */
 
-  if(conn->given->protocol & CURLPROTO_HTTPS) {
+  if(conn->given->flags & PROTOPT_SSL) {
     /* perform SSL initialization */
     if(data->state.used_interface == Curl_if_multi) {
       result = https_connecting(conn, done);
@@ -1331,7 +1331,7 @@ static int http_getsock_do(struct connectdata *conn,
 static CURLcode https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
-  DEBUGASSERT((conn) && (conn->handler->protocol & CURLPROTO_HTTPS));
+  DEBUGASSERT((conn) && (conn->handler->flags & PROTOPT_SSL));
 
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
@@ -1349,7 +1349,7 @@ static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
 {
-  if(conn->handler->protocol & CURLPROTO_HTTPS) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
 
     if(!numsocks)

@@ -629,12 +629,10 @@ static CURLcode imap_multi_statemach(struct connectdata *conn,
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
 
-  if((conn->handler->protocol & CURLPROTO_IMAPS) && !imapc->ssldone) {
+  if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
-  }
-  else {
+  else
     result = Curl_pp_multi_statemach(&imapc->pp);
-  }
 
   *done = (bool)(imapc->state == IMAP_STOP);
 
@@ -744,11 +742,9 @@ static CURLcode imap_connect(struct connectdata *conn,
       return result;
   }
 
-  if((conn->handler->protocol & CURLPROTO_IMAPS) &&
+  if((conn->handler->flags & PROTOPT_SSL) &&
      data->state.used_interface != Curl_if_multi) {
     /* BLOCKING */
-    /* IMAPS is simply imap with SSL for the control channel */
-    /* now, perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;

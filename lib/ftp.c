@@ -2946,10 +2946,8 @@ static CURLcode ftp_connect(struct connectdata *conn,
       return result;
   }
 
-  if(conn->handler->protocol & CURLPROTO_FTPS) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
-    /* FTPS is simply ftp with SSL for the control channel */
-    /* now, perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;

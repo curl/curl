@@ -676,10 +676,8 @@ static CURLcode pop3_connect(struct connectdata *conn,
       return result;
   }
 
-  if(conn->handler->protocol & CURLPROTO_POP3S) {
+  if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
-    /* POP3S is simply pop3 with SSL for the control channel */
-    /* now, perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;

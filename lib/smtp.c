@@ -1027,12 +1027,10 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn,
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
 
-  if((conn->handler->protocol & CURLPROTO_SMTPS) && !smtpc->ssldone) {
+  if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
-  }
-  else {
+  else
     result = Curl_pp_multi_statemach(&smtpc->pp);
-  }
 
   *done = (bool)(smtpc->state == SMTP_STOP);
 
