@@ -112,6 +112,7 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_GOPHER,                          /* defport */
   CURLPROTO_GOPHER,                     /* protocol */
   PROTOPT_NONE                          /* flags */

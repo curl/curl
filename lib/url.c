@@ -265,6 +265,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   0,                                    /* defport */
   0,                                    /* protocol */
   PROTOPT_NONE                          /* flags */

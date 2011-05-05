@@ -63,6 +63,19 @@ static int rtsp_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
 
+/*
+ * Parse and write out any available RTP data.
+ *
+ * nread: amount of data left after k->str. will be modified if RTP
+ *        data is parsed and k->str is moved up
+ * readmore: whether or not the RTP parser needs more data right away
+ */
+static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
+                                   struct connectdata *conn,
+                                   ssize_t *nread,
+                                   bool *readmore);
+
+
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
@@ -96,6 +109,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   Curl_rtsp_disconnect,                 /* disconnect */
+  rtsp_rtp_readwrite,                   /* readwrite */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -560,10 +574,11 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   return result;
 }
 
-CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
-                                 struct connectdata *conn,
-                                 ssize_t *nread,
-                                 bool *readmore) {
+
+static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
+                                   struct connectdata *conn,
+                                   ssize_t *nread,
+                                   bool *readmore) {
   struct SingleRequest *k = &data->req;
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
 

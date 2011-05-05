@@ -126,6 +126,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* readwrite */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
@@ -150,6 +151,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* readwrite */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3 | CURLPROTO_POP3S, /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
@@ -174,6 +176,7 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_POP3,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -198,6 +201,7 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_POP3S,                           /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */

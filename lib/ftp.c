@@ -178,6 +178,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_getsock,                     /* doing_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* readwrite */
   PORT_FTP,                        /* defport */
   CURLPROTO_FTP,                   /* protocol */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION /* flags */
@@ -202,6 +203,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_getsock,                     /* doing_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* readwrite */
   PORT_FTPS,                       /* defport */
   CURLPROTO_FTP | CURLPROTO_FTPS,  /* protocol */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION /* flags */
@@ -226,6 +228,7 @@ static const struct Curl_handler Curl_handler_ftp_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_FTP,                             /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -250,6 +253,7 @@ static const struct Curl_handler Curl_handler_ftps_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_FTPS,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */

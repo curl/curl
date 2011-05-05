@@ -467,16 +467,13 @@ static CURLcode readwrite_data(struct SessionHandle *data,
        in the flow below before the actual storing is done. */
     k->str = k->buf;
 
-#ifndef CURL_DISABLE_RTSP
-    /* Check for RTP at the beginning of the data */
-    if(conn->handler->protocol & CURLPROTO_RTSP) {
-      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
+    if(conn->handler->readwrite) {
+      result = conn->handler->readwrite(data, conn, &nread, &readmore);
       if(result)
         return result;
       if(readmore)
         break;
     }
-#endif
 
 #ifndef CURL_DISABLE_HTTP
     /* Since this is a two-state thing, we check if we are parsing
@@ -488,17 +485,14 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       if(result)
         return result;
 
-#ifndef CURL_DISABLE_RTSP
-      /* Check for RTP after the headers if there is no Content */
-      if(k->maxdownload <= 0 && nread > 0 &&
-         (conn->handler->protocol & CURLPROTO_RTSP)) {
-        result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
+      if(conn->handler->readwrite &&
+         (k->maxdownload <= 0 && nread > 0)) {
+        result = conn->handler->readwrite(data, conn, &nread, &readmore);
         if(result)
           return result;
         if(readmore)
           break;
       }
-#endif
 
       if(stop_reading) {
         /* We've stopped dealing with input, get out of the do-while loop */
@@ -765,16 +759,13 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
     } /* if(! header and data to read ) */
 
-#ifndef CURL_DISABLE_RTSP
-    if(excess > 0 && !conn->bits.stream_was_rewound &&
-       (conn->handler->protocol & CURLPROTO_RTSP)) {
-      /* Check for RTP after the content if there is unrewound excess */
-
+    if(conn->handler->readwrite &&
+       (excess > 0 && !conn->bits.stream_was_rewound)) {
       /* Parse the excess data */
       k->str += nread;
       nread = (ssize_t)excess;
 
-      result = Curl_rtsp_rtp_readwrite(data, conn, &nread, &readmore);
+      result = conn->handler->readwrite(data, conn, &nread, &readmore);
       if(result)
         return result;
 
@@ -782,7 +773,6 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         k->keepon |= KEEP_RECV; /* we're not done reading */
       break;
     }
-#endif
 
     if(is_empty_data) {
       /* if we received nothing, the server closed the connection and we

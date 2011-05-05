@@ -172,6 +172,7 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_getsock,                          /* doing_getsock */
   ssh_perform_getsock,                  /* perform_getsock */
   scp_disconnect,                       /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_SSH,                             /* defport */
   CURLPROTO_SCP,                        /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION /* flags */
@@ -195,6 +196,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_getsock,                          /* doing_getsock */
   ssh_perform_getsock,                  /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_SSH,                             /* defport */
   CURLPROTO_SFTP,                       /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION /* flags */

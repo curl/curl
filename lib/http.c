@@ -139,6 +139,7 @@ const struct Curl_handler Curl_handler_http = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -161,6 +162,7 @@ const struct Curl_handler Curl_handler_https = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
   PROTOPT_SSL                           /* flags */

@@ -134,6 +134,7 @@ const struct Curl_handler Curl_handler_smtp = {
   smtp_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* readwrite */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
@@ -158,6 +159,7 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* readwrite */
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTP | CURLPROTO_SMTPS, /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
@@ -182,6 +184,7 @@ static const struct Curl_handler Curl_handler_smtp_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_SMTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -206,6 +209,7 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_SMTPS,                           /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */

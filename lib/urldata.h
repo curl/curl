@@ -684,6 +684,11 @@ struct Curl_handler {
    */
   CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
 
+  /* If used, this function gets called from transfer.c:readwrite_data() to
+     allow the protocol to do extra reads/writes */
+  CURLcode (*readwrite)(struct SessionHandle *data, struct connectdata *conn,
+                        ssize_t *nread, bool *readmore);
+
   long defport;           /* Default port. */
   unsigned int protocol;  /* See CURLPROTO_*  */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
