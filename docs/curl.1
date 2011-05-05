@@ -1243,6 +1243,9 @@ assumed at port 1080. (Added in 7.15.2)
 This option overrides any previous use of \fI-x, --proxy\fP, as they are
 mutually exclusive.
 
+Since 7.21.7, this option is superfluous since you can specify a socks4 proxy
+with \fI-x, --proxy\fP using a socks4:// protocol prefix.
+
 If this option is used several times, the last one will be used.
 .IP "--socks4a <host[:port]>"
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
@@ -1250,6 +1253,9 @@ assumed at port 1080. (Added in 7.18.0)
 
 This option overrides any previous use of \fI-x, --proxy\fP, as they are
 mutually exclusive.
+
+Since 7.21.7, this option is superfluous since you can specify a socks4a proxy
+with \fI-x, --proxy\fP using a socks4a:// protocol prefix.
 
 If this option is used several times, the last one will be used.
 .IP "--socks5-hostname <host[:port]>"
@@ -1260,6 +1266,10 @@ the port number is not specified, it is assumed at port 1080. (Added in
 This option overrides any previous use of \fI-x, --proxy\fP, as they are
 mutually exclusive.
 
+Since 7.21.7, this option is superfluous since you can specify a
+socks5-hostnamae proxy with \fI-x, --proxy\fP using a socks5h:// protocol
+prefix.
+
 If this option is used several times, the last one will be used. (This option
 was previously wrongly documented and used as --socks without the number
 appended.)
@@ -1269,6 +1279,9 @@ port number is not specified, it is assumed at port 1080.
 
 This option overrides any previous use of \fI-x, --proxy\fP, as they are
 mutually exclusive.
+
+Since 7.21.7, this option is superfluous since you can specify a socks5 proxy
+with \fI-x, --proxy\fP using a socks5:// protocol prefix.
 
 If this option is used several times, the last one will be used. (This option
 was previously wrongly documented and used as --socks without the number
@@ -1545,9 +1558,9 @@ variables, including the protocol prefix (http://) and the embedded user +
 password.
 
 From 7.21.7, the proxy string may be specified with a protocol:// prefix to
-specify alternative proxy protocols. Use socks4://, socks4a:// or socks5:// to
-request the specific SOCKS version to be used. No protocol specified, http://
-and all others will be treated as HTTP proxies.
+specify alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
+socks5h:// to request the specific SOCKS version to be used. No protocol
+specified, http:// and all others will be treated as HTTP proxies.
 
 If this option is used several times, the last one will be used.
 .IP "-X, --request <command>"
