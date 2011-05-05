@@ -4069,7 +4069,9 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   endofprot = strstr(proxy, "://");
   if(endofprot) {
     proxyptr = endofprot+3;
-    if(checkprefix("socks5", proxy))
+    if(checkprefix("socks5h", proxy))
+      conn->proxytype = CURLPROXY_SOCKS5_HOSTNAME;
+    else if(checkprefix("socks5", proxy))
       conn->proxytype = CURLPROXY_SOCKS5;
     else if(checkprefix("socks4a", proxy))
       conn->proxytype = CURLPROXY_SOCKS4A;
