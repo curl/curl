@@ -129,7 +129,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* readwrite */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
-  PROTOPT_CLOSEACTION               /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD /* flags */
 };
 
 
@@ -154,7 +154,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* readwrite */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAP | CURLPROTO_IMAPS, /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | PROTOPT_NEEDSPWD /* flags */
 };
 #endif
 

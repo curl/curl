@@ -4452,7 +4452,7 @@ static CURLcode set_userpass(struct connectdata *conn,
                              const char *user, const char *passwd)
 {
   /* If our protocol needs a password and we have none, use the defaults */
-  if((conn->handler->protocol & (CURLPROTO_FTP|CURLPROTO_IMAP)) &&
+  if((conn->handler->flags & PROTOPT_NEEDSPWD) &&
      !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);
