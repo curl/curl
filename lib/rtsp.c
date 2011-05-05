@@ -59,6 +59,12 @@
 #define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \
                              ((int)((unsigned char)((p)[3]))))
 
+/* protocol-specific functions set up to be called by the main engine */
+static CURLcode rtsp_do(struct connectdata *conn, bool *done);
+static CURLcode rtsp_done(struct connectdata *conn, CURLcode, bool premature);
+static CURLcode rtsp_connect(struct connectdata *conn, bool *done);
+static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead);
+
 static int rtsp_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
@@ -99,16 +105,16 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len);
 const struct Curl_handler Curl_handler_rtsp = {
   "RTSP",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_rtsp,                            /* do_it */
-  Curl_rtsp_done,                       /* done */
+  rtsp_do,                              /* do_it */
+  rtsp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_rtsp_connect,                    /* connect_it */
+  rtsp_connect,                         /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   rtsp_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  Curl_rtsp_disconnect,                 /* disconnect */
+  rtsp_disconnect,                      /* disconnect */
   rtsp_rtp_readwrite,                   /* readwrite */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
@@ -148,7 +154,7 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
   return ret_val;
 }
 
-CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done)
+static CURLcode rtsp_connect(struct connectdata *conn, bool *done)
 {
   CURLcode httpStatus;
   struct SessionHandle *data = conn->data;
@@ -166,16 +172,16 @@ CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done)
   return httpStatus;
 }
 
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn, bool dead_connection)
+static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead)
 {
-  (void) dead_connection;
+  (void) dead;
   Curl_safefree(conn->proto.rtspc.rtp_buf);
   return CURLE_OK;
 }
 
 
-CURLcode Curl_rtsp_done(struct connectdata *conn,
-                        CURLcode status, bool premature)
+static CURLcode rtsp_done(struct connectdata *conn,
+                          CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
   struct RTSP *rtsp = data->state.proto.rtsp;
@@ -209,7 +215,7 @@ CURLcode Curl_rtsp_done(struct connectdata *conn,
   return httpStatus;
 }
 
-CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
+static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;

@@ -101,7 +101,6 @@
 #include "curl_memory.h"
 #include "select.h"
 #include "multiif.h"
-#include "rtsp.h"
 #include "connect.h"
 #include "non-ascii.h"
 

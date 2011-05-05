@@ -139,7 +139,6 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "inet_ntop.h"
 #include "http_ntlm.h"
 #include "socks.h"
-#include "rtsp.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
 

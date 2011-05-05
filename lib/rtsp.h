@@ -26,17 +26,12 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-/* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_rtsp(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_done(struct connectdata *conn, CURLcode, bool premature);
-CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn, bool dead_connection);
-
-CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
 bool Curl_rtsp_connisdead(struct connectdata *check);
+CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
 
 #else
 /* disabled */
+#define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
 #define Curl_rtsp_connisdead(x) TRUE
 
 #endif /* CURL_DISABLE_RTSP */

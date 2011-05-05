@@ -96,7 +96,6 @@
 #include "multiif.h"
 #include "rawstr.h"
 #include "content_encoding.h"
-#include "rtsp.h"
 #include "http_proxy.h"
 #include "warnless.h"
 #include "non-ascii.h"
@@ -3314,13 +3313,12 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
       }
     }
-#ifndef CURL_DISABLE_RTSP
     else if(conn->handler->protocol & CURLPROTO_RTSP) {
       result = Curl_rtsp_parseheader(conn, k->p);
       if(result)
         return result;
     }
-#endif
+
     /*
      * End of header-checks. Write them to the client.
      */

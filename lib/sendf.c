@@ -42,7 +42,6 @@
 #include "sslgen.h"
 #include "ssh.h"
 #include "multiif.h"
-#include "rtsp.h"
 #include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
