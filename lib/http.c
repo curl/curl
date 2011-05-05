@@ -338,7 +338,7 @@ static bool pickoneauth(struct auth *pick)
  *   }
  * }
  */
-CURLcode Curl_http_perhapsrewind(struct connectdata *conn)
+static CURLcode http_perhapsrewind(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct HTTP *http = data->state.proto.http;
@@ -475,7 +475,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD) &&
        !conn->bits.rewindaftersend) {
-      code = Curl_http_perhapsrewind(conn);
+      code = http_perhapsrewind(conn);
       if(code)
         return code;
     }
@@ -3307,7 +3307,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
           /* some cases of POST and PUT etc needs to rewind the data
              stream at this point */
-          result = Curl_http_perhapsrewind(conn);
+          result = http_perhapsrewind(conn);
           if(result)
             return result;
         }
