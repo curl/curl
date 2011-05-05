@@ -345,10 +345,9 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
 
-  if(!http || !(conn->handler->protocol & CURLPROTO_HTTP))
-    /* If this is still NULL, we have not reach very far and we can
-       safely skip this rewinding stuff, or this is attempted to get used
-       when HTTP isn't activated */
+  if(!http)
+    /* If this is still NULL, we have not reach very far and we can safely
+       skip this rewinding stuff */
     return CURLE_OK;
 
   switch(data->set.httpreq) {
