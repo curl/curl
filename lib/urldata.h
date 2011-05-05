@@ -698,7 +698,7 @@ struct Curl_handler {
    the send function might need to be called while uploading, or vice versa.
 */
 #define PROTOPT_DIRLOCK (1<<3)
-#define PROTOPT_BANPROXY (1<<4)    /* not allowed to use proxy */
+#define PROTOPT_NONETWORK (1<<4)    /* protocol doesn't use the network! */
 
 
 /* return the count of bytes sent, or -1 on error */

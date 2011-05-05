@@ -129,7 +129,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* disconnect */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
-  PROTOPT_BANPROXY                      /* flags */
+  PROTOPT_NONETWORK                     /* flags */
 };
 
 

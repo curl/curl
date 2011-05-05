@@ -4768,9 +4768,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   else if(!proxy)
     proxy = detect_proxy(conn);
 
-  if(proxy && (!*proxy || (conn->handler->flags & PROTOPT_BANPROXY))) {
+  if(proxy && (!*proxy || (conn->handler->flags & PROTOPT_NONETWORK))) {
     free(proxy);  /* Don't bother with an empty proxy string or if the
-                     protocol doesn't work with proxy */
+                     protocol doesn't work with network */
     proxy = NULL;
   }
 
@@ -4828,7 +4828,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/
 #ifndef CURL_DISABLE_FILE
-  if(conn->handler->protocol & CURLPROTO_FILE) {
+  if(conn->handler->flags & PROTOPT_NONETWORK) {
     bool done;
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
@@ -4988,9 +4988,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(conn->handler->protocol & CURLPROTO_FILE) {
-    /* There's nothing in this function to setup if we're only doing
-       a file:// transfer */
+  if(conn->handler->flags & PROTOPT_NONETWORK) {
+    /* nothing to setup when not using a network */
     *protocol_done = TRUE;
     return result;
   }
