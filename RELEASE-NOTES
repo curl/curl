@@ -10,7 +10,7 @@ Curl and libcurl 7.21.7
 This release includes the following changes:
 
  o recognize the [protocol]:// prefix in proxy hosts where the protocol is one
-   of socks4, socks4a or socks5.
+   of socks4, socks4a, socks5 or socks5h.
 
 This release includes the following bugfixes:
 
@@ -18,6 +18,7 @@ This release includes the following bugfixes:
  o fix connect with SOCKS proxy when using the multi interface
  o anyauthput.c: stdint.h must not be included unconditionally
  o CMake: improved build
+ o SCP/SFTP enable non-blocking earlier
 
 This release includes the following known bugs:
 
