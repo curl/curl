@@ -400,9 +400,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   ssize_t nread; /* number of bytes read */
   size_t excess = 0; /* excess bytes read */
   bool is_empty_data = FALSE;
-#ifndef CURL_DISABLE_RTSP
   bool readmore = FALSE; /* used by RTP to signal for more data */
-#endif
 
   *done = FALSE;
 
