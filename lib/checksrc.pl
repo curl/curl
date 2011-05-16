@@ -118,7 +118,7 @@ sub scanfile {
             checkwarn($line, length($1), $file, $l, "Contains TAB character", 1);
         }
         # detect trailing white space
-        if($l =~ /^(\S+)[ \t]+\z/) {
+        if($l =~ /^(.*)[ \t]+\z/) {
             checkwarn($line, length($1), $file, $l, "Trailing whitespace");
         }
 
