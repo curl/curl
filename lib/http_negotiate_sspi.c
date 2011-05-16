@@ -133,7 +133,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
      (ret = get_gss_name(conn, proxy, neg_ctx->server_name)))
     return ret;
 
-  if(!neg_ctx->max_token_length) {
+  if(!neg_ctx->output_token) {
     PSecPkgInfo SecurityPackage;
     ret = s_pSecFn->QuerySecurityPackageInfo((SEC_CHAR *)"Negotiate",
                                              &SecurityPackage);
@@ -153,19 +153,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     header++;
 
   len = strlen(header);
-  if(len > 0) {
-    input_token = malloc(neg_ctx->max_token_length);
-    if(!input_token)
-      return -1;
-
-    input_token_len = Curl_base64_decode(header,
-                                         (unsigned char **)&input_token);
-    if(input_token_len == 0)
-      return -1;
-  }
-
-  if(!input_token) {
-    /* first call in a new negotation, we have to require credentials,
+  if(!len) {
+    /* first call in a new negotation, we have to acquire credentials,
        and allocate memory for the context */
 
     neg_ctx->credentials = (CredHandle *)malloc(sizeof(CredHandle));
@@ -180,6 +169,16 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                          NULL, NULL, neg_ctx->credentials,
                                          &lifetime);
     if(neg_ctx->status != SEC_E_OK)
+      return -1;
+  }
+  else {
+    input_token = malloc(neg_ctx->max_token_length);
+    if(!input_token)
+      return -1;
+
+    input_token_len = Curl_base64_decode(header,
+                                         (unsigned char **)&input_token);
+    if(input_token_len == 0)
       return -1;
   }
 
@@ -280,6 +279,8 @@ static void cleanup(struct negotiatedata *neg_ctx)
     free(neg_ctx->output_token);
     neg_ctx->output_token = 0;
   }
+
+  neg_ctx->max_token_length = 0;
 }
 
 void Curl_cleanup_negotiate(struct SessionHandle *data)
