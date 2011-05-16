@@ -341,7 +341,7 @@ typedef curl_socket_t
                             curlsocktype purpose,
                             struct curl_sockaddr *address);
 
-typedef void
+typedef int
 (*curl_closesocket_callback)(void *clientp, curl_socket_t item);
 
 typedef enum {

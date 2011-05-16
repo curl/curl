@@ -1172,7 +1172,8 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 int Curl_closesocket(struct connectdata *conn,
                      curl_socket_t sock)
 {
-  (void)conn;
-
-  return sclose(sock);
+  if(conn && conn->fclosesocket)
+    return conn->fclosesocket(conn->closesocket_client, sock);
+  else
+    return sclose(sock);
 }
