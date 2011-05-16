@@ -341,6 +341,9 @@ typedef curl_socket_t
                             curlsocktype purpose,
                             struct curl_sockaddr *address);
 
+typedef void
+(*curl_closesocket_callback)(void *clientp, curl_socket_t item);
+
 typedef enum {
   CURLIOE_OK,            /* I/O operation successful */
   CURLIOE_UNKNOWNCMD,    /* command was unknown to callback */
@@ -1474,6 +1477,11 @@ typedef enum {
 
   */
   CINIT(TRANSFER_ENCODING, LONG, 207),
+
+  /* Callback function for closing socket (instead of close(2)). The callback
+     should have type curl_closesocket_callback */
+  CINIT(CLOSESOCKETFUNCTION, FUNCTIONPOINT, 208),
+  CINIT(CLOSESOCKETDATA, OBJECTPOINT, 209),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

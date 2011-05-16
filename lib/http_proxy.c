@@ -37,6 +37,7 @@
 #include "rawstr.h"
 #include "progress.h"
 #include "non-ascii.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -482,7 +483,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       if(closeConnection && data->req.newurl) {
         /* Connection closed by server. Don't use it anymore */
-        sclose(conn->sock[sockindex]);
+        Curl_closesocket(conn, conn->sock[sockindex]);
         conn->sock[sockindex] = CURL_SOCKET_BAD;
         break;
       }

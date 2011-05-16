@@ -2185,7 +2185,7 @@ static CURLcode Curl_do_perform(struct SessionHandle *data)
           if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET]) {
             /* if we failed anywhere, we must clean up the secondary socket if
                it was used */
-            sclose(conn->sock[SECONDARYSOCKET]);
+            Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
             conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
           }
         }

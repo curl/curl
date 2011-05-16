@@ -357,7 +357,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 
         s=accept(sock, (struct sockaddr *) &add, &size);
       }
-      sclose(sock); /* close the first socket */
+      Curl_closesocket(conn, sock); /* close the first socket */
 
       if(CURL_SOCKET_BAD == s) {
         failf(data, "Error accept()ing server connect");
@@ -912,7 +912,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
           failf(data, "getsockname() failed: %s",
                 Curl_strerror(conn, SOCKERRNO) );
-          sclose(portsock);
+          Curl_closesocket(conn, portsock);
           return CURLE_FTP_PORT_FAILED;
         }
         port = port_min;
@@ -921,7 +921,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       else if(error != EADDRINUSE && error != EACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(conn, error) );
-        sclose(portsock);
+        Curl_closesocket(conn, portsock);
         return CURLE_FTP_PORT_FAILED;
       }
     }
@@ -934,7 +934,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* maybe all ports were in use already*/
   if(port > port_max) {
     failf(data, "bind() failed, we ran out of ports!");
-    sclose(portsock);
+    Curl_closesocket(conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -944,7 +944,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
-    sclose(portsock);
+    Curl_closesocket(conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -952,7 +952,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   if(listen(portsock, 1)) {
     failf(data, "socket failure: %s", Curl_strerror(conn, SOCKERRNO));
-    sclose(portsock);
+    Curl_closesocket(conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -1038,7 +1038,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
      the cleanup function will close it in case we fail before the true
      secondary stuff is made */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
-    sclose(conn->sock[SECONDARYSOCKET]);
+    Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
   conn->sock[SECONDARYSOCKET] = portsock;
 
   /* this tcpconnect assignment below is a hackish work-around to make the
@@ -3100,7 +3100,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
          still requested to use SSL */
     }
     if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET]) {
-      sclose(conn->sock[SECONDARYSOCKET]);
+      Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
       conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
     }
   }
@@ -4080,7 +4080,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 
   if(result && (conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD)) {
     /* Failure detected, close the second socket if it was created already */
-    sclose(conn->sock[SECONDARYSOCKET]);
+    Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
     return result;
   }

@@ -2232,6 +2232,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.opensocket_client = va_arg(param, void *);
     break;
 
+  case CURLOPT_CLOSESOCKETFUNCTION:
+    /*
+     * close socket callback function: called instead of close()
+     * when shutting down a connection
+     */
+    data->set.fclosesocket = va_arg(param, curl_closesocket_callback);
+    break;
+
+  case CURLOPT_CLOSESOCKETDATA:
+    /*
+     * socket callback data pointer. Might be NULL.
+     */
+    data->set.closesocket_client = va_arg(param, void *);
+    break;
+
   case CURLOPT_SSL_SESSIONID_CACHE:
     data->set.ssl.sessionid = (bool)(0 != va_arg(param, long));
     break;
@@ -2524,9 +2539,9 @@ static void conn_free(struct connectdata *conn)
 
   /* close possibly still open sockets */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
-    sclose(conn->sock[SECONDARYSOCKET]);
+    Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
-    sclose(conn->sock[FIRSTSOCKET]);
+    Curl_closesocket(conn, conn->sock[FIRSTSOCKET]);
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -3537,6 +3552,11 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   }
   conn->localportrange = data->set.localportrange;
   conn->localport = data->set.localport;
+
+  /* the close socket stuff needs to be copied to the connection struct as
+     it may live on without (this specific) SessionHandle */
+  conn->fclosesocket = data->set.fclosesocket;
+  conn->closesocket_client = data->set.closesocket_client;
 
   return conn;
   error:

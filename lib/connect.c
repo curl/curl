@@ -510,7 +510,7 @@ static CURLcode trynextip(struct connectdata *conn,
   *connected = FALSE;
 
   if(sockindex != FIRSTSOCKET) {
-    sclose(fd_to_close);
+    Curl_closesocket(conn, fd_to_close);
     return CURLE_COULDNT_CONNECT; /* no next */
   }
 
@@ -525,12 +525,12 @@ static CURLcode trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
-      sclose(fd_to_close);
+      Curl_closesocket(conn, fd_to_close);
       return CURLE_OK;
     }
     ai = ai->ai_next;
   }
-  sclose(fd_to_close);
+  Curl_closesocket(conn, fd_to_close);
   return CURLE_COULDNT_CONNECT;
 }
 
@@ -905,7 +905,7 @@ singleipconnect(struct connectdata *conn,
     error = ERRNO;
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           error, Curl_strerror(conn, error));
-    sclose(sockfd);
+    Curl_closesocket(conn, sockfd);
     return CURLE_OK;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
@@ -934,7 +934,7 @@ singleipconnect(struct connectdata *conn,
     if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
       isconnected = TRUE;
     else if(error) {
-      sclose(sockfd); /* close the socket and bail out */
+      Curl_closesocket(conn, sockfd); /* close the socket and bail out */
       return CURLE_ABORTED_BY_CALLBACK;
     }
   }
@@ -942,7 +942,7 @@ singleipconnect(struct connectdata *conn,
   /* possibly bind the local end to an IP, interface or port */
   res = bindlocal(conn, sockfd, addr.family);
   if(res) {
-    sclose(sockfd); /* close socket and bail out */
+    Curl_closesocket(conn, sockfd); /* close socket and bail out */
     return res;
   }
 
@@ -976,7 +976,7 @@ singleipconnect(struct connectdata *conn,
 #endif
       rc = waitconnect(conn, sockfd, timeout_ms);
       if(WAITCONN_ABORTED == rc) {
-        sclose(sockfd);
+        Curl_closesocket(conn, sockfd);
         return CURLE_ABORTED_BY_CALLBACK;
       }
       break;
@@ -1017,7 +1017,7 @@ singleipconnect(struct connectdata *conn,
   }
 
   /* connect failed or timed out */
-  sclose(sockfd);
+  Curl_closesocket(conn, sockfd);
 
   return CURLE_OK;
 }
@@ -1162,4 +1162,17 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
     return CURL_SOCKET_BAD;
 
   return sockfd;
+}
+
+/*
+ * Close a socket.
+ *
+ * 'conn' can be NULL, beware!
+ */
+int Curl_closesocket(struct connectdata *conn,
+                     curl_socket_t sock)
+{
+  (void)conn;
+
+  return sclose(sock);
 }

@@ -125,7 +125,7 @@ bool Curl_ipv6works(void)
       ipv6_works = 0;
     else {
       ipv6_works = 1;
-      sclose(s);
+      Curl_closesocket(NULL, s);
     }
   }
   return (ipv6_works>0)?TRUE:FALSE;

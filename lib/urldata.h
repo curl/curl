@@ -737,6 +737,9 @@ struct connectdata {
      and a HTTP proxy may in fact respond using chunked encoding */
   struct Curl_chunker chunk;
 
+  curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
+  void *closesocket_client;
+
   bool inuse; /* This is a marker for the connection cache logic. If this is
                  TRUE this handle is being used by an easy handle and cannot
                  be used by any other easy handle without careful
@@ -1369,6 +1372,9 @@ struct UserDefined {
                                            the address and opening the
                                            socket */
   void* opensocket_client;
+  curl_closesocket_callback fclosesocket; /* function for closing the
+                                             socket */
+  void* closesocket_client;
 
   void *seek_client;    /* pointer to pass to the seek callback */
   /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */

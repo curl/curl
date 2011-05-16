@@ -240,7 +240,6 @@ struct timeval {
 #  define sclose(x)  close((x))
 #endif
 
-
 /*
  * Uppercase macro versions of ANSI/ISO is*() functions/macros which
  * avoid negative number inputs with argument byte codes > 127.
