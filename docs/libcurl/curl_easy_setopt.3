@@ -310,7 +310,7 @@ argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
 .IP CURLOPT_CLOSESOCKETFUNCTION
 Function pointer that should match the \fIcurl_closesocket_callback\fP
 prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
-instead of the \fIclose(2)\fP or \fIclosesocket(2)\fP call when sockets are
+instead of the \fIclose(3)\fP or \fIclosesocket(3)\fP call when sockets are
 closed (not for any other file descriptors). This is pretty much the reverse
 to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. \fIReturn 0 to signal success
 and 1 if there was an error.  (Option added in 7.21.7)
