@@ -255,7 +255,8 @@ static CURLcode handshake(struct connectdata *conn,
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_ready(readfd, writefd,
-                               nonblocking?0:(int)timeout_ms?1000:timeout_ms);
+                               nonblocking?0:
+                               ((int)timeout_ms?timeout_ms:1000));
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
