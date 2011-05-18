@@ -23,6 +23,39 @@
 
 #include "memdebug.h"
 
+#ifdef LIB585
+
+int counter;
+
+static int opensocket(void *clientp,
+                      curlsocktype purpose,
+                      struct curl_sockaddr *addr)
+{
+  (void)clientp;
+  (void)purpose;
+  printf("[OPEN] counter: %d\n", ++counter);
+  return socket(addr->family, addr->socktype, addr->protocol);
+}
+
+static int closesocket(void *clientp, curl_socket_t sock)
+{
+  (void)clientp;
+  printf("[CLOSE] counter: %d\n", counter--);
+  return sclose(sock);
+}
+
+static void setupcallbacks(CURL *curl)
+{
+  curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
+  curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
+  counter = 0;
+}
+
+#else
+#define setupcallbacks(x)
+#endif
+
+
 int test(char *URL)
 {
   CURLcode res;
@@ -42,6 +75,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
+
+  setupcallbacks(curl);
 
   res = curl_easy_perform(curl);
 
