@@ -33,7 +33,11 @@
 #include <curl/mprintf.h>
 
 #ifdef USE_ARES
-#include <ares.h>
+#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
+     (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
+#    define CARES_STATICLIB
+#  endif
+#  include <ares.h>
 #endif
 
 #ifdef USE_LIBIDN
