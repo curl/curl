@@ -27,9 +27,9 @@
 
 int counter;
 
-static int opensocket(void *clientp,
-                      curlsocktype purpose,
-                      struct curl_sockaddr *addr)
+static curl_socket_t tst_opensocket(void *clientp,
+                                    curlsocktype purpose,
+                                    struct curl_sockaddr *addr)
 {
   (void)clientp;
   (void)purpose;
@@ -37,7 +37,7 @@ static int opensocket(void *clientp,
   return socket(addr->family, addr->socktype, addr->protocol);
 }
 
-static int closesocket(void *clientp, curl_socket_t sock)
+static int tst_closesocket(void *clientp, curl_socket_t sock)
 {
   (void)clientp;
   printf("[CLOSE] counter: %d\n", counter--);
@@ -46,8 +46,8 @@ static int closesocket(void *clientp, curl_socket_t sock)
 
 static void setupcallbacks(CURL *curl)
 {
-  curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
-  curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
+  curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, tst_opensocket);
+  curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, tst_closesocket);
   counter = 0;
 }
 
