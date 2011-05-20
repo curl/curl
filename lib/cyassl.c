@@ -122,6 +122,7 @@ cyassl_connect_step1(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
+#ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(data->set.str[STRING_SSL_CAFILE]) {
     if(!SSL_CTX_load_verify_locations(conssl->ctx,
@@ -175,6 +176,12 @@ cyassl_connect_step1(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
+#else
+  if(CyaSSL_no_filesystem_verify(conssl->ctx)!= SSL_SUCCESS)
+  {
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif //NO_FILESYSTEM
 
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
