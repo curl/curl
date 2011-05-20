@@ -41,7 +41,7 @@ Open a Visual Studio Command prompt or the SDK CMD shell.
      Everything is already pre-configured by calling one of the command
      prompt.
 
-Once you are in the consonle, go to the winbuild directory in the Curl 
+Once you are in the console, go to the winbuild directory in the Curl 
 sources:
     cd curl-src\winbuild
 
