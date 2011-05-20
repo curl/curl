@@ -1,4 +1,4 @@
-Updated: January 24, 2011 (http://curl.haxx.se/docs/faq.html)
+Updated: March 8, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -51,6 +51,8 @@ FAQ
   3.17 How do I list the root dir of an FTP server?
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
   3.19 How do I get HTTP from a host using a specific IP address?
+  3.20 How to SFTP from my user's home directory?
+  3.21 Protocol xxx not supported or disabled in libcurl
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -107,7 +109,7 @@ FAQ
 
  7. PHP/CURL Issues
   7.1 What is PHP/CURL?
-  7.2 Who write PHP/CURL?
+  7.2 Who wrote PHP/CURL?
   7.3 Can I perform multiple requests using the same handle?
 
 ==============================================================================
@@ -470,9 +472,13 @@ FAQ
   3.1 curl: (1) SSL is disabled, https: not supported
 
   If you get this output when trying to get anything from a https:// server,
-  it means that the configure script couldn't find all libs and include files
-  it requires for SSL to work. If the configure script fails to find them,
-  curl is simply built without SSL support.
+  it means that the instance of curl/libcurl that you're using was built
+  without support for this protocol.
+
+  This could've happened if the configure script that was run at build time
+  couldn't find all libs and include files curl requires for SSL to work. If
+  the configure script fails to find them, curl is simply built without SSL
+  support.
 
   To get the https:// support into a curl that was previously built but that
   reports that https:// is not supported, you should dig through the document
@@ -714,6 +720,35 @@ FAQ
   but use the target IP address in the URL:
 
     curl --header "Host: www.example.com" http://127.0.0.1/
+
+  3.20 How to SFTP from my user's home directory?
+
+  Contrary to how FTP works, SFTP and SCP URLs specify the exact directory to
+  work with. It means that if you don't specify that you want the user's home
+  directory, you get the actual root directory.
+
+  To specify a file in your user's home directory, you need to use the correct
+  URL syntax which for sftp might look similar to:
+
+    curl -O -u user:password sftp://example.com/~/file.txt
+
+  and for SCP it is just a different protocol prefix:
+
+    curl -O -u user:password scp://example.com/~/file.txt
+
+  3.21 Protocol xxx not supported or disabled in libcurl
+
+  When passing on a URL to curl to use, it may respond that the particular
+  protocol is not supported or disabled. The particular way this error message
+  is phrased is because curl doesn't make a distinction internally of whether
+  a particular protocol is not supported (ie never got any code added that
+  knows how to speak that protocol) or if it was explicitly disabled. curl can
+  be built to only support a given set of protocols, and the rest would then
+  be disabled or not supported.
+
+  Note that this error will also occur if you pass a wrongly spelled protocol
+  part as in "htpt://example.com" or as in the less evident case if you prefix
+  the protocol part with a space as in " http://example.com/".
 
 
 4. Running Problems
@@ -1138,13 +1173,12 @@ FAQ
   the import libraries below. These are the libraries produced by the various
   lib/Makefile.* files:
 
-  Target:          static lib.   import lib for libcurl*.dll.
-  -----------------------------------------------------------
-  MingW:           libcurl.a     libcurldll.a
-  MSVC (release):  libcurl.lib   libcurl_imp.lib
-  MSVC (debug):    libcurld.lib  libcurld_imp.lib
-  Borland:         libcurl.lib   libcurl_imp.lib
-
+       Target:          static lib.   import lib for libcurl*.dll.
+       -----------------------------------------------------------
+       MingW:           libcurl.a     libcurldll.a
+       MSVC (release):  libcurl.lib   libcurl_imp.lib
+       MSVC (debug):    libcurld.lib  libcurld_imp.lib
+       Borland:         libcurl.lib   libcurl_imp.lib
 
   5.8 libcurl.so.X: open failed: No such file or directory
 
@@ -1178,21 +1212,20 @@ FAQ
   - The non-ipv6 resolver that can use one out of four host name resolve calls
     (depending on what your system supports):
 
-    A - gethostbyname()
-    B - gethostbyname_r() with 3 arguments
-    C - gethostbyname_r() with 5 arguments
-    D - gethostbyname_r() with 6 arguments
+      A - gethostbyname()
+      B - gethostbyname_r() with 3 arguments
+      C - gethostbyname_r() with 5 arguments
+      D - gethostbyname_r() with 6 arguments
 
   - The ipv6-resolver that uses getaddrinfo()
 
   - The c-ares based name resolver that uses the c-ares library for resolves.
-    Using this offers asynchronous name resolves but it currently has no IPv6
-    support.
+    Using this offers asynchronous name resolves.
 
   - The threaded resolver (default option on Windows). It uses:
 
-    A - gethostbyname() on plain ipv4 hosts
-    B - getaddrinfo() on ipv6-enabled hosts
+      A - gethostbyname() on plain ipv4 hosts
+      B - getaddrinfo() on ipv6-enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.
@@ -1245,14 +1278,14 @@ FAQ
   member function that is passed a pointer to the class:
 
      // f is the pointer to your object.
-     static YourClass::staticFunction(void *buffer, size_t sz, size_t n, void *f)
+     static YourClass::func(void *buffer, size_t sz, size_t n, void *f)
      {
        // Call non-static member function.
        static_cast<YourClass*>(f)->nonStaticFunction();
      }
 
      // This is how you pass pointer to the static function:
-     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:staticFunction);
+     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:func);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
   5.15 How do I get an FTP directory listing?
@@ -1347,12 +1380,16 @@ FAQ
   You do not have to reveal or make public any changes to the libcurl source
   code.
 
-  You do not have to reveal or make public that you are using libcurl within
+  You do not have to broadcast to the world that you are using libcurl within
   your app.
 
-  As can be seen here: http://curl.haxx.se/docs/companies.html and
-  elsewhere, more and more companies are discovering the power
-  of libcurl and take advantage of it even in commercial environments.
+  All we ask is that you disclose "the copyright notice and this permission
+  notice" somewhere. Most probably like in the documentation or in the section
+  where other third party dependencies already are mentioned and acknowledged.
+
+  As can be seen here: http://curl.haxx.se/docs/companies.html and elsewhere,
+  more and more companies are discovering the power of libcurl and take
+  advantage of it even in commercial environments.
 
 
 7. PHP/CURL Issues
@@ -1368,7 +1405,7 @@ FAQ
   CURL (often using all caps) or sometimes ext/curl, but both cause much
   confusion to users which in turn gives us a higher question load.
 
-  7.2 Who write PHP/CURL?
+  7.2 Who wrote PHP/CURL?
 
   PHP/CURL is a module that comes with the regular PHP package. It depends and
   uses libcurl, so you need to have libcurl installed properly first before

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,9 +44,15 @@ can be a misspelled protocol string or just a protocol libcurl has no code
 for.
 .IP "CURLE_FAILED_INIT (2)"
 Very early initialization code failed. This is likely to be an internal error
-or problem.
+or problem, or a resource problem where something fundamental couldn't get
+done at init time.
 .IP "CURLE_URL_MALFORMAT (3)"
 The URL was not properly formatted.
+.IP "CURLE_NOT_BUILT_IN (4)"
+A requested feature, protocol or option was not found built-in in this libcurl
+due to a build-time decision. This means that a feature or option was not
+enabled or explicitly disabled when libcurl was built and in order to get it
+to function you have to get a rebuilt libcurl.
 .IP "CURLE_COULDNT_RESOLVE_PROXY (5)"
 Couldn't resolve proxy. The given proxy host could not be resolved.
 .IP "CURLE_COULDNT_RESOLVE_HOST (6)"
@@ -145,9 +151,11 @@ CURLOPT_INTERFACE.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
 Too many redirects. When following redirects, libcurl hit the maximum amount.
 Set your limit with CURLOPT_MAXREDIRS.
-.IP "CURLE_UNKNOWN_TELNET_OPTION (48)"
-An option set with CURLOPT_TELNETOPTIONS was not recognized/known. Refer to
-the appropriate documentation.
+.IP "CURLE_UNKNOWN_OPTION (48)"
+An option passed to libcurl is not recognized/known. Refer to the appropriate
+documentation. This is most likely a problem in the program that uses
+libcurl. The error buffer might contain more specific information about which
+exact option it concerns.
 .IP "CURLE_TELNET_OPTION_SYNTAX (49)"
 A telnet option string was Illegally formatted.
 .IP "CURLE_PEER_FAILED_VERIFICATION (51)"

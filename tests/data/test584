@@ -1,0 +1,102 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+Pipelining
+multi
+</keywords>
+</info>
+
+# Server-side
+# Silly division of the first request is solely to appease the server which expects n_data_items == n_requests
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 4
+
+584
+</data1>
+<data2>
+HTTP/1.1 200 OK
+</data2>
+<data3>
+Server: test-server/fake
+</data3>
+<data4>
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 5
+
+585
+
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 4
+
+586
+</data4>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib530
+</tool>
+ <name>
+HTTP GET using pipelining (nonzero length after zero length)
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/path/584
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /path/5840001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/5840002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/5840003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/5840004 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 4
+
+584
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 5
+
+585
+
+HTTP/1.1 200 OK
+Server: test-server/fake
+Content-Length: 4
+
+586
+</stdout>
+</verify>
+</testcase>

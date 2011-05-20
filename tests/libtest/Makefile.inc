@@ -5,14 +5,14 @@ TESTUTIL = testutil.c testutil.h
 SUPPORTFILES = first.c test.h
 
 # These are all libcurl test programs
-noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506	\
-  lib507 lib508 lib510 lib511 lib512 lib513 lib514 lib515 lib516	\
-  lib517 lib518 lib519 lib520 lib521 lib523 lib524 lib525 lib526 lib527	\
-  lib574 lib575 lib576 lib577 lib578 lib579 \
-  lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542 lib543 \
-  lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 \
-  lib539 lib557 lib558 lib559 lib560 lib562 lib564 lib565 lib566 lib567 \
-  lib568 lib569 lib570 lib571 lib572 lib573 chkhostname
+noinst_PROGRAMS = chkhostname \
+  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib510	\
+  lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519 lib520	\
+  lib521 lib523 lib524 lib525 lib526 lib527 lib574 lib575 lib576 lib578	\
+  lib579 lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542	\
+  lib543 lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555	\
+  lib556 lib539 lib557 lib560 lib562 lib564 lib565 lib566 lib567 lib568	\
+  lib569 lib570 lib571 lib572 lib573 lib582 lib583 lib585
 
 chkhostname_SOURCES = chkhostname.c $(top_srcdir)/lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
@@ -122,12 +122,6 @@ lib556_SOURCES = lib556.c $(SUPPORTFILES)
 
 lib557_SOURCES = lib557.c $(SUPPORTFILES)
 
-lib558_SOURCES = lib558.c $(SUPPORTFILES)
-lib558_CFLAGS = -DLIB558
-
-lib559_SOURCES = lib558.c $(SUPPORTFILES)
-lib559_CFLAGS = -DLIB559
-
 lib560_SOURCES = lib560.c $(SUPPORTFILES)
 
 lib574_SOURCES = lib574.c $(SUPPORTFILES)
@@ -135,8 +129,6 @@ lib574_SOURCES = lib574.c $(SUPPORTFILES)
 lib575_SOURCES = lib575.c $(SUPPORTFILES)
 
 lib576_SOURCES = lib576.c $(SUPPORTFILES)
-
-lib577_SOURCES = lib577.c $(SUPPORTFILES)
 
 lib562_SOURCES = lib562.c $(SUPPORTFILES)
 
@@ -165,3 +157,9 @@ lib578_SOURCES = lib578.c $(SUPPORTFILES)
 
 lib579_SOURCES = lib579.c $(SUPPORTFILES)
 
+lib582_SOURCES = lib582.c $(SUPPORTFILES) $(TESTUTIL)
+
+lib583_SOURCES = lib583.c $(SUPPORTFILES)
+
+lib585_SOURCES = lib500.c $(SUPPORTFILES)
+lib585_CFLAGS = -DLIB585

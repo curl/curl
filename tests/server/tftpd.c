@@ -1132,8 +1132,8 @@ static void sendtftp(struct testcase *test, struct formats *pf)
       nak(ERRNO + 100);
       return;
     }
-    sdp->th_opcode = htons((u_short)opcode_DATA);
-    sdp->th_block = htons((u_short)sendblock);
+    sdp->th_opcode = htons((unsigned short)opcode_DATA);
+    sdp->th_block = htons(sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
     (void) sigsetjmp(timeoutbuf, 1);
@@ -1158,8 +1158,8 @@ static void sendtftp(struct testcase *test, struct formats *pf)
         logmsg("read: fail");
         return;
       }
-      sap->th_opcode = ntohs((u_short)sap->th_opcode);
-      sap->th_block = ntohs((u_short)sap->th_block);
+      sap->th_opcode = ntohs((unsigned short)sap->th_opcode);
+      sap->th_block = ntohs(sap->th_block);
 
       if (sap->th_opcode == opcode_ERROR) {
         logmsg("got ERROR");
@@ -1196,8 +1196,8 @@ static void recvtftp(struct testcase *test, struct formats *pf)
   rap = &ackbuf.hdr;
   do {
     timeout = 0;
-    rap->th_opcode = htons((u_short)opcode_ACK);
-    rap->th_block = htons((u_short)recvblock);
+    rap->th_opcode = htons((unsigned short)opcode_ACK);
+    rap->th_block = htons(recvblock);
     recvblock++;
 #ifdef HAVE_SIGSETJMP
     (void) sigsetjmp(timeoutbuf, 1);
@@ -1222,8 +1222,8 @@ send_ack:
         logmsg("read: fail\n");
         goto abort;
       }
-      rdp->th_opcode = ntohs((u_short)rdp->th_opcode);
-      rdp->th_block = ntohs((u_short)rdp->th_block);
+      rdp->th_opcode = ntohs((unsigned short)rdp->th_opcode);
+      rdp->th_block = ntohs(rdp->th_block);
       if (rdp->th_opcode == opcode_ERROR)
         goto abort;
       if (rdp->th_opcode == opcode_DATA) {
@@ -1248,8 +1248,8 @@ send_ack:
   } while (size == SEGSIZE);
   write_behind(test, pf->f_convert);
 
-  rap->th_opcode = htons((u_short)opcode_ACK);  /* send the "final" ack */
-  rap->th_block = htons((u_short)recvblock);
+  rap->th_opcode = htons((unsigned short)opcode_ACK);  /* send the "final" ack */
+  rap->th_block = htons(recvblock);
   (void) swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
@@ -1282,8 +1282,8 @@ static void nak(int error)
   struct errmsg *pe;
 
   tp = &buf.hdr;
-  tp->th_opcode = htons((u_short)opcode_ERROR);
-  tp->th_code = htons((u_short)error);
+  tp->th_opcode = htons((unsigned short)opcode_ERROR);
+  tp->th_code = htons((unsigned short)error);
   for (pe = errmsgs; pe->e_code >= 0; pe++)
     if (pe->e_code == error)
       break;

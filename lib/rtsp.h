@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,26 +26,13 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-/*
- * Parse and write out any available RTP data.
- *
- * nread: amount of data left after k->str. will be modified if RTP
- *        data is parsed and k->str is moved up
- * readmore: whether or not the RTP parser needs more data right away
- */
-CURLcode Curl_rtsp_rtp_readwrite(struct SessionHandle *data,
-                                 struct connectdata *conn,
-                                 ssize_t *nread,
-                                 bool *readmore);
-
-
-/* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_rtsp(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_done(struct connectdata *conn, CURLcode, bool premature);
-CURLcode Curl_rtsp_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_rtsp_disconnect(struct connectdata *conn, bool dead_connection);
-
+bool Curl_rtsp_connisdead(struct connectdata *check);
 CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
+
+#else
+/* disabled */
+#define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
+#define Curl_rtsp_connisdead(x) TRUE
 
 #endif /* CURL_DISABLE_RTSP */
 

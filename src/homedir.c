@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,23 +54,23 @@ char *GetEnv(const char *variable, char do_expand)
    * started. Don't accept truncated results (i.e. rc >= sizeof(buf1)).  */
 
   rc = GetEnvironmentVariable(variable, buf1, sizeof(buf1));
-  if (rc > 0 && rc < sizeof(buf1)) {
+  if(rc > 0 && rc < sizeof(buf1)) {
     env = buf1;
     variable = buf1;
   }
-  if (do_expand && strchr(variable,'%')) {
+  if(do_expand && strchr(variable,'%')) {
     /* buf2 == variable if not expanded */
     rc = ExpandEnvironmentStrings (variable, buf2, sizeof(buf2));
-    if (rc > 0 && rc < sizeof(buf2) &&
-        !strchr(buf2,'%'))    /* no vars still unexpanded */
+    if(rc > 0 && rc < sizeof(buf2) &&
+       !strchr(buf2,'%'))    /* no vars still unexpanded */
       env = buf2;
   }
 #else
   (void)do_expand;
 #ifdef __VMS
   env = getenv(variable);
-  if (env && strcmp("HOME",variable) == 0) {
-        env = decc_translate_vms(env);
+  if(env && strcmp("HOME",variable) == 0) {
+    env = decc_translate_vms(env);
   }
 #else
   /* no length control */
@@ -97,13 +97,13 @@ char *homedir(void)
  {
    struct passwd *pw = getpwuid(geteuid());
 
-   if (pw) {
+   if(pw) {
 #ifdef __VMS
      home = decc_translate_vms(pw->pw_dir);
 #else
      home = pw->pw_dir;
 #endif
-     if (home && home[0])
+     if(home && home[0])
        home = strdup(home);
      else
        home = NULL;

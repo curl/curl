@@ -46,8 +46,8 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_close_all Curl_polarssl_close_all
 #define curlssl_close Curl_polarssl_close
 #define curlssl_shutdown(x,y) 0
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_FAILED_INIT)
-#define curlssl_set_engine_default(x) (x=x, CURLE_FAILED_INIT)
+#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_polarssl_version
 #define curlssl_check_cxn(x) (x=x, -1)

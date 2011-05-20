@@ -31,7 +31,7 @@
    versions instead */
 #include "curlx.h" /* from the private lib dir */
 
-/* just to please base64.h we create a fake struct */
+/* just to please curl_base64.h we create a fake struct */
 struct SessionHandle {
   int fake;
 };

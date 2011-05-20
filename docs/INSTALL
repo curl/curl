@@ -211,9 +211,9 @@ Win32
    adjust as necessary. It is also possible to override these paths with
    environment variables, for example:
 
-     set ZLIB_PATH=c:\zlib-1.2.3
-     set OPENSSL_PATH=c:\openssl-0.9.8k
-     set LIBSSH2_PATH=c:\libssh2-1.1
+     set ZLIB_PATH=c:\zlib-1.2.5
+     set OPENSSL_PATH=c:\openssl-0.9.8r
+     set LIBSSH2_PATH=c:\libssh2-1.2.8
 
    ATTENTION: if you want to build with libssh2 support you have to use latest
    version 0.17 - previous versions will NOT work with 7.17.0 and later!
@@ -232,7 +232,7 @@ Win32
 
    If you want to enable LDAPS support then set LDAPS=1.
 
-   - optional MingW32-built OpenlDAP SDK available from:
+   - optional MingW32-built OpenLDAP SDK available from:
      http://www.gknw.net/mirror/openldap/
    - optional recent Novell CLDAP SDK available from:
      http://developer.novell.com/ndk/cldap.htm
@@ -314,7 +314,7 @@ Win32
    documentation on how to compile zlib. Define the ZLIB_PATH environment
    variable to the location of zlib.h and zlib.lib, for example:
 
-     set ZLIB_PATH=c:\zlib-1.2.3
+     set ZLIB_PATH=c:\zlib-1.2.5
 
    Then run 'nmake vc-zlib' in curl's root directory.
 
@@ -328,7 +328,7 @@ Win32
    Before running nmake define the OPENSSL_PATH environment variable with
    the root/base directory of OpenSSL, for example:
 
-     set OPENSSL_PATH=c:\openssl-0.9.8k
+     set OPENSSL_PATH=c:\openssl-0.9.8q
 
    Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in curl's root
    directory.  'nmake vc-ssl' will create a libcurl static and dynamic
@@ -660,7 +660,7 @@ NetWare
    Builds automatically created 8 times a day from current git are here:
    http://www.gknw.net/mirror/curl/autobuilds/
    the status of these builds can be viewed at the autobuild table:
-   http://curl.haxx.se/auto/
+   http://curl.haxx.se/dev/builds.html
 
 
 eCos
@@ -904,9 +904,9 @@ REDUCING SIZE
    .comment section).
 
    Using these techniques it is possible to create a basic HTTP-only shared
-   libcurl library for i386 Linux platforms that is only 98 KiB in size, and
-   an FTP-only library that is 94 KiB in size (as of libcurl version 7.20.0,
-   using gcc 4.3.3).
+   libcurl library for i386 Linux platforms that is only 101 KiB in size, and
+   an FTP-only library that is 105 KiB in size (as of libcurl version 7.21.5,
+   using gcc 4.4.3).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size than dynamically linking.
@@ -1002,17 +1002,21 @@ PORTS
 Useful URLs
 ===========
 
-c-ares    http://daniel.haxx.se/projects/c-ares/license.html
-GNU GSS   http://www.gnu.org/software/gss/
-GnuTLS    http://www.gnu.org/software/gnutls/
-Heimdal   http://www.pdc.kth.se/heimdal/
-libidn    http://www.gnu.org/software/libidn/
-libssh2   http://www.libssh2.org
-MingW     http://www.mingw.org
+axTLS        http://axtls.sourceforge.net/
+c-ares       http://c-ares.haxx.se/
+GNU GSS      http://www.gnu.org/software/gss/
+GnuTLS       http://www.gnu.org/software/gnutls/
+Heimdal      http://www.pdc.kth.se/heimdal/
+libidn       http://www.gnu.org/software/libidn/
+libssh2      http://www.libssh2.org/
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
-NSS       http://www.mozilla.org/projects/security/pki/nss/
-OpenLDAP  http://www.openldap.org
-OpenSSL   http://www.openssl.org
-PolarSSL  http://polarssl.org
-yassl     http://www.yassl.com/
-Zlib      http://www.gzip.org/zlib/
+NSS          http://www.mozilla.org/projects/security/pki/nss/
+OpenLDAP     http://www.openldap.org/
+OpenSSL      http://www.openssl.org/
+PolarSSL     http://polarssl.org/
+yassl        http://www.yassl.com/
+Zlib         http://www.zlib.net/
+
+MingW        http://www.mingw.org/
+MinGW-w64    http://mingw-w64.sourceforge.net/
+OpenWatcom   http://www.openwatcom.org/

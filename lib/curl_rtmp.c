@@ -51,7 +51,7 @@ static CURLcode rtmp_setup(struct connectdata *conn);
 static CURLcode rtmp_do(struct connectdata *conn, bool *done);
 static CURLcode rtmp_done(struct connectdata *conn, CURLcode, bool premature);
 static CURLcode rtmp_connect(struct connectdata *conn, bool *done);
-static CURLcode rtmp_disconnect(struct connectdata *conn, bool dead_connection);
+static CURLcode rtmp_disconnect(struct connectdata *conn, bool dead);
 
 static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
@@ -73,8 +73,10 @@ const struct Curl_handler Curl_handler_rtmp = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMP,                            /* defport */
-  PROT_RTMP                             /* protocol */
+  CURLPROTO_RTMP,                       /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
 
 const struct Curl_handler Curl_handler_rtmpt = {
@@ -90,8 +92,10 @@ const struct Curl_handler Curl_handler_rtmpt = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMPT,                           /* defport */
-  PROT_RTMPT                            /* protocol */
+  CURLPROTO_RTMPT,                      /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
 
 const struct Curl_handler Curl_handler_rtmpe = {
@@ -107,8 +111,10 @@ const struct Curl_handler Curl_handler_rtmpe = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMP,                            /* defport */
-  PROT_RTMPE                            /* protocol */
+  CURLPROTO_RTMPE,                      /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
 
 const struct Curl_handler Curl_handler_rtmpte = {
@@ -124,8 +130,10 @@ const struct Curl_handler Curl_handler_rtmpte = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMPT,                           /* defport */
-  PROT_RTMPTE                           /* protocol */
+  CURLPROTO_RTMPTE,                     /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
 
 const struct Curl_handler Curl_handler_rtmps = {
@@ -141,9 +149,12 @@ const struct Curl_handler Curl_handler_rtmps = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMPS,                           /* defport */
-  PROT_RTMPS                            /* protocol */
+  CURLPROTO_RTMPS,                      /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
+
 const struct Curl_handler Curl_handler_rtmpts = {
   "RTMPTS",                             /* scheme */
   rtmp_setup,                           /* setup_connection */
@@ -157,20 +168,22 @@ const struct Curl_handler Curl_handler_rtmpts = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   PORT_RTMPS,                           /* defport */
-  PROT_RTMPTS                           /* protocol */
+  CURLPROTO_RTMPTS,                     /* protocol */
+  PROTOPT_NONE                          /* flags*/
 };
 
 static CURLcode rtmp_setup(struct connectdata *conn)
 {
   RTMP *r = RTMP_Alloc();
 
-  if (!r)
+  if(!r)
     return CURLE_OUT_OF_MEMORY;
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if (!RTMP_SetupURL(r, conn->data->change.url)) {
+  if(!RTMP_SetupURL(r, conn->data->change.url)) {
     RTMP_Free(r);
     return CURLE_URL_MALFORMAT;
   }
@@ -188,17 +201,19 @@ static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
   /* We have to know if it's a write before we send the
    * connect request packet
    */
-  if (conn->data->set.upload)
+  if(conn->data->set.upload)
     r->Link.protocol |= RTMP_FEATURE_WRITE;
 
   /* For plain streams, use the buffer toggle trick to keep data flowing */
-  if (!(r->Link.lFlags & RTMP_LF_LIVE) && !(r->Link.protocol & RTMP_FEATURE_HTTP))
+  if(!(r->Link.lFlags & RTMP_LF_LIVE) &&
+     !(r->Link.protocol & RTMP_FEATURE_HTTP))
     r->Link.lFlags |= RTMP_LF_BUFX;
 
   curlx_nonblock(r->m_sb.sb_socket, FALSE);
-  setsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
+  setsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO,
+             (char *)&tv, sizeof(tv));
 
-  if (!RTMP_Connect1(r, NULL))
+  if(!RTMP_Connect1(r, NULL))
     return CURLE_FAILED_INIT;
 
   /* Clients must send a periodic BytesReceived report to the server */
@@ -214,13 +229,14 @@ static CURLcode rtmp_do(struct connectdata *conn, bool *done)
 {
   RTMP *r = conn->proto.generic;
 
-  if (!RTMP_ConnectStream(r, 0))
+  if(!RTMP_ConnectStream(r, 0))
     return CURLE_FAILED_INIT;
 
-  if (conn->data->set.upload) {
+  if(conn->data->set.upload) {
     Curl_pgrsSetUploadSize(conn->data, conn->data->set.infilesize);
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
-  } else
+  }
+  else
     Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
   *done = TRUE;
   return CURLE_OK;
@@ -241,7 +257,7 @@ static CURLcode rtmp_disconnect(struct connectdata *conn,
 {
   RTMP *r = conn->proto.generic;
   (void)dead_connection;
-  if (r) {
+  if(r) {
     conn->proto.generic = NULL;
     RTMP_Close(r);
     RTMP_Free(r);
@@ -258,12 +274,13 @@ static ssize_t rtmp_recv(struct connectdata *conn, int sockindex, char *buf,
   (void)sockindex; /* unused */
 
   nread = RTMP_Read(r, buf, len);
-  if (nread < 0) {
-    if (r->m_read.status == RTMP_READ_COMPLETE ||
+  if(nread < 0) {
+    if(r->m_read.status == RTMP_READ_COMPLETE ||
         r->m_read.status == RTMP_READ_EOF) {
       conn->data->req.size = conn->data->req.bytecount;
       nread = 0;
-    } else
+    }
+    else
       *err = CURLE_RECV_ERROR;
   }
   return nread;
@@ -278,9 +295,9 @@ static ssize_t rtmp_send(struct connectdata *conn, int sockindex,
   (void)sockindex; /* unused */
 
   num = RTMP_Write(r, (char *)buf, len);
-  if (num < 0) {
+  if(num < 0)
     *err = CURLE_SEND_ERROR;
-  }
+
   return num;
 }
 #endif  /* USE_LIBRTMP */

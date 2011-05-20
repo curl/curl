@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,8 +37,6 @@ void Curl_freeset(struct SessionHandle * data);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
                       bool *async, bool *protocol_connect);
-CURLcode Curl_async_resolved(struct connectdata *conn,
-                             bool *protocol_connect);
 CURLcode Curl_do(struct connectdata **, bool *done);
 CURLcode Curl_do_more(struct connectdata *);
 CURLcode Curl_done(struct connectdata **, CURLcode, bool premature);
@@ -47,6 +45,8 @@ CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 void Curl_safefree(void *ptr);
+CURLcode Curl_setup_conn(struct connectdata *conn,
+                         bool *protocol_done);
 
 /* create a connection cache */
 struct conncache *Curl_mk_connc(int type, long amount);
@@ -82,7 +82,8 @@ void Curl_close_connections(struct SessionHandle *data);
 void Curl_reset_reqproto(struct connectdata *conn);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
-#define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi service */
+#define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi
+                                                     service */
 
 CURLcode Curl_connected_proxy(struct connectdata *conn);
 

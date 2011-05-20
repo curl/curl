@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -36,11 +36,11 @@ use LWP::UserAgent;
 use strict;
 use vars qw($opt_b $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v);
 
-my $url = 'http://mxr.mozilla.org/seamonkey/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
+my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.14';
+my $version = '1.15';
 
 getopts('bhilnqtuv');
 
@@ -56,8 +56,7 @@ if ($opt_i) {
   print ("=" x 78 . "\n");
 }
 
-$0 =~ s/\\/\//g;
-$0 = substr($0, rindex($0, '/') + 1);
+$0 =~ s@.*(/|\\)@@;
 if ($opt_h) {
   printf("Usage:\t%s [-b] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", $0);
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
@@ -72,22 +71,24 @@ if ($opt_h) {
 }
 
 my $crt = $ARGV[0] || 'ca-bundle.crt';
-my $txt = substr($url, rindex($url, '/') + 1);
-$txt =~ s/\?.*//;
+(my $txt = $url) =~ s@(.*/|\?.*)@@g;
 
-if (!$opt_n || !-e $txt) {
+my $resp;
+
+unless ($opt_n and -e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
+
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
-  my $req = new HTTP::Request('GET', $url);
-  my $res = $ua->request($req);
-  if ($res->is_success) {
-    open(TXT,">$txt") or die "Couldn't open $txt: $!";
-    print TXT $res->content . "\n";
-    close(TXT) or die "Couldn't close $txt: $!";
-  } else {
-    die $res->status_line;
-  }
+  $ua->env_proxy();
+  $resp = $ua->mirror($url, $txt);
 }
+
+if ($resp && $resp->code eq '304') {
+    print "Not modified\n" unless $opt_q;
+    exit 0;
+}
+
+my $currentdate = scalar gmtime($resp ? $resp->last_modified : (stat($txt))[9]);
 
 if ($opt_b && -e $crt) {
   my $bk = 1;
@@ -98,18 +99,17 @@ if ($opt_b && -e $crt) {
 }
 
 my $format = $opt_t ? "plain text and " : "";
-my $currentdate = scalar gmtime() . " UTC";
 open(CRT,">$crt") or die "Couldn't open $crt: $!";
 print CRT <<EOT;
 ##
 ## $crt -- Bundle of CA Root Certificates
 ##
-## Converted at: ${currentdate}
+## Certificate data from Mozilla as of: ${currentdate}
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
 ## file (certdata.txt).  This file can be found in the mozilla source tree:
-## '/mozilla/security/nss/lib/ckfw/builtins/certdata.txt'
+## $url
 ##
 ## It contains the certificates in ${format}PEM format and therefore
 ## can be directly used with curl / libcurl / php_curl, or with

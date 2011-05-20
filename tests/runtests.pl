@@ -651,7 +651,9 @@ sub stopserver {
     #
     foreach my $server (@killservers) {
         if($run{$server}) {
-            $pidlist .= "$run{$server} ";
+            # we must prepend a space since $pidlist may already contain
+            # a pid
+            $pidlist .= " $run{$server}";
             $run{$server} = 0;
         }
         $runcert{$server} = 0 if($runcert{$server});
@@ -2146,8 +2148,6 @@ sub checksystem {
             if($feat =~ /debug/i) {
                 # curl was built with --enable-debug
                 $debug_build = 1;
-                # set the NETRC debug env
-                $ENV{'CURL_DEBUG_NETRC'} = "$LOGDIR/netrc";
             }
             if($feat =~ /SSL/i) {
                 # ssl enabled
@@ -2476,13 +2476,8 @@ sub singletest {
                 next;
             }
         }
-	elsif($f eq "axTLS") {
-	    if($has_axtls) {
-		next;
-	    }
-	}
-        elsif($f eq "netrc_debug") {
-            if($debug_build) {
+        elsif($f eq "axTLS") {
+            if($has_axtls) {
                 next;
             }
         }

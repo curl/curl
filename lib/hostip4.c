@@ -87,6 +87,7 @@ bool Curl_ipvalid(struct connectdata *conn)
 }
 
 #ifdef CURLRES_SYNCH
+
 /*
  * Curl_getaddrinfo() - the ipv4 synchronous version.
  *

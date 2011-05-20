@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,52 +72,5 @@
  **********************************************************************/
 #ifdef CURLRES_SYNCH
 
-/*
- * Curl_wait_for_resolv() for synch-builds.  Curl_resolv() can never return
- * wait==TRUE, so this function will never be called. If it still gets called,
- * we return failure at once.
- *
- * We provide this function only to allow multi.c to remain unaware if we are
- * doing asynch resolves or not.
- */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
-{
-  (void)conn;
-  *entry=NULL;
-  return CURLE_COULDNT_RESOLVE_HOST;
-}
-
-/*
- * This function will never be called when synch-built. If it still gets
- * called, we return failure at once.
- *
- * We provide this function only to allow multi.c to remain unaware if we are
- * doing asynch resolves or not.
- */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **dns)
-{
-  (void)conn;
-  *dns = NULL;
-
-  return CURLE_COULDNT_RESOLVE_HOST;
-}
-
-/*
- * We just return OK, this function is never actually used for synch builds.
- * It is present here to keep #ifdefs out from multi.c
- */
-
-int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *sock,
-                        int numsocks)
-{
-  (void)conn;
-  (void)sock;
-  (void)numsocks;
-
-  return 0; /* no bits since we don't use any socks */
-}
 
 #endif /* truly sync */

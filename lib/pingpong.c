@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,6 +32,7 @@
 #include "speedcheck.h"
 #include "pingpong.h"
 #include "multiif.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -208,13 +209,10 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
 
   Curl_pp_init(pp);
 
-#ifdef CURL_DOES_CONVERSIONS
   res = Curl_convert_to_network(data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
-  if(res != CURLE_OK) {
+  if(res)
     return res;
-  }
-#endif /* CURL_DOES_CONVERSIONS */
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
   conn->data_prot = PROT_CMD;
@@ -344,13 +342,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       if(res == CURLE_AGAIN)
         return CURLE_OK; /* return */
 
-#ifdef CURL_DOES_CONVERSIONS
-      if((res == CURLE_OK) && (gotbytes > 0)) {
+      if((res == CURLE_OK) && (gotbytes > 0))
         /* convert from the network encoding */
         res = Curl_convert_from_network(data, ptr, gotbytes);
-        /* Curl_convert_from_network calls failf if unsuccessful */
-      }
-#endif /* CURL_DOES_CONVERSIONS */
+      /* Curl_convert_from_network calls failf if unsuccessful */
 
       if(CURLE_OK != res) {
         result = (CURLcode)res; /* Set outer result variable to this error. */
@@ -436,8 +431,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           /* We got an excessive line without newlines and we need to deal
              with it. We keep the first bytes of the line then we throw
              away the rest. */
-          infof(data, "Excessive server response line length received, %zd bytes."
-                " Stripping\n", gotbytes);
+          infof(data, "Excessive server response line length received, "
+                "%zd bytes. Stripping\n", gotbytes);
           restart = TRUE;
 
           /* we keep 40 bytes since all our pingpong protocols are only
@@ -445,9 +440,9 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           clipamount = 40;
         }
         else if(pp->nread_resp > BUFSIZE/2) {
-          /* We got a large chunk of data and there's potentially still trailing
-             data to take care of, so we put any such part in the "cache", clear
-             the buffer to make space and restart. */
+          /* We got a large chunk of data and there's potentially still
+             trailing data to take care of, so we put any such part in the
+             "cache", clear the buffer to make space and restart. */
           clipamount = perline;
           restart = TRUE;
         }

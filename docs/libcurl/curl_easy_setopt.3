@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -208,6 +208,10 @@ From 7.18.0, the function can return CURL_READFUNC_PAUSE which then will cause
 reading from this connection to become paused. See \fIcurl_easy_pause(3)\fP
 for further details.
 
+\fBBugs\fP: when doing TFTP uploads, you must return the exact amount of data
+that the callback wants, or it will be considered the final packet by the
+server end and the transfer will end there.
+
 If you set this callback pointer to NULL, or don't set it at all, the default
 internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA\fP.
@@ -271,6 +275,10 @@ discretion.  Return 0 (zero) from the callback on success. Return 1 from the
 callback function to signal an unrecoverable error to the library and it will
 close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option added in
 7.15.6.)
+
+Added in 7.21.5, the callback function may return
+\fICURL_SOCKOPT_ALREADY_CONNECTED\fP, which tells libcurl that the socket is
+in fact already connected and then libcurl will not attempt to connect it.
 .IP CURLOPT_SOCKOPTDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
@@ -299,6 +307,17 @@ address blacklisting.  The default behavior is:
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
 (Option added in 7.17.1.)
+.IP CURLOPT_CLOSESOCKETFUNCTION
+Function pointer that should match the \fIcurl_closesocket_callback\fP
+prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
+instead of the \fIclose(3)\fP or \fIclosesocket(3)\fP call when sockets are
+closed (not for any other file descriptors). This is pretty much the reverse
+to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. \fIReturn 0 to signal success
+and 1 if there was an error.  (Option added in 7.21.7)
+.IP CURLOPT_CLOSESOCKETDATA
+Pass a pointer that will be untouched by libcurl and passed as the first
+argument in the opensocket callback set with
+\fICURLOPT_CLOSESOCKETFUNCTION\fP.  (Option added in 7.21.7)
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
@@ -624,6 +643,13 @@ use of a proxy, even if there is an environment variable set for it.
 Since 7.14.1, the proxy host string given in environment variables can be
 specified the exact same way as the proxy can be set with \fICURLOPT_PROXY\fP,
 include protocol prefix (http://) and embedded user + password.
+
+Since 7.21.7, the proxy string may be specified with a protocol:// prefix to
+specify alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
+socks5h:// (the last one to enable socks5 and asking the proxy to do the
+resolving, also known as CURLPROXY_SOCKS5_HOSTNAME type) to request the
+specific SOCKS version to be used. No protocol specified, http:// and all
+others will be treated as HTTP proxies.
 .IP CURLOPT_PROXYPORT
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.
@@ -633,6 +659,11 @@ this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
 \fICURLPROXY_SOCKS4\fP (added in 7.15.2), \fICURLPROXY_SOCKS5\fP,
 \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and \fICURLPROXY_SOCKS5_HOSTNAME\fP
 (added in 7.18.0). The HTTP type is default. (Added in 7.10)
+
+If you set \fBCURLOPT_PROXYTYPE\fP to \fICURLPROXY_HTTP_1_0\fP, it will only
+affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
+used for "regular" HTTP requests is instead controled with
+\fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
 Pass a pointer to a zero terminated string. The should be a comma- separated
 list of hosts which do not use a proxy, if one is specified.  The only
@@ -823,7 +854,7 @@ below. If more than one bit is set, libcurl will first query the site to see
 which authentication methods it supports and then pick the best one you allow
 it to use. For some methods, this will induce an extra network round-trip. Set
 the actual name and password with the \fICURLOPT_USERPWD\fP option or
-with the \fICURLOPT_USERNAME\fP and the \fICURLOPT_USERPASSWORD\fP options.
+with the \fICURLOPT_USERNAME\fP and the \fICURLOPT_PASSWORD\fP options.
 (Added in 7.10.6)
 .RS
 .IP CURLAUTH_BASIC
@@ -870,6 +901,29 @@ This is a meta symbol. Or this value together with a single specific auth
 value to force libcurl to probe for un-restricted auth and if not, only that
 single auth algorithm is acceptable. (Added in 7.21.3)
 .RE
+.IP CURLOPT_TLSAUTH_TYPE
+Pass a long as parameter, which is set to a bitmask, to tell libcurl which
+authentication method(s) you want it to use for TLS authentication.
+.RS
+.IP CURLOPT_TLSAUTH_SRP
+TLS-SRP authentication. Secure Remote Password authentication for TLS is
+defined in RFC 5054 and provides mutual authentication if both sides have a
+shared secret. To use TLS-SRP, you must also set the
+\fICURLOPT_TLSAUTH_USERNAME\fP and \fICURLOPT_TLSAUTH_PASSWORD\fP options.
+
+You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
+to work. (Added in 7.21.4)
+.RE
+.IP CURLOPT_TLSAUTH_USERNAME
+Pass a char * as parameter, which should point to the zero-terminated username
+to use for the TLS authentication method specified with the
+\fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
+\fICURLOPT_TLS_PASSWORD\fP option also be set. (Added in 7.21.4)
+.IP CURLOPT_TLSAUTH_PASSWORD
+Pass a char * as parameter, which should point to the zero-terminated password
+to use for the TLS authentication method specified with the
+\fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
+\fICURLOPT_TLS_USERNAME\fP option also be set. (Added in 7.21.4)
 .IP CURLOPT_PROXYAUTH
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
 authentication method(s) you want it to use for your proxy authentication.  If
@@ -885,7 +939,7 @@ work. (Added in 7.10.7)
 Pass a parameter set to 1 to enable this. When enabled, libcurl will
 automatically set the Referer: field in requests where it follows a Location:
 redirect.
-.IP CURLOPT_ENCODING
+.IP CURLOPT_ACCEPT_ENCODING
 Sets the contents of the Accept-Encoding: header sent in an HTTP request, and
 enables decoding of a response when a Content-Encoding: header is received.
 Three encodings are supported: \fIidentity\fP, which does nothing,
@@ -897,6 +951,21 @@ supported encodings is sent.
 This is a request, not an order; the server may or may not do it.  This option
 must be set (to any non-NULL value) or else any unsolicited encoding done by
 the server is ignored. See the special file lib/README.encoding for details.
+
+(This option was called CURLOPT_ENCODING before 7.21.6)
+.IP CURLOPT_TRANSFER_ENCODING
+Adds a request for compressed Transfer Encoding in the outgoing HTTP
+request. If the server supports this and so desires, it can respond with the
+HTTP resonse sent using a compressed Transfer-Encoding that will be
+automatically uncompressed by libcurl on receival.
+
+Transfer-Encoding differs slightly from the Content-Encoding you ask for with
+\fBCURLOPT_ACCEPT_ENCODING\fP in that a Transfer-Encoding is strictly meant to
+be for the transfer and thus MUST be decoded before the data arrives in the
+client. Traditionally, Transfer-Encoding has been much less used and supported
+by both HTTP clients and HTTP servers.
+
+(Added in 7.21.6)
 .IP CURLOPT_FOLLOWLOCATION
 A parameter set to 1 tells the library to follow any Location: header that the
 server sends as part of an HTTP header.
@@ -1648,8 +1717,8 @@ given limit. This concerns both FTP and HTTP transfers.
 .IP CURLOPT_TIMECONDITION
 Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
 value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
-or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP, FTP, and
-RTSP.
+or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP, FTP, RTSP,
+and FILE.
 
 The last modification time of a file is not always known and in such instances
 this feature will have no effect even if the given time condition would not
@@ -1804,7 +1873,7 @@ resolves, by including a string in the linked list that uses the format
 \&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
 and port number must exactly match what was already added previously.
 
-(Added in 7.12.3)
+(Added in 7.21.3)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
@@ -1980,7 +2049,10 @@ The default value for this option is 2.
 
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
-\fICURLOPT_SSL_VERIFYPEER\fP.
+\fICURLOPT_SSL_VERIFYPEER\fP.  If libcurl is built against NSS and
+\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_SSL_VERIFYHOST\fP
+is ignored.
+
 .IP CURLOPT_CERTINFO
 Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
 this enabled, libcurl (if built with OpenSSL) will extract lots of information
@@ -2044,13 +2116,15 @@ libcurl will reject the connection to the host unless the md5sums match. This
 option is only for SCP and SFTP transfers. (Added in 7.17.1)
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
 Pass a char * pointing to a file name for your public key. If not used,
-libcurl defaults to using \fB~/.ssh/id_dsa.pub\fP.
-(Added in 7.16.1)
+libcurl defaults to \fB$HOME/.ssh/id_dsa.pub\fP if the HOME environment
+variable is set, and just "id_dsa.pub" in the current directory if HOME is not
+set.  (Added in 7.16.1)
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
 Pass a char * pointing to a file name for your private key. If not used,
-libcurl defaults to using \fB~/.ssh/id_dsa\fP.  If the file is
-password-protected, set the password with \fICURLOPT_KEYPASSWD\fP. (Added in
-7.16.1)
+libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
+is set, and just "id_dsa" in the current directory if HOME is not set.  If the
+file is password-protected, set the password with
+\fICURLOPT_KEYPASSWD\fP. (Added in 7.16.1)
 .IP CURLOPT_SSH_KNOWNHOSTS
 Pass a pointer to a zero terminated string holding the file name of the
 known_host file to use.  The known_hosts file should use the OpenSSH file
@@ -2061,7 +2135,10 @@ behavior on host and key (mis)matching. (Added in 7.19.6)
 .IP CURLOPT_SSH_KEYFUNCTION
 Pass a pointer to a curl_sshkeycallback function. It gets called when the
 known_host matching has been done, to allow the application to act and decide
-for libcurl how to proceed. It gets passed the CURL handle, the key from the
+for libcurl how to proceed. The callback will only be called if
+\fICURLOPT_SSH_KNOWNHOSTS\fP is also set.
+
+The curl_sshkeycallback function gets passed the CURL handle, the key from the
 known_hosts file, the key from the remote site, info from libcurl on the
 matching status and a custom pointer (set with \fICURLOPT_SSH_KEYDATA\fP). It
 MUST return one of the following return codes to tell libcurl how to act:

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -294,7 +294,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
     size_t ss_size;
 #ifdef ENABLE_IPV6
-    if (he->h_addrtype == AF_INET6)
+    if(he->h_addrtype == AF_INET6)
       ss_size = sizeof (struct sockaddr_in6);
     else
 #endif
@@ -486,7 +486,7 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't wanna include in memdebug.c
+ * require a bunch of structs I didn't want to include in memdebug.c
  */
 
 void
@@ -506,7 +506,7 @@ curl_dofreeaddrinfo(struct addrinfo *freethis,
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't wanna include in memdebug.c
+ * require a bunch of structs I didn't want to include in memdebug.c
  */
 
 int

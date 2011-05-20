@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -96,32 +96,31 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
     share->specifier &= ~(1<<type);
-    switch( type )
-    {
-      case CURL_LOCK_DATA_DNS:
-        if(share->hostcache) {
-          Curl_hash_destroy(share->hostcache);
-          share->hostcache = NULL;
-        }
-        break;
+    switch( type ) {
+    case CURL_LOCK_DATA_DNS:
+      if(share->hostcache) {
+        Curl_hash_destroy(share->hostcache);
+        share->hostcache = NULL;
+      }
+      break;
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-      case CURL_LOCK_DATA_COOKIE:
-        if(share->cookies) {
-          Curl_cookie_cleanup(share->cookies);
-          share->cookies = NULL;
-        }
-        break;
+    case CURL_LOCK_DATA_COOKIE:
+      if(share->cookies) {
+        Curl_cookie_cleanup(share->cookies);
+        share->cookies = NULL;
+      }
+      break;
 #endif   /* CURL_DISABLE_HTTP */
 
-      case CURL_LOCK_DATA_SSL_SESSION:
-        break;
+    case CURL_LOCK_DATA_SSL_SESSION:
+      break;
 
-      case CURL_LOCK_DATA_CONNECT:
-        break;
+    case CURL_LOCK_DATA_CONNECT:
+      break;
 
-      default:
-        return CURLSHE_BAD_OPTION;
+    default:
+      return CURLSHE_BAD_OPTION;
     }
     break;
 
@@ -170,10 +169,8 @@ curl_share_cleanup(CURLSH *sh)
     share->hostcache = NULL;
   }
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(share->cookies)
     Curl_cookie_cleanup(share->cookies);
-#endif   /* CURL_DISABLE_HTTP */
 
   if(share->unlockfunc)
     share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);

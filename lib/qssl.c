@@ -266,7 +266,7 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
       connssl->state = ssl_connection_none;
     }
   }
-  if (rc == CURLE_OK) {
+  if(rc == CURLE_OK) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = qsossl_recv;
     conn->send[sockindex] = qsossl_send;
@@ -347,7 +347,7 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex)
   what = Curl_socket_ready(conn->sock[sockindex],
                            CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
 
-  for (;;) {
+  for(;;) {
     if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -395,7 +395,7 @@ static ssize_t qsossl_send(struct connectdata * conn, int sockindex,
 
     case SSL_ERROR_BAD_STATE:
       /* The operation did not complete; the same SSL I/O function
-         should be called again later. This is basicly an EWOULDBLOCK
+         should be called again later. This is basically an EWOULDBLOCK
          equivalent. */
       *curlcode = CURLE_AGAIN;
       return -1;

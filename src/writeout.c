@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -167,7 +167,8 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
                 break;
               case VAR_REDIRECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME, &doubleinfo))
+                   curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME,
+                                     &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
               case VAR_TOTAL_TIME:
@@ -211,12 +212,14 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
                 break;
               case VAR_SIZE_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &doubleinfo))
+                   curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD,
+                                     &doubleinfo))
                   fprintf(stream, "%.0f", doubleinfo);
                 break;
               case VAR_SPEED_DOWNLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &doubleinfo))
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD,
+                                     &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
               case VAR_SPEED_UPLOAD:
@@ -244,7 +247,8 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
                 break;
               case VAR_SSL_VERIFY_RESULT:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT, &longinfo))
+                   curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
+                                     &longinfo))
                   fprintf(stream, "%ld", longinfo);
                 break;
               default:

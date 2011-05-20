@@ -30,15 +30,18 @@ CMake/CurlTests.c CMake/FindOpenSSL.cmake CMake/FindZLIB.cmake		\
 CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
+WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
+winbuild/MakefileBuild.vc winbuild/Makefile.vc
+
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  curl-style.el sample.emacs RELEASE-NOTES buildconf 	\
  libcurl.pc.in vc6curl.dsw MacOSX-Framework Android.mk $(CMAKE_DIST)	\
- Makefile.msvc.names
+ Makefile.msvc.names $(WINBUILD_DIST)
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = lib src
-DIST_SUBDIRS = $(SUBDIRS) tests include packages docs
+SUBDIRS = lib src include
+DIST_SUBDIRS = $(SUBDIRS) tests packages docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
@@ -152,3 +155,7 @@ ca-bundle: lib/mk-ca-bundle.pl
 ca-firefox: lib/firefox-db2pem.sh
 	@echo "generate a fresh ca-bundle.crt"
 	./lib/firefox-db2pem.sh lib/ca-bundle.crt
+
+checksrc:
+	cd lib && $(MAKE) checksrc
+	cd src && $(MAKE) checksrc

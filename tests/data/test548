@@ -87,7 +87,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.haxx.se/path/548 http://%HOSTIP:%HTTPPORT s1lly:pers0n
+http://test.remote.example.com/path/548 http://%HOSTIP:%HTTPPORT s1lly:pers0n
 </command>
 <precheck>
 chkhostname curlhost
@@ -100,28 +100,28 @@ chkhostname curlhost
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-POST http://test.remote.haxx.se/path/548 HTTP/1.1
+POST http://test.remote.example.com/path/548 HTTP/1.1
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.haxx.se
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
 Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
-POST http://test.remote.haxx.se/path/548 HTTP/1.1
+POST http://test.remote.example.com/path/548 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.haxx.se
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
-POST http://test.remote.haxx.se/path/548 HTTP/1.1
+POST http://test.remote.example.com/path/548 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAIYrD1xJmhNBNL9fLzuk9PV9436GAxPu0EKWzqQ/sZDVLXnp1JrySgl8A+cibE6z4HMxbGx5Y3VybGhvc3Q=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.haxx.se
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36

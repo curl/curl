@@ -233,47 +233,46 @@
 
  For unix-like operating systems:
 
-   http://www.gnu.org/software/patch/patch.html
-   http://www.gnu.org/directory/diffutils.html
+     http://www.gnu.org/software/patch/patch.html
+     http://www.gnu.org/directory/diffutils.html
 
  For Windows:
 
-   http://gnuwin32.sourceforge.net/packages/patch.htm
-   http://gnuwin32.sourceforge.net/packages/diffutils.htm
+     http://gnuwin32.sourceforge.net/packages/patch.htm
+     http://gnuwin32.sourceforge.net/packages/diffutils.htm
 
 3.4 How to get your changes into the main sources
 
- 1. Submit your patch to the curl-library mailing list
+ Submit your patch to the curl-library mailing list.
 
- 2. Make the patch against as recent sources as possible.
+ Make the patch against as recent sources as possible.
 
- 3. Make sure your patch adheres to the source indent and coding style of
-    already existing source code. Failing to do so just adds more work for me.
+ Make sure your patch adheres to the source indent and coding style of already
+ existing source code. Failing to do so just adds more work for me.
 
- 4. Respond to replies on the list about the patch and answer questions and/or
-    fix nits/flaws. This is very important. I will take lack of replies as a
-    sign that you're not very anxious to get your patch accepted and I tend to
-    simply drop such patches from my TODO list.
+ Respond to replies on the list about the patch and answer questions and/or
+ fix nits/flaws. This is very important. I will take lack of replies as a sign
+ that you're not very anxious to get your patch accepted and I tend to simply
+ drop such patches from my TODO list.
 
- 5. If you've followed the above mentioned paragraphs and your patch still
-    hasn't been incorporated after some weeks, consider resubmitting it to the
-    list.
+ If you've followed the above paragraphs and your patch still hasn't been
+ incorporated after some weeks, consider resubmitting it to the list.
 
 3.5 Write good commit messages
 
-  A short guide to how to do fine commit messages in the curl project.
+ A short guide to how to do fine commit messages in the curl project.
 
-  ---- start ----
-  [area]: [short line describing the main effect]
+      ---- start ----
+      [area]: [short line describing the main effect]
 
-  [separate the above single line from the rest with an empty line]
+      [separate the above single line from the rest with an empty line]
 
-  [full description, no wider than 72 columns that describe as much as
-  possible as to why this change is made, and possibly what things
-  it fixes and everything else that is related]
-   ---- stop ----
+      [full description, no wider than 72 columns that describe as much as
+      possible as to why this change is made, and possibly what things
+      it fixes and everything else that is related]
+      ---- stop ----
 
-  Don't forget to use commit --author="" if you commit someone else's work,
-  and make sure that you have your own user and email setup correctly in git
-  before you commit
+ Don't forget to use commit --author="" if you commit someone else's work,
+ and make sure that you have your own user and email setup correctly in git
+ before you commit
 

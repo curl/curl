@@ -38,7 +38,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
  config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
  Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		   \
  mk-ca-bundle.vbs firefox-db2pem.sh $(CMAKE_DIST) config-vxworks.h	   \
- Makefile.vxworks config-vms.h
+ Makefile.vxworks config-vms.h checksrc.pl
 
 CLEANFILES = $(DSP) $(VCPROJ)
 
@@ -184,3 +184,12 @@ $(VCPROJ): vc8proj.head vc8proj.foot Makefile.am
 	echo "<File RelativePath=\""$$file"\"></File>" $(VCPROJOUT); \
 	done; \
 	cat $(srcdir)/vc8proj.foot $(VCPROJOUT) )
+
+
+checksrc:
+	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/lib $(CSOURCES) $(HHEADERS)
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
+endif

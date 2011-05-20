@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@
 #include "sslgen.h"
 #include "ssh.h"
 #include "multiif.h"
-#include "rtsp.h"
+#include "non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -58,7 +58,7 @@
 #include <string.h>
 #include "curl_memory.h"
 #include "strerror.h"
-#include "easyif.h" /* for the Curl_convert_from_network prototype */
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -298,7 +298,8 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       /* this is just a case of EWOULDBLOCK */
       bytes_written=0;
       *code = CURLE_AGAIN;
-    } else {
+    }
+    else {
       failf(conn->data, "Send failure: %s",
             Curl_strerror(conn, err));
       conn->data->state.os_errno = err;
@@ -353,7 +354,8 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       ) {
       /* this is just a case of EWOULDBLOCK */
       *code = CURLE_AGAIN;
-    } else {
+    }
+    else {
       failf(conn->data, "Recv failure: %s",
             Curl_strerror(conn, err));
       conn->data->state.os_errno = err;
@@ -441,15 +443,13 @@ CURLcode Curl_client_write(struct connectdata *conn,
   }
 
   if(type & CLIENTWRITE_BODY) {
-    if((conn->protocol&PROT_FTP) && conn->proto.ftpc.transfertype == 'A') {
-#ifdef CURL_DOES_CONVERSIONS
+    if((conn->handler->protocol&CURLPROTO_FTP) &&
+       conn->proto.ftpc.transfertype == 'A') {
       /* convert from the network encoding */
-      size_t rc;
-      rc = Curl_convert_from_network(data, ptr, len);
+      size_t rc = Curl_convert_from_network(data, ptr, len);
       /* Curl_convert_from_network calls failf if unsuccessful */
-      if(rc != CURLE_OK)
+      if(rc)
         return rc;
-#endif /* CURL_DOES_CONVERSIONS */
 
 #ifdef CURL_DO_LINEEND_CONV
       /* convert end-of-line markers */
@@ -622,7 +622,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
       size_t i;
       for(i = 0; i < size-4; i++) {
         if(memcmp(&buf[i], "\x0d\x0a\x0d\x0a", 4) == 0) {
-          /* convert everthing through this CRLFCRLF but no further */
+          /* convert everything through this CRLFCRLF but no further */
           conv_size = i + 4;
           break;
         }

@@ -260,7 +260,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_slistp = ptr.to_slist;
     break;
   case CURLINFO_CONDITION_UNMET:
-    /* return if the condition prevented the document to get transfered */
+    /* return if the condition prevented the document to get transferred */
     *param_longp = data->info.timecond;
     break;
   case CURLINFO_RTSP_SESSION_ID:

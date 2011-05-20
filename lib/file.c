@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -90,7 +90,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || \
+  defined(__SYMBIAN32__)
 #define DOS_FILESYSTEM 1
 #endif
 
@@ -126,8 +127,10 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
   0,                                    /* defport */
-  PROT_FILE                             /* protocol */
+  CURLPROTO_FILE,                       /* protocol */
+  PROTOPT_NONETWORK                     /* flags */
 };
 
 
@@ -244,18 +247,17 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   actual_path = real_path;
   if((actual_path[0] == '/') &&
       actual_path[1] &&
-      (actual_path[2] == ':' || actual_path[2] == '|'))
-  {
+     (actual_path[2] == ':' || actual_path[2] == '|')) {
     actual_path[2] = ':';
     actual_path++;
   }
 
   /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
-  for (i=0; actual_path[i] != '\0'; ++i)
+  for(i=0; actual_path[i] != '\0'; ++i)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY); /* no CR/LF translation */
+  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
   fd = open_readonly(real_path, O_RDONLY);
@@ -376,7 +378,7 @@ static CURLcode file_upload(struct connectdata *conn)
 
     /*skip bytes before resume point*/
     if(data->state.resume_from) {
-      if( (curl_off_t)nread <= data->state.resume_from ) {
+      if((curl_off_t)nread <= data->state.resume_from ) {
         data->state.resume_from -= nread;
         nread = 0;
         buf2 = buf;
@@ -455,12 +457,19 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   fd = conn->data->state.proto.file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
-  if( -1 != fstat(fd, &statbuf)) {
+  if(-1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;
     /* and store the modification time */
     data->info.filetime = (long)statbuf.st_mtime;
     fstated = TRUE;
+  }
+
+  if(fstated && !data->state.range && data->set.timecondition) {
+    if(!Curl_meets_timecondition(data, (time_t)data->info.filetime)) {
+      *done = TRUE;
+      return CURLE_OK;
+    }
   }
 
   /* If we have selected NOBODY and HEADER, it means that we only want file
@@ -480,14 +489,13 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
       return result;
 
     if(fstated) {
-      const struct tm *tm;
       time_t filetime = (time_t)statbuf.st_mtime;
-#ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (const struct tm *)gmtime_r(&filetime, &buffer);
-#else
-      tm = gmtime(&filetime);
-#endif
+      const struct tm *tm = &buffer;
+      result = Curl_gmtime(filetime, &buffer);
+      if(result)
+        return result;
+
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       snprintf(buf, BUFSIZE-1,
                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
@@ -529,7 +537,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   }
 
   /* A high water mark has been specified so we obey... */
-  if (data->req.maxdownload > 0)
+  if(data->req.maxdownload > 0)
     expected_size = data->req.maxdownload;
 
   if(fstated && (expected_size == 0))
@@ -555,10 +563,10 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     bytestoread = (expected_size < BUFSIZE-1)?(size_t)expected_size:BUFSIZE-1;
     nread = read(fd, buf, bytestoread);
 
-    if( nread > 0)
+    if(nread > 0)
       buf[nread] = 0;
 
-    if (nread <= 0 || expected_size == 0)
+    if(nread <= 0 || expected_size == 0)
       break;
 
     bytecount += nread;

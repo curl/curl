@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,10 +25,6 @@
 
    http://davenport.sourceforge.net/ntlm.html
    http://www.innovation.ch/java/ntlm.html
-
-   Another implementation:
-   http://lxr.mozilla.org/mozilla/source/security/manager/ssl/src/nsNTLMAuthModule.cpp
-
 */
 
 #ifndef CURL_DISABLE_HTTP
@@ -52,7 +48,7 @@
 #endif
 
 #include "urldata.h"
-#include "easyif.h"  /* for Curl_convert_... prototypes */
+#include "non-ascii.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
 #include "rawstr.h"
 #include "curl_base64.h"
@@ -137,7 +133,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef USE_NTRESPONSES 
+#ifndef USE_NTRESPONSES
 /* Define this to make the type-3 message include the NT response message */
 #define USE_NTRESPONSES 1
 
@@ -525,16 +521,12 @@ static void mk_lm_hash(struct SessionHandle *data,
   Curl_strntoupper((char *)pw, password, len);
   memset(&pw[len], 0, 14-len);
 
-#ifdef CURL_DOES_CONVERSIONS
   /*
    * The LanManager hashed password needs to be created using the
    * password in the network encoding not the host encoding.
    */
-  if(data)
-    Curl_convert_to_network(data, (char *)pw, 14);
-#else
-  (void)data;
-#endif
+  if(Curl_convert_to_network(data, (char *)pw, 14))
+    return;
 
   {
     /* Create LanManager hashed password. */
@@ -575,7 +567,7 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                size_t srclen)
 {
   size_t i;
-  for (i=0; i<srclen; i++) {
+  for(i=0; i<srclen; i++) {
     dest[2*i]   = (unsigned char)src[i];
     dest[2*i+1] =   '\0';
   }
@@ -590,21 +582,19 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 {
   size_t len = strlen(password);
   unsigned char *pw = malloc(len*2);
+  CURLcode result;
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
   ascii_to_unicode_le(pw, password, len);
 
-#ifdef CURL_DOES_CONVERSIONS
   /*
-   * The NT hashed password needs to be created using the
-   * password in the network encoding not the host encoding.
+   * The NT hashed password needs to be created using the password in the
+   * network encoding not the host encoding.
    */
-  if(data)
-    Curl_convert_to_network(data, (char *)pw, len*2);
-#else
-  (void)data;
-#endif
+  result = Curl_convert_to_network(data, (char *)pw, len*2);
+  if(result)
+    return result;
 
   {
     /* Create NT hashed password. */
@@ -663,6 +653,20 @@ ntlm_sspi_cleanup(struct ntlmdata *ntlm)
   (((x) >>16)&0xff), (((x)>>24) & 0xff)
 
 #define HOSTNAME_MAX 1024
+
+#ifndef USE_WINDOWS_SSPI
+/* copy the source to the destination and fill in zeroes in every
+   other destination byte! */
+static void unicodecpy(unsigned char *dest,
+                       const char *src, size_t length)
+{
+  size_t i;
+  for(i=0; i<length; i++) {
+    dest[2*i] = (unsigned char)src[i];
+    dest[2*i+1] = '\0';
+  }
+}
+#endif
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
@@ -724,10 +728,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     passwdp="";
 
 #ifdef USE_WINDOWS_SSPI
-  if (s_hSecDll == NULL) {
+  if(s_hSecDll == NULL) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
-    if (s_hSecDll == NULL)
+    if(s_hSecDll == NULL)
       return err;
   }
 #endif
@@ -881,25 +885,26 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
 
     DEBUG_OUT({
-      fprintf(stderr, "**** TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
-              LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
-                          NTLMFLAG_REQUEST_TARGET|
-                          NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                          NTLM2FLAG|
-                          NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
-              NTLMFLAG_NEGOTIATE_OEM|
-              NTLMFLAG_REQUEST_TARGET|
-              NTLMFLAG_NEGOTIATE_NTLM_KEY|
-              NTLM2FLAG|
-              NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-      print_flags(stderr,
-                  NTLMFLAG_NEGOTIATE_OEM|
-                  NTLMFLAG_REQUEST_TARGET|
-                  NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                  NTLM2FLAG|
-                  NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-      fprintf(stderr, "\n****\n");
-    });
+        fprintf(stderr, "* TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x "
+                "0x%08.8x ",
+                LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
+                            NTLMFLAG_REQUEST_TARGET|
+                            NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                            NTLM2FLAG|
+                            NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
+                NTLMFLAG_NEGOTIATE_OEM|
+                NTLMFLAG_REQUEST_TARGET|
+                NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                NTLM2FLAG|
+                NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+        print_flags(stderr,
+                    NTLMFLAG_NEGOTIATE_OEM|
+                    NTLMFLAG_REQUEST_TARGET|
+                    NTLMFLAG_NEGOTIATE_NTLM_KEY|
+                    NTLM2FLAG|
+                    NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+        fprintf(stderr, "\n****\n");
+      });
 
     /* now size is the size of the base64 encoded package size */
     size = Curl_base64_encode(NULL, (char *)ntlmbuf, size, &base64);
@@ -955,14 +960,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     type_3.pvBuffer   = ntlmbuf;
     type_3.cbBuffer   = sizeof(ntlmbuf);
 
-    status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle, &ntlm->c_handle,
-                                       (char *) host,
-                                       ISC_REQ_CONFIDENTIALITY |
-                                       ISC_REQ_REPLAY_DETECT |
-                                       ISC_REQ_CONNECTION,
-                                       0, SECURITY_NETWORK_DREP, &type_2_desc,
-                                       0, &ntlm->c_handle, &type_3_desc,
-                                       &attrs, &tsDummy);
+    status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle,
+                                                  &ntlm->c_handle,
+                                                  (char *) host,
+                                                  ISC_REQ_CONFIDENTIALITY |
+                                                  ISC_REQ_REPLAY_DETECT |
+                                                  ISC_REQ_CONNECTION,
+                                                  0, SECURITY_NETWORK_DREP,
+                                                  &type_2_desc,
+                                                  0, &ntlm->c_handle,
+                                                  &type_3_desc,
+                                                  &attrs, &tsDummy);
 
     if(status != SEC_E_OK)
       return CURLE_RECV_ERROR;
@@ -978,6 +986,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     int ntrespoff;
     unsigned char ntresp[24]; /* fixed-size */
 #endif
+    bool unicode = ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE;
     size_t useroff;
     const char *user;
     size_t userlen;
@@ -1008,6 +1017,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       if(dot)
         *dot = '\0';
       hostlen = strlen(host);
+    }
+
+    if(unicode) {
+      domlen = domlen * 2;
+      userlen = userlen * 2;
+      hostlen = hostlen * 2;
     }
 
 #if USE_NTLM2SESSION
@@ -1069,7 +1084,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
     else
 #endif
-	{
+        {
 
 #if USE_NTRESPONSES
       unsigned char ntbuffer[0x18];
@@ -1098,13 +1113,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
     useroff = domoff + domlen;
     hostoff = useroff + userlen;
-
-    /*
-     * In the case the server sets the flag NTLMFLAG_NEGOTIATE_UNICODE, we
-     * need to filter it off because libcurl doesn't UNICODE encode the
-     * strings it packs into the NTLM authenticate packet.
-     */
-    ntlm->flags &= ~NTLMFLAG_NEGOTIATE_UNICODE;
 
     /* Create the big type-3 message binary blob */
     size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
@@ -1211,14 +1219,14 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
     DEBUG_OUT({
-        fprintf(stderr, "\n                  ntresp=");
+        fprintf(stderr, "\n   ntresp=");
         print_hex(stderr, (char *)&ntlmbuf[ntrespoff], 0x18);
     });
 
 #endif
 
     DEBUG_OUT({
-        fprintf(stderr, "\n                  flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
+        fprintf(stderr, "\n   flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
                 LONGQUARTET(ntlm->flags), ntlm->flags);
         print_flags(stderr, ntlm->flags);
         fprintf(stderr, "\n****\n");
@@ -1233,25 +1241,33 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
     DEBUGASSERT(size == domoff);
-    memcpy(&ntlmbuf[size], domain, domlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], domain, domlen/2);
+    else
+      memcpy(&ntlmbuf[size], domain, domlen);
+
     size += domlen;
 
     DEBUGASSERT(size == useroff);
-    memcpy(&ntlmbuf[size], user, userlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], user, userlen/2);
+    else
+      memcpy(&ntlmbuf[size], user, userlen);
+
     size += userlen;
 
     DEBUGASSERT(size == hostoff);
-    memcpy(&ntlmbuf[size], host, hostlen);
+    if(unicode)
+      unicodecpy(&ntlmbuf[size], host, hostlen/2);
+    else
+      memcpy(&ntlmbuf[size], host, hostlen);
+
     size += hostlen;
 
-#ifdef CURL_DOES_CONVERSIONS
     /* convert domain, user, and host to ASCII but leave the rest as-is */
-    if(CURLE_OK != Curl_convert_to_network(conn->data,
-                                           (char *)&ntlmbuf[domoff],
-                                           size-domoff)) {
+    if(Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
+                               size-domoff))
       return CURLE_CONV_FAILED;
-    }
-#endif /* CURL_DOES_CONVERSIONS */
 
 #endif
 

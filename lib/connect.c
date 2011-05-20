@@ -174,7 +174,7 @@ long Curl_timeleft(struct SessionHandle *data,
     nowp = &now;
   }
 
-  /* substract elapsed time */
+  /* subtract elapsed time */
   timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
@@ -263,7 +263,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
-  if ( !dev && !port )
+  if(!dev && !port)
     /* no local kind of binding was requested */
     return CURLE_OK;
 
@@ -315,16 +315,16 @@ static CURLcode bindlocal(struct connectdata *conn,
       long ipver = conn->ip_version;
       int rc;
 
-      if (af == AF_INET)
+      if(af == AF_INET)
         conn->ip_version = CURL_IPRESOLVE_V4;
 #ifdef ENABLE_IPV6
-      else if (af == AF_INET6)
+      else if(af == AF_INET6)
         conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
 
       rc = Curl_resolv(conn, dev, 0, &h);
       if(rc == CURLRESOLV_PENDING)
-        (void)Curl_wait_for_resolv(conn, &h);
+        (void)Curl_resolver_wait_resolv(conn, &h);
       conn->ip_version = ipver;
 
       if(h) {
@@ -372,14 +372,14 @@ static CURLcode bindlocal(struct connectdata *conn,
   else {
     /* no device was given, prepare sa to match af's needs */
 #ifdef ENABLE_IPV6
-    if ( af == AF_INET6 ) {
+    if(af == AF_INET6) {
       si6->sin6_family = AF_INET6;
       si6->sin6_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in6);
     }
     else
 #endif
-    if ( af == AF_INET ) {
+    if(af == AF_INET) {
       si4->sin_family = AF_INET;
       si4->sin_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in);
@@ -387,8 +387,8 @@ static CURLcode bindlocal(struct connectdata *conn,
   }
 
   for(;;) {
-    if( bind(sockfd, sock, sizeof_sa) >= 0) {
-    /* we succeeded to bind */
+    if(bind(sockfd, sock, sizeof_sa) >= 0) {
+      /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
@@ -510,7 +510,7 @@ static CURLcode trynextip(struct connectdata *conn,
   *connected = FALSE;
 
   if(sockindex != FIRSTSOCKET) {
-    sclose(fd_to_close);
+    Curl_closesocket(conn, fd_to_close);
     return CURLE_COULDNT_CONNECT; /* no next */
   }
 
@@ -525,12 +525,12 @@ static CURLcode trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
-      sclose(fd_to_close);
+      Curl_closesocket(conn, fd_to_close);
       return CURLE_OK;
     }
     ai = ai->ai_next;
   }
-  sclose(fd_to_close);
+  Curl_closesocket(conn, fd_to_close);
   return CURLE_COULDNT_CONNECT;
 }
 
@@ -698,7 +698,13 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   if(WAITCONN_CONNECTED == rc) {
     if(verifyconnect(sockfd, &error)) {
-      /* we are connected, awesome! */
+      /* we are connected with TCP, awesome! */
+
+      /* see if we need to do any proxy magic first once we connected */
+      code = Curl_connected_proxy(conn);
+      if(code)
+        return code;
+
       conn->bits.tcpconnect = TRUE;
       *connected = TRUE;
       Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
@@ -809,8 +815,8 @@ void Curl_sndbufset(curl_socket_t sockfd)
   int curval = 0;
   int curlen = sizeof(curval);
 
-  if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
-    if (curval > val)
+  if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
+    if(curval > val)
       return;
 
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
@@ -837,7 +843,7 @@ singleipconnect(struct connectdata *conn,
   struct Curl_sockaddr_ex addr;
   int rc;
   int error;
-  bool isconnected;
+  bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
   CURLcode res = CURLE_OK;
@@ -888,7 +894,7 @@ singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if (conn->scope && (addr.family == AF_INET6))
+  if(conn->scope && (addr.family == AF_INET6))
     sa6->sin6_scope_id = conn->scope;
 #endif
 
@@ -899,7 +905,7 @@ singleipconnect(struct connectdata *conn,
     error = ERRNO;
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           error, Curl_strerror(conn, error));
-    sclose(sockfd);
+    Curl_closesocket(conn, sockfd);
     return CURLE_OK;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
@@ -924,16 +930,19 @@ singleipconnect(struct connectdata *conn,
     error = data->set.fsockopt(data->set.sockopt_client,
                                sockfd,
                                CURLSOCKTYPE_IPCXN);
-    if(error) {
-      sclose(sockfd); /* close the socket and bail out */
-      return res;
+
+    if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
+      isconnected = TRUE;
+    else if(error) {
+      Curl_closesocket(conn, sockfd); /* close the socket and bail out */
+      return CURLE_ABORTED_BY_CALLBACK;
     }
   }
 
   /* possibly bind the local end to an IP, interface or port */
   res = bindlocal(conn, sockfd, addr.family);
   if(res) {
-    sclose(sockfd); /* close socket and bail out */
+    Curl_closesocket(conn, sockfd); /* close socket and bail out */
     return res;
   }
 
@@ -941,7 +950,7 @@ singleipconnect(struct connectdata *conn,
   curlx_nonblock(sockfd, TRUE);
 
   /* Connect TCP sockets, bind UDP */
-  if(conn->socktype == SOCK_STREAM) {
+  if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
     conn->connecttime = Curl_tvnow();
     if(conn->num_addr > 1)
@@ -967,7 +976,7 @@ singleipconnect(struct connectdata *conn,
 #endif
       rc = waitconnect(conn, sockfd, timeout_ms);
       if(WAITCONN_ABORTED == rc) {
-        sclose(sockfd);
+        Curl_closesocket(conn, sockfd);
         return CURLE_ABORTED_BY_CALLBACK;
       }
       break;
@@ -989,7 +998,8 @@ singleipconnect(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  isconnected = verifyconnect(sockfd, &error);
+  if(!isconnected)
+    isconnected = verifyconnect(sockfd, &error);
 
   if(!rc && isconnected) {
     /* we are connected, awesome! */
@@ -1007,7 +1017,7 @@ singleipconnect(struct connectdata *conn,
   }
 
   /* connect failed or timed out */
-  sclose(sockfd);
+  Curl_closesocket(conn, sockfd);
 
   return CURLE_OK;
 }
@@ -1063,8 +1073,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with a Curl_addrinfo chain
    */
-  for (curr_addr = ai, aliasindex=0; curr_addr;
-       curr_addr = curr_addr->ai_next, aliasindex++) {
+  for(curr_addr = ai, aliasindex=0; curr_addr;
+      curr_addr = curr_addr->ai_next, aliasindex++) {
 
     /* start connecting to the IP curr_addr points to */
     CURLcode res =
@@ -1118,6 +1128,9 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
                                   struct connectdata **connp)
 {
   curl_socket_t sockfd;
+
+  DEBUGASSERT(data);
+
   if((data->state.lastconnect != -1) &&
      (data->state.connc->connects[data->state.lastconnect] != NULL)) {
     struct connectdata *c =
@@ -1149,4 +1162,18 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
     return CURL_SOCKET_BAD;
 
   return sockfd;
+}
+
+/*
+ * Close a socket.
+ *
+ * 'conn' can be NULL, beware!
+ */
+int Curl_closesocket(struct connectdata *conn,
+                     curl_socket_t sock)
+{
+  if(conn && conn->fclosesocket)
+    return conn->fclosesocket(conn->closesocket_client, sock);
+  else
+    return sclose(sock);
 }

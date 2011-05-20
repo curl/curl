@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -94,4 +94,14 @@ $(HUGE):
 	echo "/* built-in manual is disabled, blank function */" > $(HUGE)
 	echo '#include "hugehelp.h"' >> $(HUGE)
 	echo "void hugehelp(void) {}" >>$(HUGE)
+endif
+
+# ignore hugehelp.c since it is generated source code and it plays by slightly
+# different rules!
+checksrc:
+	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/src -Whugehelp.c $(curl_SOURCES)
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
 endif

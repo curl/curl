@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -160,7 +160,8 @@ static const struct tzinfo tz[]= {
   {"G",  +7 * 60},         /* Golf */
   {"H",  +8 * 60},         /* Hotel */
   {"I",  +9 * 60},         /* India */
-  /* "J", Juliet is not used as a timezone, to indicate the observer's local time */
+  /* "J", Juliet is not used as a timezone, to indicate the observer's local
+     time */
   {"K", +10 * 60},         /* Kilo */
   {"L", +11 * 60},         /* Lima */
   {"M", +12 * 60},         /* Mike */
@@ -282,11 +283,11 @@ static time_t my_timegm(struct my_tm *tm)
 
   year = tm->tm_year + 1900;
   month = tm->tm_mon;
-  if (month < 0) {
+  if(month < 0) {
     year += (11 - month) / 12;
     month = 11 - (11 - month) % 12;
   }
-  else if (month >= 12) {
+  else if(month >= 12) {
     year -= month / 12;
     month = month % 12;
   }
@@ -387,7 +388,7 @@ int Curl_parsedate(const char *date, time_t *output)
            (indate< date) &&
            ((date[-1] == '+' || date[-1] == '-'))) {
           /* four digits and a value less than or equal to 1400 (to take into
-             account all sorts of funny time zone diffs) and it is preceeded
+             account all sorts of funny time zone diffs) and it is preceded
              with a plus or minus. This is a time zone indication.  1400 is
              picked since +1300 is frequently used and +1400 is mentioned as
              an edge number in the document "ISO C 200X Proposal: Timezone
@@ -513,4 +514,30 @@ time_t curl_getdate(const char *p, const time_t *now)
   }
   /* everything else is fail */
   return -1;
+}
+
+/*
+ * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
+ * gmtime_r() or gmtime() functions anywhere else but here.
+ *
+ * To make sure no such function calls slip in, we define them to cause build
+ * errors, which is why we use the name within parentheses in this function.
+ *
+ */
+
+CURLcode Curl_gmtime(time_t intime, struct tm *store)
+{
+  const struct tm *tm;
+#ifdef HAVE_GMTIME_R
+  /* thread-safe version */
+  tm = (struct tm *)gmtime_r(&intime, store);
+#else
+  tm = gmtime(&intime);
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+#endif
+
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }

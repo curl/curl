@@ -18,6 +18,17 @@ Building with CMake
    CMake builds can be configured either from the command line, or from one
    of CMake's GUI's.
 
+Important notice
+==================
+   If you got your curl sources from a distribution tarball, make sure to
+   delete the generic 'include/curl/curlbuild.h' file that comes with it:
+       rm -f curl/include/curl/curlbuild.h
+
+   The purpose of this file is to provide reasonable definitions for systems
+   where autoconfiguration is not available. CMake will create its own
+   version of this file in its build directory. If the "generic" version
+   is not deleted, weird build errors may occur on some systems.
+
 Command Line CMake
 ==================
    A command line build of Curl is similar to the autotools build of Curl. It
@@ -32,9 +43,10 @@ Command Line CMake
        # variable prior to running CMake.
        cmake ../curl
        make
-       # currently make test and make install are not implemented
+       # currently make test is not implemented
        #make test
-       #make install
+       # Install to default location:
+       make install
 
 ccmake
 =========

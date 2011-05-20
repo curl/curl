@@ -39,7 +39,7 @@ HTTP GET with proxy and CURLOPT_PORT
  </name>
 # first URL then proxy
  <command>
-http://www.haxx.se:999/523 http://%HOSTIP:%HTTPPORT 
+http://www.example.com:999/523 http://%HOSTIP:%HTTPPORT 
 </command>
 </client>
 
@@ -50,9 +50,9 @@ http://www.haxx.se:999/523 http://%HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET HTTP://www.haxx.se:19999/523 HTTP/1.1
+GET HTTP://www.example.com:19999/523 HTTP/1.1
 Authorization: Basic eHh4Onl5eQ==
-Host: www.haxx.se:19999
+Host: www.example.com:19999
 Accept: */*
 Proxy-Connection: Keep-Alive
 

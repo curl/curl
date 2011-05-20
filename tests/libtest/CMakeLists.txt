@@ -65,8 +65,7 @@ endforeach()
 # lib547
 # #lib548
 # lib549 lib552 lib553 lib554 lib555 lib556
-# lib539 lib557 lib558
-# #lib559
+# lib539 lib557
 # lib560
 # )
 
@@ -118,10 +117,5 @@ endforeach()
 
 # SET(TEST_NAME lib548)
 # SET(SOURCE "lib547.c" ${SUPPORTFILES})
-# ADD_TESTUTIL_IF_NECESSARY(${TEST_NAME})
-# SETUP_TEST(${TEST_NAME} ${SOURCE})
-
-# SET(TEST_NAME lib559)
-# SET(SOURCE "lib558.c" ${SUPPORTFILES})
 # ADD_TESTUTIL_IF_NECESSARY(${TEST_NAME})
 # SETUP_TEST(${TEST_NAME} ${SOURCE})

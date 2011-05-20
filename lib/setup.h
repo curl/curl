@@ -26,7 +26,8 @@
  * Define WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32) && \
+    !defined(__SYMBIAN32__)
 #define WIN32
 #endif
 
@@ -523,7 +524,8 @@
 #if defined(_MSC_VER) && !defined(__POCC__)
 #  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
 #    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
-#      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. "Windows Server 2003 PSDK"
+#      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
+             "Windows Server 2003 PSDK"
 #    else
 #      define CURL_DISABLE_LDAP 1
 #    endif
@@ -551,7 +553,9 @@ int netware_init(void);
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
-#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS)
+#if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || \
+    defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS) || \
+    defined(USE_CYASSL)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -560,7 +564,8 @@ int netware_init(void);
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || defined(USE_GNUTLS) || defined(USE_NSS)
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
+   defined(USE_GNUTLS) || defined(USE_NSS)
 #define USE_NTLM
 #endif
 #endif

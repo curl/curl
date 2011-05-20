@@ -19,12 +19,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8q
+OPENSSL_PATH = ../../openssl-0.9.8r
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.7
+LIBSSH2_PATH = ../../libssh2-1.2.8
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -145,7 +145,11 @@ AR	= ar
 ARFLAGS	= -cq
 LIBEXT	= a
 RANLIB	= ranlib
-CFLAGS	+= -fno-builtin -fpcc-struct-return -fno-strict-aliasing
+CFLAGS  += -m32
+CFLAGS	+= -fno-builtin -fno-strict-aliasing
+ifeq ($(findstring gcc,$(CC)),gcc)
+CFLAGS	+= -fpcc-struct-return
+endif
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 ifeq ($(POSIXFL),1)

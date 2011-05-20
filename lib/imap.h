@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,8 @@ typedef enum {
                        a connect */
   IMAP_LOGIN,
   IMAP_STARTTLS,
+  IMAP_UPGRADETLS, /* asynchronously upgrade the connection to SSL/TLS
+                      (multi mode only) */
   IMAP_SELECT,
   IMAP_FETCH,
   IMAP_LOGOUT,
@@ -47,6 +49,7 @@ struct imap_conn {
   imapstate state; /* always use imap.c:state() to change state! */
   int cmdid;       /* id number/index */
   const char *idstr; /* pointer to a string for which to wait for as id */
+  bool ssldone;      /* connect() over SSL? only relevant in multi mode */
 };
 
 extern const struct Curl_handler Curl_handler_imap;

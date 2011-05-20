@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -84,17 +84,17 @@ void ourWriteEnv(CURL *curl)
   long longinfo;
   double doubleinfo;
 
-  for (i=0; variables[i].name; i++) {
+  for(i=0; variables[i].name; i++) {
     switch (variables[i].type) {
     case writeenv_STRING:
-      if (curl_easy_getinfo(curl, variables[i].id, &string) == CURLE_OK)
+      if(curl_easy_getinfo(curl, variables[i].id, &string) == CURLE_OK)
         internalSetEnv(variables[i].name, string);
       else
         internalSetEnv(variables[i].name, NULL);
       break;
 
     case writeenv_LONG:
-      if (curl_easy_getinfo(curl, variables[i].id, &longinfo) == CURLE_OK) {
+      if(curl_easy_getinfo(curl, variables[i].id, &longinfo) == CURLE_OK) {
         curl_msprintf(numtext, "%5ld", longinfo);
         internalSetEnv(variables[i].name, numtext);
       }
@@ -102,7 +102,7 @@ void ourWriteEnv(CURL *curl)
         internalSetEnv(variables[i].name, NULL);
       break;
     case writeenv_DOUBLE:
-      if (curl_easy_getinfo(curl, variables[i].id, &doubleinfo) == CURLE_OK) {
+      if(curl_easy_getinfo(curl, variables[i].id, &doubleinfo) == CURLE_OK) {
         curl_msprintf(numtext, "%6.2f", doubleinfo);
         internalSetEnv(variables[i].name, numtext);
       }

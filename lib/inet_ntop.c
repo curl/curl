@@ -69,8 +69,7 @@ static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
           ((int)((unsigned char)src[3])) & 0xff);
 
   len = strlen(tmp);
-  if(len == 0 || len >= size)
-  {
+  if(len == 0 || len >= size) {
     SET_ERRNO(ENOSPC);
     return (NULL);
   }
@@ -105,61 +104,51 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
    *  Find the longest run of 0x00's in src[] for :: shorthanding.
    */
   memset(words, '\0', sizeof(words));
-  for (i = 0; i < IN6ADDRSZ; i++)
-      words[i/2] |= (src[i] << ((1 - (i % 2)) << 3));
+  for(i = 0; i < IN6ADDRSZ; i++)
+    words[i/2] |= (src[i] << ((1 - (i % 2)) << 3));
 
   best.base = -1;
   cur.base  = -1;
   best.len = 0;
   cur.len = 0;
 
-  for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++)
-  {
-    if(words[i] == 0)
-    {
+  for(i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
+    if(words[i] == 0) {
       if(cur.base == -1)
         cur.base = i, cur.len = 1;
       else
         cur.len++;
     }
-    else if(cur.base != -1)
-    {
+    else if(cur.base != -1) {
       if(best.base == -1 || cur.len > best.len)
-         best = cur;
+        best = cur;
       cur.base = -1;
     }
   }
   if((cur.base != -1) && (best.base == -1 || cur.len > best.len))
-     best = cur;
+    best = cur;
   if(best.base != -1 && best.len < 2)
-     best.base = -1;
-
-  /* Format the result.
-   */
+    best.base = -1;
+  /* Format the result. */
   tp = tmp;
-  for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++)
-  {
-    /* Are we inside the best run of 0x00's?
-     */
-    if(best.base != -1 && i >= best.base && i < (best.base + best.len))
-    {
+  for(i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
+    /* Are we inside the best run of 0x00's? */
+    if(best.base != -1 && i >= best.base && i < (best.base + best.len)) {
       if(i == best.base)
-         *tp++ = ':';
+        *tp++ = ':';
       continue;
     }
 
     /* Are we following an initial run of 0x00s or any real hex?
      */
     if(i != 0)
-       *tp++ = ':';
+      *tp++ = ':';
 
     /* Is this address an encapsulated IPv4?
      */
     if(i == 6 && best.base == 0 &&
-        (best.len == 6 || (best.len == 5 && words[5] == 0xffff)))
-    {
-      if(!inet_ntop4(src+12, tp, sizeof(tmp) - (tp - tmp)))
-      {
+        (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
+      if(!inet_ntop4(src+12, tp, sizeof(tmp) - (tp - tmp))) {
         SET_ERRNO(ENOSPC);
         return (NULL);
       }
@@ -177,8 +166,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 
   /* Check for overflow, copy, and we're done.
    */
-  if((size_t)(tp - tmp) > size)
-  {
+  if((size_t)(tp - tmp) > size) {
     SET_ERRNO(ENOSPC);
     return (NULL);
   }
@@ -195,9 +183,9 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
  * error, EAFNOSUPPORT or ENOSPC.
  *
  * On Windows we store the error in the thread errno, not
- * in the winsock error code. This is to avoid loosing the
+ * in the winsock error code. This is to avoid losing the
  * actual last winsock error. So use macro ERRNO to fetch the
- * errno this funtion sets when returning NULL, not SOCKERRNO.
+ * errno this function sets when returning NULL, not SOCKERRNO.
  */
 char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
 {

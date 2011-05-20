@@ -33,21 +33,21 @@ Gallagher, and support for the 'gzip' encoding was added by Dan Fandrich.
 
 To cause libcurl to request a content encoding use:
 
-    curl_easy_setopt(curl, CURLOPT_ENCODING, <string>)
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, <string>)
 
 where <string> is the intended value of the Accept-Encoding header.
 
 Currently, libcurl only understands how to process responses that use the
-"deflate" or "gzip" Content-Encoding, so the only values for CURLOPT_ENCODING
-that will work (besides "identity," which does nothing) are "deflate" and
-"gzip" If a response is encoded using the "compress" or methods, libcurl will
-return an error indicating that the response could not be decoded.  If
-<string> is NULL no Accept-Encoding header is generated.  If <string> is a
-zero-length string, then an Accept-Encoding header containing all supported
-encodings will be generated.
+"deflate" or "gzip" Content-Encoding, so the only values for
+CURLOPT_ACCEPT_ENCODING that will work (besides "identity," which does
+nothing) are "deflate" and "gzip" If a response is encoded using the
+"compress" or methods, libcurl will return an error indicating that the
+response could not be decoded.  If <string> is NULL no Accept-Encoding header
+is generated.  If <string> is a zero-length string, then an Accept-Encoding
+header containing all supported encodings will be generated.
 
-The CURLOPT_ENCODING must be set to any non-NULL value for content to be
-automatically decoded.  If it is not set and the server still sends encoded
+The CURLOPT_ACCEPT_ENCODING must be set to any non-NULL value for content to
+be automatically decoded.  If it is not set and the server still sends encoded
 content (despite not having been asked), the data is returned in its raw form
 and the Content-Encoding type is not checked.
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,22 +76,22 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
   struct ifaddrs *iface, *head;
   char *ip=NULL;
 
-  if (getifaddrs(&head) >= 0) {
-    for (iface=head; iface != NULL; iface=iface->ifa_next) {
-      if ((iface->ifa_addr != NULL) &&
-          (iface->ifa_addr->sa_family == af) &&
-          curl_strequal(iface->ifa_name, interface)) {
+  if(getifaddrs(&head) >= 0) {
+    for(iface=head; iface != NULL; iface=iface->ifa_next) {
+      if((iface->ifa_addr != NULL) &&
+         (iface->ifa_addr->sa_family == af) &&
+         curl_strequal(iface->ifa_name, interface)) {
         void *addr;
         char scope[12]="";
 #ifdef ENABLE_IPV6
-        if (af == AF_INET6) {
+        if(af == AF_INET6) {
           unsigned int scopeid = 0;
           addr = &((struct sockaddr_in6 *)iface->ifa_addr)->sin6_addr;
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
           /* Include the scope of this interface as part of the address */
           scopeid = ((struct sockaddr_in6 *)iface->ifa_addr)->sin6_scope_id;
 #endif
-          if (scopeid)
+          if(scopeid)
             snprintf(scope, sizeof(scope), "%%%u", scopeid);
         }
         else

@@ -7,7 +7,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2010 Daniel Stenberg
+ * Copyright (c) 2004 - 2011 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,9 +88,9 @@ strlcpy (char *dst, const char *src, size_t dst_sz)
   size_t n;
   char *p;
 
-  for (p = dst, n = 0;
-       n + 1 < dst_sz && *src != '\0';
-       ++p, ++src, ++n)
+  for(p = dst, n = 0;
+      n + 1 < dst_sz && *src != '\0';
+      ++p, ++src, ++n)
     *p = *src;
   *p = '\0';
   if(*src == '\0')

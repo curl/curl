@@ -64,9 +64,6 @@ If this is received, the location following worked
 
 # Client-side
 <client>
-<features>
-netrc_debug
-</features>
 <server>
 http
 </server>
@@ -74,7 +71,7 @@ http
 HTTP Location: following with --netrc-optional
  </name>
  <command>
-http://supersite.com/want/257 -L -x http://%HOSTIP:%HTTPPORT --netrc-optional
+http://supersite.com/want/257 -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file log/netrc
 </command>
 
 # netrc auth for two out of three sites:

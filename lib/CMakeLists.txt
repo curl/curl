@@ -122,3 +122,5 @@ if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
   endif()
 endif()
+
+install(TARGETS ${LIB_NAME} DESTINATION lib)

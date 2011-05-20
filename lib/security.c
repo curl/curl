@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -147,7 +147,7 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
 }
 
 /* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
-   saying whether an error occured or CURLE_OK if |len| was read. */
+   saying whether an error occurred or CURLE_OK if |len| was read. */
 static CURLcode
 socket_read(curl_socket_t fd, void *to, size_t len)
 {
@@ -173,7 +173,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
 
 
 /* Write |len| bytes from the buffer |to| to the socket |fd|. Return a
-   CURLcode saying whether an error occured or CURLE_OK if |len| was
+   CURLcode saying whether an error occurred or CURLE_OK if |len| was
    written. */
 static CURLcode
 socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
@@ -208,17 +208,17 @@ static CURLcode read_data(struct connectdata *conn,
   CURLcode ret;
 
   ret = socket_read(fd, &len, sizeof(len));
-  if (ret != CURLE_OK)
+  if(ret != CURLE_OK)
     return ret;
 
   len = ntohl(len);
   tmp = realloc(buf->data, len);
-  if (tmp == NULL)
+  if(tmp == NULL)
     return CURLE_OUT_OF_MEMORY;
 
   buf->data = tmp;
   ret = socket_read(fd, buf->data, len);
-  if (ret != CURLE_OK)
+  if(ret != CURLE_OK)
     return ret;
   buf->size = conn->mech->decode(conn->app_data, buf->data, len,
                                  conn->data_prot, conn);
@@ -522,7 +522,7 @@ static CURLcode choose_mech(struct connectdata *conn)
         break;
       default:
         if(ret/100 == 5) {
-          infof(data, "The server does not support the security extensions.\n");
+          infof(data, "server does not support the security extensions\n");
           return CURLE_USE_SSL_FAILED;
         }
         break;

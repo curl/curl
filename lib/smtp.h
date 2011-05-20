@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,6 +34,8 @@ typedef enum {
   SMTP_EHLO,
   SMTP_HELO,
   SMTP_STARTTLS,
+  SMTP_UPGRADETLS, /* asynchronously upgrade the connection to SSL/TLS
+                      (multi mode only) */
   SMTP_AUTHPLAIN,
   SMTP_AUTHLOGIN,
   SMTP_AUTHPASSWD,
@@ -57,6 +59,7 @@ struct smtp_conn {
   unsigned int authmechs;       /* Accepted authentication methods. */
   smtpstate state; /* always use smtp.c:state() to change state! */
   struct curl_slist *rcpt;
+  bool ssldone; /* is connect() over SSL done? only relevant in multi mode */
 };
 
 /* Authentication mechanism flags. */

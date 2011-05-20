@@ -1,36 +1,26 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
  *                             / __| | | | |_) | |
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- */
-
-#include "test.h"
-
-/*
- * This hacky test bypasses the library external API,
- * using internal only libcurl functions. So don't be
- * surprised if we cannot run it when the library has
- * been built with hidden symbols, exporting only the
- * ones in the public API.
- */
-
-#if defined(CURL_HIDDEN_SYMBOLS)
-#  define SKIP_TEST 1
-#elif defined(WIN32) && !defined(CURL_STATICLIB)
-#  define SKIP_TEST 1
-#else
-#  undef  SKIP_TEST
-#endif
-
-
-#if !defined(SKIP_TEST)
-
-#include "memdebug.h"
-
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
 #include "curl_fnmatch.h"
+#include "curlcheck.h"
 
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
@@ -217,39 +207,27 @@ static const struct testcase tests[] = {
   { "",                         "",                       MATCH }
 };
 
-
-int test(char *URL)
+static CURLcode unit_setup( void )
 {
+  return CURLE_OK;
+}
+
+static void unit_stop( void )
+{
+}
+
+UNITTEST_START
+
   int testnum = sizeof(tests) / sizeof(struct testcase);
   int i, rc;
-  (void)URL; /* not used */
 
-  if(!strcmp(URL, "check")) {
-    /* test harness script verifying if this test can run */
-    return 0; /* sure, run this! */
-  }
-
-  printf("===========================\n");
   for(i = 0; i < testnum; i++) {
     rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(rc != tests[i].result) {
       printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)\n",
              tests[i].pattern, tests[i].string, tests[i].result, rc);
+      fail("pattern mismatch");
     }
   }
-  printf("===========================\n");
-  return 0;
-}
 
-#else /* !defined(SKIP_TEST) */
-
-
-int test(char *URL)
-{
-  (void)URL;
-  fprintf(stdout, "libcurl built with hidden symbols");
-  return 1; /* skip test */
-}
-
-
-#endif /* !defined(SKIP_TEST) */
+UNITTEST_STOP

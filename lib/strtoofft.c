@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -110,9 +110,9 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
   /* Loop handling digits. */
   value = 0;
   overflow = 0;
-  for (i = get_char(end[0], base);
-       i != -1;
-       end++, i = get_char(end[0], base)) {
+  for(i = get_char(end[0], base);
+      i != -1;
+      end++, i = get_char(end[0], base)) {
     newval = base * value + i;
     if(newval < value) {
       /* We've overflowed. */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -110,11 +110,13 @@
  * hostip.c   - method-independent resolver functions and utility functions
  * hostasyn.c - functions for asynchronous name resolves
  * hostsyn.c  - functions for synchronous name resolves
- * hostares.c - functions for ares-using name resolves
- * hostthre.c - functions for threaded name resolves
  * hostip4.c  - ipv4-specific functions
  * hostip6.c  - ipv6-specific functions
  *
+ * The two asynchronous name resolver backends are implemented in:
+ * asyn-ares.c   - functions for ares-using name resolves
+ * asyn-thread.c - functions for threaded name resolves
+
  * The hostip.h is the united header file for all this. It defines the
  * CURLRES_* defines based on the config*.h and setup.h defines.
  */
@@ -288,7 +290,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
   struct hostcache_prune_data user;
 
-  if( !dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
+  if(!dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
     /* cache forever means never prune, and NULL hostcache means
        we can't do it */
     return 0;
@@ -296,7 +298,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
   time(&user.now);
   user.cache_timeout = data->set.dns_cache_timeout;
 
-  if( !hostcache_timestamp_remove(&user,dns) )
+  if(!hostcache_timestamp_remove(&user,dns) )
     return 0;
 
   Curl_hash_clean_with_criterium(data->dns.hostcache,
@@ -426,7 +428,7 @@ int Curl_resolv(struct connectdata *conn,
   free(entry_id);
 
   /* See whether the returned entry is stale. Done before we release lock */
-  if( remove_entry_if_stale(data, dns) )
+  if(remove_entry_if_stale(data, dns))
     dns = NULL; /* the memory deallocation is being handled by the hash */
 
   if(dns) {
@@ -464,7 +466,7 @@ int Curl_resolv(struct connectdata *conn,
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_is_resolved(conn, &dns);
+        result = Curl_resolver_is_resolved(conn, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
         if(dns)
@@ -559,7 +561,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   *entry = NULL;
 
 #ifdef USE_ALARM_TIMEOUT
-  if (data->set.no_signal)
+  if(data->set.no_signal)
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
   else
@@ -689,7 +691,7 @@ void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
   dns->inuse--;
   /* only free if nobody is using AND it is not in hostcache (timestamp ==
      0) */
-  if (dns->inuse == 0 && dns->timestamp == 0) {
+  if(dns->inuse == 0 && dns->timestamp == 0) {
     Curl_freeaddrinfo(dns->addr);
     free(dns);
   }
@@ -707,7 +709,7 @@ static void freednsentry(void *freethis)
 
   /* mark the entry as not in hostcache */
   p->timestamp = 0;
-  if (p->inuse == 0) {
+  if(p->inuse == 0) {
     Curl_freeaddrinfo(p->addr);
     free(p);
   }

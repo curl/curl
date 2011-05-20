@@ -78,7 +78,7 @@ ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.7
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.2.8
 !endif
 
 !ifdef %librtmp_root
@@ -90,7 +90,7 @@ LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8q
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8r
 !endif
 
 !ifdef %ares_root
@@ -192,6 +192,14 @@ $(LINK_ARG): $(__MAKEFILES__)
 !endif
 !ifdef %use_ares
 	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
+!endif
+!ifdef %use_winidn
+!  if $(__VERSION__) > 1290
+	@%append $^@ library normaliz.lib
+!  else
+	@%append $^@ import '_IdnToAscii@20' 'NORMALIZ.DLL'.'IdnToAscii'
+	@%append $^@ import '_IdnToUnicode@20' 'NORMALIZ.DLL'.'IdnToUnicode'
+!  endif
 !endif
 !else
 	@%append $^@ library ..$(DS)lib$(DS)$(LIBNAME)_imp.lib

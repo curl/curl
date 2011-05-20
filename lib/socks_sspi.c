@@ -180,7 +180,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   SecPkgCredentials_Names names;
   TimeStamp expiry;
   char *service_name=NULL;
-  u_short us_length;
+  unsigned short us_length;
   ULONG qop;
   unsigned char socksreq[4]; /* room for gssapi exchange header only */
   char *service = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
@@ -197,7 +197,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
    */
 
   /* prepare service name */
-  if (strchr(service, '/')) {
+  if(strchr(service, '/')) {
     service_name = malloc(strlen(service));
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
@@ -234,15 +234,16 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   cred_handle.dwLower = 0;
   cred_handle.dwUpper = 0;
 
-  sspi_major_status = s_pSecFn->AcquireCredentialsHandleA( NULL,
-                                                           (char *)"Kerberos",
-                                                           SECPKG_CRED_OUTBOUND,
-                                                           NULL,
-                                                           NULL,
-                                                           NULL,
-                                                           NULL,
-                                                           &cred_handle,
-                                                           &expiry);
+  sspi_major_status =
+    s_pSecFn->AcquireCredentialsHandleA( NULL,
+                                         (char *)"Kerberos",
+                                         SECPKG_CRED_OUTBOUND,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         &cred_handle,
+                                         &expiry);
 
   if(check_sspi_err(data, sspi_major_status,sspi_minor_status,
                     "AcquireCredentialsHandleA") ) {
@@ -408,9 +409,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   service_name=NULL;
 
   /* Everything is good so far, user was authenticated! */
-  sspi_major_status = s_pSecFn->QueryCredentialsAttributes( &cred_handle,
-                                                            SECPKG_CRED_ATTR_NAMES,
-                                                            &names);
+  sspi_major_status =
+    s_pSecFn->QueryCredentialsAttributes( &cred_handle,
+                                          SECPKG_CRED_ATTR_NAMES,
+                                          &names);
   s_pSecFn->FreeCredentialsHandle(&cred_handle);
   if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
                     "QueryCredentialAttributes") ){
@@ -576,7 +578,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
-  } else {
+  }
+  else {
     code = Curl_write_plain(conn, sock, (char *)sspi_send_token.pvBuffer,
                             sspi_send_token.cbBuffer, &written);
     if((code != CURLE_OK) || (sspi_send_token.cbBuffer != (size_t)written)) {
@@ -666,7 +669,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq,sspi_w_token[1].pvBuffer,sspi_w_token[1].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
-  } else {
+  }
+  else {
     if(sspi_w_token[0].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%d).",
             sspi_w_token[0].cbBuffer);
@@ -684,7 +688,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   /* For later use if encryption is required
      conn->socks5_gssapi_enctype = socksreq[0];
-     if (socksreq[0] != 0)
+     if(socksreq[0] != 0)
      conn->socks5_sspi_context = sspi_context;
      else {
      s_pSecFn->DeleteSecurityContext(&sspi_context);

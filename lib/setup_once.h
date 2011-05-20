@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -239,7 +239,6 @@ struct timeval {
 #else
 #  define sclose(x)  close((x))
 #endif
-
 
 /*
  * Uppercase macro versions of ANSI/ISO is*() functions/macros which
@@ -487,7 +486,6 @@ typedef int sig_atomic_t;
  */
 
 #define ZERO_NULL 0
-
 
 #endif /* __SETUP_ONCE_H */
 

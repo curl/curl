@@ -27,7 +27,7 @@ Content-Type: application/sdp
 v=0
 s=rtspd SDP
 i=A fake SDP reply
-u=http://www.curl.haxx.se/fakesdp.ps
+u=http://www.curl.example.com/fakesdp.ps
 </data2>
 <data3>
 RTSP/1.0 200 Okie Dokie

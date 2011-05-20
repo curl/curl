@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+POP3
+LIST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+# When doing LIST, we get the default list output hard-coded in the test
+# POP3 server
+<datacheck>
+1 100
+2 4294967400
+4 200
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+ <name>
+POP3 LIST messages
+ </name>
+ <command>
+pop3://%HOSTIP:%POP3PORT/ -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER user
+PASS secret
+LIST 
+QUIT
+</protocol>
+</verify>
+</testcase>

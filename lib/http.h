@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,12 +65,6 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
                                 Curl_send_buffer *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                    Curl_send_buffer *req_buffer);
-
-
-/* ftp can use this as well */
-CURLcode Curl_proxyCONNECT(struct connectdata *conn,
-                           int tunnelsocket,
-                           const char *hostname, unsigned short remote_port);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
@@ -157,5 +151,26 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                                      struct connectdata *conn,
                                      ssize_t *nread,
                                      bool *stop_reading);
+
+/**
+ * Curl_http_output_auth() setups the authentication headers for the
+ * host/proxy and the correct authentication
+ * method. conn->data->state.authdone is set to TRUE when authentication is
+ * done.
+ *
+ * @param conn all information about the current connection
+ * @param request pointer to the request keyword
+ * @param path pointer to the requested path
+ * @param proxytunnel boolean if this is the request setting up a "proxy
+ * tunnel"
+ *
+ * @returns CURLcode
+ */
+CURLcode
+Curl_http_output_auth(struct connectdata *conn,
+                      const char *request,
+                      const char *path,
+                      bool proxytunnel); /* TRUE if this is the request setting
+                                            up the proxy tunnel */
 
 #endif

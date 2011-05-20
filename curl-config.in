@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo libcurl @VERSION@
+	echo libcurl @CURLVERSION@
 	exit 0
 	;;
 
@@ -113,7 +113,7 @@ while test $# -gt 0; do
 	  # silent success
 	  exit 0
 	else
-	  echo "requested version $checkfor is newer than existing @VERSION@"
+	  echo "requested version $checkfor is newer than existing @CURLVERSION@"
 	  exit 1
 	fi
 	;;

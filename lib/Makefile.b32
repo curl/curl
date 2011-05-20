@@ -40,17 +40,17 @@ PP_CMD   = cpp32 -q -P-
 CC_CMD   = bcc32 -q -c
 LD       = bcc32
 RM       = del 2>NUL
-MKDIR    = mkdir
-RMDIR    = rmdir /s /q 2>NUL
+MKDIR    = md
+RMDIR    = rd /q
 LIB      = tlib
 IMPLIB   = implib
 
-CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -Dinline=__inline
+CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -w-inl -w-pia -w-pin -Dinline=__inline
 LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
 SRCDIR   = .
-OBJDIR   = .\objs
+OBJDIR   = .\BCC_objs
 INCDIRS  = -I.;..\include
 LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
 DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
@@ -83,11 +83,13 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 
 .path.c   = $(SRCDIR)
 .path.obj = $(OBJDIR)
+.path.int = $(OBJDIR)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 !include Makefile.inc
 
 OBJECTS = $(CSOURCES:.c=.obj)
+PREPROCESSED = $(CSOURCES:.c=.int)
 
 .c.obj:
 	@-$(RM) $(@R).int
@@ -97,6 +99,10 @@ OBJECTS = $(CSOURCES:.c=.obj)
 all:	$(OBJDIR) $(LIBCURL_LIB) $(LIBCURL_DLL)
 
 clean:
+	cd $(OBJDIR)
+	@-$(RM) $(OBJECTS)
+	@-$(RM) $(PREPROCESSED)
+	cd ..
 	@-$(RMDIR) $(OBJDIR)
 	@-$(RM) $(LIBCURL_LIB)
 	@-$(RM) $(LIBCURL_IMPLIB)

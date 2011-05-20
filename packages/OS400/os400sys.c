@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -863,6 +863,7 @@ Curl_ldap_get_dn_a(void * ld, LDAPMessage * entry)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
+  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
@@ -894,6 +895,7 @@ Curl_ldap_first_attribute_a(void * ld,
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
+  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to
@@ -925,6 +927,7 @@ Curl_ldap_next_attribute_a(void * ld,
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
+  cp2[i] = '\0';
 
   /* No way to allocate a buffer here, because it will be released by
      ldap_memfree() and ldap_memalloc() does not exist. The solution is to

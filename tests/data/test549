@@ -41,7 +41,7 @@ FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
  </name>
 # first URL then proxy
  <command>
-ftp://www.haxx.se/moo/549 http://%HOSTIP:%HTTPPORT 
+ftp://www.example.com/moo/549 http://%HOSTIP:%HTTPPORT 
 </command>
 </client>
 
@@ -52,8 +52,8 @@ ftp://www.haxx.se/moo/549 http://%HOSTIP:%HTTPPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET ftp://www.haxx.se/moo/549;type=i HTTP/1.1
-Host: www.haxx.se:21
+GET ftp://www.example.com/moo/549;type=i HTTP/1.1
+Host: www.example.com:21
 Accept: */*
 Proxy-Connection: Keep-Alive
 

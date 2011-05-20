@@ -1,5 +1,26 @@
 #ifndef __SRC_CONFIG_WIN32_H
 #define __SRC_CONFIG_WIN32_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
 
 /* ================================================================ */
 /*    src/config-win32.h - Hand crafted config file for windows     */
@@ -302,7 +323,8 @@
    2000 as a supported build target. VS2008 default installations provide an
    embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
    valid build target for VS2008. Popular belief is that binaries built using
-   Windows SDK versions 6.X and Windows 2000 as a build target are functional */
+   Windows SDK versions 6.X and Windows 2000 as a build target are
+   functional */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #  define VS2008_MINIMUM_TARGET 0x0500
 #endif
@@ -323,7 +345,8 @@
 #  ifndef WINVER
 #    define WINVER VS2008_DEFAULT_TARGET
 #  endif
-#  if (_WIN32_WINNT < VS2008_MINIMUM_TARGET) || (WINVER < VS2008_MINIMUM_TARGET)
+#  if (_WIN32_WINNT < VS2008_MINIMUM_TARGET) || \
+  (WINVER < VS2008_MINIMUM_TARGET)
 #    error VS2008 does not support Windows build targets prior to Windows 2000
 #  endif
 #endif

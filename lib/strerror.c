@@ -29,7 +29,7 @@
       (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
       (defined(HAVE_GLIBC_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)) || \
       (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R))
-#    error "strerror_r MUST be either POSIX-style, glibc-style or vxworks-style"
+#    error "strerror_r MUST be either POSIX, glibc or vxworks-style"
 #  endif
 #endif
 
@@ -64,6 +64,10 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_URL_MALFORMAT:
     return "URL using bad/illegal format or missing URL";
+
+  case CURLE_NOT_BUILT_IN:
+    return "A requested feature, protocol or option was not found built-in in"
+      " this libcurl due to a build-time decision.";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
     return "Couldn't resolve proxy name";
@@ -167,8 +171,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TOO_MANY_REDIRECTS :
     return "Number of redirects hit maximum amount";
 
-  case CURLE_UNKNOWN_TELNET_OPTION:
-    return "User specified an unknown telnet option";
+  case CURLE_UNKNOWN_OPTION:
+    return "An unknown option was passed in to libcurl";
 
   case CURLE_TELNET_OPTION_SYNTAX :
     return "Malformed telnet option";
@@ -201,13 +205,14 @@ curl_easy_strerror(CURLcode error)
     return "Couldn't use specified SSL cipher";
 
   case CURLE_SSL_CACERT:
-    return "Peer certificate cannot be authenticated with known CA certificates";
+    return "Peer certificate cannot be authenticated with given CA "
+      "certificates";
 
   case CURLE_SSL_CACERT_BADFILE:
     return "Problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
-    return "Unrecognized HTTP Content-Encoding";
+    return "Unrecognized or bad HTTP Content or Transfer-Encoding";
 
   case CURLE_LDAP_INVALID_URL:
     return "Invalid LDAP URL";
@@ -281,11 +286,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_CHUNK_FAILED:
     return "Chunk callback failed";
 
-  case CURLE_TLSAUTH_FAILED:
-    return "TLS Authentication failed";
-
     /* error codes not used by current libcurl */
-  case CURLE_OBSOLETE4:
   case CURLE_OBSOLETE10:
   case CURLE_OBSOLETE12:
   case CURLE_OBSOLETE16:

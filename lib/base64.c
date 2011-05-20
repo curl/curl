@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,16 +20,7 @@
  *
  ***************************************************************************/
 
-/* Base64 encoding/decoding
- *
- * Test harnesses down the bottom - compile with -DTEST_ENCODE for
- * a program that will read in raw data from stdin and write out
- * a base64-encoded version to stdout, and the length returned by the
- * encoding function to stderr. Compile with -DTEST_DECODE for a program that
- * will go the other way.
- *
- * This code will break if int is smaller than 32 bits
- */
+/* Base64 encoding/decoding */
 
 #include "setup.h"
 
@@ -40,10 +31,10 @@
 #include <curl/mprintf.h>
 
 #include "urldata.h" /* for the SessionHandle definition */
-#include "easyif.h"  /* for Curl_convert_... prototypes */
 #include "warnless.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
+#include "non-ascii.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -155,9 +146,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   int inputparts;
   char *output;
   char *base64data;
-#ifdef CURL_DOES_CONVERSIONS
   char *convbuf = NULL;
-#endif
 
   const char *indata = inputbuff;
 
@@ -170,32 +159,19 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   if(NULL == output)
     return 0;
 
-#ifdef CURL_DOES_CONVERSIONS
   /*
    * The base64 data needs to be created using the network encoding
    * not the host encoding.  And we can't change the actual input
    * so we copy it to a buffer, translate it, and use that instead.
    */
-  if(data) {
-    convbuf = malloc(insize);
-    if(!convbuf) {
-      free(output);
-      return 0;
-    }
-    memcpy(convbuf, indata, insize);
-    if(CURLE_OK != Curl_convert_to_network(data, convbuf, insize)) {
-      free(convbuf);
-      free(output);
-      return 0;
-    }
-    indata = convbuf; /* switch to the converted buffer */
-  }
-#else
-  (void)data;
-#endif
+  if(Curl_convert_clone(data, indata, insize, &convbuf))
+    return 0;
+
+  if(convbuf)
+    indata = (char *)convbuf;
 
   while(insize > 0) {
-    for (i = inputparts = 0; i < 3; i++) {
+    for(i = inputparts = 0; i < 3; i++) {
       if(insize > 0) {
         inputparts++;
         ibuf[i] = (unsigned char) *indata;
@@ -238,10 +214,9 @@ size_t Curl_base64_encode(struct SessionHandle *data,
   *output=0;
   *outptr = base64data; /* make it return the actual data memory */
 
-#ifdef CURL_DOES_CONVERSIONS
-  if(data)
+  if(convbuf)
     free(convbuf);
-#endif
+
   return strlen(base64data); /* return the length of the new data */
 }
 /* ---- End of Base64 Encoding ---- */

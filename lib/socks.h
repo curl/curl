@@ -1,5 +1,5 @@
-#ifndef __SOCKS_H
-#define __SOCKS_H
+#ifndef __CURL_SOCKS_H
+#define __CURL_SOCKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,12 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
+#ifdef CURL_DISABLE_PROXY
+#define Curl_SOCKS4(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#else
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
@@ -66,4 +72,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                       struct connectdata *conn);
 #endif
 
-#endif  /* __SOCKS_H */
+#endif /* CURL_DISABLE_PROXY */
+
+#endif  /* __CURL_SOCKS_H */
