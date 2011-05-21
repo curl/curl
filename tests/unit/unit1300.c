@@ -19,12 +19,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <stdlib.h>
-#include "curl_config.h"
-#include "setup.h"
+#include "curlcheck.h"
 
 #include "llist.h"
-#include "curlcheck.h"
 
 struct curl_llist *llist;
 

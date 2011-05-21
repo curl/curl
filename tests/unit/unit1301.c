@@ -19,12 +19,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <stdlib.h>
-#include "curl_config.h"
-#include "setup.h"
+#include "curlcheck.h"
 
 #include "strequal.h"
-#include "curlcheck.h"
 
 static CURLcode unit_setup( void ) {return CURLE_OK;}
 static void unit_stop( void ) {}

@@ -19,14 +19,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <stdlib.h>
-#include "curl_config.h"
-#include "setup.h"
+#include "curlcheck.h"
 
 #include "urldata.h"
 #include "url.h" /* for Curl_safefree */
 #include "curl_base64.h"
-#include "curlcheck.h"
 #include "memdebug.h" /* LAST include file */
 
 static struct SessionHandle *data;
