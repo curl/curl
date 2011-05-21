@@ -986,7 +986,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     int ntrespoff;
     unsigned char ntresp[24]; /* fixed-size */
 #endif
-    bool unicode = ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE;
+    bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE)?TRUE:FALSE;
     size_t useroff;
     const char *user;
     size_t userlen;
