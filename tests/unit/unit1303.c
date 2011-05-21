@@ -63,7 +63,7 @@ struct timetest {
   int now_us;
   int timeout_ms;
   int connecttimeout_ms;
-  int connecting;
+  bool connecting;
   long result;
   const char *comment;
 };
