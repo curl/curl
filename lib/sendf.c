@@ -446,7 +446,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
     if((conn->handler->protocol&CURLPROTO_FTP) &&
        conn->proto.ftpc.transfertype == 'A') {
       /* convert from the network encoding */
-      size_t rc = Curl_convert_from_network(data, ptr, len);
+      CURLcode rc = Curl_convert_from_network(data, ptr, len);
       /* Curl_convert_from_network calls failf if unsuccessful */
       if(rc)
         return rc;
