@@ -1,5 +1,5 @@
-#ifndef __COOKIE_H
-#define __COOKIE_H
+#ifndef HEADER_CURL_COOKIE_H
+#define HEADER_CURL_COOKIE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -98,7 +98,7 @@ int Curl_cookie_output(struct CookieInfo *, const char *);
 #define Curl_cookie_list(x) NULL
 #define Curl_cookie_loadfiles(x) do { } while (0)
 #define Curl_cookie_init(x,y,z,w) NULL
-#define Curl_cookie_cleanup(x)
+#define Curl_cookie_cleanup(x) do { } while (0)
 #define Curl_flush_cookies(x,y)
 #else
 void Curl_flush_cookies(struct SessionHandle *data, int cleanup);
@@ -109,4 +109,4 @@ struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
 void Curl_cookie_loadfiles(struct SessionHandle *data);
 #endif
 
-#endif
+#endif /* HEADER_CURL_COOKIE_H */
