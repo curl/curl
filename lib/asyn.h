@@ -60,7 +60,7 @@ void Curl_resolver_global_cleanup(void);
  * Returning anything else than CURLE_OK fails curl_easy_init() with the
  * correspondent code.
  */
-int Curl_resolver_init(void **resolver);
+CURLcode Curl_resolver_init(void **resolver);
 
 /*
  * Curl_resolver_cleanup()

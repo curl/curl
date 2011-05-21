@@ -119,7 +119,7 @@ void Curl_resolver_global_cleanup(void)
  * URL-state specific environment ('resolver' member of the UrlState
  * structure).  Does nothing here.
  */
-int Curl_resolver_init(void **resolver)
+CURLcode Curl_resolver_init(void **resolver)
 {
   (void)resolver;
   return CURLE_OK;
