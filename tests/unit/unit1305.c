@@ -19,11 +19,8 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "test.h"
+#include "curlcheck.h"
 
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
@@ -39,7 +36,6 @@
 
 #include "hash.h"
 #include "hostip.h"
-#include "curlcheck.h"
 
 #include "curl_memory.h"
 #include "memdebug.h" /* LAST include file */

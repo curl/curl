@@ -19,8 +19,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_fnmatch.h"
 #include "curlcheck.h"
+
+#include "curl_fnmatch.h"
 
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
