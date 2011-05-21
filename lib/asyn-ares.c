@@ -140,7 +140,7 @@ void Curl_resolver_global_cleanup(void)
  * URL-state specific environment ('resolver' member of the UrlState
  * structure).  Fills the passed pointer by the initialized ares_channel.
  */
-int Curl_resolver_init(void **resolver)
+CURLcode Curl_resolver_init(void **resolver)
 {
   int status = ares_init((ares_channel*)resolver);
   if(status != ARES_SUCCESS) {
