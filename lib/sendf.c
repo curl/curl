@@ -416,6 +416,7 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
   /* Determine the callback(s) to use. */
   if(type & CLIENTWRITE_BODY)
     writebody = data->set.fwrite_func;
+
   if((type & CLIENTWRITE_HEADER) &&
      (data->set.fwrite_header || data->set.writeheader)) {
     /*
