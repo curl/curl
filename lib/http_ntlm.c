@@ -1269,7 +1269,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     /* convert domain, user, and host to ASCII but leave the rest as-is */
     res = Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
-                                  size-domoff)
+                                  size-domoff);
     if(res)
       return CURLE_CONV_FAILED;
 
