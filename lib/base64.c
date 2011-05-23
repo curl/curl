@@ -140,6 +140,7 @@ size_t Curl_base64_encode(struct SessionHandle *data,
                           const char *inputbuff, size_t insize,
                           char **outptr)
 {
+  CURLcode res;
   unsigned char ibuf[3];
   unsigned char obuf[4];
   int i;
@@ -164,8 +165,11 @@ size_t Curl_base64_encode(struct SessionHandle *data,
    * not the host encoding.  And we can't change the actual input
    * so we copy it to a buffer, translate it, and use that instead.
    */
-  if(Curl_convert_clone(data, indata, insize, &convbuf))
+  res = Curl_convert_clone(data, indata, insize, &convbuf);
+  if(res) {
+    free(output);
     return 0;
+  }
 
   if(convbuf)
     indata = (char *)convbuf;
