@@ -509,10 +509,11 @@ static int sshkeycallback(CURL *easy,
 
 static CURLcode ssh_knownhost(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
   CURLcode result = CURLE_OK;
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
+  struct SessionHandle *data = conn->data;
+
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /* we're asked to verify the host against a file */
     struct ssh_conn *sshc = &conn->proto.sshc;
