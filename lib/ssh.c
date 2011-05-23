@@ -522,8 +522,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
     size_t keylen;
     const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                     &keylen, &keytype);
-    int keycheck;
-    int keybit;
+    int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
+    int keybit = 0;
 
     if(remotekey) {
       /*
