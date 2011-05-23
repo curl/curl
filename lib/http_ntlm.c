@@ -512,6 +512,7 @@ static void mk_lm_hash(struct SessionHandle *data,
                        const char *password,
                        unsigned char *lmbuffer /* 21 bytes */)
 {
+  CURLcode res;
   unsigned char pw[14];
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
@@ -525,7 +526,8 @@ static void mk_lm_hash(struct SessionHandle *data,
    * The LanManager hashed password needs to be created using the
    * password in the network encoding not the host encoding.
    */
-  if(Curl_convert_to_network(data, (char *)pw, 14))
+  res = Curl_convert_to_network(data, (char *)pw, 14);
+  if(res)
     return;
 
   {
@@ -947,6 +949,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     SECURITY_STATUS status;
     ULONG attrs;
     TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
+    CURLcode res;
 
     type_2_desc.ulVersion  = type_3_desc.ulVersion  = SECBUFFER_VERSION;
     type_2_desc.cBuffers   = type_3_desc.cBuffers   = 1;
@@ -1265,8 +1268,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     size += hostlen;
 
     /* convert domain, user, and host to ASCII but leave the rest as-is */
-    if(Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
-                               size-domoff))
+    res = Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
+                                  size-domoff)
+    if(res)
       return CURLE_CONV_FAILED;
 
 #endif
