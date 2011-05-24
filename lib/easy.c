@@ -86,6 +86,7 @@
 #include "slist.h"
 #include "curl_rand.h"
 #include "non-ascii.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
