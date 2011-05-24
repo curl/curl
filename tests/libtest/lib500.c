@@ -25,7 +25,7 @@
 
 #ifdef LIB585
 
-int counter;
+static int counter;
 
 static curl_socket_t tst_opensocket(void *clientp,
                                     curlsocktype purpose,
