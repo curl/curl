@@ -23,9 +23,9 @@
 
 #include "netrc.h"
 
-char login[LOGINSIZE];
-char password[PASSWORDSIZE];
-char filename[64];
+static char login[LOGINSIZE];
+static char password[PASSWORDSIZE];
+static char filename[64];
 
 static CURLcode unit_setup(void)
 {
