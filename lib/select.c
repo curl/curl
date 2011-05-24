@@ -47,6 +47,7 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
+#include "warnless.h"
 
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
 

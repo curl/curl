@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  ***************************************************************************/
 
 #include "setup.h"
+
+#define BUILDING_WARNLESS_C 1
 
 #include "warnless.h"
 
@@ -251,3 +253,31 @@ size_t curlx_sotouz(curl_off_t sonum)
 #  pragma warning(pop)
 #endif
 }
+
+#if defined(__INTEL_COMPILER) && defined(__unix__)
+
+int curlx_FD_ISSET(int fd, fd_set *fdset)
+{
+  #pragma warning(push)
+  #pragma warning(disable:1469) /* clobber ignored */
+  return FD_ISSET(fd, fdset);
+  #pragma warning(pop)
+}
+
+void curlx_FD_SET(int fd, fd_set *fdset)
+{
+  #pragma warning(push)
+  #pragma warning(disable:1469) /* clobber ignored */
+  FD_SET(fd, fdset);
+  #pragma warning(pop)
+}
+
+void curlx_FD_ZERO(fd_set *fdset)
+{
+  #pragma warning(push)
+  #pragma warning(disable:593) /* variable was set but never used */
+  FD_ZERO(fdset);
+  #pragma warning(pop)
+}
+
+#endif /* __INTEL_COMPILER && __unix__ */
