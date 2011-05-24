@@ -42,12 +42,9 @@ and the tests/FILEFORMAT documentation.
 For the actual C file, here's a very simple example:
 
 ----------------------- start -------------------------------
-#include <stdlib.h>
-#include "curl_config.h"
-#include "setup.h"
+#include "curlcheck.h"
 
 #include "a libcurl header.h" /* from the lib dir */
-#include "curlcheck.h"
 
 static void unit_setup( void )
 {
