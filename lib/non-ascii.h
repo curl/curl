@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_NON_ASCII_H
+#define HEADER_CURL_NON_ASCII_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -48,8 +50,7 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
                                  char *buffer, size_t length);
 CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form);
 #else
-#define Curl_convert_clone(a,b,c,d) \
-  ((void)a, (void)b, (void)c, *(d)=NULL, CURLE_OK)
+#define Curl_convert_clone(a,b,c,d) ((void)a, CURLE_OK)
 #define Curl_convert_init(x)
 #define Curl_convert_setup(x)
 #define Curl_convert_close(x)
@@ -58,3 +59,5 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form);
 #define Curl_convert_from_utf8(a,b,c) ((void)a, CURLE_OK)
 #define Curl_convert_form(a,b) CURLE_OK
 #endif
+
+#endif /* HEADER_CURL_NON_ASCII_H */
