@@ -35,6 +35,8 @@
 
 #define BUILDING_WARNLESS_C 1
 
+#define BUILDING_WARNLESS_C 1
+
 #include "warnless.h"
 
 #define CURL_MASK_SCHAR  0x7F
