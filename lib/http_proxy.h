@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_HTTP_PROXY_H
+#define HEADER_CURL_HTTP_PROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -31,3 +33,5 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 #else
 #define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #endif
+
+#endif /* HEADER_CURL_HTTP_PROXY_H */
