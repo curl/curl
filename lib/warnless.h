@@ -47,8 +47,11 @@ void curlx_FD_SET(int fd, fd_set *fdset);
 void curlx_FD_ZERO(fd_set *fdset);
 
 #ifndef BUILDING_WARNLESS_C
+#  undef  FD_ISSET
 #  define FD_ISSET(a,b) curlx_FD_ISSET((a),(b))
+#  undef  FD_SET
 #  define FD_SET(a,b)   curlx_FD_SET((a),(b))
+#  undef  FD_ZERO
 #  define FD_ZERO(a)    curlx_FD_ZERO((a))
 #endif
 
