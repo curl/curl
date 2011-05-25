@@ -49,7 +49,10 @@ char *libtest_arg2=NULL;
 char *libtest_arg3=NULL;
 int test_argc;
 char **test_argv;
+
+#ifdef UNITTESTS
 int unitfail; /* for unittests */
+#endif
 
 int main(int argc, char **argv)
 {
