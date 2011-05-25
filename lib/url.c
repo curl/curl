@@ -4812,8 +4812,11 @@ static CURLcode create_conn(struct SessionHandle *data,
       /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
       return CURLE_UNSUPPORTED_PROTOCOL;
 #else
-      /* force this connection's protocol to become HTTP */
-      conn->handler = &Curl_handler_http;
+      /* force this connection's protocol to become HTTP if not already
+         compatible */
+      if(!(conn->handler->protocol & CURLPROTO_HTTP))
+        conn->handler = &Curl_handler_http;
+
       conn->bits.httpproxy = TRUE;
 #endif
     }
