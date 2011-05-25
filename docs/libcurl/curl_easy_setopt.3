@@ -145,7 +145,7 @@ Using the rules above, a file name pattern can be constructed:
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
-function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP This
+function( char *ptr, size_t size, size_t nmemb, void *userdata);\fP This
 function gets called by libcurl as soon as there is data received that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
