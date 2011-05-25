@@ -40,7 +40,7 @@ INCLUDES = -I$(top_builddir)/include/curl \
            -I$(top_srcdir)/include        \
            -I$(top_builddir)/lib          \
            -I$(top_srcdir)/lib            \
-	   -I$(top_srcdir)/tests/libtest  \
+           -I$(top_srcdir)/tests/libtest  \
            -I$(top_builddir)/ares         \
            -I$(top_srcdir)/ares
 else
@@ -49,16 +49,16 @@ INCLUDES = -I$(top_builddir)/include/curl \
            -I$(top_srcdir)/include        \
            -I$(top_builddir)/lib          \
            -I$(top_srcdir)/lib 		  \
-	   -I$(top_srcdir)/tests/libtest
+           -I$(top_srcdir)/tests/libtest
 endif
 
 if CURLDEBUG
 
 EXTRA_DIST = Makefile.inc
 
-LDADD = $(top_builddir)/tests/libtest/first.o $(top_builddir)/lib/libcurlu.la \
-	@CURL_LIBS@
+LDADD = $(top_builddir)/lib/libcurlu.la @CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
+CFLAGS += -DUNITTESTS
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
