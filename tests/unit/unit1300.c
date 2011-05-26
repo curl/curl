@@ -23,7 +23,7 @@
 
 #include "llist.h"
 
-struct curl_llist *llist;
+static struct curl_llist *llist;
 
 static void test_curl_llist_dtor(void *key, void *value)
 {

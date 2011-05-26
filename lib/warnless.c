@@ -280,4 +280,19 @@ void curlx_FD_ZERO(fd_set *fdset)
   #pragma warning(pop)
 }
 
+unsigned short curlx_htons(unsigned short usnum)
+{
+  #pragma warning(push)
+  #pragma warning(disable:810) /* conversion may lose significant bits */
+  return htons(usnum);
+  #pragma warning(pop)
+}
+
+unsigned short curlx_ntohs(unsigned short usnum)
+{
+  #pragma warning(push)
+  #pragma warning(disable:810) /* conversion may lose significant bits */
+  return ntohs(usnum);
+  #pragma warning(pop)
+}
 #endif /* __INTEL_COMPILER && __unix__ */

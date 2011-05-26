@@ -89,6 +89,7 @@
 #include "inet_pton.h"
 #include "sslgen.h" /* for Curl_ssl_check_cxn() */
 #include "progress.h"
+#include "warnless.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
