@@ -37,6 +37,7 @@
 #include "timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
