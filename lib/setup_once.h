@@ -356,7 +356,10 @@ typedef int sig_atomic_t;
  * (or equivalent) on this platform to hide platform details to code using it.
  */
 
-#ifdef USE_WINSOCK
+#if defined CUSTOM_SOCKET_ERROR_FUNCTION
+// define SOCKERRNO somewhere else
+// define SET_SOCKERRNO somewhere else
+#elif defined USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
 #define SET_SOCKERRNO(x)  (WSASetLastError((int)(x)))
 #else
