@@ -949,7 +949,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     SECURITY_STATUS status;
     ULONG attrs;
     TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
-    CURLcode res;
 
     type_2_desc.ulVersion  = type_3_desc.ulVersion  = SECBUFFER_VERSION;
     type_2_desc.cBuffers   = type_3_desc.cBuffers   = 1;
