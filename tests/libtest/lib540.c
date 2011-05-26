@@ -30,6 +30,7 @@
 
 #include "test.h"
 
+#include "warnless.h"
 #include "memdebug.h"
 
 #define PROXY libtest_arg2
