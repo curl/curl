@@ -160,7 +160,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
   socksreq[0] = 4; /* version (SOCKS4) */
   socksreq[1] = 1; /* connect */
-  *((unsigned short*)&socksreq[2]) = htons((unsigned short)remote_port);
+  socksreq[2] = (unsigned char)((remote_port >> 8) & 0xff); /* PORT MSB */
+  socksreq[3] = (unsigned char)(remote_port & 0xff);        /* PORT LSB */
 
   /* DNS resolve only for SOCKS4, not SOCKS4a */
   if(!protocol4a) {
@@ -309,7 +310,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             ", request rejected or failed.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     case 92:
@@ -319,7 +320,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             "identd on the client.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     case 93:
@@ -329,7 +330,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             "report different user-ids.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     default:
@@ -338,7 +339,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             ", Unknown.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     }
@@ -584,8 +585,10 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     socksreq[4] = (char) hostname_len; /* address length */
     memcpy(&socksreq[5], hostname, hostname_len); /* address bytes w/o NULL */
 
-    *((unsigned short*)&socksreq[hostname_len+5]) =
-      htons((unsigned short)remote_port);
+    /* PORT MSB */
+    socksreq[hostname_len+5] = (unsigned char)((remote_port >> 8) & 0xff);
+    /* PORT LSB */
+    socksreq[hostname_len+6] = (unsigned char)(remote_port & 0xff);
   }
   else {
     struct Curl_dns_entry *dns;
@@ -635,7 +638,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       return CURLE_COULDNT_RESOLVE_HOST;
     }
 
-    *((unsigned short*)&socksreq[8]) = htons((unsigned short)remote_port);
+    socksreq[8] = (unsigned char)((remote_port >> 8) & 0xff); /* PORT MSB */
+    socksreq[9] = (unsigned char)(remote_port & 0xff);        /* PORT LSB */
   }
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -676,7 +680,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+            ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
       return CURLE_COULDNT_CONNECT;
   }
