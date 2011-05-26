@@ -81,7 +81,7 @@ if(!$file) {
 do {
     if($file ne "$wlist") {
         my $fullname = $file;
-        $fullname = "$dir/$file" if $fullname !~ '^/';
+        $fullname = "$dir/$file" if ($fullname !~ '^\.?\.?/');
         scanfile($fullname);
     }
     $file = shift @ARGV;
