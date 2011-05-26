@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include "test.h"
 
+#include "warnless.h"
+
 /*
  * Simply download a HTTPS file!
  *

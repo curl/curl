@@ -45,6 +45,7 @@
 #include <fcntl.h>
 
 #include "testutil.h"
+#include "warnless.h"
 #include "memdebug.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
