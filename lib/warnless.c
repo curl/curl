@@ -22,6 +22,20 @@
 
 #include "setup.h"
 
+#if defined(__INTEL_COMPILER) && defined(__unix__)
+
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#  include <arpa/inet.h>
+#endif
+
+#endif /* __INTEL_COMPILER && __unix__ */
+
 #define BUILDING_WARNLESS_C 1
 
 #include "warnless.h"
