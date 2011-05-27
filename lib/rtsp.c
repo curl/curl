@@ -214,6 +214,8 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
   const char *p_stream_uri = NULL;
   const char *p_transport = NULL;
   const char *p_uagent = NULL;
+  const char *p_proxyuserpwd = NULL;
+  const char *p_userpwd = NULL;
 
   *done = TRUE;
 
@@ -305,9 +307,6 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  /* TODO: auth? */
-  /* TODO: proxy? */
-
   /* Stream URI. Default to server '*' if not specified */
   if(data->set.str[STRING_RTSP_STREAM_URI]) {
     p_stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
@@ -370,6 +369,14 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
           data->set.str[STRING_USERAGENT]) {
     p_uagent = conn->allocptr.uagent;
   }
+
+  /* setup the authentication headers */
+  result = Curl_http_output_auth(conn, p_request, p_stream_uri, FALSE);
+  if(result)
+    return result;
+
+  p_proxyuserpwd = conn->allocptr.proxyuserpwd;
+  p_userpwd = conn->allocptr.userpwd;
 
   /* Referrer */
   Curl_safefree(conn->allocptr.ref);
@@ -444,13 +451,25 @@ CURLcode Curl_rtsp(struct connectdata *conn, bool *done)
                             "%s" /* range */
                             "%s" /* referrer */
                             "%s" /* user-agent */
+                            "%s" /* proxyuserpwd */
+                            "%s" /* userpwd */
                             ,
                             p_transport ? p_transport : "",
                             p_accept ? p_accept : "",
                             p_accept_encoding ? p_accept_encoding : "",
                             p_range ? p_range : "",
                             p_referrer ? p_referrer : "",
-                            p_uagent ? p_uagent : "");
+                            p_uagent ? p_uagent : "",
+                            p_proxyuserpwd ? p_proxyuserpwd : "",
+                            p_userpwd ? p_userpwd : "");
+
+  /*
+   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
+   * with basic and digest, it will be freed anyway by the next request
+   */
+  Curl_safefree (conn->allocptr.userpwd);
+  conn->allocptr.userpwd = NULL;
+
   if(result)
     return result;
 
