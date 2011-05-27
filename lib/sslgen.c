@@ -221,8 +221,7 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
   return res;
 #else
   *done = TRUE; /* fallback to BLOCKING */
-  conn->ssl[sockindex].use = TRUE;
-  return curlssl_connect(conn, sockindex);
+  return Curl_ssl_connect(conn, sockindex);
 #endif /* non-blocking connect support */
 }
 
