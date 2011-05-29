@@ -19,7 +19,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include <curl/curl.h>
+
 #include "setup.h"
+
+/*
+** system headers
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,92 +42,106 @@
 #  endif
 #endif
 
-#include <curl/curl.h>
+#ifdef NETWARE
+#  ifdef __NOVELL_LIBC__
+#    include <screen.h>
+#  else
+#    include <nwconio.h>
+#    define mkdir mkdir_510
+#  endif
+#endif
+
+#ifdef HAVE_IO_H
+#  include <io.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
+#endif
+
+#ifdef HAVE_UTIME_H
+#  include <utime.h>
+#elif defined(HAVE_SYS_UTIME_H)
+#  include <sys/utime.h>
+#endif
+
+#ifdef HAVE_LIMITS_H
+#  include <limits.h>
+#endif
+
+#ifdef HAVE_SYS_POLL_H
+#  include <sys/poll.h>
+#elif defined(HAVE_POLL_H)
+#  include <poll.h>
+#endif
+
+#ifdef HAVE_LOCALE_H
+#  include <locale.h>
+#endif
+
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+
+#ifdef HAVE_NETINET_TCP_H
+#  include <netinet/tcp.h>
+#endif
+
+#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
+#  include <iconv.h>
+/* set default codesets for iconv */
+#  ifndef CURL_ICONV_CODESET_OF_NETWORK
+#    define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
+#  endif
+#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+
+#ifdef MSDOS
+#  include <dos.h>
+#endif
+
+#if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)
+#  include <io.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#endif
+
+#ifdef WIN32
+#  include <direct.h>
+#endif
+
+/*
+** src subdirectory headers
+*/
 
 #include "urlglob.h"
 #include "writeout.h"
 #include "getpass.h"
 #include "homedir.h"
 #include "curlutil.h"
+#include "os-specific.h"
+#include "version.h"
+#include "xattr.h"
 #ifdef USE_MANUAL
-#include "hugehelp.h"
+#  include "hugehelp.h"
 #endif
 #ifdef USE_ENVIRONMENT
-#include "writeenv.h"
+#  include "writeenv.h"
 #endif
+
+/*
+** libcurl subdirectory headers
+*/
+
 #include "rawstr.h"
-
-#include "xattr.h"
-
-#define CURLseparator   "--_curl_--"
-
-#ifdef NETWARE
-#ifdef __NOVELL_LIBC__
-#include <screen.h>
-#else
-#include <nwconio.h>
-#define mkdir mkdir_510
-#endif
-#endif
-
-#include "version.h"
-
-#ifdef HAVE_IO_H /* typical win32 habit */
-#include <io.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
-#ifdef HAVE_UTIME_H
-#include <utime.h>
-#else
-#ifdef HAVE_SYS_UTIME_H
-#include <sys/utime.h>
-#endif
-
-#endif /* HAVE_UTIME_H */
-
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
-#ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#elif defined(HAVE_POLL_H)
-#include <poll.h>
-#endif
-
-#ifdef HAVE_LOCALE_H
-#include <locale.h> /* for setlocale() */
-#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
    versions instead */
-#include "curlx.h" /* header from the libcurl directory */
-
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-#include <iconv.h>
-/* set default codesets for iconv */
-#ifndef CURL_ICONV_CODESET_OF_NETWORK
-#define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
-#endif
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
-
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h> /* for IPPROTO_TCP */
-#endif
-#ifdef HAVE_NETINET_TCP_H
-#include <netinet/tcp.h> /* for TCP_KEEPIDLE, TCP_KEEPINTVL */
-#endif
-
-#include "os-specific.h"
+#include "curlx.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -189,8 +209,6 @@ static char *sanitize_dos_name(char *);
 
 #ifdef MSDOS
 #define USE_WATT32
-#include <dos.h>
-
 #ifdef DJGPP
 /* we want to glob our own argv[] */
 char **__crt0_glob_function (char *arg)
@@ -213,6 +231,8 @@ char **__crt0_glob_function (char *arg)
 #define STDERR_FILENO  fileno(stderr)
 #endif
 
+#define CURLseparator   "--_curl_--"
+
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
 
@@ -231,9 +251,6 @@ typedef enum {
  */
 
 #ifdef USE_WIN32_LARGE_FILES
-#  include <io.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
 #  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
 #  define stat(fname,stp)            _stati64(fname, stp)
@@ -246,9 +263,6 @@ typedef enum {
  */
 
 #ifdef USE_WIN32_SMALL_FILES
-#  include <io.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
 #  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #  define fstat(fdes,stp)            _fstat(fdes, stp)
 #  define stat(fname,stp)            _stat(fname, stp)
@@ -265,7 +279,6 @@ typedef enum {
 #endif
 
 #ifdef WIN32
-#  include <direct.h>
 #  define mkdir(x,y) (mkdir)(x)
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
