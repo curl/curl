@@ -19,9 +19,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <curl/curl.h>
-
 #include "setup.h"
+
+#include <curl/curl.h>
 
 /*
 ** system headers
