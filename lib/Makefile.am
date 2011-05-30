@@ -46,7 +46,7 @@ lib_LTLIBRARIES = libcurl.la
 LIBCURL_LIBS = @LIBCURL_LIBS@
 
 # This might hold -Werror
-libcurl_la_CFLAGS = $(CFLAGS) @CURL_CFLAG_EXTRAS@
+CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
