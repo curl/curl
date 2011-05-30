@@ -62,8 +62,7 @@ CURL_HEADERS := \
 	mprintf.h \
 	multi.h \
 	stdcheaders.h \
-	typecheck-gcc.h \
-	types.h
+	typecheck-gcc.h
 
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
