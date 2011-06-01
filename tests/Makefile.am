@@ -30,7 +30,14 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
  certs/srp-verifier-conf certs/srp-verifier-db
 
-SUBDIRS = data server libtest unit
+if BUILD_UNITTESTS
+BUILD_UNIT = unit
+else
+BUILD_UNIT =
+endif
+
+SUBDIRS = data server libtest $(BUILD_UNIT)
+DIST_SUBDIRS = $(SUBDIRS) unit
 
 PERLFLAGS = -I$(srcdir)
 

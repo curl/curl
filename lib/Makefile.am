@@ -106,7 +106,7 @@ endif
 # For the full guide on libcurl ABI rules, see docs/libcurl/ABI
 
 if NO_UNDEFINED
-# The -no-undefined flag is CRUCIAL for this to build fine on Cygwin.
+# The -no-undefined flag is crucial to build fine on some platforms
 UNDEF = -no-undefined
 endif
 
@@ -116,17 +116,17 @@ if MIMPURE
 MIMPURE = -mimpure-text
 endif
 
-LINKFLAGS=$(UNDEF) $(MIMPURE) $(LIBCURL_LIBS)
+libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(LIBCURL_LIBS)
 
-libcurl_la_LDFLAGS = $(LINKFLAGS) $(VERSIONINFO)
-
-# as unit testing will compile and link everything an extra time, we only
-# do it if debug is enabled
-if CURLDEBUG
+# unit testing static library built only along with unit tests
+if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurlu.la
-libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
-libcurlu_la_LDFLAGS = -static $(LINKFLAGS)
+else
+noinst_LTLIBRARIES =
 endif
+
+libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
+libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

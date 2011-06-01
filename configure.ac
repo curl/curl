@@ -305,6 +305,8 @@ AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 CURL_CHECK_CURLDEBUG
 AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
+AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_curldebug = xyes)
+
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************

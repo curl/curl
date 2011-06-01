@@ -5,7 +5,7 @@ UNITFILES = curlcheck.h \
  $(top_srcdir)/tests/libtest/first.c
 
 # These are all unit test programs
-noinst_PROGRAMS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307
+UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1301_SOURCES = unit1301.c $(UNITFILES)
