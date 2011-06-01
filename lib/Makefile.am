@@ -124,7 +124,7 @@ libcurl_la_LDFLAGS = $(LINKFLAGS) $(VERSIONINFO)
 # do it if debug is enabled
 if CURLDEBUG
 noinst_LTLIBRARIES = libcurlu.la
-libcurlu_la_CFLAGS = -DUNITTESTS
+libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
 libcurlu_la_LDFLAGS = -static $(LINKFLAGS)
 endif
 

@@ -58,7 +58,7 @@ EXTRA_DIST = Makefile.inc
 
 LDADD = $(top_builddir)/lib/libcurlu.la @CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
-CFLAGS += -DUNITTESTS
+AM_CPPFLAGS = -DUNITTESTS
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
