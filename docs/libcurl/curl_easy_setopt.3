@@ -106,18 +106,18 @@ This feature is only supported by the FTP download for now.
 
 A brief introduction of its syntax follows:
 .RS
-.IP "\fB*\fP - ASTERISK"
+.IP "* - ASTERISK"
 \&ftp://example.com/some/path/\fB*.txt\fP (for all txt's from the root
 directory)
 .RE
 .RS
-.IP "\fB?\fP - QUESTION MARK"
+.IP "? - QUESTION MARK"
 Question mark matches any (exactly one) character.
 
 \&ftp://example.com/some/path/\fBphoto?.jpeg\fP
 .RE
 .RS
-.IP "\fB[\fP - BRACKET EXPRESSION"
+.IP "[ - BRACKET EXPRESSION"
 The left bracket opens a bracket expression. The question mark and asterisk have
 no special meaning in a bracket expression. Each bracket expression ends by the
 right bracket and matches exactly one character. Some examples follow:
