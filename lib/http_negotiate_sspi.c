@@ -143,7 +143,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     /* Allocate input and output buffers according to the max token size
        as indicated by the security package */
     neg_ctx->max_token_length = SecurityPackage->cbMaxToken;
-    neg_ctx->output_token = (BYTE *)malloc(neg_ctx->max_token_length);
+    neg_ctx->output_token = malloc(neg_ctx->max_token_length);
     s_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
@@ -157,8 +157,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     /* first call in a new negotation, we have to acquire credentials,
        and allocate memory for the context */
 
-    neg_ctx->credentials = (CredHandle *)malloc(sizeof(CredHandle));
-    neg_ctx->context = (CtxtHandle *)malloc(sizeof(CtxtHandle));
+    neg_ctx->credentials = malloc(sizeof(CredHandle));
+    neg_ctx->context = malloc(sizeof(CtxtHandle));
 
     if(!neg_ctx->credentials || !neg_ctx->context)
       return -1;

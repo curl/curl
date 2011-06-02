@@ -877,7 +877,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
     size_t i;
 
     /* alloc an array and store all cookie pointers */
-    array = (struct Cookie **)malloc(sizeof(struct Cookie *) * matches);
+    array = malloc(sizeof(struct Cookie *) * matches);
     if(!array)
       goto fail;
 

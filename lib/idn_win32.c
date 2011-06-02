@@ -43,7 +43,7 @@ static wchar_t *_curl_win32_UTF8_to_wchar(const char *str_utf8)
     int str_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
                                         str_utf8, -1, NULL, 0);
     if(str_w_len) {
-      str_w = (wchar_t *) malloc(str_w_len * sizeof(wchar_t));
+      str_w = malloc(str_w_len * sizeof(wchar_t));
       if(str_w) {
         if(MultiByteToWideChar(CP_UTF8, 0, str_utf8, -1, str_w,
                                 str_w_len) == 0) {
@@ -65,7 +65,7 @@ static const char *_curl_win32_wchar_to_UTF8(const wchar_t *str_w)
     size_t str_utf8_len = WideCharToMultiByte(CP_UTF8, 0, str_w, -1, NULL,
                                               0, NULL, NULL);
     if(str_utf8_len) {
-      str_utf8 = (char *) malloc(str_utf8_len * sizeof(wchar_t));
+      str_utf8 = malloc(str_utf8_len * sizeof(wchar_t));
       if(str_utf8) {
         if(WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, str_utf8_len,
                                 NULL, FALSE) == 0) {

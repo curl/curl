@@ -572,7 +572,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     conn->async.done = FALSE;   /* not done */
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
-    res = (struct ResolverResults *)calloc(sizeof(struct ResolverResults),1);
+    res = calloc(sizeof(struct ResolverResults),1);
     if(!res) {
       Curl_safefree(conn->async.hostname);
       conn->async.hostname = NULL;

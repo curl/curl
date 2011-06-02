@@ -71,7 +71,7 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   pat->content.Set.size = 0;
   pat->content.Set.ptr_s = 0;
   /* FIXME: Here's a nasty zero size malloc */
-  pat->content.Set.elements = (char**)malloc(0);
+  pat->content.Set.elements = malloc(0);
   ++glob->size;
 
   while(!done) {
