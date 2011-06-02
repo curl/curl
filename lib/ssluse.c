@@ -76,6 +76,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifndef OPENSSL_VERSION_NUMBER
+#error "OPENSSL_VERSION_NUMBER not defined"
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1
 #else

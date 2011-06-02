@@ -83,6 +83,10 @@
 #      include <rand.h>
 #    endif
 
+#ifndef OPENSSL_VERSION_NUMBER
+#error "OPENSSL_VERSION_NUMBER not defined"
+#endif
+
 #if OPENSSL_VERSION_NUMBER < 0x00907001L
 #define DES_key_schedule des_key_schedule
 #define DES_cblock des_cblock
