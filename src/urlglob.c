@@ -70,8 +70,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   pat->type = UPTSet;
   pat->content.Set.size = 0;
   pat->content.Set.ptr_s = 0;
-  /* FIXME: Here's a nasty zero size malloc */
-  pat->content.Set.elements = malloc(0);
+  pat->content.Set.elements = NULL;
+
   ++glob->size;
 
   while(!done) {
@@ -90,15 +90,23 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
     case ',':
     case '}':                           /* set element completed */
       *buf = '\0';
-      pat->content.Set.elements =
-        realloc(pat->content.Set.elements,
-                (pat->content.Set.size + 1) * sizeof(char*));
+      if(pat->content.Set.elements)
+        pat->content.Set.elements =
+          realloc(pat->content.Set.elements,
+                  (pat->content.Set.size + 1) * sizeof(char*));
+      else
+        pat->content.Set.elements =
+          malloc((pat->content.Set.size + 1) * sizeof(char*));
       if(!pat->content.Set.elements) {
         snprintf(glob->errormsg, sizeof(glob->errormsg), "out of memory");
         return GLOB_ERROR;
       }
       pat->content.Set.elements[pat->content.Set.size] =
         strdup(glob->glob_buffer);
+      if(!pat->content.Set.elements[pat->content.Set.size]) {
+        snprintf(glob->errormsg, sizeof(glob->errormsg), "out of memory");
+        return GLOB_ERROR;
+      }
       ++pat->content.Set.size;
 
       if(*pattern == '}') {
@@ -363,11 +371,13 @@ void glob_cleanup(URLGlob* glob)
       free(glob->literal[i/2]);
     }
     else {              /* odd indexes contain sets or ranges */
-      if(glob->pattern[i/2].type == UPTSet) {
+      if((glob->pattern[i/2].type == UPTSet) &&
+         (glob->pattern[i/2].content.Set.elements)) {
         for(elem = glob->pattern[i/2].content.Set.size - 1;
              elem >= 0;
              --elem) {
-          free(glob->pattern[i/2].content.Set.elements[elem]);
+          if(glob->pattern[i/2].content.Set.elements[elem])
+            free(glob->pattern[i/2].content.Set.elements[elem]);
         }
         free(glob->pattern[i/2].content.Set.elements);
       }
