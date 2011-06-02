@@ -4006,14 +4006,14 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         cur_pos = slash_pos + 1; /* jump to the rest of the string */
         if(++ftpc->dirdepth >= ftpc->diralloc) {
           /* enlarge array */
-          char *bigger;
+          char **bigger;
           ftpc->diralloc *= 2; /* double the size each time */
           bigger = realloc(ftpc->dirs, ftpc->diralloc * sizeof(ftpc->dirs[0]));
           if(!bigger) {
             freedirs(ftpc);
             return CURLE_OUT_OF_MEMORY;
           }
-          ftpc->dirs = (char **)bigger;
+          ftpc->dirs = bigger;
         }
       }
     }
