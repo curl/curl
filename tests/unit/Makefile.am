@@ -54,7 +54,7 @@ endif
 
 EXTRA_DIST = Makefile.inc
 
-LDADD = $(top_builddir)/lib/libcurlu.la @CURL_LIBS@
+LDADD = $(top_builddir)/lib/libcurlu.la @LDFLAGS@ @LIBCURL_LIBS@ @LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
 AM_CPPFLAGS = -DUNITTESTS
 
