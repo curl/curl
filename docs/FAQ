@@ -36,7 +36,7 @@ FAQ
   3.2 How do I tell curl to resume a transfer?
   3.3 Why doesn't my posting using -F work?
   3.4 How do I tell curl to run custom FTP commands?
-  3.5 How can I disable the Pragma: nocache header?
+  3.5 How can I disable the Accept: */* header?
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
@@ -491,7 +491,6 @@ FAQ
   3.2 How do I tell curl to resume a transfer?
 
   Curl supports resumed transfers both ways on both FTP and HTTP.
-
   Try the -C option.
 
   3.3 Why doesn't my posting using -F work?
@@ -517,11 +516,11 @@ FAQ
   FTP commands without transferring anything. Therefore you must always specify
   a URL to transfer to/from even when doing custom FTP commands.
 
-  3.5 How can I disable the Pragma: nocache header?
+  3.5 How can I disable the Accept: */* header?
 
   You can change all internally generated headers by adding a replacement with
   the -H/--header option. By adding a header with empty contents you safely
-  disable that one. Use -H "Pragma:" to disable that specific header.
+  disable that one. Use -H "Accept:" to disable that specific header.
 
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
 
@@ -1260,14 +1259,13 @@ FAQ
   With the easy interface you make sure to return the correct error code from
   one of the callbacks, but none of them are instant. There is no function you
   can call from another thread or similar that will stop it immediately.
-  Instead you need to make sure that one of the callbacks you use return an
-  appropriate value that will stop the transfer.
-
-  Suitable callbacks that you can do this with include the progress callback,
-  the read callback and the write callback.
+  Instead, you need to make sure that one of the callbacks you use returns an
+  appropriate value that will stop the transfer.  Suitable callbacks that you
+  can do this with include the progress callback, the read callback and the
+  write callback.
 
   If you're using the multi interface, you can also stop a transfer by
-  removing the particular easy handle from the multi stack. At any moment you
+  removing the particular easy handle from the multi stack at any moment you
   think the transfer is done.
 
   5.14 Using C++ non-static functions for callbacks?
