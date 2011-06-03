@@ -101,7 +101,6 @@ Example set of cookies:
 /* The last #include file should be: */
 #include "memdebug.h"
 
-
 static void freecookie(struct Cookie *co)
 {
   if(co->expirestr)
@@ -1040,14 +1039,14 @@ static char *get_netscape_format(const struct Cookie *co)
 }
 
 /*
- * Curl_cookie_output()
+ * cookie_output()
  *
  * Writes all internally known cookies to the specified file. Specify
  * "-" as file name to write to stdout.
  *
  * The function returns non-zero on write failure.
  */
-int Curl_cookie_output(struct CookieInfo *c, const char *dumphere)
+static int cookie_output(struct CookieInfo *c, const char *dumphere)
 {
   struct Cookie *co;
   FILE *out;
@@ -1147,7 +1146,7 @@ void Curl_flush_cookies(struct SessionHandle *data, int cleanup)
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
 
     /* if we have a destination file for all the cookies to get dumped to */
-    if(Curl_cookie_output(data->cookies, data->set.str[STRING_COOKIEJAR]))
+    if(cookie_output(data->cookies, data->set.str[STRING_COOKIEJAR]))
       infof(data, "WARNING: failed to save cookies in %s\n",
             data->set.str[STRING_COOKIEJAR]);
   }
