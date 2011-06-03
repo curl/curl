@@ -305,8 +305,23 @@ AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 CURL_CHECK_CURLDEBUG
 AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
+supports_unittests=yes
+# cross-compilation of unit tests static library/programs fails when
+# libcurl shared library is built. This might be due to a libtool or
+# automake issue. In this case we disable unit tests.
+if test "x$cross_compiling" != "xno" &&
+   test "x$enable_shared" != "xno"; then
+  supports_unittests=no
+fi
+
 dnl Build unit tests when option --enable-debug is given.
-AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_debug = xyes)
+if test "x$want_debug" = "xyes" &&
+   test "x$supports_unittests" = "xyes"; then
+  want_unittests=yes
+else
+  want_unittests=no
+fi
+AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
