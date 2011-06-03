@@ -113,6 +113,8 @@
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
+static int http_should_fail(struct connectdata *conn);
+
 #ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
 static int https_getsock(struct connectdata *conn,
@@ -193,7 +195,7 @@ char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader)
  * case of allocation failure. Returns an empty string if the header value
  * consists entirely of whitespace.
  */
-char *Curl_copy_header_value(const char *h)
+static char *copy_header_value(const char *h)
 {
   const char *start;
   const char *end;
@@ -496,7 +498,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
       data->state.authhost.done = TRUE;
     }
   }
-  if(Curl_http_should_fail(conn)) {
+  if(http_should_fail(conn)) {
     failf (data, "The requested URL returned error: %d",
            data->req.httpcode);
     code = CURLE_HTTP_RETURNED_ERROR;
@@ -819,7 +821,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
 }
 
 /**
- * Curl_http_should_fail() determines whether an HTTP response has gotten us
+ * http_should_fail() determines whether an HTTP response has gotten us
  * into an error state or not.
  *
  * @param conn all information about the current connection
@@ -828,7 +830,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
  *
  * @retval 1 communications should not continue
  */
-int Curl_http_should_fail(struct connectdata *conn)
+static int http_should_fail(struct connectdata *conn)
 {
   struct SessionHandle *data;
   int httpcode;
@@ -1786,7 +1788,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
-    char *cookiehost = Curl_copy_header_value(ptr);
+    char *cookiehost = copy_header_value(ptr);
     if(!cookiehost)
       return CURLE_OUT_OF_MEMORY;
     if(!*cookiehost)
@@ -2792,7 +2794,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * When all the headers have been parsed, see if we should give
        * up and return an error.
        */
-      if(Curl_http_should_fail(conn)) {
+      if(http_should_fail(conn)) {
         failf (data, "The requested URL returned error: %d",
                k->httpcode);
         return CURLE_HTTP_RETURNED_ERROR;
@@ -3084,7 +3086,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
     }
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
-      char *contenttype = Curl_copy_header_value(k->p);
+      char *contenttype = copy_header_value(k->p);
       if(!contenttype)
         return CURLE_OUT_OF_MEMORY;
       if(!*contenttype)
@@ -3290,7 +3292,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             checkprefix("Location:", k->p) &&
             !data->req.location) {
       /* this is the URL that the server advises us to use instead */
-      char *location = Curl_copy_header_value(k->p);
+      char *location = copy_header_value(k->p);
       if(!location)
         return CURLE_OUT_OF_MEMORY;
       if(!*location)

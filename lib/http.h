@@ -36,9 +36,6 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
 
 char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader);
 
-char *Curl_copy_header_value(const char *h);
-
-
 /* ------------------------------------------------------------------------- */
 /*
  * The add_buffer series of functions are used to build one large memory chunk
@@ -82,8 +79,6 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
                               int httpcode, const char *header);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
 CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
-
-int Curl_http_should_fail(struct connectdata *conn);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
