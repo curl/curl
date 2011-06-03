@@ -100,6 +100,24 @@ struct tzinfo {
   int offset; /* +/- in minutes */
 };
 
+/*
+ * parsedate()
+ *
+ * Returns:
+ *
+ * PARSEDATE_OK     - a fine conversion
+ * PARSEDATE_FAIL   - failed to convert
+ * PARSEDATE_LATER  - time overflow at the far end of time_t
+ * PARSEDATE_SOONER - time underflow at the low end of time_t
+ */
+
+static int parsedate(const char *date, time_t *output);
+
+#define PARSEDATE_OK     0
+#define PARSEDATE_FAIL   -1
+#define PARSEDATE_LATER  1
+#define PARSEDATE_SOONER 2
+
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
 #define tDAYZONE -60       /* offset for daylight savings time */
@@ -302,7 +320,7 @@ static time_t my_timegm(struct my_tm *tm)
 }
 
 /*
- * Curl_parsedate()
+ * parsedate()
  *
  * Returns:
  *
@@ -312,7 +330,7 @@ static time_t my_timegm(struct my_tm *tm)
  * PARSEDATE_SOONER - time underflow at the low end of time_t
  */
 
-int Curl_parsedate(const char *date, time_t *output)
+static int parsedate(const char *date, time_t *output)
 {
   time_t t = 0;
   int wdaynum=-1;  /* day of the week number, 0-6 (mon-sun) */
@@ -503,7 +521,7 @@ int Curl_parsedate(const char *date, time_t *output)
 time_t curl_getdate(const char *p, const time_t *now)
 {
   time_t parsed;
-  int rc = Curl_parsedate(p, &parsed);
+  int rc = parsedate(p, &parsed);
   (void)now; /* legacy argument from the past that we ignore */
 
   switch(rc) {
