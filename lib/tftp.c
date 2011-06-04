@@ -1255,7 +1255,7 @@ static CURLcode tftp_easy_statemach(struct connectdata *conn)
 
 
     /* Wait until ready to read or timeout occurs */
-    rc = Curl_socket_ready(fd_read, CURL_SOCKET_BAD, (int)(timeout_ms));
+    rc = Curl_socket_ready(fd_read, CURL_SOCKET_BAD, timeout_ms);
 
     k->now = Curl_tvnow();
 

@@ -343,7 +343,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
     if(timeout_ms < interval_ms)
       interval_ms = timeout_ms;
 
-    switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)interval_ms)) {
+    switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, interval_ms)) {
     case -1: /* error */
       /* let's die here */
       failf(data, "Error while waiting for server connect");
@@ -517,7 +517,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
        */
     }
     else {
-      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, (int)interval_ms)) {
+      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, interval_ms)) {
       case -1: /* select() error, stop reading */
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);

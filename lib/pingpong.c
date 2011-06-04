@@ -138,7 +138,7 @@ CURLcode Curl_pp_easy_statemach(struct pingpong *pp)
 
   rc = Curl_socket_ready(pp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
                          pp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
-                         (int)interval_ms);
+                         interval_ms);
 
   if(Curl_pgrsUpdate(conn))
     result = CURLE_ABORTED_BY_CALLBACK;

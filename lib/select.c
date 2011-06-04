@@ -160,7 +160,7 @@ static int wait_ms(int timeout_ms)
  *    CURL_CSELECT_IN | CURL_CSELECT_OUT | CURL_CSELECT_ERR
  */
 int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
-                      int timeout_ms)
+                      long timeout_ms)
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[2];

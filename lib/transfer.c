@@ -1282,9 +1282,9 @@ Transfer(struct connectdata *conn)
   struct SingleRequest *k = &data->req;
   bool done=FALSE;
   bool first=TRUE;
-  int timeout_ms;
+  long timeout_ms;
   int buffersize;
-  int totmp;
+  long totmp;
 
   if((conn->sockfd == CURL_SOCKET_BAD) &&
      (conn->writesockfd == CURL_SOCKET_BAD))
@@ -1322,8 +1322,8 @@ Transfer(struct connectdata *conn)
         /* calculate upload rate-limitation timeout. */
         buffersize = (int)(data->set.buffer_size ?
                            data->set.buffer_size : BUFSIZE);
-        totmp = (int)Curl_sleep_time(data->set.max_send_speed,
-                                     data->progress.ulspeed, buffersize);
+        totmp = Curl_sleep_time(data->set.max_send_speed,
+                                data->progress.ulspeed, buffersize);
         if(totmp < timeout_ms)
           timeout_ms = totmp;
       }
@@ -1343,8 +1343,8 @@ Transfer(struct connectdata *conn)
         /* Calculate download rate-limitation timeout. */
         buffersize = (int)(data->set.buffer_size ?
                            data->set.buffer_size : BUFSIZE);
-        totmp = (int)Curl_sleep_time(data->set.max_recv_speed,
-                                     data->progress.dlspeed, buffersize);
+        totmp = Curl_sleep_time(data->set.max_recv_speed,
+                                data->progress.dlspeed, buffersize);
         if(totmp < timeout_ms)
           timeout_ms = totmp;
       }

@@ -211,8 +211,8 @@ int waitconnect(struct connectdata *conn,
   for(;;) {
 
     /* now select() until we get connect or timeout */
-    rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, (int)(timeout_msec>1000?
-                                                          1000:timeout_msec));
+    rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, timeout_msec>1000?
+                           1000:timeout_msec);
     if(Curl_pgrsUpdate(conn))
       return WAITCONN_ABORTED;
 

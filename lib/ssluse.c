@@ -881,7 +881,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
     buffsize = (int)sizeof(buf);
     while(!done) {
       int what = Curl_socket_ready(conn->sock[sockindex],
-                             CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+                                   CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         ERR_clear_error();
 
@@ -2477,8 +2477,7 @@ ossl_connect_common(struct connectdata *conn,
       curl_socket_t readfd = ssl_connect_2_reading==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
-      what = Curl_socket_ready(readfd, writefd,
-                               nonblocking?0:(int)timeout_ms);
+      what = Curl_socket_ready(readfd, writefd, nonblocking?0:timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

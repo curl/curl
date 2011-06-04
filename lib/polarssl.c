@@ -238,7 +238,7 @@ Curl_polarssl_connect(struct connectdata *conn,
       }
 
       switch(Curl_socket_ready(conn->sock[sockindex],
-                        CURL_SOCKET_BAD, timeout_ms)) {
+                               CURL_SOCKET_BAD, timeout_ms)) {
       case 0:
         failf(data, "SSL handshake timeout");
         return CURLE_OPERATION_TIMEDOUT;

@@ -81,7 +81,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
       break;
     }
     if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD,
-                   (int)(conn_timeout - conntime)) <= 0) {
+                         conn_timeout - conntime) <= 0) {
       result = ~CURLE_OK;
       break;
     }
@@ -409,7 +409,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   curlx_nonblock(sock, TRUE);
 
   /* wait until socket gets connected */
-  result = Curl_socket_ready(CURL_SOCKET_BAD, sock, (int)timeout);
+  result = Curl_socket_ready(CURL_SOCKET_BAD, sock, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5: no connection here");
@@ -448,7 +448,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   curlx_nonblock(sock, TRUE);
 
-  result = Curl_socket_ready(sock, CURL_SOCKET_BAD, (int)timeout);
+  result = Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5 nothing to read");
