@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 56
+# serial 57
 
 
 dnl CURL_CHECK_COMPILER
@@ -39,6 +39,8 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   flags_opt_all="unknown"
   flags_opt_yes="unknown"
   flags_opt_off="unknown"
+  #
+  flags_prefer_cppflags="no"
   #
   CURL_CHECK_COMPILER_DEC_C
   CURL_CHECK_COMPILER_HPUX_C
@@ -210,6 +212,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_IBM_C], [
     flags_opt_all="$flags_opt_all -qoptimize=5"
     flags_opt_yes="-O2"
     flags_opt_off="-qnooptimize"
+    flags_prefer_cppflags="yes"
   else
     AC_MSG_RESULT([no])
   fi
@@ -586,15 +589,15 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
       IBM_C)
         #
         dnl Ensure that compiler optimizations are always thread-safe.
-        tmp_CFLAGS="$tmp_CFLAGS -qthreaded"
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -qthreaded"
         dnl Disable type based strict aliasing optimizations, using worst
         dnl case aliasing assumptions when compiling. Type based aliasing
         dnl would restrict the lvalues that could be safely used to access
         dnl a data object.
-        tmp_CFLAGS="$tmp_CFLAGS -qnoansialias"
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -qnoansialias"
         dnl Force compiler to stop after the compilation phase, without
         dnl generating an object code file when compilation has errors.
-        tmp_CFLAGS="$tmp_CFLAGS -qhalt=e"
+        tmp_CPPFLAGS="$tmp_CPPFLAGS -qhalt=e"
         ;;
         #
       INTEL_UNIX_C)
@@ -720,8 +723,13 @@ AC_DEFUN([CURL_SET_COMPILER_DEBUG_OPTS], [
       tmp_options="$flags_dbg_off"
     fi
     #
-    CPPFLAGS="$tmp_CPPFLAGS"
-    CFLAGS="$tmp_CFLAGS $tmp_options"
+    if test "$flags_prefer_cppflags" = "yes"; then
+      CPPFLAGS="$tmp_CPPFLAGS $tmp_options"
+      CFLAGS="$tmp_CFLAGS"
+    else
+      CPPFLAGS="$tmp_CPPFLAGS"
+      CFLAGS="$tmp_CFLAGS $tmp_options"
+    fi
     squeeze CPPFLAGS
     squeeze CFLAGS
     CURL_COMPILER_WORKS_IFELSE([
@@ -796,8 +804,13 @@ AC_DEFUN([CURL_SET_COMPILER_OPTIMIZE_OPTS], [
         AC_MSG_CHECKING([if compiler accepts optimizer disabling options])
         tmp_options="$flags_opt_off"
       fi
-      CPPFLAGS="$tmp_CPPFLAGS"
-      CFLAGS="$tmp_CFLAGS $tmp_options"
+      if test "$flags_prefer_cppflags" = "yes"; then
+        CPPFLAGS="$tmp_CPPFLAGS $tmp_options"
+        CFLAGS="$tmp_CFLAGS"
+      else
+        CPPFLAGS="$tmp_CPPFLAGS"
+        CFLAGS="$tmp_CFLAGS $tmp_options"
+      fi
       squeeze CPPFLAGS
       squeeze CFLAGS
       CURL_COMPILER_WORKS_IFELSE([
@@ -951,6 +964,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "402"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wcast-align"
           fi
+          #
           dnl Only gcc 4.3 or later
           if test "$compiler_num" -ge "403"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wtype-limits -Wold-style-declaration"
@@ -1198,11 +1212,11 @@ AC_DEFUN([CURL_CHECK_CURLDEBUG], [
   fi
   #
   if test "$want_curldebug" = "yes"; then
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
+    CPPFLAGS="-DCURLDEBUG $CPPFLAGS"
     squeeze CPPFLAGS
   fi
   if test "$want_debug" = "yes"; then
-    CPPFLAGS="$CPPFLAGS -DDEBUGBUILD"
+    CPPFLAGS="-DDEBUGBUILD $CPPFLAGS"
     squeeze CPPFLAGS
   fi
 ])
