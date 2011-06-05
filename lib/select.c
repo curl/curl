@@ -180,7 +180,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
   int ret;
 
   if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
-    r = wait_ms(timeout_ms);
+    r = wait_ms((int)timeout_ms);
     return r;
   }
 
@@ -364,7 +364,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     }
   }
   if(fds_none) {
-    r = wait_ms(timeout_ms);
+    r = wait_ms((int)timeout_ms);
     return r;
   }
 
