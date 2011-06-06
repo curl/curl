@@ -1531,6 +1531,8 @@ if test X"$OPT_SSL" != Xno; then
        export LD_LIBRARY_PATH
        AC_MSG_NOTICE([Added $LIB_OPENSSL to LD_LIBRARY_PATH])
     fi
+    CURL_CHECK_OPENSSL_ADD_ALL_API
+    CURL_CHECK_OPENSSL_DESRANDKEY_API
   fi
 
 fi
