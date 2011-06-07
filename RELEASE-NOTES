@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o GnuTLS handshake: fix timeout
  o cyassl: build without filesystem
  o HTTPS over HTTP proxy using the multi interface
+ o speedcheck: invalid timeout event on a reused handle
 
 This release includes the following known bugs:
 

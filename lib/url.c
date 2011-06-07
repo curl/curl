@@ -2675,6 +2675,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   conn_free(conn);
   data->state.current_conn = NULL;
+  Curl_speedinit(data);
 
   return CURLE_OK;
 }
