@@ -563,6 +563,9 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
             if(!Curl_meets_timecondition(data, k->timeofdoc)) {
               *done = TRUE;
+              /* we abort the transfer before it is completed == we ruin the
+                 re-use ability. Close the connection */
+              conn->bits.close = TRUE;
               return CURLE_OK;
             }
           } /* we have a time condition */
