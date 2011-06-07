@@ -1,5 +1,5 @@
-#ifndef __URLDATA_H
-#define __URLDATA_H
+#ifndef HEADER_CURL_URLDATA_H
+#define HEADER_CURL_URLDATA_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -71,12 +71,12 @@
 
 #ifdef USE_SSLEAY
 #ifdef USE_OPENSSL
-#include "openssl/rsa.h"
-#include "openssl/crypto.h"
-#include "openssl/x509.h"
-#include "openssl/pem.h"
-#include "openssl/ssl.h"
-#include "openssl/err.h"
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <openssl/engine.h>
 #endif
@@ -84,12 +84,12 @@
 #include <openssl/pkcs12.h>
 #endif
 #else /* SSLeay-style includes */
-#include "rsa.h"
-#include "crypto.h"
-#include "x509.h"
-#include "pem.h"
-#include "ssl.h"
-#include "err.h"
+#include <rsa.h>
+#include <crypto.h>
+#include <x509.h>
+#include <pem.h>
+#include <ssl.h>
+#include <err.h>
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <engine.h>
 #endif
@@ -1570,4 +1570,4 @@ struct SessionHandle {
 
 #define LIBCURL_NAME "libcurl"
 
-#endif
+#endif /* HEADER_CURL_URLDATA_H */
