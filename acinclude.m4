@@ -1731,7 +1731,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
       shift
       #
       recvfrom_ptrt_arg2=$[2]
-      recvfrom_qual_type_arg5=$[5]
+      recvfrom_qual_ptrt_arg5=$[5]
       recvfrom_ptrt_arg6=$[6]
       #
       AC_DEFINE_UNQUOTED(RECVFROM_TYPE_ARG1, $[1],
@@ -1753,14 +1753,14 @@ AC_DEFUN([CURL_CHECK_FUNC_RECVFROM], [
           ;;
       esac
       #
-      case "$recvfrom_qual_type_arg5" in
+      case "$recvfrom_qual_ptrt_arg5" in
         const*)
           recvfrom_qual_arg5=const
-          recvfrom_ptrt_arg5=`echo $recvfrom_qual_type_arg5 | sed 's/^const //'`
+          recvfrom_ptrt_arg5=`echo $recvfrom_qual_ptrt_arg5 | sed 's/^const //'`
         ;;
         *)
           recvfrom_qual_arg5=
-          recvfrom_ptrt_arg5=$recvfrom_qual_type_arg5
+          recvfrom_ptrt_arg5=$recvfrom_qual_ptrt_arg5
         ;;
       esac
       #
