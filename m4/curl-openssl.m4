@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 3
+# serial 4
 
 
 dnl CURL_CHECK_OPENSSL_ADD_ALL_ALGORITHMS_API
@@ -325,4 +325,30 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
        No matter what, do not ever define this manually or by any other means.])
   fi
   curl_openssl_api_library=$tst_api
+])
+
+
+dnl CURL_CHECK_OPENSSL_API
+dnl -------------------------------------------------
+
+AC_DEFUN([CURL_CHECK_OPENSSL_API], [
+  #
+  CURL_CHECK_OPENSSL_API_HEADERS
+  CURL_CHECK_OPENSSL_API_LIBRARY
+  #
+  tst_match="yes"
+  #
+  AC_MSG_CHECKING([for OpenSSL headers and library versions matching])
+  if test "$curl_openssl_api_headers" = "unknown" ||
+    test "$curl_openssl_api_library" = "unknown"; then
+    tst_match="fail"
+    tst_warns="Can not compare OpenSSL headers and library versions."
+  elif test "$curl_openssl_api_headers" != "$curl_openssl_api_library"; then
+    tst_match="no"
+    tst_warns="OpenSSL headers and library versions do not match."
+  fi
+  AC_MSG_RESULT([$tst_match])
+  if test "$tst_match" != "yes"; then
+    AC_MSG_WARN([$tst_warns])
+  fi
 ])
