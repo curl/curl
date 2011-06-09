@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 2
+# serial 3
 
 
 dnl CURL_CHECK_OPENSSL_ADD_ALL_ALGORITHMS_API
@@ -35,57 +35,40 @@ dnl or in any other way shall not define this.
 
 AC_DEFUN([CURL_CHECK_OPENSSL_ADD_ALL_ALGORITHMS_API], [
   #
-  tst_openssl_add_all_algorithms_api="unknown"
+  tst_api="unknown"
   #
   AC_MSG_CHECKING([for OpenSSL_add_all_algorithms API])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-    ]],[[
-      OPENSSL_add_all_algorithms_conf();
-      OPENSSL_add_all_algorithms_noconf();
-    ]])
-  ],[
-    tst_openssl_add_all_algorithms_api="0x097"
-  ])
-  if test "$tst_openssl_add_all_algorithms_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        OpenSSL_add_all_algorithms();
-      ]])
+      AC_LANG_FUNC_LINK_TRY([OPENSSL_add_all_algorithms_noconf])
     ],[
-      tst_openssl_add_all_algorithms_api="0x095"
+      tst_api="0x097"
     ])
   fi
-  if test "$tst_openssl_add_all_algorithms_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        SSLeay_add_all_algorithms();
-      ]])
+      AC_LANG_FUNC_LINK_TRY([OpenSSL_add_all_algorithms])
     ],[
-      tst_openssl_add_all_algorithms_api="0x091"
+      tst_api="0x095"
     ])
   fi
-  case "$tst_openssl_add_all_algorithms_api" in
-    0x097)
-      tst_show="0.9.7"
-      ;;
-    0x095)
-      tst_show="0.9.5"
-      ;;
-    0x091)
-      tst_show="0.9.1"
-      ;;
-    *)
-      tst_show="unknown"
-      ;;
+  if test "$tst_api" = "unknown"; then
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([SSLeay_add_all_algorithms])
+    ],[
+      tst_api="0x091"
+    ])
+  fi
+  case $tst_api in
+    0x097) tst_show="0.9.7" ;;
+    0x095) tst_show="0.9.5" ;;
+    0x091) tst_show="0.9.1" ;;
+    *)     tst_show="unknown" ;;
   esac
   AC_MSG_RESULT([$tst_show])
   #
-  if test "$tst_openssl_add_all_algorithms_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_ADD_ALL_ALGORITHMS_API,
-      $tst_openssl_add_all_algorithms_api,
+  if test "$tst_api" != "unknown"; then
+    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_ADD_ALL_ALGORITHMS_API, $tst_api,
       [OpenSSL link time API for OpenSSL_add_all_algorithms function. Configure
        script only definition. No matter what, do not ever define yourself.])
   fi
@@ -103,63 +86,53 @@ dnl or in any other way shall not define this.
 
 AC_DEFUN([CURL_CHECK_OPENSSL_DES_RANDOM_KEY_API], [
   #
-  tst_openssl_des_random_key_api="unknown"
+  tst_api="unknown"
   #
   AC_MSG_CHECKING([for OpenSSL DES_random_key API])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-    ]],[[
-      if(0 != DES_random_key(0))
-        return 1;
-    ]])
-  ],[
-    tst_openssl_des_random_key_api="0x097"
-  ])
-  if test "$tst_openssl_des_random_key_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != des_random_key(0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([DES_random_key])
     ],[
-      tst_openssl_des_random_key_api="0x095"
+      tst_api="0x097"
     ])
   fi
-  case "$tst_openssl_des_random_key_api" in
-    0x097)
-      tst_show="0.9.7"
-      ;;
-    0x095)
-      tst_show="0.9.5"
-      ;;
-    *)
-      tst_show="unknown"
-      ;;
+  if test "$tst_api" = "unknown"; then
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([des_random_key])
+    ],[
+      tst_api="0x095"
+    ])
+  fi
+  case $tst_api in
+    0x097) tst_show="0.9.7" ;;
+    0x095) tst_show="0.9.5" ;;
+    *)     tst_show="unknown" ;;
   esac
   AC_MSG_RESULT([$tst_show])
   #
-  if test "$tst_openssl_des_random_key_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DES_RANDOM_KEY_API,
-      $tst_openssl_des_random_key_api,
+  if test "$tst_api" != "unknown"; then
+    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DES_RANDOM_KEY_API, $tst_api,
       [OpenSSL link time API for OpenSSL DES_random_key function. Configure
        script only definition. No matter what, do not ever define yourself.])
   fi
 ])
 
 
-dnl CURL_CHECK_OPENSSL_HEADERS_VERSION
+dnl CURL_CHECK_OPENSSL_API_HEADERS
 dnl -------------------------------------------------
 dnl Find out OpenSSL headers API version, as reported
 dnl by OPENSSL_VERSION_NUMBER. No runtime checks
-dnl allowed here for cross-compilation sake.
+dnl allowed here for cross-compilation support.
+dnl HAVE_OPENSSL_API_HEADERS is defined as apprpriate
+dnl only for systems which actually run the configure
+dnl script. Config files generated manually or in any
+dnl other way shall not define this.
 
-AC_DEFUN([CURL_CHECK_OPENSSL_HEADERS_VERSION], [
+AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
+  #
+  tst_api="unknown"
   #
   AC_MSG_CHECKING([for OpenSSL headers version])
-  #
-  tst_openssl_headers_api="unknown"
-  #
   CURL_CHECK_DEF([OPENSSL_VERSION_NUMBER], [
 #   ifdef USE_OPENSSL
 #     include <openssl/crypto.h>
@@ -168,167 +141,188 @@ AC_DEFUN([CURL_CHECK_OPENSSL_HEADERS_VERSION], [
 #   endif
     ], [silent])
   if test "$curl_cv_have_def_OPENSSL_VERSION_NUMBER" = "yes"; then
-    tst_openssl_headers_api=$curl_cv_def_OPENSSL_VERSION_NUMBER
+    tst_verlen=`expr "$curl_cv_def_OPENSSL_VERSION_NUMBER" : '.*'`
+    case "x$tst_verlen" in
+      x6)
+        tst_vermaj=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 3`
+        tst_vermin=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 4`
+        tst_verfix=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 5`
+        tst_api=0x$tst_vermaj$tst_vermin$tst_verfix
+        ;;
+      x11)
+        tst_vermaj=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 3`
+        tst_vermin=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 5`
+        tst_verfix=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 7`
+        tst_api=0x$tst_vermaj$tst_vermin$tst_verfix
+        ;;
+      *)
+        tst_api="unknown"
+        ;;
+    esac
+    case $tst_api in
+      0x110) tst_show="1.1.0" ;;
+      0x101) tst_show="1.0.1" ;;
+      0x100) tst_show="1.0.0" ;;
+      0x099) tst_show="0.9.9" ;;
+      0x098) tst_show="0.9.8" ;;
+      0x097) tst_show="0.9.7" ;;
+      0x096) tst_show="0.9.6" ;;
+      0x095) tst_show="0.9.5" ;;
+      0x094) tst_show="0.9.4" ;;
+      0x093) tst_show="0.9.3" ;;
+      0x092) tst_show="0.9.2" ;;
+      0x091) tst_show="0.9.1" ;;
+      *)     tst_show="unknown" ;;
+    esac
+    tst_show="$tst_show - $curl_cv_def_OPENSSL_VERSION_NUMBER"
+  else
+    tst_show="unknown"
   fi
-  AC_MSG_RESULT([$tst_openssl_headers_api])
+  AC_MSG_RESULT([$tst_show])
   #
+  if test "$tst_api" != "unknown"; then
+    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_HEADERS, $tst_api,
+      [OpenSSL headers configure time API. Defined only by configure script.
+       No matter what, do not ever define this manually or by any other means.])
+  fi
+  curl_openssl_api_headers=$tst_api
 ])
 
 
-dnl CURL_CHECK_OPENSSL_LIBRARY_VERSION
+dnl CURL_CHECK_OPENSSL_API_LIBRARY
 dnl -------------------------------------------------
 dnl Find out OpenSSL library API version, performing
 dnl only link tests in order to avoid getting fooled
 dnl by mismatched OpenSSL headers. No runtime checks
-dnl allowed here for cross-compilation sake.
+dnl allowed here for cross-compilation support.
+dnl HAVE_OPENSSL_API_LIBRARY is defined as apprpriate
+dnl only for systems which actually run the configure
+dnl script. Config files generated manually or in any
+dnl other way shall not define this.
+dnl
+dnl Most probably we should not bother attempting to
+dnl detect OpenSSL library development API versions
+dnl 0.9.9 and 1.1.0. For our intended use, detecting
+dnl released versions should be good enough.
+dnl
+dnl Given that currently we are not using the result
+dnl of this check, except for informative purposes,
+dnl lets try to figure out everything.
 
-AC_DEFUN([CURL_CHECK_OPENSSL_LIBRARY_VERSION], [
+AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
+  #
+  tst_api="unknown"
   #
   AC_MSG_CHECKING([for OpenSSL library version])
-  #
-  tst_openssl_library_api="unknown"
-  #
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
+    case $host in
+      *-*-vms*)
+        AC_LINK_IFELSE([
+          AC_LANG_FUNC_LINK_TRY([SSL_CTX_set_not_resumbl_sess_cb])
+        ],[
+          tst_api="0x110"
+        ])
+        ;;
+      *)
+        AC_LINK_IFELSE([
+          AC_LANG_FUNC_LINK_TRY([SSL_CTX_set_not_resumable_session_callback])
+        ],[
+          tst_api="0x110"
+        ])
+        ;;
+    esac
+  fi
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != OBJ_add_sigid(0, 0, 0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([SSL_renegotiate_abbreviated])
     ],[
-      dnl 1.0.0 or newer
-      tst_openssl_library_api="0x100"
+      tst_api="0x101"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != ERR_set_mark())
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([OBJ_add_sigid])
     ],[
-      dnl 0.9.8 or newer
-      tst_openssl_library_api="0x098"
+      tst_api="0x100"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != ERR_peek_last_error())
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([ERR_set_mark])
     ],[
-      dnl 0.9.7 or newer
-      tst_openssl_library_api="0x097"
+      tst_api="0x098"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != c2i_ASN1_OBJECT(0, 0, 0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([ERR_peek_last_error])
     ],[
-      dnl 0.9.6 or newer
-      tst_openssl_library_api="0x096"
+      tst_api="0x097"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != SSL_CTX_set_purpose(0, 0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([c2i_ASN1_OBJECT])
     ],[
-      dnl 0.9.5 or newer
-      tst_openssl_library_api="0x095"
+      tst_api="0x096"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != OBJ_obj2txt(0, 0, 0, 0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([SSL_CTX_set_purpose])
     ],[
-      dnl 0.9.4 or newer
-      tst_openssl_library_api="0x094"
+      tst_api="0x095"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != SSL_get_verify_depth(0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([OBJ_obj2txt])
     ],[
-      dnl 0.9.3 or newer
-      tst_openssl_library_api="0x093"
+      tst_api="0x094"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != SSL_library_init())
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([SSL_get_verify_depth])
     ],[
-      dnl 0.9.2 or newer
-      tst_openssl_library_api="0x092"
+      tst_api="0x093"
     ])
   fi
-  if test "$tst_openssl_library_api" = "unknown"; then
+  if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        if(0 != SSL_CTX_set_cipher_list(0, 0))
-          return 1;
-      ]])
+      AC_LANG_FUNC_LINK_TRY([SSL_library_init])
     ],[
-      dnl 0.9.1 or newer
-      tst_openssl_library_api="0x091"
+      tst_api="0x092"
     ])
   fi
-  #
-  case "$tst_openssl_library_api" in
-    0x100)
-      tst_show="1.0.0"
-      ;;
-    0x098)
-      tst_show="0.9.8"
-      ;;
-    0x097)
-      tst_show="0.9.7"
-      ;;
-    0x096)
-      tst_show="0.9.6"
-      ;;
-    0x095)
-      tst_show="0.9.5"
-      ;;
-    0x094)
-      tst_show="0.9.4"
-      ;;
-    0x093)
-      tst_show="0.9.3"
-      ;;
-    0x092)
-      tst_show="0.9.2"
-      ;;
-    0x091)
-      tst_show="0.9.1"
-      ;;
-    *)
-      tst_show="unknown"
-      ;;
+  if test "$tst_api" = "unknown"; then
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([SSL_CTX_set_cipher_list])
+    ],[
+      tst_api="0x091"
+    ])
+  fi
+  case $tst_api in
+    0x110) tst_show="1.1.0" ;;
+    0x101) tst_show="1.0.1" ;;
+    0x100) tst_show="1.0.0" ;;
+    0x099) tst_show="0.9.9" ;;
+    0x098) tst_show="0.9.8" ;;
+    0x097) tst_show="0.9.7" ;;
+    0x096) tst_show="0.9.6" ;;
+    0x095) tst_show="0.9.5" ;;
+    0x094) tst_show="0.9.4" ;;
+    0x093) tst_show="0.9.3" ;;
+    0x092) tst_show="0.9.2" ;;
+    0x091) tst_show="0.9.1" ;;
+    *)     tst_show="unknown" ;;
   esac
   AC_MSG_RESULT([$tst_show])
   #
+  if test "$tst_api" != "unknown"; then
+    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_LIBRARY, $tst_api,
+      [OpenSSL library link time API. Defined only by configure script.
+       No matter what, do not ever define this manually or by any other means.])
+  fi
+  curl_openssl_api_library=$tst_api
 ])
