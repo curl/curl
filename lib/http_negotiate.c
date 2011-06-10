@@ -36,6 +36,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "gssapi.h"
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
@@ -238,19 +239,20 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 #endif
   }
 
-  major_status = gss_init_sec_context(&minor_status,
-                                      GSS_C_NO_CREDENTIAL,
-                                      &neg_ctx->context,
-                                      neg_ctx->server_name,
-                                      GSS_C_NO_OID,
-                                      GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
-                                      0,
-                                      GSS_C_NO_CHANNEL_BINDINGS,
-                                      &input_token,
-                                      NULL,
-                                      &output_token,
-                                      NULL,
-                                      NULL);
+  major_status = Curl_gss_init_sec_context(&minor_status,
+                                           GSS_C_NO_CREDENTIAL,
+                                           &neg_ctx->context,
+                                           neg_ctx->server_name,
+                                           GSS_C_NO_OID,
+                                           GSS_C_MUTUAL_FLAG
+                                           | GSS_C_REPLAY_FLAG,
+                                           0,
+                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           &input_token,
+                                           NULL,
+                                           &output_token,
+                                           NULL,
+                                           NULL);
   if(input_token.length > 0)
     gss_release_buffer(&minor_status2, &input_token);
   neg_ctx->status = major_status;

@@ -47,21 +47,10 @@
 #endif
 #include <string.h>
 
-#ifdef HAVE_GSSGNU
-#  include <gss.h>
-#elif defined HAVE_GSSMIT
-   /* MIT style */
-#  include <gssapi/gssapi.h>
-#  include <gssapi/gssapi_generic.h>
-#  include <gssapi/gssapi_krb5.h>
-#else
-   /* Heimdal-style */
-#  include <gssapi.h>
-#endif
-
 #include "urldata.h"
 #include "curl_base64.h"
 #include "ftp.h"
+#include "gssapi.h"
 #include "sendf.h"
 #include "krb4.h"
 #include "curl_memory.h"
@@ -242,19 +231,19 @@ krb5_auth(void *app_data, struct connectdata *conn)
          taken care by a final gss_release_buffer. */
       gss_release_buffer(&min, &output_buffer);
       ret = AUTH_OK;
-      maj = gss_init_sec_context(&min,
-                                 GSS_C_NO_CREDENTIAL,
-                                 context,
-                                 gssname,
-                                 GSS_C_NO_OID,
-                                 GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
-                                 0,
-                                 &chan,
-                                 gssresp,
-                                 NULL,
-                                 &output_buffer,
-                                 NULL,
-                                 NULL);
+      maj = Curl_gss_init_sec_context(&min,
+                                      GSS_C_NO_CREDENTIAL,
+                                      context,
+                                      gssname,
+                                      GSS_C_NO_OID,
+                                      GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
+                                      0,
+                                      &chan,
+                                      gssresp,
+                                      NULL,
+                                      &output_buffer,
+                                      NULL,
+                                      NULL);
 
       if(gssresp) {
         free(_gssresp.value);
