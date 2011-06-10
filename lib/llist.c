@@ -62,6 +62,8 @@ Curl_llist_alloc(curl_llist_dtor dtor)
  * inserted first in the list.
  *
  * Returns: 1 on success and 0 on failure.
+ *
+ * @unittest: 1300
  */
 int
 Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
@@ -101,9 +103,11 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
   return 1;
 }
 
-int
-Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
-                  void *user)
+/*
+ * @unittest: 1300
+ */
+int Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
+                      void *user)
 {
   if(e == NULL || list->size == 0)
     return 1;

@@ -131,6 +131,8 @@ singleipconnect(struct connectdata *conn,
  * If 'nowp' is non-NULL, it points to the current time.
  * 'duringconnect' is FALSE if not during a connect, as then of course the
  * connect timeout is not taken into account!
+ *
+ * @unittest: 1303
  */
 long Curl_timeleft(struct SessionHandle *data,
                    struct timeval *nowp,

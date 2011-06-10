@@ -140,7 +140,10 @@ mk_hash_element(const void *key, size_t key_len, const void *p)
 #define FETCH_LIST(x,y,z) x->table[x->hash_func(y, z, x->slots)]
 
 /* Insert the data in the hash. If there already was a match in the hash,
-   that data is replaced. */
+ * that data is replaced.
+ *
+ * @unittest: 1305
+ */
 void *
 Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 {

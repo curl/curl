@@ -737,6 +737,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 
 /*
  * curl_formadd() is a public API to add a section to the multipart formpost.
+ *
+ * @unittest: 1308
  */
 
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
@@ -858,6 +860,8 @@ void Curl_formclean(struct FormData **form_ptr)
  * curl_formget()
  * Serialize a curl_httppost struct.
  * Returns 0 on success.
+ *
+ * @unittest: 1308
  */
 int curl_formget(struct curl_httppost *form, void *arg,
                  curl_formget_callback append)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,9 @@ enum host_lookup_state {
   HOSTEND /* LAST enum */
 };
 
+/*
+ * @unittest: 1304
+ */
 int Curl_parsenetrc(const char *host,
                     char *login,
                     char *password,

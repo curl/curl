@@ -413,6 +413,9 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
   }
 }
 
+/*
+ * @unittest: 1307
+ */
 int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
 {
   (void)ptr; /* the argument is specified by the curl_fnmatch_callback
