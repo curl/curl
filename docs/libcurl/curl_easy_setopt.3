@@ -343,10 +343,10 @@ Function pointer that should match the following prototype: \fIsize_t
 function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP. This
 function gets called by libcurl as soon as it has received header data. The
 header callback will be called once for each header and only complete header
-lines are passed on to the callback. Parsing headers should be easy enough
-using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
-multiplied with \fInmemb\fP. Do not assume that the header line is zero
-terminated! The pointer named \fIuserdata\fP is the one you set with the
+lines are passed on to the callback. Parsing headers is very easy using
+this. The size of the data pointed to by \fIptr\fP is \fIsize\fP multiplied
+with \fInmemb\fP. Do not assume that the header line is zero terminated! The
+pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
@@ -365,19 +365,20 @@ negotiation. If you need to operate on only the headers from the final
 response, you will need to collect headers in the callback yourself and use
 HTTP status lines, for example, to delimit response boundaries.
 
-Since 7.14.1: When a server sends a chunked encoded transfer, it may contain a
-trailer. That trailer is identical to a HTTP header and if such a trailer is
-received it is passed to the application using this callback as well. There
-are several ways to detect it being a trailer and not an ordinary header: 1)
-it comes after the response-body. 2) it comes after the final header line (CR
-LF) 3) a Trailer: header among the response-headers mention what header to
-expect in the trailer.
+When a server sends a chunked encoded transfer, it may contain a trailer. That
+trailer is identical to a HTTP header and if such a trailer is received it is
+passed to the application using this callback as well. There are several ways
+to detect it being a trailer and not an ordinary header: 1) it comes after the
+response-body. 2) it comes after the final header line (CR LF) 3) a Trailer:
+header among the regular response-headers mention what header(s) to expect in
+the trailer.
 .IP CURLOPT_WRITEHEADER
 (This option is also known as \fBCURLOPT_HEADERDATA\fP) Pass a pointer to be
-used to write the header part of the received data to. If you don't use your
-own callback to take care of the writing, this must be a valid FILE *. See
-also the \fICURLOPT_HEADERFUNCTION\fP option above on how to set a custom
-get-all-headers callback.
+used to write the header part of the received data to. If you don't use
+\fICURLOPT_WRITEFUNCTION\fP or \fICURLOPT_HEADERFUNCTION\fP to take care of
+the writing, this must be a valid FILE * as the internal default will then be
+a plain fwrite(). See also the \fICURLOPT_HEADERFUNCTION\fP option above on
+how to set a custom get-all-headers callback.
 .IP CURLOPT_DEBUGFUNCTION
 Function pointer that should match the following prototype: \fIint
 curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
