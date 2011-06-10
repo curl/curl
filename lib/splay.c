@@ -93,7 +93,10 @@ struct Curl_tree *Curl_splay(struct timeval i,
 }
 
 /* Insert key i into the tree t.  Return a pointer to the resulting tree or
-   NULL if something went wrong. */
+ * NULL if something went wrong.
+ *
+ * @unittest: 1309
+ */
 struct Curl_tree *Curl_splayinsert(struct timeval i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
@@ -145,56 +148,6 @@ struct Curl_tree *Curl_splayinsert(struct timeval i,
   node->same = NULL; /* no identical node (yet) */
   return node;
 }
-
-#if 0
-/* Deletes 'i' from the tree if it's there (with an exact match). Returns a
-   pointer to the resulting tree.
-
-   Function not used in libcurl.
-*/
-struct Curl_tree *Curl_splayremove(struct timeval i,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree **removed)
-{
-  struct Curl_tree *x;
-
-  *removed = NULL; /* default to no removed */
-
-  if(t==NULL)
-    return NULL;
-
-  t = Curl_splay(i,t);
-  if(compare(i, t->key) == 0) {               /* found it */
-
-    /* FIRST! Check if there is a list with identical sizes */
-    if((x = t->same) != NULL) {
-      /* there is, pick one from the list */
-
-      /* 'x' is the new root node */
-
-      x->key = t->key;
-      x->larger = t->larger;
-      x->smaller = t->smaller;
-
-      *removed = t;
-      return x; /* new root */
-    }
-
-    if(t->smaller == NULL) {
-      x = t->larger;
-    }
-    else {
-      x = Curl_splay(i, t->smaller);
-      x->larger = t->larger;
-    }
-    *removed = t;
-
-    return x;
-  }
-  else
-    return t;                         /* It wasn't there */
-}
-#endif
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree.  best-fit means the node with the given or lower key */
@@ -256,14 +209,16 @@ struct Curl_tree *Curl_splaygetbest(struct timeval i,
 
 
 /* Deletes the very node we point out from the tree if it's there. Stores a
-   pointer to the new resulting tree in 'newroot'.
-
-   Returns zero on success and non-zero on errors! TODO: document error codes.
-   When returning error, it does not touch the 'newroot' pointer.
-
-   NOTE: when the last node of the tree is removed, there's no tree left so
-   'newroot' will be made to point to NULL.
-*/
+ * pointer to the new resulting tree in 'newroot'.
+ *
+ * Returns zero on success and non-zero on errors! TODO: document error codes.
+ * When returning error, it does not touch the 'newroot' pointer.
+ *
+ * NOTE: when the last node of the tree is removed, there's no tree left so
+ * 'newroot' will be made to point to NULL.
+ *
+ * @unittest: 1309
+ */
 int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
@@ -331,109 +286,3 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
   return 0;
 }
 
-#ifdef DEBUGBUILD
-
-void Curl_splayprint(struct Curl_tree * t, int d, char output)
-{
-  struct Curl_tree *node;
-  int i;
-  int count;
-  if(t == NULL)
-    return;
-
-  Curl_splayprint(t->larger, d+1, output);
-  for(i=0; i<d; i++)
-    if(output)
-      fprintf(stderr, "  ");
-
-  if(output) {
-#ifdef TEST_SPLAY
-    fprintf(stderr, "%ld[%d]", (long)t->key.tv_usec, i);
-#else
-    fprintf(stderr, "%ld.%ld[%d]", (long)t->key.tv_sec,
-            (long)t->key.tv_usec, i);
-#endif
-  }
-
-  for(count=0, node = t->same; node; node = node->same, count++)
-    ;
-
-  if(output) {
-    if(count)
-      fprintf(stderr, " [%d more]\n", count);
-    else
-      fprintf(stderr, "\n");
-  }
-
-  Curl_splayprint(t->smaller, d+1, output);
-}
-#endif
-
-#ifdef TEST_SPLAY
-
-/*#define TEST2 */
-#define MAX 50
-#define TEST2
-
-/* A sample use of these functions.  Start with the empty tree, insert some
-   stuff into it, and then delete it */
-int main(int argc, argv_item_t argv[])
-{
-  struct Curl_tree *root, *t;
-  void *ptrs[MAX];
-  int adds=0;
-  int rc;
-
-  static const long sizes[]={
-    50, 60, 50, 100, 60, 200, 120, 300, 400, 200, 256, 122, 60, 120, 200, 300,
-    220, 80, 90, 50, 100, 60, 200, 120, 300, 400, 200, 256, 122, 60, 120, 200,
-    300, 220, 80, 90, 50, 100, 60, 200, 120, 300, 400, 200, 256, 122, 60, 120,
-    200, 300, 220, 80, 90};
-  int i;
-  root = NULL;              /* the empty tree */
-
-  for(i = 0; i < MAX; i++) {
-    struct timeval key;
-    ptrs[i] = t = malloc(sizeof(struct Curl_tree));
-    if(!t) {
-      puts("out of memory!");
-      return 0;
-    }
-
-    key.tv_sec = 0;
-#ifdef TEST2
-    key.tv_usec = sizes[i];
-#elif defined(TEST1)
-    key.tv_usec = (541*i)%1023;
-#elif defined(TEST3)
-    key.tv_usec = 100;
-#endif
-
-    t->payload = (void *)key.tv_usec; /* for simplicity */
-    root = Curl_splayinsert(key, root, t);
-  }
-
-#if 0
-  puts("Result:");
-  Curl_splayprint(root, 0, 1);
-#endif
-
-#if 1
-  for(i = 0; i < MAX; i++) {
-    int rem = (i+7)%MAX;
-    struct Curl_tree *r;
-    printf("Tree look:\n");
-    Curl_splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %ld\n", rem,
-           (long)((struct Curl_tree *)ptrs[rem])->payload);
-    rc = Curl_splayremovebyaddr(root, (struct Curl_tree *)ptrs[rem], &root);
-    if(rc)
-      /* failed! */
-      printf("remove %d failed!\n", rem);
-  }
-#endif
-
-  return 0;
-}
-
-#endif /* TEST_SPLAY */
