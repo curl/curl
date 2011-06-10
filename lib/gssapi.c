@@ -24,30 +24,25 @@
 
 OM_uint32 Curl_gss_init_sec_context(
     OM_uint32 * minor_status,
-    gss_cred_id_t cred_handle,
     gss_ctx_id_t * context,
     gss_name_t target_name,
-    gss_OID mech_type, /* needed? */
-    OM_uint32 req_flags,          /* TBR. */
-    OM_uint32 time_req,
     gss_channel_bindings_t input_chan_bindings,
     gss_buffer_t input_token,
-    gss_OID * actual_mech_type,
     gss_buffer_t output_token,
-    OM_uint32 * ret_flags,
-    OM_uint32 * time_rec)
+    OM_uint32 * ret_flags)
 {
   return gss_init_sec_context(minor_status,
-                              cred_handle,
+                              GSS_C_NO_CREDENTIAL, /* cred_handle */
                               context,
                               target_name,
-                              mech_type,
-                              req_flags,
-                              time_req,
+                              GSS_C_NO_OID, /* mech_type */
+                              /* req_flags */
+                              GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
+                              0, /* time_req */
                               input_chan_bindings,
                               input_token,
-                              actual_mech_type,
+                              NULL, /* actual_mech_type */
                               output_token,
                               ret_flags,
-                              time_rec);
+                              NULL /* time_rec */);
 }

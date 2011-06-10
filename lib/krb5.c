@@ -232,17 +232,11 @@ krb5_auth(void *app_data, struct connectdata *conn)
       gss_release_buffer(&min, &output_buffer);
       ret = AUTH_OK;
       maj = Curl_gss_init_sec_context(&min,
-                                      GSS_C_NO_CREDENTIAL,
                                       context,
                                       gssname,
-                                      GSS_C_NO_OID,
-                                      GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
-                                      0,
                                       &chan,
                                       gssresp,
-                                      NULL,
                                       &output_buffer,
-                                      NULL,
                                       NULL);
 
       if(gssresp) {

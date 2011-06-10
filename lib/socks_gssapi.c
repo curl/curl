@@ -185,18 +185,12 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* errors, keep sending it...                                            */
   for(;;) {
     gss_major_status = Curl_gss_init_sec_context(&gss_minor_status,
-                                                 GSS_C_NO_CREDENTIAL,
-                                                 &gss_context, server,
-                                                 GSS_C_NULL_OID,
-                                                 GSS_C_MUTUAL_FLAG |
-                                                 GSS_C_REPLAY_FLAG,
-                                                 0,
+                                                 &gss_context,
+                                                 server,
                                                  NULL,
                                                  gss_token,
-                                                 NULL,
                                                  &gss_send_token,
-                                                 &gss_ret_flags,
-                                                 NULL);
+                                                 &gss_ret_flags);
 
     if(gss_token != GSS_C_NO_BUFFER)
       gss_release_buffer(&gss_status, &gss_recv_token);
