@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+unittest
+curl_formadd
+curl_formget
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+formpost unit tests
+ </name>
+<tool>
+unit1308
+</tool>
+</client>
+
+</testcase>
