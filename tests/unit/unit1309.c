@@ -70,25 +70,20 @@ UNITTEST_START
 /* number of nodes to add to the splay tree */
 #define NUM_NODES 50
 
-  struct Curl_tree *root, *t;
-  void *ptrs[NUM_NODES];
+  struct Curl_tree *root;
+  struct Curl_tree nodes[NUM_NODES];
   int rc;
   int i;
   root = NULL;              /* the empty tree */
 
   for(i = 0; i < NUM_NODES; i++) {
     struct timeval key;
-    ptrs[i] = t = malloc(sizeof(struct Curl_tree));
-    if(!t) {
-      puts("out of memory!");
-      return 0;
-    }
 
     key.tv_sec = 0;
     key.tv_usec = (541*i)%1023;
 
-    t->payload = (void *)key.tv_usec; /* for simplicity */
-    root = Curl_splayinsert(key, root, t);
+    nodes[i].payload = (void *)key.tv_usec; /* for simplicity */
+    root = Curl_splayinsert(key, root, &nodes[i]);
   }
 
   puts("Result:");
@@ -99,11 +94,13 @@ UNITTEST_START
     printf("Tree look:\n");
     splayprint(root, 0, 1);
     printf("remove pointer %d, payload %ld\n", rem,
-           (long)((struct Curl_tree *)ptrs[rem])->payload);
-    rc = Curl_splayremovebyaddr(root, (struct Curl_tree *)ptrs[rem], &root);
-    if(rc)
+           (long)(nodes[rem].payload));
+    rc = Curl_splayremovebyaddr(root, &nodes[rem], &root);
+    if(rc) {
       /* failed! */
       printf("remove %d failed!\n", rem);
+      fail("remove");
+    }
   }
 
 UNITTEST_STOP
