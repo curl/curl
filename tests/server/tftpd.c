@@ -605,7 +605,8 @@ static ssize_t write_behind(struct testcase *test, int convert)
     }
     /* formerly
        putc(c, file); */
-    write(test->ofile, &c, 1);
+    if(1 != write(test->ofile, &c, 1))
+      break;
     skipit:
     prevchar = c;
   }

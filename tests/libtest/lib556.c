@@ -84,9 +84,11 @@ int test(char *URL)
         sleep(1); /* avoid ctl-10 dump */
 #endif
 
-        if(iolen)
+        if(iolen) {
           /* send received stuff to stdout */
-          write(STDOUT_FILENO, buf, iolen);
+          if(!write(STDOUT_FILENO, buf, iolen))
+            break;
+        }
         total += iolen;
 
       } while(((res == CURLE_OK) || (res == CURLE_AGAIN)) && (total < 129));
