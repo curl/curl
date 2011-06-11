@@ -190,7 +190,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
      value indicating a blocking call should be performed. */
 
   if(timeout_ms > 0) {
-    pending_ms = timeout_ms;
+    pending_ms = (int)timeout_ms;
     initial_tv = curlx_tvnow();
   }
 
@@ -222,7 +222,7 @@ int Curl_socket_ready(curl_socket_t readfd, curl_socket_t writefd,
     if(error && error_not_EINTR)
       break;
     if(timeout_ms > 0) {
-      pending_ms = timeout_ms - elapsed_ms;
+      pending_ms = (int)(timeout_ms - elapsed_ms);
       if(pending_ms <= 0)
         break;
     }
