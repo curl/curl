@@ -21,101 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 4
-
-
-dnl CURL_CHECK_OPENSSL_ADD_ALL_ALGORITHMS_API
-dnl -------------------------------------------------
-dnl Link time verification check of which API is
-dnl used for OpenSSL_add_all_algorithms function.
-dnl HAVE_OPENSSL_ADD_ALL_ALGORITHMS_API gets defined as
-dnl apprpriate only for systems which actually run the
-dnl configure script. Config files generated manually
-dnl or in any other way shall not define this.
-
-AC_DEFUN([CURL_CHECK_OPENSSL_ADD_ALL_ALGORITHMS_API], [
-  #
-  tst_api="unknown"
-  #
-  AC_MSG_CHECKING([for OpenSSL_add_all_algorithms API])
-  if test "$tst_api" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([OPENSSL_add_all_algorithms_noconf])
-    ],[
-      tst_api="0x097"
-    ])
-  fi
-  if test "$tst_api" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([OpenSSL_add_all_algorithms])
-    ],[
-      tst_api="0x095"
-    ])
-  fi
-  if test "$tst_api" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([SSLeay_add_all_algorithms])
-    ],[
-      tst_api="0x091"
-    ])
-  fi
-  case $tst_api in
-    0x097) tst_show="0.9.7" ;;
-    0x095) tst_show="0.9.5" ;;
-    0x091) tst_show="0.9.1" ;;
-    *)     tst_show="unknown" ;;
-  esac
-  AC_MSG_RESULT([$tst_show])
-  #
-  if test "$tst_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_ADD_ALL_ALGORITHMS_API, $tst_api,
-      [OpenSSL link time API for OpenSSL_add_all_algorithms function. Configure
-       script only definition. No matter what, do not ever define yourself.])
-  fi
-])
-
-
-dnl CURL_CHECK_OPENSSL_DES_RANDOM_KEY_API
-dnl -------------------------------------------------
-dnl Link time verification check of which API is
-dnl used for OpenSSL DES_random_key function.
-dnl HAVE_OPENSSL_DES_RANDOM_KEY_API gets defined as
-dnl apprpriate only for systems which actually run the
-dnl configure script. Config files generated manually
-dnl or in any other way shall not define this.
-
-AC_DEFUN([CURL_CHECK_OPENSSL_DES_RANDOM_KEY_API], [
-  #
-  tst_api="unknown"
-  #
-  AC_MSG_CHECKING([for OpenSSL DES_random_key API])
-  if test "$tst_api" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([DES_random_key])
-    ],[
-      tst_api="0x097"
-    ])
-  fi
-  if test "$tst_api" = "unknown"; then
-    AC_LINK_IFELSE([
-      AC_LANG_FUNC_LINK_TRY([des_random_key])
-    ],[
-      tst_api="0x095"
-    ])
-  fi
-  case $tst_api in
-    0x097) tst_show="0.9.7" ;;
-    0x095) tst_show="0.9.5" ;;
-    *)     tst_show="unknown" ;;
-  esac
-  AC_MSG_RESULT([$tst_show])
-  #
-  if test "$tst_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DES_RANDOM_KEY_API, $tst_api,
-      [OpenSSL link time API for OpenSSL DES_random_key function. Configure
-       script only definition. No matter what, do not ever define yourself.])
-  fi
-])
+# serial 5
 
 
 dnl CURL_CHECK_OPENSSL_API_HEADERS
@@ -180,11 +86,11 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
   fi
   AC_MSG_RESULT([$tst_show])
   #
-  if test "$tst_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_HEADERS, $tst_api,
-      [OpenSSL headers configure time API. Defined only by configure script.
-       No matter what, do not ever define this manually or by any other means.])
-  fi
+dnl if test "$tst_api" != "unknown"; then
+dnl AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_HEADERS, $tst_api,
+dnl   [OpenSSL headers configure time API. Defined only by configure script.
+dnl    No matter what, do not ever define this manually or by any other means.])
+dnl fi
   curl_openssl_api_headers=$tst_api
 ])
 
@@ -319,11 +225,11 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
   esac
   AC_MSG_RESULT([$tst_show])
   #
-  if test "$tst_api" != "unknown"; then
-    AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_LIBRARY, $tst_api,
-      [OpenSSL library link time API. Defined only by configure script.
-       No matter what, do not ever define this manually or by any other means.])
-  fi
+dnl if test "$tst_api" != "unknown"; then
+dnl AC_DEFINE_UNQUOTED(HAVE_OPENSSL_API_LIBRARY, $tst_api,
+dnl   [OpenSSL library link time API. Defined only by configure script.
+dnl    No matter what, do not ever define this manually or by any other means.])
+dnl fi
   curl_openssl_api_library=$tst_api
 ])
 
