@@ -15,6 +15,7 @@ none
 </server>
 <features>
 unittest
+http
 </features>
  <name>
 formpost unit tests
