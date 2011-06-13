@@ -75,4 +75,21 @@ UNITTEST_START
 
   curl_formfree(post);
 
+  /* start a new formpost with a file upload and formget */
+  post = last = NULL;
+
+  rc = curl_formadd(&post, &last,
+                    CURLFORM_PTRNAME, "name of file field",
+                    CURLFORM_FILE, "log/test-1308",
+                    CURLFORM_FILENAME, "custom named file",
+                    CURLFORM_END);
+
+  fail_unless(rc == 0, "curl_formadd returned error");
+
+  rc = curl_formget(post, &total_size, print_httppost_callback);
+  fail_unless(rc == 0, "curl_formget returned error");
+  fail_unless(total_size == 847, "curl_formget got wrong size back");
+
+  curl_formfree(post);
+
 UNITTEST_STOP

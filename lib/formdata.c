@@ -891,7 +891,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
           Curl_formclean(&data);
           return -1;
         }
-      } while(nread == sizeof(buffer));
+      } while(nread);
     }
     else {
       if(ptr->length != append(arg, ptr->line, ptr->length)) {
@@ -1306,6 +1306,11 @@ static size_t readfromfile(struct Form *form, char *buffer,
       return 0;
     else
       nread = form->fread_func(buffer, 1, size, form->data->line);
+
+    if(nread > size)
+      /* the read callback can return a value larger than the buffer but
+         treat any such as no data in this case */
+      nread = 0;
   }
   else {
     if(!form->fp) {
@@ -1316,9 +1321,9 @@ static size_t readfromfile(struct Form *form, char *buffer,
     }
     nread = fread(buffer, 1, size, form->fp);
   }
-  if(!nread || nread > size) {
+  if(!nread) {
     /* this is the last chunk from the file, move on */
-    if(!callback) {
+    if(form->fp) {
       fclose(form->fp);
       form->fp = NULL;
     }
