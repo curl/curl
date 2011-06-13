@@ -564,6 +564,12 @@ FAQ
   install and use them, in the libcurl section of the curl web site:
   http://curl.haxx.se/libcurl/
 
+  All the various bindings to libcurl are made by other projects and people,
+  outside of the cURL project. The cURL project itself only produces libcurl
+  with its plain C API. If you don't find anywhere else to ask you can ask
+  about bindings on the curl-library list too, but be prepared that people on
+  that list may not know anything about bindings.
+
   In October 2009, there were interfaces available for the following
   languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
   Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
