@@ -875,7 +875,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
     return (int)rc;
 
   for(ptr = data; ptr; ptr = ptr->next) {
-    if(ptr->type == FORM_FILE) {
+    if((ptr->type == FORM_FILE) || (ptr->type == FORM_CALLBACK)) {
       char buffer[8192];
       size_t nread;
       struct Form temp;
@@ -1301,8 +1301,12 @@ static size_t readfromfile(struct Form *form, char *buffer,
   size_t nread;
   bool callback = (bool)(form->data->type == FORM_CALLBACK);
 
-  if(callback)
-    nread = form->fread_func(buffer, 1, size, form->data->line);
+  if(callback) {
+    if(form->fread_func == ZERO_NULL)
+      return 0;
+    else
+      nread = form->fread_func(buffer, 1, size, form->data->line);
+  }
   else {
     if(!form->fp) {
       /* this file hasn't yet been opened */
