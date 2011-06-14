@@ -24,6 +24,9 @@ This release includes the following bugfixes:
  o cyassl: build without filesystem
  o HTTPS over HTTP proxy using the multi interface
  o speedcheck: invalid timeout event on a reused handle
+ o Force connection close for HTTP 200 OK when time condition matched
+ o curl_formget: fix FILE * leak
+ o configure: improved OpenSSL detection
 
 This release includes the following known bugs:
 
