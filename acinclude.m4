@@ -2856,7 +2856,7 @@ AC_DEFUN([DO_CURL_OFF_T_CHECK], [
     tmp_includes=""
     tmp_source=""
     tmp_fmt=""
-    case AS_TR_SH([$1]) in
+    case XC_SH_TR_SH([$1]) in
       int64_t)
         tmp_includes="$curl_includes_inttypes"
         tmp_source="char f@<:@@:>@ = PRId64;"
@@ -2914,7 +2914,7 @@ AC_DEFUN([DO_CURL_OFF_T_SUFFIX_CHECK], [
   curl_suffix_curl_off_t="unknown"
   curl_suffix_curl_off_tu="unknown"
   #
-  case AS_TR_SH([$1]) in
+  case XC_SH_TR_SH([$1]) in
     long_long | __longlong | __longlong_t)
       tst_suffixes="LL::"
       ;;
@@ -3086,7 +3086,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     curl_format_curl_off_tu=`echo "$curl_format_curl_off_tu" | "$SED" 's/D$/U/'`
   else
     x_pull_headers="no"
-    case AS_TR_SH([$curl_typeof_curl_off_t]) in
+    case XC_SH_TR_SH([$curl_typeof_curl_off_t]) in
       long_long | __longlong | __longlong_t)
         curl_format_curl_off_t="lld"
         curl_format_curl_off_tu="llu"

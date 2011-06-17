@@ -2617,7 +2617,7 @@ AC_CHECK_FUNCS([fork \
     ],[
       AC_MSG_RESULT([yes])
       eval "ac_cv_func_$func=yes"
-      AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$func]), [1],
+      AC_DEFINE_UNQUOTED(XC_SH_TR_CPP([HAVE_$func]), [1],
         [Define to 1 if you have the $func function.])
     ],[
       AC_MSG_RESULT([but still no])
