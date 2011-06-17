@@ -64,6 +64,7 @@ int test(char *URL)
   struct curl_httppost *formpost=NULL;
   struct curl_httppost *lastptr=NULL;
   struct WriteThis pooh;
+  struct WriteThis pooh2;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -80,6 +81,23 @@ int test(char *URL)
                         CURLFORM_STREAM, &pooh,
                         CURLFORM_CONTENTSLENGTH, pooh.sizeleft,
                         CURLFORM_FILENAME, "postit2.c",
+                        CURLFORM_END);
+
+  if(formrc)
+    printf("curl_formadd(1) = %d\n", (int)formrc);
+
+  /* Now add the same data with another name and make it not look like
+     a file upload but still using the callback */
+
+  pooh2.readptr = data;
+  pooh2.sizeleft = strlen(data);
+
+  /* Fill in the file upload field */
+  formrc = curl_formadd(&formpost,
+                        &lastptr,
+                        CURLFORM_COPYNAME, "callbackdata",
+                        CURLFORM_STREAM, &pooh2,
+                        CURLFORM_CONTENTSLENGTH, pooh2.sizeleft,
                         CURLFORM_END);
 
   if(formrc)

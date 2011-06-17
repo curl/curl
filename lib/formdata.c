@@ -1134,15 +1134,17 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
         /* it should be noted that for the HTTPPOST_FILENAME and
            HTTPPOST_CALLBACK cases the ->showfilename struct member is always
            assigned at this point */
-        char *filebasename=
-          (!post->showfilename)?strippath(post->contents):NULL;
+        if(post->showfilename || (post->flags & HTTPPOST_FILENAME)) {
+          char *filebasename=
+            (!post->showfilename)?strippath(post->contents):NULL;
 
-        result = AddFormDataf(&form, &size,
-                              "; filename=\"%s\"",
-                              (post->showfilename?post->showfilename:
-                               filebasename));
-        if(filebasename)
-          free(filebasename);
+          result = AddFormDataf(&form, &size,
+                                "; filename=\"%s\"",
+                                (post->showfilename?post->showfilename:
+                                 filebasename));
+          if(filebasename)
+            free(filebasename);
+        }
 
         if(result)
           break;
