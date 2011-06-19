@@ -31,6 +31,9 @@
 /* this must be the last include file */
 #include "memdebug.h"
 
+/*
+ * @unittest: 1300
+ */
 static void
 llist_init(struct curl_llist *l, curl_llist_dtor dtor)
 {
@@ -106,8 +109,9 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
 /*
  * @unittest: 1300
  */
-int Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
-                      void *user)
+int
+Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
+                  void *user)
 {
   if(e == NULL || list->size == 0)
     return 1;
@@ -153,6 +157,9 @@ Curl_llist_count(struct curl_llist *list)
   return list->size;
 }
 
+/*
+ * @unittest: 1300
+ */
 int Curl_llist_move(struct curl_llist *list, struct curl_llist_element *e,
                     struct curl_llist *to_list,
                     struct curl_llist_element *to_e)
