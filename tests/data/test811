@@ -36,7 +36,7 @@ pop3://%HOSTIP:%POP3PORT/ -u user:secret
 <protocol>
 USER user
 PASS secret
-LIST 
+LIST
 QUIT
 </protocol>
 </verify>
