@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------------
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 1
+# serial 2
 
 
 dnl XC_SH_TR_SH (expression)
@@ -54,7 +54,9 @@ dnl argument, where all non-alfanumeric characters are
 dnl converted to the underscore '_' character.
 
 AC_DEFUN([XC_M4_TR_SH],
-[patsubst([$1], [[^a-zA-Z0-9_]], [_])])
+[patsubst(XC_QPATSUBST(XC_QUOTE($1),
+                       [[^a-zA-Z0-9_]], [_]),
+          [\(_\(.*\)_\)], [\2])])
 
 
 dnl XC_M4_TR_SH_EX (expression, [extra])
@@ -66,7 +68,11 @@ dnl example [*+], [*], and [+] are valid 'extra' args.
 AC_DEFUN([XC_M4_TR_SH_EX],
 [ifelse([$2], [],
   [XC_M4_TR_SH([$1])],
-  [patsubst(patsubst([[$1]], [[$2]], [p]), [[^a-zA-Z0-9_]], [_])])])
+  [patsubst(XC_QPATSUBST(XC_QPATSUBST(XC_QUOTE($1),
+                                      [[$2]],
+                                      [p]),
+                         [[^a-zA-Z0-9_]], [_]),
+            [\(_\(.*\)_\)], [\2])])])
 
 
 dnl XC_SH_TR_CPP (expression)
@@ -108,10 +114,11 @@ dnl converted to the underscore '_' character and alnum
 dnl characters are converted to uppercase.
 
 AC_DEFUN([XC_M4_TR_CPP],
-[patsubst(translit([[$1]],
-                   [abcdefghijklmnopqrstuvwxyz],
-                   [ABCDEFGHIJKLMNOPQRSTUVWXYZ]),
-          [[^A-Z0-9_]], [_])])
+[patsubst(XC_QPATSUBST(XC_QTRANSLIT(XC_QUOTE($1),
+                                    [abcdefghijklmnopqrstuvwxyz],
+                                    [ABCDEFGHIJKLMNOPQRSTUVWXYZ]),
+                       [[^A-Z0-9_]], [_]),
+          [\(_\(.*\)_\)], [\2])])
 
 
 dnl XC_M4_TR_CPP_EX (expression, [extra])
@@ -123,8 +130,35 @@ dnl example [*+], [*], and [+] are valid 'extra' args.
 AC_DEFUN([XC_M4_TR_CPP_EX],
 [ifelse([$2], [],
   [XC_M4_TR_CPP([$1])],
-  [patsubst(translit(patsubst([[[$1]]], [[$2]], [P]),
-                     [abcdefghijklmnopqrstuvwxyz],
-                     [ABCDEFGHIJKLMNOPQRSTUVWXYZ]),
-            [[^A-Z0-9_]], [_])])])
+  [patsubst(XC_QPATSUBST(XC_QTRANSLIT(XC_QPATSUBST(XC_QUOTE($1),
+                                                   [[$2]],
+                                                   [P]),
+                                      [abcdefghijklmnopqrstuvwxyz],
+                                      [ABCDEFGHIJKLMNOPQRSTUVWXYZ]),
+                         [[^A-Z0-9_]], [_]),
+            [\(_\(.*\)_\)], [\2])])])
+
+
+dnl XC_QUOTE (expression)
+dnl -------------------------------------------------
+dnl Expands to quoted result of 'expression' expansion.
+
+AC_DEFUN([XC_QUOTE],
+[[$@]])
+
+
+dnl XC_QPATSUBST (string, regexp[, repl])
+dnl -------------------------------------------------
+dnl Expands to quoted result of 'patsubst' expansion.
+
+AC_DEFUN([XC_QPATSUBST],
+[XC_QUOTE(patsubst([$1], [$2], [$3]))])
+
+
+dnl XC_QTRANSLIT (string, chars, repl)
+dnl -------------------------------------------------
+dnl Expands to quoted result of 'translit' expansion.
+
+AC_DEFUN([XC_QTRANSLIT],
+[XC_QUOTE(translit([$1], [$2], [$3]))])
 
