@@ -72,6 +72,7 @@ LOCAL_COPY_HEADERS_TO := libcurl/curl
 LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
 
 LOCAL_MODULE:= libcurl
+LOCAL_MODULE_TAGS := optional
 
 # Copy the licence to a place where Android will find it.
 # Actually, this doesn't quite work because the build system searches
@@ -92,6 +93,7 @@ include $(LOCAL_PATH)/src/Makefile.inc
 LOCAL_SRC_FILES := $(addprefix src/,$(CURL_CFILES))
 
 LOCAL_MODULE := curl
+LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES := libcurl
 LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
