@@ -14,6 +14,12 @@ Installing Binary Packages
    binary package. This document describes how to compile, build and install
    curl and libcurl from source code.
 
+Building from git
+=================
+
+   If you get your code off a git repository, see the GIT-INFO file in the
+   root directory for specific instructions on how to proceed.
+
 UNIX
 ====
    A normal unix installation is made in three or four steps (after you've
