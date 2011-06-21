@@ -486,7 +486,6 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
 {
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
-  struct SessionHandle *data = conn->data;
   CURLcode rc = CURLE_OK;
 
   DEBUGASSERT(conn && td);
@@ -638,7 +637,6 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   int error;
   char sbuf[NI_MAXSERV];
   int pf = PF_INET;
-  struct SessionHandle *data = conn->data;
 
   *waitp = 0; /* default to synchronous response */
 
@@ -677,12 +675,12 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   /* fall-back to blocking version */
-  infof(data, "init_resolve_thread() failed for %s; %s\n",
+  infof(conn->data, "init_resolve_thread() failed for %s; %s\n",
         hostname, Curl_strerror(conn, ERRNO));
 
   error = Curl_getaddrinfo_ex(hostname, sbuf, &hints, &res);
   if(error) {
-    infof(data, "getaddrinfo() failed for %s:%d; %s\n",
+    infof(conn->data, "getaddrinfo() failed for %s:%d; %s\n",
           hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
   }
