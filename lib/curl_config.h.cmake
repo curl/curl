@@ -1,8 +1,5 @@
 /* lib/curl_config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if you have the $func function. */
-#cmakedefine AS_TR_CPP ${AS_TR_CPP}
-
 /* when building libcurl itself */
 #cmakedefine BUILDING_LIBCURL ${BUILDING_LIBCURL}
 
