@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -114,7 +114,7 @@ CCD   = cl.exe $(RTLIBD) /Gm /ZI /Od /D_DEBUG /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 RCD   = rc.exe /dDEBUGBUILD=1
 
-CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
+CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 RESFLAGS = /i../include
 
