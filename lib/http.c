@@ -3158,7 +3158,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       /* Find the first non-space letter */
       start = k->p + 18;
 
-      do {
+      for(;;) {
         /* skip whitespaces and commas */
         while(*start && (ISSPACE(*start) || (*start == ',')))
           start++;
@@ -3204,7 +3204,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           /* unknown! */
           break;
 
-      } while(1);
+      }
 
     }
     else if(checkprefix("Content-Encoding:", k->p) &&
