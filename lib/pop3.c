@@ -481,11 +481,14 @@ static CURLcode pop3_list(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  if(pop3c->mailbox[0] != '\0')
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  else
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST");
   if(result)
     return result;
 
-  if(strlen(pop3c->mailbox))
+  if(pop3c->mailbox[0] != '\0')
     state(conn, POP3_LIST_SINGLE);
   else
     state(conn, POP3_LIST);
