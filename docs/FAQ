@@ -1157,6 +1157,11 @@ FAQ
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
 
+  When you use the easy interface, the connection cache is kept within the
+  easy handle. If you instead use the multi interface, the connection cache
+  will be kept within the multi handle and will be shared among all the easy
+  handles that are used within the same multi handle.
+
   5.7 Link errors when building libcurl on Windows!
 
   You need to make sure that your project, and all the libraries (both static
