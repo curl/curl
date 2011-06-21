@@ -485,6 +485,10 @@ static int parsedate(const char *date, time_t *output)
     return PARSEDATE_SOONER;
   }
 
+  if((mdaynum > 31) || (monnum > 11) ||
+     (hournum > 23) || (minnum > 59) || (secnum > 60))
+    return PARSEDATE_FAIL; /* clearly an illegal date */
+
   tm.tm_sec = secnum;
   tm.tm_min = minnum;
   tm.tm_hour = hournum;
