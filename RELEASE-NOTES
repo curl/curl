@@ -27,6 +27,10 @@ This release includes the following bugfixes:
  o Force connection close for HTTP 200 OK when time condition matched
  o curl_formget: fix FILE * leak
  o configure: improved OpenSSL detection
+ o Android build: support gingerbread
+ o CURLFORM_STREAM: acknowledge CURLFORM_FILENAME
+ o windows build: use correct MS CRT
+ o pop3: remove extra space in LIST command
 
 This release includes the following known bugs:
 
@@ -37,7 +41,7 @@ advice from friends like these:
 
  Dan Fandrich, Guenter Knauf, Vsevolod Novikov, Zmey Petroff,
  Dagobert Michelsen, Jeff Pohlmeyer, Dmitri Shubin, Matteo Rocco,
- Aaron Orenstein, Yang Tse, Kamil Dudka
-
+ Aaron Orenstein, Yang Tse, Kamil Dudka, Amr Shahin, Josue Andrade Gomes,
+ Ori Avtalion
 
         Thanks! (and sorry if I forgot to mention someone)
