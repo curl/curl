@@ -1,6 +1,6 @@
-Curl and libcurl 7.21.7
+Curl and libcurl 7.21.8
 
- Public curl releases:         123
+ Public curl releases:         124
  Command line options:         144
  curl_easy_setopt() options:   186
  Public functions in libcurl:  58
@@ -9,30 +9,11 @@ Curl and libcurl 7.21.7
 
 This release includes the following changes:
 
- o recognize the [protocol]:// prefix in proxy hosts where the protocol is one
-   of socks4, socks4a, socks5 or socks5h.
- o Added CURLOPT_CLOSESOCKETFUNCTION and CURLOPT_CLOSESOCKETDATA
+ o 
 
 This release includes the following bugfixes:
 
- o SECURITY ADVISORY: inappropriate GSSAPI delegation. Full details at
-   http://curl.haxx.se/docs/adv_20110623.html
- o NTLM: work with unicode
- o fix connect with SOCKS proxy when using the multi interface
- o anyauthput.c: stdint.h must not be included unconditionally
- o CMake: improved build
- o SCP/SFTP enable non-blocking earlier
- o GnuTLS handshake: fix timeout
- o cyassl: build without filesystem
- o HTTPS over HTTP proxy using the multi interface
- o speedcheck: invalid timeout event on a reused handle
- o Force connection close for HTTP 200 OK when time condition matched
- o curl_formget: fix FILE * leak
- o configure: improved OpenSSL detection
- o Android build: support gingerbread
- o CURLFORM_STREAM: acknowledge CURLFORM_FILENAME
- o windows build: use correct MS CRT
- o pop3: remove extra space in LIST command
+ o curl_getdate: detect some illegal dates better
 
 This release includes the following known bugs:
 
@@ -41,9 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Guenter Knauf, Vsevolod Novikov, Zmey Petroff,
- Dagobert Michelsen, Jeff Pohlmeyer, Dmitri Shubin, Matteo Rocco,
- Aaron Orenstein, Yang Tse, Kamil Dudka, Amr Shahin, Josue Andrade Gomes,
- Ori Avtalion, Richard Silverman, Julien Chaffraix
+ Paolo Piacentini
 
         Thanks! (and sorry if I forgot to mention someone)
