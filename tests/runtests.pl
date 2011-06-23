@@ -226,6 +226,7 @@ my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
 my %enabled_keywords;   # key words of tests to run
+my %disabled;           # disabled test cases 
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -2437,6 +2438,9 @@ sub singletest {
     if($disttests !~ /test$testnum\W/ ) {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
     }
+    if($disabled{$testnum}) {
+        logmsg "Warning: test$testnum is explicitly disabled\n";
+    }
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -3861,7 +3865,6 @@ sub runtimestats {
 my $number=0;
 my $fromnum=-1;
 my @testthis;
-my %disabled;
 while(@ARGV) {
     if ($ARGV[0] eq "-v") {
         # verbose output
@@ -4116,6 +4119,22 @@ if(!$listonly) {
 }
 
 #######################################################################
+# Fetch all disabled tests
+#
+
+open(D, "<$TESTDIR/DISABLED");
+while(<D>) {
+    if(/^ *\#/) {
+        # allow comments
+        next;
+    }
+    if($_ =~ /(\d+)/) {
+        $disabled{$1}=$1; # disable this test number
+    }
+}
+close(D);
+
+#######################################################################
 # If 'all' tests are requested, find out all test numbers
 #
 
@@ -4124,18 +4143,6 @@ if ( $TESTCASES eq "all") {
     opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
-
-    open(D, "<$TESTDIR/DISABLED");
-    while(<D>) {
-        if(/^ *\#/) {
-            # allow comments
-            next;
-        }
-        if($_ =~ /(\d+)/) {
-            $disabled{$1}=$1; # disable this test number
-        }
-    }
-    close(D);
 
     $TESTCASES=""; # start with no test cases
 
