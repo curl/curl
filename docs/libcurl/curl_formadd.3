@@ -30,18 +30,19 @@ curl_formadd - add a section to a multipart/formdata HTTP POST
 .ad
 .SH DESCRIPTION
 curl_formadd() is used to append sections when building a multipart/formdata
-HTTP POST (sometimes referred to as RFC2388-style posts). Append one section at
-a time until you've added all the sections you want included and then you pass
-the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
-\fIlastitem\fP is set after each call and on repeated invokes it should be
-left as set to allow repeated invokes to find the end of the list faster.
+HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
+at a time until you've added all the sections you want included and then you
+pass the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
+\fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
+invokes it should be left as set to allow repeated invokes to find the end of
+the list faster.
 
 After the \fIlastitem\fP pointer follow the real arguments.
 
-The pointers \fI*firstitem\fP and \fI*lastitem\fP should both be pointing to
+The pointers \fIfirstitem\fP and \fIlastitem\fP should both be pointing to
 NULL in the first call to this function. All list-data will be allocated by
-the function itself. You must call \fIcurl_formfree(3)\fP after the form post
-has been done to free the resources.
+the function itself. You must call \fIcurl_formfree(3)\fP on the
+\fIfirstitem\P after the form post has been done to free the resources.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.

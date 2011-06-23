@@ -32,6 +32,10 @@ curl_formfree() is used to clean up data previously built/appended with
 \fIcurl_formadd(3)\fP. This must be called when the data has been used, which
 typically means after \fIcurl_easy_perform(3)\fP has been called.
 
+The pointer to free is the same pointer you passed to the
+\fBCURLOPT_HTTPPOST\fP option, which is the \fIfirstitem\fP pointer from the
+\fIcurl_formadd(3)\fP invoke(s).
+
 \fBform\fP is the pointer as returned from a previous call to
 \fIcurl_formadd(3)\fP and may be NULL.
 .SH RETURN VALUE
