@@ -109,6 +109,7 @@ nothing
 80: 20110623 56:34:56 => -1
 81: 20111323 12:34:56 => -1
 82: 20110623 12:34:79 => -1
+83: Wed, 31 Dec 2008 23:59:60 GMT => 1230768000
 </stdout>
 
 # This test case previously testes an overflow case ("2094 Nov 6 =>
