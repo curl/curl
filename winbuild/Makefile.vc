@@ -64,7 +64,7 @@ USE_SSL      = true
 SSL=dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL      = true
-SSL=dll
+SSL=static
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
