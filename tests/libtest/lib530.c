@@ -161,20 +161,16 @@ int test(char *URL)
     mp_timedout = FALSE;
     mp_start = tutil_tvnow();
 
-    while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = (int)curl_multi_perform(m, &running);
-      if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-          MULTI_PERFORM_HANG_TIMEOUT) {
-        mp_timedout = TRUE;
-        break;
-      }
-      if (running <= 0) {
-        done = TRUE; /* bail out */
-        break;
-      }
-    }
-    if (mp_timedout || done)
+    res = (int)curl_multi_perform(m, &running);
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+        MULTI_PERFORM_HANG_TIMEOUT) {
+      mp_timedout = TRUE;
       break;
+    }
+    if (running <= 0) {
+      done = TRUE; /* bail out */
+      break;
+    }
 
     if (res != CURLM_OK) {
       fprintf(stderr, "not okay???\n");

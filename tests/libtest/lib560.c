@@ -63,9 +63,7 @@ int test(char *URL)
   curl_multi_add_handle(multi_handle, http_handle);
 
   /* we start some action by calling perform right away */
-  do {
-    code = curl_multi_perform(multi_handle, &still_running);
-  } while(code == CURLM_CALL_MULTI_PERFORM);
+  code = curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -100,9 +98,7 @@ int test(char *URL)
     case 0:
     default:
       /* timeout or readable/writable sockets */
-      do {
-        code = curl_multi_perform(multi_handle, &still_running);
-      } while(code == CURLM_CALL_MULTI_PERFORM);
+      code = curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }

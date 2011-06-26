@@ -99,41 +99,38 @@ int test(char *URL)
     mp_timedout = FALSE;
     mp_start = tutil_tvnow();
 
-    while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = (int)curl_multi_perform(m, &running);
-      if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-          MULTI_PERFORM_HANG_TIMEOUT) {
-        mp_timedout = TRUE;
-        break;
-      }
-      if (running <= 0) {
-        if(!current++) {
-          fprintf(stderr, "Advancing to URL 1\n");
-          /* remove the handle we use */
-          curl_multi_remove_handle(m, curl);
+    res = (int)curl_multi_perform(m, &running);
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+        MULTI_PERFORM_HANG_TIMEOUT) {
+      mp_timedout = TRUE;
+      break;
+    }
+    if (running <= 0) {
+      if(!current++) {
+        fprintf(stderr, "Advancing to URL 1\n");
+        /* remove the handle we use */
+        curl_multi_remove_handle(m, curl);
 
-          /* make us re-use the same handle all the time, and try resetting
-             the handle first too */
-          curl_easy_reset(curl);
-          test_setopt(curl, CURLOPT_URL, libtest_arg2);
-          test_setopt(curl, CURLOPT_VERBOSE, 1);
-          test_setopt(curl, CURLOPT_FAILONERROR, 1);
+        /* make us re-use the same handle all the time, and try resetting
+           the handle first too */
+        curl_easy_reset(curl);
+        test_setopt(curl, CURLOPT_URL, libtest_arg2);
+        test_setopt(curl, CURLOPT_VERBOSE, 1);
+        test_setopt(curl, CURLOPT_FAILONERROR, 1);
 
-          /* re-add it */
-          res = (int)curl_multi_add_handle(m, curl);
-          if(res) {
-            fprintf(stderr, "add handle failed: %d.\n", res);
-            res = 243;
-            break;
-          }
+        /* re-add it */
+        res = (int)curl_multi_add_handle(m, curl);
+        if(res) {
+          fprintf(stderr, "add handle failed: %d.\n", res);
+          res = 243;
+          break;
         }
-        else
-          done = TRUE; /* bail out */
+      }
+      else {
+        done = TRUE; /* bail out */
         break;
       }
     }
-    if (mp_timedout || done)
-      break;
 
     if (res != CURLM_OK) {
       fprintf(stderr, "not okay???\n");

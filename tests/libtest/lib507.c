@@ -75,14 +75,10 @@ int test(char *URL)
   mp_timedout = FALSE;
   mp_start = tutil_tvnow();
 
-  do {
-    ret = curl_multi_perform(multi, &still_running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-        MULTI_PERFORM_HANG_TIMEOUT) {
-      mp_timedout = TRUE;
-      break;
-    }
-  } while (ret == CURLM_CALL_MULTI_PERFORM);
+  ret = curl_multi_perform(multi, &still_running);
+  if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+      MULTI_PERFORM_HANG_TIMEOUT)
+    mp_timedout = TRUE;
 
   ml_timedout = FALSE;
   ml_start = tutil_tvnow();
@@ -116,20 +112,18 @@ int test(char *URL)
       default:
         mp_timedout = FALSE;
         mp_start = tutil_tvnow();
-        do {
-          ret = curl_multi_perform(multi, &still_running);
-          if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-              MULTI_PERFORM_HANG_TIMEOUT) {
-            mp_timedout = TRUE;
-            break;
-          }
-        } while (ret == CURLM_CALL_MULTI_PERFORM);
+        ret = curl_multi_perform(multi, &still_running);
+        if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+            MULTI_PERFORM_HANG_TIMEOUT)
+          mp_timedout = TRUE;
         break;
     }
   }
   if (ml_timedout || mp_timedout) {
-    if (ml_timedout) fprintf(stderr, "ml_timedout\n");
-    if (mp_timedout) fprintf(stderr, "mp_timedout\n");
+    if (ml_timedout)
+      fprintf(stderr, "ml_timedout\n");
+    if (mp_timedout)
+      fprintf(stderr, "mp_timedout\n");
     fprintf(stderr, "ABORTING TEST, since it seems "
             "that it would have run forever.\n");
     i = TEST_ERR_RUNS_FOREVER;

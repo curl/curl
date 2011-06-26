@@ -106,15 +106,11 @@ int test(char *URL)
 
     fprintf(stderr, "curl_multi_perform()\n");
 
-    ret = CURLM_CALL_MULTI_PERFORM;
-
-    while (ret == CURLM_CALL_MULTI_PERFORM) {
-      ret = curl_multi_perform(m, &running);
-      if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-          MULTI_PERFORM_HANG_TIMEOUT) {
-        mp_timedout = TRUE;
-        break;
-      }
+    ret = curl_multi_perform(m, &running);
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+        MULTI_PERFORM_HANG_TIMEOUT) {
+      mp_timedout = TRUE;
+      break;
     }
     if (mp_timedout)
       break;
