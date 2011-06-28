@@ -37,8 +37,6 @@
 #include <pthread.h>
 
 #include <curl/curl.h>
-#include <curl/types.h> /* new for v7 */
-#include <curl/easy.h> /* new for v7 */
 
 #define NUMT 4
 

@@ -22,8 +22,6 @@
 #include <stdio.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 /*
  * This is an example showing how to get a single file from an FTP server.

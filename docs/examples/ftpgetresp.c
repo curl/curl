@@ -22,8 +22,6 @@
 #include <stdio.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 /*
  * Similar to ftpget.c but this also stores the received response-lines

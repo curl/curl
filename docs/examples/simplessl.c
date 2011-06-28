@@ -22,9 +22,6 @@
 #include <stdio.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
-
 
 /* some requirements for this to work:
    1.   set pCertFile to the file with the client certificate

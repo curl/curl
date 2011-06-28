@@ -24,8 +24,6 @@
 #include <unistd.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {

@@ -23,8 +23,6 @@
 #include <string.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 /*
  * This is an example showing how to check a single file's size and mtime
