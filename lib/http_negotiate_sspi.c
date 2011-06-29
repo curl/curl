@@ -45,12 +45,15 @@
 #include "memdebug.h"
 
 static int
-get_gss_name(struct connectdata *conn, bool proxy, char *server)
+get_gss_name(struct connectdata *conn, bool proxy,
+             struct negotiatedata *neg_ctx)
 {
-  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
-    &conn->data->state.negotiate;
   const char* service;
   size_t length;
+
+  if(proxy && !conn->proxy.name)
+    /* proxy auth requested but no given proxy name, error out! */
+    return -1;
 
   /* GSSAPI implementation by Globus (known as GSI) requires the name to be
      of form "<service>/<fqdn>" instead of <service>@<fqdn> (ie. slash instead
@@ -71,7 +74,7 @@ get_gss_name(struct connectdata *conn, bool proxy, char *server)
   if(length + 1 > sizeof(neg_ctx->server_name))
     return EMSGSIZE;
 
-  snprintf(server, sizeof(neg_ctx->server_name), "%s/%s",
+  snprintf(neg_ctx->server_name, sizeof(neg_ctx->server_name), "%s/%s",
            service, proxy ? conn->proxy.name : conn->host.name);
 
   return 0;
@@ -130,7 +133,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   if(strlen(neg_ctx->server_name) == 0 &&
-     (ret = get_gss_name(conn, proxy, neg_ctx->server_name)))
+     (ret = get_gss_name(conn, proxy, neg_ctx)))
     return ret;
 
   if(!neg_ctx->output_token) {
