@@ -1068,16 +1068,18 @@ file will not be read and used. See the \fI-K, --config\fP for details on the
 default config file search path.
 .IP "-Q, --quote <command>"
 (FTP/SFTP) Send an arbitrary command to the remote FTP or SFTP server. Quote
-commands are sent BEFORE the transfer takes place (just after the
-initial PWD command in an FTP transfer, to be exact). To make commands
-take place after a successful transfer, prefix them with a dash '-'.
-To make commands be sent after libcurl has changed the working directory,
-just before the transfer command(s), prefix the command with a '+' (this
-is only supported for FTP). You may specify any number of commands. If
-the server returns failure for one of the commands, the entire operation
-will be aborted. You must send syntactically correct FTP commands as
-RFC 959 defines to FTP servers, or one of the commands listed below to
-SFTP servers.  This option can be used multiple times.
+commands are sent BEFORE the transfer takes place (just after the initial PWD
+command in an FTP transfer, to be exact). To make commands take place after a
+successful transfer, prefix them with a dash '-'.  To make commands be sent
+after libcurl has changed the working directory, just before the transfer
+command(s), prefix the command with a '+' (this is only supported for
+FTP). You may specify any number of commands. If the server returns failure
+for one of the commands, the entire operation will be aborted. You must send
+syntactically correct FTP commands as RFC 959 defines to FTP servers, or one
+of the commands listed below to SFTP servers.  This option can be used
+multiple times. When speaking to a FTP server, prefix the command with an
+asterisk (*) to make libcurl continue even if the command fails as by default
+curl will stop at first failure.
 
 SFTP is a binary protocol. Unlike for FTP, libcurl interprets SFTP quote
 commands itself before sending them to the server.  File names may be quoted
