@@ -2929,23 +2929,23 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
       if(conn->handler->protocol & CURLPROTO_HTTP) {
         nc = sscanf(HEADER1,
-            " HTTP/%d.%d %3d",
-            &httpversion_major,
-            &conn->httpversion,
-            &k->httpcode);
+                    " HTTP/%d.%d %3d",
+                    &httpversion_major,
+                    &conn->httpversion,
+                    &k->httpcode);
         if(nc==3) {
           conn->httpversion += 10 * httpversion_major;
         }
         else {
           /* this is the real world, not a Nirvana
              NCSA 1.5.x returns this crap when asked for HTTP/1.1
-             */
+          */
           nc=sscanf(HEADER1, " HTTP %3d", &k->httpcode);
           conn->httpversion = 10;
 
           /* If user has set option HTTP200ALIASES,
              compare header line against list of aliases
-             */
+          */
           if(!nc) {
             if(checkhttpprefix(data, k->p)) {
               nc = 1;
