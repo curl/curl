@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -107,7 +107,7 @@ struct httprequest {
   bool digest;    /* Authorization digest header found */
   bool ntlm;      /* Authorization ntlm header found */
   int writedelay; /* if non-zero, delay this number of seconds between
-		      writes in the response */
+                     writes in the response */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
@@ -397,12 +397,13 @@ static int ProcessRequest(struct httprequest *req)
         return 1; /* done */
       }
       else {
+        char *orgcmd = NULL;
         char *cmd = NULL;
         size_t cmdsize = 0;
         int num=0;
 
         /* get the custom server control "commands" */
-        error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
+        error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
         if(error) {
           logmsg("getpart() failed with error: %d", error);
@@ -410,8 +411,9 @@ static int ProcessRequest(struct httprequest *req)
           return 1; /* done */
         }
 
-        if(cmdsize) {
-          logmsg("Found a reply-servercmd section!");
+        cmd = orgcmd;
+        while(cmd && cmdsize) {
+          char *check;
 
           if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
             logmsg("instructed to require authorization header");
@@ -445,9 +447,26 @@ static int ProcessRequest(struct httprequest *req)
           else {
             logmsg("funny instruction found: %s", cmd);
           }
+          /* try to deal with CRLF or just LF */
+          check = strchr(cmd, '\r');
+          if(!check)
+            check = strchr(cmd, '\n');
+
+          if(check) {
+            /* get to the letter following the newline */
+            while((*check == '\r') || (*check == '\n'))
+              check++;
+
+            if(!*check)
+              /* if we reached a zero, get out */
+              break;
+            cmd = check;
+          }
+          else
+            break;
         }
-        if(cmd)
-          free(cmd);
+        if(orgcmd)
+          free(orgcmd);
       }
     }
     else {
