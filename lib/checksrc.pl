@@ -148,6 +148,11 @@ sub scanfile {
         if($l =~ /^(.*)\} else/) {
             checkwarn($line, length($1), $file, $l, "else after closing brace on same line");
         }
+        # check for "){"
+        if($l =~ /^(.*)\)\{/) {
+            checkwarn($line, length($1)+1, $file, $l, "missing space after close paren");
+        }
+
         # check for open brace first on line but not first column
         # only alert if previous line ended with a close paren and wasn't a cpp
         # line
