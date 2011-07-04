@@ -627,7 +627,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     }
 
     /* Check if completed (That is, a less than full packet is received) */
-    if(state->rbytes < (ssize_t)state->blksize+4){
+    if(state->rbytes < (ssize_t)state->blksize+4) {
       state->state = TFTP_STATE_FIN;
     }
     else {

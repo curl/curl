@@ -58,7 +58,7 @@ static int SSL_read(SSL *ssl, void *buf, int num)
 
   while((ret = ssl_read(ssl, &read_buf)) == SSL_OK);
 
-  if(ret > SSL_OK){
+  if(ret > SSL_OK) {
     memcpy(buf, read_buf, ret > num ? num : ret);
   }
 
@@ -187,10 +187,10 @@ Curl_axtls_connect(struct connectdata *conn,
   /* Load the trusted CA cert bundle file */
   if(data->set.ssl.CAfile) {
     if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, data->set.ssl.CAfile, NULL)
-       != SSL_OK){
+       != SSL_OK) {
       infof(data, "error reading ca cert file %s \n",
             data->set.ssl.CAfile);
-      if(data->set.ssl.verifypeer){
+      if(data->set.ssl.verifypeer) {
         Curl_axtls_close(conn, sockindex);
         return CURLE_SSL_CACERT_BADFILE;
       }
@@ -208,13 +208,13 @@ Curl_axtls_connect(struct connectdata *conn,
    */
 
   /* Load client certificate */
-  if(data->set.str[STRING_CERT]){
+  if(data->set.str[STRING_CERT]) {
     i=0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
-    while(cert_types[i] != 0){
+    while(cert_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
                                     data->set.str[STRING_CERT], NULL);
-      if(ssl_fcn_return == SSL_OK){
+      if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read cert file %s \n",
               data->set.str[STRING_CERT]);
         break;
@@ -222,7 +222,7 @@ Curl_axtls_connect(struct connectdata *conn,
       i++;
     }
     /* Tried all cert types, none worked. */
-    if(cert_types[i] == 0){
+    if(cert_types[i] == 0) {
       failf(data, "%s is not x509 or pkcs12 format",
             data->set.str[STRING_CERT]);
       Curl_axtls_close(conn, sockindex);
@@ -233,13 +233,13 @@ Curl_axtls_connect(struct connectdata *conn,
   /* Load client key.
      If a pkcs12 file successfully loaded a cert, then there's nothing to do
      because the key has already been loaded. */
-  if(data->set.str[STRING_KEY] && cert_types[i] != SSL_OBJ_PKCS12){
+  if(data->set.str[STRING_KEY] && cert_types[i] != SSL_OBJ_PKCS12) {
     i=0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
-    while(key_types[i] != 0){
+    while(key_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
                                     data->set.str[STRING_KEY], NULL);
-      if(ssl_fcn_return == SSL_OK){
+      if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read key file %s \n",
               data->set.str[STRING_KEY]);
         break;
@@ -247,7 +247,7 @@ Curl_axtls_connect(struct connectdata *conn,
       i++;
     }
     /* Tried all key types, none worked. */
-    if(key_types[i] == 0){
+    if(key_types[i] == 0) {
       failf(data, "Failure: %s is not a supported key file",
             data->set.str[STRING_KEY]);
       Curl_axtls_close(conn, sockindex);
@@ -273,7 +273,7 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* Check to make sure handshake was ok. */
   ssl_fcn_return = ssl_handshake_status(ssl);
-  if(ssl_fcn_return != SSL_OK){
+  if(ssl_fcn_return != SSL_OK) {
     Curl_axtls_close(conn, sockindex);
     ssl_display_error(ssl_fcn_return); /* goes to stdout. */
     return map_error_to_curl(ssl_fcn_return);
@@ -285,8 +285,8 @@ Curl_axtls_connect(struct connectdata *conn,
    */
 
   /* Verify server's certificate */
-  if(data->set.ssl.verifypeer){
-    if(ssl_verify_cert(ssl) != SSL_OK){
+  if(data->set.ssl.verifypeer) {
+    if(ssl_verify_cert(ssl) != SSL_OK) {
       Curl_axtls_close(conn, sockindex);
       failf(data, "server cert verify failed");
       return CURLE_SSL_CONNECT_ERROR;
@@ -415,7 +415,7 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
       nread = (ssize_t)SSL_read(conn->ssl[sockindex].ssl, buf,
                                 sizeof(buf));
 
-      if(nread < SSL_OK){
+      if(nread < SSL_OK) {
         failf(data, "close notify alert not received during shutdown");
         retval = -1;
       }
@@ -447,13 +447,13 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 
   infof(conn->data, "  axtls_recv\n");
 
-  if(connssl){
+  if(connssl) {
     ret = (ssize_t)SSL_read(conn->ssl[num].ssl, buf, (int)buffersize);
 
     /* axTLS isn't terribly generous about error reporting */
     /* With patched axTLS, SSL_CLOSE_NOTIFY=-3.  Hard-coding until axTLS
        team approves proposed fix. */
-    if(ret == -3 ){
+    if(ret == -3 ) {
       Curl_axtls_close(conn, num);
     }
     else if(ret < 0) {

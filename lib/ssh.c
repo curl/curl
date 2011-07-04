@@ -1581,7 +1581,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                     SEEK_SET);
         }
 
-        if(seekerr != CURL_SEEKFUNC_OK){
+        if(seekerr != CURL_SEEKFUNC_OK) {
 
           if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
             failf(data, "Could not seek stream");

@@ -264,7 +264,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   if(Curl_GetFTPResponse(&nread, conn, NULL))
     return -1;
 
-  if(data->state.buffer[0] != '2'){
+  if(data->state.buffer[0] != '2') {
     Curl_failf(data, "Server didn't accept auth data");
     return AUTH_ERROR;
   }
@@ -349,7 +349,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   if(result)
     return result;
 
-  if(conn->data->state.buffer[0] != '3'){
+  if(conn->data->state.buffer[0] != '3') {
     krb4_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }

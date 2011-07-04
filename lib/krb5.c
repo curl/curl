@@ -289,7 +289,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
           break;
         }
 
-        if(data->state.buffer[0] != '2' && data->state.buffer[0] != '3'){
+        if(data->state.buffer[0] != '2' && data->state.buffer[0] != '3') {
           Curl_infof(data, "Server didn't accept auth data\n");
           ret = AUTH_ERROR;
           break;

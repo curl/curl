@@ -421,7 +421,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    socket error string function can be used for this pupose. */
 static const char *gai_strerror(int ecode)
 {
-  switch (ecode){
+  switch (ecode) {
   case EAI_AGAIN:
     return "The name could not be resolved at this time";
   case EAI_BADFLAGS:

@@ -283,7 +283,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
 
     if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
-                      "InitializeSecurityContextA") ){
+                      "InitializeSecurityContextA") ) {
       free(service_name);
       service_name=NULL;
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
@@ -416,7 +416,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                           &names);
   s_pSecFn->FreeCredentialsHandle(&cred_handle);
   if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
-                    "QueryCredentialAttributes") ){
+                    "QueryCredentialAttributes") ) {
     s_pSecFn->DeleteSecurityContext(&sspi_context);
     s_pSecFn->FreeContextBuffer(names.sUserName);
     failf(data, "Failed to determine user name.");
@@ -499,7 +499,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
     sspi_w_token[1].cbBuffer = 1;
     sspi_w_token[1].pvBuffer = malloc(1);
-    if(!sspi_w_token[1].pvBuffer){
+    if(!sspi_w_token[1].pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
