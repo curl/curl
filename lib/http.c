@@ -404,8 +404,10 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
            data left to send, keep on sending. */
 
         /* rewind data when completely done sending! */
-        if(!conn->bits.authneg)
+        if(!conn->bits.authneg) {
           conn->bits.rewindaftersend = TRUE;
+          infof(data, "Rewind stream after send\n");
+        }
 
         return CURLE_OK;
       }
@@ -1683,6 +1685,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(!data->state.first_host)
       return CURLE_OUT_OF_MEMORY;
   }
+  http->writebytecount = http->readbytecount = 0;
 
   if((conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_FTP)) &&
      data->set.upload) {
@@ -2543,6 +2546,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     Curl_pgrsSetUploadCounter(data, http->writebytecount);
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
+
+    if(http->writebytecount >= postsize) {
+      /* already sent the entire request body, mark the "upload" as
+         complete */
+      infof(data, "upload completely sent off: %" FORMAT_OFF_T "out of "
+            "%" FORMAT_OFF_T " bytes\n",
+            http->writebytecount, postsize);
+      data->req.upload_done = TRUE;
+      data->req.keepon &= ~KEEP_SEND; /* we're done writing */
+      data->req.exp100 = EXP100_SEND_DATA; /* already sent */
+    }
   }
 
   return result;
@@ -2814,17 +2828,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
       }
 
-      if(417 == k->httpcode) {
-        /*
-         * we got: "417 Expectation Failed" this means:
-         * we have made a HTTP call and our Expect Header
-         * seems to cause a problem => abort the write operations
-         * (or prevent them from starting).
-         */
-        k->exp100 = EXP100_FAILED;
-        k->keepon &= ~KEEP_SEND;
-      }
-
       /*
        * When all the headers have been parsed, see if we should give
        * up and return an error.
@@ -2863,6 +2866,46 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
         if(result)
           return result;
+
+        if(k->httpcode >= 300) {
+          if((!conn->bits.authneg) && !conn->bits.close &&
+             !conn->bits.rewindaftersend) {
+            /*
+             * General treatment of errors when about to send data. Including :
+             * "417 Expectation Failed", while waiting for 100-continue.
+             *
+             * The check for close above is done simply because of something
+             * else has already deemed the connection to get closed then
+             * something else should've considered the big picture and we
+             * avoid this check.
+             *
+             * rewindaftersend indicates that something has told libcurl to
+             * continue sending even if it gets discarded
+             */
+
+            switch(data->set.httpreq) {
+            case HTTPREQ_PUT:
+            case HTTPREQ_POST:
+            case HTTPREQ_POST_FORM:
+              /* We got an error response. If this happened before the whole
+               * request body has been sent we stop sending and mark the
+               * connection for closure after we've read the entire response.
+               */
+              if(!k->upload_done) {
+                infof(data, "HTTP error before end of send, stop sending\n");
+                conn->bits.close = TRUE; /* close after this */
+                k->upload_done = TRUE;
+                k->keepon &= ~KEEP_SEND; /* don't send */
+                if(data->state.expect100header)
+                  k->exp100 = EXP100_FAILED;
+              }
+              break;
+
+            default: /* default label present to avoid compiler warnings */
+              break;
+            }
+          }
+        }
 
         if(conn->bits.rewindaftersend) {
           /* We rewind after a complete send, so thus we continue
