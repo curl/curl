@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "gssapi.h"
+#include "curl_gssapi.h"
 
 OM_uint32 Curl_gss_init_sec_context(
     OM_uint32 * minor_status,

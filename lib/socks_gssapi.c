@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #endif
 
-#include "gssapi.h"
+#include "curl_gssapi.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "connect.h"

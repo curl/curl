@@ -50,7 +50,7 @@
 #include "urldata.h"
 #include "curl_base64.h"
 #include "ftp.h"
-#include "gssapi.h"
+#include "curl_gssapi.h"
 #include "sendf.h"
 #include "krb4.h"
 #include "curl_memory.h"

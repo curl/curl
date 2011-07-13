@@ -36,7 +36,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "gssapi.h"
+#include "curl_gssapi.h"
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
