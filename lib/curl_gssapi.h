@@ -22,6 +22,8 @@
 
 #include "setup.h"
 
+#ifdef HAVE_GSSAPI
+
 #ifdef HAVE_GSSGNU
 #  include <gss.h>
 #elif defined HAVE_GSSMIT
@@ -45,3 +47,5 @@ OM_uint32 Curl_gss_init_sec_context(
     gss_buffer_t input_token,
     gss_buffer_t output_token,
     OM_uint32 * ret_flags);
+
+#endif /* HAVE_GSSAPI */

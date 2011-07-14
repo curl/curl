@@ -20,6 +20,10 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
+#ifdef HAVE_GSSAPI
+
 #include "curl_gssapi.h"
 
 OM_uint32 Curl_gss_init_sec_context(
@@ -46,3 +50,5 @@ OM_uint32 Curl_gss_init_sec_context(
                               ret_flags,
                               NULL /* time_rec */);
 }
+
+#endif /* HAVE_GSSAPI */
