@@ -22,6 +22,8 @@ cd libtest
 #       _ Retain only lines that begins with "identifier =".
 #       _ Turn these lines into shell variable assignments.
 
+top_srcdir="${TOPDIR}"
+export top_srcdir
 eval "`sed -e ': begin'                                                 \
         -e '/\\\\$/{'                                                   \
         -e 'N'                                                          \

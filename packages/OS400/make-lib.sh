@@ -46,9 +46,7 @@ make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
 make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"
 
 for SRC in ${CSOURCES}
-do      MODULE=`basename "${SRC}" .c |
-                tr '[a-z]' '[A-Z]'   |
-                sed -e 's/^\(..........\).*/\1/'`
+do      MODULE=`db2_name "${SRC}"`
         make_module "${MODULE}" "${SRC}"
 done
 

@@ -147,6 +147,10 @@ use:
         CURLINFO_EFFECTIVE_URL
         CURLINFO_CONTENT_TYPE
         CURLINFO_FTP_ENTRY_PATH
+        CURLINFO_REDIRECT_URL
+        CURLINFO_PRIMARY_IP
+        CURLINFO_RTSP_SESSION_ID
+        CURLINFO_LOCAL_IP
   Other options are processed like in curl_easy_getinfo().
 
   Standard compilation environment does support neither autotools nor make;
@@ -159,14 +163,27 @@ OS/400.
 
 
 Protocols currently implemented on OS/400:
-_ HTTP
-_ HTTPS
+_ DICT
+_ FILE
 _ FTP
 _ FTPS
-_ FTP with secure transmission.
+_ FTP with secure transmission
+_ GOPHER
+_ HTTP
+_ HTTPS
+_ IMAP
+_ IMAPS
+_ IMAP with secure transmission
 _ LDAP
-_ DICT
+_ POP3
+_ POP3S
+_ POP3 with secure transmission
+_ RTSP
+_ SMTP
+_ SMTPS
+_ SMTP with secure transmission
 _ TELNET
+_ TFTP
 
 
 
