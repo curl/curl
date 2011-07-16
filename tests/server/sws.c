@@ -117,6 +117,7 @@ struct httprequest {
   int rcmd;       /* doing a special command, see defines above */
   int prot_version;  /* HTTP version * 10 */
   bool pipelining;   /* true if request is pipelined */
+  int callcount;  /* times ProcessRequest() gets called */
 };
 
 static int ProcessRequest(struct httprequest *req);
@@ -308,13 +309,16 @@ static int ProcessRequest(struct httprequest *req)
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
-  char logbuf[256];
+  char logbuf[456];
   int prot_major, prot_minor;
   char *end;
   int error;
   end = strstr(line, end_of_headers);
 
-  logmsg("ProcessRequest() called");
+  req->callcount++;
+
+  logmsg("Process %d bytes request%s", req->offset,
+         req->callcount > 1?" [CONTINUED]":"");
 
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
@@ -346,7 +350,7 @@ static int ProcessRequest(struct httprequest *req)
       FILE *stream;
       char *filename;
 
-      if((strlen(doc) + strlen(request)) < 200)
+      if((strlen(doc) + strlen(request)) < 400)
         sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
                 request, doc, prot_major, prot_minor);
       else
@@ -500,13 +504,17 @@ static int ProcessRequest(struct httprequest *req)
       }
     }
   }
+  else if((req->offset >= 3) && (req->testno == DOCNUMBER_NOTHING)) {
+    logmsg("** Unusual request. Starts with %02x %02x %02x",
+           line[0], line[1], line[2]);
+  }
 
   if(!end) {
     /* we don't have a complete request yet! */
-    logmsg("ProcessRequest returned without a complete request");
+    logmsg("request not complete yet");
     return 0; /* not complete yet */
   }
-  logmsg("ProcessRequest found a complete request");
+  logmsg("- request found to be complete");
 
   if(use_gopher) {
     /* when using gopher we cannot check the request until the entire
@@ -635,10 +643,11 @@ static int ProcessRequest(struct httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-1, sending back data %ld", req->partno);
   }
-  else if((req->partno >= 1000) && strstr(req->reqbuf, "Authorization: Basic")) {
-    /* If the client is passing this Basic-header and the part number is already
-       >=1000, we add 1 to the part number.  This allows simple Basic authentication
-       negotiation to work in the test suite. */
+  else if((req->partno >= 1000) &&
+          strstr(req->reqbuf, "Authorization: Basic")) {
+    /* If the client is passing this Basic-header and the part number is
+       already >=1000, we add 1 to the part number.  This allows simple Basic
+       authentication negotiation to work in the test suite. */
     req->partno += 1;
     logmsg("Received Basic request, sending back data %ld", req->partno);
   }
@@ -650,6 +659,7 @@ static int ProcessRequest(struct httprequest *req)
      req->prot_version >= 11 &&
      end &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
+     !req->cl &&
      (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
       !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
@@ -674,8 +684,10 @@ static int ProcessRequest(struct httprequest *req)
      makes the server NOT wait for PUT/POST data and you can then make the
      test case send a rejection before any such data has been sent. Test case
      154 uses this.*/
-  if(req->auth_req && !req->auth)
+  if(req->auth_req && !req->auth) {
+    logmsg("Return early due to auth requested by none provided");
     return 1; /* done */
+  }
 
   if(req->cl > 0) {
     if(req->cl <= req->offset - (end - req->reqbuf) - strlen(end_of_headers))
@@ -775,6 +787,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->rcmd = RCMD_NORMALREQ;
   req->prot_version = 0;
   req->pipelining = FALSE;
+  req->callcount = 0;
 
   /*** end of httprequest init ***/
 
@@ -786,9 +799,9 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
     else {
       if(req->skip)
-        /* we are instructed to not read the entire thing, so we make sure to only
-           read what we're supposed to and NOT read the enire thing the client
-           wants to send! */
+        /* we are instructed to not read the entire thing, so we make sure to
+           only read what we're supposed to and NOT read the enire thing the
+           client wants to send! */
         got = sread(sock, reqbuf + req->offset, req->cl);
       else
         got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
@@ -870,7 +883,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   char partbuf[80]="data";
 
-  logmsg("Send response number %ld part %ld", req->testno, req->partno);
+  logmsg("Send response test%ld section <data%ld>", req->testno, req->partno);
 
   switch(req->rcmd) {
   default:
@@ -1413,8 +1426,13 @@ int main(int argc, char *argv[])
         break;
       }
 
-      if(req.open)
-        logmsg("=> persistant connection request ended, awaits new request");
+      if(req.open) {
+        logmsg("=> persistant connection request ended, awaits new request\n");
+        /*
+        const char *keepopen="[KEEPING CONNECTION OPEN]";
+        storerequest((char *)keepopen, strlen(keepopen));
+        */
+      }
       /* if we got a CONNECT, loop and get another request as well! */
     } while(req.open || (req.testno == DOCNUMBER_CONNECT));
 
