@@ -13,7 +13,11 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o curl_getdate: detect some illegal dates better
+ o curl_getdate: detect some illegal dates better'
+ o when sending a request and an error is received before the (entire) request
+   body is sent, stop sending the request and close the connection after
+   having received the entire response. This is equally true if an Expect:
+   100-continue header was used.
 
 This release includes the following known bugs:
 
@@ -22,6 +26,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Paolo Piacentini
+ Paolo Piacentini, Steven Parkes
 
         Thanks! (and sorry if I forgot to mention someone)
