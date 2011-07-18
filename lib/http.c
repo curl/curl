@@ -307,6 +307,8 @@ static bool pickoneauth(struct auth *pick)
     pick->picked = CURLAUTH_DIGEST;
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
+  else if(avail & CURLAUTH_NTLM_SSO)
+    pick->picked = CURLAUTH_NTLM_SSO;
   else if(avail & CURLAUTH_BASIC)
     pick->picked = CURLAUTH_BASIC;
   else {
@@ -393,7 +395,9 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   if((expectsend == -1) || (expectsend > bytessent)) {
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
-       (data->state.authhost.picked == CURLAUTH_NTLM)) {
+       (data->state.authhost.picked == CURLAUTH_NTLM) ||
+       (data->state.authproxy.picked == CURLAUTH_NTLM_SSO) ||
+       (data->state.authhost.picked == CURLAUTH_NTLM_SSO)) {
       if(((expectsend - bytessent) < 2000) ||
          (conn->ntlm.state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started *OR* there is just a little (<2K)
@@ -549,6 +553,15 @@ output_auth_headers(struct connectdata *conn,
   if(authstatus->picked == CURLAUTH_NTLM) {
     auth="NTLM";
     result = Curl_output_ntlm(conn, proxy);
+    if(result)
+      return result;
+  }
+  else
+#endif
+#ifdef USE_NTLM_SSO
+  if(authstatus->picked == CURLAUTH_NTLM_SSO) {
+    auth="NTLM_SSO";
+    result = Curl_output_ntlm_sso(conn, proxy);
     if(result)
       return result;
   }
@@ -766,13 +779,35 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
     if(checkprefix("NTLM", start)) {
       *availp |= CURLAUTH_NTLM;
       authp->avail |= CURLAUTH_NTLM;
-      if(authp->picked == CURLAUTH_NTLM) {
+      if(authp->picked == CURLAUTH_NTLM ||
+         authp->picked == CURLAUTH_NTLM_SSO) {
         /* NTLM authentication is picked and activated */
         CURLntlm ntlm =
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
-
-        if(CURLNTLM_BAD != ntlm)
+        if(CURLNTLM_BAD != ntlm) {
           data->state.authproblem = FALSE;
+#ifdef USE_NTLM_SSO
+          if(authp->picked == CURLAUTH_NTLM_SSO) {
+            *availp &= ~CURLAUTH_NTLM;
+            authp->avail &= ~CURLAUTH_NTLM;
+            *availp |= CURLAUTH_NTLM_SSO;
+            authp->avail |= CURLAUTH_NTLM_SSO;
+
+            /* Get the challenge-message which will be passed to
+             * ntlm_auth for generating the type 3 message later */
+            while(*start && ISSPACE(*start))
+              start++;
+            if(checkprefix("NTLM", start)) {
+              start += strlen("NTLM");
+              while(*start && ISSPACE(*start))
+                start++;
+              if(*start)
+                if((conn->challenge_header = strdup(start)) == NULL)
+                  return CURLE_OUT_OF_MEMORY;
+            }
+          }
+#endif
+        }
         else {
           infof(data, "Authentication problem. Ignoring this.\n");
           data->state.authproblem = TRUE;

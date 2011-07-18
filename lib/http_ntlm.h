@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,6 +37,12 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy,
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
+
+#ifdef USE_NTLM_SSO
+/* this is for creating ntlm header output by delegating challenge/response
+ * to a Samba's daemon helper ntlm_auth */
+CURLcode Curl_output_ntlm_sso(struct connectdata *conn, bool proxy);
+#endif
 
 void Curl_ntlm_cleanup(struct connectdata *conn);
 #ifndef USE_NTLM

@@ -43,6 +43,15 @@
 #include <unistd.h>
 #endif
 
+#ifdef USE_NTLM_SSO
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <errno.h>
+#endif
+
 #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
 #include <netdb.h>
 #endif
@@ -673,6 +682,277 @@ static void unicodecpy(unsigned char *dest,
   }
 }
 #endif
+
+#ifdef USE_NTLM_SSO
+static void sso_ntlm_close(struct connectdata *conn)
+{
+  if(conn->fd_helper != -1) {
+    close(conn->fd_helper);
+    conn->fd_helper = -1;
+  }
+
+  if(conn->pid) {
+    int ret, i;
+    for(i = 0; i < 4; i++) {
+      ret = waitpid(conn->pid, NULL, WNOHANG);
+      if(ret == conn->pid || errno == ECHILD)
+        break;
+      switch(i) {
+      case 0:
+        kill(conn->pid, SIGTERM);
+        break;
+      case 2:
+        kill(conn->pid, SIGKILL);
+        break;
+      case 1:
+      case 3:
+        break;
+      }
+    }
+    conn->pid = 0;
+  }
+
+  Curl_safefree(conn->challenge_header);
+  conn->challenge_header = NULL;
+  Curl_safefree(conn->response_header);
+  conn->response_header = NULL;
+}
+
+static CURLcode sso_ntlm_initiate(struct connectdata *conn,
+                                  const char *userp)
+{
+  int sockfds[2];
+  pid_t pid;
+  const char *username;
+  char *slash, *domain = NULL;
+  const char *ntlm_auth;
+
+  /* Return if communication with ntlm_auth already set up */
+  if(conn->fd_helper != -1 || conn->pid) {
+    return CURLE_OK;
+  }
+
+  username = userp;
+  slash = strpbrk(username, "\\/");
+  if(slash) {
+    if((domain = strdup(username)) == NULL)
+      return CURLE_OUT_OF_MEMORY;
+    slash = domain + (slash - username);
+    *slash = '\0';
+    username = username + (slash - domain) + 1;
+  }
+
+  /* When DEBUGBUILD is defined and environment variable NTLM_AUTH is set
+   * (in test case 2005), use a fake_ntlm to do NTLM challenge/response,
+   * which only accept commands and output strings pre-written/saved in
+   * test case 2005 */
+#ifdef DEBUGBUILD
+  ntlm_auth=getenv("NTLM_AUTH");
+#endif
+  if(!ntlm_auth)
+    ntlm_auth = NTLM_AUTH;
+
+  if(access(ntlm_auth, X_OK) != 0)
+    goto done;
+
+  if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds))
+    goto done;
+
+  pid = fork();
+  if(!pid) {
+    /* child process */
+    if(dup2(sockfds[1], 0) == -1 || dup2(sockfds[1], 1) == -1)
+      exit(1);
+
+    execl(ntlm_auth, "--helper-protocol", "ntlmssp-client-1",
+          "--use-cached-creds", "--username", username,
+          domain?"--domain":NULL, domain, NULL);
+    exit(1);
+  }
+  else if(pid == -1) {
+    close(sockfds[0]);
+    close(sockfds[1]);
+    goto done;
+  }
+
+  close(sockfds[1]);
+  conn->fd_helper = sockfds[0];
+  conn->pid = pid;
+  Curl_safefree(domain);
+  return CURLE_OK;
+
+done:
+  Curl_safefree(domain);
+  return CURLE_REMOTE_ACCESS_DENIED;
+}
+
+static CURLcode sso_ntlm_response(struct connectdata *conn,
+                                  const char *input, curlntlm state)
+{
+  ssize_t size;
+  char buf[200]; /* enough, type 1, 3 message length is less then 200 */
+  char *tmpbuf = buf;
+  size_t len_in = strlen(input), len_out = sizeof(buf);
+
+  while(len_in > 0) {
+    int written = write(conn->fd_helper, input, len_in);
+    if(written == -1) {
+      /* Interrupted by a signal, retry it */
+      if(errno == EINTR)
+        continue;
+      /* write failed if other errors happen */
+      goto done;
+    }
+    input += written;
+    len_in -= written;
+  }
+  /* Read one line */
+  while(len_out > 0) {
+    size = read(conn->fd_helper, tmpbuf, len_out);
+    if(size == -1) {
+      if(errno == EINTR)
+        continue;
+      goto done;
+    }
+    else if(size == 0)
+      goto done;
+    else if(tmpbuf[size - 1] == '\n') {
+      tmpbuf[size - 1] = '\0';
+      goto wrfinish;
+    }
+    tmpbuf += size;
+    len_out -= size;
+  }
+  goto done;
+wrfinish:
+  /* Samba/winbind installed but not configured */
+  if(state == NTLMSTATE_TYPE1 &&
+     size == 3 &&
+     buf[0] == 'P' && buf[1] == 'W')
+    return CURLE_REMOTE_ACCESS_DENIED;
+  /* invalid response */
+  if(size < 4)
+    goto done;
+  if(state == NTLMSTATE_TYPE1 &&
+     (buf[0]!='Y' || buf[1]!='R' || buf[2]!=' '))
+    goto done;
+  if(state == NTLMSTATE_TYPE2 &&
+     (buf[0]!='K' || buf[1]!='K' || buf[2]!=' ') &&
+     (buf[0]!='A' || buf[1]!='F' || buf[2]!=' '))
+    goto done;
+
+  conn->response_header = aprintf("NTLM %.*s", size - 4, buf + 3);
+  return CURLE_OK;
+done:
+  return CURLE_REMOTE_ACCESS_DENIED;
+}
+
+/*this is for creating ntlm header output by delegating challenge/response
+ *to a Samba's daemon helper ntlm_auth */
+CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
+                              bool proxy)
+{
+  /* point to the address of the pointer that holds the string to sent to the
+     server, which is for a plain host or for a HTTP proxy */
+  char **allocuserpwd;
+  /* point to the name and password for this */
+  const char *userp;
+  /* point to the correct struct with this */
+  struct ntlmdata *ntlm;
+  struct auth *authp;
+
+  CURLcode res = CURLE_OK;
+  char *input;
+
+  DEBUGASSERT(conn);
+  DEBUGASSERT(conn->data);
+
+  if(proxy) {
+    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    userp = conn->proxyuser;
+    ntlm = &conn->proxyntlm;
+    authp = &conn->data->state.authproxy;
+  }
+  else {
+    allocuserpwd = &conn->allocptr.userpwd;
+    userp = conn->user;
+    ntlm = &conn->ntlm;
+    authp = &conn->data->state.authhost;
+  }
+  authp->done = FALSE;
+
+  /* not set means empty */
+  if(!userp)
+    userp="";
+
+  switch(ntlm->state) {
+  case NTLMSTATE_TYPE1:
+  default:
+    /* Use Samba's 'winbind' daemon to support NTLM single-sign-on,
+     * by delegating the NTLM challenge/response protocal to a helper
+     * in ntlm_auth.
+     * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
+     * http://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
+     * http://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
+     * The preprocessor variable 'USE_NTLM_AUTH' indicates whether
+     * this feature is enabled. Another one 'NTLM_AUTH' contains absolute
+     * path of it.
+     * If NTLM single-sign-on fails, go back to original request
+     * handling process.
+     */
+    /* Clean data before using them */
+    conn->fd_helper = -1;
+    conn->pid = 0;
+    conn->challenge_header = NULL;
+    conn->response_header = NULL;
+    /* Create communication with ntlm_auth */
+    res = sso_ntlm_initiate(conn, userp);
+    if(res)
+      return res;
+    res = sso_ntlm_response(conn, "YR\n", ntlm->state);
+    if(res)
+      return res;
+
+    Curl_safefree(*allocuserpwd);
+    *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
+                            proxy?"Proxy-":"",
+                            conn->response_header);
+    DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
+    Curl_safefree(conn->response_header);
+    conn->response_header = NULL;
+    break;
+  case NTLMSTATE_TYPE2:
+    input = aprintf("TT %s\n", conn->challenge_header);
+    res = sso_ntlm_response(conn,
+                            input,
+                            ntlm->state);
+    if(res)
+      return res;
+
+    Curl_safefree(*allocuserpwd);
+    *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
+                            proxy?"Proxy-":"",
+                            conn->response_header);
+    DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
+    ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+    authp->done = TRUE;
+    sso_ntlm_close(conn);
+    free(input);
+    break;
+  case NTLMSTATE_TYPE3:
+    /* connection is already authenticated,
+     * don't send a header in future requests */
+    if(*allocuserpwd) {
+      free(*allocuserpwd);
+      *allocuserpwd=NULL;
+    }
+    authp->done = TRUE;
+    break;
+  }
+
+  return CURLE_OK;
+}
+#endif /* USE_NTLM_SSO */
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
@@ -1320,6 +1600,9 @@ Curl_ntlm_cleanup(struct connectdata *conn)
   ntlm_sspi_cleanup(&conn->ntlm);
   ntlm_sspi_cleanup(&conn->proxyntlm);
 #else
+#ifdef USE_NTLM_SSO
+  sso_ntlm_close(conn);
+#endif
   (void)conn;
 #endif
 }

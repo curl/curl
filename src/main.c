@@ -1869,6 +1869,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*k", "digest",     FALSE},
     {"*l", "negotiate",  FALSE},
     {"*m", "ntlm",       FALSE},
+    {"*M", "ntlm-sso",   FALSE},
     {"*n", "basic",      FALSE},
     {"*o", "anyauth",    FALSE},
 #ifdef USE_WATT32
@@ -2221,6 +2222,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
         else
           config->authtype &= ~CURLAUTH_NTLM;
+        break;
+
+      case 'M': /* --ntlm-sso */
+        if(toggle) {
+          if(curlinfo->features & CURL_VERSION_NTLM_SSO)
+            config->authtype |= CURLAUTH_NTLM_SSO;
+          else
+            return PARAM_LIBCURL_DOESNT_SUPPORT;
+        }
+        else
+          config->authtype &= ~CURLAUTH_NTLM_SSO;
         break;
 
       case 'n': /* --basic for completeness */
@@ -3203,6 +3215,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"IPv6", CURL_VERSION_IPV6},
           {"Largefile", CURL_VERSION_LARGEFILE},
           {"NTLM", CURL_VERSION_NTLM},
+          {"NTLM_SSO", CURL_VERSION_NTLM_SSO},
           {"SPNEGO", CURL_VERSION_SPNEGO},
           {"SSL",  CURL_VERSION_SSL},
           {"SSPI",  CURL_VERSION_SSPI},
