@@ -1,4 +1,4 @@
-noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd
+noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm
 
 CURLX_SRCS = \
  $(top_srcdir)/lib/mprintf.c \
@@ -63,3 +63,8 @@ tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  tftp.h
 tftpd_LDADD = @TEST_SERVER_LIBS@
 tftpd_CFLAGS = $(AM_CFLAGS)
+
+fake_ntlm_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+ fake_ntlm.c
+fake_ntlm_LDADD = @TEST_SERVER_LIBS@
+fake_ntlm_CFLAGS = $(AM_CFLAGS)
