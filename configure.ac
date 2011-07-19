@@ -1330,7 +1330,7 @@ if test X"$OPT_SSL" != Xno; then
     dnl the user told us to look
     OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
     AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
-    if test -e "$OPENSSL_PCDIR/openssl.pc"; then
+    if test -f "$OPENSSL_PCDIR/openssl.pc"; then
       PKGTEST="yes"
     fi
 
