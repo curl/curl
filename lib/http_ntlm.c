@@ -725,7 +725,7 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
   pid_t pid;
   const char *username;
   char *slash, *domain = NULL;
-  const char *ntlm_auth;
+  const char *ntlm_auth = NULL;
 
   /* Return if communication with ntlm_auth already set up */
   if(conn->fd_helper != -1 || conn->pid) {
