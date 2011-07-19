@@ -230,7 +230,8 @@ krb5_auth(void *app_data, struct connectdata *conn)
          taken care by a final gss_release_buffer. */
       gss_release_buffer(&min, &output_buffer);
       ret = AUTH_OK;
-      maj = Curl_gss_init_sec_context(&min,
+      maj = Curl_gss_init_sec_context(data,
+                                      &min,
                                       context,
                                       gssname,
                                       &chan,

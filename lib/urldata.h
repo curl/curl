@@ -1525,6 +1525,8 @@ struct UserDefined {
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
+
+  bool gssapi_delegation;	/* allow GSSAPI credential delegation */
 };
 
 struct Names {

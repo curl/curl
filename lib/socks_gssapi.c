@@ -180,7 +180,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
   for(;;) {
-    gss_major_status = Curl_gss_init_sec_context(&gss_minor_status,
+    gss_major_status = Curl_gss_init_sec_context(data,
+                                                 &gss_minor_status,
                                                  &gss_context,
                                                  server,
                                                  NULL,

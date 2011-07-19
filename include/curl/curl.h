@@ -1484,6 +1484,9 @@ typedef enum {
   CINIT(CLOSESOCKETFUNCTION, FUNCTIONPOINT, 208),
   CINIT(CLOSESOCKETDATA, OBJECTPOINT, 209),
 
+  /* allow GSSAPI credential delegation */
+  CINIT(GSSAPI_DELEGATION, LONG, 210),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

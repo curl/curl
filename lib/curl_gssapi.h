@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "setup.h"
+#include "urldata.h"
 
 #ifdef HAVE_GSSAPI
 
@@ -42,6 +43,7 @@
 /* Common method for using gss api */
 
 OM_uint32 Curl_gss_init_sec_context(
+    const struct SessionHandle *data,
     OM_uint32 * minor_status,
     gss_ctx_id_t * context,
     gss_name_t target_name,

@@ -1975,6 +1975,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                        va_arg(param, char *));
     data->set.krb = (bool)(NULL != data->set.str[STRING_KRB_LEVEL]);
     break;
+  case CURLOPT_GSSAPI_DELEGATION:
+    /*
+     * allow GSSAPI credential delegation
+     */
+    data->set.gssapi_delegation = (bool)(0 != va_arg(param, long));
+    break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
      * Enable peer SSL verifying.

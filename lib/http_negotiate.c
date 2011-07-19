@@ -131,8 +131,9 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status,
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                          const char *header)
 {
-  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
-    &conn->data->state.negotiate;
+  struct SessionHandle *data = conn->data;
+  struct negotiatedata *neg_ctx = proxy?&data->state.proxyneg:
+    &data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
@@ -168,7 +169,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
-    Curl_cleanup_negotiate(conn->data);
+    Curl_cleanup_negotiate(data);
     return -1;
   }
 
@@ -217,7 +218,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                  NULL)) {
         free(spnegoToken);
         spnegoToken = NULL;
-        infof(conn->data, "Parse SPNEGO Target Token failed\n");
+        infof(data, "Parse SPNEGO Target Token failed\n");
       }
       else {
         free(input_token.value);
@@ -229,13 +230,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
         input_token.length = mechTokenLength;
         free(mechToken);
         mechToken = NULL;
-        infof(conn->data, "Parse SPNEGO Target Token succeeded\n");
+        infof(data, "Parse SPNEGO Target Token succeeded\n");
       }
     }
 #endif
   }
 
-  major_status = Curl_gss_init_sec_context(&minor_status,
+  major_status = Curl_gss_init_sec_context(data,
+                                           &minor_status,
                                            &neg_ctx->context,
                                            neg_ctx->server_name,
                                            GSS_C_NO_CHANNEL_BINDINGS,
@@ -246,7 +248,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     gss_release_buffer(&minor_status2, &input_token);
   neg_ctx->status = major_status;
   if(GSS_ERROR(major_status)) {
-    /* Curl_cleanup_negotiate(conn->data) ??? */
+    /* Curl_cleanup_negotiate(data) ??? */
     log_gss_error(conn, minor_status,
                   "gss_init_sec_context() failed: ");
     return -1;
