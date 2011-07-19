@@ -2495,6 +2495,11 @@ sub singletest {
                 next;
             }
         }
+        elsif($f eq "debug") {
+            if($debug_build) {
+                next;
+            }
+        }
         elsif($f eq "large_file") {
             if($large_file) {
                 next;
