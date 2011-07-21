@@ -31,6 +31,34 @@
 #endif
 
 /*
+ * poll() function on Windows Vista and later is called WSAPoll()
+ */
+
+#if defined(USE_WINSOCK) && (USE_WINSOCK > 1) && \
+    defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#  undef  HAVE_POLL
+#  define HAVE_POLL 1
+#  undef  HAVE_POLL_FINE
+#  define HAVE_POLL_FINE 1
+#  define poll(x,y,z) WSAPoll((x),(y),(z))
+#  if defined(_MSC_VER) && defined(POLLRDNORM)
+#    undef  POLLPRI
+#    define POLLPRI POLLRDBAND
+#    define HAVE_STRUCT_POLLFD 1
+#  endif
+#endif
+
+
+/*
+ * In some cases select may be preferred over poll/WSAPoll.
+ */
+
+#ifdef FORCE_SELECT
+#define HAVE_SELECT 1
+#undef HAVE_POLL_FINE
+#endif // FORCE_SELECT
+
+/*
  * Definition of pollfd struct and constants for platforms lacking them.
  */
 
