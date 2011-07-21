@@ -48,6 +48,16 @@
 #  endif
 #endif
 
+
+/*
+ * In some cases select may be preferred over poll/WSAPoll.
+ */
+
+#ifdef FORCE_SELECT
+#define HAVE_SELECT 1
+#undef HAVE_POLL_FINE
+#endif // FORCE_SELECT
+
 /*
  * Definition of pollfd struct and constants for platforms lacking them.
  */
