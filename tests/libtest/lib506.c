@@ -22,7 +22,6 @@
 #include "test.h"
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 #include <curl/mprintf.h>
 

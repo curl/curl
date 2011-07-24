@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h> /* required for send() & recv() prototypes */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@
 
 #define HAVE_ARPA_INET_H 1
 #define HAVE_CLOSESOCKET_CAMEL 1
+#define HAVE_ERRNO_H 1
 #define HAVE_GETHOSTBYADDR 1
 #define HAVE_INET_ADDR 1
 #define HAVE_INTTYPES_H 1

@@ -34,7 +34,6 @@
 #ifdef NEED_CURL_STRTOLL
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 /* Range tests can be used for alphanum decoding if characters are consecutive,
    like in ASCII. Else an array is scanned. Determine this condition now. */

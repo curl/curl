@@ -28,7 +28,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 #include "strequal.h"
 

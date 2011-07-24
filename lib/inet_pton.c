@@ -33,7 +33,6 @@
 #include <arpa/inet.h>
 #endif
 #include <string.h>
-#include <errno.h>
 
 #include "inet_pton.h"
 

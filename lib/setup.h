@@ -279,7 +279,6 @@
 #ifdef HAVE_ASSERT_H
 #include <assert.h>
 #endif
-#include <errno.h>
 
 #ifdef __TANDEM /* for nsr-tandem-nsk systems */
 #include <floss.h>

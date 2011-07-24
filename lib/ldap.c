@@ -41,7 +41,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 #ifdef CURL_LDAP_WIN            /* Use Windows LDAP implementation. */
 # include <winldap.h>

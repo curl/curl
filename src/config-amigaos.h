@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@
 #define OS "AmigaOS"
 
 #define HAVE_CLOSESOCKET_CAMEL  1
+#define HAVE_ERRNO_H            1
 #define HAVE_UNISTD_H           1
 #define HAVE_STRDUP             1
 #define HAVE_UTIME              1

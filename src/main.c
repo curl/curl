@@ -34,7 +34,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <errno.h>
 
 #if defined(MSDOS) || defined(WIN32)
 #  if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)

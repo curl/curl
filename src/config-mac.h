@@ -32,6 +32,7 @@
 #define USE_MANUAL 1
 
 #define HAVE_UNISTD_H           1
+#define HAVE_ERRNO_H            1
 #define HAVE_FCNTL_H            1
 #define HAVE_UTIME_H            1
 #define HAVE_SYS_UTIME_H        1

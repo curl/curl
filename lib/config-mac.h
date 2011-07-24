@@ -30,6 +30,7 @@
 
 #define OS "mac"
 
+#define HAVE_ERRNO_H            1
 #define HAVE_NETINET_IN_H       1
 #define HAVE_SYS_SOCKET_H       1
 #define HAVE_SYS_SELECT_H       1

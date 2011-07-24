@@ -24,7 +24,6 @@
 
 #ifdef USE_QSOSSL
 #include <qsossl.h>
-#include <errno.h>
 #include <string.h>
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>

@@ -29,7 +29,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 #ifdef WIN32
 #include <time.h>

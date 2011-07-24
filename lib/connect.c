@@ -69,7 +69,6 @@
 #endif
 
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
 
 #define _MPRINTF_REPLACE /* use our functions only */

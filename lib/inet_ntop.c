@@ -35,7 +35,6 @@
 #include <arpa/inet.h>
 #endif
 #include <string.h>
-#include <errno.h>
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

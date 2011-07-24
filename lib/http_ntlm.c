@@ -49,7 +49,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <errno.h>
 #endif
 
 #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))

@@ -30,6 +30,9 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
+/* Define if you have the <errno.h> header file.  */
+#define HAVE_ERRNO_H 1
+
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
 
