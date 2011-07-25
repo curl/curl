@@ -2110,8 +2110,12 @@ support for FTP.
 
 (This option was known as CURLOPT_KRB4LEVEL up to 7.16.3)
 .IP CURLOPT_GSSAPI_DELEGATION
-Set the parameter to 1 to allow GSSAPI credential delegation.  The delegation
-is disabled by default since 7.21.7.
+Set the parameter to CURLGSSAPI_DELEGATION_FLAG to allow unconditional GSSAPI
+credential delegation.  The delegation is disabled by default since 7.21.7.
+Set the parameter to CURLGSSAPI_DELEGATION_POLICY_FLAG to delegate only if
+the OK-AS-DELEGATE flag is set in the service ticket in case this feature is
+supported by the GSSAPI implementation and the definition of
+GSS_C_DELEG_POLICY_FLAG was available at compile-time.
 (Added in 7.21.8)
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES

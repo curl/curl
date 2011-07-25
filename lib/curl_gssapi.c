@@ -36,10 +36,18 @@ OM_uint32 Curl_gss_init_sec_context(
     gss_buffer_t output_token,
     OM_uint32 * ret_flags)
 {
-  OM_uint32 req_flags;
+  OM_uint32 req_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
 
-  req_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
-  if (data->set.gssapi_delegation)
+  if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
+#ifdef GSS_C_DELEG_POLICY_FLAG
+    req_flags |= GSS_C_DELEG_POLICY_FLAG;
+#else
+    infof(data, "warning: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
+        "compiled in\n");
+#endif
+  }
+
+  if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
   return gss_init_sec_context(minor_status,

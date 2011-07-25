@@ -1526,7 +1526,8 @@ struct UserDefined {
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
 
-  bool gssapi_delegation;	/* allow GSSAPI credential delegation */
+  long gssapi_delegation; /* GSSAPI credential delegation, see the
+                             documentation of CURLOPT_GSSAPI_DELEGATION */
 };
 
 struct Names {

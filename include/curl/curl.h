@@ -615,6 +615,10 @@ typedef enum {
 #define CURLSSH_AUTH_KEYBOARD  (1<<3) /* keyboard interactive */
 #define CURLSSH_AUTH_DEFAULT CURLSSH_AUTH_ANY
 
+#define CURLGSSAPI_DELEGATION_NONE        0      /* no delegation (default) */
+#define CURLGSSAPI_DELEGATION_POLICY_FLAG (1<<0) /* if permitted by policy */
+#define CURLGSSAPI_DELEGATION_FLAG        (1<<1) /* delegate always */
+
 #define CURL_ERROR_SIZE 256
 
 struct curl_khkey {

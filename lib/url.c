@@ -1977,9 +1977,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_GSSAPI_DELEGATION:
     /*
-     * allow GSSAPI credential delegation
+     * GSSAPI credential delegation
      */
-    data->set.gssapi_delegation = (bool)(0 != va_arg(param, long));
+    data->set.gssapi_delegation = va_arg(param, long);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
