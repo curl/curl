@@ -45,10 +45,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-
 #ifndef WIN32
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

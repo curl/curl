@@ -25,9 +25,6 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 
 #if !defined(HAVE_SELECT) && !defined(HAVE_POLL_FINE)
 #error "We can't compile without select() or poll() support."

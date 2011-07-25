@@ -31,16 +31,12 @@
 #include <ctype.h>
 
 #if defined(WIN32)
-#include <time.h>
 #include <io.h>
 #else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #include <netinet/in.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

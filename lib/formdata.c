@@ -32,10 +32,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <time.h>
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
 #endif
+
 #include "urldata.h" /* for struct SessionHandle */
 #include "formdata.h"
 #include "curl_rand.h"

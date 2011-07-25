@@ -37,8 +37,6 @@
 
 #include "setup.h"
 
-#include <time.h>
-
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
 
