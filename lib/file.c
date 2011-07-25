@@ -30,10 +30,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#ifdef WIN32
-#include <io.h>
-#include <fcntl.h>
-#else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -63,8 +59,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-#endif /* WIN32 */
 
 #include "strtoofft.h"
 #include "urldata.h"

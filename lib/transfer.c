@@ -33,9 +33,6 @@
 #include "strequal.h"
 #include "rawstr.h"
 
-#ifdef WIN32
-#include <io.h>
-#else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -72,8 +69,6 @@
 #ifndef HAVE_SOCKET
 #error "We can't compile without socket() support!"
 #endif
-
-#endif  /* WIN32 */
 
 #include "urldata.h"
 #include <curl/curl.h>

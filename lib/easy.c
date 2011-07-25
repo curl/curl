@@ -29,11 +29,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "strequal.h"
-
-#ifdef WIN32
-#include <io.h>
-#else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -60,8 +55,7 @@
 #include <sys/param.h>
 #endif
 
-#endif  /* WIN32 ... */
-
+#include "strequal.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"

@@ -30,9 +30,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#ifdef WIN32
-#include <io.h>
-#else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -58,8 +55,6 @@
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
-#endif
-
 #endif
 
 #include "urldata.h"
