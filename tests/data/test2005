@@ -71,6 +71,10 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 # set path to fake_auth instead of real ntlm_auth to generate NTLM type1 and type 3 messages
 NTLM_AUTH=server/fake_ntlm
+# set source directory so fake_ntlm can find the test files
+NTLM_AUTH_SRCDIR=%SRCDIR
+# set the test number
+NTLM_AUTH_TESTNUM=2005
  </setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/2005 -u testuser:anypasswd --ntlm-sso

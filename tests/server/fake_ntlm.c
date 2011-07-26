@@ -58,14 +58,29 @@ int main(void)
   char *type1_input = NULL, *type3_input = NULL;
   char *type1_output = NULL, *type3_output = NULL;
   size_t size = 0;
+  int testnum;
+  const char *env;
 
-  filename = test2file(2005);
+  env = getenv("NTLM_AUTH_TESTNUM");
+  if (env) {
+    testnum = strtoul(env, NULL, 10);
+  } else {
+    logmsg("Test number not specified in NTLM_AUTH_TESTNUM");
+    exit(1);
+  }
+
+  env = getenv("NTLM_AUTH_SRCDIR");
+  if (env) {
+    path = env;
+  }
+
+  filename = test2file(testnum);
   stream=fopen(filename, "rb");
   if(!stream) {
     error = ERRNO;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", filename);
-    logmsg("Couldn't open test file %ld", 2005);
+    logmsg("Couldn't open test file %ld", testnum);
     exit(1);
   }
   else {
@@ -83,7 +98,7 @@ int main(void)
     error = ERRNO;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", filename);
-    logmsg("Couldn't open test file %ld", 2005);
+    logmsg("Couldn't open test file %ld", testnum);
     exit(1);
   }
   else {
@@ -103,7 +118,7 @@ int main(void)
         error = ERRNO;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
-        logmsg("Couldn't open test file %ld", 2005);
+        logmsg("Couldn't open test file %ld", testnum);
         exit(1);
       }
       else {
@@ -124,7 +139,7 @@ int main(void)
         error = ERRNO;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
-        logmsg("Couldn't open test file %ld", 2005);
+        logmsg("Couldn't open test file %ld", testnum);
         exit(1);
       }
       else {
