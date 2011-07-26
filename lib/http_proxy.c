@@ -27,6 +27,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 #include "urldata.h"
 #include <curl/curl.h>
 #include "http_proxy.h"

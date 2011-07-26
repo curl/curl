@@ -72,14 +72,8 @@
   20040911 +0200
 
 */
-#include "setup.h"
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
 
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h> /* for strtol() */
-#endif
+#include "setup.h"
 
 #include <curl/curl.h>
 #include "rawstr.h"

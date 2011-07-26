@@ -23,12 +23,6 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_HTTP
-/* -- WIN32 approved -- */
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

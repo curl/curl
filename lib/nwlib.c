@@ -20,14 +20,12 @@
  *
  ***************************************************************************/
 
-#ifdef NETWARE /* Novell NetWare */
+#include "setup.h"
 
-#include <stdlib.h>
+#ifdef NETWARE /* Novell NetWare */
 
 #ifdef __NOVELL_LIBC__
 /* For native LibC-based NLM we need to register as a real lib. */
-#include <errno.h>
-#include <string.h>
 #include <library.h>
 #include <netware.h>
 #include <screen.h>

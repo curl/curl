@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 #include "setup.h"
 
 /* NTLM details:
@@ -32,20 +33,12 @@
 
 #define DEBUG_ME 0
 
-/* -- WIN32 approved -- */
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #ifdef USE_NTLM_SSO
 #include <unistd.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>

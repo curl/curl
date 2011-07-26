@@ -28,9 +28,6 @@
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
-#include <stdio.h>
-#include <string.h>
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

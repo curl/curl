@@ -32,10 +32,6 @@
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 #include "urldata.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

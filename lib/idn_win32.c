@@ -19,13 +19,15 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/***************************************************************************
- * IDN Implementation using windows native APIs
- * Pierre Joye <pierre@php.net>
- ***************************************************************************/
-#if defined(WIN32) && defined(USE_WIN32_IDN)
-#include <windows.h>
-#include <stdio.h>
+
+ /*
+  * IDN conversions using Windows kernel32 and normaliz libraries.
+  */
+
+#include "setup.h"
+
+#ifdef USE_WIN32_IDN
+
 #include <tchar.h>
 
 #ifdef WANT_IDN_PROTOTYPES
@@ -121,7 +123,5 @@ int curl_win32_ascii_to_idn(const char *in, size_t in_len, char **out_utf8)
   }
   return 1;
 }
-#else
-typedef int dummy; /* because ISO C forbids an empty translation unit! */
-#endif
- /* WIN32 */
+
+#endif /* USE_WIN32_IDN */

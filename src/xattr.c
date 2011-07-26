@@ -27,7 +27,6 @@
 
 #ifdef HAVE_FSETXATTR
 #include <sys/types.h>
-#include <string.h>
 #include <sys/xattr.h> /* include header from libc, not from libattr */
 
 /* mapping table of curl metadata to extended attribute names */

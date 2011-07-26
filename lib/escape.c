@@ -24,12 +24,9 @@
  * allocated string or NULL if an error occurred.  */
 
 #include "setup.h"
-#include <ctype.h>
+
 #include <curl/curl.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "curl_memory.h"
 #include "urldata.h"
 #include "warnless.h"

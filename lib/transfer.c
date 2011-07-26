@@ -22,13 +22,6 @@
 
 #include "setup.h"
 
-/* -- WIN32 approved -- */
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "strtoofft.h"
 #include "strequal.h"
 #include "rawstr.h"

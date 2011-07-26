@@ -36,11 +36,6 @@
  */
 
 #include "setup.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <string.h>
 
 #if defined(DJGPP) && (DJGPP_MINOR < 4)
 #undef _MPRINTF_REPLACE /* don't use x_was_used() here */

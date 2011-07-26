@@ -136,12 +136,10 @@ print <<HEAD
 #include "setup.h"
 #ifdef USE_MANUAL
 #include "hugehelp.h"
-#include <stdio.h>
 HEAD
     ;
 if($c) {
     print <<HEAD
-#include <stdlib.h>
 #include <zlib.h>
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.

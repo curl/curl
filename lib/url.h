@@ -1,5 +1,5 @@
-#ifndef __URL_H
-#define __URL_H
+#ifndef HEADER_CURL_URL_H
+#define HEADER_CURL_URL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,8 +21,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-#include <stdarg.h> /* to make sure we have ap_list */
 
 /*
  * Prototypes for library-wide functions provided by url.c
@@ -94,4 +92,4 @@ void Curl_verboseconnect(struct connectdata *conn);
 #endif
 
 
-#endif
+#endif /* HEADER_CURL_URL_H */

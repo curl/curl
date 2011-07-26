@@ -26,11 +26,6 @@
 
 #ifdef USE_LIBSSH2
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
 #endif

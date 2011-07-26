@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include "setup.h"
+
 #include "wildcard.h"
 #include "llist.h"
 #include "fileinfo.h"

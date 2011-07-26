@@ -31,11 +31,6 @@
 #ifndef gss_nt_service_name
 #define gss_nt_service_name GSS_C_NT_HOSTBASED_SERVICE
 #endif
-#include <string.h>
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 
 #include "curl_gssapi.h"
 #include "urldata.h"

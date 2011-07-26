@@ -22,10 +22,6 @@
 
 #include "setup.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h> /* required for send() & recv() prototypes */
 #endif
@@ -54,7 +50,6 @@
 #define Curl_sec_read(a,b,c,d) -1
 #endif
 
-#include <string.h>
 #include "curl_memory.h"
 #include "strerror.h"
 

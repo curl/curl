@@ -32,9 +32,6 @@
 
 #include "setup.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif

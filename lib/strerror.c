@@ -34,8 +34,6 @@
 #endif
 
 #include <curl/curl.h>
-#include <stdlib.h>
-#include <string.h>
 
 #ifdef USE_LIBIDN
 #include <idna.h>

@@ -22,10 +22,6 @@
 
 #include "setup.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif

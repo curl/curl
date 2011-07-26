@@ -32,7 +32,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#include <string.h>
 
 #include "inet_pton.h"
 

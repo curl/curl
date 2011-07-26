@@ -23,11 +23,7 @@
 #include "setup.h"
 
 #if !defined(CURL_DISABLE_PROXY) || defined(USE_WINDOWS_SSPI)
-#include <string.h>
 
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

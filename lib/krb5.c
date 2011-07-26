@@ -41,11 +41,9 @@
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
 #endif
 
-#include <stdlib.h>
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#include <string.h>
 
 #include "urldata.h"
 #include "curl_base64.h"

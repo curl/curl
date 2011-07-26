@@ -23,10 +23,6 @@
 /* client-local setup.h */
 #include "setup.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <curl/curl.h>
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */

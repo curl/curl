@@ -1,6 +1,6 @@
 #ifdef CURLDEBUG
-#ifndef _CURL_MEMDEBUG_H
-#define _CURL_MEMDEBUG_H
+#ifndef HEADER_CURL_MEMDEBUG_H
+#define HEADER_CURL_MEMDEBUG_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -39,7 +39,6 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#include <stdio.h>
 
 #define logfile curl_debuglogfile
 
@@ -133,7 +132,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #endif /* MEMDEBUG_NODEFINES */
 
-#endif /* _CURL_MEMDEBUG_H */
+#endif /* HEADER_CURL_MEMDEBUG_H */
 #endif /* CURLDEBUG */
 
 #ifndef fake_sclose

@@ -24,9 +24,6 @@
 
 #include "setup.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 

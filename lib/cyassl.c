@@ -27,15 +27,12 @@
  */
 
 #include "setup.h"
+
 #ifdef USE_CYASSL
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-
 
 #include "urldata.h"
 #include "sendf.h"

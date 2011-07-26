@@ -22,9 +22,6 @@
 
 #include "setup.h"
 
-#include <string.h>
-#include <stdlib.h>
-
 #include "hash.h"
 #include "llist.h"
 

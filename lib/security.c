@@ -46,9 +46,6 @@
 #ifndef CURL_DISABLE_FTP
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
 
-#include <stdarg.h>
-#include <string.h>
-
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif

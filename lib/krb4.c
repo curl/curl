@@ -44,11 +44,9 @@
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_KRB4
 
-#include <stdlib.h>
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#include <string.h>
 #include <krb.h>
 #include <des.h>
 

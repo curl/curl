@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 #include "setup.h"
 
 #include <curl/curl.h>
@@ -27,13 +28,8 @@
 ** system headers
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <ctype.h>
 
 #if defined(MSDOS) || defined(WIN32)
 #  if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)

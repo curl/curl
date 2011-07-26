@@ -27,7 +27,6 @@
 #ifdef USE_NSS
 
 #include "curl_md4.h"
-#include <string.h>
 
 typedef unsigned int UINT4;
 

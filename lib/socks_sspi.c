@@ -20,16 +20,9 @@
  *
  ***************************************************************************/
 
-
 #include "setup.h"
 
 #ifdef USE_WINDOWS_SSPI
-
-#include <string.h>
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"

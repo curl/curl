@@ -24,9 +24,6 @@
 
 #ifdef HAVE_LIBZ
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"

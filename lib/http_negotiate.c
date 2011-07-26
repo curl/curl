@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 #include "setup.h"
 
 #ifdef HAVE_GSSAPI
@@ -27,12 +28,6 @@
 #endif
 
 #ifndef CURL_DISABLE_HTTP
- /* -- WIN32 approved -- */
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <ctype.h>
 
 #include "urldata.h"
 #include "sendf.h"

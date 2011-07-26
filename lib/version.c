@@ -22,9 +22,6 @@
 
 #include "setup.h"
 
-#include <string.h>
-#include <stdio.h>
-
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sslgen.h"

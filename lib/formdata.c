@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include "setup.h"
+
 #include <curl/curl.h>
 
 /* Length of the random boundary string. */
@@ -28,10 +29,6 @@
 
 #if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
 #endif

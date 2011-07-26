@@ -24,7 +24,6 @@
 
 #ifndef HAVE_STRTOK_R
 #include <stddef.h>
-#include <string.h>
 
 #include "strtok.h"
 

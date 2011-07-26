@@ -24,8 +24,6 @@
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
-#include <string.h>
-
 #include "curl_md5.h"
 #include "curl_hmac.h"
 

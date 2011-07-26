@@ -27,10 +27,6 @@
 #include "urldata.h"
 #include "getinfo.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include "curl_memory.h"
 #include "sslgen.h"
 #include "connect.h" /* Curl_getconnectinfo() */

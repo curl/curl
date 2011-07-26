@@ -40,7 +40,6 @@
 #ifdef __VMS
 #  include <in.h>
 #  include <inet.h>
-#  include <stdlib.h>
 #endif
 
 #if defined(NETWARE) && defined(__NOVELL_LIBC__)

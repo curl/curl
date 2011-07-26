@@ -23,11 +23,6 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

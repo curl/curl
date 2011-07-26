@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include "setup.h"
+
 #include "strtoofft.h"
 
 /*
@@ -32,14 +33,11 @@
  */
 
 #ifdef NEED_CURL_STRTOLL
-#include <stdlib.h>
-#include <ctype.h>
 
 /* Range tests can be used for alphanum decoding if characters are consecutive,
    like in ASCII. Else an array is scanned. Determine this condition now. */
 
 #if('9' - '0') != 9 || ('Z' - 'A') != 25 || ('z' - 'a') != 25
-#include <string.h>
 
 #define NO_RANGE_TEST
 
