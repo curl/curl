@@ -1631,7 +1631,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   curl_off_t included_body = 0;
   const char *httpstring;
   Curl_send_buffer *req_buffer;
-  curl_off_t postsize; /* off_t type to be able to hold a large file size */
+  curl_off_t postsize = 0; /* off_t type to be able to hold a large file size */
   int seekerr = CURL_SEEKFUNC_OK;
 
   /* Always consider the DO phase done after this function call, even if there

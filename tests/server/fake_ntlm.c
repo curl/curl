@@ -27,13 +27,21 @@
  * responses with a pre-written string saved in test case test2005.
  */
 
-#include <stdio.h>
-#include <errno.h>
-#include <unistd.h>
+#define CURL_NO_OLDIES
 
+#include "setup.h"
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#define ENABLE_CURLX_PRINTF
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
+
+/* include memdebug.h last */
+#include "memdebug.h"
 
 #ifndef DEFAULT_LOGFILE
 #define DEFAULT_LOGFILE "log/fake_ntlm.log"

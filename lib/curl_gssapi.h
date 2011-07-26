@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_GSSAPI_H
+#define HEADER_CURL_GSSAPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -49,3 +51,5 @@ OM_uint32 Curl_gss_init_sec_context(
     OM_uint32 * ret_flags);
 
 #endif /* HAVE_GSSAPI */
+
+#endif /* HEADER_CURL_GSSAPI_H */
