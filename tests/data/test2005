@@ -70,7 +70,7 @@ CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 # set path to fake_auth instead of real ntlm_auth to generate NTLM type1 and type 3 messages
-NTLM_AUTH=server/fake_ntlm
+NTLM_AUTH=%PWD/server/fake_ntlm
 # set source directory so fake_ntlm can find the test files
 NTLM_AUTH_SRCDIR=%SRCDIR
 # set the test number
