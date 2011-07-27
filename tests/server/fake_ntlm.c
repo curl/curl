@@ -49,7 +49,7 @@
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 
-int main(void)
+int main(int argc, char *argv[])
 {
   char buf[1024];
   FILE *stream;
@@ -60,6 +60,41 @@ int main(void)
   size_t size = 0;
   int testnum;
   const char *env;
+  int arg = 1;
+  char *helper_user = (char *)"unknown";
+  char *helper_proto = (char *)"unknown";
+  char *helper_domain = (char *)"unknown";
+  bool use_cached_creds = FALSE;
+
+  while(argc > arg) {
+    if(!strcmp("--use-cached-creds", argv[arg])) {
+      use_cached_creds = TRUE;
+      arg++;
+    }
+    else if(!strcmp("--helper-protocol", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        helper_proto = argv[arg++];
+    }
+    else if(!strcmp("--username", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        helper_user = argv[arg++];
+    }
+    else if(!strcmp("--domain", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        helper_domain = argv[arg++];
+    }
+    else {
+      puts("Usage: fake_ntlm [option]\n"
+           " --use-cached-creds\n"
+           " --helper-protocol [protocol]\n"
+           " --username [username]\n"
+           " --domain [domain]");
+      exit(1);
+    }
+  }
 
   env = getenv("NTLM_AUTH_TESTNUM");
   if (env) {
