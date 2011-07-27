@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   char *type1_input = NULL, *type3_input = NULL;
   char *type1_output = NULL, *type3_output = NULL;
   size_t size = 0;
-  int testnum;
+  long testnum;
   const char *env;
   int arg = 1;
   char *helper_user = (char *)"unknown";
@@ -98,7 +98,13 @@ int main(int argc, char *argv[])
 
   env = getenv("NTLM_AUTH_TESTNUM");
   if (env) {
-    testnum = strtoul(env, NULL, 10);
+    char *endptr;
+    long lnum = strtol(env, &endptr, 10);
+    if((endptr != env + strlen(env)) || (lnum < 1L)) {
+      logmsg("Test number not valid in NTLM_AUTH_TESTNUM");
+      exit(1);
+    }
+    testnum = lnum;
   } else {
     logmsg("Test number not specified in NTLM_AUTH_TESTNUM");
     exit(1);

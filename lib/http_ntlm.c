@@ -834,7 +834,7 @@ static CURLcode sso_ntlm_response(struct connectdata *conn,
   size_t len_in = strlen(input), len_out = sizeof(buf);
 
   while(len_in > 0) {
-    int written = write(conn->fd_helper, input, len_in);
+    ssize_t written = write(conn->fd_helper, input, len_in);
     if(written == -1) {
       /* Interrupted by a signal, retry it */
       if(errno == EINTR)
