@@ -55,6 +55,7 @@
 #include "curl_base64.h"
 #include "http_ntlm.h"
 #include "url.h"
+#include "strerror.h"
 #include "curl_gethostname.h"
 #include "curl_memory.h"
 
@@ -718,6 +719,8 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
   const char *username;
   char *slash, *domain = NULL;
   const char *ntlm_auth = NULL;
+  char *ntlm_auth_alloc = NULL;
+  int error;
 
   /* Return if communication with ntlm_auth already set up */
   if(conn->fd_helper != -1 || conn->pid) {
@@ -739,32 +742,75 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
    * which only accept commands and output strings pre-written/saved in
    * test case 2005 */
 #ifdef DEBUGBUILD
-  ntlm_auth=getenv("NTLM_AUTH");
+  ntlm_auth_alloc = curl_getenv("NTLM_AUTH");
+  if(ntlm_auth_alloc)
+    ntlm_auth = ntlm_auth_alloc;
+  else
 #endif
-  if(!ntlm_auth)
     ntlm_auth = NTLM_AUTH;
 
-  if(access(ntlm_auth, X_OK) != 0)
+  if(access(ntlm_auth, X_OK) != 0) {
+    error = ERRNO;
+    failf(conn->data, "Could not access ntlm_auth: %s errno %d: %s",
+          ntlm_auth, error, Curl_strerror(conn, error));
     goto done;
+  }
 
-  if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds))
+  if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
+    error = ERRNO;
+    failf(conn->data, "Could not open socket pair. errno %d: %s",
+          error, Curl_strerror(conn, error));
     goto done;
+  }
 
   pid = fork();
-  if(!pid) {
-    /* child process */
-    if(dup2(sockfds[1], 0) == -1 || dup2(sockfds[1], 1) == -1)
-      exit(1);
-
-    execl(ntlm_auth, "--helper-protocol", "ntlmssp-client-1",
-          "--use-cached-creds", "--username", username,
-          domain?"--domain":NULL, domain, NULL);
-    exit(1);
-  }
-  else if(pid == -1) {
+  if(pid == -1) {
+    error = ERRNO;
     close(sockfds[0]);
     close(sockfds[1]);
+    failf(conn->data, "Could not fork. errno %d: %s",
+          error, Curl_strerror(conn, error));
     goto done;
+  }
+  else if(!pid) {
+    /*
+     * child process
+     */
+
+    close(sockfds[0]);
+
+    if(dup2(sockfds[1], STDIN_FILENO) == -1) {
+      error = ERRNO;
+      failf(conn->data, "Could not redirect child stdin. errno %d: %s",
+            error, Curl_strerror(conn, error));
+      exit(1);
+    }
+
+    if(dup2(sockfds[1], STDOUT_FILENO) == -1) {
+      error = ERRNO;
+      failf(conn->data, "Could not redirect child stdout. errno %d: %s",
+            error, Curl_strerror(conn, error));
+      exit(1);
+    }
+
+    if(domain)
+      execl(ntlm_auth, ntlm_auth,
+            "--helper-protocol", "ntlmssp-client-1",
+            "--use-cached-creds",
+            "--username", username,
+            "--domain", domain,
+            NULL);
+    else
+      execl(ntlm_auth, ntlm_auth,
+            "--helper-protocol", "ntlmssp-client-1",
+            "--use-cached-creds",
+            "--username", username,
+            NULL);
+
+    error = ERRNO;
+    failf(conn->data, "Could not execl(). errno %d: %s",
+          error, Curl_strerror(conn, error));
+    exit(1);
   }
 
   close(sockfds[1]);
@@ -775,6 +821,7 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
 
 done:
   Curl_safefree(domain);
+  Curl_safefree(ntlm_auth_alloc);
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
