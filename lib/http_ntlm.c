@@ -817,6 +817,7 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
   conn->fd_helper = sockfds[0];
   conn->pid = pid;
   Curl_safefree(domain);
+  Curl_safefree(ntlm_auth_alloc);
   return CURLE_OK;
 
 done:
@@ -962,9 +963,13 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
     break;
   case NTLMSTATE_TYPE2:
     input = aprintf("TT %s\n", conn->challenge_header);
+    if(!input)
+      return CURLE_OUT_OF_MEMORY;
     res = sso_ntlm_response(conn,
                             input,
                             ntlm->state);
+    free(input);
+    input = NULL;
     if(res)
       return res;
 
@@ -976,7 +981,6 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
     sso_ntlm_close(conn);
-    free(input);
     break;
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
