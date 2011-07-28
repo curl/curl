@@ -27,6 +27,7 @@
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_OLD_GSSMIT
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
+#define NCOMPAT 1
 #endif
 #ifndef gss_nt_service_name
 #define gss_nt_service_name GSS_C_NT_HOSTBASED_SERVICE

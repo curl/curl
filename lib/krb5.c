@@ -39,6 +39,7 @@
 
 #ifdef HAVE_OLD_GSSMIT
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
+#define NCOMPAT 1
 #endif
 
 #ifdef HAVE_NETDB_H
