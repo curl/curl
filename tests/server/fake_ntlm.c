@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  while(fgets(buf, 1024, stdin)) {
+  while(fgets(buf, sizeof(buf), stdin)) {
     if(strcmp(buf, type1_input) == 0) {
       stream=fopen(filename, "rb");
       if(!stream) {
