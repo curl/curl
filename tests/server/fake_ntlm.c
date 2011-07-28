@@ -49,6 +49,71 @@
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 
+/*
+ * Returns an allocated buffer with printable representation of input
+ * buffer contents or returns NULL on out of memory condition.
+ */
+static char *printable(char *inbuf, size_t inlength)
+{
+  char *outbuf;
+  char *newbuf;
+  size_t newsize;
+  size_t outsize;
+  size_t outincr = 0;
+  size_t i, o = 0;
+
+#define HEX_FMT_STR  "[0x%02X]"
+#define HEX_STR_LEN  6
+#define NOTHING_STR  "[NOTHING]"
+#define NOTHING_LEN  9
+
+  if(!inlength)
+    inlength = strlen(inbuf);
+
+  if(inlength) {
+    outincr = ((inlength/2) < (HEX_STR_LEN+1)) ? HEX_STR_LEN+1 : inlength/2;
+    outsize = inlength + outincr;
+  }
+  else
+    outsize = NOTHING_LEN + 1;
+
+  outbuf = malloc(outsize);
+  if(!outbuf)
+    return NULL;
+
+  if(!inlength) {
+    sprintf(&outbuf[0], "%s", NOTHING_STR);
+    return outbuf;
+  }
+
+  for(i=0; i<inlength; i++) {
+
+    if(o > outsize - (HEX_STR_LEN + 1)) {
+      newsize = outsize + outincr;
+      newbuf = realloc(outbuf, newsize);
+      if(!newbuf) {
+        free(outbuf);
+        return NULL;
+      }
+      outbuf = newbuf;
+      outsize = newsize;
+    }
+
+    if((inbuf[i] > 0x20) && (inbuf[i] < 0x7F)) {
+      outbuf[o] = inbuf[i];
+      o++;
+    }
+    else {
+      sprintf(&outbuf[o], HEX_FMT_STR, inbuf[i]);
+      o += HEX_STR_LEN;
+    }
+
+  }
+  outbuf[o] = '\0';
+
+  return outbuf;
+}
+
 int main(int argc, char *argv[])
 {
   char buf[1024];
@@ -65,6 +130,9 @@ int main(int argc, char *argv[])
   char *helper_proto = (char *)"unknown";
   char *helper_domain = (char *)"unknown";
   bool use_cached_creds = FALSE;
+  char *msgbuf;
+
+  buf[0] = '\0';
 
   while(argc > arg) {
     if(!strcmp("--use-cached-creds", argv[arg])) {
@@ -197,7 +265,13 @@ int main(int argc, char *argv[])
     }
     else {
       printf("Unknown request\n");
-      logmsg("invalid input: %s\n", buf);
+      msgbuf = printable(buf, 0);
+      if(msgbuf) {
+        logmsg("invalid input: '%s'\n", msgbuf);
+        free(msgbuf);
+      }
+      else
+        logmsg("OOM formatting invalid input: '%s'\n", buf);
       exit(1);
     }
   }
