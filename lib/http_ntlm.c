@@ -51,6 +51,7 @@
 #include "urldata.h"
 #include "non-ascii.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
+#include "select.h"
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_ntlm.h"
@@ -694,10 +695,14 @@ static void sso_ntlm_close(struct connectdata *conn)
       case 0:
         kill(conn->pid, SIGTERM);
         break;
+      case 1:
+        /* Give the process another moment to shut down cleanly before
+           bringing down the axe */
+        Curl_wait_ms(1);
+        break;
       case 2:
         kill(conn->pid, SIGKILL);
         break;
-      case 1:
       case 3:
         break;
       }
