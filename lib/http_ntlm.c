@@ -946,11 +946,6 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
      * If NTLM single-sign-on fails, go back to original request
      * handling process.
      */
-    /* Clean data before using them */
-    conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-    conn->ntlm_auth_hlpr_pid = 0;
-    conn->challenge_header = NULL;
-    conn->response_header = NULL;
     /* Create communication with ntlm_auth */
     res = sso_ntlm_initiate(conn, userp);
     if(res)

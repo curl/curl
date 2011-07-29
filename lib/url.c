@@ -3515,6 +3515,13 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->ip_version = data->set.ipver;
 
+#ifdef USE_NTLM_SSO
+  conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
+  conn->ntlm_auth_hlpr_pid = 0;
+  conn->challenge_header = NULL;
+  conn->response_header = NULL;
+#endif
+
   if(data->multi && Curl_multi_canPipeline(data->multi) &&
       !conn->master_buffer) {
     /* Allocate master_buffer to be used for pipelining */
