@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 67
+# serial 66
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -1094,74 +1094,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
     AC_DEFINE_UNQUOTED(HAVE_FCNTL, 1,
       [Define to 1 if you have the fcntl function.])
     ac_cv_func_fcntl="yes"
-    CURL_CHECK_FUNC_FCNTL_FD_CLOEXEC
     CURL_CHECK_FUNC_FCNTL_O_NONBLOCK
   else
     AC_MSG_RESULT([no])
     ac_cv_func_fcntl="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_FCNTL_FD_CLOEXEC
-dnl -------------------------------------------------
-dnl Verify if fcntl with status flag FD_CLOEXEC is
-dnl available, can be compiled, and seems to work. If
-dnl all of these are true, then HAVE_FCNTL_FD_CLOEXEC
-dnl will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_FCNTL_FD_CLOEXEC], [
-  #
-  tst_compi_fcntl_fd_cloexec="unknown"
-  tst_allow_fcntl_fd_cloexec="unknown"
-  #
-  case $host_os in
-    some_systems)
-      dnl FD_CLOEXEC does not work on these platforms
-      curl_disallow_fcntl_fd_cloexec="yes"
-      ;;
-  esac
-  #
-  if test "$ac_cv_func_fcntl" = "yes"; then
-    AC_MSG_CHECKING([if fcntl FD_CLOEXEC is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_fcntl
-      ]],[[
-        int flags = 0;
-        if(0 != fcntl(0, F_SETFD, flags | FD_CLOEXEC))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_fcntl_fd_cloexec="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_fcntl_fd_cloexec="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_fcntl_fd_cloexec" = "yes"; then
-    AC_MSG_CHECKING([if fcntl FD_CLOEXEC usage allowed])
-    if test "x$curl_disallow_fcntl_fd_cloexec" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_fcntl_fd_cloexec="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_fcntl_fd_cloexec="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if fcntl FD_CLOEXEC might be used])
-  if test "$tst_compi_fcntl_fd_cloexec" = "yes" &&
-     test "$tst_allow_fcntl_fd_cloexec" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_FCNTL_FD_CLOEXEC, 1,
-      [Define to 1 if you have a working fcntl FD_CLOEXEC function.])
-    ac_cv_func_fcntl_fd_cloexec="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_fcntl_fd_cloexec="no"
   fi
 ])
 
@@ -5681,145 +5617,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_DEFINE_UNQUOTED(HAVE_SOCKET, 1,
       [Define to 1 if you have the socket function.])
     ac_cv_func_socket="yes"
-    CURL_CHECK_FUNC_SOCKET_SOCK_CLOEXEC
-    CURL_CHECK_FUNC_SOCKET_SOCK_NONBLOCK
   else
     AC_MSG_RESULT([no])
     ac_cv_func_socket="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_SOCKET_SOCK_CLOEXEC
-dnl -------------------------------------------------
-dnl Verify if socket with type flag SOCK_CLOEXEC is
-dnl available, can be compiled, and seems to work. If
-dnl all of these are true, then HAVE_SOCKET_SOCK_CLOEXEC
-dnl will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_SOCKET_SOCK_CLOEXEC], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
-  #
-  tst_compi_socket_sock_cloexec="unknown"
-  tst_allow_socket_sock_cloexec="unknown"
-  #
-  case $host_os in
-    some_systems)
-      dnl socket SOCK_CLOEXEC does not work
-      curl_disallow_socket_sock_cloexec="yes"
-      ;;
-  esac
-  #
-  if test "$ac_cv_func_socket" = "yes"; then
-    AC_MSG_CHECKING([if socket SOCK_CLOEXEC is compilable])
-    AC_COMPILE_IFELSE([
-        $curl_includes_winsock2
-        $curl_includes_sys_socket
-        $curl_includes_socket
-      ]],[[
-        int flags = 0;
-        if(0 != socket(0, flags | SOCK_CLOEXEC, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_socket_sock_cloexec="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_socket_sock_cloexec="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_socket_sock_cloexec" = "yes"; then
-    AC_MSG_CHECKING([if socket SOCK_CLOEXEC usage allowed])
-    if test "x$curl_disallow_socket_sock_cloexec" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_socket_sock_cloexec="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_socket_sock_cloexec="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if socket SOCK_CLOEXEC might be used])
-  if test "$tst_compi_socket_sock_cloexec" = "yes" &&
-     test "$tst_allow_socket_sock_cloexec" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SOCKET_SOCK_CLOEXEC, 1,
-      [Define to 1 if you have a working socket SOCK_CLOEXEC function.])
-    ac_cv_func_socket_sock_cloexec="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_socket_sock_cloexec="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_SOCKET_SOCK_NONBLOCK
-dnl -------------------------------------------------
-dnl Verify if socket with type flag SOCK_NONBLOCK is
-dnl available, can be compiled, and seems to work. If
-dnl all of these are true, then HAVE_SOCKET_SOCK_NONBLOCK
-dnl will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_SOCKET_SOCK_NONBLOCK], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
-  #
-  tst_compi_socket_sock_nonblock="unknown"
-  tst_allow_socket_sock_nonblock="unknown"
-  #
-  case $host_os in
-    some_systems)
-      dnl socket SOCK_NONBLOCK does not work
-      curl_disallow_socket_sock_nonblock="yes"
-      ;;
-  esac
-  #
-  if test "$ac_cv_func_socket" = "yes"; then
-    AC_MSG_CHECKING([if socket SOCK_NONBLOCK is compilable])
-    AC_COMPILE_IFELSE([
-        $curl_includes_winsock2
-        $curl_includes_sys_socket
-        $curl_includes_socket
-      ]],[[
-        int flags = 0;
-        if(0 != socket(0, flags | SOCK_NONBLOCK, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_socket_sock_nonblock="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_socket_sock_nonblock="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_socket_sock_nonblock" = "yes"; then
-    AC_MSG_CHECKING([if socket SOCK_NONBLOCK usage allowed])
-    if test "x$curl_disallow_socket_sock_nonblock" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_socket_sock_nonblock="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_socket_sock_nonblock="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if socket SOCK_NONBLOCK might be used])
-  if test "$tst_compi_socket_sock_nonblock" = "yes" &&
-     test "$tst_allow_socket_sock_nonblock" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SOCKET_SOCK_NONBLOCK, 1,
-      [Define to 1 if you have a working socket SOCK_NONBLOCK function.])
-    ac_cv_func_socket_sock_nonblock="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_socket_sock_nonblock="no"
   fi
 ])
 
@@ -5906,143 +5706,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
     AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR, 1,
       [Define to 1 if you have the socketpair function.])
     ac_cv_func_socketpair="yes"
-    CURL_CHECK_FUNC_SOCKETPAIR_SOCK_CLOEXEC
-    CURL_CHECK_FUNC_SOCKETPAIR_SOCK_NONBLOCK
   else
     AC_MSG_RESULT([no])
     ac_cv_func_socketpair="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_SOCKETPAIR_SOCK_CLOEXEC
-dnl -------------------------------------------------
-dnl Verify if socketpair with type flag SOCK_CLOEXEC is
-dnl available, can be compiled, and seems to work. If
-dnl all of these are true, then HAVE_SOCKETPAIR_SOCK_CLOEXEC
-dnl will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR_SOCK_CLOEXEC], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
-  #
-  tst_compi_socketpair_sock_cloexec="unknown"
-  tst_allow_socketpair_sock_cloexec="unknown"
-  #
-  case $host_os in
-    some_systems)
-      dnl socketpair SOCK_CLOEXEC does not work
-      curl_disallow_socketpair_sock_cloexec="yes"
-      ;;
-  esac
-  #
-  if test "$ac_cv_func_socketpair" = "yes"; then
-    AC_MSG_CHECKING([if socketpair SOCK_CLOEXEC is compilable])
-    AC_COMPILE_IFELSE([
-        $curl_includes_sys_socket
-        $curl_includes_socket
-      ]],[[
-        int sv[2];
-        int flags = 0;
-        if(0 != socketpair(0, flags | SOCK_CLOEXEC, 0, sv))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_socketpair_sock_cloexec="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_socketpair_sock_cloexec="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_socketpair_sock_cloexec" = "yes"; then
-    AC_MSG_CHECKING([if socketpair SOCK_CLOEXEC usage allowed])
-    if test "x$curl_disallow_socketpair_sock_cloexec" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_socketpair_sock_cloexec="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_socketpair_sock_cloexec="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if socketpair SOCK_CLOEXEC might be used])
-  if test "$tst_compi_socketpair_sock_cloexec" = "yes" &&
-     test "$tst_allow_socketpair_sock_cloexec" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR_SOCK_CLOEXEC, 1,
-      [Define to 1 if you have a working socketpair SOCK_CLOEXEC function.])
-    ac_cv_func_socketpair_sock_cloexec="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_socketpair_sock_cloexec="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_SOCKETPAIR_SOCK_NONBLOCK
-dnl -------------------------------------------------
-dnl Verify if socketpair with type flag SOCK_NONBLOCK is
-dnl available, can be compiled, and seems to work. If
-dnl all of these are true, then HAVE_SOCKETPAIR_SOCK_NONBLOCK
-dnl will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR_SOCK_NONBLOCK], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
-  #
-  tst_compi_socketpair_sock_nonblock="unknown"
-  tst_allow_socketpair_sock_nonblock="unknown"
-  #
-  case $host_os in
-    some_systems)
-      dnl socketpair SOCK_NONBLOCK does not work
-      curl_disallow_socketpair_sock_nonblock="yes"
-      ;;
-  esac
-  #
-  if test "$ac_cv_func_socketpair" = "yes"; then
-    AC_MSG_CHECKING([if socketpair SOCK_NONBLOCK is compilable])
-    AC_COMPILE_IFELSE([
-        $curl_includes_sys_socket
-        $curl_includes_socket
-      ]],[[
-        int sv[2];
-        int flags = 0;
-        if(0 != socketpair(0, flags | SOCK_NONBLOCK, 0, sv))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_socketpair_sock_nonblock="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_socketpair_sock_nonblock="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_socketpair_sock_nonblock" = "yes"; then
-    AC_MSG_CHECKING([if socketpair SOCK_NONBLOCK usage allowed])
-    if test "x$curl_disallow_socketpair_sock_nonblock" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_socketpair_sock_nonblock="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_socketpair_sock_nonblock="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if socketpair SOCK_NONBLOCK might be used])
-  if test "$tst_compi_socketpair_sock_nonblock" = "yes" &&
-     test "$tst_allow_socketpair_sock_nonblock" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR_SOCK_NONBLOCK, 1,
-      [Define to 1 if you have a working socketpair SOCK_NONBLOCK function.])
-    ac_cv_func_socketpair_sock_nonblock="yes"
-  else
-    AC_MSG_RESULT([no])
-    ac_cv_func_socketpair_sock_nonblock="no"
   fi
 ])
 
