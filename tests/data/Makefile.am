@@ -73,8 +73,8 @@ test1110 test1111 test1112 test1113 test1114 test1115 test1116 test1117	\
 test1118 test1119 test1120 test1121 test1122 test1123 test1124 test1125	\
 test1126 test1127 test1128 test1129 test1130 test1131 test1200 test1201	\
 test1202 test1203 test1300 test1301 test1302 test1303 test1304 test1305	\
-test1306 test1307 test1308 test1309 test2000 test2001 test2002 test2003	\
-test2004 test2005
+test1306 test1307 test1308 test1309 test1310 \
+test2000 test2001 test2002 test2003 test2004
 
 EXTRA_DIST = $(TESTCASES) DISABLED
 

@@ -74,10 +74,10 @@ NTLM_AUTH=%PWD/server/fake_ntlm
 # set source directory so fake_ntlm can find the test files
 NTLM_AUTH_SRCDIR=%SRCDIR
 # set the test number
-NTLM_AUTH_TESTNUM=2005
+NTLM_AUTH_TESTNUM=1310
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/2005 -u testuser:anypasswd --ntlm-sso
+http://%HOSTIP:%HTTPPORT/1310 -u testuser:anypasswd --ntlm-sso
 </command>
 <precheck>
 chkhostname curlhost
@@ -90,13 +90,13 @@ chkhostname curlhost
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /2005 HTTP/1.1
+GET /1310 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAA
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
-GET /2005 HTTP/1.1
+GET /1310 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAE8AAAAYABgAZwAAAAAAAABAAAAACAAIAEAAAAAHAAcASAAAAAAAAAAAAAAAggEAAHRlc3R1c2VyVU5LTk9XTlpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOQ==
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
