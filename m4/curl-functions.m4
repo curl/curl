@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 65
+# serial 66
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -5620,6 +5620,95 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   else
     AC_MSG_RESULT([no])
     ac_cv_func_socket="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_SOCKETPAIR
+dnl -------------------------------------------------
+dnl Verify if socketpair is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_socketpair, then
+dnl HAVE_SOCKETPAIR will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
+  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
+  #
+  tst_links_socketpair="unknown"
+  tst_proto_socketpair="unknown"
+  tst_compi_socketpair="unknown"
+  tst_allow_socketpair="unknown"
+  #
+  AC_MSG_CHECKING([if socketpair can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([socketpair])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_socketpair="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_socketpair="no"
+  ])
+  #
+  if test "$tst_links_socketpair" = "yes"; then
+    AC_MSG_CHECKING([if socketpair is prototyped])
+    AC_EGREP_CPP([socketpair],[
+      $curl_includes_sys_socket
+      $curl_includes_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_socketpair="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_socketpair="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_socketpair" = "yes"; then
+    AC_MSG_CHECKING([if socketpair is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_sys_socket
+        $curl_includes_socket
+      ]],[[
+        int sv[2];
+        if(0 != socketpair(0, 0, 0, sv))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_socketpair="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_socketpair="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_socketpair" = "yes"; then
+    AC_MSG_CHECKING([if socketpair usage allowed])
+    if test "x$curl_disallow_socketpair" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_socketpair="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_socketpair="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if socketpair might be used])
+  if test "$tst_links_socketpair" = "yes" &&
+     test "$tst_proto_socketpair" = "yes" &&
+     test "$tst_compi_socketpair" = "yes" &&
+     test "$tst_allow_socketpair" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR, 1,
+      [Define to 1 if you have the socketpair function.])
+    ac_cv_func_socketpair="yes"
+  else
+    AC_MSG_RESULT([no])
+    ac_cv_func_socketpair="no"
   fi
 ])
 

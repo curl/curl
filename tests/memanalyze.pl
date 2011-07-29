@@ -236,6 +236,14 @@ while(<FILE>) {
             $getfile{$1}="$source:$linenum";
             $openfile++;
         }
+        elsif($function =~ /socketpair\(\) = (\d*) (\d*)/) {
+            $filedes{$1}=1;
+            $getfile{$1}="$source:$linenum";
+            $openfile++;
+            $filedes{$2}=1;
+            $getfile{$2}="$source:$linenum";
+            $openfile++;
+        }
         elsif($function =~ /accept\(\) = (\d*)/) {
             $filedes{$1}=1;
             $getfile{$1}="$source:$linenum";

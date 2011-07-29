@@ -680,20 +680,20 @@ static void unicodecpy(unsigned char *dest,
 #ifdef USE_NTLM_SSO
 static void sso_ntlm_close(struct connectdata *conn)
 {
-  if(conn->fd_helper != -1) {
-    close(conn->fd_helper);
-    conn->fd_helper = -1;
+  if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
+    sclose(conn->ntlm_auth_hlpr_socket);
+    conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   }
 
-  if(conn->pid) {
-    int ret, i;
+  if(conn->ntlm_auth_hlpr_pid) {
+    int i;
     for(i = 0; i < 4; i++) {
-      ret = waitpid(conn->pid, NULL, WNOHANG);
-      if(ret == conn->pid || errno == ECHILD)
+      pid_t ret = waitpid(conn->ntlm_auth_hlpr_pid, NULL, WNOHANG);
+      if(ret == conn->ntlm_auth_hlpr_pid || errno == ECHILD)
         break;
       switch(i) {
       case 0:
-        kill(conn->pid, SIGTERM);
+        kill(conn->ntlm_auth_hlpr_pid, SIGTERM);
         break;
       case 1:
         /* Give the process another moment to shut down cleanly before
@@ -701,13 +701,13 @@ static void sso_ntlm_close(struct connectdata *conn)
         Curl_wait_ms(1);
         break;
       case 2:
-        kill(conn->pid, SIGKILL);
+        kill(conn->ntlm_auth_hlpr_pid, SIGKILL);
         break;
       case 3:
         break;
       }
     }
-    conn->pid = 0;
+    conn->ntlm_auth_hlpr_pid = 0;
   }
 
   Curl_safefree(conn->challenge_header);
@@ -719,8 +719,8 @@ static void sso_ntlm_close(struct connectdata *conn)
 static CURLcode sso_ntlm_initiate(struct connectdata *conn,
                                   const char *userp)
 {
-  int sockfds[2];
-  pid_t pid;
+  curl_socket_t sockfds[2];
+  pid_t child_pid;
   const char *username;
   char *slash, *domain = NULL;
   const char *ntlm_auth = NULL;
@@ -728,9 +728,9 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
   int error;
 
   /* Return if communication with ntlm_auth already set up */
-  if(conn->fd_helper != -1 || conn->pid) {
+  if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
+     conn->ntlm_auth_hlpr_pid)
     return CURLE_OK;
-  }
 
   username = userp;
   slash = strpbrk(username, "\\/");
@@ -768,21 +768,21 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
     goto done;
   }
 
-  pid = fork();
-  if(pid == -1) {
+  child_pid = fork();
+  if(child_pid == -1) {
     error = ERRNO;
-    close(sockfds[0]);
-    close(sockfds[1]);
+    sclose(sockfds[0]);
+    sclose(sockfds[1]);
     failf(conn->data, "Could not fork. errno %d: %s",
           error, Curl_strerror(conn, error));
     goto done;
   }
-  else if(!pid) {
+  else if(!child_pid) {
     /*
      * child process
      */
 
-    close(sockfds[0]);
+    sclose(sockfds[0]);
 
     if(dup2(sockfds[1], STDIN_FILENO) == -1) {
       error = ERRNO;
@@ -813,14 +813,15 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
             NULL);
 
     error = ERRNO;
+    sclose(sockfds[1]);
     failf(conn->data, "Could not execl(). errno %d: %s",
           error, Curl_strerror(conn, error));
     exit(1);
   }
 
-  close(sockfds[1]);
-  conn->fd_helper = sockfds[0];
-  conn->pid = pid;
+  sclose(sockfds[1]);
+  conn->ntlm_auth_hlpr_socket = sockfds[0];
+  conn->ntlm_auth_hlpr_pid = child_pid;
   Curl_safefree(domain);
   Curl_safefree(ntlm_auth_alloc);
   return CURLE_OK;
@@ -840,7 +841,7 @@ static CURLcode sso_ntlm_response(struct connectdata *conn,
   size_t len_in = strlen(input), len_out = sizeof(buf);
 
   while(len_in > 0) {
-    ssize_t written = write(conn->fd_helper, input, len_in);
+    ssize_t written = write(conn->ntlm_auth_hlpr_socket, input, len_in);
     if(written == -1) {
       /* Interrupted by a signal, retry it */
       if(errno == EINTR)
@@ -853,7 +854,7 @@ static CURLcode sso_ntlm_response(struct connectdata *conn,
   }
   /* Read one line */
   while(len_out > 0) {
-    size = read(conn->fd_helper, tmpbuf, len_out);
+    size = read(conn->ntlm_auth_hlpr_socket, tmpbuf, len_out);
     if(size == -1) {
       if(errno == EINTR)
         continue;
@@ -946,8 +947,8 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
      * handling process.
      */
     /* Clean data before using them */
-    conn->fd_helper = -1;
-    conn->pid = 0;
+    conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
+    conn->ntlm_auth_hlpr_pid = 0;
     conn->challenge_header = NULL;
     conn->response_header = NULL;
     /* Create communication with ntlm_auth */

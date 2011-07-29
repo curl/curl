@@ -65,6 +65,11 @@ CURL_EXTERN int curl_sclose(curl_socket_t sockfd,
                             int line , const char *source);
 CURL_EXTERN curl_socket_t curl_accept(curl_socket_t s, void *a, void *alen,
                                       int line, const char *source);
+#ifdef HAVE_SOCKETPAIR
+CURL_EXTERN int curl_socketpair(int domain, int type, int protocol,
+                                curl_socket_t socket_vector[2],
+                                int line , const char *source);
+#endif
 
 /* FILE functions */
 CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
@@ -90,6 +95,10 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #undef accept /* for those with accept as a macro */
 #define accept(sock,addr,len)\
  curl_accept(sock,addr,len,__LINE__,__FILE__)
+#ifdef HAVE_SOCKETPAIR
+#define socketpair(domain,type,protocol,socket_vector)\
+ curl_socketpair(domain,type,protocol,socket_vector,__LINE__,__FILE__)
+#endif
 
 #ifdef HAVE_GETADDRINFO
 #if defined(getaddrinfo) && defined(__osf__)
