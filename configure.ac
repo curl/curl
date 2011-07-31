@@ -2419,6 +2419,7 @@ AC_CHECK_HEADERS(
         stdbool.h \
         arpa/tftp.h \
         sys/filio.h \
+        sys/wait.h \
         setjmp.h,
 dnl to do if not found
 [],
