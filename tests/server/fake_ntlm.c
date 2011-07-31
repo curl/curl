@@ -168,21 +168,21 @@ int main(int argc, char *argv[])
          helper_user, helper_proto, helper_domain,
          (use_cached_creds == TRUE) ? "yes" : "no");
 
-  env = getenv("NTLM_AUTH_TESTNUM");
+  env = getenv("CURL_NTLM_AUTH_TESTNUM");
   if (env) {
     char *endptr;
     long lnum = strtol(env, &endptr, 10);
     if((endptr != env + strlen(env)) || (lnum < 1L)) {
-      logmsg("Test number not valid in NTLM_AUTH_TESTNUM");
+      logmsg("Test number not valid in CURL_NTLM_AUTH_TESTNUM");
       exit(1);
     }
     testnum = lnum;
   } else {
-    logmsg("Test number not specified in NTLM_AUTH_TESTNUM");
+    logmsg("Test number not specified in CURL_NTLM_AUTH_TESTNUM");
     exit(1);
   }
 
-  env = getenv("NTLM_AUTH_SRCDIR");
+  env = getenv("CURL_NTLM_AUTH_SRCDIR");
   if (env) {
     path = env;
   }

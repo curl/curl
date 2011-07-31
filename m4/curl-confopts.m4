@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 14
+# serial 15
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -493,6 +493,66 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       AC_SUBST([USE_ARES], [1])
       curl_res_msg="c-ares"
     fi
+  fi
+])
+
+
+dnl CURL_CHECK_OPTION_WINBIND_NTLM_AUTH
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-ntlm-auth or --disable-ntlm-auth, and
+dnl set shell variable want_wb_ntlm_auth and
+dnl want_wb_ntlm_auth_file as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_WINBIND_NTLM_AUTH], [
+  AC_BEFORE([$0],[CURL_CHECK_WINBIND_NTLM_AUTH])dnl
+  OPT_WINBIND_NTLM_AUTH="default"
+  AC_ARG_ENABLE(wb-ntlm-auth,
+AC_HELP_STRING([--enable-wb-ntlm-auth@<:@=FILE@:>@],[Enable winbind's ntlm_auth helper for NTLM SSO, where FILE is ntlm_auth's absolute filename (default: /usr/bin/ntlm_auth)])
+AC_HELP_STRING([--disable-wb-ntlm-auth],[Disable winbind's ntlm_auth helper for NTLM SSO]),
+  OPT_WINBIND_NTLM_AUTH=$enableval)
+  want_wb_ntlm_auth_file="/usr/bin/ntlm_auth"
+  case "$OPT_WINBIND_NTLM_AUTH" in
+    no)
+      dnl --disable-wb-ntlm-auth option used
+      want_wb_ntlm_auth="no"
+      ;;
+    default)
+      dnl configure option not specified
+      want_wb_ntlm_auth="yes"
+      ;;
+    *)
+      dnl --enable-wb-ntlm-auth option used
+      want_wb_ntlm_auth="yes"
+      if test -n "$enableval" && test "$enableval" != "yes"; then
+        want_wb_ntlm_auth_file="$enableval"
+      fi
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_WINBIND_NTLM_AUTH
+dnl -------------------------------------------------
+dnl Check if winbind's ntlm_auth helper support will
+dnl finally be enabled depending on configure option
+dnl given and target platform.
+
+AC_DEFUN([CURL_CHECK_WINBIND_NTLM_AUTH], [
+  AC_REQUIRE([CURL_CHECK_OPTION_WINBIND_NTLM_AUTH])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_MSG_CHECKING([whether to enable winbind's ntlm_auth support for NTLM SSO])
+  if test "$ac_cv_native_windows" = "yes"; then
+    want_wb_ntlm_auth_file=""
+    want_wb_ntlm_auth="no"
+  fi
+  AC_MSG_RESULT([$want_wb_ntlm_auth])
+  if test "$want_wb_ntlm_auth" = "yes"; then
+    AC_DEFINE(WINBIND_NTLM_AUTH_ENABLED, 1,
+      [Define to enable winbind's ntlm_auth support for NTLM SSO.])
+    AC_DEFINE_UNQUOTED(WINBIND_NTLM_AUTH_FILE, "$want_wb_ntlm_auth_file",
+      [Define absolute filename for winbind's ntlm_auth helper.])
+    WINBIND_NTLM_AUTH_ENABLED=1
   fi
 ])
 

@@ -542,9 +542,13 @@ output_auth_headers(struct connectdata *conn,
 #ifdef USE_NTLM_SSO
   if(authstatus->picked == CURLAUTH_NTLM_SSO) {
     auth="NTLM_SSO";
+#ifdef WINBIND_NTLM_AUTH_ENABLED
     result = Curl_output_ntlm_sso(conn, proxy);
     if(result)
       return result;
+#else
+    return CURLE_REMOTE_ACCESS_DENIED;
+#endif
   }
   else
 #endif
@@ -767,7 +771,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
         if(CURLNTLM_BAD != ntlm) {
           data->state.authproblem = FALSE;
-#ifdef USE_NTLM_SSO
+#ifdef WINBIND_NTLM_AUTH_ENABLED
           if(authp->picked == CURLAUTH_NTLM_SSO) {
             *availp &= ~CURLAUTH_NTLM;
             authp->avail &= ~CURLAUTH_NTLM;

@@ -2687,34 +2687,6 @@ then
   USE_MANUAL="no";
 fi
 
-dnl **********************************************************
-dnl path of NTLM single-sign-on helper ntlm_auth
-dnl
-AC_ARG_WITH(ntlm-auth,
-   AC_HELP_STRING([--with-ntlm-auth=PATH],
-                  [Where to look for ntlm_auth, path points to ntlm_auth installation (default: /usr/bin/ntlm_auth);])
-   AC_HELP_STRING([--without-ntlm-auth],
-        [disable ntlm single-sign-on by using ntlm_auth]),
-ntlm_auth="$withval",
-        [if test "$ac_cv_native_windows" = "yes"; then ntlm_auth="no"; else ntlm_auth="/usr/bin/ntlm_auth"; fi])
-
-AC_MSG_CHECKING([if using ntlm_auth is requested])
-
-if test "$ntlm_auth" != "no"; then
-  AC_DEFINE(USE_NTLM_AUTH, 1, [Whether or not use Samba's 'winbind' daemon helper 'ntlm_auth' for NTLM single-sign-on])
-  AC_SUBST(USE_NTLM_AUTH, [1])
-  if test "$ntlm_auth" = "yes"; then
-    dnl --with-ntlm-auth (without path) used, use default path
-    ntlm_auth="/usr/bin/ntlm_auth"
-  fi
-  AC_MSG_RESULT($ntlm_auth)
-else
-  AC_MSG_RESULT(no)
-fi
-AC_SUBST(ntlm_auth)
-AC_DEFINE_UNQUOTED(NTLM_AUTH, "$ntlm_auth", [Samba's 'winbind' daemon helper 'ntlm_auth' which can be used for NTLM single-sign-on])
-
-
 dnl *************************************************************************
 dnl If the manual variable still is set, then we go with providing a built-in
 dnl manual
@@ -2822,6 +2794,10 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
   esac ],
        AC_MSG_RESULT(yes)
 )
+
+CURL_CHECK_OPTION_WINBIND_NTLM_AUTH
+
+CURL_CHECK_WINBIND_NTLM_AUTH
 
 dnl ************************************************************
 dnl disable TLS-SRP authentication
@@ -2998,7 +2974,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
-    if test "x$USE_NTLM_AUTH" = "x1"; then
+    if test "x$WINBIND_NTLM_AUTH_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_SSO"
     fi
   fi

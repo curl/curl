@@ -1,5 +1,5 @@
-#ifndef __HTTP_NTLM_H
-#define __HTTP_NTLM_H
+#ifndef HEADER_CURL_HTTP_NTLM_H
+#define HEADER_CURL_HTTP_NTLM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -38,9 +38,9 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy,
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 
-#ifdef USE_NTLM_SSO
+#ifdef WINBIND_NTLM_AUTH_ENABLED
 /* this is for creating ntlm header output by delegating challenge/response
- * to a Samba's daemon helper ntlm_auth */
+   to Samba's winbind daemon helper ntlm_auth */
 CURLcode Curl_output_ntlm_sso(struct connectdata *conn, bool proxy);
 #endif
 
@@ -152,4 +152,5 @@ void Curl_ntlm_cleanup(struct connectdata *conn);
 
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */
-#endif
+
+#endif /* HEADER_CURL_HTTP_NTLM_H */

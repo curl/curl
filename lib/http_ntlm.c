@@ -33,14 +33,16 @@
 
 #define DEBUG_ME 0
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#ifdef USE_NTLM_SSO
-#include <unistd.h>
-#include <sys/types.h>
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 
@@ -677,7 +679,7 @@ static void unicodecpy(unsigned char *dest,
 }
 #endif
 
-#ifdef USE_NTLM_SSO
+#ifdef WINBIND_NTLM_AUTH_ENABLED
 static void sso_ntlm_close(struct connectdata *conn)
 {
   if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
@@ -742,17 +744,17 @@ static CURLcode sso_ntlm_initiate(struct connectdata *conn,
     username = username + (slash - domain) + 1;
   }
 
-  /* When DEBUGBUILD is defined and environment variable NTLM_AUTH is set
-   * (in test case 2005), use a fake_ntlm to do NTLM challenge/response,
-   * which only accept commands and output strings pre-written/saved in
-   * test case 2005 */
+  /* For testing purposes, when DEBUGBUILD is defined and environment
+     variable CURL_NTLM_AUTH is set a fake_ntlm is used to perform
+     NTLM challenge/response which only accepts commands and output
+     strings pre-written in test case definitions */
 #ifdef DEBUGBUILD
-  ntlm_auth_alloc = curl_getenv("NTLM_AUTH");
+  ntlm_auth_alloc = curl_getenv("CURL_NTLM_AUTH");
   if(ntlm_auth_alloc)
     ntlm_auth = ntlm_auth_alloc;
   else
 #endif
-    ntlm_auth = NTLM_AUTH;
+    ntlm_auth = WINBIND_NTLM_AUTH_FILE;
 
   if(access(ntlm_auth, X_OK) != 0) {
     error = ERRNO;
@@ -940,9 +942,9 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
      * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
      * http://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
      * http://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
-     * The preprocessor variable 'USE_NTLM_AUTH' indicates whether
-     * this feature is enabled. Another one 'NTLM_AUTH' contains absolute
-     * path of it.
+     * Preprocessor symbol 'WINBIND_NTLM_AUTH_ENABLED' is defined when
+     * this feature is enabled and 'WINBIND_NTLM_AUTH_FILE' symbol holds
+     * absolute filename of ntlm_auth helper.
      * If NTLM single-sign-on fails, go back to original request
      * handling process.
      */
@@ -996,7 +998,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 
   return CURLE_OK;
 }
-#endif /* USE_NTLM_SSO */
+#endif /* WINBIND_NTLM_AUTH_ENABLED */
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
@@ -1644,7 +1646,7 @@ Curl_ntlm_cleanup(struct connectdata *conn)
   ntlm_sspi_cleanup(&conn->ntlm);
   ntlm_sspi_cleanup(&conn->proxyntlm);
 #else
-#ifdef USE_NTLM_SSO
+#ifdef WINBIND_NTLM_AUTH_ENABLED
   sso_ntlm_close(conn);
 #endif
   (void)conn;

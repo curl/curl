@@ -566,7 +566,7 @@ int netware_init(void);
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
    defined(USE_GNUTLS) || defined(USE_NSS)
 #define USE_NTLM
-#if defined(USE_NTLM_AUTH)
+#if defined(WINBIND_NTLM_AUTH_ENABLED)
 /* Support NTLM single-sign-on by using Samba's winbind daemon helper
    'ntlm_auth' */
 #define USE_NTLM_SSO

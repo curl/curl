@@ -3515,7 +3515,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->ip_version = data->set.ipver;
 
-#ifdef USE_NTLM_SSO
+#ifdef WINBIND_NTLM_AUTH_ENABLED
   conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   conn->ntlm_auth_hlpr_pid = 0;
   conn->challenge_header = NULL;

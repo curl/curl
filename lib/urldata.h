@@ -905,9 +905,8 @@ struct connectdata {
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
-#ifdef USE_NTLM_SSO
-  /* data used for communication with Samba's winbind daemon helper
-     ntlm_auth */
+#ifdef WINBIND_NTLM_AUTH_ENABLED
+  /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
   char* challenge_header;
