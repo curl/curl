@@ -31,6 +31,9 @@ Building with Visual C++, prerequises
 Building with Visual C++
 ========================
 
+If you use a git checkout, before running the following steps, run 
+buildconf.bat in the top of the source directory.
+
 Open a Visual Studio Command prompt or the SDK CMD shell.
 
     Using the CMD Shell:
@@ -54,13 +57,13 @@ where <options> is one or many of:
   VC=<6,7,8,9,10>              - VC versions
   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
                                  Default to sibbling directory deps: ../deps
-                                 Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
+                                 Libraries can be fetched at http://windows.php.net/downloads/php-sdk/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
   WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
   WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
   USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
-  USE_IPV6=<yes or no>         - Enable IPV6, default to yes
+  ENABLE_IPV6=<yes or no>      - Enable IPV6, default to yes
   DEBUG=<yes or no>            - Debug builds
   USE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
                                  or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
