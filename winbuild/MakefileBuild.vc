@@ -154,15 +154,15 @@ USE_IPV6   =true
 USE_IPV6   =true
 !ENDIF
 
-!IFNDEF USE_IDN
+!IFNDEF ENABLE_IDN
 USE_IDN   =true
-!ELSEIF "$(USE_IDN)"=="yes"
+!ELSEIF "$(ENABLE_IDN)"=="yes"
 USE_IDN   =true
 !ENDIF
 
 !IF "$(USE_IDN)"=="true"
 CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
-LFLAGS    = $(LFLAGS) Normaliz.lib
+LFLAGS    = $(LFLAGS)
 !ENDIF
 
 !IF "$(USE_IPV6)"=="true"
@@ -204,6 +204,10 @@ CFGSET=true
 !ENDIF
 
 WIN_LIBS    = ws2_32.lib wldap32.lib
+!IF "$(USE_IDN)"=="true"
+WIN_LIBS=$(WIN_LIBS) normaliz.lib
+!ENDIF
+
 !IF "$(CFGSET)" == "FALSE"
 !ERROR please choose a valid mode
 !ENDIF
@@ -232,7 +236,8 @@ CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
 
 !IF "$(AS_DLL)" == "true"
 
-LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK      = $(LNKDLL) $(WIN_LIBS) $(LFLAGS) /out:$(LIB_DIROBJ)\$(TARGET)
+
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
@@ -253,7 +258,8 @@ TARGET   = $(LIB_NAME_STATIC_DEBUG)
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
 !ENDIF
-LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+
+LNK      = $(LNKLIB) $(WIN_LIBS) $(LFLAGS) /out:$(LIB_DIROBJ)\$(TARGET)
 CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 
@@ -301,13 +307,6 @@ DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 # curl.exe
 #
 CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
-
-#!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
-#TARGET   = $(LIB_NAME_STATIC)
-#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(LIB_DIROBJ)\$(TARGET)
-#CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
-#CFGSET   = TRUE
-#!ENDIF
 
 #######################
 # Only the clean target can be used if a config was not provided.
@@ -406,9 +405,9 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\rawstr.obj \
  $(CURL_DIROBJ)\strtoofft.obj
- 
+
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
-	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
+	$(CURL_LINK) $(WIN_LIBS) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
 
 {$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
