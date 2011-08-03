@@ -1,4 +1,4 @@
-To be addressed in 7.21.6
+To be addressed in 7.21.8 (or 7.22.0?)
 =========================
 
 284 - bug 3172608 "No re-authentication when HTTP connecton is closed"
@@ -10,6 +10,56 @@ To be addressed in 7.21.6
       Would appreciate a Windows developer to give it a look before we apply
       the suggested patch
 
-287 - bug 3215314 Post quote operation to rename fails in Windows
+289 - bug 3349227 "secure attribute in cookie does not work with equals sign"
 
-289 -
+290 - bug 3375603 "curl has problem with remote names containing ';'"
+
+291 - bug 3383692 "GET PARAMETER request and body in response"
+
+292 - bug 3385258 "Addendum to 3370895"
+
+293 - from http://bugzilla.redhat.com/723075 "curl segfaults"
+
+294 - [curl] add a CUSTOM_SOCKET_ERROR_FUNCTION define for SET_SOCKERRNO
+     (#21) https://github.com/bagder/curl/pull/21
+
+295 - "RTSP Authentication (#22)" https://github.com/bagder/curl/pull/22
+
+296 - "OOM leak in multi code" (by Dan Fandrich)
+
+297 - "--ftp-create-dirs fails on SFTP?" Trasca Virgil
+     http://curl.haxx.se/mail/archive-2011-06/0051.html
+
+298 - [patch RFC] An option to set Kerberos service name
+      Pete Zaitcev  http://curl.haxx.se/mail/lib-2011-07/0120.html
+
+299 - POP3 empty list problem & solution + DELE command + SMTP fix
+      Graeme Gill http://curl.haxx.se/mail/lib-2011-07/0047.html
+
+300 - "Polling on stray socket on sequential transfers." Andrew S
+      http://curl.haxx.se/mail/lib-2011-07/0053.html
+
+301 - "Forcing select on vista"
+      http://curl.haxx.se/mail/lib-2011-07/0128.html
+
+302 - "Problem with file upload using CURLFORM_BUFFER" (Regression)
+      Henry Ludemann http://curl.haxx.se/mail/lib-2011-07/0176.html
+
+303 - "Added AUTH NTLM for SMTP" Steve Holme
+      http://curl.haxx.se/mail/lib-2011-07/0186.html and
+      http://curl.haxx.se/mail/lib-2011-08/0008.html
+
+304 - "Async-DNS-resolve-thread gets started even when a dotted IP is
+      provided" by Christian Hägele
+      http://curl.haxx.se/mail/lib-2011-08/0009.html
+
+305 - "Use SSL_MODE_RELEASE_BUFFERS if available," by Cristian Rodríguez
+      http://curl.haxx.se/mail/lib-2011-08/0017.html
+
+306 -
+
+
+
+
+
+
