@@ -25,9 +25,10 @@
 #ifdef HAVE_GSSAPI
 
 #include "curl_gssapi.h"
+#include "sendf.h"
 
 OM_uint32 Curl_gss_init_sec_context(
-    const struct SessionHandle *data,
+    struct SessionHandle *data,
     OM_uint32 * minor_status,
     gss_ctx_id_t * context,
     gss_name_t target_name,
