@@ -481,6 +481,7 @@ typedef enum {
 
 struct OutStruct {
   char *filename;
+  bool alloc_filename;
   FILE *stream;
   struct Configurable *config;
   curl_off_t bytes; /* amount written so far */
@@ -4457,6 +4458,9 @@ static char *get_url_file_name(const char *url)
   return fn;
 }
 
+/*
+ * Copies a file name part and returns an ALLOCATED data buffer.
+ */
 static char*
 parse_filename(char *ptr, size_t len)
 {
@@ -4525,6 +4529,26 @@ parse_filename(char *ptr, size_t len)
   if(copy!=p)
     memmove(copy, p, strlen(p)+1);
 
+  /* in case we built curl debug enabled, we allow an evironment variable
+   * named CURL_TESTDIR to prefix the given file name to put it into a
+   * specific directory
+   */
+#ifdef CURLDEBUG
+  {
+    char *tdir = curlx_getenv("CURL_TESTDIR");
+    if(tdir) {
+      char buffer[512]; /* suitably large */
+      snprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
+      free(copy);
+      copy = strdup(buffer); /* clone the buffer, we don't use the libcurl
+                                aprintf() or similar since we want to use the
+                                same memory code as the "real" parse_filename
+                                function */
+      curl_free(tdir);
+    }
+  }
+#endif
+
   return copy;
 }
 
@@ -4544,7 +4568,8 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
        (encoded filenames (*=) are not supported) */
     for(;;) {
       char *filename;
-      char *semi;
+      char *eol; /* end of line, we can't easily search for the end of the
+                    file name due to it sometimes being quoted or not */
 
       while(*p && (p < end) && !ISALPHA(*p))
         p++;
@@ -4558,15 +4583,16 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
         continue;
       }
       p+=9;
-      semi = strchr(p, ';');
+      eol = strchr(p, '\n');
 
       /* this expression below typecasts 'cb' only to avoid
          warning: signed and unsigned type in conditional expression
       */
-      len = semi ? (semi - p) : (ssize_t)cb - (p - str);
+      len = eol ? (eol - p) : (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
       if(filename) {
         outs->filename = filename;
+        outs->alloc_filename = TRUE;
         break;
       }
     }
@@ -4838,6 +4864,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     /* open file for output: */
     if(strcmp(config->headerfile,"-")) {
       heads.filename = config->headerfile;
+      heads.alloc_filename = FALSE;
     }
     else
       heads.stream=stdout;
@@ -5008,6 +5035,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
 
           outs.filename = outfile;
+          outs.alloc_filename = FALSE;
 
           if(config->resume_from) {
             outs.init = config->resume_from;
@@ -5752,6 +5780,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               warnf(config, "Error setting extended attributes: %s\n",
                     strerror(errno) );
           }
+          if(outs.alloc_filename)
+            free(outs.filename);
 
           rc = fclose(outs.stream);
           if(!res && rc) {
