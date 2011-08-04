@@ -2825,7 +2825,13 @@ sub singletest {
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
 	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
-        $cmdargs ="$out --include --verbose --trace-time $cmd";
+
+        my $inc="";
+        if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
+            $inc = "--include ";
+        }
+
+        $cmdargs ="$out $inc--verbose --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
