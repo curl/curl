@@ -10,6 +10,8 @@ Curl and libcurl 7.21.8
 This release includes the following changes:
 
  o Added CURLOPT_GSSAPI_DELEGATION
+ o Added NTLM_SSO support
+ o Display notes from setup file in testcurl.pl
  o 
 
 This release includes the following bugfixes:
@@ -19,6 +21,20 @@ This release includes the following bugfixes:
    body is sent, stop sending the request and close the connection after
    having received the entire response. This is equally true if an Expect:
    100-continue header was used.
+ o When using both -J and a single -O with multiple URLs, a missing init
+   could cause a segfault
+ o -J fixed for escaped quotes
+ o -J fixed for file names with semicolons
+ o progress: reset flags at transfer start to avoid wrong 
+   CURLINFO_CONTENT_LENGTH_DOWNLOAD
+ o curl_gssapi: Guard files with HAVE_GSSAPI and rename private header
+ o silence picky compilers: mark unused parameters
+ o help output: more gnu like output
+ o libtests: stop checking for CURLM_CALL_MULTI_PERFORM
+ o setting a non-HTTP proxy with an environment variable or with CURLOPT_PROXY
+   / --proxy (without specifying CURLOPT_PROXYTYPE) would still make it do
+   proxy-like HTTP requests
+ o 
 
 This release includes the following known bugs:
 
@@ -27,6 +43,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Paolo Piacentini, Steven Parkes
+ Paolo Piacentini, Steven Parkes, Adam Tkac, Ben Winslow, Dan Fandrich,
+ Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
+ Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
+ Christian Hagele, Richard Silverman
 
         Thanks! (and sorry if I forgot to mention someone)
