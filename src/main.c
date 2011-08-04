@@ -4898,6 +4898,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     outs.stream = stdout;
     outs.config = config;
     outs.bytes = 0; /* nothing written yet */
+    outs.filename = NULL;
 
     /* save outfile pattern before expansion */
     if(urlnode->outfile) {
