@@ -12,8 +12,6 @@ To be addressed in 7.21.8 (or 7.22.0?)
 
 289 - bug 3349227 "secure attribute in cookie does not work with equals sign"
 
-290 - bug 3375603 "curl has problem with remote names containing ';'"
-
 291 - bug 3383692 "GET PARAMETER request and body in response"
 
 292 - bug 3385258 "Addendum to 3370895"
