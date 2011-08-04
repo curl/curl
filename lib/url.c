@@ -3501,6 +3501,8 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
 #else /* CURL_DISABLE_PROXY */
 
+  /* note that these two proxy bits are now just on what looks to be
+     requested, they may be altered down the road */
   conn->bits.proxy = (bool)(data->set.str[STRING_PROXY] &&
                             *data->set.str[STRING_PROXY]);
   conn->bits.httpproxy = (bool)(conn->bits.proxy &&
@@ -4825,6 +4827,8 @@ static CURLcode create_conn(struct SessionHandle *data,
       conn->bits.httpproxy = TRUE;
 #endif
     }
+    else
+      conn->bits.httpproxy = FALSE; /* not a HTTP proxy */
     conn->bits.proxy = TRUE;
   }
   else {
