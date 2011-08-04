@@ -4467,21 +4467,23 @@ parse_filename(char *ptr, size_t len)
   char* copy;
   char* p;
   char* q;
-  char quote = 0;
+  char stop = 0;
 
   /* simple implementation of strndup() */
   copy = malloc(len+1);
   if(!copy)
     return NULL;
-  strncpy(copy, ptr, len);
+  memcpy(copy, ptr, len);
   copy[len] = 0;
 
   p = copy;
   if(*p == '\'' || *p == '"') {
     /* store the starting quote */
-    quote = *p;
+    stop = *p;
     p++;
   }
+  else
+    stop = ';';
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(copy, '/');
@@ -4505,26 +4507,25 @@ parse_filename(char *ptr, size_t len)
     }
   }
 
-  if(quote) {
-    /* if the file name started with a quote, then scan for the end quote and
-       stop there */
-    q = strrchr(p, quote);
-    if(q)
-      *q = 0;
+  /* scan for the end letter and stop there */
+  q = p;
+  while(*q) {
+    if(q[1] && q[0]=='\\')
+      q++;
+    else if(q[0] == stop)
+      break;
+    q++;
   }
-  else
-    q = NULL; /* no start quote, so no end has been found */
+  *q = 0;
 
-  if(!q) {
-    /* make sure the file name doesn't end in \r or \n */
-    q = strchr(p, '\r');
-    if(q)
-      *q  = 0;
+  /* make sure the file name doesn't end in \r or \n */
+  q = strchr(p, '\r');
+  if(q)
+    *q  = 0;
 
-    q = strchr(p, '\n');
-    if(q)
-      *q  = 0;
-  }
+  q = strchr(p, '\n');
+  if(q)
+    *q  = 0;
 
   if(copy!=p)
     memmove(copy, p, strlen(p)+1);
@@ -4559,7 +4560,6 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   const char* str = (char*)ptr;
   const size_t cb = size*nmemb;
   const char* end = (char*)ptr + cb;
-  size_t len;
 
   if(cb > 20 && checkprefix("Content-disposition:", str)) {
     char *p = (char*)str + 20;
@@ -4568,8 +4568,7 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
        (encoded filenames (*=) are not supported) */
     for(;;) {
       char *filename;
-      char *eol; /* end of line, we can't easily search for the end of the
-                    file name due to it sometimes being quoted or not */
+      size_t len;
 
       while(*p && (p < end) && !ISALPHA(*p))
         p++;
@@ -4583,12 +4582,11 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
         continue;
       }
       p+=9;
-      eol = strchr(p, '\n');
 
       /* this expression below typecasts 'cb' only to avoid
          warning: signed and unsigned type in conditional expression
       */
-      len = eol ? (eol - p) : (ssize_t)cb - (p - str);
+      len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
       if(filename) {
         outs->filename = filename;
