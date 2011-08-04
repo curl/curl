@@ -135,6 +135,11 @@
 #  endif
 #endif
 
+#ifdef USE_LWIPSOCK
+#  include <lwip/sockets.h>
+#  include <lwip/netdb.h>
+#endif
+
 #ifdef TPF
 #  include <sys/socket.h>
    /* change which select is used for the curl command line tool */

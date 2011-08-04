@@ -251,6 +251,11 @@
 #  endif
 #endif
 
+#ifdef USE_LWIPSOCK
+#  include <lwip/sockets.h>
+#  include <lwip/netdb.h>
+#endif
+
 #ifdef HAVE_EXTRA_STRICMP_H
 #  include <extra/stricmp.h>
 #endif

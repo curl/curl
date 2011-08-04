@@ -263,6 +263,31 @@
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
 /* ---------------------------------------------------------------- */
+/*               BSD-style lwIP TCP/IP stack SPECIFIC               */
+/* ---------------------------------------------------------------- */
+
+/* Define this to use BSD-style lwIP TCP/IP stack  */
+/* #define USE_LWIPSOCK 1 */
+
+#ifdef USE_LWIPSOCK
+#  undef USE_WINSOCK
+#  undef HAVE_WINSOCK_H
+#  undef HAVE_WINSOCK2_H
+#  undef HAVE_WS2TCPIP_H
+#  undef HAVE_ERRNO_H
+#  undef HAVE_GETHOSTNAME
+#  undef HAVE_GETNAMEINFO
+#  undef LWIP_POSIX_SOCKETS_IO_NAMES
+#  define HAVE_FREEADDRINFO
+#  define HAVE_GETADDRINFO
+#  define HAVE_GETHOSTBYNAME
+#  define HAVE_GETHOSTBYNAME_R
+#  define HAVE_GETHOSTBYNAME_R_6
+#  define LWIP_POSIX_SOCKETS_IO_NAMES 0
+#  define SOCKET int
+#endif
+
+/* ---------------------------------------------------------------- */
 /*                        Watt-32 tcp/ip SPECIFIC                   */
 /* ---------------------------------------------------------------- */
 

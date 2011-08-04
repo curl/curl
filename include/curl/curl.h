@@ -56,7 +56,7 @@
 #include <time.h>
 
 #if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__CYGWIN__)
-#if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H))
+#if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H) || defined(__LWIP_OPT_H__))
 /* The check above prevents the winsock2 inclusion if winsock.h already was
    included, since they can't co-exist without problems */
 #include <winsock2.h>
@@ -76,6 +76,10 @@
 
 #if !defined(WIN32) && !defined(_WIN32_WCE)
 #include <sys/socket.h>
+#endif
+
+#if defined(__LWIP_OPT_H__)
+#include <lwip/sockets.h>
 #endif
 
 #if !defined(WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__)
