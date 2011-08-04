@@ -16,8 +16,6 @@ To be addressed in 7.21.8 (or 7.22.0?)
 
 292 - bug 3385258 "Addendum to 3370895"
 
-293 - from http://bugzilla.redhat.com/723075 "curl segfaults"
-
 294 - [curl] add a CUSTOM_SOCKET_ERROR_FUNCTION define for SET_SOCKERRNO
      (#21) https://github.com/bagder/curl/pull/21
 
