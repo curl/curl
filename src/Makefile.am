@@ -51,8 +51,8 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 
 curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-BUILT_SOURCES = hugehelp.c
-CLEANFILES = hugehelp.c
+BUILT_SOURCES = hugehelp.c config-win32.h
+CLEANFILES = hugehelp.c config-win32.h
 # Use the C locale to ensure that only ASCII characters appear in the
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
@@ -68,6 +68,11 @@ MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=hugehelp.c
+CFGWIN32=config-win32.h
+
+$(CFGWIN32): $(top_srcdir)/lib/config-win32.h
+	echo "creating $(CFGWIN32)"
+	@(cp $(top_srcdir)/lib/config-win32.h $(CFGWIN32))
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
@@ -97,9 +102,9 @@ $(HUGE):
 endif
 
 # ignore hugehelp.c since it is generated source code and it plays by slightly
-# different rules!
+# different rules! config-win32.h already checked in lib subdir.
 checksrc:
-	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/src -Whugehelp.c $(curl_SOURCES)
+	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/src -Whugehelp.c -Wconfig-win32.h $(curl_SOURCES)
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

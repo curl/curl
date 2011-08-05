@@ -62,7 +62,7 @@ while(1) {
         next;
     }
     elsif($file =~ /-W(.*)/) {
-        $wlist = $1;
+        $wlist .= " $1 ";
         $file = shift @ARGV;
         next;
     }
@@ -79,7 +79,7 @@ if(!$file) {
 }
 
 do {
-    if($file ne "$wlist") {
+    if($wlist !~ / $file /) {
         my $fullname = $file;
         $fullname = "$dir/$file" if ($fullname !~ '^\.?\.?/');
         scanfile($fullname);
