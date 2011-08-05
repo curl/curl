@@ -1,5 +1,5 @@
-#ifndef __LIB_CONFIG_WIN32_H
-#define __LIB_CONFIG_WIN32_H
+#ifndef HEADER_CURL_CONFIG_WIN32_H
+#define HEADER_CURL_CONFIG_WIN32_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* ================================================================ */
-/*    lib/config-win32.h - Hand crafted config file for Windows     */
+/*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
 /* ---------------------------------------------------------------- */
@@ -56,6 +56,9 @@
 
 /* Define if you have the <limits.h> header file.  */
 #define HAVE_LIMITS_H 1
+
+/* Define if you have the <locale.h> header file.  */
+#define HAVE_LOCALE_H 1
 
 /* Define if you need the malloc.h header file even with stdlib.h  */
 #if !defined(__SALFORDC__) && !defined(__POCC__)
@@ -165,6 +168,9 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 /* #define HAVE_DOPRNT 1 */
 
+/* Define if you have the ftruncate function.  */
+#define HAVE_FTRUNCATE 1
+
 /* Define if you have the gethostbyaddr function.  */
 #define HAVE_GETHOSTBYADDR 1
 
@@ -207,6 +213,12 @@
 
 /* Define if you have the select function.  */
 #define HAVE_SELECT 1
+
+/* Define if you have the setlocale function.  */
+#define HAVE_SETLOCALE 1
+
+/* Define if you have the setmode function. */
+#define HAVE_SETMODE 1
 
 /* Define if you have the setvbuf function.  */
 #define HAVE_SETVBUF 1
@@ -388,6 +400,9 @@
 /* Define this if you have struct timeval */
 #define HAVE_STRUCT_TIMEVAL 1
 
+/* Define this if struct sockaddr_in6 has the sin6_scope_id member */
+#define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
+
 /* ---------------------------------------------------------------- */
 /*               BSD-style lwIP TCP/IP stack SPECIFIC               */
 /* ---------------------------------------------------------------- */
@@ -404,13 +419,20 @@
 #  undef HAVE_GETHOSTNAME
 #  undef HAVE_GETNAMEINFO
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
+#  undef RECV_TYPE_ARG1
+#  undef RECV_TYPE_ARG3
+#  undef SEND_TYPE_ARG1
+#  undef SEND_TYPE_ARG3
 #  define HAVE_FREEADDRINFO
 #  define HAVE_GETADDRINFO
 #  define HAVE_GETHOSTBYNAME
 #  define HAVE_GETHOSTBYNAME_R
 #  define HAVE_GETHOSTBYNAME_R_6
 #  define LWIP_POSIX_SOCKETS_IO_NAMES 0
-#  define SOCKET int
+#  define RECV_TYPE_ARG1 int
+#  define RECV_TYPE_ARG3 size_t
+#  define SEND_TYPE_ARG1 int
+#  define SEND_TYPE_ARG3 size_t
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -477,7 +499,7 @@
    2000 as a supported build target. VS2008 default installations provide an
    embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
    valid build target for VS2008. Popular belief is that binaries built using
-   Windows SDK versions 6.X and Windows 2000 as a build target are functional */
+   Windows SDK versions 6.X and build targetting Windows 2000 are functional */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #  define VS2008_MINIMUM_TARGET 0x0500
 #endif
@@ -498,7 +520,8 @@
 #  ifndef WINVER
 #    define WINVER VS2008_DEFAULT_TARGET
 #  endif
-#  if (_WIN32_WINNT < VS2008_MINIMUM_TARGET) || (WINVER < VS2008_MINIMUM_TARGET)
+#  if (WINVER < VS2008_MINIMUM_TARGET) || \
+#     (_WIN32_WINNT < VS2008_MINIMUM_TARGET)
 #    error VS2008 does not support Windows build targets prior to Windows 2000
 #  endif
 #endif
@@ -636,8 +659,11 @@
 /* Name of package */
 #define PACKAGE "curl"
 
+/* If you want to build curl with the built-in manual */
+#define USE_MANUAL 1
+
 #if defined(__POCC__) || (USE_IPV6)
 #  define ENABLE_IPV6 1
 #endif
 
-#endif /* __LIB_CONFIG_WIN32_H */
+#endif /* HEADER_CURL_CONFIG_WIN32_H */

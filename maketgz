@@ -94,6 +94,9 @@ findprog()
 echo "maketgz: cp lib/curl_config.h.in src/curl_config.h.in"
 cp lib/curl_config.h.in src/curl_config.h.in
 
+echo "maketgz: cp lib/config-win32.h src/config-win32.h"
+cp lib/config-win32.h src/config-win32.h
+
 ############################################################################
 #
 # Enforce a rerun of configure (updates the VERSION)
