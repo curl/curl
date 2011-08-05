@@ -78,10 +78,6 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(__LWIP_OPT_H__)
-#include <lwip/sockets.h>
-#endif
-
 #if !defined(WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__)
 #include <sys/time.h>
 #endif
@@ -124,7 +120,7 @@ typedef void CURL;
 
 #ifndef curl_socket_typedef
 /* socket typedef */
-#ifdef WIN32
+#if defined(WIN32) && !defined(__LWIP_OPT_H__)
 typedef SOCKET curl_socket_t;
 #define CURL_SOCKET_BAD INVALID_SOCKET
 #else

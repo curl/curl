@@ -792,7 +792,7 @@ static void nosigpipe(struct connectdata *conn,
 #define nosigpipe(x,y)
 #endif
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
 

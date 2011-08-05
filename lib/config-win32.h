@@ -407,7 +407,7 @@
 /*               BSD-style lwIP TCP/IP stack SPECIFIC               */
 /* ---------------------------------------------------------------- */
 
-/* Define this to use BSD-style lwIP TCP/IP stack  */
+/* Define this to use BSD-style lwIP TCP/IP stack */
 /* #define USE_LWIPSOCK 1 */
 
 #ifdef USE_LWIPSOCK
