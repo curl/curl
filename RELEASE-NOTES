@@ -12,6 +12,7 @@ This release includes the following changes:
  o Added CURLOPT_GSSAPI_DELEGATION
  o Added NTLM_SSO support
  o Display notes from setup file in testcurl.pl
+ o BSD-style lwIP TCP/IP stack support on Windows
  o 
 
 This release includes the following bugfixes:
