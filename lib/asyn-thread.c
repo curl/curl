@@ -626,14 +626,28 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                                          int *waitp)
 {
   struct addrinfo hints;
+  struct in_addr in;
   Curl_addrinfo *res;
   int error;
   char sbuf[NI_MAXSERV];
   int pf = PF_INET;
+#ifdef CURLRES_IPV6
+  struct in6_addr in6;
+#endif /* CURLRES_IPV6 */
 
   *waitp = 0; /* default to synchronous response */
 
-#ifndef CURLRES_IPV4
+  /* First check if this is an IPv4 address string */
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+    /* This is a dotted IP address 123.123.123.123-style */
+    return Curl_ip2addr(AF_INET, &in, hostname, port);
+
+#ifdef CURLRES_IPV6
+  /* check if this is an IPv6 address string */
+  if(Curl_inet_pton (AF_INET6, hostname, &in6) > 0)
+    /* This is an IPv6 address literal */
+    return Curl_ip2addr(AF_INET6, &in6, hostname, port);
+
   /*
    * Check if a limited name resolve has been requested.
    */
@@ -653,7 +667,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     /* the stack seems to be a non-ipv6 one */
     pf = PF_INET;
 
-#endif /* !CURLRES_IPV4 */
+#endif /* CURLRES_IPV6 */
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
