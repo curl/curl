@@ -55,5 +55,8 @@ To be addressed in 7.21.8 (or 7.22.0?)
 306 - SSL Sessions shared by Alejandro Alvarez Ayllon
       http://curl.haxx.se/mail/lib-2011-08/0002.html
 
-307 -
+307 - "ftp downloading operation result" by Spoon Man, multi fix and SOCKS
+      timeout fix
+      http://curl.haxx.se/mail/lib-2011-07/0177.html
 
+308 -
