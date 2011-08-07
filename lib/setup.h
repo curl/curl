@@ -252,6 +252,7 @@
 #endif
 
 #ifdef USE_LWIPSOCK
+#  include <lwip/init.h>
 #  include <lwip/sockets.h>
 #  include <lwip/netdb.h>
 #endif

@@ -1,5 +1,5 @@
-#ifndef __CONNECT_H
-#define __CONNECT_H
+#ifndef HEADER_CURL_CONNECT_H
+#define HEADER_CURL_CONNECT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -52,7 +52,7 @@ long Curl_timeleft(struct SessionHandle *data,
 curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
                                   struct connectdata **connp);
 
-#ifdef WIN32
+#ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
 
@@ -70,4 +70,5 @@ void Curl_sndbufset(curl_socket_t sockfd);
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
-#endif
+
+#endif /* HEADER_CURL_CONNECT_H */

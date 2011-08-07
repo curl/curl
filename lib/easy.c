@@ -125,6 +125,8 @@ static CURLcode win32_init(void)
     return CURLE_FAILED_INIT;
   }
   /* The Windows Sockets DLL is acceptable. Proceed. */
+#elif defined(USE_LWIPSOCK)
+  lwip_init();
 #endif
 
 #ifdef USE_WINDOWS_SSPI
