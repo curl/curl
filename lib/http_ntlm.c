@@ -843,7 +843,7 @@ static CURLcode sso_ntlm_response(struct connectdata *conn,
   size_t len_in = strlen(input), len_out = sizeof(buf);
 
   while(len_in > 0) {
-    ssize_t written = write(conn->ntlm_auth_hlpr_socket, input, len_in);
+    ssize_t written = swrite(conn->ntlm_auth_hlpr_socket, input, len_in);
     if(written == -1) {
       /* Interrupted by a signal, retry it */
       if(errno == EINTR)
@@ -856,7 +856,7 @@ static CURLcode sso_ntlm_response(struct connectdata *conn,
   }
   /* Read one line */
   while(len_out > 0) {
-    size = read(conn->ntlm_auth_hlpr_socket, tmpbuf, len_out);
+    size = sread(conn->ntlm_auth_hlpr_socket, tmpbuf, len_out);
     if(size == -1) {
       if(errno == EINTR)
         continue;
