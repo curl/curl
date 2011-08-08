@@ -4094,12 +4094,13 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 
 /* called from multi.c while DOing */
 static CURLcode ftp_doing(struct connectdata *conn,
-                               bool *dophase_done)
+                          bool *dophase_done)
 {
-  CURLcode result;
-  result = ftp_multi_statemach(conn, dophase_done);
+  CURLcode result = ftp_multi_statemach(conn, dophase_done);
 
-  if(*dophase_done) {
+  if(result)
+    DEBUGF(infof(conn->data, "DO phase failed\n"));
+  else if(*dophase_done) {
     result = ftp_dophase_done(conn, FALSE /* not connected */);
 
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
