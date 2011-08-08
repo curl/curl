@@ -118,7 +118,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   ssize_t actualread;
   ssize_t written;
   int result;
-  long timeout;
   OM_uint32 gss_major_status, gss_minor_status, gss_status;
   OM_uint32 gss_ret_flags;
   int gss_conf_state, gss_enc;
@@ -133,9 +132,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   char             *user=NULL;
   unsigned char socksreq[4]; /* room for gssapi exchange header only */
   char *serviceptr = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
-
-  /* get timeout */
-  timeout = Curl_timeleft(data, NULL, TRUE);
 
   /*   GSSAPI request looks like
    * +----+------+-----+----------------+
@@ -245,8 +241,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
      * +----+------+-----+----------------+
      */
 
-    result=Curl_blockread_all(conn, sock, (char *)socksreq, 4,
-                              &actualread, timeout);
+    result=Curl_blockread_all(conn, sock, (char *)socksreq, 4, &actualread);
     if(result != CURLE_OK || actualread != 4) {
       failf(data, "Failed to receive GSSAPI authentication response.");
       gss_release_name(&gss_status, &server);
@@ -286,8 +281,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
 
     result=Curl_blockread_all(conn, sock, (char *)gss_recv_token.value,
-                              gss_recv_token.length,
-                              &actualread, timeout);
+                              gss_recv_token.length, &actualread);
 
     if(result != CURLE_OK || actualread != us_length) {
       failf(data, "Failed to receive GSSAPI authentication token.");
@@ -444,8 +438,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_release_buffer(&gss_status, &gss_w_token);
   }
 
-  result=Curl_blockread_all(conn, sock, (char *)socksreq, 4,
-                            &actualread, timeout);
+  result=Curl_blockread_all(conn, sock, (char *)socksreq, 4, &actualread);
   if(result != CURLE_OK || actualread != 4) {
     failf(data, "Failed to receive GSSAPI encryption response.");
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -477,8 +470,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_OUT_OF_MEMORY;
   }
   result=Curl_blockread_all(conn, sock, (char *)gss_recv_token.value,
-                            gss_recv_token.length,
-                            &actualread, timeout);
+                            gss_recv_token.length, &actualread);
 
   if(result != CURLE_OK || actualread != us_length) {
     failf(data, "Failed to receive GSSAPI encryptrion type.");

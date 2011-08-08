@@ -56,28 +56,21 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
                        curl_socket_t sockfd,     /* read from this socket */
                        char *buf,                /* store read data here */
                        ssize_t buffersize,       /* max amount to read */
-                       ssize_t *n,               /* amount bytes read */
-                       long conn_timeout)        /* timeout for data wait
-                                                    relative to
-                                                    conn->created */
+                       ssize_t *n)               /* amount bytes read */
 {
   ssize_t nread;
   ssize_t allread = 0;
   int result;
-  struct timeval tvnow;
-  long conntime;
+  long timeleft;
   *n = 0;
   for(;;) {
-    tvnow = Curl_tvnow();
-    /* calculating how long connection is establishing */
-    conntime = Curl_tvdiff(tvnow, conn->created);
-    if(conntime > conn_timeout) {
+    timeleft = Curl_timeleft(conn->data, NULL, TRUE);
+    if(timeleft < 0) {
       /* we already got the timeout */
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
-    if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD,
-                         conn_timeout - conntime) <= 0) {
+    if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD, timeleft) <= 0) {
       result = ~CURLE_OK;
       break;
     }
@@ -129,13 +122,9 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
-  long timeout;
   struct SessionHandle *data = conn->data;
 
-  /* get timeout */
-  timeout = Curl_timeleft(data, NULL, TRUE);
-
-  if(timeout < 0) {
+  if(Curl_timeleft(data, NULL, TRUE) < 0) {
     /* time-out, bail out, go home */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
@@ -260,7 +249,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
     /* Receive response */
     result = Curl_blockread_all(conn, sock, (char *)socksreq, packetsize,
-                           &actualread, timeout);
+                                &actualread);
     if((result != CURLE_OK) || (actualread != packetsize)) {
       failf(data, "Failed to receive SOCKS4 connect request ack.");
       return CURLE_COULDNT_CONNECT;
@@ -462,8 +451,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   curlx_nonblock(sock, FALSE);
 
-  result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread,
-                            timeout);
+  result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
   if((result != CURLE_OK) || (actualread != 2)) {
     failf(data, "Unable to receive initial SOCKS5 response.");
     return CURLE_COULDNT_CONNECT;
@@ -523,8 +511,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       return CURLE_COULDNT_CONNECT;
     }
 
-    result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread,
-                         timeout);
+    result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
     if((result != CURLE_OK) || (actualread != 2)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
@@ -660,7 +647,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   else
 #endif
     result = Curl_blockread_all(conn, sock, (char *)socksreq, packetsize,
-                           &actualread, timeout);
+                                &actualread);
   if((result != CURLE_OK) || (actualread != packetsize)) {
     failf(data, "Failed to receive SOCKS5 connect request ack.");
     return CURLE_COULDNT_CONNECT;
@@ -716,7 +703,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     if(packetsize > 10) {
       packetsize -= 10;
       result = Curl_blockread_all(conn, sock, (char *)&socksreq[10],
-                                  packetsize, &actualread, timeout);
+                                  packetsize, &actualread);
       if((result != CURLE_OK) || (actualread != packetsize)) {
         failf(data, "Failed to receive SOCKS5 connect request ack.");
         return CURLE_COULDNT_CONNECT;
