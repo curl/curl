@@ -423,35 +423,39 @@ dnl GNUC versions these warnings are not silenced.
 
 AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
-  tmp_has_include="no"
-  tmp_chg_FLAGS="$CFLAGS"
-  for word1 in $tmp_chg_FLAGS; do
-    case "$word1" in
-      -I*)
-        tmp_has_include="yes"
-        ;;
-    esac
-  done
-  if test "$tmp_has_include" = "yes"; then
-    tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/^-I/ -isystem /g'`
-    tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/ -I/ -isystem /g'`
-    CFLAGS="$tmp_chg_FLAGS"
-    squeeze CFLAGS
-  fi
-  tmp_has_include="no"
-  tmp_chg_FLAGS="$CPPFLAGS"
-  for word1 in $tmp_chg_FLAGS; do
-    case "$word1" in
-      -I*)
-        tmp_has_include="yes"
-        ;;
-    esac
-  done
-  if test "$tmp_has_include" = "yes"; then
-    tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/^-I/ -isystem /g'`
-    tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/ -I/ -isystem /g'`
-    CPPFLAGS="$tmp_chg_FLAGS"
-    squeeze CPPFLAGS
+  AC_REQUIRE([CURL_CHECK_COMPILER])dnl
+  if test "$compiler_id" = "GNU_C" ||
+    test "$compiler_id" = "CLANG"; then
+    tmp_has_include="no"
+    tmp_chg_FLAGS="$CFLAGS"
+    for word1 in $tmp_chg_FLAGS; do
+      case "$word1" in
+        -I*)
+          tmp_has_include="yes"
+          ;;
+      esac
+    done
+    if test "$tmp_has_include" = "yes"; then
+      tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/^-I/ -isystem /g'`
+      tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/ -I/ -isystem /g'`
+      CFLAGS="$tmp_chg_FLAGS"
+      squeeze CFLAGS
+    fi
+    tmp_has_include="no"
+    tmp_chg_FLAGS="$CPPFLAGS"
+    for word1 in $tmp_chg_FLAGS; do
+      case "$word1" in
+        -I*)
+          tmp_has_include="yes"
+          ;;
+      esac
+    done
+    if test "$tmp_has_include" = "yes"; then
+      tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/^-I/ -isystem /g'`
+      tmp_chg_FLAGS=`echo "$tmp_chg_FLAGS" | "$SED" 's/ -I/ -isystem /g'`
+      CPPFLAGS="$tmp_chg_FLAGS"
+      squeeze CPPFLAGS
+    fi
   fi
 ])
 
