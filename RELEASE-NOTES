@@ -13,6 +13,7 @@ This release includes the following changes:
  o Added NTLM_SSO support
  o Display notes from setup file in testcurl.pl
  o BSD-style lwIP TCP/IP stack support on Windows
+ o OpenSSL: Use SSL_MODE_RELEASE_BUFFERS if available
  o 
 
 This release includes the following bugfixes:
@@ -35,6 +36,11 @@ This release includes the following bugfixes:
  o setting a non-HTTP proxy with an environment variable or with CURLOPT_PROXY
    / --proxy (without specifying CURLOPT_PROXYTYPE) would still make it do
    proxy-like HTTP requests
+ o CURLFORM_BUFFER: insert filename as documented (regression)
+ o SOCKS: fix the connect timeout
+ o ftp_doing: bail out on error properly while multi interfacing
+ o improved Content-Encoded decoding error message
+ o asyn-thread: check for dotted addresses before thread starts
  o 
 
 This release includes the following known bugs:
@@ -47,6 +53,7 @@ advice from friends like these:
  Paolo Piacentini, Steven Parkes, Adam Tkac, Ben Winslow, Dan Fandrich,
  Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
  Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
- Christian Hagele, Richard Silverman
+ Christian Hagele, Richard Silverman, Henry Ludemann, Cristian Rodriguez,
+
 
         Thanks! (and sorry if I forgot to mention someone)
