@@ -136,6 +136,16 @@ int test(char *URL)
   if(formrc)
     printf("curl_formadd(3) = %d\n", (int)formrc);
 
+  formrc = curl_formadd(&formpost, &lastptr,
+                        CURLFORM_COPYNAME, "somename",
+                        CURLFORM_BUFFER, "somefile.txt",
+                        CURLFORM_BUFFERPTR, "blah blah",
+                        CURLFORM_BUFFERLENGTH, 9,
+                        CURLFORM_END);
+
+  if(formrc)
+    printf("curl_formadd(4) = %d\n", (int)formrc);
+
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_formfree(formpost);

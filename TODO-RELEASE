@@ -36,9 +36,6 @@ To be addressed in 7.21.8 (or 7.22.0?)
 301 - "Forcing select on vista"
       http://curl.haxx.se/mail/lib-2011-07/0128.html
 
-302 - "Problem with file upload using CURLFORM_BUFFER" (Regression)
-      Henry Ludemann http://curl.haxx.se/mail/lib-2011-07/0176.html
-
 303 - "Added AUTH NTLM for SMTP" Steve Holme
       http://curl.haxx.se/mail/lib-2011-07/0186.html and
       http://curl.haxx.se/mail/lib-2011-08/0008.html
