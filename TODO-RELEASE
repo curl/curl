@@ -1,4 +1,4 @@
-To be addressed in 7.21.8 (or 7.22.0?)
+To be addressed in 7.22.0
 =========================
 
 284 - bug 3172608 "No re-authentication when HTTP connecton is closed"
@@ -9,8 +9,6 @@ To be addressed in 7.21.8 (or 7.22.0?)
       http://curl.haxx.se/bug/view.cgi?id=3163118
       Would appreciate a Windows developer to give it a look before we apply
       the suggested patch
-
-289 - bug 3349227 "secure attribute in cookie does not work with equals sign"
 
 291 - bug 3383692 "GET PARAMETER request and body in response"
 
