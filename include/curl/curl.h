@@ -919,9 +919,7 @@ typedef enum {
   /* send linked-list of post-transfer QUOTE commands */
   CINIT(POSTQUOTE, OBJECTPOINT, 39),
 
-  /* Pass a pointer to string of the output using full variable-replacement
-     as described elsewhere. */
-  CINIT(WRITEINFO, OBJECTPOINT, 40),
+  CINIT(WRITEINFO, OBJECTPOINT, 40), /* DEPRECATED, do not use! */
 
   CINIT(VERBOSE, LONG, 41),      /* talk a lot */
   CINIT(HEADER, LONG, 42),       /* throw the header out too */
@@ -997,8 +995,7 @@ typedef enum {
   /* Max amount of cached alive connections */
   CINIT(MAXCONNECTS, LONG, 71),
 
-  /* 72 - DEPRECATED */
-  CINIT(CLOSEPOLICY, LONG, 72),
+  CINIT(CLOSEPOLICY, LONG, 72), /* DEPRECATED, do not use! */
 
   /* 73 = OBSOLETE */
 
@@ -1072,7 +1069,7 @@ typedef enum {
   CINIT(SSLENGINE_DEFAULT, LONG, 90),
 
   /* Non-zero value means to use the global dns cache */
-  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91), /* To become OBSOLETE soon */
+  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91), /* DEPRECATED, do not use! */
 
   /* DNS cache timeout */
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
