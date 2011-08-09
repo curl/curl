@@ -44,10 +44,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 CURLcode Curl_output_ntlm_sso(struct connectdata *conn, bool proxy);
 #endif
 
-void Curl_ntlm_cleanup(struct connectdata *conn);
-#ifndef USE_NTLM
-#define Curl_ntlm_cleanup(x)
-#endif
+void Curl_http_ntlm_cleanup(struct connectdata *conn);
 
 /* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
 

@@ -164,7 +164,7 @@ static unsigned int readint_le(unsigned char *buf) /* must point to a
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
-static void print_flags(FILE *handle, unsigned long flags)
+static void ntlm_print_flags(FILE *handle, unsigned long flags)
 {
   if(flags & NTLMFLAG_NEGOTIATE_UNICODE)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_UNICODE ");
@@ -232,7 +232,7 @@ static void print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_56 ");
 }
 
-static void print_hex(FILE *handle, const char *buf, size_t len)
+static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 {
   const char *p = buf;
   fprintf(stderr, "0x");
@@ -270,7 +270,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
     return CURLNTLM_BAD;
 #endif
 
-  ntlm = proxy?&conn->proxyntlm:&conn->ntlm;
+  ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
 
   /* skip initial whitespaces */
   while(*header && ISSPACE(*header))
@@ -328,9 +328,9 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       DEBUG_OUT({
         fprintf(stderr, "**** TYPE2 header flags=0x%08.8lx ", ntlm->flags);
-        print_flags(stderr, ntlm->flags);
+        ntlm_print_flags(stderr, ntlm->flags);
         fprintf(stderr, "\n                  nonce=");
-        print_hex(stderr, (char *)ntlm->nonce, 8);
+        ntlm_print_hex(stderr, (char *)ntlm->nonce, 8);
         fprintf(stderr, "\n****\n");
         fprintf(stderr, "**** Header %s\n ", header);
       });
@@ -549,8 +549,8 @@ static void mk_lm_hash(struct SessionHandle *data,
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer,
                     DESKEY(ks), DES_ENCRYPT);
 
-    setup_des_key(pw+7, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
+    setup_des_key(pw + 7, DESKEY(ks));
+    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
                     DESKEY(ks), DES_ENCRYPT);
 #elif defined(USE_GNUTLS)
     gcry_cipher_hd_t des;
@@ -561,12 +561,12 @@ static void mk_lm_hash(struct SessionHandle *data,
     gcry_cipher_close(des);
 
     gcry_cipher_open(&des, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
-    setup_des_key(pw+7, &des);
-    gcry_cipher_encrypt(des, lmbuffer+8, 8, magic, 8);
+    setup_des_key(pw + 7, &des);
+    gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
 #elif defined(USE_NSS)
     encrypt_des(magic, lmbuffer,   pw);
-    encrypt_des(magic, lmbuffer+8, pw+7);
+    encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif
 
     memset(lmbuffer + 16, 0, 21 - 16);
@@ -578,7 +578,7 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
                                size_t srclen)
 {
   size_t i;
-  for(i=0; i<srclen; i++) {
+  for(i = 0; i < srclen; i++) {
     dest[2*i]   = (unsigned char)src[i];
     dest[2*i+1] =   '\0';
   }
@@ -612,16 +612,16 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 #ifdef USE_SSLEAY
     MD4_CTX MD4pw;
     MD4_Init(&MD4pw);
-    MD4_Update(&MD4pw, pw, 2*len);
+    MD4_Update(&MD4pw, pw, 2 * len);
     MD4_Final(ntbuffer, &MD4pw);
 #elif defined(USE_GNUTLS)
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
-    gcry_md_write(MD4pw, pw, 2*len);
+    gcry_md_write(MD4pw, pw, 2 * len);
     memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
 #elif defined(USE_NSS)
-    Curl_md4it(ntbuffer, pw, 2*len);
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
@@ -632,13 +632,11 @@ static CURLcode mk_nt_hash(struct SessionHandle *data,
 }
 #endif
 
-
 #endif
 
 #ifdef USE_WINDOWS_SSPI
 
-static void
-ntlm_sspi_cleanup(struct ntlmdata *ntlm)
+static void ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 {
   if(ntlm->type_2) {
     free(ntlm->type_2);
@@ -672,9 +670,9 @@ static void unicodecpy(unsigned char *dest,
                        const char *src, size_t length)
 {
   size_t i;
-  for(i=0; i<length; i++) {
-    dest[2*i] = (unsigned char)src[i];
-    dest[2*i+1] = '\0';
+  for(i = 0; i < length; i++) {
+    dest[2 * i] = (unsigned char)src[i];
+    dest[2 * i + 1] = '\0';
   }
 }
 #endif
@@ -1004,16 +1002,16 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 CURLcode Curl_output_ntlm(struct connectdata *conn,
                           bool proxy)
 {
-  const char *domain=""; /* empty */
-  char host [HOSTNAME_MAX+ 1] = ""; /* empty */
+  const char *domain = ""; /* empty */
+  char host[HOSTNAME_MAX + 1] = ""; /* empty */
 #ifndef USE_WINDOWS_SSPI
-  size_t domlen = strlen(domain);
-  size_t hostlen = strlen(host);
+  size_t domlen = 0;
+  size_t hostlen = 0;
   size_t hostoff; /* host name offset */
   size_t domoff;  /* domain name offset */
 #endif
   size_t size;
-  char *base64=NULL;
+  char *base64 = NULL;
   unsigned char ntlmbuf[1024]; /* enough, unless the user+host+domain is very
                                   long */
 
@@ -1024,6 +1022,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   /* point to the name and password for this */
   const char *userp;
   const char *passwdp;
+
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
   struct auth *authp;
@@ -1054,10 +1053,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   /* not set means empty */
   if(!userp)
-    userp="";
+    userp = "";
 
   if(!passwdp)
-    passwdp="";
+    passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
   if(s_hSecDll == NULL) {
@@ -1078,7 +1077,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     SECURITY_STATUS status;
     ULONG attrs;
     const char *user;
-    int domlen;
+    size_t domlen = 0;
+	size_t userlen = 0;
+	size_t passwdlen = 0;
     TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
 
     ntlm_sspi_cleanup(ntlm);
@@ -1098,7 +1099,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       domlen = 0;
     }
 
-    if(user && *user) {
+    if(user)
+      userlen = strlen(user);
+
+    if(passwdp)
+      passwdlen = strlen(passwdp);
+
+    if(userlen > 0) {
       /* note: initialize all of this before doing the mallocs so that
        * it can be cleaned up later without leaking memory.
        */
@@ -1106,12 +1113,15 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
       if((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
         return CURLE_OUT_OF_MEMORY;
-      ntlm->identity.UserLength = strlen(user);
+
+      ntlm->identity.UserLength = userlen;
       if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
         return CURLE_OUT_OF_MEMORY;
+
       ntlm->identity.PasswordLength = strlen(passwdp);
-      if((ntlm->identity.Domain = malloc(domlen+1)) == NULL)
+      if((ntlm->identity.Domain = malloc(domlen + 1)) == NULL)
         return CURLE_OUT_OF_MEMORY;
+
       strncpy((char *)ntlm->identity.Domain, domain, domlen);
       ntlm->identity.Domain[domlen] = '\0';
       ntlm->identity.DomainLength = domlen;
@@ -1121,10 +1131,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       ntlm->p_identity = NULL;
     }
 
-    if(s_pSecFn->AcquireCredentialsHandleA(
-          NULL, (char *)"NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
-          NULL, NULL, &ntlm->handle, &tsDummy
-          ) != SEC_E_OK) {
+    if(s_pSecFn->AcquireCredentialsHandleA(NULL, (char *)"NTLM", SECPKG_CRED_OUTBOUND,
+										   NULL, ntlm->p_identity, NULL, NULL,
+										   &ntlm->handle, &tsDummy) != SEC_E_OK) {
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -1145,8 +1154,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                                                  &ntlm->c_handle, &desc,
                                                  &attrs, &tsDummy);
 
-    if(status == SEC_I_COMPLETE_AND_CONTINUE ||
-        status == SEC_I_CONTINUE_NEEDED) {
+    if(status == SEC_I_COMPLETE_AND_CONTINUE || status == SEC_I_CONTINUE_NEEDED) {
       s_pSecFn->CompleteAuthToken(&ntlm->c_handle, &desc);
     }
     else if(status != SEC_E_OK) {
@@ -1179,72 +1187,72 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #else
 #define NTLM2FLAG 0
 #endif
-    snprintf((char *)ntlmbuf, sizeof(ntlmbuf), NTLMSSP_SIGNATURE "%c"
+    snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
+             NTLMSSP_SIGNATURE "%c"
              "\x01%c%c%c" /* 32-bit type = 1 */
              "%c%c%c%c"   /* 32-bit NTLM flag field */
-             "%c%c"  /* domain length */
-             "%c%c"  /* domain allocated space */
-             "%c%c"  /* domain name offset */
-             "%c%c"  /* 2 zeroes */
-             "%c%c"  /* host length */
-             "%c%c"  /* host allocated space */
-             "%c%c"  /* host name offset */
-             "%c%c"  /* 2 zeroes */
-             "%s"   /* host name */
-             "%s",  /* domain string */
-             0,     /* trailing zero */
-             0,0,0, /* part of type-1 long */
+             "%c%c"       /* domain length */
+             "%c%c"       /* domain allocated space */
+             "%c%c"       /* domain name offset */
+             "%c%c"       /* 2 zeroes */
+             "%c%c"       /* host length */
+             "%c%c"       /* host allocated space */
+             "%c%c"       /* host name offset */
+             "%c%c"       /* 2 zeroes */
+             "%s"         /* host name */
+             "%s",        /* domain string */
+             0,           /* trailing zero */
+             0, 0, 0,     /* part of type-1 long */
 
-             LONGQUARTET(
-               NTLMFLAG_NEGOTIATE_OEM|
-               NTLMFLAG_REQUEST_TARGET|
-               NTLMFLAG_NEGOTIATE_NTLM_KEY|
-               NTLM2FLAG|
-               NTLMFLAG_NEGOTIATE_ALWAYS_SIGN
-               ),
+             LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
+                         NTLMFLAG_REQUEST_TARGET |
+                         NTLMFLAG_NEGOTIATE_NTLM_KEY |
+                         NTLM2FLAG |
+                         NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
              SHORTPAIR(domlen),
              SHORTPAIR(domlen),
              SHORTPAIR(domoff),
-             0,0,
+             0, 0,
              SHORTPAIR(hostlen),
              SHORTPAIR(hostlen),
              SHORTPAIR(hostoff),
-             0,0,
-             host /* this is empty */, domain /* this is empty */);
+             0, 0,
+             host,  /* this is empty */
+			 domain /* this is empty */);
 
     /* initial packet length */
     size = 32 + hostlen + domlen;
 #endif
 
     DEBUG_OUT({
-        fprintf(stderr, "* TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x "
-                "0x%08.8x ",
-                LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM|
-                            NTLMFLAG_REQUEST_TARGET|
-                            NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                            NTLM2FLAG|
-                            NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
-                NTLMFLAG_NEGOTIATE_OEM|
-                NTLMFLAG_REQUEST_TARGET|
-                NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                NTLM2FLAG|
-                NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-        print_flags(stderr,
-                    NTLMFLAG_NEGOTIATE_OEM|
-                    NTLMFLAG_REQUEST_TARGET|
-                    NTLMFLAG_NEGOTIATE_NTLM_KEY|
-                    NTLM2FLAG|
-                    NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
-        fprintf(stderr, "\n****\n");
-      });
+      fprintf(stderr, "* TYPE1 header flags=0x%02.2x%02.2x%02.2x%02.2x "
+              "0x%08.8x ",
+              LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
+                          NTLMFLAG_REQUEST_TARGET |
+                          NTLMFLAG_NEGOTIATE_NTLM_KEY |
+                          NTLM2FLAG |
+                          NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
+              NTLMFLAG_NEGOTIATE_OEM |
+              NTLMFLAG_REQUEST_TARGET |
+              NTLMFLAG_NEGOTIATE_NTLM_KEY |
+              NTLM2FLAG |
+              NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+      ntlm_print_flags(stderr,
+                       NTLMFLAG_NEGOTIATE_OEM |
+                       NTLMFLAG_REQUEST_TARGET |
+                       NTLMFLAG_NEGOTIATE_NTLM_KEY |
+                       NTLM2FLAG |
+                       NTLMFLAG_NEGOTIATE_ALWAYS_SIGN);
+      fprintf(stderr, "\n****\n");
+    });
 
     /* now size is the size of the base64 encoded package size */
     size = Curl_base64_encode(NULL, (char *)ntlmbuf, size, &base64);
 
-    if(size >0 ) {
+    if(size > 0) {
       Curl_safefree(*allocuserpwd);
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
-                              proxy?"Proxy-":"",
+                              proxy ? "Proxy-" : "",
                               base64);
       DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
       free(base64);
@@ -1274,16 +1282,18 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   {
 #ifdef USE_WINDOWS_SSPI
-    SecBuffer type_2, type_3;
-    SecBufferDesc type_2_desc, type_3_desc;
+    SecBuffer type_2;
+	SecBuffer type_3;
+    SecBufferDesc type_2_desc;
+	SecBufferDesc type_3_desc;
     SECURITY_STATUS status;
     ULONG attrs;
     TimeStamp tsDummy; /* For Windows 9x compatibility of SPPI calls */
 
-    type_2_desc.ulVersion  = type_3_desc.ulVersion  = SECBUFFER_VERSION;
-    type_2_desc.cBuffers   = type_3_desc.cBuffers   = 1;
-    type_2_desc.pBuffers   = &type_2;
-    type_3_desc.pBuffers   = &type_3;
+    type_2_desc.ulVersion = type_3_desc.ulVersion  = SECBUFFER_VERSION;
+    type_2_desc.cBuffers  = type_3_desc.cBuffers   = 1;
+    type_2_desc.pBuffers  = &type_2;
+    type_3_desc.pBuffers  = &type_3;
 
     type_2.BufferType = SECBUFFER_TOKEN;
     type_2.pvBuffer   = ntlm->type_2;
@@ -1318,10 +1328,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     int ntrespoff;
     unsigned char ntresp[24]; /* fixed-size */
 #endif
-    bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE)?TRUE:FALSE;
+    bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE) ? TRUE : FALSE;
     size_t useroff;
     const char *user;
-    size_t userlen;
+    size_t userlen = 0;
     CURLcode res;
 
     user = strchr(userp, '\\');
@@ -1335,7 +1345,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
     else
       user = userp;
-    userlen = strlen(user);
+
+    if(user)
+      userlen = strlen(user);
 
     if(Curl_gethostname(host, HOSTNAME_MAX)) {
       infof(conn->data, "gethostname() failed, continuing without!");
@@ -1383,13 +1395,14 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #endif
 
       /* 8 bytes random data as challenge in lmresp */
-      memcpy(lmresp,entropy,8);
-      /* Pad with zeros */
-      memset(lmresp+8,0,0x10);
+      memcpy(lmresp, entropy, 8);
+
+	  /* Pad with zeros */
+      memset(lmresp + 8, 0, 0x10);
 
       /* Fill tmp with challenge(nonce?) + entropy */
-      memcpy(tmp,&ntlm->nonce[0],8);
-      memcpy(tmp+8,entropy,8);
+      memcpy(tmp, &ntlm->nonce[0], 8);
+      memcpy(tmp + 8, entropy, 8);
 
 #ifdef USE_SSLEAY
       MD5_Init(&MD5pw);
@@ -1417,7 +1430,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
     else
 #endif
-        {
+    {
 
 #if USE_NTRESPONSES
       unsigned char ntbuffer[0x18];
@@ -1450,48 +1463,48 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     /* Create the big type-3 message binary blob */
     size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
                     NTLMSSP_SIGNATURE "%c"
-                    "\x03%c%c%c" /* type-3, 32 bits */
+                    "\x03%c%c%c"      /* 32-bit type = 3 */
 
-                    "%c%c" /* LanManager length */
-                    "%c%c" /* LanManager allocated space */
-                    "%c%c" /* LanManager offset */
-                    "%c%c" /* 2 zeroes */
+                    "%c%c"            /* LanManager length */
+                    "%c%c"            /* LanManager allocated space */
+                    "%c%c"            /* LanManager offset */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c" /* NT-response length */
-                    "%c%c" /* NT-response allocated space */
-                    "%c%c" /* NT-response offset */
-                    "%c%c" /* 2 zeroes */
+                    "%c%c"            /* NT-response length */
+                    "%c%c"            /* NT-response allocated space */
+                    "%c%c"            /* NT-response offset */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c"  /* domain length */
-                    "%c%c"  /* domain allocated space */
-                    "%c%c"  /* domain name offset */
-                    "%c%c"  /* 2 zeroes */
+                    "%c%c"            /* domain length */
+                    "%c%c"            /* domain allocated space */
+                    "%c%c"            /* domain name offset */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c"  /* user length */
-                    "%c%c"  /* user allocated space */
-                    "%c%c"  /* user offset */
-                    "%c%c"  /* 2 zeroes */
+                    "%c%c"            /* user length */
+                    "%c%c"            /* user allocated space */
+                    "%c%c"            /* user offset */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c"  /* host length */
-                    "%c%c"  /* host allocated space */
-                    "%c%c"  /* host offset */
-                    "%c%c"  /* 2 zeroes */
+                    "%c%c"            /* host length */
+                    "%c%c"            /* host allocated space */
+                    "%c%c"            /* host offset */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c"  /* session key length (unknown purpose) */
-                    "%c%c"  /* session key allocated space (unknown purpose) */
-                    "%c%c"  /* session key offset (unknown purpose) */
-                    "%c%c"  /* 2 zeroes */
+                    "%c%c"            /* session key length (unknown purpose) */
+                    "%c%c"            /* session key allocated space (unknown purpose) */
+                    "%c%c"            /* session key offset (unknown purpose) */
+                    "%c%c"            /* 2 zeroes */
 
-                    "%c%c%c%c" /* flags */
+                    "%c%c%c%c",       /* flags */
 
                     /* domain string */
                     /* user string */
                     /* host string */
                     /* LanManager response */
                     /* NT response */
-                    ,
-                    0, /* zero termination */
-                    0,0,0, /* type-3 long, the 24 upper bits */
+
+                    0,                /* zero termination */
+                    0, 0, 0,          /* type-3 long, the 24 upper bits */
 
                     SHORTPAIR(0x18),  /* LanManager response length, twice */
                     SHORTPAIR(0x18),
@@ -1533,7 +1546,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     DEBUGASSERT(size==64);
 
     DEBUGASSERT(size == (size_t)lmrespoff);
-    /* We append the binary hashes */
+    
+	/* We append the binary hashes */
     if(size < (sizeof(ntlmbuf) - 0x18)) {
       memcpy(&ntlmbuf[size], lmresp, 0x18);
       size += 0x18;
@@ -1541,7 +1555,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     DEBUG_OUT({
         fprintf(stderr, "**** TYPE3 header lmresp=");
-        print_hex(stderr, (char *)&ntlmbuf[lmrespoff], 0x18);
+        ntlm_print_hex(stderr, (char *)&ntlmbuf[lmrespoff], 0x18);
     });
 
 #if USE_NTRESPONSES
@@ -1553,7 +1567,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     DEBUG_OUT({
         fprintf(stderr, "\n   ntresp=");
-        print_hex(stderr, (char *)&ntlmbuf[ntrespoff], 0x18);
+        ntlm_print_hex(stderr, (char *)&ntlmbuf[ntrespoff], 0x18);
     });
 
 #endif
@@ -1561,10 +1575,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     DEBUG_OUT({
         fprintf(stderr, "\n   flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
                 LONGQUARTET(ntlm->flags), ntlm->flags);
-        print_flags(stderr, ntlm->flags);
+        ntlm_print_flags(stderr, ntlm->flags);
         fprintf(stderr, "\n****\n");
     });
-
 
     /* Make sure that the domain, user and host strings fit in the target
        buffer before we copy them there. */
@@ -1638,9 +1651,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   return CURLE_OK;
 }
 
-
-void
-Curl_ntlm_cleanup(struct connectdata *conn)
+void Curl_http_ntlm_cleanup(struct connectdata *conn)
 {
 #ifdef USE_WINDOWS_SSPI
   ntlm_sspi_cleanup(&conn->ntlm);
@@ -1652,7 +1663,6 @@ Curl_ntlm_cleanup(struct connectdata *conn)
   (void)conn;
 #endif
 }
-
 
 #endif /* USE_NTLM */
 #endif /* !CURL_DISABLE_HTTP */

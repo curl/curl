@@ -2617,7 +2617,9 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     if(has_host_ntlm || has_proxy_ntlm) {
       data->state.authproblem = FALSE;
 
-      Curl_ntlm_cleanup(conn);
+#ifdef USE_NTLM
+      Curl_http_ntlm_cleanup(conn);
+#endif
     }
   }
 
