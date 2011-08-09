@@ -1268,9 +1268,8 @@ the port number is not specified, it is assumed at port 1080. (Added in
 This option overrides any previous use of \fI-x, --proxy\fP, as they are
 mutually exclusive.
 
-Since 7.21.7, this option is superfluous since you can specify a
-socks5-hostnamae proxy with \fI-x, --proxy\fP using a socks5h:// protocol
-prefix.
+Since 7.21.7, this option is superfluous since you can specify a socks5
+hostname proxy with \fI-x, --proxy\fP using a socks5h:// protocol prefix.
 
 If this option is used several times, the last one will be used. (This option
 was previously wrongly documented and used as --socks without the number
@@ -1658,22 +1657,39 @@ Default config file, see \fI-K, --config\fP for details.
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. http_proxy is an exception as it is only
 available in lower case.
+
+Using an environment variable to set the proxy has the same effect as using
+the \fI--proxy\fP option.
+
 .IP "http_proxy [protocol://]<host>[:port]"
 Sets the proxy server to use for HTTP.
 .IP "HTTPS_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use for HTTPS.
-.IP "FTP_PROXY [protocol://]<host>[:port]"
-Sets the proxy server to use for FTP.
+.IP "[url-protocol]_PROXY [protocol://]<host>[:port]"
+Sets the proxy server to use for [url-protocol], where the protocol is a
+protocol that curl supports and as specified in a URL. FTP, FTPS, POP3, IMAP,
+SMTP, LDAP etc.
 .IP "ALL_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts>"
 list of host names that shouldn't go through any proxy. If set to a asterisk
 \&'*' only, it matches all hosts.
+.SH "PROXY PROTOCOL PREFIXES"
+Since curl version 7.21.7, the proxy string may be specified with a
+protocol:// prefix to specify alternative proxy protocols.
 
-Since 7.21.7, the proxy string may be specified with a protocol:// prefix to
-specify alternative proxy protocols. Use socks4://, socks4a:// or socks5:// to
-request the specific SOCKS version to be used. No protocol specified, http://
-and all others will be treated as HTTP proxies.
+If no protocol is specified in the proxy string or if the string doesn't match
+a supported one, the proxy will be treated as a HTTP proxy.
+
+The supported proxy protocol prefixes are as follows:
+.IP "socks4://"
+Makes it the equivalent of \fI--socks4\fP
+.IP "socks4a://"
+Makes it the equivalent of \fI--socks4a\fP
+.IP "socks5://"
+Makes it the equivalent of \fI--socks5\fP
+.IP "socks5h://"
+Makes it the equivalent of \fI--socks5-hostname\fP
 .SH EXIT CODES
 There are a bunch of different error codes and their corresponding error
 messages that may appear during bad conditions. At the time of this writing,
@@ -1854,4 +1870,3 @@ ftp://ftp.sunet.se/pub/www/utilities/curl/
 .SH "SEE ALSO"
 .BR ftp (1),
 .BR wget (1)
-
