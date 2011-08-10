@@ -100,6 +100,7 @@
  15.5 remove CURLOPT_FAILONERROR
  15.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
  15.7 remove progress meter from libcurl
+ 15.8 remove 'curl_httppost' from public
 
 ==============================================================================
 
@@ -569,3 +570,12 @@ to provide the data to send.
  The progress callback should then be bumped as well to get proper 64bit
  variable types passed to it instead of doubles so that big files work
  correctly.
+
+15.8 remove 'curl_httppost' from public
+
+ curl_formadd() was made to fill in a public struct, but the fact that the
+ struct is public is never really used by application for their own advantage
+ but instead often restricts how the form functions can or can't be modified.
+
+ Changing them to return a private handle will benefit the implementation and
+ allow us much greater freedoms while still maintining a solid API and ABI.
