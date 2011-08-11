@@ -1170,7 +1170,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   }
 #else
   {
-    char *host = "";                    /* empty */
+    const char *host = "";              /* empty */
     const char *domain = "";            /* empty */
     size_t hostlen = 0;
     size_t domlen = 0;
