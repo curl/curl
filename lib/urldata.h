@@ -360,7 +360,7 @@ struct ntlmdata {
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   int has_handles;
   void *type_2;
-  int n_type_2;
+  unsigned long n_type_2;
 #else
   unsigned int flags;
   unsigned char nonce[8];
