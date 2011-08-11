@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,8 +37,15 @@ This will effectively close all connections this handle has used and possibly
 has kept open until now. Don't call this function if you intend to transfer
 more files.
 
-Any uses of the \fBhandle\fP after this function has been called are
-illegal. This kills the handle and all memory associated with it!
+Occasionally you may get your progress callback or header callback called from
+within \fIcurl_easy_cleanup(3)\fP (if previously set for the handle using
+\fIcurl_easy_setopt(3)\fP). Like if libcurl decides to shut down the
+connection and the protocol is of a kind that requires a command/response
+sequence before disconnect. Examples of such protocols are FTP, POP3 and IMAP.
+
+Any uses of the \fBhandle\fP after this function has been called and have
+returned, are illegal. This kills the handle and all memory associated with
+it!
 
 With libcurl versions prior to 7.17.: when you've called this, you can safely
 remove all the strings you've previously told libcurl to use, as it won't use
