@@ -50,6 +50,6 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn);
 #define Curl_http_ntlm_cleanup(x)
 #endif
 
-#include <curl_ntlm.h>
+#include "curl_ntlm.h"
 
 #endif /* HEADER_CURL_HTTP_NTLM_H */
