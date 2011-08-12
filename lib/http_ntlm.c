@@ -304,7 +304,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
                12    Target Name            security buffer
                20    Flags                  long
                24    Challenge              8 bytes
-              (32)   Context (optional)     8 bytes (two consecutive longs) (*)
+              (32)   Context                8 bytes (two consecutive longs) (*)
               (40)   Target Information     security buffer (*)
               (48)   OS Version Structure   8 bytes (*)
       32 (48) (56)   Start of data block    (*)
@@ -1289,13 +1289,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
               8    NTLM Message Type      long (0x03000000)
              12    LM/LMv2 Response       security buffer
              20    NTLM/NTLMv2 Response   security buffer
-             28    Domain Name            security buffer
+             28    Target Name            security buffer
              36    User Name              security buffer
              44    Workstation Name       security buffer
             (52)   Session Key            security buffer (*)
             (60)   Flags                  long (*)
             (64)   OS Version Structure   8 bytes (*)
-    52 (64) (72)   Start of data block    (*)
+    52 (64) (72)   Start of data block
                                           (*) -> Optional
     */
 
