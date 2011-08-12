@@ -320,6 +320,18 @@ URL-encode that data and pass it on in the POST. The name part gets an equal
 sign appended, resulting in \fIname=urlencoded-file-content\fP. Note that the
 name is expected to be URL-encoded already.
 .RE
+.IP "--delegation LEVEL"
+Set \fILEVEL\fP to tell the server what it is allowed to delegate when it
+comes to user credentials. Used with GSS/kerberos.
+.RS
+.IP "none"
+Don't allow any delegation.
+.IP "policy"
+Delegates if and only if the OK-AS-DELEGATE flag is set in the Kerberos
+service ticket, which is a matter of realm policy.
+.IP "always"
+Unconditionally allow the server to delegate.
+.RE
 .IP "--digest"
 (HTTP) Enables HTTP Digest authentication. This is a authentication that
 prevents the password from being sent over the wire in clear text. Use this in

@@ -1,7 +1,7 @@
 Curl and libcurl 7.22.0
 
  Public curl releases:         124
- Command line options:         148
+ Command line options:         149
  curl_easy_setopt() options:   192
  Public functions in libcurl:  58
  Known libcurl bindings:       39
@@ -14,7 +14,7 @@ This release includes the following changes:
  o Display notes from setup file in testcurl.pl
  o BSD-style lwIP TCP/IP stack support on Windows
  o OpenSSL: Use SSL_MODE_RELEASE_BUFFERS if available
- o 
+ o --delegation was added to set CURLOPT_GSSAPI_DELEGATION
 
 This release includes the following bugfixes:
 
