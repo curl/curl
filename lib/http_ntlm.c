@@ -250,13 +250,19 @@ static unsigned int readint_le(unsigned char *buf)
 #endif
 
 /*
-  (*) = A "security buffer" is a triplet consisting of two shorts and one
-  long:
+  NTLM message structure notes:
 
-  1. a 'short' containing the length of the buffer in bytes
-  2. a 'short' containing the allocated space for the buffer in bytes
-  3. a 'long' containing the offset to the start of the buffer from the
-     beginning of the NTLM message, in bytes.
+  A 'short' is a little-endian, 16-bit unsigned value.
+
+  A 'long' is a little-endian, 32-bit unsigned value.
+
+  A 'security buffer' represents a triplet used to point to a buffer,
+  consisting of two shorts and one long:
+
+    1. A 'short' containing the length of the buffer content in bytes.
+    2. A 'short' containing the allocated space for the buffer in bytes.
+    3. A 'long' containing the offset to the start of the buffer in bytes,
+       from the beginning of the NTLM message.
 */
 
 CURLntlm Curl_input_ntlm(struct connectdata *conn,
