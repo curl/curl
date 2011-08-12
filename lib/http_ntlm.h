@@ -50,6 +50,9 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn);
 #define Curl_http_ntlm_cleanup(x)
 #endif
 
+/* NTLM buffer fixed size, large enough for long user + host + domain */
+#define NTLM_BUFSIZE 1024
+
 /* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
 
 #define NTLMFLAG_NEGOTIATE_UNICODE               (1<<0)

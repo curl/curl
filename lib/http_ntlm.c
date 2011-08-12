@@ -237,10 +237,12 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 #endif
 
 #ifndef USE_WINDOWS_SSPI
-/* this function converts from the little endian format used in the incoming
-   package to whatever endian format we're using natively */
-static unsigned int readint_le(unsigned char *buf) /* must point to a
-                                                      4 bytes buffer*/
+/*
+ * This function converts from the little endian format used in the
+ * incoming package to whatever endian format we're using natively.
+ * Argument is a pointer to a 4 byte buffer.
+ */
+static unsigned int readint_le(unsigned char *buf)
 {
   return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
     ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
@@ -258,7 +260,7 @@ static unsigned int readint_le(unsigned char *buf) /* must point to a
 */
 
 CURLntlm Curl_input_ntlm(struct connectdata *conn,
-                         bool proxy,   /* if proxy or not */
+                         bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:
                                                 header */
 {
@@ -286,18 +288,21 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
       header++;
 
     if(*header) {
-      /* We got a type-2 message here:
+      /* We got a type-2 message */
+      /* NTLM type-2 message structure:
 
-         Index   Description         Content
-         0       NTLMSSP Signature   Null-terminated ASCII "NTLMSSP"
-                                     (0x4e544c4d53535000)
-         8       NTLM Message Type   long (0x02000000)
-         12      Target Name         security buffer(*)
-         20      Flags               long
-         24      Challenge           8 bytes
-         (32)    Context (optional)  8 bytes (two consecutive longs)
-         (40)    Target Information  (optional) security buffer(*)
-         32 (48) start of data block
+              Index  Description            Content
+                0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+                                            (0x4e544c4d53535000)
+                8    NTLM Message Type      long (0x02000000)
+               12    Target Name            security buffer
+               20    Flags                  long
+               24    Challenge              8 bytes
+              (32)   Context (optional)     8 bytes (two consecutive longs) (*)
+              (40)   Target Information     security buffer (*)
+              (48)   OS Version Structure   8 bytes (*)
+      32 (48) (56)   Start of data block    (*)
+                                            (*) -> Optional
       */
       size_t size;
       unsigned char *buffer;
@@ -487,7 +492,7 @@ static void lm_resp(const unsigned char *keys,
                   DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 7, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+8),
+  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 8),
                   DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 14, DESKEY(ks));
@@ -511,8 +516,8 @@ static void lm_resp(const unsigned char *keys,
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
 #elif defined(USE_NSS)
-  encrypt_des(plaintext, results,    keys);
-  encrypt_des(plaintext, results + 8,  keys + 7);
+  encrypt_des(plaintext, results, keys);
+  encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
 #endif
 }
@@ -568,7 +573,7 @@ static void mk_lm_hash(struct SessionHandle *data,
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
 #elif defined(USE_NSS)
-    encrypt_des(magic, lmbuffer,   pw);
+    encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif
 
@@ -889,8 +894,10 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
-/*this is for creating ntlm header output by delegating challenge/response
- *to a Samba's daemon helper ntlm_auth */
+/*
+ * This is for creating ntlm header output by delegating challenge/response
+ * to a Samba's daemon helper ntlm_auth
+ */
 CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
                               bool proxy)
 {
@@ -952,7 +959,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 
     Curl_safefree(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
-                            proxy?"Proxy-":"",
+                            proxy ? "Proxy-" : "",
                             conn->response_header);
     DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
     Curl_safefree(conn->response_header);
@@ -972,7 +979,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 
     Curl_safefree(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
-                            proxy?"Proxy-":"",
+                            proxy ? "Proxy-" : "",
                             conn->response_header);
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
@@ -994,14 +1001,15 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 }
 #endif /* WINBIND_NTLM_AUTH_ENABLED */
 
-/* this is for creating ntlm header output */
+/*
+ * This is for creating ntlm header output
+ */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
                           bool proxy)
 {
   size_t size;
   char *base64 = NULL;
-  unsigned char ntlmbuf[1024]; /* enough, unless the user + host + domain is
-                                  very long */
+  unsigned char ntlmbuf[NTLM_BUFSIZE];
 
   /* point to the address of the pointer that holds the string to sent to the
      server, which is for a plain host or for a HTTP proxy */
@@ -1015,8 +1023,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   struct ntlmdata *ntlm;
   struct auth *authp;
 
+  struct SessionHandle *data;
+
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->data);
+
+  data = conn->data;
 
 #ifdef USE_NSS
   if(CURLE_OK != Curl_nss_force_init(conn->data))
@@ -1059,17 +1071,19 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
 
-    /* Create and send a type-1 message:
+    /* Create a type-1 message */
+    /* NTLM type-1 message structure:
 
-    Index Description          Content
-    0     NTLMSSP Signature    Null-terminated ASCII "NTLMSSP"
-                               (0x4e544c4d53535000)
-    8     NTLM Message Type    long (0x01000000)
-    12    Flags                long
-    16    Supplied Domain      security buffer(*)
-    24    Supplied Workstation security buffer(*)
-    32    start of data block
-
+         Index  Description            Content
+           0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+                                       (0x4e544c4d53535000)
+           8    NTLM Message Type      long (0x01000000)
+          12    Flags                  long
+         (16)   Supplied Domain        security buffer (*)
+         (24)   Supplied Workstation   security buffer (*)
+         (32)   OS Version Structure   8 bytes (*)
+    (32) (40)   Start of data block    (*)
+                                       (*) -> Optional
     */
 #ifdef USE_WINDOWS_SSPI
   {
@@ -1127,7 +1141,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
       strncpy((char *)ntlm->identity.Domain, domain, domlen);
       ntlm->identity.Domain[domlen] = '\0';
-      ntlm->identity.DomainLength =  (unsigned long)domlen;
+      ntlm->identity.DomainLength = (unsigned long)domlen;
       ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
     }
     else
@@ -1143,7 +1157,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     desc.ulVersion = SECBUFFER_VERSION;
     desc.cBuffers  = 1;
     desc.pBuffers  = &buf;
-    buf.cbBuffer   = sizeof(ntlmbuf);
+    buf.cbBuffer   = NTLM_BUFSIZE;
     buf.BufferType = SECBUFFER_TOKEN;
     buf.pvBuffer   = ntlmbuf;
 
@@ -1183,7 +1197,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 #else
 #define NTLM2FLAG 0
 #endif
-    snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
+    snprintf((char *)ntlmbuf, NTLM_BUFSIZE,
              NTLMSSP_SIGNATURE "%c"
              "\x01%c%c%c" /* 32-bit type = 1 */
              "%c%c%c%c"   /* 32-bit NTLM flag field */
@@ -1216,7 +1230,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
              host,  /* this is empty */
              domain /* this is empty */);
 
-    /* initial packet length */
+    /* Initial packet length */
     size = 32 + hostlen + domlen;
   }
 #endif
@@ -1260,21 +1274,23 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     break;
 
   case NTLMSTATE_TYPE2:
-    /* We received the type-2 message already, create a type-3 message:
+    /* We already received the type-2 message, create a type-3 message */
+    /* NTLM type-3 message structure:
 
-    Index   Description            Content
-    0       NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
-                                   (0x4e544c4d53535000)
-    8       NTLM Message Type      long (0x03000000)
-    12      LM/LMv2 Response       security buffer(*)
-    20      NTLM/NTLMv2 Response   security buffer(*)
-    28      Domain Name            security buffer(*)
-    36      User Name              security buffer(*)
-    44      Workstation Name       security buffer(*)
-    (52)    Session Key (optional) security buffer(*)
-    (60)    Flags (optional)       long
-    52 (64) start of data block
-
+            Index  Description            Content
+              0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+                                          (0x4e544c4d53535000)
+              8    NTLM Message Type      long (0x03000000)
+             12    LM/LMv2 Response       security buffer
+             20    NTLM/NTLMv2 Response   security buffer
+             28    Domain Name            security buffer
+             36    User Name              security buffer
+             44    Workstation Name       security buffer
+            (52)   Session Key            security buffer (*)
+            (60)   Flags                  long (*)
+            (64)   OS Version Structure   8 bytes (*)
+    52 (64) (72)   Start of data block    (*)
+                                          (*) -> Optional
     */
 
   {
@@ -1298,7 +1314,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     type_2.cbBuffer   = ntlm->n_type_2;
     type_3.BufferType = SECBUFFER_TOKEN;
     type_3.pvBuffer   = ntlmbuf;
-    type_3.cbBuffer   = sizeof(ntlmbuf);
+    type_3.cbBuffer   = NTLM_BUFSIZE;
 
     status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle,
                                                   &ntlm->c_handle,
@@ -1353,7 +1369,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       userlen = strlen(user);
 
     if(Curl_gethostname(host, HOSTNAME_MAX)) {
-      infof(conn->data, "gethostname() failed, continuing without!");
+      infof(data, "gethostname() failed, continuing without!");
       hostlen = 0;
     }
     else {
@@ -1384,16 +1400,16 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       /* Need to create 8 bytes random data */
 #ifdef USE_SSLEAY
       MD5_CTX MD5pw;
-      Curl_ossl_seed(conn->data); /* Initiate the seed if not already done */
+      Curl_ossl_seed(data); /* Initiate the seed if not already done */
       RAND_bytes(entropy, 8);
 #elif defined(USE_GNUTLS)
       gcry_md_hd_t MD5pw;
-      Curl_gtls_seed(conn->data); /* Initiate the seed if not already done */
+      Curl_gtls_seed(data); /* Initiate the seed if not already done */
       gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
 #elif defined(USE_NSS)
       PK11Context *MD5pw;
       unsigned int outlen;
-      Curl_nss_seed(conn->data);  /* Initiate the seed if not already done */
+      Curl_nss_seed(data);  /* Initiate the seed if not already done */
       PK11_GenerateRandom(entropy, 8);
 #endif
 
@@ -1425,7 +1441,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
       /* We shall only use the first 8 bytes of md5sum,
          but the des code in lm_resp only encrypt the first 8 bytes */
-      if(mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+      if(mk_nt_hash(data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, md5sum, ntresp);
 
@@ -1441,12 +1457,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       unsigned char lmbuffer[0x18];
 
 #if USE_NTRESPONSES
-      if(mk_nt_hash(conn->data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
+      if(mk_nt_hash(data, passwdp, ntbuffer) == CURLE_OUT_OF_MEMORY)
         return CURLE_OUT_OF_MEMORY;
       lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
 
-      mk_lm_hash(conn->data, passwdp, lmbuffer);
+      mk_lm_hash(data, passwdp, lmbuffer);
       lm_resp(lmbuffer, &ntlm->nonce[0], lmresp);
       /* A safer but less compatible alternative is:
        *   lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
@@ -1464,7 +1480,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     hostoff = useroff + userlen;
 
     /* Create the big type-3 message binary blob */
-    size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
+    size = snprintf((char *)ntlmbuf, NTLM_BUFSIZE,
                     NTLMSSP_SIGNATURE "%c"
                     "\x03%c%c%c"  /* 32-bit type = 3 */
 
@@ -1551,7 +1567,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     DEBUGASSERT(size == (size_t)lmrespoff);
 
     /* We append the binary hashes */
-    if(size < (sizeof(ntlmbuf) - 0x18)) {
+    if(size < (NTLM_BUFSIZE - 0x18)) {
       memcpy(&ntlmbuf[size], lmresp, 0x18);
       size += 0x18;
     }
@@ -1562,7 +1578,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     });
 
 #if USE_NTRESPONSES
-    if(size < (sizeof(ntlmbuf) - 0x18)) {
+    if(size < (NTLM_BUFSIZE - 0x18)) {
       DEBUGASSERT(size == (size_t)ntrespoff);
       memcpy(&ntlmbuf[size], ntresp, 0x18);
       size += 0x18;
@@ -1584,8 +1600,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     /* Make sure that the domain, user and host strings fit in the
        buffer before we copy them there. */
-    if(size + userlen + domlen + hostlen >= sizeof(ntlmbuf)) {
-      failf(conn->data, "user + domain + host name too big");
+    if(size + userlen + domlen + hostlen >= NTLM_BUFSIZE) {
+      failf(data, "user + domain + host name too big");
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -1613,9 +1629,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     size += hostlen;
 
-    /* convert domain, user, and host to ASCII but leave the rest as-is */
-    res = Curl_convert_to_network(conn->data, (char *)&ntlmbuf[domoff],
-                                  size-domoff);
+    /* Convert domain, user, and host to ASCII but leave the rest as-is */
+    res = Curl_convert_to_network(data, (char *)&ntlmbuf[domoff],
+                                  size - domoff);
     if(res)
       return CURLE_CONV_FAILED;
 
@@ -1638,7 +1654,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
   }
-  break;
+    break;
 
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
