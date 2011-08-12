@@ -2081,7 +2081,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
                                 transferred! */
 
     if(data->state.proto.http->writebytecount)
-      Curl_readrewind(conn);
+      return Curl_readrewind(conn);
   }
   return CURLE_OK;
 }
