@@ -655,6 +655,7 @@ struct Configurable {
                              basically each given URL to transfer */
   struct OutStruct *outs;
   bool xattr; /* store metadata in extended attributes */
+  long gssapi_delegation;
 };
 
 #define WARN_PREFIX "Warning: "
@@ -812,6 +813,7 @@ static void help(void)
     "     --data-ascii DATA  HTTP POST ASCII data (H)",
     "     --data-binary DATA  HTTP POST binary data (H)",
     "     --data-urlencode DATA  HTTP POST data url encoded (H)",
+    "     --delegation STRING GSS-API delegation permission",
     "     --digest        Use HTTP Digest Authentication (H)",
     "     --disable-eprt  Inhibit using EPRT or LPRT (F)",
     "     --disable-epsv  Inhibit using EPSV (F)",
@@ -1818,6 +1820,18 @@ static int sockoptcallback(void *clientp, curl_socket_t curlfd,
   return 0;
 }
 
+static long delegation(struct Configurable *config,
+                       char *str)
+{
+  if(curlx_raw_equal("none", str))
+    return CURLGSSAPI_DELEGATION_NONE;
+  if(curlx_raw_equal("policy", str))
+    return CURLGSSAPI_DELEGATION_POLICY_FLAG;
+  if(curlx_raw_equal("always", str))
+    return CURLGSSAPI_DELEGATION_FLAG;
+  warnf(config, "unrecognized delegation method '%s', using none\n", str);
+  return CURLGSSAPI_DELEGATION_NONE;
+}
 
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
@@ -1938,6 +1952,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$D", "proto",      TRUE},
     {"$E", "proto-redir", TRUE},
     {"$F", "resolve",    TRUE},
+    {"$G", "delegation", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -2522,6 +2537,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         err = add2list(&config->resolve, nextarg);
         if(err)
           return err;
+        break;
+      case 'G': /* --delegation LEVEL */
+        config->gssapi_delegation = delegation(config, nextarg);
         break;
       }
       break;
@@ -5597,9 +5615,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           /* new in 7.21.3 */
           my_setopt(curl, CURLOPT_RESOLVE, config->resolve);
 
-        /* TODO: new in ### */
-        curl_easy_setopt(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
-        curl_easy_setopt(curl, CURLOPT_TLSAUTH_PASSWORD, config->tls_password);
+        /* new in 7.21.4 */
+        my_setopt_str(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
+        my_setopt_str(curl, CURLOPT_TLSAUTH_PASSWORD, config->tls_password);
+
+        /* new in 7.22.0 */
+        if(config->gssapi_delegation)
+          my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
+                        config->gssapi_delegation);
 
         retry_numretries = config->req_retry;
 
