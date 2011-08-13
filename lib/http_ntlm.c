@@ -265,7 +265,7 @@ static unsigned int readint_le(unsigned char *buf)
        from the beginning of the NTLM message.
 */
 
-CURLntlm Curl_input_ntlm(struct connectdata *conn,
+CURLcode Curl_input_ntlm(struct connectdata *conn,
                          bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:
                                                 header */
@@ -275,10 +275,12 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 #ifndef USE_WINDOWS_SSPI
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
 #endif
+  CURLcode result = CURLE_OK;
 
 #ifdef USE_NSS
-  if(CURLE_OK != Curl_nss_force_init(conn->data))
-    return CURLNTLM_BAD;
+  result = Curl_nss_force_init(conn->data);
+  if(result)
+    return result;
 #endif
 
   ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
@@ -314,7 +316,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
       unsigned char *buffer;
       size = Curl_base64_decode(header, &buffer);
       if(!buffer)
-        return CURLNTLM_BAD;
+        return CURLE_OUT_OF_MEMORY;
 
       ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
@@ -334,7 +336,8 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
          (memcmp(buffer + 8, type2_marker, sizeof(type2_marker)) != 0)) {
         /* This was not a good enough type-2 message */
         free(buffer);
-        return CURLNTLM_BAD;
+        infof(conn->data, "NTLM handshake failure (bad type-2 message)\n");
+        return CURLE_REMOTE_ACCESS_DENIED;
       }
 
       ntlm->flags = readint_le(&buffer[20]);
@@ -352,14 +355,16 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
       free(buffer);
     }
     else {
-      if(ntlm->state >= NTLMSTATE_TYPE1)
-        return CURLNTLM_BAD;
+      if(ntlm->state >= NTLMSTATE_TYPE1) {
+        infof(conn->data, "NTLM handshake failure (internal error)\n");
+        return CURLE_REMOTE_ACCESS_DENIED;
+      }
 
       ntlm->state = NTLMSTATE_TYPE1; /* we should sent away a type-1 */
     }
   }
 
-  return CURLNTLM_FINE;
+  return result;
 }
 
 #ifndef USE_WINDOWS_SSPI

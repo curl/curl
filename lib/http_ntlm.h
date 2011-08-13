@@ -22,17 +22,8 @@
  *
  ***************************************************************************/
 
-typedef enum {
-  CURLNTLM_NONE, /* not a ntlm */
-  CURLNTLM_BAD,  /* an ntlm, but one we don't like */
-  CURLNTLM_FIRST, /* the first 401-reply we got with NTLM */
-  CURLNTLM_FINE, /* an ntlm we act on */
-
-  CURLNTLM_LAST  /* last entry in this enum, don't use */
-} CURLntlm;
-
 /* this is for ntlm header input */
-CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy,
+CURLcode Curl_input_ntlm(struct connectdata *conn, bool proxy,
                          const char *header);
 
 /* this is for creating ntlm header output */

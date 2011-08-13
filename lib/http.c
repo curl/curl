@@ -767,9 +767,9 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       if(authp->picked == CURLAUTH_NTLM ||
          authp->picked == CURLAUTH_NTLM_SSO) {
         /* NTLM authentication is picked and activated */
-        CURLntlm ntlm =
+        CURLcode ntlm =
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
-        if(CURLNTLM_BAD != ntlm) {
+        if(CURLE_OK == ntlm) {
           data->state.authproblem = FALSE;
 #ifdef WINBIND_NTLM_AUTH_ENABLED
           if(authp->picked == CURLAUTH_NTLM_SSO) {
