@@ -41,7 +41,9 @@ This release includes the following bugfixes:
  o ftp_doing: bail out on error properly while multi interfacing
  o improved Content-Encoded decoding error message
  o asyn-thread: check for dotted addresses before thread starts
- o 
+ o cmake: find winsock when building on windows
+ o Curl_retry_request: check return code
+ o cookies: handle 'secure=' as if it was 'secure'
 
 This release includes the following known bugs:
 
@@ -54,6 +56,6 @@ advice from friends like these:
  Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
  Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
  Christian Hagele, Richard Silverman, Henry Ludemann, Cristian Rodriguez,
-
+ Steve Holme, Jim Hollinger, Pau Garcia i Quiles
 
         Thanks! (and sorry if I forgot to mention someone)
