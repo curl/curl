@@ -127,9 +127,11 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     return -1;
   }
 
-  if(strlen(neg_ctx->server_name) == 0 &&
-     (ret = get_gss_name(conn, proxy, neg_ctx)))
-    return ret;
+  if(0 == strlen(neg_ctx->server_name)) {
+    ret = get_gss_name(conn, proxy, neg_ctx);
+    if(ret)
+      return ret;
+  }
 
   if(!neg_ctx->output_token) {
     PSecPkgInfo SecurityPackage;
