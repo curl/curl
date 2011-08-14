@@ -10,8 +10,6 @@ To be addressed in 7.22.0
       Would appreciate a Windows developer to give it a look before we apply
       the suggested patch
 
-291 - bug 3383692 "GET PARAMETER request and body in response"
-
 294 - [curl] add a CUSTOM_SOCKET_ERROR_FUNCTION define for SET_SOCKERRNO
      (#21) https://github.com/bagder/curl/pull/21
 
