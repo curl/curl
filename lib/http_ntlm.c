@@ -444,7 +444,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
 CURLcode Curl_output_ntlm(struct connectdata *conn,
                           bool proxy)
 {
-  size_t size;
+  size_t size = 0;
   char *base64 = NULL;
   unsigned char ntlmbuf[NTLM_BUFSIZE];
   CURLcode res;

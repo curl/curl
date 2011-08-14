@@ -292,6 +292,10 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   size_t size;
   unsigned char *buffer;
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_WINDOWS_SSPI)
+  (void)data;
+#endif
+
   size = Curl_base64_decode(header, &buffer);
   if(!buffer)
     return CURLE_OUT_OF_MEMORY;
@@ -786,6 +790,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   size_t hostoff = 0;
   size_t domoff = hostoff + hostlen;  /* This is 0: remember that host and
                                          domain are empty */
+  (void)userp;
+  (void)passwdp;
+  (void)ntlm;
+
 #if USE_NTLM2SESSION
 #define NTLM2FLAG NTLMFLAG_NEGOTIATE_NTLM2_KEY
 #else
@@ -894,6 +902,10 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   SECURITY_STATUS status;
   ULONG attrs;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+
+  (void)passwdp;
+  (void)userp;
+  (void)data;
 
   type_2_desc.ulVersion = type_3_desc.ulVersion  = SECBUFFER_VERSION;
   type_2_desc.cBuffers  = type_3_desc.cBuffers   = 1;
