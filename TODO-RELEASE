@@ -5,13 +5,7 @@ To be addressed in 7.22.0
       http://curl.haxx.se/bug/view.cgi?id=3172608
       Would be nice if someone could verify the suggested patch
 
-285 - bug 3163118 "Allow programatic use of telnet on Windows"
-      http://curl.haxx.se/bug/view.cgi?id=3163118
-      Would appreciate a Windows developer to give it a look before we apply
-      the suggested patch
-
-294 - [curl] add a CUSTOM_SOCKET_ERROR_FUNCTION define for SET_SOCKERRNO
-     (#21) https://github.com/bagder/curl/pull/21
+    = communication in progress, current patch deemed not good enough
 
 295 - "RTSP Authentication (#22)" https://github.com/bagder/curl/pull/22
 
@@ -20,23 +14,24 @@ To be addressed in 7.22.0
 297 - "--ftp-create-dirs fails on SFTP?" Trasca Virgil
      http://curl.haxx.se/mail/archive-2011-06/0051.html
 
+    = can't repeat
+
 298 - [patch RFC] An option to set Kerberos service name
       Pete Zaitcev  http://curl.haxx.se/mail/lib-2011-07/0120.html
+
+    = current patch deemed not good enough
 
 299 - POP3 empty list problem & solution + DELE command + SMTP fix
       Graeme Gill http://curl.haxx.se/mail/lib-2011-07/0047.html
 
+    = current patch deemed not good enough
+
 300 - "Polling on stray socket on sequential transfers." Andrew S
       http://curl.haxx.se/mail/lib-2011-07/0053.html
 
-301 - "Forcing select on vista"
-      http://curl.haxx.se/mail/lib-2011-07/0128.html
-
-303 - "Added AUTH NTLM for SMTP" Steve Holme
-      http://curl.haxx.se/mail/lib-2011-07/0186.html and
-      http://curl.haxx.se/mail/lib-2011-08/0008.html
-
 306 - SSL Sessions shared by Alejandro Alvarez Ayllon
       http://curl.haxx.se/mail/lib-2011-08/0002.html
+
+    = current patch deemed not good enough
 
 308 -
