@@ -22,7 +22,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c polarssl.c		\
   curl_rtmp.c openldap.c curl_gethostname.c gopher.c axtls.c		\
   idn_win32.c http_negotiate_sspi.c cyassl.c http_proxy.c non-ascii.c	\
-  asyn-ares.c asyn-thread.c curl_gssapi.c
+  asyn-ares.c asyn-thread.c curl_gssapi.c curl_ntlm.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
