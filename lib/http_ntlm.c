@@ -461,12 +461,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   struct ntlmdata *ntlm;
   struct auth *authp;
 
-  struct SessionHandle *data;
-
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->data);
-
-  data = conn->data;
 
 #ifdef USE_NSS
   if(CURLE_OK != Curl_nss_force_init(conn->data))
