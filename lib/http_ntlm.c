@@ -62,6 +62,12 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#if defined(USE_NSS)
+#include "nssg.h"
+#elif defined(USE_WINDOWS_SSPI)
+#include "curl_sspi.h"
+#endif
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
