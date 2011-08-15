@@ -314,6 +314,26 @@ if test "x$cross_compiling" != "xno" &&
   supports_unittests=no
 fi
 
+# IRIX 6.5.24 gcc 3.3 autobuilds fail unittests library compilation due to
+# a problem related with OpenSSL headers and library versions not matching.
+# Disable unit tests while time to further investigate this is found.
+case $host in
+  mips-sgi-irix6.5)
+    if test "$compiler_id" = "GNU_C"; then
+      supports_unittests=no
+    fi
+    ;;
+esac
+
+# All AIX autobuilds fails unit tests linking against unittests library
+# due to unittests library being built with no symbols or members. Libtool ?
+# Disable unit tests while time to further investigate this is found.
+case $host_os in
+  aix*)
+    supports_unittests=no
+    ;;
+esac
+
 dnl Build unit tests when option --enable-debug is given.
 if test "x$want_debug" = "xyes" &&
    test "x$supports_unittests" = "xyes"; then
