@@ -28,10 +28,11 @@ Cseq: 2
 
 scale=enormous
 speed=ludicrous
+
 </data2>
 
 <data3>
-RTSP/1.0 200 OK
+RTSP/1.0 204 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
 Cseq: 3
