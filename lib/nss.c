@@ -895,10 +895,42 @@ isTLSIntoleranceError(PRInt32 err)
   }
 }
 
-static CURLcode init_nss(struct SessionHandle *data)
+static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
+{
+  if(NSS_IsInitialized())
+    return CURLE_OK;
+
+  if(cert_dir) {
+    SECStatus rv;
+    const bool use_sql = NSS_VersionCheck("3.12.0");
+    char *certpath = aprintf("%s%s", use_sql ? "sql:" : "", cert_dir);
+    if(!certpath)
+      return CURLE_OUT_OF_MEMORY;
+
+    infof(data, "Initializing NSS with certpath: %s\n", certpath);
+    rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
+    free(certpath);
+
+    if(rv == SECSuccess)
+      return CURLE_OK;
+
+    infof(data, "Unable to initialize NSS database\n");
+  }
+
+  infof(data, "Initializing NSS with certpath: none\n");
+  if(NSS_NoDB_Init(NULL) == SECSuccess)
+    return CURLE_OK;
+
+  infof(data, "Unable to initialize NSS\n");
+  return CURLE_SSL_CACERT_BADFILE;
+}
+
+static CURLcode nss_init(struct SessionHandle *data)
 {
   char *cert_dir;
   struct_stat st;
+  CURLcode rv;
+
   if(initialized)
     return CURLE_OK;
 
@@ -919,31 +951,14 @@ static CURLcode init_nss(struct SessionHandle *data)
     }
   }
 
-  if(!NSS_IsInitialized()) {
-    SECStatus rv;
-    initialized = 1;
-    infof(data, "Initializing NSS with certpath: %s\n",
-          cert_dir ? cert_dir : "none");
-    if(!cert_dir) {
-      rv = NSS_NoDB_Init(NULL);
-    }
-    else {
-      char *certpath =
-        PR_smprintf("%s%s", NSS_VersionCheck("3.12.0") ? "sql:" : "",
-                    cert_dir);
-      rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
-      PR_smprintf_free(certpath);
-    }
-    if(rv != SECSuccess) {
-      infof(data, "Unable to initialize NSS database\n");
-      initialized = 0;
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-  }
+  rv = nss_init_core(data, cert_dir);
+  if(rv)
+    return rv;
 
   if(num_enabled_ciphers() == 0)
     NSS_SetDomesticPolicy();
 
+  initialized = 1;
   return CURLE_OK;
 }
 
@@ -978,7 +993,7 @@ CURLcode Curl_nss_force_init(struct SessionHandle *data)
   }
 
   PR_Lock(nss_initlock);
-  rv = init_nss(data);
+  rv = nss_init(data);
   PR_Unlock(nss_initlock);
   return rv;
 }
@@ -1181,7 +1196,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
-  curlerr = init_nss(conn->data);
+  curlerr = nss_init(conn->data);
   if(CURLE_OK != curlerr) {
     PR_Unlock(nss_initlock);
     goto error;
