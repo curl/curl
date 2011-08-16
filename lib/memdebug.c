@@ -48,6 +48,7 @@
 struct memdebug {
   size_t size;
   union {
+    curl_off_t o;
     double d;
     void * p;
   } mem[1];
@@ -166,12 +167,9 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
   user_size = wanted_size * wanted_elements;
   size = sizeof(struct memdebug) + user_size;
 
-  mem = (Curl_cmalloc)(size);
-  if(mem) {
-    /* fill memory with zeroes */
-    memset(mem->mem, 0, user_size);
+  mem = (Curl_ccalloc)(1, size);
+  if(mem)
     mem->size = user_size;
-  }
 
   if(source)
     curl_memlog("MEM %s:%d calloc(%zu,%zu) = %p\n",
