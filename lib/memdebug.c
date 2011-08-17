@@ -45,6 +45,52 @@
 #  define assert(x) do { } while (0)
 #endif
 
+/*
+ * Until 2011-08-17 libcurl's Memory Tracking feature also performed
+ * automatic malloc and free filling operations using 0xA5 and 0x13
+ * values. Our own preinitialization of dynamically allocated memory
+ * might be useful when not using third party memory debuggers, but
+ * on the other hand this would fool memory debuggers into thinking
+ * that all dynamically allocated memory is properly initialized.
+ *
+ * As a default setting, libcurl's Memory Tracking feature no longer
+ * performs preinitialization of dynamically allocated memory on its
+ * own. If you know what you are doing, and really want to retain old
+ * behavior, you can achieve this compiling with preprocessor symbols
+ * CURL_MT_MALLOC_FILL and CURL_MT_FREE_FILL defined with appropriate
+ * values.
+ */
+
+#ifdef CURL_MT_MALLOC_FILL
+# if (CURL_MT_MALLOC_FILL < 0) || (CURL_MT_MALLOC_FILL > 0xff)
+#   error "invalid CURL_MT_MALLOC_FILL or out of range"
+# endif
+#endif
+
+#ifdef CURL_MT_FREE_FILL
+# if (CURL_MT_FREE_FILL < 0) || (CURL_MT_FREE_FILL > 0xff)
+#   error "invalid CURL_MT_FREE_FILL or out of range"
+# endif
+#endif
+
+#if defined(CURL_MT_MALLOC_FILL) && defined(CURL_MT_FREE_FILL)
+# if (CURL_MT_MALLOC_FILL == CURL_MT_FREE_FILL)
+#   error "CURL_MT_MALLOC_FILL same as CURL_MT_FREE_FILL"
+# endif
+#endif
+
+#ifdef CURL_MT_MALLOC_FILL
+#  define mt_malloc_fill(buf,len) memset((buf), CURL_MT_MALLOC_FILL, (len))
+#else
+#  define mt_malloc_fill(buf,len)
+#endif
+
+#ifdef CURL_MT_FREE_FILL
+#  define mt_free_fill(buf,len) memset((buf), CURL_MT_FREE_FILL, (len))
+#else
+#  define mt_free_fill(buf,len)
+#endif
+
 struct memdebug {
   size_t size;
   union {
@@ -141,7 +187,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   mem = (Curl_cmalloc)(size);
   if(mem) {
     /* fill memory with junk */
-    memset(mem->mem, 0xA5, wantedsize);
+    mt_malloc_fill(mem->mem, wantedsize);
     mem->size = wantedsize;
   }
 
@@ -258,8 +304,8 @@ void curl_dofree(void *ptr, int line, const char *source)
 #  pragma warning(pop)
 #endif
 
-  /* destroy  */
-  memset(mem->mem, 0x13, mem->size);
+  /* destroy */
+  mt_free_fill(mem->mem, mem->size);
 
   /* free for real */
   (Curl_cfree)(mem);
