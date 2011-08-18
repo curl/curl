@@ -659,7 +659,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   *connected = FALSE; /* a very negative world view is best */
 
-  if(conn->bits.tcpconnect) {
+  if(conn->bits.tcpconnect[sockindex]) {
     /* we are connected already! */
     *connected = TRUE;
     return CURLE_OK;
@@ -698,7 +698,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       if(code)
         return code;
 
-      conn->bits.tcpconnect = TRUE;
+      conn->bits.tcpconnect[sockindex] = TRUE;
       *connected = TRUE;
       Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
       Curl_verboseconnect(conn);

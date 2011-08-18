@@ -3200,8 +3200,11 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     /* All is cool, we store the current information */
     conn->ip_addr = addr;
 
-    if(*connected)
+    if(*connected) {
       result = Curl_connected_proxy(conn);
+      if(!result)
+        conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
+    }
   }
 
   if(result)
@@ -3294,7 +3297,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 
   *protocol_done = FALSE;
 
-  if(conn->bits.tcpconnect && conn->bits.protoconnstart) {
+  if(conn->bits.tcpconnect[FIRSTSOCKET] && conn->bits.protoconnstart) {
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
        or proxy. Note that we don't know if the protocol is actually done.
@@ -3307,7 +3310,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(!conn->bits.tcpconnect) {
+  if(!conn->bits.tcpconnect[FIRSTSOCKET]) {
 
     Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
     Curl_verboseconnect(conn);
@@ -4870,7 +4873,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     /* Setup a "faked" transfer that'll do nothing */
     if(CURLE_OK == result) {
       conn->data = data;
-      conn->bits.tcpconnect = TRUE; /* we are "connected */
+      conn->bits.tcpconnect[FIRSTSOCKET] = TRUE; /* we are "connected */
 
       ConnectionStore(data, conn);
 
@@ -5064,10 +5067,10 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
       if(connected) {
         result = Curl_protocol_connect(conn, protocol_done);
         if(CURLE_OK == result)
-          conn->bits.tcpconnect = TRUE;
+          conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
       }
       else
-        conn->bits.tcpconnect = FALSE;
+        conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
 
       /* if the connection was closed by the server while exchanging
          authentication informations, retry with the new set
@@ -5086,7 +5089,7 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     else {
       Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
       Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
-      conn->bits.tcpconnect = TRUE;
+      conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
       *protocol_done = TRUE;
       Curl_verboseconnect(conn);
       Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);

@@ -1043,7 +1043,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
      The *proper* fix is to make sure that the active connection from the
      server is done in a non-blocking way. Currently, it is still BLOCKING.
   */
-  conn->bits.tcpconnect = TRUE;
+  conn->bits.tcpconnect[SECONDARYSOCKET] = TRUE;
 
   state(conn, FTP_PORT);
   return result;
@@ -1703,7 +1703,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   if(result)
     return result;
 
-  conn->bits.tcpconnect = connected; /* simply TRUE or FALSE */
+  conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
 
   /*
    * When this is used from the multi interface, this might've returned with
@@ -1741,6 +1741,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     break;
   }
 
+  if(result)
+    return result;
+
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
     /* FIX: this MUST wait for a proper connect first if 'connected' is
      * FALSE */
@@ -1763,10 +1766,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
     data->state.proto.ftp = ftp_save;
 
-    if(CURLE_OK != result)
+    if(result)
       return result;
   }
 
+  conn->bits.tcpconnect[SECONDARYSOCKET] = TRUE;
 
   state(conn, FTP_STOP); /* this phase is completed */
 
@@ -3473,7 +3477,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     result = ftp_easy_statemach(conn);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
-  *connected = conn->bits.tcpconnect;
+  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
     DEBUGF(infof(conn->data, "DO phase is complete\n"));

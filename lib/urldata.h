@@ -411,7 +411,7 @@ struct ConnectBits {
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
 
-  bool tcpconnect;    /* the TCP layer (or similar) is connected, this is set
+  bool tcpconnect[2]; /* the TCP layer (or similar) is connected, this is set
                          the first time on the first connect function call */
   bool protoconnstart;/* the protocol layer has STARTED its operation after
                          the TCP layer connect */
