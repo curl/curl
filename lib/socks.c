@@ -284,10 +284,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     /* Result */
     switch(socksreq[1]) {
     case 90:
-      if(protocol4a)
-        infof(data, "SOCKS4a request granted.\n");
-      else
-        infof(data, "SOCKS4 request granted.\n");
+      infof(data, "SOCKS4%s request granted.\n", protocol4a?"a":"");
       break;
     case 91:
       failf(data,
