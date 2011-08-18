@@ -177,11 +177,9 @@ void hugehelp(void)
     return;
 
   headerlen = 10;
+  memset(&z, 0, sizeof(z_stream));
   z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
   z.next_in = (unsigned char *)hugehelpgz + headerlen;
-  z.zalloc = (alloc_func)Z_NULL;
-  z.zfree = (free_func)Z_NULL;
-  z.opaque = 0;
 
   if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;

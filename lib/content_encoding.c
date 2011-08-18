@@ -158,11 +158,7 @@ Curl_unencode_deflate_write(struct connectdata *conn,
 
   /* Initialize zlib? */
   if(k->zlib_init == ZLIB_UNINIT) {
-    z->zalloc = (alloc_func)Z_NULL;
-    z->zfree = (free_func)Z_NULL;
-    z->opaque = 0;
-    z->next_in = NULL;
-    z->avail_in = 0;
+    memset(z, 0, sizeof(z_stream));
     if(inflateInit(z) != Z_OK)
       return process_zlib_error(conn, z);
     k->zlib_init = ZLIB_INIT;
@@ -269,11 +265,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
 
   /* Initialize zlib? */
   if(k->zlib_init == ZLIB_UNINIT) {
-    z->zalloc = (alloc_func)Z_NULL;
-    z->zfree = (free_func)Z_NULL;
-    z->opaque = 0;
-    z->next_in = NULL;
-    z->avail_in = 0;
+    memset(z, 0, sizeof(z_stream));
 
     if(strcmp(zlibVersion(), "1.2.0.4") >= 0) {
       /* zlib ver. >= 1.2.0.4 supports transparent gzip decompressing */
