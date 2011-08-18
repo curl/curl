@@ -700,7 +700,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       conn->bits.tcpconnect[sockindex] = TRUE;
       *connected = TRUE;
-      Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+      if(sockindex == FIRSTSOCKET)
+        Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
       Curl_verboseconnect(conn);
       Curl_updateconninfo(conn, sockfd);
 

@@ -3202,8 +3202,10 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 
     if(*connected) {
       result = Curl_connected_proxy(conn);
-      if(!result)
+      if(!result) {
         conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
+        Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+      }
     }
   }
 
