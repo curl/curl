@@ -98,6 +98,11 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifdef WIN32
+#  undef  PATH_MAX
+#  define PATH_MAX MAX_PATH
+#endif
+
 #ifndef PATH_MAX
 #define PATH_MAX 1024 /* just an extra precaution since there are systems that
                          have their definition hidden well */
