@@ -2701,7 +2701,7 @@ CURLcode scp_perform(struct connectdata *conn,
     result = ssh_easy_statemach(conn, FALSE);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
-  *connected = conn->bits.tcpconnect;
+  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
@@ -2908,7 +2908,7 @@ CURLcode sftp_perform(struct connectdata *conn,
     result = ssh_easy_statemach(conn, FALSE);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
-  *connected = conn->bits.tcpconnect;
+  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
