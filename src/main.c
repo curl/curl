@@ -4617,6 +4617,38 @@ header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   return cb;
 }
 
+#ifdef CURLDEBUG
+static void memory_tracking_init(void)
+{
+  char *env;
+  /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
+  env = curlx_getenv("CURL_MEMDEBUG");
+  if(env) {
+    /* use the value as file name */
+    char fname[CURL_MT_LOGFNAME_BUFSIZE];
+    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
+      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    strcpy(fname, env);
+    curl_free(env);
+    curl_memdebug(fname);
+    /* this weird stuff here is to make curl_free() get called
+       before curl_memdebug() as otherwise memory tracking will
+       log a free() without an alloc! */
+  }
+  /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
+  env = curlx_getenv("CURL_MEMLIMIT");
+  if(env) {
+    char *endptr;
+    long num = strtol(env, &endptr, 10);
+    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+      curl_memlimit(num);
+    curl_free(env);
+  }
+}
+#else
+#  define memory_tracking_init(x)
+#endif
+
 static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
@@ -4653,32 +4685,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   memset(&heads, 0, sizeof(struct OutStruct));
 
-#ifdef CURLDEBUG
-  /* this sends all memory debug messages to a logfile named memdump */
-  env = curlx_getenv("CURL_MEMDEBUG");
-  if(env) {
-    /* use the value as file name */
-    char *s = strdup(env);
-    curl_free(env);
-    curl_memdebug(s);
-    free(s);
-    /* this weird strdup() and stuff here is to make the curl_free() get
-       called before the memdebug() as otherwise the memdebug tracing will
-       with tracing a free() without an alloc! */
-  }
-  env = curlx_getenv("CURL_MEMLIMIT");
-  if(env) {
-    char *endptr;
-    long num = strtol(env, &endptr, 10);
-    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_memlimit(num);
-    curl_free(env);
-  }
-#endif
+  memory_tracking_init();
 
   /* Initialize curl library - do not call any libcurl functions before.
-     Note that the CURLDEBUG magic above is an exception, but then that's not
-     part of the official public API.
+     Note that the memory_tracking_init() magic above is an exception, but
+     then that's not part of the official public API.
   */
   if(main_init() != CURLE_OK) {
     helpf(config->errors, "error initializing curl library\n");

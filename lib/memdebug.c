@@ -119,7 +119,7 @@ static long memsize = 0;  /* set number of mallocs allowed */
 void curl_memdebug(const char *logname)
 {
   if(!logfile) {
-    if(logname)
+    if(logname && *logname)
       logfile = fopen(logname, "w");
     else
       logfile = stderr;

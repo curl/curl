@@ -32,13 +32,11 @@
 
 #include <curl/curl.h>
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
+#define CURL_MT_LOGFNAME_BUFSIZE 512
 
 #define logfile curl_debuglogfile
 

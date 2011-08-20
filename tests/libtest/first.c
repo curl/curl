@@ -54,24 +54,25 @@ char **test_argv;
 int unitfail; /* for unittests */
 #endif
 
-int main(int argc, char **argv)
-{
-  char *URL;
-
 #ifdef CURLDEBUG
-  /* this sends all memory debug messages to a logfile named memdump */
-  char *env = curl_getenv("CURL_MEMDEBUG");
+static void memory_tracking_init(void)
+{
+  char *env;
+  /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
+  env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as file name */
-    char *s = strdup(env);
+    char fname[CURL_MT_LOGFNAME_BUFSIZE];
+    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
+      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    strcpy(fname, env);
     curl_free(env);
-    curl_memdebug(s);
-    free(s);
-    /* this weird strdup() and stuff here is to make the curl_free() get
-       called before the memdebug() as otherwise the memdebug tracing will
-       with tracing a free() without an alloc! */
+    curl_memdebug(fname);
+    /* this weird stuff here is to make curl_free() get called
+       before curl_memdebug() as otherwise memory tracking will
+       log a free() without an alloc! */
   }
-  /* this enables the fail-on-alloc-number-N functionality */
+  /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curl_getenv("CURL_MEMLIMIT");
   if(env) {
     char *endptr;
@@ -80,7 +81,16 @@ int main(int argc, char **argv)
       curl_memlimit(num);
     curl_free(env);
   }
+}
+#else
+#  define memory_tracking_init(x)
 #endif
+
+int main(int argc, char **argv)
+{
+  char *URL;
+
+  memory_tracking_init();
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
