@@ -259,6 +259,7 @@ my $verbose;
 my $debugprotocol;
 my $anyway;
 my $gdbthis;      # run test case with gdb debugger
+my $gdbxwin;      # use windowed gdb when using gdb
 my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
@@ -2925,7 +2926,8 @@ sub singletest {
                        "$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis) {
-        runclient("$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
+        my $GDBW = ($gdbxwin) ? "-w" : "";
+        runclient("$gdb --directory libtest $DBGCURL $GDBW -x $LOGDIR/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
@@ -3916,6 +3918,11 @@ while(@ARGV) {
         # run this test with gdb
         $gdbthis=1;
     }
+    elsif ($ARGV[0] eq "-gw") {
+        # run this test with windowed gdb
+        $gdbthis=1;
+        $gdbxwin=1;
+    }
     elsif($ARGV[0] eq "-s") {
         # short output
         $short=1;
@@ -3987,6 +3994,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -c path  use this curl executable
   -d       display server debug info
   -g       run the test case with gdb
+  -gw      run the test case with gdb as a windowed application
   -h       this help text
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
