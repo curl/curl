@@ -133,7 +133,6 @@ print <<HEAD
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  * Generation time: $now
  */
-#include "setup.h"
 #ifdef USE_MANUAL
 #include "hugehelp.h"
 HEAD
@@ -141,6 +140,9 @@ HEAD
 if($c) {
     print <<HEAD
 #include <zlib.h>
+#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
+#include "memdebug.h"
+#endif
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.
      Thanks to this operation, the size of this data shrunk from $gzip
@@ -165,6 +167,17 @@ HEAD
 
     print <<EOF
 #define BUF_SIZE 0x10000
+static voidpf zalloc_func(voidpf opaque, unsigned int items, unsigned int size)
+{
+  (void) opaque;
+  /* not a typo, keep it calloc() */
+  return (voidpf) calloc(items, size);
+}
+static void zfree_func(voidpf opaque, voidpf ptr)
+{
+  (void) opaque;
+  free(ptr);
+}
 /* Decompress and send to stdout a gzip-compressed buffer */
 void hugehelp(void)
 {
@@ -178,6 +191,8 @@ void hugehelp(void)
 
   headerlen = 10;
   memset(&z, 0, sizeof(z_stream));
+  z.zalloc = (alloc_func)zalloc_func;
+  z.zfree = (free_func)zfree_func;
   z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
   z.next_in = (unsigned char *)hugehelpgz + headerlen;
 

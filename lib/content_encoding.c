@@ -49,6 +49,21 @@
 #define COMMENT      0x10 /* bit 4 set: file comment present */
 #define RESERVED     0xE0 /* bits 5..7: reserved */
 
+static voidpf
+zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
+{
+  (void) opaque;
+  /* not a typo, keep it calloc() */
+  return (voidpf) calloc(items, size);
+}
+
+static void
+zfree_cb(voidpf opaque, voidpf ptr)
+{
+  (void) opaque;
+  free(ptr);
+}
+
 static CURLcode
 process_zlib_error(struct connectdata *conn, z_stream *z)
 {
@@ -159,6 +174,9 @@ Curl_unencode_deflate_write(struct connectdata *conn,
   /* Initialize zlib? */
   if(k->zlib_init == ZLIB_UNINIT) {
     memset(z, 0, sizeof(z_stream));
+    z->zalloc = (alloc_func)zalloc_cb;
+    z->zfree = (free_func)zfree_cb;
+
     if(inflateInit(z) != Z_OK)
       return process_zlib_error(conn, z);
     k->zlib_init = ZLIB_INIT;
@@ -266,6 +284,8 @@ Curl_unencode_gzip_write(struct connectdata *conn,
   /* Initialize zlib? */
   if(k->zlib_init == ZLIB_UNINIT) {
     memset(z, 0, sizeof(z_stream));
+    z->zalloc = (alloc_func)zalloc_cb;
+    z->zfree = (free_func)zfree_cb;
 
     if(strcmp(zlibVersion(), "1.2.0.4") >= 0) {
       /* zlib ver. >= 1.2.0.4 supports transparent gzip decompressing */
