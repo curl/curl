@@ -83,7 +83,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#  define memory_tracking_init(x)
+#  define memory_tracking_init()
 #endif
 
 int main(int argc, char **argv)
