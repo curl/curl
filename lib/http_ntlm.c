@@ -105,11 +105,11 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       header++;
 
     if(*header) {
-      /* We got a type-2 message */
-
       result = Curl_ntlm_decode_type2_message(conn->data, header, ntlm);
       if(CURLE_OK != result)
         return result;
+
+      ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
     }
     else {
       if(ntlm->state >= NTLMSTATE_TYPE1) {
@@ -117,7 +117,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
         return CURLE_REMOTE_ACCESS_DENIED;
       }
 
-      ntlm->state = NTLMSTATE_TYPE1; /* we should sent away a type-1 */
+      ntlm->state = NTLMSTATE_TYPE1; /* We should send away a type-1 */
     }
   }
 

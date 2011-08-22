@@ -252,9 +252,9 @@ static unsigned int readint_le(unsigned char *buf)
 /*
   NTLM message structure notes:
 
-  A 'short' is a little-endian, 16-bit unsigned value.
+  A 'short' is a 'network short', a little-endian 16-bit unsigned value.
 
-  A 'long' is a little-endian, 32-bit unsigned value.
+  A 'long' is a 'network long', a little-endian, 32-bit unsigned value.
 
   A 'security buffer' represents a triplet used to point to a buffer,
   consisting of two shorts and one long:
@@ -265,6 +265,22 @@ static unsigned int readint_le(unsigned char *buf)
        from the beginning of the NTLM message.
 */
 
+/*
+ * Curl_ntlm_decode_type2_message()
+ *
+ * This is used to decode a ntlm type-2 message received from a: HTTP, SMTP
+ * or POP3 server. The message is first decoded from a base64 string into a
+ * raw ntlm message and checked for validity before the appropriate data for
+ * creating a type-3 message is written to the given ntlm data structure.
+ *
+ * Parameters:
+ *
+ * data    [in]     - Pointer to session handle.
+ * header  [in]     - Pointer to the input buffer.
+ * ntlm    [in]     - Pointer to ntlm data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         const char* header,
                                         struct ntlmdata* ntlm)
@@ -299,8 +315,6 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   size = Curl_base64_decode(header, &buffer);
   if(!buffer)
     return CURLE_OUT_OF_MEMORY;
-
-  ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
 #ifdef USE_WINDOWS_SSPI
   ntlm->type_2 = malloc(size + 1);
@@ -661,7 +675,23 @@ static void unicodecpy(unsigned char *dest,
 }
 #endif
 
-
+/*
+ * Curl_ntlm_create_type1_message()
+ *
+ * This is used to generate a ntlm type-1 message ready for encoding
+ * and sending to the recipient, be it a: HTTP, SMTP or POP3 server,
+ * using the appropriate compile time crypo API.
+ *
+ * Parameters:
+ *
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in]     - The ntlm data struct being used and modified.
+ * ntlmbuf [in]     - Pointer to preallocated buffer to receive message.
+ * sizep   [out]    - Size of message written into output buffer.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
@@ -865,6 +895,24 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   return CURLE_OK;
 }
 
+/*
+ * Curl_ntlm_create_type3_message()
+ *
+ * This is used to generate a ntlm type-3 message ready for encoding
+ * and sending to the recipient, be it a: HTTP, SMTP or POP3 server,
+ * using the appropriate compile time crypo API.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in]     - The ntlm data struct being used and modified.
+ * ntlmbuf [in]     - Pointer to preallocated buffer to receive message.
+ * sizep   [out]    - Size of message written into output buffer.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                         const char *userp,
                                         const char *passwdp,
