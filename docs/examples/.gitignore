@@ -4,6 +4,7 @@ certinfo
 chkspeed
 cookie_interface
 debug
+externalsocket
 fileupload
 fopen
 ftp-wildcard
