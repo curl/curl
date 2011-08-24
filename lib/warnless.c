@@ -268,6 +268,25 @@ size_t curlx_sotouz(curl_off_t sonum)
 #endif
 }
 
+/*
+** signed int to unsigned size_t
+*/
+
+size_t curlx_sitouz(int sinum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  DEBUGASSERT(sinum >= 0);
+  return (size_t) sinum;
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
 int curlx_FD_ISSET(int fd, fd_set *fdset)

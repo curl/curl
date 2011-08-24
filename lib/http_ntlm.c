@@ -455,8 +455,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 {
   size_t size = 0;
   char *base64 = NULL;
+  size_t base64_sz = 0;
   unsigned char ntlmbuf[NTLM_BUFSIZE];
-  CURLcode res;
+  CURLcode error;
 
   /* point to the address of the pointer that holds the string to sent to the
      server, which is for a plain host or for a HTTP proxy */
@@ -516,14 +517,19 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     /* Create a type-1 message */
 
-    res = Curl_ntlm_create_type1_message(userp, passwdp,
-                                         ntlm, ntlmbuf, &size);
+    error = Curl_ntlm_create_type1_message(userp, passwdp,
+                                           ntlm, ntlmbuf, &size);
+    if(error)
+      return error;
 
-    if(CURLE_OK == res) {
-      /* now size is the size of the base64 encoded package size */
-      size = Curl_base64_encode(NULL, (char *)ntlmbuf, size, &base64);
+    if(size > 0) {
+      /* convert the binary blob into base64 */
+      error = Curl_base64_encode(NULL, (char *)ntlmbuf, size,
+                                 &base64, &base64_sz);
+      if(error)
+        return error;
 
-      if(size > 0) {
+      if(base64_sz > 0) {
         Curl_safefree(*allocuserpwd);
         *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                                 proxy ? "Proxy-" : "",
@@ -532,35 +538,36 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
         free(base64);
       }
     }
-    else
-      return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
     break;
 
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
 
-    res = Curl_ntlm_create_type3_message(conn->data, userp, passwdp,
-                                         ntlm, ntlmbuf, &size);
+    error = Curl_ntlm_create_type3_message(conn->data, userp, passwdp,
+                                           ntlm, ntlmbuf, &size);
+    if(error)
+      return error;
 
-    if(CURLE_OK == res) {
+    if(size > 0) {
       /* convert the binary blob into base64 */
-      size = Curl_base64_encode(NULL, (char *)ntlmbuf, size, &base64);
+      error = Curl_base64_encode(NULL, (char *)ntlmbuf, size,
+                                 &base64, &base64_sz);
+      if(error)
+        return error;
 
-      if(size > 0) {
+      if(base64_sz > 0) {
         Curl_safefree(*allocuserpwd);
         *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                                 proxy ? "Proxy-" : "",
                                 base64);
         DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
         free(base64);
+
+        ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+        authp->done = TRUE;
       }
     }
-    else
-      return CURLE_OUT_OF_MEMORY; /* FIX TODO */
-
-    ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
-    authp->done = TRUE;
 
     break;
 

@@ -544,12 +544,21 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
           }
         }
         if(binary || binval) {
-          char *val_b64;
+          char *val_b64 = NULL;
+          size_t val_b64_sz = 0;
           /* Binary value, encode to base64. */
-          size_t val_b64_sz = Curl_base64_encode(data,
-                                            bvals[i].bv_val,
-                                            bvals[i].bv_len,
-                                            &val_b64);
+          CURLcode error = Curl_base64_encode(data,
+                                              bvals[i].bv_val,
+                                              bvals[i].bv_len,
+                                              &val_b64,
+                                              &val_b64_sz);
+          if(error) {
+            ber_memfree(bvals);
+            ber_free(ber, 0);
+            ldap_msgfree(result);
+            *err = error;
+            return -1;
+          }
           Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
           data->req.bytecount += 2;
           if(val_b64_sz > 0) {

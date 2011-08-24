@@ -280,7 +280,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char *ha1;
   unsigned char ha2[33];/* 32 digits and 1 zero byte */
   char cnoncebuf[7];
-  char *cnonce;
+  char *cnonce = NULL;
+  size_t cnonce_sz = 0;
   char *tmp = NULL;
   struct timeval now;
 
@@ -343,10 +344,12 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     /* Generate a cnonce */
     now = Curl_tvnow();
     snprintf(cnoncebuf, sizeof(cnoncebuf), "%06ld", (long)now.tv_sec);
-    if(Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf), &cnonce))
-      d->cnonce = cnonce;
-    else
-      return CURLE_OUT_OF_MEMORY;
+
+    rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
+                            &cnonce, &cnonce_sz);
+    if(rc)
+      return rc;
+    d->cnonce = cnonce;
   }
 
   /*

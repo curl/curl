@@ -138,9 +138,11 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   int ret;
-  size_t len, rawlen;
+  size_t len;
+  size_t rawlen = 0;
   bool gss;
   const char* protocol;
+  CURLcode error;
 
   while(*header && ISSPACE(*header))
     header++;
@@ -183,9 +185,9 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   len = strlen(header);
   if(len > 0) {
-    rawlen = Curl_base64_decode(header,
-                                (unsigned char **)&input_token.value);
-    if(rawlen == 0)
+    error = Curl_base64_decode(header,
+                               (unsigned char **)&input_token.value, &rawlen);
+    if(error || rawlen == 0)
       return -1;
     input_token.length = rawlen;
 
@@ -270,8 +272,9 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
     &conn->data->state.negotiate;
   char *encoded = NULL;
-  size_t len;
+  size_t len = 0;
   char *userp;
+  CURLcode error;
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
   if(checkprefix("Negotiate", neg_ctx->protocol)) {
@@ -317,13 +320,21 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     }
   }
 #endif
-  len = Curl_base64_encode(conn->data,
-                           neg_ctx->output_token.value,
-                           neg_ctx->output_token.length,
-                           &encoded);
+  error = Curl_base64_encode(conn->data,
+                             neg_ctx->output_token.value,
+                             neg_ctx->output_token.length,
+                             &encoded, &len);
+  if(error) {
+    Curl_safefree(neg_ctx->output_token.value);
+    neg_ctx->output_token.value = NULL;
+    return error;
+  }
 
-  if(len == 0)
-    return CURLE_OUT_OF_MEMORY;
+  if(len == 0) {
+    Curl_safefree(neg_ctx->output_token.value);
+    neg_ctx->output_token.value = NULL;
+    return CURLE_REMOTE_ACCESS_DENIED;
+  }
 
   userp = aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
                   neg_ctx->protocol, encoded);

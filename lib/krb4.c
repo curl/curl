@@ -201,7 +201,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   int ret;
   char *p;
   unsigned char *ptr;
-  size_t len;
+  size_t len = 0;
   KTEXT_ST adat;
   MSG_DAT msg_data;
   int checksum;
@@ -212,6 +212,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   int l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
   CURLcode result;
+  size_t base64_sz = 0;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)LOCAL_ADDR, &l) < 0)
@@ -247,8 +248,10 @@ krb4_auth(void *app_data, struct connectdata *conn)
   }
 #endif
 
-  if(Curl_base64_encode(conn->data, (char *)adat.dat, adat.length, &p) < 1) {
-    Curl_failf(data, "Out of memory base64-encoding");
+  result = Curl_base64_encode(conn->data, (char *)adat.dat, adat.length,
+                              &p, &base64_sz)
+  if(result) {
+    Curl_failf(data, "base64-encoding: %s", curl_easy_strerror(result));
     return AUTH_CONTINUE;
   }
 
@@ -273,10 +276,15 @@ krb4_auth(void *app_data, struct connectdata *conn)
     return AUTH_ERROR;
   }
   p += 5;
-  len = Curl_base64_decode(p, &ptr);
+  result = Curl_base64_decode(p, &ptr, &len);
+  if(result) {
+    Curl_failf(data, "base64-decoding: %s", curl_easy_strerror(result));
+    return AUTH_ERROR;
+  }
   if(len > sizeof(adat.dat)-1) {
     free(ptr);
-    len=0;
+    ptr = NULL;
+    len = 0;
   }
   if(!len || !ptr) {
     Curl_failf(data, "Failed to decode base64 from server");
@@ -330,11 +338,12 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   char *name;
   char *p;
   char passwd[100];
-  size_t tmp;
+  size_t tmp = 0;
   ssize_t nread;
   enum protection_level save;
   CURLcode result;
   unsigned char *ptr;
+  size_t base64_sz = 0;
 
   save = krb4_set_command_prot(conn, PROT_PRIVATE);
 
@@ -360,10 +369,15 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
 
   p += 2;
-  tmp = Curl_base64_decode(p, &ptr);
+  result = Curl_base64_decode(p, &ptr, &tmp);
+  if(result) {
+    Curl_failf(conn->data, "base64-decoding: %s", curl_easy_strerror(result));
+    return result;
+  }
   if(tmp >= sizeof(tkt.dat)) {
     free(ptr);
-    tmp=0;
+    ptr = NULL;
+    tmp = 0;
   }
   if(!tmp || !ptr) {
     Curl_failf(conn->data, "Failed to decode base64 in reply");
@@ -404,11 +418,12 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   memset(key, 0, sizeof(key));
   memset(schedule, 0, sizeof(schedule));
   memset(passwd, 0, sizeof(passwd));
-  if(Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length, &p)
-     < 1) {
-    failf(conn->data, "Out of memory base64-encoding.");
+  result = Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length,
+                              &p, &base64_sz)
+  if(result) {
+    Curl_failf(conn->data, "base64-encoding: %s", curl_easy_strerror(result));
     krb4_set_command_prot(conn, save);
-    return CURLE_OUT_OF_MEMORY;
+    return result;
   }
   memset (tktcopy.dat, 0, tktcopy.length);
 

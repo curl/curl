@@ -341,7 +341,8 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static size_t smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
+static CURLcode smtp_auth_plain_data(struct connectdata *conn,
+                                     char **outptr, size_t *outlen)
 {
   char plainauth[2 * MAX_CURL_USER_LENGTH + MAX_CURL_PASSWORD_LENGTH];
   size_t ulen;
@@ -350,8 +351,11 @@ static size_t smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
   ulen = strlen(conn->user);
   plen = strlen(conn->passwd);
 
-  if(2 * ulen + plen + 2 > sizeof plainauth)
-    return 0;
+  if(2 * ulen + plen + 2 > sizeof plainauth) {
+    *outlen = 0;
+    *outptr = NULL;
+    return CURLE_OUT_OF_MEMORY; /* plainauth too small */
+  }
 
   memcpy(plainauth, conn->user, ulen);
   plainauth[ulen] = '\0';
@@ -359,21 +363,25 @@ static size_t smtp_auth_plain_data(struct connectdata * conn, char * * outptr)
   plainauth[2 * ulen + 1] = '\0';
   memcpy(plainauth + 2 * ulen + 2, conn->passwd, plen);
   return Curl_base64_encode(conn->data, plainauth, 2 * ulen + plen + 2,
-                            outptr);
+                            outptr, outlen);
 }
 
-static size_t smtp_auth_login_user(struct connectdata * conn, char * * outptr)
+static CURLcode smtp_auth_login_user(struct connectdata *conn,
+                                     char **outptr, size_t *outlen)
 {
-  size_t ulen;
-
-  ulen = strlen(conn->user);
+  size_t ulen = strlen(conn->user);
 
   if(!ulen) {
     *outptr = strdup("=");
-    return *outptr? 1: 0;
+    if(*outptr) {
+      *outlen = (size_t) 1;
+      return CURLE_OK;
+    }
+    *outlen = 0;
+    return CURLE_OUT_OF_MEMORY;
   }
 
-  return Curl_base64_encode(conn->data, conn->user, ulen, outptr);
+  return Curl_base64_encode(conn->data, conn->user, ulen, outptr, outlen);
 }
 
 static CURLcode smtp_authenticate(struct connectdata *conn)
@@ -409,13 +417,13 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
       mech = "PLAIN";
       state1 = SMTP_AUTHPLAIN;
       state2 = SMTP_AUTH;
-      l = smtp_auth_plain_data(conn, &initresp);
+      result = smtp_auth_plain_data(conn, &initresp, &l);
     }
     else if(smtpc->authmechs & SMTP_AUTH_LOGIN) {
       mech = "LOGIN";
       state1 = SMTP_AUTHLOGIN;
       state2 = SMTP_AUTHPASSWD;
-      l = smtp_auth_login_user(conn, &initresp);
+      result = smtp_auth_login_user(conn, &initresp, &l);
     }
     else {
       infof(conn->data, "No known auth mechanisms supported!\n");
@@ -423,24 +431,20 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     }
 
     if(!result) {
-      if(!l)
-        result = CURLE_OUT_OF_MEMORY;
-      else if(initresp &&
-              l + strlen(mech) <= 512 - 8) {   /* AUTH <mech> ...<crlf> */
+      if(initresp &&
+         l + strlen(mech) <= 512 - 8) { /* AUTH <mech> ...<crlf> */
         result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
-        free(initresp);
 
         if(!result)
           state(conn, state2);
       }
       else {
-        Curl_safefree(initresp);
-
         result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
 
         if(!result)
           state(conn, state1);
       }
+      Curl_safefree(initresp);
     }
   }
 
@@ -571,8 +575,8 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t l;
-  char * plainauth;
+  size_t l = 0;
+  char * plainauth = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -581,16 +585,16 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    l = smtp_auth_plain_data(conn, &plainauth);
+    result = smtp_auth_plain_data(conn, &plainauth, &l);
 
-    if(!l)
-      result = CURLE_OUT_OF_MEMORY;
-    else {
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
-      free(plainauth);
+    if(!result) {
+      if(plainauth) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
 
-      if(!result)
-        state(conn, SMTP_AUTH);
+        if(!result)
+          state(conn, SMTP_AUTH);
+      }
+      Curl_safefree(plainauth);
     }
   }
 
@@ -604,8 +608,8 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t l;
-  char * authuser;
+  size_t l = 0;
+  char * authuser = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -614,16 +618,16 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    l = smtp_auth_login_user(conn, &authuser);
+    result = smtp_auth_login_user(conn, &authuser, &l);
 
-    if(!l)
-      result = CURLE_OUT_OF_MEMORY;
-    else {
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
-      free(authuser);
+    if(!result) {
+      if(authuser) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
 
-      if(!result)
-        state(conn, SMTP_AUTHPASSWD);
+        if(!result)
+          state(conn, SMTP_AUTHPASSWD);
+      }
+      Curl_safefree(authuser);
     }
   }
 
@@ -638,8 +642,8 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   size_t plen;
-  size_t l;
-  char *authpasswd;
+  size_t l = 0;
+  char *authpasswd = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -653,16 +657,16 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
     if(!plen)
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "=");
     else {
-      l = Curl_base64_encode(data, conn->passwd, plen, &authpasswd);
+      result = Curl_base64_encode(data, conn->passwd, plen, &authpasswd, &l);
 
-      if(!l)
-        result = CURLE_OUT_OF_MEMORY;
-      else {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
-        free(authpasswd);
+      if(!result) {
+        if(authpasswd) {
+          result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
 
-        if(!result)
-          state(conn, SMTP_AUTH);
+          if(!result)
+            state(conn, SMTP_AUTH);
+        }
+        Curl_safefree(authpasswd);
       }
     }
   }
@@ -682,8 +686,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   char * chlg64 = data->state.buffer;
   unsigned char * chlg;
   size_t chlglen;
-  size_t l;
-  char * rplyb64;
+  size_t l = 0;
+  char * rplyb64 = NULL;
   HMAC_context * ctxt;
   unsigned char digest[16];
   char reply[MAX_CURL_USER_LENGTH + 32 /* 2 * size of MD5 digest */ + 1];
@@ -711,9 +715,9 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
     if(++l) {
       chlg64[l] = '\0';
 
-      chlglen = Curl_base64_decode(chlg64, &chlg);
-      if(!chlglen)
-        return CURLE_OUT_OF_MEMORY;
+      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      if(result)
+        return result;
     }
   }
 
@@ -723,17 +727,14 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
                         (unsigned int)(strlen(conn->passwd)));
 
   if(!ctxt) {
-    if(chlg)
-      free(chlg);
-
+    Curl_safefree(chlg);
     return CURLE_OUT_OF_MEMORY;
   }
 
   if(chlglen > 0)
     Curl_HMAC_update(ctxt, chlg, (unsigned int)(chlglen));
 
-  if(chlg)
-    free(chlg);
+  Curl_safefree(chlg);
 
   Curl_HMAC_final(ctxt, digest);
 
@@ -746,16 +747,16 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
            digest[12], digest[13], digest[14], digest[15]);
 
   /* Encode it to base64 and send it. */
-  l = Curl_base64_encode(data, reply, 0, &rplyb64);
+  result = Curl_base64_encode(data, reply, 0, &rplyb64, &l);
 
-  if(!l)
-    result = CURLE_OUT_OF_MEMORY;
-  else {
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", rplyb64);
-    free(rplyb64);
+  if(!result) {
+    if(rplyb64) {
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", rplyb64);
 
-    if(!result)
-      state(conn, SMTP_AUTH);
+      if(!result)
+        state(conn, SMTP_AUTH);
+    }
+    Curl_safefree(rplyb64);
   }
 
   return result;

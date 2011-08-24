@@ -172,6 +172,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   gss_name_t gssname;
   gss_ctx_id_t *context = app_data;
   struct gss_channel_bindings_struct chan;
+  size_t base64_sz = 0;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)LOCAL_ADDR, &l) < 0)
@@ -251,9 +252,10 @@ krb5_auth(void *app_data, struct connectdata *conn)
       }
 
       if(output_buffer.length != 0) {
-        if(Curl_base64_encode(data, (char *)output_buffer.value,
-                              output_buffer.length, &p) < 1) {
-          Curl_infof(data, "Out of memory base64-encoding\n");
+        result = Curl_base64_encode(data, (char *)output_buffer.value,
+                                    output_buffer.length, &p, &base64_sz)
+        if(result) {
+          Curl_infof(data,"base64-encoding: %s\n", curl_easy_strerror(result));
           ret = AUTH_CONTINUE;
           break;
         }
@@ -281,10 +283,11 @@ krb5_auth(void *app_data, struct connectdata *conn)
         p = data->state.buffer + 4;
         p = strstr(p, "ADAT=");
         if(p) {
-          _gssresp.length = Curl_base64_decode(p + 5, (unsigned char **)
-                                               &_gssresp.value);
-          if(_gssresp.length < 1) {
-            Curl_failf(data, "Out of memory base64-encoding\n");
+          result = Curl_base64_decode(p + 5,
+                                      (unsigned char **)&_gssresp.value,
+                                      &_gssresp.length);
+          if(result) {
+            Curl_failf(data,"base64-decoding: %s", curl_easy_strerror(result));
             ret = AUTH_CONTINUE;
             break;
           }

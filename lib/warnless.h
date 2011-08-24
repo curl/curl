@@ -38,6 +38,8 @@ ssize_t curlx_uztosz(size_t uznum);
 
 size_t curlx_sotouz(curl_off_t sonum);
 
+size_t curlx_sitouz(int sinum);
+
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
 int curlx_FD_ISSET(int fd, fd_set *fdset);

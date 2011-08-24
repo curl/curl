@@ -305,16 +305,22 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         (*) -> Optional
   */
 
-  size_t size;
-  unsigned char *buffer;
+  size_t size = 0;
+  unsigned char *buffer = NULL;
+  CURLcode error;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_WINDOWS_SSPI)
   (void)data;
 #endif
 
-  size = Curl_base64_decode(header, &buffer);
-  if(!buffer)
-    return CURLE_OUT_OF_MEMORY;
+  error = Curl_base64_decode(header, &buffer, &size);
+  if(error)
+    return error;
+
+  if(!buffer) {
+    infof(data, "NTLM handshake failure (unhandled condition)\n");
+    return CURLE_REMOTE_ACCESS_DENIED;
+  }
 
 #ifdef USE_WINDOWS_SSPI
   ntlm->type_2 = malloc(size + 1);
