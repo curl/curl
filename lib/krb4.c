@@ -249,7 +249,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
 #endif
 
   result = Curl_base64_encode(conn->data, (char *)adat.dat, adat.length,
-                              &p, &base64_sz)
+                              &p, &base64_sz);
   if(result) {
     Curl_failf(data, "base64-encoding: %s", curl_easy_strerror(result));
     return AUTH_CONTINUE;
@@ -419,7 +419,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   memset(schedule, 0, sizeof(schedule));
   memset(passwd, 0, sizeof(passwd));
   result = Curl_base64_encode(conn->data, (char *)tktcopy.dat, tktcopy.length,
-                              &p, &base64_sz)
+                              &p, &base64_sz);
   if(result) {
     Curl_failf(conn->data, "base64-encoding: %s", curl_easy_strerror(result));
     krb4_set_command_prot(conn, save);
