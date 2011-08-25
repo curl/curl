@@ -24,22 +24,20 @@
 
 #ifdef USE_NTLM
 
-/* This is to generate a ntlm type-1 message */
+/* This is to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        unsigned char *ntlmbuf,
-                                        size_t *size);
+                                        char **outptr);
 
-/* This is to generate a ntlm type-3 message */
+/* This is to generate a base64 encoded NTLM type-3 message */
 CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                         const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        unsigned char *ntlmbuf,
-                                        size_t *size);
+                                        char **outptr);
 
-/* This is to decode a ntlm type-2 message */
+/* This is to decode a NTLM type-2 message */
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         const char* header,
                                         struct ntlmdata* ntlm);

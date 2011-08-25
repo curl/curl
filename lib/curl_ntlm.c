@@ -684,28 +684,25 @@ static void unicodecpy(unsigned char *dest,
 /*
  * Curl_ntlm_create_type1_message()
  *
- * This is used to generate a ntlm type-1 message ready for encoding
- * and sending to the recipient, be it a: HTTP, SMTP or POP3 server,
+ * This is used to generate an already encoded NTLM type-1 message ready
+ * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
  * using the appropriate compile time crypo API.
  *
  * Parameters:
  *
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
- * ntlm    [in]     - The ntlm data struct being used and modified.
- * ntlmbuf [in]     - Pointer to preallocated buffer to receive message.
- * sizep   [out]    - Size of message written into output buffer.
+ * ntlm    [in/out] - The ntlm data struct being used and modified.
+ * outptr  [in/out] - The adress where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        unsigned char *ntlmbuf,
-                                        size_t *sizep)
+                                        char **outptr)
 {
-  size_t size;
-
   /* NTLM type-1 message structure:
 
        Index  Description            Content
@@ -719,6 +716,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   (32) (40)   Start of data block    (*)
                                      (*) -> Optional
   */
+
+  unsigned char ntlmbuf[NTLM_BUFSIZE];
+  size_t base64_sz = 0;
+  size_t size;
 
 #ifdef USE_WINDOWS_SSPI
 
@@ -895,17 +896,15 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     fprintf(stderr, "\n****\n");
   });
 
-  /* Return the message size */
-  *sizep = size;
-
-  return CURLE_OK;
+  /* Return with binary blob encoded into base64 */
+  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, &base64_sz);
 }
 
 /*
  * Curl_ntlm_create_type3_message()
  *
- * This is used to generate a ntlm type-3 message ready for encoding
- * and sending to the recipient, be it a: HTTP, SMTP or POP3 server,
+ * This is used to generate an already encoded NTLM type-3 message ready
+ * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
  * using the appropriate compile time crypo API.
  *
  * Parameters:
@@ -913,9 +912,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
- * ntlm    [in]     - The ntlm data struct being used and modified.
- * ntlmbuf [in]     - Pointer to preallocated buffer to receive message.
- * sizep   [out]    - Size of message written into output buffer.
+ * ntlm    [in/out] - The ntlm data struct being used and modified.
+ * outptr  [in/out] - The adress where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
  *
  * Returns CURLE_OK on success.
  */
@@ -923,8 +922,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                         const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        unsigned char *ntlmbuf,
-                                        size_t *sizep)
+                                        char **outptr)
 {
   /* NTLM type-3 message structure:
 
@@ -944,7 +942,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                           (*) -> Optional
   */
 
-
+  unsigned char ntlmbuf[NTLM_BUFSIZE];
+  size_t base64_sz = 0;
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
@@ -1294,10 +1293,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
 #endif
 
-  /* Return the message size */
-  *sizep = size;
-
-  return CURLE_OK;
+  /* Return with binary blob encoded into base64 */
+  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, &base64_sz);
 }
 
 #endif /* USE_NTLM */
