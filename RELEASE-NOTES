@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o lots of MinGW build tweaks
  o Curl_gethostname: return un-qualified machine name
  o fixed the openssl version number configure check
+ o nss: certificates from files are no longer looked up by file base names
 
 This release includes the following known bugs:
 

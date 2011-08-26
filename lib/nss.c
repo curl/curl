@@ -354,6 +354,10 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  if(!cacert && CKO_CERTIFICATE == obj_class)
+    /* store reference to a client certificate */
+    ssl->obj_clicert = obj;
+
   return CURLE_OK;
 }
 
@@ -398,6 +402,7 @@ static int nss_load_cert(struct ssl_connect_data *ssl,
     nickname = strdup(filename);
     if(!nickname)
       return 0;
+
     goto done;
   }
 
@@ -797,44 +802,51 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
                                   struct CERTCertificateStr **pRetCert,
                                   struct SECKEYPrivateKeyStr **pRetKey)
 {
-  static const char pem_nickname[] = "PEM Token #1";
-  const char *pem_slotname = pem_nickname;
-
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)arg;
   struct SessionHandle *data = connssl->data;
   const char *nickname = connssl->client_nickname;
 
-  if(mod && nickname &&
-     0 == strncmp(nickname, pem_nickname, /* length of "PEM Token" */ 9)) {
-
+#ifdef HAVE_PK11_CREATEGENERICOBJECT
+  if(connssl->obj_clicert) {
     /* use the cert/key provided by PEM reader */
-    PK11SlotInfo *slot;
+    static const char pem_slotname[] = "PEM Token #1";
+    SECItem cert_der = { 0, NULL, 0 };
     void *proto_win = SSL_RevealPinArg(sock);
-    *pRetKey = NULL;
 
-    *pRetCert = PK11_FindCertFromNickname(nickname, proto_win);
-    if(NULL == *pRetCert) {
-      failf(data, "NSS: client certificate not found: %s", nickname);
+    PK11SlotInfo *slot = PK11_FindSlotByName(pem_slotname);
+    if(NULL == slot) {
+      failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
       return SECFailure;
     }
 
-    slot = PK11_FindSlotByName(pem_slotname);
-    if(NULL == slot) {
-      failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
+    if(PK11_ReadRawAttribute(PK11_TypeGeneric, connssl->obj_clicert, CKA_VALUE,
+                             &cert_der) != SECSuccess) {
+      failf(data, "NSS: CKA_VALUE not found in PK11 generic object");
+      PK11_FreeSlot(slot);
+      return SECFailure;
+    }
+
+    *pRetCert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
+    SECITEM_FreeItem(&cert_der, PR_FALSE);
+    if(NULL == *pRetCert) {
+      failf(data, "NSS: client certificate from file not found");
+      PK11_FreeSlot(slot);
       return SECFailure;
     }
 
     *pRetKey = PK11_FindPrivateKeyFromCert(slot, *pRetCert, NULL);
     PK11_FreeSlot(slot);
     if(NULL == *pRetKey) {
-      failf(data, "NSS: private key not found for certificate: %s", nickname);
+      failf(data, "NSS: private key from file not found");
+      CERT_DestroyCertificate(*pRetCert);
       return SECFailure;
     }
 
-    infof(data, "NSS: client certificate: %s\n", nickname);
+    infof(data, "NSS: client certificate from file\n");
     display_cert_info(data, *pRetCert);
     return SECSuccess;
   }
+#endif
 
   /* use the default NSS hook */
   if(SECSuccess != NSS_GetClientAuthData((void *)nickname, sock, caNames,
@@ -1076,6 +1088,7 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
     /* destroy all NSS objects in order to avoid failure of NSS shutdown */
     Curl_llist_destroy(connssl->obj_list, NULL);
     connssl->obj_list = NULL;
+    connssl->obj_clicert = NULL;
 #endif
     PR_Close(connssl->handle);
     connssl->handle = NULL;
