@@ -194,7 +194,10 @@ no file will be written. The file will be written using the Netscape cookie
 file format. If you set the file name to a single dash, "-", the cookies will
 be written to stdout.
 
-.B NOTE
+This command line option will activate the cookie engine that makes curl
+record and use cookies. Another way to activate it is to use the \fI-b,
+--cookie\fP option.
+
 If the cookie jar can't be created or written to, the whole curl operation
 won't fail or even report an error clearly. Using -v will get a warning
 displayed, but that is the only visible feedback you get about this possibly
