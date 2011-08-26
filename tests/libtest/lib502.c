@@ -73,6 +73,10 @@ int test(char *URL)
   mp_start = tutil_tvnow();
 
   while (running) {
+    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
+    fd_set fdread, fdwrite, fdexcep;
+    int maxfd = -1;
+
     res = (int)curl_multi_perform(m, &running);
     if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
@@ -83,11 +87,26 @@ int test(char *URL)
       fprintf(stderr, "nothing left running.\n");
       break;
     }
+
+    FD_ZERO(&fdread);
+    FD_ZERO(&fdwrite);
+    FD_ZERO(&fdexcep);
+    curl_multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
+
+    /* In a real-world program you OF COURSE check the return code of the
+       function calls.  On success, the value of maxfd is guaranteed to be
+       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
+       case of (maxfd == -1), we call select(0, ...), which is basically equal
+       to sleep. */
+
+    if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout) == -1) {
+      res = ~CURLM_OK;
+      break;
+    }
   }
 
   if (mp_timedout) {
-    if (mp_timedout) fprintf(stderr, "mp_timedout\n");
-    fprintf(stderr, "ABORTING TEST, since it seems "
+    fprintf(stderr, "mp_timedout\nABORTING TEST, since it seems "
             "that it would have run forever.\n");
     res = TEST_ERR_RUNS_FOREVER;
   }
