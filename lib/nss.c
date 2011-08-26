@@ -278,17 +278,16 @@ static int is_file(const char *filename)
   return 0;
 }
 
-/* Return on heap allocated filename/nickname of a certificate.  The returned
- * string should be later deallocated using free().  *is_nickname is set to
- * TRUE if the given string is treated as nickname; FALSE if the given string
- * is treated as file name.
+/* Check if the given string is filename or nickname of a certificate.  If the
+ * given string is recognized as filename, return NULL.  If the given string is
+ * recognized as nickname, return a duplicated string.  The returned string
+ * should be later deallocated using free().  If the OOM failure occurs, we
+ * return NULL, too.
  */
-static char *fmt_nickname(struct SessionHandle *data, enum dupstring cert_kind,
-                          bool *is_nickname)
+static char* dup_nickname(struct SessionHandle *data, enum dupstring cert_kind)
 {
   const char *str = data->set.str[cert_kind];
   const char *n;
-  *is_nickname = TRUE;
 
   if(!is_file(str))
     /* no such file exists, use the string as nickname */
@@ -303,10 +302,7 @@ static char *fmt_nickname(struct SessionHandle *data, enum dupstring cert_kind,
   }
 
   /* we'll use the PEM reader to read the certificate from file */
-  *is_nickname = FALSE;
-
-  n++; /* skip last slash */
-  return aprintf("PEM Token #%d:%s", 1, n);
+  return NULL;
 }
 
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
@@ -1352,17 +1348,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.str[STRING_CERT]) {
-    bool is_nickname;
-    char *nickname = fmt_nickname(data, STRING_CERT, &is_nickname);
-    if(!nickname)
-      return CURLE_OUT_OF_MEMORY;
-
-    if(!is_nickname && !cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
-                                   data->set.str[STRING_KEY])) {
+    char *nickname = dup_nickname(data, STRING_CERT);
+    if(!nickname && !cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
+                                data->set.str[STRING_KEY]))
       /* failf() is already done in cert_stuff() */
-      free(nickname);
       return CURLE_SSL_CERTPROBLEM;
-    }
 
     /* store the nickname for SelectClientCert() called during handshake */
     connssl->client_nickname = nickname;
@@ -1420,16 +1410,12 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(data->set.str[STRING_SSL_ISSUERCERT]) {
     SECStatus ret = SECFailure;
-    bool is_nickname;
-    char *nickname = fmt_nickname(data, STRING_SSL_ISSUERCERT, &is_nickname);
-    if(!nickname)
-      return CURLE_OUT_OF_MEMORY;
-
-    if(is_nickname)
+    char *nickname = dup_nickname(data, STRING_SSL_ISSUERCERT);
+    if(nickname) {
       /* we support only nicknames in case of STRING_SSL_ISSUERCERT for now */
       ret = check_issuer_cert(connssl->handle, nickname);
-
-    free(nickname);
+      free(nickname);
+    }
 
     if(SECFailure == ret) {
       infof(data,"SSL certificate issuer check failed\n");
