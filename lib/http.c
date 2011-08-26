@@ -545,16 +545,12 @@ output_auth_headers(struct connectdata *conn,
   }
   else
 #endif
-#ifdef USE_NTLM_SSO
-  if(authstatus->picked == CURLAUTH_NTLM_WB) {
-    auth="NTLM_SSO";
 #ifdef WINBIND_NTLM_AUTH_ENABLED
+  if(authstatus->picked == CURLAUTH_NTLM_WB) {
+    auth="NTLM_WB";
     result = Curl_output_ntlm_wb(conn, proxy);
     if(result)
       return result;
-#else
-    return CURLE_REMOTE_ACCESS_DENIED;
-#endif
   }
   else
 #endif

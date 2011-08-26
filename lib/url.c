@@ -1388,9 +1388,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef USE_NTLM_SSO
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM single-sign-on without SSL
-                                  and ntlm_auth */
+#ifndef WINBIND_NTLM_AUTH_ENABLED
+    auth &= ~CURLAUTH_NTLM_WB;
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
@@ -1453,9 +1452,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef USE_NTLM_SSO
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM single-sign-on without SSL
-                                  and ntlm_auth */
+#ifndef WINBIND_NTLM_AUTH_ENABLED
+    auth &= ~CURLAUTH_NTLM_WB;
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or

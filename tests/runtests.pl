@@ -203,7 +203,7 @@ my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
-my $has_ntlm_sso; # set if libcurl is built with NTLM single-sign-on support
+my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 
@@ -2174,9 +2174,9 @@ sub checksystem {
                 # NTLM enabled
                 $has_ntlm=1;
             }
-            if($feat =~ /NTLM_SSO/i) {
-                # NTLM single-sign-on enabled
-                $has_ntlm_sso=1;
+            if($feat =~ /NTLM_WB/i) {
+                # NTLM delegation to winbind daemon ntlm_auth helper enabled
+                $has_ntlm_wb=1;
             }
             if($feat =~ /CharConv/i) {
                 # CharConv enabled
@@ -2526,8 +2526,8 @@ sub singletest {
                 next;
             }
         }
-        elsif($f eq "NTLM_SSO") {
-            if($has_ntlm_sso) {
+        elsif($f eq "NTLM_WB") {
+            if($has_ntlm_wb) {
                 next;
             }
         }
