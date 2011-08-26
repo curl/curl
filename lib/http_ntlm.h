@@ -32,7 +32,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 #ifdef WINBIND_NTLM_AUTH_ENABLED
 /* this is for creating ntlm header output by delegating challenge/response
    to Samba's winbind daemon helper ntlm_auth */
-CURLcode Curl_output_ntlm_sso(struct connectdata *conn, bool proxy);
+CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy);
 #endif
 
 #ifdef USE_NTLM

@@ -292,8 +292,8 @@ static bool pickoneauth(struct auth *pick)
     pick->picked = CURLAUTH_DIGEST;
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
-  else if(avail & CURLAUTH_NTLM_SSO)
-    pick->picked = CURLAUTH_NTLM_SSO;
+  else if(avail & CURLAUTH_NTLM_WB)
+    pick->picked = CURLAUTH_NTLM_WB;
   else if(avail & CURLAUTH_BASIC)
     pick->picked = CURLAUTH_BASIC;
   else {
@@ -381,8 +381,8 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM) ||
-       (data->state.authproxy.picked == CURLAUTH_NTLM_SSO) ||
-       (data->state.authhost.picked == CURLAUTH_NTLM_SSO)) {
+       (data->state.authproxy.picked == CURLAUTH_NTLM_WB) ||
+       (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
       if(((expectsend - bytessent) < 2000) ||
          (conn->ntlm.state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started *OR* there is just a little (<2K)
@@ -546,10 +546,10 @@ output_auth_headers(struct connectdata *conn,
   else
 #endif
 #ifdef USE_NTLM_SSO
-  if(authstatus->picked == CURLAUTH_NTLM_SSO) {
+  if(authstatus->picked == CURLAUTH_NTLM_WB) {
     auth="NTLM_SSO";
 #ifdef WINBIND_NTLM_AUTH_ENABLED
-    result = Curl_output_ntlm_sso(conn, proxy);
+    result = Curl_output_ntlm_wb(conn, proxy);
     if(result)
       return result;
 #else
@@ -771,18 +771,18 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       *availp |= CURLAUTH_NTLM;
       authp->avail |= CURLAUTH_NTLM;
       if(authp->picked == CURLAUTH_NTLM ||
-         authp->picked == CURLAUTH_NTLM_SSO) {
+         authp->picked == CURLAUTH_NTLM_WB) {
         /* NTLM authentication is picked and activated */
         CURLcode ntlm =
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
         if(CURLE_OK == ntlm) {
           data->state.authproblem = FALSE;
 #ifdef WINBIND_NTLM_AUTH_ENABLED
-          if(authp->picked == CURLAUTH_NTLM_SSO) {
+          if(authp->picked == CURLAUTH_NTLM_WB) {
             *availp &= ~CURLAUTH_NTLM;
             authp->avail &= ~CURLAUTH_NTLM;
-            *availp |= CURLAUTH_NTLM_SSO;
-            authp->avail |= CURLAUTH_NTLM_SSO;
+            *availp |= CURLAUTH_NTLM_WB;
+            authp->avail |= CURLAUTH_NTLM_WB;
 
             /* Get the challenge-message which will be passed to
              * ntlm_auth for generating the type 3 message later */

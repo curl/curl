@@ -241,7 +241,7 @@ static curl_version_info_data version_info = {
   | CURL_VERSION_NTLM
 #endif
 #ifdef USE_NTLM_SSO
-  | CURL_VERSION_NTLM_SSO
+  | CURL_VERSION_NTLM_WB
 #endif
 #ifdef USE_WINDOWS_SSPI
   | CURL_VERSION_SSPI

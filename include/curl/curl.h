@@ -598,7 +598,7 @@ typedef enum {
 #define CURLAUTH_GSSNEGOTIATE (1<<2)  /* GSS-Negotiate */
 #define CURLAUTH_NTLM         (1<<3)  /* NTLM */
 #define CURLAUTH_DIGEST_IE    (1<<4)  /* Digest with IE flavour */
-#define CURLAUTH_NTLM_SSO     (1<<5)  /* NTLM single-sign-on */
+#define CURLAUTH_NTLM_WB      (1<<5)  /* NTLM delegating to winbind helper */
 #define CURLAUTH_ONLY         (1<<31) /* used together with a single other
                                          type to force no auth or just that
                                          single type */
@@ -2095,8 +2095,8 @@ typedef struct {
 #define CURL_VERSION_CONV      (1<<12) /* character conversions supported */
 #define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
 #define CURL_VERSION_TLSAUTH_SRP (1<<14) /* TLS-SRP auth is supported */
-#define CURL_VERSION_NTLM_SSO  (1<<15)  /* NTLM single-sign-on is supported
-                                           by using ntlm_auth */
+#define CURL_VERSION_NTLM_WB   (1<<15) /* NTLM delegating to winbind helper */
+
  /*
  * NAME curl_version_info()
  *

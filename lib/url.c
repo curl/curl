@@ -1389,8 +1389,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
 #ifndef USE_NTLM_SSO
-    auth &= ~CURLAUTH_NTLM_SSO; /* no NTLM single-sign-on without SSL
-                                   and ntlm_auth */
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM single-sign-on without SSL
+                                  and ntlm_auth */
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
@@ -1454,8 +1454,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
 #ifndef USE_NTLM_SSO
-    auth &= ~CURLAUTH_NTLM_SSO; /* no NTLM single-sign-on without SSL
-                                   and ntlm_auth */
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM single-sign-on without SSL
+                                  and ntlm_auth */
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
@@ -2999,7 +2999,7 @@ ConnectionExists(struct SessionHandle *data,
         if((needle->handler->protocol & CURLPROTO_FTP) ||
            ((needle->handler->protocol & CURLPROTO_HTTP) &&
             ((data->state.authhost.want==CURLAUTH_NTLM) ||
-             (data->state.authhost.want==CURLAUTH_NTLM_SSO)))) {
+             (data->state.authhost.want==CURLAUTH_NTLM_WB)))) {
           /* This is FTP or HTTP+NTLM, verify that we're using the same name
              and password as well */
           if(!strequal(needle->user, check->user) ||

@@ -125,7 +125,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 }
 
 #ifdef WINBIND_NTLM_AUTH_ENABLED
-static void sso_ntlm_close(struct connectdata *conn)
+static void wb_ntlm_close(struct connectdata *conn)
 {
   if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
     sclose(conn->ntlm_auth_hlpr_socket);
@@ -163,8 +163,8 @@ static void sso_ntlm_close(struct connectdata *conn)
   conn->response_header = NULL;
 }
 
-static CURLcode sso_ntlm_initiate(struct connectdata *conn,
-                                  const char *userp)
+static CURLcode wb_ntlm_initiate(struct connectdata *conn,
+                                 const char *userp)
 {
   curl_socket_t sockfds[2];
   pid_t child_pid;
@@ -279,8 +279,8 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
-static CURLcode sso_ntlm_response(struct connectdata *conn,
-                                  const char *input, curlntlm state)
+static CURLcode wb_ntlm_response(struct connectdata *conn,
+                                 const char *input, curlntlm state)
 {
   ssize_t size;
   char buf[200]; /* enough, type 1, 3 message length is less then 200 */
@@ -342,9 +342,9 @@ done:
 
 /*
  * This is for creating ntlm header output by delegating challenge/response
- * to a Samba's daemon helper ntlm_auth
+ * to Samba's winbind daemon helper ntlm_auth.
  */
-CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
+CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
                               bool proxy)
 {
   /* point to the address of the pointer that holds the string to sent to the
@@ -396,10 +396,10 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
      * handling process.
      */
     /* Create communication with ntlm_auth */
-    res = sso_ntlm_initiate(conn, userp);
+    res = wb_ntlm_initiate(conn, userp);
     if(res)
       return res;
-    res = sso_ntlm_response(conn, "YR\n", ntlm->state);
+    res = wb_ntlm_response(conn, "YR\n", ntlm->state);
     if(res)
       return res;
 
@@ -415,9 +415,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
     input = aprintf("TT %s", conn->challenge_header);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = sso_ntlm_response(conn,
-                            input,
-                            ntlm->state);
+    res = wb_ntlm_response(conn, input, ntlm->state);
     free(input);
     input = NULL;
     if(res)
@@ -430,7 +428,7 @@ CURLcode Curl_output_ntlm_sso(struct connectdata *conn,
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
-    sso_ntlm_close(conn);
+    wb_ntlm_close(conn);
     break;
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
@@ -566,7 +564,7 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn)
   Curl_ntlm_sspi_cleanup(&conn->ntlm);
   Curl_ntlm_sspi_cleanup(&conn->proxyntlm);
 #elif defined(WINBIND_NTLM_AUTH_ENABLED)
-  sso_ntlm_close(conn);
+  wb_ntlm_close(conn);
 #else
   (void)conn;
 #endif

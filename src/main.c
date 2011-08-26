@@ -2237,13 +2237,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 'M': /* --ntlm-sso */
         if(toggle) {
-          if(curlinfo->features & CURL_VERSION_NTLM_SSO)
-            config->authtype |= CURLAUTH_NTLM_SSO;
+          if(curlinfo->features & CURL_VERSION_NTLM_WB)
+            config->authtype |= CURLAUTH_NTLM_WB;
           else
             return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
         else
-          config->authtype &= ~CURLAUTH_NTLM_SSO;
+          config->authtype &= ~CURLAUTH_NTLM_WB;
         break;
 
       case 'n': /* --basic for completeness */
@@ -3229,7 +3229,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"IPv6", CURL_VERSION_IPV6},
           {"Largefile", CURL_VERSION_LARGEFILE},
           {"NTLM", CURL_VERSION_NTLM},
-          {"NTLM_SSO", CURL_VERSION_NTLM_SSO},
+          {"NTLM_SSO", CURL_VERSION_NTLM_WB},
           {"SPNEGO", CURL_VERSION_SPNEGO},
           {"SSL",  CURL_VERSION_SSL},
           {"SSPI",  CURL_VERSION_SSPI},
