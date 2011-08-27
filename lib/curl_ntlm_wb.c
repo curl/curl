@@ -36,20 +36,12 @@
 #include <signal.h>
 #endif
 
-#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-#include <netdb.h>
-#endif
-
 #include "urldata.h"
-#include "non-ascii.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
 #include "select.h"
-#include "rawstr.h"
-#include "curl_base64.h"
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"
-#include "curl_gethostname.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */

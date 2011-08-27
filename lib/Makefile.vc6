@@ -507,6 +507,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_gethostname.obj \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_ntlm.obj \
+	$(DIROBJ)\curl_ntlm_core.obj \
 	$(DIROBJ)\curl_ntlm_wb.obj \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
