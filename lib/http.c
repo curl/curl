@@ -545,7 +545,7 @@ output_auth_headers(struct connectdata *conn,
   }
   else
 #endif
-#ifdef WINBIND_NTLM_AUTH_ENABLED
+#ifdef NTLM_WB_ENABLED
   if(authstatus->picked == CURLAUTH_NTLM_WB) {
     auth="NTLM_WB";
     result = Curl_output_ntlm_wb(conn, proxy);
@@ -773,7 +773,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
         if(CURLE_OK == ntlm) {
           data->state.authproblem = FALSE;
-#ifdef WINBIND_NTLM_AUTH_ENABLED
+#ifdef NTLM_WB_ENABLED
           if(authp->picked == CURLAUTH_NTLM_WB) {
             *availp &= ~CURLAUTH_NTLM;
             authp->avail &= ~CURLAUTH_NTLM;

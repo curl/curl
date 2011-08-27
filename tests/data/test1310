@@ -62,7 +62,7 @@ debug
 http
 </server>
  <name>
-HTTP with NTLM single-sign-on authorization
+HTTP with NTLM delegation to winbind helper
  </name>
  <setenv>
 # we force our own host name, in order to make the test machine independent
@@ -70,7 +70,7 @@ CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 # set path to fake_auth instead of real ntlm_auth to generate NTLM type1 and type 3 messages
-CURL_NTLM_AUTH=%PWD/server/fake_ntlm
+CURL_NTLM_WB_FILE=%PWD/server/fake_ntlm
 # set source directory so fake_ntlm can find the test files
 CURL_NTLM_AUTH_SRCDIR=%SRCDIR
 # set the test number

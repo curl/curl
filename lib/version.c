@@ -240,7 +240,7 @@ static curl_version_info_data version_info = {
 #ifdef USE_NTLM
   | CURL_VERSION_NTLM
 #endif
-#ifdef WINBIND_NTLM_AUTH_ENABLED
+#ifdef NTLM_WB_ENABLED
   | CURL_VERSION_NTLM_WB
 #endif
 #ifdef USE_WINDOWS_SSPI

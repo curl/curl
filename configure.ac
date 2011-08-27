@@ -2816,9 +2816,9 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
        AC_MSG_RESULT(yes)
 )
 
-CURL_CHECK_OPTION_WINBIND_NTLM_AUTH
+CURL_CHECK_OPTION_NTLM_WB
 
-CURL_CHECK_WINBIND_NTLM_AUTH
+CURL_CHECK_NTLM_WB
 
 dnl ************************************************************
 dnl disable TLS-SRP authentication
@@ -2995,7 +2995,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
-    if test "x$WINBIND_NTLM_AUTH_ENABLED" = "x1"; then
+    if test "x$NTLM_WB_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
     fi
   fi

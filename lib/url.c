@@ -1388,7 +1388,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef WINBIND_NTLM_AUTH_ENABLED
+#ifndef NTLM_WB_ENABLED
     auth &= ~CURLAUTH_NTLM_WB;
 #endif
 #ifndef USE_HTTP_NEGOTIATE
@@ -1452,7 +1452,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifndef WINBIND_NTLM_AUTH_ENABLED
+#ifndef NTLM_WB_ENABLED
     auth &= ~CURLAUTH_NTLM_WB;
 #endif
 #ifndef USE_HTTP_NEGOTIATE
@@ -3526,7 +3526,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->ip_version = data->set.ipver;
 
-#ifdef WINBIND_NTLM_AUTH_ENABLED
+#ifdef NTLM_WB_ENABLED
   conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   conn->ntlm_auth_hlpr_pid = 0;
   conn->challenge_header = NULL;

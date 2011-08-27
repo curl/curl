@@ -124,8 +124,8 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
   return result;
 }
 
-#ifdef WINBIND_NTLM_AUTH_ENABLED
-static void wb_ntlm_close(struct connectdata *conn)
+#ifdef NTLM_WB_ENABLED
+static void ntlm_wb_cleanup(struct connectdata *conn)
 {
   if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
     sclose(conn->ntlm_auth_hlpr_socket);
@@ -163,8 +163,7 @@ static void wb_ntlm_close(struct connectdata *conn)
   conn->response_header = NULL;
 }
 
-static CURLcode wb_ntlm_initiate(struct connectdata *conn,
-                                 const char *userp)
+static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
 {
   curl_socket_t sockfds[2];
   pid_t child_pid;
@@ -190,16 +189,16 @@ static CURLcode wb_ntlm_initiate(struct connectdata *conn,
   }
 
   /* For testing purposes, when DEBUGBUILD is defined and environment
-     variable CURL_NTLM_AUTH is set a fake_ntlm is used to perform
+     variable CURL_NTLM_WB_FILE is set a fake_ntlm is used to perform
      NTLM challenge/response which only accepts commands and output
      strings pre-written in test case definitions */
 #ifdef DEBUGBUILD
-  ntlm_auth_alloc = curl_getenv("CURL_NTLM_AUTH");
+  ntlm_auth_alloc = curl_getenv("CURL_NTLM_WB_FILE");
   if(ntlm_auth_alloc)
     ntlm_auth = ntlm_auth_alloc;
   else
 #endif
-    ntlm_auth = WINBIND_NTLM_AUTH_FILE;
+    ntlm_auth = NTLM_WB_FILE;
 
   if(access(ntlm_auth, X_OK) != 0) {
     error = ERRNO;
@@ -279,7 +278,7 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
-static CURLcode wb_ntlm_response(struct connectdata *conn,
+static CURLcode ntlm_wb_response(struct connectdata *conn,
                                  const char *input, curlntlm state)
 {
   ssize_t size;
@@ -347,7 +346,7 @@ done:
 CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
                               bool proxy)
 {
-  /* point to the address of the pointer that holds the string to sent to the
+  /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
   char **allocuserpwd;
   /* point to the name and password for this */
@@ -383,23 +382,23 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
   default:
-    /* Use Samba's 'winbind' daemon to support NTLM single-sign-on,
+    /* Use Samba's 'winbind' daemon to support NTLM authentication,
      * by delegating the NTLM challenge/response protocal to a helper
      * in ntlm_auth.
      * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
      * http://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
      * http://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
-     * Preprocessor symbol 'WINBIND_NTLM_AUTH_ENABLED' is defined when
-     * this feature is enabled and 'WINBIND_NTLM_AUTH_FILE' symbol holds
-     * absolute filename of ntlm_auth helper.
-     * If NTLM single-sign-on fails, go back to original request
-     * handling process.
+     * Preprocessor symbol 'NTLM_WB_ENABLED' is defined when this
+     * feature is enabled and 'NTLM_WB_FILE' symbol holds absolute
+     * filename of ntlm_auth helper.
+     * If NTLM authentication using winbind fails, go back to original
+     * request handling process.
      */
     /* Create communication with ntlm_auth */
-    res = wb_ntlm_initiate(conn, userp);
+    res = ntlm_wb_init(conn, userp);
     if(res)
       return res;
-    res = wb_ntlm_response(conn, "YR\n", ntlm->state);
+    res = ntlm_wb_response(conn, "YR\n", ntlm->state);
     if(res)
       return res;
 
@@ -415,7 +414,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     input = aprintf("TT %s", conn->challenge_header);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = wb_ntlm_response(conn, input, ntlm->state);
+    res = ntlm_wb_response(conn, input, ntlm->state);
     free(input);
     input = NULL;
     if(res)
@@ -428,7 +427,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
-    wb_ntlm_close(conn);
+    ntlm_wb_cleanup(conn);
     break;
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
@@ -443,7 +442,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 
   return CURLE_OK;
 }
-#endif /* WINBIND_NTLM_AUTH_ENABLED */
+#endif /* NTLM_WB_ENABLED */
 
 /*
  * This is for creating ntlm header output
@@ -563,8 +562,8 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn)
 #ifdef USE_WINDOWS_SSPI
   Curl_ntlm_sspi_cleanup(&conn->ntlm);
   Curl_ntlm_sspi_cleanup(&conn->proxyntlm);
-#elif defined(WINBIND_NTLM_AUTH_ENABLED)
-  wb_ntlm_close(conn);
+#elif defined(NTLM_WB_ENABLED)
+  ntlm_wb_cleanup(conn);
 #else
   (void)conn;
 #endif
