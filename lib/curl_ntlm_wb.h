@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP_NTLM_H
-#define HEADER_CURL_HTTP_NTLM_H
+#ifndef HEADER_CURL_NTLM_WB_H
+#define HEADER_CURL_NTLM_WB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,21 +22,14 @@
  *
  ***************************************************************************/
 
-#ifdef USE_NTLM
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
 
-/* this is for ntlm header input */
-CURLcode Curl_input_ntlm(struct connectdata *conn, bool proxy,
-                         const char *header);
+/* this is for creating ntlm header output by delegating challenge/response
+   to Samba's winbind daemon helper ntlm_auth */
+CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy);
 
-/* this is for creating ntlm header output */
-CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
-
-void Curl_http_ntlm_cleanup(struct connectdata *conn);
-
-#else
-
-#define Curl_http_ntlm_cleanup(a)
+void Curl_ntlm_wb_cleanup(struct connectdata *conn);
 
 #endif
 
-#endif /* HEADER_CURL_HTTP_NTLM_H */
+#endif /* HEADER_CURL_NTLM_WB_H */

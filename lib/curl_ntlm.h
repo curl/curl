@@ -50,6 +50,9 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm);
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 
+/* Stuff only required for curl_ntlm.c */
+#ifdef BUILDING_CURL_NTLM_C
+
 /* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
 
 #define NTLMFLAG_NEGOTIATE_UNICODE               (1<<0)
@@ -153,6 +156,8 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm);
 
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */
+
+#endif /* BUILDING_CURL_NTLM_C */
 
 #endif /* USE_NTLM */
 

@@ -28,7 +28,6 @@
    http://www.innovation.ch/java/ntlm.html
 */
 
-#ifndef CURL_DISABLE_HTTP
 #ifdef USE_NTLM
 
 #define DEBUG_ME 0
@@ -46,6 +45,8 @@
 #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
 #include <netdb.h>
 #endif
+
+#define BUILDING_CURL_NTLM_C
 
 #include "urldata.h"
 #include "non-ascii.h"  /* for Curl_convert_... prototypes */
@@ -1298,4 +1299,3 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 }
 
 #endif /* USE_NTLM */
-#endif /* !CURL_DISABLE_HTTP */

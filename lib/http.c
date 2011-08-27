@@ -63,6 +63,7 @@
 #include "sslgen.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
+#include "curl_ntlm_wb.h"
 #include "http_negotiate.h"
 #include "url.h"
 #include "share.h"

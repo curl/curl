@@ -568,6 +568,7 @@ int netware_init(void);
 #define USE_HTTP_NEGOTIATE
 #endif
 
+/* Single point where USE_NTLM definition might be done */
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
    defined(USE_GNUTLS) || defined(USE_NSS)
