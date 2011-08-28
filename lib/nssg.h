@@ -1,5 +1,5 @@
-#ifndef __NSSG_H
-#define __NSSG_H
+#ifndef HEADER_CURL_NSSG_H
+#define HEADER_CURL_NSSG_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -28,6 +28,7 @@
  */
 
 #include "urldata.h"
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
                                       int sockindex,
@@ -68,4 +69,4 @@ CURLcode Curl_nss_force_init(struct SessionHandle *data);
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 
 #endif /* USE_NSS */
-#endif
+#endif /* HEADER_CURL_NSSG_H */

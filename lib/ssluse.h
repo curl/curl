@@ -1,5 +1,5 @@
-#ifndef __SSLUSE_H
-#define __SSLUSE_H
+#ifndef HEADER_CURL_SSLUSE_H
+#define HEADER_CURL_SSLUSE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,12 +22,15 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #ifdef USE_SSLEAY
 /*
  * This header should only be needed to get included by sslgen.c and ssluse.c
  */
 
 #include "urldata.h"
+
 CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
                                        int sockindex,
@@ -81,4 +84,4 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 
 #endif /* USE_SSLEAY */
-#endif /* __SSLUSE_H */
+#endif /* HEADER_CURL_SSLUSE_H */

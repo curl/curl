@@ -1,5 +1,5 @@
-#ifndef __GTLS_H
-#define __GTLS_H
+#ifndef HEADER_CURL_GTLS_H
+#define HEADER_CURL_GTLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,7 +22,11 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #ifdef USE_GNUTLS
+
+#include "urldata.h"
 
 int Curl_gtls_init(void);
 int Curl_gtls_cleanup(void);
@@ -60,4 +64,4 @@ int Curl_gtls_seed(struct SessionHandle *data);
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 
 #endif /* USE_GNUTLS */
-#endif
+#endif /* HEADER_CURL_GTLS_H */
