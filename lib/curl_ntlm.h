@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #ifdef USE_NTLM
 
 /* this is for ntlm header input */

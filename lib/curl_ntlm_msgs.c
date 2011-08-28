@@ -22,106 +22,73 @@
 
 #include "setup.h"
 
-/* NTLM details:
-
-   http://davenport.sourceforge.net/ntlm.html
-   http://www.innovation.ch/java/ntlm.html
-*/
-
 #ifdef USE_NTLM
+
+/*
+ * NTLM details:
+ *
+ * http://davenport.sourceforge.net/ntlm.html
+ * http://www.innovation.ch/java/ntlm.html
+ */
 
 #define DEBUG_ME 0
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#ifdef USE_SSLEAY
 
-#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-#include <netdb.h>
-#endif
+#  ifdef USE_OPENSSL
+#    include <openssl/des.h>
+#    ifndef OPENSSL_NO_MD4
+#      include <openssl/md4.h>
+#    endif
+#    include <openssl/md5.h>
+#    include <openssl/ssl.h>
+#    include <openssl/rand.h>
+#  else
+#    include <des.h>
+#    ifndef OPENSSL_NO_MD4
+#      include <md4.h>
+#    endif
+#    include <md5.h>
+#    include <ssl.h>
+#    include <rand.h>
+#  endif
+#  include "ssluse.h"
 
-#define BUILDING_CURL_NTLM_MSGS_C
+#elif defined(USE_GNUTLS)
+
+#  include <gcrypt.h>
+#  include "gtls.h"
+#  define MD5_DIGEST_LENGTH 16
+#  define MD4_DIGEST_LENGTH 16
+
+#elif defined(USE_NSS)
+
+#  include <nss.h>
+#  include <pk11pub.h>
+#  include <hasht.h>
+#  include "nssg.h"
+#  include "curl_md4.h"
+#  define MD5_DIGEST_LENGTH MD5_LENGTH
+
+#elif defined(USE_WINDOWS_SSPI)
+#  include "curl_sspi.h"
+#else
+#  error "Can't compile NTLM support without a crypto library."
+#endif
 
 #include "urldata.h"
 #include "non-ascii.h"
 #include "sendf.h"
-#include "select.h"
-#include "rawstr.h"
 #include "curl_base64.h"
-#include "curl_ntlm_msgs.h"
-#include "url.h"
-#include "strerror.h"
+#include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
 #include "curl_memory.h"
 
+#define BUILDING_CURL_NTLM_MSGS_C
+#include "curl_ntlm_msgs.h"
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
-
-#ifdef USE_SSLEAY
-#include "ssluse.h"
-#    ifdef USE_OPENSSL
-#      include <openssl/des.h>
-#      ifndef OPENSSL_NO_MD4
-#        include <openssl/md4.h>
-#      endif
-#      include <openssl/md5.h>
-#      include <openssl/ssl.h>
-#      include <openssl/rand.h>
-#    else
-#      include <des.h>
-#      ifndef OPENSSL_NO_MD4
-#        include <md4.h>
-#      endif
-#      include <md5.h>
-#      include <ssl.h>
-#      include <rand.h>
-#    endif
-
-#ifndef OPENSSL_VERSION_NUMBER
-#error "OPENSSL_VERSION_NUMBER not defined"
-#endif
-
-#ifdef OPENSSL_NO_MD4
-/* This requires MD4, but OpenSSL was compiled without it */
-#define USE_NTRESPONSES 0
-#define USE_NTLM2SESSION 0
-#endif
-
-#elif defined(USE_GNUTLS)
-
-#include "gtls.h"
-#include <gcrypt.h>
-
-#define MD5_DIGEST_LENGTH 16
-#define MD4_DIGEST_LENGTH 16
-
-#elif defined(USE_NSS)
-
-#include "curl_md4.h"
-#include "nssg.h"
-#include <nss.h>
-#include <pk11pub.h>
-#include <hasht.h>
-#define MD5_DIGEST_LENGTH MD5_LENGTH
-
-#elif defined(USE_WINDOWS_SSPI)
-
-#include "curl_sspi.h"
-
-#else
-#    error "Can't compile NTLM support without a crypto library."
-#endif
-
-#ifndef USE_NTRESPONSES
-/* Define this to make the type-3 message include the NT response message */
-#define USE_NTRESPONSES 1
-
-/* Define this to make the type-3 message include the NTLM2Session response
-   message, requires USE_NTRESPONSES. */
-#define USE_NTLM2SESSION 1
-#endif
-
-#include "curl_ntlm_core.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

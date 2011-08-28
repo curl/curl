@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
 
 /* this is for creating ntlm header output by delegating challenge/response
@@ -30,6 +32,6 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn, bool proxy);
 
 void Curl_ntlm_wb_cleanup(struct connectdata *conn);
 
-#endif
+#endif /* USE_NTLM && NTLM_WB_ENABLED */
 
 #endif /* HEADER_CURL_NTLM_WB_H */

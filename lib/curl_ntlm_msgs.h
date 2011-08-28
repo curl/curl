@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "setup.h"
+
 #ifdef USE_NTLM
 
 /* This is to generate a base64 encoded NTLM type-1 message */

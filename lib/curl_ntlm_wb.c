@@ -24,6 +24,13 @@
 
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
 
+/*
+ * NTLM details:
+ *
+ * http://davenport.sourceforge.net/ntlm.html
+ * http://www.innovation.ch/java/ntlm.html
+ */
+
 #define DEBUG_ME 0
 
 #ifdef HAVE_UNISTD_H

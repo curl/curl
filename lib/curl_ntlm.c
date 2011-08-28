@@ -22,42 +22,24 @@
 
 #include "setup.h"
 
-/* NTLM details:
-
-   http://davenport.sourceforge.net/ntlm.html
-   http://www.innovation.ch/java/ntlm.html
-*/
-
 #ifdef USE_NTLM
+
+/*
+ * NTLM details:
+ *
+ * http://davenport.sourceforge.net/ntlm.html
+ * http://www.innovation.ch/java/ntlm.html
+ */
 
 #define DEBUG_ME 0
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-
-#if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
-#include <netdb.h>
-#endif
-
 #include "urldata.h"
-#include "non-ascii.h"  /* for Curl_convert_... prototypes */
 #include "sendf.h"
-#include "select.h"
 #include "rawstr.h"
-#include "curl_base64.h"
 #include "curl_ntlm.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_ntlm_wb.h"
 #include "url.h"
-#include "strerror.h"
-#include "curl_gethostname.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
