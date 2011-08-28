@@ -14,7 +14,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   curl_fnmatch.c fileinfo.c ftplistparser.c wildcard.c krb5.c		\
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
   content_encoding.c share.c http_digest.c md4.c md5.c curl_rand.c	\
-  http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	\
+  http_negotiate.c inet_pton.c strtoofft.c strerror.c			\
   hostasyn.c hostip4.c hostip6.c hostsyn.c inet_ntop.c parsedate.c	\
   select.c gtls.c sslgen.c tftp.c splay.c strdup.c socks.c ssh.c nss.c	\
   qssl.c rawstr.c curl_addrinfo.c socks_gssapi.c socks_sspi.c		\
@@ -23,7 +23,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   curl_rtmp.c openldap.c curl_gethostname.c gopher.c axtls.c		\
   idn_win32.c http_negotiate_sspi.c cyassl.c http_proxy.c non-ascii.c	\
   asyn-ares.c asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c	\
-  curl_ntlm_core.c
+  curl_ntlm_core.c curl_ntlm_msgs.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -31,7 +31,7 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   getinfo.h strequal.h krb4.h memdebug.h http_chunks.h curl_rand.h	\
   curl_fnmatch.h wildcard.h fileinfo.h ftplistparser.h strtok.h		\
   connect.h llist.h hash.h content_encoding.h share.h curl_md4.h	\
-  curl_md5.h http_digest.h http_negotiate.h http_ntlm.h inet_pton.h	\
+  curl_md5.h http_digest.h http_negotiate.h inet_pton.h			\
   strtoofft.h strerror.h inet_ntop.h curlx.h curl_memory.h setup.h	\
   transfer.h select.h easyif.h multiif.h parsedate.h sslgen.h gtls.h	\
   tftp.h sockaddr.h splay.h strdup.h setup_once.h socks.h ssh.h nssg.h	\
@@ -39,4 +39,4 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   curl_memrchr.h imap.h pop3.h smtp.h pingpong.h rtsp.h curl_threads.h	\
   warnless.h curl_hmac.h polarssl.h curl_rtmp.h curl_gethostname.h	\
   gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h \
-  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h
+  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h

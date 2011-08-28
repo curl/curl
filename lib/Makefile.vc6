@@ -508,6 +508,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_ntlm.obj \
 	$(DIROBJ)\curl_ntlm_core.obj \
+	$(DIROBJ)\curl_ntlm_msgs.obj \
 	$(DIROBJ)\curl_ntlm_wb.obj \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
@@ -536,7 +537,6 @@ X_OBJS= \
 	$(DIROBJ)\http_digest.obj \
 	$(DIROBJ)\http_negotiate.obj \
         $(DIROBJ)\http_negotiate_sspi.obj \
-	$(DIROBJ)\http_ntlm.obj \
 	$(DIROBJ)\http.obj \
 	$(DIROBJ)\http_proxy.obj \
 	$(DIROBJ)\if2ip.obj \

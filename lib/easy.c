@@ -63,7 +63,7 @@
 #include "easyif.h"
 #include "select.h"
 #include "sendf.h" /* for failf function prototype */
-#include "http_ntlm.h"
+#include "curl_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "curl_rand.h"

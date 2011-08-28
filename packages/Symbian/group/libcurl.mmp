@@ -28,7 +28,7 @@ SOURCE \
   curl_fnmatch.c fileinfo.c ftplistparser.c wildcard.c krb5.c		\
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
   content_encoding.c share.c http_digest.c md4.c md5.c curl_rand.c	\
-  http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	\
+  http_negotiate.c curl_ntlm_msgs.c inet_pton.c strtoofft.c strerror.c	\
   hostasyn.c hostip4.c hostip6.c hostsyn.c inet_ntop.c parsedate.c	\
   select.c gtls.c sslgen.c tftp.c splay.c strdup.c socks.c ssh.c nss.c	\
   qssl.c rawstr.c curl_addrinfo.c socks_gssapi.c socks_sspi.c		\
