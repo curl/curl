@@ -16,6 +16,7 @@ This release includes the following changes:
  o OpenSSL: Use SSL_MODE_RELEASE_BUFFERS if available
  o --delegation was added to set CURLOPT_GSSAPI_DELEGATION
  o nss: start with no database if the selected database is broken
+ o telnet: allow programatic use on Windows
 
 This release includes the following bugfixes:
 
@@ -45,6 +46,9 @@ This release includes the following bugfixes:
  o cmake: find winsock when building on windows
  o Curl_retry_request: check return code
  o cookies: handle 'secure=' as if it was 'secure'
+ o tests: break busy loops in tests 502, 555, and 573
+ o FTP: fix proxy connect race condition with multi interface and SOCKS proxy
+ o RTSP: GET_PARAMETER requests have a body
 
 This release includes the following known bugs:
 
@@ -57,6 +61,6 @@ advice from friends like these:
  Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
  Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
  Christian Hagele, Richard Silverman, Henry Ludemann, Cristian Rodriguez,
- Steve Holme, Jim Hollinger, Pau Garcia i Quiles
+ Steve Holme, Jim Hollinger, Pau Garcia i Quiles, Fabian Keil, Wu Yongzheng
 
         Thanks! (and sorry if I forgot to mention someone)
