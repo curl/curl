@@ -210,9 +210,6 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
  *
  * Sends the formated string as an IMAP command to a server
  *
- * NOTE: we build the command in a fixed-length buffer, which sets length
- * restrictions on the command!
- *
  * Designed to never block.
  */
 static CURLcode imapsendf(struct connectdata *conn,

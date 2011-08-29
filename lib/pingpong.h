@@ -98,9 +98,6 @@ long Curl_pp_state_timeout(struct pingpong *pp);
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
  *
- * NOTE: we build the command in a fixed-length buffer, which sets length
- * restrictions on the command!
- *
  * made to never block
  */
 CURLcode Curl_pp_sendf(struct pingpong *pp,
@@ -113,9 +110,6 @@ CURLcode Curl_pp_sendf(struct pingpong *pp,
  * Send the formated string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
- *
- * NOTE: we build the command in a fixed-length buffer, which sets length
- * restrictions on the command!
  *
  * made to never block
  */
