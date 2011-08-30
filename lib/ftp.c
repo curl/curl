@@ -1229,12 +1229,15 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  PPSENDF(&conn->proto.ftpc.pp, "%s",cmd);
+  result = Curl_pp_sendf(&conn->proto.ftpc.pp, "%s", cmd);
 
   if(lstArg)
     free(lstArg);
 
   free(cmd);
+
+  if(result != CURLE_OK)
+    return result;
 
   state(conn, FTP_LIST);
 
@@ -2623,7 +2626,14 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
              systems. */
 
           if(!ftpc->server_os && ftpc->entrypath[0] != '/') {
-            PPSENDF(&ftpc->pp, "SYST", NULL);
+
+            result = Curl_pp_sendf(&ftpc->pp, "SYST", NULL);
+            if(result != CURLE_OK) {
+              free(ftpc->entrypath);
+              ftpc->entrypath = NULL;
+              data->state.most_recent_ftp_entrypath = NULL;
+              return result;
+            }
             state(conn, FTP_SYST);
             break;
           }
@@ -2656,13 +2666,19 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         for(store = os; *ptr && *ptr != ' ';)
           *store++ = *ptr++;
         *store = '\0'; /* zero terminate */
+        Curl_safefree(ftpc->server_os);
         ftpc->server_os = os;
 
         /* Check for special servers here. */
 
         if(strequal(ftpc->server_os, "OS/400")) {
           /* Force OS400 name format 1. */
-          PPSENDF(&ftpc->pp, "SITE NAMEFMT 1", NULL);
+          result = Curl_pp_sendf(&ftpc->pp, "SITE NAMEFMT 1", NULL);
+          if(result != CURLE_OK) {
+            free(ftpc->server_os);
+            ftpc->server_os = NULL;
+            return result;
+          }
           state(conn, FTP_NAMEFMT);
           break;
         }
