@@ -2610,12 +2610,6 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
             store++;
             ptr++;
           }
-          if(ftpc->entrypath)
-            free(ftpc->entrypath);
-          ftpc->entrypath =dir; /* remember this */
-          infof(data, "Entry path is '%s'\n", ftpc->entrypath);
-          /* also save it where getinfo can access it: */
-          data->state.most_recent_ftp_entrypath = ftpc->entrypath;
 
           /* If the path name does not look like an absolute path (i.e.: it
              does not start with a '/'), we probably need some server-dependent
@@ -2629,18 +2623,27 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
              if the path name looks strange to minimize overhead on other
              systems. */
 
-          if(!ftpc->server_os && ftpc->entrypath[0] != '/') {
+          if(!ftpc->server_os && dir[0] != '/') {
 
             result = Curl_pp_sendf(&ftpc->pp, "SYST", NULL);
             if(result != CURLE_OK) {
-              free(ftpc->entrypath);
-              ftpc->entrypath = NULL;
-              data->state.most_recent_ftp_entrypath = NULL;
+              free(dir);
               return result;
             }
+            Curl_safefree(ftpc->entrypath);
+            ftpc->entrypath = dir; /* remember this */
+            infof(data, "Entry path is '%s'\n", ftpc->entrypath);
+            /* also save it where getinfo can access it: */
+            data->state.most_recent_ftp_entrypath = ftpc->entrypath;
             state(conn, FTP_SYST);
             break;
           }
+
+          Curl_safefree(ftpc->entrypath);
+          ftpc->entrypath = dir; /* remember this */
+          infof(data, "Entry path is '%s'\n", ftpc->entrypath);
+          /* also save it where getinfo can access it: */
+          data->state.most_recent_ftp_entrypath = ftpc->entrypath;
         }
         else {
           /* couldn't get the path */
@@ -2670,25 +2673,28 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         for(store = os; *ptr && *ptr != ' ';)
           *store++ = *ptr++;
         *store = '\0'; /* zero terminate */
-        Curl_safefree(ftpc->server_os);
-        ftpc->server_os = os;
 
         /* Check for special servers here. */
 
-        if(strequal(ftpc->server_os, "OS/400")) {
+        if(strequal(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(&ftpc->pp, "SITE NAMEFMT 1", NULL);
           if(result != CURLE_OK) {
-            free(ftpc->server_os);
-            ftpc->server_os = NULL;
+            free(os);
             return result;
           }
+          /* remember target server OS */
+          Curl_safefree(ftpc->server_os);
+          ftpc->server_os = os;
           state(conn, FTP_NAMEFMT);
           break;
         }
-      else {
-        /* Nothing special for the target server. */
-       }
+        else {
+          /* Nothing special for the target server. */
+          /* remember target server OS */
+          Curl_safefree(ftpc->server_os);
+          ftpc->server_os = os;
+        }
       }
       else {
         /* Cannot identify server OS. Continue anyway and cross fingers. */
