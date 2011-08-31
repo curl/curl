@@ -644,6 +644,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   const char *fingerprint;
 #endif /* CURL_LIBSSH2_DEBUG */
   const char *host_public_key_md5;
+  char *new_readdir_line;
   int rc = LIBSSH2_ERROR_NONE, i;
   int err;
   int seekerr = CURL_SEEKFUNC_OK;
@@ -1859,10 +1860,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       Curl_safefree(sshc->readdir_linkPath);
       sshc->readdir_linkPath = NULL;
-      sshc->readdir_line = realloc(sshc->readdir_line,
-                                   sshc->readdir_totalLen + 4 +
-                                   sshc->readdir_len);
-      if(!sshc->readdir_line) {
+
+      new_readdir_line = realloc(sshc->readdir_line,
+                                 sshc->readdir_totalLen + 4 +
+                                 sshc->readdir_len);
+      if(!new_readdir_line) {
+        Curl_safefree(sshc->readdir_line);
+        sshc->readdir_line = NULL;
         Curl_safefree(sshc->readdir_filename);
         sshc->readdir_filename = NULL;
         Curl_safefree(sshc->readdir_longentry);
@@ -1871,6 +1875,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = CURLE_OUT_OF_MEMORY;
         break;
       }
+      sshc->readdir_line = new_readdir_line;
 
       sshc->readdir_currLen += snprintf(sshc->readdir_line +
                                         sshc->readdir_currLen,
