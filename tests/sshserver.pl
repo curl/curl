@@ -362,8 +362,10 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #***************************************************************************
 # Generate host and client key files for curl's tests
 #
-if((! -e $hstprvkeyf) || (! -e $hstpubkeyf) ||
-   (! -e $cliprvkeyf) || (! -e $clipubkeyf)) {
+if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
+   (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
+   (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
+   (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
