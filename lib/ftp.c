@@ -964,6 +964,13 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     conn->bits.ftp_use_eprt = TRUE;
 #endif
 
+  /* we set the secondary socket variable to this for now, it is only so that
+     the cleanup function will close it in case we fail before the true
+     secondary stuff is made */
+  if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
+    Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
+  conn->sock[SECONDARYSOCKET] = portsock;
+
   for(; fcmd != DONE; fcmd++) {
 
     if(!conn->bits.ftp_use_eprt && (EPRT == fcmd))
@@ -999,10 +1006,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       result = Curl_pp_sendf(&ftpc->pp, "%s |%d|%s|%hu|", mode[fcmd],
                              sa->sa_family == AF_INET?1:2,
                              myhost, port);
-      if(result) {
-        Curl_closesocket(conn, portsock);
+      if(result)
         return result;
-      }
       break;
     }
     else if(PORT == fcmd) {
@@ -1022,23 +1027,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       snprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
 
       result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
-      if(result) {
-        Curl_closesocket(conn, portsock);
+      if(result)
         return result;
-      }
       break;
     }
   }
 
   /* store which command was sent */
   ftpc->count1 = fcmd;
-
-  /* we set the secondary socket variable to this for now, it is only so that
-     the cleanup function will close it in case we fail before the true
-     secondary stuff is made */
-  if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
-    Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
-  conn->sock[SECONDARYSOCKET] = portsock;
 
   /* this tcpconnect assignment below is a hackish work-around to make the
      multi interface with active FTP work - as it will not wait for a
