@@ -554,6 +554,10 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
   *entry = NULL;
 
+  if(timeoutms < 0)
+    /* got an already expired timeout */
+    return CURLRESOLV_TIMEDOUT;
+
 #ifdef USE_ALARM_TIMEOUT
   if(data->set.no_signal)
     /* Ignore the timeout when signals are disabled */
