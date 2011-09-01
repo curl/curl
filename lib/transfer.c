@@ -1437,8 +1437,10 @@ static CURLcode loadhostpairs(struct SessionHandle *data)
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-      if(!dns)
+      if(!dns) {
+        Curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
   data->change.resolve = NULL; /* dealt with now */
