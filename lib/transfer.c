@@ -169,11 +169,12 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     const char *endofline_native;
     const char *endofline_network;
     int hexlen;
+
+    if(
 #ifdef CURL_DO_LINEEND_CONV
-    if((data->set.crlf) || (data->set.prefer_ascii)) {
-#else
-    if(data->set.crlf) {
-#endif /* CURL_DO_LINEEND_CONV */
+       (data->set.prefer_ascii) ||
+#endif
+       (data->set.crlf)) {
       /* \n will become \r\n later on */
       endofline_native  = "\n";
       endofline_network = "\x0a";
@@ -505,7 +506,6 @@ static CURLcode readwrite_data(struct SessionHandle *data,
        is non-headers. */
     if(k->str && !k->header && (nread > 0 || is_empty_data)) {
 
-
 #ifndef CURL_DISABLE_HTTP
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to
@@ -553,9 +553,10 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             }
           } /* we have a time condition */
 
-        } /* this is HTTP */
+        } /* this is HTTP or RTSP */
       } /* this is the first time we write a body part */
 #endif /* CURL_DISABLE_HTTP */
+
       k->bodywrites++;
 
       /* pass data to the debug function before it gets "dechunked" */
@@ -875,13 +876,12 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 #endif /* CURL_DISABLE_SMTP */
 
       /* convert LF to CRLF if so asked */
-      if((!sending_http_headers) &&
+      if((!sending_http_headers) && (
 #ifdef CURL_DO_LINEEND_CONV
-        /* always convert if we're FTPing in ASCII mode */
-         ((data->set.crlf) || (data->set.prefer_ascii))) {
-#else
-         (data->set.crlf)) {
+         /* always convert if we're FTPing in ASCII mode */
+         (data->set.prefer_ascii) ||
 #endif
+         (data->set.crlf))) {
         if(data->state.scratch == NULL)
           data->state.scratch = malloc(2*BUFSIZE);
         if(data->state.scratch == NULL) {
