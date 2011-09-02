@@ -166,8 +166,8 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
      * child process
      */
 
-    sclose(sockfds[0]);
-
+    /* Don't use sclose in the child since it fools the socket leak detector */
+    close(sockfds[0]);
     if(dup2(sockfds[1], STDIN_FILENO) == -1) {
       error = ERRNO;
       failf(conn->data, "Could not redirect child stdin. errno %d: %s",
@@ -197,7 +197,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
             NULL);
 
     error = ERRNO;
-    sclose(sockfds[1]);
+    close(sockfds[1]);
     failf(conn->data, "Could not execl(). errno %d: %s",
           error, Curl_strerror(conn, error));
     exit(1);
