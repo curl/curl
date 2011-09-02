@@ -952,8 +952,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   data = easy->easy_handle;
 
   do {
-    /* this is a do-while loop just to allow a break to skip to the end
-       of it */
+    /* this is a single-iteration do-while loop just to allow a
+       break to skip to the end of it */
     bool disconnect_conn = FALSE;
 
     /* Handle the case when the pipe breaks, i.e., the connection
@@ -1657,7 +1657,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(easy->easy_conn && Curl_pgrsUpdate(easy->easy_conn))
         easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
-  } while(0);
+  } WHILE_FALSE; /* just to break out from! */
 
   if(CURLM_STATE_COMPLETED == easy->state) {
     if(data->dns.hostcachetype == HCACHE_MULTI) {

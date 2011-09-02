@@ -303,6 +303,27 @@ struct timeval {
 
 
 /*
+ * Macro WHILE_FALSE may be used to build single-iteration do-while loops,
+ * avoiding compiler warnings. Mostly intended for other macro definitions.
+ */
+
+#define WHILE_FALSE  while(0)
+
+#if defined(_MSC_VER) && !defined(__POCC__)
+#  undef WHILE_FALSE
+#  if (_MSC_VER < 1500)
+#    define WHILE_FALSE  while(1, 0)
+#  else
+#    define WHILE_FALSE \
+__pragma(warning(push)) \
+__pragma(warning(disable:4127)) \
+while(0) \
+__pragma(warning(pop))
+#  endif
+#endif
+
+
+/*
  * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
  */
 
@@ -339,7 +360,7 @@ typedef int sig_atomic_t;
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) do { } while (0)
+#define DEBUGF(x) do { } WHILE_FALSE
 #endif
 
 
@@ -350,7 +371,7 @@ typedef int sig_atomic_t;
 #if defined(DEBUGBUILD) && defined(HAVE_ASSERT_H)
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) do { } while (0)
+#define DEBUGASSERT(x) do { } WHILE_FALSE
 #endif
 
 

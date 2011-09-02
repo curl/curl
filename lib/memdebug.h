@@ -1,6 +1,6 @@
-#ifdef CURLDEBUG
 #ifndef HEADER_CURL_MEMDEBUG_H
 #define HEADER_CURL_MEMDEBUG_H
+#ifdef CURLDEBUG
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -139,9 +139,21 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #endif /* MEMDEBUG_NODEFINES */
 
-#endif /* HEADER_CURL_MEMDEBUG_H */
 #endif /* CURLDEBUG */
 
+/*
+** Following section applies even when CURLDEBUG is not defined.
+*/
+
 #ifndef fake_sclose
-#define fake_sclose(x)
+#define fake_sclose(x)  do { } WHILE_FALSE
 #endif
+
+/*
+ * Curl_safefree defined as a macro to allow MemoryTracking feature
+ * to log free() calls at same location where Curl_safefree is used.
+ */
+
+#define Curl_safefree(ptr)  do {if((ptr)) free((ptr));} WHILE_FALSE
+
+#endif /* HEADER_CURL_MEMDEBUG_H */

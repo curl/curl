@@ -252,12 +252,6 @@ static const struct Curl_handler Curl_handler_dummy = {
   PROTOPT_NONE                          /* flags */
 };
 
-void Curl_safefree(void *ptr)
-{
-  if(ptr)
-    free(ptr);
-}
-
 static void close_connections(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */

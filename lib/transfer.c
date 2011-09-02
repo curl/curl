@@ -800,6 +800,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
   /*
    * We loop here to do the READ and SEND loop until we run out of
    * data to send or until we get EWOULDBLOCK back
+   *
+   * FIXME: above comment is misleading. Currently no looping is
+   * actually done in do-while loop below.
    */
   do {
 
@@ -971,7 +974,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
     Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
-  } while(0); /* just to break out from! */
+  } WHILE_FALSE; /* just to break out from! */
 
   return CURLE_OK;
 }

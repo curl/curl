@@ -42,7 +42,6 @@ CURLcode Curl_disconnect(struct connectdata *, bool dead_connection);
 CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
-void Curl_safefree(void *ptr);
 CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done);
 

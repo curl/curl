@@ -49,7 +49,7 @@
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
 
 #if defined(USE_WINSOCK) || defined(TPF)
-#define VERIFY_SOCK(x) do { } while(0)
+#define VERIFY_SOCK(x) do { } WHILE_FALSE
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \
@@ -57,7 +57,7 @@
     SET_SOCKERRNO(EINVAL); \
     return -1; \
   } \
-} while(0)
+} WHILE_FALSE
 #endif
 
 /* Convenience local macros */
