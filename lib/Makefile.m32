@@ -24,7 +24,7 @@ OPENSSL_PATH = ../../openssl-0.9.8r
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.8
+LIBSSH2_PATH = ../../libssh2-1.2.9
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
