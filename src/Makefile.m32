@@ -50,8 +50,16 @@ ifndef LIBCARES_PATH
 LIBCARES_PATH = ../ares
 endif
 
+# Edit the var below to set to your architecture or set environment var.
+ifndef ARCH
+ARCH = w32
+endif
+
 CC = gcc
 CFLAGS = -g -O2 -Wall
+ifeq ($(ARCH),w64)
+CFLAGS += -D_AMD64_
+endif
 # comment LDFLAGS below to keep debug info
 LDFLAGS = -s
 RC = windres
