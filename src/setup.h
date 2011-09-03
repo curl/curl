@@ -222,7 +222,7 @@ int fileno( FILE *stream);
  * Include macros and defines that should only be processed once.
  */
 
-#ifndef HEADER_CURL_SETUP_ONCE_H
+#ifndef __SETUP_ONCE_H
 #include "setup_once.h"
 #endif
 
