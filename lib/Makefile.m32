@@ -138,9 +138,8 @@ ifdef IDN
   DLL_LIBS += -L$(LIBIDN_PATH)/lib -lidn
 else
 ifdef WINIDN
-  INCLUDES += -I"$(WINIDN_PATH)/include"
-  CFLAGS += -DHAVE_NORMALIZATION_H
   CFLAGS += -DUSE_WIN32_IDN
+  CFLAGS += -DWANT_IDN_PROTOTYPES
   DLL_LIBS += -L"$(WINIDN_PATH)" -lnormaliz
 endif
 endif
