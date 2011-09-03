@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
 
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
 
@@ -64,7 +65,7 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 */
 void Curl_sndbufset(curl_socket_t sockfd);
 #else
-#define Curl_sndbufset(y)
+#define Curl_sndbufset(y) Curl_nop_stmt
 #endif
 
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);

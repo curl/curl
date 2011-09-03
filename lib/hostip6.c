@@ -154,7 +154,7 @@ static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
   }
 }
 #else
-#define dump_addrinfo(x,y)
+#define dump_addrinfo(x,y) Curl_nop_stmt
 #endif
 
 /*

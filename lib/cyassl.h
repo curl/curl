@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
 
 #ifdef USE_CYASSL
 
@@ -45,7 +46,7 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 
 /* API setup for CyaSSL */
 #define curlssl_init Curl_cyassl_init
-#define curlssl_cleanup()
+#define curlssl_cleanup() Curl_nop_stmt
 #define curlssl_connect Curl_cyassl_connect
 #define curlssl_connect_nonblocking Curl_cyassl_connect_nonblocking
 #define curlssl_session_free(x)  Curl_cyassl_session_free(x)

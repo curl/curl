@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
 
 /*
  * Prototypes for library-wide functions provided by url.c
@@ -85,7 +86,7 @@ void Curl_reset_reqproto(struct connectdata *conn);
 CURLcode Curl_connected_proxy(struct connectdata *conn);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x)  do { } while (0)
+#define Curl_verboseconnect(x)  Curl_nop_stmt
 #else
 void Curl_verboseconnect(struct connectdata *conn);
 #endif

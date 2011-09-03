@@ -1,5 +1,5 @@
-#ifndef __CURL_CONTENT_ENCODING_H
-#define __CURL_CONTENT_ENCODING_H
+#ifndef HEADER_CURL_CONTENT_ENCODING_H
+#define HEADER_CURL_CONTENT_ENCODING_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@
 void Curl_unencode_cleanup(struct connectdata *conn);
 #else
 #define ALL_CONTENT_ENCODINGS "identity"
-#define Curl_unencode_cleanup(x)
+#define Curl_unencode_cleanup(x) Curl_nop_stmt
 #endif
 
 CURLcode Curl_unencode_deflate_write(struct connectdata *conn,
@@ -45,4 +45,4 @@ Curl_unencode_gzip_write(struct connectdata *conn,
                          ssize_t nread);
 
 
-#endif
+#endif /* HEADER_CURL_CONTENT_ENCODING_H */

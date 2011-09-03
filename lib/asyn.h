@@ -146,15 +146,15 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver isn't used */
-#define Curl_resolver_cancel(x)
+#define Curl_resolver_cancel(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_getsock(x,y,z) 0
 #define Curl_resolver_duphandle(x,y) CURLE_OK
 #define Curl_resolver_init(x) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK
-#define Curl_resolver_global_cleanup()
-#define Curl_resolver_cleanup(x)
+#define Curl_resolver_global_cleanup() Curl_nop_stmt
+#define Curl_resolver_cleanup(x) Curl_nop_stmt
 #endif
 
 #ifdef CURLRES_ASYNCH

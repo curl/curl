@@ -52,7 +52,7 @@ static void setupcallbacks(CURL *curl)
 }
 
 #else
-#define setupcallbacks(x)
+#define setupcallbacks(x) Curl_nop_stmt
 #endif
 
 

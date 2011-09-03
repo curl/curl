@@ -190,7 +190,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   chan.application_data.value = NULL;
 
   /* this loop will execute twice (once for service, once for host) */
-  while(1) {
+  for(;;) {
     /* this really shouldn't be repeated here, but can't help it */
     if(service == srv_host) {
       result = Curl_ftpsendf(conn, "AUTH GSSAPI");

@@ -465,7 +465,7 @@ static void smtp_to_smtps(struct connectdata *conn)
   conn->handler = &Curl_handler_smtps;
 }
 #else
-#define smtp_to_smtps(x)
+#define smtp_to_smtps(x) Curl_nop_stmt
 #endif
 
 /* for STARTTLS responses */

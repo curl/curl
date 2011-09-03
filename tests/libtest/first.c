@@ -83,7 +83,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#  define memory_tracking_init()
+#  define memory_tracking_init() Curl_nop_stmt
 #endif
 
 int main(int argc, char **argv)

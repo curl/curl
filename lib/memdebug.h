@@ -146,7 +146,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 */
 
 #ifndef fake_sclose
-#define fake_sclose(x)  do { } WHILE_FALSE
+#define fake_sclose(x)  Curl_nop_stmt
 #endif
 
 /*

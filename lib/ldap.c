@@ -105,11 +105,11 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp);
   #define LDAP_TRACE(x)   do { \
                             _ldap_trace ("%u: ", __LINE__); \
                             _ldap_trace x; \
-                          } while(0)
+                          } WHILE_FALSE
 
   static void _ldap_trace (const char *fmt, ...);
 #else
-  #define LDAP_TRACE(x)   ((void)0)
+  #define LDAP_TRACE(x)   Curl_nop_stmt
 #endif
 
 

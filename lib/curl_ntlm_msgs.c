@@ -182,7 +182,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
     fprintf(stderr, "%02.2x", (unsigned int)*p++);
 }
 #else
-# define DEBUG_OUT(x)
+# define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
 #ifndef USE_WINDOWS_SSPI

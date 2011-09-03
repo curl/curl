@@ -1,5 +1,5 @@
-#ifndef __HTTP_DIGEST_H
-#define __HTTP_DIGEST_H
+#ifndef HEADER_CURL_HTTP_DIGEST_H
+#define HEADER_CURL_HTTP_DIGEST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
 
 typedef enum {
   CURLDIGEST_NONE, /* not a digest */
@@ -50,7 +51,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 void Curl_digest_cleanup(struct SessionHandle *data);
 #else
-#define Curl_digest_cleanup(x) do {} while(0)
+#define Curl_digest_cleanup(x) Curl_nop_stmt
 #endif
 
-#endif
+#endif /* HEADER_CURL_HTTP_DIGEST_H */

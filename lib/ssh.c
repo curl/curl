@@ -2488,7 +2488,7 @@ static void ssh_block2waitfor(struct connectdata *conn, bool block)
 }
 #else
   /* no libssh2 directional support so we simply don't know */
-#define ssh_block2waitfor(x,y)
+#define ssh_block2waitfor(x,y) Curl_nop_stmt
 #endif
 
 /* called repeatedly until done from multi.c */

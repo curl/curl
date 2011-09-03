@@ -37,7 +37,7 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn);
 
 #else
 
-#define Curl_http_ntlm_cleanup(a)
+#define Curl_http_ntlm_cleanup(a) Curl_nop_stmt
 
 #endif
 

@@ -51,9 +51,9 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
 CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form);
 #else
 #define Curl_convert_clone(a,b,c,d) ((void)a, CURLE_OK)
-#define Curl_convert_init(x)
-#define Curl_convert_setup(x)
-#define Curl_convert_close(x)
+#define Curl_convert_init(x) Curl_nop_stmt
+#define Curl_convert_setup(x) Curl_nop_stmt
+#define Curl_convert_close(x) Curl_nop_stmt
 #define Curl_convert_to_network(a,b,c) ((void)a, CURLE_OK)
 #define Curl_convert_from_network(a,b,c) ((void)a, CURLE_OK)
 #define Curl_convert_from_utf8(a,b,c) ((void)a, CURLE_OK)

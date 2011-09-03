@@ -790,7 +790,7 @@ static void nosigpipe(struct connectdata *conn,
           Curl_strerror(conn, SOCKERRNO));
 }
 #else
-#define nosigpipe(x,y)
+#define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
 #ifdef USE_WINSOCK

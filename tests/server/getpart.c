@@ -49,7 +49,7 @@ struct SessionHandle {
 #ifdef DEBUG_GETPART
 #define show(x) printf x
 #else
-#define show(x)
+#define show(x) Curl_nop_stmt
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)

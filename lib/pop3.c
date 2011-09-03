@@ -280,7 +280,7 @@ static void pop3_to_pop3s(struct connectdata *conn)
   conn->handler = &Curl_handler_pop3s;
 }
 #else
-#define pop3_to_pop3s(x)
+#define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
 /* for STARTTLS responses */

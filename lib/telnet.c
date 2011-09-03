@@ -88,7 +88,7 @@
 #define  CURL_SB_LEN(x) (x->subend - x->subpointer)
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define printoption(a,b,c,d)  do { } while(0)
+#define printoption(a,b,c,d)  Curl_nop_stmt
 #endif
 
 #ifdef USE_WINSOCK

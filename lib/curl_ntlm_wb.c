@@ -60,7 +60,17 @@
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
 #else
-# define DEBUG_OUT(x)
+# define DEBUG_OUT(x) Curl_nop_stmt
+#endif
+
+/* Portable 'sclose_nolog' used only in child process instead of 'sclose'
+   to avoid fooling the socket leak detector */
+#if defined(HAVE_CLOSESOCKET)
+#  define sclose_nolog(x)  closesocket((x))
+#elif defined(HAVE_CLOSESOCKET_CAMEL)
+#  define sclose_nolog(x)  CloseSocket((x))
+#else
+#  define sclose_nolog(x)  close((x))
 #endif
 
 void Curl_ntlm_wb_cleanup(struct connectdata *conn)
@@ -167,7 +177,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
      */
 
     /* Don't use sclose in the child since it fools the socket leak detector */
-    close(sockfds[0]);
+    sclose_nolog(sockfds[0]);
     if(dup2(sockfds[1], STDIN_FILENO) == -1) {
       error = ERRNO;
       failf(conn->data, "Could not redirect child stdin. errno %d: %s",
@@ -197,7 +207,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
             NULL);
 
     error = ERRNO;
-    close(sockfds[1]);
+    sclose_nolog(sockfds[1]);
     failf(conn->data, "Could not execl(). errno %d: %s",
           error, Curl_strerror(conn, error));
     exit(1);

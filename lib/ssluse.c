@@ -120,7 +120,7 @@
 /* 0.9.6 didn't have X509_STORE_set_flags() */
 #define HAVE_X509_STORE_SET_FLAGS 1
 #else
-#define X509_STORE_set_flags(x,y)
+#define X509_STORE_set_flags(x,y) Curl_nop_stmt
 #endif
 
 /*
@@ -1407,7 +1407,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
 #  define use_sni(x)  sni = (x)
 #else
-#  define use_sni(x)  do { } while (0)
+#  define use_sni(x)  Curl_nop_stmt
 #endif
 
 static CURLcode
@@ -1919,7 +1919,7 @@ do {                              \
       pubkey_show(data, _num, #_type, #_name, (unsigned char*)bufp, len); \
     } \
   } \
-} while(0)
+} WHILE_FALSE
 
 static int X509V3_ext(struct SessionHandle *data,
                       int certnum,

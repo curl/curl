@@ -335,7 +335,7 @@ static void imap_to_imaps(struct connectdata *conn)
   conn->handler = &Curl_handler_imaps;
 }
 #else
-#define imap_to_imaps(x)
+#define imap_to_imaps(x) Curl_nop_stmt
 #endif
 
 /* for STARTTLS responses */

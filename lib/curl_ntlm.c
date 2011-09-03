@@ -57,7 +57,7 @@
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
 #else
-# define DEBUG_OUT(x)
+# define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
 CURLcode Curl_input_ntlm(struct connectdata *conn,

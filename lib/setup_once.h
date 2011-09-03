@@ -1,5 +1,5 @@
-#ifndef __SETUP_ONCE_H
-#define __SETUP_ONCE_H
+#ifndef HEADER_CURL_SETUP_ONCE_H
+#define HEADER_CURL_SETUP_ONCE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -324,6 +324,13 @@ __pragma(warning(pop))
 
 
 /*
+ * Definition of our NOP statement Object-like macro
+ */
+
+#define Curl_nop_stmt  do { } WHILE_FALSE
+
+
+/*
  * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
  */
 
@@ -360,7 +367,7 @@ typedef int sig_atomic_t;
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) do { } WHILE_FALSE
+#define DEBUGF(x) Curl_nop_stmt
 #endif
 
 
@@ -371,7 +378,7 @@ typedef int sig_atomic_t;
 #if defined(DEBUGBUILD) && defined(HAVE_ASSERT_H)
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) do { } WHILE_FALSE
+#define DEBUGASSERT(x) Curl_nop_stmt
 #endif
 
 
@@ -527,5 +534,4 @@ typedef int sig_atomic_t;
 #  endif
 #endif
 
-#endif /* __SETUP_ONCE_H */
-
+#endif /* HEADER_CURL_SETUP_ONCE_H */

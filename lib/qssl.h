@@ -1,5 +1,5 @@
-#ifndef __QSSL_H
-#define __QSSL_H
+#ifndef HEADER_CURL_QSSL_H
+#define HEADER_CURL_QSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
 
 /*
  * This header should only be needed to get included by sslgen.c and qssl.c
@@ -45,7 +46,7 @@ int Curl_qsossl_check_cxn(struct connectdata * cxn);
 #define curlssl_connect Curl_qsossl_connect
 
 /*  No session handling for QsoSSL */
-#define curlssl_session_free(x)
+#define curlssl_session_free(x) Curl_nop_stmt
 #define curlssl_close_all Curl_qsossl_close_all
 #define curlssl_close Curl_qsossl_close
 #define curlssl_shutdown(x,y) Curl_qsossl_shutdown(x,y)
@@ -56,4 +57,5 @@ int Curl_qsossl_check_cxn(struct connectdata * cxn);
 #define curlssl_check_cxn(x) Curl_qsossl_check_cxn(x)
 #define curlssl_data_pending(x,y) 0
 #endif /* USE_QSOSSL */
-#endif
+
+#endif /* HEADER_CURL_QSSL_H */

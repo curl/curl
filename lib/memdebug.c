@@ -42,7 +42,7 @@
 #include "memdebug.h"
 
 #ifndef HAVE_ASSERT_H
-#  define assert(x) do { } while (0)
+#  define assert(x) Curl_nop_stmt
 #endif
 
 /*
@@ -82,13 +82,13 @@
 #ifdef CURL_MT_MALLOC_FILL
 #  define mt_malloc_fill(buf,len) memset((buf), CURL_MT_MALLOC_FILL, (len))
 #else
-#  define mt_malloc_fill(buf,len)
+#  define mt_malloc_fill(buf,len) Curl_nop_stmt
 #endif
 
 #ifdef CURL_MT_FREE_FILL
 #  define mt_free_fill(buf,len) memset((buf), CURL_MT_FREE_FILL, (len))
 #else
-#  define mt_free_fill(buf,len)
+#  define mt_free_fill(buf,len) Curl_nop_stmt
 #endif
 
 struct memdebug {
