@@ -120,6 +120,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "connect.h"
 #include "inet_ntop.h"
 #include "curl_ntlm.h"
+#include "curl_ntlm_wb.h"
 #include "socks.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
@@ -2530,6 +2531,10 @@ static void conn_free(struct connectdata *conn)
     Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     Curl_closesocket(conn, conn->sock[FIRSTSOCKET]);
+
+#ifdef NTLM_WB_ENABLED
+  Curl_ntlm_wb_cleanup(conn);
+#endif
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
