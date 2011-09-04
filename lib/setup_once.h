@@ -257,9 +257,12 @@ struct timeval {
 #define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
 #define ISUPPER(x)  (isupper((int)  ((unsigned char)x)))
 #define ISLOWER(x)  (islower((int)  ((unsigned char)x)))
+#define ISASCII(x)  (isascii((int)  ((unsigned char)x)))
 
 #define ISBLANK(x)  (int)((((unsigned char)x) == ' ') || \
                           (((unsigned char)x) == '\t'))
+
+#define TOLOWER(x)  (tolower((int)  ((unsigned char)x)))
 
 
 /*
@@ -324,13 +327,6 @@ __pragma(warning(pop))
 
 
 /*
- * Definition of our NOP statement Object-like macro
- */
-
-#define Curl_nop_stmt  do { } WHILE_FALSE
-
-
-/*
  * Typedef to 'int' if sig_atomic_t is not an available 'typedefed' type.
  */
 
@@ -367,7 +363,7 @@ typedef int sig_atomic_t;
 #ifdef DEBUGBUILD
 #define DEBUGF(x) x
 #else
-#define DEBUGF(x) Curl_nop_stmt
+#define DEBUGF(x) do { } WHILE_FALSE
 #endif
 
 
@@ -378,7 +374,7 @@ typedef int sig_atomic_t;
 #if defined(DEBUGBUILD) && defined(HAVE_ASSERT_H)
 #define DEBUGASSERT(x) assert(x)
 #else
-#define DEBUGASSERT(x) Curl_nop_stmt
+#define DEBUGASSERT(x) do { } WHILE_FALSE
 #endif
 
 
@@ -518,20 +514,5 @@ typedef int sig_atomic_t;
 
 #define ZERO_NULL 0
 
-
-/*
- * Ensure that Winsock and lwIP TCP/IP stacks are not mixed.
- */
-
-#if defined(__LWIP_OPT_H__)
-#  if defined(SOCKET) || \
-     defined(USE_WINSOCK) || \
-     defined(HAVE_ERRNO_H) || \
-     defined(HAVE_WINSOCK_H) || \
-     defined(HAVE_WINSOCK2_H) || \
-     defined(HAVE_WS2TCPIP_H)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
-#  endif
-#endif
 
 #endif /* __SETUP_ONCE_H */
