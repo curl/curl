@@ -40,7 +40,7 @@ my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.15';
+my $version = '1.16';
 
 getopts('bhilnqtuv');
 
@@ -77,15 +77,13 @@ my $resp;
 
 unless ($opt_n and -e $txt) {
   print "Downloading '$txt' ...\n" if (!$opt_q);
-
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
   $ua->env_proxy();
   $resp = $ua->mirror($url, $txt);
-}
-
-if ($resp && $resp->code eq '304') {
+  if ($resp && $resp->code eq '304') {
     print "Not modified\n" unless $opt_q;
     exit 0;
+  }
 }
 
 my $currentdate = scalar gmtime($resp ? $resp->last_modified : (stat($txt))[9]);
@@ -124,6 +122,7 @@ close(CRT) or die "Couldn't close $crt: $!";
 print "Processing  '$txt' ...\n" if (!$opt_q);
 my $caname;
 my $certnum = 0;
+my $skipnum = 0;
 open(TXT,"$txt") or die "Couldn't open $txt: $!";
 while (<TXT>) {
   if (/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
@@ -147,6 +146,7 @@ while (<TXT>) {
   if (/^CKA_LABEL\s+[A-Z0-9]+\s+\"(.*)\"/) {
     $caname = $1;
   }
+  my $untrusted = 0;
   if (/^CKA_VALUE MULTILINE_OCTAL/) {
     my $data;
     while (<TXT>) {
@@ -158,28 +158,36 @@ while (<TXT>) {
         $data .= chr(oct);
       }
     }
-    my $pem = "-----BEGIN CERTIFICATE-----\n"
-            . MIME::Base64::encode($data)
-            . "-----END CERTIFICATE-----\n";
-    open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
-    print CRT "\n$caname\n";
-    print CRT ("=" x length($caname) . "\n");
-    if (!$opt_t) {
-      print CRT $pem;
+    while (<TXT>) {
+      last if (/^#$/);
+      $untrusted = 1 if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/);
     }
-    close(CRT) or die "Couldn't close $crt: $!";
-    if ($opt_t) {
-      open(TMP, "|$openssl x509 -md5 -fingerprint -text -inform PEM >> $crt") or die "Couldn't open openssl pipe: $!";
-      print TMP $pem;
-      close(TMP) or die "Couldn't close openssl pipe: $!";
+    if ($untrusted) {
+      $skipnum ++;
+    } else {
+      my $pem = "-----BEGIN CERTIFICATE-----\n"
+              . MIME::Base64::encode($data)
+              . "-----END CERTIFICATE-----\n";
+      open(CRT, ">>$crt") or die "Couldn't open $crt: $!";
+      print CRT "\n$caname\n";
+      print CRT ("=" x length($caname) . "\n");
+      if (!$opt_t) {
+        print CRT $pem;
+      }
+      close(CRT) or die "Couldn't close $crt: $!";
+      if ($opt_t) {
+        open(TMP, "|$openssl x509 -md5 -fingerprint -text -inform PEM >> $crt") or die "Couldn't open openssl pipe: $!";
+        print TMP $pem;
+        close(TMP) or die "Couldn't close openssl pipe: $!";
+      }
+      print "Parsing: $caname\n" if ($opt_v);
+      $certnum ++;
     }
-    print "Parsing: $caname\n" if ($opt_v);
-    $certnum ++;
   }
 }
 close(TXT) or die "Couldn't close $txt: $!";
 unlink $txt if ($opt_u);
-print "Done ($certnum CA certs processed).\n" if (!$opt_q);
+print "Done ($certnum CA certs processed, $skipnum skipped).\n" if (!$opt_q);
 
 exit;
 
