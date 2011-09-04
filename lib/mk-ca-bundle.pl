@@ -187,7 +187,7 @@ while (<TXT>) {
 }
 close(TXT) or die "Couldn't close $txt: $!";
 unlink $txt if ($opt_u);
-print "Done ($certnum CA certs processed, $skipnum skipped).\n" if (!$opt_q);
+print "Done ($certnum CA certs processed, $skipnum untrusted skipped).\n" if (!$opt_q);
 
 exit;
 
