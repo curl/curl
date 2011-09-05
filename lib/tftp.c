@@ -206,7 +206,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
 {
   time_t maxtime, timeout;
   long timeout_ms;
-  bool start = (bool)(state->state == TFTP_STATE_START);
+  bool start = (state->state == TFTP_STATE_START) ? TRUE : FALSE;
 
   time(&state->start_time);
 
@@ -1334,7 +1334,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
     result = tftp_state_machine(state, event);
     if(result != CURLE_OK)
       return(result);
-    *done = (bool)(state->state == TFTP_STATE_FIN);
+    *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
     if(*done)
       /* Tell curl we're done */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
@@ -1356,7 +1356,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
       result = tftp_state_machine(state, state->event);
       if(result != CURLE_OK)
         return(result);
-      *done = (bool)(state->state == TFTP_STATE_FIN);
+      *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
       if(*done)
         /* Tell curl we're done */
         Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);

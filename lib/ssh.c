@@ -2500,7 +2500,7 @@ static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
                  implementation */
 
   result = ssh_statemach_act(conn, &block);
-  *done = (bool)(sshc->state == SSH_STOP);
+  *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
   ssh_block2waitfor(conn, block);
 
   return result;

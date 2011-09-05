@@ -2139,7 +2139,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->disable_epsv = toggle;
         break;
       case 'E': /* --epsv */
-        config->disable_epsv = (bool)(!toggle);
+        config->disable_epsv = (!toggle)?TRUE:FALSE;
         break;
 #ifdef USE_ENVIRONMENT
       case 'f':
@@ -2325,7 +2325,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->disable_eprt = toggle;
         break;
       case 'Z': /* --eprt */
-        config->disable_eprt = (bool)(!toggle);
+        config->disable_eprt = (!toggle)?TRUE:FALSE;
         break;
 
       default: /* the URL! */
@@ -2456,7 +2456,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->ftp_ssl_reqd = toggle;
         break;
       case 'w': /* --no-sessionid */
-        config->disable_sessionid = (bool)(!toggle);
+        config->disable_sessionid = (!toggle)?TRUE:FALSE;
         break;
       case 'x': /* --ftp-ssl-control */
         if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
@@ -2482,7 +2482,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->post301 = toggle;
         break;
       case '1': /* --no-keepalive */
-        config->nokeepalive = (bool)(!toggle);
+        config->nokeepalive = (!toggle)?TRUE:FALSE;
         break;
       case '3': /* --keepalive-time */
         if(str2num(&config->alivetime, nextarg))
@@ -2894,7 +2894,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                    nextarg,
                    &config->httppost,
                    &config->last_post,
-                   (bool) (subletter=='s'))) /* 's' means literal string */
+                   (subletter=='s')?TRUE:FALSE)) /* 's' means literal string */
         return PARAM_BAD_USE;
       if(SetHTTPrequest(config, HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
@@ -3004,7 +3004,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
       if(longopt)
-        config->nobuffer = (bool)(!toggle);
+        config->nobuffer = (!toggle)?TRUE:FALSE;
       else
         config->nobuffer = toggle;
       break;
@@ -3130,7 +3130,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->mute = config->noprogress = TRUE;
       else
         config->mute = config->noprogress = FALSE;
-      config->showerror = (bool)(!toggle); /* toggle off */
+      config->showerror = (!toggle)?TRUE:FALSE; /* toggle off */
       break;
     case 'S':
       /* show errors */
@@ -3995,7 +3995,7 @@ int my_trace(CURL *handle, curl_infotype type,
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
       (void)fwrite(data+st, i-st+1, 1, output);
-      newl = (bool)(size && (data[size-1] != '\n'));
+      newl = (size && (data[size-1] != '\n'))?TRUE:FALSE;
       traced_data = FALSE;
       break;
     case CURLINFO_TEXT:
@@ -4003,7 +4003,7 @@ int my_trace(CURL *handle, curl_infotype type,
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
       (void)fwrite(data, size, 1, output);
-      newl = (bool)(size && (data[size-1] != '\n'));
+      newl = (size && (data[size-1] != '\n'))?TRUE:FALSE;
       traced_data = FALSE;
       break;
     case CURLINFO_DATA_OUT:
@@ -4395,8 +4395,8 @@ static void dumpeasycode(struct Configurable *config)
 
 static bool stdin_upload(const char *uploadfile)
 {
-  return (bool)(curlx_strequal(uploadfile, "-") ||
-                curlx_strequal(uploadfile, "."));
+  return (curlx_strequal(uploadfile, "-") ||
+          curlx_strequal(uploadfile, ".")) ? TRUE : FALSE;
 }
 
 /* Adds the file name to the URL if it doesn't already have one.

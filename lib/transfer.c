@@ -430,7 +430,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
     *didwhat |= KEEP_RECV;
     /* indicates data of zero size, i.e. empty file */
-    is_empty_data = (bool)((nread == 0) && (k->bodywrites == 0));
+    is_empty_data = ((nread == 0) && (k->bodywrites == 0)) ? TRUE : FALSE;
 
     /* NUL terminate, allowing string ops to be used */
     if(0 < nread || is_empty_data) {
@@ -1143,8 +1143,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = (bool)(0 == (k->keepon&(KEEP_RECV|KEEP_SEND|
-                                  KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)));
+  *done = (0 == (k->keepon&(KEEP_RECV|KEEP_SEND|
+                            KEEP_RECV_PAUSE|KEEP_SEND_PAUSE))) ? TRUE : FALSE;
 
   return CURLE_OK;
 }
@@ -1607,7 +1607,7 @@ static bool is_absolute_url(const char *url)
   char prot[16]; /* URL protocol string storage */
   char letter;   /* used for a silly sscanf */
 
-  return (bool)(2 == sscanf(url, "%15[^?&/:]://%c", prot, &letter));
+  return (2 == sscanf(url, "%15[^?&/:]://%c", prot, &letter)) ? TRUE : FALSE;
 }
 
 /*

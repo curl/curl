@@ -570,7 +570,7 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result = Curl_pp_multi_statemach(&pop3c->pp);
 
-  *done = (bool)(pop3c->state == POP3_STOP);
+  *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }

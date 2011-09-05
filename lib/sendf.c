@@ -73,7 +73,7 @@ static size_t convert_lineends(struct SessionHandle *data,
     return(size);
   }
 
-  if(data->state.prev_block_had_trailing_cr == TRUE) {
+  if(data->state.prev_block_had_trailing_cr) {
     /* The previous block of incoming data
        had a trailing CR, which was turned into a LF. */
     if(*startPtr == '\n') {
@@ -536,8 +536,8 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
-  bool pipelining = (bool)(conn->data->multi &&
-                     Curl_multi_canPipeline(conn->data->multi));
+  bool pipelining = (conn->data->multi &&
+                     Curl_multi_canPipeline(conn->data->multi)) ? TRUE : FALSE;
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets

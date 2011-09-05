@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
   logmsg("fake_ntlm (user: %s) (proto: %s) (domain: %s) (cached creds: %s)",
          helper_user, helper_proto, helper_domain,
-         (use_cached_creds == TRUE) ? "yes" : "no");
+         (use_cached_creds) ? "yes" : "no");
 
   env = getenv("CURL_NTLM_AUTH_TESTNUM");
   if (env) {

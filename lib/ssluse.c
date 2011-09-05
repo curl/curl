@@ -166,14 +166,14 @@ static int passwd_callback(char *buf, int num, int verify
 #define seed_enough(x) rand_enough()
 static bool rand_enough(void)
 {
-  return (bool)(0 != RAND_status());
+  return (0 != RAND_status()) ? TRUE : FALSE;
 }
 #else
 #define seed_enough(x) rand_enough(x)
 static bool rand_enough(int nread)
 {
   /* this is a very silly decision to make */
-  return (bool)(nread > 500);
+  return (nread > 500) ? TRUE : FALSE;
 }
 #endif
 
@@ -2564,7 +2564,7 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
 {
   if(conn->ssl[connindex].handle)
     /* SSL is in use */
-    return (bool)(0 != SSL_pending(conn->ssl[connindex].handle));
+    return (0 != SSL_pending(conn->ssl[connindex].handle)) ? TRUE : FALSE;
   else
     return FALSE;
 }

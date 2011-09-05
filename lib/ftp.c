@@ -298,8 +298,8 @@ static void freedirs(struct ftp_conn *ftpc)
 */
 static bool isBadFtpString(const char *string)
 {
-  return (bool)((NULL != strchr(string, '\r')) ||
-                (NULL != strchr(string, '\n')));
+  return ((NULL != strchr(string, '\r')) ||
+          (NULL != strchr(string, '\n'))) ? TRUE : FALSE;
 }
 
 /***********************************************************************
@@ -2530,7 +2530,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->ssl[SECONDARYSOCKET].use =
-          (bool)(data->set.ftp_ssl != CURLUSESSL_CONTROL);
+          (data->set.ftp_ssl != CURLUSESSL_CONTROL) ? TRUE : FALSE;
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
       else if(data->set.ftp_ssl > CURLUSESSL_CONTROL)
@@ -2841,7 +2841,7 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
   /* Check for the state outside of the Curl_socket_ready() return code checks
      since at times we are in fact already in this state when this function
      gets called. */
-  *done = (bool)(ftpc->state == FTP_STOP);
+  *done = (ftpc->state == FTP_STOP) ? TRUE : FALSE;
 
   return result;
 }
@@ -2895,9 +2895,9 @@ static CURLcode ftp_init(struct connectdata *conn)
   */
   ftp->user = conn->user;
   ftp->passwd = conn->passwd;
-  if(TRUE == isBadFtpString(ftp->user))
+  if(isBadFtpString(ftp->user))
     return CURLE_URL_MALFORMAT;
-  if(TRUE == isBadFtpString(ftp->passwd))
+  if(isBadFtpString(ftp->passwd))
     return CURLE_URL_MALFORMAT;
 
   conn->proto.ftpc.known_filesize = -1; /* unknown size for now */

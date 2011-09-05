@@ -62,7 +62,7 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
   /* most recent unix versions */
   int flags;
   flags = fcntl(sockfd, F_GETFL, 0);
-  if(FALSE != nonblock)
+  if(nonblock)
     return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
     return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
@@ -70,26 +70,25 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
 #elif defined(HAVE_IOCTL_FIONBIO)
 
   /* older unix versions */
-  int flags;
-  flags = nonblock;
+  int flags = nonblock ? 1 : 0;
   return ioctl(sockfd, FIONBIO, &flags);
 
 #elif defined(HAVE_IOCTLSOCKET_FIONBIO)
 
   /* Windows */
-  unsigned long flags;
-  flags = nonblock;
+  unsigned long flags = nonblock ? 1UL : 0UL;
   return ioctlsocket(sockfd, FIONBIO, &flags);
 
 #elif defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
 
   /* Amiga */
-  return IoctlSocket(sockfd, FIONBIO, (long)nonblock);
+  long flags = nonblock ? 1L : 0L;
+  return IoctlSocket(sockfd, FIONBIO, flags);
 
 #elif defined(HAVE_SETSOCKOPT_SO_NONBLOCK)
 
   /* BeOS */
-  long b = nonblock ? 1 : 0;
+  long b = nonblock ? 1L : 0L;
   return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 
 #else

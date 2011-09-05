@@ -1032,7 +1032,7 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn,
   else
     result = Curl_pp_multi_statemach(&smtpc->pp);
 
-  *done = (bool)(smtpc->state == SMTP_STOP);
+  *done = (smtpc->state == SMTP_STOP) ? TRUE : FALSE;
 
   return result;
 }

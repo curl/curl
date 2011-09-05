@@ -1273,7 +1273,7 @@ static size_t readfromfile(struct Form *form, char *buffer,
                            size_t size)
 {
   size_t nread;
-  bool callback = (bool)(form->data->type == FORM_CALLBACK);
+  bool callback = (form->data->type == FORM_CALLBACK)?TRUE:FALSE;
 
   if(callback) {
     if(form->fread_func == ZERO_NULL)

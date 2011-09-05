@@ -1386,7 +1386,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   }
 
   /* We called WSACreateEvent, so call WSACloseEvent */
-  if(close_event_func(event_handle) == FALSE) {
+  if(!close_event_func(event_handle)) {
     infof(data,"WSACloseEvent failed (%d)", SOCKERRNO);
   }
 

@@ -630,7 +630,7 @@ static CURLcode imap_multi_statemach(struct connectdata *conn,
   else
     result = Curl_pp_multi_statemach(&imapc->pp);
 
-  *done = (bool)(imapc->state == IMAP_STOP);
+  *done = (imapc->state == IMAP_STOP) ? TRUE : FALSE;
 
   return result;
 }

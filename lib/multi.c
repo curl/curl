@@ -628,9 +628,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   easy = data->multi_pos;
 
   if(easy) {
-    bool premature = (bool)(easy->state < CURLM_STATE_COMPLETED);
-    bool easy_owns_conn = (bool)(easy->easy_conn &&
-                                 (easy->easy_conn->data == easy->easy_handle));
+    bool premature = (easy->state < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
+    bool easy_owns_conn = (easy->easy_conn &&
+                           (easy->easy_conn->data == easy->easy_handle)) ?
+                           TRUE : FALSE;
 
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
@@ -1282,7 +1283,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             disconnect_conn = TRUE;
           }
           else
-            retry = (bool)(newurl?TRUE:FALSE);
+            retry = (newurl)?TRUE:FALSE;
 
           Curl_posttransfer(data);
           drc = Curl_done(&easy->easy_conn, easy->result, FALSE);
@@ -1481,14 +1482,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_posttransfer(data);
         Curl_done(&easy->easy_conn, easy->result, FALSE);
       }
-      else if(TRUE == done) {
+      else if(done) {
         char *newurl = NULL;
         bool retry = FALSE;
         followtype follow=FOLLOW_NONE;
 
         easy->result = Curl_retry_request(easy->easy_conn, &newurl);
         if(!easy->result)
-          retry = (bool)(newurl?TRUE:FALSE);
+          retry = (newurl)?TRUE:FALSE;
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(data);
@@ -2213,7 +2214,7 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     multi->socket_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->pipelining_enabled = (bool)(0 != va_arg(param, long));
+    multi->pipelining_enabled = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLMOPT_TIMERFUNCTION:
     multi->timer_cb = va_arg(param, curl_multi_timer_callback);
@@ -2478,7 +2479,7 @@ static bool isHandleAtHead(struct SessionHandle *handle,
 {
   struct curl_llist_element *curr = pipeline->head;
   if(curr)
-    return (bool)(curr->ptr == handle);
+    return (curr->ptr == handle) ? TRUE : FALSE;
 
   return FALSE;
 }

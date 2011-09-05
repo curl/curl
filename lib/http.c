@@ -588,7 +588,7 @@ output_auth_headers(struct connectdata *conn,
           proxy?"Proxy":"Server", auth,
           proxy?(conn->proxyuser?conn->proxyuser:""):
                 (conn->user?conn->user:""));
-    authstatus->multi = (bool)(!authstatus->done);
+    authstatus->multi = (!authstatus->done) ? TRUE : FALSE;
   }
   else
     authstatus->multi = FALSE;
@@ -745,7 +745,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       data->state.authproblem = TRUE;
     }
     else {
-      neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
+      neg = Curl_input_negotiate(conn, (httpcode == 407)?TRUE:FALSE, start);
       if(neg == 0) {
         DEBUGASSERT(!data->req.newurl);
         data->req.newurl = strdup(data->change.url);
@@ -771,7 +771,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
          authp->picked == CURLAUTH_NTLM_WB) {
         /* NTLM authentication is picked and activated */
         CURLcode ntlm =
-          Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
+          Curl_input_ntlm(conn, (httpcode == 407)?TRUE:FALSE, start);
         if(CURLE_OK == ntlm) {
           data->state.authproblem = FALSE;
 #ifdef NTLM_WB_ENABLED
@@ -817,7 +817,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           /* We call this function on input Digest headers even if Digest
            * authentication isn't activated yet, as we need to store the
            * incoming data from this header in case we are gonna use Digest. */
-          dig = Curl_input_digest(conn, (bool)(httpcode == 407), start);
+          dig = Curl_input_digest(conn, (httpcode == 407)?TRUE:FALSE, start);
 
           if(CURLDIGEST_FINE != dig) {
             infof(data, "Authentication problem. Ignoring this.\n");
@@ -946,7 +946,7 @@ static size_t readmoredata(char *buffer,
     return 0;
 
   /* make sure that a HTTP request is never sent away chunked! */
-  conn->data->req.forbidchunk = (bool)(http->sending == HTTPSEND_REQUEST);
+  conn->data->req.forbidchunk = (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
 
   if(http->postsize <= (curl_off_t)fullsize) {
     memcpy(buffer, http->postdata, (size_t)http->postsize);
@@ -1479,11 +1479,11 @@ CURLcode Curl_http_done(struct connectdata *conn,
 static bool use_http_1_1(const struct SessionHandle *data,
                          const struct connectdata *conn)
 {
-  return (bool)((data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
+  return ((data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
          ((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
           ((conn->httpversion == 11) ||
            ((conn->httpversion != 10) &&
-            (data->state.httpversion != 10)))));
+            (data->state.httpversion != 10))))) ? TRUE : FALSE;
 }
 
 /* check and possibly add an Expect: header */
@@ -2154,8 +2154,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                conn->allocptr.cookiehost?
                                conn->allocptr.cookiehost:host,
                                data->state.path,
-                               (bool)(conn->handler->protocol&CURLPROTO_HTTPS?
-                                      TRUE:FALSE));
+                               (conn->handler->protocol&CURLPROTO_HTTPS)?
+                               TRUE:FALSE);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
     if(co) {
@@ -2582,7 +2582,7 @@ checkhttpprefix(struct SessionHandle *data,
     head = head->next;
   }
 
-  if((rc != TRUE) && (checkprefix("HTTP/", s)))
+  if(!rc && (checkprefix("HTTP/", s)))
     rc = TRUE;
 
 #ifdef CURL_DOES_CONVERSIONS
