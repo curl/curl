@@ -5250,7 +5250,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           SET_BINMODE(stdout);
         }
 
-        if(1 == config->tcp_nodelay)
+        if(config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 1);
 
         /* where to store */
