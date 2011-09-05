@@ -195,6 +195,10 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   enum protection_level data_sec = conn->data_prot;
 #endif
 
+  DEBUGASSERT(pp->sendleft == 0);
+  DEBUGASSERT(pp->sendsize == 0);
+  DEBUGASSERT(pp->sendthis == NULL);
+
   fmt_crlf = aprintf("%s\r\n", fmt); /* append a trailing CRLF */
   if(!fmt_crlf)
     return CURLE_OUT_OF_MEMORY;
@@ -236,11 +240,10 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
                s, (size_t)bytes_written, conn);
 
   if(bytes_written != (ssize_t)write_len) {
-    /* the whole chunk was not sent, store the rest of the data */
-    write_len -= bytes_written;
-    memmove(s, s + bytes_written, write_len + 1);
+    /* the whole chunk was not sent, keep it around and adjust sizes */
     pp->sendthis = s;
-    pp->sendsize = pp->sendleft = write_len;
+    pp->sendsize = write_len;
+    pp->sendleft = write_len - bytes_written;
   }
   else {
     free(s);
