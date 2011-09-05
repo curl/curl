@@ -4280,6 +4280,9 @@ sub displaylogs {
         if(($log =~ /^file\d+\.txt/) && ($log !~ /^file$testnum\.txt/)) {
             next; # skip fileNnn.txt of other tests
         }
+        if(($log =~ /^netrc\d+/) && ($log !~ /^netrc$testnum/)) {
+            next; # skip netrcNnn of other tests
+        }
         if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests
         }

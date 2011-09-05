@@ -41,7 +41,7 @@ static void unit_stop(void)
 UNITTEST_START
   int result;
 
-  static const char* filename1 = "log/netrc";
+  static const char* filename1 = "log/netrc1304";
   memcpy(filename, filename1, strlen(filename1));
 
   /*
