@@ -21,9 +21,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
@@ -33,10 +30,8 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
 
+#include "warnless.h"
 #include "memdebug.h"
 
 #ifndef FD_SETSIZE

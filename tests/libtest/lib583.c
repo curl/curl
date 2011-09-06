@@ -26,8 +26,11 @@
 
 #include "test.h"
 
-#include <unistd.h>
 #include <sys/stat.h>
+
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
 
 int test(char *URL)
 {

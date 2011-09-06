@@ -19,7 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #ifdef HAVE_SYS_STAT_H

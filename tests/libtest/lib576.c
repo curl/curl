@@ -19,8 +19,8 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "test.h"
+
 #include "testutil.h"
 #include "memdebug.h"
 

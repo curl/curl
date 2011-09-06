@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include <sys/types.h>
-
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"

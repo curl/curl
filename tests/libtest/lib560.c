@@ -22,6 +22,7 @@
 #include "test.h"
 
 #include "warnless.h"
+#include "memdebug.h"
 
 /*
  * Simply download a HTTPS file!

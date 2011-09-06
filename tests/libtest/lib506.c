@@ -20,8 +20,6 @@
  *
  ***************************************************************************/
 #include "test.h"
-#include <stdlib.h>
-#include <ctype.h>
 
 #include <curl/mprintf.h>
 
