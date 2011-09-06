@@ -76,17 +76,18 @@ int test(char *URL)
   }
 
   /* this tests if removing an easy handle immediately after multi
-     perform has been called succeeds or not. Logged afterwards */
-    
-  res1 = (int) curl_multi_perform(multiHandle, &stillRunning);
-  res  = (int) curl_multi_remove_handle(multiHandle, curl);
+     perform has been called succeeds or not. */
 
+  fprintf(stderr, "curl_multi_perform()...\n");
+  res1 = (int) curl_multi_perform(multiHandle, &stillRunning);
   if(res1)
     fprintf(stderr, "curl_multi_perform() failed, "
             "with code %d\n", res1);
   else
     fprintf(stderr, "curl_multi_perform() succeeded\n");
 
+  fprintf(stderr, "curl_multi_remove_handle()...\n");
+  res = (int) curl_multi_remove_handle(multiHandle, curl);
   if(res)
     fprintf(stderr, "curl_multi_remove_handle() failed, "
             "with code %d\n", res);
