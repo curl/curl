@@ -2388,10 +2388,39 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
         sshc->ssh_session = NULL;
       }
+
+      /* worst-case scenario cleanup */
+
+      DEBUGASSERT(sshc->ssh_session == NULL);
+      DEBUGASSERT(sshc->ssh_channel == NULL);
+      DEBUGASSERT(sshc->sftp_session == NULL);
+      DEBUGASSERT(sshc->sftp_handle == NULL);
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+      DEBUGASSERT(sshc->kh == NULL);
+#endif
+
+      Curl_safefree(sshc->rsa_pub);
+      Curl_safefree(sshc->rsa);
+
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+
+      Curl_safefree(sshc->homedir);
+
+      Curl_safefree(sshc->readdir_filename);
+      Curl_safefree(sshc->readdir_longentry);
+      Curl_safefree(sshc->readdir_line);
+      Curl_safefree(sshc->readdir_linkPath);
+
+      /* the code we are about to return */
+      result = sshc->actualcode;
+
+      memset(sshc, 0, sizeof(struct ssh_conn));
+
       conn->bits.close = TRUE;
+      sshc->state = SSH_SESSION_FREE; /* current */
       sshc->nextstate = SSH_NO_STATE;
       state(conn, SSH_STOP);
-      result = sshc->actualcode;
       break;
 
     case SSH_QUIT:
