@@ -34,43 +34,75 @@
 
 int test(char *URL)
 {
-  CURLMcode retVal;
   int stillRunning;
   CURLM* multiHandle;
   CURL* curl;
+  int res1 = 0;
   int res;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  multiHandle = curl_multi_init();
-  curl = curl_easy_init();
+  if((multiHandle = curl_multi_init()) == NULL) {
+    fprintf(stderr, "curl_multi_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  if((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_multi_cleanup(multiHandle);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
   test_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
   test_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
   test_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
 
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+  test_setopt(curl, CURLOPT_UPLOAD, 1);
+  test_setopt(curl, CURLOPT_VERBOSE, 1);
 
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)5);
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)5);
 
-  curl_multi_add_handle(multiHandle, curl);
-  retVal = curl_multi_perform(multiHandle, &stillRunning);
-  if (retVal != CURLM_OK)
-    fprintf(stderr, "curl_multi_perform() failed!n");
+  if((res = (int)curl_multi_add_handle(multiHandle, curl)) != CURLM_OK) {
+    fprintf(stderr, "curl_multi_add_handle() failed, "
+            "with code %d\n", res);
+    curl_easy_cleanup(curl);
+    curl_multi_cleanup(multiHandle);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  fprintf(stderr, "curl_multi_remove_handle()!\n");
-  retVal = curl_multi_remove_handle(multiHandle, curl);
-  if (retVal == CURLM_OK)
-    fprintf(stderr, "curl_multi_remove_handle() was successful!\n");
+  /* this tests if removing an easy handle immediately after multi
+     perform has been called succeeds or not. Logged afterwards */
+    
+  res1 = (int) curl_multi_perform(multiHandle, &stillRunning);
+  res  = (int) curl_multi_remove_handle(multiHandle, curl);
+
+  if(res1)
+    fprintf(stderr, "curl_multi_perform() failed, "
+            "with code %d\n", res1);
   else
-    fprintf(stderr, "curl_multi_remove_handle() failed\n");
+    fprintf(stderr, "curl_multi_perform() succeeded\n");
+
+  if(res)
+    fprintf(stderr, "curl_multi_remove_handle() failed, "
+            "with code %d\n", res);
+  else
+    fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_multi_cleanup(multiHandle);
+  curl_global_cleanup();
 
-  return res;
+  if(res)
+    return res;
+  else
+    return res1;
 }

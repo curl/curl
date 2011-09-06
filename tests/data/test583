@@ -35,9 +35,8 @@ sftp://localhost:%SSHPORT%PWD/log/upload583.txt %USER:
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-</strip>
-<protocol>
-</protocol>
+<errorcode>
+0
+</errorcode>
 </verify>
 </testcase>
