@@ -805,7 +805,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         host = addr;
       else
         host = hbuf; /* use the hbuf for host name */
-    }else
+    }
+    else
       /* there was only a port(-range) given, default the host */
       host = NULL;
   } /* data->set.ftpport */
