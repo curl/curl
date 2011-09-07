@@ -36,10 +36,10 @@ struct MemoryStruct {
 
 
 static size_t
-WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
-  struct MemoryStruct *mem = (struct MemoryStruct *)data;
+  struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
   mem->memory = realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL) {
@@ -48,7 +48,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
     exit(EXIT_FAILURE);
   }
 
-  memcpy(&(mem->memory[mem->size]), ptr, realsize);
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->memory[mem->size] = 0;
 
