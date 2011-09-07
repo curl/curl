@@ -145,7 +145,7 @@ sub scanfile {
         }
 
         # check for "} else"
-        if($l =~ /^(.*)\} else/) {
+        if($l =~ /^(.*)\} *else/) {
             checkwarn($line, length($1), $file, $l, "else after closing brace on same line");
         }
         # check for "){"
