@@ -1559,6 +1559,31 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
         }
       }
     }
+    else {
+      ptr = strchr(headers->data, ';');
+      if(ptr) {
+
+        ptr++; /* pass the semicolon */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+
+        if(*ptr) {
+          /* this may be used for something else in the future */
+        }
+        else {
+          if(*(--ptr) == ';') {
+            CURLcode result;
+
+            /* send no-value custom header if terminated by semicolon */
+            *ptr = ':';
+            result = Curl_add_bufferf(req_buffer, "%s\r\n",
+                                             headers->data);
+            if(result)
+              return result;
+          }
+        }
+      }
+    }
     headers = headers->next;
   }
   return CURLE_OK;

@@ -30,7 +30,7 @@ http
 Replaced internal and added custom HTTP headers
  </name>
  <command>
- -H "extra-header: here" -H "Accept: replaced" http://%HOSTIP:%HTTPPORT/4
+ -H "extra-header: here" -H "Accept: replaced" -H "X-Custom-Header;" -H "X-Test: foo; " -H "X-Test:" -H "X-Test2: foo;" -H "X-Test3:  " -H "X-Test4;  " -H "X-Test5;ignored" http://%HOSTIP:%HTTPPORT/4
 </command>
 </client>
 
@@ -45,6 +45,9 @@ GET /4 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 extra-header: here
 Accept: replaced
+X-Custom-Header:
+X-Test: foo; 
+X-Test2: foo;
 
 </protocol>
 </verify>

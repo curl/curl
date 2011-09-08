@@ -9,7 +9,7 @@ Curl and libcurl 7.22.1
 
 This release includes the following changes:
 
- o 
+ o Empty headers can be sent in HTTP requests by terminating with a semicolon
 
 This release includes the following bugfixes:
 
@@ -22,6 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Yukihiro Kawada 
 
         Thanks! (and sorry if I forgot to mention someone)
