@@ -41,12 +41,12 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
      (Curl_tvlong(data->state.keeps_speed) != 0) &&
      (data->progress.current_speed < data->set.low_speed_limit)) {
     long howlong = Curl_tvdiff(now, data->state.keeps_speed);
+    long nextcheck = (data->set.low_speed_time * 1000) - howlong;
 
     /* We are now below the "low speed limit". If we are below it
        for "low speed time" seconds we consider that enough reason
        to abort the download. */
-
-    if((howlong/1000) > data->set.low_speed_time) {
+    if(nextcheck <= 0) {
       /* we have been this slow for long enough, now die */
       failf(data,
             "Operation too slow. "
@@ -55,7 +55,10 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
             data->set.low_speed_time);
       return CURLE_OPERATION_TIMEDOUT;
     }
-    Curl_expire(data, howlong);
+    else {
+      /* wait complete low_speed_time */
+      Curl_expire(data, nextcheck);
+    }
   }
   else {
     /* we keep up the required speed all right */
