@@ -111,6 +111,7 @@
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);
 static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
+static LIBSSH2_ALLOC_FUNC(my_libssh2_calloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
@@ -197,6 +198,44 @@ const struct Curl_handler Curl_handler_sftp = {
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION /* flags */
 };
 
+
+static void
+libssh2_version_components(int *major, int *minor, int *patch)
+{
+  char buff[80];
+  char *ptr = &buff[0];
+  *major = 0;
+  *minor = 0;
+  *patch = 0;
+#ifdef HAVE_LIBSSH2_VERSION
+  /* run-time version */
+  snprintf(buff, sizeof(buff), "%s", libssh2_version(0));
+#else
+  /* compile-time version */
+  snprintf(buff, sizeof(buff), "%s", LIBSSH2_VERSION);
+#endif
+  while(ptr && ISDIGIT(*ptr)) {
+    *major *= 10;
+    *major += *ptr - '0';
+    ptr++;
+  }
+  if(*ptr == '.') {
+    ptr++;
+    while(ptr && ISDIGIT(*ptr)) {
+      *minor *= 10;
+      *minor += *ptr - '0';
+      ptr++;
+    }
+    if(*ptr == '.') {
+      ptr++;
+      while(ptr && ISDIGIT(*ptr)) {
+        *patch *= 10;
+        *patch += *ptr - '0';
+        ptr++;
+      }
+    }
+  }
+}
 
 static void
 kbd_callback(const char *name, int name_len, const char *instruction,
@@ -303,6 +342,12 @@ static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc)
 {
   (void)abstract; /* arg not used */
   return malloc(count);
+}
+
+static LIBSSH2_ALLOC_FUNC(my_libssh2_calloc)
+{
+  (void)abstract; /* arg not used */
+  return calloc(1, count);
 }
 
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
@@ -2625,6 +2670,9 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 #endif
   struct ssh_conn *ssh;
   CURLcode result;
+  int major = 0;
+  int minor = 0;
+  int patch = 0;
   struct SessionHandle *data = conn->data;
 
   /* We default to persistent connections. We set this already in this connect
@@ -2659,9 +2707,15 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   sock = conn->sock[FIRSTSOCKET];
 #endif /* CURL_LIBSSH2_DEBUG */
 
-  ssh->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
-                                             my_libssh2_free,
-                                             my_libssh2_realloc, conn);
+  libssh2_version_components(&major, &minor, &patch);
+  if((major < 1) || ((major == 1) && (minor < 3)))
+    ssh->ssh_session = libssh2_session_init_ex(my_libssh2_calloc,
+                                               my_libssh2_free,
+                                               my_libssh2_realloc, conn);
+  else
+    ssh->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
+                                               my_libssh2_free,
+                                               my_libssh2_realloc, conn);
   if(ssh->ssh_session == NULL) {
     failf(data, "Failure initialising ssh session");
     return CURLE_FAILED_INIT;
