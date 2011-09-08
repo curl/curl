@@ -434,7 +434,7 @@ char convert_char(curl_infotype infotype, char this_char)
 }
 #endif /* CURL_DOES_CONVERSIONS */
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW64__)
 
 #ifdef __BORLANDC__
 /* 64-bit lseek-like function unavailable */
