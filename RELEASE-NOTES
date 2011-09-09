@@ -49,6 +49,11 @@ This release includes the following bugfixes:
  o tests: break busy loops in tests 502, 555, and 573
  o FTP: fix proxy connect race condition with multi interface and SOCKS proxy
  o RTSP: GET_PARAMETER requests have a body
+ o fixed several memory leaks in OOM situations
+ o bad expire(0) caused multi_socket API to hang
+ o libssh2: use calloc as alloc function for older libssh2
+ o Avoid ftruncate() static define with mingw64
+ o mk-ca-bundle.pl: ignore untrusted certs
 
 This release includes the following known bugs:
 
@@ -61,6 +66,7 @@ advice from friends like these:
  Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
  Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
  Christian Hagele, Richard Silverman, Henry Ludemann, Cristian Rodriguez,
- Steve Holme, Jim Hollinger, Pau Garcia i Quiles, Fabian Keil, Wu Yongzheng
+ Steve Holme, Jim Hollinger, Pau Garcia i Quiles, Fabian Keil, Wu Yongzheng,
+ Adriano Meirelles
 
         Thanks! (and sorry if I forgot to mention someone)
