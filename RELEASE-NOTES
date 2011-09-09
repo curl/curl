@@ -51,7 +51,6 @@ This release includes the following bugfixes:
  o RTSP: GET_PARAMETER requests have a body
  o fixed several memory leaks in OOM situations
  o bad expire(0) caused multi_socket API to hang
- o libssh2: use calloc as alloc function for older libssh2
  o Avoid ftruncate() static define with mingw64
  o mk-ca-bundle.pl: ignore untrusted certs
 
