@@ -2118,10 +2118,10 @@ sub checksystem {
                $has_openssl=1;
                $ssllib="polarssl";
            } 
-	   elsif ($libcurl =~ /axtls/i) {
-	       $has_axtls=1;
-	       $ssllib="axTLS";
-	   }
+           elsif ($libcurl =~ /axtls/i) {
+               $has_axtls=1;
+               $ssllib="axTLS";
+           }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2825,7 +2825,7 @@ sub singletest {
     }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
-	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
+        $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
 
         my $inc="";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
