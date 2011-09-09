@@ -747,7 +747,7 @@ static void tcpnodelay(struct connectdata *conn,
 #ifdef TCP_NODELAY
   struct SessionHandle *data= conn->data;
   curl_socklen_t onoff = (curl_socklen_t) data->set.tcp_nodelay;
-  int proto = IPPROTO_TCP;
+  int level = IPPROTO_TCP;
 
 #if 0
   /* The use of getprotobyname() is disabled since it isn't thread-safe on
@@ -759,10 +759,10 @@ static void tcpnodelay(struct connectdata *conn,
      detected. */
   struct protoent *pe = getprotobyname("tcp");
   if(pe)
-    proto = pe->p_proto;
+    level = pe->p_proto;
 #endif
 
-  if(setsockopt(sockfd, proto, TCP_NODELAY, (void *)&onoff,
+  if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
           Curl_strerror(conn, SOCKERRNO));
