@@ -1241,7 +1241,7 @@ sub runhttpsserver {
     $flags .= "--connect $HTTPPORT --accept $HTTPSPORT";
 
     my $cmd = "$perl $srcdir/secureserver.pl $flags";
-    my ($httpspid, $pid2) = startnew($cmd, $pidfile, 20, 0);
+    my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httpspid <= 0 || !kill(0, $httpspid)) {
         # it is NOT alive
@@ -1501,7 +1501,7 @@ sub runftpsserver {
     $flags .= "--connect $FTPPORT --accept $FTPSPORT";
 
     my $cmd = "$perl $srcdir/secureserver.pl $flags";
-    my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 20, 0);
+    my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftpspid <= 0 || !kill(0, $ftpspid)) {
         # it is NOT alive
@@ -1742,7 +1742,7 @@ sub runsshserver {
     $flags .= "--user \"$USER\"";
 
     my $cmd = "$perl $srcdir/sshserver.pl $flags";
-    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 80, 0);
+    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
 
     # on loaded systems sshserver start up can take longer than the timeout
     # passed to startnew, when this happens startnew completes without being
