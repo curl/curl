@@ -86,13 +86,21 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
     case ',':
     case '}':                           /* set element completed */
       *buf = '\0';
-      if(pat->content.Set.elements)
-        pat->content.Set.elements =
-          realloc(pat->content.Set.elements,
-                  (pat->content.Set.size + 1) * sizeof(char*));
+      if(pat->content.Set.elements) {
+        char **new_arr = realloc(pat->content.Set.elements,
+                                 (pat->content.Set.size + 1) * sizeof(char*));
+        if(!new_arr) {
+          short elem;
+          for(elem = 0; elem < pat->content.Set.size; elem++)
+            free(pat->content.Set.elements[elem]);
+          free(pat->content.Set.elements);
+          pat->content.Set.ptr_s = 0;
+          pat->content.Set.size = 0;
+        }
+        pat->content.Set.elements = new_arr;
+      }
       else
-        pat->content.Set.elements =
-          malloc((pat->content.Set.size + 1) * sizeof(char*));
+        pat->content.Set.elements = malloc(sizeof(char*));
       if(!pat->content.Set.elements) {
         snprintf(glob->errormsg, sizeof(glob->errormsg), "out of memory");
         return GLOB_ERROR;
@@ -100,6 +108,13 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       pat->content.Set.elements[pat->content.Set.size] =
         strdup(glob->glob_buffer);
       if(!pat->content.Set.elements[pat->content.Set.size]) {
+        short elem;
+        for(elem = 0; elem < pat->content.Set.size; elem++)
+          free(pat->content.Set.elements[elem]);
+        free(pat->content.Set.elements);
+        pat->content.Set.elements = NULL;
+        pat->content.Set.ptr_s = 0;
+        pat->content.Set.size = 0;
         snprintf(glob->errormsg, sizeof(glob->errormsg), "out of memory");
         return GLOB_ERROR;
       }
@@ -405,7 +420,8 @@ char *glob_next_url(URLGlob *glob)
       pat = &glob->pattern[i];
       switch (pat->type) {
       case UPTSet:
-        if(++pat->content.Set.ptr_s == pat->content.Set.size) {
+        if((pat->content.Set.elements) &&
+           (++pat->content.Set.ptr_s == pat->content.Set.size)) {
           pat->content.Set.ptr_s = 0;
           carry = TRUE;
         }
@@ -445,11 +461,13 @@ char *glob_next_url(URLGlob *glob)
       pat = &glob->pattern[j/2];
       switch(pat->type) {
       case UPTSet:
-        len = strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
-        snprintf(buf, buflen, "%s",
-                 pat->content.Set.elements[pat->content.Set.ptr_s]);
-        buf += len;
-        buflen -= len;
+        if(pat->content.Set.elements) {
+          len = strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
+          snprintf(buf, buflen, "%s",
+                   pat->content.Set.elements[pat->content.Set.ptr_s]);
+          buf += len;
+          buflen -= len;
+        }
         break;
       case UPTCharRange:
         *buf++ = pat->content.CharRange.ptr_c;
@@ -501,8 +519,11 @@ char *glob_match_url(char *filename, URLGlob *glob)
         URLPattern pat = glob->pattern[i];
         switch (pat.type) {
         case UPTSet:
-          appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
-          appendlen = strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+          if(pat.content.Set.elements) {
+            appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
+            appendlen =
+              strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+          }
           break;
         case UPTCharRange:
           numbuf[0]=pat.content.CharRange.ptr_c;
