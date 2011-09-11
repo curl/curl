@@ -12,7 +12,6 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
- 1.1 Zero-copy interface
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
@@ -22,7 +21,6 @@
  2. libcurl - multi interface
  2.1 More non-blocking
  2.2 Remove easy interface internally
- 2.3 Avoid having to remove/readd handles
  2.4 Fix HTTP Pipelining for PUT
 
  3. Documentation
@@ -55,12 +53,10 @@
  7.5 Export session ids
  7.6 Provide callback for cert verification
  7.7 Support other SSL libraries
- 7.8  Support SRP on the TLS layer
  7.9 improve configure --with-ssl
 
  8. GnuTLS
  8.1 SSL engine stuff
- 8.2 SRP
  8.3 check connection
  8.4 non-gcrypt
 
@@ -78,6 +74,7 @@
  11.6 url-specific options
  11.7 metalink support
  11.8 warning when setting an option
+ 11.9 IPv6 addresses with globbing
 
  12. Build
  12.1 roffit
@@ -106,12 +103,6 @@
 ==============================================================================
 
 1. libcurl
-
-1.1 Zero-copy interface
-
- Introduce another callback interface for upload/download that makes one less
- copy of data and thus a faster operation.
- [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
 1.2 More data sharing
 
@@ -180,23 +171,6 @@
  return the easy handle's return code. This will thus make everything
  internally use and assume the multi interface. The select()-loop should use
  curl_multi_socket().
-
-2.3 Avoid having to remove/readd handles
-
- curl_multi_handle_control() - this can control the easy handle (while) added
- to a multi handle in various ways:
-
- o RESTART, unconditionally restart this easy handle's transfer from the
-   start, re-init the state
-
- o RESTART_COMPLETED, restart this easy handle's transfer but only if the
-   existing transfer has already completed and it is in a "finished state".
-
- o STOP, just stop this transfer and consider it completed
-
- o PAUSE?
-
- o RESUME?
 
 2.4 Fix HTTP Pipelining for PUT
 
@@ -345,12 +319,6 @@ to provide the data to send.
  Make curl's SSL layer capable of using other free SSL libraries.  Such as
  MatrixSSL (http://www.matrixssl.org/).
 
-7.8  Support SRP on the TLS layer
-
- Peter Sylvester's patch for SRP on the TLS layer.  Awaits OpenSSL support for
- this, no need to support this in libcurl before there's an OpenSSL release
- that does it.
-
 7.9 improve configure --with-ssl
 
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
@@ -361,11 +329,6 @@ to provide the data to send.
 8.1 SSL engine stuff
 
  Is this even possible?
-
-8.2 SRP
-
- Work out a common method with Peter Sylvester's OpenSSL-patch for SRP on the
- TLS to provide name and password. GnuTLS already supports it...
 
 8.3 check connection
 
@@ -461,6 +424,13 @@ to provide the data to send.
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
   compiled into the library.
+
+11.9 IPv6 addresses with globbing
+
+  Currently the command line client needs to get url globbing disabled (with
+  -g) for it to support IPv6 numerical addresses. This is a rather silly flaw
+  that should be corrected. It probably involves a smarter detection of the
+  '[' and ']' letters.
 
 12. Build
 
