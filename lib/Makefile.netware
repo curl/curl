@@ -24,7 +24,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2.9
+LIBSSH2_PATH = ../../libssh2-1.3.0
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -95,7 +95,7 @@ else
 endif
 PERL	= perl
 # Here you can find a native Win32 binary of the original awk:
-# http://www.gknw.net/development/prgtools/awk-20070501.zip
+# http://www.gknw.net/development/prgtools/awk-20100523.zip
 AWK	= awk
 CP	= cp -afv
 MKDIR	= mkdir
