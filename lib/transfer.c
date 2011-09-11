@@ -286,7 +286,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
     else {
       /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
          given FILE * stream and we can actually attempt to rewind that
-         ourself with fseek() */
+         ourselves with fseek() */
       if(data->set.fread_func == (curl_read_callback)fread) {
         if(-1 != fseek(data->set.in, 0, SEEK_SET))
           /* successful rewind */
@@ -1128,7 +1128,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             (conn->chunk.state != CHUNK_STOP)) {
       /*
        * In chunked mode, return an error if the connection is closed prior to
-       * the empty (terminiating) chunk is read.
+       * the empty (terminating) chunk is read.
        *
        * The condition above used to check for
        * conn->proto.http->chunk.datasize != 0 which is true after reading
@@ -1205,11 +1205,11 @@ int Curl_single_getsock(const struct connectdata *conn,
 /*
  * Determine optimum sleep time based on configured rate, current rate,
  * and packet size.
- * Returns value in mili-seconds.
+ * Returns value in milliseconds.
  *
  * The basic idea is to adjust the desired rate up/down in this method
  * based on whether we are running too slow or too fast.  Then, calculate
- * how many miliseconds to wait for the next packet to achieve this new
+ * how many milliseconds to wait for the next packet to achieve this new
  * rate.
  */
 long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
@@ -1235,7 +1235,7 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
     rate_bps += rate_bps >> 6;
   }
 
-  /* Determine number of miliseconds to wait until we do
+  /* Determine number of milliseconds to wait until we do
    * the next packet at the adjusted rate.  We should wait
    * longer when using larger packets, for instance.
    */
@@ -1883,19 +1883,18 @@ CURLcode Curl_follow(struct SessionHandle *data,
   case 301: /* Moved Permanently */
     /* (quote from RFC2616, section 10.3.2):
      *
-     * Note: When automatically redirecting a POST request after receiving a
-     * 301 status code, some existing HTTP/1.0 user agents will erroneously
-     * change it into a GET request.
+     * When automatically redirecting a POST request after receiving a 301
+     * status code, some existing HTTP/1.0 user agents will erroneously change
+     * it into a GET request.
      *
      * ----
      *
-     * Warning: Because most of importants user agents do this obvious RFC2616
-     * violation, many webservers expect this misbehavior. So these servers
-     * often answers to a POST request with an error page.  To be sure that
-     * libcurl gets the page that most user agents would get, libcurl has to
-     * force GET.
+     * As most of the important user agents do this obvious RFC2616 violation,
+     * many webservers expect this. So these servers often answers to a POST
+     * request with an error page.  To be sure that libcurl gets the page that
+     * most user agents would get, libcurl has to force GET.
      *
-     * This behaviour can be overridden with CURLOPT_POSTREDIR.
+     * This behavior can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
@@ -1923,7 +1922,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     302 status code may be used instead, since most user agents react
     to a 302 response as described here for 303.
 
-    This behaviour can be overriden with CURLOPT_POSTREDIR
+    This behavior can be overridden with CURLOPT_POSTREDIR
     */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
