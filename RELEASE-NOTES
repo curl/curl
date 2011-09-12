@@ -12,7 +12,7 @@ This release includes the following changes:
  o Added CURLOPT_GSSAPI_DELEGATION
  o Added support for NTLM delegation to Samba's winbind daemon helper ntlm_auth
  o Display notes from setup file in testcurl.pl
- o BSD-style lwIP TCP/IP stack support on Windows
+ o BSD-style lwIP TCP/IP stack experimental support on Windows
  o OpenSSL: Use SSL_MODE_RELEASE_BUFFERS if available
  o --delegation was added to set CURLOPT_GSSAPI_DELEGATION
  o nss: start with no database if the selected database is broken

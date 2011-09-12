@@ -491,6 +491,9 @@ Win32
    http://download.savannah.gnu.org/releases/lwip/lwip-1.4.0.zip
    http://download.savannah.gnu.org/releases/lwip/contrib-1.4.0.zip
 
+   This BSD-style lwIP TCP/IP stack support must be considered experimental
+   given that it has been verified that lwIP 1.4.0 still needs some polish,
+   and libcurl might yet need some additional adjustment, caveat emptor.
 
    Important static libcurl usage note
    -----------------------------------
