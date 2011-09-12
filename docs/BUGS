@@ -6,17 +6,18 @@
 
 BUGS
 
- 1. There are still bugs
- 2. Where to report
- 3. What to report
- 4. libcurl problems
- 5. Who will fix the problems
- 6. How to get a stack trace
- 7. Bugs in libcurl bindings
+ 1. Bugs
+  1.1 There are still bugs
+  1.2 Where to report
+  1.3 What to report
+  1.4 libcurl problems
+  1.5 Who will fix the problems
+  1.6 How to get a stack trace
+  1.7 Bugs in libcurl bindings
 
 ==============================================================================
 
-1. There are still bugs
+1.1 There are still bugs
 
   Curl and libcurl have grown substantially since the beginning. At the time
   of writing (September 2011), there are about 66000 lines of source code, and
@@ -27,7 +28,7 @@ BUGS
   To help us make curl the stable and solid product we want it to be, we need
   bug reports and bug fixes.
 
-2. Where to report
+1.2 Where to report
 
   If you can't fix a bug yourself and submit a fix for it, try to report an as
   detailed report as possible to a curl mailing list to allow one of us to
@@ -41,7 +42,7 @@ BUGS
   If you feel you need to ask around first, find a suitable mailing list and
   post there. The lists are available on http://curl.haxx.se/mail/
 
-3. What to report
+1.3 What to report
 
   When reporting a bug, you should include all information that will help us
   understand what's wrong, what you expected to happen and how to repeat the
@@ -71,7 +72,7 @@ BUGS
   The address and how to subscribe to the mailing lists are detailed in the
   MANUAL file.
 
-4. libcurl problems
+1.4 libcurl problems
 
   First, post all libcurl problems on the curl-library mailing list.
 
@@ -93,7 +94,7 @@ BUGS
   valgrind or similar before you post memory-related or "crashing" problems to
   us.
 
-5. Who will fix the problems
+1.5 Who will fix the problems
 
   If the problems or bugs you describe are considered to be bugs, we want to
   have the problems fixed.
@@ -112,7 +113,7 @@ BUGS
   We get reports from many people every month and each report can take a
   considerable amount of time to really go to the bottom with.
 
-6. How to get a stack trace
+1.6 How to get a stack trace
 
   First, you must make sure that you compile all sources with -g and that you
   don't 'strip' the final executable. Try to avoid optimizing the code as
@@ -132,7 +133,7 @@ BUGS
   crashed. Include the stack trace with your detailed bug report. It'll help a
   lot.
 
-7. Bugs in libcurl bindings
+1.7 Bugs in libcurl bindings
 
   There will of course pop up bugs in libcurl bindings. You should then
   primarily approach the team that works on that particular binding and see
