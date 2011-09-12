@@ -91,7 +91,9 @@ SIGPIPE signals, which otherwise are sent by the system when trying to send
 data to a socket which is closed in the other end. libcurl makes an effort to
 never cause such SIGPIPEs to trigger, but some operating systems have no way
 to avoid them and even on those that have there are some corner cases when
-they may still happen, contrary to our desire.
+they may still happen, contrary to our desire. In addition, using
+\fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
+raised.
 .IP CURLOPT_WILDCARDMATCH
 Set this option to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the
@@ -890,6 +892,20 @@ prevent the password from being eavesdropped.
 
 You need to build libcurl with OpenSSL support for this option to work, or
 build libcurl on Windows.
+.IP CURLAUTH_NTLM_WB
+NTLM delegating to winbind helper. Authentication is performed by a separate
+binary application that is executed when needed. The name of the application
+is specified at compile time but is typically /usr/bin/ntlm_auth
+(Added in 7.22.0)
+
+Note that libcurl will fork when necessary to run the winbind application and
+kill it when complete, calling waitpid() to await its exit when done. On POSIX
+operating systems, killing the process will cause a SIGCHLD signal to be
+raised (regardless of whether \fICURLOPT_NOSIGNAL\fP is set), which must be
+handled intelligently by the application. In particular, the application must
+not unconditionally call wait() in its SIGCHLD signal handler to avoid being
+subject to a race condition.  This behavior is subject to change in future
+versions of libcurl.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
 it finds suitable. libcurl will automatically select the one it finds most
