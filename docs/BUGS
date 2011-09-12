@@ -6,21 +6,33 @@
 
 BUGS
 
+ 1. There are still bugs
+ 2. Where to report
+ 3. What to report
+ 4. libcurl problems
+ 5. Who will fix the problems
+ 6. How to get a stack trace
+ 7. Bugs in libcurl bindings
+
+==============================================================================
+
+1. There are still bugs
+
   Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (July 2007), there are about 47000 lines of source code, and by
-  the time you read this it has probably grown even more.
+  of writing (September 2011), there are about 66000 lines of source code, and
+  by the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
 
   To help us make curl the stable and solid product we want it to be, we need
   bug reports and bug fixes.
 
-WHERE TO REPORT
+2. Where to report
 
   If you can't fix a bug yourself and submit a fix for it, try to report an as
   detailed report as possible to a curl mailing list to allow one of us to
-  have a go at a solution. You should also post your bug/problem at curl's bug
-  tracking system over at
+  have a go at a solution. You can optionally also post your bug/problem at
+  curl's bug tracking system over at
 
         http://sourceforge.net/bugs/?group_id=976
 
@@ -29,7 +41,7 @@ WHERE TO REPORT
   If you feel you need to ask around first, find a suitable mailing list and
   post there. The lists are available on http://curl.haxx.se/mail/
 
-WHAT TO REPORT
+3. What to report
 
   When reporting a bug, you should include all information that will help us
   understand what's wrong, what you expected to happen and how to repeat the
@@ -59,7 +71,48 @@ WHAT TO REPORT
   The address and how to subscribe to the mailing lists are detailed in the
   MANUAL file.
 
-HOW TO GET A STACK TRACE
+4. libcurl problems
+
+  First, post all libcurl problems on the curl-library mailing list.
+
+  When you've written your own application with libcurl to perform transfers,
+  it is even more important to be specific and detailed when reporting bugs.
+
+  Tell us the libcurl version and your operating system. Tell us the name and
+  version of all relevant sub-components like for example the SSL library
+  you're using and what name resolving your libcurl uses. If you use SFTP or
+  SCP, the libssh2 version is relevant etc.
+
+  Showing us a real source code example repeating your problem is the best way
+  to get our attention and it will greatly increase our chances to understand
+  your problem and to work on a fix (if we agree it truly is a problem).
+
+  Lots of problems that appear to be libcurl problems are actually just abuses
+  of the libcurl API or other malfunctions in your applications. It is adviced
+  that you run your problematic program using a memory debug tool like
+  valgrind or similar before you post memory-related or "crashing" problems to
+  us.
+
+5. Who will fix the problems
+
+  If the problems or bugs you describe are considered to be bugs, we want to
+  have the problems fixed.
+
+  There are no developers in the curl project that are paid to work on bugs.
+  All developers that take on reported bugs do this on a volountary basis. We
+  do it out of an ambition to keep curl and libcurl excellent products and out
+  of pride.
+
+  But please do not assume that you can just lump over something to us and it
+  will then magically be fixed after some given time. Most often we need
+  feedback and help to understand what you've experienced and how to repeat a
+  problem. Then we may only be able to assist YOU to debug the problem and to
+  track down the proper fix.
+
+  We get reports from many people every month and each report can take a
+  considerable amount of time to really go to the bottom with.
+
+6. How to get a stack trace
 
   First, you must make sure that you compile all sources with -g and that you
   don't 'strip' the final executable. Try to avoid optimizing the code as
@@ -79,3 +132,12 @@ HOW TO GET A STACK TRACE
   crashed. Include the stack trace with your detailed bug report. It'll help a
   lot.
 
+7. Bugs in libcurl bindings
+
+  There will of course pop up bugs in libcurl bindings. You should then
+  primarily approach the team that works on that particular binding and see
+  what you can do to help them fix the problem.
+
+  If you suspect that the problem exists in the underlying libcurl, then
+  please convert your program over to plain C and follow the steps outlined
+  above.
