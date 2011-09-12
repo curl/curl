@@ -1000,8 +1000,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       result = Curl_pp_sendf(&ftpc->pp, "%s |%d|%s|%hu|", mode[fcmd],
                              sa->sa_family == AF_INET?1:2,
                              myhost, port);
-      if(result)
+      if(result) {
+        Curl_closesocket(conn, portsock);
+        /* don't retry using PORT */
+        ftpc->count1 = PORT;
+        /* bail out */
+        state(conn, FTP_STOP);
         return result;
+      }
       break;
     }
     else if(PORT == fcmd) {
@@ -1021,8 +1027,12 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       snprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
 
       result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
-      if(result)
+      if(result) {
+        Curl_closesocket(conn, portsock);
+        /* bail out */
+        state(conn, FTP_STOP);
         return result;
+      }
       break;
     }
   }
