@@ -48,10 +48,12 @@ BUGS
   understand what's wrong, what you expected to happen and how to repeat the
   bad behavior. You therefore need to tell us:
 
-   - your operating system's name and version number (uname -a under a unix
-     is fine)
+   - your operating system's name and version number
+
    - what version of curl you're using (curl -V is fine)
+
    - versions of the used libraries that libcurl is built to use
+
    - what URL you were working with (if possible), at least which protocol
 
   and anything and everything else you think matters. Tell us what you
@@ -100,7 +102,7 @@ BUGS
   have the problems fixed.
 
   There are no developers in the curl project that are paid to work on bugs.
-  All developers that take on reported bugs do this on a volountary basis. We
+  All developers that take on reported bugs do this on a voluntary basis. We
   do it out of an ambition to keep curl and libcurl excellent products and out
   of pride.
 
