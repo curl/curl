@@ -28,15 +28,22 @@
 
 #include "curl_gethostname.h"
 
+/* Hostname buffer size */
+#define HOSTNAME_MAX 1024
+
 /*
  * Curl_gethostname() is a wrapper around gethostname() which allows
  * overriding the host name that the function would normally return.
  * This capability is used by the test suite to verify exact matching
- * of NTLM authentication, which exercises libcurl's MD4 and DES code.
+ * of NTLM authentication, which exercises libcurl's MD4 and DES code
+ * as well as by the SMTP module when a hostname is not provided.
  *
  * For libcurl debug enabled builds host name overriding takes place
  * when environment variable CURL_GETHOSTNAME is set, using the value
  * held by the variable to override returned host name.
+ *
+ * Note: The function always returns the un-qualified hostname rather
+ * than being provider dependent.
  *
  * For libcurl shared library release builds the test suite preloads
  * another shared library named libhostname using the LD_PRELOAD
@@ -58,24 +65,48 @@ int Curl_gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen) {
   return -1;
 
 #else
+  int err = 0;
+  char* dot = NULL;
+  char hostname[HOSTNAME_MAX + 1];
 
 #ifdef DEBUGBUILD
 
   /* Override host name when environment variable CURL_GETHOSTNAME is set */
   const char *force_hostname = getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
-    strncpy(name, force_hostname, namelen);
-    name[namelen-1] = '\0';
-    return 0;
+    strncpy(hostname, force_hostname, sizeof(hostname));
+    hostname[sizeof(hostname) - 1] = '\0';
   }
+  else
+    err = gethostname(hostname, sizeof(hostname));
 
-#endif /* DEBUGBUILD */
+#else /* DEBUGBUILD */
 
   /* The call to system's gethostname() might get intercepted by the
      libhostname library when libcurl is built as a non-debug shared
      library when running the test suite. */
-  return gethostname(name, namelen);
+  err = gethostname(hostname, sizeof(hostname));
 
+#endif
+
+  if(err != 0)
+    return err;
+
+  /* Is the hostname fully qualified? */
+  dot = strchr(hostname, '.');
+  if(dot) {
+    /* Copy only the machine name to the specified buffer */
+    size_t size = dot - hostname;
+    strncpy(name, hostname, namelen > size ? size : namelen);
+    name[(namelen > size ? size : namelen) - 1] = '\0';
+  }
+  else {
+    /* Copy the hostname to the specified buffer */
+    strncpy(name, hostname, namelen);
+    name[namelen - 1] = '\0';
+  }
+
+  return 0;
 #endif
 
 }
