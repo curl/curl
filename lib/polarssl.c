@@ -39,6 +39,15 @@
 #include <polarssl/havege.h>
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
+#include <polarssl/version.h>
+
+#if POLARSSL_VERSION_NUMBER<0x01000000
+/*
+  Earlier versions of polarssl had no WANT_READ or WANT_WRITE, only TRY_AGAIN
+*/
+#define POLARSSL_ERR_NET_WANT_READ  POLARSSL_ERR_NET_TRY_AGAIN
+#define POLARSSL_ERR_NET_WANT_WRITE POLARSSL_ERR_NET_TRY_AGAIN
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -186,8 +195,12 @@ Curl_polarssl_connect(struct connectdata *conn,
               net_recv, &conn->sock[sockindex],
               net_send, &conn->sock[sockindex]);
 
-  ssl_set_ciphers(&conn->ssl[sockindex].ssl, ssl_default_ciphers);
 
+#if POLARSSL_VERSION_NUMBER<0x01000000
+  ssl_set_ciphers(&conn->ssl[sockindex].ssl, ssl_default_ciphers);
+#else
+  ssl_set_ciphersuites(&conn->ssl[sockindex].ssl, ssl_default_ciphersuites);
+#endif
   if(!Curl_ssl_getsessionid(conn, &old_session, &old_session_size)) {
     memcpy(&conn->ssl[sockindex].ssn, old_session, old_session_size);
     infof(data, "PolarSSL re-using session\n");
@@ -222,7 +235,8 @@ Curl_polarssl_connect(struct connectdata *conn,
   for(;;) {
     if(!(ret = ssl_handshake(&conn->ssl[sockindex].ssl)))
       break;
-    else if(ret != POLARSSL_ERR_NET_TRY_AGAIN) {
+    else if( ret != POLARSSL_ERR_NET_WANT_READ &&
+             ret != POLARSSL_ERR_NET_WANT_WRITE ) {
       failf(data, "ssl_handshake returned -0x%04X", -ret);
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -252,7 +266,11 @@ Curl_polarssl_connect(struct connectdata *conn,
   }
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
+#if POLARSSL_VERSION_NUMBER<0x01000000
         ssl_get_cipher(&conn->ssl[sockindex].ssl));
+#else
+        ssl_get_ciphersuite_name(&conn->ssl[sockindex].ssl));
+#endif
 
   ret = ssl_get_verify_result(&conn->ssl[sockindex].ssl);
 
@@ -316,7 +334,7 @@ static ssize_t polarssl_send(struct connectdata *conn,
                   (unsigned char *)mem, len);
 
   if(ret < 0) {
-    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ?
+    *curlcode = (ret == POLARSSL_ERR_NET_WANT_WRITE) ?
       CURLE_AGAIN : CURLE_SEND_ERROR;
     ret = -1;
   }
@@ -354,7 +372,7 @@ static ssize_t polarssl_recv(struct connectdata *conn,
     if(ret == POLARSSL_ERR_SSL_PEER_CLOSE_NOTIFY)
       return 0;
 
-    *curlcode = (ret == POLARSSL_ERR_NET_TRY_AGAIN) ?
+    *curlcode = (ret == POLARSSL_ERR_NET_WANT_READ) ?
       CURLE_AGAIN : CURLE_RECV_ERROR;
     return -1;
   }
