@@ -235,8 +235,8 @@ Curl_polarssl_connect(struct connectdata *conn,
   for(;;) {
     if(!(ret = ssl_handshake(&conn->ssl[sockindex].ssl)))
       break;
-    else if( ret != POLARSSL_ERR_NET_WANT_READ &&
-             ret != POLARSSL_ERR_NET_WANT_WRITE ) {
+    else if(ret != POLARSSL_ERR_NET_WANT_READ &&
+            ret != POLARSSL_ERR_NET_WANT_WRITE) {
       failf(data, "ssl_handshake returned -0x%04X", -ret);
       return CURLE_SSL_CONNECT_ERROR;
     }
