@@ -1,6 +1,6 @@
-Curl and libcurl 7.22.0
+Curl and libcurl 7.22.1
 
- Public curl releases:         124
+ Public curl releases:         125
  Command line options:         149
  curl_easy_setopt() options:   192
  Public functions in libcurl:  58
@@ -9,51 +9,11 @@ Curl and libcurl 7.22.0
 
 This release includes the following changes:
 
- o Added CURLOPT_GSSAPI_DELEGATION
- o Added support for NTLM delegation to Samba's winbind daemon helper ntlm_auth
- o Display notes from setup file in testcurl.pl
- o BSD-style lwIP TCP/IP stack experimental support on Windows
- o OpenSSL: Use SSL_MODE_RELEASE_BUFFERS if available
- o --delegation was added to set CURLOPT_GSSAPI_DELEGATION
- o nss: start with no database if the selected database is broken
- o telnet: allow programatic use on Windows
+ o 
 
 This release includes the following bugfixes:
 
- o curl_getdate: detect some illegal dates better
- o when sending a request and an error is received before the (entire) request
-   body is sent, stop sending the request and close the connection after
-   having received the entire response. This is equally true if an Expect:
-   100-continue header was used.
- o When using both -J and a single -O with multiple URLs, a missing init
-   could cause a segfault
- o -J fixed for escaped quotes
- o -J fixed for file names with semicolons
- o progress: reset flags at transfer start to avoid wrong 
-   CURLINFO_CONTENT_LENGTH_DOWNLOAD
- o curl_gssapi: Guard files with HAVE_GSSAPI and rename private header
- o silence picky compilers: mark unused parameters
- o help output: more gnu like output
- o libtests: stop checking for CURLM_CALL_MULTI_PERFORM
- o setting a non-HTTP proxy with an environment variable or with CURLOPT_PROXY
-   / --proxy (without specifying CURLOPT_PROXYTYPE) would still make it do
-   proxy-like HTTP requests
- o CURLFORM_BUFFER: insert filename as documented (regression)
- o SOCKS: fix the connect timeout
- o ftp_doing: bail out on error properly while multi interfacing
- o improved Content-Encoded decoding error message
- o asyn-thread: check for dotted addresses before thread starts
- o cmake: find winsock when building on windows
- o Curl_retry_request: check return code
- o cookies: handle 'secure=' as if it was 'secure'
- o tests: break busy loops in tests 502, 555, and 573
- o FTP: fix proxy connect race condition with multi interface and SOCKS proxy
- o RTSP: GET_PARAMETER requests have a body
- o fixed several memory leaks in OOM situations
- o bad expire(0) caused multi_socket API to hang
- o Avoid ftruncate() static define with mingw64
- o mk-ca-bundle.pl: ignore untrusted certs
- o builds with PolarSSL 1.0.0
+ o 
 
 This release includes the following known bugs:
 
@@ -62,11 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Paolo Piacentini, Steven Parkes, Adam Tkac, Ben Winslow, Dan Fandrich,
- Julien Chaffraix, Kamil Dudka, Mandy Wu, Michael Mueller, Patrick Monnerat,
- Yang Tse, Paul Howarth, Garrett Holmstrom, Peter Hjalmarsson, Herve Amblard,
- Christian Hagele, Richard Silverman, Henry Ludemann, Cristian Rodriguez,
- Steve Holme, Jim Hollinger, Pau Garcia i Quiles, Fabian Keil, Wu Yongzheng,
- Adriano Meirelles, Jeff Pohlmeyer
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
