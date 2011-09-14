@@ -19,8 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-/* client-local setup.h */
 #include "setup.h"
 
 #include <curl/curl.h>
@@ -31,9 +29,7 @@
 #include "urlglob.h"
 #include "os-specific.h"
 
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-#include "memdebug.h"
-#endif
+#include "memdebug.h" /* keep this as LAST include */
 
 typedef enum {
   GLOB_OK,

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,20 +21,22 @@
  ***************************************************************************/
 #include "setup.h"
 
+#ifdef __VMS
+
+#if defined(__DECC) && !defined(__VAX) && \
+    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+#include <unixlib.h>
+#endif
+
 #include <curl/curl.h>
 
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 
+#include "curlmsg_vms.h"
 #include "os-specific.h"
 
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-#  include "memdebug.h"
-#endif
-
-#ifdef __VMS
-
-#include "curlmsg_vms.h"
+#include "memdebug.h" /* keep this as LAST include */
 
 void decc$__posix_exit(int __status);
 void decc$exit(int __status);
@@ -120,8 +122,6 @@ void vms_special_exit(int code, int vms_show)
  * RTL features without using the DECC$* logical name method, nor
  * requiring the user to define the corresponding logical names.
  */
-
-#include <unixlib.h>
 
 /* Structure to hold a DECC$* feature name and its desired value. */
 typedef struct {

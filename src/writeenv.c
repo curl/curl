@@ -19,24 +19,22 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "setup.h"
 
 #ifdef USE_ENVIRONMENT
-
-#include <curl/curl.h>
-#include "writeenv.h"
 
 #ifdef __riscos__
 #include <kernel.h>
 #endif
 
+#include <curl/curl.h>
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-#include "memdebug.h"
-#endif
+#include "writeenv.h"
+
+#include "memdebug.h" /* keep this as LAST include */
 
 static const struct
 {

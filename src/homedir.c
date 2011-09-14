@@ -19,7 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "setup.h"
 
 #ifdef HAVE_PWD_H
@@ -34,9 +33,7 @@
 
 #include "homedir.h"
 
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-#include "memdebug.h"
-#endif
+#include "memdebug.h" /* keep this as LAST include */
 
 static
 char *GetEnv(const char *variable, char do_expand)

@@ -19,7 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "setup.h"
 
 #ifdef HAVE_SYS_TYPES_H
@@ -35,6 +34,8 @@
 #include <curl/mprintf.h>
 
 #include "writeout.h"
+
+#include "memdebug.h" /* keep this as LAST include */
 
 typedef enum {
   VAR_NONE,       /* must be the first */

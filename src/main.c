@@ -19,7 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "setup.h"
 
 #include <curl/curl.h>
@@ -138,16 +137,10 @@
    versions instead */
 #include "curlx.h"
 
-/* The last #include file should be: */
-#ifdef CURLDEBUG
-#ifndef CURLTOOLDEBUG
-#define MEMDEBUG_NODEFINES
-#endif
 /* This is low-level hard-hacking memory leak tracking and similar. Using
    the library level code from this client-side is ugly, but we do this
    anyway for convenience. */
-#include "memdebug.h"
-#endif
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef __VMS
 static int vms_show = 0;

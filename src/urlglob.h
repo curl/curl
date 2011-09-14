@@ -1,5 +1,5 @@
-#ifndef __URLGLOB_H
-#define __URLGLOB_H
+#ifndef HEADER_CURL_URLGLOB_H
+#define HEADER_CURL_URLGLOB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "setup.h"
+
 typedef enum {
   UPTSet=1,
   UPTCharRange,
@@ -64,4 +66,4 @@ char* glob_next_url(URLGlob*);
 char* glob_match_url(char*, URLGlob *);
 void glob_cleanup(URLGlob* glob);
 
-#endif
+#endif /* HEADER_CURL_URLGLOB_H */

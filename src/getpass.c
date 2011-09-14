@@ -19,10 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-/* This file is a reimplementation of the previous one, due to license
-   problems. */
-
 #include "setup.h"
 
 #ifndef HAVE_GETPASS_R
@@ -31,8 +27,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include "getpass.h"
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -45,17 +39,30 @@
 #endif
 #endif
 
-/* The last #include file should be: */
-#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
-#include "memdebug.h"
+#ifdef __VMS
+#  include descrip
+#  include starlet
+#  include iodef
 #endif
+
+#ifdef WIN32
+#  include <conio.h>
+#endif
+
+#ifdef NETWARE
+#  ifdef __NOVELL_LIBC__
+#    include <screen.h>
+#  else
+#    include <nwconio.h>
+#  endif
+#endif
+
+#include "getpass.h"
+
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef __VMS
 /* VMS implementation */
-#include descrip
-#include starlet
-#include iodef
-/* #include iosbdef */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   long sts;
@@ -90,12 +97,6 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 }
 #define DONE
 #endif /* __VMS */
-
-
-#ifdef WIN32
-/* Windows implementation */
-#include <conio.h>
-#endif
 
 #ifdef __SYMBIAN32__
 #define getch() getchar()
@@ -136,13 +137,11 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #ifdef NETWARE
 /* NetWare implementation */
 #ifdef __NOVELL_LIBC__
-#include <screen.h>
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   return getpassword(prompt, buffer, buflen);
 }
 #else
-#include <nwconio.h>
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   size_t i = 0;

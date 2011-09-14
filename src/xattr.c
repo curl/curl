@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,15 +19,19 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-/* client-local setup.h */
 #include "setup.h"
-#include <curl/curl.h>
-#include "xattr.h"
 
 #ifdef HAVE_FSETXATTR
 #include <sys/types.h>
 #include <sys/xattr.h> /* include header from libc, not from libattr */
+#endif
+
+#include <curl/curl.h>
+#include "xattr.h"
+
+#include "memdebug.h" /* keep this as LAST include */
+
+#ifdef HAVE_FSETXATTR
 
 /* mapping table of curl metadata to extended attribute names */
 static const struct xattr_mapping {
