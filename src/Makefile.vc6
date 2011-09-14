@@ -121,7 +121,7 @@ RCD   = rc.exe /dDEBUGBUILD=1
 
 CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
-RESFLAGS = /i../include
+RESFLAGS = /i../lib /i../include
 
 # This manifest thing is for VC8, enabled by the maketgz script that
 # builds the VC8 version of this makefile. Left commented out in the VC6
