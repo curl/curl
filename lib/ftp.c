@@ -1001,6 +1001,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
                              sa->sa_family == AF_INET?1:2,
                              myhost, port);
       if(result) {
+        failf(data, "Failure sending EPRT command: %s",
+              curl_easy_strerror(result));
         Curl_closesocket(conn, portsock);
         /* don't retry using PORT */
         ftpc->count1 = PORT;
@@ -1028,6 +1030,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
       result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
       if(result) {
+        failf(data, "Failure sending PORT command: %s",
+              curl_easy_strerror(result));
         Curl_closesocket(conn, portsock);
         /* bail out */
         state(conn, FTP_STOP);
