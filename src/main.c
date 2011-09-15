@@ -4900,15 +4900,26 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     /* Here's the loop for uploading multiple files within the same
        single globbed string. If no upload, we enter the loop once anyway. */
-    for(up = 0;
-        (!up && !infiles) ||
-          ((uploadfile = inglob?
-           glob_next_url(inglob):
-           (!up?strdup(infiles):NULL)) != NULL);
-        up++) {
-      int separator = 0;
+    for(up = 0 ;; up++) {
+
       long retry_numretries;
-      uploadfilesize=-1;
+      int separator;
+
+      if(!up && !infiles)
+        Curl_nop_stmt;
+      else {
+        if(inglob)
+          uploadfile = glob_next_url(inglob);
+        else if(!up)
+          uploadfile = strdup(infiles);
+        else
+          uploadfile = NULL;
+        if(!uploadfile)
+          break;
+      }
+
+      separator = 0;
+      uploadfilesize = -1;
 
       if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
@@ -4926,20 +4937,22 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(i = 0;
-          ((url = urls?glob_next_url(urls):(i?NULL:strdup(url))) != NULL);
-          i++) {
-        /* NOTE: In the condition expression in the for() statement above, the
-           'url' variable is only ever strdup()ed if(i == 0) and thus never
-           when this loops later on. Further down in this function we call
-           free(url) and then the code loops. Static code parsers may thus get
-           tricked into believing that we have a potential access-after-free
-           here.  I can however not spot any such case. */
+      for(i = 0 ;; i++) {
 
         int infd = STDIN_FILENO;
         bool infdopen;
         char *outfile;
         struct timeval retrystart;
+
+        if(urls)
+          url = glob_next_url(urls);
+        else if(!i)
+          url = strdup(url);
+        else
+          url = NULL;
+        if(!url)
+          break;
+
         outfile = outfiles?strdup(outfiles):NULL;
 
         if((urlnode->flags&GETOUT_USEREMOTE) ||
