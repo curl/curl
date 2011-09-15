@@ -980,6 +980,7 @@ static int parseconfig(const char *filename,
 static char *my_get_line(FILE *fp);
 static int create_dir_hierarchy(const char *outfile, FILE *errors);
 
+#if 0
 static void GetStr(char **string,
                    const char *value)
 {
@@ -987,6 +988,17 @@ static void GetStr(char **string,
   if(value)
     *string = strdup(value);
 }
+#else
+#define GetStr(str,val) \
+do { \
+  if(*(str)) { \
+    free(*(str)); \
+    *(str) = NULL; \
+  } \
+  if((val)) \
+    *(str) = strdup((val)); \
+} WHILE_FALSE
+#endif
 
 static void clean_getout(struct Configurable *config)
 {
@@ -3084,7 +3096,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               "Appending one for you!\n");
         off = curlx_strtoofft(nextarg, NULL, 10);
         snprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
-        GetStr(&config->range, buffer);
+        Curl_safefree(config->range);
+        config->range = strdup(buffer);
       }
       {
         /* byte range requested */
@@ -3172,7 +3185,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'v':
       if(toggle) {
         /* the '%' thing here will cause the trace get sent to stderr */
-        GetStr(&config->trace_dump, (char *)"%");
+        Curl_safefree(config->trace_dump);
+        config->trace_dump = strdup("%");
         if(config->tracetype && (config->tracetype != TRACE_PLAIN))
           warnf(config,
                 "-v, --verbose overrides an earlier trace/verbose option\n");
