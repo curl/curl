@@ -88,8 +88,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
         if(!new_arr) {
           short elem;
           for(elem = 0; elem < pat->content.Set.size; elem++)
-            free(pat->content.Set.elements[elem]);
-          free(pat->content.Set.elements);
+            Curl_safefree(pat->content.Set.elements[elem]);
+          Curl_safefree(pat->content.Set.elements);
           pat->content.Set.ptr_s = 0;
           pat->content.Set.size = 0;
         }
@@ -106,9 +106,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       if(!pat->content.Set.elements[pat->content.Set.size]) {
         short elem;
         for(elem = 0; elem < pat->content.Set.size; elem++)
-          free(pat->content.Set.elements[elem]);
-        free(pat->content.Set.elements);
-        pat->content.Set.elements = NULL;
+          Curl_safefree(pat->content.Set.elements[elem]);
+        Curl_safefree(pat->content.Set.elements);
         pat->content.Set.ptr_s = 0;
         pat->content.Set.size = 0;
         snprintf(glob->errormsg, sizeof(glob->errormsg), "out of memory");
@@ -320,7 +319,7 @@ static GlobCode glob_word(URLGlob *glob, char *pattern,
 
   if(GLOB_OK != res)
     /* free that strdup'ed string again */
-    free(glob->literal[litindex]);
+    Curl_safefree(glob->literal[litindex]);
 
   return res; /* something got wrong */
 }
@@ -341,7 +340,7 @@ int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
 
   glob_expand = calloc(1, sizeof(URLGlob));
   if(NULL == glob_expand) {
-    free(glob_buffer);
+    Curl_safefree(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
   }
   glob_expand->size = 0;
@@ -357,9 +356,8 @@ int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
               CURLE_URL_MALFORMAT, glob_expand->errormsg);
     }
     /* it failed, we cleanup */
-    free(glob_buffer);
-    free(glob_expand);
-    glob_expand = NULL;
+    Curl_safefree(glob_buffer);
+    Curl_safefree(glob_expand);
     *urlnum = 1;
     return CURLE_URL_MALFORMAT;
   }
@@ -375,7 +373,7 @@ void glob_cleanup(URLGlob* glob)
 
   for(i = glob->size - 1; i < glob->size; --i) {
     if(!(i & 1)) {     /* even indexes contain literals */
-      free(glob->literal[i/2]);
+      Curl_safefree(glob->literal[i/2]);
     }
     else {              /* odd indexes contain sets or ranges */
       if((glob->pattern[i/2].type == UPTSet) &&
@@ -384,14 +382,14 @@ void glob_cleanup(URLGlob* glob)
              elem >= 0;
              --elem) {
           if(glob->pattern[i/2].content.Set.elements[elem])
-            free(glob->pattern[i/2].content.Set.elements[elem]);
+            Curl_safefree(glob->pattern[i/2].content.Set.elements[elem]);
         }
-        free(glob->pattern[i/2].content.Set.elements);
+        Curl_safefree(glob->pattern[i/2].content.Set.elements);
       }
     }
   }
-  free(glob->glob_buffer);
-  free(glob);
+  Curl_safefree(glob->glob_buffer);
+  Curl_safefree(glob);
 }
 
 char *glob_next_url(URLGlob *glob)
@@ -537,7 +535,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
         default:
           printf("internal error: invalid pattern type (%d)\n",
                  (int)pat.type);
-          free(target);
+          Curl_safefree(target);
           return NULL;
         }
       }
@@ -559,7 +557,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
       allocsize = (appendlen + stringlen)*2;
       newstr=realloc(target, allocsize + 1);
       if(NULL ==newstr) {
-        free(target);
+        Curl_safefree(target);
         return NULL;
       }
       target=newstr;

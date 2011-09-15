@@ -983,31 +983,25 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors);
 static void GetStr(char **string,
                    const char *value)
 {
-  if(*string)
-    free(*string);
+  Curl_safefree(*string);
   if(value)
     *string = strdup(value);
-  else
-    *string = NULL;
 }
 
 static void clean_getout(struct Configurable *config)
 {
-  struct getout *node=config->url_list;
   struct getout *next;
+  struct getout *node = config->url_list;
 
   while(node) {
     next = node->next;
-    if(node->url)
-      free(node->url);
-    if(node->outfile)
-      free(node->outfile);
-    if(node->infile)
-      free(node->infile);
-    free(node);
-
-    node = next; /* GOTO next */
+    Curl_safefree(node->url);
+    Curl_safefree(node->outfile);
+    Curl_safefree(node->infile);
+    Curl_safefree(node);
+    node = next;
   }
+  config->url_list = NULL;
 }
 
 static struct getout *new_getout(struct Configurable *config)
@@ -1075,7 +1069,7 @@ AddMultiFiles(const char *file_name,
       multi = multi_type;
     }
     else {
-      free(multi);
+      Curl_safefree(multi);
       return NULL;
     }
   }
@@ -1090,7 +1084,7 @@ AddMultiFiles(const char *file_name,
       multi = multi_name;
     }
     else {
-      free(multi);
+      Curl_safefree(multi);
       return NULL;
     }
   }
@@ -1105,14 +1099,17 @@ AddMultiFiles(const char *file_name,
 
 /* Free the items of the list.
  */
-static void FreeMultiInfo(struct multi_files *multi_start)
+static void FreeMultiInfo(struct multi_files **multi_start)
 {
-  struct multi_files *multi;
-  while(multi_start) {
-    multi = multi_start;
-    multi_start = multi_start->next;
-    free(multi);
+  struct multi_files *next;
+  struct multi_files *item = *multi_start;
+
+  while(item) {
+    next = item->next;
+    Curl_safefree(item);
+    item = next;
   }
+  *multi_start = NULL;
 }
 
 /* Print list of OpenSSL engines supported.
@@ -1246,8 +1243,8 @@ static int formparse(struct Configurable *config,
               if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
                              major, minor)) {
                 warnf(config, "Illegally formatted content-type field!\n");
-                free(contents);
-                FreeMultiInfo(multi_start);
+                Curl_safefree(contents);
+                FreeMultiInfo(&multi_start);
                 return 2; /* illegal content-type syntax! */
               }
 
@@ -1308,8 +1305,8 @@ static int formparse(struct Configurable *config,
         if(!AddMultiFiles(contp, type, filename, &multi_start,
                           &multi_current)) {
           warnf(config, "Error building form post!\n");
-          free(contents);
-          FreeMultiInfo(multi_start);
+          Curl_safefree(contents);
+          FreeMultiInfo(&multi_start);
           return 3;
         }
         contp = sep; /* move the contents pointer to after the separator */
@@ -1328,8 +1325,8 @@ static int formparse(struct Configurable *config,
         forms = malloc((count+1)*sizeof(struct curl_forms));
         if(!forms) {
           fprintf(config->errors, "Error building form post!\n");
-          free(contents);
-          FreeMultiInfo(multi_start);
+          Curl_safefree(contents);
+          FreeMultiInfo(&multi_start);
           return 4;
         }
         for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next) {
@@ -1337,16 +1334,16 @@ static int formparse(struct Configurable *config,
           forms[i].value = ptr->form.value;
         }
         forms[count].option = CURLFORM_END;
-        FreeMultiInfo(multi_start);
+        FreeMultiInfo(&multi_start);
         if(curl_formadd(httppost, last_post,
                         CURLFORM_COPYNAME, name,
                         CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
           warnf(config, "curl_formadd failed!\n");
-          free(forms);
-          free(contents);
+          Curl_safefree(forms);
+          Curl_safefree(contents);
           return 5;
         }
-        free(forms);
+        Curl_safefree(forms);
       }
     }
     else {
@@ -1375,7 +1372,7 @@ static int formparse(struct Configurable *config,
                         CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
           warnf(config, "curl_formadd failed, possibly the file %s is bad!\n",
                 contp+1);
-          free(contents);
+          Curl_safefree(contents);
           return 6;
         }
       }
@@ -1390,7 +1387,7 @@ static int formparse(struct Configurable *config,
         if(curl_formadd(httppost, last_post,
                         CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
           warnf(config, "curl_formadd failed!\n");
-          free(contents);
+          Curl_safefree(contents);
           return 7;
         }
       }
@@ -1401,7 +1398,7 @@ static int formparse(struct Configurable *config,
     warnf(config, "Illegally formatted input field!\n");
     return 1;
   }
-  free(contents);
+  Curl_safefree(contents);
   return 0;
 }
 
@@ -1461,8 +1458,7 @@ static ParameterError file2string(char **bufp, FILE *file)
         *ptr = '\0';
       buflen = strlen(buffer);
       if((ptr = realloc(string, stringlen+buflen+1)) == NULL) {
-        if(string)
-          free(string);
+        Curl_safefree(string);
         return PARAM_NO_MEM;
       }
       string = ptr;
@@ -1487,15 +1483,13 @@ static ParameterError file2memory(char **bufp, size_t *size, FILE *file)
       if(!buffer || (alloc == nused)) {
         /* size_t overflow detection for huge files */
         if(alloc+1 > ((size_t)-1)/2) {
-          if(buffer)
-            free(buffer);
+          Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         alloc *= 2;
         /* allocate an extra char, reserved space, for null termination */
         if((newbuf = realloc(buffer, alloc+1)) == NULL) {
-          if(buffer)
-            free(buffer);
+          Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         buffer = newbuf;
@@ -1512,8 +1506,7 @@ static ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     }
     /* discard buffer if nothing was read */
     if(!nused) {
-      free(buffer);
-      buffer = NULL; /* no string */
+      Curl_safefree(buffer); /* no string */
     }
   }
   *size = nused;
@@ -1630,7 +1623,7 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
         action = allow;
         break;
       default: /* Includes case of terminating NULL */
-        free(buffer);
+        Curl_safefree(buffer);
         return 1;
       }
     }
@@ -1660,7 +1653,7 @@ static long proto2num(struct Configurable *config, long *val, const char *str)
       warnf(config, "unrecognized protocol '%s'\n", token);
     }
   }
-  free(buffer);
+  Curl_safefree(buffer);
   return 0;
 }
 
@@ -2356,9 +2349,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->ftp_ssl = toggle;
         break;
       case 'b': /* --ftp-pasv */
-        if(config->ftpport)
-          free(config->ftpport);
-        config->ftpport = NULL;
+        Curl_safefree(config->ftpport);
         break;
       case 'c': /* --socks5 specifies a socks5 proxy to use, and resolves
                    the name locally and passes on the resolved address */
@@ -2673,7 +2664,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
         else {
           char *enc = curl_easy_escape(config->easy, postdata, (int)size);
-          free(postdata); /* no matter if it worked or not */
+          Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
             /* now make a string with the name from above and append the
                encoded string */
@@ -2748,13 +2739,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
         config->postfields=malloc(newlen);
         if(!config->postfields) {
-          free(postdata);
+          Curl_safefree(postdata);
           return PARAM_NO_MEM;
         }
         /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
         snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
-        free(oldpost);
-        free(postdata);
+        Curl_safefree(oldpost);
+        Curl_safefree(postdata);
       }
       else
         config->postfields=postdata;
@@ -3441,7 +3432,7 @@ static int parseconfig(const char *filename,
         filename = filebuffer;
 #endif /* WIN32 */
       }
-      free(home); /* we've used it, now free it */
+      Curl_safefree(home); /* we've used it, now free it */
     }
 
 # else /* __AMIGA__ */
@@ -3483,7 +3474,7 @@ static int parseconfig(const char *filename,
       case '\n':
       case '*':
       case '\0':
-        free(aline);
+        Curl_safefree(aline);
         continue;
       }
 
@@ -3511,7 +3502,7 @@ static int parseconfig(const char *filename,
         param=malloc(strlen(line)+1); /* parameter */
         if(!param) {
           /* out of memory */
-          free(aline);
+          Curl_safefree(aline);
           rc = 1;
           break;
         }
@@ -3529,7 +3520,7 @@ static int parseconfig(const char *filename,
         /* do this so getparameter can check for required parameters.
            Otherwise it always thinks there's a parameter. */
         if(alloced_param)
-          free(param);
+          Curl_safefree(param);
         param = NULL;
       }
 
@@ -3554,12 +3545,10 @@ static int parseconfig(const char *filename,
         }
       }
 
-      if(alloced_param) {
-        free(param);
-        param = NULL;
-      }
+      if(alloced_param)
+        Curl_safefree(param);
 
-      free(aline);
+      Curl_safefree(aline);
     }
     if(file != stdin)
       fclose(file);
@@ -4081,91 +4070,56 @@ int my_trace(CURL *handle, curl_infotype type,
 
 static void free_config_fields(struct Configurable *config)
 {
-  if(config->random_file)
-    free(config->random_file);
-  if(config->egd_file)
-    free(config->egd_file);
-  if(config->trace_dump)
-    free(config->trace_dump);
-  if(config->cipher_list)
-    free(config->cipher_list);
-  if(config->userpwd)
-    free(config->userpwd);
-  if(config->postfields)
-    free(config->postfields);
-  if(config->proxy)
-    free(config->proxy);
-  if(config->proxyuserpwd)
-    free(config->proxyuserpwd);
-  if(config->noproxy)
-    free(config->noproxy);
-  if(config->cookie)
-    free(config->cookie);
-  if(config->cookiefile)
-    free(config->cookiefile);
-  if(config->krblevel)
-    free(config->krblevel);
-  if(config->headerfile)
-    free(config->headerfile);
-  if(config->ftpport)
-    free(config->ftpport);
-  if(config->range)
-    free(config->range);
-  if(config->customrequest)
-    free(config->customrequest);
-  if(config->writeout)
-    free(config->writeout);
-  if(config->httppost)
+  Curl_safefree(config->random_file);
+  Curl_safefree(config->egd_file);
+  Curl_safefree(config->trace_dump);
+  Curl_safefree(config->cipher_list);
+  Curl_safefree(config->userpwd);
+  Curl_safefree(config->postfields);
+  Curl_safefree(config->proxy);
+  Curl_safefree(config->proxyuserpwd);
+  Curl_safefree(config->noproxy);
+  Curl_safefree(config->cookie);
+  Curl_safefree(config->cookiefile);
+  Curl_safefree(config->krblevel);
+  Curl_safefree(config->headerfile);
+  Curl_safefree(config->ftpport);
+  Curl_safefree(config->range);
+  Curl_safefree(config->customrequest);
+  Curl_safefree(config->writeout);
+
+  if(config->httppost) {
     curl_formfree(config->httppost);
-  if(config->netrc_file)
-    free(config->netrc_file);
-  if(config->cert)
-    free(config->cert);
-  if(config->cacert)
-    free(config->cacert);
-  if(config->cert_type)
-    free(config->cert_type);
-  if(config->capath)
-    free(config->capath);
-  if(config->crlfile)
-    free(config->crlfile);
-  if(config->cookiejar)
-    free(config->cookiejar);
-  if(config->ftp_account)
-    free(config->ftp_account);
-  if(config->ftp_alternative_to_user)
-    free(config->ftp_alternative_to_user);
-  if(config->iface)
-    free(config->iface);
-  if(config->socksproxy)
-    free(config->socksproxy);
-  if(config->libcurl)
-    free(config->libcurl);
-  if(config->key_passwd)
-    free(config->key_passwd);
-  if(config->key)
-    free(config->key);
-  if(config->key_type)
-    free(config->key_type);
-  if(config->pubkey)
-    free(config->pubkey);
-  if(config->referer)
-    free(config->referer);
-  if(config->hostpubmd5)
-    free(config->hostpubmd5);
-  if(config->mail_from)
-    free(config->mail_from);
+    config->httppost = NULL;
+  }
+
+  Curl_safefree(config->netrc_file);
+  Curl_safefree(config->cert);
+  Curl_safefree(config->cacert);
+  Curl_safefree(config->cert_type);
+  Curl_safefree(config->capath);
+  Curl_safefree(config->crlfile);
+  Curl_safefree(config->cookiejar);
+  Curl_safefree(config->ftp_account);
+  Curl_safefree(config->ftp_alternative_to_user);
+  Curl_safefree(config->iface);
+  Curl_safefree(config->socksproxy);
+  Curl_safefree(config->libcurl);
+  Curl_safefree(config->key_passwd);
+  Curl_safefree(config->key);
+  Curl_safefree(config->key_type);
+  Curl_safefree(config->pubkey);
+  Curl_safefree(config->referer);
+  Curl_safefree(config->hostpubmd5);
+  Curl_safefree(config->mail_from);
+
 #ifdef USE_TLS_SRP
-  if(config->tls_authtype)
-    free(config->tls_authtype);
-  if(config->tls_username)
-    free(config->tls_username);
-  if(config->tls_password)
-    free(config->tls_password);
+  Curl_safefree(config->tls_authtype);
+  Curl_safefree(config->tls_username);
+  Curl_safefree(config->tls_password);
 #endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  if(config->socks5_gssapi_service)
-    free(config->socks5_gssapi_service);
+  Curl_safefree(config->socks5_gssapi_service);
 #endif
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
@@ -4176,8 +4130,10 @@ static void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->mail_rcpt);
   curl_slist_free_all(config->resolve);
 
-  if(config->easy)
+  if(config->easy) {
     curl_easy_cleanup(config->easy);
+    config->easy = NULL;
+  }
 }
 
 #ifdef WIN32
@@ -4207,7 +4163,7 @@ static void FindWin32CACert(struct Configurable *config,
     if(buflen > 0) {
       GetStr(&config->cacert, retval);
     }
-    free(retval);
+    Curl_safefree(retval);
   }
 }
 
@@ -4427,7 +4383,7 @@ static char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
     if(encfile) {
       char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
       if(!urlbuffer) {
-        free(url);
+        Curl_safefree(url);
         return NULL;
       }
       if(ptr)
@@ -4439,7 +4395,7 @@ static char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
 
       curl_free(encfile);
 
-      free(url);
+      Curl_safefree(url);
       url = urlbuffer; /* use our new URL instead! */
     }
   }
@@ -4501,7 +4457,7 @@ parse_filename(char *ptr, size_t len)
   if(q) {
     p=q+1;
     if(!*p) {
-      free(copy);
+      Curl_safefree(copy);
       return NULL;
     }
   }
@@ -4513,7 +4469,7 @@ parse_filename(char *ptr, size_t len)
   if(q) {
     p = q+1;
     if(!*p) {
-      free(copy);
+      Curl_safefree(copy);
       return NULL;
     }
   }
@@ -4551,7 +4507,7 @@ parse_filename(char *ptr, size_t len)
     if(tdir) {
       char buffer[512]; /* suitably large */
       snprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
-      free(copy);
+      Curl_safefree(copy);
       copy = strdup(buffer); /* clone the buffer, we don't use the libcurl
                                 aprintf() or similar since we want to use the
                                 same memory code as the "real" parse_filename
@@ -4842,12 +4798,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     if(config->use_httpget) {
       /* Use the postfields data for a http get */
       httpgetfields = strdup(config->postfields);
-      free(config->postfields);
-      config->postfields = NULL;
+      Curl_safefree(config->postfields);
       if(SetHTTPrequest(config,
                         (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
-        free(httpgetfields);
+        Curl_safefree(httpgetfields);
         return PARAM_BAD_USE;
       }
     }
@@ -4906,12 +4861,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     if(NULL == url) {
       /* This node had no URL, skip it and continue to the next */
-      if(urlnode->outfile)
-        free(urlnode->outfile);
+      Curl_safefree(urlnode->outfile);
 
       /* move on to the next URL */
       nextnode=urlnode->next;
-      free(urlnode); /* free the node */
+      Curl_safefree(urlnode); /* free the node */
       urlnode = nextnode;
       continue; /* next please */
     }
@@ -4939,8 +4893,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                      config->showerror?config->errors:NULL);
       if(res != CURLE_OK) {
         clean_getout(config);
-        if(outfiles)
-          free(outfiles);
+        Curl_safefree(outfiles);
         break;
       }
     }
@@ -5003,7 +4956,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
-              free(url);
+              Curl_safefree(url);
               break;
             }
 #if defined(MSDOS) || defined(WIN32)
@@ -5020,11 +4973,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = outfile;
             outfile = glob_match_url(storefile, urls);
-            free(storefile);
+            Curl_safefree(storefile);
             if(!outfile) {
               /* bad globbing */
               warnf(config, "bad output glob!\n");
-              free(url);
+              Curl_safefree(url);
               res = CURLE_FAILED_INIT;
               break;
             }
@@ -5035,7 +4988,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           if(config->create_dirs &&
              (-1 == create_dir_hierarchy(outfile, config->errors))) {
-            free(url);
+            Curl_safefree(url);
             res = CURLE_WRITE_ERROR;
             break;
           }
@@ -5064,7 +5017,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
             if(!outs.stream) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
-              free(url);
+              Curl_safefree(url);
               res = CURLE_WRITE_ERROR;
               break;
             }
@@ -5230,7 +5183,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             */
             sprintf(urlbuffer, "%s/?%s", url, httpgetfields);
 
-          free(url); /* free previous URL */
+          Curl_safefree(url); /* free previous URL */
           url = urlbuffer; /* use our new URL instead! */
         }
 
@@ -5373,8 +5326,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         else {
           char *home = homedir();
           char *file = aprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
-          if(home)
-            free(home);
+          Curl_safefree(home);
 
           if(file) {
             my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
@@ -5811,7 +5763,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                     strerror(errno) );
           }
           if(outs.alloc_filename)
-            free(outs.filename);
+            Curl_safefree(outs.filename);
 
           rc = fclose(outs.stream);
           if(!res && rc) {
@@ -5846,11 +5798,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
 
         quit_urls:
-        if(url)
-          free(url);
+        Curl_safefree(url);
 
-        if(outfile)
-          free(outfile);
+        Curl_safefree(outfile);
 
         if(infdopen)
           close(infd);
@@ -5863,8 +5813,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         urls = NULL;
       }
 
-      if(uploadfile)
-        free(uploadfile);
+      Curl_safefree(uploadfile);
 
     } /* loop to the next globbed upload file */
 
@@ -5873,30 +5822,24 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       inglob = NULL;
     }
 
-    if(outfiles)
-      free(outfiles);
+    Curl_safefree(outfiles);
 
     /* empty this urlnode struct */
-    if(urlnode->url)
-      free(urlnode->url);
-    if(urlnode->outfile)
-      free(urlnode->outfile);
-    if(urlnode->infile)
-      free(urlnode->infile);
+    Curl_safefree(urlnode->url);
+    Curl_safefree(urlnode->outfile);
+    Curl_safefree(urlnode->infile);
 
     /* move on to the next URL */
     nextnode=urlnode->next;
-    free(urlnode); /* free the node */
+    Curl_safefree(urlnode); /* free the node */
     urlnode = nextnode;
 
   } /* while-loop through all URLs */
 
   quit_curl:
-  if(httpgetfields)
-    free(httpgetfields);
+  Curl_safefree(httpgetfields);
 
-  if(config->engine)
-    free(config->engine);
+  Curl_safefree(config->engine);
 
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
@@ -5908,7 +5851,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     fclose(heads.stream);
 
   if(allocuseragent)
-    free(config->useragent);
+    Curl_safefree(config->useragent);
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
@@ -6003,7 +5946,7 @@ static char *my_get_line(FILE *fp)
       char *ptr;
       ptr = realloc(retval, strlen(retval) + strlen(buf) + 1);
       if(NULL == ptr) {
-        free(retval);
+        Curl_safefree(retval);
         return NULL;
       }
       retval = ptr;
@@ -6073,7 +6016,7 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
 
   dirbuildup = malloc(sizeof(char) * strlen(outfile));
   if(!dirbuildup) {
-    free(outdup);
+    Curl_safefree(outdup);
     return -1;
   }
   dirbuildup[0] = '\0';
@@ -6104,8 +6047,8 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
     }
     tempdir = tempdir2;
   }
-  free(dirbuildup);
-  free(outdup);
+  Curl_safefree(dirbuildup);
+  Curl_safefree(outdup);
 
   return result; /* 0 is fine, -1 is badness */
 }
@@ -6268,7 +6211,7 @@ static char *sanitize_dos_name(char *fn)
   if(strlen(fn) >= PATH_MAX)
     fn[PATH_MAX-1]=0; /* truncate it */
   strcpy(tmpfn, msdosify(fn));
-  free(fn);
+  Curl_safefree(fn);
   return strdup(rename_if_dos_device_name(tmpfn));
 }
 #endif /* MSDOS || WIN32 */
