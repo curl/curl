@@ -45,8 +45,8 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_CONSOLE" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_CONSOLE" /FD /GZ /c
-# ADD BASE RSC /l 0x409 /i "..\include" /d "_DEBUG"
-# ADD RSC /l 0x409 /i "..\include" /d "_DEBUG"
+# ADD BASE RSC /l 0x409 /i "..\lib" /i "..\include" /d "_DEBUG"
+# ADD RSC /l 0x409 /i "..\lib" /i "..\include" /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -69,8 +69,8 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_CONSOLE" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_CONSOLE" /FD /c
-# ADD BASE RSC /l 0x409 /i "..\include" /d "NDEBUG"
-# ADD RSC /l 0x409 /i "..\include" /d "NDEBUG"
+# ADD BASE RSC /l 0x409 /i "..\lib" /i "..\include" /d "NDEBUG"
+# ADD RSC /l 0x409 /i "..\lib" /i "..\include" /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -93,8 +93,8 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /GZ /c
-# ADD BASE RSC /l 0x409 /i "..\include" /d "_DEBUG"
-# ADD RSC /l 0x409 /i "..\include" /d "_DEBUG"
+# ADD BASE RSC /l 0x409 /i "..\lib" /i "..\include" /d "_DEBUG"
+# ADD RSC /l 0x409 /i "..\lib" /i "..\include" /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -117,8 +117,8 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\lib" /I "..\include" /I "." /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /c
-# ADD BASE RSC /l 0x409 /i "..\include" /d "NDEBUG"
-# ADD RSC /l 0x409 /i "..\include" /d "NDEBUG"
+# ADD BASE RSC /l 0x409 /i "..\lib" /i "..\include" /d "NDEBUG"
+# ADD RSC /l 0x409 /i "..\lib" /i "..\include" /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
