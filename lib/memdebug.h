@@ -152,8 +152,10 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 /*
  * Curl_safefree defined as a macro to allow MemoryTracking feature
  * to log free() calls at same location where Curl_safefree is used.
+ * This macro also assigns NULL to given pointer when free'd.
  */
 
-#define Curl_safefree(ptr)  do {if((ptr)) free((ptr));} WHILE_FALSE
+#define Curl_safefree(ptr) \
+  do {if((ptr)) {free((ptr)); (ptr) = NULL;}} WHILE_FALSE
 
 #endif /* HEADER_CURL_MEMDEBUG_H */
