@@ -85,14 +85,6 @@
 #  include <netinet/tcp.h>
 #endif
 
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-#  include <iconv.h>
-/* set default codesets for iconv */
-#  ifndef CURL_ICONV_CODESET_OF_NETWORK
-#    define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
-#  endif
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
-
 #ifdef MSDOS
 #  include <dos.h>
 #endif
@@ -119,6 +111,7 @@
 #include "os-specific.h"
 #include "version.h"
 #include "xattr.h"
+#include "tool_convert.h"
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -319,113 +312,6 @@ typedef enum {
   " not match the domain name in the URL).\n"                           \
   "If you'd like to turn off curl's verification of the certificate, use\n" \
   " the -k (or --insecure) option.\n"
-
-#ifdef CURL_DOES_CONVERSIONS
-#ifdef HAVE_ICONV
-iconv_t inbound_cd  = (iconv_t)-1;
-iconv_t outbound_cd = (iconv_t)-1;
-
-/*
- * convert_to_network() is an internal function to convert
- * from the host encoding to ASCII on non-ASCII platforms.
- */
-static CURLcode
-convert_to_network(char *buffer, size_t length)
-{
-  CURLcode rc;
-
-  /* translate from the host encoding to the network encoding */
-  char *input_ptr, *output_ptr;
-  size_t in_bytes, out_bytes;
-
-  /* open an iconv conversion descriptor if necessary */
-  if(outbound_cd == (iconv_t)-1) {
-    outbound_cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
-                             CURL_ICONV_CODESET_OF_HOST);
-    if(outbound_cd == (iconv_t)-1) {
-      return CURLE_CONV_FAILED;
-    }
-  }
-  /* call iconv */
-  input_ptr = output_ptr = buffer;
-  in_bytes = out_bytes = length;
-  rc = iconv(outbound_cd, &input_ptr,  &in_bytes,
-             &output_ptr, &out_bytes);
-  if((rc == -1) || (in_bytes != 0)) {
-    return CURLE_CONV_FAILED;
-  }
-
-  return CURLE_OK;
-}
-
-/*
- * convert_from_network() is an internal function
- * for performing ASCII conversions on non-ASCII platforms.
- */
-static CURLcode
-convert_from_network(char *buffer, size_t length)
-{
-  CURLcode rc;
-
-  /* translate from the network encoding to the host encoding */
-  char *input_ptr, *output_ptr;
-  size_t in_bytes, out_bytes;
-
-  /* open an iconv conversion descriptor if necessary */
-  if(inbound_cd == (iconv_t)-1) {
-    inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
-                            CURL_ICONV_CODESET_OF_NETWORK);
-    if(inbound_cd == (iconv_t)-1) {
-      return CURLE_CONV_FAILED;
-    }
-  }
-  /* call iconv */
-  input_ptr = output_ptr = buffer;
-  in_bytes = out_bytes = length;
-  rc = iconv(inbound_cd, &input_ptr,  &in_bytes,
-             &output_ptr, &out_bytes);
-  if((rc == -1) || (in_bytes != 0)) {
-    return CURLE_CONV_FAILED;
-  }
-
-  return CURLE_OK;
-}
-#endif /* HAVE_ICONV */
-
-static
-char convert_char(curl_infotype infotype, char this_char)
-{
-/* determine how this specific character should be displayed */
-  switch(infotype) {
-  case CURLINFO_DATA_IN:
-  case CURLINFO_DATA_OUT:
-  case CURLINFO_SSL_DATA_IN:
-  case CURLINFO_SSL_DATA_OUT:
-    /* data, treat as ASCII */
-    if((this_char >= 0x20) && (this_char < 0x7f)) {
-      /* printable ASCII hex value: convert to host encoding */
-      convert_from_network(&this_char, 1);
-    }
-    else {
-      /* non-printable ASCII, use a replacement character */
-      return UNPRINTABLE_CHAR;
-    }
-    /* fall through to default */
-  default:
-    /* treat as host encoding */
-    if(ISPRINT(this_char)
-       &&  (this_char != '\t')
-       &&  (this_char != '\r')
-       &&  (this_char != '\n')) {
-      /* printable characters excluding tabs and line end characters */
-      return this_char;
-    }
-    break;
-  }
-  /* non-printable, use a replacement character  */
-  return UNPRINTABLE_CHAR;
-}
-#endif /* CURL_DOES_CONVERSIONS */
 
 #if defined(WIN32) && !defined(__MINGW64__)
 
@@ -716,13 +602,7 @@ static CURLcode main_init(void)
 static void main_free(void)
 {
   curl_global_cleanup();
-#if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
-  /* close iconv conversion descriptor */
-  if(inbound_cd != (iconv_t)-1)
-    iconv_close(inbound_cd);
-  if(outbound_cd != (iconv_t)-1)
-    iconv_close(outbound_cd);
-#endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+  convert_cleanup();
 }
 
 static int SetHTTPrequest(struct Configurable *config,

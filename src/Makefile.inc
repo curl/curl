@@ -15,12 +15,13 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 	$(top_srcdir)/lib/nonblock.c
 
 CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
-	getpass.c homedir.c curlutil.c os-specific.c xattr.c
+	getpass.c homedir.c curlutil.c os-specific.c xattr.c \
+	tool_convert.c
 
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-riscos.h urlglob.h version.h os-specific.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
-	xattr.h
+	xattr.h tool_convert.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 
