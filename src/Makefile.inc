@@ -16,12 +16,12 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 
 CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c os-specific.c xattr.c \
-	tool_convert.c
+	tool_convert.c tool_mfiles.c
 
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-riscos.h urlglob.h version.h os-specific.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
-	xattr.h tool_convert.h
+	xattr.h tool_convert.h tool_mfiles.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 

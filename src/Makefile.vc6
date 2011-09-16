@@ -143,6 +143,7 @@ RELEASE_OBJS= \
 	rawstrr.obj \
 	strtoofftr.obj \
 	tool_convertr.obj \
+	tool_mfilesr.obj \
 	urlglobr.obj \
 	writeoutr.obj \
 	xattrr.obj \
@@ -159,6 +160,7 @@ DEBUG_OBJS= \
 	rawstrd.obj \
 	strtoofftd.obj \
 	tool_convertd.obj \
+	tool_mfilesd.obj \
 	urlglobd.obj \
 	writeoutd.obj \
 	xattrd.obj \
@@ -306,6 +308,8 @@ strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 tool_convertr.obj: tool_convert.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_mfilesr.obj: tool_mfiles.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
 xattrr.obj: xattr.c
 	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
 mainr.obj: main.c
@@ -336,6 +340,8 @@ strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 tool_convertd.obj: tool_convert.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_mfilesd.obj: tool_mfiles.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
 xattrd.obj: xattr.c
 	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
 maind.obj: main.c

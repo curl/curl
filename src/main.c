@@ -112,6 +112,7 @@
 #include "version.h"
 #include "xattr.h"
 #include "tool_convert.h"
+#include "tool_mfiles.h"
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -918,92 +919,6 @@ static struct getout *new_getout(struct Configurable *config)
   return node;
 }
 
-/* Structure for storing the information needed to build a multiple files
- * section
- */
-struct multi_files {
-  struct curl_forms   form;
-  struct multi_files *next;
-};
-
-/* Add a new list entry possibly with a type_name
- */
-static struct multi_files *
-AddMultiFiles(const char *file_name,
-              const char *type_name,
-              const char *show_filename,
-              struct multi_files **multi_start,
-              struct multi_files **multi_current)
-{
-  struct multi_files *multi;
-  struct multi_files *multi_type = NULL;
-  struct multi_files *multi_name = NULL;
-  multi = malloc(sizeof(struct multi_files));
-  if(multi) {
-    memset(multi, 0, sizeof(struct multi_files));
-    multi->form.option = CURLFORM_FILE;
-    multi->form.value = file_name;
-  }
-  else
-    return NULL;
-
-  if(!*multi_start)
-    *multi_start = multi;
-
-  if(type_name) {
-    multi_type = malloc(sizeof(struct multi_files));
-    if(multi_type) {
-      memset(multi_type, 0, sizeof(struct multi_files));
-      multi_type->form.option = CURLFORM_CONTENTTYPE;
-      multi_type->form.value = type_name;
-      multi->next = multi_type;
-
-      multi = multi_type;
-    }
-    else {
-      Curl_safefree(multi);
-      return NULL;
-    }
-  }
-  if(show_filename) {
-    multi_name = malloc(sizeof(struct multi_files));
-    if(multi_name) {
-      memset(multi_name, 0, sizeof(struct multi_files));
-      multi_name->form.option = CURLFORM_FILENAME;
-      multi_name->form.value = show_filename;
-      multi->next = multi_name;
-
-      multi = multi_name;
-    }
-    else {
-      Curl_safefree(multi);
-      return NULL;
-    }
-  }
-
-  if(*multi_current)
-    (*multi_current)->next = multi;
-
-  *multi_current = multi;
-
-  return *multi_current;
-}
-
-/* Free the items of the list.
- */
-static void FreeMultiInfo(struct multi_files **multi_start)
-{
-  struct multi_files *next;
-  struct multi_files *item = *multi_start;
-
-  while(item) {
-    next = item->next;
-    Curl_safefree(item);
-    item = next;
-  }
-  *multi_start = NULL;
-}
-
 /* Print list of OpenSSL engines supported.
  */
 static void list_engines(const struct curl_slist *engines)
@@ -1087,11 +1002,13 @@ static int formparse(struct Configurable *config,
     contp = contents;
 
     if('@' == contp[0] && !literal_value) {
-      struct multi_files *multi_start = NULL, *multi_current = NULL;
-      /* we use the @-letter to indicate file name(s) */
-      contp++;
 
-      multi_start = multi_current=NULL;
+      /* we use the @-letter to indicate file name(s) */
+
+      struct multi_files *multi_start = NULL;
+      struct multi_files *multi_current = NULL;
+
+      contp++;
 
       do {
         /* since this was a file, it may have a content-type specifier
@@ -1136,7 +1053,7 @@ static int formparse(struct Configurable *config,
                              major, minor)) {
                 warnf(config, "Illegally formatted content-type field!\n");
                 Curl_safefree(contents);
-                FreeMultiInfo(&multi_start);
+                FreeMultiInfo(&multi_start, &multi_current);
                 return 2; /* illegal content-type syntax! */
               }
 
@@ -1198,7 +1115,6 @@ static int formparse(struct Configurable *config,
                           &multi_current)) {
           warnf(config, "Error building form post!\n");
           Curl_safefree(contents);
-          FreeMultiInfo(&multi_start);
           return 3;
         }
         contp = sep; /* move the contents pointer to after the separator */
@@ -1218,7 +1134,7 @@ static int formparse(struct Configurable *config,
         if(!forms) {
           fprintf(config->errors, "Error building form post!\n");
           Curl_safefree(contents);
-          FreeMultiInfo(&multi_start);
+          FreeMultiInfo(&multi_start, &multi_current);
           return 4;
         }
         for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next) {
@@ -1226,7 +1142,7 @@ static int formparse(struct Configurable *config,
           forms[i].value = ptr->form.value;
         }
         forms[count].option = CURLFORM_END;
-        FreeMultiInfo(&multi_start);
+        FreeMultiInfo(&multi_start, &multi_current);
         if(curl_formadd(httppost, last_post,
                         CURLFORM_COPYNAME, name,
                         CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {

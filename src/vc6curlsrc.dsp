@@ -179,6 +179,10 @@ SOURCE=.\tool_convert.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_mfiles.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\urlglob.c
 # End Source File
 # Begin Source File
@@ -240,6 +244,10 @@ SOURCE=..\lib\strtoofft.h
 # Begin Source File
 
 SOURCE=.\tool_convert.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_mfiles.h
 # End Source File
 # Begin Source File
 
