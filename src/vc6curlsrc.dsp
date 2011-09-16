@@ -175,6 +175,10 @@ SOURCE=..\lib\strtoofft.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_cfgable.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_convert.c
 # End Source File
 # Begin Source File
@@ -240,6 +244,10 @@ SOURCE=..\lib\rawstr.h
 # Begin Source File
 
 SOURCE=..\lib\strtoofft.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cfgable.h
 # End Source File
 # Begin Source File
 
