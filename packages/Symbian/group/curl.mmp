@@ -9,7 +9,8 @@ UID           0x00000000 0xF0206442
 SOURCEPATH  ../../../src
 SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
-    getpass.c homedir.c curlutil.c os-specific.c xattr.c
+    getpass.c homedir.c curlutil.c os-specific.c xattr.c \
+    tool_cfgable.c tool_convert.c tool_mfiles.c
 
 SOURCEPATH  ../../../lib
 SOURCE \
