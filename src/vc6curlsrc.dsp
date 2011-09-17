@@ -187,6 +187,10 @@ SOURCE=.\tool_mfiles.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_myfunc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\urlglob.c
 # End Source File
 # Begin Source File
@@ -256,6 +260,10 @@ SOURCE=.\tool_convert.h
 # Begin Source File
 
 SOURCE=.\tool_mfiles.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_myfunc.h
 # End Source File
 # Begin Source File
 

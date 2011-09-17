@@ -145,6 +145,7 @@ RELEASE_OBJS= \
 	tool_cfgabler.obj \
 	tool_convertr.obj \
 	tool_mfilesr.obj \
+	tool_myfuncr.obj \
 	urlglobr.obj \
 	writeoutr.obj \
 	xattrr.obj \
@@ -163,6 +164,7 @@ DEBUG_OBJS= \
 	tool_cfgabled.obj \
 	tool_convertd.obj \
 	tool_mfilesd.obj \
+	tool_myfuncd.obj \
 	urlglobd.obj \
 	writeoutd.obj \
 	xattrd.obj \
@@ -314,6 +316,8 @@ tool_convertr.obj: tool_convert.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_convert.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_myfuncr.obj: tool_myfunc.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
 xattrr.obj: xattr.c
 	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
 mainr.obj: main.c
@@ -348,6 +352,8 @@ tool_convertd.obj: tool_convert.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_convert.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_myfuncd.obj: tool_myfunc.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
 xattrd.obj: xattr.c
 	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
 maind.obj: main.c

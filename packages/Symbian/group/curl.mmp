@@ -10,7 +10,7 @@ SOURCEPATH  ../../../src
 SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
     getpass.c homedir.c curlutil.c os-specific.c xattr.c \
-    tool_cfgable.c tool_convert.c tool_mfiles.c
+    tool_cfgable.c tool_convert.c tool_mfiles.c tool_myfunc.c
 
 SOURCEPATH  ../../../lib
 SOURCE \

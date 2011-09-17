@@ -114,6 +114,7 @@
 #include "tool_convert.h"
 #include "tool_mfiles.h"
 #include "tool_cfgable.h"
+#include "tool_myfunc.h"
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -4132,7 +4133,6 @@ static int
 operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
-  char useragent[256]; /* buah, we don't want a larger default user agent */
   struct ProgressData progressbar;
   struct getout *urlnode;
   struct getout *nextnode;
@@ -4149,8 +4149,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   curl_off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
-
-  bool allocuseragent=FALSE;
 
   char *httpgetfields=NULL;
 
@@ -4281,14 +4279,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     helpf(config->errors, "no URL specified!\n");
     return CURLE_FAILED_INIT;
   }
-  if(NULL == config->useragent) {
-    /* set non-zero default values: */
-    snprintf(useragent, sizeof(useragent),
-             CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
-    config->useragent= useragent;
+
+  if(!config->useragent)
+    config->useragent = my_useragent();
+  if(!config->useragent) {
+    clean_getout(config);
+    res = CURLE_OUT_OF_MEMORY;
+    goto quit_curl;
   }
-  else
-    allocuseragent = TRUE;
 
   /* On WIN32 we can't set the path to curl-ca-bundle.crt
    * at compile time. So we look here for the file in two ways:
@@ -5392,9 +5390,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   if(heads.stream && (heads.stream != stdout))
     fclose(heads.stream);
-
-  if(allocuseragent)
-    Curl_safefree(config->useragent);
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
