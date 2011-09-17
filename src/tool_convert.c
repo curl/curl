@@ -149,3 +149,4 @@ char convert_char(curl_infotype infotype, char this_char)
 }
 
 #endif /* CURL_DOES_CONVERSIONS */
+
