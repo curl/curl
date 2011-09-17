@@ -158,7 +158,7 @@ ifdef IDN
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
-  DLL_LIBS += -L"$(WINIDN_PATH)" -lnormaliz
+  curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
 endif
 endif
 ifdef SSPI
