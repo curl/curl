@@ -27,72 +27,99 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* TODO: review that all dinamically allocated fields are free'd */
+/* TODO: review handling of unhandled fields marked below */
 
 void free_config_fields(struct Configurable *config)
 {
+  if(config->easy) {
+    curl_easy_cleanup(config->easy);
+    config->easy = NULL;
+  }
+
   Curl_safefree(config->random_file);
   Curl_safefree(config->egd_file);
-  Curl_safefree(config->trace_dump);
-  Curl_safefree(config->cipher_list);
-  Curl_safefree(config->userpwd);
-  Curl_safefree(config->postfields);
-  Curl_safefree(config->proxy);
-  Curl_safefree(config->proxyuserpwd);
-  Curl_safefree(config->noproxy);
+
+  /* config->useragent not handled */
+
   Curl_safefree(config->cookie);
+  Curl_safefree(config->cookiejar);
   Curl_safefree(config->cookiefile);
-  Curl_safefree(config->krblevel);
+
+  Curl_safefree(config->postfields);
+  Curl_safefree(config->referer);
+
   Curl_safefree(config->headerfile);
   Curl_safefree(config->ftpport);
+  Curl_safefree(config->iface);
+
   Curl_safefree(config->range);
+
+  Curl_safefree(config->userpwd);
+  Curl_safefree(config->tls_username);
+  Curl_safefree(config->tls_password);
+  Curl_safefree(config->tls_authtype);
+  Curl_safefree(config->proxyuserpwd);
+  Curl_safefree(config->proxy);
+
+  Curl_safefree(config->noproxy);
+  Curl_safefree(config->mail_from);
+  curl_slist_free_all(config->mail_rcpt);
+
+  Curl_safefree(config->netrc_file);
+
+  /* config->url_list not handled */
+  /* config->url_last not handled */
+  /* config->url_get not handled */
+  /* config->url_out not handled */
+
+  Curl_safefree(config->cipher_list);
+  Curl_safefree(config->cert);
+  Curl_safefree(config->cert_type);
+  Curl_safefree(config->cacert);
+  Curl_safefree(config->capath);
+  Curl_safefree(config->crlfile);
+  Curl_safefree(config->key);
+  Curl_safefree(config->key_type);
+  Curl_safefree(config->key_passwd);
+  Curl_safefree(config->pubkey);
+  Curl_safefree(config->hostpubmd5);
+
+  /* config->engine not handled */
+
   Curl_safefree(config->customrequest);
+  Curl_safefree(config->krblevel);
+  Curl_safefree(config->trace_dump);
+
+  /* config->trace_stream not handled */
+
   Curl_safefree(config->writeout);
+
+  /* config->errors not handled */
+
+  curl_slist_free_all(config->quote);
+  curl_slist_free_all(config->postquote);
+  curl_slist_free_all(config->prequote);
+
+  curl_slist_free_all(config->headers);
 
   if(config->httppost) {
     curl_formfree(config->httppost);
     config->httppost = NULL;
   }
 
-  Curl_safefree(config->netrc_file);
-  Curl_safefree(config->cert);
-  Curl_safefree(config->cacert);
-  Curl_safefree(config->cert_type);
-  Curl_safefree(config->capath);
-  Curl_safefree(config->crlfile);
-  Curl_safefree(config->cookiejar);
-  Curl_safefree(config->ftp_account);
-  Curl_safefree(config->ftp_alternative_to_user);
-  Curl_safefree(config->iface);
-  Curl_safefree(config->socksproxy);
-  Curl_safefree(config->libcurl);
-  Curl_safefree(config->key_passwd);
-  Curl_safefree(config->key);
-  Curl_safefree(config->key_type);
-  Curl_safefree(config->pubkey);
-  Curl_safefree(config->referer);
-  Curl_safefree(config->hostpubmd5);
-  Curl_safefree(config->mail_from);
+  /* config->last_post not handled */
 
-#ifdef USE_TLS_SRP
-  Curl_safefree(config->tls_authtype);
-  Curl_safefree(config->tls_username);
-  Curl_safefree(config->tls_password);
-#endif
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  Curl_safefree(config->socks5_gssapi_service);
-#endif
-
-  curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
-  curl_slist_free_all(config->prequote);
-  curl_slist_free_all(config->postquote);
-  curl_slist_free_all(config->headers);
   curl_slist_free_all(config->telnet_options);
-  curl_slist_free_all(config->mail_rcpt);
   curl_slist_free_all(config->resolve);
 
-  if(config->easy) {
-    curl_easy_cleanup(config->easy);
-    config->easy = NULL;
-  }
+  Curl_safefree(config->socksproxy);
+  Curl_safefree(config->socks5_gssapi_service);
+
+  Curl_safefree(config->ftp_account);
+  Curl_safefree(config->ftp_alternative_to_user);
+
+  Curl_safefree(config->libcurl);
+
+  /* config->outs not handled */
+
 }
