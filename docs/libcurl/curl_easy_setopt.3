@@ -672,24 +672,23 @@ directory underneath the root directory then the absolute path must be
 specified by using an additional forward slash to the beginning of the path.
 
 ftp://user:password@my.site.com//readme.txt - This retrieves the readme.txt
-from the root directory when logging in as a specified user. 
+from the root directory when logging in as a specified user.
 
 .B SMTP
 
 The path part of a SMTP request specifies the host name to present during
 communication with the mail server. If the path is omitted then libcurl will
-perform a call to \fCurl_gethostname\fP to resolve the local computer's
-host name. However, \fCurl_gethostname\fP does not return the fully qualified
-domain name that is required by some mail servers and specifing this path
-allows you to specify an alternative nane such as your machine's fully
-qualified domain name which you might have obtained from an external function
-such as gethostname or getaddrinfo.
+attempt to to resolve the local computer's host name. However, that will not
+return the fully qualified domain name that is required by some mail servers
+and specifing this path allows you to specify an alternative name such as your
+machine's fully qualified domain name which you might have obtained from an
+external function such as gethostname or getaddrinfo.
 
 smtp://mail.domain.com - This connects to the mail server at domain.com and
 sends your local computer's host name in the HELO / EHLO command.
 
-smtp://mail.domain.com/client.domain.com - This will send client.domain.com
-in the HELO / EHLO command to the mail server at domain.com.
+smtp://mail.domain.com/client.domain.com - This will send client.domain.com in
+the HELO / EHLO command to the mail server at domain.com.
 
 .B NOTES
 
