@@ -584,20 +584,117 @@ POST/PUT and a 401 or 407 is received immediately afterwards.
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero
-terminated string.
+terminated string which must be URL-encoded in the following format:
 
-If the given URL lacks the protocol part ("http://" or "ftp://" etc), it will
-attempt to guess which protocol to use based on the given host name. If the
-given protocol of the set URL is not supported, libcurl will return on error
-(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP or
-\fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed info
-on which protocols are supported.
+scheme://host:port/path
 
-The string given to CURLOPT_URL must be url-encoded and follow RFC 2396
+For a greater explaination of the format please see RFC 2396
 (http://curl.haxx.se/rfc/rfc2396.txt).
 
-Starting with version 7.20.0, the fragment part of the URI will not be send as
-part of the path, which was the case previously.
+If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
+etc), libcurl will attempt to resolve which protocol to use based on the
+given host mame. If the protocol is not supported, libcurl will return
+(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP
+or \fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed
+information on which protocols are supported.
+
+The host part of the URL contains the address of the server that you want to
+connect to. This can be the fully qualified domain name of the server, the
+local network name of the machine on your network or the IP address of the
+server or machine represented by either an IPv4 or IPv6 address. For example:
+
+http://www.domain.com/
+
+http://hostname/
+
+http://192.168.0.1/
+
+http://[2001:1890:1112:1::20]/
+
+It is also possible to specify the user name and password as part of the
+host, for some protocols, when connecting to servers that require
+authentication.
+
+HTTP and FTP support this type of authentication as follows:
+
+http://name:password@www.domain.com
+ftp://name:password@ftp.domain.com
+
+The port is optional and when not specified libcurl will use the default port
+based on the determined or specified protocol: 80 for http, 21 for ftp and 25
+for smtp, etc. The following examples show how to specify the port:
+
+http://www.weirdserver.com:8080/ - This will connect to a web server using
+port 8080.
+
+smtp://mail.domain.com:587/ - This will connect to a smtp server on the
+alternative mail port.
+
+The path part of the URL is protocol specific and whilst some examples are
+given below this list is not conclusive:
+
+.B HTTP
+
+The path part of a HTTP request specifies the file to retrieve and from what
+directory. If the directory is not specified then the web server's root
+directory is used. If the file is omitted then the default document will be
+retrieved for either the directory specified or the root directory.
+
+http://www.netscape.com - This gets the main page (index.html in this
+example) from Netscape's web server.
+
+http://www.netscape.com/index.html - This returns the main page from Netscape
+by specifing the page to get.
+
+http://www.netscape.com/contactus/ - This returns the default document from
+the contact us directory.
+
+.B FTP
+
+The path part of a FTP request specifies the file to retrieve and from what
+directory. If the file part is omitted then libcurl downloads the directory
+listing for the directory specified. If the directory is omitted then
+the directory listing for the root / home directory will be returned.
+
+ftp://cool.haxx.se - This retrieves the directory listing for our FTP server.
+
+ftp://cool.haxx.se/readme.txt - This downloads the file readme.txt from the
+root directory.
+
+ftp://cool.haxx.se/libcurl/readme.txt - This downloads readme.txt from the
+libcurl directory.
+
+ftp://user:password@my.site.com/readme.txt - This retrieves the readme.txt
+file from the user's home directory. When a username and password is
+specified, everything that is specified in the path part is relative to the
+user's home directory. To retrieve files from the root directory or a
+directory underneath the root directory then the absolute path must be
+specified by using an additional forward slash to the beginning of the path.
+
+ftp://user:password@my.site.com//readme.txt - This retrieves the readme.txt
+from the root directory when logging in as a specified user. 
+
+.B SMTP
+
+The path part of a SMTP request specifies the host name to present during
+communication with the mail server. If the path is omitted then libcurl will
+perform a call to \fCurl_gethostname\fP to resolve the local computer's
+host name. However, \fCurl_gethostname\fP does not return the fully qualified
+domain name that is required by some mail servers and specifing this path
+allows you to specify an alternative nane such as your machine's fully
+qualified domain name which you might have obtained from an external function
+such as gethostname or getaddrinfo.
+
+smtp://mail.domain.com - This connects to the mail server at domain.com and
+sends your local computer's host name in the HELO / EHLO command.
+
+smtp://mail.domain.com/client.domain.com - This will send client.domain.com
+in the HELO / EHLO command to the mail server at domain.com.
+
+.B NOTES
+
+Starting with version 7.20.0, the fragment part of the URI will not be sent as
+part of the path, which was previously the case.
 
 \fICURLOPT_URL\fP is the only option that \fBmust\fP be set before
 \fIcurl_easy_perform(3)\fP is called.
