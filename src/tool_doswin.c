@@ -73,9 +73,9 @@ __pragma(warning(pop))
 #endif
 
 #ifdef WIN32
-#  define _use_lfn(f) (0, 1)  /* long file names always available */
+#  define _use_lfn(f) ALWAYS_TRUE   /* long file names always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) (1, 0)  /* long file names never available */
+#  define _use_lfn(f) ALWAYS_FALSE  /* long file names never available */
 #endif
 
 static const char *msdosify (const char *file_name);
