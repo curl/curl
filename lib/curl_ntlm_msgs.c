@@ -683,18 +683,13 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   if(user)
     userlen = strlen(user);
 
-  if(Curl_gethostname(host, HOSTNAME_MAX)) {
+  /* Get the machine's un-qualified host name as NTLM doesn't like the fully
+     qualified domain name */
+  if(Curl_gethostname(host, sizeof(host))) {
     infof(data, "gethostname() failed, continuing without!");
     hostlen = 0;
   }
   else {
-    /* If the workstation if configured with a full DNS name (i.e.
-     * workstation.somewhere.net) gethostname() returns the fully qualified
-     * name, which NTLM doesn't like.
-     */
-    char *dot = strchr(host, '.');
-    if(dot)
-      *dot = '\0';
     hostlen = strlen(host);
   }
 
