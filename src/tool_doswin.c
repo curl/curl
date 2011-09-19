@@ -32,6 +32,33 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+/*
+ * Macros ALWAYS_TRUE and ALWAYS_FALSE are used to avoid compiler warnings.
+ */
+
+#define ALWAYS_TRUE   (1)
+#define ALWAYS_FALSE  (0)
+
+#if defined(_MSC_VER) && !defined(__POCC__)
+#  undef ALWAYS_TRUE
+#  undef ALWAYS_FALSE
+#  if (_MSC_VER < 1500)
+#    define ALWAYS_TRUE   (0, 1)
+#    define ALWAYS_FALSE  (1, 0)
+#  else
+#    define ALWAYS_TRUE \
+__pragma(warning(push)) \
+__pragma(warning(disable:4127)) \
+(1) \
+__pragma(warning(pop))
+#    define ALWAYS_FALSE \
+__pragma(warning(push)) \
+__pragma(warning(disable:4127)) \
+(0) \
+__pragma(warning(pop))
+#  endif
+#endif
+
 #ifdef WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
