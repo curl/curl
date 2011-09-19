@@ -42,3 +42,4 @@ char convert_char(curl_infotype infotype, char this_char);
 #endif
 
 #endif /* HEADER_CURL_TOOL_CONVERT_H */
+

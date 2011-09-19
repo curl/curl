@@ -126,3 +126,4 @@ void FreeMultiInfo(struct multi_files **multi_first,
   if(multi_last)
     *multi_last = NULL;
 }
+

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_MFILES_H
-#define HEADER_CURL_TOOL_MFILES_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,24 +21,30 @@
  ***************************************************************************/
 #include "setup.h"
 
-/*
- * Structure for storing the information needed to build
- * a multiple files section.
- */
+#include "tool_bname.h"
 
-struct multi_files {
-  struct curl_forms   form;
-  struct multi_files *next;
-};
+#include "memdebug.h" /* keep this as LAST include */
 
-struct multi_files *AddMultiFiles(const char *file_name,
-                                  const char *type_name,
-                                  const char *show_filename,
-                                  struct multi_files **multi_first,
-                                  struct multi_files **multi_last);
+#ifndef HAVE_BASENAME
 
-void FreeMultiInfo(struct multi_files **multi_first,
-                   struct multi_files **multi_last);
+char *tool_basename(char *path)
+{
+  char *s1;
+  char *s2;
 
-#endif /* HEADER_CURL_TOOL_MFILES_H */
+  s1 = strrchr(path, '/');
+  s2 = strrchr(path, '\\');
+
+  if(s1 && s2) {
+    path = (s1 > s2) ? s1 + 1 : s2 + 1;
+  }
+  else if(s1)
+    path = s1 + 1;
+  else if(s2)
+    path = s2 + 1;
+
+  return path;
+}
+
+#endif /* HAVE_BASENAME */
 

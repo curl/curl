@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_MFILES_H
-#define HEADER_CURL_TOOL_MFILES_H
+#ifndef HEADER_CURL_TOOL_DIRHIE_H
+#define HEADER_CURL_TOOL_DIRHIE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,24 +23,7 @@
  ***************************************************************************/
 #include "setup.h"
 
-/*
- * Structure for storing the information needed to build
- * a multiple files section.
- */
+CURLcode create_dir_hierarchy(const char *outfile, FILE *errors);
 
-struct multi_files {
-  struct curl_forms   form;
-  struct multi_files *next;
-};
-
-struct multi_files *AddMultiFiles(const char *file_name,
-                                  const char *type_name,
-                                  const char *show_filename,
-                                  struct multi_files **multi_first,
-                                  struct multi_files **multi_last);
-
-void FreeMultiInfo(struct multi_files **multi_first,
-                   struct multi_files **multi_last);
-
-#endif /* HEADER_CURL_TOOL_MFILES_H */
+#endif /* HEADER_CURL_TOOL_DIRHIE_H */
 

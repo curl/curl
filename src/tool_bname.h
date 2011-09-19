@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_MFILES_H
-#define HEADER_CURL_TOOL_MFILES_H
+#ifndef HEADER_CURL_TOOL_BNAME_H
+#define HEADER_CURL_TOOL_BNAME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,24 +23,13 @@
  ***************************************************************************/
 #include "setup.h"
 
-/*
- * Structure for storing the information needed to build
- * a multiple files section.
- */
+#ifndef HAVE_BASENAME
 
-struct multi_files {
-  struct curl_forms   form;
-  struct multi_files *next;
-};
+char *tool_basename(char *path);
 
-struct multi_files *AddMultiFiles(const char *file_name,
-                                  const char *type_name,
-                                  const char *show_filename,
-                                  struct multi_files **multi_first,
-                                  struct multi_files **multi_last);
+#define basename(x) tool_basename((x))
 
-void FreeMultiInfo(struct multi_files **multi_first,
-                   struct multi_files **multi_last);
+#endif /* HAVE_BASENAME */
 
-#endif /* HEADER_CURL_TOOL_MFILES_H */
+#endif /* HEADER_CURL_TOOL_BNAME_H */
 

@@ -30,18 +30,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(MSDOS) || defined(WIN32)
-#  if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#    include <libgen.h>
-#  endif
-#endif
-
 #ifdef NETWARE
 #  ifdef __NOVELL_LIBC__
 #    include <screen.h>
 #  else
 #    include <nwconio.h>
-#    define mkdir mkdir_510
 #  endif
 #endif
 
@@ -89,16 +82,6 @@
 #  include <dos.h>
 #endif
 
-#if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)
-#  include <io.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#endif
-
-#ifdef WIN32
-#  include <direct.h>
-#endif
-
 /*
 ** src subdirectory headers
 */
@@ -108,13 +91,15 @@
 #include "getpass.h"
 #include "homedir.h"
 #include "curlutil.h"
-#include "os-specific.h"
 #include "version.h"
 #include "xattr.h"
-#include "tool_convert.h"
-#include "tool_mfiles.h"
 #include "tool_cfgable.h"
+#include "tool_convert.h"
+#include "tool_dirhie.h"
+#include "tool_doswin.h"
+#include "tool_mfiles.h"
 #include "tool_myfunc.h"
+#include "tool_vms.h"
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -169,28 +154,6 @@ static int vms_show = 0;
 #define O_BINARY 0
 #endif
 
-#if defined(MSDOS) || defined(WIN32)
-
-static const char *msdosify(const char *);
-static char *rename_if_dos_device_name(char *);
-static char *sanitize_dos_name(char *);
-
-#ifndef S_ISCHR
-#  ifdef S_IFCHR
-#    define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
-#  else
-#    define S_ISCHR(m) (0) /* cannot tell if file is a device */
-#  endif
-#endif
-
-#ifdef WIN32
-#  define _use_lfn(f) (1)  /* long file names always available */
-#elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) (0)  /* long file names never available */
-#endif
-
-#endif /* MSDOS || WIN32 */
-
 #ifdef MSDOS
 #define USE_WATT32
 #ifdef DJGPP
@@ -219,47 +182,6 @@ char **__crt0_glob_function (char *arg)
 
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
-
-/*
- * Large file support (>2Gb) using WIN32 functions.
- */
-
-#ifdef USE_WIN32_LARGE_FILES
-#  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
-#  define fstat(fdes,stp)            _fstati64(fdes, stp)
-#  define stat(fname,stp)            _stati64(fname, stp)
-#  define struct_stat                struct _stati64
-#  define LSEEK_ERROR                (__int64)-1
-#endif
-
-/*
- * Small file support (<2Gb) using WIN32 functions.
- */
-
-#ifdef USE_WIN32_SMALL_FILES
-#  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
-#  define fstat(fdes,stp)            _fstat(fdes, stp)
-#  define stat(fname,stp)            _stat(fname, stp)
-#  define struct_stat                struct _stat
-#  define LSEEK_ERROR                (long)-1
-#endif
-
-#ifndef struct_stat
-#  define struct_stat struct stat
-#endif
-
-#ifndef LSEEK_ERROR
-#  define LSEEK_ERROR (off_t)-1
-#endif
-
-#ifdef WIN32
-#  define mkdir(x,y) (mkdir)(x)
-#  undef  PATH_MAX
-#  define PATH_MAX MAX_PATH
-#  ifndef __POCC__
-#    define F_OK 0
-#  endif
-#endif
 
 /*
  * Default sizeof(off_t) in case it hasn't been defined in config file.
@@ -648,7 +570,6 @@ static curl_version_info_data *curlinfo;
 static int parseconfig(const char *filename,
                        struct Configurable *config);
 static char *my_get_line(FILE *fp);
-static int create_dir_hierarchy(const char *outfile, FILE *errors);
 
 #if 0
 static void GetStr(char **string,
@@ -4496,8 +4417,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outfile = get_url_file_name(url);
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
-              res = CURLE_WRITE_ERROR;
               Curl_safefree(url);
+              res = CURLE_WRITE_ERROR;
               break;
             }
 #if defined(MSDOS) || defined(WIN32)
@@ -4505,6 +4426,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                bad characters in the file name before using it */
             outfile = sanitize_dos_name(outfile);
             if(!outfile) {
+              warnf(config, "out of memory\n");
+              Curl_safefree(url);
               res = CURLE_OUT_OF_MEMORY;
               break;
             }
@@ -4527,11 +4450,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           /* Create the directory hierarchy, if not pre-existent to a multiple
              file output call */
 
-          if(config->create_dirs &&
-             (-1 == create_dir_hierarchy(outfile, config->errors))) {
-            Curl_safefree(url);
-            res = CURLE_WRITE_ERROR;
-            break;
+          if(config->create_dirs) {
+            res = create_dir_hierarchy(outfile, config->errors);
+            /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
+            if(res == CURLE_OUT_OF_MEMORY)
+              warnf(config, "out of memory\n");
+            if(res) {
+              Curl_safefree(url);
+              break;
+            }
           }
 
           if(config->resume_from_current) {
@@ -5499,257 +5426,3 @@ static char *my_get_line(FILE *fp)
   return retval;
 }
 
-static void show_dir_errno(FILE *errors, const char *name)
-{
-  switch (ERRNO) {
-#ifdef EACCES
-  case EACCES:
-    fprintf(errors,"You don't have permission to create %s.\n", name);
-    break;
-#endif
-#ifdef ENAMETOOLONG
-  case ENAMETOOLONG:
-    fprintf(errors,"The directory name %s is too long.\n", name);
-    break;
-#endif
-#ifdef EROFS
-  case EROFS:
-    fprintf(errors,"%s resides on a read-only file system.\n", name);
-    break;
-#endif
-#ifdef ENOSPC
-  case ENOSPC:
-    fprintf(errors,"No space left on the file system that will "
-            "contain the directory %s.\n", name);
-    break;
-#endif
-#ifdef EDQUOT
-  case EDQUOT:
-    fprintf(errors,"Cannot create directory %s because you "
-            "exceeded your quota.\n", name);
-    break;
-#endif
-  default :
-    fprintf(errors,"Error creating directory %s.\n", name);
-    break;
-  }
-}
-
-/* Create the needed directory hierarchy recursively in order to save
-   multi-GETs in file output, ie:
-   curl "http://my.site/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
-   should create all the dir* automagically
-*/
-static int create_dir_hierarchy(const char *outfile, FILE *errors)
-{
-  char *tempdir;
-  char *tempdir2;
-  char *outdup;
-  char *dirbuildup;
-  int result=0;
-
-  outdup = strdup(outfile);
-  if(!outdup)
-    return -1;
-
-  dirbuildup = malloc(sizeof(char) * strlen(outfile));
-  if(!dirbuildup) {
-    Curl_safefree(outdup);
-    return -1;
-  }
-  dirbuildup[0] = '\0';
-
-  tempdir = strtok(outdup, DIR_CHAR);
-
-  while(tempdir != NULL) {
-    tempdir2 = strtok(NULL, DIR_CHAR);
-    /* since strtok returns a token for the last word even
-       if not ending with DIR_CHAR, we need to prune it */
-    if(tempdir2 != NULL) {
-      size_t dlen = strlen(dirbuildup);
-      if(dlen)
-        sprintf(&dirbuildup[dlen], "%s%s", DIR_CHAR, tempdir);
-      else {
-        if(0 != strncmp(outdup, DIR_CHAR, 1))
-          strcpy(dirbuildup, tempdir);
-        else
-          sprintf(dirbuildup, "%s%s", DIR_CHAR, tempdir);
-      }
-      if(access(dirbuildup, F_OK) == -1) {
-        result = mkdir(dirbuildup,(mode_t)0000750);
-        if(-1 == result) {
-          show_dir_errno(errors, dirbuildup);
-          break; /* get out of loop */
-        }
-      }
-    }
-    tempdir = tempdir2;
-  }
-  Curl_safefree(dirbuildup);
-  Curl_safefree(outdup);
-
-  return result; /* 0 is fine, -1 is badness */
-}
-
-#if defined(MSDOS) || defined(WIN32)
-
-#ifndef HAVE_BASENAME
-/* basename() returns a pointer to the last component of a pathname.
- * Ripped from lib/formdata.c.
- */
-static char *Curl_basename(char *path)
-{
-  /* Ignore all the details above for now and make a quick and simple
-     implementaion here */
-  char *s1;
-  char *s2;
-
-  s1=strrchr(path, '/');
-  s2=strrchr(path, '\\');
-
-  if(s1 && s2) {
-    path = (s1 > s2? s1 : s2)+1;
-  }
-  else if(s1)
-    path = s1 + 1;
-  else if(s2)
-    path = s2 + 1;
-
-  return path;
-}
-#define basename(x) Curl_basename((x))
-#endif /* HAVE_BASENAME */
-
-/* The following functions are taken with modification from the DJGPP
- * port of tar 1.12. They use algorithms originally from DJTAR. */
-
-static const char *
-msdosify (const char *file_name)
-{
-  static char dos_name[PATH_MAX];
-  static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
-    "|<>\\\":?*"; /* illegal in DOS & W95 */
-  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
-  int idx, dot_idx;
-  const char *s = file_name;
-  char *d = dos_name;
-  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
-  const char *illegal_aliens = illegal_chars_dos;
-  size_t len = sizeof (illegal_chars_dos) - 1;
-
-  /* Support for Windows 9X VFAT systems, when available. */
-  if(_use_lfn (file_name)) {
-    illegal_aliens = illegal_chars_w95;
-    len -= (illegal_chars_w95 - illegal_chars_dos);
-  }
-
-  /* Get past the drive letter, if any. */
-  if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
-    *d++ = *s++;
-    *d++ = *s++;
-  }
-
-  for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
-    if(memchr (illegal_aliens, *s, len)) {
-      /* Dots are special: DOS doesn't allow them as the leading character,
-         and a file name cannot have more than a single dot.  We leave the
-         first non-leading dot alone, unless it comes too close to the
-         beginning of the name: we want sh.lex.c to become sh_lex.c, not
-         sh.lex-c.  */
-      if(*s == '.') {
-        if(idx == 0 && (s[1] == '/' || (s[1] == '.' && s[2] == '/'))) {
-          /* Copy "./" and "../" verbatim.  */
-          *d++ = *s++;
-          if(*s == '.')
-            *d++ = *s++;
-          *d = *s;
-        }
-        else if(idx == 0)
-          *d = '_';
-        else if(dot_idx >= 0) {
-          if(dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
-            d[dot_idx - idx] = '_'; /* replace previous dot */
-            *d = '.';
-          }
-          else
-            *d = '-';
-        }
-        else
-          *d = '.';
-
-        if(*s == '.')
-          dot_idx = idx;
-      }
-      else if(*s == '+' && s[1] == '+') {
-        if(idx - 2 == dot_idx) { /* .c++, .h++ etc. */
-          *d++ = 'x';
-          *d   = 'x';
-        }
-        else {
-          /* libg++ etc.  */
-          memcpy (d, "plus", 4);
-          d += 3;
-        }
-        s++;
-        idx++;
-      }
-      else
-        *d = '_';
-    }
-    else
-      *d = *s;
-    if(*s == '/') {
-      idx = 0;
-      dot_idx = -1;
-    }
-    else
-      idx++;
-  }
-
-  *d = '\0';
-  return dos_name;
-}
-
-static char *
-rename_if_dos_device_name (char *file_name)
-{
-  /* We could have a file whose name is a device on MS-DOS.  Trying to
-   * retrieve such a file would fail at best and wedge us at worst.  We need
-   * to rename such files. */
-  char *base;
-  struct_stat st_buf;
-  char fname[PATH_MAX];
-
-  strncpy(fname, file_name, PATH_MAX-1);
-  fname[PATH_MAX-1] = 0;
-  base = basename(fname);
-  if(((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
-    size_t blen = strlen (base);
-
-    if(strlen(fname) >= PATH_MAX-1) {
-      /* Make room for the '_' */
-      blen--;
-      base[blen] = 0;
-    }
-    /* Prepend a '_'.  */
-    memmove (base + 1, base, blen + 1);
-    base[0] = '_';
-    strcpy (file_name, fname);
-  }
-  return file_name;
-}
-
-/* Replace bad characters in the file name before using it.
- * fn will always be freed before return
- * The returned pointer must be freed by the caller if not NULL
- */
-static char *sanitize_dos_name(char *fn)
-{
-  char tmpfn[PATH_MAX];
-  if(strlen(fn) >= PATH_MAX)
-    fn[PATH_MAX-1]=0; /* truncate it */
-  strcpy(tmpfn, msdosify(fn));
-  Curl_safefree(fn);
-  return strdup(rename_if_dos_device_name(tmpfn));
-}
-#endif /* MSDOS || WIN32 */

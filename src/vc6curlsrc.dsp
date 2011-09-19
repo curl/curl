@@ -159,10 +159,6 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\os-specific.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\nonblock.c
 # End Source File
 # Begin Source File
@@ -175,6 +171,10 @@ SOURCE=..\lib\strtoofft.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_bname.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_cfgable.c
 # End Source File
 # Begin Source File
@@ -183,11 +183,23 @@ SOURCE=.\tool_convert.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_dirhie.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_doswin.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\tool_myfunc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_vms.c
 # End Source File
 # Begin Source File
 
@@ -231,10 +243,6 @@ SOURCE=.\hugehelp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\os-specific.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\setup.h
 # End Source File
 # Begin Source File
@@ -251,6 +259,10 @@ SOURCE=..\lib\strtoofft.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_bname.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_cfgable.h
 # End Source File
 # Begin Source File
@@ -259,11 +271,23 @@ SOURCE=.\tool_convert.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_dirhie.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_doswin.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\tool_myfunc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_vms.h
 # End Source File
 # Begin Source File
 

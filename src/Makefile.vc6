@@ -139,13 +139,16 @@ RELEASE_OBJS= \
 	hugehelpr.obj \
 	mainr.obj \
 	nonblockr.obj \
-	os-specificr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
+	tool_bnamer.obj \
 	tool_cfgabler.obj \
 	tool_convertr.obj \
+	tool_dirhier.obj \
+	tool_doswinr.obj \
 	tool_mfilesr.obj \
 	tool_myfuncr.obj \
+	tool_vmsr.obj \
 	urlglobr.obj \
 	writeoutr.obj \
 	xattrr.obj \
@@ -158,13 +161,16 @@ DEBUG_OBJS= \
 	hugehelpd.obj \
 	maind.obj \
 	nonblockd.obj \
-	os-specificd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
+	tool_bnamed.obj \
 	tool_cfgabled.obj \
 	tool_convertd.obj \
+	tool_dirhied.obj \
+	tool_doswind.obj \
 	tool_mfilesd.obj \
 	tool_myfuncd.obj \
+	tool_vmsd.obj \
 	urlglobd.obj \
 	writeoutd.obj \
 	xattrd.obj \
@@ -302,22 +308,28 @@ homedirr.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
 curlutilr.obj: curlutil.c
 	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
-os-specificr.obj: os-specific.c
-	$(CCR) $(CFLAGS) /Fo"$@" os-specific.c
 nonblockr.obj: ../lib/nonblock.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+tool_bnamer.obj: tool_bname.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_bname.c
 tool_cfgabler.obj: tool_cfgable.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_cfgable.c
 tool_convertr.obj: tool_convert.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_dirhier.obj: tool_dirhie.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_dirhie.c
+tool_doswinr.obj: tool_doswin.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_myfuncr.obj: tool_myfunc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_vmsr.obj: tool_vms.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrr.obj: xattr.c
 	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
 mainr.obj: main.c
@@ -338,22 +350,28 @@ homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
 curlutild.obj: curlutil.c
 	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
-os-specificd.obj: os-specific.c
-	$(CCD) $(CFLAGS) /Fo"$@" os-specific.c
 nonblockd.obj: ../lib/nonblock.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrd.obj: ../lib/rawstr.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+tool_bnamed.obj: tool_bname.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_bname.c
 tool_cfgabled.obj: tool_cfgable.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_cfgable.c
 tool_convertd.obj: tool_convert.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_dirhied.obj: tool_dirhie.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_dirhie.c
+tool_doswind.obj: tool_doswin.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_myfuncd.obj: tool_myfunc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_vmsd.obj: tool_vms.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrd.obj: xattr.c
 	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
 maind.obj: main.c

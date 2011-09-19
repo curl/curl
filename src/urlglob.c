@@ -27,7 +27,7 @@
 #include <curl/mprintf.h>
 
 #include "urlglob.h"
-#include "os-specific.h"
+#include "tool_vms.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

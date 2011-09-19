@@ -242,3 +242,4 @@ struct Configurable {
 void free_config_fields(struct Configurable *config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
+
