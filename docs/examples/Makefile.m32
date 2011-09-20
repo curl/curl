@@ -19,31 +19,47 @@
 # KIND, either express or implied.
 #
 ###########################################################################
-#########################################################################
 #
-## Makefile for building curl examples with MingW32
-## and optionally OpenSSL (0.9.8), libssh2 (0.18), zlib (1.2.3)
+## Makefile for building curl examples with MingW (GCC-3.2 or later)
+## and optionally OpenSSL (0.9.8), libssh2 (1.3), zlib (1.2.5), librtmp (2.3)
 ##
-## Usage:
-## mingw32-make -f Makefile.m32 [SSL=1] [SSH2=1] [ZLIB=1] [SSPI=1] [IPV6=1] [DYN=1]
+## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
+## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
-## set ZLIB_PATH=c:/zlib-1.2.3
+## set ZLIB_PATH=c:/zlib-1.2.5
 ## set ZLIB=1
-##
-#########################################################################
+#
+###########################################################################
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.3
+ZLIB_PATH = ../../../zlib-1.2.5
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8k
+OPENSSL_PATH = ../../../openssl-0.9.8r
+endif
+ifndef OPENSSL_LIB
+OPENSSL_LIB = $(OPENSSL_PATH)/out
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.2
+LIBSSH2_PATH = ../../../libssh2-1.3.0
+endif
+# Edit the path below to point to the base of your librtmp package.
+ifndef LIBRTMP_PATH
+LIBRTMP_PATH = ../../../librtmp-2.3
+endif
+# Edit the path below to point to the base of your libidn package.
+ifndef LIBIDN_PATH
+LIBIDN_PATH = ../../../libidn-1.18
+endif
+# Edit the path below to point to the base of your MS idndlpackage. 
+# Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
+# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ad6158d7-ddba-416a-9109-07607425a815
+ifndef WINIDN_PATH
+WINIDN_PATH = ../../../Microsoft IDN Mitigation APIs
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
@@ -51,25 +67,78 @@ LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 
 PROOT = ../..
-ARES_LIB = $(PROOT)/ares
+
+# Edit the path below to point to the base of your c-ares package.
+ifndef LIBCARES_PATH
+LIBCARES_PATH = $(PROOT)/ares
+endif
+
+# Edit the var below to set to your architecture or set environment var.
+ifndef ARCH
+ARCH = w32
+endif
 
 SSL = 1
 ZLIB = 1
 
 CC = gcc
 CFLAGS = -g -O2 -Wall
+CFLAGS += -fno-strict-aliasing
+ifeq ($(ARCH),w64)
+CFLAGS += -D_AMD64_
+endif
 # comment LDFLAGS below to keep debug info
 LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=$(PROOT)/include -O COFF -i
-RM = del /q /f > NUL 2>&1
+RM = del /q /f 2>NUL
 CP = copy
 
 ########################################################
 ## Nothing more to do below this line!
 
+ifeq ($(findstring -dyn,$(CFG)),-dyn)
+DYN = 1
+endif
+ifeq ($(findstring -ares,$(CFG)),-ares)
+ARES = 1
+endif
+ifeq ($(findstring -rtmp,$(CFG)),-rtmp)
+RTMP = 1
+SSL = 1
+ZLIB = 1
+endif
+ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
+SSH2 = 1
+SSL = 1
+ZLIB = 1
+endif
+ifeq ($(findstring -ssl,$(CFG)),-ssl)
+SSL = 1
+endif
+ifeq ($(findstring -zlib,$(CFG)),-zlib)
+ZLIB = 1
+endif
+ifeq ($(findstring -idn,$(CFG)),-idn)
+IDN = 1
+endif
+ifeq ($(findstring -winidn,$(CFG)),-winidn)
+WINIDN = 1
+endif
+ifeq ($(findstring -sspi,$(CFG)),-sspi)
+SSPI = 1
+endif
+ifeq ($(findstring -spnego,$(CFG)),-spnego)
+SPNEGO = 1
+endif
+ifeq ($(findstring -ldaps,$(CFG)),-ldaps)
+LDAPS = 1
+endif
+ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
+IPV6 = 1
+endif
+
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
-LINK = $(CC) $(LDFLAGS) -o $@
 
 ifdef DYN
   curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
@@ -81,34 +150,45 @@ else
 endif
 ifdef ARES
   ifndef DYN
-    curl_DEPENDENCIES += $(ARES_LIB)/libcares.a
+    curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
   endif
   CFLAGS += -DUSE_ARES
-  curl_LDADD += -L$(ARES_LIB) -lcares
+  curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
+endif
+ifdef RTMP
+  CFLAGS += -DUSE_LIBRTMP
+  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
 endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  curl_LDADD += -L$(LIBSSH2_PATH)/win32 -lssh2
+  curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
-  INCLUDES += -I"$(OPENSSL_PATH)/outinc"
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
-  ifdef DYN
-    curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
-  else
-    curl_LDADD += -L$(OPENSSL_PATH)/out -lssl -lcrypto -lgdi32
-  endif
+  curl_LDADD += -L"$(OPENSSL_LIB)" -leay32 -lssl32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  curl_LDADD += -L$(ZLIB_PATH) -lz
+  curl_LDADD += -L"$(ZLIB_PATH)" -lz
+endif
+ifdef IDN
+  CFLAGS += -DUSE_LIBIDN
+  curl_LDADD += -L"$(LIBIDN_PATH)/lib" -lidn
+else
+ifdef WINIDN
+  CFLAGS += -DUSE_WIN32_IDN
+  curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
+endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
 endif
+ifdef SPNEGO
+  CFLAGS += -DHAVE_SPNEGO
+endif
 ifdef IPV6
-  CFLAGS += -DENABLE_IPV6
+  CFLAGS += -DENABLE_IPV6 -D_WIN32_WINNT=0x0501
 endif
 ifdef LDAPS
   CFLAGS += -DHAVE_LDAP_SSL
@@ -127,7 +207,6 @@ curl_LDADD += -lwldap32
 endif
 endif
 curl_LDADD += -lws2_32
-COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
@@ -140,15 +219,14 @@ example_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 all: $(example_PROGRAMS)
 
 .o.exe: $(curl_DEPENDENCIES)
-	$(LINK) $< $(curl_LDADD)
+	$(CC) $(LDFLAGS) -o $@ $< $(curl_LDADD)
 
 .c.o:
-	$(COMPILE) -c $<
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 .rc.res:
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
 	$(RM) $(example_PROGRAMS)
-
 

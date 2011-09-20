@@ -1,7 +1,7 @@
-#########################################################################
+###########################################################################
 #
-## Makefile for building libcurl.a with MingW32 (GCC-3.2 or later)
-## and optionally OpenSSL (0.9.8), libssh2 (1.2), zlib (1.2.5), librtmp (2.3)
+## Makefile for building libcurl.a with MingW (GCC-3.2 or later)
+## and optionally OpenSSL (0.9.8), libssh2 (1.3), zlib (1.2.5), librtmp (2.3)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -9,10 +9,8 @@
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.5
 ## set ZLIB=1
-##
-## Comments to: Troy Engel <tengel@sonic.net> or
-##              Joern Hartroth <hartroth@acm.org>
-#########################################################################
+#
+###########################################################################
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
@@ -21,6 +19,12 @@ endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8r
+endif
+ifndef OPENSSL_INCLUDE
+OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
+endif
+ifndef OPENSSL_LIB
+OPENSSL_LIB = $(OPENSSL_PATH)/out
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
@@ -45,9 +49,11 @@ ifndef LDAP_SDK
 LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 
+PROOT = ..
+
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
-LIBCARES_PATH = ../ares
+LIBCARES_PATH = $(PROOT)/ares
 endif
 
 # Edit the var below to set to your architecture or set environment var.
@@ -57,6 +63,7 @@ endif
 
 CC = gcc
 CFLAGS = -g -O2 -Wall
+CFLAGS += -fno-strict-aliasing
 ifeq ($(ARCH),w64)
 CFLAGS += -D_AMD64_
 endif
@@ -65,7 +72,7 @@ LDFLAGS = -s
 AR = ar
 RANLIB = ranlib
 RC = windres
-RCFLAGS = --include-dir=../include -DDEBUGBUILD=0 -O COFF -i
+RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF -i
 RM = del /q /f 2>NUL
 STRIP = strip -g
 
@@ -115,10 +122,11 @@ endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
+
 ifdef ARES
-  INCLUDES += -I$(LIBCARES_PATH)
+  INCLUDES += -I"$(LIBCARES_PATH)"
   CFLAGS += -DUSE_ARES
-  DLL_LIBS += -L$(LIBCARES_PATH) -lcares
+  DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
   libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
 endif
 ifdef RTMP
@@ -129,24 +137,24 @@ endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  DLL_LIBS += -L$(LIBSSH2_PATH)/win32 -lssh2
+  DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
-  INCLUDES += -I"$(OPENSSL_PATH)/outinc" -I"$(OPENSSL_PATH)/outinc/openssl"
+  INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -DHAVE_OPENSSL_ENGINE_H -DHAVE_OPENSSL_PKCS12_H \
             -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5 \
             -DCURL_WANTS_CA_BUNDLE_ENV
-  DLL_LIBS += -L$(OPENSSL_PATH)/out -leay32 -lssl32
+  DLL_LIBS += -L"$(OPENSSL_LIB)" -leay32 -lssl32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  DLL_LIBS += -L$(ZLIB_PATH) -lz
+  DLL_LIBS += -L"$(ZLIB_PATH)" -lz
 endif
 ifdef IDN
   INCLUDES += -I"$(LIBIDN_PATH)/include"
   CFLAGS += -DUSE_LIBIDN
-  DLL_LIBS += -L$(LIBIDN_PATH)/lib -lidn
+  DLL_LIBS += -L"$(LIBIDN_PATH)/lib" -lidn
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
@@ -178,11 +186,10 @@ ifdef USE_LDAP_OPENLDAP
 endif
 ifndef USE_LDAP_NOVELL
 ifndef USE_LDAP_OPENLDAP
-DLL_LIBS += -lwldap32
+  DLL_LIBS += -lwldap32
 endif
 endif
 DLL_LIBS += -lws2_32
-COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
@@ -214,7 +221,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 	  -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
 .c.o:
-	$(COMPILE) -c $<
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 .rc.res:
 	$(RC) $(RCFLAGS) $< -o $@
@@ -224,8 +231,6 @@ clean:
 
 distclean vclean: clean
 	-$(RM) $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY)
-
-FORCE: ;
 
 $(LIBCARES_PATH)/libcares.a:
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.m32
