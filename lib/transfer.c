@@ -1699,26 +1699,37 @@ static char *concat_url(const char *base, const char *relurl)
     }
   }
   else {
-    /* We got a new absolute path for this server, cut off from the
-       first slash */
-    pathsep = strchr(protsep, '/');
-    if(pathsep) {
-      /* When people use badly formatted URLs, such as
-         "http://www.url.com?dir=/home/daniel" we must not use the first
-         slash, if there's a ?-letter before it! */
-      char *sep = strchr(protsep, '?');
-      if(sep && (sep < pathsep))
-        pathsep = sep;
-      *pathsep=0;
+    /* We got a new absolute path for this server */
+
+    if((relurl[0] == '/') && (relurl[1] == '/')) {
+      /* the new URL starts with //, just keep the protocol part from the
+         original one */
+      *protsep=0;
+      useurl = &relurl[2]; /* we keep the slashes from the original, so we
+                              skip the new ones */
     }
     else {
-      /* There was no slash. Now, since we might be operating on a badly
-         formatted URL, such as "http://www.url.com?id=2380" which doesn't
-         use a slash separator as it is supposed to, we need to check for a
-         ?-letter as well! */
-      pathsep = strchr(protsep, '?');
-      if(pathsep)
+      /* cut off the original URL from the first slash, or deal with URLs
+         without slash */
+      pathsep = strchr(protsep, '/');
+      if(pathsep) {
+        /* When people use badly formatted URLs, such as
+           "http://www.url.com?dir=/home/daniel" we must not use the first
+           slash, if there's a ?-letter before it! */
+        char *sep = strchr(protsep, '?');
+        if(sep && (sep < pathsep))
+          pathsep = sep;
         *pathsep=0;
+      }
+      else {
+        /* There was no slash. Now, since we might be operating on a badly
+           formatted URL, such as "http://www.url.com?id=2380" which doesn't
+           use a slash separator as it is supposed to, we need to check for a
+           ?-letter as well! */
+        pathsep = strchr(protsep, '?');
+        if(pathsep)
+          *pathsep=0;
+      }
     }
   }
 
@@ -1731,8 +1742,8 @@ static char *concat_url(const char *base, const char *relurl)
 
   urllen = strlen(url_clone);
 
-  newest = malloc( urllen + 1 + /* possible slash */
-                         newlen + 1 /* zero byte */);
+  newest = malloc(urllen + 1 + /* possible slash */
+                  newlen + 1 /* zero byte */);
 
   if(!newest) {
     free(url_clone); /* don't leak this */
