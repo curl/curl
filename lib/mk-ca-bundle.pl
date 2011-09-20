@@ -160,7 +160,8 @@ while (<TXT>) {
     }
     while (<TXT>) {
       last if (/^#$/);
-      $untrusted = 1 if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/);
+      $untrusted = 1 if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/
+                     or /^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_TRUST_UNKNOWN$/);
     }
     if ($untrusted) {
       $skipnum ++;
