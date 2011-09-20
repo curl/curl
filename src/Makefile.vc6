@@ -146,9 +146,12 @@ RELEASE_OBJS= \
 	tool_convertr.obj \
 	tool_dirhier.obj \
 	tool_doswinr.obj \
+	tool_easysrcr.obj \
 	tool_mfilesr.obj \
 	tool_msgsr.obj \
 	tool_myfuncr.obj \
+	tool_progressr.obj \
+	tool_setoptr.obj \
 	tool_vmsr.obj \
 	urlglobr.obj \
 	writeoutr.obj \
@@ -169,9 +172,12 @@ DEBUG_OBJS= \
 	tool_convertd.obj \
 	tool_dirhied.obj \
 	tool_doswind.obj \
+	tool_easysrcd.obj \
 	tool_mfilesd.obj \
 	tool_msgsd.obj \
 	tool_myfuncd.obj \
+	tool_progressd.obj \
+	tool_setoptd.obj \
 	tool_vmsd.obj \
 	urlglobd.obj \
 	writeoutd.obj \
@@ -326,12 +332,18 @@ tool_dirhier.obj: tool_dirhie.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_dirhie.c
 tool_doswinr.obj: tool_doswin.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_doswin.c
+tool_easysrcr.obj: tool_easysrc.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_easysrc.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsr.obj: tool_msgs.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncr.obj: tool_myfunc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_progressr.obj: tool_progress.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_progress.c
+tool_setoptr.obj: tool_setopt.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_vmsr.obj: tool_vms.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrr.obj: xattr.c
@@ -370,12 +382,18 @@ tool_dirhied.obj: tool_dirhie.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_dirhie.c
 tool_doswind.obj: tool_doswin.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_doswin.c
+tool_easysrcd.obj: tool_easysrc.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_easysrc.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsd.obj: tool_msgs.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncd.obj: tool_myfunc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_progressd.obj: tool_progress.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_progress.c
+tool_setoptd.obj: tool_setopt.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_vmsd.obj: tool_vms.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrd.obj: xattr.c

@@ -17,15 +17,16 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c xattr.c \
 	tool_bname.c tool_cfgable.c tool_convert.c tool_dirhie.c \
-	tool_doswin.c tool_mfiles.c tool_msgs.c tool_myfunc.c \
-	tool_vms.c
+	tool_doswin.c tool_easysrc.c tool_mfiles.c tool_msgs.c \
+	tool_myfunc.c tool_progress.c tool_setopt.c tool_vms.c
 
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-riscos.h urlglob.h version.h xattr.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
 	tool_bname.h tool_cfgable.h tool_convert.h tool_dirhie.h \
-	tool_doswin.h tool_mfiles.h tool_msgs.h tool_myfunc.h \
-	tool_sdecls.h tool_vms.h
+	tool_doswin.h tool_easysrc.h tool_mfiles.h tool_msgs.h \
+	tool_myfunc.h tool_progress.h tool_sdecls.h tool_setopt.h \
+	tool_vms.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 

@@ -91,7 +91,7 @@ struct Configurable {
   bool netrc_opt;
   bool netrc;
   char *netrc_file;
-  bool noprogress;
+  bool noprogress;          /* don't show progress meter, --silent given */
   bool isatty;              /* updated internally only if output is a tty */
   struct getout *url_list;  /* point to the first node */
   struct getout *url_last;  /* point to the last/current node */
@@ -119,7 +119,7 @@ struct Configurable {
   trace tracetype;
   bool tracetime;           /* include timestamp? */
   long httpversion;
-  int progressmode;
+  int progressmode;         /* CURL_PROGRESS_BAR or CURL_PROGRESS_STATS */
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;

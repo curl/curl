@@ -97,9 +97,12 @@
 #include "tool_convert.h"
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
+#include "tool_easysrc.h"
 #include "tool_mfiles.h"
 #include "tool_msgs.h"
 #include "tool_myfunc.h"
+#include "tool_progress.h"
+#include "tool_setopt.h"
 #include "tool_vms.h"
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
@@ -180,9 +183,6 @@ char **__crt0_glob_function (char *arg)
 #endif
 
 #define CURLseparator   "--_curl_--"
-
-#define CURL_PROGRESS_STATS 0 /* default progress display */
-#define CURL_PROGRESS_BAR   1
 
 /*
  * Default sizeof(off_t) in case it hasn't been defined in config file.
@@ -3177,121 +3177,6 @@ static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
   return (size_t)rc;
 }
 
-struct ProgressData {
-  int calls;
-  curl_off_t prev;
-  int width;
-  FILE *out; /* where to write everything to */
-  curl_off_t initial_size;
-};
-
-static int myprogress (void *clientp,
-                       double dltotal,
-                       double dlnow,
-                       double ultotal,
-                       double ulnow)
-{
-  /* The original progress-bar source code was written for curl by Lars Aas,
-     and this new edition inherits some of his concepts. */
-
-  char line[256];
-  char outline[256];
-  char format[40];
-  double frac;
-  double percent;
-  int barwidth;
-  int num;
-  int i;
-
-  struct ProgressData *bar = (struct ProgressData *)clientp;
-  curl_off_t total = (curl_off_t)dltotal + (curl_off_t)ultotal +
-    bar->initial_size; /* expected transfer size */
-  curl_off_t point = (curl_off_t)dlnow + (curl_off_t)ulnow +
-    bar->initial_size; /* we've come this far */
-
-  if(point > total)
-    /* we have got more than the expected total! */
-    total = point;
-
-  bar->calls++; /* simply count invokes */
-
-  if(total < 1) {
-    curl_off_t prevblock = bar->prev / 1024;
-    curl_off_t thisblock = point / 1024;
-    while(thisblock > prevblock) {
-      fprintf( bar->out, "#" );
-      prevblock++;
-    }
-  }
-  else {
-    frac = (double)point / (double)total;
-    percent = frac * 100.0f;
-    barwidth = bar->width - 7;
-    num = (int) (((double)barwidth) * frac);
-    for(i = 0; i < num; i++)
-      line[i] = '#';
-    line[i] = '\0';
-    snprintf( format, sizeof(format), "%%-%ds %%5.1f%%%%", barwidth );
-    snprintf( outline, sizeof(outline), format, line, percent );
-    fprintf( bar->out, "\r%s", outline );
-  }
-  fflush(bar->out);
-  bar->prev = point;
-
-  return 0;
-}
-
-static
-void progressbarinit(struct ProgressData *bar,
-                     struct Configurable *config)
-{
-#ifdef __EMX__
-  /* 20000318 mgs */
-  int scr_size [2];
-#endif
-  char *colp;
-
-  memset(bar, 0, sizeof(struct ProgressData));
-
-  /* pass this through to progress function so
-   * it can display progress towards total file
-   * not just the part that's left. (21-may-03, dbyron) */
-  if(config->use_resume)
-    bar->initial_size = config->resume_from;
-
-/* TODO: get terminal width through ansi escapes or something similar.
-   try to update width when xterm is resized... - 19990617 larsa */
-#ifndef __EMX__
-  /* 20000318 mgs
-   * OS/2 users most likely won't have this env var set, and besides that
-   * we're using our own way to determine screen width */
-  colp = curlx_getenv("COLUMNS");
-  if(colp != NULL) {
-    char *endptr;
-    long num = strtol(colp, &endptr, 10);
-    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 0))
-      bar->width = (int)num;
-    else
-      bar->width = 79;
-    curl_free(colp);
-  }
-  else
-    bar->width = 79;
-#else
-  /* 20000318 mgs
-   * We use this emx library call to get the screen width, and subtract
-   * one from what we got in order to avoid a problem with the cursor
-   * advancing to the next line if we print a string that is as long as
-   * the screen is wide. */
-
-  _scrsize(scr_size);
-  bar->width = scr_size[0] - 1;
-#endif
-
-  bar->out = config->errors;
-}
-
-
 static
 void dump(const char *timebuf, const char *text,
           FILE *stream, const unsigned char *ptr, size_t size,
@@ -3537,165 +3422,6 @@ output_expected(const char* url, const char* uploadfile)
     return TRUE;   /* HTTP(S) upload */
 
   return FALSE; /* non-HTTP upload, probably no output should be expected */
-}
-
-#define my_setopt(x,y,z) _my_setopt(x, FALSE, config, #y, y, z)
-#define my_setopt_str(x,y,z) _my_setopt(x, TRUE, config, #y, y, z)
-
-static struct curl_slist *easycode;
-static struct curl_slist *easycode_remarks;
-
-static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
-                           const char *name, CURLoption tag, ...);
-
-static CURLcode _my_setopt(CURL *curl, bool str, struct Configurable *config,
-                           const char *name, CURLoption tag, ...)
-{
-  va_list arg;
-  CURLcode ret;
-  char *bufp;
-  char value[256];
-  bool remark=FALSE;
-  bool skip=FALSE;
-
-  va_start(arg, tag);
-
-  if(tag < CURLOPTTYPE_OBJECTPOINT) {
-    long lval = va_arg(arg, long);
-    snprintf(value, sizeof(value), "%ldL", lval);
-    ret = curl_easy_setopt(curl, tag, lval);
-    if(!lval)
-      skip = TRUE;
-  }
-  else if(tag < CURLOPTTYPE_OFF_T) {
-    void *pval = va_arg(arg, void *);
-    unsigned char *ptr = (unsigned char *)pval;
-
-    /* function pointers are never printable */
-    if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
-      if(pval) {
-        strcpy(value, "functionpointer"); /* 'value' fits 256 bytes */
-        remark = TRUE;
-      }
-      else
-        skip = TRUE;
-    }
-
-    else if(pval && str)
-      snprintf(value, sizeof(value), "\"%s\"", (char *)ptr);
-    else if(pval) {
-      strcpy(value, "objectpointer"); /* 'value' fits 256 bytes */
-      remark = TRUE;
-    }
-    else
-      skip = TRUE;
-
-    ret = curl_easy_setopt(curl, tag, pval);
-
-  }
-  else {
-    curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(value, sizeof(value),
-             "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
-    ret = curl_easy_setopt(curl, tag, oval);
-
-    if(!oval)
-      skip = TRUE;
-  }
-
-  if(config->libcurl && !skip) {
-    /* we only use this for real if --libcurl was used */
-
-    if(remark)
-      bufp = curlx_maprintf("%s set to a %s", name, value);
-    else
-      bufp = curlx_maprintf("curl_easy_setopt(hnd, %s, %s);", name, value);
-
-    if(!bufp)
-      ret = CURLE_OUT_OF_MEMORY;
-    else {
-      struct curl_slist *list =
-        curl_slist_append(remark?easycode_remarks:easycode, bufp);
-
-      if(remark)
-        easycode_remarks = list;
-      else
-        easycode = list;
-    }
-    if(bufp)
-      curl_free(bufp);
-  }
-  va_end(arg);
-
-  return ret;
-}
-
-static const char * const srchead[]={
-  "/********* Sample code generated by the curl command line tool **********",
-  " * All curl_easy_setopt() options are documented at:",
-  " * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html",
-  " ************************************************************************/",
-  "#include <curl/curl.h>",
-  "",
-  "int main(int argc, char *argv[])",
-  "{",
-  "  CURLcode ret;",
-  NULL
-};
-
-static void dumpeasycode(struct Configurable *config)
-{
-  struct curl_slist *ptr;
-  char *o = config->libcurl;
-
-  if(o) {
-    FILE *out;
-    bool fopened = FALSE;
-    if(strcmp(o, "-")) {
-      out = fopen(o, "wt");
-      fopened = TRUE;
-    }
-    else
-      out= stdout;
-    if(!out)
-      warnf(config, "Failed to open %s to write libcurl code!\n", o);
-    else {
-      int i;
-      const char *c;
-
-      for(i=0; ((c = srchead[i]) != '\0'); i++)
-        fprintf(out, "%s\n", c);
-
-      ptr = easycode;
-      while(ptr) {
-        fprintf(out, "  %s\n", ptr->data);
-        ptr = ptr->next;
-      }
-
-      ptr = easycode_remarks;
-      if(ptr) {
-        fprintf(out,
-                "\n  /* Here is a list of options the curl code"
-                " used that cannot get generated\n"
-                "     as source easily. You may select to either"
-                " not use them or implement\n     them yourself.\n"
-                "\n");
-        while(ptr) {
-          fprintf(out, "  %s\n", ptr->data);
-          ptr = ptr->next;
-        }
-        fprintf(out, "\n  */\n");
-      }
-
-      fprintf(out,
-              "  return (int)ret;\n"
-              "}\n"
-              "/**** End of sample code ****/\n");
-      if(fopened)
-        fclose(out);
-    }
-  }
-  curl_slist_free_all(easycode);
 }
 
 static bool stdin_upload(const char *uploadfile)
@@ -4126,16 +3852,34 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
      !config->capath &&
      !config->insecure_ok) {
     env = curlx_getenv("CURL_CA_BUNDLE");
-    if(env)
-      GetStr(&config->cacert, env);
+    if(env) {
+      config->cacert = strdup(env);
+      if(!config->cacert) {
+        clean_getout(config);
+        curl_free(env);
+        goto quit_curl;
+      }
+    }
     else {
       env = curlx_getenv("SSL_CERT_DIR");
-      if(env)
-        GetStr(&config->capath, env);
+      if(env) {
+        config->capath = strdup(env);
+        if(!config->capath) {
+          clean_getout(config);
+          curl_free(env);
+          goto quit_curl;
+        }
+      }
       else {
         env = curlx_getenv("SSL_CERT_FILE");
-        if(env)
-          GetStr(&config->cacert, env);
+        if(env) {
+          config->cacert = strdup(env);
+          if(!config->cacert) {
+            clean_getout(config);
+            curl_free(env);
+            goto quit_curl;
+          }
+        }
       }
     }
 
@@ -4170,9 +3914,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
-  /* This is the first entry added to easycode and it initializes the slist */
-  easycode = curl_slist_append(easycode, "CURL *hnd = curl_easy_init();");
-  if(!easycode) {
+  /* This is the first entry added to easysrc and it initializes the slist */
+  easysrc = curl_slist_append(easysrc, "CURL *hnd = curl_easy_init();");
+  if(!easysrc) {
     clean_getout(config);
     res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
@@ -4760,7 +4504,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            !config->noprogress && !config->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
-          my_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
+          my_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress);
           my_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
 
@@ -4798,16 +4542,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_VERBOSE, TRUE);
         }
 
-        res = CURLE_OK;
-
-        /* new in curl ?? */
+        /* new in curl 7.9.3 */
         if(config->engine) {
-          res = my_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
+          res = res_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
+          if(res)
+            goto show_error;
           my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
         }
-
-        if(res != CURLE_OK)
-          goto show_error;
 
         if(config->encoding)
           my_setopt_str(curl, CURLOPT_ACCEPT_ENCODING, "");
@@ -4953,8 +4694,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_RESOLVE, config->resolve);
 
         /* new in 7.21.4 */
-        my_setopt_str(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
-        my_setopt_str(curl, CURLOPT_TLSAUTH_PASSWORD, config->tls_password);
+        if(config->tls_username)
+          my_setopt_str(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
+        if(config->tls_password)
+          my_setopt_str(curl, CURLOPT_TLSAUTH_PASSWORD, config->tls_password);
 
         /* new in 7.22.0 */
         if(config->gssapi_delegation)
@@ -4967,7 +4710,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         for(;;) {
           res = curl_easy_perform(curl);
-          if(!curl_slist_append(easycode, "ret = curl_easy_perform(hnd);")) {
+          if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
             res = CURLE_OUT_OF_MEMORY;
             break;
           }
@@ -5221,8 +4964,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
   config->easy = NULL; /* cleanup now */
-  if(easycode)
-    curl_slist_append(easycode, "curl_easy_cleanup(hnd);");
+  if(easysrc)
+    curl_slist_append(easysrc, "curl_easy_cleanup(hnd);");
 
   if(heads.stream && (heads.stream != stdout))
     fclose(heads.stream);
@@ -5233,7 +4976,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   /* Dump the libcurl code if previously enabled.
      NOTE: that this function relies on config->errors amongst other things
      so not everything can be closed and cleaned before this is called */
-  dumpeasycode(config);
+  dumpeasysrc(config);
 
   if(config->errors_fopened)
     fclose(config->errors);

@@ -191,6 +191,10 @@ SOURCE=.\tool_doswin.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_easysrc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.c
 # End Source File
 # Begin Source File
@@ -200,6 +204,14 @@ SOURCE=.\tool_msgs.c
 # Begin Source File
 
 SOURCE=.\tool_myfunc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_progress.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_setopt.c
 # End Source File
 # Begin Source File
 
@@ -283,6 +295,10 @@ SOURCE=.\tool_doswin.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_easysrc.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.h
 # End Source File
 # Begin Source File
@@ -295,7 +311,15 @@ SOURCE=.\tool_myfunc.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_progress.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_sdecls.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_setopt.h
 # End Source File
 # Begin Source File
 
