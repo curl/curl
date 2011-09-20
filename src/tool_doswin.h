@@ -27,6 +27,12 @@
 
 char *sanitize_dos_name(char *file_name);
 
+#ifdef WIN32
+
+CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file);
+
+#endif /* WIN32 */
+
 #endif /* MSDOS || WIN32 */
 
 #endif /* HEADER_CURL_TOOL_DOSWIN_H */

@@ -27,6 +27,11 @@
 #  include <libgen.h>
 #endif
 
+#ifdef WIN32
+#  include <curl/curl.h>
+#  include "tool_cfgable.h"
+#endif
+
 #include "tool_bname.h"
 #include "tool_doswin.h"
 
@@ -224,6 +229,60 @@ static char *rename_if_dos_device_name (char *file_name)
   }
   return file_name;
 }
+
+#ifdef WIN32
+
+/*
+ * Function to find CACert bundle on a Win32 platform using SearchPath.
+ * (SearchPath is already declared via inclusions done in setup header file)
+ * (Use the ASCII version instead of the unicode one!)
+ * The order of the directories it searches is:
+ *  1. application's directory
+ *  2. current working directory
+ *  3. Windows System directory (e.g. C:\windows\system32)
+ *  4. Windows Directory (e.g. C:\windows)
+ *  5. all directories along %PATH%
+ *
+ * For WinXP and later search order actually depends on registry value:
+ * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeProcessSearchMode
+ */
+
+CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file)
+{
+  CURLcode result = CURLE_OK;
+
+  curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
+
+  /* search and set cert file only if "we" support SSL */
+  if(info->features & CURL_VERSION_SSL) {
+
+    DWORD res_len;
+    DWORD buf_tchar_size = PATH_MAX + 1;
+    DWORD buf_bytes_size = sizeof(TCHAR) * buf_tchar_size;
+    char *ptr = NULL;
+
+    char *buf = malloc(buf_bytes_size);
+    if(!buf)
+      return CURLE_OUT_OF_MEMORY;
+    buf[0] = '\0';
+
+    res_len = SearchPathA(NULL, bundle_file, NULL, buf_tchar_size, buf, &ptr);
+    if(res_len > 0) {
+      Curl_safefree(config->cacert);
+      config->cacert = strdup(buf);
+      if(!config->cacert)
+        result = CURLE_OUT_OF_MEMORY;
+    }
+    else
+      result = CURLE_SSL_CACERT;
+
+    free(buf);
+  }
+
+  return result;
+}
+
+#endif /* WIN32 */
 
 #endif /* MSDOS || WIN32 */
 

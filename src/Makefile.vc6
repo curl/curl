@@ -121,7 +121,7 @@ RCD   = rc.exe /dDEBUGBUILD=1
 
 CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
-RESFLAGS = /i../lib /i../include
+RESFLAGS = /i../include
 
 # This manifest thing is for VC8, enabled by the maketgz script that
 # builds the VC8 version of this makefile. Left commented out in the VC6
@@ -147,6 +147,7 @@ RELEASE_OBJS= \
 	tool_dirhier.obj \
 	tool_doswinr.obj \
 	tool_mfilesr.obj \
+	tool_msgsr.obj \
 	tool_myfuncr.obj \
 	tool_vmsr.obj \
 	urlglobr.obj \
@@ -169,6 +170,7 @@ DEBUG_OBJS= \
 	tool_dirhied.obj \
 	tool_doswind.obj \
 	tool_mfilesd.obj \
+	tool_msgsd.obj \
 	tool_myfuncd.obj \
 	tool_vmsd.obj \
 	urlglobd.obj \
@@ -326,6 +328,8 @@ tool_doswinr.obj: tool_doswin.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_msgsr.obj: tool_msgs.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncr.obj: tool_myfunc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
 tool_vmsr.obj: tool_vms.c
@@ -368,6 +372,8 @@ tool_doswind.obj: tool_doswin.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_msgsd.obj: tool_msgs.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncd.obj: tool_myfunc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
 tool_vmsd.obj: tool_vms.c

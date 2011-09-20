@@ -23,50 +23,7 @@
  ***************************************************************************/
 #include "setup.h"
 
-typedef enum {
-  HTTPREQ_UNSPEC,
-  HTTPREQ_GET,
-  HTTPREQ_HEAD,
-  HTTPREQ_POST,
-  HTTPREQ_SIMPLEPOST,
-  HTTPREQ_CUSTOM,
-  HTTPREQ_LAST
-} HttpReq;
-
-typedef enum {
-  TRACE_NONE,  /* no trace/verbose output at all */
-  TRACE_BIN,   /* tcpdump inspired look */
-  TRACE_ASCII, /* like *BIN but without the hex output */
-  TRACE_PLAIN  /* -v/--verbose type */
-} trace;
-
-struct OutStruct {
-  char *filename;
-  bool alloc_filename;
-  FILE *stream;
-  struct Configurable *config;
-  curl_off_t bytes; /* amount written so far */
-  curl_off_t init;  /* original size (non-zero when appending) */
-};
-
-/*
- * A chain of these 'getout' nodes contain URL's to fetch and where to
- * place URL's contents.
- */
-
-struct getout {
-  struct getout *next;      /* next one */
-  char          *url;       /* the URL we deal with */
-  char          *outfile;   /* where to store the output */
-  char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
-  int            flags;     /* options - composed of GETOUT_* bits */
-};
-
-#define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
-#define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
-#define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
-#define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
+#include "tool_sdecls.h"
 
 struct Configurable {
   CURL *easy;               /* once we have one, we keep it here */
@@ -120,7 +77,7 @@ struct Configurable {
   struct curl_slist *mail_rcpt;
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
-  bool mute;                /* shutup */
+  bool mute;                /* don't show messages, --silent given */
   bool use_ascii;           /* select ascii or text transfer */
   bool autoreferer;         /* automatically set referer */
   bool failonerror;         /* fail on (HTTP) errors */
@@ -178,8 +135,8 @@ struct Configurable {
   bool proxyanyauth;
   char *writeout;           /* %-styled format string to output */
   bool writeenv;            /* write results to environment, if available */
-  FILE *errors;             /* if stderr redirect is requested */
-  bool errors_fopened;
+  FILE *errors;             /* errors stream, defaults to stderr */
+  bool errors_fopened;      /* whether errors stream isn't stderr */
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;

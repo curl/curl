@@ -98,6 +98,7 @@
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
 #include "tool_mfiles.h"
+#include "tool_msgs.h"
 #include "tool_myfunc.h"
 #include "tool_vms.h"
 #ifdef USE_MANUAL
@@ -266,49 +267,6 @@ static int ftruncate64(int fd, curl_off_t where)
 
 #endif /* WIN32 */
 
-#define WARN_PREFIX "Warning: "
-#define WARN_TEXTWIDTH (79 - (int)strlen(WARN_PREFIX))
-/* produce this text message to the user unless mute was selected */
-static void warnf(struct Configurable *config, const char *fmt, ...)
-{
-  if(!config->mute) {
-    va_list ap;
-    int len;
-    char *ptr;
-    char print_buffer[256];
-
-    va_start(ap, fmt);
-    len = vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
-    va_end(ap);
-
-    ptr = print_buffer;
-    while(len > 0) {
-      fputs(WARN_PREFIX, config->errors);
-
-      if(len > (int)WARN_TEXTWIDTH) {
-        int cut = WARN_TEXTWIDTH-1;
-
-        while(!ISSPACE(ptr[cut]) && cut) {
-          cut--;
-        }
-        if(0 == cut)
-          /* not a single cutting position was found, just cut it at the
-             max text width then! */
-          cut = WARN_TEXTWIDTH-1;
-
-        (void)fwrite(ptr, cut + 1, 1, config->errors);
-        fputs("\n", config->errors);
-        ptr += cut+1; /* skip the space too */
-        len -= cut;
-      }
-      else {
-        fputs(ptr, config->errors);
-        len = 0;
-      }
-    }
-  }
-}
-
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
@@ -344,22 +302,6 @@ static int SetHTTPrequest(struct Configurable *config,
   }
   warnf(config, "You can only select one HTTP request!\n");
   return 1;
-}
-
-static void helpf(FILE *errors, const char *fmt, ...)
-{
-  va_list ap;
-  if(fmt) {
-    va_start(ap, fmt);
-    fputs("curl: ", errors); /* prefix it */
-    vfprintf(errors, fmt, ap);
-    va_end(ap);
-  }
-  fprintf(errors, "curl: try 'curl --help' "
-#ifdef USE_MANUAL
-          "or 'curl --manual' "
-#endif
-          "for more information\n");
 }
 
 static void help(void)
@@ -3169,11 +3111,6 @@ static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   return rc;
 }
 
-struct InStruct {
-  int fd;
-  struct Configurable *config;
-};
-
 #define MAX_SEEK 2147483647
 
 /*
@@ -3587,39 +3524,6 @@ int my_trace(CURL *handle, curl_infotype type,
   dump(timebuf, text, output, data, size, config->tracetype, type);
   return 0;
 }
-
-#ifdef WIN32
-
-/* Function to find CACert bundle on a Win32 platform using SearchPath.
- * (SearchPath is already declared via inclusions done in setup header file)
- * (Use the ASCII version instead of the unicode one!)
- * The order of the directories it searches is:
- *  1. application's directory
- *  2. current working directory
- *  3. Windows System directory (e.g. C:\windows\system32)
- *  4. Windows Directory (e.g. C:\windows)
- *  5. all directories along %PATH%
- */
-static void FindWin32CACert(struct Configurable *config,
-                            const char *bundle_file)
-{
-  /* only check for cert file if "we" support SSL */
-  if(curlinfo->features & CURL_VERSION_SSL) {
-    DWORD buflen;
-    char *ptr = NULL;
-    char *retval = malloc(sizeof (TCHAR) * (MAX_PATH + 1));
-    if(!retval)
-      return;
-    retval[0] = '\0';
-    buflen = SearchPathA(NULL, bundle_file, NULL, MAX_PATH+2, retval, &ptr);
-    if(buflen > 0) {
-      GetStr(&config->cacert, retval);
-    }
-    Curl_safefree(retval);
-  }
-}
-
-#endif
 
 #define RETRY_SLEEP_DEFAULT 1000  /* ms */
 #define RETRY_SLEEP_MAX     600000 /* ms == 10 minutes */
@@ -4238,8 +4142,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     if(env)
       curl_free(env);
 #ifdef WIN32
-    else
-      FindWin32CACert(config, "curl-ca-bundle.crt");
+    else {
+      res = FindWin32CACert(config, "curl-ca-bundle.crt");
+      if(res) {
+        clean_getout(config);
+        goto quit_curl;
+      }
+    }
 #endif
   }
 

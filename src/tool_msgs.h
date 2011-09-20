@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_VERSION_H
-#define HEADER_CURL_TOOL_VERSION_H
+#ifndef HEADER_CURL_TOOL_MSGS_H
+#define HEADER_CURL_TOOL_MSGS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,14 +21,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <curl/curlver.h>
+#include "setup.h"
 
-#define CURL_NAME "curl"
-#define CURL_COPYRIGHT LIBCURL_COPYRIGHT
-#define CURL_VERSION LIBCURL_VERSION
-#define CURL_VERSION_MAJOR LIBCURL_VERSION_MAJOR
-#define CURL_VERSION_MINOR LIBCURL_VERSION_MINOR
-#define CURL_VERSION_PATCH LIBCURL_VERSION_PATCH
-#define CURL_ID CURL_NAME " " CURL_VERSION " (" OS ") "
+void warnf(struct Configurable *config, const char *fmt, ...);
 
-#endif /* HEADER_CURL_TOOL_VERSION_H */
+void helpf(FILE *errors, const char *fmt, ...);
+
+#endif /* HEADER_CURL_TOOL_MSGS_H */
+
