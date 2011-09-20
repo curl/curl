@@ -2083,6 +2083,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       if(data->share->cookies == data->cookies)
         data->cookies = NULL;
 
+      if(data->share->sslsession == data->state.session) {
+        data->state.session = NULL;
+        data->set.ssl.numsessions = 0;
+      }
+
       data->share->dirty--;
 
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
@@ -2114,6 +2119,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         data->cookies = data->share->cookies;
       }
 #endif   /* CURL_DISABLE_HTTP */
+      if(data->share->sslsession) {
+        data->set.ssl.numsessions = data->share->nsslsession;
+        data->state.session = data->share->sslsession;
+      }
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
 
     }

@@ -62,6 +62,7 @@
 #include "url.h"
 #include "curl_memory.h"
 #include "progress.h"
+#include "share.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -236,6 +237,10 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
     /* session ID re-use is disabled */
     return TRUE;
 
+  /* Lock for reading if shared */
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SHARED);
+
   for(i=0; i< data->set.ssl.numsessions; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
@@ -254,13 +259,19 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
     }
   }
   *ssl_sessionid = NULL;
+
+  /* Unlock for reading */
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
+
+
   return TRUE;
 }
 
 /*
  * Kill a single session ID entry in the cache.
  */
-static int kill_session(struct curl_ssl_session *session)
+int Curl_ssl_kill_session(struct curl_ssl_session *session)
 {
   if(session->sessionid) {
     /* defensive check */
@@ -288,14 +299,23 @@ static int kill_session(struct curl_ssl_session *session)
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
 {
   int i;
-  for(i=0; i< conn->data->set.ssl.numsessions; i++) {
-    struct curl_ssl_session *check = &conn->data->state.session[i];
+  struct SessionHandle *data=conn->data;
+
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION,
+                    CURL_LOCK_ACCESS_SINGLE);
+
+  for(i=0; i< data->set.ssl.numsessions; i++) {
+    struct curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
-      kill_session(check);
+      Curl_ssl_kill_session(check);
       break;
     }
   }
+
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
 /*
@@ -325,6 +345,10 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   /* Now we should add the session ID and the host name to the cache, (remove
      the oldest if necessary) */
 
+  /* If using shared SSL session, lock! */
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+
   /* find an empty slot for us, or find the oldest */
   for(i=1; (i<data->set.ssl.numsessions) &&
         data->state.session[i].sessionid; i++) {
@@ -335,7 +359,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   }
   if(i == data->set.ssl.numsessions)
     /* cache is full, we must "kill" the oldest entry! */
-    kill_session(store);
+    Curl_ssl_kill_session(store);
   else
     store = &data->state.session[i]; /* use this slot */
 
@@ -348,6 +372,11 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
     free(store->name);
   store->name = clone_host;               /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
+
+
+  /* Unlock */
+  if(data->share && data->share->sslsession == data->state.session)
+    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
   if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config)) {
     store->sessionid = NULL; /* let caller free sessionid */
@@ -363,14 +392,20 @@ void Curl_ssl_close_all(struct SessionHandle *data)
 {
   long i;
   /* kill the session ID cache */
-  if(data->state.session) {
+  if(data->state.session &&
+     !(data->share && data->share->sslsession == data->state.session)) {
+
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+
     for(i=0; i< data->set.ssl.numsessions; i++)
       /* the single-killer function handles empty table slots */
-      kill_session(&data->state.session[i]);
+      Curl_ssl_kill_session(&data->state.session[i]);
 
     /* free the cache data */
     free(data->state.session);
     data->state.session = NULL;
+
+    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
   }
 
   curlssl_close_all(data);

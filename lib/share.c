@@ -25,6 +25,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "share.h"
+#include "sslgen.h"
 #include "curl_memory.h"
 
 /* The last #include file should be: */
@@ -82,7 +83,16 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       break;
 #endif   /* CURL_DISABLE_HTTP */
 
-    case CURL_LOCK_DATA_SSL_SESSION: /* not supported (yet) */
+    case CURL_LOCK_DATA_SSL_SESSION:
+      if(!share->sslsession) {
+        share->nsslsession = 8;
+        share->sslsession = calloc(share->nsslsession,
+                                   sizeof(struct curl_ssl_session));
+        if(!share->sslsession)
+          return CURLSHE_NOMEM;
+      }
+      break;
+
     case CURL_LOCK_DATA_CONNECT:     /* not supported (yet) */
 
     default:
@@ -112,6 +122,11 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 #endif   /* CURL_DISABLE_HTTP */
 
     case CURL_LOCK_DATA_SSL_SESSION:
+      if(share->sslsession) {
+        free(share->sslsession);
+        share->sslsession = NULL;
+        share->nsslsession = 0;
+      }
       break;
 
     case CURL_LOCK_DATA_CONNECT:
@@ -148,6 +163,7 @@ CURLSHcode
 curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = (struct Curl_share *)sh;
+  unsigned int i;
 
   if(share == NULL)
     return CURLSHE_INVALID;
@@ -169,6 +185,12 @@ curl_share_cleanup(CURLSH *sh)
 
   if(share->cookies)
     Curl_cookie_cleanup(share->cookies);
+
+  if(share->sslsession) {
+    for(i = 0; i < share->nsslsession; ++i)
+      Curl_ssl_kill_session(&(share->sslsession[i]));
+    free(share->sslsession);
+  }
 
   if(share->unlockfunc)
     share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);

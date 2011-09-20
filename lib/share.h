@@ -26,6 +26,7 @@
 #include "setup.h"
 #include <curl/curl.h>
 #include "cookie.h"
+#include "urldata.h"
 
 /* SalfordC says "A structure member may not be volatile". Hence:
  */
@@ -46,6 +47,9 @@ struct Curl_share {
 
   struct curl_hash *hostcache;
   struct CookieInfo *cookies;
+
+  struct curl_ssl_session *sslsession;
+  unsigned int nsslsession;
 };
 
 CURLSHcode Curl_share_lock (struct SessionHandle *, curl_lock_data,
