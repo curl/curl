@@ -2561,7 +2561,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(http->writebytecount >= postsize) {
       /* already sent the entire request body, mark the "upload" as
          complete */
-      infof(data, "upload completely sent off: %" FORMAT_OFF_T "out of "
+      infof(data, "upload completely sent off: %" FORMAT_OFF_T " out of "
             "%" FORMAT_OFF_T " bytes\n",
             http->writebytecount, postsize);
       data->req.upload_done = TRUE;
