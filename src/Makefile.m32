@@ -20,8 +20,11 @@ endif
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8r
 endif
-ifndef OPENSSL_LIB
-OPENSSL_LIB = $(OPENSSL_PATH)/out
+ifndef OPENSSL_LIBPATH
+OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
+endif
+ifndef OPENSSL_LIBS
+OPENSSL_LIBS = -leay32 -lssl32
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
@@ -68,6 +71,7 @@ endif
 LDFLAGS = -s
 RC = windres
 RCFLAGS = --include-dir=$(PROOT)/include -O COFF -i
+
 RM = del /q /f 2>NUL
 CP = copy
 
@@ -146,7 +150,7 @@ ifdef SSH2
 endif
 ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
-  curl_LDADD += -L"$(OPENSSL_LIB)" -leay32 -lssl32
+  curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
