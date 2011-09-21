@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP without --mail-from
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 814@foo -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO user
+MAIL FROM:<>
+RCPT TO:<814@foo>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+
+.
+</upload>
+</verify>
+</testcase>
