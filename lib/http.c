@@ -546,7 +546,7 @@ output_auth_headers(struct connectdata *conn,
   }
   else
 #endif
-#ifdef NTLM_WB_ENABLED
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   if(authstatus->picked == CURLAUTH_NTLM_WB) {
     auth="NTLM_WB";
     result = Curl_output_ntlm_wb(conn, proxy);

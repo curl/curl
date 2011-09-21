@@ -1380,10 +1380,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     /* switch off bits we can't support */
 #ifndef USE_NTLM
-    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
-#endif
-#ifndef NTLM_WB_ENABLED
-    auth &= ~CURLAUTH_NTLM_WB;
+    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
+#elif !defined(NTLM_WB_ENABLED)
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
@@ -1443,10 +1443,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     }
     /* switch off bits we can't support */
 #ifndef USE_NTLM
-    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
-#endif
-#ifndef NTLM_WB_ENABLED
-    auth &= ~CURLAUTH_NTLM_WB;
+    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
+#elif !defined(NTLM_WB_ENABLED)
+    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_HTTP_NEGOTIATE
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
@@ -2531,7 +2531,7 @@ static void conn_free(struct connectdata *conn)
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     Curl_closesocket(conn, conn->sock[FIRSTSOCKET]);
 
-#ifdef NTLM_WB_ENABLED
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
 #endif
 
@@ -3524,7 +3524,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->ip_version = data->set.ipver;
 
-#ifdef NTLM_WB_ENABLED
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   conn->ntlm_auth_hlpr_pid = 0;
   conn->challenge_header = NULL;
