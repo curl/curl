@@ -208,7 +208,6 @@ libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
 RESOURCE = libcurl.res
 
-.SUFFIXES: .rc .res
 
 all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
@@ -225,10 +224,10 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 	$(CC) $(LDFLAGS) -shared -Wl,--out-implib,$(libcurl_dll_a_LIBRARY) \
 	  -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
-.c.o: $(PROOT)/include/curl/curlbuild.h
+%.o: %.c $(PROOT)/include/curl/curlbuild.h
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
-.rc.res:
+%.res: %.rc
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:

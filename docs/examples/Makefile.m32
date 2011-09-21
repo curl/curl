@@ -217,20 +217,21 @@ include Makefile.inc
 
 example_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 
-.SUFFIXES: .rc .res .o .exe
-
 
 all: $(example_PROGRAMS)
 
-.o.exe: $(curl_DEPENDENCIES)
+%.exe: %.o $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_LDADD)
 
-.c.o:
+%.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
-.rc.res:
+%.res: %.rc
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
-	$(RM) $(example_PROGRAMS)
+	$(RM) $(example_PROGRAMS:.exe=.o)
+
+distclean vclean: clean
+	-$(RM) $(example_PROGRAMS)
 

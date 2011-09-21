@@ -206,8 +206,6 @@ endif
 
 RESOURCE = curl.res
 
-.SUFFIXES: .rc .res
-
 
 all: $(curl_PROGRAMS)
 
@@ -224,10 +222,10 @@ hugehelp.c:
 	@echo Creating $@
 	@$(CP) hugehelp.c.cvs $@
 
-.c.o:
+%.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
-.rc.res:
+%.res: %.rc
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
