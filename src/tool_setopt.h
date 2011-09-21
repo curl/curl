@@ -29,7 +29,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
 /*
  * Macros used in operate()
  */
-
+#if 0
 #define my_setopt(x,y,z)  do { \
   res = tool_setopt(x, FALSE, config, #y, y, z); \
   if(res) \
@@ -41,6 +41,10 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
   if(res) \
     goto quit_curl; \
 } WHILE_FALSE
+#else
+#define my_setopt(x,y,z) tool_setopt(x, FALSE, config, #y, y, z)
+#define my_setopt_str(x,y,z) tool_setopt(x, TRUE, config, #y, y, z)
+#endif
 
 #define res_setopt(x,y,z) tool_setopt(x, FALSE, config, #y, y, z)
 
