@@ -207,7 +207,7 @@ ifdef USE_LDAP_OPENLDAP
 endif
 ifndef USE_LDAP_NOVELL
 ifndef USE_LDAP_OPENLDAP
-curl_LDADD += -lwldap32
+  curl_LDADD += -lwldap32
 endif
 endif
 curl_LDADD += -lws2_32
@@ -215,10 +215,10 @@ curl_LDADD += -lws2_32
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
 
-example_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
+check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 
 
-all: $(example_PROGRAMS)
+all: $(check_PROGRAMS)
 
 %.exe: %.o $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_LDADD)
@@ -230,8 +230,8 @@ all: $(example_PROGRAMS)
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
-	$(RM) $(example_PROGRAMS:.exe=.o)
+	-$(RM) $(check_PROGRAMS:.exe=.o)
 
 distclean vclean: clean
-	-$(RM) $(example_PROGRAMS)
+	-$(RM) $(check_PROGRAMS)
 
