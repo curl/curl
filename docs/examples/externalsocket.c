@@ -28,13 +28,17 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <sys/socket.h>       /*  socket definitions        */
+#ifdef WIN32
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#define close closesocket
+#else
 #include <sys/types.h>        /*  socket types              */
+#include <sys/socket.h>       /*  socket definitions        */
 #include <arpa/inet.h>        /*  inet (3) funtions         */
 #include <unistd.h>           /*  misc. UNIX functions      */
+#endif
 
 #include <errno.h>
 
@@ -72,6 +76,16 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
+#ifdef WIN32
+  WSADATA wsaData;
+  int initwsa;
+
+  if((initwsa = WSAStartup(MAKEWORD(2,0), &wsaData)) != 0) {
+    printf("WSAStartup failed: %d\n", initwsa);
+    return 1;
+  }
+#endif
+
   curl = curl_easy_init();
   if(curl) {
     /*
@@ -81,16 +95,16 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
 
     /* Create the socket "manually" */
-    if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
-      fprintf(stderr, "ECHOCLNT: Error creating listening socket.\n");
+    if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
+      printf("Error creating listening socket.\n");
       return 3;
     }
 
     memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family      = AF_INET;
-    servaddr.sin_port        = htons(PORTNUM);
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port   = htons(PORTNUM);
 
-    if(inet_aton(IPADDR, &servaddr.sin_addr) <= 0 )
+    if (INADDR_NONE == (servaddr.sin_addr.s_addr = inet_addr(IPADDR)))
       return 2;
 
     if(connect(sockfd,(struct sockaddr *) &servaddr, sizeof(servaddr)) ==
