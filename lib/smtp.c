@@ -791,7 +791,11 @@ static CURLcode smtp_mail(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
 
   /* send MAIL FROM */
-  if(data->set.str[STRING_MAIL_FROM][0] == '<')
+  if(!data->set.str[STRING_MAIL_FROM])
+    /* null reverse-path, RFC-2821, sect. 3.7 */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<>");
+
+  else if(data->set.str[STRING_MAIL_FROM][0] == '<')
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
                            data->set.str[STRING_MAIL_FROM]);
   else
