@@ -225,7 +225,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 	$(CC) $(LDFLAGS) -shared -Wl,--out-implib,$(libcurl_dll_a_LIBRARY) \
 	  -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
-.c.o:
+.c.o: $(PROOT)/include/curl/curlbuild.h
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 .rc.res:
