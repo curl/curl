@@ -4042,10 +4042,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       /* Here's looping around each globbed URL */
       for(i = 0 ;; i++) {
 
-        int infd = STDIN_FILENO;
+        int infd;
         bool infdopen;
         char *outfile;
         struct timeval retrystart;
+
+        outfile = NULL;
+        infdopen = FALSE;
+        infd = STDIN_FILENO;
 
         if(urls)
           url = glob_next_url(urls);
@@ -4056,7 +4060,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(!url)
           break;
 
-        outfile = outfiles?strdup(outfiles):NULL;
+        if(outfiles) {
+          outfile = strdup(outfiles);
+          if(!outfile) {
+            res = CURLE_OUT_OF_MEMORY;
+            goto show_error;
+          }
+        }
 
         if((urlnode->flags&GETOUT_USEREMOTE) ||
            (outfile && !curlx_strequal("-", outfile)) ) {
@@ -4071,19 +4081,16 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outfile = get_url_file_name(url);
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
-              Curl_safefree(url);
               res = CURLE_WRITE_ERROR;
-              break;
+              goto quit_urls;
             }
 #if defined(MSDOS) || defined(WIN32)
             /* For DOS and WIN32, we do some major replacing of
                bad characters in the file name before using it */
             outfile = sanitize_dos_name(outfile);
             if(!outfile) {
-              warnf(config, "out of memory\n");
-              Curl_safefree(url);
               res = CURLE_OUT_OF_MEMORY;
-              break;
+              goto show_error;
             }
 #endif /* MSDOS || WIN32 */
           }
@@ -4095,9 +4102,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             if(!outfile) {
               /* bad globbing */
               warnf(config, "bad output glob!\n");
-              Curl_safefree(url);
               res = CURLE_FAILED_INIT;
-              break;
+              goto quit_urls;
             }
           }
 
@@ -4107,11 +4113,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(config->create_dirs) {
             res = create_dir_hierarchy(outfile, config->errors);
             /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
-            if(res == CURLE_OUT_OF_MEMORY)
-              warnf(config, "out of memory\n");
+            if(res == CURLE_WRITE_ERROR)
+              goto quit_urls;
             if(res) {
-              Curl_safefree(url);
-              break;
+              goto show_error;
             }
           }
 
@@ -4136,12 +4141,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(config->resume_from) {
             outs.init = config->resume_from;
             /* open file for output: */
-            outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
+            outs.stream = fopen(outfile, config->resume_from?"ab":"wb");
             if(!outs.stream) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
-              Curl_safefree(url);
               res = CURLE_WRITE_ERROR;
-              break;
+              goto quit_urls;
             }
           }
           else {
@@ -4149,7 +4153,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             outs.bytes = 0;     /* reset byte counter */
           }
         }
-        infdopen=FALSE;
+
         if(uploadfile && !stdin_upload(uploadfile)) {
           /*
            * We have specified a file to upload and it isn't "-".
@@ -4158,9 +4162,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           url = add_file_name_to_url(curl, url, uploadfile);
           if(!url) {
-            helpf(config->errors, "out of memory\n");
             res = CURLE_OUT_OF_MEMORY;
-            break;
+            goto show_error;
           }
           /* VMS Note:
            *
@@ -4177,28 +4180,17 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            * to be considered with one appended if implied CC
            */
 
-          infd= open(uploadfile, O_RDONLY | O_BINARY);
+          infd = open(uploadfile, O_RDONLY | O_BINARY);
           if((infd == -1) || fstat(infd, &fileinfo)) {
             helpf(config->errors, "Can't open '%s'!\n", uploadfile);
-            if(infd != -1)
+            if(infd != -1) {
               close(infd);
-
-            /* Free the list of remaining URLs and globbed upload files
-             * to force curl to exit immediately
-             */
-            if(urls) {
-              glob_cleanup(urls);
-              urls = NULL;
+              infd = STDIN_FILENO;
             }
-            if(inglob) {
-              glob_cleanup(inglob);
-              inglob = NULL;
-            }
-
             res = CURLE_READ_ERROR;
             goto quit_urls;
           }
-          infdopen=TRUE;
+          infdopen = TRUE;
 
           /* we ignore file size for char/block devices, sockets, etc. */
           if(S_ISREG(fileinfo.st_mode))
@@ -4231,8 +4223,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                   " file or a fixed auth type instead!\n");
           }
 
+          DEBUGASSERT(infdopen == FALSE);
+          DEBUGASSERT(infd == STDIN_FILENO);
+
           SET_BINMODE(stdin);
-          infd = STDIN_FILENO;
           if(curlx_strequal(uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
               warnf(config,
@@ -4258,12 +4252,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(httpgetfields) {
           char *urlbuffer;
           /* Find out whether the url contains a file name */
-          const char *pc =strstr(url, "://");
-          char sep='?';
+          const char *pc = strstr(url, "://");
+          char sep = '?';
           if(pc)
-            pc+=3;
+            pc += 3;
           else
-            pc=url;
+            pc = url;
 
           pc = strrchr(pc, '/'); /* check for a slash */
 
@@ -4280,22 +4274,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
           urlbuffer = malloc(strlen(url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
-            helpf(config->errors, "out of memory\n");
-
-            /* Free the list of remaining URLs and globbed upload files
-             * to force curl to exit immediately
-             */
-            if(urls) {
-              glob_cleanup(urls);
-              urls = NULL;
-            }
-            if(inglob) {
-              glob_cleanup(inglob);
-              inglob = NULL;
-            }
-
             res = CURLE_OUT_OF_MEMORY;
-            goto quit_urls;
+            goto show_error;
           }
           if(pc)
             sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
@@ -4534,19 +4514,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               }
               free(home);
             }
-            if(res) {
-              /* Free the list of remaining URLs and globbed upload files
-               * to force curl to exit immediately */
-              if(urls) {
-                glob_cleanup(urls);
-                urls = NULL;
-              }
-              if(inglob) {
-                glob_cleanup(inglob);
-                inglob = NULL;
-              }
-              goto quit_urls;
-            }
+            if(res)
+              goto show_error;
           }
         }
 
@@ -4780,7 +4749,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           res = curl_easy_perform(curl);
           if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
             res = CURLE_OUT_OF_MEMORY;
-            break;
+            goto show_error;
           }
 
           if(config->content_disposition && outs.stream && !config->mute &&
@@ -4881,7 +4850,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
                   if(!config->mute)
                     fprintf(config->errors,
                             "failed to truncate, exiting\n");
-                  break;
+                  res = CURLE_WRITE_ERROR;
+                  goto quit_urls;
                 }
                 /* now seek to the end of the file, the position where we
                    just truncated the file in a large file-safe way */
@@ -4895,13 +4865,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
                 outs.bytes = 0; /* clear for next round */
               }
-              continue;
+              continue; /* curl_easy_perform loop */
             }
           } /* if retry_numretries */
 
           /* In all ordinary cases, just break out of loop here */
           retry_sleep = retry_sleep_default;
-          break;
+          break; /* curl_easy_perform loop */
 
         }
 
@@ -4918,55 +4888,82 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           ourWriteEnv(curl);
 #endif
 
+        /*
+        ** Code within this loop may jump directly here to label 'show_error'
+        ** in order to display an error message for CURLcode stored in 'res'
+        ** variable and exit loop once that necessary writing and cleanup
+        ** in label 'quit_urls' has been done.
+        */
+
         show_error:
 
 #ifdef __VMS
         if(is_vms_shell()) {
           /* VMS DCL shell behavior */
-          if(!config->showerror) {
+          if(!config->showerror)
             vms_show = VMSSTS_HIDE;
-          }
         }
         else
 #endif
-        {
-          if((res!=CURLE_OK) && config->showerror) {
-            fprintf(config->errors, "curl: (%d) %s\n", res,
-                    errorbuffer[0]? errorbuffer:
-                    curl_easy_strerror((CURLcode)res));
-            if(CURLE_SSL_CACERT == res) {
-              fprintf(config->errors, "%s%s",
-                      CURL_CA_CERT_ERRORMSG1,
-                      CURL_CA_CERT_ERRORMSG2 );
-            }
-          }
+        if(res && config->showerror) {
+          fprintf(config->errors, "curl: (%d) %s\n", res,
+                  (errorbuffer[0]) ? errorbuffer: curl_easy_strerror(res));
+          if(res == CURLE_SSL_CACERT)
+            fprintf(config->errors, "%s%s",
+                    CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2);
         }
+
+        /* Fall through comment to 'quit_urls' label */
+
+        /*
+        ** Upon error condition and always that a message has already been
+        ** displayed, code within this loop may jump directly here to label
+        ** 'quit_urls' otherwise it should jump to 'show_error' label above.
+        **
+        ** When 'res' variable is _not_ CURLE_OK loop will exit once that
+        ** all code following 'quit_urls' has been executed. Otherwise it
+        ** will loop to the beginning from where it may exit if there are
+        ** no more urls left.
+        */
+
+        quit_urls:
+
+        /* Set file extended attributes */
+        if(!res && config->xattr &&
+           outfile && !curlx_strequal(outfile, "-") && outs.stream) {
+          int rc = fwrite_xattr(curl, fileno(outs.stream));
+          if(rc)
+            warnf(config, "Error setting extended attributes: %s\n",
+                  strerror(errno));
+        }
+
+        /* Close the file */
         if(outfile && !curlx_strequal(outfile, "-") && outs.stream) {
-          int rc;
-
-          if(config->xattr) {
-            rc = fwrite_xattr(curl, fileno(outs.stream) );
-            if(rc)
-              warnf(config, "Error setting extended attributes: %s\n",
-                    strerror(errno) );
-          }
-          if(outs.alloc_filename)
-            Curl_safefree(outs.filename);
-
-          rc = fclose(outs.stream);
+          int rc = fclose(outs.stream);
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
             fprintf(config->errors, "(%d) Failed writing body\n", res);
           }
+          if(outs.alloc_filename)
+            Curl_safefree(outs.filename);
         }
 
+#ifdef __AMIGA__
+        if(!res) {
+          /* Set the url (up to 80 chars) as comment for the file */
+          if(strlen(url) > 78)
+            url[79] = '\0';
+          SetComment( outs.filename, url);
+        }
+#endif
+
 #ifdef HAVE_UTIME
-        /* Important that we set the time _after_ the file has been
-           closed, as is done above here */
-        if(config->remote_time && outs.filename) {
-          /* ask libcurl if we got a time. Pretty please */
-          long filetime;
+        /* File time can only be set _after_ the file has been closed */
+        if(!res && config->remote_time &&
+           outs.filename && !curlx_strequal("-", outs.filename)) {
+          /* Ask libcurl if we got a remote file time */
+          long filetime = -1;
           curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
           if(filetime >= 0) {
             struct utimbuf times;
@@ -4976,22 +4973,36 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
 #endif
-#ifdef __AMIGA__
-        /* Set the url as comment for the file. (up to 80 chars are allowed)
-         */
-        if(strlen(url) > 78)
-          url[79] = '\0';
 
-        SetComment( outs.filename, url);
-#endif
+        /* Cleanup loop-local variables for next loop iteration or exit */
 
-        quit_urls:
-        Curl_safefree(url);
-
+        if(infdopen) {
+          close(infd);
+          infdopen = FALSE;    /* not needed */
+          infd = STDIN_FILENO; /* not needed */
+        }
         Curl_safefree(outfile);
 
-        if(infdopen)
-          close(infd);
+        /* ... */
+
+        Curl_safefree(url);
+
+        if(res) {
+          /* Free list of remaining URLs */
+          if(urls) {
+            glob_cleanup(urls);
+            urls = NULL;
+          }
+          /* Free list of globbed upload files */
+          if(inglob) {
+            glob_cleanup(inglob);
+            inglob = NULL;
+          }
+        }
+
+        /* upon error exit loop */
+        if(res)
+          break;
 
       } /* loop to the next URL */
 
@@ -5002,6 +5013,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       }
 
       Curl_safefree(uploadfile);
+
+      /* upon error exit loop */
+      if(res)
+        break;
 
     } /* loop to the next globbed upload file */
 
