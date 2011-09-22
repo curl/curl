@@ -678,11 +678,11 @@ from the root directory when logging in as a specified user.
 
 The path part of a SMTP request specifies the host name to present during
 communication with the mail server. If the path is omitted then libcurl will
-attempt to to resolve the local computer's host name. However, that will not
+attempt to to resolve the local computer's host name. However, this will not
 return the fully qualified domain name that is required by some mail servers
-and specifing this path allows you to specify an alternative name such as your
-machine's fully qualified domain name which you might have obtained from an
-external function such as gethostname or getaddrinfo.
+and specifing this path allows you to specify an alternative name, such as
+your machine's fully qualified domain name, which you might have obtained
+from an external function such as gethostname or getaddrinfo.
 
 smtp://mail.domain.com - This connects to the mail server at domain.com and
 sends your local computer's host name in the HELO / EHLO command.
@@ -765,7 +765,7 @@ affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
 used for "regular" HTTP requests is instead controled with
 \fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
-Pass a pointer to a zero terminated string. The should be a comma- separated
+Pass a pointer to a zero terminated string. The should be a comma separated
 list of hosts which do not use a proxy, if one is specified.  The only
 wildcard is a single * character, which matches all hosts, and effectively
 disables the proxy. Each name in this list is matched as either a domain which
@@ -1029,12 +1029,12 @@ You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
 to work. (Added in 7.21.4)
 .RE
 .IP CURLOPT_TLSAUTH_USERNAME
-Pass a char * as parameter, which should point to the zero-terminated username
+Pass a char * as parameter, which should point to the zero terminated username
 to use for the TLS authentication method specified with the
 \fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
 \fICURLOPT_TLS_PASSWORD\fP option also be set. (Added in 7.21.4)
 .IP CURLOPT_TLSAUTH_PASSWORD
-Pass a char * as parameter, which should point to the zero-terminated password
+Pass a char * as parameter, which should point to the zero terminated password
 to use for the TLS authentication method specified with the
 \fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
 \fICURLOPT_TLS_USERNAME\fP option also be set. (Added in 7.21.4)
@@ -1567,7 +1567,7 @@ a reply.
 Initiate the shutdown and wait for a reply.
 .RE
 .IP CURLOPT_FTP_ACCOUNT
-Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
+Pass a pointer to a zero terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,
 this data is sent off using the ACCT command. (Added in 7.13.0)
 .IP CURLOPT_FTP_FILEMETHOD
