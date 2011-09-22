@@ -195,6 +195,10 @@ SOURCE=.\tool_easysrc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_libinfo.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.c
 # End Source File
 # Begin Source File
@@ -296,6 +300,10 @@ SOURCE=.\tool_doswin.h
 # Begin Source File
 
 SOURCE=.\tool_easysrc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_libinfo.h
 # End Source File
 # Begin Source File
 

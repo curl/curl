@@ -30,6 +30,7 @@
 #ifdef WIN32
 #  include <curl/curl.h>
 #  include "tool_cfgable.h"
+#  include "tool_libinfo.h"
 #endif
 
 #include "tool_bname.h"
@@ -251,10 +252,8 @@ CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file)
 {
   CURLcode result = CURLE_OK;
 
-  curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
-
-  /* search and set cert file only if "we" support SSL */
-  if(info->features & CURL_VERSION_SSL) {
+  /* search and set cert file only if libcurl supports SSL */
+  if(curlinfo->features & CURL_VERSION_SSL) {
 
     DWORD res_len;
     DWORD buf_tchar_size = PATH_MAX + 1;

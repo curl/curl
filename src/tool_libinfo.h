@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_SETOPT_H
-#define HEADER_CURL_TOOL_SETOPT_H
+#ifndef HEADER_CURL_TOOL_LIBINFO_H
+#define HEADER_CURL_TOOL_LIBINFO_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,28 +23,12 @@
  ***************************************************************************/
 #include "setup.h"
 
-CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
-                     const char *name, CURLoption tag, ...);
+/* global variable declarations, for libcurl run-time info */
 
-/*
- * Macros used in operate()
- */
+extern curl_version_info_data *curlinfo;
+extern long built_in_protos;
 
-#define my_setopt(x,y,z)  do { \
-  res = tool_setopt(x, FALSE, config, #y, y, z); \
-  if(res) \
-    goto show_error; \
-} WHILE_FALSE
+CURLcode get_libcurl_info(void);
 
-#define my_setopt_str(x,y,z)  do { \
-  res = tool_setopt(x, TRUE, config, #y, y, z); \
-  if(res) \
-    goto show_error; \
-} WHILE_FALSE
-
-#define res_setopt(x,y,z) tool_setopt(x, FALSE, config, #y, y, z)
-
-#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, config, #y, y, z)
-
-#endif /* HEADER_CURL_TOOL_SETOPT_H */
+#endif /* HEADER_CURL_TOOL_LIBINFO_H */
 
