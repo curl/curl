@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <curl/curl.h>
+#include "printf_macro.h"
 
 /* Auxiliary function that waits on the socket. */
 static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
@@ -122,7 +123,7 @@ int main(void)
       if(CURLE_OK != res)
         break;
 
-      printf("Received %u bytes.\n", iolen);
+      printf("Received %" _FMT_SIZE_T " bytes.\n", iolen);
     }
 
     /* always cleanup */
