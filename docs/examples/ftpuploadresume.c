@@ -39,7 +39,7 @@
 
 /* The MinGW headers are missing a few Win32 function definitions,
    you shouldn't need this if you use VC++ */
-#ifdef __MINGW32__
+#if defined(__MINGW32__) && !defined(__MINGW64__)
 int __cdecl _snscanf(const char * input, size_t length, const char * format, ...);
 #endif
 
