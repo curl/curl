@@ -216,6 +216,7 @@ curl_LDADD += -lws2_32
 include Makefile.inc
 
 check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
+check_PROGRAMS += ftpuploadresume.exe synctime.exe
 
 
 all: $(check_PROGRAMS)
