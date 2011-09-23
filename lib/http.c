@@ -1803,8 +1803,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   else {
     if((conn->handler->protocol&CURLPROTO_HTTP) &&
-        data->set.upload &&
-        (data->set.infilesize == -1)) {
+       data->set.upload &&
+       (data->set.infilesize == -1)) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
@@ -1982,7 +1982,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        * This is meant to get the size of the present remote-file by itself.
        * We don't support this now. Bail out!
        */
-       data->state.resume_from = 0;
+      data->state.resume_from = 0;
     }
 
     if(data->state.resume_from && !data->state.this_is_a_follow) {
@@ -2073,17 +2073,17 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         curl_off_t total_expected_size=
           data->state.resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
-            aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
-                    "/%" FORMAT_OFF_T "\r\n",
-                    data->state.range, total_expected_size-1,
-                    total_expected_size);
+          aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
+                  "/%" FORMAT_OFF_T "\r\n",
+                  data->state.range, total_expected_size-1,
+                  total_expected_size);
       }
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
         conn->allocptr.rangeline =
-            aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
-                    data->state.range, data->set.infilesize);
+          aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
+                  data->state.range, data->set.infilesize);
       }
       if(!conn->allocptr.rangeline)
         return CURLE_OUT_OF_MEMORY;
@@ -2116,45 +2116,47 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  result = Curl_add_bufferf(req_buffer,
-                "%s" /* ftp typecode (;type=x) */
-                " HTTP/%s\r\n" /* HTTP version */
-                "%s" /* proxyuserpwd */
-                "%s" /* userpwd */
-                "%s" /* range */
-                "%s" /* user agent */
-                "%s" /* host */
-                "%s" /* accept */
-                "%s" /* TE: */
-                "%s" /* accept-encoding */
-                "%s" /* referer */
-                "%s" /* Proxy-Connection */
-                "%s",/* transfer-encoding */
+  result =
+    Curl_add_bufferf(req_buffer,
+                     "%s" /* ftp typecode (;type=x) */
+                     " HTTP/%s\r\n" /* HTTP version */
+                     "%s" /* proxyuserpwd */
+                     "%s" /* userpwd */
+                     "%s" /* range */
+                     "%s" /* user agent */
+                     "%s" /* host */
+                     "%s" /* accept */
+                     "%s" /* TE: */
+                     "%s" /* accept-encoding */
+                     "%s" /* referer */
+                     "%s" /* Proxy-Connection */
+                     "%s",/* transfer-encoding */
 
-                ftp_typecode,
-                httpstring,
-                conn->allocptr.proxyuserpwd?
-                conn->allocptr.proxyuserpwd:"",
-                conn->allocptr.userpwd?conn->allocptr.userpwd:"",
-                (data->state.use_range && conn->allocptr.rangeline)?
-                conn->allocptr.rangeline:"",
-                (data->set.str[STRING_USERAGENT] &&
-                 *data->set.str[STRING_USERAGENT] && conn->allocptr.uagent)?
-                conn->allocptr.uagent:"",
-                (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
-                http->p_accept?http->p_accept:"",
-                conn->allocptr.te?conn->allocptr.te:"",
-                (data->set.str[STRING_ENCODING] &&
-                 *data->set.str[STRING_ENCODING] &&
-                 conn->allocptr.accept_encoding)?
-                conn->allocptr.accept_encoding:"",
-                (data->change.referer && conn->allocptr.ref)?
-                conn->allocptr.ref:"" /* Referer: <data> */,
-                (conn->bits.httpproxy &&
-                 !conn->bits.tunnel_proxy &&
-                 !Curl_checkheaders(data, "Proxy-Connection:"))?
-                "Proxy-Connection: Keep-Alive\r\n":"",
-                te
+                     ftp_typecode,
+                     httpstring,
+                     conn->allocptr.proxyuserpwd?
+                     conn->allocptr.proxyuserpwd:"",
+                     conn->allocptr.userpwd?conn->allocptr.userpwd:"",
+                     (data->state.use_range && conn->allocptr.rangeline)?
+                     conn->allocptr.rangeline:"",
+                     (data->set.str[STRING_USERAGENT] &&
+                      *data->set.str[STRING_USERAGENT] &&
+                      conn->allocptr.uagent)?
+                     conn->allocptr.uagent:"",
+                     (conn->allocptr.host?conn->allocptr.host:""),
+                     http->p_accept?http->p_accept:"",
+                     conn->allocptr.te?conn->allocptr.te:"",
+                     (data->set.str[STRING_ENCODING] &&
+                      *data->set.str[STRING_ENCODING] &&
+                      conn->allocptr.accept_encoding)?
+                     conn->allocptr.accept_encoding:"",
+                     (data->change.referer && conn->allocptr.ref)?
+                     conn->allocptr.ref:"" /* Referer: <data> */,
+                     (conn->bits.httpproxy &&
+                      !conn->bits.tunnel_proxy &&
+                      !Curl_checkheaders(data, "Proxy-Connection:"))?
+                     "Proxy-Connection: Keep-Alive\r\n":"",
+                     te
       );
 
   /*
@@ -2194,8 +2196,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
               break;
           }
           result = Curl_add_bufferf(req_buffer,
-                               "%s%s=%s", count?"; ":"",
-                               co->name, co->value);
+                                    "%s%s=%s", count?"; ":"",
+                                    co->name, co->value);
           if(result)
             break;
           count++;
@@ -2209,8 +2211,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         result = Curl_add_bufferf(req_buffer, "Cookie: ");
       if(CURLE_OK == result) {
         result = Curl_add_bufferf(req_buffer, "%s%s",
-                             count?"; ":"",
-                             addcookies);
+                                  count?"; ":"",
+                                  addcookies);
         count++;
       }
     }
@@ -2277,11 +2279,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     http->sending = HTTPSEND_BODY;
 
-    if(!data->req.upload_chunky) {
+    if(!data->req.upload_chunky &&
+       !Curl_checkheaders(data, "Content-Length:")) {
       /* only add Content-Length if not uploading chunked */
       result = Curl_add_bufferf(req_buffer,
-                           "Content-Length: %" FORMAT_OFF_T "\r\n",
-                           http->postsize);
+                                "Content-Length: %" FORMAT_OFF_T "\r\n",
+                                http->postsize);
       if(result)
         return result;
     }
@@ -2348,11 +2351,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     else
       postsize = data->set.infilesize;
 
-    if((postsize != -1) && !data->req.upload_chunky) {
+    if((postsize != -1) && !data->req.upload_chunky &&
+       !Curl_checkheaders(data, "Content-Length:")) {
       /* only add Content-Length if not uploading chunked */
       result = Curl_add_bufferf(req_buffer,
-                           "Content-Length: %" FORMAT_OFF_T "\r\n",
-                           postsize );
+                                "Content-Length: %" FORMAT_OFF_T "\r\n",
+                                postsize );
       if(result)
         return result;
     }
@@ -2402,8 +2406,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* we allow replacing this header if not during auth negotiation,
            although it isn't very wise to actually set your own */
         result = Curl_add_bufferf(req_buffer,
-                             "Content-Length: %" FORMAT_OFF_T"\r\n",
-                             postsize);
+                                  "Content-Length: %" FORMAT_OFF_T"\r\n",
+                                  postsize);
         if(result)
           return result;
       }
@@ -2453,7 +2457,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           /* We're not sending it 'chunked', append it to the request
              already now to reduce the number if send() calls */
           result = Curl_add_buffer(req_buffer, data->set.postfields,
-                              (size_t)postsize);
+                                   (size_t)postsize);
           included_body = postsize;
         }
         else {
@@ -2461,10 +2465,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
           if(CURLE_OK == result)
             result = Curl_add_buffer(req_buffer, data->set.postfields,
-                                (size_t)postsize);
+                                     (size_t)postsize);
           if(CURLE_OK == result)
             result = Curl_add_buffer(req_buffer,
-                                "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
+                                     "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
           /* CR  LF   0  CR  LF  CR  LF */
           included_body = postsize + 7;
         }
@@ -2500,7 +2504,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* Chunky upload is selected and we're negotiating auth still, send
            end-of-data only */
         result = Curl_add_buffer(req_buffer,
-                            "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
+                                 "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
         /* CR  LF   0  CR  LF  CR  LF */
         if(result)
           return result;
