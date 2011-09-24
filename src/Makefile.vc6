@@ -142,6 +142,13 @@ RELEASE_OBJS= \
 	rawstrr.obj \
 	strtoofftr.obj \
 	tool_bnamer.obj \
+	tool_cb_dbgr.obj \
+	tool_cb_hdrr.obj \
+	tool_cb_prgr.obj \
+	tool_cb_rear.obj \
+	tool_cb_seer.obj \
+	tool_cb_sktr.obj \
+	tool_cb_wrtr.obj \
 	tool_cfgabler.obj \
 	tool_convertr.obj \
 	tool_dirhier.obj \
@@ -151,7 +158,6 @@ RELEASE_OBJS= \
 	tool_mfilesr.obj \
 	tool_msgsr.obj \
 	tool_myfuncr.obj \
-	tool_progressr.obj \
 	tool_setoptr.obj \
 	tool_vmsr.obj \
 	urlglobr.obj \
@@ -169,6 +175,13 @@ DEBUG_OBJS= \
 	rawstrd.obj \
 	strtoofftd.obj \
 	tool_bnamed.obj \
+	tool_cb_dbgd.obj \
+	tool_cb_hdrd.obj \
+	tool_cb_prgd.obj \
+	tool_cb_read.obj \
+	tool_cb_seed.obj \
+	tool_cb_sktd.obj \
+	tool_cb_wrtd.obj \
 	tool_cfgabled.obj \
 	tool_convertd.obj \
 	tool_dirhied.obj \
@@ -178,7 +191,6 @@ DEBUG_OBJS= \
 	tool_mfilesd.obj \
 	tool_msgsd.obj \
 	tool_myfuncd.obj \
-	tool_progressd.obj \
 	tool_setoptd.obj \
 	tool_vmsd.obj \
 	urlglobd.obj \
@@ -326,6 +338,20 @@ strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 tool_bnamer.obj: tool_bname.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_bname.c
+tool_cb_dbgr.obj: tool_cb_dbg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_dbg.c
+tool_cb_hdrr.obj: tool_cb_hdr.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_hdr.c
+tool_cb_prgr.obj: tool_cb_prg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_prg.c
+tool_cb_rear.obj: tool_cb_rea.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_rea.c
+tool_cb_seer.obj: tool_cb_see.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_see.c
+tool_cb_sktr.obj: tool_cb_skt.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_skt.c
+tool_cb_wrtr.obj: tool_cb_wrt.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
 tool_cfgabler.obj: tool_cfgable.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_cfgable.c
 tool_convertr.obj: tool_convert.c
@@ -344,8 +370,6 @@ tool_msgsr.obj: tool_msgs.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncr.obj: tool_myfunc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
-tool_progressr.obj: tool_progress.c
-	$(CCR) $(CFLAGS) /Fo"$@" tool_progress.c
 tool_setoptr.obj: tool_setopt.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_vmsr.obj: tool_vms.c
@@ -378,6 +402,20 @@ strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 tool_bnamed.obj: tool_bname.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_bname.c
+tool_cb_dbgd.obj: tool_cb_dbg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_dbg.c
+tool_cb_hdrd.obj: tool_cb_hdr.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_hdr.c
+tool_cb_prgd.obj: tool_cb_prg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_prg.c
+tool_cb_read.obj: tool_cb_rea.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_rea.c
+tool_cb_seed.obj: tool_cb_see.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_see.c
+tool_cb_sktd.obj: tool_cb_skt.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_skt.c
+tool_cb_wrtd.obj: tool_cb_wrt.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
 tool_cfgabled.obj: tool_cfgable.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_cfgable.c
 tool_convertd.obj: tool_convert.c
@@ -396,8 +434,6 @@ tool_msgsd.obj: tool_msgs.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_msgs.c
 tool_myfuncd.obj: tool_myfunc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
-tool_progressd.obj: tool_progress.c
-	$(CCD) $(CFLAGS) /Fo"$@" tool_progress.c
 tool_setoptd.obj: tool_setopt.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_vmsd.obj: tool_vms.c

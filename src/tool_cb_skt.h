@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_PROGRESS_H
-#define HEADER_CURL_TOOL_PROGRESS_H
+#ifndef HEADER_CURL_TOOL_CB_SKT_H
+#define HEADER_CURL_TOOL_CB_SKT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,23 +23,13 @@
  ***************************************************************************/
 #include "setup.h"
 
-#define CURL_PROGRESS_STATS 0 /* default progress display */
-#define CURL_PROGRESS_BAR   1
+/*
+** callback for CURLOPT_SOCKOPTFUNCTION
+*/
 
-struct ProgressData {
-  int         calls;
-  curl_off_t  prev;
-  int         width;
-  FILE       *out;  /* where to write everything to */
-  curl_off_t  initial_size;
-};
+int tool_sockopt_cb(void *userdata,
+                    curl_socket_t curlfd,
+                    curlsocktype purpose);
 
-int my_progress(void *clientp,
-                double dltotal, double dlnow,
-                double ultotal, double ulnow);
-
-void progressbarinit(struct ProgressData *bar,
-                     struct Configurable *config);
-
-#endif /* HEADER_CURL_TOOL_PROGRESS_H */
+#endif /* HEADER_CURL_TOOL_CB_SKT_H */
 

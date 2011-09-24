@@ -28,13 +28,17 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
-#include "tool_progress.h"
+#include "tool_cb_prg.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-int my_progress(void *clientp,
-                double dltotal, double dlnow,
-                double ultotal, double ulnow)
+/*
+** callback for CURLOPT_PROGRESSFUNCTION
+*/
+
+int tool_progress_cb(void *clientp,
+                     double dltotal, double dlnow,
+                     double ultotal, double ulnow)
 {
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherits some of his concepts. */

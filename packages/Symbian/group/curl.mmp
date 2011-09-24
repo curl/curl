@@ -11,6 +11,13 @@ SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
     getpass.c homedir.c curlutil.c xattr.c \
     tool_bname.c \
+    tool_cb_dbg.c \
+    tool_cb_hdr.c \
+    tool_cb_prg.c \
+    tool_cb_rea.c \
+    tool_cb_see.c \
+    tool_cb_skt.c \
+    tool_cb_wrt.c \
     tool_cfgable.c \
     tool_convert.c \
     tool_dirhie.c \
@@ -20,7 +27,6 @@ SOURCE \
     tool_mfiles.c \
     tool_msgs.c \
     tool_myfunc.c \
-    tool_progress.c \
     tool_setopt.c \
     tool_vms.c
 

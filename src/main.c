@@ -102,9 +102,17 @@
 #include "tool_mfiles.h"
 #include "tool_msgs.h"
 #include "tool_myfunc.h"
-#include "tool_progress.h"
+#include "tool_cb_prg.h"
 #include "tool_setopt.h"
 #include "tool_vms.h"
+
+#include "tool_cb_rea.h"
+#include "tool_cb_wrt.h"
+#include "tool_cb_see.h"
+#include "tool_cb_skt.h"
+#include "tool_cb_hdr.h"
+#include "tool_cb_dbg.h"
+
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -229,44 +237,6 @@ char **__crt0_glob_function (char *arg)
   " not match the domain name in the URL).\n"                           \
   "If you'd like to turn off curl's verification of the certificate, use\n" \
   " the -k (or --insecure) option.\n"
-
-#if defined(WIN32) && !defined(__MINGW64__)
-
-#ifdef __BORLANDC__
-/* 64-bit lseek-like function unavailable */
-#  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
-#endif
-
-#ifdef __POCC__
-#  if(__POCC__ < 450)
-/* 64-bit lseek-like function unavailable */
-#    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
-#  else
-#    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
-#  endif
-#endif
-
-#ifndef HAVE_FTRUNCATE
-#define HAVE_FTRUNCATE 1
-#endif
-
-/*
- * Truncate a file handle at a 64-bit position 'where'.
- */
-
-static int ftruncate64(int fd, curl_off_t where)
-{
-  if(_lseeki64(fd, where, SEEK_SET) < 0)
-    return -1;
-
-  if(!SetEndOfFile((HANDLE)_get_osfhandle(fd)))
-    return -1;
-
-  return 0;
-}
-#define ftruncate(fd,where) ftruncate64(fd,where)
-
-#endif /* WIN32 */
 
 /*
  * This is the main global constructor for the app. Call this before
@@ -1208,60 +1178,6 @@ static int ftpcccmethod(struct Configurable *config, const char *str)
     return CURLFTPSSL_CCC_ACTIVE;
   warnf(config, "unrecognized ftp CCC method '%s', using default\n", str);
   return CURLFTPSSL_CCC_PASSIVE;
-}
-
-
-static int sockoptcallback(void *clientp, curl_socket_t curlfd,
-                           curlsocktype purpose)
-{
-  struct Configurable *config = (struct Configurable *)clientp;
-  int onoff = 1; /* this callback is only used if we ask for keepalives on the
-                    connection */
-#if defined(TCP_KEEPIDLE) || defined(TCP_KEEPINTVL)
-  int keepidle = (int)config->alivetime;
-#endif
-
-  switch(purpose) {
-  case CURLSOCKTYPE_IPCXN:
-    if(setsockopt(curlfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&onoff,
-                  sizeof(onoff)) < 0) {
-      /* don't abort operation, just issue a warning */
-      SET_SOCKERRNO(0);
-      warnf(clientp, "Could not set SO_KEEPALIVE!\n");
-      return 0;
-    }
-    else {
-      if(config->alivetime) {
-#ifdef TCP_KEEPIDLE
-        if(setsockopt(curlfd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)&keepidle,
-                      sizeof(keepidle)) < 0) {
-          /* don't abort operation, just issue a warning */
-          SET_SOCKERRNO(0);
-          warnf(clientp, "Could not set TCP_KEEPIDLE!\n");
-          return 0;
-        }
-#endif
-#ifdef TCP_KEEPINTVL
-        if(setsockopt(curlfd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepidle,
-                      sizeof(keepidle)) < 0) {
-          /* don't abort operation, just issue a warning */
-          SET_SOCKERRNO(0);
-          warnf(clientp, "Could not set TCP_KEEPINTVL!\n");
-          return 0;
-        }
-#endif
-#if !defined(TCP_KEEPIDLE) || !defined(TCP_KEEPINTVL)
-        warnf(clientp, "Keep-alive functionality somewhat crippled due to "
-              "missing support in your operating system!\n");
-#endif
-      }
-    }
-    break;
-  default:
-    break;
-  }
-
-  return 0;
 }
 
 static long delegation(struct Configurable *config,
@@ -3045,369 +2961,6 @@ static void go_sleep(long ms)
 #endif
 }
 
-static size_t my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
-{
-  size_t rc;
-  struct OutStruct *out=(struct OutStruct *)stream;
-  struct Configurable *config = out->config;
-
-  /*
-   * Once that libcurl has called back my_fwrite() the returned value
-   * is checked against the amount that was intended to be written, if
-   * it does not match then it fails with CURLE_WRITE_ERROR. So at this
-   * point returning a value different from sz*nmemb indicates failure.
-   */
-  const size_t err_rc = (sz * nmemb) ? 0 : 1;
-
-  if(!out->stream) {
-    out->bytes = 0; /* nothing written yet */
-    if(!out->filename) {
-      warnf(config, "Remote filename has no length!\n");
-      return err_rc; /* Failure */
-    }
-
-    if(config->content_disposition) {
-      /* don't overwrite existing files */
-      FILE* f = fopen(out->filename, "r");
-      if(f) {
-        fclose(f);
-        warnf(config, "Refusing to overwrite %s: %s\n", out->filename,
-              strerror(EEXIST));
-        return err_rc; /* Failure */
-      }
-    }
-
-    /* open file for writing */
-    out->stream=fopen(out->filename, "wb");
-    if(!out->stream) {
-      warnf(config, "Failed to create the file %s: %s\n", out->filename,
-            strerror(errno));
-      return err_rc; /* failure */
-    }
-  }
-
-  rc = fwrite(buffer, sz, nmemb, out->stream);
-
-  if((sz * nmemb) == rc)
-    /* we added this amount of data to the output */
-    out->bytes += (sz * nmemb);
-
-  if(config->readbusy) {
-    config->readbusy = FALSE;
-    curl_easy_pause(config->easy, CURLPAUSE_CONT);
-  }
-
-  if(config->nobuffer) {
-    /* disable output buffering */
-    int res = fflush(out->stream);
-    if(res) {
-      /* return a value that isn't the same as sz * nmemb */
-      return err_rc; /* failure */
-    }
-  }
-
-  return rc;
-}
-
-#define MAX_SEEK 2147483647
-
-/*
- * my_seek() is the CURLOPT_SEEKFUNCTION we use
- */
-static int my_seek(void *stream, curl_off_t offset, int whence)
-{
-  struct InStruct *in=(struct InStruct *)stream;
-
-#if(CURL_SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
-  /* The offset check following here is only interesting if curl_off_t is
-     larger than off_t and we are not using the WIN32 large file support
-     macros that provide the support to do 64bit seeks correctly */
-
-  if(offset > MAX_SEEK) {
-    /* Some precaution code to work around problems with different data sizes
-       to allow seeking >32bit even if off_t is 32bit. Should be very rare and
-       is really valid on weirdo-systems. */
-    curl_off_t left = offset;
-
-    if(whence != SEEK_SET)
-      /* this code path doesn't support other types */
-      return 1;
-
-    if(LSEEK_ERROR == lseek(in->fd, 0, SEEK_SET))
-      /* couldn't rewind to beginning */
-      return 1;
-
-    while(left) {
-      long step = (left>MAX_SEEK ? MAX_SEEK : (long)left);
-      if(LSEEK_ERROR == lseek(in->fd, step, SEEK_CUR))
-        /* couldn't seek forwards the desired amount */
-        return 1;
-      left -= step;
-    }
-    return 0;
-  }
-#endif
-  if(LSEEK_ERROR == lseek(in->fd, offset, whence))
-    /* couldn't rewind, the reason is in errno but errno is just not portable
-       enough and we don't actually care that much why we failed. We'll let
-       libcurl know that it may try other means if it wants to. */
-    return CURL_SEEKFUNC_CANTSEEK;
-
-  return 0;
-}
-
-static size_t my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
-{
-  ssize_t rc;
-  struct InStruct *in=(struct InStruct *)userp;
-
-  rc = read(in->fd, buffer, sz*nmemb);
-  if(rc < 0) {
-    if(errno == EAGAIN) {
-      errno = 0;
-      in->config->readbusy = TRUE;
-      return CURL_READFUNC_PAUSE;
-    }
-    /* since size_t is unsigned we can't return negative values fine */
-    rc = 0;
-  }
-  in->config->readbusy = FALSE;
-  return (size_t)rc;
-}
-
-static
-void dump(const char *timebuf, const char *text,
-          FILE *stream, const unsigned char *ptr, size_t size,
-          trace tracetype, curl_infotype infotype)
-{
-  size_t i;
-  size_t c;
-
-  unsigned int width=0x10;
-
-  if(tracetype == TRACE_ASCII)
-    /* without the hex output, we can fit more on screen */
-    width = 0x40;
-
-  fprintf(stream, "%s%s, %zd bytes (0x%zx)\n", timebuf, text, size, size);
-
-  for(i=0; i<size; i+= width) {
-
-    fprintf(stream, "%04zx: ", i);
-
-    if(tracetype == TRACE_BIN) {
-      /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i+c < size)
-          fprintf(stream, "%02x ", ptr[i+c]);
-        else
-          fputs("   ", stream);
-    }
-
-    for(c = 0; (c < width) && (i+c < size); c++) {
-      /* check for 0D0A; if found, skip past and start a new line of output */
-      if((tracetype == TRACE_ASCII) &&
-         (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
-        i+=(c+2-width);
-        break;
-      }
-#ifdef CURL_DOES_CONVERSIONS
-      /* repeat the 0D0A check above but use the host encoding for CRLF */
-      if((tracetype == TRACE_ASCII) &&
-         (i+c+1 < size) && ptr[i+c]=='\r' && ptr[i+c+1]=='\n') {
-        i+=(c+2-width);
-        break;
-      }
-      /* convert to host encoding and print this character */
-      fprintf(stream, "%c", convert_char(infotype, ptr[i+c]));
-#else
-      (void)infotype;
-      fprintf(stream, "%c",
-              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:UNPRINTABLE_CHAR);
-#endif /* CURL_DOES_CONVERSIONS */
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if((tracetype == TRACE_ASCII) &&
-         (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
-        i+=(c+3-width);
-        break;
-      }
-    }
-    fputc('\n', stream); /* newline */
-  }
-  fflush(stream);
-}
-
-static
-int my_trace(CURL *handle, curl_infotype type,
-             unsigned char *data, size_t size,
-             void *userp)
-{
-  struct Configurable *config = (struct Configurable *)userp;
-  FILE *output=config->errors;
-  const char *text;
-  struct timeval tv;
-  struct tm *now;
-  char timebuf[20];
-  time_t secs;
-  static time_t epoch_offset;
-  static int    known_offset;
-
-  (void)handle; /* prevent compiler warning */
-
-  if(config->tracetime) {
-    tv = cutil_tvnow();
-    if(!known_offset) {
-      epoch_offset = time(NULL) - tv.tv_sec;
-      known_offset = 1;
-    }
-    secs = epoch_offset + tv.tv_sec;
-    now = localtime(&secs);  /* not thread safe but we don't care */
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-             now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
-  }
-  else
-    timebuf[0]=0;
-
-  if(!config->trace_stream) {
-    /* open for append */
-    if(curlx_strequal("-", config->trace_dump))
-      config->trace_stream = stdout;
-    else if(curlx_strequal("%", config->trace_dump))
-      /* Ok, this is somewhat hackish but we do it undocumented for now */
-      config->trace_stream = config->errors;  /* aka stderr */
-    else {
-      config->trace_stream = fopen(config->trace_dump, "w");
-      config->trace_fopened = TRUE;
-    }
-  }
-
-  if(config->trace_stream)
-    output = config->trace_stream;
-
-  if(!output) {
-    warnf(config, "Failed to create/open output");
-    return 0;
-  }
-
-  if(config->tracetype == TRACE_PLAIN) {
-    /*
-     * This is the trace look that is similar to what libcurl makes on its
-     * own.
-     */
-    static const char * const s_infotype[] = {
-      "*", "<", ">", "{", "}", "{", "}"
-    };
-    size_t i;
-    size_t st=0;
-    static bool newl = FALSE;
-    static bool traced_data = FALSE;
-
-    switch(type) {
-    case CURLINFO_HEADER_OUT:
-      for(i=0; i<size-1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
-            fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-          }
-          (void)fwrite(data+st, i-st+1, 1, output);
-          st = i+1;
-          newl = FALSE;
-        }
-      }
-      if(!newl)
-        fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      (void)fwrite(data+st, i-st+1, 1, output);
-      newl = (size && (data[size-1] != '\n'))?TRUE:FALSE;
-      traced_data = FALSE;
-      break;
-    case CURLINFO_TEXT:
-    case CURLINFO_HEADER_IN:
-      if(!newl)
-        fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      (void)fwrite(data, size, 1, output);
-      newl = (size && (data[size-1] != '\n'))?TRUE:FALSE;
-      traced_data = FALSE;
-      break;
-    case CURLINFO_DATA_OUT:
-    case CURLINFO_DATA_IN:
-    case CURLINFO_SSL_DATA_IN:
-    case CURLINFO_SSL_DATA_OUT:
-      if(!traced_data) {
-        /* if the data is output to a tty and we're sending this debug trace
-           to stderr or stdout, we don't display the alert about the data not
-           being shown as the data _is_ shown then just not via this
-           function */
-        if(!config->isatty ||
-           ((output != stderr) && (output != stdout))) {
-          if(!newl)
-            fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-          fprintf(output, "[data not shown]\n");
-          newl = FALSE;
-          traced_data = TRUE;
-        }
-      }
-      break;
-    default: /* nada */
-      newl = FALSE;
-      traced_data = FALSE;
-      break;
-    }
-
-    return 0;
-  }
-
-#ifdef CURL_DOES_CONVERSIONS
-  /* Special processing is needed for CURLINFO_HEADER_OUT blocks
-   * if they contain both headers and data (separated by CRLFCRLF).
-   * We dump the header text and then switch type to CURLINFO_DATA_OUT.
-   */
-  if((type == CURLINFO_HEADER_OUT) && (size > 4)) {
-    size_t i;
-    for(i = 0; i < size - 4; i++) {
-      if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
-        /* dump everything through the CRLFCRLF as a sent header */
-        text = "=> Send header";
-        dump(timebuf, text, output, data, i+4, config->tracetype, type);
-        data += i + 3;
-        size -= i + 4;
-        type = CURLINFO_DATA_OUT;
-        data += 1;
-        break;
-      }
-    }
-  }
-#endif /* CURL_DOES_CONVERSIONS */
-
-  switch (type) {
-  case CURLINFO_TEXT:
-    fprintf(output, "%s== Info: %s", timebuf, data);
-  default: /* in case a new one is introduced to shock us */
-    return 0;
-
-  case CURLINFO_HEADER_OUT:
-    text = "=> Send header";
-    break;
-  case CURLINFO_DATA_OUT:
-    text = "=> Send data";
-    break;
-  case CURLINFO_HEADER_IN:
-    text = "<= Recv header";
-    break;
-  case CURLINFO_DATA_IN:
-    text = "<= Recv data";
-    break;
-  case CURLINFO_SSL_DATA_IN:
-    text = "<= Recv SSL data";
-    break;
-  case CURLINFO_SSL_DATA_OUT:
-    text = "=> Send SSL data";
-    break;
-  }
-
-  dump(timebuf, text, output, data, size, config->tracetype, type);
-  return 0;
-}
-
 #define RETRY_SLEEP_DEFAULT 1000L   /* ms */
 #define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
 
@@ -3503,147 +3056,6 @@ static char *get_url_file_name(const char *url)
     fn = *pc ? strdup(pc): NULL;
   }
   return fn;
-}
-
-/*
- * Copies a file name part and returns an ALLOCATED data buffer.
- */
-static char*
-parse_filename(char *ptr, size_t len)
-{
-  char* copy;
-  char* p;
-  char* q;
-  char stop = 0;
-
-  /* simple implementation of strndup() */
-  copy = malloc(len+1);
-  if(!copy)
-    return NULL;
-  memcpy(copy, ptr, len);
-  copy[len] = 0;
-
-  p = copy;
-  if(*p == '\'' || *p == '"') {
-    /* store the starting quote */
-    stop = *p;
-    p++;
-  }
-  else
-    stop = ';';
-
-  /* if the filename contains a path, only use filename portion */
-  q = strrchr(copy, '/');
-  if(q) {
-    p=q+1;
-    if(!*p) {
-      Curl_safefree(copy);
-      return NULL;
-    }
-  }
-
-  /* If the filename contains a backslash, only use filename portion. The idea
-     is that even systems that don't handle backslashes as path separators
-     probably want the path removed for convenience. */
-  q = strrchr(p, '\\');
-  if(q) {
-    p = q+1;
-    if(!*p) {
-      Curl_safefree(copy);
-      return NULL;
-    }
-  }
-
-  /* scan for the end letter and stop there */
-  q = p;
-  while(*q) {
-    if(q[1] && q[0]=='\\')
-      q++;
-    else if(q[0] == stop)
-      break;
-    q++;
-  }
-  *q = 0;
-
-  /* make sure the file name doesn't end in \r or \n */
-  q = strchr(p, '\r');
-  if(q)
-    *q  = 0;
-
-  q = strchr(p, '\n');
-  if(q)
-    *q  = 0;
-
-  if(copy!=p)
-    memmove(copy, p, strlen(p)+1);
-
-  /* in case we built curl debug enabled, we allow an evironment variable
-   * named CURL_TESTDIR to prefix the given file name to put it into a
-   * specific directory
-   */
-#ifdef CURLDEBUG
-  {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
-    if(tdir) {
-      char buffer[512]; /* suitably large */
-      snprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
-      Curl_safefree(copy);
-      copy = strdup(buffer); /* clone the buffer, we don't use the libcurl
-                                aprintf() or similar since we want to use the
-                                same memory code as the "real" parse_filename
-                                function */
-      curl_free(tdir);
-    }
-  }
-#endif
-
-  return copy;
-}
-
-static size_t
-header_callback(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-  struct OutStruct* outs = (struct OutStruct*)stream;
-  const char* str = (char*)ptr;
-  const size_t cb = size*nmemb;
-  const char* end = (char*)ptr + cb;
-
-  if(cb > 20 && checkprefix("Content-disposition:", str)) {
-    char *p = (char*)str + 20;
-
-    /* look for the 'filename=' parameter
-       (encoded filenames (*=) are not supported) */
-    for(;;) {
-      char *filename;
-      size_t len;
-
-      while(*p && (p < end) && !ISALPHA(*p))
-        p++;
-      if(p > end-9)
-        break;
-
-      if(memcmp(p, "filename=", 9)) {
-        /* no match, find next parameter */
-        while((p < end) && (*p != ';'))
-          p++;
-        continue;
-      }
-      p+=9;
-
-      /* this expression below typecasts 'cb' only to avoid
-         warning: signed and unsigned type in conditional expression
-      */
-      len = (ssize_t)cb - (p - str);
-      filename = parse_filename(p, len);
-      if(filename) {
-        outs->filename = filename;
-        outs->alloc_filename = TRUE;
-        break;
-      }
-    }
-  }
-
-  return cb;
 }
 
 #ifdef CURLDEBUG
@@ -4322,7 +3734,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         /* what call to write */
-        my_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+        my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
 
         /* for uploads */
         input.fd = infd;
@@ -4331,12 +3743,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* what call to read */
         if((outfile && !curlx_strequal("-", outfile)) ||
            !checkprefix("telnet:", this_url))
-          my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
+          my_setopt(curl, CURLOPT_READFUNCTION, tool_read_cb);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
            CURLOPT_IOCTLFUNCTION/DATA pair previously provided for seeking */
         my_setopt(curl, CURLOPT_SEEKDATA, &input);
-        my_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
+        my_setopt(curl, CURLOPT_SEEKFUNCTION, tool_seek_cb);
 
         if(config->recvpersecond)
           /* tell libcurl to use a smaller sized buffer as it allows us to
@@ -4581,7 +3993,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            !config->noprogress && !config->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
-          my_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress);
+          my_setopt(curl, CURLOPT_PROGRESSFUNCTION, tool_progress_cb);
           my_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
 
@@ -4607,7 +4019,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_FTP_USE_EPRT, FALSE);
 
         if(config->tracetype != TRACE_NONE) {
-          my_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+          my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
           my_setopt(curl, CURLOPT_DEBUGDATA, config);
           my_setopt(curl, CURLOPT_VERBOSE, TRUE);
         }
@@ -4702,7 +4114,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.17.1 */
         if(!config->nokeepalive) {
-          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockoptcallback);
+          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, tool_sockopt_cb);
           my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
         }
 
@@ -4727,7 +4139,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if((urlnode->flags & GETOUT_USEREMOTE)
            && config->content_disposition) {
-          my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+          my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
           my_setopt(curl, CURLOPT_HEADERDATA, &outs);
         }
         else {
@@ -5044,6 +4456,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     Curl_safefree(urlnode->outfile);
     Curl_safefree(urlnode->infile);
     urlnode->flags = 0;
+
+    /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
 
     /*
     ** Bail out upon critical errors

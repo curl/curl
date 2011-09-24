@@ -17,6 +17,13 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c xattr.c \
 	tool_bname.c \
+	tool_cb_dbg.c \
+	tool_cb_hdr.c \
+	tool_cb_prg.c \
+	tool_cb_rea.c \
+	tool_cb_see.c \
+	tool_cb_skt.c \
+	tool_cb_wrt.c \
 	tool_cfgable.c \
 	tool_convert.c \
 	tool_dirhie.c \
@@ -26,7 +33,6 @@ CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	tool_mfiles.c \
 	tool_msgs.c \
 	tool_myfunc.c \
-	tool_progress.c \
 	tool_setopt.c \
 	tool_vms.c
 
@@ -34,6 +40,13 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-riscos.h urlglob.h version.h xattr.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
 	tool_bname.h \
+	tool_cb_dbg.h \
+	tool_cb_hdr.h \
+	tool_cb_prg.h \
+	tool_cb_rea.h \
+	tool_cb_see.h \
+	tool_cb_skt.h \
+	tool_cb_wrt.h \
 	tool_cfgable.h \
 	tool_convert.h \
 	tool_dirhie.h \
@@ -43,7 +56,6 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_mfiles.h \
 	tool_msgs.h \
 	tool_myfunc.h \
-	tool_progress.h \
 	tool_sdecls.h \
 	tool_setopt.h \
 	tool_vms.h

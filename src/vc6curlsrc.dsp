@@ -175,6 +175,34 @@ SOURCE=.\tool_bname.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_cb_dbg.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_hdr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_prg.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_rea.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_see.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_skt.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_wrt.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_cfgable.c
 # End Source File
 # Begin Source File
@@ -208,10 +236,6 @@ SOURCE=.\tool_msgs.c
 # Begin Source File
 
 SOURCE=.\tool_myfunc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\tool_progress.c
 # End Source File
 # Begin Source File
 
@@ -283,6 +307,34 @@ SOURCE=.\tool_bname.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_cb_dbg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_hdr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_prg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_rea.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_see.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_skt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_cb_wrt.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_cfgable.h
 # End Source File
 # Begin Source File
@@ -316,10 +368,6 @@ SOURCE=.\tool_msgs.h
 # Begin Source File
 
 SOURCE=.\tool_myfunc.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\tool_progress.h
 # End Source File
 # Begin Source File
 
