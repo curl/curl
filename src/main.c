@@ -3408,8 +3408,8 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#define RETRY_SLEEP_DEFAULT 1000  /* ms */
-#define RETRY_SLEEP_MAX     600000 /* ms == 10 minutes */
+#define RETRY_SLEEP_DEFAULT 1000L   /* ms */
+#define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
 
 static bool
 output_expected(const char* url, const char* uploadfile)
@@ -3684,66 +3684,57 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
   struct getout *urlnode;
-  struct getout *nextnode;
 
   struct OutStruct outs;
   struct OutStruct heads;
-  struct InStruct input;
 
-  URLGlob *urls=NULL;
-  URLGlob *inglob=NULL;
-  int urlnum;
-  int infilenum;
-  char *uploadfile=NULL; /* a single file, never a glob */
+  CURL *curl = NULL;
+  char *httpgetfields = NULL;
 
-  curl_off_t uploadfilesize; /* -1 means unknown */
-  bool stillflags=TRUE;
-
-  char *httpgetfields=NULL;
-
-  CURL *curl;
+  bool stillflags;
   int res = 0;
   int i;
-  long retry_sleep_default;
-  long retry_sleep;
 
-  char *env;
-
+  errorbuffer[0] = '\0';
+  memset(&outs, 0, sizeof(struct OutStruct));
   memset(&heads, 0, sizeof(struct OutStruct));
 
   memory_tracking_init();
 
-  /* Initialize curl library - do not call any libcurl functions before.
-     Note that the memory_tracking_init() magic above is an exception, but
-     then that's not part of the official public API.
+  /*
+  ** Initialize curl library - do not call any libcurl functions before
+  ** this point. Note that the memory_tracking_init() magic above is an
+  ** exception, but then that's not part of the official public API.
   */
   if(main_init() != CURLE_OK) {
     helpf(config->errors, "error initializing curl library\n");
     return CURLE_FAILED_INIT;
   }
 
-  /*
-   * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
-   * when all transfers are done.
-   */
+  /* Get libcurl info right away */
+  if(get_libcurl_info() != CURLE_OK) {
+    helpf(config->errors, "error retrieving curl library information\n");
+    main_free();
+    return CURLE_FAILED_INIT;
+  }
+
+  /* Get a curl handle to use for all forthcoming curl transfers */
   curl = curl_easy_init();
   if(!curl) {
-    clean_getout(config);
+    helpf(config->errors, "error initializing curl easy handle\n");
+    main_free();
     return CURLE_FAILED_INIT;
   }
   config->easy = curl;
 
-  memset(&outs,0,sizeof(outs));
-
+  /* Store a pointer to our 'outs' struct used for output writing */
   config->outs = &outs;
 
-  /* we get libcurl info right away */
-  if(get_libcurl_info() != CURLE_OK) {
-    clean_getout(config);
-    return CURLE_FAILED_INIT;
-  }
-
-  errorbuffer[0]=0; /* prevent junk from being output */
+  /*
+  ** Beyond this point no return'ing from this function allowed.
+  ** Jump to label 'quit_curl' in order to abandon this function
+  ** from outside of nested loops further down below.
+  */
 
   /* setup proper locale from environment */
 #ifdef HAVE_SETLOCALE
@@ -3752,9 +3743,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* inits */
   config->postfieldsize = -1;
-  config->showerror=TRUE;
-  config->use_httpget=FALSE;
-  config->create_dirs=FALSE;
+  config->showerror = TRUE;
+  config->use_httpget = FALSE;
+  config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
   config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
   config->proto_present = FALSE;
@@ -3762,7 +3753,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
   config->proto_redir_present = FALSE;
 
-  if(argc>1 &&
+  if((argc > 1) &&
      (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
      strchr(argv[1], 'q')) {
     /*
@@ -3777,25 +3768,26 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   if((argc < 2)  && !config->url_list) {
     helpf(config->errors, NULL);
-    return CURLE_FAILED_INIT;
+    res = CURLE_FAILED_INIT;
+    goto quit_curl;
   }
 
   /* Parse options */
-  for(i = 1; i < argc; i++) {
+  for(i = 1, stillflags = TRUE; i < argc; i++) {
     if(stillflags &&
        ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
-      char *origopt=argv[i];
+      char *origopt = argv[i];
 
       char *flag = argv[i];
 
       if(curlx_strequal("--", argv[i]))
         /* this indicates the end of the flags and thus enables the
            following (URL) argument to start with -. */
-        stillflags=FALSE;
+        stillflags = FALSE;
       else {
-        nextarg= (i < argc - 1)? argv[i+1]: NULL;
+        nextarg = (i < (argc-1)) ? argv[i+1] : NULL;
 
         res = getparameter(flag, nextarg, &passarg, config);
         if(res) {
@@ -3805,8 +3797,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             helpf(config->errors, "option %s: %s\n", origopt, reason);
             retval = CURLE_FAILED_INIT;
           }
-          clean_getout(config);
-          return retval;
+          res = retval;
+          goto quit_curl;
         }
 
         if(passarg) /* we're supposed to skip this */
@@ -3818,24 +3810,20 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       /* just add the URL please */
       res = getparameter((char *)"--url", argv[i], &used, config);
       if(res)
-        return res;
+        goto quit_curl;
     }
   }
 
-  retry_sleep_default = config->retry_delay?
-    config->retry_delay*1000:RETRY_SLEEP_DEFAULT; /* ms */
-  retry_sleep = retry_sleep_default;
-
   if((!config->url_list || !config->url_list->url) && !config->list_engines) {
-    clean_getout(config);
     helpf(config->errors, "no URL specified!\n");
-    return CURLE_FAILED_INIT;
+    res = CURLE_FAILED_INIT;
+    goto quit_curl;
   }
 
   if(!config->useragent)
     config->useragent = my_useragent();
   if(!config->useragent) {
-    clean_getout(config);
+    helpf(config->errors, "out of memory\n");
     res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
@@ -3852,12 +3840,14 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
+    char *env;
     env = curlx_getenv("CURL_CA_BUNDLE");
     if(env) {
       config->cacert = strdup(env);
       if(!config->cacert) {
-        clean_getout(config);
         curl_free(env);
+        helpf(config->errors, "out of memory\n");
+        res = CURLE_OUT_OF_MEMORY;
         goto quit_curl;
       }
     }
@@ -3866,8 +3856,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       if(env) {
         config->capath = strdup(env);
         if(!config->capath) {
-          clean_getout(config);
           curl_free(env);
+          helpf(config->errors, "out of memory\n");
+          res = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
       }
@@ -3876,8 +3867,9 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(env) {
           config->cacert = strdup(env);
           if(!config->cacert) {
-            clean_getout(config);
             curl_free(env);
+            helpf(config->errors, "out of memory\n");
+            res = CURLE_OUT_OF_MEMORY;
             goto quit_curl;
           }
         }
@@ -3889,10 +3881,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 #ifdef WIN32
     else {
       res = FindWin32CACert(config, "curl-ca-bundle.crt");
-      if(res) {
-        clean_getout(config);
+      if(res)
         goto quit_curl;
-      }
     }
 #endif
   }
@@ -3905,27 +3895,28 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       if(SetHTTPrequest(config,
                         (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
-        Curl_safefree(httpgetfields);
-        return PARAM_BAD_USE;
+        res = PARAM_BAD_USE;
+        goto quit_curl;
       }
     }
     else {
-      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
-        return PARAM_BAD_USE;
+      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq)) {
+        res = PARAM_BAD_USE;
+        goto quit_curl;
+      }
     }
   }
 
   /* This is the first entry added to easysrc and it initializes the slist */
   easysrc = curl_slist_append(easysrc, "CURL *hnd = curl_easy_init();");
   if(!easysrc) {
-    clean_getout(config);
+    helpf(config->errors, "out of memory\n");
     res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
 
   if(config->list_engines) {
     struct curl_slist *engines = NULL;
-
     curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
     list_engines(engines);
     curl_slist_free_all(engines);
@@ -3933,44 +3924,58 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     goto quit_curl;
   }
 
-  /* After this point, we should call curl_easy_cleanup() if we decide to bail
-   * out from this function! */
-
-  urlnode = config->url_list;
-
+  /* Single header file for all URLs */
   if(config->headerfile) {
     /* open file for output: */
-    if(strcmp(config->headerfile,"-")) {
-      heads.filename = config->headerfile;
-      heads.alloc_filename = FALSE;
+    if(strcmp(config->headerfile, "-")) {
+      FILE *newfile = fopen(config->headerfile, "wb");
+      if(!newfile) {
+        warnf(config, "Failed to open %s\n", config->headerfile);
+        res = CURLE_WRITE_ERROR;
+        goto quit_curl;
+      }
+      else {
+        heads.filename = config->headerfile;
+        heads.alloc_filename = FALSE;
+        heads.stream = newfile;
+        heads.config = config;
+      }
     }
-    else
-      heads.stream=stdout;
-    heads.config = config;
+    else {
+      heads.filename = config->headerfile; /* "-" */
+      heads.alloc_filename = FALSE;
+      heads.stream = stdout;
+      heads.config = config;
+    }
   }
 
+  /*
+  ** Nested loops start here.
+  */
+
   /* loop through the list of given URLs */
-  while(urlnode) {
+
+  for(urlnode = config->url_list; urlnode; urlnode = urlnode->next) {
+
     int up; /* upload file counter within a single upload glob */
-    char *dourl;
-    char *url;
     char *infiles; /* might be a glob pattern */
-    char *outfiles=NULL;
+    char *outfiles;
+    int infilenum;
+    URLGlob *inglob;
 
-    /* get the full URL (it might be NULL) */
-    dourl=urlnode->url;
+    outfiles = NULL;
+    infilenum = 0;
+    inglob = NULL;
 
-    url = dourl;
+    /* urlnode->url is the full URL (it might be NULL) */
 
-    if(NULL == url) {
-      /* This node had no URL, skip it and continue to the next */
+    if(!urlnode->url) {
+      /* This node has no URL. Free node data without destroying the
+         node itself nor modifying next pointer and continue to next */
       Curl_safefree(urlnode->outfile);
-
-      /* move on to the next URL */
-      nextnode=urlnode->next;
-      Curl_safefree(urlnode); /* free the node */
-      urlnode = nextnode;
-      continue; /* next please */
+      Curl_safefree(urlnode->infile);
+      urlnode->flags = 0;
+      continue; /* next URL please */
     }
 
     /* default output stream is stdout */
@@ -3983,7 +3988,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     if(urlnode->outfile) {
       outfiles = strdup(urlnode->outfile);
       if(!outfiles) {
-        clean_getout(config);
+        helpf(config->errors, "out of memory\n");
+        res = CURLE_OUT_OF_MEMORY;
         break;
       }
     }
@@ -3994,8 +4000,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       /* Unless explicitly shut off */
       res = glob_url(&inglob, infiles, &infilenum,
                      config->showerror?config->errors:NULL);
-      if(res != CURLE_OK) {
-        clean_getout(config);
+      if(res) {
         Curl_safefree(outfiles);
         break;
       }
@@ -4005,8 +4010,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
        single globbed string. If no upload, we enter the loop once anyway. */
     for(up = 0 ;; up++) {
 
-      long retry_numretries;
+      char *uploadfile; /* a single file, never a glob */
       int separator;
+      URLGlob *urls;
+      int urlnum;
+
+      uploadfile = NULL;
+      separator = 0;
+      urls = NULL;
+      urlnum = 0;
 
       if(!up && !infiles)
         Curl_nop_stmt;
@@ -4021,15 +4033,13 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           break;
       }
 
-      separator = 0;
-      uploadfilesize = -1;
-
       if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
-        res = glob_url(&urls, dourl, &urlnum,
+        res = glob_url(&urls, urlnode->url, &urlnum,
                        config->showerror?config->errors:NULL);
-        if(res != CURLE_OK) {
+        if(res) {
+          Curl_safefree(uploadfile);
           break;
         }
       }
@@ -4045,19 +4055,27 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         int infd;
         bool infdopen;
         char *outfile;
+        struct InStruct input;
         struct timeval retrystart;
+        curl_off_t uploadfilesize;
+        long retry_numretries;
+        long retry_sleep_default;
+        long retry_sleep;
+        char *this_url;
 
         outfile = NULL;
         infdopen = FALSE;
         infd = STDIN_FILENO;
+        uploadfilesize = -1; /* -1 means unknown */
 
         if(urls)
-          url = glob_next_url(urls);
-        else if(!i)
-          url = strdup(url);
+          this_url = glob_next_url(urls);
+        else if(!i) {
+          this_url = strdup(urlnode->url);
+        }
         else
-          url = NULL;
-        if(!url)
+          this_url = NULL;
+        if(!this_url)
           break;
 
         if(outfiles) {
@@ -4078,7 +4096,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           if(!outfile) {
             /* extract the file name from the URL */
-            outfile = get_url_file_name(url);
+            outfile = get_url_file_name(this_url);
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
@@ -4160,8 +4178,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
           struct_stat fileinfo;
 
-          url = add_file_name_to_url(curl, url, uploadfile);
-          if(!url) {
+          this_url = add_file_name_to_url(curl, this_url, uploadfile);
+          if(!this_url) {
             res = CURLE_OUT_OF_MEMORY;
             goto show_error;
           }
@@ -4194,7 +4212,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* we ignore file size for char/block devices, sockets, etc. */
           if(S_ISREG(fileinfo.st_mode))
-            uploadfilesize=fileinfo.st_size;
+            uploadfilesize = fileinfo.st_size;
 
         }
         else if(uploadfile && stdin_upload(uploadfile)) {
@@ -4237,7 +4255,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(uploadfile && config->resume_from_current)
           config->resume_from = -1; /* -1 will then force get-it-yourself */
 
-        if(output_expected(url, uploadfile)
+        if(output_expected(this_url, uploadfile)
            && outs.stream && isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
@@ -4245,19 +4263,19 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(urlnum > 1 && !(config->mute)) {
           fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
-                  i+1, urlnum, url, outfile ? outfile : "<stdout>");
+                  i+1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
-            printf("%s%s\n", CURLseparator, url);
+            printf("%s%s\n", CURLseparator, this_url);
         }
         if(httpgetfields) {
           char *urlbuffer;
           /* Find out whether the url contains a file name */
-          const char *pc = strstr(url, "://");
+          const char *pc = strstr(this_url, "://");
           char sep = '?';
           if(pc)
             pc += 3;
           else
-            pc = url;
+            pc = this_url;
 
           pc = strrchr(pc, '/'); /* check for a slash */
 
@@ -4272,21 +4290,21 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           /*
            * Then append ? followed by the get fields to the url.
            */
-          urlbuffer = malloc(strlen(url) + strlen(httpgetfields) + 3);
+          urlbuffer = malloc(strlen(this_url) + strlen(httpgetfields) + 3);
           if(!urlbuffer) {
             res = CURLE_OUT_OF_MEMORY;
             goto show_error;
           }
           if(pc)
-            sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
+            sprintf(urlbuffer, "%s%c%s", this_url, sep, httpgetfields);
           else
             /* Append  / before the ? to create a well-formed url
                if the url contains a hostname only
             */
-            sprintf(urlbuffer, "%s/?%s", url, httpgetfields);
+            sprintf(urlbuffer, "%s/?%s", this_url, httpgetfields);
 
-          Curl_safefree(url); /* free previous URL */
-          url = urlbuffer; /* use our new URL instead! */
+          Curl_safefree(this_url); /* free previous URL */
+          this_url = urlbuffer; /* use our new URL instead! */
         }
 
         if(!config->errors)
@@ -4312,7 +4330,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
         if((outfile && !curlx_strequal("-", outfile)) ||
-           !checkprefix("telnet:", url))
+           !checkprefix("telnet:", this_url))
           my_setopt(curl, CURLOPT_READFUNCTION, my_fread);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
@@ -4328,7 +4346,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* size of uploaded file: */
         if(uploadfilesize != -1)
           my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
-        my_setopt_str(curl, CURLOPT_URL, url);     /* what to fetch */
+        my_setopt_str(curl, CURLOPT_URL, this_url);     /* what to fetch */
         my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress);
         if(config->no_body) {
           my_setopt(curl, CURLOPT_NOBODY, 1);
@@ -4741,8 +4759,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
                         config->gssapi_delegation);
 
-        retry_numretries = config->req_retry;
+        /* initialize retry vars for loop below */
+        retry_sleep_default = (config->retry_delay) ?
+          config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
 
+        retry_numretries = config->req_retry;
+        retry_sleep = retry_sleep_default; /* ms */
         retrystart = cutil_tvnow();
 
         for(;;) {
@@ -4761,7 +4783,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(retry_numretries &&
              (!config->retry_maxtime ||
               (cutil_tvdiff(cutil_tvnow(), retrystart)<
-               config->retry_maxtime*1000)) ) {
+               config->retry_maxtime*1000L)) ) {
             enum {
               RETRY_NO,
               RETRY_TIMEOUT,
@@ -4779,10 +4801,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               /* If it returned OK. _or_ failonerror was enabled and it
                  returned due to such an error, check for HTTP transient
                  errors to retry on. */
-              char *this_url=NULL;
-              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &this_url);
-              if(this_url &&
-                 checkprefix("http", this_url)) {
+              char *effective_url = NULL;
+              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+              if(effective_url &&
+                 checkprefix("http", effective_url)) {
                 /* This was HTTP(S) */
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
@@ -4825,7 +4847,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               warnf(config, "Transient problem: %s "
                     "Will retry in %ld seconds. "
                     "%ld retries left.\n",
-                    m[retry], retry_sleep/1000, retry_numretries);
+                    m[retry], retry_sleep/1000L, retry_numretries);
 
               go_sleep(retry_sleep);
               retry_numretries--;
@@ -4870,7 +4892,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           } /* if retry_numretries */
 
           /* In all ordinary cases, just break out of loop here */
-          retry_sleep = retry_sleep_default;
           break; /* curl_easy_perform loop */
 
         }
@@ -4974,30 +4995,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 #endif
 
-        /* Cleanup loop-local variables for next loop iteration or exit */
+        /* Free loop-local allocated memory and close loop-local opened fd */
+
+        Curl_safefree(outfile);
+        Curl_safefree(this_url);
 
         if(infdopen) {
           close(infd);
-          infdopen = FALSE;    /* not needed */
-          infd = STDIN_FILENO; /* not needed */
-        }
-        Curl_safefree(outfile);
-
-        /* ... */
-
-        Curl_safefree(url);
-
-        if(res) {
-          /* Free list of remaining URLs */
-          if(urls) {
-            glob_cleanup(urls);
-            urls = NULL;
-          }
-          /* Free list of globbed upload files */
-          if(inglob) {
-            glob_cleanup(inglob);
-            inglob = NULL;
-          }
+          infdopen = FALSE;
+          infd = STDIN_FILENO;
         }
 
         /* upon error exit loop */
@@ -5006,13 +5012,15 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
       } /* loop to the next URL */
 
+      /* Free loop-local allocated memory and close loop-local opened fd */
+
+      Curl_safefree(uploadfile);
+
       if(urls) {
-        /* cleanup memory used for URL globbing patterns */
+        /* Free list of remaining URLs */
         glob_cleanup(urls);
         urls = NULL;
       }
-
-      Curl_safefree(uploadfile);
 
       /* upon error exit loop */
       if(res)
@@ -5020,38 +5028,68 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     } /* loop to the next globbed upload file */
 
+    /* Free loop-local allocated memory and close loop-local opened fd */
+
+    Curl_safefree(outfiles);
+
     if(inglob) {
+      /* Free list of globbed upload files */
       glob_cleanup(inglob);
       inglob = NULL;
     }
 
-    Curl_safefree(outfiles);
-
-    /* empty this urlnode struct */
+    /* Free this URL node data without destroying the
+       the node itself nor modifying next pointer. */
     Curl_safefree(urlnode->url);
     Curl_safefree(urlnode->outfile);
     Curl_safefree(urlnode->infile);
+    urlnode->flags = 0;
 
-    /* move on to the next URL */
-    nextnode=urlnode->next;
-    Curl_safefree(urlnode); /* free the node */
-    urlnode = nextnode;
+    /*
+    ** Bail out upon critical errors
+    */
+    switch(res) {
+    case CURLE_FAILED_INIT:
+    case CURLE_OUT_OF_MEMORY:
+    case CURLE_FUNCTION_NOT_FOUND:
+    case CURLE_BAD_FUNCTION_ARGUMENT:
+      goto quit_curl;
+    default:
+      /* Merrily loop to next URL */
+      break;
+    }
 
-  } /* while-loop through all URLs */
+  } /* for-loop through all URLs */
+
+  /*
+  ** Nested loops end here.
+  */
 
   quit_curl:
+
+  /* Free function-local referenced allocated memory */
   Curl_safefree(httpgetfields);
 
-  Curl_safefree(config->engine);
+  /* Free list of given URLs */
+  clean_getout(config);
 
-  /* cleanup the curl handle! */
-  curl_easy_cleanup(curl);
-  config->easy = NULL; /* cleanup now */
+  /* Cleanup the curl handle now that our
+     progressbar struct is still in scope */
+  if(curl) {
+    curl_easy_cleanup(curl);
+    config->easy = curl = NULL;
+  }
   if(easysrc)
     curl_slist_append(easysrc, "curl_easy_cleanup(hnd);");
 
-  if(heads.stream && (heads.stream != stdout))
-    fclose(heads.stream);
+  /* Close function-local opened file descriptors */
+
+  if(config->headerfile) {
+    if(strcmp(heads.filename, "-") && heads.stream)
+      fclose(heads.stream);
+    if(heads.alloc_filename)
+      Curl_safefree(heads.filename);
+  }
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
@@ -5061,7 +5099,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
      so not everything can be closed and cleaned before this is called */
   dumpeasysrc(config);
 
-  if(config->errors_fopened)
+  if(config->errors_fopened && config->errors)
     fclose(config->errors);
 
   main_free(); /* cleanup */

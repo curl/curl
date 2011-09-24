@@ -58,9 +58,6 @@ struct OutStruct {
  * or a file descriptor as returned from an 'open' call for some file.
  *
  * 'config' member is a pointer to associated 'Configurable' struct.
- *
- * TODO: evaluate if an additional struct member should be added to
- * allow easier handling of 'stdin' vs other 'file' descriptors.
  */
 
 struct InStruct {

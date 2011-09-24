@@ -31,6 +31,8 @@
 
 void free_config_fields(struct Configurable *config)
 {
+  struct getout *urlnode;
+
   if(config->easy) {
     curl_easy_cleanup(config->easy);
     config->easy = NULL;
@@ -65,10 +67,19 @@ void free_config_fields(struct Configurable *config)
 
   Curl_safefree(config->netrc_file);
 
-  /* config->url_list not handled */
-  /* config->url_last not handled */
-  /* config->url_get not handled */
-  /* config->url_out not handled */
+  urlnode = config->url_list;
+  while(urlnode) {
+    struct getout *next = urlnode->next;
+    Curl_safefree(urlnode->url);
+    Curl_safefree(urlnode->outfile);
+    Curl_safefree(urlnode->infile);
+    Curl_safefree(urlnode);
+    urlnode = next;
+  }
+  config->url_list = NULL;
+  config->url_last = NULL;
+  config->url_get = NULL;
+  config->url_out = NULL;
 
   Curl_safefree(config->cipher_list);
   Curl_safefree(config->cert);
@@ -81,18 +92,17 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->key_passwd);
   Curl_safefree(config->pubkey);
   Curl_safefree(config->hostpubmd5);
-
-  /* config->engine not handled */
+  Curl_safefree(config->engine);
 
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);
   Curl_safefree(config->trace_dump);
 
-  /* config->trace_stream not handled */
+  config->trace_stream = NULL; /* closed elsewhere when appropriate */
 
   Curl_safefree(config->writeout);
 
-  /* config->errors not handled */
+  config->errors = NULL; /* closed elsewhere when appropriate */
 
   curl_slist_free_all(config->quote);
   curl_slist_free_all(config->postquote);
@@ -118,7 +128,6 @@ void free_config_fields(struct Configurable *config)
 
   Curl_safefree(config->libcurl);
 
-  /* config->outs not handled */
-
+  config->outs = NULL; /* closed elsewhere when appropriate */
 }
 
