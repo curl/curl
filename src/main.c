@@ -1980,6 +1980,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {
       char *postdata=NULL;
       FILE *file;
+      size_t size = 0;
 
       if(subletter == 'e') { /* --data-urlencode*/
         /* [name]=[content], we encode the content part only
@@ -1989,7 +1990,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
          * the content.
          */
         const char *p = strchr(nextarg, '=');
-        size_t size = 0;
         size_t nlen;
         char is_file;
         if(!p)
@@ -2035,6 +2035,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           /* no data from the file, point to a zero byte string to make this
              get sent as a POST anyway */
           postdata=strdup("");
+          size = 0;
         }
         else {
           char *enc = curl_easy_escape(config->easy, postdata, (int)size);
@@ -2048,10 +2049,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
               curl_free(enc);
               return PARAM_NO_MEM;
             }
-            if(nlen > 0) /* only append '=' if we have a name */
+            if(nlen > 0) { /* only append '=' if we have a name */
               snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
-            else
+              size = outlen-1;
+            }
+            else {
               strcpy(n, enc);
+              size = outlen-2; /* since no '=' was inserted */
+            }
             curl_free(enc);
             postdata = n;
           }
@@ -2060,7 +2065,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
       }
       else if('@' == *nextarg) {
-        size_t size = 0;
         /* the data begins with a '@' letter, it means that a file name
            or - (stdin) follows */
         nextarg++; /* pass the @ */
@@ -2077,13 +2081,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
                   "an empty POST.\n", nextarg);
         }
 
-        if(subletter == 'b') {
+        if(subletter == 'b')
           /* forced binary */
           err = file2memory(&postdata, &size, file);
-          config->postfieldsize = (curl_off_t)size;
-        }
-        else
+        else {
           err = file2string(&postdata, file);
+          if(postdata)
+            size = strlen(postdata);
+        }
 
         if(file && (file != stdin))
           fclose(file);
@@ -2098,6 +2103,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       else {
         GetStr(&postdata, nextarg);
+        size=strlen(postdata);
       }
 
 #ifdef CURL_DOES_CONVERSIONS
@@ -2107,22 +2113,29 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
 
       if(config->postfields) {
-        /* we already have a string, we append this one
-           with a separating &-letter */
+        /* we already have a string, we append this one with a separating
+           &-letter */
         char *oldpost=config->postfields;
-        size_t newlen = strlen(oldpost) + strlen(postdata) + 2;
-        config->postfields=malloc(newlen);
+        curl_off_t oldlen = config->postfieldsize;
+        curl_off_t newlen = oldlen + size + 2;
+        config->postfields=malloc((size_t)newlen);
         if(!config->postfields) {
           Curl_safefree(postdata);
           return PARAM_NO_MEM;
         }
-        /* use ASCII value 0x26 for '&' to accommodate non-ASCII platforms */
-        snprintf(config->postfields, newlen, "%s\x26%s", oldpost, postdata);
+        memcpy(config->postfields, oldpost, (size_t)oldlen);
+        /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
+        config->postfields[oldlen]='\x26';
+        memcpy(&config->postfields[oldlen+1], postdata, size);
+        config->postfields[oldlen+1+size]=0;
         Curl_safefree(oldpost);
         Curl_safefree(postdata);
+        config->postfieldsize += size+1;
       }
-      else
+      else {
         config->postfields=postdata;
+        config->postfieldsize = size;
+      }
     }
     /*
       We can't set the request type here, as this data might be used in
