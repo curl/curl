@@ -4339,8 +4339,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         else
 #endif
         if(res && config->showerror) {
-          fprintf(config->errors, "curl: (%d) %s\n", res,
-                  (errorbuffer[0]) ? errorbuffer: curl_easy_strerror(res));
+          fprintf(config->errors, "curl: (%d) %s\n", res, (errorbuffer[0]) ?
+                  errorbuffer : curl_easy_strerror((CURLcode)res));
           if(res == CURLE_SSL_CACERT)
             fprintf(config->errors, "%s%s",
                     CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2);
