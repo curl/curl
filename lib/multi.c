@@ -41,8 +41,8 @@
 #include "sendf.h"
 #include "timeval.h"
 #include "http.h"
-#include "warnless.h"
 #include "select.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
