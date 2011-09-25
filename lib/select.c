@@ -46,20 +46,6 @@
 #include "select.h"
 #include "warnless.h"
 
-/* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1] */
-
-#if defined(USE_WINSOCK) || defined(TPF)
-#define VERIFY_SOCK(x) Curl_nop_stmt
-#else
-#define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
-#define VERIFY_SOCK(x) do { \
-  if(!VALID_SOCK(x)) { \
-    SET_SOCKERRNO(EINVAL); \
-    return -1; \
-  } \
-} WHILE_FALSE
-#endif
-
 /* Convenience local macros */
 
 #define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)

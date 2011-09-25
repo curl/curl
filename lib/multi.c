@@ -42,6 +42,7 @@
 #include "timeval.h"
 #include "http.h"
 #include "warnless.h"
+#include "select.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -907,11 +908,11 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
     for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       curl_socket_t s = CURL_SOCKET_BAD;
 
-      if(bitmap & GETSOCK_READSOCK(i)) {
+      if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
         FD_SET(sockbunch[i], read_fd_set);
         s = sockbunch[i];
       }
-      if(bitmap & GETSOCK_WRITESOCK(i)) {
+      if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
         FD_SET(sockbunch[i], write_fd_set);
         s = sockbunch[i];
       }

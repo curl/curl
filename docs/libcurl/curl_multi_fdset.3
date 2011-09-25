@@ -53,6 +53,14 @@ When doing select(), you should use \fBcurl_multi_timeout\fP to figure out how
 long to wait for action. Call \fIcurl_multi_perform\fP even if no activity has
 been seen on the fd_sets after the timeout expires as otherwise internal
 retries and timeouts may not work as you'd think and want.
+
+If one of the sockets used by libcurl happens to be larger than what can be
+set in an fd_set, which on POSIX systems means that the file descriptor is
+larger than FD_SETSIZE, then libcurl will try to not set it. Setting a too
+large file descriptor in an fd_set implies an out of bounds write which can
+cause crashes, or worse. The effect of NOT storing it will possibly save you
+from the crash, but will make your program NOT wait for sockets it should wait
+for...
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP

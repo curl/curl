@@ -96,4 +96,20 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
                        fd_set* excepts, struct timeval* tv);
 #endif
 
+/* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1], which
+   unfortunately makes it impossible for us to easily check if they're valid
+*/
+#if defined(USE_WINSOCK) || defined(TPF)
+#define VALID_SOCK(x) 1
+#define VERIFY_SOCK(x) Curl_nop_stmt
+#else
+#define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
+#define VERIFY_SOCK(x) do { \
+  if(!VALID_SOCK(x)) { \
+    SET_SOCKERRNO(EINVAL); \
+    return -1; \
+  } \
+} WHILE_FALSE
+#endif
+
 #endif /* __SELECT_H */
