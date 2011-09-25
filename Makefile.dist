@@ -73,10 +73,15 @@ mingw32:
 mingw32-clean:
 	$(MAKE) -C lib -f Makefile.m32 clean
 	$(MAKE) -C src -f Makefile.m32 clean
+	$(MAKE) -C docs/examples -f Makefile.m32 clean
 
 mingw32-vclean mingw32-distclean:
 	$(MAKE) -C lib -f Makefile.m32 vclean
 	$(MAKE) -C src -f Makefile.m32 vclean
+	$(MAKE) -C docs/examples -f Makefile.m32 vclean
+
+mingw32-examples%:
+	$(MAKE) -C docs/examples -f Makefile.m32 CFG=$@
 
 mingw32%:
 	$(MAKE) -C lib -f Makefile.m32 CFG=$@
@@ -217,33 +222,26 @@ netware:
 	$(MAKE) -C lib -f Makefile.netware
 	$(MAKE) -C src -f Makefile.netware
 
-netware-ares:
-	$(MAKE) -C lib -f Makefile.netware WITH_ARES=1
-	$(MAKE) -C src -f Makefile.netware WITH_ARES=1
-
-netware-ssl:
-	$(MAKE) -C lib -f Makefile.netware WITH_SSL=1
-	$(MAKE) -C src -f Makefile.netware WITH_SSL=1
-
-netware-ssl-zlib:
-	$(MAKE) -C lib -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
-	$(MAKE) -C src -f Makefile.netware WITH_SSL=1 WITH_ZLIB=1
-
-netware-ssh2-ssl-zlib:
-	$(MAKE) -C lib -f Makefile.netware WITH_SSH2=1 WITH_SSL=1 WITH_ZLIB=1
-	$(MAKE) -C src -f Makefile.netware WITH_SSH2=1 WITH_SSL=1 WITH_ZLIB=1
-
-netware-zlib:
-	$(MAKE) -C lib -f Makefile.netware WITH_ZLIB=1
-	$(MAKE) -C src -f Makefile.netware WITH_ZLIB=1
-
 netware-clean:
 	$(MAKE) -C lib -f Makefile.netware clean
 	$(MAKE) -C src -f Makefile.netware clean
+	$(MAKE) -C docs/examples -f Makefile.netware clean
+
+netware-vclean netware-distclean:
+	$(MAKE) -C lib -f Makefile.netware vclean
+	$(MAKE) -C src -f Makefile.netware vclean
+	$(MAKE) -C docs/examples -f Makefile.netware vclean
 
 netware-install:
 	$(MAKE) -C lib -f Makefile.netware install
 	$(MAKE) -C src -f Makefile.netware install
+
+netware-examples-%:
+	$(MAKE) -C docs/examples -f Makefile.netware CFG=$@
+
+netware-%:
+	$(MAKE) -C lib -f Makefile.netware CFG=$@
+	$(MAKE) -C src -f Makefile.netware CFG=$@
 
 unix: all
 
