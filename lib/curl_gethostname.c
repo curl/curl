@@ -28,9 +28,6 @@
 
 #include "curl_gethostname.h"
 
-/* Hostname buffer size */
-#define HOSTNAME_MAX 1024
-
 /*
  * Curl_gethostname() is a wrapper around gethostname() which allows
  * overriding the host name that the function would normally return.

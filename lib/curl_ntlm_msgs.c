@@ -93,9 +93,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* Hostname buffer size */
-#define HOSTNAME_MAX 1024
-
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
