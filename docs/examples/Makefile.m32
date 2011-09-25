@@ -81,9 +81,6 @@ ifndef ARCH
 ARCH = w32
 endif
 
-SSL = 1
-ZLIB = 1
-
 CC = gcc
 CFLAGS = -g -O2 -Wall
 CFLAGS += -fno-strict-aliasing
