@@ -187,10 +187,15 @@ typedef int (*curl_progress_callback)(void *clientp,
 #define CURL_MAX_HTTP_HEADER (100*1024)
 #endif
 
-
 /* This is a magic return code for the write callback that, when returned,
    will signal libcurl to pause receiving on the current transfer. */
 #define CURL_WRITEFUNC_PAUSE 0x10000001
+
+/* If the write callback itself allocates memory dynamically and this fails
+   due to an out of memory condition, returning CURL_WRITEFUNC_OUT_OF_MEMORY
+   is the proper way to tell libcurl of this condition. */
+#define CURL_WRITEFUNC_OUT_OF_MEMORY 0x10000002
+
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,

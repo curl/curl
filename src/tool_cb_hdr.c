@@ -47,6 +47,10 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   const size_t cb = size * nmemb;
   const char *end = (char*)ptr + cb;
 
+  if(cb >= CURL_WRITEFUNC_PAUSE)
+    /* CURL_WRITEFUNC_PAUSE limits input size */
+    return CURL_WRITEFUNC_OUT_OF_MEMORY;
+
   if(cb > 20 && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
 
@@ -74,12 +78,13 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       */
       len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
-      /* TODO: OOM handling - return (size_t)-1 ? */
       if(filename) {
         outs->filename = filename;
         outs->alloc_filename = TRUE;
         break;
       }
+      else
+        return CURL_WRITEFUNC_OUT_OF_MEMORY;
     }
   }
 

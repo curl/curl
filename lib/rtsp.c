@@ -725,6 +725,11 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
   writeit = data->set.fwrite_rtp?data->set.fwrite_rtp:data->set.fwrite_func;
   wrote = writeit(ptr, 1, len, data->set.rtp_out);
 
+  if(CURL_WRITEFUNC_OUT_OF_MEMORY == wrote) {
+    failf (data, "Out of memory writing RTP data");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   if(CURL_WRITEFUNC_PAUSE == wrote) {
     failf (data, "Cannot pause RTP");
     return CURLE_WRITE_ERROR;
