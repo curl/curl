@@ -1100,7 +1100,7 @@ static CURLcode smtp_connect(struct connectdata *conn,
   struct pingpong *pp = &smtpc->pp;
   const char *path = conn->data->state.path;
   int len;
-  char localhost[1024 + 1];
+  char localhost[HOSTNAME_MAX + 1];
 
   *done = FALSE; /* default to not done yet */
 
