@@ -51,6 +51,13 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
    */
   const size_t err_rc = (sz * nmemb) ? 0 : 1;
 
+#ifdef DEBUGBUILD
+  if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
+    warnf(config, "Data size exceeds single call write limit!\n");
+    return err_rc; /* Failure */
+  }
+#endif
+
   if(!out->stream) {
     out->bytes = 0; /* nothing written yet */
     if(!out->filename) {

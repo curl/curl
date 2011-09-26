@@ -30,6 +30,7 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_msgs.h"
 #include "tool_cb_hdr.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -46,6 +47,21 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char*)ptr + cb;
+
+  /*
+   * Once that libcurl has called back tool_header_cb() the returned value
+   * is checked against the amount that was intended to be written, if
+   * it does not match then it fails with CURLE_WRITE_ERROR. So at this
+   * point returning a value different from sz*nmemb indicates failure.
+   */
+  size_t failure = (size * nmemb) ? 0 : 1;
+
+#ifdef DEBUGBUILD
+  if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
+    warnf(config, "Header data exceeds single call write limit!\n");
+    return failure;
+  }
+#endif
 
   if(cb > 20 && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
@@ -74,12 +90,13 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       */
       len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
-      /* TODO: OOM handling - return (size_t)-1 ? */
       if(filename) {
         outs->filename = filename;
         outs->alloc_filename = TRUE;
         break;
       }
+      else
+        return failure;
     }
   }
 
@@ -157,11 +174,11 @@ static char *parse_filename(const char *ptr, size_t len)
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
 
-  /* in case we built curl debug enabled, we allow an evironment variable
+  /* in case we built debug enabled, we allow an evironment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
    * specific directory
    */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   {
     char *tdir = curlx_getenv("CURL_TESTDIR");
     if(tdir) {
