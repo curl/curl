@@ -787,24 +787,36 @@ static CURLcode smtp_state_auth_resp(struct connectdata *conn,
 /* start the DO phase */
 static CURLcode smtp_mail(struct connectdata *conn)
 {
+  char *from = NULL;
+  char *size = NULL;
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
 
-  /* send MAIL FROM */
+  /* calculate the FROM parameter */
   if(!data->set.str[STRING_MAIL_FROM])
     /* null reverse-path, RFC-2821, sect. 3.7 */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<>");
-
+    from = "<>";
   else if(data->set.str[STRING_MAIL_FROM][0] == '<')
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s",
-                           data->set.str[STRING_MAIL_FROM]);
+    from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
   else
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:<%s>",
-                           data->set.str[STRING_MAIL_FROM]);
+    from = aprintf("<%s>", data->set.str[STRING_MAIL_FROM]);
+
+  /* calculate the optional SIZE parameter */
+  if(conn->data->set.infilesize > 0)
+    size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
+
+  /* send MAIL FROM */
+  if(size == NULL)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s", from);
+  else
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s SIZE=%s",
+	                       from, size);
+
   if(result)
     return result;
 
   state(conn, SMTP_MAIL);
+
   return result;
 }
 
