@@ -47,6 +47,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char*)ptr + cb;
+  struct Configurable *config = outs->config;
 
   /*
    * Once that libcurl has called back tool_header_cb() the returned value
@@ -57,7 +58,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   size_t failure = (size * nmemb) ? 0 : 1;
 
 #ifdef DEBUGBUILD
-  if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
+  if(size * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
     warnf(config, "Header data exceeds single call write limit!\n");
     return failure;
   }
