@@ -51,10 +51,6 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
    */
   const size_t err_rc = (sz * nmemb) ? 0 : 1;
 
-  if(sz * nmemb >= CURL_WRITEFUNC_PAUSE)
-    /* CURL_WRITEFUNC_PAUSE limits input size */
-    return CURL_WRITEFUNC_OUT_OF_MEMORY;
-
   if(!out->stream) {
     out->bytes = 0; /* nothing written yet */
     if(!out->filename) {

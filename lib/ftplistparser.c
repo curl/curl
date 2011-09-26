@@ -354,8 +354,6 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* Curl_ftp_parselist is a write callback function */
-
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
 {
@@ -367,10 +365,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
   unsigned long i = 0;
   CURLcode rc;
 
-  if(bufflen >= CURL_WRITEFUNC_PAUSE)
-    /* CURL_WRITEFUNC_PAUSE limits input size */
-    return CURL_WRITEFUNC_OUT_OF_MEMORY;
-
   if(parser->error) { /* error in previous call */
     /* scenario:
      * 1. call => OK..
@@ -378,9 +372,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
      * 3. (last) call => is skipped RIGHT HERE and the error is hadled later
      *    in wc_statemach()
      */
-    if(parser->error == CURLE_OUT_OF_MEMORY)
-      return CURL_WRITEFUNC_OUT_OF_MEMORY;
-
     return bufflen;
   }
 
@@ -397,12 +388,12 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
       parser->file_data = Curl_fileinfo_alloc();
       if(!parser->file_data) {
         parser->error = CURLE_OUT_OF_MEMORY;
-        return CURL_WRITEFUNC_OUT_OF_MEMORY;
+        return bufflen;
       }
       parser->file_data->b_data = malloc(FTP_BUFFER_ALLOCSIZE);
       if(!parser->file_data->b_data) {
         PL_ERROR(conn, CURLE_OUT_OF_MEMORY);
-        return CURL_WRITEFUNC_OUT_OF_MEMORY;
+        return bufflen;
       }
       parser->file_data->b_size = FTP_BUFFER_ALLOCSIZE;
       parser->item_offset = 0;
@@ -425,7 +416,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         parser->file_data = NULL;
         parser->error = CURLE_OUT_OF_MEMORY;
         PL_ERROR(conn, CURLE_OUT_OF_MEMORY);
-        return CURL_WRITEFUNC_OUT_OF_MEMORY;
+        return bufflen;
       }
     }
 

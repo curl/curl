@@ -160,11 +160,6 @@ From 7.18.0, the function can return CURL_WRITEFUNC_PAUSE which then will
 cause writing to this connection to become paused. See
 \fIcurl_easy_pause(3)\fP for further details.
 
-From 7.22.1, the function can return CURL_WRITEFUNC_OUT_OF_MEMORY to indicate
-libcurl that an attempt to dynamically allocate memory from within the write
-callback itself has failed. This will abort the transfer and make libcurl
-return CURLE_OUT_OF_MEMORY.
-
 This function may be called with zero bytes data if the transferred file is
 empty.
 

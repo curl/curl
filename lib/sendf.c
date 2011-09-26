@@ -459,11 +459,6 @@ CURLcode Curl_client_write(struct connectdata *conn,
       wrote = len;
     }
 
-    if(CURL_WRITEFUNC_OUT_OF_MEMORY == wrote) {
-      failf(data, "Out of memory writing body");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
     if(CURL_WRITEFUNC_PAUSE == wrote)
       return pausewrite(data, type, ptr, len);
 
@@ -486,12 +481,6 @@ CURLcode Curl_client_write(struct connectdata *conn,
        regardless of the ftp transfer mode (ASCII/Image) */
 
     wrote = writeit(ptr, 1, len, data->set.writeheader);
-
-    if(CURL_WRITEFUNC_OUT_OF_MEMORY == wrote) {
-      failf(data, "Out of memory writing header");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
     if(CURL_WRITEFUNC_PAUSE == wrote)
       /* here we pass in the HEADER bit only since if this was body as well
          then it was passed already and clearly that didn't trigger the pause,
