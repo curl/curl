@@ -521,7 +521,11 @@ typedef int (_curl_progress_callback2)(const void *,
    _curl_callback_compatible((expr), _curl_debug_callback1) ||                \
    _curl_callback_compatible((expr), _curl_debug_callback2) ||                \
    _curl_callback_compatible((expr), _curl_debug_callback3) ||                \
-   _curl_callback_compatible((expr), _curl_debug_callback4))
+   _curl_callback_compatible((expr), _curl_debug_callback4) ||                \
+   _curl_callback_compatible((expr), _curl_debug_callback5) ||                \
+   _curl_callback_compatible((expr), _curl_debug_callback6) ||                \
+   _curl_callback_compatible((expr), _curl_debug_callback7) ||                \
+   _curl_callback_compatible((expr), _curl_debug_callback8))
 typedef int (_curl_debug_callback1) (CURL *,
     curl_infotype, char *, size_t, void *);
 typedef int (_curl_debug_callback2) (CURL *,
@@ -530,6 +534,14 @@ typedef int (_curl_debug_callback3) (CURL *,
     curl_infotype, const char *, size_t, void *);
 typedef int (_curl_debug_callback4) (CURL *,
     curl_infotype, const char *, size_t, const void *);
+typedef int (_curl_debug_callback5) (CURL *,
+    curl_infotype, unsigned char *, size_t, void *);
+typedef int (_curl_debug_callback6) (CURL *,
+    curl_infotype, unsigned char *, size_t, const void *);
+typedef int (_curl_debug_callback7) (CURL *,
+    curl_infotype, const unsigned char *, size_t, void *);
+typedef int (_curl_debug_callback8) (CURL *,
+    curl_infotype, const unsigned char *, size_t, const void *);
 
 /* evaluates to true if expr is of type curl_ssl_ctx_callback or "similar" */
 /* this is getting even messier... */
