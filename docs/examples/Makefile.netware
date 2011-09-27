@@ -42,6 +42,11 @@ ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../../librtmp-2.3
 endif
 
+# Edit the path below to point to the base of your fbopenssl package.
+ifndef FBOPENSSL_PATH
+FBOPENSSL_PATH = ../../fbopenssl-0.4
+endif
+
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
 LIBCARES_PATH = ../../ares
@@ -223,7 +228,7 @@ else
 	IMPORTS	= @$(CURL_LIB)/libcurl.imp
 endif
 ifdef WITH_SSH2
-	INCLUDES += -I$(LIBSSH2_PATH)/include
+	# INCLUDES += -I$(LIBSSH2_PATH)/include
 ifdef LINK_STATIC
 	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
 else
@@ -238,10 +243,14 @@ ifdef LINK_STATIC
 endif
 endif
 ifdef WITH_SSL
-	# INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
+	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
+ifdef WITH_SPNEGO
+	# INCLUDES += -I$(FBOPENSSL_PATH)/include
+	LDLIBS += $(FBOPENSSL_PATH)/nw/fbopenssl.$(LIBEXT)
+endif
 else
 ifdef WITH_AXTLS
 	INCLUDES += -I$(AXTLS_PATH)/inc

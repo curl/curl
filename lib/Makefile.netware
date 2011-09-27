@@ -42,6 +42,11 @@ ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
 endif
 
+# Edit the path below to point to the base of your fbopenssl package.
+ifndef FBOPENSSL_PATH
+FBOPENSSL_PATH = ../../fbopenssl-0.4
+endif
+
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
 LIBCARES_PATH = ../ares
@@ -241,6 +246,10 @@ ifdef WITH_SSL
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
 	INSTDEP += ca-bundle.crt
+ifdef WITH_SPNEGO
+	INCLUDES += -I$(FBOPENSSL_PATH)/include
+	LDLIBS += $(FBOPENSSL_PATH)/nw/fbopenssl.$(LIBEXT)
+endif
 else
 ifdef WITH_AXTLS
 	INCLUDES += -I$(AXTLS_PATH)/inc
@@ -621,6 +630,9 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_LIBSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
+ifdef WITH_SPNEGO
+	@echo $(DL)#define HAVE_SPNEGO 1$(DL) >> $@
+endif
 else
 ifdef WITH_AXTLS
 	@echo $(DL)#define USE_AXTLS 1$(DL) >> $@
