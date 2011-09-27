@@ -51,7 +51,7 @@ CURL_DEF_TOKEN $1
   ],[
     tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
-      "$SED" 's/.*CURL_DEF_TOKEN[[ ]]//' 2>/dev/null | \
+      "$SED" 's/.*CURL_DEF_TOKEN[[ ]][[ ]]*//' 2>/dev/null | \
       "$SED" 's/[["]][[ ]]*[["]]//g' 2>/dev/null`
     if test -z "$tmp_exp" || test "$tmp_exp" = "$1"; then
       tmp_exp=""
