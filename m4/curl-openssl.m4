@@ -55,7 +55,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
         tst_verfix=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 5`
         tst_api=0x$tst_vermaj$tst_vermin$tst_verfix
         ;;
-      x11)
+      x11|x10)
         tst_vermaj=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 3`
         tst_vermin=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 5`
         tst_verfix=`echo $curl_cv_def_OPENSSL_VERSION_NUMBER | cut -c 7`
