@@ -1,4 +1,4 @@
-Curl and libcurl 7.22.1
+Curl and libcurl 7.23.0
 
  Public curl releases:         125
  Command line options:         149
@@ -10,6 +10,7 @@ Curl and libcurl 7.22.1
 This release includes the following changes:
 
  o Empty headers can be sent in HTTP requests by terminating with a semicolon
+ o SSL session sharing support added to curl_share_setopt()
 
 This release includes the following bugfixes:
 
@@ -22,6 +23,7 @@ This release includes the following bugfixes:
  o curl_multi_fdset: avoid FD_SET out of bounds
  o lots of MinGW build tweaks
  o Curl_gethostname: return un-qualified machine name
+ o fixed then openssl version number configure check
 
 This release includes the following known bugs:
 
@@ -31,6 +33,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Yukihiro Kawada, Dave Reisner, Gisle Vanem, Guenter Knauf, Steve Holme,
- Yang Tse, Christopher Stone, Taneli Vahakangas
+ Yang Tse, Christopher Stone, Taneli Vahakangas, Albert Chin,
+ Alejandro Alvarez, Dan Fandrich
 
         Thanks! (and sorry if I forgot to mention someone)
