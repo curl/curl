@@ -795,22 +795,32 @@ static CURLcode smtp_mail(struct connectdata *conn)
   /* calculate the FROM parameter */
   if(!data->set.str[STRING_MAIL_FROM])
     /* null reverse-path, RFC-2821, sect. 3.7 */
-    from = "<>";
+    from = strdup("<>");
   else if(data->set.str[STRING_MAIL_FROM][0] == '<')
     from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
   else
     from = aprintf("<%s>", data->set.str[STRING_MAIL_FROM]);
 
+  if(!from)
+    return CURLE_OUT_OF_MEMORY;
+
   /* calculate the optional SIZE parameter */
-  if(conn->data->set.infilesize > 0)
+  if(conn->data->set.infilesize > 0) {
     size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
+
+    if(!size)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* send MAIL FROM */
   if(size == NULL)
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s", from);
   else
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s SIZE=%s",
-	                       from, size);
+                           from, size);
+
+  Curl_safefree(size);
+  Curl_safefree(from);
 
   if(result)
     return result;
