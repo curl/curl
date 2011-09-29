@@ -588,7 +588,7 @@ terminated string which must be URL-encoded in the following format:
 
 scheme://host:port/path
 
-For a greater explaination of the format please see RFC 2396
+For a greater explanation of the format please see RFC 2396
 (http://curl.haxx.se/rfc/rfc2396.txt).
 
 If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
@@ -603,7 +603,7 @@ connect to. This can be the fully qualified domain name of the server, the
 local network name of the machine on your network or the IP address of the
 server or machine represented by either an IPv4 or IPv6 address. For example:
 
-http://www.domain.com/
+http://www.example.com/
 
 http://hostname/
 
@@ -638,20 +638,22 @@ given below this list is not conclusive:
 The path part of a HTTP request specifies the file to retrieve and from what
 directory. If the directory is not specified then the web server's root
 directory is used. If the file is omitted then the default document will be
-retrieved for either the directory specified or the root directory.
+retrieved for either the directory specified or the root directory. The
+exact resource returned for each URL is entirely dependent on the server's
+configuration.
 
 http://www.netscape.com - This gets the main page (index.html in this
 example) from Netscape's web server.
 
 http://www.netscape.com/index.html - This returns the main page from Netscape
-by specifing the page to get.
+by specifying the page to get.
 
 http://www.netscape.com/contactus/ - This returns the default document from
-the contact us directory.
+the contactus directory.
 
 .B FTP
 
-The path part of a FTP request specifies the file to retrieve and from what
+The path part of an FTP request specifies the file to retrieve and from what
 directory. If the file part is omitted then libcurl downloads the directory
 listing for the directory specified. If the directory is omitted then
 the directory listing for the root / home directory will be returned.
@@ -664,23 +666,24 @@ root directory.
 ftp://cool.haxx.se/libcurl/readme.txt - This downloads readme.txt from the
 libcurl directory.
 
-ftp://user:password@my.site.com/readme.txt - This retrieves the readme.txt
+ftp://user:password@my.example.com/readme.txt - This retrieves the readme.txt
 file from the user's home directory. When a username and password is
 specified, everything that is specified in the path part is relative to the
 user's home directory. To retrieve files from the root directory or a
 directory underneath the root directory then the absolute path must be
-specified by using an additional forward slash to the beginning of the path.
+specified by prepending an additional forward slash to the beginning of the
+path.
 
-ftp://user:password@my.site.com//readme.txt - This retrieves the readme.txt
+ftp://user:password@my.example.com//readme.txt - This retrieves the readme.txt
 from the root directory when logging in as a specified user.
 
 .B SMTP
 
 The path part of a SMTP request specifies the host name to present during
 communication with the mail server. If the path is omitted then libcurl will
-attempt to to resolve the local computer's host name. However, this will not
+attempt to resolve the local computer's host name. However, this may not
 return the fully qualified domain name that is required by some mail servers
-and specifing this path allows you to specify an alternative name, such as
+and specifying this path allows you to set an alternative name, such as
 your machine's fully qualified domain name, which you might have obtained
 from an external function such as gethostname or getaddrinfo.
 
@@ -689,6 +692,38 @@ sends your local computer's host name in the HELO / EHLO command.
 
 smtp://mail.domain.com/client.domain.com - This will send client.domain.com in
 the HELO / EHLO command to the mail server at domain.com.
+
+.B SCP
+
+The path part of an SCP request specifies the file to retrieve and from what
+directory. The file part may not be omitted. The file is taken as an absolute
+path from the root directory on the server. To specify a path relative to
+the user's home directory on the server, prepend ~/ to the path portion.
+If the user name is not embedded in the URL, it can be set with the
+\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
+
+scp://user@example.com/etc/issue - This specifies the file /etc/issue
+
+scp://example.com/~/my-file - This specifies the file my-file in the
+user's home directory on the server
+
+.B SFTP
+
+The path part of an SFTP request specifies the file to retrieve and from what
+directory. If the file part is omitted then libcurl downloads the directory
+listing for the directory specified.  If the path ends in a / then a directory
+listing is returned instead of a file.  If the path is omitted entirely then
+the directory listing for the root / home directory will be returned.
+If the user name is not embedded in the URL, it can be set with the
+\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
+
+sftp://user:pass@example.com/etc/issue - This specifies the file /etc/issue
+
+sftp://user@example.com/~/my-file - This specifies the file my-file in the
+user's home directory
+
+sftp://ssh.example.com/~/Documents/ - This requests a directory listing
+of the Documents directory under the user's home directory
 
 .B NOTES
 
@@ -762,7 +797,7 @@ this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
 
 If you set \fBCURLOPT_PROXYTYPE\fP to \fICURLPROXY_HTTP_1_0\fP, it will only
 affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
-used for "regular" HTTP requests is instead controled with
+used for "regular" HTTP requests is instead controlled with
 \fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
 Pass a pointer to a zero terminated string. The should be a comma separated
