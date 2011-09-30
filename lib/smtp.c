@@ -808,12 +808,15 @@ static CURLcode smtp_mail(struct connectdata *conn)
   if(conn->data->set.infilesize > 0) {
     size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
 
-    if(!size)
+    if(!size) {
+      Curl_safefree(from);
+
       return CURLE_OUT_OF_MEMORY;
+    }
   }
 
   /* send MAIL FROM */
-  if(size == NULL)
+  if(!size)
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s", from);
   else
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "MAIL FROM:%s SIZE=%s",
