@@ -90,6 +90,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 #define Curl_ssl_check_cxn(x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
 #define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
+#define Curl_ssl_kill_session(x) 0
 #endif
 
 #endif /* HEADER_CURL_SSLGEN_H */
