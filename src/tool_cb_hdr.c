@@ -56,6 +56,9 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
    */
   size_t failure = (size * nmemb) ? 0 : 1;
 
+  if(!outs->config)
+    return failure;
+
 #ifdef DEBUGBUILD
   if((size * nmemb > (size_t)CURL_MAX_WRITE_SIZE) ||
      (size * nmemb > (size_t)CURL_MAX_HTTP_HEADER)) {
@@ -64,7 +67,8 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(cb > 20 && checkprefix("Content-disposition:", str)) {
+  if(!outs->filename && (cb > 20) &&
+    checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
@@ -94,6 +98,9 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       if(filename) {
         outs->filename = filename;
         outs->alloc_filename = TRUE;
+        outs->s_isreg = TRUE;
+        outs->fopened = FALSE;
+        outs->stream = NULL;
         break;
       }
       else

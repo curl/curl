@@ -40,8 +40,8 @@
 size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;
-  struct OutStruct *out = userdata;
-  struct Configurable *config = out->config;
+  struct OutStruct *outs = userdata;
+  struct Configurable *config = outs->config;
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value
@@ -49,47 +49,85 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  const size_t err_rc = (sz * nmemb) ? 0 : 1;
+  const size_t failure = (sz * nmemb) ? 0 : 1;
+
+  if(!config)
+    return failure;
 
 #ifdef DEBUGBUILD
   if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
     warnf(config, "Data size exceeds single call write limit!\n");
-    return err_rc; /* Failure */
+    return failure;
+  }
+
+  {
+    /* Some internal congruency checks on received OutStruct */
+    bool check_fails = FALSE;
+    if(outs->filename) {
+      /* regular file */
+      if(!*outs->filename)
+        check_fails = TRUE;
+      if(!outs->s_isreg)
+        check_fails = TRUE;
+      if(outs->fopened && !outs->stream)
+        check_fails = TRUE;
+      if(!outs->fopened && outs->stream)
+        check_fails = TRUE;
+      if(!outs->fopened && outs->bytes)
+        check_fails = TRUE;
+    }
+    else {
+      /* standard stream */
+      if(!outs->stream || outs->s_isreg || outs->fopened)
+        check_fails = TRUE;
+      if(outs->alloc_filename || outs->init)
+        check_fails = TRUE;
+    }
+    if(check_fails) {
+      warnf(config, "Invalid output struct data for write callback\n");
+      return failure;
+    }
   }
 #endif
 
-  if(!out->stream) {
-    out->bytes = 0; /* nothing written yet */
-    if(!out->filename) {
+  if(!outs->stream) {
+    FILE *file;
+
+    if(!outs->filename || !*outs->filename) {
       warnf(config, "Remote filename has no length!\n");
-      return err_rc; /* Failure */
+      return failure;
     }
 
     if(config->content_disposition) {
       /* don't overwrite existing files */
-      FILE* f = fopen(out->filename, "r");
-      if(f) {
-        fclose(f);
-        warnf(config, "Refusing to overwrite %s: %s\n", out->filename,
+      file = fopen(outs->filename, "rb");
+      if(file) {
+        fclose(file);
+        warnf(config, "Refusing to overwrite %s: %s\n", outs->filename,
               strerror(EEXIST));
-        return err_rc; /* Failure */
+        return failure;
       }
     }
 
     /* open file for writing */
-    out->stream = fopen(out->filename, "wb");
-    if(!out->stream) {
-      warnf(config, "Failed to create the file %s: %s\n", out->filename,
+    file = fopen(outs->filename, "wb");
+    if(!file) {
+      warnf(config, "Failed to create the file %s: %s\n", outs->filename,
             strerror(errno));
-      return err_rc; /* failure */
+      return failure;
     }
+    outs->s_isreg = TRUE;
+    outs->fopened = TRUE;
+    outs->stream = file;
+    outs->bytes = 0;
+    outs->init = 0;
   }
 
-  rc = fwrite(buffer, sz, nmemb, out->stream);
+  rc = fwrite(buffer, sz, nmemb, outs->stream);
 
   if((sz * nmemb) == rc)
     /* we added this amount of data to the output */
-    out->bytes += (sz * nmemb);
+    outs->bytes += (sz * nmemb);
 
   if(config->readbusy) {
     config->readbusy = FALSE;
@@ -97,12 +135,10 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
   if(config->nobuffer) {
-    /* disable output buffering */
-    int res = fflush(out->stream);
-    if(res) {
-      /* return a value that isn't the same as sz * nmemb */
-      return err_rc; /* failure */
-    }
+    /* output buffering disabled */
+    int res = fflush(outs->stream);
+    if(res)
+      return failure;
   }
 
   return rc;

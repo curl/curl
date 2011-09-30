@@ -26,27 +26,43 @@
 
 /*
  * OutStruct variables keep track of information relative to curl's
- * output writing, which may take place to stdout or to some file.
+ * output writing, which may take place to a standard stream or a file.
  *
- * 'filename' member is a pointer to either a file name string or to
- * string "-" to indicate that output is written to stdout.
+ * 'filename' member is either a pointer to a file name string or NULL
+ * when dealing with a standard stream.
  *
  * 'alloc_filename' member is TRUE when string pointed by 'filename' has been
  * dynamically allocated and 'belongs' to this OutStruct, otherwise FALSE.
  *
- * 'stream' member is a pointer to a stream controlling object as returned
- * from a 'fopen' call or stdout. When 'stdout' this shall not be closed.
+ * 's_isreg' member is TRUE when output goes to a regular file, this also
+ * implies that output is 'seekable' and 'appendable' and also that member
+ * 'filename' points to file name's string. For any standard stream member
+ * 's_isreg' will be FALSE.
  *
- * 'bytes' member represents amount written, and 'init' initial file size.
+ * 'fopened' member is TRUE when output goes to a regular file and it
+ * has been fopen'ed, requiring it to be closed later on. In any other
+ * case this is FALSE.
+ *
+ * 'stream' member is a pointer to a stream controlling object as returned
+ * from a 'fopen' call or a standard stream.
+ *
+ * 'config' member is a pointer to associated 'Configurable' struct.
+ *
+ * 'bytes' member represents amount written so far.
+ *
+ * 'init' member holds original file size or offset at which truncation is
+ * taking place. Always zero unless appending to a non-empty regular file.
  */
 
 struct OutStruct {
-  char *filename;               /* pointer to file name or "-" string */
-  bool alloc_filename;          /* allocated filename belongs to this */
-  FILE *stream;                 /* stdout or stream controlling object */
-  struct Configurable *config;  /* pointer back to Configurable struct */
-  curl_off_t bytes;             /* amount written so far */
-  curl_off_t init;              /* original size (non-zero when appending) */
+  char *filename;
+  bool alloc_filename;
+  bool s_isreg;
+  bool fopened;
+  FILE *stream;
+  struct Configurable *config;
+  curl_off_t bytes;
+  curl_off_t init;
 };
 
 

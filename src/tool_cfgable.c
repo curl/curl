@@ -127,7 +127,5 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->ftp_alternative_to_user);
 
   Curl_safefree(config->libcurl);
-
-  config->outs = NULL; /* closed elsewhere when appropriate */
 }
 

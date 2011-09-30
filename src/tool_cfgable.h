@@ -190,7 +190,7 @@ struct Configurable {
 
   int default_node_flags;   /* default flags to search for each 'node', which
                                is basically each given URL to transfer */
-  struct OutStruct *outs;
+
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
 

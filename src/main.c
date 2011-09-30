@@ -3110,7 +3110,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   struct ProgressData progressbar;
   struct getout *urlnode;
 
-  struct OutStruct outs;
   struct OutStruct heads;
 
   CURL *curl = NULL;
@@ -3121,8 +3120,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   int i;
 
   errorbuffer[0] = '\0';
-  memset(&outs, 0, sizeof(struct OutStruct));
+  /* default headers output stream is stdout */
   memset(&heads, 0, sizeof(struct OutStruct));
+  heads.stream = stdout;
+  heads.config = config;
 
   memory_tracking_init();
 
@@ -3151,9 +3152,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
     return CURLE_FAILED_INIT;
   }
   config->easy = curl;
-
-  /* Store a pointer to our 'outs' struct used for output writing */
-  config->outs = &outs;
 
   /*
   ** Beyond this point no return'ing from this function allowed.
@@ -3352,7 +3350,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   /* Single header file for all URLs */
   if(config->headerfile) {
     /* open file for output: */
-    if(strcmp(config->headerfile, "-")) {
+    if(!curlx_strequal(config->headerfile, "-")) {
       FILE *newfile = fopen(config->headerfile, "wb");
       if(!newfile) {
         warnf(config, "Failed to open %s\n", config->headerfile);
@@ -3361,16 +3359,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       }
       else {
         heads.filename = config->headerfile;
-        heads.alloc_filename = FALSE;
+        heads.s_isreg = TRUE;
+        heads.fopened = TRUE;
         heads.stream = newfile;
-        heads.config = config;
       }
-    }
-    else {
-      heads.filename = config->headerfile; /* "-" */
-      heads.alloc_filename = FALSE;
-      heads.stream = stdout;
-      heads.config = config;
     }
   }
 
@@ -3402,12 +3394,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
       urlnode->flags = 0;
       continue; /* next URL please */
     }
-
-    /* default output stream is stdout */
-    outs.stream = stdout;
-    outs.config = config;
-    outs.bytes = 0; /* nothing written yet */
-    outs.filename = NULL;
 
     /* save outfile pattern before expansion */
     if(urlnode->outfile) {
@@ -3480,6 +3466,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         int infd;
         bool infdopen;
         char *outfile;
+        struct OutStruct outs;
         struct InStruct input;
         struct timeval retrystart;
         curl_off_t uploadfilesize;
@@ -3492,6 +3479,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         infdopen = FALSE;
         infd = STDIN_FILENO;
         uploadfilesize = -1; /* -1 means unknown */
+
+        /* default output stream is stdout */
+        memset(&outs, 0, sizeof(struct OutStruct));
+        outs.stream = stdout;
+        outs.config = config;
 
         if(urls)
           this_url = glob_next_url(urls);
@@ -3563,37 +3555,42 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
             }
           }
 
-          if(config->resume_from_current) {
-            /* We're told to continue from where we are now. Get the
-               size of the file as it is now and open it for append instead */
-
-            struct_stat fileinfo;
-
-            /* VMS -- Danger, the filesize is only valid for stream files */
-            if(0 == stat(outfile, &fileinfo))
-              /* set offset to current file size: */
-              config->resume_from = fileinfo.st_size;
-            else
-              /* let offset be 0 */
-              config->resume_from = 0;
-          }
-
-          outs.filename = outfile;
-          outs.alloc_filename = FALSE;
-
-          if(config->resume_from) {
-            outs.init = config->resume_from;
-            /* open file for output: */
-            outs.stream = fopen(outfile, config->resume_from?"ab":"wb");
-            if(!outs.stream) {
-              helpf(config->errors, "Can't open '%s'!\n", outfile);
-              res = CURLE_WRITE_ERROR;
-              goto quit_urls;
-            }
+          if((urlnode->flags & GETOUT_USEREMOTE)
+             && config->content_disposition) {
+            /* Our header callback sets the filename */
+            DEBUGASSERT(!outs.filename);
           }
           else {
-            outs.stream = NULL; /* open when needed */
-            outs.bytes = 0;     /* reset byte counter */
+            if(config->resume_from_current) {
+              /* We're told to continue from where we are now. Get the size
+                 of the file as it is now and open it for append instead */
+              struct_stat fileinfo;
+              /* VMS -- Danger, the filesize is only valid for stream files */
+              if(0 == stat(outfile, &fileinfo))
+                /* set offset to current file size: */
+                config->resume_from = fileinfo.st_size;
+              else
+                /* let offset be 0 */
+                config->resume_from = 0;
+            }
+
+            if(config->resume_from) {
+              /* open file for output: */
+              FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
+              if(!file) {
+                helpf(config->errors, "Can't open '%s'!\n", outfile);
+                res = CURLE_WRITE_ERROR;
+                goto quit_urls;
+              }
+              outs.fopened = TRUE;
+              outs.stream = file;
+              outs.init = config->resume_from;
+            }
+            else {
+              outs.stream = NULL; /* open when needed */
+            }
+            outs.filename = outfile;
+            outs.s_isreg = TRUE;
           }
         }
 
@@ -4375,8 +4372,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         quit_urls:
 
         /* Set file extended attributes */
-        if(!res && config->xattr &&
-           outfile && !curlx_strequal(outfile, "-") && outs.stream) {
+        if(!res && config->xattr && outs.fopened && outs.stream) {
           int rc = fwrite_xattr(curl, fileno(outs.stream));
           if(rc)
             warnf(config, "Error setting extended attributes: %s\n",
@@ -4384,30 +4380,36 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         /* Close the file */
-        if(outfile && !curlx_strequal(outfile, "-") && outs.stream) {
+        if(outs.fopened && outs.stream) {
           int rc = fclose(outs.stream);
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
             fprintf(config->errors, "(%d) Failed writing body\n", res);
           }
-          if(outs.alloc_filename)
-            Curl_safefree(outs.filename);
+        }
+        else if(!outs.s_isreg && outs.stream) {
+          /* Dump standard stream buffered data */
+          int rc = fflush(outs.stream);
+          if(!res && rc) {
+            /* something went wrong in the writing process */
+            res = CURLE_WRITE_ERROR;
+            fprintf(config->errors, "(%d) Failed writing body\n", res);
+          }
         }
 
 #ifdef __AMIGA__
-        if(!res) {
+        if(!res && outs.s_isreg && outs.filename) {
           /* Set the url (up to 80 chars) as comment for the file */
           if(strlen(url) > 78)
             url[79] = '\0';
-          SetComment( outs.filename, url);
+          SetComment(outs.filename, url);
         }
 #endif
 
 #ifdef HAVE_UTIME
         /* File time can only be set _after_ the file has been closed */
-        if(!res && config->remote_time &&
-           outs.filename && !curlx_strequal("-", outs.filename)) {
+        if(!res && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
           long filetime = -1;
           curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
@@ -4419,6 +4421,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
 #endif
+        /* No more business with this output struct */
+        if(outs.alloc_filename)
+          Curl_safefree(outs.filename);
+        memset(&outs, 0, sizeof(struct OutStruct));
 
         /* Free loop-local allocated memory and close loop-local opened fd */
 
@@ -4437,7 +4443,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
       } /* loop to the next URL */
 
-      /* Free loop-local allocated memory and close loop-local opened fd */
+      /* Free loop-local allocated memory */
 
       Curl_safefree(uploadfile);
 
@@ -4453,7 +4459,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     } /* loop to the next globbed upload file */
 
-    /* Free loop-local allocated memory and close loop-local opened fd */
+    /* Free loop-local allocated memory */
 
     Curl_safefree(outfiles);
 
@@ -4511,12 +4517,10 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* Close function-local opened file descriptors */
 
-  if(config->headerfile) {
-    if(strcmp(heads.filename, "-") && heads.stream)
-      fclose(heads.stream);
-    if(heads.alloc_filename)
-      Curl_safefree(heads.filename);
-  }
+  if(heads.fopened && heads.stream)
+    fclose(heads.stream);
+  if(heads.alloc_filename)
+    Curl_safefree(heads.filename);
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
