@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -249,9 +249,11 @@ complication for you. Given simply the URL to a file, libcurl will take care
 of all the details needed to get the file moved from one machine to another.
 
 .SH "Multi-threading Issues"
-The first basic rule is that you must \fBnever\fP share a libcurl handle (be
-it easy or multi or whatever) between multiple threads. Only use one handle in
-one thread at a time.
+The first basic rule is that you must \fBnever\fP simultaneously share a
+libcurl handle (be it easy or multi or whatever) between multiple
+threads. Only use one handle in one thread at any time. You can pass the
+handles around among threads, but you must never use a single handle from more
+than one thread at any given time.
 
 libcurl is completely thread safe, except for two issues: signals and SSL/TLS
 handlers. Signals are used for timing out name resolves (during DNS lookup) -
