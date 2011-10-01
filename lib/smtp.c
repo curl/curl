@@ -111,7 +111,6 @@ static CURLcode smtp_doing(struct connectdata *conn,
 static CURLcode smtp_setup_connection(struct connectdata * conn);
 static CURLcode smtp_state_upgrade_tls(struct connectdata *conn);
 
-
 /*
  * SMTP protocol handler.
  */
@@ -134,7 +133,6 @@ const struct Curl_handler Curl_handler_smtp = {
   CURLPROTO_SMTP,                   /* protocol */
   PROTOPT_CLOSEACTION               /* flags */
 };
-
 
 #ifdef USE_SSL
 /*
@@ -185,7 +183,6 @@ static const struct Curl_handler Curl_handler_smtp_proxy = {
   PROTOPT_NONE                          /* flags */
 };
 
-
 #ifdef USE_SSL
 /*
  * HTTP-proxyed SMTPS protocol handler.
@@ -211,7 +208,6 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
 };
 #endif
 #endif
-
 
 /* Function that checks for an ending smtp status code at the start of the
    given string.
@@ -388,64 +384,61 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  char * initresp;
-  const char * mech;
-  size_t l;
-  smtpstate state1;
-  smtpstate state2;
+  char *initresp = NULL;
+  const char *mech = NULL;
+  size_t len = 0;
+  smtpstate state1 = SMTP_STOP;
+  smtpstate state2 = SMTP_STOP;
 
-  if(!conn->bits.user_passwd)
-    state(conn, SMTP_STOP);             /* End of connect phase. */
-  else {
-    initresp = (char *) NULL;
-    l = 1;
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't. */
+  if(!conn->bits.user_passwd) {
+    state(conn, SMTP_STOP);
 
-    /* Check supported authentication mechanisms by decreasing order of
-       security. */
-    mech = (const char *) NULL;         /* Avoid compiler warnings. */
-    state1 = SMTP_STOP;
-    state2 = SMTP_STOP;
+    return result;
+  }
 
+  /* Check supported authentication mechanisms by decreasing order of
+     security. */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
-      mech = "CRAM-MD5";
-      state1 = SMTP_AUTHCRAM;
-    }
-    else
+  if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
+    mech = "CRAM-MD5";
+    state1 = SMTP_AUTHCRAM;
+  }
+  else
 #endif
-    if(smtpc->authmechs & SMTP_AUTH_LOGIN) {
-      mech = "LOGIN";
-      state1 = SMTP_AUTHLOGIN;
-      state2 = SMTP_AUTHPASSWD;
-      result = smtp_auth_login_user(conn, &initresp, &l);
-    }
-    else if(smtpc->authmechs & SMTP_AUTH_PLAIN) {
-      mech = "PLAIN";
-      state1 = SMTP_AUTHPLAIN;
-      state2 = SMTP_AUTH;
-      result = smtp_auth_plain_data(conn, &initresp, &l);
+  if(smtpc->authmechs & SMTP_AUTH_LOGIN) {
+    mech = "LOGIN";
+    state1 = SMTP_AUTHLOGIN;
+    state2 = SMTP_AUTHPASSWD;
+    result = smtp_auth_login_user(conn, &initresp, &len);
+  }
+  else if(smtpc->authmechs & SMTP_AUTH_PLAIN) {
+    mech = "PLAIN";
+    state1 = SMTP_AUTHPLAIN;
+    state2 = SMTP_AUTH;
+    result = smtp_auth_plain_data(conn, &initresp, &len);
+  }
+  else {
+    infof(conn->data, "No known auth mechanisms supported!\n");
+    result = CURLE_LOGIN_DENIED;      /* Other mechanisms not supported. */
+  }
+
+  if(!result) {
+    if(initresp &&
+       strlen(mech) + len <= 512 - 8) { /* AUTH <mech> ...<crlf> */
+       result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
+
+      if(!result)
+        state(conn, state2);
     }
     else {
-      infof(conn->data, "No known auth mechanisms supported!\n");
-      result = CURLE_LOGIN_DENIED;      /* Other mechanisms not supported. */
+      result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
+
+      if(!result)
+        state(conn, state1);
     }
-
-    if(!result) {
-      if(initresp &&
-         l + strlen(mech) <= 512 - 8) { /* AUTH <mech> ...<crlf> */
-        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
-
-        if(!result)
-          state(conn, state2);
-      }
-      else {
-        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
-
-        if(!result)
-          state(conn, state1);
-      }
-      Curl_safefree(initresp);
-    }
+    Curl_safefree(initresp);
   }
 
   return result;
@@ -498,6 +491,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
       }
     }
   }
+
   return result;
 }
 
@@ -565,6 +559,7 @@ static CURLcode smtp_state_helo_resp(struct connectdata *conn,
     /* end the connect phase */
     state(conn, SMTP_STOP);
   }
+
   return result;
 }
 
@@ -575,8 +570,8 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t l = 0;
-  char * plainauth = NULL;
+  size_t len = 0;
+  char *plainauth = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -585,7 +580,7 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = smtp_auth_plain_data(conn, &plainauth, &l);
+    result = smtp_auth_plain_data(conn, &plainauth, &len);
 
     if(!result) {
       if(plainauth) {
@@ -608,8 +603,8 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t l = 0;
-  char * authuser = NULL;
+  size_t len = 0;
+  char *authuser = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -618,7 +613,7 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = smtp_auth_login_user(conn, &authuser, &l);
+    result = smtp_auth_login_user(conn, &authuser, &len);
 
     if(!result) {
       if(authuser) {
@@ -642,7 +637,7 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   size_t plen;
-  size_t l = 0;
+  size_t len = 0;
   char *authpasswd = NULL;
 
   (void)instate; /* no use for this yet */
@@ -657,7 +652,7 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
     if(!plen)
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "=");
     else {
-      result = Curl_base64_encode(data, conn->passwd, plen, &authpasswd, &l);
+      result = Curl_base64_encode(data, conn->passwd, plen, &authpasswd, &len);
 
       if(!result) {
         if(authpasswd) {
@@ -686,9 +681,9 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   char * chlg64 = data->state.buffer;
   unsigned char * chlg;
   size_t chlglen;
-  size_t l = 0;
-  char * rplyb64 = NULL;
-  HMAC_context * ctxt;
+  size_t len = 0;
+  char *rplyb64 = NULL;
+  HMAC_context *ctxt;
   unsigned char digest[16];
   char reply[MAX_CURL_USER_LENGTH + 32 /* 2 * size of MD5 digest */ + 1];
 
@@ -707,13 +702,13 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   chlglen = 0;
 
   if(*chlg64 != '=') {
-    for(l = strlen(chlg64); l--;)
-      if(chlg64[l] != '\r' && chlg64[l] != '\n' && chlg64[l] != ' ' &&
-         chlg64[l] != '\t')
+    for(len = strlen(chlg64); len--;)
+      if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
+         chlg64[len] != '\t')
         break;
 
-    if(++l) {
-      chlg64[l] = '\0';
+    if(++len) {
+      chlg64[len] = '\0';
 
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
@@ -747,7 +742,7 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
            digest[12], digest[13], digest[14], digest[15]);
 
   /* Encode it to base64 and send it. */
-  result = Curl_base64_encode(data, reply, 0, &rplyb64, &l);
+  result = Curl_base64_encode(data, reply, 0, &rplyb64, &len);
 
   if(!result) {
     if(rplyb64) {
@@ -849,6 +844,7 @@ static CURLcode smtp_rcpt_to(struct connectdata *conn)
     if(!result)
       state(conn, SMTP_RCPT);
   }
+
   return result;
 }
 
@@ -909,6 +905,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
 
     state(conn, SMTP_DATA);
   }
+
   return result;
 }
 
@@ -949,6 +946,7 @@ static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
     result = CURLE_RECV_ERROR;
 
   state(conn, SMTP_STOP);
+
   return result;
 }
 
@@ -1046,6 +1044,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
     }
   }
+
   return result;
 }
 
@@ -1440,6 +1439,7 @@ static CURLcode smtp_doing(struct connectdata *conn,
 
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
   }
+
   return result;
 }
 
@@ -1579,6 +1579,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     /* set the new amount too */
     data->req.upload_present = nread;
   }
+
   return CURLE_OK;
 }
 
