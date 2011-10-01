@@ -30,14 +30,16 @@
 CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        char **outptr);
+                                        char **outptr,
+                                        size_t *outlen);
 
 /* This is to generate a base64 encoded NTLM type-3 message */
 CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                         const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        char **outptr);
+                                        char **outptr,
+                                        size_t *outlen);
 
 /* This is to decode a NTLM type-2 message */
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,

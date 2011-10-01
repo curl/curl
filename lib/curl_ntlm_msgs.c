@@ -354,13 +354,15 @@ static void unicodecpy(unsigned char *dest,
  * ntlm    [in/out] - The ntlm data struct being used and modified.
  * outptr  [in/out] - The adress where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        char **outptr)
+                                        char **outptr,
+                                        size_t *outlen)
 {
   /* NTLM type-1 message structure:
 
@@ -377,7 +379,6 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   */
 
   unsigned char ntlmbuf[NTLM_BUFSIZE];
-  size_t base64_sz = 0;
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
@@ -556,7 +557,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   });
 
   /* Return with binary blob encoded into base64 */
-  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, &base64_sz);
+  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
 }
 
 /*
@@ -574,6 +575,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
  * ntlm    [in/out] - The ntlm data struct being used and modified.
  * outptr  [in/out] - The adress where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
  *
  * Returns CURLE_OK on success.
  */
@@ -581,7 +583,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                         const char *userp,
                                         const char *passwdp,
                                         struct ntlmdata *ntlm,
-                                        char **outptr)
+                                        char **outptr,
+                                        size_t *outlen)
 {
   /* NTLM type-3 message structure:
 
@@ -602,7 +605,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   */
 
   unsigned char ntlmbuf[NTLM_BUFSIZE];
-  size_t base64_sz = 0;
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
@@ -950,7 +952,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 #endif
 
   /* Return with binary blob encoded into base64 */
-  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, &base64_sz);
+  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
 }
 
 #endif /* USE_NTLM */

@@ -114,6 +114,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                           bool proxy)
 {
   char *base64 = NULL;
+  size_t len = 0;
   CURLcode error;
 
   /* point to the address of the pointer that holds the string to send to the
@@ -172,7 +173,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    error = Curl_ntlm_create_type1_message(userp, passwdp, ntlm, &base64);
+    error = Curl_ntlm_create_type1_message(userp, passwdp, ntlm, &base64,
+                                           &len);
+
     if(error)
       return error;
 
@@ -189,7 +192,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
     error = Curl_ntlm_create_type3_message(conn->data, userp, passwdp,
-                                           ntlm, &base64);
+                                           ntlm, &base64, &len);
     if(error)
       return error;
 
