@@ -85,6 +85,7 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curl_gethostname.h"
+#include "curl_ntlm_msgs.h"
 #include "warnless.h"
 #include "http_proxy.h"
 
@@ -263,6 +264,8 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
         smtpc->authmechs |= SMTP_AUTH_GSSAPI;
       else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
         smtpc->authmechs |= SMTP_AUTH_EXTERNAL;
+      else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+        smtpc->authmechs |= SMTP_AUTH_NTLM;
 
       line += wordlen;
       len -= wordlen;
@@ -290,6 +293,8 @@ static void state(struct connectdata *conn,
     "AUTHLOGIN",
     "AUTHPASSWD",
     "AUTHCRAM",
+    "AUTHNTLM",
+    "AUTHNTLM_TYPE2MSG",
     "AUTH",
     "MAIL",
     "RCPT",
@@ -311,6 +316,8 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   smtpc->authmechs = 0;         /* No known authentication mechanisms yet. */
+  smtpc->authused = 0;          /* Clear the authentication mechanism used
+                                   for esmtp connections */
 
   /* send EHLO */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
@@ -326,6 +333,9 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
 {
   CURLcode result;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
+
+  smtpc->authused = 0;          /* No authentication mechanism used in smtp
+                                   connections */
 
   /* send HELO */
   result = Curl_pp_sendf(&smtpc->pp, "HELO %s", smtpc->domain);
@@ -380,6 +390,15 @@ static CURLcode smtp_auth_login_user(struct connectdata *conn,
   return Curl_base64_encode(conn->data, conn->user, ulen, outptr, outlen);
 }
 
+#ifdef USE_NTLM
+static CURLcode smtp_auth_ntlm_type1_message(struct connectdata *conn,
+                                             char **outptr, size_t *outlen)
+{
+  return Curl_ntlm_create_type1_message(conn->user, conn->passwd,
+                                        &conn->ntlm, outptr, outlen);
+}
+#endif
+
 static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -404,6 +423,17 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
     mech = "CRAM-MD5";
     state1 = SMTP_AUTHCRAM;
+    smtpc->authused = SMTP_AUTH_CRAM_MD5;
+  }
+  else
+#endif
+#ifdef USE_NTLM
+  if(smtpc->authmechs & SMTP_AUTH_NTLM) {
+    mech = "NTLM";
+    state1 = SMTP_AUTHNTLM;
+    state2 = SMTP_AUTHNTLM_TYPE2MSG;
+    smtpc->authused = SMTP_AUTH_NTLM;
+    result = smtp_auth_ntlm_type1_message(conn, &initresp, &len);
   }
   else
 #endif
@@ -411,12 +441,14 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     mech = "LOGIN";
     state1 = SMTP_AUTHLOGIN;
     state2 = SMTP_AUTHPASSWD;
+    smtpc->authused = SMTP_AUTH_LOGIN;
     result = smtp_auth_login_user(conn, &initresp, &len);
   }
   else if(smtpc->authmechs & SMTP_AUTH_PLAIN) {
     mech = "PLAIN";
     state1 = SMTP_AUTHPLAIN;
     state2 = SMTP_AUTH;
+    smtpc->authused = SMTP_AUTH_PLAIN;
     result = smtp_auth_plain_data(conn, &initresp, &len);
   }
   else {
@@ -759,6 +791,78 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
 
 #endif
 
+#ifdef USE_NTLM
+/* for the AUTH NTLM (without initial response) response. */
+static CURLcode smtp_state_auth_ntlm_resp(struct connectdata *conn,
+                                          int smtpcode,
+                                          smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *type1msg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = smtp_auth_ntlm_type1_message(conn, &type1msg, &len);
+
+    if(!result) {
+      if(type1msg) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type1msg);
+
+        if(!result)
+          state(conn, SMTP_AUTHNTLM_TYPE2MSG);
+      }
+      Curl_safefree(type1msg);
+    }
+  }
+
+  return result;
+}
+
+/* for the NTLM type-2 response (sent in reponse to our type-1 message). */
+static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
+                                                   int smtpcode,
+                                                   smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *type3msg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+	  result = Curl_ntlm_decode_type2_message(data, data->state.buffer + 4, &conn->ntlm);
+
+  	if(!result) {
+	    result = Curl_ntlm_create_type3_message(conn->data, conn->user, conn->passwd, &conn->ntlm, &type3msg, &len);
+
+      if(!result) {
+        if(type3msg) {
+          result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
+
+          if(!result)
+            state(conn, SMTP_AUTH);
+        }
+        Curl_safefree(type3msg);
+      }
+    }
+  }
+
+  return result;
+}
+#endif
+
 /* for final responses to AUTH sequences. */
 static CURLcode smtp_state_auth_resp(struct connectdata *conn,
                                      int smtpcode,
@@ -1013,6 +1117,16 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     case SMTP_AUTHCRAM:
       result = smtp_state_authcram_resp(conn, smtpcode, smtpc->state);
+      break;
+#endif
+
+#ifdef USE_NTLM
+    case SMTP_AUTHNTLM:
+      result = smtp_state_auth_ntlm_resp(conn, smtpcode, smtpc->state);
+      break;
+
+	case SMTP_AUTHNTLM_TYPE2MSG:
+      result = smtp_state_auth_ntlm_type2msg_resp(conn, smtpcode, smtpc->state);
       break;
 #endif
 
@@ -1401,6 +1515,13 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
     (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&smtpc->pp);
+
+#ifdef USE_NTLM
+  /* Cleanup the ntlm structure */
+  if(smtpc->authused == SMTP_AUTH_NTLM) {
+    Curl_ntlm_sspi_cleanup(&conn->ntlm);
+  }
+#endif
 
   /* This won't already be freed in some error cases */
   Curl_safefree(smtpc->domain);
