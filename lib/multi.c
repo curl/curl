@@ -1657,8 +1657,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       /* if there's still a connection to use, call the progress function */
       else if(easy->easy_conn && Curl_pgrsUpdate(easy->easy_conn)) {
-        easy->result = CURLE_ABORTED_BY_CALLBACK;
-        multistate(easy, CURLM_STATE_COMPLETED);
+        /* aborted due to progress callback return code must close the
+           connection */
+        easy->easy_conn->bits.close = TRUE;
+
+        /* if not yet in DONE state, go there, otherwise COMPLETED */
+        multistate(easy, (easy->state < CURLM_STATE_DONE)?
+                   CURLM_STATE_DONE: CURLM_STATE_COMPLETED);
+        result = CURLM_CALL_MULTI_PERFORM;
       }
     }
   } WHILE_FALSE; /* just to break out from! */

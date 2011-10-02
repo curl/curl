@@ -136,6 +136,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 static long ConnectionKillOne(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
+static CURLcode do_init(struct connectdata *conn);
 
 /*
  * Protocol table.
@@ -4988,6 +4989,9 @@ static CURLcode create_conn(struct SessionHandle *data,
     ConnectionStore(data, conn);
   }
 
+  /* Setup and init stuff before DO starts, in preparing for the transfer. */
+  do_init(conn);
+
   /*
    * Setup whatever necessary for a resumed transfer
    */
@@ -5333,9 +5337,6 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
   CURLcode result=CURLE_OK;
   struct connectdata *conn = *connp;
   struct SessionHandle *data = conn->data;
-
-  /* setup and init stuff before DO starts, in preparing for the transfer */
-  do_init(conn);
 
   if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */
