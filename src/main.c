@@ -113,6 +113,9 @@
 #include "tool_cb_hdr.h"
 #include "tool_cb_dbg.h"
 
+#include "tool_binmode.h"
+#include "tool_formparse.h"
+
 #ifdef USE_MANUAL
 #  include "hugehelp.h"
 #endif
@@ -151,16 +154,6 @@ static int vms_show = 0;
 
 #define DEFAULT_MAXREDIRS  50L
 
-#if defined(O_BINARY) && defined(HAVE_SETMODE)
-#ifdef __HIGHC__
-#define SET_BINMODE(file) _setmode(file,O_BINARY)
-#else
-#define SET_BINMODE(file) setmode(fileno(file),O_BINARY)
-#endif
-#else
-#define SET_BINMODE(file)   ((void)0)
-#endif
-
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
    source code but yet it doesn't ruin anything */
@@ -192,35 +185,6 @@ char **__crt0_glob_function (char *arg)
 #endif
 
 #define CURLseparator   "--_curl_--"
-
-/*
- * Default sizeof(off_t) in case it hasn't been defined in config file.
- */
-
-#ifndef SIZEOF_OFF_T
-#  if defined(__VMS) && !defined(__VAX)
-#    if defined(_LARGEFILE)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__OS400__) && defined(__ILEC400__)
-#    if defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__MVS__) && defined(__IBMC__)
-#    if defined(_LP64) || defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__370__) && defined(__IBMC__)
-#    if defined(_LP64) || defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(TPF)
-#    define SIZEOF_OFF_T 8
-#  endif
-#  ifndef SIZEOF_OFF_T
-#    define SIZEOF_OFF_T 4
-#  endif
-#endif
 
 #define CURL_CA_CERT_ERRORMSG1                                          \
   "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n"       \
@@ -481,15 +445,6 @@ static int parseconfig(const char *filename,
                        struct Configurable *config);
 static char *my_get_line(FILE *fp);
 
-#if 0
-static void GetStr(char **string,
-                   const char *value)
-{
-  Curl_safefree(*string);
-  if(value)
-    *string = strdup(value);
-}
-#else
 #define GetStr(str,val) \
 do { \
   if(*(str)) { \
@@ -498,8 +453,9 @@ do { \
   } \
   if((val)) \
     *(str) = strdup((val)); \
+  if(!*(str)) \
+    return PARAM_NO_MEM; \
 } WHILE_FALSE
-#endif
 
 static void clean_getout(struct Configurable *config)
 {
@@ -551,285 +507,6 @@ static void list_engines(const struct curl_slist *engines)
   for(; engines; engines = engines->next)
     printf("  %s\n", engines->data);
 }
-
-/***************************************************************************
- *
- * formparse()
- *
- * Reads a 'name=value' parameter and builds the appropriate linked list.
- *
- * Specify files to upload with 'name=@filename'. Supports specified
- * given Content-Type of the files. Such as ';type=<content-type>'.
- *
- * If literal_value is set, any initial '@' or '<' in the value string
- * loses its special meaning, as does any embedded ';type='.
- *
- * You may specify more than one file for a single name (field). Specify
- * multiple files by writing it like:
- *
- * 'name=@filename,filename2,filename3'
- *
- * If you want content-types specified for each too, write them like:
- *
- * 'name=@filename;type=image/gif,filename2,filename3'
- *
- * If you want custom headers added for a single part, write them in a separate
- * file and do like this:
- *
- * 'name=foo;headers=@headerfile' or why not
- * 'name=@filemame;headers=@headerfile'
- *
- * To upload a file, but to fake the file name that will be included in the
- * formpost, do like this:
- *
- * 'name=@filename;filename=/dev/null'
- *
- * This function uses curl_formadd to fulfill it's job. Is heavily based on
- * the old curl_formparse code.
- *
- ***************************************************************************/
-
-#define FORM_FILE_SEPARATOR ','
-#define FORM_TYPE_SEPARATOR ';'
-
-static int formparse(struct Configurable *config,
-                     const char *input,
-                     struct curl_httppost **httppost,
-                     struct curl_httppost **last_post,
-                     bool literal_value)
-{
-  /* nextarg MUST be a string in the format 'name=contents' and we'll
-     build a linked list with the info */
-  char name[256];
-  char *contents;
-  char major[128];
-  char minor[128];
-  char *contp;
-  const char *type = NULL;
-  char *sep;
-  char *sep2;
-
-  if((1 == sscanf(input, "%255[^=]=", name)) &&
-     ((contp = strchr(input, '=')) != NULL)) {
-    /* the input was using the correct format */
-
-    /* Allocate the contents */
-    contents = strdup(contp+1);
-    if(!contents) {
-      fprintf(config->errors, "out of memory\n");
-      return 1;
-    }
-    contp = contents;
-
-    if('@' == contp[0] && !literal_value) {
-
-      /* we use the @-letter to indicate file name(s) */
-
-      struct multi_files *multi_start = NULL;
-      struct multi_files *multi_current = NULL;
-
-      contp++;
-
-      do {
-        /* since this was a file, it may have a content-type specifier
-           at the end too, or a filename. Or both. */
-        char *ptr;
-        char *filename=NULL;
-
-        sep=strchr(contp, FORM_TYPE_SEPARATOR);
-        sep2=strchr(contp, FORM_FILE_SEPARATOR);
-
-        /* pick the closest */
-        if(sep2 && (sep2 < sep)) {
-          sep = sep2;
-
-          /* no type was specified! */
-        }
-
-        type = NULL;
-
-        if(sep) {
-
-          /* if we got here on a comma, don't do much */
-          if(FORM_FILE_SEPARATOR == *sep)
-            ptr = NULL;
-          else
-            ptr = sep+1;
-
-          *sep=0; /* terminate file name at separator */
-
-          while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
-
-            /* pass all white spaces */
-            while(ISSPACE(*ptr))
-              ptr++;
-
-            if(checkprefix("type=", ptr)) {
-              /* set type pointer */
-              type = &ptr[5];
-
-              /* verify that this is a fine type specifier */
-              if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
-                             major, minor)) {
-                warnf(config, "Illegally formatted content-type field!\n");
-                Curl_safefree(contents);
-                FreeMultiInfo(&multi_start, &multi_current);
-                return 2; /* illegal content-type syntax! */
-              }
-
-              /* now point beyond the content-type specifier */
-              sep = (char *)type + strlen(major)+strlen(minor)+1;
-
-              /* there's a semicolon following - we check if it is a filename
-                 specified and if not we simply assume that it is text that
-                 the user wants included in the type and include that too up
-                 to the next zero or semicolon. */
-              if((*sep==';') && !checkprefix(";filename=", sep)) {
-                sep2 = strchr(sep+1, ';');
-                if(sep2)
-                  sep = sep2;
-                else
-                  sep = sep+strlen(sep); /* point to end of string */
-              }
-
-              if(*sep) {
-                *sep=0; /* zero terminate type string */
-
-                ptr=sep+1;
-              }
-              else
-                ptr = NULL; /* end */
-            }
-            else if(checkprefix("filename=", ptr)) {
-              filename = &ptr[9];
-              ptr=strchr(filename, FORM_TYPE_SEPARATOR);
-              if(!ptr) {
-                ptr=strchr(filename, FORM_FILE_SEPARATOR);
-              }
-              if(ptr) {
-                *ptr=0; /* zero terminate */
-                ptr++;
-              }
-            }
-            else
-              /* confusion, bail out of loop */
-              break;
-          }
-          /* find the following comma */
-          if(ptr)
-            sep=strchr(ptr, FORM_FILE_SEPARATOR);
-          else
-            sep=NULL;
-        }
-        else {
-          sep=strchr(contp, FORM_FILE_SEPARATOR);
-        }
-        if(sep) {
-          /* the next file name starts here */
-          *sep =0;
-          sep++;
-        }
-        /* if type == NULL curl_formadd takes care of the problem */
-
-        if(!AddMultiFiles(contp, type, filename, &multi_start,
-                          &multi_current)) {
-          warnf(config, "Error building form post!\n");
-          Curl_safefree(contents);
-          return 3;
-        }
-        contp = sep; /* move the contents pointer to after the separator */
-
-      } while(sep && *sep); /* loop if there's another file name */
-
-      /* now we add the multiple files section */
-      if(multi_start) {
-        struct curl_forms *forms = NULL;
-        struct multi_files *ptr = multi_start;
-        unsigned int i, count = 0;
-        while(ptr) {
-          ptr = ptr->next;
-          ++count;
-        }
-        forms = malloc((count+1)*sizeof(struct curl_forms));
-        if(!forms) {
-          fprintf(config->errors, "Error building form post!\n");
-          Curl_safefree(contents);
-          FreeMultiInfo(&multi_start, &multi_current);
-          return 4;
-        }
-        for(i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next) {
-          forms[i].option = ptr->form.option;
-          forms[i].value = ptr->form.value;
-        }
-        forms[count].option = CURLFORM_END;
-        FreeMultiInfo(&multi_start, &multi_current);
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_COPYNAME, name,
-                        CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
-          warnf(config, "curl_formadd failed!\n");
-          Curl_safefree(forms);
-          Curl_safefree(contents);
-          return 5;
-        }
-        Curl_safefree(forms);
-      }
-    }
-    else {
-      struct curl_forms info[4];
-      int i = 0;
-      char *ct = literal_value? NULL: strstr(contp, ";type=");
-
-      info[i].option = CURLFORM_COPYNAME;
-      info[i].value = name;
-      i++;
-
-      if(ct) {
-        info[i].option = CURLFORM_CONTENTTYPE;
-        info[i].value = &ct[6];
-        i++;
-        ct[0]=0; /* zero terminate here */
-      }
-
-      if(contp[0]=='<' && !literal_value) {
-        info[i].option = CURLFORM_FILECONTENT;
-        info[i].value = contp+1;
-        i++;
-        info[i].option = CURLFORM_END;
-
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
-          warnf(config, "curl_formadd failed, possibly the file %s is bad!\n",
-                contp+1);
-          Curl_safefree(contents);
-          return 6;
-        }
-      }
-      else {
-#ifdef CURL_DOES_CONVERSIONS
-        convert_to_network(contp, strlen(contp));
-#endif
-        info[i].option = CURLFORM_COPYCONTENTS;
-        info[i].value = contp;
-        i++;
-        info[i].option = CURLFORM_END;
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
-          warnf(config, "curl_formadd failed!\n");
-          Curl_safefree(contents);
-          return 7;
-        }
-      }
-    }
-
-  }
-  else {
-    warnf(config, "Illegally formatted input field!\n");
-    return 1;
-  }
-  Curl_safefree(contents);
-  return 0;
-}
-
 
 typedef enum {
   PARAM_OK,
@@ -2009,7 +1686,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", p)) {
             file = stdin;
-            SET_BINMODE(stdin);
+            set_binmode(stdin);
           }
           else {
             file = fopen(p, "rb");
@@ -2072,7 +1749,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(curlx_strequal("-", nextarg)) {
           file = stdin;
           if(subletter == 'b') /* forced data-binary */
-            SET_BINMODE(stdin);
+            set_binmode(stdin);
         }
         else {
           file = fopen(nextarg, "rb");
@@ -3666,7 +3343,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           DEBUGASSERT(infdopen == FALSE);
           DEBUGASSERT(infd == STDIN_FILENO);
 
-          SET_BINMODE(stdin);
+          set_binmode(stdin);
           if(curlx_strequal(uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
               warnf(config,
@@ -3735,7 +3412,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
         if((!outfile || !strcmp(outfile, "-")) && !config->use_ascii) {
           /* We get the output to stdout and we have not got the ASCII/text
              flag, then set stdout to be binary */
-          SET_BINMODE(stdout);
+          set_binmode(stdout);
         }
 
         if(config->tcp_nodelay)

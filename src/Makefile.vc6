@@ -141,6 +141,7 @@ RELEASE_OBJS= \
 	nonblockr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
+	tool_binmoder.obj \
 	tool_bnamer.obj \
 	tool_cb_dbgr.obj \
 	tool_cb_hdrr.obj \
@@ -154,6 +155,7 @@ RELEASE_OBJS= \
 	tool_dirhier.obj \
 	tool_doswinr.obj \
 	tool_easysrcr.obj \
+	tool_formparser.obj \
 	tool_libinfor.obj \
 	tool_mfilesr.obj \
 	tool_msgsr.obj \
@@ -174,6 +176,7 @@ DEBUG_OBJS= \
 	nonblockd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
+	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
 	tool_cb_hdrd.obj \
@@ -187,6 +190,7 @@ DEBUG_OBJS= \
 	tool_dirhied.obj \
 	tool_doswind.obj \
 	tool_easysrcd.obj \
+	tool_formparsed.obj \
 	tool_libinfod.obj \
 	tool_mfilesd.obj \
 	tool_msgsd.obj \
@@ -336,6 +340,8 @@ rawstrr.obj: ../lib/rawstr.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+tool_binmoder.obj: tool_binmode.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamer.obj: tool_bname.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_bname.c
 tool_cb_dbgr.obj: tool_cb_dbg.c
@@ -362,6 +368,8 @@ tool_doswinr.obj: tool_doswin.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_easysrcr.obj: tool_easysrc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_easysrc.c
+tool_formparser.obj: tool_formparse.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_formparse.c
 tool_libinfor.obj: tool_libinfo.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_mfilesr.obj: tool_mfiles.c
@@ -400,6 +408,8 @@ rawstrd.obj: ../lib/rawstr.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+tool_binmoded.obj: tool_binmode.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamed.obj: tool_bname.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_bname.c
 tool_cb_dbgd.obj: tool_cb_dbg.c
@@ -426,6 +436,8 @@ tool_doswind.obj: tool_doswin.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_doswin.c
 tool_easysrcd.obj: tool_easysrc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_easysrc.c
+tool_formparsed.obj: tool_formparse.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_formparse.c
 tool_libinfod.obj: tool_libinfo.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_mfilesd.obj: tool_mfiles.c

@@ -10,6 +10,7 @@ SOURCEPATH  ../../../src
 SOURCE \
     main.c hugehelp.c urlglob.c writeout.c writeenv.c \
     getpass.c homedir.c curlutil.c xattr.c \
+    tool_binmode.c \
     tool_bname.c \
     tool_cb_dbg.c \
     tool_cb_hdr.c \
@@ -23,6 +24,7 @@ SOURCE \
     tool_dirhie.c \
     tool_doswin.c \
     tool_easysrc.c \
+    tool_formparse.c \
     tool_libinfo.c \
     tool_mfiles.c \
     tool_msgs.c \

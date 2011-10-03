@@ -16,6 +16,7 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 
 CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c xattr.c \
+	tool_binmode.c \
 	tool_bname.c \
 	tool_cb_dbg.c \
 	tool_cb_hdr.c \
@@ -29,6 +30,7 @@ CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	tool_dirhie.c \
 	tool_doswin.c \
 	tool_easysrc.c \
+	tool_formparse.c \
 	tool_libinfo.c \
 	tool_mfiles.c \
 	tool_msgs.c \
@@ -39,6 +41,7 @@ CURL_CFILES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-riscos.h urlglob.h version.h xattr.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
+	tool_binmode.h \
 	tool_bname.h \
 	tool_cb_dbg.h \
 	tool_cb_hdr.h \
@@ -52,6 +55,7 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_dirhie.h \
 	tool_doswin.h \
 	tool_easysrc.h \
+	tool_formparse.h \
 	tool_libinfo.h \
 	tool_mfiles.h \
 	tool_msgs.h \

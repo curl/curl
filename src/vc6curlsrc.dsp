@@ -171,6 +171,10 @@ SOURCE=..\lib\strtoofft.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_binmode.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_bname.c
 # End Source File
 # Begin Source File
@@ -220,6 +224,10 @@ SOURCE=.\tool_doswin.c
 # Begin Source File
 
 SOURCE=.\tool_easysrc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_formparse.c
 # End Source File
 # Begin Source File
 
@@ -303,6 +311,10 @@ SOURCE=..\lib\strtoofft.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_binmode.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_bname.h
 # End Source File
 # Begin Source File
@@ -352,6 +364,10 @@ SOURCE=.\tool_doswin.h
 # Begin Source File
 
 SOURCE=.\tool_easysrc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_formparse.h
 # End Source File
 # Begin Source File
 
