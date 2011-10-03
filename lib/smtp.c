@@ -842,11 +842,12 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-	  result = Curl_ntlm_decode_type2_message(data, data->state.buffer + 4, &conn->ntlm);
-
-  	if(!result) {
-	    result = Curl_ntlm_create_type3_message(conn->data, conn->user, conn->passwd, &conn->ntlm, &type3msg, &len);
-
+    result = Curl_ntlm_decode_type2_message(data, data->state.buffer + 4,
+                                            &conn->ntlm);
+    if(!result) {
+      result = Curl_ntlm_create_type3_message(conn->data, conn->user,
+                                              conn->passwd, &conn->ntlm,
+                                              &type3msg, &len);
       if(!result) {
         if(type3msg) {
           result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
@@ -1125,8 +1126,9 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       result = smtp_state_auth_ntlm_resp(conn, smtpcode, smtpc->state);
       break;
 
-	case SMTP_AUTHNTLM_TYPE2MSG:
-      result = smtp_state_auth_ntlm_type2msg_resp(conn, smtpcode, smtpc->state);
+    case SMTP_AUTHNTLM_TYPE2MSG:
+      result = smtp_state_auth_ntlm_type2msg_resp(conn, smtpcode,
+                                                  smtpc->state);
       break;
 #endif
 
