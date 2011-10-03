@@ -2014,8 +2014,9 @@ typedef enum {
   CURLSHE_BAD_OPTION, /* 1 */
   CURLSHE_IN_USE,     /* 2 */
   CURLSHE_INVALID,    /* 3 */
-  CURLSHE_NOMEM,      /* out of memory */
-  CURLSHE_LAST /* never use */
+  CURLSHE_NOMEM,      /* 4 out of memory */
+  CURLSHE_NOT_BUILT_IN, /* 5 feature not present in lib */
+  CURLSHE_LAST        /* never use */
 } CURLSHcode;
 
 typedef enum {

@@ -550,6 +550,7 @@ CURLSHE_BAD_OPTION              7.10.3
 CURLSHE_INVALID                 7.10.3
 CURLSHE_IN_USE                  7.10.3
 CURLSHE_NOMEM                   7.12.0
+CURLSHE_NOT_BUILT_IN            7.23.0
 CURLSHE_OK                      7.10.3
 CURLSHOPT_LOCKFUNC              7.10.3
 CURLSHOPT_NONE                  7.10.3
