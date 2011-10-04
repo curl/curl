@@ -175,7 +175,6 @@ CURLSHcode
 curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = (struct Curl_share *)sh;
-  unsigned int i;
 
   if(share == NULL)
     return CURLSHE_INVALID;
@@ -200,6 +199,7 @@ curl_share_cleanup(CURLSH *sh)
 
 #ifdef USE_SSL
   if(share->sslsession) {
+    unsigned int i;
     for(i = 0; i < share->nsslsession; ++i)
       Curl_ssl_kill_session(&(share->sslsession[i]));
     free(share->sslsession);
