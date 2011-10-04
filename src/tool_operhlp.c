@@ -1,0 +1,231 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+#include "setup.h"
+
+#include <curl/curl.h>
+
+#include "rawstr.h"
+
+#define ENABLE_CURLX_PRINTF
+/* use our own printf() functions */
+#include "curlx.h"
+
+#include "version.h"
+
+#include "tool_cfgable.h"
+#include "tool_convert.h"
+#include "tool_operhlp.h"
+
+#include "memdebug.h" /* keep this as LAST include */
+
+/*
+ * my_useragent: returns allocated string with default user agent
+ */
+char *my_useragent(void)
+{
+  char useragent[256]; /* we don't want a larger default user agent */
+
+  snprintf(useragent, sizeof(useragent),
+           CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
+
+  return strdup(useragent);
+}
+
+/*
+ * Print list of OpenSSL supported engines
+ */
+void list_engines(const struct curl_slist *engines)
+{
+  puts("Build-time engines:");
+  if(!engines) {
+    puts("  <none>");
+    return;
+  }
+  for(; engines; engines = engines->next)
+    printf("  %s\n", engines->data);
+}
+
+void clean_getout(struct Configurable *config)
+{
+  struct getout *next;
+  struct getout *node = config->url_list;
+
+  while(node) {
+    next = node->next;
+    Curl_safefree(node->url);
+    Curl_safefree(node->outfile);
+    Curl_safefree(node->infile);
+    Curl_safefree(node);
+    node = next;
+  }
+  config->url_list = NULL;
+}
+
+bool output_expected(const char *url, const char *uploadfile)
+{
+  if(!uploadfile)
+    return TRUE;  /* download */
+  if(checkprefix("http://", url) || checkprefix("https://", url))
+    return TRUE;   /* HTTP(S) upload */
+
+  return FALSE; /* non-HTTP upload, probably no output should be expected */
+}
+
+bool stdin_upload(const char *uploadfile)
+{
+  return (curlx_strequal(uploadfile, "-") ||
+          curlx_strequal(uploadfile, ".")) ? TRUE : FALSE;
+}
+
+/*
+ * Adds the file name to the URL if it doesn't already have one.
+ * url will be freed before return if the returned pointer is different
+ */
+char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
+{
+  /* If no file name part is given in the URL, we add this file name */
+  char *ptr = strstr(url, "://");
+  if(ptr)
+    ptr += 3;
+  else
+    ptr = url;
+  ptr = strrchr(ptr, '/');
+  if(!ptr || !strlen(++ptr)) {
+    /* The URL has no file name part, add the local file name. In order
+       to be able to do so, we have to create a new URL in another
+       buffer.*/
+
+    /* We only want the part of the local path that is on the right
+       side of the rightmost slash and backslash. */
+    const char *filep = strrchr(filename, '/');
+    char *file2 = strrchr(filep?filep:filename, '\\');
+    char *encfile;
+
+    if(file2)
+      filep = file2 + 1;
+    else if(filep)
+      filep++;
+    else
+      filep = filename;
+
+    /* URL encode the file name */
+    encfile = curl_easy_escape(curl, filep, 0 /* use strlen */);
+    if(encfile) {
+      char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
+      if(!urlbuffer) {
+        Curl_safefree(url);
+        return NULL;
+      }
+      if(ptr)
+        /* there is a trailing slash on the URL */
+        sprintf(urlbuffer, "%s%s", url, encfile);
+      else
+        /* there is no trailing slash on the URL */
+        sprintf(urlbuffer, "%s/%s", url, encfile);
+
+      curl_free(encfile);
+
+      Curl_safefree(url);
+      url = urlbuffer; /* use our new URL instead! */
+    }
+  }
+  return url;
+}
+
+/* Extracts the name portion of the URL.
+ * Returns a heap-allocated string, or NULL if no name part
+ */
+char *get_url_file_name(const char *url)
+{
+  char *fn = NULL;
+
+  /* Find and get the remote file name */
+  const char *pc = strstr(url, "://");
+  if(pc)
+    pc += 3;
+  else
+    pc = url;
+  pc = strrchr(pc, '/');
+
+  if(pc) {
+    /* duplicate the string beyond the slash */
+    pc++;
+    fn = *pc ? strdup(pc): NULL;
+  }
+  return fn;
+}
+
+/*
+ * This is the main global constructor for the app. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+CURLcode main_init(void)
+{
+#if defined(__DJGPP__) || defined(__GO32__)
+  /* stop stat() wasting time */
+  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
+#endif
+
+  return curl_global_init(CURL_GLOBAL_DEFAULT);
+}
+
+/*
+ * This is the main global destructor for the app. Call this after
+ * _all_ libcurl usage is done.
+ */
+void main_free(void)
+{
+  curl_global_cleanup();
+  convert_cleanup();
+}
+
+#ifdef CURLDEBUG
+void memory_tracking_init(void)
+{
+  char *env;
+  /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
+  env = curlx_getenv("CURL_MEMDEBUG");
+  if(env) {
+    /* use the value as file name */
+    char fname[CURL_MT_LOGFNAME_BUFSIZE];
+    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
+      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    strcpy(fname, env);
+    curl_free(env);
+    curl_memdebug(fname);
+    /* this weird stuff here is to make curl_free() get called
+       before curl_memdebug() as otherwise memory tracking will
+       log a free() without an alloc! */
+  }
+  /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
+  env = curlx_getenv("CURL_MEMLIMIT");
+  if(env) {
+    char *endptr;
+    long num = strtol(env, &endptr, 10);
+    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+      curl_memlimit(num);
+    curl_free(env);
+  }
+}
+#endif
+

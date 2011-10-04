@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
+#ifndef HEADER_CURL_TOOL_PANYKEY_H
+#define HEADER_CURL_TOOL_PANYKEY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,15 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+#if defined(__SYMBIAN32__) || defined(NETWARE)
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
+void tool_pressanykey(void);
 
-void dumpeasysrc(struct Configurable *config);
+#else
 
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+#define tool_pressanykey() Curl_nop_stmt
+
+#endif
+
+#endif /* HEADER_CURL_TOOL_PANYKEY_H */
 

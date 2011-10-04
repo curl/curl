@@ -42,7 +42,7 @@ PROGRAM_NAME = curl.exe
 # Verify that current subdir is curl's 'src'
 # -------------------------------------------
 
-!IF ! EXIST(.\main.c)
+!IF ! EXIST(.\tool_main.c)
 !  MESSAGE Can not process this makefile from outside of curl's 'src' subdirectory.
 !  MESSAGE Change to curl's 'src' subdirectory, and try again.
 !  ERROR   See previous message.
@@ -137,7 +137,6 @@ RELEASE_OBJS= \
 	getpassr.obj \
 	homedirr.obj \
 	hugehelpr.obj \
-	mainr.obj \
 	nonblockr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
@@ -156,11 +155,20 @@ RELEASE_OBJS= \
 	tool_doswinr.obj \
 	tool_easysrcr.obj \
 	tool_formparser.obj \
+	tool_getparamr.obj \
+	tool_helpr.obj \
+	tool_helpersr.obj \
 	tool_libinfor.obj \
+	tool_mainr.obj \
 	tool_mfilesr.obj \
 	tool_msgsr.obj \
-	tool_myfuncr.obj \
+	tool_operater.obj \
+	tool_operhlpr.obj \
+	tool_panykeyr.obj \
+	tool_paramhlpr.obj \
+	tool_parsecfgr.obj \
 	tool_setoptr.obj \
+	tool_sleepr.obj \
 	tool_vmsr.obj \
 	urlglobr.obj \
 	writeoutr.obj \
@@ -172,7 +180,6 @@ DEBUG_OBJS= \
 	getpassd.obj \
 	homedird.obj \
 	hugehelpd.obj \
-	maind.obj \
 	nonblockd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
@@ -191,11 +198,20 @@ DEBUG_OBJS= \
 	tool_doswind.obj \
 	tool_easysrcd.obj \
 	tool_formparsed.obj \
+	tool_getparamd.obj \
+	tool_helpd.obj \
+	tool_helpersd.obj \
 	tool_libinfod.obj \
+	tool_maind.obj \
 	tool_mfilesd.obj \
 	tool_msgsd.obj \
-	tool_myfuncd.obj \
+	tool_operated.obj \
+	tool_operhlpd.obj \
+	tool_panykeyd.obj \
+	tool_paramhlpd.obj \
+	tool_parsecfgd.obj \
 	tool_setoptd.obj \
+	tool_sleepd.obj \
 	tool_vmsd.obj \
 	urlglobd.obj \
 	writeoutd.obj \
@@ -370,22 +386,38 @@ tool_easysrcr.obj: tool_easysrc.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_easysrc.c
 tool_formparser.obj: tool_formparse.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_formparse.c
+tool_getparamr.obj: tool_getparam.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_helpr.obj: tool_help.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_help.c
+tool_helpersr.obj: tool_helpers.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_helpers.c
 tool_libinfor.obj: tool_libinfo.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
+tool_mainr.obj: tool_main.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_main.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsr.obj: tool_msgs.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_msgs.c
-tool_myfuncr.obj: tool_myfunc.c
-	$(CCR) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_operater.obj: tool_operate.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_operate.c
+tool_operhlpr.obj: tool_operhlp.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_operhlp.c
+tool_panykeyr.obj: tool_panykey.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_panykey.c
+tool_paramhlpr.obj: tool_paramhlp.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_paramhlp.c
+tool_parsecfgr.obj: tool_parsecfg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_parsecfg.c
 tool_setoptr.obj: tool_setopt.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_setopt.c
+tool_sleepr.obj: tool_sleep.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_sleep.c
 tool_vmsr.obj: tool_vms.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrr.obj: xattr.c
 	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
-mainr.obj: main.c
-	$(CCR) $(CFLAGS) /Fo"$@" main.c
 curlr.res : curl.rc
 	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
@@ -438,22 +470,38 @@ tool_easysrcd.obj: tool_easysrc.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_easysrc.c
 tool_formparsed.obj: tool_formparse.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_formparse.c
+tool_getparamd.obj: tool_getparam.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_helpd.obj: tool_help.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_help.c
+tool_helpersd.obj: tool_helpers.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_helpers.c
 tool_libinfod.obj: tool_libinfo.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
+tool_maind.obj: tool_main.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_main.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsd.obj: tool_msgs.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_msgs.c
-tool_myfuncd.obj: tool_myfunc.c
-	$(CCD) $(CFLAGS) /Fo"$@" tool_myfunc.c
+tool_operated.obj: tool_operate.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_operate.c
+tool_operhlpd.obj: tool_operhlp.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_operhlp.c
+tool_panykeyd.obj: tool_panykey.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_panykey.c
+tool_paramhlpd.obj: tool_paramhlp.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_paramhlp.c
+tool_parsecfgd.obj: tool_parsecfg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_parsecfg.c
 tool_setoptd.obj: tool_setopt.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_setopt.c
+tool_sleepd.obj: tool_sleep.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_sleep.c
 tool_vmsd.obj: tool_vms.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrd.obj: xattr.c
 	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
-maind.obj: main.c
-	$(CCD) $(CFLAGS) /Fo"$@" main.c
 curld.res : curl.rc
 	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
 

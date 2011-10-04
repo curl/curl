@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_MYFUNC_H
-#define HEADER_CURL_TOOL_MYFUNC_H
+#ifndef HEADER_CURL_TOOL_MAIN_H
+#define HEADER_CURL_TOOL_MAIN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,7 +23,22 @@
  ***************************************************************************/
 #include "setup.h"
 
-char *my_useragent(void);
+#define DEFAULT_MAXREDIRS  50L
 
-#endif /* HEADER_CURL_TOOL_MYFUNC_H */
+#define RETRY_SLEEP_DEFAULT 1000L   /* ms */
+#define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
+
+#ifndef STDIN_FILENO
+#  define STDIN_FILENO  fileno(stdin)
+#endif
+
+#ifndef STDOUT_FILENO
+#  define STDOUT_FILENO  fileno(stdout)
+#endif
+
+#ifndef STDERR_FILENO
+#  define STDERR_FILENO  fileno(stderr)
+#endif
+
+#endif /* HEADER_CURL_TOOL_MAIN_H */
 

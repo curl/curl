@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
+#ifndef HEADER_CURL_TOOL_OPERHLP_H
+#define HEADER_CURL_TOOL_OPERHLP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,29 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+char *my_useragent(void);
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
+void list_engines(const struct curl_slist *engines);
 
-void dumpeasysrc(struct Configurable *config);
+void clean_getout(struct Configurable *config);
 
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+bool output_expected(const char *url, const char *uploadfile);
+
+bool stdin_upload(const char *uploadfile);
+
+char *add_file_name_to_url(CURL *curl, char *url, const char *filename);
+
+char *get_url_file_name(const char *url);
+
+CURLcode main_init(void);
+
+void main_free(void);
+
+#ifdef CURLDEBUG
+void memory_tracking_init(void);
+#else
+#  define memory_tracking_init() Curl_nop_stmt
+#endif
+
+#endif /* HEADER_CURL_TOOL_OPERHLP_H */
 

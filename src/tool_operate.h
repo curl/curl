@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
+#ifndef HEADER_CURL_TOOL_OPERATE_H
+#define HEADER_CURL_TOOL_OPERATE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,7 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+int operate(struct Configurable *config, int argc, argv_item_t argv[]);
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
-
-void dumpeasysrc(struct Configurable *config);
-
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+#endif /* HEADER_CURL_TOOL_OPERATE_H */
 

@@ -27,6 +27,12 @@
 
 char *sanitize_dos_name(char *file_name);
 
+#if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
+
+char **__crt0_glob_function(char *arg);
+
+#endif /* MSDOS && (__DJGPP__ || __GO32__) */
+
 #ifdef WIN32
 
 CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file);

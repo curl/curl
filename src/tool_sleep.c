@@ -21,28 +21,38 @@
  ***************************************************************************/
 #include "setup.h"
 
-#include <curl/curl.h>
+#ifdef HAVE_SYS_SELECT_H
+#  include <sys/select.h>
+#endif
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
-#include "curlx.h"
+#ifdef HAVE_SYS_POLL_H
+#  include <sys/poll.h>
+#elif defined(HAVE_POLL_H)
+#  include <poll.h>
+#endif
 
-#include "version.h"
-#include "tool_myfunc.h"
+#ifdef MSDOS
+#  include <dos.h>
+#endif
+
+#include "tool_sleep.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/*
- * my_useragent: returns allocated string with default user agent
- */
-
-char *my_useragent(void)
+void tool_go_sleep(long ms)
 {
-  char useragent[256]; /* we don't want a larger default user agent */
-
-  snprintf(useragent, sizeof(useragent),
-           CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
-
-  return strdup(useragent);
+#if defined(MSDOS)
+  delay(ms);
+#elif defined(WIN32)
+  Sleep(ms);
+#elif defined(HAVE_POLL_FINE)
+  poll((void *)0, 0, (int)ms);
+#else
+  struct timeval timeout;
+  timeout.tv_sec = ms / 1000L;
+  ms = ms % 1000L;
+  timeout.tv_usec = ms * 1000L;
+  select(0, NULL,  NULL, NULL, &timeout);
+#endif
 }
 

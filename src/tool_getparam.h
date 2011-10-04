@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
+#ifndef HEADER_CURL_TOOL_GETPARAM_H
+#define HEADER_CURL_TOOL_GETPARAM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,24 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+typedef enum {
+  PARAM_OK,
+  PARAM_OPTION_AMBIGUOUS,
+  PARAM_OPTION_UNKNOWN,
+  PARAM_REQUIRES_PARAMETER,
+  PARAM_BAD_USE,
+  PARAM_HELP_REQUESTED,
+  PARAM_GOT_EXTRA_PARAMETER,
+  PARAM_BAD_NUMERIC,
+  PARAM_LIBCURL_DOESNT_SUPPORT,
+  PARAM_NO_MEM,
+  PARAM_LAST
+} ParameterError;
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
+ParameterError getparameter(char *flag,
+                            char *nextarg,
+                            bool *usedarg,
+                            struct Configurable *config);
 
-void dumpeasysrc(struct Configurable *config);
-
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+#endif /* HEADER_CURL_TOOL_GETPARAM_H */
 

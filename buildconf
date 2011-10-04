@@ -80,7 +80,7 @@ removethis(){
 # Ensure that buildconf runs from the subdirectory where configure.ac lives
 #
 if test ! -f configure.ac ||
-  test ! -f src/main.c ||
+  test ! -f src/tool_main.c ||
   test ! -f lib/urldata.h ||
   test ! -f include/curl/curl.h; then
   echo "Can not run buildconf from outside of curl's source subdirectory!"

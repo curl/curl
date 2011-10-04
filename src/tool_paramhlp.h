@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
+#ifndef HEADER_CURL_TOOL_PARAMHLP_H
+#define HEADER_CURL_TOOL_PARAMHLP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,31 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+struct getout *new_getout(struct Configurable *config);
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
+ParameterError file2string(char **bufp, FILE *file);
 
-void dumpeasysrc(struct Configurable *config);
+ParameterError file2memory(char **bufp, size_t *size, FILE *file);
 
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+void cleanarg(char *str);
+
+int str2num(long *val, const char *str);
+
+long proto2num(struct Configurable *config, long *val, const char *str);
+
+int str2offset(curl_off_t *val, const char *str);
+
+void checkpasswd(const char *kind, char **userpwd);
+
+ParameterError add2list(struct curl_slist **list, const char *ptr);
+
+int ftpfilemethod(struct Configurable *config, const char *str);
+
+int ftpcccmethod(struct Configurable *config, const char *str);
+
+long delegation(struct Configurable *config, char *str);
+
+
+
+#endif /* HEADER_CURL_TOOL_PARAMHLP_H */
 

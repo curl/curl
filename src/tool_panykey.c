@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +21,20 @@
  ***************************************************************************/
 #include "setup.h"
 
-/* global variable declarations, for easy-interface source code generation */
+#if defined(__SYMBIAN32__) || defined(NETWARE)
 
-extern struct curl_slist *easysrc;
-extern struct curl_slist *easysrc_remarks;
+#include "tool_panykey.h"
 
-void dumpeasysrc(struct Configurable *config);
+#include "memdebug.h" /* keep this as LAST include */
 
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
+void tool_pressanykey(void)
+{
+#if defined(__SYMBIAN32__)
+  getchar();
+#elif defined(NETWARE)
+  pressanykey();
+#endif
+}
+
+#endif /* __SYMBIAN32__ || NETWARE */
 

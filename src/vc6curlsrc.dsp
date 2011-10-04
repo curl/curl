@@ -155,10 +155,6 @@ SOURCE=.\hugehelp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\nonblock.c
 # End Source File
 # Begin Source File
@@ -231,7 +227,23 @@ SOURCE=.\tool_formparse.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_getparam.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_help.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_helpers.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_libinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_main.c
 # End Source File
 # Begin Source File
 
@@ -243,11 +255,31 @@ SOURCE=.\tool_msgs.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tool_myfunc.c
+SOURCE=.\tool_operate.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_operhlp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_panykey.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_paramhlp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_parsecfg.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\tool_setopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_sleep.c
 # End Source File
 # Begin Source File
 
@@ -371,7 +403,23 @@ SOURCE=.\tool_formparse.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_getparam.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_help.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_helpers.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_libinfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_main.h
 # End Source File
 # Begin Source File
 
@@ -383,7 +431,23 @@ SOURCE=.\tool_msgs.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tool_myfunc.h
+SOURCE=.\tool_operate.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_operhlp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_panykey.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_paramhlp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_parsecfg.h
 # End Source File
 # Begin Source File
 
@@ -392,6 +456,10 @@ SOURCE=.\tool_sdecls.h
 # Begin Source File
 
 SOURCE=.\tool_setopt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_sleep.h
 # End Source File
 # Begin Source File
 
