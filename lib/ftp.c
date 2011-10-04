@@ -853,7 +853,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     free(addr);
 
   if(res == NULL) {
-    failf(data, "Curl_resolv failed, we can not recover!");
+    failf(data, "failed to resolve the address provided to PORT: %s", host);
     return CURLE_FTP_PORT_FAILED;
   }
 
