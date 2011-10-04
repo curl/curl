@@ -50,9 +50,7 @@ struct Curl_share {
   struct CookieInfo *cookies;
 #endif
 
-#ifdef USE_SSL
   struct curl_ssl_session *sslsession;
-#endif
   unsigned int nsslsession;
 };
 
