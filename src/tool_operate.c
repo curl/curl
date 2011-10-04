@@ -67,6 +67,7 @@
 #include "tool_cb_skt.h"
 #include "tool_cb_wrt.h"
 #include "tool_dirhie.h"
+#include "tool_doswin.h"
 #include "tool_easysrc.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
