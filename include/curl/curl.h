@@ -1518,6 +1518,9 @@ typedef enum {
   /* Enable/disable specific SSL features with a bitmask, see CURLSSLOPT_* */
   CINIT(SSL_OPTIONS, LONG, 216),
 
+  /* set the SMTP auth originator */
+  CINIT(MAIL_AUTH, OBJECTPOINT, 217),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

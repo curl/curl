@@ -1335,6 +1335,7 @@ enum dupstring {
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
   STRING_MAIL_FROM,
+  STRING_MAIL_AUTH,
 
 #ifdef USE_TLS_SRP
   STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
