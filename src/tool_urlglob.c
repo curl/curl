@@ -419,7 +419,7 @@ void glob_cleanup(URLGlob* glob)
   Curl_safefree(glob);
 }
 
-char *glob_next_url(URLGlob *glob)
+int glob_next_url(char **globbed, URLGlob *glob)
 {
   URLPattern *pat;
   char *lit;
@@ -428,6 +428,8 @@ char *glob_next_url(URLGlob *glob)
   size_t len;
   size_t buflen = glob->urllen + 1;
   char *buf = glob->glob_buffer;
+
+  *globbed = NULL;
 
   if(!glob->beenhere)
     glob->beenhere = 1;
@@ -464,11 +466,13 @@ char *glob_next_url(URLGlob *glob)
         break;
       default:
         printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-        exit (CURLE_FAILED_INIT);
+        return CURLE_FAILED_INIT;
       }
     }
-    if(carry)          /* first pattern ptr has run into overflow, done! */
-      return NULL;
+    if(carry) {         /* first pattern ptr has run into overflow, done! */
+      /* TODO: verify if this should actally return CURLE_OK. */
+      return CURLE_OK; /* CURLE_OK to match previous behavior */
+    }
   }
 
   for(j = 0; j < glob->size; ++j) {
@@ -502,15 +506,20 @@ char *glob_next_url(URLGlob *glob)
         break;
       default:
         printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-        exit (CURLE_FAILED_INIT);
+        return CURLE_FAILED_INIT;
       }
     }
   }
   *buf = '\0';
-  return strdup(glob->glob_buffer);
+
+  *globbed = strdup(glob->glob_buffer);
+  if(!*globbed)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
 }
 
-char *glob_match_url(char *filename, URLGlob *glob)
+int glob_match_url(char **result, char *filename, URLGlob *glob)
 {
   char *target;
   size_t allocsize;
@@ -518,6 +527,8 @@ char *glob_match_url(char *filename, URLGlob *glob)
   char *appendthis = NULL;
   size_t appendlen = 0;
   size_t stringlen = 0;
+
+  *result = NULL;
 
   /* We cannot use the glob_buffer for storage here since the filename may
    * be longer than the URL we use. We allocate a good start size, then
@@ -527,7 +538,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
                                        trailing zero */
   target = malloc(allocsize);
   if(!target)
-    return NULL; /* major failure */
+    return CURLE_OUT_OF_MEMORY;
 
   while(*filename) {
     if(*filename == '#' && ISDIGIT(filename[1])) {
@@ -563,7 +574,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
           printf("internal error: invalid pattern type (%d)\n",
                  (int)pat.type);
           Curl_safefree(target);
-          return NULL;
+          return CURLE_FAILED_INIT;
         }
       }
       else {
@@ -585,7 +596,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
       newstr = realloc(target, allocsize + 1);
       if(!newstr) {
         Curl_safefree(target);
-        return NULL;
+        return CURLE_OUT_OF_MEMORY;
       }
       target = newstr;
     }
@@ -593,5 +604,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
     stringlen += appendlen;
   }
   target[stringlen]= '\0';
-  return target;
+  *result = target;
+  return CURLE_OK;
 }
+

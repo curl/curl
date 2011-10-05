@@ -441,10 +441,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       if(!up && !infiles)
         Curl_nop_stmt;
       else {
-        if(inglob)
-          uploadfile = glob_next_url(inglob);
-        else if(!up)
+        if(inglob) {
+          res = glob_next_url(&uploadfile, inglob);
+          if(res == CURLE_OUT_OF_MEMORY)
+            helpf(config->errors, "out of memory\n");
+        }
+        else if(!up) {
           uploadfile = strdup(infiles);
+          if(!uploadfile) {
+            helpf(config->errors, "out of memory\n");
+            res = CURLE_OUT_OF_MEMORY;
+          }
+        }
         else
           uploadfile = NULL;
         if(!uploadfile)
@@ -492,10 +500,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         outs.stream = stdout;
         outs.config = config;
 
-        if(urls)
-          this_url = glob_next_url(urls);
+        if(urls) {
+          res = glob_next_url(&this_url, urls);
+          if(res)
+            goto show_error;
+        }
         else if(!i) {
           this_url = strdup(urlnode->url);
+          if(!this_url) {
+            res = CURLE_OUT_OF_MEMORY;
+            goto show_error;
+          }
         }
         else
           this_url = NULL;
@@ -541,12 +556,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           else if(urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = outfile;
-            outfile = glob_match_url(storefile, urls);
+            res = glob_match_url(&outfile, storefile, urls);
             Curl_safefree(storefile);
-            if(!outfile) {
+            if(res) {
               /* bad globbing */
               warnf(config, "bad output glob!\n");
-              res = CURLE_FAILED_INIT;
               goto quit_urls;
             }
           }

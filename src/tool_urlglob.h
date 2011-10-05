@@ -64,8 +64,8 @@ typedef struct {
 } URLGlob;
 
 int glob_url(URLGlob**, char*, int *, FILE *);
-char* glob_next_url(URLGlob*);
-char* glob_match_url(char*, URLGlob *);
+int glob_next_url(char **, URLGlob *);
+int glob_match_url(char **, char*, URLGlob *);
 void glob_cleanup(URLGlob* glob);
 
 #endif /* HEADER_CURL_TOOL_URLGLOB_H */
