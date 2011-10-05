@@ -1016,7 +1016,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       }
       else {
         GetStr(&postdata, nextarg);
-        size = strlen(postdata);
+        if(postdata)
+          size = strlen(postdata);
       }
 
 #ifdef CURL_DOES_CONVERSIONS
