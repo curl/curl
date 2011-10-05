@@ -43,6 +43,8 @@ void set_binmode(FILE *stream)
 #  else
   setmode(fileno(stream), O_BINARY);
 #  endif
+#else
+  (void)stream;
 #endif
 }
 
