@@ -600,7 +600,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         if(config->url_get || ((config->url_get = config->url_list) != NULL)) {
           /* there's a node here, if it already is filled-in continue to find
              an "empty" node */
-          while(config->url_get && (config->url_get->flags&GETOUT_URL))
+          while(config->url_get && (config->url_get->flags & GETOUT_URL))
             config->url_get = config->url_get->next;
         }
 
@@ -613,7 +613,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           /* there was no free node, create one! */
           url = new_getout(config);
 
-        if(url) {
+        if(!url)
+          return PARAM_NO_MEM;
+        else {
           /* fill in the URL */
           GetStr(&url->url, nextarg);
           url->flags |= GETOUT_URL;
@@ -941,6 +943,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           /* no data from the file, point to a zero byte string to make this
              get sent as a POST anyway */
           postdata = strdup("");
+          if(!postdata)
+            return PARAM_NO_MEM;
           size = 0;
         }
         else {
@@ -1004,7 +1008,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         if(!postdata) {
           /* no data from the file, point to a zero byte string to make this
              get sent as a POST anyway */
-          postdata=strdup("");
+          postdata = strdup("");
+          if(!postdata)
+            return PARAM_NO_MEM;
         }
       }
       else {
@@ -1298,7 +1304,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       if(config->url_out || ((config->url_out = config->url_list) != NULL)) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
-        while(config->url_out && (config->url_out->flags&GETOUT_OUTFILE))
+        while(config->url_out && (config->url_out->flags & GETOUT_OUTFILE))
           config->url_out = config->url_out->next;
       }
 
@@ -1311,7 +1317,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         /* there was no free node, create one! */
         url = new_getout(config);
 
-      if(url) {
+      if(!url)
+        return PARAM_NO_MEM;
+      else {
         /* fill in the outfile */
         if('o' == letter) {
           GetStr(&url->outfile, nextarg);
@@ -1379,6 +1387,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         snprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
         Curl_safefree(config->range);
         config->range = strdup(buffer);
+        if(!config->range)
+          return PARAM_NO_MEM;
       }
       {
         /* byte range requested */
@@ -1427,7 +1437,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       if(config->url_out || ((config->url_out = config->url_list) != NULL)) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
-        while(config->url_out && (config->url_out->flags&GETOUT_UPLOAD))
+        while(config->url_out && (config->url_out->flags & GETOUT_UPLOAD))
           config->url_out = config->url_out->next;
       }
 
@@ -1440,7 +1450,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         /* there was no free node, create one! */
         url = new_getout(config);
 
-      if(url) {
+      if(!url)
+        return PARAM_NO_MEM;
+      else {
         url->flags |= GETOUT_UPLOAD; /* mark -T used */
         if(!*nextarg)
           url->flags |= GETOUT_NOUPLOAD;
@@ -1455,19 +1467,25 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       /* user:password  */
       GetStr(&config->userpwd, nextarg);
       cleanarg(nextarg);
-      checkpasswd("host", &config->userpwd);
+      err = checkpasswd("host", &config->userpwd);
+      if(err)
+        return err;
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
       cleanarg(nextarg);
-      checkpasswd("proxy", &config->proxyuserpwd);
+      err = checkpasswd("proxy", &config->proxyuserpwd);
+      if(err)
+        return err;
       break;
     case 'v':
       if(toggle) {
         /* the '%' thing here will cause the trace get sent to stderr */
         Curl_safefree(config->trace_dump);
         config->trace_dump = strdup("%");
+        if(!config->trace_dump)
+          return PARAM_NO_MEM;
         if(config->tracetype && (config->tracetype != TRACE_PLAIN))
           warnf(config,
                 "-v, --verbose overrides an earlier trace/verbose option\n");

@@ -35,7 +35,7 @@ bool stdin_upload(const char *uploadfile);
 
 char *add_file_name_to_url(CURL *curl, char *url, const char *filename);
 
-char *get_url_file_name(const char *url);
+CURLcode get_url_file_name(char **filename, const char *url);
 
 CURLcode main_init(void);
 

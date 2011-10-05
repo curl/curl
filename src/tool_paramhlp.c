@@ -41,12 +41,9 @@
 
 struct getout *new_getout(struct Configurable *config)
 {
-  struct getout *node =malloc(sizeof(struct getout));
-  struct getout *last= config->url_last;
+  struct getout *node = calloc(1, sizeof(struct getout));
+  struct getout *last = config->url_last;
   if(node) {
-    /* clear the struct */
-    memset(node, 0, sizeof(struct getout));
-
     /* append this new node last in the list */
     if(last)
       last->next = node;
@@ -120,8 +117,11 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     buffer[nused] = '\0';
     /* free trailing slack space, if possible */
     if(alloc != nused) {
-      if((newbuf = realloc(buffer, nused+1)) != NULL)
-        buffer = newbuf;
+      if((newbuf = realloc(buffer, nused+1)) == NULL) {
+        Curl_safefree(buffer);
+        return PARAM_NO_MEM;
+      }
+      buffer = newbuf;
     }
     /* discard buffer if nothing was read */
     if(!nused) {
@@ -221,6 +221,8 @@ long proto2num(struct Configurable *config, long *val, const char *str)
     return 1;
 
   buffer = strdup(str); /* because strtok corrupts it */
+  if(!buffer)
+    return 1;
 
   for(token = strtok(buffer, sep);
       token;
@@ -298,17 +300,18 @@ int str2offset(curl_off_t *val, const char *str)
   return 0;
 }
 
-void checkpasswd(const char *kind, /* for what purpose */
-                 char **userpwd)   /* pointer to allocated string */
+ParameterError checkpasswd(const char *kind, /* for what purpose */
+                           char **userpwd)   /* pointer to allocated string */
 {
   char *ptr;
+
   if(!*userpwd)
-    return;
+    return PARAM_OK;
 
   ptr = strchr(*userpwd, ':');
   if(!ptr) {
     /* no password present, prompt for one */
-    char passwd[256]="";
+    char passwd[256] = "";
     char prompt[256];
     size_t passwdlen;
     size_t userlen = strlen(*userpwd);
@@ -327,14 +330,15 @@ void checkpasswd(const char *kind, /* for what purpose */
     passptr = realloc(*userpwd,
                       passwdlen + 1 + /* an extra for the colon */
                       userlen + 1);   /* an extra for the zero */
+    if(!passptr)
+      return PARAM_NO_MEM;
 
-    if(passptr) {
-      /* append the password separated with a colon */
-      passptr[userlen]=':';
-      memcpy(&passptr[userlen+1], passwd, passwdlen+1);
-      *userpwd = passptr;
-    }
+    /* append the password separated with a colon */
+    passptr[userlen] = ':';
+    memcpy(&passptr[userlen+1], passwd, passwdlen+1);
+    *userpwd = passptr;
   }
+  return PARAM_OK;
 }
 
 ParameterError add2list(struct curl_slist **list, const char *ptr)

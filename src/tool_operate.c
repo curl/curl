@@ -317,6 +317,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       /* Use the postfields data for a http get */
       httpgetfields = strdup(config->postfields);
       Curl_safefree(config->postfields);
+      if(!httpgetfields) {
+        helpf(config->errors, "out of memory\n");
+        res = CURLE_OUT_OF_MEMORY;
+        goto quit_curl;
+      }
       if(SetHTTPrequest(config,
                         (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
@@ -515,7 +520,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           if(!outfile) {
             /* extract the file name from the URL */
-            outfile = get_url_file_name(this_url);
+            res = get_url_file_name(&outfile, this_url);
+            if(res)
+              goto show_error;
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;

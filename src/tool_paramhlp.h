@@ -37,7 +37,7 @@ long proto2num(struct Configurable *config, long *val, const char *str);
 
 int str2offset(curl_off_t *val, const char *str);
 
-void checkpasswd(const char *kind, char **userpwd);
+ParameterError checkpasswd(const char *kind, char **userpwd);
 
 ParameterError add2list(struct curl_slist **list, const char *ptr);
 
@@ -46,8 +46,6 @@ int ftpfilemethod(struct Configurable *config, const char *str);
 int ftpcccmethod(struct Configurable *config, const char *str);
 
 long delegation(struct Configurable *config, char *str);
-
-
 
 #endif /* HEADER_CURL_TOOL_PARAMHLP_H */
 

@@ -152,14 +152,17 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
 }
 
 /* Extracts the name portion of the URL.
- * Returns a heap-allocated string, or NULL if no name part
+ * Returns a pointer to a heap-allocated string or NULL if
+ * no name part, at location indicated by first argument.
  */
-char *get_url_file_name(const char *url)
+CURLcode get_url_file_name(char **filename, const char *url)
 {
-  char *fn = NULL;
+  const char *pc;
+
+  *filename = NULL;
 
   /* Find and get the remote file name */
-  const char *pc = strstr(url, "://");
+  pc = strstr(url, "://");
   if(pc)
     pc += 3;
   else
@@ -169,9 +172,13 @@ char *get_url_file_name(const char *url)
   if(pc) {
     /* duplicate the string beyond the slash */
     pc++;
-    fn = *pc ? strdup(pc): NULL;
+    if(*pc) {
+      *filename = strdup(pc);
+      if(!*filename)
+        return CURLE_OUT_OF_MEMORY;
+    }
   }
-  return fn;
+  return CURLE_OK;
 }
 
 /*
