@@ -936,7 +936,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
         else {
           GetStr(&postdata, p);
-          size = strlen(postdata);
+          if(postdata)
+            size = strlen(postdata);
         }
 
         if(!postdata) {
@@ -1019,8 +1020,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       }
 
 #ifdef CURL_DOES_CONVERSIONS
-      if(subletter != 'b') { /* NOT forced binary, convert to ASCII */
-        convert_to_network(postdata, strlen(postdata));
+      if(subletter != 'b') {
+        /* NOT forced binary, convert to ASCII */
+        if(convert_to_network(postdata, strlen(postdata))) {
+          Curl_safefree(postdata);
+          return PARAM_NO_MEM;
+        }
       }
 #endif
 
@@ -1032,6 +1037,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         curl_off_t newlen = oldlen + size + 2;
         config->postfields = malloc((size_t)newlen);
         if(!config->postfields) {
+          Curl_safefree(oldpost);
           Curl_safefree(postdata);
           return PARAM_NO_MEM;
         }
@@ -1053,8 +1059,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       We can't set the request type here, as this data might be used in
       a simple GET if -G is used. Already or soon.
 
-      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-      return PARAM_BAD_USE;
+      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq)) {
+        Curl_safefree(postdata);
+        return PARAM_BAD_USE;
+      }
     */
     break;
     case 'D':

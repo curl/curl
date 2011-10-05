@@ -132,6 +132,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
     if(encfile) {
       char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
       if(!urlbuffer) {
+        curl_free(encfile);
         Curl_safefree(url);
         return NULL;
       }
@@ -143,8 +144,8 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
         sprintf(urlbuffer, "%s/%s", url, encfile);
 
       curl_free(encfile);
-
       Curl_safefree(url);
+
       url = urlbuffer; /* use our new URL instead! */
     }
   }
