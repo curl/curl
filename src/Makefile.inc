@@ -14,7 +14,7 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 	$(top_srcdir)/lib/rawstr.c \
 	$(top_srcdir)/lib/nonblock.c
 
-CURL_CFILES = hugehelp.c urlglob.c writeout.c writeenv.c \
+CURL_CFILES = hugehelp.c writeout.c writeenv.c \
 	getpass.c homedir.c curlutil.c xattr.c \
 	tool_binmode.c \
 	tool_bname.c \
@@ -45,10 +45,11 @@ CURL_CFILES = hugehelp.c urlglob.c writeout.c writeenv.c \
 	tool_parsecfg.c \
 	tool_setopt.c \
 	tool_sleep.c \
+	tool_urlglob.c \
 	tool_vms.c
 
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
-	config-riscos.h urlglob.h version.h xattr.h \
+	config-riscos.h version.h xattr.h \
 	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
 	tool_binmode.h \
 	tool_bname.h \
@@ -80,6 +81,7 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_sdecls.h \
 	tool_setopt.h \
 	tool_sleep.h \
+	tool_urlglob.h \
 	tool_vms.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)

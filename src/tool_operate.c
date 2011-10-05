@@ -49,7 +49,6 @@
 
 #include "curlutil.h"
 #include "homedir.h"
-#include "urlglob.h"
 #include "writeout.h"
 #include "xattr.h"
 
@@ -79,6 +78,7 @@
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
 #include "tool_sleep.h"
+#include "tool_urlglob.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

@@ -169,8 +169,8 @@ RELEASE_OBJS= \
 	tool_parsecfgr.obj \
 	tool_setoptr.obj \
 	tool_sleepr.obj \
+	tool_urlglobr.obj \
 	tool_vmsr.obj \
-	urlglobr.obj \
 	writeoutr.obj \
 	xattrr.obj \
 	curlr.res
@@ -212,8 +212,8 @@ DEBUG_OBJS= \
 	tool_parsecfgd.obj \
 	tool_setoptd.obj \
 	tool_sleepd.obj \
+	tool_urlglobd.obj \
 	tool_vmsd.obj \
-	urlglobd.obj \
 	writeoutd.obj \
 	xattrd.obj \
 	curld.res
@@ -342,8 +342,6 @@ hugehelpr.obj: hugehelp.c
 	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 writeoutr.obj: writeout.c
 	$(CCR) $(CFLAGS) /Fo"$@" writeout.c
-urlglobr.obj: urlglob.c
-	$(CCR) $(CFLAGS) /Fo"$@" urlglob.c
 getpassr.obj: getpass.c
 	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
 homedirr.obj: homedir.c
@@ -414,6 +412,8 @@ tool_setoptr.obj: tool_setopt.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_sleepr.obj: tool_sleep.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_sleep.c
+tool_urlglobr.obj: tool_urlglob.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_urlglob.c
 tool_vmsr.obj: tool_vms.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrr.obj: xattr.c
@@ -426,8 +426,6 @@ hugehelpd.obj: hugehelp.c
 	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 writeoutd.obj: writeout.c
 	$(CCD) $(CFLAGS) /Fo"$@" writeout.c
-urlglobd.obj: urlglob.c
-	$(CCD) $(CFLAGS) /Fo"$@" urlglob.c
 getpassd.obj: getpass.c
 	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
 homedird.obj: homedir.c
@@ -498,6 +496,8 @@ tool_setoptd.obj: tool_setopt.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_setopt.c
 tool_sleepd.obj: tool_sleep.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_sleep.c
+tool_urlglobd.obj: tool_urlglob.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_urlglob.c
 tool_vmsd.obj: tool_vms.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
 xattrd.obj: xattr.c

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_URLGLOB_H
-#define HEADER_CURL_URLGLOB_H
+#ifndef HEADER_CURL_TOOL_URLGLOB_H
+#define HEADER_CURL_TOOL_URLGLOB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,7 +24,7 @@
 #include "setup.h"
 
 typedef enum {
-  UPTSet=1,
+  UPTSet = 1,
   UPTCharRange,
   UPTNumRange
 } URLPatternType;
@@ -38,12 +38,14 @@ typedef struct {
       short ptr_s;
     } Set;
     struct {
-      char min_c, max_c;
+      char min_c;
+      char max_c;
       char ptr_c;
       int step;
     } CharRange;
     struct {
-      int min_n, max_n;
+      int min_n;
+      int max_n;
       short padlength;
       int ptr_n;
       int step;
@@ -52,7 +54,7 @@ typedef struct {
 } URLPattern;
 
 typedef struct {
-  char* literal[10];
+  char *literal[10];
   URLPattern pattern[9];
   size_t size;
   size_t urllen;
@@ -66,4 +68,5 @@ char* glob_next_url(URLGlob*);
 char* glob_match_url(char*, URLGlob *);
 void glob_cleanup(URLGlob* glob);
 
-#endif /* HEADER_CURL_URLGLOB_H */
+#endif /* HEADER_CURL_TOOL_URLGLOB_H */
+

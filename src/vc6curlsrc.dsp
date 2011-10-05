@@ -283,11 +283,11 @@ SOURCE=.\tool_sleep.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tool_vms.c
+SOURCE=.\tool_urlglob.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\urlglob.c
+SOURCE=.\tool_vms.c
 # End Source File
 # Begin Source File
 
@@ -463,11 +463,11 @@ SOURCE=.\tool_sleep.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tool_vms.h
+SOURCE=.\tool_urlglob.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\urlglob.h
+SOURCE=.\tool_vms.h
 # End Source File
 # Begin Source File
 
