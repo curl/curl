@@ -139,18 +139,6 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\curlutil.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\getpass.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\homedir.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\hugehelp.c
 # End Source File
 # Begin Source File
@@ -231,11 +219,19 @@ SOURCE=.\tool_getparam.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_getpass.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_help.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\tool_helpers.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_homedir.c
 # End Source File
 # Begin Source File
 
@@ -287,19 +283,23 @@ SOURCE=.\tool_urlglob.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_util.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_vms.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\writeenv.c
+SOURCE=.\tool_writeenv.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\writeout.c
+SOURCE=.\tool_writeout.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\xattr.c
+SOURCE=.\tool_xattr.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -308,18 +308,6 @@ SOURCE=.\xattr.c
 # Begin Source File
 
 SOURCE=".\config-win32.h"
-# End Source File
-# Begin Source File
-
-SOURCE=.\curlutil.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\getpass.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\homedir.h
 # End Source File
 # Begin Source File
 
@@ -407,11 +395,19 @@ SOURCE=.\tool_getparam.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_getpass.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_help.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\tool_helpers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_homedir.h
 # End Source File
 # Begin Source File
 
@@ -467,23 +463,27 @@ SOURCE=.\tool_urlglob.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_util.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_version.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_vms.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\version.h
+SOURCE=.\tool_writeenv.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\writeenv.h
+SOURCE=.\tool_writeout.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\writeout.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xattr.h
+SOURCE=.\tool_xattr.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

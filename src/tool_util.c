@@ -21,13 +21,13 @@
  ***************************************************************************/
 #include "setup.h"
 
-#include "curlutil.h"
+#include "tool_util.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct timeval cutil_tvnow(void)
+struct timeval tool_tvnow(void)
 {
   /*
   ** GetTickCount() is available on _all_ Windows versions from W95 up
@@ -43,7 +43,7 @@ struct timeval cutil_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct timeval cutil_tvnow(void)
+struct timeval tool_tvnow(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -77,7 +77,7 @@ struct timeval cutil_tvnow(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct timeval cutil_tvnow(void)
+struct timeval tool_tvnow(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -91,7 +91,7 @@ struct timeval cutil_tvnow(void)
 
 #else
 
-struct timeval cutil_tvnow(void)
+struct timeval tool_tvnow(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -110,25 +110,25 @@ struct timeval cutil_tvnow(void)
  *
  * Returns: the time difference in number of milliseconds.
  */
-long cutil_tvdiff(struct timeval newer, struct timeval older)
+long tool_tvdiff(struct timeval newer, struct timeval older)
 {
   return (newer.tv_sec-older.tv_sec)*1000+
     (newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
- * Same as cutil_tvdiff but with full usec resolution.
+ * Same as tool_tvdiff but with full usec resolution.
  *
  * Returns: the time difference in seconds with subsecond resolution.
  */
-double cutil_tvdiff_secs(struct timeval newer, struct timeval older)
+double tool_tvdiff_secs(struct timeval newer, struct timeval older)
 {
   return (double)(newer.tv_sec-older.tv_sec)+
     (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
 
 /* return the number of seconds in the given input timeval struct */
-long cutil_tvlong(struct timeval t1)
+long tool_tvlong(struct timeval t1)
 {
   return t1.tv_sec;
 }

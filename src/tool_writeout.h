@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_XATTR_H
-#define HEADER_CURL_XATTR_H
+#ifndef HEADER_CURL_TOOL_WRITEOUT_H
+#define HEADER_CURL_TOOL_WRITEOUT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,6 +23,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-int fwrite_xattr(CURL *curl, int fd);
+void ourWriteOut(CURL *curl, const char *out);
 
-#endif /* HEADER_CURL_XATTR_H */
+#endif /* HEADER_CURL_TOOL_WRITEOUT_H */

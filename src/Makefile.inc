@@ -14,8 +14,7 @@ CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
 	$(top_srcdir)/lib/rawstr.c \
 	$(top_srcdir)/lib/nonblock.c
 
-CURL_CFILES = hugehelp.c writeout.c writeenv.c \
-	getpass.c homedir.c curlutil.c xattr.c \
+CURL_CFILES = hugehelp.c \
 	tool_binmode.c \
 	tool_bname.c \
 	tool_cb_dbg.c \
@@ -32,8 +31,10 @@ CURL_CFILES = hugehelp.c writeout.c writeenv.c \
 	tool_easysrc.c \
 	tool_formparse.c \
 	tool_getparam.c \
+	tool_getpass.c \
 	tool_help.c \
 	tool_helpers.c \
+	tool_homedir.c \
 	tool_libinfo.c \
 	tool_main.c \
 	tool_mfiles.c \
@@ -46,11 +47,14 @@ CURL_CFILES = hugehelp.c writeout.c writeenv.c \
 	tool_setopt.c \
 	tool_sleep.c \
 	tool_urlglob.c \
-	tool_vms.c
+	tool_util.c \
+	tool_vms.c \
+	tool_writeenv.c \
+	tool_writeout.c \
+	tool_xattr.c
 
 CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
-	config-riscos.h version.h xattr.h \
-	writeout.h writeenv.h getpass.h homedir.h curlutil.h \
+	config-riscos.h \
 	tool_binmode.h \
 	tool_bname.h \
 	tool_cb_dbg.h \
@@ -67,8 +71,10 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_easysrc.h \
 	tool_formparse.h \
 	tool_getparam.h \
+	tool_getpass.h \
 	tool_help.h \
 	tool_helpers.h \
+	tool_homedir.h \
 	tool_libinfo.h \
 	tool_main.h \
 	tool_mfiles.h \
@@ -82,7 +88,12 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_setopt.h \
 	tool_sleep.h \
 	tool_urlglob.h \
-	tool_vms.h
+	tool_util.h \
+	tool_version.h \
+	tool_vms.h \
+	tool_writeenv.h \
+	tool_writeout.h \
+	tool_xattr.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 

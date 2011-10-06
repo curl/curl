@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HOMEDIR_H
-#define HEADER_CURL_HOMEDIR_H
+#ifndef HEADER_CURL_TOOL_XATTR_H
+#define HEADER_CURL_TOOL_XATTR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,6 +23,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-char *homedir(void);
+int fwrite_xattr(CURL *curl, int fd);
 
-#endif /* HEADER_CURL_HOMEDIR_H */
+#endif /* HEADER_CURL_TOOL_XATTR_H */

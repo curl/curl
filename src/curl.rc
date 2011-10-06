@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 #include <winver.h>
-#include "version.h"
+#include "tool_version.h"
 
 LANGUAGE  0x09,0x01
 

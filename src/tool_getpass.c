@@ -25,18 +25,17 @@
 /* this file is only for systems without getpass_r() */
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 #ifdef HAVE_FCNTL_H
-#include <fcntl.h>
+#  include <fcntl.h>
 #endif
+
 #ifdef HAVE_TERMIOS_H
-#include <termios.h>
-#else
-#ifdef HAVE_TERMIO_H
-#include <termio.h>
-#endif
+#  include <termios.h>
+#elif defined(HAVE_TERMIO_H)
+#  include <termio.h>
 #endif
 
 #ifdef __VMS
@@ -57,7 +56,10 @@
 #  endif
 #endif
 
-#include "getpass.h"
+#define _MPRINTF_REPLACE
+#include <curl/mprintf.h>
+
+#include "tool_getpass.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -80,15 +82,15 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
   $DESCRIPTOR(ttdesc, "TT");
 
-  buffer[0]='\0';
-  sts = sys$assign(&ttdesc, &chan,0,0);
+  buffer[0] = '\0';
+  sts = sys$assign(&ttdesc, &chan, 0, 0);
   if(sts & 1) {
     sts = sys$qiow(0, chan,
                    IO$_READPROMPT | IO$M_NOECHO,
                    &iosb, 0, 0, buffer, buflen, 0, 0,
                    prompt, strlen(prompt));
 
-    if((sts & 1) && (iosb.iosb$w_status&1))
+    if((sts & 1) && (iosb.iosb$w_status & 1))
       buffer[iosb.iosb$w_bcnt] = '\0';
 
     sts = sys$dassgn(chan);
@@ -99,7 +101,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #endif /* __VMS */
 
 #ifdef __SYMBIAN32__
-#define getch() getchar()
+#  define getch() getchar()
 #endif
 
 #if defined(WIN32) || defined(__SYMBIAN32__)
@@ -109,25 +111,25 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   size_t i;
   fputs(prompt, stderr);
 
-  for(i=0; i<buflen; i++) {
+  for(i = 0; i < buflen; i++) {
     buffer[i] = (char)getch();
     if(buffer[i] == '\r' || buffer[i] == '\n') {
-      buffer[i] = 0;
+      buffer[i] = '\0';
       break;
     }
     else
       if(buffer[i] == '\b')
         /* remove this letter and if this is not the first key, remove the
            previous one as well */
-        i = i - (i>=1?2:1);
+        i = i - (i >= 1) ? 2 : 1;
   }
 #ifndef __SYMBIAN32__
   /* since echo is disabled, print a newline */
   fputs("\n", stderr);
 #endif
   /* if user didn't hit ENTER, terminate buffer */
-  if(i==buflen)
-    buffer[buflen-1]=0;
+  if(i == buflen)
+    buffer[buflen-1] = '\0';
 
   return buffer; /* we always return success */
 }
@@ -165,7 +167,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
       putchar('*');
 
   } while((buffer[i-1] != 13) && (i < buflen));
-  buffer[i-1] = 0;
+  buffer[i-1] = '\0';
   printf("\r\n");
   return buffer;
 }
@@ -176,13 +178,11 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #ifndef DONE /* not previously provided */
 
 #ifdef HAVE_TERMIOS_H
-#define struct_term struct termios
+#  define struct_term  struct termios
+#elif defined(HAVE_TERMIO_H)
+#  define struct_term  struct termio
 #else
-#ifdef HAVE_TERMIO_H
-#define struct_term  struct termio
-#else
-#undef struct_term
-#endif
+#  undef  struct_term
 #endif
 
 static bool ttyecho(bool enable, int fd)
@@ -199,17 +199,15 @@ static bool ttyecho(bool enable, int fd)
     noecho = withecho;
     noecho.c_lflag &= ~ECHO;
     tcsetattr(fd, TCSANOW, &noecho);
-#else /* HAVE_TERMIOS_H */
-#ifdef HAVE_TERMIO_H
+#elif defined(HAVE_TERMIO_H)
     ioctl(fd, TCGETA, &withecho);
     noecho = withecho;
     noecho.c_lflag &= ~ECHO;
     ioctl(fd, TCSETA, &noecho);
-#else /* HAVE_TERMIO_H */
-/* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H, we can't disable echo! */
-    (void)fd; /* prevent compiler warning on unused variable */
+#else
+    /* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H, we can't disable echo! */
+    (void)fd;
     return FALSE; /* not disabled */
-#endif
 #endif
     return TRUE; /* disabled */
   }
@@ -218,13 +216,10 @@ static bool ttyecho(bool enable, int fd)
        now use to reset the terminal status) */
 #ifdef HAVE_TERMIOS_H
     tcsetattr(fd, TCSAFLUSH, &withecho);
-#else /* HAVE_TERMIOS_H */
-#ifdef HAVE_TERMIO_H
+#elif defined(HAVE_TERMIO_H)
     ioctl(fd, TCSETA, &withecho);
 #else
-/* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H */
     return FALSE; /* not enabled */
-#endif
 #endif
     return TRUE; /* enabled */
   }
@@ -236,18 +231,18 @@ char *getpass_r(const char *prompt, /* prompt to display */
 {
   ssize_t nread;
   bool disabled;
-  int fd=open("/dev/tty", O_RDONLY);
+  int fd = open("/dev/tty", O_RDONLY);
   if(-1 == fd)
     fd = 1; /* use stdin if the tty couldn't be used */
 
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
   fputs(prompt, stderr);
-  nread=read(fd, password, buflen);
+  nread = read(fd, password, buflen);
   if(nread > 0)
-    password[--nread]=0; /* zero terminate where enter is stored */
+    password[--nread] = '\0'; /* zero terminate where enter is stored */
   else
-    password[0]=0; /* got nothing */
+    password[0] = '\0'; /* got nothing */
 
   if(disabled) {
     /* if echo actually was disabled, add a newline */

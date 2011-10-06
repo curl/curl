@@ -133,9 +133,6 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
 RELEASE_OBJS= \
-	curlutilr.obj \
-	getpassr.obj \
-	homedirr.obj \
 	hugehelpr.obj \
 	nonblockr.obj \
 	rawstrr.obj \
@@ -156,8 +153,10 @@ RELEASE_OBJS= \
 	tool_easysrcr.obj \
 	tool_formparser.obj \
 	tool_getparamr.obj \
+	tool_getpassr.obj \
 	tool_helpr.obj \
 	tool_helpersr.obj \
+	tool_homedirr.obj \
 	tool_libinfor.obj \
 	tool_mainr.obj \
 	tool_mfilesr.obj \
@@ -170,15 +169,14 @@ RELEASE_OBJS= \
 	tool_setoptr.obj \
 	tool_sleepr.obj \
 	tool_urlglobr.obj \
+	tool_utilr.obj \
 	tool_vmsr.obj \
-	writeoutr.obj \
-	xattrr.obj \
+	tool_writeenvr.obj \
+	tool_writeoutr.obj \
+	tool_xattrr.obj \
 	curlr.res
 
 DEBUG_OBJS= \
-	curlutild.obj \
-	getpassd.obj \
-	homedird.obj \
 	hugehelpd.obj \
 	nonblockd.obj \
 	rawstrd.obj \
@@ -199,8 +197,10 @@ DEBUG_OBJS= \
 	tool_easysrcd.obj \
 	tool_formparsed.obj \
 	tool_getparamd.obj \
+	tool_getpassd.obj \
 	tool_helpd.obj \
 	tool_helpersd.obj \
+	tool_homedird.obj \
 	tool_libinfod.obj \
 	tool_maind.obj \
 	tool_mfilesd.obj \
@@ -213,9 +213,11 @@ DEBUG_OBJS= \
 	tool_setoptd.obj \
 	tool_sleepd.obj \
 	tool_urlglobd.obj \
+	tool_utild.obj \
 	tool_vmsd.obj \
-	writeoutd.obj \
-	xattrd.obj \
+	tool_writeenvd.obj \
+	tool_writeoutd.obj \
+	tool_xattrd.obj \
 	curld.res
 
 #################################################
@@ -340,14 +342,6 @@ debug: $(DEBUG_OBJS)
 ## Release
 hugehelpr.obj: hugehelp.c
 	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
-writeoutr.obj: writeout.c
-	$(CCR) $(CFLAGS) /Fo"$@" writeout.c
-getpassr.obj: getpass.c
-	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
-homedirr.obj: homedir.c
-	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
-curlutilr.obj: curlutil.c
-	$(CCR) $(CFLAGS) /Fo"$@" curlutil.c
 nonblockr.obj: ../lib/nonblock.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrr.obj: ../lib/rawstr.c
@@ -386,10 +380,14 @@ tool_formparser.obj: tool_formparse.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_formparse.c
 tool_getparamr.obj: tool_getparam.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_getpassr.obj: tool_getpass.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_getpass.c
 tool_helpr.obj: tool_help.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_help.c
 tool_helpersr.obj: tool_helpers.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_helpers.c
+tool_homedirr.obj: tool_homedir.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_homedir.c
 tool_libinfor.obj: tool_libinfo.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_mainr.obj: tool_main.c
@@ -414,24 +412,22 @@ tool_sleepr.obj: tool_sleep.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_sleep.c
 tool_urlglobr.obj: tool_urlglob.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_urlglob.c
+tool_utilr.obj: tool_util.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_util.c
 tool_vmsr.obj: tool_vms.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
-xattrr.obj: xattr.c
-	$(CCR) $(CFLAGS) /Fo"$@" xattr.c
+tool_writeenvr.obj: tool_writeenv.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_writeenv.c
+tool_writeoutr.obj: tool_writeout.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_writeout.c
+tool_xattrr.obj: tool_xattr.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_xattr.c
 curlr.res : curl.rc
 	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
 ## Debug
 hugehelpd.obj: hugehelp.c
 	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
-writeoutd.obj: writeout.c
-	$(CCD) $(CFLAGS) /Fo"$@" writeout.c
-getpassd.obj: getpass.c
-	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
-homedird.obj: homedir.c
-	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
-curlutild.obj: curlutil.c
-	$(CCD) $(CFLAGS) /Fo"$@" curlutil.c
 nonblockd.obj: ../lib/nonblock.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrd.obj: ../lib/rawstr.c
@@ -470,10 +466,14 @@ tool_formparsed.obj: tool_formparse.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_formparse.c
 tool_getparamd.obj: tool_getparam.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_getpassd.obj: tool_getpass.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_getpass.c
 tool_helpd.obj: tool_help.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_help.c
 tool_helpersd.obj: tool_helpers.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_helpers.c
+tool_homedird.obj: tool_homedir.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_homedir.c
 tool_libinfod.obj: tool_libinfo.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_maind.obj: tool_main.c
@@ -498,10 +498,16 @@ tool_sleepd.obj: tool_sleep.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_sleep.c
 tool_urlglobd.obj: tool_urlglob.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_urlglob.c
+tool_utild.obj: tool_util.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_util.c
 tool_vmsd.obj: tool_vms.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
-xattrd.obj: xattr.c
-	$(CCD) $(CFLAGS) /Fo"$@" xattr.c
+tool_writeenvd.obj: tool_writeenv.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_writeenv.c
+tool_writeoutd.obj: tool_writeout.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_writeout.c
+tool_xattrd.obj: tool_xattr.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_xattr.c
 curld.res : curl.rc
 	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
 

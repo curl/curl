@@ -33,8 +33,6 @@
 #  include "hugehelp.h"
 #endif
 
-#include "version.h"
-
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
@@ -46,6 +44,7 @@
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
+#include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

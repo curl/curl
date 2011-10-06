@@ -24,7 +24,7 @@
 #ifdef USE_ENVIRONMENT
 
 #ifdef __riscos__
-#include <kernel.h>
+#  include <kernel.h>
 #endif
 
 #include <curl/curl.h>
@@ -32,7 +32,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "writeenv.h"
+#include "tool_writeenv.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

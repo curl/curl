@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_WRITEOUT_H
-#define HEADER_CURL_WRITEOUT_H
+#ifndef HEADER_CURL_TOOL_WRITEENV_H
+#define HEADER_CURL_TOOL_WRITEENV_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,6 +23,13 @@
  ***************************************************************************/
 #include "setup.h"
 
-void ourWriteOut(CURL *curl, const char *out);
+#ifdef USE_ENVIRONMENT
 
-#endif /* HEADER_CURL_WRITEOUT_H */
+void ourWriteEnv(CURL *curl);
+
+#else
+#  define ourWriteEnv(x)  Curl_nop_stmt
+#endif
+
+#endif /* HEADER_CURL_TOOL_WRITEENV_H */
+

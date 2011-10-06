@@ -47,15 +47,6 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
-#include "curlutil.h"
-#include "homedir.h"
-#include "writeout.h"
-#include "xattr.h"
-
-#ifdef USE_ENVIRONMENT
-#  include "writeenv.h"
-#endif
-
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_dbg.h"
@@ -70,6 +61,7 @@
 #include "tool_easysrc.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
+#include "tool_homedir.h"
 #include "tool_libinfo.h"
 #include "tool_main.h"
 #include "tool_msgs.h"
@@ -79,6 +71,10 @@
 #include "tool_setopt.h"
 #include "tool_sleep.h"
 #include "tool_urlglob.h"
+#include "tool_util.h"
+#include "tool_writeenv.h"
+#include "tool_writeout.h"
+#include "tool_xattr.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -1210,7 +1206,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         retry_numretries = config->req_retry;
         retry_sleep = retry_sleep_default; /* ms */
-        retrystart = cutil_tvnow();
+        retrystart = tvnow();
 
         for(;;) {
           res = curl_easy_perform(curl);
@@ -1227,7 +1223,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
              time */
           if(retry_numretries &&
              (!config->retry_maxtime ||
-              (cutil_tvdiff(cutil_tvnow(), retrystart)<
+              (tvdiff(tvnow(), retrystart) <
                config->retry_maxtime*1000L)) ) {
             enum {
               RETRY_NO,
@@ -1349,10 +1345,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->writeout)
           ourWriteOut(curl, config->writeout);
-#ifdef USE_ENVIRONMENT
+
         if(config->writeenv)
           ourWriteEnv(curl);
-#endif
 
         /*
         ** Code within this loop may jump directly here to label 'show_error'

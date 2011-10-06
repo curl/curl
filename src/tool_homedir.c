@@ -22,21 +22,20 @@
 #include "setup.h"
 
 #ifdef HAVE_PWD_H
-#include <pwd.h>
+#  include <pwd.h>
 #endif
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 #ifdef __VMS
-#include <unixlib.h>
+#  include <unixlib.h>
 #endif
 
-#include "homedir.h"
+#include "tool_homedir.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-static
-char *GetEnv(const char *variable, char do_expand)
+static char *GetEnv(const char *variable, char do_expand)
 {
   char *env = NULL;
 #ifdef WIN32
@@ -70,7 +69,7 @@ char *GetEnv(const char *variable, char do_expand)
   env = getenv(variable);
 #endif
 #endif
-  return (env && env[0])?strdup(env):NULL;
+  return (env && env[0]) ? strdup(env) : NULL;
 }
 
 /* return the home directory of the current user as an allocated string */

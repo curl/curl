@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_WRITEENV_H
-#define HEADER_CURL_WRITEENV_H
+#ifndef HEADER_CURL_TOOL_HOMEDIR_H
+#define HEADER_CURL_TOOL_HOMEDIR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,6 +23,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-void ourWriteEnv(CURL *curl);
+char *homedir(void);
 
-#endif /* HEADER_CURL_WRITEENV_H */
+#endif /* HEADER_CURL_TOOL_HOMEDIR_H */

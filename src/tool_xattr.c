@@ -22,12 +22,12 @@
 #include "setup.h"
 
 #ifdef HAVE_FSETXATTR
-#include <sys/types.h>
-#include <sys/xattr.h> /* include header from libc, not from libattr */
+#  include <sys/xattr.h> /* header from libc, not from libattr */
 #endif
 
 #include <curl/curl.h>
-#include "xattr.h"
+
+#include "tool_xattr.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -42,8 +42,8 @@ static const struct xattr_mapping {
    * http://freedesktop.org/wiki/CommonExtendedAttributes
    */
   { "user.xdg.origin.url", CURLINFO_EFFECTIVE_URL },
-  { "user.mime_type", CURLINFO_CONTENT_TYPE },
-  { NULL, CURLINFO_NONE } /* last element, abort loop here */
+  { "user.mime_type",      CURLINFO_CONTENT_TYPE },
+  { NULL,                  CURLINFO_NONE } /* last element, abort loop here */
 };
 
 /* store metadata from the curl request alongside the downloaded
@@ -59,9 +59,9 @@ int fwrite_xattr(CURL *curl, int fd)
     CURLcode rc = curl_easy_getinfo(curl, mappings[i].info, &value);
     if(rc == CURLE_OK && value) {
 #ifdef HAVE_FSETXATTR_6
-      err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0, 0 );
+      err = fsetxattr(fd, mappings[i].attr, value, strlen(value), 0, 0);
 #elif defined(HAVE_FSETXATTR_5)
-      err = fsetxattr( fd, mappings[i].attr, value, strlen(value), 0 );
+      err = fsetxattr(fd, mappings[i].attr, value, strlen(value), 0);
 #endif
     }
     i++;

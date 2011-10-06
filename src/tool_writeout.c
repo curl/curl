@@ -21,19 +21,12 @@
  ***************************************************************************/
 #include "setup.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
 #include <curl/curl.h>
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
-#include "writeout.h"
+#include "tool_writeout.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -100,7 +93,7 @@ static const struct variable replacements[]={
 void ourWriteOut(CURL *curl, const char *writeinfo)
 {
   FILE *stream = stdout;
-  const char *ptr=writeinfo;
+  const char *ptr = writeinfo;
   char *stringp;
   long longinfo;
   double doubleinfo;
@@ -110,7 +103,7 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
       if('%' == ptr[1]) {
         /* an escaped %-letter */
         fputc('%', stream);
-        ptr+=2;
+        ptr += 2;
       }
       else {
         /* this is meant as a variable to output */
@@ -119,10 +112,10 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
         int i;
         if(('{' == ptr[1]) && ((end = strchr(ptr, '}')) != NULL)) {
           bool match = FALSE;
-          ptr+=2; /* pass the % and the { */
-          keepit=*end;
-          *end=0; /* zero terminate */
-          for(i=0; replacements[i].name; i++) {
+          ptr += 2; /* pass the % and the { */
+          keepit = *end;
+          *end = 0; /* zero terminate */
+          for(i = 0; replacements[i].name; i++) {
             if(curl_strequal(ptr, replacements[i].name)) {
               match = TRUE;
               switch(replacements[i].id) {
@@ -258,14 +251,14 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
           if(!match) {
             fprintf(stderr, "curl: unknown --write-out variable: '%s'\n", ptr);
           }
-          ptr=end+1; /* pass the end */
+          ptr = end + 1; /* pass the end */
           *end = keepit;
         }
         else {
           /* illegal syntax, then just output the characters that are used */
           fputc('%', stream);
           fputc(ptr[1], stream);
-          ptr+=2;
+          ptr += 2;
         }
       }
     }
@@ -286,7 +279,7 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
         fputc(ptr[1], stream);
         break;
       }
-      ptr+=2;
+      ptr += 2;
     }
     else {
       fputc(*ptr, stream);

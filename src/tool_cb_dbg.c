@@ -27,11 +27,10 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
-#include "curlutil.h"
-
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
+#include "tool_util.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -60,7 +59,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   (void)handle; /* not used */
 
   if(config->tracetime) {
-    tv = cutil_tvnow();
+    tv = tvnow();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
       known_offset = 1;

@@ -8,8 +8,7 @@ UID           0x00000000 0xF0206442
 
 SOURCEPATH  ../../../src
 SOURCE \
-    hugehelp.c writeout.c writeenv.c \
-    getpass.c homedir.c curlutil.c xattr.c \
+    hugehelp.c \
     tool_binmode.c \
     tool_bname.c \
     tool_cb_dbg.c \
@@ -26,8 +25,10 @@ SOURCE \
     tool_easysrc.c \
     tool_formparse.c \
     tool_getparam.c \
+    tool_getpass.c \
     tool_help.c \
     tool_helpers.c \
+    tool_homedir.c \
     tool_libinfo.c \
     tool_main.c \
     tool_mfiles.c \
@@ -40,7 +41,11 @@ SOURCE \
     tool_setopt.c \
     tool_sleep.c \
     tool_urlglob.c \
-    tool_vms.c
+    tool_util.c \
+    tool_vms.c \
+    tool_writeenv.c \
+    tool_writeout.c \
+    tool_xattr.c
 
 SOURCEPATH  ../../../lib
 SOURCE \

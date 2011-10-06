@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SRC_UTIL_H
-#define HEADER_CURL_SRC_UTIL_H
+#ifndef HEADER_CURL_TOOL_UTIL_H
+#define HEADER_CURL_TOOL_UTIL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,8 +23,7 @@
  ***************************************************************************/
 #include "setup.h"
 
-
-struct timeval cutil_tvnow(void);
+struct timeval tool_tvnow(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -32,17 +31,26 @@ struct timeval cutil_tvnow(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-long cutil_tvdiff(struct timeval t1, struct timeval t2);
+long tool_tvdiff(struct timeval t1, struct timeval t2);
 
 /*
- * Same as cutil_tvdiff but with full usec resolution.
+ * Same as tool_tvdiff but with full usec resolution.
  *
  * Returns: the time difference in seconds with subsecond resolution.
  */
-double cutil_tvdiff_secs(struct timeval t1, struct timeval t2);
+double tool_tvdiff_secs(struct timeval t1, struct timeval t2);
 
-long cutil_tvlong(struct timeval t1);
+long tool_tvlong(struct timeval t1);
 
+#undef tvnow
+#undef tvdiff
+#undef tvdiff_secs
+#undef tvlong
 
-#endif  /* HEADER_CURL_SRC_UTIL_H */
+#define tvnow()           tool_tvnow()
+#define tvdiff(a,b)       tool_tvdiff((a), (b))
+#define tvdiff_secs(a,b)  tool_tvdiff_secs((a), (b))
+#define tvlong(a)         tool_tvlong((a))
+
+#endif /* HEADER_CURL_TOOL_UTIL_H */
 

@@ -29,11 +29,10 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
-#include "version.h"
-
 #include "tool_cfgable.h"
 #include "tool_convert.h"
 #include "tool_operhlp.h"
+#include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
