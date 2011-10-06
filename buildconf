@@ -89,7 +89,9 @@ if test ! -f configure.ac ||
 fi
 
 #--------------------------------------------------------------------------
-# autoconf 2.57 or newer
+# autoconf 2.57 or newer. Unpatched version 2.67 does not generate proper
+# configure script. Unpatched version 2.68 is simply unusable, we should
+# disallow 2.68 usage.
 #
 need_autoconf="2.57"
 ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -n 1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
@@ -108,7 +110,15 @@ if test "$1" = "2" -a "$2" -lt "57" || test "$1" -lt "2"; then
   exit 1
 fi
 
-echo "buildconf: autoconf version $ac_version (ok)"
+if test "$1" = "2" -a "$2" -eq "67"; then
+  echo "buildconf: autoconf version $ac_version (BAD)"
+  echo "            Unpatched version generates broken configure script."
+elif test "$1" = "2" -a "$2" -eq "68"; then
+  echo "buildconf: autoconf version $ac_version (BAD)"
+  echo "            Unpatched version generates unusable configure script."
+else
+  echo "buildconf: autoconf version $ac_version (ok)"
+fi
 
 am4te_version=`${AUTOM4TE:-autom4te} --version 2>/dev/null|head -n 1| sed -e 's/autom4te\(.*\)/\1/' -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$am4te_version"; then
