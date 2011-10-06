@@ -1041,7 +1041,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Add this handle to the send or pend pipeline */
         easy->result = addHandleToSendOrPendPipeline(data,
                                                      easy->easy_conn);
-        if(CURLE_OK == easy->result) {
+        if(CURLE_OK != easy->result)
+          disconnect_conn = TRUE;
+        else {
           if(async)
             /* We're now waiting for an asynchronous name lookup */
             multistate(easy, CURLM_STATE_WAITRESOLVE);
@@ -1539,8 +1541,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             easy->result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            if(easy->result)
+            if(easy->result) {
+              disconnect_conn = TRUE;
               free(newurl);
+            }
           }
 
           multistate(easy, CURLM_STATE_DONE);
