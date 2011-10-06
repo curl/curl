@@ -158,7 +158,8 @@ rtsp-ipv6
 imap
 pop3
 smtp
-http+tls-srp
+httptls+srp
+httptls+srp-ipv6
 
 Give only one per line.  This subsection is mandatory.
 </server>
@@ -183,6 +184,7 @@ SSL
 socks
 unittest
 debug
+TLS-SRP
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server

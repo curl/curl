@@ -41,7 +41,7 @@ Accept: */*
 # Client-side
 <client>
 <server>
-http+tls-srp
+httptls+srp
 </server>
 <features>
 TLS-SRP

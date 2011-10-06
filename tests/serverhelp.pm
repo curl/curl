@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -63,6 +63,13 @@ use vars qw(
 
 
 #***************************************************************************
+# Just for convenience, test harness uses 'https' and 'httptls' literals as
+# values for 'proto' variable in order to differentiate different servers.
+# 'https' literal is used for stunnel based https test servers, and 'httptls'
+# is used for non-stunnel https test servers.
+
+
+#***************************************************************************
 # Return server characterization factors given a server id string.
 #
 sub serverfactors {
@@ -71,18 +78,20 @@ sub serverfactors {
     my $ipvnum;
     my $idnum;
 
-    if($server =~ /^((ftp|http|imap|pop3|smtp)s?)(\d*)(-ipv6|)$/) {
+    if($server =~
+        /^((ftp|http|imap|pop3|smtp)s?)(\d*)(-ipv6|)$/) {
         $proto  = $1;
         $idnum  = ($3 && ($3 > 1)) ? $3 : 1;
         $ipvnum = ($4 && ($4 =~ /6$/)) ? 6 : 4;
     }
-    elsif($server =~ /^(tftp|sftp|socks|ssh|rtsp)(\d*)(-ipv6|)$/) {
+    elsif($server =~
+        /^(tftp|sftp|socks|ssh|rtsp|gopher|httptls)(\d*)(-ipv6|)$/) {
         $proto  = $1;
         $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
         $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
     }
     else {
-        die "invalid server id: $server"
+        die "invalid server id: '$server'"
     }
     return($proto, $ipvnum, $idnum);
 }
@@ -95,16 +104,16 @@ sub servername_str {
     my ($proto, $ipver, $idnum) = @_;
 
     $proto = uc($proto) if($proto);
-    die "unsupported protocol: $proto" unless($proto &&
-        ($proto =~ /^(((FTP|HTTP|IMAP|POP3|SMTP)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTP\+TLS-SRP))$/));
+    die "unsupported protocol: '$proto'" unless($proto &&
+        ($proto =~ /^(((FTP|HTTP|IMAP|POP3|SMTP)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTPTLS))$/));
 
     $ipver = (not $ipver) ? 'ipv4' : lc($ipver);
-    die "unsupported IP version: $ipver" unless($ipver &&
+    die "unsupported IP version: '$ipver'" unless($ipver &&
         ($ipver =~ /^(4|6|ipv4|ipv6|-ipv4|-ipv6)$/));
     $ipver = ($ipver =~ /6$/) ? '-IPv6' : '';
 
     $idnum = 1 if(not $idnum);
-    die "unsupported ID number: $idnum" unless($idnum &&
+    die "unsupported ID number: '$idnum'" unless($idnum &&
         ($idnum =~ /^(\d+)$/));
     $idnum = '' unless($idnum > 1);
 
@@ -188,7 +197,7 @@ sub server_outputfilename {
 #
 sub mainsockf_pidfilename {
     my ($proto, $ipver, $idnum) = @_;
-    die "unsupported protocol: $proto" unless($proto &&
+    die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
     return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
@@ -200,7 +209,7 @@ sub mainsockf_pidfilename {
 #
 sub mainsockf_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
-    die "unsupported protocol: $proto" unless($proto &&
+    die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log':'_sockfilt.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
@@ -212,7 +221,7 @@ sub mainsockf_logfilename {
 #
 sub datasockf_pidfilename {
     my ($proto, $ipver, $idnum) = @_;
-    die "unsupported protocol: $proto" unless($proto &&
+    die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.pid';
     return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
@@ -224,7 +233,7 @@ sub datasockf_pidfilename {
 #
 sub datasockf_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
-    die "unsupported protocol: $proto" unless($proto &&
+    die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
