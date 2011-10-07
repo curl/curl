@@ -1804,6 +1804,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     /* remove the pending list of messages */
     Curl_llist_destroy(multi->msglist, NULL);
+    multi->msglist = NULL;
 
     /* remove all easy handles */
     easy = multi->easy.next;

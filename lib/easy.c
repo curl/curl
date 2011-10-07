@@ -676,16 +676,15 @@ CURL *curl_easy_duphandle(CURL *incurl)
 
   if(outcurl) {
     if(outcurl->state.connc &&
-       (outcurl->state.connc->type == CONNCACHE_PRIVATE))
+       (outcurl->state.connc->type == CONNCACHE_PRIVATE)) {
       Curl_rm_connc(outcurl->state.connc);
-    if(outcurl->state.headerbuff)
-      free(outcurl->state.headerbuff);
-    if(outcurl->change.cookielist)
-      curl_slist_free_all(outcurl->change.cookielist);
-    if(outcurl->change.url)
-      free(outcurl->change.url);
-    if(outcurl->change.referer)
-      free(outcurl->change.referer);
+      outcurl->state.connc = NULL;
+    }
+    curl_slist_free_all(outcurl->change.cookielist);
+    outcurl->change.cookielist = NULL;
+    Curl_safefree(outcurl->state.headerbuff);
+    Curl_safefree(outcurl->change.url);
+    Curl_safefree(outcurl->change.referer);
     Curl_freeset(outcurl);
     free(outcurl);
   }

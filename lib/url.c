@@ -2569,6 +2569,11 @@ static void conn_free(struct connectdata *conn)
   Curl_llist_destroy(conn->pend_pipe, NULL);
   Curl_llist_destroy(conn->done_pipe, NULL);
 
+  conn->send_pipe = NULL;
+  conn->recv_pipe = NULL;
+  conn->pend_pipe = NULL;
+  conn->done_pipe = NULL;
+
   Curl_safefree(conn->localdev);
   Curl_free_ssl_config(&conn->ssl_config);
 
@@ -3583,6 +3588,12 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   Curl_llist_destroy(conn->recv_pipe, NULL);
   Curl_llist_destroy(conn->pend_pipe, NULL);
   Curl_llist_destroy(conn->done_pipe, NULL);
+
+  conn->send_pipe = NULL;
+  conn->recv_pipe = NULL;
+  conn->pend_pipe = NULL;
+  conn->done_pipe = NULL;
+
   Curl_safefree(conn->master_buffer);
   Curl_safefree(conn->localdev);
   Curl_safefree(conn);
@@ -4650,10 +4661,17 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(old_conn->passwd);
   Curl_safefree(old_conn->proxyuser);
   Curl_safefree(old_conn->proxypasswd);
+
   Curl_llist_destroy(old_conn->send_pipe, NULL);
   Curl_llist_destroy(old_conn->recv_pipe, NULL);
   Curl_llist_destroy(old_conn->pend_pipe, NULL);
   Curl_llist_destroy(old_conn->done_pipe, NULL);
+
+  old_conn->send_pipe = NULL;
+  old_conn->recv_pipe = NULL;
+  old_conn->pend_pipe = NULL;
+  old_conn->done_pipe = NULL;
+
   Curl_safefree(old_conn->master_buffer);
 }
 

@@ -763,18 +763,25 @@ static void printsub(struct SessionHandle *data,
 static CURLcode check_telnet_options(struct connectdata *conn)
 {
   struct curl_slist *head;
+  struct curl_slist *beg;
   char option_keyword[128];
   char option_arg[256];
   char *buf;
   struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->data->state.proto.telnet;
+  CURLcode result = CURLE_OK;
 
   /* Add the user name as an environment variable if it
      was given on the command line */
   if(conn->bits.user_passwd) {
     snprintf(option_arg, sizeof(option_arg), "USER,%s", conn->user);
-    tn->telnet_vars = curl_slist_append(tn->telnet_vars, option_arg);
-
+    beg = curl_slist_append(tn->telnet_vars, option_arg);
+    if(!beg) {
+      curl_slist_free_all(tn->telnet_vars);
+      tn->telnet_vars = NULL;
+      return CURLE_OUT_OF_MEMORY;
+    }
+    tn->telnet_vars = beg;
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
 
@@ -800,24 +807,33 @@ static CURLcode check_telnet_options(struct connectdata *conn)
 
       /* Environment variable */
       if(Curl_raw_equal(option_keyword, "NEW_ENV")) {
-        buf = strdup(option_arg);
-        if(!buf)
-          return CURLE_OUT_OF_MEMORY;
-        tn->telnet_vars = curl_slist_append(tn->telnet_vars, buf);
+        beg = curl_slist_append(tn->telnet_vars, option_arg);
+        if(!beg) {
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        tn->telnet_vars = beg;
         tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
         continue;
       }
 
       failf(data, "Unknown telnet option %s", head->data);
-      return CURLE_UNKNOWN_TELNET_OPTION;
+      result = CURLE_UNKNOWN_TELNET_OPTION;
+      break;
     }
     else {
       failf(data, "Syntax error in telnet option: %s", head->data);
-      return CURLE_TELNET_OPTION_SYNTAX;
+      result = CURLE_TELNET_OPTION_SYNTAX;
+      break;
     }
   }
 
-  return CURLE_OK;
+  if(result) {
+    curl_slist_free_all(tn->telnet_vars);
+    tn->telnet_vars = NULL;
+  }
+
+  return result;
 }
 
 /*
@@ -1109,6 +1125,7 @@ static CURLcode telnet_done(struct connectdata *conn,
   (void)premature; /* not used */
 
   curl_slist_free_all(tn->telnet_vars);
+  tn->telnet_vars = NULL;
 
   free(conn->data->state.proto.telnet);
   conn->data->state.proto.telnet = NULL;

@@ -131,6 +131,10 @@ Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
 
   list->dtor(user, e->ptr);
 
+  e->ptr  = NULL;
+  e->prev = NULL;
+  e->next = NULL;
+
   free(e);
   --list->size;
 

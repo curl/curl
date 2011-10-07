@@ -109,7 +109,7 @@ char *sanitize_dos_name(char *file_name)
 
   strcpy(new_name, msdosify(file_name));
 
-  free(file_name);
+  Curl_safefree(file_name);
 
   return strdup(rename_if_dos_device_name(new_name));
 }
@@ -288,7 +288,7 @@ CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file)
     else
       result = CURLE_SSL_CACERT;
 
-    free(buf);
+    Curl_safefree(buf);
   }
 
   return result;

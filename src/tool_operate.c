@@ -971,7 +971,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                   /* libssh2 version older than 1.1.1 */
                   res = CURLE_OK;
               }
-              free(home);
+              Curl_safefree(home);
             }
             if(res)
               goto show_error;

@@ -1107,23 +1107,20 @@ struct curl_slist *Curl_cookie_list(struct SessionHandle *data)
 
   c = data->cookies->cookies;
 
-  beg = list;
   while(c) {
     /* fill the list with _all_ the cookies we know */
     line = get_netscape_format(c);
-    if(line == NULL) {
-      curl_slist_free_all(beg);
+    if(!line) {
+      curl_slist_free_all(list);
       return NULL;
     }
-    list = curl_slist_append(list, line);
+    beg = curl_slist_append(list, line);
     free(line);
-    if(list == NULL) {
-      curl_slist_free_all(beg);
+    if(!beg) {
+      curl_slist_free_all(list);
       return NULL;
     }
-    else if(beg == NULL) {
-      beg = list;
-    }
+    list = beg;
     c = c->next;
   }
 
@@ -1148,10 +1145,12 @@ void Curl_flush_cookies(struct SessionHandle *data, int cleanup)
             data->set.str[STRING_COOKIEJAR]);
   }
   else {
-    if(cleanup && data->change.cookielist)
+    if(cleanup && data->change.cookielist) {
       /* since nothing is written, we can just free the list of cookie file
          names */
       curl_slist_free_all(data->change.cookielist); /* clean up list */
+      data->change.cookielist = NULL;
+    }
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   }
 

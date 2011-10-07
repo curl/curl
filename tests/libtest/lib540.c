@@ -49,23 +49,45 @@ static int init(CURLM *cm, const char* url, const char* userpwd,
   }
 
   res = curl_easy_setopt(eh, CURLOPT_URL, url);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_PROXY, PROXY);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_PROXYUSERPWD, userpwd);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_VERBOSE, 1L);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_HEADER, 1L);
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
   res = curl_easy_setopt(eh, CURLOPT_HTTPHEADER, headers); /* custom Host: */
-  if(res) return 1;
+  if(res) {
+    curl_easy_cleanup(eh);
+    return 1;
+  }
 
   if ((res = (int)curl_multi_add_handle(cm, eh)) != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle() failed, "
             "with code %d\n", res);
+    curl_easy_cleanup(eh);
     return 1; /* failure */
   }
 
@@ -80,13 +102,16 @@ static int loop(CURLM *cm, const char* url, const char* userpwd,
   int M, Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
+  CURLMcode rc;
 
   if(init(cm, url, userpwd, headers))
     return 1; /* failure */
 
   while (U) {
 
-    (void) curl_multi_perform(cm, &U);
+    rc = curl_multi_perform(cm, &U);
+    if(rc == CURLM_OUT_OF_MEMORY)
+      return 1; /* failure */
 
     if (U) {
       FD_ZERO(&R);

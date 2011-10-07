@@ -72,9 +72,12 @@ Curl_hash_init(struct curl_hash *h,
     for(i = 0; i < slots; ++i) {
       h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
       if(!h->table[i]) {
-        while(i--)
+        while(i--) {
           Curl_llist_destroy(h->table[i], NULL);
+          h->table[i] = NULL;
+        }
         free(h->table);
+        h->table = NULL;
         return 1; /* failure */
       }
     }
@@ -240,6 +243,7 @@ Curl_hash_clean(struct curl_hash *h)
   }
 
   free(h->table);
+  h->table = NULL;
 }
 
 void
