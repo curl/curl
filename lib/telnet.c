@@ -766,7 +766,6 @@ static CURLcode check_telnet_options(struct connectdata *conn)
   struct curl_slist *beg;
   char option_keyword[128];
   char option_arg[256];
-  char *buf;
   struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->data->state.proto.telnet;
   CURLcode result = CURLE_OK;
