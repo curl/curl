@@ -18,12 +18,12 @@ This release includes the following bugfixes:
  o SMTP without --mail-from caused segfault
  o prevent extra progress meter headers between multiple files
  o allow Content-Length to be replaced when sending HTTP requests
- o curl now always set postfieldsize to allow --data-binary and --data
+ o curl now always sets postfieldsize to allow --data-binary and --data
    to be mixed in the same command line
  o curl_multi_fdset: avoid FD_SET out of bounds
  o lots of MinGW build tweaks
  o Curl_gethostname: return un-qualified machine name
- o fixed then openssl version number configure check
+ o fixed the openssl version number configure check
 
 This release includes the following known bugs:
 
