@@ -37,61 +37,60 @@
 #define PROXYUSERPWD libtest_arg3
 #define HOST test_argv[4]
 
+CURL *eh = NULL;
+
 static int init(CURLM *cm, const char* url, const char* userpwd,
                 struct curl_slist *headers)
 {
-  CURL *eh;
   int res;
 
   if ((eh = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    return 1; /* failure */
+    goto init_failed;
   }
 
   res = curl_easy_setopt(eh, CURLOPT_URL, url);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_PROXY, PROXY);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_PROXYUSERPWD, userpwd);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_VERBOSE, 1L);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_HEADER, 1L);
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
+
   res = curl_easy_setopt(eh, CURLOPT_HTTPHEADER, headers); /* custom Host: */
-  if(res) {
-    curl_easy_cleanup(eh);
-    return 1;
-  }
+  if(res)
+    goto init_failed;
 
   if ((res = (int)curl_multi_add_handle(cm, eh)) != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
-    curl_easy_cleanup(eh);
-    return 1; /* failure */
+    fprintf(stderr, "curl_multi_add_handle() failed, with code %d\n", res);
+    goto init_failed;
   }
 
   return 0; /* success */
+
+init_failed:
+  if(eh) {
+    curl_easy_cleanup(eh);
+    eh = NULL;
+  }
+
+  return 1; /* failure */
 }
 
 static int loop(CURLM *cm, const char* url, const char* userpwd,
@@ -153,6 +152,7 @@ static int loop(CURLM *cm, const char* url, const char* userpwd,
                 curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
+        eh = NULL;
       }
       else {
         fprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
@@ -204,7 +204,14 @@ int test(char *URL)
 
 test_cleanup:
 
-  curl_multi_cleanup(cm);
+  if(cm && eh)
+    curl_multi_remove_handle(cm, eh);
+
+  if(eh)
+    curl_easy_cleanup(eh);
+
+  if(cm)
+    curl_multi_cleanup(cm);
 
   curl_global_cleanup();
 
