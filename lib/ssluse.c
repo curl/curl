@@ -1855,6 +1855,7 @@ static CURLcode push_certinfo_len(struct SessionHandle *data,
      equivalent of curl_slist_append but doesn't strdup() the given data as
      like in this place the extra malloc/free is totally pointless */
   nl = curl_slist_append(ci->certinfo[certnum], output);
+  free(output);
   if(!nl) {
     curl_slist_free_all(ci->certinfo[certnum]);
     ci->certinfo[certnum] = NULL;
@@ -1862,8 +1863,6 @@ static CURLcode push_certinfo_len(struct SessionHandle *data,
   }
   else
     ci->certinfo[certnum] = nl;
-
-  free(output);
 
   return res;
 }

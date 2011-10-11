@@ -425,12 +425,13 @@ CURLM *curl_multi_init(void)
   return (CURLM *) multi;
 
   error:
-  if(multi->sockhash)
-    Curl_hash_destroy(multi->sockhash);
-  if(multi->hostcache)
-    Curl_hash_destroy(multi->hostcache);
-  if(multi->connc)
-    Curl_rm_connc(multi->connc);
+
+  Curl_hash_destroy(multi->sockhash);
+  multi->sockhash = NULL;
+  Curl_hash_destroy(multi->hostcache);
+  multi->hostcache = NULL;
+  Curl_rm_connc(multi->connc);
+  multi->connc = NULL;
 
   free(multi);
   return NULL;
@@ -1801,6 +1802,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     }
 
     Curl_rm_connc(multi->connc);
+    multi->connc = NULL;
 
     /* remove the pending list of messages */
     Curl_llist_destroy(multi->msglist, NULL);

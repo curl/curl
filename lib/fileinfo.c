@@ -48,8 +48,7 @@ void Curl_fileinfo_dtor(void *user, void *element)
   if(!finfo)
     return;
 
-  if(finfo->b_data)
-    free(finfo->b_data);
+  Curl_safefree(finfo->b_data);
 
   free(finfo);
 }

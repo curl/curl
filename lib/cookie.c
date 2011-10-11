@@ -144,9 +144,9 @@ void Curl_cookie_loadfiles(struct SessionHandle *data)
                                        data->set.cookiesession);
       list = list->next;
     }
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     curl_slist_free_all(data->change.cookielist); /* clean up list */
     data->change.cookielist = NULL; /* don't do this again! */
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
 }
 

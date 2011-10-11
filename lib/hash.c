@@ -38,11 +38,14 @@ hash_element_dtor(void *user, void *element)
   struct curl_hash *h = (struct curl_hash *) user;
   struct curl_hash_element *e = (struct curl_hash_element *) element;
 
-  if(e->key)
-    free(e->key);
+  Curl_safefree(e->key);
 
-  if(e->ptr)
+  if(e->ptr) {
     h->dtor(e->ptr);
+    e->ptr = NULL;
+  }
+
+  e->key_len = 0;
 
   free(e);
 }
@@ -78,13 +81,16 @@ Curl_hash_init(struct curl_hash *h,
         }
         free(h->table);
         h->table = NULL;
+        h->slots = 0;
         return 1; /* failure */
       }
     }
     return 0; /* fine */
   }
-  else
+  else {
+    h->slots = 0;
     return 1; /* failure */
+  }
 }
 
 struct curl_hash *
@@ -190,6 +196,7 @@ int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
     he = le->ptr;
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
       Curl_llist_remove(l, le, (void *) h);
+      --h->size;
       return 0;
     }
   }
@@ -244,6 +251,8 @@ Curl_hash_clean(struct curl_hash *h)
 
   free(h->table);
   h->table = NULL;
+  h->size = 0;
+  h->slots = 0;
 }
 
 void

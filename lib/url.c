@@ -458,6 +458,7 @@ CURLcode Curl_close(struct SessionHandle *data)
 
       /* free the connection cache if allocated privately */
       Curl_rm_connc(data->state.connc);
+      data->state.connc = NULL;
     }
   }
 
@@ -618,13 +619,19 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
    curl_multi_cleanup(). */
 void Curl_rm_connc(struct conncache *c)
 {
+  if(!c)
+    return;
+
   if(c->connects) {
     long i;
-    for(i = 0; i < c->num; ++i)
+    for(i = 0; i < c->num; ++i) {
       conn_free(c->connects[i]);
-
+      c->connects[i] = NULL;
+    }
     free(c->connects);
+    c->connects = NULL;
   }
+  c->num = 0;
 
   free(c);
 }
@@ -1258,10 +1265,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       /* append the cookie file name to the list of file names, and deal with
          them later */
       cl = curl_slist_append(data->change.cookielist, argptr);
-
-      if(!cl)
+      if(!cl) {
+        curl_slist_free_all(data->change.cookielist);
+        data->change.cookielist = NULL;
         return CURLE_OUT_OF_MEMORY;
-
+      }
       data->change.cookielist = cl; /* store the list for later use */
     }
     break;
