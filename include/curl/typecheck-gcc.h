@@ -392,7 +392,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 /* evaluates to true if expr is abuffer suitable for CURLOPT_ERRORBUFFER */
 /* XXX: also check size of an char[] array? */
 #define _curl_is_error_buffer(expr)                                           \
-  (__builtin_types_compatible_p(__typeof__(expr), char *) ||                  \
+  (_curl_is_NULL(expr) ||                                                     \
+   __builtin_types_compatible_p(__typeof__(expr), char *) ||                  \
    __builtin_types_compatible_p(__typeof__(expr), char[]))
 
 /* evaluates to true if expr is of type (const) void* or (const) FILE* */
