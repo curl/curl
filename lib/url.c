@@ -276,10 +276,7 @@ static CURLcode setstropt(char **charp, char * s)
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
 
-  if(*charp) {
-    free(*charp);
-    *charp = (char *) NULL;
-  }
+  Curl_safefree(*charp);
 
   if(s) {
     s = strdup(s);
@@ -480,6 +477,8 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   /* Free the pathbuffer */
   Curl_safefree(data->state.pathbuffer);
+  data->state.path = NULL;
+
   Curl_safefree(data->state.proto.generic);
 
   /* Close down all open SSL info and sessions */
@@ -488,11 +487,17 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
 
-  if(data->change.referer_alloc)
-    free(data->change.referer);
+  if(data->change.referer_alloc) {
+    Curl_safefree(data->change.referer);
+    data->change.referer_alloc = FALSE;
+  }
+  data->change.referer = NULL;
 
-  if(data->change.url_alloc)
-    free(data->change.url);
+  if(data->change.url_alloc) {
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
+  data->change.url = NULL;
 
   Curl_safefree(data->state.headerbuff);
 
@@ -1216,7 +1221,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * String to set in the HTTP Referer: field.
      */
     if(data->change.referer_alloc) {
-      free(data->change.referer);
+      Curl_safefree(data->change.referer);
       data->change.referer_alloc = FALSE;
     }
     result = setstropt(&data->set.str[STRING_SET_REFERER],
@@ -1633,8 +1638,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     if(data->change.url_alloc) {
       /* the already set URL is allocated, free it first! */
-      free(data->change.url);
-      data->change.url_alloc=FALSE;
+      Curl_safefree(data->change.url);
+      data->change.url_alloc = FALSE;
     }
     result = setstropt(&data->set.str[STRING_SET_URL],
                        va_arg(param, char *));
@@ -4428,8 +4433,10 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
       if(!url)
         return CURLE_OUT_OF_MEMORY;
 
-      if(data->change.url_alloc)
-        free(data->change.url);
+      if(data->change.url_alloc) {
+        Curl_safefree(data->change.url);
+        data->change.url_alloc = FALSE;
+      }
 
       data->change.url = url;
       data->change.url_alloc = TRUE;
@@ -4653,11 +4660,11 @@ static void reuse_conn(struct connectdata *old_conn,
 
   /* host can change, when doing keepalive with a proxy ! */
   if(conn->bits.proxy) {
-    free(conn->host.rawalloc);
+    Curl_safefree(conn->host.rawalloc);
     conn->host=old_conn->host;
   }
   else
-    free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
+    Curl_safefree(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
@@ -4756,14 +4763,19 @@ static CURLcode create_conn(struct SessionHandle *data,
    */
 
   Curl_safefree(data->state.pathbuffer);
+  data->state.path = NULL;
+
   data->state.pathbuffer = malloc(urllen+2);
   if(NULL == data->state.pathbuffer)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
   data->state.path = data->state.pathbuffer;
 
   conn->host.rawalloc = malloc(urllen+2);
-  if(NULL == conn->host.rawalloc)
+  if(NULL == conn->host.rawalloc) {
+    Curl_safefree(data->state.pathbuffer);
+    data->state.path = NULL;
     return CURLE_OUT_OF_MEMORY;
+  }
 
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
@@ -4786,6 +4798,11 @@ static CURLcode create_conn(struct SessionHandle *data,
     if(!reurl) {
       Curl_safefree(proxy);
       return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(data->change.url_alloc) {
+      Curl_safefree(data->change.url);
+      data->change.url_alloc = FALSE;
     }
 
     data->change.url = reurl;

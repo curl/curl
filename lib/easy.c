@@ -701,10 +701,10 @@ void curl_easy_reset(CURL *curl)
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
   Curl_safefree(data->state.pathbuffer);
-  data->state.pathbuffer=NULL;
+
+  data->state.path = NULL;
 
   Curl_safefree(data->state.proto.generic);
-  data->state.proto.generic=NULL;
 
   /* zero out UserDefined data: */
   Curl_freeset(data);

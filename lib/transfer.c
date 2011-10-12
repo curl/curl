@@ -1806,15 +1806,14 @@ CURLcode Curl_follow(struct SessionHandle *data,
          when we get the next URL. We pick the ->url field, which may or may
          not be 100% correct */
 
-      if(data->change.referer_alloc)
-        /* If we already have an allocated referer, free this first */
-        free(data->change.referer);
+      if(data->change.referer_alloc) {
+        Curl_safefree(data->change.referer);
+        data->change.referer_alloc = FALSE;
+      }
 
       data->change.referer = strdup(data->change.url);
-      if(!data->change.referer) {
-        data->change.referer_alloc = FALSE;
+      if(!data->change.referer)
         return CURLE_OUT_OF_MEMORY;
-      }
       data->change.referer_alloc = TRUE; /* yes, free this later */
     }
   }
@@ -1861,12 +1860,13 @@ CURLcode Curl_follow(struct SessionHandle *data,
   if(disallowport)
     data->state.allow_port = FALSE;
 
-  if(data->change.url_alloc)
-    free(data->change.url);
-  else
-    data->change.url_alloc = TRUE; /* the URL is allocated */
+  if(data->change.url_alloc) {
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
 
   data->change.url = newurl;
+  data->change.url_alloc = TRUE;
   newurl = NULL; /* don't free! */
 
   infof(data, "Issue another request to this URL: '%s'\n", data->change.url);

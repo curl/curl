@@ -3667,8 +3667,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     strcat(tmp_path, finfo->filename);
     /* switch default "state.pathbuffer" and tmp_path, good to see
        ftp_parse_url_path function to understand this trick */
-    if(conn->data->state.pathbuffer)
-      free(conn->data->state.pathbuffer);
+    Curl_safefree(conn->data->state.pathbuffer);
     conn->data->state.pathbuffer = tmp_path;
     conn->data->state.path = tmp_path;
 

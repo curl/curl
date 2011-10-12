@@ -1912,8 +1912,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           memcpy(newurl + newlen + (ptr - url),
                  ptr + currlen, /* copy the trailing zero byte too */
                  urllen - (ptr-url) - currlen + 1);
-          if(data->change.url_alloc)
-            free(data->change.url);
+          if(data->change.url_alloc) {
+            Curl_safefree(data->change.url);
+            data->change.url_alloc = FALSE;
+          }
           data->change.url = newurl;
           data->change.url_alloc = TRUE;
         }
