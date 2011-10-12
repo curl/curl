@@ -4664,7 +4664,8 @@ static void reuse_conn(struct connectdata *old_conn,
     conn->host=old_conn->host;
   }
   else
-    Curl_safefree(old_conn->host.rawalloc); /* free the newly allocated name buffer */
+    /* free the newly allocated name buffer */
+    Curl_safefree(old_conn->host.rawalloc);
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
