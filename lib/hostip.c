@@ -596,10 +596,6 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif
 #endif /* HAVE_SIGACTION */
 
-  /* alarm() makes a signal get sent when the timeout fires off, and that
-     will abort system calls */
-  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
-
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
@@ -612,6 +608,10 @@ int Curl_resolv_timeout(struct connectdata *conn,
     rc = CURLRESOLV_ERROR;
     goto clean_up;
   }
+
+  /* alarm() makes a signal get sent when the timeout fires off, and that
+     will abort system calls */
+  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
 
 #else
 #ifndef CURLRES_ASYNCH
