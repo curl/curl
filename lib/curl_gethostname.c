@@ -62,46 +62,41 @@ int Curl_gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen) {
   return -1;
 
 #else
-  int err = 0;
-  char* dot = NULL;
-  char hostname[HOSTNAME_MAX + 1];
+  int err;
+  char* dot;
 
 #ifdef DEBUGBUILD
 
   /* Override host name when environment variable CURL_GETHOSTNAME is set */
   const char *force_hostname = getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
-    strncpy(hostname, force_hostname, sizeof(hostname));
-    hostname[sizeof(hostname) - 1] = '\0';
+    strncpy(name, force_hostname, namelen);
+    err = 0;
   }
-  else
-    err = gethostname(hostname, sizeof(hostname));
+  else {
+    name[0] = '\0';
+    err = gethostname(name, namelen);
+  }
 
 #else /* DEBUGBUILD */
 
   /* The call to system's gethostname() might get intercepted by the
      libhostname library when libcurl is built as a non-debug shared
      library when running the test suite. */
-  err = gethostname(hostname, sizeof(hostname));
+  name[0] = '\0';
+  err = gethostname(name, namelen);
 
 #endif
 
-  if(err != 0)
+  name[namelen - 1] = '\0';
+
+  if(err)
     return err;
 
-  /* Is the hostname fully qualified? */
-  dot = strchr(hostname, '.');
-  if(dot) {
-    /* Copy only the machine name to the specified buffer */
-    size_t size = dot - hostname;
-    strncpy(name, hostname, namelen > size ? size : namelen);
-    name[(namelen > size ? size : namelen) - 1] = '\0';
-  }
-  else {
-    /* Copy the hostname to the specified buffer */
-    strncpy(name, hostname, namelen);
-    name[namelen - 1] = '\0';
-  }
+  /* Truncate domain, leave only machine name */
+  dot = strchr(name, '.');
+  if(dot)
+    *dot = '\0';
 
   return 0;
 #endif
