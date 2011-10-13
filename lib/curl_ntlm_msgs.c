@@ -720,7 +720,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
 #elif defined(USE_NSS)
     PK11Context *MD5pw;
-    unsigned int outlen;
+    unsigned int MD5len;
     Curl_nss_seed(data);  /* Initiate the seed if not already done */
     PK11_GenerateRandom(entropy, 8);
 #endif
@@ -747,7 +747,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 #elif defined(USE_NSS)
     MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
     PK11_DigestOp(MD5pw, tmp, 16);
-    PK11_DigestFinal(MD5pw, md5sum, &outlen, MD5_DIGEST_LENGTH);
+    PK11_DigestFinal(MD5pw, md5sum, &MD5len, MD5_DIGEST_LENGTH);
     PK11_DestroyContext(MD5pw, PR_TRUE);
 #endif
 
