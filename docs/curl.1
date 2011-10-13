@@ -1594,6 +1594,14 @@ Specifies a custom FTP command to use instead of LIST when doing file lists
 with FTP.
 
 If this option is used several times, the last one will be used.
+
+.IP "--xattr"
+When saving output to a file, this option tells curl to store certain file
+metadata in extened file attributes. Currently, the URL is stored in the
+xdg.origin.url attribute and, for HTTP, the content type is stored in
+the mime_type attribute. If the file system does not support extended
+attributes, a warning is issued.
+
 .IP "-y, --speed-time <time>"
 If a download is slower than speed-limit bytes per second during a speed-time
 period, the download gets aborted. If speed-time is used, the default
