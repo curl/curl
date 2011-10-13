@@ -135,7 +135,7 @@ struct Curl_multi {
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   long type;
 
-  /* We have a linked list with easy handles */
+  /* We have a doubly-linked circular list with easy handles */
   struct Curl_one_easy easy;
 
   int num_easy; /* amount of entries in the linked list above. */
@@ -440,11 +440,12 @@ CURLM *curl_multi_init(void)
 CURLMcode curl_multi_add_handle(CURLM *multi_handle,
                                 CURL *easy_handle)
 {
-  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct curl_llist *timeoutlist;
   struct Curl_one_easy *easy;
   struct closure *cl;
-  struct closure *prev=NULL;
-  struct SessionHandle *data = easy_handle;
+  struct closure *prev = NULL;
+  struct Curl_multi *multi = (struct Curl_multi *)multi_handle;
+  struct SessionHandle *data = (struct SessionHandle *)easy_handle;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -454,39 +455,74 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!GOOD_EASY_HANDLE(easy_handle))
     return CURLM_BAD_EASY_HANDLE;
 
-  /* Prevent users to add the same handle more than once! */
-  if(((struct SessionHandle *)easy_handle)->multi)
+  /* Prevent users from adding same easy handle more than
+     once and prevent adding to more than one multi stack */
+  if(data->multi)
     /* possibly we should create a new unique error code for this condition */
     return CURLM_BAD_EASY_HANDLE;
 
-  data->state.timeoutlist = Curl_llist_alloc(multi_freetimeout);
-  if(!data->state.timeoutlist)
+  /* We want the connection cache to have plenty of room. Before we supported
+     the shared cache every single easy handle had 5 entries in their cache
+     by default. */
+  if(((multi->num_easy + 1) * 4) > multi->connc->num) {
+    long newmax = (multi->num_easy + 1) * 4;
+
+    if(multi->maxconnects && (newmax > multi->maxconnects))
+      /* don't grow beyond the allowed size */
+      newmax = multi->maxconnects;
+
+    if(newmax > multi->connc->num) {
+      /* we only do this is we can in fact grow the cache */
+      CURLcode res = Curl_ch_connc(data, multi->connc, newmax);
+      if(res)
+        return CURLM_OUT_OF_MEMORY;
+    }
+  }
+
+  /* Allocate and initialize timeout list for easy handle */
+  timeoutlist = Curl_llist_alloc(multi_freetimeout);
+  if(!timeoutlist)
     return CURLM_OUT_OF_MEMORY;
 
-  /* Now, time to add an easy handle to the multi stack */
+  /* Allocate new node for the doubly-linked circular list of
+     Curl_one_easy structs that holds pointers to easy handles */
   easy = calloc(1, sizeof(struct Curl_one_easy));
-  if(!easy)
+  if(!easy) {
+    Curl_llist_destroy(timeoutlist, NULL);
     return CURLM_OUT_OF_MEMORY;
+  }
 
+  /*
+  ** No failure allowed in this function beyond this point. And
+  ** no modification of easy nor multi handle allowed before this
+  ** except for potential multi's connection cache growing which
+  ** won't be undone in this function no matter what.
+  */
+
+  /* Make easy handle use timeout list initialized above */
+  data->state.timeoutlist = timeoutlist;
+  timeoutlist = NULL;
+
+  /* Remove handle from the list of 'closure handles' in case it is there */
   cl = multi->closure;
   while(cl) {
     struct closure *next = cl->next;
-    if(cl->easy_handle == (struct SessionHandle *)easy_handle) {
-      /* remove this handle from the closure list */
+    if(cl->easy_handle == data) {
+      /* Remove node from list */
       free(cl);
       if(prev)
         prev->next = next;
       else
         multi->closure = next;
-      break; /* no need to continue since this handle can only be present once
-                in the list */
+      /* No need to continue, handle can only be present once in the list */
+      break;
     }
     prev = cl;
     cl = next;
   }
 
   /* set the easy handle */
-  easy->easy_handle = easy_handle;
+  easy->easy_handle = data;
   multistate(easy, CURLM_STATE_INIT);
 
   /* set the back pointer to one_easy to assist in removal */
@@ -507,25 +543,21 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     easy->easy_handle->dns.hostcachetype = HCACHE_MULTI;
   }
 
-  if(easy->easy_handle->state.connc) {
-    if(easy->easy_handle->state.connc->type == CONNCACHE_PRIVATE) {
-      /* kill old private version */
-      Curl_rm_connc(easy->easy_handle->state.connc);
-      /* point out our shared one instead */
-      easy->easy_handle->state.connc = multi->connc;
-    }
-    /* else it is already using multi? */
+  /* On a multi stack the connection cache, owned by the multi handle,
+     is shared between all easy handles within the multi handle. */
+  if(easy->easy_handle->state.connc &&
+     (easy->easy_handle->state.connc->type == CONNCACHE_PRIVATE)) {
+    /* kill old private connection cache */
+    Curl_rm_connc(easy->easy_handle->state.connc);
+    easy->easy_handle->state.connc = NULL;
   }
-  else
-    /* point out our shared one */
-    easy->easy_handle->state.connc = multi->connc;
-
-  /* Make sure the type is setup correctly */
+  /* Point now to this multi's connection cache */
+  easy->easy_handle->state.connc = multi->connc;
   easy->easy_handle->state.connc->type = CONNCACHE_MULTI;
 
-  /* This adds the new entry at the back of the list
-     to try and maintain a FIFO queue so the pipelined
-     requests are in order. */
+  /* This adds the new entry at the 'end' of the doubly-linked circular
+     list of Curl_one_easy structs to try and maintain a FIFO queue so
+     the pipelined requests are in order. */
 
   /* We add this new entry last in the list. We make our 'next' point to the
      'first' struct and our 'prev' point to the previous 'prev' */
@@ -539,6 +571,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
      the new node */
   easy->prev->next = easy;
 
+  /* make the SessionHandle refer back to this multi handle */
   Curl_easy_addmulti(easy_handle, multi_handle);
 
   /* make the SessionHandle struct refer back to this struct */
@@ -554,27 +587,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* increase the node-counter */
   multi->num_easy++;
-
-  if((multi->num_easy * 4) > multi->connc->num) {
-    /* We want the connection cache to have plenty room. Before we supported
-       the shared cache every single easy handle had 5 entries in their cache
-       by default. */
-    long newmax = multi->num_easy * 4;
-
-    if(multi->maxconnects && (multi->maxconnects < newmax))
-      /* don't grow beyond the allowed size */
-      newmax = multi->maxconnects;
-
-    if(newmax > multi->connc->num) {
-      /* we only do this is we can in fact grow the cache */
-      CURLcode res = Curl_ch_connc(easy_handle, multi->connc, newmax);
-      if(res != CURLE_OK) {
-        /* FIXME: may need to do more cleanup here */
-        curl_multi_remove_handle(multi_handle, easy_handle);
-        return CURLM_OUT_OF_MEMORY;
-      }
-    }
-  }
 
   /* increase the alive-counter */
   multi->num_alive++;
@@ -1622,7 +1634,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       return CURLM_INTERNAL_ERROR;
     }
 
-    if(CURLM_STATE_COMPLETED > easy->state) {
+    if(easy->state < CURLM_STATE_COMPLETED) {
       if(CURLE_OK != easy->result) {
         /*
          * If an error was returned, and we aren't in completed state now,
@@ -1646,16 +1658,20 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                         easy->easy_conn->done_pipe);
           /* Check if we can move pending requests to send pipe */
           checkPendPipeline(easy->easy_conn);
+
+          if(disconnect_conn) {
+            /* disconnect properly */
+            Curl_disconnect(easy->easy_conn, /* dead_connection */ FALSE);
+
+            /* This is where we make sure that the easy_conn pointer is reset.
+               We don't have to do this in every case block above where a
+               failure is detected */
+            easy->easy_conn = NULL;
+          }
         }
-
-        if(disconnect_conn) {
-          /* disconnect properly */
-          Curl_disconnect(easy->easy_conn, /* dead_connection */ FALSE);
-
-          /* This is where we make sure that the easy_conn pointer is reset.
-             We don't have to do this in every case block above where a
-             failure is detected */
-          easy->easy_conn = NULL;
+        else if(easy->state == CURLM_STATE_CONNECT) {
+          /* Curl_connect() failed */
+          (void)Curl_posttransfer(data);
         }
 
         multistate(easy, CURLM_STATE_COMPLETED);
