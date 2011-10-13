@@ -248,11 +248,11 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
 
     state->max_time = state->start_time+maxtime;
 
-    /* Set per-block timeout to 10% of total */
-    timeout = maxtime/10 ;
+    /* Set per-block timeout to total */
+    timeout = maxtime;
 
-    /* Average reposting an ACK after 15 seconds */
-    state->retry_max = (int)timeout/15;
+    /* Average reposting an ACK after 5 seconds */
+    state->retry_max = (int)timeout/5;
   }
   /* But bound the total number */
   if(state->retry_max<3)
@@ -591,15 +591,10 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
     if(NEXT_BLOCKNUM(state->block) != rblock) {
-      /* No, log it, up the retry count and fail if over the limit */
+      /* No, log it */
       infof(data,
-            "Received unexpected DATA packet block %d\n", rblock);
-      state->retries++;
-      if(state->retries > state->retry_max) {
-        failf(data, "tftp_rx: giving up waiting for block %d",
-              NEXT_BLOCKNUM(state->block));
-        return CURLE_TFTP_ILLEGAL;
-      }
+            "Received unexpected DATA packet block %d, expecting block %d\n",
+            rblock, NEXT_BLOCKNUM(state->block));
       break;
     }
     /* This is the expected block.  Reset counters and ACK it. */
