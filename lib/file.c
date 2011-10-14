@@ -67,6 +67,7 @@
 #include "url.h"
 #include "curl_memory.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -422,7 +423,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t expected_size=0;
   bool fstated=FALSE;
   ssize_t nread;
-  size_t bytestoread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
@@ -544,7 +544,10 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   while(res == CURLE_OK) {
     /* Don't fill a whole buffer if we want less than all data */
-    bytestoread = (expected_size < BUFSIZE-1)?(size_t)expected_size:BUFSIZE-1;
+    size_t bytestoread =
+      (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
+      curlx_sotouz(expected_size) : BUFSIZE - 1;
+
     nread = read(fd, buf, bytestoread);
 
     if(nread > 0)
