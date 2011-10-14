@@ -1440,6 +1440,14 @@ int main(int argc, char *argv[])
       break;
 
     logmsg("====> Client disconnect");
+
+    if(!req.open)
+      /* When instructed to close connection after server-reply we
+         wait a very small amount of time before doing so. If this
+         is not done client might get an ECONNRESET before reading
+         a single byte of server-reply. */
+      wait_ms(50);
+
     sclose(msgsock);
     msgsock = CURL_SOCKET_BAD;
 
