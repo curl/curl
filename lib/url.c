@@ -5073,7 +5073,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
@@ -5118,6 +5118,12 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
       bool connected = FALSE;
 
       result = ConnectPlease(data, conn, &connected);
+
+      if(result && !conn->ip_addr) {
+        /* transport connection failure not related with authentication */
+        conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
+        return result;
+      }
 
       if(connected) {
         result = Curl_protocol_connect(conn, protocol_done);
