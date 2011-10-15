@@ -99,6 +99,7 @@
  15.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
  15.7 remove progress meter from libcurl
  15.8 remove 'curl_httppost' from public
+ 15.9 have form functions use CURL handle argument
 
 ==============================================================================
 
@@ -559,3 +560,11 @@ to provide the data to send.
 
  Changing them to return a private handle will benefit the implementation and
  allow us much greater freedoms while still maintining a solid API and ABI.
+
+15.9 have form functions use CURL handle argument
+
+ curl_formadd() and curl_formget() both currently have no CURL handle
+ argument, but both can use a callback that is set in the easy handle, and
+ thus curl_formget() with callback cannot function without first having
+ curl_easy_perform() (or similar) called - which is hard to grasp and a design
+ mistake.
