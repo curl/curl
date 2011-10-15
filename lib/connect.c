@@ -836,7 +836,7 @@ singleipconnect(struct connectdata *conn,
 {
   struct Curl_sockaddr_ex addr;
   int rc;
-  int error;
+  int error = 0;
   bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
@@ -946,6 +946,8 @@ singleipconnect(struct connectdata *conn,
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+    if(-1 == rc)
+      error = SOCKERRNO;
     conn->connecttime = Curl_tvnow();
     if(conn->num_addr > 1)
       Curl_expire(data, conn->timeoutms_per_addr);
@@ -954,8 +956,6 @@ singleipconnect(struct connectdata *conn,
     rc = 0;
 
   if(-1 == rc) {
-    error = SOCKERRNO;
-
     switch (error) {
     case EINPROGRESS:
     case EWOULDBLOCK:
