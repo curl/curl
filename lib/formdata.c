@@ -855,10 +855,11 @@ int curl_formget(struct curl_httppost *form, void *arg,
 
       do {
         nread = readfromfile(&temp, buffer, sizeof(buffer));
-        if((nread == (size_t) -1) || (nread != append(arg, buffer, nread))) {
-          if(temp.fp) {
+        if((nread == (size_t) -1) ||
+           (nread > sizeof(buffer)) ||
+           (nread != append(arg, buffer, nread))) {
+          if(temp.fp)
             fclose(temp.fp);
-          }
           Curl_formclean(&data);
           return -1;
         }
@@ -1269,6 +1270,13 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata )
   return 0;
 }
 
+/*
+ * readfromfile()
+ *
+ * The read callback that this function may use can return a value larger than
+ * 'size' (which then this function returns) that indicates a problem and it
+ * must be properly dealt with
+ */
 static size_t readfromfile(struct Form *form, char *buffer,
                            size_t size)
 {
@@ -1280,11 +1288,6 @@ static size_t readfromfile(struct Form *form, char *buffer,
       return 0;
     else
       nread = form->fread_func(buffer, 1, size, form->data->line);
-
-    if(nread > size)
-      /* the read callback can return a value larger than the buffer but
-         treat any such as no data in this case */
-      nread = 0;
   }
   else {
     if(!form->fp) {
