@@ -164,7 +164,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* inits */
   config->postfieldsize = -1;
-  config->showerror = TRUE;
+  config->showerror = -1; /* will show errors */
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;

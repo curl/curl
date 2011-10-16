@@ -64,7 +64,9 @@ struct Configurable {
   char *range;
   long low_speed_limit;
   long low_speed_time;
-  bool showerror;
+  int showerror; /* -1 == unset, default => show errors
+                    0 => -s is used to NOT show errors
+                    1 => -S has been used to show errors */
   char *userpwd;
   char *tls_username;
   char *tls_password;

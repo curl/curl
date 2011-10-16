@@ -1426,11 +1426,15 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->mute = config->noprogress = TRUE;
       else
         config->mute = config->noprogress = FALSE;
-      config->showerror = (!toggle)?TRUE:FALSE; /* toggle off */
+      if(config->showerror < 0)
+        /* if still on the default value, set showerror to the reverse of
+           toggle. This is to allow -S and -s to be used in an independent
+           order but still have the same effect. */
+        config->showerror = (!toggle)?TRUE:FALSE; /* toggle off */
       break;
     case 'S':
       /* show errors */
-      config->showerror = toggle; /* toggle on if used with -s */
+      config->showerror = toggle?1:0; /* toggle on if used with -s */
       break;
     case 't':
       /* Telnet options */
