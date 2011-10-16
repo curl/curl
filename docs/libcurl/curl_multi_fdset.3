@@ -40,14 +40,15 @@ but be sure to FD_ZERO them before calling this function as
 otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should be
 called as soon as one of them is ready to be read from or written to.
 
-To be sure to have up-to-date results, you should call
-\fIcurl_multi_perform\fP until it does not return CURLM_CALL_MULTI_PERFORM
-prior to calling \fIcurl_multi_fdset\fP.  This will make sure that libcurl has
-updated the handles' socket states.
-
 If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
 this function returns. Otherwise it will contain the higher descriptor number
-libcurl set.
+libcurl set. When libcurl returns -1 in \fImax_fd\fP, it is because libcurl
+currently does something that isn't possible for your application to monitor
+with a socket and unfortunately you can then not know exactly when the current
+action is completed using select(). When max_fd returns with -1, you need to
+wait a while and then proceed and call \fIcurl_multi_perform\fP anyway. How
+long to wait? I would suggest 100 milliseconds at least, but you may want to
+test it out in your own particular conditions to find a suitable value.
 
 When doing select(), you should use \fBcurl_multi_timeout\fP to figure out how
 long to wait for action. Call \fIcurl_multi_perform\fP even if no activity has
