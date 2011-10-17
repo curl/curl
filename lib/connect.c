@@ -907,11 +907,6 @@ singleipconnect(struct connectdata *conn,
 
   Curl_persistconninfo(conn);
 
-#ifdef ENABLE_IPV6
-  if(addr.family == AF_INET6)
-    conn->bits.ipv6 = TRUE;
-#endif
-
   if(data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
 
@@ -999,6 +994,10 @@ singleipconnect(struct connectdata *conn,
     /* we are connected, awesome! */
     *connected = TRUE; /* this is a true connect */
     infof(data, "connected\n");
+#ifdef ENABLE_IPV6
+    conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
+#endif
+
     Curl_updateconninfo(conn, sockfd);
     *sockp = sockfd;
     return CURLE_OK;
