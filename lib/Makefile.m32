@@ -8,12 +8,32 @@
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.5
-## set ZLIB=1
+##
+## If you are using the precompiled DLL package from the zlib project,
+## <http://zlib.net/zlib125-dll.zip>, then you will need to use `dlltool` to
+## create the import library:
+##
+##   dlltool -D zlib1.dll -d "%ZLIB_PATH%/lib/zlib.def" -l libz.a
+##
+## Copy the newly-created file `libz.a` into the zlib `lib` directory and:
+## set ZLIB_INCLUDE=%ZLIB_PATH%/include
+## set ZLIB_LIBPATH=%ZLIB_PATH%/lib
+##
+## If you are using the Windows OpenSSL build from Shining Light Productions:
+## set OPENSSL_INCLUDE=%OPENSSL_PATH%/include
+## set OPENSSL_LIBPATH=%OPENSSL_PATH%/lib/MinGW
+## set OPENSSL_LIBS=-leay32 "%OPENSSL_LIBPATH%/ssleay32.a"
 #
 ###########################################################################
 
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib-1.2.5
+endif
+ifndef ZLIB_INCLUDE
+ZLIB_INCLUDE = $(ZLIB_PATH)
+endif
+ifndef ZLIB_LIBPATH
+ZLIB_LIBPATH = $(ZLIB_PATH)/lib
 endif
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8r
@@ -147,9 +167,9 @@ ifdef SSL
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
-  INCLUDES += -I"$(ZLIB_PATH)"
+  INCLUDES += -I"$(ZLIB_INCLUDE)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  DLL_LIBS += -L"$(ZLIB_PATH)" -lz
+  DLL_LIBS += -L"$(ZLIB_LIBPATH)" -lz
 endif
 ifdef IDN
   INCLUDES += -I"$(LIBIDN_PATH)/include"
