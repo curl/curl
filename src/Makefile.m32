@@ -4,7 +4,7 @@
 ## and optionally OpenSSL (0.9.8), libssh2 (1.3), zlib (1.2.5), librtmp (2.3)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
+## Example: mingw32-make -f Makefile.m32 CFG=-dyn-zlib-ssl-spi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.5
