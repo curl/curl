@@ -11,6 +11,9 @@ This release includes the following changes:
 
  o Empty headers can be sent in HTTP requests by terminating with a semicolon
  o SSL session sharing support added to curl_share_setopt()
+ o Added support to MAIL FROM for the optional SIZE parameter
+ o smtp: Added support for NTLM authentication
+ o curl tool: code split into tool_*.[ch] files
 
 This release includes the following bugfixes:
 
@@ -25,6 +28,18 @@ This release includes the following bugfixes:
  o Curl_gethostname: return un-qualified machine name
  o fixed the openssl version number configure check
  o nss: certificates from files are no longer looked up by file base names
+ o returning abort from the progress function when using the multi interface
+   would not properly cancel the transfer and close the connection
+ o fix libcurl.m4 to not fail with modern gcc versions
+ o ftp: improved the failed PORT host name resolved error message
+ o TFTP timeout and unexpected block adjustments
+ o HTTP and GOPHER test server-side connection closing adjustments
+ o fix endless loop upon transport connection timeout
+ o don't clobber errno on failed connect
+ o typecheck: allow NULL to unset CURLOPT_ERRORBUFFER
+ o formdata: ack read callback abort
+ o make --show-error properly position independent
+ o set the ipv6-connection boolean correctly on connect
 
 This release includes the following known bugs:
 
@@ -35,6 +50,9 @@ advice from friends like these:
 
  Yukihiro Kawada, Dave Reisner, Gisle Vanem, Guenter Knauf, Steve Holme,
  Yang Tse, Christopher Stone, Taneli Vahakangas, Albert Chin,
- Alejandro Alvarez, Dan Fandrich
+ Alejandro Alvarez, Dan Fandrich, Julien Royer, Georg Lippitsch,
+ Vladimir Grishchenko, Dominique Leuenberger, Marcin Adamski,
+ Jerry Wu, Michal Marek, Frank Van Uffelen, Fabian Hiernaux, Anton Bychkov,
+ Andreas Olsson, Kamil Dudka, Thomas L. Shinnick
 
         Thanks! (and sorry if I forgot to mention someone)
