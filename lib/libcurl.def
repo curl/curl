@@ -2,7 +2,7 @@
 ; Definition file for the DLL version of the LIBCURL library from curl
 ;
 
-LIBRARY		LIBCURL
+LIBRARY		libcurl-4
 
 ;DESCRIPTION	'curl libcurl - http://curl.haxx.se'
 

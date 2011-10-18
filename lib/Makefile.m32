@@ -214,8 +214,8 @@ DLL_LIBS += -lws2_32
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-libcurl_dll_LIBRARY = libcurl.dll
-libcurl_dll_a_LIBRARY = libcurldll.a
+libcurl_dll_LIBRARY = libcurl-4.dll
+libcurl_dll_a_LIBRARY = libcurl.dll.a
 libcurl_a_LIBRARY = libcurl.a
 
 libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
