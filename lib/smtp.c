@@ -1661,35 +1661,36 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   }
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
-  for(i = 0, si = 0; i < nread; i++, si++) {
-    ssize_t left = nread - i;
+  for(i = 0, si = 0; i < nread; i++) {
 
-    if(left >= (ssize_t)(SMTP_EOB_LEN - smtpc->eob)) {
-      if(!memcmp(SMTP_EOB + smtpc->eob, &data->req.upload_fromhere[i],
-                 SMTP_EOB_LEN - smtpc->eob)) {
-        /* It matched, copy the replacement data to the target buffer
-           instead. Note that the replacement does not contain the
-           trailing CRLF but we instead continue to match on that one
-           to deal with repeated sequences. Like CRLF.CRLF.CRLF etc
-        */
-        memcpy(&data->state.scratch[si], SMTP_EOB_REPL,
-               SMTP_EOB_REPL_LEN);
-        si += SMTP_EOB_REPL_LEN - 1; /* minus one since the for() increments
-                                        it */
-        i += SMTP_EOB_LEN - smtpc->eob - 1 - 2;
-        smtpc->eob = 0; /* start over */
-        continue;
-      }
-    }
-    else if(!memcmp(SMTP_EOB + smtpc->eob, &data->req.upload_fromhere[i],
-                    left)) {
-      /* the last piece of the data matches the EOB so we can't send that
-         until we know the rest of it */
-      smtpc->eob += left;
-      break;
+    if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
+      smtpc->eob++;
+    else if(smtpc->eob) {
+      /* previously a substring matched, output that first */
+      memcpy(&data->state.scratch[si], SMTP_EOB, smtpc->eob);
+      si += smtpc->eob;
+
+      /* then compare the first byte */
+      if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
+        smtpc->eob=1;
+      else
+        smtpc->eob = 0;
     }
 
-    data->state.scratch[si] = data->req.upload_fromhere[i];
+    if(SMTP_EOB_LEN == smtpc->eob) {
+      /* It matched, copy the replacement data to the target buffer
+         instead. Note that the replacement does not contain the
+         trailing CRLF but we instead continue to match on that one
+         to deal with repeated sequences. Like CRLF.CRLF.CRLF etc
+      */
+      memcpy(&data->state.scratch[si], SMTP_EOB_REPL,
+             SMTP_EOB_REPL_LEN);
+      si += SMTP_EOB_REPL_LEN;
+      smtpc->eob = 2; /* start over at two bytes */
+    }
+    else if(!smtpc->eob)
+      data->state.scratch[si++] = data->req.upload_fromhere[i];
+
   } /* for() */
 
   if(si != nread) {
