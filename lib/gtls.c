@@ -476,8 +476,10 @@ gtls_connect_step1(struct connectdata *conn,
   gnutls_transport_set_push_function(session, Curl_gtls_push);
   gnutls_transport_set_pull_function(session, Curl_gtls_pull);
 
+#if GNUTLS_VERSION_NUMBER < 0x020c00
   /* lowat must be set to zero when using custom push and pull functions. */
   gnutls_transport_set_lowat(session, 0);
+#endif
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
