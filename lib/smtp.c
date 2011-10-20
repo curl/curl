@@ -1671,8 +1671,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
       si += smtpc->eob;
 
       /* then compare the first byte */
-      if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
-        smtpc->eob=1;
+      if(SMTP_EOB[0] == data->req.upload_fromhere[i])
+        smtpc->eob = 1;
       else
         smtpc->eob = 0;
     }
