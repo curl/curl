@@ -40,8 +40,6 @@ struct WriteThis {
 
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
-
 #ifdef LIB587
   (void)ptr;
   (void)size;
@@ -49,6 +47,8 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   (void)userp;
   return CURL_READFUNC_ABORT;
 #else
+
+  struct WriteThis *pooh = (struct WriteThis *)userp;
 
   if(size*nmemb < 1)
     return 0;
