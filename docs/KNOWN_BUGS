@@ -12,12 +12,6 @@ may have been fixed since this was written!
   http://curl.haxx.se/mail/lib-2009-10/0024.html
   http://curl.haxx.se/bug/view.cgi?id=2944325
 
-74. The HTTP spec allows headers to be merged and become comma-separated
-  instead of being repeated several times. This also include Authenticate: and
-  Proxy-Authenticate: headers and while this hardly every happens in real life
-  it will confuse libcurl which does not properly support it for all headers -
-  like those Authenticate headers.
-
 73. if a connection is made to a FTP server but the server then just never
   sends the 220 response or otherwise is dead slow, libcurl will not
   acknowledge the connection timeout during that phase but only the "real"
