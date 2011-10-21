@@ -94,6 +94,9 @@ static CURLcode file_do(struct connectdata *, bool *done);
 static CURLcode file_done(struct connectdata *conn,
                           CURLcode status, bool premature);
 static CURLcode file_connect(struct connectdata *conn, bool *done);
+static CURLcode file_disconnect(struct connectdata *conn,
+                                bool dead_connection);
+
 
 /*
  * FILE scheme handler.
@@ -111,7 +114,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  file_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
@@ -207,10 +210,9 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
     /* file is not a protocol that can deal with "persistancy" */
     file = data->state.proto.file;
     Curl_safefree(file->freepath);
+    file->path = NULL;
     if(file->fd != -1)
       close(file->fd);
-    file->path = NULL;
-    file->freepath = NULL;
     file->fd = -1;
   }
 
@@ -267,10 +269,31 @@ static CURLcode file_done(struct connectdata *conn,
   struct FILEPROTO *file = conn->data->state.proto.file;
   (void)status; /* not used */
   (void)premature; /* not used */
-  Curl_safefree(file->freepath);
 
-  if(file->fd != -1)
-    close(file->fd);
+  if(file) {
+    Curl_safefree(file->freepath);
+    file->path = NULL;
+    if(file->fd != -1)
+      close(file->fd);
+    file->fd = -1;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode file_disconnect(struct connectdata *conn,
+                                bool dead_connection)
+{
+  struct FILEPROTO *file = conn->data->state.proto.file;
+  (void)dead_connection; /* not used */
+
+  if(file) {
+    Curl_safefree(file->freepath);
+    file->path = NULL;
+    if(file->fd != -1)
+      close(file->fd);
+    file->fd = -1;
+  }
 
   return CURLE_OK;
 }
