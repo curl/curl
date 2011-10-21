@@ -615,10 +615,11 @@ It is also possible to specify the user name and password as part of the
 host, for some protocols, when connecting to servers that require
 authentication.
 
-HTTP and FTP support this type of authentication as follows:
+For exammple the following types of authentication support this:
 
-http://name:password@www.domain.com
-ftp://name:password@ftp.domain.com
+http://user:password@www.domain.com
+ftp://user:password@ftp.domain.com
+pop3://user:password@mail.domain.com
 
 The port is optional and when not specified libcurl will use the default port
 based on the determined or specified protocol: 80 for http, 21 for ftp and 25
@@ -693,6 +694,15 @@ sends your local computer's host name in the HELO / EHLO command.
 smtp://mail.domain.com/client.domain.com - This will send client.domain.com in
 the HELO / EHLO command to the mail server at domain.com.
 
+.B POP3
+
+The path part of a POP3 request specifies the mailbox (message) to retrieve.
+If the mailbox is not specified then a list of waiting messages is returned
+instead.
+
+pop3://user:password@mail.domain.com - This lists the available messages
+pop3://user:password@mail.domain.com/1 - This retrieves the first message
+
 .B SCP
 
 The path part of an SCP request specifies the file to retrieve and from what
@@ -717,7 +727,8 @@ the directory listing for the root / home directory will be returned.
 If the user name is not embedded in the URL, it can be set with the
 \fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
 
-sftp://user:pass@example.com/etc/issue - This specifies the file /etc/issue
+sftp://user:password@example.com/etc/issue - This specifies the file
+/etc/issue
 
 sftp://user@example.com/~/my-file - This specifies the file my-file in the
 user's home directory
