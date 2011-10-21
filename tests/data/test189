@@ -9,7 +9,7 @@ Content-Length: 2
 OK
 </data>
 <data1>
-HTTP/1.1 200 OK 
+HTTP/1.1 200 OK
 Connection: close
 Content-Length: 15
 
@@ -21,7 +21,7 @@ HTTP/1.1 301 OK swsbounce
 Location: /189
 Content-Length: 2
 
-HTTP/1.1 200 OK 
+HTTP/1.1 200 OK
 Connection: close
 Content-Length: 15
 

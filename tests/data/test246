@@ -55,7 +55,7 @@ ok
 
 # Client-side
 <client>
-# 
+#
 <server>
 http
 </server>

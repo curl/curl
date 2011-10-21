@@ -21,16 +21,16 @@ Set-Cookie:ismatch=this  ; domain=127.0.0.1; path=/silly/
 Set-Cookie: sec1value=secure1  ; domain=127.0.0.1; path=/secure1/ ; secure
 Set-Cookie: sec2value=secure2  ; domain=127.0.0.1; path=/secure2/ ; secure=
 Set-Cookie: sec3value=secure3  ; domain=127.0.0.1; path=/secure3/ ; secure=
-Set-Cookie: sec4value=secure4  ; secure=; domain=127.0.0.1; path=/secure4/ ; 
-Set-Cookie: sec5value=secure5  ; secure; domain=127.0.0.1; path=/secure5/ ; 
-Set-Cookie: sec6value=secure6  ; secure ; domain=127.0.0.1; path=/secure6/ ; 
-Set-Cookie: sec7value=secure7  ; secure   ; domain=127.0.0.1; path=/secure7/ ; 
-Set-Cookie: sec8value=secure8  ; secure= ; domain=127.0.0.1; path=/secure8/ ; 
-Set-Cookie: secure=very1  ; secure=; domain=127.0.0.1; path=/secure9/; 
+Set-Cookie: sec4value=secure4  ; secure=; domain=127.0.0.1; path=/secure4/ ;
+Set-Cookie: sec5value=secure5  ; secure; domain=127.0.0.1; path=/secure5/ ;
+Set-Cookie: sec6value=secure6  ; secure ; domain=127.0.0.1; path=/secure6/ ;
+Set-Cookie: sec7value=secure7  ; secure   ; domain=127.0.0.1; path=/secure7/ ;
+Set-Cookie: sec8value=secure8  ; secure= ; domain=127.0.0.1; path=/secure8/ ;
+Set-Cookie: secure=very1  ; secure=; domain=127.0.0.1; path=/secure9/;
 Set-Cookie: httpo1=value1  ; domain=127.0.0.1; path=/p1/; httponly
 Set-Cookie: httpo2=value2  ; domain=127.0.0.1; path=/p2/; httponly=
 Set-Cookie: httpo3=value3  ; httponly; domain=127.0.0.1; path=/p3/;
-Set-Cookie: httpo4=value4  ; httponly=; domain=127.0.0.1; path=/p4/; 
+Set-Cookie: httpo4=value4  ; httponly=; domain=127.0.0.1; path=/p4/;
 Set-Cookie: httponly=myvalue1  ; domain=127.0.0.1; path=/p4/; httponly
 Set-Cookie: httpandsec=myvalue2  ; domain=127.0.0.1; path=/p4/; httponly; secure
 Set-Cookie: httpandsec2=myvalue3; domain=127.0.0.1; path=/p4/; httponly=; secure

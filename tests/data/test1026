@@ -17,7 +17,7 @@
 none
 </server>
  <name>
-curl --manual 
+curl --manual
  </name>
  <command>
 --manual

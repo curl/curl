@@ -26,7 +26,7 @@ http
 --data-urlencode
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1015 --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/1015.txt" --data-urlencode @log/1015.txt 
+http://%HOSTIP:%HTTPPORT/1015 --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@log/1015.txt" --data-urlencode @log/1015.txt
 </command>
 <file name="log/1015.txt">
 content to _?!#$'|<>

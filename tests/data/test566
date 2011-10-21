@@ -39,7 +39,7 @@ HTTP GET with CURLINFO_CONTENT_LENGTH_DOWNLOAD and 0 bytes transfer
  <command>
 http://%HOSTIP:%HTTPPORT/566 log/ip566
 </command>
-</client> 
+</client>
 
 #
 # Verify data after the test has been "shot"

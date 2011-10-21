@@ -39,7 +39,7 @@ HTTP GET with proxy and CURLOPT_PORT
  </name>
 # first URL then proxy
  <command>
-http://www.example.com:999/523 http://%HOSTIP:%HTTPPORT 
+http://www.example.com:999/523 http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 

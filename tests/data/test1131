@@ -31,7 +31,7 @@ FAILURE2
 </data1>
 
 # we use skip to make the test server never read the full payload off
-# the socket and instead return the response at once 
+# the socket and instead return the response at once
 <servercmd>
 skip: 100
 </servercmd>

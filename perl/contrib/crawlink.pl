@@ -135,7 +135,7 @@ sub SplitURL {
         $getserver = $2;
         $getpath = $3;
         $getdocument = "";
-    
+
         if($getpath !~ /\//) {
             $getpath ="";
             $getdocument = $3;
@@ -256,7 +256,7 @@ sub GetLinks {
     while($in =~ /[^<]*(<[^>]+>)/g ) {
         # we have a tag in $1
         my $tag = $1;
-    
+
         if($tag =~ /^<!--/) {
             # this is a comment tag, ignore it
         }

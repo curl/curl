@@ -250,7 +250,7 @@ if($stunnel_version >= 400) {
 	output = $logfile
 	socket = $socketopt
 	foreground = yes
-	
+
 	[curltest]
 	accept = $accept_port
 	connect = $target_port

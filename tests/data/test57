@@ -12,7 +12,7 @@ HTTP GET
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Funny-head: yesyes
-Content-Type: text/html; charset=ISO-8859-4   
+Content-Type: text/html; charset=ISO-8859-4
 
 </data>
 </reply>

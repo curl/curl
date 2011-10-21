@@ -77,7 +77,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/1100 -u testuser:testpass --ntlm -L -d "stuff to send away" 
+http://%HOSTIP:%HTTPPORT/1100 -u testuser:testpass --ntlm -L -d "stuff to send away"
 </command>
 <precheck>
 chkhostname curlhost

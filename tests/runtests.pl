@@ -230,7 +230,7 @@ my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
 my %enabled_keywords;   # key words of tests to run
-my %disabled;           # disabled test cases 
+my %disabled;           # disabled test cases
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -2130,7 +2130,7 @@ sub checksystem {
                $has_polarssl=1;
                $has_openssl=1;
                $ssllib="polarssl";
-           } 
+           }
            elsif ($libcurl =~ /axtls/i) {
                $has_axtls=1;
                $ssllib="axTLS";
