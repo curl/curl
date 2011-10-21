@@ -146,7 +146,7 @@ Daniel Stenberg (14 May 2010)
   compressed Content-Encoding!
 
   (http://curl.haxx.se/bug/view.cgi?id=3000056)
-  
+
 Daniel Stenberg (12 May 2010)
 - Howard Chu brought support for RTMP. This is powered by the underlying
   librtmp library. It supports a range of variations and "sub-protocols"
@@ -181,14 +181,14 @@ Daniel Stenberg (7 May 2010)
   That situation is subject for some closer inspection in the future.
 
 - Howard Chu split the I/O handling functions into private handlers.
-    
+
   Howard Chu brought the bulk work of this patch that properly moves out the
   sending and recving of data to the parts of the code that are properly
   responsible for the various ways of doing so.
-  
+
   Daniel Stenberg assisted with polishing a few bits and fixed some minor
   flaws in the original patch.
-  
+
   Another upside of this patch is that we now abuse CURLcodes less with the
   "magic" -1 return codes and instead use CURLE_AGAIN more consistently.
 
@@ -296,7 +296,7 @@ Daniel Stenberg (28 Mar 2010)
 - Ben Greear: If you pass a URL to pop3 that does not contain a message ID as
   part of the URL, it would previously ask for 'INBOX' which just causes the
   pop3 server to return an error.
-    
+
   Now libcurl treats en empty message ID as a request for LIST (list of pop3
   message IDs).  User's code could then parse this and download individual
   messages as desired.
@@ -318,7 +318,7 @@ Daniel Stenberg (24 Mar 2010)
   the last packet received constitutes the end of the response body, libcurl
   still treats it as a timeout condition and reports a message like:
 
-  "Operation timed out after 3000 milliseconds with 876 out of 876 bytes 
+  "Operation timed out after 3000 milliseconds with 876 out of 876 bytes
   received"
 
   It should only a timeout if the timer lapsed and we DIDN'T receive the end
@@ -368,7 +368,7 @@ Daniel Stenberg (22 Mar 2010)
   case of a timeout, the signal handler for SIGALRM never gets removed. I
   think that in my case it gets executed at some point later on when execution
   has long left Curl_resolv_timeout() or even the cURL library.
-  
+
   The code that is jumped to with siglongjmp() simply sets the error message
   to "name lookup timed out" and then returns with CURLRESOLV_ERROR. I guess
   that instead of simply returning without cleaning up, the code should have a
@@ -17288,7 +17288,7 @@ Version 5.1 (not publicly released)
 
    They should be set for protocol-specific proxies. General proxy should be
    set with
-	
+
 	ALL_PROXY
 
    And a comma-separated list of host names that shouldn't go through any

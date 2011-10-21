@@ -164,7 +164,7 @@ unlock: share  [Pigs in space]: 61
 GLOBAL_CLEANUP
 </stdout>
 <stderr>
-http://%HOSTIP:%HTTPPORT/506 
+http://%HOSTIP:%HTTPPORT/506
 </stderr>
 <file name="log/jar506" mode="text">
 # Netscape HTTP Cookie File

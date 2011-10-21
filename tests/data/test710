@@ -37,7 +37,7 @@ socks5
 HTTP GET via SOCKS5 set with --proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/710 --proxy socks5://%HOSTIP:%SOCKSPORT 
+http://%HOSTIP:%HTTPPORT/710 --proxy socks5://%HOSTIP:%SOCKSPORT
 </command>
 </client>
 

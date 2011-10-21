@@ -21,7 +21,7 @@ Content-Type: text/html; charset=iso-8859-1
 
 # Client-side
 <client>
-# 
+#
 <server>
 http
 </server>

@@ -90,7 +90,7 @@ my @recent = reverse sort sortversions keys %used;
 # the most recent symbol
 my $newsym = $recent[0];
 # the most recent version
-my $newver = $doc{$newsym}; 
+my $newver = $doc{$newsym};
 
 print "The scanned source uses these symbols introduced in $newver:\n";
 

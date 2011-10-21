@@ -25,7 +25,7 @@ Content-Length: 0
 
 # Client-side
 <client>
-# 
+#
 <server>
 http
 </server>

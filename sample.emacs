@@ -21,7 +21,7 @@
 the right hook to run.")
 
 (defun my-style-selective-mode-hook-function ()
-  "Run each PREDICATE in `my-style-selective-mode-hook' to see if the 
+  "Run each PREDICATE in `my-style-selective-mode-hook' to see if the
 HOOK in the pair should be executed. If the PREDICATE evaluate to non
 nil HOOK is executed and the rest of the hooks are ignored."
   (let ((h my-style-selective-mode-hook))
@@ -37,9 +37,9 @@ nil HOOK is executed and the rest of the hooks are ignored."
 ;; non nil if the hook in the pair is supposed to be evaluated. In the
 ;; example a part of the path is used to select what style to
 ;; use. Choose what is appropriate for you.
-(add-hook 'my-style-selective-mode-hook 
+(add-hook 'my-style-selective-mode-hook
 	  '((string-match "curl" (buffer-file-name)) . curl-c-mode-common-hook))
-(add-hook 'my-style-selective-mode-hook 
+(add-hook 'my-style-selective-mode-hook
 	  '((string-match "other" (buffer-file-name)) . other-c-mode-common-hook))
 ;; Make sure the default style is appended.
 (add-hook 'my-style-selective-mode-hook '(t . my-c-mode-common-hook) t)

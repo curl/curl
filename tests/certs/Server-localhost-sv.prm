@@ -17,7 +17,7 @@ countryName_value            = NN
 organizationName              = "Organization Name"
 organizationName_value     = Edel Curl Arctic Illudium Research Cloud
 commonName                      = "Common Name"
-commonName_value              = localhost 
+commonName_value              = localhost
 
 [something]
 # The key

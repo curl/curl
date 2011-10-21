@@ -30,15 +30,15 @@ Certificate:
                     de:5b:a3:e5:b2:3f:4c:77:53
                 Exponent: 65537 (0x10001)
         X509v3 extensions:
-            X509v3 Subject Alternative Name: 
+            X509v3 Subject Alternative Name:
                 DNS:localhost
-            X509v3 Key Usage: 
+            X509v3 Key Usage:
                 Key Encipherment
-            X509v3 Extended Key Usage: 
+            X509v3 Extended Key Usage:
                 TLS Web Server Authentication
-            X509v3 Subject Key Identifier: 
+            X509v3 Subject Key Identifier:
                 3B:2B:84:0D:23:3C:46:F9:9B:E5:C2:FA:B7:30:E7:AC:E3:ED:09:C3
-            X509v3 Authority Key Identifier: 
+            X509v3 Authority Key Identifier:
                 keyid:AD:3E:E2:39:07:B8:5C:AA:26:90:94:4C:26:69:21:83:E2:4E:36:94
 
             X509v3 Basic Constraints: critical
