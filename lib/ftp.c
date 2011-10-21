@@ -134,9 +134,10 @@ static CURLcode ftp_connect(struct connectdata *conn, bool *done);
 static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection);
 static CURLcode ftp_nextconnect(struct connectdata *conn);
 static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
-static int ftp_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
+static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks);
+static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
+                              int numsocks);
 static CURLcode ftp_doing(struct connectdata *conn,
                           bool *dophase_done);
 static CURLcode ftp_setup_connection(struct connectdata * conn);
@@ -171,6 +172,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_doing,                       /* doing */
   ftp_getsock,                     /* proto_getsock */
   ftp_getsock,                     /* doing_getsock */
+  ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
@@ -196,6 +198,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_doing,                       /* doing */
   ftp_getsock,                     /* proto_getsock */
   ftp_getsock,                     /* doing_getsock */
+  ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
@@ -222,6 +225,7 @@ static const struct Curl_handler Curl_handler_ftp_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -247,6 +251,7 @@ static const struct Curl_handler Curl_handler_ftps_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -632,6 +637,37 @@ static int ftp_getsock(struct connectdata *conn,
                        int numsocks)
 {
   return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
+}
+
+/* For the FTP "DO_MORE" phase only */
+static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
+                              int numsocks)
+{
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
+
+  if(!numsocks)
+    return GETSOCK_BLANK;
+
+  /* When in DO_MORE state, we could be either waiting for us to connect to a
+     remote site, or we could wait for that site to connect to us. Or just
+     handle ordinary commands.
+
+     When waiting for a connect, we will be in FTP_STOP state and then we wait
+     for the secondary socket to become writeable. If we're in another state,
+     we're still handling commands on the control (primary) connection.
+
+  */
+
+  switch(ftpc->state) {
+  case FTP_STOP:
+    break;
+  default:
+    return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
+  }
+
+  socks[0] = conn->sock[SECONDARYSOCKET];
+
+  return GETSOCK_READSOCK(0);
 }
 
 /* This is called after the FTP_QUOTE state is passed.

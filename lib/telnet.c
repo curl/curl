@@ -182,6 +182,7 @@ const struct Curl_handler Curl_handler_telnet = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */

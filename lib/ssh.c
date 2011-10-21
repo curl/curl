@@ -165,6 +165,7 @@ const struct Curl_handler Curl_handler_scp = {
   scp_doing,                            /* doing */
   ssh_getsock,                          /* proto_getsock */
   ssh_getsock,                          /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ssh_perform_getsock,                  /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -189,6 +190,7 @@ const struct Curl_handler Curl_handler_sftp = {
   sftp_doing,                           /* doing */
   ssh_getsock,                          /* proto_getsock */
   ssh_getsock,                          /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ssh_perform_getsock,                  /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */

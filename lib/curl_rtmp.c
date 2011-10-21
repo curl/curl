@@ -71,6 +71,7 @@ const struct Curl_handler Curl_handler_rtmp = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -90,6 +91,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -109,6 +111,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -128,6 +131,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -147,6 +151,7 @@ const struct Curl_handler Curl_handler_rtmps = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -166,6 +171,7 @@ const struct Curl_handler Curl_handler_rtmpts = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */

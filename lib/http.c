@@ -118,6 +118,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   http_getsock_do,                      /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -141,6 +142,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* doing */
   https_getsock,                        /* proto_getsock */
   http_getsock_do,                      /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */

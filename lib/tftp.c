@@ -184,6 +184,7 @@ const struct Curl_handler Curl_handler_tftp = {
   tftp_doing,                           /* doing */
   tftp_getsock,                         /* proto_getsock */
   tftp_getsock,                         /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   tftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */

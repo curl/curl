@@ -83,6 +83,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -107,6 +108,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */

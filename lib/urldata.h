@@ -671,6 +671,12 @@ struct Curl_handler {
                        curl_socket_t *socks,
                        int numsocks);
 
+  /* Called from the multi interface during the DO_MORE phase, and it should
+     then return a proper fd set */
+  int (*domore_getsock)(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks);
+
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */

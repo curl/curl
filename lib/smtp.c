@@ -127,6 +127,7 @@ const struct Curl_handler Curl_handler_smtp = {
   smtp_doing,                       /* doing */
   smtp_getsock,                     /* proto_getsock */
   smtp_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -151,6 +152,7 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_doing,                       /* doing */
   smtp_getsock,                     /* proto_getsock */
   smtp_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -176,6 +178,7 @@ static const struct Curl_handler Curl_handler_smtp_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -200,6 +203,7 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */

@@ -113,6 +113,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   rtsp_getsock_do,                      /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtsp_disconnect,                      /* disconnect */
   rtsp_rtp_readwrite,                   /* readwrite */
