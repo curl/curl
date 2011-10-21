@@ -32,11 +32,10 @@ ftp://%HOSTIP:%FTPPORT/538
 </client>
 
 # Verify data after the test has been "shot"
+# TEST_ERR_SUCCESS is errorcode 120
 <verify>
-# ok, the error code here is supposed to be 100 for the fine case since
-# that's just how lib504.c is written
 <errorcode>
-100
+120
 </errorcode>
 <protocol>
 USER anonymous

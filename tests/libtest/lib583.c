@@ -33,58 +33,36 @@
 int test(char *URL)
 {
   int stillRunning;
-  CURLM* multiHandle;
-  CURL* curl;
-  int res1 = 0;
-  int res;
+  CURLM* multiHandle = NULL;
+  CURL* curl = NULL;
+  int res = 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
+  global_init(CURL_GLOBAL_ALL);
 
-  if((multiHandle = curl_multi_init()) == NULL) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  multi_init(multiHandle);
 
-  if((curl = curl_easy_init()) == NULL) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_multi_cleanup(multiHandle);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  easy_init(curl);
 
-  test_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
-  test_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
-  test_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
+  easy_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
+  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
+  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
 
-  test_setopt(curl, CURLOPT_UPLOAD, 1);
-  test_setopt(curl, CURLOPT_VERBOSE, 1);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)5);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_INFILESIZE, (long)5);
 
-  if((res = (int)curl_multi_add_handle(multiHandle, curl)) != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
-    curl_easy_cleanup(curl);
-    curl_multi_cleanup(multiHandle);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  multi_add_handle(multiHandle, curl);
 
   /* this tests if removing an easy handle immediately after multi
      perform has been called succeeds or not. */
 
   fprintf(stderr, "curl_multi_perform()...\n");
-  res1 = (int) curl_multi_perform(multiHandle, &stillRunning);
-  if(res1)
-    fprintf(stderr, "curl_multi_perform() failed, "
-            "with code %d\n", res1);
-  else
-    fprintf(stderr, "curl_multi_perform() succeeded\n");
+
+  multi_perform(multiHandle, &stillRunning);
+
+  fprintf(stderr, "curl_multi_perform() succeeded\n");
 
   fprintf(stderr, "curl_multi_remove_handle()...\n");
   res = (int) curl_multi_remove_handle(multiHandle, curl);
@@ -96,12 +74,11 @@ int test(char *URL)
 
 test_cleanup:
 
+  /* undocumented cleanup sequence - type UB */
+
   curl_easy_cleanup(curl);
   curl_multi_cleanup(multiHandle);
   curl_global_cleanup();
 
-  if(res)
-    return res;
-  else
-    return res1;
+  return res;
 }

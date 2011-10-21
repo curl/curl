@@ -30,25 +30,33 @@
 #  include "memdebug.h"
 #endif
 
-int select_test (int num_fds, fd_set *rd, fd_set *wr, fd_set *exc,
-                 struct timeval *tv)
+int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
+                   struct timeval *tv)
 {
+  if(nfds < 0) {
+    SET_SOCKERRNO(EINVAL);
+    return -1;
+  }
 #ifdef USE_WINSOCK
-  /* Winsock doesn't like no socket set in 'rd', 'wr' or 'exc'. This is
-   * case when 'num_fds <= 0. So sleep.
+  /* 
+   * Winsock select() requires that at least one of the three fd_set
+   * pointers is not NULL and points to a non-empty fdset. IOW Winsock
+   * select() can not be used to sleep without a single fd_set.
    */
-  if (num_fds <= 0) {
+  if(!nfds) {
     Sleep(1000*tv->tv_sec + tv->tv_usec/1000);
     return 0;
   }
 #endif
-  return select(num_fds, rd, wr, exc, tv);
+  return select(nfds, rd, wr, exc, tv);
 }
 
 char *libtest_arg2=NULL;
 char *libtest_arg3=NULL;
 int test_argc;
 char **test_argv;
+
+struct timeval tv_test_start; /* for test timing */
 
 #ifdef UNITTESTS
 int unitfail; /* for unittests */

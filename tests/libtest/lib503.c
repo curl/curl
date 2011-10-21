@@ -25,8 +25,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
+#define TEST_HANG_TIMEOUT 60 * 1000
 
 /*
  * Source code in here hugely as reported in bug report 651460 by
@@ -38,121 +37,62 @@
 
 int test(char *URL)
 {
-  CURL *c;
+  CURL *c = NULL;
   CURLM *m = NULL;
   int res = 0;
   int running;
-  char done = FALSE;
-  struct timeval ml_start;
-  struct timeval mp_start;
-  char ml_timedout = FALSE;
-  char mp_timedout = FALSE;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
+  start_test_timing();
 
-  if ((c = curl_easy_init()) == NULL) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  global_init(CURL_GLOBAL_ALL);
 
-  test_setopt(c, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
-  test_setopt(c, CURLOPT_URL, URL);
-  test_setopt(c, CURLOPT_USERPWD, "test:ing");
-  test_setopt(c, CURLOPT_PROXYUSERPWD, "test:ing");
-  test_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(c, CURLOPT_HEADER, 1L);
+  easy_init(c);
 
-  if ((m = curl_multi_init()) == NULL) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    curl_easy_cleanup(c);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  easy_setopt(c, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
+  easy_setopt(c, CURLOPT_URL, URL);
+  easy_setopt(c, CURLOPT_USERPWD, "test:ing");
+  easy_setopt(c, CURLOPT_PROXYUSERPWD, "test:ing");
+  easy_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1L);
+  easy_setopt(c, CURLOPT_HEADER, 1L);
 
-  if ((res = (int)curl_multi_add_handle(m, c)) != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
-    curl_multi_cleanup(m);
-    curl_easy_cleanup(c);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  multi_init(m);
 
-  ml_timedout = FALSE;
-  ml_start = tutil_tvnow();
+  multi_add_handle(m, c);
 
-  while(!done) {
-    fd_set rd, wr, exc;
-    int max_fd;
+  for(;;) {
     struct timeval interval;
+    fd_set rd, wr, exc;
+    int maxfd = -99;
 
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    if (tutil_tvdiff(tutil_tvnow(), ml_start) >
-        MAIN_LOOP_HANG_TIMEOUT) {
-      ml_timedout = TRUE;
-      break;
-    }
-    mp_timedout = FALSE;
-    mp_start = tutil_tvnow();
+    multi_perform(m, &running);
 
-    res = (int)curl_multi_perform(m, &running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-        MULTI_PERFORM_HANG_TIMEOUT) {
-      mp_timedout = TRUE;
-      break;
-    }
-    if (running <= 0) {
-      done = TRUE;
-      break;
-    }
+    abort_on_test_timeout();
 
-    if (mp_timedout || done)
-      break;
-
-    if (res != CURLM_OK) {
-      fprintf(stderr, "not okay???\n");
-      break;
-    }
+    if(!running)
+      break; /* done */
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);
     FD_ZERO(&exc);
-    max_fd = 0;
 
-    if (curl_multi_fdset(m, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
-      fprintf(stderr, "unexpected failured of fdset.\n");
-      res = 89;
-      break;
-    }
+    multi_fdset(m, &rd, &wr, &exc, &maxfd);
 
-    if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
-      fprintf(stderr, "bad select??\n");
-      res = 95;
-      break;
-    }
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-  }
+    select_test(maxfd+1, &rd, &wr, &exc, &interval);
 
-  if (ml_timedout || mp_timedout) {
-    if (ml_timedout) fprintf(stderr, "ml_timedout\n");
-    if (mp_timedout) fprintf(stderr, "mp_timedout\n");
-    fprintf(stderr, "ABORTING TEST, since it seems "
-            "that it would have run forever.\n");
-    res = TEST_ERR_RUNS_FOREVER;
+    abort_on_test_timeout();
   }
 
 test_cleanup:
 
-  if(m) {
-    curl_multi_remove_handle(m, c);
-    curl_multi_cleanup(m);
-  }
+  /* proper cleanup sequence - type PA */
+
+  curl_multi_remove_handle(m, c);
+  curl_multi_cleanup(m);
   curl_easy_cleanup(c);
   curl_global_cleanup();
 

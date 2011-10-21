@@ -27,6 +27,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
+#define TEST_HANG_TIMEOUT 60 * 1000
+
 /* 3x download!
  * 1. normal
  * 2. dup handle
@@ -35,26 +37,21 @@
 
 int test(char *URL)
 {
-  CURLMcode m;
-  CURL *handle = NULL, *duphandle;
+  CURL *handle = NULL;
+  CURL *duphandle = NULL;
   CURLM *mhandle = NULL;
   int res = 0;
   int still_running = 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    goto test_cleanup;
-  }
+  start_test_timing();
 
-  handle = curl_easy_init();
-  if(!handle) {
-    res = CURLE_OUT_OF_MEMORY;
-    goto test_cleanup;
-  }
+  global_init(CURL_GLOBAL_ALL);
 
-  test_setopt(handle, CURLOPT_URL, URL);
-  test_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
-  test_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_init(handle);
+
+  easy_setopt(handle, CURLOPT_URL, URL);
+  easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
+  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
 
   res = curl_easy_perform(handle);
   if(res)
@@ -70,49 +67,48 @@ int test(char *URL)
   curl_easy_cleanup(handle);
   handle = duphandle;
 
-  mhandle = curl_multi_init();
-  if(!mhandle) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    goto test_cleanup;
-  }
+  multi_init(mhandle);
 
-  curl_multi_add_handle(mhandle, handle);
+  multi_add_handle(mhandle, handle);
 
-  curl_multi_perform(mhandle, &still_running);
+  multi_perform(mhandle, &still_running);
+
+  abort_on_test_timeout();
 
   while(still_running) {
-    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
-    int rc;
+    struct timeval timeout;
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcep;
-    int max_fdset = -1;
+    int maxfd = -99;
+
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 100000L; /* 100 ms */
+
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    m = curl_multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &max_fdset);
-    if(m != CURLM_OK) {
-      fprintf(stderr, "curl_multi_fdset() error\n");
-      goto test_cleanup;
-    }
-    /* We call select(max_fdset + 1, ...), specially in case of (maxfd == -1),
-     * we call select(0, ...), which is basically equal to sleep. */
-    rc = select(max_fdset + 1, &fdread, &fdwrite, &fdexcep, &timeout);
-    if(rc == -1) {
-      fprintf(stderr, "select() error\n");
-      goto test_cleanup;
-    }
-    else {
-      curl_multi_perform(mhandle, &still_running);
-    }
+    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
+
+    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+    abort_on_test_timeout();
+
+    multi_perform(mhandle, &still_running);
+
+    abort_on_test_timeout();
   }
 
 test_cleanup:
-  if(mhandle)
-    curl_multi_cleanup(mhandle);
-  if(handle)
-    curl_easy_cleanup(handle);
+
+  /* undocumented cleanup sequence - type UA */
+
+  curl_multi_cleanup(mhandle);
+  curl_easy_cleanup(handle);
   curl_global_cleanup();
+
   return res;
 }

@@ -33,7 +33,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
+#define TEST_HANG_TIMEOUT 60 * 1000
 
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
@@ -75,114 +75,82 @@ static curlioerr ioctlcallback(CURL *handle,
 
 int test(char *URL)
 {
-  int res;
-  CURL *curl;
+  int res = 0;
+  CURL *curl = NULL;
   int counter=0;
   CURLM *m = NULL;
   int running=1;
-  struct timeval mp_start;
-  char mp_timedout = FALSE;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
+  start_test_timing();
 
-  if ((curl = curl_easy_init()) == NULL) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  global_init(CURL_GLOBAL_ALL);
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_init(curl);
+
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* read the POST data from a callback */
-  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
-  test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
-  test_setopt(curl, CURLOPT_READFUNCTION, readcallback);
-  test_setopt(curl, CURLOPT_READDATA, &counter);
+  easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
+  easy_setopt(curl, CURLOPT_READFUNCTION, readcallback);
+  easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose chunked)! */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
 
-  test_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_POST, 1L);
 #ifdef CURL_DOES_CONVERSIONS
   /* Convert the POST data to ASCII. */
-  test_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
+  easy_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
 #endif
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  test_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
-  test_setopt(curl, CURLOPT_PROXYAUTH,
+  easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+  easy_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
+  easy_setopt(curl, CURLOPT_PROXYAUTH,
                    (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
 
-  if ((m = curl_multi_init()) == NULL) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  multi_init(m);
 
-  if ((res = (int)curl_multi_add_handle(m, curl)) != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
-    curl_multi_cleanup(m);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
-
-  mp_timedout = FALSE;
-  mp_start = tutil_tvnow();
+  multi_add_handle(m, curl);
 
   while (running) {
-    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
+    struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
-    int maxfd = -1;
+    int maxfd = -99;
 
-    res = (int)curl_multi_perform(m, &running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-        MULTI_PERFORM_HANG_TIMEOUT) {
-      mp_timedout = TRUE;
-      break;
-    }
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 100000L; /* 100 ms */
+
+    multi_perform(m, &running);
+
+    abort_on_test_timeout();
+
 #ifdef TPF
     sleep(1); /* avoid ctl-10 dump */
 #endif
-    if (running <= 0) {
-      fprintf(stderr, "nothing left running.\n");
-      break;
-    }
+
+    if(!running)
+      break; /* done */
 
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
-    curl_multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    /* In a real-world program you OF COURSE check the return code of the
-       function calls.  On success, the value of maxfd is guaranteed to be
-       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-       case of (maxfd == -1), we call select(0, ...), which is basically equal
-       to sleep. */
+    multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout) == -1) {
-      res = ~CURLM_OK;
-      break;
-    }
-  }
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-  if (mp_timedout) {
-    fprintf(stderr, "mp_timedout\nABORTING TEST, since it seems "
-            "that it would have run forever.\n");
-    res = TEST_ERR_RUNS_FOREVER;
+    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+    abort_on_test_timeout();
   }
 
 test_cleanup:
 
-  if(m) {
-    curl_multi_remove_handle(m, curl);
-    curl_multi_cleanup(m);
-  }
+  /* proper cleanup sequence - type PA */
+
+  curl_multi_remove_handle(m, curl);
+  curl_multi_cleanup(m);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

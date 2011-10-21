@@ -27,117 +27,110 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
+#define TEST_HANG_TIMEOUT 60 * 1000
 
-static CURLMcode perform(CURLM * multi)
+static int perform(CURLM *multi)
 {
   int handles;
-  CURLMcode code;
   fd_set fdread, fdwrite, fdexcep;
-  struct timeval mp_start;
-  char mp_timedout = FALSE;
+  int res = 0;
 
-  mp_timedout = FALSE;
-  mp_start = tutil_tvnow();
+  for(;;) {
+    struct timeval interval;
+    int maxfd = -99;
 
-  for (;;) {
-    static struct timeval timeout = /* 100 ms */ { 0, 100000L };
-    int maxfd = -1;
+    interval.tv_sec = 0;
+    interval.tv_usec = 100000L; /* 100 ms */
 
-    code = curl_multi_perform(multi, &handles);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-        MULTI_PERFORM_HANG_TIMEOUT) {
-      mp_timedout = TRUE;
-      break;
-    }
-    if (handles <= 0)
-      return CURLM_OK;
+    res_multi_perform(multi, &handles);
+    if(res)
+      return res;
 
-    switch (code) {
-      case CURLM_OK:
-        break;
-      default:
-        return code;
-    }
+    res_test_timedout();
+    if(res)
+      return res;
+
+    if(!handles)
+      break; /* done */
 
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
-    curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    /* In a real-world program you OF COURSE check the return code of the
-       function calls.  On success, the value of maxfd is guaranteed to be
-       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-       case of (maxfd == -1), we call select(0, ...), which is basically equal
-       to sleep. */
+    res_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+    if(res)
+      return res;
 
-    if (select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout) == -1)
-      return (CURLMcode) ~CURLM_OK;
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
+
+    res_select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);
+    if(res)
+      return res;
+
+    res_test_timedout();
+    if(res)
+      return res;
   }
 
-  /* We only reach this point if (mp_timedout) */
-  if (mp_timedout) fprintf(stderr, "mp_timedout\n");
-  fprintf(stderr, "ABORTING TEST, since it seems "
-          "that it would have run forever.\n");
-  return (CURLMcode) ~CURLM_OK;
+  return 0; /* success */
 }
 
 int test(char *URL)
 {
-  CURLM *multi;
-  CURL *easy;
+  CURLM *multi = NULL;
+  CURL *easy = NULL;
   int res = 0;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
+  start_test_timing();
+
+  global_init(CURL_GLOBAL_ALL);
+
+  multi_init(multi);
+
+  easy_init(easy);
+
+  multi_setopt(multi, CURLMOPT_PIPELINING, 1L);
+
+  easy_setopt(easy, CURLOPT_WRITEFUNCTION, fwrite);
+  easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
+  easy_setopt(easy, CURLOPT_URL, URL);
+
+  res_multi_add_handle(multi, easy);
+  if(res) {
+    printf("curl_multi_add_handle() 1 failed\n");
+    goto test_cleanup;
   }
 
-  if ((multi = curl_multi_init()) == NULL) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+  res = perform(multi);
+  if(res) {
+    printf("retrieve 1 failed\n");
+    goto test_cleanup;
   }
 
-  if ((easy = curl_easy_init()) == NULL) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_multi_cleanup(multi);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  curl_multi_remove_handle(multi, easy);
 
-  curl_multi_setopt(multi, CURLMOPT_PIPELINING, 1L);
-
-  test_setopt(easy, CURLOPT_WRITEFUNCTION, fwrite);
-  test_setopt(easy, CURLOPT_FAILONERROR, 1L);
-  test_setopt(easy, CURLOPT_URL, URL);
-
-  if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
-    printf("curl_multi_add_handle() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-  } else {
-    if (perform(multi) != CURLM_OK)
-      printf("retrieve 1 failed\n");
-
-    curl_multi_remove_handle(multi, easy);
-  }
   curl_easy_reset(easy);
 
-  test_setopt(easy, CURLOPT_FAILONERROR, 1L);
-  test_setopt(easy, CURLOPT_URL, libtest_arg2);
+  easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
+  easy_setopt(easy, CURLOPT_URL, libtest_arg2);
 
-  if (curl_multi_add_handle(multi, easy) != CURLM_OK) {
+  res_multi_add_handle(multi, easy);
+  if(res) {
     printf("curl_multi_add_handle() 2 failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-  } else {
-    if (perform(multi) != CURLM_OK)
-      printf("retrieve 2 failed\n");
-
-    curl_multi_remove_handle(multi, easy);
+    goto test_cleanup;
   }
 
+  res = perform(multi);
+  if(res) {
+    printf("retrieve 2 failed\n");
+    goto test_cleanup;
+  }
+
+  curl_multi_remove_handle(multi, easy);
+
 test_cleanup:
+
+  /* undocumented cleanup sequence - type UB */
 
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);

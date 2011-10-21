@@ -46,8 +46,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define MAIN_LOOP_HANG_TIMEOUT     90 * 1000
-#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
+#define TEST_HANG_TIMEOUT 60 * 1000
 
 #define NUM_HANDLES 4
 
@@ -56,109 +55,51 @@ int test(char *URL)
   int res = 0;
   CURL *curl[NUM_HANDLES];
   int running;
-  char done=FALSE;
   CURLM *m = NULL;
-  int current=0;
-  int i, j;
-  struct timeval ml_start;
-  struct timeval mp_start;
-  char ml_timedout = FALSE;
-  char mp_timedout = FALSE;
+  int current = 0;
+  int i;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
+  for(i=0; i < NUM_HANDLES; i++)
+    curl[i] = NULL;
+
+  start_test_timing();
+
+  global_init(CURL_GLOBAL_ALL);
 
   /* get NUM_HANDLES easy handles */
   for(i=0; i < NUM_HANDLES; i++) {
-    curl[i] = curl_easy_init();
-    if(!curl[i]) {
-      fprintf(stderr, "curl_easy_init() failed "
-              "on handle #%d\n", i);
-      for (j=i-1; j >= 0; j--) {
-        curl_easy_cleanup(curl[j]);
-      }
-      curl_global_cleanup();
-      return TEST_ERR_MAJOR_BAD + i;
-    }
-    res = curl_easy_setopt(curl[i], CURLOPT_URL, URL);
-    if(res) {
-      fprintf(stderr, "curl_easy_setopt() failed "
-              "on handle #%d\n", i);
-      for (j=i; j >= 0; j--) {
-        curl_easy_cleanup(curl[j]);
-      }
-      curl_global_cleanup();
-      return TEST_ERR_MAJOR_BAD + i;
-    }
-
+    easy_init(curl[i]);
+    /* specify target */
+    easy_setopt(curl[i], CURLOPT_URL, URL);
     /* go verbose */
-    res = curl_easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
-    if(res) {
-      fprintf(stderr, "curl_easy_setopt() failed "
-              "on handle #%d\n", i);
-      for (j=i; j >= 0; j--) {
-        curl_easy_cleanup(curl[j]);
-      }
-      curl_global_cleanup();
-      return TEST_ERR_MAJOR_BAD + i;
-    }
+    easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
   }
 
-  if ((m = curl_multi_init()) == NULL) {
-    fprintf(stderr, "curl_multi_init() failed\n");
-    for(i=0; i < NUM_HANDLES; i++) {
-      curl_easy_cleanup(curl[i]);
-    }
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  multi_init(m);
 
-  if ((res = (int)curl_multi_add_handle(m, curl[current])) != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle() failed, "
-            "with code %d\n", res);
-    curl_multi_cleanup(m);
-    for(i=0; i < NUM_HANDLES; i++) {
-      curl_easy_cleanup(curl[i]);
-    }
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
-
-  ml_timedout = FALSE;
-  ml_start = tutil_tvnow();
+  multi_add_handle(m, curl[current]);
 
   fprintf(stderr, "Start at URL 0\n");
 
-  while (!done) {
-    fd_set rd, wr, exc;
-    int max_fd;
+  for(;;) {
     struct timeval interval;
+    fd_set rd, wr, exc;
+    int maxfd = -99;
 
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    if (tutil_tvdiff(tutil_tvnow(), ml_start) >
-        MAIN_LOOP_HANG_TIMEOUT) {
-      ml_timedout = TRUE;
-      break;
-    }
-    mp_timedout = FALSE;
-    mp_start = tutil_tvnow();
+    multi_perform(m, &running);
 
-    res = (int)curl_multi_perform(m, &running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-        MULTI_PERFORM_HANG_TIMEOUT) {
-      mp_timedout = TRUE;
-      break;
-    }
-    if (running <= 0) {
+    abort_on_test_timeout();
+
+    if(!running) {
 #ifdef LIB527
       /* NOTE: this code does not remove the handle from the multi handle
          here, which would be the nice, sane and documented way of working.
          This however tests that the API survives this abuse gracefully. */
       curl_easy_cleanup(curl[current]);
+      curl[current] = NULL;
 #endif
       if(++current < NUM_HANDLES) {
         fprintf(stderr, "Advancing to URL %d\n", current);
@@ -169,74 +110,75 @@ int test(char *URL)
         /* make us re-use the same handle all the time, and try resetting
            the handle first too */
         curl_easy_reset(curl[0]);
-        test_setopt(curl[0], CURLOPT_URL, URL);
-        test_setopt(curl[0], CURLOPT_VERBOSE, 1L);
+        easy_setopt(curl[0], CURLOPT_URL, URL);
+        /* go verbose */
+        easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
 
         /* re-add it */
-        res = (int)curl_multi_add_handle(m, curl[0]);
+        multi_add_handle(m, curl[0]);
 #else
-        res = (int)curl_multi_add_handle(m, curl[current]);
+        multi_add_handle(m, curl[current]);
 #endif
-        if(res) {
-          fprintf(stderr, "add handle failed: %d.\n", res);
-          res = 243;
-          break;
-        }
       }
       else {
-        done = TRUE; /* bail out */
-        break;
+        break; /* done */
       }
-    }
-
-    if (res != CURLM_OK) {
-      fprintf(stderr, "not okay???\n");
-      break;
     }
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);
     FD_ZERO(&exc);
-    max_fd = 0;
 
-    if (curl_multi_fdset(m, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
-      fprintf(stderr, "unexpected failured of fdset.\n");
-      res = 189;
-      break;
-    }
+    multi_fdset(m, &rd, &wr, &exc, &maxfd);
 
-    if (select_test(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
-      fprintf(stderr, "bad select??\n");
-      res = 195;
-      break;
-    }
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
+
+    select_test(maxfd+1, &rd, &wr, &exc, &interval);
+
+    abort_on_test_timeout();
   }
 
-  if (ml_timedout || mp_timedout) {
-    if (ml_timedout) fprintf(stderr, "ml_timedout\n");
-    if (mp_timedout) fprintf(stderr, "mp_timedout\n");
-    fprintf(stderr, "ABORTING TEST, since it seems "
-            "that it would have run forever.\n");
-    res = TEST_ERR_RUNS_FOREVER;
-  }
-
-#ifdef LIB532
 test_cleanup:
-#endif
 
-#ifndef LIB527
-  /* get NUM_HANDLES easy handles */
+#if defined(LIB526)
+
+  /* test 526 and 528 */
+  /* proper cleanup sequence - type PB */
+
   for(i=0; i < NUM_HANDLES; i++) {
-#ifdef LIB526
-    if(m)
-      curl_multi_remove_handle(m, curl[i]);
-#endif
+    curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }
-#endif
-  if(m)
-    curl_multi_cleanup(m);
-
+  curl_multi_cleanup(m);
   curl_global_cleanup();
+
+#elif defined(LIB527)
+
+  /* test 527 */
+
+  /* Upon non-failure test flow the easy's have already been cleanup'ed. In
+     case there is a failure we arrive here with easy's that have not been
+     cleanup'ed yet, in this case we have to cleanup them or otherwise these
+     will be leaked, let's use undocumented cleanup sequence - type UB */
+
+  if(res)
+    for(i=0; i < NUM_HANDLES; i++)
+      curl_easy_cleanup(curl[i]);
+
+  curl_multi_cleanup(m);
+  curl_global_cleanup();
+
+#elif defined(LIB532)
+
+  /* test 532 */
+  /* undocumented cleanup sequence - type UB */
+
+  for(i=0; i < NUM_HANDLES; i++)
+    curl_easy_cleanup(curl[i]);
+  curl_multi_cleanup(m);
+  curl_global_cleanup();
+
+#endif
+
   return res;
 }

@@ -35,9 +35,10 @@ http://%HOSTIP:%HTTPSPORT/504 %HOSTIP:55555
 </client>
 
 # Verify data after the test has been "shot"
+# TEST_ERR_SUCCESS is errorcode 120
 <verify>
 <errorcode>
-100
+120
 </errorcode>
 </verify>
 </testcase>
