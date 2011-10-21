@@ -3167,6 +3167,7 @@ sub singletest {
     my $errorcode = $err[0] || "0";
     my $ok="";
     my $res;
+    chomp $errorcode;
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
@@ -3354,7 +3355,7 @@ sub singletest {
     }
     else {
         if(!$short) {
-            printf("\n%s returned $cmdres, %d was expected\n",
+            printf("\n%s returned $cmdres, when expecting %s\n",
                    (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " exit FAILED\n";
