@@ -2094,8 +2094,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         data->dns.hostcachetype = HCACHE_NONE;
       }
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(data->share->cookies == data->cookies)
         data->cookies = NULL;
+#endif
 
       if(data->share->sslsession == data->state.session) {
         data->state.session = NULL;
