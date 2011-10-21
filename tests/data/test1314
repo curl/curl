@@ -3,9 +3,11 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 followlocation
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
@@ -25,7 +27,7 @@ Content-Length: 4
 Connection: close
 
 moo
-</data>
+</data1>
 
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsbounce
