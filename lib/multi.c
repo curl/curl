@@ -125,9 +125,9 @@ struct Curl_one_easy {
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
-  ((x)&&(((struct Curl_multi *)(x))->type == CURL_MULTI_HANDLE))
+  ((x) && (((struct Curl_multi *)(x))->type == CURL_MULTI_HANDLE))
 #define GOOD_EASY_HANDLE(x) \
- (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER)
+  ((x) && (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER))
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
