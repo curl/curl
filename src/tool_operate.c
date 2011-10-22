@@ -1208,12 +1208,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         retry_sleep = retry_sleep_default; /* ms */
         retrystart = tvnow();
 
+        if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
+          res = CURLE_OUT_OF_MEMORY;
+          goto show_error;
+        }
+
         for(;;) {
           res = curl_easy_perform(curl);
-          if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
-            res = CURLE_OUT_OF_MEMORY;
-            goto show_error;
-          }
 
           if(config->content_disposition && outs.stream && !config->mute &&
              outs.filename)
