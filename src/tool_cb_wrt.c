@@ -55,9 +55,17 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
     return failure;
 
 #ifdef DEBUGBUILD
-  if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
-    warnf(config, "Data size exceeds single call write limit!\n");
-    return failure;
+  if(config->include_headers) {
+    if(sz * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
+      warnf(config, "Data size exceeds single call write limit!\n");
+      return failure;
+    }
+  }
+  else {
+    if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
+      warnf(config, "Data size exceeds single call write limit!\n");
+      return failure;
+    }
   }
 
   {

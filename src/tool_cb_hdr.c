@@ -60,8 +60,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
     return failure;
 
 #ifdef DEBUGBUILD
-  if((size * nmemb > (size_t)CURL_MAX_WRITE_SIZE) ||
-     (size * nmemb > (size_t)CURL_MAX_HTTP_HEADER)) {
+  if(size * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
     warnf(outs->config, "Header data exceeds single call write limit!\n");
     return failure;
   }
