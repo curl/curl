@@ -747,7 +747,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   static const char mode[][5] = { "EPRT", "PORT" };
   int rc;
   int error;
-  char *host=NULL;
+  char *host = NULL;
   char *string_ftpport = data->set.str[STRING_FTPPORT];
   struct Curl_dns_entry *h=NULL;
   unsigned short port_min = 0;
@@ -855,8 +855,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
-      if(addr)
-        free(addr);
+      Curl_safefree(addr);
       return CURLE_FTP_PORT_FAILED;
     }
     switch(sa->sa_family) {
@@ -885,13 +884,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   else
     res = NULL; /* failure! */
 
-  if(addr)
-    free(addr);
-
   if(res == NULL) {
     failf(data, "failed to resolve the address provided to PORT: %s", host);
+    Curl_safefree(addr);
     return CURLE_FTP_PORT_FAILED;
   }
+
+  Curl_safefree(addr);
+  host = NULL;
 
   /* step 2, create a socket for the requested address */
 
@@ -3065,7 +3065,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   struct pingpong *pp = &ftpc->pp;
   ssize_t nread;
   int ftpcode;
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   bool was_ctl_valid = ftpc->ctl_valid;
   char *path;
   const char *path_to_use = data->state.path;
@@ -3123,8 +3123,12 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   path = curl_easy_unescape(data, path_to_use, 0, NULL);
   if(!path) {
     /* out of memory, but we can limp along anyway (and should try to
-     * since we're in the out of memory cleanup path) */
-    ftpc->prevpath = NULL; /* no path */
+     * since we may already be in the out of memory cleanup path) */
+    if(!result)
+      result = CURLE_OUT_OF_MEMORY;
+    ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+    conn->bits.close = TRUE; /* mark for connection closure */
+    ftpc->prevpath = NULL; /* no path remembering */
   }
   else {
     size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
@@ -3162,6 +3166,12 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     if(!result && ftpc->dont_check && data->req.maxdownload > 0)
       /* partial download completed */
       result = Curl_pp_sendf(pp, "ABOR");
+      if(result) {
+        failf(data, "Failure sending ABOR command: %s",
+              curl_easy_strerror(result));
+        ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+        conn->bits.close = TRUE; /* mark for connection closure */
+      }
 
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* The secondary socket is using SSL so we must close down that part
@@ -3174,6 +3184,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET]) {
       Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
       conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
+      conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
     }
   }
 
@@ -3892,7 +3903,16 @@ static CURLcode ftp_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   if(conn->proto.ftpc.ctl_valid) {
-    PPSENDF(&conn->proto.ftpc.pp, "QUIT", NULL);
+    result = Curl_pp_sendf(&conn->proto.ftpc.pp, "QUIT", NULL);
+    if(result) {
+      failf(conn->data, "Failure sending QUIT command: %s",
+            curl_easy_strerror(result));
+      conn->proto.ftpc.ctl_valid = FALSE; /* mark control connection as bad */
+      conn->bits.close = TRUE; /* mark for connection closure */
+      state(conn, FTP_STOP);
+      return result;
+    }
+
     state(conn, FTP_QUIT);
 
     result = ftp_easy_statemach(conn);
