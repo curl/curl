@@ -76,7 +76,6 @@ my $ipvnum = 4;     # server IPv number (4 or 6)
 my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
-my $grok_eprt;
 
 my $path   = '.';
 my $logdir = $path .'/log';
@@ -1154,7 +1153,9 @@ sub PASV_ftp {
     return;
 }
 
-# Support both PORT and EPRT here. Consider LPRT too.
+#
+# Support both PORT and EPRT here.
+#
 
 sub PORT_ftp {
     my ($arg, $cmd) = @_;
@@ -1173,8 +1174,9 @@ sub PORT_ftp {
         $addr = "$1.$2.$3.$4";
     }
     # EPRT |2|::1|49706|
-    elsif(($cmd eq "EPRT") && ($grok_eprt)) {
+    elsif($cmd eq "EPRT") {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
+            logmsg "bad EPRT-line: $arg\n";
             sendcontrol "500 silly you, go away\r\n";
             return 0;
         }
@@ -1242,7 +1244,7 @@ sub customize {
             $customreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
-        if($_ =~ /COUNT ([A-Z]+) (.*)/) {
+        elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
             # we blank the customreply for this command when having
             # been used this number of times
             $customcount{$1}=$2;
@@ -1341,12 +1343,10 @@ while(@ARGV) {
     elsif($ARGV[0] eq '--ipv4') {
         $ipvnum = 4;
         $listenaddr = '127.0.0.1' if($listenaddr eq '::1');
-        $grok_eprt = 0;
     }
     elsif($ARGV[0] eq '--ipv6') {
         $ipvnum = 6;
         $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
-        $grok_eprt = 1;
     }
     elsif($ARGV[0] eq '--port') {
         if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {

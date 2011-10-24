@@ -4,11 +4,13 @@
 FTP
 PORT
 FAILURE
+EPRT refused
 </keywords>
 </info>
 # Server-side
 <reply>
 <servercmd>
+REPLY EPRT 500 we don't like EPRT now
 REPLY PORT 314 bluah you f00l!
 </servercmd>
 </reply>
