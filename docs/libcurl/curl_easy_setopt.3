@@ -171,8 +171,12 @@ Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA\fP option.
 
 The callback function will be passed as much data as possible in all invokes,
 but you cannot possibly make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of data that can be passed to the write callback
-is defined in the curl.h header file: CURL_MAX_WRITE_SIZE.
+thousands. The maximum amount of body data that can be passed to the write
+callback is defined in the curl.h header file: CURL_MAX_WRITE_SIZE (the usual
+default is 16K). If you however have \fICURLOPT_HEADER\fP set, which sends
+header data to the write callback, you can get up to
+\fICURL_MAX_HTTP_HEADER\fP bytes of header data passed into it. This usually
+means 100K.
 .IP CURLOPT_WRITEDATA
 Data pointer to pass to the file write function. If you use the
 \fICURLOPT_WRITEFUNCTION\fP option, this is the pointer you'll get as
@@ -353,6 +357,9 @@ pointer named \fIuserdata\fP is the one you set with the
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
 transfer and return \fICURL_WRITE_ERROR\fP.
+
+A complete header that is passed to this function can be up to
+\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
