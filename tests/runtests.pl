@@ -1128,7 +1128,24 @@ sub verifyserver {
     return $pid;
 }
 
+#######################################################################
+# Single shot server responsiveness test. This should only be used
+# to verify that a server present in %run hash is still functional
+#
+sub responsiveserver {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
 
+    my $fun = $protofunc{$proto};
+    my $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
+
+    if($pid > 0) {
+        return 1; # responsive
+    }
+
+    my $srvrname = servername_str($proto, $ipvnum, $idnum);
+    logmsg "running server check FAILED (unresponsive $srvrname server)\n";
+    return 0;
+}
 
 #######################################################################
 # start the http server
@@ -1947,6 +1964,42 @@ sub runsocksserver {
     }
 
     return ($pid2, $sshpid);
+}
+
+#######################################################################
+# Single shot pingpong server responsiveness test. This should only be
+# used to verify that a server present in %run hash is still functional
+#
+sub responsive_pingpong_server {
+    my ($proto, $id, $verbose, $ipv6) = @_;
+    my $port;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($proto eq "ftp") {
+        $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
+
+        if($ipvnum==6) {
+            # if IPv6, use a different setup
+            $port = $FTP6PORT;
+        }
+    }
+    elsif($proto eq "pop3") {
+        $port = ($ipvnum==6) ? $POP36PORT : $POP3PORT;
+    }
+    elsif($proto eq "imap") {
+        $port = ($ipvnum==6) ? $IMAP6PORT : $IMAPPORT;
+    }
+    elsif($proto eq "smtp") {
+        $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
+    }
+    else {
+        print STDERR "Unsupported protocol $proto!!\n";
+        return 0;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
 }
 
 #######################################################################
@@ -3528,6 +3581,10 @@ sub startservers {
            ($what eq "ftp") ||
            ($what eq "imap") ||
            ($what eq "smtp")) {
+            if($torture && $run{$what} &&
+               !responsive_pingpong_server($what, "", $verbose)) {
+                stopserver($what);
+            }
             if(!$run{$what}) {
                 ($pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
@@ -3538,6 +3595,10 @@ sub startservers {
             }
         }
         elsif($what eq "ftp2") {
+            if($torture && $run{'ftp2'} && 
+               !responsive_pingpong_server("ftp", "2", $verbose)) {
+                stopserver('ftp2');
+            }
             if(!$run{'ftp2'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "2", $verbose);
                 if($pid <= 0) {
@@ -3548,6 +3609,10 @@ sub startservers {
             }
         }
         elsif($what eq "ftp-ipv6") {
+            if($torture && $run{'ftp-ipv6'} &&
+               !responsive_pingpong_server("ftp", "", $verbose, "ipv6")) {
+                stopserver('ftp-ipv6');
+            }
             if(!$run{'ftp-ipv6'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "", $verbose, "ipv6");
                 if($pid <= 0) {
@@ -3637,6 +3702,10 @@ sub startservers {
             if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
                 # stop server when running and using a different cert
                 stopserver('ftps');
+            }
+            if($torture && $run{'ftp'} &&
+               !responsive_pingpong_server("ftp", "", $verbose)) {
+                stopserver('ftp');
             }
             if(!$run{'ftp'}) {
                 ($pid, $pid2) = runpingpongserver("ftp", "", $verbose);
