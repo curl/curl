@@ -40,6 +40,11 @@ This release includes the following bugfixes:
  o formdata: ack read callback abort
  o make --show-error properly position independent
  o set the ipv6-connection boolean correctly on connect
+ o SMTP: fix end-of-body string escaping
+ o gtls: only call gnutls_transport_set_lowat with <gnutls-2.12.0
+ o HTTP: handle multiple auths in a single WWW-Authenticate line
+ o curl_multi_fdset: correct fdset with FTP PORT use
+ o windbuild: fix the static build
 
 This release includes the following known bugs:
 
@@ -53,6 +58,7 @@ advice from friends like these:
  Alejandro Alvarez, Dan Fandrich, Julien Royer, Georg Lippitsch,
  Vladimir Grishchenko, Dominique Leuenberger, Marcin Adamski,
  Jerry Wu, Michal Marek, Frank Van Uffelen, Fabian Hiernaux, Anton Bychkov,
- Andreas Olsson, Kamil Dudka, Thomas L. Shinnick
+ Andreas Olsson, Kamil Dudka, Thomas L. Shinnick, Tim Harder, Nick Zitzmann,
+ Gokhan Sengun, Tom Wright
 
         Thanks! (and sorry if I forgot to mention someone)
