@@ -1,0 +1,68 @@
+#
+# For this test the server rejects the EPRT command
+# and code in lib589 makes use of curl_multi_timeout()
+#
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+STOR
+multi
+EPRT refused
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+<servercmd>
+REPLY EPRT 500 we don't like EPRT now
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib589
+</tool>
+ <name>
+FTP PORT upload using multi interface timeout, EPRT doesn't work
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/path/589 log/upload589
+</command>
+<file name="log/upload589">
+Moooooooooooo for 589
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip off parts of the PORT and EPRT commands that might differ
+<strippart>
+s/^PORT (.*)/PORT/
+s/^EPRT \|1\|(.*)/EPRT \|1\|/
+</strippart>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPRT |1|
+PORT
+TYPE I
+STOR 589
+QUIT
+</protocol>
+<upload>
+Moooooooooooo for 589
+ upload this
+</upload>
+</verify>
+</testcase>
