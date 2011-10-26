@@ -136,6 +136,8 @@ static int loop(int num, CURLM *cm, const char* url, const char* userpwd,
       if(res)
         return res;
 
+      /* At this point, L is guaranteed to be greater or equal than -1. */
+
       if(L != -1) {
         T.tv_sec = L/1000;
         T.tv_usec = (L%1000)*1000;

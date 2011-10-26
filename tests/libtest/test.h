@@ -95,6 +95,7 @@ extern int unitfail;
 #define TEST_ERR_USAGE         118
 #define TEST_ERR_FOPEN         117
 #define TEST_ERR_FSTAT         116
+#define TEST_ERR_BAD_TIMEOUT   115
 
 /*
 ** Macros for test source code readability/maintainability.
@@ -301,14 +302,20 @@ extern int unitfail;
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_timeout(A,B,Y,Z) do {                   \
-  CURLMcode ec;                                           \
-  if((ec = curl_multi_timeout((A),(B))) != CURLM_OK) {    \
-    fprintf(stderr, "%s:%d curl_multi_timeout() failed, " \
-            "with code %d (%s)\n",                        \
-            (Y), (Z), (int)ec, curl_multi_strerror(ec));  \
-    res = (int)ec;                                        \
-  }                                                       \
+#define exe_multi_timeout(A,B,Y,Z) do {                      \
+  CURLMcode ec;                                              \
+  if((ec = curl_multi_timeout((A),(B))) != CURLM_OK) {       \
+    fprintf(stderr, "%s:%d curl_multi_timeout() failed, "    \
+            "with code %d (%s)\n",                           \
+            (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
+    res = (int)ec;                                           \
+  }                                                          \
+  else if(*((B)) < -1L) {                                    \
+    fprintf(stderr, "%s:%d curl_multi_timeout() succeeded, " \
+            "but returned invalid timeout value (%ld)\n",    \
+            (Y), (Z), (long)*((B)));                         \
+    res = TEST_ERR_BAD_TIMEOUT;                              \
+  }                                                          \
 } WHILE_FALSE
 
 #define res_multi_timeout(A,B) \
