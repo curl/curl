@@ -1775,10 +1775,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
   if(GOOD_MULTI_HANDLE(multi)) {
     multi->type = 0; /* not good anymore */
-    Curl_hash_destroy(multi->hostcache);
-    Curl_hash_destroy(multi->sockhash);
-    multi->hostcache = NULL;
-    multi->sockhash = NULL;
 
     /* go over all connections that have close actions */
     for(i=0; i< multi->connc->num; i++) {
@@ -1801,6 +1797,12 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       free(cl);
       cl= n;
     }
+
+    Curl_hash_destroy(multi->hostcache);
+    multi->hostcache = NULL;
+
+    Curl_hash_destroy(multi->sockhash);
+    multi->sockhash = NULL;
 
     Curl_rm_connc(multi->connc);
     multi->connc = NULL;
