@@ -1967,6 +1967,25 @@ sub runsocksserver {
 }
 
 #######################################################################
+# Single shot http and gopher server responsiveness test. This should only
+# be used to verify that a server present in %run hash is still functional
+#
+sub responsive_http_server {
+    my ($proto, $verbose, $ipv6, $port) = @_;
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $ip = $HOST6IP;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
 # Single shot pingpong server responsiveness test. This should only be
 # used to verify that a server present in %run hash is still functional
 #
@@ -1998,6 +2017,66 @@ sub responsive_pingpong_server {
         print STDERR "Unsupported protocol $proto!!\n";
         return 0;
     }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
+# Single shot rtsp server responsiveness test. This should only be
+# used to verify that a server present in %run hash is still functional
+#
+sub responsive_rtsp_server {
+    my ($verbose, $ipv6) = @_;
+    my $port = $RTSPPORT;
+    my $ip = $HOSTIP;
+    my $proto = 'rtsp';
+    my $ipvnum = 4;
+    my $idnum = 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $port = $RTSP6PORT;
+        $ip = $HOST6IP;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
+# Single shot tftp server responsiveness test. This should only be
+# used to verify that a server present in %run hash is still functional
+#
+sub responsive_tftp_server {
+    my ($id, $verbose, $ipv6) = @_;
+    my $port = $TFTPPORT;
+    my $ip = $HOSTIP;
+    my $proto = 'tftp';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $port = $TFTP6PORT;
+        $ip = $HOST6IP;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
+# Single shot non-stunnel HTTP TLS extensions capable server
+# responsiveness test. This should only be used to verify that a
+# server present in %run hash is still functional
+#
+sub responsive_httptls_server {
+    my ($verbose, $ipv6) = @_;
+    my $proto = "httptls";
+    my $port = ($ipv6 && ($ipv6 =~ /6$/)) ? $HTTPTLS6PORT : $HTTPTLSPORT;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
+    my $idnum = 1;
 
     return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
 }
@@ -3624,6 +3703,10 @@ sub startservers {
             }
         }
         elsif($what eq "gopher") {
+            if($torture && $run{'gopher'} &&
+               !responsive_http_server("gopher", $verbose, 0, $GOPHERPORT)) {
+                stopserver('gopher');
+            }
             if(!$run{'gopher'}) {
                 ($pid, $pid2) = runhttpserver("gopher", $verbose, 0,
                                               $GOPHERPORT);
@@ -3635,6 +3718,11 @@ sub startservers {
             }
         }
         elsif($what eq "gopher-ipv6") {
+            if($torture && $run{'gopher-ipv6'} &&
+               !responsive_http_server("gopher", $verbose, "ipv6",
+                                       $GOPHER6PORT)) {
+                stopserver('gopher-ipv6');
+            }
             if(!$run{'gopher-ipv6'}) {
                 ($pid, $pid2) = runhttpserver("gopher", $verbose, "ipv6",
                                               $GOPHER6PORT);
@@ -3647,6 +3735,10 @@ sub startservers {
             }
         }
         elsif($what eq "http") {
+            if($torture && $run{'http'} &&
+               !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
+                stopserver('http');
+            }
             if(!$run{'http'}) {
                 ($pid, $pid2) = runhttpserver("http", $verbose, 0,
                                               $HTTPPORT);
@@ -3658,6 +3750,10 @@ sub startservers {
             }
         }
         elsif($what eq "http-ipv6") {
+            if($torture && $run{'http-ipv6'} &&
+               !responsive_http_server("http", $verbose, "IPv6", $HTTP6PORT)) {
+                stopserver('http-ipv6');
+            }
             if(!$run{'http-ipv6'}) {
                 ($pid, $pid2) = runhttpserver("http", $verbose, "IPv6",
                                               $HTTP6PORT);
@@ -3670,6 +3766,10 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp") {
+            if($torture && $run{'rtsp'} &&
+               !responsive_rtsp_server($verbose)) {
+                stopserver('rtsp');
+            }
             if(!$run{'rtsp'}) {
                 ($pid, $pid2) = runrtspserver($verbose);
                 if($pid <= 0) {
@@ -3680,6 +3780,10 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp-ipv6") {
+            if($torture && $run{'rtsp-ipv6'} &&
+               !responsive_rtsp_server($verbose, "IPv6")) {
+                stopserver('rtsp-ipv6');
+            }
             if(!$run{'rtsp-ipv6'}) {
                 ($pid, $pid2) = runrtspserver($verbose, "IPv6");
                 if($pid <= 0) {
@@ -3741,6 +3845,10 @@ sub startservers {
                 # stop server when running and using a different cert
                 stopserver('https');
             }
+            if($torture && $run{'http'} &&
+               !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
+                stopserver('http');
+            }
             if(!$run{'http'}) {
                 ($pid, $pid2) = runhttpserver("http", $verbose, 0,
                                               $HTTPPORT);
@@ -3765,6 +3873,10 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return "no gnutls-serv";
             }
+            if($torture && $run{'httptls'} &&
+               !responsive_httptls_server($verbose, "IPv4")) {
+                stopserver('httptls');
+            }
             if(!$run{'httptls'}) {
                 ($pid, $pid2) = runhttptlsserver($verbose, "IPv4");
                 if($pid <= 0) {
@@ -3780,6 +3892,10 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return "no gnutls-serv";
             }
+            if($torture && $run{'httptls-ipv6'} &&
+               !responsive_httptls_server($verbose, "IPv6")) {
+                stopserver('httptls-ipv6');
+            }
             if(!$run{'httptls-ipv6'}) {
                 ($pid, $pid2) = runhttptlsserver($verbose, "IPv6");
                 if($pid <= 0) {
@@ -3791,6 +3907,10 @@ sub startservers {
             }
         }
         elsif($what eq "tftp") {
+            if($torture && $run{'tftp'} &&
+               !responsive_http_server("", $verbose)) {
+                stopserver('tftp');
+            }
             if(!$run{'tftp'}) {
                 ($pid, $pid2) = runtftpserver("", $verbose);
                 if($pid <= 0) {
@@ -3801,6 +3921,10 @@ sub startservers {
             }
         }
         elsif($what eq "tftp-ipv6") {
+            if($torture && $run{'tftp-ipv6'} &&
+               !responsive_http_server("", $verbose, "IPv6")) {
+                stopserver('tftp-ipv6');
+            }
             if(!$run{'tftp-ipv6'}) {
                 ($pid, $pid2) = runtftpserver("", $verbose, "IPv6");
                 if($pid <= 0) {
