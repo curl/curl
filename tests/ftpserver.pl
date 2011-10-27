@@ -126,15 +126,18 @@ my @welcome;      # text returned to client upon connection
 #**********************************************************************
 # global vars customized for each test from the server commands file
 #
-my $ctrldelay;    # set if server should throttle ctrl stream
-my $datadelay;    # set if server should throttle data stream
-my $retrweirdo;   # set if ftp server should use RETRWEIRDO
-my $retrnosize;   # set if ftp server should use RETRNOSIZE
-my $pasvbadip;    # set if ftp server should use PASVBADIP
-my $nosave;       # set if ftp server should not save uploaded data
-my %customreply;  #
-my %customcount;  #
-my %delayreply;   #
+my $ctrldelay;     # set if server should throttle ctrl stream
+my $datadelay;     # set if server should throttle data stream
+my $retrweirdo;    # set if ftp server should use RETRWEIRDO
+my $retrnosize;    # set if ftp server should use RETRNOSIZE
+my $pasvbadip;     # set if ftp server should use PASVBADIP
+my $nosave;        # set if ftp server should not save uploaded data
+my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
+my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
+my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
+my %customreply;   #
+my %customcount;   #
+my %delayreply;    #
 
 #**********************************************************************
 # global variables for to test ftp wildcardmatching or other test that
@@ -1071,7 +1074,7 @@ sub PASV_ftp {
         logmsg "failed to run sockfilt for data connection\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         sendcontrol "500 no free ports!\r\n";
-        return 0;
+        return;
     }
 
     logmsg "Run sockfilt for data on pid $slavepid\n";
@@ -1102,6 +1105,12 @@ sub PASV_ftp {
         $pasvport = $2;
     }
 
+    if($nodataconn) {
+        # kill data sockfilter and make believe the client
+        # that it is possible to establish a data connection.
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+    }
+
     if($cmd ne "EPSV") {
         # PASV reply
         my $p=$listenaddr;
@@ -1115,6 +1124,11 @@ sub PASV_ftp {
     else {
         # EPSV reply
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
+    }
+
+    if($nodataconn) {
+        logmsg "client fooled, running without data connection\n";
+        return;
     }
 
     eval {
@@ -1162,13 +1176,16 @@ sub PORT_ftp {
     my $port;
     my $addr;
 
+    # kill previous data connection sockfilt when alive
+    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+
     # We always ignore the given IP and use localhost.
 
     if($cmd eq "PORT") {
         if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
             logmsg "bad PORT-line: $arg\n";
             sendcontrol "500 silly you, go away\r\n";
-            return 0;
+            return;
         }
         $port = ($5<<8)+$6;
         $addr = "$1.$2.$3.$4";
@@ -1178,7 +1195,7 @@ sub PORT_ftp {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
             logmsg "bad EPRT-line: $arg\n";
             sendcontrol "500 silly you, go away\r\n";
-            return 0;
+            return;
         }
         sendcontrol "200 Thanks for dropping by. We contact you later\r\n";
         $port = $3;
@@ -1186,12 +1203,31 @@ sub PORT_ftp {
     }
     else {
         sendcontrol "500 we don't like $cmd now\r\n";
-        return 0;
+        return;
     }
 
     if(!$port || $port > 65535) {
         print STDERR "very illegal PORT number: $port\n";
-        return 1;
+        return;
+    }
+
+    if($nodataconn) {
+        # don't establish data connection back to client,
+        # and don't send anything over control connection.
+        logmsg "client fooled, will not connect back to him\n";
+        return;
+    }
+    elsif($nodataconn425) {
+        # don't establish data connection back to client,
+        # reply with 425 over control connection.
+        sendcontrol "425 Can't open data connection\r\n";
+        return;
+    }
+    elsif($nodataconn421) {
+        # don't establish data connection back to client
+        # reply with 421 over control connection.
+        sendcontrol "421 Connection timed out\r\n";
+        return;
     }
 
     # We fire up a new sockfilt to do the data transfer for us.
@@ -1224,15 +1260,18 @@ sub PORT_ftp {
 # On success returns 1, otherwise zero.
 #
 sub customize {
-    $ctrldelay = 0;    # default is no throttling of the ctrl stream
-    $datadelay = 0;    # default is no throttling of the data stream
-    $retrweirdo = 0;   # default is no use of RETRWEIRDO
-    $retrnosize = 0;   # default is no use of RETRNOSIZE
-    $pasvbadip = 0;    # default is no use of PASVBADIP
-    $nosave = 0;       # default is to actually save uploaded data to file
-    %customreply = (); #
-    %customcount = (); #
-    %delayreply = ();  #
+    $ctrldelay = 0;     # default is no throttling of the ctrl stream
+    $datadelay = 0;     # default is no throttling of the data stream
+    $retrweirdo = 0;    # default is no use of RETRWEIRDO
+    $retrnosize = 0;    # default is no use of RETRNOSIZE
+    $pasvbadip = 0;     # default is no use of PASVBADIP
+    $nosave = 0;        # default is to actually save uploaded data to file
+    $nodataconn = 0;    # default is to establish or accept data channel
+    $nodataconn425 = 0; # default is to not send 425 without data channel
+    $nodataconn421 = 0; # default is to not send 421 without data channel
+    %customreply = ();  #
+    %customcount = ();  #
+    %delayreply = ();   #
 
     open(CUSTOM, "<log/ftpserver.cmd") ||
         return 1;
@@ -1270,6 +1309,21 @@ sub customize {
         elsif($_ =~ /PASVBADIP/) {
             logmsg "FTPD: instructed to use PASVBADIP\n";
             $pasvbadip=1;
+        }
+        elsif($_ =~ /NODATACONN425/) {
+            # applies only to active FTP mode
+            logmsg "FTPD: instructed to use NODATACONN425\n";
+            $nodataconn425=1;
+        }
+        elsif($_ =~ /NODATACONN421/) {
+            # applies only to active FTP mode
+            logmsg "FTPD: instructed to use NODATACONN421\n";
+            $nodataconn421=1;
+        }
+        elsif($_ =~ /NODATACONN/) {
+            # applies to both active and passive FTP modes
+            logmsg "FTPD: instructed to use NODATACONN\n";
+            $nodataconn=1;
         }
         elsif($_ =~ /NOSAVE/) {
             # don't actually store the file we upload - to be used when
