@@ -37,16 +37,41 @@ int test(char *URL)
   int running;
   int msgs_left;
   CURLMsg *msg;
+  FILE *upload = NULL;
+  int error;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  upload = fopen(libtest_arg2, "rb");
+  if(!upload) {
+    error = ERRNO;
+    fprintf(stderr, "fopen() failed with error: %d (%s)\n",
+            error, strerror(error));
+    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
+    return TEST_ERR_FOPEN;
+  }
+
+  res_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(upload);
+    return res;
+  }
 
   easy_init(easy);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
+  /* go verbose */
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+
+  /* specify target */
+  easy_setopt(easy, CURLOPT_URL, URL);
+
+  /* enable uploading */
   easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+
+  /* data pointer for the file read function */
+  easy_setopt(easy, CURLOPT_READDATA, upload);
+
+  /* use active mode FTP */
   easy_setopt(easy, CURLOPT_FTPPORT, "-");
 
   multi_init(multi);
@@ -85,8 +110,8 @@ int test(char *URL)
       interval.tv_usec = (timeout%1000)*1000;
     }
     else {
-      interval.tv_sec = 5;
-      interval.tv_usec = 0;
+      interval.tv_sec = 0;
+      interval.tv_usec = 100000L; /* 100 ms */
     }
 
     select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);
@@ -105,6 +130,9 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
+
+  /* close the local file */
+  fclose(upload);
 
   return res;
 }
