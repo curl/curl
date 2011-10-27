@@ -1339,18 +1339,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                          &dophase_done);
       if(CURLE_OK == easy->result) {
         if(dophase_done) {
-          /* after DO, go PERFORM... or DO_MORE */
-          if(easy->easy_conn->bits.do_more) {
-            /* we're supposed to do more, but we need to sit down, relax
-               and wait a little while first */
-            multistate(easy, CURLM_STATE_DO_MORE);
-            result = CURLM_OK;
-          }
-          else {
-            /* we're done with the DO, now DO_DONE */
-            multistate(easy, CURLM_STATE_DO_DONE);
-            result = CURLM_CALL_MULTI_PERFORM;
-          }
+          /* after DO, go DO_DONE or DO_MORE */
+          multistate(easy, easy->easy_conn->bits.do_more?
+                     CURLM_STATE_DO_MORE:
+                     CURLM_STATE_DO_DONE);
+          result = CURLM_CALL_MULTI_PERFORM;
         } /* dophase_done */
       }
       else {
