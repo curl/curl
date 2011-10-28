@@ -1143,7 +1143,7 @@ sub responsiveserver {
     }
 
     my $srvrname = servername_str($proto, $ipvnum, $idnum);
-    logmsg "running server check FAILED (unresponsive $srvrname server)\n";
+    logmsg " FAILED running server precheck (unresponsive $srvrname server)\n";
     return 0;
 }
 
@@ -3908,7 +3908,7 @@ sub startservers {
         }
         elsif($what eq "tftp") {
             if($torture && $run{'tftp'} &&
-               !responsive_http_server("", $verbose)) {
+               !responsive_tftp_server("", $verbose)) {
                 stopserver('tftp');
             }
             if(!$run{'tftp'}) {
@@ -3922,7 +3922,7 @@ sub startservers {
         }
         elsif($what eq "tftp-ipv6") {
             if($torture && $run{'tftp-ipv6'} &&
-               !responsive_http_server("", $verbose, "IPv6")) {
+               !responsive_tftp_server("", $verbose, "IPv6")) {
                 stopserver('tftp-ipv6');
             }
             if(!$run{'tftp-ipv6'}) {
