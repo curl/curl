@@ -78,6 +78,17 @@ static void tls_log_func(int level, const char *str)
 #endif
 static bool gtls_inited = FALSE;
 
+#if defined(GNUTLS_VERSION_NUMBER)
+#  if (GNUTLS_VERSION_NUMBER >= 0x020c00)
+#    undef gnutls_transport_set_lowat
+#    define gnutls_transport_set_lowat(A,B) Curl_nop_stmt
+#  endif
+#  if (GNUTLS_VERSION_NUMBER >= 0x020c03)
+#    undef gnutls_transport_set_global_errno
+#    define gnutls_transport_set_global_errno(A) SET_ERRNO((A))
+#  endif
+#endif
+
 /*
  * Custom push and pull callback functions used by GNU TLS to read and write
  * to the socket.  These functions are simple wrappers to send() and recv()
@@ -476,10 +487,8 @@ gtls_connect_step1(struct connectdata *conn,
   gnutls_transport_set_push_function(session, Curl_gtls_push);
   gnutls_transport_set_pull_function(session, Curl_gtls_pull);
 
-#if GNUTLS_VERSION_NUMBER < 0x020c00
   /* lowat must be set to zero when using custom push and pull functions. */
   gnutls_transport_set_lowat(session, 0);
-#endif
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
