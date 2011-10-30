@@ -1134,16 +1134,19 @@ sub verifyserver {
 #
 sub responsiveserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $prev_verbose = $verbose;
 
+    $verbose = 0;
     my $fun = $protofunc{$proto};
     my $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
+    $verbose = $prev_verbose;
 
     if($pid > 0) {
         return 1; # responsive
     }
 
     my $srvrname = servername_str($proto, $ipvnum, $idnum);
-    logmsg " FAILED running server precheck (unresponsive $srvrname server)\n";
+    logmsg " server precheck FAILED (unresponsive $srvrname server)\n";
     return 0;
 }
 
@@ -2778,6 +2781,9 @@ sub singletest {
         delete $oldenv{$var};
     }
 
+    # remove test server commands file before servers are started/verified
+    unlink($FTPDCMD) if(-f $FTPDCMD);
+
     # timestamp required servers verification start
     $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
 
@@ -3251,7 +3257,7 @@ sub singletest {
     }
 
     # remove the test server commands file after each test
-    unlink($FTPDCMD);
+    unlink($FTPDCMD) if(-f $FTPDCMD);
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
