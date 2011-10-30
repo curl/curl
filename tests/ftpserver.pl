@@ -143,8 +143,18 @@ my %delayreply;    #
 # global variables for to test ftp wildcardmatching or other test that
 # need flexible LIST responses.. and corresponding files.
 # $ftptargetdir is keeping the fake "name" of LIST directory.
+#
 my $ftplistparserstate;
 my $ftptargetdir;
+
+#**********************************************************************
+# when running a ftp server, global var datasockf_mode var is used to
+# keep info relative to the actual running state of the secondary or
+# data sockfilt process. 'none' represents that the data sockfilt is
+# not running. 'active' and 'passive' indicates that the data sockfilt
+# is running and specifies operational mode.
+#
+my $datasockf_mode = 'none';
 
 #**********************************************************************
 # global vars used for signal handling
@@ -455,25 +465,40 @@ sub close_dataconn {
 
     my $datapid = processexists($datasockf_pidfile);
 
+    logmsg "=====> Closing $datasockf_mode DATA connection...\n";
+
     if(!$closed) {
-        logmsg "* disconnect data connection\n";
         if($datapid > 0) {
+            logmsg "Server disconnects $datasockf_mode DATA connection\n";
             print DWRITE "DISC\n";
             my $i;
             sysread DREAD, $i, 5;
         }
+        else {
+            logmsg "Server finds $datasockf_mode DATA connection already ".
+                   "disconnected\n";
+        }
     }
     else {
-        logmsg "data connection already disconnected\n";
+        logmsg "Server knows $datasockf_mode DATA connection is already ".
+               "disconnected\n";
     }
-    logmsg "=====> Closed data connection\n";
 
-    logmsg "* quit sockfilt for data (pid $datapid)\n";
     if($datapid > 0) {
         print DWRITE "QUIT\n";
         waitpid($datapid, 0);
         unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
+        logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
+               "(pid $datapid)\n";
     }
+    else {
+        logmsg "DATA sockfilt for $datasockf_mode data channel already ".
+               "dead\n";
+    }
+
+    logmsg "=====> Closed $datasockf_mode DATA connection\n";
+
+    $datasockf_mode = 'none';
 }
 
 ################
@@ -1057,7 +1082,15 @@ sub PASV_ftp {
     my $pasvport;
 
     # kill previous data connection sockfilt when alive
-    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+    if($datasockf_mode ne 'none') {
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
+        $datasockf_mode = 'none';
+    }
+
+    logmsg "====> Passive DATA channel requested by client\n";
+
+    logmsg "DATA sockfilt for passive data channel starting...\n";
 
     # We fire up a new sockfilt to do the data transfer for us.
     my $datasockfcmd = "./server/sockfilt " .
@@ -1066,18 +1099,34 @@ sub PASV_ftp {
         "--logfile \"$datasockf_logfile\"";
     $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
+    $datasockf_mode = 'passive';
+
+    print STDERR "$datasockfcmd\n" if($verbose);
+
     print DWRITE "PING\n";
     my $pong;
     sysread_or_die(\*DREAD, \$pong, 5);
 
-    if($pong !~ /^PONG/) {
-        logmsg "failed to run sockfilt for data connection\n";
+    if($pong =~ /^FAIL/) {
+        logmsg "DATA sockfilt said: FAIL\n";
+        logmsg "DATA sockfilt for passive data channel failed\n";
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
+        sendcontrol "500 no free ports!\r\n";
+        return;
+    }
+    elsif($pong !~ /^PONG/) {
+        logmsg "DATA sockfilt unexpected response: $pong\n";
+        logmsg "DATA sockfilt for passive data channel failed\n";
+        logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
         sendcontrol "500 no free ports!\r\n";
         return;
     }
 
-    logmsg "Run sockfilt for data on pid $slavepid\n";
+    logmsg "DATA sockfilt for passive data channel started (pid $slavepid)\n";
 
     # Find out what port we listen on
     my $i;
@@ -1105,10 +1154,26 @@ sub PASV_ftp {
         $pasvport = $2;
     }
 
-    if($nodataconn) {
-        # kill data sockfilter and make believe the client
-        # that it is possible to establish a data connection.
+    if(!$pasvport) {
+        logmsg "DATA sockfilt unknown listener port\n";
+        logmsg "DATA sockfilt for passive data channel failed\n";
+        logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
+        sendcontrol "500 no free ports!\r\n";
+        return;
+    }
+
+    logmsg "DATA sockfilt for passive data channel listens on port ".
+           "$pasvport\n";
+
+    if($nodataconn) {
+        logmsg "DATA sockfilt for passive data channel killed ".
+               "(NODATACONN)\n";
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
     }
 
     if($cmd ne "EPSV") {
@@ -1126,8 +1191,11 @@ sub PASV_ftp {
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
     }
 
+    logmsg "Client has been notified that DATA conn ".
+           "will be accepted on port $pasvport\n";
+
     if($nodataconn) {
-        logmsg "client fooled, running without data connection\n";
+        logmsg "====> Client fooled (NODATACONN)\n";
         return;
     }
 
@@ -1140,6 +1208,8 @@ sub PASV_ftp {
         # Wait for 'CNCT'
         my $input;
 
+        # FIX: Monitor ctrl conn for disconnect
+
         while(sysread(DREAD, $input, 5)) {
 
             if($input !~ /^CNCT/) {
@@ -1147,7 +1217,7 @@ sub PASV_ftp {
                 logmsg "Odd, we got $input from client\n";
                 next;
             }
-            logmsg "====> Client DATA connect\n";
+            logmsg "Client connects to port $pasvport\n";
             last;
         }
         alarm 0;
@@ -1157,11 +1227,15 @@ sub PASV_ftp {
         logmsg "$srvrname server timed out awaiting data connection ".
             "on port $pasvport\n";
         logmsg "accept failed or connection not even attempted\n";
+        logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
         return;
     }
     else {
-        logmsg "data connection setup on port $pasvport\n";
+        logmsg "====> Client established passive DATA connection ".
+               "on port $pasvport\n";
     }
 
     return;
@@ -1177,13 +1251,20 @@ sub PORT_ftp {
     my $addr;
 
     # kill previous data connection sockfilt when alive
-    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+    if($datasockf_mode ne 'none') {
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
+        $datasockf_mode = 'none';
+    }
+
+    logmsg "====> Active DATA channel requested by client\n";
 
     # We always ignore the given IP and use localhost.
 
     if($cmd eq "PORT") {
         if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
-            logmsg "bad PORT-line: $arg\n";
+            logmsg "DATA sockfilt for active data channel not started ".
+                   "(bad PORT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
         }
@@ -1193,7 +1274,8 @@ sub PORT_ftp {
     # EPRT |2|::1|49706|
     elsif($cmd eq "EPRT") {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
-            logmsg "bad EPRT-line: $arg\n";
+            logmsg "DATA sockfilt for active data channel not started ".
+                   "(bad EPRT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
         }
@@ -1202,33 +1284,38 @@ sub PORT_ftp {
         $addr = $2;
     }
     else {
+        logmsg "DATA sockfilt for active data channel not started ".
+               "(invalid command: $cmd)\n";
         sendcontrol "500 we don't like $cmd now\r\n";
         return;
     }
 
     if(!$port || $port > 65535) {
-        print STDERR "very illegal PORT number: $port\n";
+        logmsg "DATA sockfilt for active data channel not started ".
+               "(illegal PORT number: $port)\n";
         return;
     }
 
     if($nodataconn) {
-        # don't establish data connection back to client,
-        # and don't send anything over control connection.
-        logmsg "client fooled, will not connect back to him\n";
+        logmsg "DATA sockfilt for active data channel not started ".
+               "(NODATACONN)\n";
+        # client shall timeout awaiting connection from server
         return;
     }
     elsif($nodataconn425) {
-        # don't establish data connection back to client,
-        # reply with 425 over control connection.
+        logmsg "DATA sockfilt for active data channel not started ".
+               "(NODATACONN425)\n";
         sendcontrol "425 Can't open data connection\r\n";
         return;
     }
     elsif($nodataconn421) {
-        # don't establish data connection back to client
-        # reply with 421 over control connection.
+        logmsg "DATA sockfilt for active data channel not started ".
+               "(NODATACONN421)\n";
         sendcontrol "421 Connection timed out\r\n";
         return;
     }
+
+    logmsg "DATA sockfilt for active data channel starting...\n";
 
     # We fire up a new sockfilt to do the data transfer for us.
     my $datasockfcmd = "./server/sockfilt " .
@@ -1237,18 +1324,36 @@ sub PORT_ftp {
         "--logfile \"$datasockf_logfile\"";
     $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
+    $datasockf_mode = 'active';
+
     print STDERR "$datasockfcmd\n" if($verbose);
 
     print DWRITE "PING\n";
     my $pong;
     sysread_or_die(\*DREAD, \$pong, 5);
 
-    if($pong !~ /^PONG/) {
-        logmsg "Failed sockfilt for data connection\n";
+    if($pong =~ /^FAIL/) {
+        logmsg "DATA sockfilt said: FAIL\n";
+        logmsg "DATA sockfilt for active data channel failed\n";
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
+        # client shall timeout awaiting connection from server
+        return;
+    }
+    elsif($pong !~ /^PONG/) {
+        logmsg "DATA sockfilt unexpected response: $pong\n";
+        logmsg "DATA sockfilt for active data channel failed\n";
+        logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt not running\n";
+        $datasockf_mode = 'none';
+        # client shall timeout awaiting connection from server
+        return;
     }
 
-    logmsg "====> Client DATA connect to port $port\n";
+    logmsg "DATA sockfilt for active data channel started (pid $slavepid)\n";
+
+    logmsg "====> Active DATA channel connected to client port $port\n";
 
     return;
 }
@@ -1474,6 +1579,14 @@ logmsg("logged pid $$ in $pidfile\n");
 
 
 while(1) {
+
+    # kill previous data connection sockfilt when alive
+    if($datasockf_mode ne 'none') {
+        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        logmsg "DATA sockfilt for $datasockf_mode data channel killed now\n";
+        $datasockf_mode = 'none';
+    }
+
     #
     # We read 'sockfilt' commands.
     #
@@ -1484,7 +1597,7 @@ while(1) {
 
     if($input !~ /^CNCT/) {
         # we wait for a connected client
-        logmsg "sockfilt said: $input";
+        logmsg "MAIN sockfilt said: $input";
         next;
     }
     logmsg "====> Client connect\n";
@@ -1494,8 +1607,6 @@ while(1) {
 
     # flush data:
     $| = 1;
-
-    killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
 
     &customize(); # read test control instructions
 
@@ -1525,7 +1636,7 @@ while(1) {
         sysread_or_die(\*SFREAD, \$i, 5);
 
         if($i !~ /^DATA/) {
-            logmsg "sockfilt said $i";
+            logmsg "MAIN sockfilt said $i";
             if($i =~ /^DISC/) {
                 # disconnect
                 last;

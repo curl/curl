@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -950,6 +950,7 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s",
            error, strerror(error));
+    write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
 
@@ -985,6 +986,7 @@ int main(int argc, char *argv[])
       error = SOCKERRNO;
       logmsg("Error connecting to port %hu: (%d) %s",
              connectport, error, strerror(error));
+      write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }
     logmsg("====> Client connect");
@@ -993,8 +995,10 @@ int main(int argc, char *argv[])
   else {
     /* passive daemon style */
     sock = sockdaemon(sock, &port);
-    if(CURL_SOCKET_BAD == sock)
+    if(CURL_SOCKET_BAD == sock) {
+      write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
+    }
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
@@ -1006,8 +1010,10 @@ int main(int argc, char *argv[])
     logmsg("Listening on port %hu", port);
 
   wrotepidfile = write_pidfile(pidname);
-  if(!wrotepidfile)
+  if(!wrotepidfile) {
+    write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
+  }
 
   do {
     juggle_again = juggle(&msgsock, sock, &mode);
