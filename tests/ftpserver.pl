@@ -148,13 +148,15 @@ my $ftplistparserstate;
 my $ftptargetdir;
 
 #**********************************************************************
-# when running a ftp server, global var datasockf_mode var is used to
-# keep info relative to the actual running state of the secondary or
-# data sockfilt process. 'none' represents that the data sockfilt is
-# not running. 'active' and 'passive' indicates that the data sockfilt
-# is running and specifies operational mode.
+# global variables used when running a ftp server to keep state info
+# relative to the secondary or data sockfilt process. Values of these
+# variables should only be modified using datasockf_state() sub, given
+# that they are closely related and relationship is a bit awkward.
 #
-my $datasockf_mode = 'none';
+my $datasockf_state = 'STOPPED'; # see datasockf_state() sub
+my $datasockf_mode = 'none';     # ['none','active','passive']
+my $datasockf_runs = 'no';       # ['no','yes']
+my $datasockf_conn = 'no';       # ['no','yes']
 
 #**********************************************************************
 # global vars used for signal handling
@@ -329,10 +331,21 @@ sub sendcontrol {
     }
 }
 
-# Send data to the client on the data stream
-
+#**********************************************************************
+# Send data to the FTP client on the data stream when data connection
+# is actually established. Given that this sub should only be called
+# when a data connection is supposed to be established, calling this
+# without a data connection is an indication of weak logic somewhere.
+#
 sub senddata {
     my $l;
+    if($datasockf_conn eq 'no') {
+        logmsg "WARNING: Detected data sending attempt without DATA channel\n";
+        foreach $l (@_) {
+            logmsg "WARNING: Data swallowed: $l\n"
+        }
+        return;
+    }
     foreach $l (@_) {
       if(!$datadelay) {
         # spit it all out at once
@@ -498,7 +511,7 @@ sub close_dataconn {
 
     logmsg "=====> Closed $datasockf_mode DATA connection\n";
 
-    $datasockf_mode = 'none';
+    datasockf_state('STOPPED');
 }
 
 ################
@@ -817,6 +830,11 @@ my @ftpdir=("total 20\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
 
+    if($datasockf_conn eq 'no') {
+        sendcontrol "503 data channel not established\r\n";
+        return 0;
+    }
+
     if($ftplistparserstate) {
       @ftpdir = ftp_contentlist($ftptargetdir);
     }
@@ -832,6 +850,12 @@ my @ftpdir=("total 20\r\n",
 
 sub NLST_ftp {
     my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
+
+    if($datasockf_conn eq 'no') {
+        sendcontrol "503 data channel not established\r\n";
+        return 0;
+    }
+
     logmsg "pass NLST data on data connection\n";
     for(@ftpdir) {
         senddata "$_\r\n";
@@ -935,6 +959,11 @@ sub SIZE_ftp {
 sub RETR_ftp {
     my ($testno) = @_;
 
+    if($datasockf_conn eq 'no') {
+        sendcontrol "503 data channel not established\r\n";
+        return 0;
+    }
+
     if($ftplistparserstate) {
         my @content = wildcard_getfile($ftptargetdir, $testno);
         if($content[0] == -1) {
@@ -1029,6 +1058,11 @@ sub STOR_ftp {
 
     my $filename = "log/upload.$testno";
 
+    if($datasockf_conn eq 'no') {
+        sendcontrol "503 data channel not established\r\n";
+        return 0;
+    }
+
     logmsg "STOR test number $testno in $filename\n";
 
     sendcontrol "125 Gimme gimme gimme!\r\n";
@@ -1080,13 +1114,14 @@ sub STOR_ftp {
 sub PASV_ftp {
     my ($arg, $cmd)=@_;
     my $pasvport;
+    my $bindonly = ($nodataconn) ? '--bindonly' : '';
 
     # kill previous data connection sockfilt when alive
-    if($datasockf_mode ne 'none') {
+    if($datasockf_runs eq 'yes') {
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
-        $datasockf_mode = 'none';
     }
+    datasockf_state('STOPPED');
 
     logmsg "====> Passive DATA channel requested by client\n";
 
@@ -1094,12 +1129,17 @@ sub PASV_ftp {
 
     # We fire up a new sockfilt to do the data transfer for us.
     my $datasockfcmd = "./server/sockfilt " .
-        "--ipv$ipvnum --port 0 " .
+        "--ipv$ipvnum $bindonly --port 0 " .
         "--pidfile \"$datasockf_pidfile\" " .
         "--logfile \"$datasockf_logfile\"";
     $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
-    $datasockf_mode = 'passive';
+    if($nodataconn) {
+        datasockf_state('PASSIVE_NODATACONN');
+    }
+    else {
+        datasockf_state('PASSIVE');
+    }
 
     print STDERR "$datasockfcmd\n" if($verbose);
 
@@ -1111,7 +1151,7 @@ sub PASV_ftp {
         logmsg "DATA sockfilt said: FAIL\n";
         logmsg "DATA sockfilt for passive data channel failed\n";
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         sendcontrol "500 no free ports!\r\n";
         return;
     }
@@ -1121,14 +1161,14 @@ sub PASV_ftp {
         logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         sendcontrol "500 no free ports!\r\n";
         return;
     }
 
     logmsg "DATA sockfilt for passive data channel started (pid $slavepid)\n";
 
-    # Find out what port we listen on
+    # Find out on what port we listen on or have bound
     my $i;
     print DWRITE "PORT\n";
 
@@ -1160,20 +1200,18 @@ sub PASV_ftp {
         logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         sendcontrol "500 no free ports!\r\n";
         return;
     }
 
-    logmsg "DATA sockfilt for passive data channel listens on port ".
-           "$pasvport\n";
-
     if($nodataconn) {
-        logmsg "DATA sockfilt for passive data channel killed ".
-               "(NODATACONN)\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
-        logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+      logmsg "DATA sockfilt for passive data channel (NODATACONN) ".
+             "bound on port $pasvport\n";
+    }
+    else {
+      logmsg "DATA sockfilt for passive data channel listens on port ".
+             "$pasvport\n";
     }
 
     if($cmd ne "EPSV") {
@@ -1230,7 +1268,7 @@ sub PASV_ftp {
         logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         return;
     }
     else {
@@ -1251,11 +1289,11 @@ sub PORT_ftp {
     my $addr;
 
     # kill previous data connection sockfilt when alive
-    if($datasockf_mode ne 'none') {
+    if($datasockf_runs eq 'yes') {
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
-        $datasockf_mode = 'none';
     }
+    datasockf_state('STOPPED');
 
     logmsg "====> Active DATA channel requested by client\n";
 
@@ -1299,18 +1337,24 @@ sub PORT_ftp {
     if($nodataconn) {
         logmsg "DATA sockfilt for active data channel not started ".
                "(NODATACONN)\n";
+        datasockf_state('ACTIVE_NODATACONN');
+        logmsg "====> Active DATA channel not established\n";
         # client shall timeout awaiting connection from server
         return;
     }
     elsif($nodataconn425) {
         logmsg "DATA sockfilt for active data channel not started ".
                "(NODATACONN425)\n";
+        datasockf_state('ACTIVE_NODATACONN');
+        logmsg "====> Active DATA channel not established\n";
         sendcontrol "425 Can't open data connection\r\n";
         return;
     }
     elsif($nodataconn421) {
         logmsg "DATA sockfilt for active data channel not started ".
                "(NODATACONN421)\n";
+        datasockf_state('ACTIVE_NODATACONN');
+        logmsg "====> Active DATA channel not established\n";
         sendcontrol "421 Connection timed out\r\n";
         return;
     }
@@ -1324,7 +1368,7 @@ sub PORT_ftp {
         "--logfile \"$datasockf_logfile\"";
     $slavepid = open2(\*DREAD, \*DWRITE, $datasockfcmd);
 
-    $datasockf_mode = 'active';
+    datasockf_state('ACTIVE');
 
     print STDERR "$datasockfcmd\n" if($verbose);
 
@@ -1336,7 +1380,7 @@ sub PORT_ftp {
         logmsg "DATA sockfilt said: FAIL\n";
         logmsg "DATA sockfilt for active data channel failed\n";
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         # client shall timeout awaiting connection from server
         return;
     }
@@ -1346,7 +1390,7 @@ sub PORT_ftp {
         logmsg "DATA sockfilt killed now\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
-        $datasockf_mode = 'none';
+        datasockf_state('STOPPED');
         # client shall timeout awaiting connection from server
         return;
     }
@@ -1356,6 +1400,59 @@ sub PORT_ftp {
     logmsg "====> Active DATA channel connected to client port $port\n";
 
     return;
+}
+
+#**********************************************************************
+# datasockf_state is used to change variables that keep state info
+# relative to the FTP secondary or data sockfilt process as soon as
+# one of the five possible stable states is reached. Variables that
+# are modified by this sub may be checked independently but should
+# not be changed except by calling this sub.
+#
+sub datasockf_state {
+    my $state = $_[0];
+
+  if($state eq 'STOPPED') {
+    # Data sockfilter initial state, not running,
+    # not connected and not used.
+    $datasockf_state = $state;
+    $datasockf_mode = 'none';
+    $datasockf_runs = 'no';
+    $datasockf_conn = 'no';
+  }
+  elsif($state eq 'PASSIVE') {
+    # Data sockfilter accepted connection from client.
+    $datasockf_state = $state;
+    $datasockf_mode = 'passive';
+    $datasockf_runs = 'yes';
+    $datasockf_conn = 'yes';
+  }
+  elsif($state eq 'ACTIVE') {
+    # Data sockfilter has connected to client.
+    $datasockf_state = $state;
+    $datasockf_mode = 'active';
+    $datasockf_runs = 'yes';
+    $datasockf_conn = 'yes';
+  }
+  elsif($state eq 'PASSIVE_NODATACONN') {
+    # Data sockfilter bound port without listening,
+    # client won't be able to establish data connection.
+    $datasockf_state = $state;
+    $datasockf_mode = 'passive';
+    $datasockf_runs = 'yes';
+    $datasockf_conn = 'no';
+  }
+  elsif($state eq 'ACTIVE_NODATACONN') {
+    # Data sockfilter does not even run,
+    # client awaits data connection from server in vain.
+    $datasockf_state = $state;
+    $datasockf_mode = 'active';
+    $datasockf_runs = 'no';
+    $datasockf_conn = 'no';
+  }
+  else {
+      die "Internal error. Unknown datasockf state: $state!";
+  }
 }
 
 #**********************************************************************
@@ -1581,11 +1678,11 @@ logmsg("logged pid $$ in $pidfile\n");
 while(1) {
 
     # kill previous data connection sockfilt when alive
-    if($datasockf_mode ne 'none') {
+    if($datasockf_runs eq 'yes') {
         killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed now\n";
-        $datasockf_mode = 'none';
     }
+    datasockf_state('STOPPED');
 
     #
     # We read 'sockfilt' commands.

@@ -123,6 +123,7 @@
 const char *serverlogfile = DEFAULT_LOGFILE;
 
 static bool verbose = FALSE;
+static bool bind_only = FALSE;
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
@@ -807,6 +808,12 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     }
   }
 
+  /* bindonly option forces no listening */
+  if(bind_only) {
+    logmsg("instructed to bind port without listening");
+    return sock;
+  }
+
   /* start accepting connections */
   rc = listen(sock, 5);
   if(0 != rc) {
@@ -875,6 +882,10 @@ int main(int argc, char *argv[])
 #endif
       arg++;
     }
+    else if(!strcmp("--bindonly", argv[arg])) {
+      bind_only = TRUE;
+      arg++;
+    }
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc>arg) {
@@ -923,6 +934,7 @@ int main(int argc, char *argv[])
            " --pidfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
+           " --bindonly\n"
            " --port [port]\n"
            " --connect [port]\n"
            " --addr [address]");
@@ -1006,6 +1018,8 @@ int main(int argc, char *argv[])
 
   if(connectport)
     logmsg("Connected to port %hu", connectport);
+  else if(bind_only)
+    logmsg("Bound without listening on port %hu", port);
   else
     logmsg("Listening on port %hu", port);
 
