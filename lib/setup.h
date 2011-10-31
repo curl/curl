@@ -319,6 +319,7 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
+#  undef  lseek
 #  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
 #  define stat(fname,stp)            _stati64(fname, stp)
@@ -334,6 +335,7 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
+#  undef  lseek
 #  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #  define fstat(fdes,stp)            _fstat(fdes, stp)
 #  define stat(fname,stp)            _stat(fname, stp)
