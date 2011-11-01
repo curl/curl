@@ -831,7 +831,15 @@ my @ftpdir=("total 20\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
 
     if($datasockf_conn eq 'no') {
-        sendcontrol "503 data channel not established\r\n";
+        if($nodataconn425) {
+            sendcontrol "425 Can't open data connection\r\n";
+        }
+        elsif($nodataconn421) {
+            sendcontrol "421 Connection timed out\r\n";
+        }
+        else {
+            sendcontrol "503 data channel not established\r\n";
+        }
         return 0;
     }
 
@@ -852,7 +860,15 @@ sub NLST_ftp {
     my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
 
     if($datasockf_conn eq 'no') {
-        sendcontrol "503 data channel not established\r\n";
+        if($nodataconn425) {
+            sendcontrol "425 Can't open data connection\r\n";
+        }
+        elsif($nodataconn421) {
+            sendcontrol "421 Connection timed out\r\n";
+        }
+        else {
+            sendcontrol "503 data channel not established\r\n";
+        }
         return 0;
     }
 
@@ -960,7 +976,15 @@ sub RETR_ftp {
     my ($testno) = @_;
 
     if($datasockf_conn eq 'no') {
-        sendcontrol "503 data channel not established\r\n";
+        if($nodataconn425) {
+            sendcontrol "425 Can't open data connection\r\n";
+        }
+        elsif($nodataconn421) {
+            sendcontrol "421 Connection timed out\r\n";
+        }
+        else {
+            sendcontrol "503 data channel not established\r\n";
+        }
         return 0;
     }
 
@@ -1059,7 +1083,15 @@ sub STOR_ftp {
     my $filename = "log/upload.$testno";
 
     if($datasockf_conn eq 'no') {
-        sendcontrol "503 data channel not established\r\n";
+        if($nodataconn425) {
+            sendcontrol "425 Can't open data connection\r\n";
+        }
+        elsif($nodataconn421) {
+            sendcontrol "421 Connection timed out\r\n";
+        }
+        else {
+            sendcontrol "503 data channel not established\r\n";
+        }
         return 0;
     }
 
@@ -1347,7 +1379,6 @@ sub PORT_ftp {
                "(NODATACONN425)\n";
         datasockf_state('ACTIVE_NODATACONN');
         logmsg "====> Active DATA channel not established\n";
-        sendcontrol "425 Can't open data connection\r\n";
         return;
     }
     elsif($nodataconn421) {
@@ -1355,7 +1386,6 @@ sub PORT_ftp {
                "(NODATACONN421)\n";
         datasockf_state('ACTIVE_NODATACONN');
         logmsg "====> Active DATA channel not established\n";
-        sendcontrol "421 Connection timed out\r\n";
         return;
     }
 
@@ -1513,12 +1543,12 @@ sub customize {
             $pasvbadip=1;
         }
         elsif($_ =~ /NODATACONN425/) {
-            # applies only to active FTP mode
+            # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN425\n";
             $nodataconn425=1;
         }
         elsif($_ =~ /NODATACONN421/) {
-            # applies only to active FTP mode
+            # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN421\n";
             $nodataconn421=1;
         }
