@@ -514,6 +514,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
         prev->next = next;
       else
         multi->closure = next;
+      /* removed from closure list now, this might reuse an existing
+         existing connection but we don't know that at this point */
+      data->state.shared_conn = NULL;
       /* No need to continue, handle can only be present once in the list */
       break;
     }
@@ -1788,7 +1791,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
        able to close connections "properly" */
     cl = multi->closure;
     while(cl) {
-      cl->easy_handle->state.shared_conn = NULL; /* no more shared */
+      cl->easy_handle->state.shared_conn = NULL; /* allow cleanup */
       if(cl->easy_handle->state.closed)
         /* close handle only if curl_easy_cleanup() already has been called
            for this easy handle */
@@ -2708,12 +2711,15 @@ static void multi_connc_remove_handle(struct Curl_multi *multi,
           /* out of memory - so much for graceful shutdown */
           Curl_disconnect(conn, /* dead_connection */ FALSE);
           multi->connc->connects[i] = NULL;
+          data->state.shared_conn = NULL;
         }
       }
-      else
+      else {
         /* disconect the easy handle from the connection since the connection
            will now remain but this easy handle is going */
+        data->state.shared_conn = NULL;
         conn->data = NULL;
+      }
     }
   }
 }
