@@ -27,6 +27,7 @@
 
 int tool_ftruncate64(int fd, curl_off_t where);
 
+#undef  ftruncate
 #define ftruncate(fd,where) tool_ftruncate64(fd,where)
 
 #ifndef HAVE_FTRUNCATE
