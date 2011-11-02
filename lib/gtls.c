@@ -82,6 +82,7 @@ static bool gtls_inited = FALSE;
 #  if (GNUTLS_VERSION_NUMBER >= 0x020c00)
 #    undef gnutls_transport_set_lowat
 #    define gnutls_transport_set_lowat(A,B) Curl_nop_stmt
+#    define USE_GNUTLS_PRIORITY_SET_DIRECT 1
 #  endif
 #  if (GNUTLS_VERSION_NUMBER >= 0x020c03)
 #    undef gnutls_transport_set_global_errno
@@ -320,7 +321,9 @@ static CURLcode
 gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
+#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
   static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
+#endif
   struct SessionHandle *data = conn->data;
   gnutls_session session;
   int rc;
@@ -440,18 +443,26 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
 
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv3) {
+#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
     static const int protocol_priority[] = { GNUTLS_SSL3, 0 };
-    gnutls_protocol_set_priority(session, protocol_priority);
+    rc = gnutls_protocol_set_priority(session, protocol_priority);
+#else
+    const char *err;
+    rc = gnutls_priority_set_direct(session, "-VERS-TLS-ALL:+VERS-SSL3.0",
+                                    &err);
+#endif
     if(rc != GNUTLS_E_SUCCESS)
       return CURLE_SSL_CONNECT_ERROR;
   }
 
+#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
   /* Sets the priority on the certificate types supported by gnutls. Priority
      is higher for types specified before others. After specifying the types
      you want, you must append a 0. */
   rc = gnutls_certificate_type_set_priority(session, cert_type_priority);
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
+#endif
 
   if(data->set.str[STRING_CERT]) {
     if(gnutls_certificate_set_x509_key_file(
