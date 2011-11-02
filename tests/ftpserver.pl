@@ -135,6 +135,7 @@ my $nosave;        # set if ftp server should not save uploaded data
 my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
 my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
+my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my %customreply;   #
 my %customcount;   #
 my %delayreply;    #
@@ -832,13 +833,19 @@ my @ftpdir=("total 20\r\n",
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "425 Can't open data connection\r\n";
         }
         elsif($nodataconn421) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "421 Connection timed out\r\n";
         }
+        elsif($nodataconn150) {
+            sendcontrol "150 Opening data connection\r\n";
+            # client shall timeout
+        }
         else {
-            sendcontrol "503 data channel not established\r\n";
+            # client shall timeout
         }
         return 0;
     }
@@ -861,13 +868,19 @@ sub NLST_ftp {
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "425 Can't open data connection\r\n";
         }
         elsif($nodataconn421) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "421 Connection timed out\r\n";
         }
+        elsif($nodataconn150) {
+            sendcontrol "150 Opening data connection\r\n";
+            # client shall timeout
+        }
         else {
-            sendcontrol "503 data channel not established\r\n";
+            # client shall timeout
         }
         return 0;
     }
@@ -977,13 +990,19 @@ sub RETR_ftp {
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "425 Can't open data connection\r\n";
         }
         elsif($nodataconn421) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "421 Connection timed out\r\n";
         }
+        elsif($nodataconn150) {
+            sendcontrol "150 Opening data connection\r\n";
+            # client shall timeout
+        }
         else {
-            sendcontrol "503 data channel not established\r\n";
+            # client shall timeout
         }
         return 0;
     }
@@ -1084,13 +1103,19 @@ sub STOR_ftp {
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "425 Can't open data connection\r\n";
         }
         elsif($nodataconn421) {
+            sendcontrol "150 Opening data connection\r\n";
             sendcontrol "421 Connection timed out\r\n";
         }
+        elsif($nodataconn150) {
+            sendcontrol "150 Opening data connection\r\n";
+            # client shall timeout
+        }
         else {
-            sendcontrol "503 data channel not established\r\n";
+            # client shall timeout
         }
         return 0;
     }
@@ -1238,12 +1263,13 @@ sub PASV_ftp {
     }
 
     if($nodataconn) {
-      logmsg "DATA sockfilt for passive data channel (NODATACONN) ".
-             "bound on port $pasvport\n";
+        my $str = nodataconn_str();
+        logmsg "DATA sockfilt for passive data channel ($str) bound on port ".
+               "$pasvport\n";
     }
     else {
-      logmsg "DATA sockfilt for passive data channel listens on port ".
-             "$pasvport\n";
+        logmsg "DATA sockfilt for passive data channel listens on port ".
+               "$pasvport\n";
     }
 
     if($cmd ne "EPSV") {
@@ -1265,7 +1291,8 @@ sub PASV_ftp {
            "will be accepted on port $pasvport\n";
 
     if($nodataconn) {
-        logmsg "====> Client fooled (NODATACONN)\n";
+        my $str = nodataconn_str();
+        logmsg "====> Client fooled ($str)\n";
         return;
     }
 
@@ -1367,23 +1394,8 @@ sub PORT_ftp {
     }
 
     if($nodataconn) {
-        logmsg "DATA sockfilt for active data channel not started ".
-               "(NODATACONN)\n";
-        datasockf_state('ACTIVE_NODATACONN');
-        logmsg "====> Active DATA channel not established\n";
-        # client shall timeout awaiting connection from server
-        return;
-    }
-    elsif($nodataconn425) {
-        logmsg "DATA sockfilt for active data channel not started ".
-               "(NODATACONN425)\n";
-        datasockf_state('ACTIVE_NODATACONN');
-        logmsg "====> Active DATA channel not established\n";
-        return;
-    }
-    elsif($nodataconn421) {
-        logmsg "DATA sockfilt for active data channel not started ".
-               "(NODATACONN421)\n";
+        my $str = nodataconn_str();
+        logmsg "DATA sockfilt for active data channel not started ($str)\n";
         datasockf_state('ACTIVE_NODATACONN');
         logmsg "====> Active DATA channel not established\n";
         return;
@@ -1486,6 +1498,20 @@ sub datasockf_state {
 }
 
 #**********************************************************************
+# nodataconn_str returns string of efective nodataconn command. Notice
+# that $nodataconn may be set alone or in addition to a $nodataconnXXX.
+#
+sub nodataconn_str {
+    my $str;
+    # order matters
+    $str = 'NODATACONN' if($nodataconn);
+    $str = 'NODATACONN425' if($nodataconn425);
+    $str = 'NODATACONN421' if($nodataconn421);
+    $str = 'NODATACONN150' if($nodataconn150);
+    return "$str";
+}
+
+#**********************************************************************
 # customize configures test server operation for each curl test, reading
 # configuration commands/parameters from server commands file each time
 # a new client control connection is established with the test server.
@@ -1501,6 +1527,7 @@ sub customize {
     $nodataconn = 0;    # default is to establish or accept data channel
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
+    $nodataconn150 = 0; # default is to not send 150 without data channel
     %customreply = ();  #
     %customcount = ();  #
     %delayreply = ();   #
@@ -1546,11 +1573,19 @@ sub customize {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN425\n";
             $nodataconn425=1;
+            $nodataconn=1;
         }
         elsif($_ =~ /NODATACONN421/) {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN421\n";
             $nodataconn421=1;
+            $nodataconn=1;
+        }
+        elsif($_ =~ /NODATACONN150/) {
+            # applies to both active and passive FTP modes
+            logmsg "FTPD: instructed to use NODATACONN150\n";
+            $nodataconn150=1;
+            $nodataconn=1;
         }
         elsif($_ =~ /NODATACONN/) {
             # applies to both active and passive FTP modes
