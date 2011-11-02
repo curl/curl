@@ -593,8 +593,10 @@ CURLcode Curl_ch_connc(struct SessionHandle *data,
        NOTE: for conncache_multi cases we must make sure that we only
        close handles not in use.
     */
-    for(i=newamount; i< c->num; i++)
+    for(i=newamount; i< c->num; i++) {
       Curl_disconnect(c->connects[i], /* dead_connection */ FALSE);
+      c->connects[i] = NULL;
+    }
 
     /* If the most recent connection is no longer valid, mark it
        invalid. */

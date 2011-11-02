@@ -1991,12 +1991,17 @@ connect_host(struct SessionHandle *data,
     /* Now, if async is TRUE here, we need to wait for the name
        to resolve */
     res = Curl_resolver_wait_resolv(*conn, NULL);
-    if(CURLE_OK == res)
+    if(CURLE_OK == res) {
       /* Resolved, continue with the connection */
       res = Curl_async_resolved(*conn, &protocol_done);
-    else
+      if(res)
+        *conn = NULL;
+    }
+    else {
       /* if we can't resolve, we kill this "connection" now */
       (void)Curl_disconnect(*conn, /* dead_connection */ FALSE);
+      *conn = NULL;
+    }
   }
 
   return res;
