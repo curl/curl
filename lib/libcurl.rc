@@ -48,7 +48,7 @@ BEGIN
       VALUE "FileDescription",  "libcurl Shared Library\0"
       VALUE "FileVersion",      LIBCURL_VERSION "\0"
       VALUE "InternalName",     "libcurl\0"
-      VALUE "OriginalFilename", "libcurl.dll\0"
+      VALUE "OriginalFilename", "libcurl-4.dll\0"
       VALUE "ProductName",      "The cURL library\0"
       VALUE "ProductVersion",   LIBCURL_VERSION "\0"
       VALUE "LegalCopyright",   "© " LIBCURL_COPYRIGHT "\0"

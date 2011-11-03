@@ -1,5 +1,6 @@
 .deps
 .libs
+*.a
 *.lib
 *.pdb
 *.dll
@@ -36,6 +37,7 @@ install-sh
 *.o
 *.lo
 *.la
+*.res
 mkinstalldirs
 tags
 TAGS
