@@ -2606,7 +2606,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   data = conn->data;
 
   if(!data) {
-    DEBUGF(infof(data, "DISCONNECT without easy handle, ignoring\n"));
+    DEBUGF(fprintf(stderr, "DISCONNECT without easy handle, ignoring\n"));
     return CURLE_OK;
   }
 

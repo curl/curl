@@ -184,7 +184,7 @@ static CURLcode file_range(struct connectdata *conn)
 static CURLcode file_connect(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data = conn->data;
-  char *real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
+  char *real_path;
   struct FILEPROTO *file;
   int fd;
 #ifdef DOS_FILESYSTEM
@@ -192,12 +192,13 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   char *actual_path;
 #endif
 
-  if(!real_path)
-    return CURLE_OUT_OF_MEMORY;
-
   /* If there already is a protocol-specific struct allocated for this
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
+
+  real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
+  if(!real_path)
+    return CURLE_OUT_OF_MEMORY;
 
   if(!data->state.proto.file) {
     file = calloc(1, sizeof(struct FILEPROTO));
