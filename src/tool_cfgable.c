@@ -27,8 +27,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* TODO: review handling of unhandled fields marked below */
-
 void free_config_fields(struct Configurable *config)
 {
   struct getout *urlnode;
@@ -114,8 +112,7 @@ void free_config_fields(struct Configurable *config)
     curl_formfree(config->httppost);
     config->httppost = NULL;
   }
-
-  /* config->last_post not handled */
+  config->last_post = NULL;
 
   curl_slist_free_all(config->telnet_options);
   curl_slist_free_all(config->resolve);
