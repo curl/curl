@@ -741,25 +741,26 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       *availp |= CURLAUTH_GSSNEGOTIATE;
       authp->avail |= CURLAUTH_GSSNEGOTIATE;
 
-      if(data->state.negotiate.state == GSS_AUTHSENT) {
-        /* if we sent GSS authentication in the outgoing request and we get
-           this back, we're in trouble */
-        infof(data, "Authentication problem. Ignoring this.\n");
-        data->state.authproblem = TRUE;
-      }
-      else {
-        neg = Curl_input_negotiate(conn, (httpcode == 407)?TRUE:FALSE, start);
-        if(neg == 0) {
-          DEBUGASSERT(!data->req.newurl);
-          data->req.newurl = strdup(data->change.url);
-          if(!data->req.newurl)
-            return CURLE_OUT_OF_MEMORY;
-          data->state.authproblem = FALSE;
-          /* we received GSS auth info and we dealt with it fine */
-          data->state.negotiate.state = GSS_AUTHRECV;
+      if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
+        if(data->state.negotiate.state == GSS_AUTHSENT) {
+          /* if we sent GSS authentication in the outgoing request and we get
+             this back, we're in trouble */
+          infof(data, "Authentication problem. Ignoring this.\n");
+          data->state.authproblem = TRUE;
         }
         else {
-          data->state.authproblem = TRUE;
+          neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
+          if(neg == 0) {
+            DEBUGASSERT(!data->req.newurl);
+            data->req.newurl = strdup(data->change.url);
+            if(!data->req.newurl)
+              return CURLE_OUT_OF_MEMORY;
+            data->state.authproblem = FALSE;
+            /* we received GSS auth info and we dealt with it fine */
+            data->state.negotiate.state = GSS_AUTHRECV;
+          }
+          else
+            data->state.authproblem = TRUE;
         }
       }
     }
