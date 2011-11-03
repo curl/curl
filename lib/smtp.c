@@ -507,7 +507,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode != 220) {
-    if(data->set.ftp_ssl != CURLUSESSL_TRY) {
+    if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied. %c", smtpcode);
       result = CURLE_LOGIN_DENIED;
     }
@@ -557,7 +557,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
-    if((data->set.ftp_ssl <= CURLUSESSL_TRY || conn->ssl[FIRSTSOCKET].use) &&
+    if((data->set.use_ssl <= CURLUSESSL_TRY || conn->ssl[FIRSTSOCKET].use) &&
      !conn->bits.user_passwd)
       result = smtp_state_helo(conn);
     else {
@@ -565,7 +565,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
       result = CURLE_LOGIN_DENIED;
     }
   }
-  else if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");

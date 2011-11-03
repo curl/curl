@@ -2169,7 +2169,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Make transfers attempt to use SSL/TLS.
      */
-    data->set.ftp_ssl = (curl_usessl)va_arg(param, long);
+    data->set.use_ssl = (curl_usessl)va_arg(param, long);
     break;
 #endif
   case CURLOPT_FTPSSLAUTH:

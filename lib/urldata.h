@@ -1493,7 +1493,7 @@ struct UserDefined {
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
   bool ftp_use_pret;     /* if PRET is to be used before PASV or not */
 
-  curl_usessl ftp_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+  curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */

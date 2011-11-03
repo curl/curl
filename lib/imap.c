@@ -580,7 +580,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       return CURLE_FTP_WEIRD_SERVER_REPLY;
     }
 
-    if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
       /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
          to TLS connection now */
       const char *str;

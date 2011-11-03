@@ -2493,7 +2493,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
 #endif
 
-      if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but FTPS is
            requested. Try a FTPS connection now */
 
@@ -2549,7 +2549,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         /* remain in this same state */
       }
       else {
-        if(data->set.ftp_ssl > CURLUSESSL_TRY)
+        if(data->set.use_ssl > CURLUSESSL_TRY)
           /* we failed and CURLUSESSL_CONTROL or CURLUSESSL_ALL is set */
           result = CURLE_USE_SSL_FAILED;
         else
@@ -2572,7 +2572,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
     case FTP_PBSZ:
       PPSENDF(&ftpc->pp, "PROT %c",
-              data->set.ftp_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+              data->set.use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
       state(conn, FTP_PROT);
 
       break;
@@ -2581,10 +2581,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->ssl[SECONDARYSOCKET].use =
-          (data->set.ftp_ssl != CURLUSESSL_CONTROL) ? TRUE : FALSE;
+          (data->set.use_ssl != CURLUSESSL_CONTROL) ? TRUE : FALSE;
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
-      else if(data->set.ftp_ssl > CURLUSESSL_CONTROL)
+      else if(data->set.use_ssl > CURLUSESSL_CONTROL)
         /* we failed and bails out */
         return CURLE_USE_SSL_FAILED;
 
