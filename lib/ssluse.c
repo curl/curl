@@ -123,6 +123,10 @@
 #define X509_STORE_set_flags(x,y) Curl_nop_stmt
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#define HAVE_ERR_REMOVE_THREAD_STATE 1
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -697,20 +701,27 @@ int Curl_ossl_init(void)
 /* Global cleanup */
 void Curl_ossl_cleanup(void)
 {
-  /* Free the SSL error strings */
-  ERR_free_strings();
-
-  /* EVP_cleanup() removes all ciphers and digests from the table. */
+  /* Free ciphers and digests lists */
   EVP_cleanup();
 
 #ifdef HAVE_ENGINE_CLEANUP
+  /* Free engine list */
   ENGINE_cleanup();
 #endif
 
 #ifdef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA
-  /* this function was not present in 0.9.6b, but was added sometimes
-     later */
+  /* Free OpenSSL ex_data table */
   CRYPTO_cleanup_all_ex_data();
+#endif
+
+  /* Free OpenSSL error strings */
+  ERR_free_strings();
+
+  /* Free thread local error state, destroying hash upon zero refcount */
+#ifdef HAVE_ERR_REMOVE_THREAD_STATE
+  ERR_remove_thread_state(NULL);
+#else
+  ERR_remove_state(0);
 #endif
 }
 
@@ -960,17 +971,6 @@ void Curl_ossl_session_free(void *ptr)
  */
 int Curl_ossl_close_all(struct SessionHandle *data)
 {
-  /*
-    ERR_remove_state() frees the error queue associated with
-    thread pid.  If pid == 0, the current thread will have its
-    error queue removed.
-
-    Since error queue data structures are allocated
-    automatically for new threads, they must be freed when
-    threads are terminated in oder to avoid memory leaks.
-  */
-  ERR_remove_state(0);
-
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
     ENGINE_finish(data->state.engine);
