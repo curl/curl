@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "setup.h"
 
+extern bool Curl_if_is_interface_name(const char *interface);
 extern char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size);
 
 #ifdef __INTERIX

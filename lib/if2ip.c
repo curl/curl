@@ -71,6 +71,24 @@
 
 #if defined(HAVE_GETIFADDRS)
 
+bool Curl_if_is_interface_name(const char *interface)
+{
+  bool result = FALSE;
+
+  struct ifaddrs *iface, *head;
+
+  if(getifaddrs(&head) >= 0) {
+    for(iface=head; iface != NULL; iface=iface->ifa_next) {
+      if(curl_strequal(iface->ifa_name, interface)) {
+        result = TRUE;
+        break;
+      }
+    }
+    freeifaddrs(head);
+  }
+  return result;
+}
+
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
@@ -108,6 +126,14 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 }
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
+
+bool Curl_if_is_interface_name(const char *interface)
+{
+  /* This is here just to support the old interfaces */
+  char buf[256];
+
+  return (Curl_if2ip(AF_INET, interface, buf, sizeof(buf)) != NULL);
+}
 
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
@@ -147,6 +173,11 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 }
 
 #else
+
+bool Curl_if_is_interface_name(const char *interface)
+{
+  return FALSE;
+}
 
 char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size)
 {

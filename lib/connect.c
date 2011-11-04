@@ -240,6 +240,10 @@ static CURLcode bindlocal(struct connectdata *conn,
   int error;
   char myhost[256] = "";
   int done = 0; /* -1 for error, 1 for address found */
+  int is_interface = FALSE;
+  int is_host = FALSE;
+  static const char *if_prefix = "if!";
+  static const char *host_prefix = "host!";
 
   /*************************************************************
    * Select device to bind socket to
@@ -251,9 +255,20 @@ static CURLcode bindlocal(struct connectdata *conn,
   memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
 
   if(dev && (strlen(dev)<255) ) {
+    if(strncmp(if_prefix, dev, strlen(if_prefix)) == 0) {
+      dev += strlen(if_prefix);
+      is_interface = TRUE;
+    }
+    else if(strncmp(host_prefix, dev, strlen(host_prefix)) == 0) {
+      dev += strlen(host_prefix);
+      is_host = TRUE;
+    }
 
     /* interface */
-    if(Curl_if2ip(af, dev, myhost, sizeof(myhost))) {
+    if(!is_host && (is_interface || Curl_if_is_interface_name(dev))) {
+      if(Curl_if2ip(af, dev, myhost, sizeof(myhost)) == NULL)
+        return CURLE_INTERFACE_FAILED;
+
       /*
        * We now have the numerical IP address in the 'myhost' buffer
        */
