@@ -45,6 +45,10 @@ This release includes the following bugfixes:
  o HTTP: handle multiple auths in a single WWW-Authenticate line
  o curl_multi_fdset: correct fdset with FTP PORT use
  o windbuild: fix the static build
+ o fix builds with GnuTLS version 3
+ o fix calling of OpenSSL's ERR_remove_state(0)
+ o HTTP auth: fix proxy Negotiate bug when Negotiate not requested
+ o ftp PORT: don't hang if bind() fails
 
 This release includes the following known bugs:
 
@@ -59,6 +63,6 @@ advice from friends like these:
  Vladimir Grishchenko, Dominique Leuenberger, Marcin Adamski,
  Jerry Wu, Michal Marek, Frank Van Uffelen, Fabian Hiernaux, Anton Bychkov,
  Andreas Olsson, Kamil Dudka, Thomas L. Shinnick, Tim Harder, Nick Zitzmann,
- Gokhan Sengun, Tom Wright
+ Gokhan Sengun, Tom Wright, Patrick Monnerat, Rene Bernhardt
 
         Thanks! (and sorry if I forgot to mention someone)
