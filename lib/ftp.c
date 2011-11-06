@@ -753,6 +753,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   unsigned short port_min = 0;
   unsigned short port_max = 0;
   unsigned short port;
+  bool possibly_non_local = TRUE;
 
   char *addr = NULL;
 
@@ -869,6 +870,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       break;
     }
     host = hbuf; /* use this host name */
+    possibly_non_local = FALSE; /* we know it is local now */
   }
 
   /* resolv ip/host to ip */
@@ -932,12 +934,12 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(bind(portsock, sa, sslen) ) {
       /* It failed. */
       error = SOCKERRNO;
-      if(error == EADDRNOTAVAIL) {
-
+      if(possibly_non_local && (error == EADDRNOTAVAIL)) {
         /* The requested bind address is not local.  Use the address used for
          * the control connection instead and restart the port loop
          */
-        failf(data, "bind(port=%hu) failed: %s", port,
+
+        infof(data, "bind(port=%hu) on non-local address failed: %s", port,
               Curl_strerror(conn, error) );
 
         sslen = sizeof(ss);
@@ -948,6 +950,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
           return CURLE_FTP_PORT_FAILED;
         }
         port = port_min;
+        possibly_non_local = FALSE; /* don't try this again */
         continue;
       }
       else if(error != EADDRINUSE && error != EACCES) {
