@@ -315,10 +315,9 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       /* we had data in the "cache", copy that instead of doing an actual
        * read
        *
-       * ftp->cache_size is cast to int here.  This should be safe,
-       * because it would have been populated with something of size
-       * int to begin with, even though its datatype may be larger
-       * than an int.
+       * pp->cache_size is cast to ssize_t here.  This should be safe, because
+       * it would have been populated with something of size int to begin
+       * with, even though its datatype may be larger than an int.
        */
       DEBUGASSERT((ptr+pp->cache_size) <= (buf+BUFSIZE+1));
       memcpy(ptr, pp->cache, pp->cache_size);
@@ -375,7 +374,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       for(i = 0; i < gotbytes; ptr++, i++) {
         perline++;
         if(*ptr=='\n') {
-          /* a newline is CRLF in ftp-talk, so the CR is ignored as
+          /* a newline is CRLF in pp-talk, so the CR is ignored as
              the line isn't really terminated until the LF comes */
 
           /* output debug output if that is requested */
