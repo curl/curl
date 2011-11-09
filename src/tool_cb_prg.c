@@ -36,6 +36,8 @@
 ** callback for CURLOPT_PROGRESSFUNCTION
 */
 
+#define MAX_BARLENGTH 256
+
 int tool_progress_cb(void *clientp,
                      double dltotal, double dlnow,
                      double ultotal, double ulnow)
@@ -43,8 +45,7 @@ int tool_progress_cb(void *clientp,
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherits some of his concepts. */
 
-  char line[256];
-  char outline[256];
+  char line[MAX_BARLENGTH+1];
   char format[40];
   double frac;
   double percent;
@@ -82,12 +83,13 @@ int tool_progress_cb(void *clientp,
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
+    if(num > MAX_BARLENGTH)
+      num = MAX_BARLENGTH;
     for(i = 0; i < num; i++)
       line[i] = '#';
     line[i] = '\0';
-    snprintf(format, sizeof(format), "%%-%ds %%5.1f%%%%", barwidth);
-    snprintf(outline, sizeof(outline), format, line, percent);
-    fprintf(bar->out, "\r%s", outline);
+    snprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
+    fprintf(bar->out, format, line, percent);
   }
   fflush(bar->out);
   bar->prev = point;
