@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include "test.h"
 
+/* lib591 is used for test cases 591, 592, 593 and 594 */
+
 #include <fcntl.h>
 
 #include "testutil.h"
@@ -42,12 +44,12 @@ int test(char *URL)
 
   start_test_timing();
 
-  upload = fopen(libtest_arg2, "rb");
+  upload = fopen(libtest_arg3, "rb");
   if(!upload) {
     error = ERRNO;
     fprintf(stderr, "fopen() failed with error: %d (%s)\n",
             error, strerror(error));
-    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
+    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg3);
     return TEST_ERR_FOPEN;
   }
 
@@ -73,6 +75,9 @@ int test(char *URL)
 
   /* use active mode FTP */
   easy_setopt(easy, CURLOPT_FTPPORT, "-");
+
+  /* server connection timeout */
+  easy_setopt(easy, CURLOPT_CONNECTTIMEOUT, strtol(libtest_arg2, NULL, 10));
 
   multi_init(multi);
 
