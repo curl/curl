@@ -49,6 +49,7 @@ This release includes the following bugfixes:
  o fix calling of OpenSSL's ERR_remove_state(0)
  o HTTP auth: fix proxy Negotiate bug when Negotiate not requested
  o ftp PORT: don't hang if bind() fails
+ o -# would crash on terminals wider than 256 columns
 
 This release includes the following known bugs:
 
@@ -63,6 +64,7 @@ advice from friends like these:
  Vladimir Grishchenko, Dominique Leuenberger, Marcin Adamski,
  Jerry Wu, Michal Marek, Frank Van Uffelen, Fabian Hiernaux, Anton Bychkov,
  Andreas Olsson, Kamil Dudka, Thomas L. Shinnick, Tim Harder, Nick Zitzmann,
- Gokhan Sengun, Tom Wright, Patrick Monnerat, Rene Bernhardt
+ Gokhan Sengun, Tom Wright, Patrick Monnerat, Rene Bernhardt,
+ Alexey Zakhlestin
 
         Thanks! (and sorry if I forgot to mention someone)
