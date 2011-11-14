@@ -94,13 +94,13 @@ int main(void)
      * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
      * will continue anyway - see the security discussion in the libcurl
      * tutorial for more details. */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
     /* If your server doesn't have a valid certificate, then you can disable
      * part of the Transport Layer Security protection by setting the
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
-     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
      * That is, in general, a bad idea. It is still better than sending your
      * authentication details in plain text though.
      * Instead, you should get the issuer certificate (or the host certificate
@@ -135,7 +135,7 @@ int main(void)
     /* Since the traffic will be encrypted, it is very useful to turn on debug
      * information within libcurl to see what is happening during the transfer.
      */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /* send the message (including headers) */
     res = curl_easy_perform(curl);
