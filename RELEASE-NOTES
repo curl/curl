@@ -1,4 +1,4 @@
-Curl and libcurl 7.23.0
+Curl and libcurl 7.24.0
 
  Public curl releases:         125
  Command line options:         149
@@ -9,47 +9,11 @@ Curl and libcurl 7.23.0
 
 This release includes the following changes:
 
- o Empty headers can be sent in HTTP requests by terminating with a semicolon
- o SSL session sharing support added to curl_share_setopt()
- o Added support to MAIL FROM for the optional SIZE parameter
- o smtp: Added support for NTLM authentication
- o curl tool: code split into tool_*.[ch] files
+ o 
 
 This release includes the following bugfixes:
 
- o handle HTTP redirects to "//hostname/path"
- o SMTP without --mail-from caused segfault
- o prevent extra progress meter headers between multiple files
- o allow Content-Length to be replaced when sending HTTP requests
- o curl now always sets postfieldsize to allow --data-binary and --data
-   to be mixed in the same command line
- o curl_multi_fdset: avoid FD_SET out of bounds
- o lots of MinGW build tweaks
- o Curl_gethostname: return un-qualified machine name
- o fixed the openssl version number configure check
- o nss: certificates from files are no longer looked up by file base names
- o returning abort from the progress function when using the multi interface
-   would not properly cancel the transfer and close the connection
- o fix libcurl.m4 to not fail with modern gcc versions
- o ftp: improved the failed PORT host name resolved error message
- o TFTP timeout and unexpected block adjustments
- o HTTP and GOPHER test server-side connection closing adjustments
- o fix endless loop upon transport connection timeout
- o don't clobber errno on failed connect
- o typecheck: allow NULL to unset CURLOPT_ERRORBUFFER
- o formdata: ack read callback abort
- o make --show-error properly position independent
- o set the ipv6-connection boolean correctly on connect
- o SMTP: fix end-of-body string escaping
- o gtls: only call gnutls_transport_set_lowat with <gnutls-2.12.0
- o HTTP: handle multiple auths in a single WWW-Authenticate line
- o curl_multi_fdset: correct fdset with FTP PORT use
- o windbuild: fix the static build
- o fix builds with GnuTLS version 3
- o fix calling of OpenSSL's ERR_remove_state(0)
- o HTTP auth: fix proxy Negotiate bug when Negotiate not requested
- o ftp PORT: don't hang if bind() fails
- o -# would crash on terminals wider than 256 columns
+ o 
 
 This release includes the following known bugs:
 
@@ -58,13 +22,6 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Yukihiro Kawada, Dave Reisner, Gisle Vanem, Guenter Knauf, Steve Holme,
- Yang Tse, Christopher Stone, Taneli Vahakangas, Albert Chin,
- Alejandro Alvarez, Dan Fandrich, Julien Royer, Georg Lippitsch,
- Vladimir Grishchenko, Dominique Leuenberger, Marcin Adamski,
- Jerry Wu, Michal Marek, Frank Van Uffelen, Fabian Hiernaux, Anton Bychkov,
- Andreas Olsson, Kamil Dudka, Thomas L. Shinnick, Tim Harder, Nick Zitzmann,
- Gokhan Sengun, Tom Wright, Patrick Monnerat, Rene Bernhardt,
- Alexey Zakhlestin
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
