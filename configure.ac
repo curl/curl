@@ -1799,17 +1799,30 @@ if test "$OPENSSL_ENABLED" != "1"; then
 fi dnl OPENSSL != 1
 
 dnl ---
-dnl If GnuTLS is enabled, we MUST verify that it uses libgcrypt since
-dnl curl code relies on that but recent GnuTLS versions can in fact build
-dnl with different crypto libraries which curl right now cannot handle
+dnl Check which crypto backend GnuTLS uses
 dnl ---
 
 if test "$GNUTLS_ENABLED" = "1"; then
-  AC_CHECK_LIB(gcrypt,
-               gcry_control, ,
-    [
-      AC_MSG_ERROR([need GnuTLS built with gcrypt to function with GnuTLS])
-    ])
+  USE_GNUTLS_NETTLE=
+  # First check if we can detect either crypto library via transitive linking
+  AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(gnutls, gcry_control, [ USE_GNUTLS_NETTLE=0 ])
+  fi
+  # If not, try linking directly to both of them to see if they are available
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(nettle, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(gcrypt, gcry_control, [ USE_GNUTLS_NETTLE=0 ])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_MSG_ERROR([GnuTLS found, but neither gcrypt nor nettle found])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = "1"; then
+    AC_DEFINE(USE_GNUTLS_NETTLE, 1, [if GnuTLS uses nettle as crypto backend])
+    AC_SUBST(USE_GNUTLS_NETTLE, [1])
+  fi
 fi
 
 dnl ---

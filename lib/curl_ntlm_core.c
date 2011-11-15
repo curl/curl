@@ -63,6 +63,11 @@
 #    define DESKEY(x) &x
 #  endif
 
+#elif defined(USE_GNUTLS_NETTLE)
+
+#  include <nettle/des.h>
+#  include <nettle/md4.h>
+
 #elif defined(USE_GNUTLS)
 
 #  include <gcrypt.h>
@@ -133,7 +138,17 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#if defined(USE_GNUTLS)
+#if defined(USE_GNUTLS_NETTLE)
+
+static void setup_des_key(const unsigned char *key_56,
+                          struct des_ctx *des)
+{
+  char key[8];
+  extend_key_56_to_64(key_56, key);
+  des_set_key(des, key);
+}
+
+#elif defined(USE_GNUTLS)
 
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.
@@ -233,6 +248,14 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, DESKEY(ks));
   DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 16),
                   DESKEY(ks), DES_ENCRYPT);
+#elif defined(USE_GNUTLS_NETTLE)
+  struct des_ctx des;
+  setup_des_key(keys, &des);
+  des_encrypt(&des, 8, results, plaintext);
+  setup_des_key(keys + 7, &des);
+  des_encrypt(&des, 8, results + 8, plaintext);
+  setup_des_key(keys + 14, &des);
+  des_encrypt(&des, 8, results + 16, plaintext);
 #elif defined(USE_GNUTLS)
   gcry_cipher_hd_t des;
 
@@ -295,6 +318,12 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw + 7, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
                     DESKEY(ks), DES_ENCRYPT);
+#elif defined(USE_GNUTLS_NETTLE)
+    struct des_ctx des;
+    setup_des_key(pw, &des);
+    des_encrypt(&des, 8, lmbuffer, magic);
+    setup_des_key(pw + 7, &des);
+    des_encrypt(&des, 8, lmbuffer + 8, magic);
 #elif defined(USE_GNUTLS)
     gcry_cipher_hd_t des;
 
@@ -357,6 +386,11 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2 * len);
     MD4_Final(ntbuffer, &MD4pw);
+#elif defined(USE_GNUTLS_NETTLE)
+    struct md4_ctx MD4pw;
+    md4_init(&MD4pw);
+    md4_update(&MD4pw, 2 * len, pw);
+    md4_digest(&MD4pw, MD4_DIGEST_SIZE, ntbuffer);
 #elif defined(USE_GNUTLS)
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);

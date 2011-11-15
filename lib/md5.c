@@ -27,6 +27,30 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 
+#ifdef USE_GNUTLS_NETTLE
+
+#include <nettle/md5.h>
+
+typedef struct md5_ctx MD5_CTX;
+
+static void MD5_Init(MD5_CTX * ctx)
+{
+  md5_init(ctx);
+}
+
+static void MD5_Update(MD5_CTX * ctx,
+                       const unsigned char * input,
+                       unsigned int inputLen)
+{
+  md5_update(ctx, inputLen, input);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+{
+  md5_digest(ctx, 16, digest);
+}
+#else
+
 #ifdef USE_GNUTLS
 
 #include <gcrypt.h>
@@ -368,6 +392,8 @@ static void Decode (UINT4 *output,
 #endif /* USE_SSLEAY */
 
 #endif /* USE_GNUTLS */
+
+#endif /* USE_GNUTLS_NETTLE */
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {

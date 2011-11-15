@@ -54,6 +54,13 @@
 #  endif
 #  include "ssluse.h"
 
+#elif defined(USE_GNUTLS_NETTLE)
+
+#  include <nettle/md5.h>
+#  include <gnutls/gnutls.h>
+#  include <gnutls/crypto.h>
+#  define MD5_DIGEST_LENGTH 16
+
 #elif defined(USE_GNUTLS)
 
 #  include <gcrypt.h>
@@ -714,6 +721,9 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     MD5_CTX MD5pw;
     Curl_ossl_seed(data); /* Initiate the seed if not already done */
     RAND_bytes(entropy, 8);
+#elif defined(USE_GNUTLS_NETTLE)
+    struct md5_ctx MD5pw;
+    gnutls_rnd(GNUTLS_RND_RANDOM, entropy, 8);
 #elif defined(USE_GNUTLS)
     gcry_md_hd_t MD5pw;
     Curl_gtls_seed(data); /* Initiate the seed if not already done */
@@ -739,6 +749,10 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     MD5_Init(&MD5pw);
     MD5_Update(&MD5pw, tmp, 16);
     MD5_Final(md5sum, &MD5pw);
+#elif defined(USE_GNUTLS_NETTLE)
+    md5_init(&MD5pw);
+    md5_update(&MD5pw, 16, tmp);
+    md5_digest(&MD5pw, 16, md5sum);
 #elif defined(USE_GNUTLS)
     gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
     gcry_md_write(MD5pw, tmp, MD5_DIGEST_LENGTH);

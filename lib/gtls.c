@@ -34,7 +34,9 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
+#ifndef USE_GNUTLS_NETTLE
 #include <gcrypt.h>
+#endif
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -1032,7 +1034,9 @@ int Curl_gtls_seed(struct SessionHandle *data)
   static bool ssl_seeded = FALSE;
 
   /* Quickly add a bit of entropy */
+#ifndef USE_GNUTLS_NETTLE
   gcry_fast_random_poll();
+#endif
 
   if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
      data->set.str[STRING_SSL_EGDSOCKET]) {
