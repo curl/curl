@@ -285,8 +285,6 @@ CURLcode FindWin32CACert(struct Configurable *config, const char *bundle_file)
       if(!config->cacert)
         result = CURLE_OUT_OF_MEMORY;
     }
-    else
-      result = CURLE_SSL_CACERT;
 
     Curl_safefree(buf);
   }
