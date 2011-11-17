@@ -1,11 +1,11 @@
 Curl and libcurl 7.24.0
 
- Public curl releases:         125
+ Public curl releases:         127
  Command line options:         149
  curl_easy_setopt() options:   192
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 873
+ Contributors:                 907
 
 This release includes the following changes:
 
