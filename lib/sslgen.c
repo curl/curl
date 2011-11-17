@@ -255,7 +255,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
        (conn->remote_port == check->remote_port) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
-      *general_age++;            /* increase general age */
+      (*general_age)++;          /* increase general age */
       check->age = *general_age; /* set this as used in this age */
       *ssl_sessionid = check->sessionid;
       if(idsize)
