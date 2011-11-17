@@ -233,14 +233,18 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   long i;
   long *general_age;
+  bool no_match = TRUE;
+
+  *ssl_sessionid = NULL;
 
   if(!conn->ssl_config.sessionid)
     /* session ID re-use is disabled */
     return TRUE;
 
-  /* Lock for reading if shared */
-  if(data->share && data->share->sslsession == data->state.session) {
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SHARED);
+  /* Lock if shared */
+  if(data->share &&
+     (data->share->specifier & (1<<CURL_LOCK_DATA_SSL_SESSION)) ) {
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
     general_age = &data->share->sessionage;
   }
   else
@@ -260,17 +264,17 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
       *ssl_sessionid = check->sessionid;
       if(idsize)
         *idsize = check->idsize;
-      return FALSE;
+      no_match = FALSE;
+      break;
     }
   }
-  *ssl_sessionid = NULL;
 
-  /* Unlock for reading */
-  if(data->share && data->share->sslsession == data->state.session)
+  /* Unlock */
+  if(data->share &&
+     (data->share->specifier & (1<<CURL_LOCK_DATA_SSL_SESSION)) )
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
-
-  return TRUE;
+  return no_match;
 }
 
 /*
