@@ -52,6 +52,7 @@ struct Curl_share {
 
   struct curl_ssl_session *sslsession;
   unsigned int nsslsession;
+  long sessionage;
 };
 
 CURLSHcode Curl_share_lock (struct SessionHandle *, curl_lock_data,

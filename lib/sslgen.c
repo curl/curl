@@ -232,14 +232,19 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
   struct curl_ssl_session *check;
   struct SessionHandle *data = conn->data;
   long i;
+  long *general_age;
 
   if(!conn->ssl_config.sessionid)
     /* session ID re-use is disabled */
     return TRUE;
 
   /* Lock for reading if shared */
-  if(data->share && data->share->sslsession == data->state.session)
+  if(data->share && data->share->sslsession == data->state.session) {
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SHARED);
+    general_age = &data->share->sessionage;
+  }
+  else
+    general_age = &data->state.sessionage;
 
   for(i=0; i< data->set.ssl.numsessions; i++) {
     check = &data->state.session[i];
@@ -250,8 +255,8 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
        (conn->remote_port == check->remote_port) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
-      data->state.sessionage++;            /* increase general age */
-      check->age = data->state.sessionage; /* set this as used in this age */
+      *general_age++;            /* increase general age */
+      check->age = *general_age; /* set this as used in this age */
       *ssl_sessionid = check->sessionid;
       if(idsize)
         *idsize = check->idsize;
@@ -333,6 +338,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   struct curl_ssl_session *store = &data->state.session[0];
   long oldest_age=data->state.session[0].age; /* zero if unused */
   char *clone_host;
+  long *general_age;
 
   /* Even though session ID re-use might be disabled, that only disables USING
      IT. We still store it here in case the re-using is again enabled for an
@@ -346,8 +352,13 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
      the oldest if necessary) */
 
   /* If using shared SSL session, lock! */
-  if(data->share && data->share->sslsession == data->state.session)
+  if(data->share && data->share->sslsession == data->state.session) {
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+    general_age = &data->share->sessionage;
+  }
+  else {
+    general_age = &data->state.sessionage;
+  }
 
   /* find an empty slot for us, or find the oldest */
   for(i=1; (i<data->set.ssl.numsessions) &&
@@ -366,7 +377,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
   store->idsize = idsize;
-  store->age = data->state.sessionage;    /* set current age */
+  store->age = *general_age;    /* set current age */
   if(store->name)
     /* free it if there's one already present */
     free(store->name);

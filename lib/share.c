@@ -91,6 +91,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         share->nsslsession = 8;
         share->sslsession = calloc(share->nsslsession,
                                    sizeof(struct curl_ssl_session));
+        share->sessionage = 0;
         if(!share->sslsession)
           return CURLSHE_NOMEM;
       }
