@@ -66,8 +66,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(!outs->filename && (cb > 20) &&
-    checkprefix("Content-disposition:", str)) {
+  if((cb > 20) && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
