@@ -3345,11 +3345,8 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(!conn->bits.tcpconnect[FIRSTSOCKET]) {
-
-    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
-    Curl_verboseconnect(conn);
-  }
+  Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+  Curl_verboseconnect(conn);
 
   if(!conn->bits.protoconnstart) {
     if(conn->handler->connect_it) {
