@@ -38,6 +38,12 @@ int test(char *URL)
   int res = 0;
   int running = 1;
   double connect_time = 0.0;
+  double dbl_epsilon;
+
+  dbl_epsilon = 1.0;
+  do {
+    dbl_epsilon /= 2.0;
+  } while ((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
 
   start_test_timing();
 
@@ -81,8 +87,8 @@ int test(char *URL)
   }
 
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
-  if (connect_time <= 0.0) {
-    fprintf(stderr, "connect time is <=0.0\n");
+  if (connect_time < dbl_epsilon) {
+    fprintf(stderr, "connect time is < epsilon\n");
     res = TEST_ERR_MAJOR_BAD;
   }
 
