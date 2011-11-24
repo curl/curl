@@ -9,10 +9,18 @@ Curl and libcurl 7.24.0
 
 This release includes the following changes:
 
+ o CURLOPT_QUOTE: SFTP supports the '*'-prefix now
+ o CURLOPT_DNS_SERVERS: set name servers if possible
+ o Add support for using nettle instead of gcrypt as gnutls backend
  o 
 
 This release includes the following bugfixes:
 
+ o SSL session share: move the age counter to the share object
+ o -J -O: use -O name if no Content-Disposition header comes!
+ o protocol_connect: show verbose connect and set connect time
+ o query-part: ignore the URI part for given protocols
+ o gnutls: only translate winsock errors for old versions
  o 
 
 This release includes the following known bugs:
@@ -22,6 +30,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Alejandro Alvarez Ayllon, Jason Glasgow, Jonas Schnelli, Mark Brand,
+ Martin Storsjo, Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)
