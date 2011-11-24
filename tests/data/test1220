@@ -1,0 +1,30 @@
+<testcase>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+ <name>
+file:// URLs with query string
+ </name>
+ <command>
+file://localhost/%PWD/log/test1220.txt?a_query=foobar#afragment
+</command>
+<file name="log/test1220.txt">
+contents in a single file
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+contents in a single file
+</stdout>
+</verify>
+</testcase>

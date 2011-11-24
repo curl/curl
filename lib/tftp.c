@@ -190,7 +190,7 @@ const struct Curl_handler Curl_handler_tftp = {
   ZERO_NULL,                            /* readwrite */
   PORT_TFTP,                            /* defport */
   CURLPROTO_TFTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
 /**********************************************************

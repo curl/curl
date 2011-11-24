@@ -4824,6 +4824,25 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
+
+  /*************************************************************
+   * If the protocol can't handle url query strings, then cut
+   * of the unhandable part
+   *************************************************************/
+  if((conn->given->flags&PROTOPT_NOURLQUERY)) {
+    char *path_q_sep = strchr(conn->data->state.path, '?');
+    if(path_q_sep) {
+      /* according to rfc3986, allow the query (?foo=bar)
+         also on protocols that can't handle it.
+
+        cut the string-part after '?'
+         */
+
+      /* terminate the string */
+      path_q_sep[0] = 0;
+    }
+  }
+
 #ifndef CURL_DISABLE_PROXY
   /*************************************************************
    * Extract the user and password from the authentication string

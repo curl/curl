@@ -133,7 +133,7 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* readwrite */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
-  PROTOPT_CLOSEACTION               /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY /* flags */
 };
 
 #ifdef USE_SSL
@@ -158,7 +158,8 @@ const struct Curl_handler Curl_handler_smtps = {
   ZERO_NULL,                        /* readwrite */
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTP | CURLPROTO_SMTPS, /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL
+  | PROTOPT_NOURLQUERY              /* flags */
 };
 #endif
 

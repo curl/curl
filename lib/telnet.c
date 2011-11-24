@@ -188,7 +188,7 @@ const struct Curl_handler Curl_handler_telnet = {
   ZERO_NULL,                            /* readwrite */
   PORT_TELNET,                          /* defport */
   CURLPROTO_TELNET,                     /* protocol */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
 

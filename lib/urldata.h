@@ -713,6 +713,8 @@ struct Curl_handler {
 #define PROTOPT_NONETWORK (1<<4)   /* protocol doesn't use the network! */
 #define PROTOPT_NEEDSPWD (1<<5)    /* needs a password, and if none is set it
                                       gets a default */
+#define PROTOPT_NOURLQUERY (1<<6)   /* protocol can't handle
+                                        url query strings (?foo=bar) ! */
 
 
 /* return the count of bytes sent, or -1 on error */

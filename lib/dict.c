@@ -98,7 +98,7 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* readwrite */
   PORT_DICT,                            /* defport */
   CURLPROTO_DICT,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_NONE | PROTOPT_NOURLQUERY      /* flags */
 };
 
 static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
