@@ -80,17 +80,14 @@ static void tls_log_func(int level, const char *str)
 #endif
 static bool gtls_inited = FALSE;
 
-#undef MAP_WINSOCK_ERRORS
 #if defined(GNUTLS_VERSION_NUMBER)
 #  if (GNUTLS_VERSION_NUMBER >= 0x020c00)
 #    undef gnutls_transport_set_lowat
 #    define gnutls_transport_set_lowat(A,B) Curl_nop_stmt
 #    define USE_GNUTLS_PRIORITY_SET_DIRECT 1
 #  endif
-#  if (GNUTLS_VERSION_NUMBER < 0x020c03)
-#    ifdef USE_WINSOCK
-#      define MAP_WINSOCK_ERRORS
-#    endif
+#  if (GNUTLS_VERSION_NUMBER >= 0x020c03)
+#    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
 #endif
 
@@ -102,7 +99,6 @@ static bool gtls_inited = FALSE;
  * us to get specific about the fourth "flags" argument, and to use arbitrary
  * private data with gnutls_transport_set_ptr if we wish.
  *
- * For old gnutls versions, curl must translate Winsock errors:
  * When these custom push and pull callbacks fail, GNU TLS checks its own
  * session-specific error variable, and when not set also its own global
  * errno variable, in order to take appropriate action. GNU TLS does not
@@ -112,9 +108,13 @@ static bool gtls_inited = FALSE;
  * resort global errno variable using gnutls_transport_set_global_errno,
  * with a transport agnostic error value. This implies that some winsock
  * error translation must take place in these callbacks.
+ *
+ * Paragraph above applies to GNU TLS versions older than 2.12.3, since
+ * this version GNU TLS does its own internal winsock error translation
+ * using system_errno() function.
  */
 
-#ifdef MAP_WINSOCK_ERRORS
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
 #  define gtls_EINTR  4
 #  define gtls_EIO    5
 #  define gtls_EAGAIN 11
@@ -135,7 +135,7 @@ static int gtls_mapped_sockerrno(void)
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
   ssize_t ret = swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
-#ifdef MAP_WINSOCK_ERRORS
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
@@ -145,7 +145,7 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
   ssize_t ret = sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
-#ifdef MAP_WINSOCK_ERRORS
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
