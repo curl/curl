@@ -46,6 +46,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
 
   pro->t_nslookup = 0;
   pro->t_connect = 0;
+  pro->t_appconnect = 0;
   pro->t_pretransfer = 0;
   pro->t_starttransfer = 0;
   pro->timespent = 0;
