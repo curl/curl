@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+RETR
+NODATACONN425
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+some bytes
+</data>
+<servercmd>
+NODATACONN425
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP PORT and 425 on download
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1211 -P -
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^EPRT \|1\|(.*)/EPRT \|1\|/
+</strippart>
+
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPRT |1|
+TYPE I
+SIZE 1211
+RETR 1211
+</protocol>
+<errorcode>
+28
+</errorcode>
+</verify>
+</testcase>
