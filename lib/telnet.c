@@ -75,12 +75,17 @@
 
 #define SUBBUFSIZE 512
 
-#define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer;
-#define CURL_SB_TERM(x)   { x->subend = x->subpointer; CURL_SB_CLEAR(x); }
-#define CURL_SB_ACCUM(x,c) \
-  if(x->subpointer < (x->subbuffer+sizeof x->subbuffer)) { \
-    *x->subpointer++ = (c); \
-  }
+#define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer
+#define CURL_SB_TERM(x)                                 \
+  do {                                                  \
+    x->subend = x->subpointer;                          \
+    CURL_SB_CLEAR(x);                                   \
+  } while(0)
+#define CURL_SB_ACCUM(x,c)                                   \
+  do {                                                       \
+    if(x->subpointer < (x->subbuffer+sizeof x->subbuffer))   \
+      *x->subpointer++ = (c);                                \
+  } while(0)
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
 #define  CURL_SB_PEEK(x)   ((*x->subpointer)&0xff)
@@ -1014,28 +1019,28 @@ static void sendsuboption(struct connectdata *conn, int option)
   switch (option) {
   case CURL_TELOPT_NAWS:
     /* We prepare data to be sent */
-    CURL_SB_CLEAR(tn)
-    CURL_SB_ACCUM(tn,CURL_IAC)
-    CURL_SB_ACCUM(tn,CURL_SB)
-    CURL_SB_ACCUM(tn,CURL_TELOPT_NAWS)
+    CURL_SB_CLEAR(tn);
+    CURL_SB_ACCUM(tn, CURL_IAC);
+    CURL_SB_ACCUM(tn, CURL_SB);
+    CURL_SB_ACCUM(tn, CURL_TELOPT_NAWS);
     /* We must deal either with litte or big endien processors */
     /* Window size must be sent according to the 'network order' */
     x=htons(tn->subopt_wsx);
     y=htons(tn->subopt_wsy);
     uc1 = (unsigned char*)&x;
     uc2 = (unsigned char*)&y;
-    CURL_SB_ACCUM(tn,uc1[0])
-      CURL_SB_ACCUM(tn,uc1[1])
-      CURL_SB_ACCUM(tn,uc2[0])
-      CURL_SB_ACCUM(tn,uc2[1])
+    CURL_SB_ACCUM(tn, uc1[0]);
+    CURL_SB_ACCUM(tn, uc1[1]);
+    CURL_SB_ACCUM(tn, uc2[0]);
+    CURL_SB_ACCUM(tn, uc2[1]);
 
-      CURL_SB_ACCUM(tn,CURL_IAC)
-      CURL_SB_ACCUM(tn,CURL_SE)
-      CURL_SB_TERM(tn)
-      /* data suboption is now ready */
+    CURL_SB_ACCUM(tn, CURL_IAC);
+    CURL_SB_ACCUM(tn, CURL_SE);
+    CURL_SB_TERM(tn);
+    /* data suboption is now ready */
 
-      printsub(data, '>', (unsigned char *)tn->subbuffer+2,
-               CURL_SB_LEN(tn)-2);
+    printsub(data, '>', (unsigned char *)tn->subbuffer+2,
+             CURL_SB_LEN(tn)-2);
 
     /* we send the header of the suboption... */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer, 3);
