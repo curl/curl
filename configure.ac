@@ -2377,6 +2377,15 @@ case "$LIBIDN" in
        fi
 
        if test "x$idn" != "xyes"; then
+         dnl check with pkg-config
+         PKG_CHECK_MODULES(LIBIDN_PC, libidn >= 0.0.0, [idn=yes], [idn=no])
+         if test "x$idn" = "xyes"; then
+            LIBS="$LIBS $LIBIDN_PC_LIBS"
+            CPPFLAGS="$CPPFLAGS $LIBIDN_PC_CFLAGS"
+         fi
+       fi
+
+       if test "x$idn" != "xyes"; then
           dnl check with default paths
           idn="yes"
           AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
