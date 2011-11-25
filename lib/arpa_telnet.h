@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,9 +26,11 @@
  * Telnet option defines. Add more here if in need.
  */
 #define CURL_TELOPT_BINARY   0  /* binary 8bit data */
+#define CURL_TELOPT_ECHO     1  /* just echo! */
 #define CURL_TELOPT_SGA      3  /* Suppress Go Ahead */
 #define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
 #define CURL_TELOPT_TTYPE   24  /* Terminal TYPE */
+#define CURL_TELOPT_NAWS    31  /* Negotiate About Window Size */
 #define CURL_TELOPT_XDISPLOC 35 /* X DISPlay LOCation */
 
 #define CURL_TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
