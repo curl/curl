@@ -115,7 +115,8 @@ struct ssh_conn {
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
-  bool acceptfail;            /* accept file in SFTP_QUOTE state */
+  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
+                                 quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
 
