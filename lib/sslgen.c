@@ -66,6 +66,11 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* convenience macro to check if this handle is using a shared SSL session */
+#define SSLSESSION_SHARED(data) (data->share &&                        \
+                                 (data->share->specifier &             \
+                                  (1<<CURL_LOCK_DATA_SSL_SESSION)))
+
 static bool safe_strequal(char* str1, char* str2)
 {
   if(str1 && str2)
@@ -242,8 +247,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
     return TRUE;
 
   /* Lock if shared */
-  if(data->share &&
-     (data->share->specifier & (1<<CURL_LOCK_DATA_SSL_SESSION)) ) {
+  if(SSLSESSION_SHARED(data)) {
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
     general_age = &data->share->sessionage;
   }
@@ -270,8 +274,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
   }
 
   /* Unlock */
-  if(data->share &&
-     (data->share->specifier & (1<<CURL_LOCK_DATA_SSL_SESSION)) )
+  if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
   return no_match;
@@ -310,7 +313,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   int i;
   struct SessionHandle *data=conn->data;
 
-  if(data->share && data->share->sslsession == data->state.session)
+  if(SSLSESSION_SHARED(data))
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION,
                     CURL_LOCK_ACCESS_SINGLE);
 
@@ -323,7 +326,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
     }
   }
 
-  if(data->share && data->share->sslsession == data->state.session)
+  if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
@@ -356,7 +359,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
      the oldest if necessary) */
 
   /* If using shared SSL session, lock! */
-  if(data->share && data->share->sslsession == data->state.session) {
+  if(SSLSESSION_SHARED(data)) {
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
     general_age = &data->share->sessionage;
   }
@@ -390,7 +393,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 
 
   /* Unlock */
-  if(data->share && data->share->sslsession == data->state.session)
+  if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
   if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config)) {
@@ -406,12 +409,8 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 void Curl_ssl_close_all(struct SessionHandle *data)
 {
   long i;
-  /* kill the session ID cache */
-  if(data->state.session &&
-     !(data->share && data->share->sslsession == data->state.session)) {
-
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
-
+  /* kill the session ID cache if not shared */
+  if(data->state.session && !SSLSESSION_SHARED(data)) {
     for(i=0; i< data->set.ssl.numsessions; i++)
       /* the single-killer function handles empty table slots */
       Curl_ssl_kill_session(&data->state.session[i]);
@@ -419,8 +418,6 @@ void Curl_ssl_close_all(struct SessionHandle *data)
     /* free the cache data */
     free(data->state.session);
     data->state.session = NULL;
-
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
   }
 
   curlssl_close_all(data);
