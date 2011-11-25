@@ -123,8 +123,11 @@ long tutil_tvdiff(struct timeval newer, struct timeval older)
  */
 double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
 {
-  return (double)(newer.tv_sec-older.tv_sec)+
-    (double)(newer.tv_usec-older.tv_usec)/1000000.0;
+  if(newer.tv_sec != older.tv_sec)
+    return (double)(newer.tv_sec-older.tv_sec)+
+      (double)(newer.tv_usec-older.tv_usec)/1000000.0;
+  else
+    return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
 
 /* return the number of seconds in the given input timeval struct */
