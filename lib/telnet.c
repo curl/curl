@@ -80,12 +80,12 @@
   do {                                                  \
     x->subend = x->subpointer;                          \
     CURL_SB_CLEAR(x);                                   \
-  } while(0)
+  } WHILE_FALSE
 #define CURL_SB_ACCUM(x,c)                                   \
   do {                                                       \
     if(x->subpointer < (x->subbuffer+sizeof x->subbuffer))   \
       *x->subpointer++ = (c);                                \
-  } while(0)
+  } WHILE_FALSE
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
 #define  CURL_SB_PEEK(x)   ((*x->subpointer)&0xff)
