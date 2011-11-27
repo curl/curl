@@ -2377,6 +2377,10 @@ case "$LIBIDN" in
        fi
 
        if test "x$idn" != "xyes"; then
+
+         dnl to prevent errors with pkg-config < 0.26
+         m4_pattern_allow(PKG_CONFIG_LIBDIR)
+
          dnl check with pkg-config
          PKG_CHECK_MODULES(LIBIDN_PC, libidn >= 0.0.0, [idn=yes], [idn=no])
          if test "x$idn" = "xyes"; then
