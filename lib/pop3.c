@@ -1032,33 +1032,67 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
 
   /* Detect the end-of-body marker, which is 5 bytes:
      0d 0a 2e 0d 0a. This marker can of course be spread out
-     over up to 5 different data chunks. Deal with it! */
+     over up to 5 different data chunks.
+  */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  size_t checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
-  size_t checkleft = POP3_EOB_LEN-pop3c->eob;
-  size_t check = (checkmax >= checkleft?checkleft:checkmax);
+  unsigned int i;
 
-  if(!memcmp(POP3_EOB, &str[nread - check], check)) {
-    /* substring match */
-    pop3c->eob += check;
-    if(pop3c->eob == POP3_EOB_LEN) {
-      /* full match, the transfer is done! */
-      str[nread - check] = '\0';
-      nread -= check;
-      k->keepon &= ~KEEP_RECV;
-      pop3c->eob = 0;
-    }
-  }
-  else if(pop3c->eob) {
-    /* not a match, but we matched a piece before so we must now
-       send that part as body first, before we move on and send
-       this buffer */
-    result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                               (char *)POP3_EOB, pop3c->eob);
+  /* since the EOB string must be within the last 5 bytes, get the index
+     position of where to start to scan for it */
+  size_t checkstart = (nread>POP3_EOB_LEN)?nread-POP3_EOB_LEN:0;
+
+  if(checkstart) {
+    /* write out the first piece, if any */
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, str, checkstart);
     if(result)
       return result;
-    pop3c->eob = 0;
+    pop3c->eob=0;
   }
+
+  for(i=checkstart; i<nread; i++) {
+    size_t prev = pop3c->eob;
+    switch(str[i]) {
+    case 0x0d:
+      if((pop3c->eob == 0) || (pop3c->eob == 3))
+        pop3c->eob++;
+      else
+        /* if it wasn't 0 or 3, it restarts the pattern match again */
+        pop3c->eob=1;
+      break;
+    case 0x0a:
+      if((pop3c->eob == 1) || (pop3c->eob == 4))
+        pop3c->eob++;
+      else
+        pop3c->eob=0;
+      break;
+    case 0x2e:
+      if(pop3c->eob == 2)
+        pop3c->eob++;
+      else
+        pop3c->eob=0;
+      break;
+    default:
+      pop3c->eob=0;
+      break;
+    }
+    if(pop3c->eob == POP3_EOB_LEN) {
+      /* full match, the transfer is done! */
+      k->keepon &= ~KEEP_RECV;
+      pop3c->eob = 0;
+      return CURLE_OK;
+    }
+    else if(prev && (prev >= pop3c->eob)) {
+      /* write out the body part that didn't match */
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
+                                 prev);
+      if(result)
+        return result;
+    }
+  }
+
+  if(pop3c->eob)
+    /* while EOB is matching, don't output it! */
+    return CURLE_OK;
 
   result = Curl_client_write(conn, CLIENTWRITE_BODY, str, nread);
 

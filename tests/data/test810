@@ -9,6 +9,11 @@ LIST
 #
 # Server-side
 <reply>
+# We use SLOWDOWN to really exercise the end-of-body parsing over multiple
+# packets
+<servercmd>
+SLOWDOWN
+</servercmd>
 # When doing LIST, we get the default list output hard-coded in the test
 # POP3 server
 <datacheck>
@@ -25,7 +30,7 @@ LIST
 pop3
 </server>
  <name>
-POP3 LIST messages
+POP3 LIST messages from *SLOW* server
  </name>
  <command>
 pop3://%HOSTIP:%POP3PORT/ -u user:secret
