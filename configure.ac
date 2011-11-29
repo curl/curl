@@ -2349,63 +2349,142 @@ dnl Check for the presence of IDN libraries and headers
 dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to build with libidn])
+OPT_IDN="default"
 AC_ARG_WITH(libidn,
 AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
 AC_HELP_STRING([--without-libidn],[Disable libidn usage]),
-  [LIBIDN="$withval"])
-
-case "$LIBIDN" in
+  [OPT_IDN=$withval])
+case "$OPT_IDN" in
   no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-       idn=""
-       dnl if there is a given path, check that FIRST
-       if test -n "$LIBIDN"; then
-         if test "x$LIBIDN" != "xyes"; then
-            oldLDFLAGS=$LDFLAGS
-            oldCPPFLAGS=$CPPFLAGS
-            LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-            CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-            idn="yes"
-            AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
-                         idn=""
-                         LDFLAGS=$oldLDFLAGS
-                         CPPFLAGS=$oldCPPFLAGS)
-         fi
-       fi
-
-       if test "x$idn" != "xyes"; then
-
-         dnl to prevent errors with pkg-config < 0.26
-         m4_pattern_allow(PKG_CONFIG_LIBDIR)
-
-         dnl check with pkg-config
-         PKG_CHECK_MODULES(LIBIDN_PC, libidn >= 0.0.0, [idn=yes], [idn=no])
-         if test "x$idn" = "xyes"; then
-            LIBS="$LIBS $LIBIDN_PC_LIBS"
-            CPPFLAGS="$CPPFLAGS $LIBIDN_PC_CFLAGS"
-         fi
-       fi
-
-       if test "x$idn" != "xyes"; then
-          dnl check with default paths
-          idn="yes"
-          AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
-                       idn="")
-       fi
-
-       if test "x$idn" = "xyes"; then
-         curl_idn_msg="enabled"
-         AC_SUBST(IDN_ENABLED, [1])
-         dnl different versions of libidn have different setups of these:
-         AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror)
-         AC_CHECK_HEADERS( idn-free.h tld.h )
-       fi
-
-       ;;
+    dnl --without-libidn option used
+    want_idn="no"
+    AC_MSG_RESULT([no])
+    ;;
+  default)
+    dnl configure option not specified
+    want_idn="yes"
+    want_idn_path="default"
+    AC_MSG_RESULT([(assumed) yes])
+    ;;
+  yes)
+    dnl --with-libidn option used without path
+    want_idn="yes"
+    want_idn_path="default"
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    dnl --with-libidn option used with path
+    want_idn="yes"
+    want_idn_path="$withval"
+    AC_MSG_RESULT([yes ($withval)])
+    ;;
 esac
+
+if test "$want_idn" = "yes"; then
+  dnl idn library support has been requested
+  clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  PKGCONFIG="no"
+  #
+  if test "$want_idn_path" != "default"; then
+    dnl path has been specified
+    IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
+    CURL_CHECK_PKGCONFIG(libidn, [$IDN_PCDIR])
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+      dnl pkg-config not available or provides no info
+      IDN_LIBS="-lidn"
+      IDN_LDFLAGS="-L$want_idn_path/lib$libsuff"
+      IDN_CPPFLAGS="-I$want_idn_path/include"
+      IDN_DIR="$want_idn_path/lib$libsuff"
+    fi
+  else
+    dnl path not specified
+    CURL_CHECK_PKGCONFIG(libidn)
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`$PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`$PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`$PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+      dnl pkg-config not available or provides no info
+      IDN_LIBS="-lidn"
+    fi
+  fi
+  #
+  if test "$PKGCONFIG" != "no"; then
+    AC_MSG_NOTICE([pkg-config: IDN_LIBS: "$IDN_LIBS"])
+    AC_MSG_NOTICE([pkg-config: IDN_LDFLAGS: "$IDN_LDFLAGS"])
+    AC_MSG_NOTICE([pkg-config: IDN_CPPFLAGS: "$IDN_CPPFLAGS"])
+    AC_MSG_NOTICE([pkg-config: IDN_DIR: "$IDN_DIR"])
+  else
+    AC_MSG_NOTICE([IDN_LIBS: "$IDN_LIBS"])
+    AC_MSG_NOTICE([IDN_LDFLAGS: "$IDN_LDFLAGS"])
+    AC_MSG_NOTICE([IDN_CPPFLAGS: "$IDN_CPPFLAGS"])
+    AC_MSG_NOTICE([IDN_DIR: "$IDN_DIR"])
+  fi
+  #
+  CPPFLAGS="$IDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$IDN_LDFLAGS $LDFLAGS"
+  LIBS="$IDN_LIBS $LIBS"
+  #
+  AC_MSG_CHECKING([if idna_to_ascii_4i can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([idna_to_ascii_4i])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_libidn="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_libidn="no"
+  ])
+  if test "$tst_links_libidn" = "no"; then
+    AC_MSG_CHECKING([if idna_to_ascii_lz can be linked])
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([idna_to_ascii_lz])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_links_libidn="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_links_libidn="no"
+    ])
+  fi
+  #
+  if test "$tst_links_libidn" = "yes"; then
+    AC_DEFINE(HAVE_LIBIDN, 1, [Define to 1 if you have the `idn' library (-lidn).])
+    dnl different versions of libidn have different setups of these:
+    AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror )
+    AC_CHECK_HEADERS( idn-free.h tld.h )
+    if test "x$ac_cv_header_tld_h" = "xyes"; then
+      AC_SUBST([IDN_ENABLED], [1])
+      curl_idn_msg="enabled"
+      if test -n "$IDN_DIR"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $IDN_DIR to LD_LIBRARY_PATH])
+      fi
+    else
+      AC_MSG_WARN([Libraries for IDN support too old: IDN disabled])
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+    fi
+  else
+    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 
 dnl Let's hope this split URL remains working:
