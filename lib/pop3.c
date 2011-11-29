@@ -421,6 +421,16 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
     return CURLE_RECV_ERROR;
   }
 
+  /* This 'OK' line ends with a CR LF pair which is the two first bytes of the
+     EOB string so count this is two matching bytes. This is necessary to make
+     the code detect the EOB if the only data than comes now is %2e CR LF like
+     when there is no body to return. */
+  pop3c->eob = 2;
+
+  /* But since this initial CR LF pair is not part of the actual body, we set
+     the strip counter here so that these bytes won't be delivered. */
+  pop3c->strip = 2;
+
   /* POP3 download */
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
                       -1, NULL); /* no upload here */
@@ -1082,11 +1092,22 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
       return CURLE_OK;
     }
     else if(prev && (prev >= pop3c->eob)) {
-      /* write out the body part that didn't match */
-      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
-                                 prev);
-      if(result)
-        return result;
+
+      /* strip can only be non-zero for the very first mismatch after CRLF and
+         then both prev and strip are equal and nothing will be output
+         below */
+      while(prev && pop3c->strip) {
+        prev--;
+        pop3c->strip--;
+      }
+
+      if(prev) {
+        /* write out the body part that didn't match */
+        result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
+                                   prev);
+        if(result)
+          return result;
+      }
     }
   }
 
@@ -1094,7 +1115,15 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
     /* while EOB is matching, don't output it! */
     return CURLE_OK;
 
-  result = Curl_client_write(conn, CLIENTWRITE_BODY, str, nread);
+  while(nread && pop3c->strip) {
+    nread--;
+    pop3c->strip--;
+    str++;
+  }
+
+  if(nread) {
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, str, nread);
+  }
 
   return result;
 }
