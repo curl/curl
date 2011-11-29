@@ -1045,7 +1045,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
      over up to 5 different data chunks.
   */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  unsigned int i;
+  size_t i;
 
   /* since the EOB string must be within the last 5 bytes, get the index
      position of where to start to scan for it */
