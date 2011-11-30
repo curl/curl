@@ -1040,61 +1040,75 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
 
-  /* Detect the end-of-body marker, which is 5 bytes:
-     0d 0a 2e 0d 0a. This marker can of course be spread out
-     over up to 5 different data chunks.
-  */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
+  bool strip_dot = FALSE;
+  size_t last = 0;
   size_t i;
 
-  /* since the EOB string must be within the last 5 bytes, get the index
-     position of where to start to scan for it */
-  size_t checkstart = (nread>POP3_EOB_LEN)?nread-POP3_EOB_LEN:0;
-
-  if(checkstart) {
-    /* write out the first piece, if any */
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, str, checkstart);
-    if(result)
-      return result;
-    pop3c->eob=0;
-  }
-
-  for(i=checkstart; i<nread; i++) {
+  /* Search through the buffer looking for the end-of-body marker which is
+     5 bytes (0d 0a 2e 0d 0a). Note that a line starting with a dot matches
+     the eob so the server will have prefixed it with an extra dot which we
+     need to strip out. Additionally the marker could of course be spread out
+     over 5 different data chunks */
+  for(i = 0; i < nread; i++) {
     size_t prev = pop3c->eob;
+
     switch(str[i]) {
     case 0x0d:
-      if((pop3c->eob == 0) || (pop3c->eob == 3))
+      if(pop3c->eob == 0) {
+        pop3c->eob++;
+
+        if(i) {
+          /* Write out the body part that didn't match */
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, &str[last],
+                                     i - last);
+
+          if(result)
+            return result;
+
+          last = i;
+        }
+      }
+      else if(pop3c->eob == 3)
         pop3c->eob++;
       else
-        /* if it wasn't 0 or 3, it restarts the pattern match again */
-        pop3c->eob=1;
+        /* If the character match wasn't at position 0 or 3 then restart the
+           pattern matching */
+        pop3c->eob = 1;
       break;
+
     case 0x0a:
-      if((pop3c->eob == 1) || (pop3c->eob == 4))
+      if(pop3c->eob == 1 || pop3c->eob == 4)
         pop3c->eob++;
       else
-        pop3c->eob=0;
+        /* If the character match wasn't at position 1 or 4 then start the
+           search again */
+        pop3c->eob = 0;
       break;
+
     case 0x2e:
       if(pop3c->eob == 2)
         pop3c->eob++;
+      else if(pop3c->eob == 3) {
+        /* We have an extra dot after the CRLF which we need to strip off */
+        strip_dot = TRUE;
+        pop3c->eob = 0;
+      }
       else
-        pop3c->eob=0;
+        /* If the character match wasn't at position 2 then start the search
+           again */
+        pop3c->eob = 0;
       break;
-    default:
-      pop3c->eob=0;
-      break;
-    }
-    if(pop3c->eob == POP3_EOB_LEN) {
-      /* full match, the transfer is done! */
-      k->keepon &= ~KEEP_RECV;
-      pop3c->eob = 0;
-      return CURLE_OK;
-    }
-    else if(prev && (prev >= pop3c->eob)) {
 
-      /* strip can only be non-zero for the very first mismatch after CRLF and
-         then both prev and strip are equal and nothing will be output
+    default:
+      pop3c->eob = 0;
+      break;
+    }
+
+    /* Did we have a partial match which has subsequently failed? */
+    if(prev && prev >= pop3c->eob) {
+      /* Strip can only be non-zero for the very first mismatch after CRLF
+         and then both prev and strip are equal and nothing will be output
          below */
       while(prev && pop3c->strip) {
         prev--;
@@ -1102,27 +1116,34 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
       }
 
       if(prev) {
-        /* write out the body part that didn't match */
+        /* If the partial match was the CRLF and dot then only write the CRLF
+           as the server would have inserted the dot */
         result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
-                                   prev);
+                                   strip_dot ? prev - 1 : prev);
+
         if(result)
           return result;
+
+        last = i;
+        strip_dot = FALSE;
       }
     }
   }
 
-  if(pop3c->eob)
-    /* while EOB is matching, don't output it! */
+  if(pop3c->eob == POP3_EOB_LEN) {
+    /* We have a full match so the transfer is done! */
+    k->keepon &= ~KEEP_RECV;
+    pop3c->eob = 0;
     return CURLE_OK;
-
-  while(nread && pop3c->strip) {
-    nread--;
-    pop3c->strip--;
-    str++;
   }
 
-  if(nread) {
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, str, nread);
+  if(pop3c->eob)
+    /* While EOB is matching nothing should be output */
+    return CURLE_OK;
+
+  if(nread - last) {
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, &str[last],
+                               nread - last);
   }
 
   return result;
