@@ -21,6 +21,11 @@ This release includes the following bugfixes:
  o protocol_connect: show verbose connect and set connect time
  o query-part: ignore the URI part for given protocols
  o gnutls: only translate winsock errors for old versions
+ o POP3: fix end of body detection
+ o POP3: detect when LIST returns no mails
+ o TELNET: improved treatment of options
+ o configure: add support for pkg-config detection of libidn
+ o CyaSSL 2.0+ library initialization adjustment
  o 
 
 This release includes the following known bugs:
@@ -31,6 +36,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Alejandro Alvarez Ayllon, Jason Glasgow, Jonas Schnelli, Mark Brand,
- Martin Storsjo, Yang Tse
+ Martin Storsjo, Yang Tse, Laurent Rabret
 
         Thanks! (and sorry if I forgot to mention someone)
