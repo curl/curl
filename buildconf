@@ -331,22 +331,29 @@ done
 # run the correct scripts now
 #
 
+if test ! -f m4/curl-functions.m4; then
+  echo "buildconf: cURL m4 macros not found"
+  exit 1
+fi
+
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 
 if test "$lt_major" = "1" && test "$lt_minor" = "5"; then
   if test -z "$lt_patch" || test "$lt_patch" -lt "26"; then
-    echo "buildconf: running libtoolize hack to rename some variables"
-    $PERL -i.bak -pe \
-      's/lt_prog_compiler_pic_works/lt_cv_prog_compiler_pic_works/g; \
-       s/lt_prog_compiler_static_works/lt_cv_prog_compiler_static_works/g;' \
-      m4/libtool.m4
+    if test -f m4/libtool.m4; then
+      our_libtool_m4='m4/libtool.m4'
+    elif test -f libtool.m4; then
+      our_libtool_m4='libtool.m4'
+    fi
+    if test -n "$our_libtool_m4"; then
+      echo "buildconf: running libtoolize hack to rename some variables"
+      $PERL -i.bak -pe \
+        's/lt_prog_compiler_pic_works/lt_cv_prog_compiler_pic_works/g; \
+         s/lt_prog_compiler_static_works/lt_cv_prog_compiler_static_works/g;' \
+        $our_libtool_m4
+    fi
   fi
-fi
-
-if test ! -f m4/curl-functions.m4; then
-  echo "buildconf: cURL m4 macros not found"
-  exit 1
 fi
 
 echo "buildconf: running aclocal"
