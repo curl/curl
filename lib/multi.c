@@ -1085,12 +1085,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* check if we have the name resolved by now */
       easy->result = Curl_resolver_is_resolved(easy->easy_conn, &dns);
 
-      if(dns) {
-        /* Update sockets here. Mainly because the socket(s) may have been
-           closed and the application thus needs to be told, even if it is
-           likely that the same socket(s) will again be used further down. */
-        singlesocket(multi, easy);
+      /* Update sockets here, because the socket(s) may have been
+         closed and the application thus needs to be told, even if it
+         is likely that the same socket(s) will again be used further
+         down.  If the name has not yet been resolved, it is likely
+         that new sockets have been opened in an attempt to contact
+         another resolver. */
+      singlesocket(multi, easy);
 
+      if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
         easy->result = Curl_async_resolved(easy->easy_conn,
