@@ -14,6 +14,7 @@ From: me@somewhere
 To: fake@nowhere
 
 ..body with a single dot first
+...triple dots...
 
 --
   yours sincerely
@@ -23,6 +24,7 @@ From: me@somewhere
 To: fake@nowhere
 
 .body with a single dot first
+..triple dots...
 
 --
   yours sincerely
