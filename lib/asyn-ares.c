@@ -610,6 +610,7 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
   int ares_result = ares_set_servers_csv(data->state.resolver, servers);
   switch(ares_result) {
   case ARES_SUCCESS:
+    result = CURLE_OK;
     break;
   case ARES_ENOMEM:
     result = CURLE_OUT_OF_MEMORY;
