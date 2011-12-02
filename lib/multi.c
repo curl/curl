@@ -1940,11 +1940,12 @@ static void singlesocket(struct Curl_multi *multi,
     }
 
     /* we know (entry != NULL) at this point, see the logic above */
-    multi->socket_cb(easy->easy_handle,
-                     s,
-                     action,
-                     multi->socket_userp,
-                     entry->socketp);
+    if(multi->socket_cb)
+      multi->socket_cb(easy->easy_handle,
+                       s,
+                       action,
+                       multi->socket_userp,
+                       entry->socketp);
 
     entry->action = action; /* store the current action state */
   }
@@ -2019,11 +2020,12 @@ static void singlesocket(struct Curl_multi *multi,
         remove_sock_from_hash = FALSE;
 
       if(remove_sock_from_hash) {
-        multi->socket_cb(easy->easy_handle,
-                         s,
-                         CURL_POLL_REMOVE,
-                         multi->socket_userp,
-                         entry ? entry->socketp : NULL);
+        if(multi->socket_cb)
+          multi->socket_cb(easy->easy_handle,
+                           s,
+                           CURL_POLL_REMOVE,
+                           multi->socket_userp,
+                           entry ? entry->socketp : NULL);
         sh_delentry(multi->sockhash, s);
       }
 
