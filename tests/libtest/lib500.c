@@ -76,6 +76,9 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
+  if(libtest_arg3 && !strcmp(libtest_arg3, "activeftp"))
+    test_setopt(curl, CURLOPT_FTPPORT, "-");
+
   setupcallbacks(curl);
 
   res = curl_easy_perform(curl);

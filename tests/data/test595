@@ -1,0 +1,57 @@
+#
+# This test is like 585 but uses passive FTP instead of HTTP
+#
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+moo
+</data>
+<datacheck>
+[OPEN] counter: 1
+[OPEN] counter: 2
+moo
+[CLOSE] counter: 2
+[CLOSE] counter: 1
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib585
+</tool>
+
+ <name>
+verify close callbacks with passive FTP
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/595 log/ip595
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 595
+RETR 595
+QUIT
+</protocol>
+</verify>
+</testcase>
