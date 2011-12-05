@@ -816,7 +816,8 @@ struct connectdata {
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
-
+  bool sock_accepted[2]; /* TRUE if the socket on this index was created with
+                            accept() */
   Curl_recv *recv[2];
   Curl_send *send[2];
 

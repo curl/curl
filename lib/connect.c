@@ -1110,10 +1110,14 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 int Curl_closesocket(struct connectdata *conn,
                      curl_socket_t sock)
 {
-  if(conn && conn->fclosesocket)
-    return conn->fclosesocket(conn->closesocket_client, sock);
-  else
-    return sclose(sock);
+  if(conn && conn->fclosesocket) {
+    if((sock != conn->sock[SECONDARYSOCKET]) ||
+       !conn->sock_accepted[SECONDARYSOCKET])
+      /* if this socket matches the second socket, and that was created with
+         accept, then we MUST NOT call the callback */
+      return conn->fclosesocket(conn->closesocket_client, sock);
+  }
+  return sclose(sock);
 }
 
 /*
