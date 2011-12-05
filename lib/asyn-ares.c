@@ -331,9 +331,12 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     res->temp_ai = NULL;
     destroy_async_data(&conn->async);
     if(!conn->async.dns) {
-      failf(data, "Could not resolve host: %s (%s)", conn->host.dispname,
+      failf(data, "Could not resolve %s: %s (%s)",
+            conn->bits.proxy?"proxy":"host",
+            conn->host.dispname,
             ares_strerror(conn->async.status));
-      return CURLE_COULDNT_RESOLVE_HOST;
+      return conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
+        CURLE_COULDNT_RESOLVE_HOST;
     }
     *dns = conn->async.dns;
   }
