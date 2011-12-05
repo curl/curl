@@ -1119,8 +1119,10 @@ int Curl_closesocket(struct connectdata *conn,
 /*
  * Create a socket based on info from 'conn' and 'ai'.
  *
- * Fill in 'addr' and 'sockfd' accordingly if OK is returned. If the open
- * socket callback is set, used that!
+ * 'addr' should be a pointer to the correct struct to get data back, or NULL.
+ * 'sockfd' must be a pointer to a socket descriptor.
+ *
+ * If the open socket callback is set, used that!
  *
  */
 CURLcode Curl_socket(struct connectdata *conn,
@@ -1129,9 +1131,11 @@ CURLcode Curl_socket(struct connectdata *conn,
                      curl_socket_t *sockfd)
 {
   struct SessionHandle *data = conn->data;
-#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
-#endif
+  struct Curl_sockaddr_ex dummy;
+
+  if(!addr)
+    /* if the caller doesn't want info back, use a local temp copy */
+    addr = &dummy;
 
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -1172,8 +1176,10 @@ CURLcode Curl_socket(struct connectdata *conn,
     return CURLE_FAILED_INIT;
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if(conn->scope && (addr->family == AF_INET6))
+  if(conn->scope && (addr->family == AF_INET6)) {
+    struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
     sa6->sin6_scope_id = conn->scope;
+  }
 #endif
 
   return CURLE_OK;

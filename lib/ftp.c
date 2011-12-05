@@ -901,14 +901,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   portsock = CURL_SOCKET_BAD;
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
-    /*
-     * Workaround for AIX5 getaddrinfo() problem (it doesn't set ai_socktype):
-     */
-    if(ai->ai_socktype == 0)
-      ai->ai_socktype = conn->socktype;
-
-    portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if(portsock == CURL_SOCKET_BAD) {
+    result = Curl_socket(conn, ai, NULL, &portsock);
+    if(result) {
       error = SOCKERRNO;
       continue;
     }
