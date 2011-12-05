@@ -644,10 +644,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   struct SSHPROTO *sftp_scp = data->state.proto.ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
-#ifdef CURL_LIBSSH2_DEBUG
   const char *fingerprint;
-#endif /* CURL_LIBSSH2_DEBUG */
-  const char *host_public_key_md5;
+  char md5buffer[33];
   char *new_readdir_line;
   int rc = LIBSSH2_ERROR_NONE, i;
   int err;
@@ -685,48 +683,40 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* fall-through */
     case SSH_HOSTKEY:
-
-#ifdef CURL_LIBSSH2_DEBUG
       /*
        * Before we authenticate we should check the hostkey's fingerprint
        * against our known hosts. How that is handled (reading from file,
-       * whatever) is up to us. As for know not much is implemented, besides
-       * showing how to get the fingerprint.
+       * whatever) is up to us.
        */
       fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
                                          LIBSSH2_HOSTKEY_HASH_MD5);
 
       /* The fingerprint points to static storage (!), don't free() it. */
-      infof(data, "Fingerprint: ");
-      for(rc = 0; rc < 16; rc++)
-        infof(data, "%02X ", (unsigned char) fingerprint[rc]);
-      infof(data, "\n");
-#endif /* CURL_LIBSSH2_DEBUG */
+      for(i = 0; i < 16; i++)
+        snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
+      infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
 
       /* Before we authenticate we check the hostkey's MD5 fingerprint
-       * against a known fingerprint, if available.  This implementation pulls
-       * it from the curl option.
+       * against a known fingerprint, if available.
        */
       if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
          strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) == 32) {
-        char buf[33];
-        host_public_key_md5 = libssh2_hostkey_hash(sshc->ssh_session,
-                                                   LIBSSH2_HOSTKEY_HASH_MD5);
-        for(i = 0; i < 16; i++)
-          snprintf(&buf[i*2], 3, "%02x",
-                   (unsigned char) host_public_key_md5[i]);
-        if(!strequal(buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5])) {
+        if(!strequal(md5buffer,
+                     data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5])) {
           failf(data,
                 "Denied establishing ssh session: mismatch md5 fingerprint. "
                 "Remote %s is not equal to %s",
-                buf, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]);
+                md5buffer, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]);
           state(conn, SSH_SESSION_FREE);
-          sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
-          break;
+          result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
         }
+        else
+          infof(data, "MD5 checksum match!\n");
+        /* as we already matched, we skip the check for known hosts */
       }
+      else
+        result = ssh_knownhost(conn);
 
-      result = ssh_knownhost(conn);
       if(!result)
         state(conn, SSH_AUTHLIST);
       break;
