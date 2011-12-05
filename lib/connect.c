@@ -89,18 +89,6 @@
 #undef SO_NOSIGPIPE
 #endif
 
-struct Curl_sockaddr_ex {
-  int family;
-  int socktype;
-  int protocol;
-  unsigned int addrlen;
-  union {
-    struct sockaddr addr;
-    struct Curl_sockaddr_storage buff;
-  } _sa_ex_u;
-};
-#define sa_addr _sa_ex_u.addr
-
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 static CURLcode
@@ -841,56 +829,13 @@ singleipconnect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
   CURLcode res = CURLE_OK;
-#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  struct sockaddr_in6 * const sa6 = (void *)&addr.sa_addr;
-#endif
 
   *sockp = CURL_SOCKET_BAD;
-
-  /*
-   * The Curl_sockaddr_ex structure is basically libcurl's external API
-   * curl_sockaddr structure with enough space available to directly hold
-   * any protocol-specific address structures. The variable declared here
-   * will be used to pass / receive data to/from the fopensocket callback
-   * if this has been set, before that, it is initialized from parameters.
-   */
-
-  addr.family = ai->ai_family;
-  addr.socktype = conn->socktype;
-  addr.protocol = conn->socktype==SOCK_DGRAM?IPPROTO_UDP:ai->ai_protocol;
-  addr.addrlen = ai->ai_addrlen;
-
-  if(addr.addrlen > sizeof(struct Curl_sockaddr_storage))
-     addr.addrlen = sizeof(struct Curl_sockaddr_storage);
-  memcpy(&addr.sa_addr, ai->ai_addr, addr.addrlen);
-
   *connected = FALSE; /* default is not connected */
 
-  if(data->set.fopensocket)
-   /*
-    * If the opensocket callback is set, all the destination address
-    * information is passed to the callback. Depending on this information the
-    * callback may opt to abort the connection, this is indicated returning
-    * CURL_SOCKET_BAD; otherwise it will return a not-connected socket. When
-    * the callback returns a valid socket the destination address information
-    * might have been changed and this 'new' address will actually be used
-    * here to connect.
-    */
-    sockfd = data->set.fopensocket(data->set.opensocket_client,
-                                   CURLSOCKTYPE_IPCXN,
-                                   (struct curl_sockaddr *)&addr);
-  else
-    /* opensocket callback not set, so simply create the socket now */
-    sockfd = socket(addr.family, addr.socktype, addr.protocol);
-
-  if(sockfd == CURL_SOCKET_BAD)
-    /* no socket, no connection */
-    return CURLE_OK;
-
-#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if(conn->scope && (addr.family == AF_INET6))
-    sa6->sin6_scope_id = conn->scope;
-#endif
+  res = Curl_socket(conn, ai, &addr, &sockfd);
+  if(res)
+    return res;
 
   /* store remote address and port used in this connection attempt */
   if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
@@ -1169,4 +1114,68 @@ int Curl_closesocket(struct connectdata *conn,
     return conn->fclosesocket(conn->closesocket_client, sock);
   else
     return sclose(sock);
+}
+
+/*
+ * Create a socket based on info from 'conn' and 'ai'.
+ *
+ * Fill in 'addr' and 'sockfd' accordingly if OK is returned. If the open
+ * socket callback is set, used that!
+ *
+ */
+CURLcode Curl_socket(struct connectdata *conn,
+                     const Curl_addrinfo *ai,
+                     struct Curl_sockaddr_ex *addr,
+                     curl_socket_t *sockfd)
+{
+  struct SessionHandle *data = conn->data;
+#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
+#endif
+
+  /*
+   * The Curl_sockaddr_ex structure is basically libcurl's external API
+   * curl_sockaddr structure with enough space available to directly hold
+   * any protocol-specific address structures. The variable declared here
+   * will be used to pass / receive data to/from the fopensocket callback
+   * if this has been set, before that, it is initialized from parameters.
+   */
+
+  addr->family = ai->ai_family;
+  addr->socktype = conn->socktype;
+  addr->protocol = conn->socktype==SOCK_DGRAM?IPPROTO_UDP:ai->ai_protocol;
+  addr->addrlen = ai->ai_addrlen;
+
+  if(addr->addrlen > sizeof(struct Curl_sockaddr_storage))
+     addr->addrlen = sizeof(struct Curl_sockaddr_storage);
+  memcpy(&addr->sa_addr, ai->ai_addr, addr->addrlen);
+
+  if(data->set.fopensocket)
+   /*
+    * If the opensocket callback is set, all the destination address
+    * information is passed to the callback. Depending on this information the
+    * callback may opt to abort the connection, this is indicated returning
+    * CURL_SOCKET_BAD; otherwise it will return a not-connected socket. When
+    * the callback returns a valid socket the destination address information
+    * might have been changed and this 'new' address will actually be used
+    * here to connect.
+    */
+    *sockfd = data->set.fopensocket(data->set.opensocket_client,
+                                    CURLSOCKTYPE_IPCXN,
+                                    (struct curl_sockaddr *)addr);
+  else
+    /* opensocket callback not set, so simply create the socket now */
+    *sockfd = socket(addr->family, addr->socktype, addr->protocol);
+
+  if(*sockfd == CURL_SOCKET_BAD)
+    /* no socket, no connection */
+    return CURLE_FAILED_INIT;
+
+#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  if(conn->scope && (addr->family == AF_INET6))
+    sa6->sin6_scope_id = conn->scope;
+#endif
+
+  return CURLE_OK;
+
 }

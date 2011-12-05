@@ -24,6 +24,7 @@
 #include "setup.h"
 
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
+#include "sockaddr.h"
 
 CURLcode Curl_is_connected(struct connectdata *conn,
                            int sockindex,
@@ -71,5 +72,36 @@ void Curl_sndbufset(curl_socket_t sockfd);
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
+
+/*
+ * The Curl_sockaddr_ex structure is basically libcurl's external API
+ * curl_sockaddr structure with enough space available to directly hold any
+ * protocol-specific address structures. The variable declared here will be
+ * used to pass / receive data to/from the fopensocket callback if this has
+ * been set, before that, it is initialized from parameters.
+ */
+struct Curl_sockaddr_ex {
+  int family;
+  int socktype;
+  int protocol;
+  unsigned int addrlen;
+  union {
+    struct sockaddr addr;
+    struct Curl_sockaddr_storage buff;
+  } _sa_ex_u;
+};
+#define sa_addr _sa_ex_u.addr
+
+/*
+ * Create a socket based on info from 'conn' and 'ai'.
+ *
+ * Fill in 'addr' and 'sockfd' accordingly if OK is returned. If the open
+ * socket callback is set, used that!
+ *
+ */
+CURLcode Curl_socket(struct connectdata *conn,
+                     const Curl_addrinfo *ai,
+                     struct Curl_sockaddr_ex *addr,
+                     curl_socket_t *sockfd);
 
 #endif /* HEADER_CURL_CONNECT_H */
