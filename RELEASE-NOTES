@@ -26,6 +26,14 @@ This release includes the following bugfixes:
  o TELNET: improved treatment of options
  o configure: add support for pkg-config detection of libidn
  o CyaSSL 2.0+ library initialization adjustment
+ o multi interface: only use non-NULL socker function pointer
+ o call opensocket callback properly for active FTP
+ o don't call close socket callback for sockets created with accept()
+ o differentiate better between host/proxy errors
+ o SSH: fix CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5
+ o multi: handle timeouts on DNS servers by checking for new sockets
+ o CURLOPT_DNS_SERVERS: fix return code
+ o POP3: fixed escaped dot not being stripped out
  o 
 
 This release includes the following known bugs:
@@ -36,6 +44,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Alejandro Alvarez Ayllon, Jason Glasgow, Jonas Schnelli, Mark Brand,
- Martin Storsjo, Yang Tse, Laurent Rabret
+ Martin Storsjo, Yang Tse, Laurent Rabret, Jason Glasgow, Steve Holme,
+ Reza Arbab, Jason Liu, Gokhan Sengun
 
         Thanks! (and sorry if I forgot to mention someone)
