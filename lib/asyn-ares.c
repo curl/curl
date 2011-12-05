@@ -419,7 +419,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      if(conn->bits.httpproxy) {
+      if(conn->bits.proxy) {
         failf(data, "Resolving proxy timed out: %s", conn->proxy.dispname);
         rc = CURLE_COULDNT_RESOLVE_PROXY;
       }
@@ -429,7 +429,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       }
     }
     else if(conn->async.done) {
-      if(conn->bits.httpproxy) {
+      if(conn->bits.proxy) {
         failf(data, "Could not resolve proxy: %s (%s)", conn->proxy.dispname,
               ares_strerror(conn->async.status));
         rc = CURLE_COULDNT_RESOLVE_PROXY;
