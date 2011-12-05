@@ -1970,9 +1970,9 @@ re-use (default behavior).
 .IP CURLOPT_CONNECTTIMEOUT
 Pass a long. It should contain the maximum time in seconds that you allow the
 connection to the server to take.  This only limits the connection phase, once
-it has connected, this option is of no more use. Set to zero to disable
-connection timeout (it will then only timeout on the system's internal
-timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
+it has connected, this option is of no more use. Set to zero to switch to the
+default built-in connection timeout - 300 seconds. See also the
+\fICURLOPT_TIMEOUT\fP option.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL\fP is set.
