@@ -127,6 +127,11 @@
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
+#ifndef HAVE_SSLV2_CLIENT_METHOD
+#undef OPENSSL_NO_SSL2 /* undef first to avoid compiler warnings */
+#define OPENSSL_NO_SSL2
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have

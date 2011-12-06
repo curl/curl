@@ -1514,7 +1514,8 @@ if test X"$OPT_SSL" != Xno; then
                     RAND_egd \
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
-                    SSL_get_shutdown )
+                    SSL_get_shutdown \
+                    SSLv2_client_method )
 
     dnl Make an attempt to detect if this is actually yassl's headers and
     dnl OpenSSL emulation layer. We still leave everything else believing
