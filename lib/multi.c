@@ -1239,7 +1239,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->easy_conn->bits.close = FALSE;
         multistate(easy, CURLM_STATE_DONE);
         easy->result = CURLE_OK;
-        result = CURLM_OK;
+        result = CURLM_CALL_MULTI_PERFORM;
       }
       else {
         /* Perform the protocol's DO action */

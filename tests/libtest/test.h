@@ -242,6 +242,31 @@ extern int unitfail;
 
 /* ---------------------------------------------------------------- */
 
+#define exe_multi_remove_handle(A,B,Y,Z) do {                   \
+  CURLMcode ec;                                                 \
+  if((ec = curl_multi_remove_handle((A),(B))) != CURLM_OK) {    \
+    fprintf(stderr, "%s:%d curl_multi_remove_handle() failed, " \
+            "with code %d (%s)\n",                              \
+            (Y), (Z), (int)ec, curl_multi_strerror(ec));        \
+    res = (int)ec;                                              \
+  }                                                             \
+} WHILE_FALSE
+
+#define res_multi_remove_handle(A,B) \
+  exe_multi_remove_handle((A),(B),(__FILE__),(__LINE__))
+
+#define chk_multi_remove_handle(A,B,Y,Z) do { \
+  exe_multi_remove_handle((A),(B),(Y),(Z));   \
+  if(res)                                     \
+    goto test_cleanup;                        \
+} WHILE_FALSE
+
+
+#define multi_remove_handle(A,B) \
+  chk_multi_remove_handle((A),(B),(__FILE__),(__LINE__))
+
+/* ---------------------------------------------------------------- */
+
 #define exe_multi_perform(A,B,Y,Z) do {                          \
   CURLMcode ec;                                                  \
   if((ec = curl_multi_perform((A),(B))) != CURLM_OK) {           \
