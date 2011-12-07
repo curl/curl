@@ -1,4 +1,4 @@
-Updated: March 8, 2011 (http://curl.haxx.se/docs/faq.html)
+Updated: December 7, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -725,6 +725,12 @@ FAQ
   but use the target IP address in the URL:
 
     curl --header "Host: www.example.com" http://127.0.0.1/
+
+  You can also opt to add faked host name entries to curl with the --resolve
+  option. That has the added benefit that things like redirects will also work
+  properly. The above operation would instead be done as:
+
+    curl --resolve www.example.com:80:127.0.0.1 http://www.example.com/
 
   3.20 How to SFTP from my user's home directory?
 
