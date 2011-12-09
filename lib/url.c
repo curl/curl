@@ -4900,8 +4900,9 @@ static CURLcode create_conn(struct SessionHandle *data,
       return CURLE_UNSUPPORTED_PROTOCOL;
 #else
       /* force this connection's protocol to become HTTP if not already
-         compatible */
-      if(!(conn->handler->protocol & CURLPROTO_HTTP))
+         compatible - if it isn't tunneling through */
+      if(!(conn->handler->protocol & CURLPROTO_HTTP) &&
+         !conn->bits.tunnel_proxy)
         conn->handler = &Curl_handler_http;
 
       conn->bits.httpproxy = TRUE;
