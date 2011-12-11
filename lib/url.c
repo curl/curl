@@ -2961,7 +2961,9 @@ ConnectionExists(struct SessionHandle *data,
     if((needle->handler->flags&PROTOPT_SSL) !=
        (check->handler->flags&PROTOPT_SSL))
       /* don't do mixed SSL and non-SSL connections */
-      continue;
+      if(!(needle->handler->protocol & check->handler->protocol))
+        /* except protocols that have been upgraded via TLS */
+        continue;
 
     if(needle->handler->flags&PROTOPT_SSL) {
       if((data->set.ssl.verifypeer != check->verifypeer) ||
@@ -3005,14 +3007,16 @@ ConnectionExists(struct SessionHandle *data,
         (needle->port == check->port))) {
       /* The requested connection does not use a HTTP proxy or it uses SSL or
          it is a non-SSL protocol tunneled over the same http proxy name and
-         port number */
+         port number or it is a non-SSL protocol which is allowed to be
+         upgraded via TLS */
 
-      if(Curl_raw_equal(needle->handler->scheme, check->handler->scheme) &&
+      if((Curl_raw_equal(needle->handler->scheme, check->handler->scheme) ||
+          needle->handler->protocol & check->handler->protocol) &&
          Curl_raw_equal(needle->host.name, check->host.name) &&
-         (needle->remote_port == check->remote_port) ) {
+         needle->remote_port == check->remote_port) {
         if(needle->handler->flags & PROTOPT_SSL) {
-          /* This is SSL, verify that we're using the same
-             ssl options as well */
+          /* This is a SSL connection so verify that we're using the same
+             SSL options as well */
           if(!Curl_ssl_config_matches(&needle->ssl_config,
                                       &check->ssl_config)) {
             DEBUGF(infof(data,
@@ -3023,7 +3027,7 @@ ConnectionExists(struct SessionHandle *data,
           }
           else if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
             DEBUGF(infof(data,
-                         "Connection #%ld has not started ssl connect, "
+                         "Connection #%ld has not started SSL connect, "
                          "can't reuse\n",
                          check->connectindex));
             continue;
