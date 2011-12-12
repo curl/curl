@@ -34,7 +34,12 @@ This release includes the following bugfixes:
  o multi: handle timeouts on DNS servers by checking for new sockets
  o CURLOPT_DNS_SERVERS: fix return code
  o POP3: fixed escaped dot not being stripped out
- o 
+ o OpenSSL: check for the SSLv2 function in configure
+ o MakefileBuild: fix the static build
+ o create_conn: don't switch to HTTP protocol if tunneling is enabled
+ o multi interface: fix block when CONNECT_ONLY option is used
+ o Fix connection reuse for TLS upgraded connections
+ o
 
 This release includes the following known bugs:
 
@@ -45,6 +50,7 @@ advice from friends like these:
 
  Alejandro Alvarez Ayllon, Jason Glasgow, Jonas Schnelli, Mark Brand,
  Martin Storsjo, Yang Tse, Laurent Rabret, Jason Glasgow, Steve Holme,
- Reza Arbab, Jason Liu, Gokhan Sengun
+ Reza Arbab, Jason Liu, Gokhan Sengun, Rob Ward, Dan Fandrich,
+ Naveen Chandran, Ward Willats, Vladimir Grishchenko
 
         Thanks! (and sorry if I forgot to mention someone)
