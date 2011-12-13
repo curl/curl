@@ -178,6 +178,8 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 
 bool Curl_if_is_interface_name(const char *interface)
 {
+  (void) interface;
+
   return FALSE;
 }
 
