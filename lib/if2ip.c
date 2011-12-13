@@ -92,7 +92,7 @@ bool Curl_if_is_interface_name(const char *interface)
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
-  char *ip=NULL;
+  char *ip = NULL;
 
   if(getifaddrs(&head) >= 0) {
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
@@ -132,7 +132,9 @@ bool Curl_if_is_interface_name(const char *interface)
   /* This is here just to support the old interfaces */
   char buf[256];
 
-  return (Curl_if2ip(AF_INET, interface, buf, sizeof(buf)) != NULL);
+  char *ip = Curl_if2ip(AF_INET, interface, buf, sizeof(buf));
+
+  return (ip != NULL) ? TRUE : FALSE;
 }
 
 char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
