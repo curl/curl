@@ -240,8 +240,8 @@ static CURLcode bindlocal(struct connectdata *conn,
   int error;
   char myhost[256] = "";
   int done = 0; /* -1 for error, 1 for address found */
-  int is_interface = FALSE;
-  int is_host = FALSE;
+  bool is_interface = FALSE;
+  bool is_host = FALSE;
   static const char *if_prefix = "if!";
   static const char *host_prefix = "host!";
 
