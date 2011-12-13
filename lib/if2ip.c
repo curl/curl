@@ -71,7 +71,7 @@
 
 #if defined(HAVE_GETIFADDRS)
 
-bool Curl_if_is_interface_name(const char *interface)
+bool Curl_if_is_interface_name(const char *interf)
 {
   bool result = FALSE;
 
@@ -79,7 +79,7 @@ bool Curl_if_is_interface_name(const char *interface)
 
   if(getifaddrs(&head) >= 0) {
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
-      if(curl_strequal(iface->ifa_name, interface)) {
+      if(curl_strequal(iface->ifa_name, interf)) {
         result = TRUE;
         break;
       }
@@ -89,7 +89,7 @@ bool Curl_if_is_interface_name(const char *interface)
   return result;
 }
 
-char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
+char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
   char *ip = NULL;
@@ -98,7 +98,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
       if((iface->ifa_addr != NULL) &&
          (iface->ifa_addr->sa_family == af) &&
-         curl_strequal(iface->ifa_name, interface)) {
+         curl_strequal(iface->ifa_name, interf)) {
         void *addr;
         char scope[12]="";
 #ifdef ENABLE_IPV6
@@ -127,17 +127,17 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-bool Curl_if_is_interface_name(const char *interface)
+bool Curl_if_is_interface_name(const char *interf)
 {
   /* This is here just to support the old interfaces */
   char buf[256];
 
-  char *ip = Curl_if2ip(AF_INET, interface, buf, sizeof(buf));
+  char *ip = Curl_if2ip(AF_INET, interf, buf, sizeof(buf));
 
   return (ip != NULL) ? TRUE : FALSE;
 }
 
-char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
+char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size)
 {
   struct ifreq req;
   struct in_addr in;
@@ -146,10 +146,10 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
   size_t len;
   char *ip;
 
-  if(!interface || (af != AF_INET))
+  if(!interf || (af != AF_INET))
     return NULL;
 
-  len = strlen(interface);
+  len = strlen(interf);
   if(len >= sizeof(req.ifr_name))
     return NULL;
 
@@ -158,7 +158,7 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
     return NULL;
 
   memset(&req, 0, sizeof(req));
-  memcpy(req.ifr_name, interface, len+1);
+  memcpy(req.ifr_name, interf, len+1);
   req.ifr_addr.sa_family = AF_INET;
 
   if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {
@@ -176,9 +176,9 @@ char *Curl_if2ip(int af, const char *interface, char *buf, int buf_size)
 
 #else
 
-bool Curl_if_is_interface_name(const char *interface)
+bool Curl_if_is_interface_name(const char *interf)
 {
-  (void) interface;
+  (void) interf;
 
   return FALSE;
 }
