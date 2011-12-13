@@ -1,5 +1,5 @@
-#ifndef __POP3_H
-#define __POP3_H
+#ifndef HEADER_CURL_POP3_H
+#define HEADER_CURL_POP3_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -61,4 +61,4 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
                          char *str,
                          size_t nread);
 
-#endif /* __POP3_H */
+#endif /* HEADER_CURL_POP3_H */

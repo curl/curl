@@ -1036,7 +1036,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
                          size_t nread)
 {
   /* This code could be made into a special function in the handler struct. */
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
 
