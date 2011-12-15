@@ -271,9 +271,9 @@ Available substitute variables include:
 %CLIENTIP   - IPv4 address of the client running curl
 %CLIENT6IP  - IPv6 address of the client running curl
 %HOSTIP    - IPv4 address of the host running this test
-%HOSTPORT  - Port number of the HTTP server
+%HTTPPORT  - Port number of the HTTP server
 %HOST6IP   - IPv6 address of the host running this test
-%HOST6PORT - IPv6 port number of the HTTP server
+%HTTP6PORT - IPv6 port number of the HTTP server
 %HTTPSPORT - Port number of the HTTPS server
 %FTPPORT   - Port number of the FTP server
 %FTP6PORT  - IPv6 port number of the FTP server
