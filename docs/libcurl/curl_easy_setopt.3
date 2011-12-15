@@ -1850,6 +1850,9 @@ as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
 For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE\fP is
 mandatory.
 
+When sending emails using SMTP, this command can be used to specify the
+optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
+
 This option does not limit how much data libcurl will actually send, as that
 is controlled entirely by what the read callback returns.
 .IP CURLOPT_INFILESIZE_LARGE
