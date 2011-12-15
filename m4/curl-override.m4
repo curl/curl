@@ -2,7 +2,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 4
+# serial 5
 
 dnl CURL_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
@@ -15,16 +15,6 @@ AC_DEFUN([CURL_OVERRIDE_AUTOCONF], [
 AC_BEFORE([$0],[AC_PROG_LIBTOOL])
 # using curl-override.m4
 ])
-
-dnl Override some Libtool tests
-dnl -------------------------------------------------
-dnl This is done to prevent Libtool 1.5.X from doing
-dnl unnecesary C++, Fortran and Java tests and reduce
-dnl resulting configure script by nearly 300 Kb.
-
-m4_define([AC_LIBTOOL_LANG_CXX_CONFIG],[:])
-m4_define([AC_LIBTOOL_LANG_F77_CONFIG],[:])
-m4_define([AC_LIBTOOL_LANG_GCJ_CONFIG],[:])
 
 dnl Override Autoconf's AC_LANG_PROGRAM (C)
 dnl -------------------------------------------------

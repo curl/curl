@@ -26,6 +26,7 @@ AC_PREREQ(2.57)
 dnl We don't know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: http://curl.haxx.se/mail/])
 
+XC_OVR_ZZ50
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright

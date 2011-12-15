@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -315,7 +315,7 @@ for fname in .deps \
     libcurl.pc \
     libtool \
     libtool.m4 \
-    libtool.m4.bak \
+    libtool.m4.tmp \
     ltmain.sh \
     ltoptions.m4 \
     ltsugar.m4 \
@@ -339,33 +339,41 @@ fi
 echo "buildconf: running libtoolize"
 $libtoolize --copy --automake --force || die "The libtoolize command failed"
 
+# When using libtool 1.5.X (X < 26) we copy libtool.m4 to our local m4
+# subdirectory and this local copy is patched to fix some warnings that
+# are triggered when running aclocal and using autoconf 2.62 or later.
+
 if test "$lt_major" = "1" && test "$lt_minor" = "5"; then
   if test -z "$lt_patch" || test "$lt_patch" -lt "26"; then
-    if test -f m4/libtool.m4; then
-      our_libtool_m4='m4/libtool.m4'
-    elif test -f libtool.m4; then
-      our_libtool_m4='libtool.m4'
+    echo "buildconf: copying libtool.m4 to local m4 subdir"
+    ac_dir=`${ACLOCAL:-aclocal} --print-ac-dir`
+    if test -f $ac_dir/libtool.m4; then
+      cp -f $ac_dir/libtool.m4 m4/libtool.m4
+    else
+      echo "buildconf: $ac_dir/libtool.m4 not found"
     fi
-    if test -n "$our_libtool_m4"; then
-      echo "buildconf: running libtoolize hack to rename some variables"
-      $PERL -i.bak -pe \
+    if test -f m4/libtool.m4; then
+      echo "buildconf: renaming some variables in local m4/libtool.m4"
+      $PERL -i.tmp -pe \
         's/lt_prog_compiler_pic_works/lt_cv_prog_compiler_pic_works/g; \
          s/lt_prog_compiler_static_works/lt_cv_prog_compiler_static_works/g;' \
-        $our_libtool_m4
+        m4/libtool.m4
+      rm -f m4/libtool.m4.tmp
     fi
   fi
+fi
+
+if test -f m4/libtool.m4; then
+  echo "buildconf: converting all mv to mv -f in local m4/libtool.m4"
+  $PERL -i.tmp -pe 's/\bmv +([^-\s])/mv -f $1/g' m4/libtool.m4
+  rm -f m4/libtool.m4.tmp
 fi
 
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "The aclocal command line failed"
 
-if test -n "$PERL"; then
-  echo "buildconf: running aclocal hack to convert all mv to mv -f"
-  $PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
-else
-  echo "buildconf: perl not found"
-  exit 1
-fi
+echo "buildconf: converting all mv to mv -f in local aclocal.m4"
+$PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
 
 echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The autoheader command failed"
