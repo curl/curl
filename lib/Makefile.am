@@ -116,7 +116,11 @@ if MIMPURE
 MIMPURE = -mimpure-text
 endif
 
-libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(LIBCURL_LIBS)
+if VERSIONED_SYMBOLS
+VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
+endif
+
+libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 
 # unit testing static library built only along with unit tests
 if BUILD_UNITTESTS

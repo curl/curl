@@ -1,0 +1,13 @@
+HIDDEN
+{
+  local:
+    __*;
+    _rest*;
+    _save*;
+};
+
+CURL_@VERSIONED_FLAVOUR@4
+{
+  global: curl_*;
+  local: *;
+};

@@ -36,7 +36,7 @@ winbuild/MakefileBuild.vc winbuild/Makefile.vc
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  curl-style.el sample.emacs RELEASE-NOTES buildconf 	\
  libcurl.pc.in vc6curl.dsw MacOSX-Framework Android.mk $(CMAKE_DIST)	\
- Makefile.msvc.names $(WINBUILD_DIST)
+ Makefile.msvc.names $(WINBUILD_DIST) lib/libcurl.vers.in
 
 bin_SCRIPTS = curl-config
 
