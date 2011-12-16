@@ -73,9 +73,6 @@
  *
  ***************************************************************************/
 
-#define FORM_FILE_SEPARATOR ','
-#define FORM_TYPE_SEPARATOR ';'
-
 int formparse(struct Configurable *config,
               const char *input,
               struct curl_httppost **httppost,
@@ -120,8 +117,8 @@ int formparse(struct Configurable *config,
         char *ptr;
         char *filename = NULL;
 
-        sep = strchr(contp, FORM_TYPE_SEPARATOR);
-        sep2 = strchr(contp, FORM_FILE_SEPARATOR);
+        sep = strchr(contp, ';');
+        sep2 = strchr(contp, ',');
 
         /* pick the closest */
         if(sep2 && (sep2 < sep)) {
@@ -133,16 +130,13 @@ int formparse(struct Configurable *config,
         type = NULL;
 
         if(sep) {
-
-          /* if we got here on a comma, don't do much */
-          if(FORM_FILE_SEPARATOR == *sep)
-            ptr = NULL;
-          else
-            ptr = sep+1;
+          bool semicolon = (';' == *sep);
 
           *sep = '\0'; /* terminate file name at separator */
 
-          while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
+          ptr = sep+1; /* point to the text following the separator */
+
+          while(semicolon && ptr && (','!= *ptr)) {
 
             /* pass all white spaces */
             while(ISSPACE(*ptr))
@@ -168,13 +162,17 @@ int formparse(struct Configurable *config,
                  specified and if not we simply assume that it is text that
                  the user wants included in the type and include that too up
                  to the next zero or semicolon. */
-              if((*sep==';') && !checkprefix(";filename=", sep)) {
-                sep2 = strchr(sep+1, ';');
-                if(sep2)
-                  sep = sep2;
-                else
-                  sep = sep + strlen(sep); /* point to end of string */
+              if(*sep==';') {
+                if(!checkprefix(";filename=", sep)) {
+                  sep2 = strchr(sep+1, ';');
+                  if(sep2)
+                    sep = sep2;
+                  else
+                    sep = sep + strlen(sep); /* point to end of string */
+                }
               }
+              else
+                semicolon = FALSE;
 
               if(*sep) {
                 *sep = '\0'; /* zero terminate type string */
@@ -186,9 +184,9 @@ int formparse(struct Configurable *config,
             }
             else if(checkprefix("filename=", ptr)) {
               filename = &ptr[9];
-              ptr = strchr(filename, FORM_TYPE_SEPARATOR);
+              ptr = strchr(filename, ';');
               if(!ptr) {
-                ptr = strchr(filename, FORM_FILE_SEPARATOR);
+                ptr = strchr(filename, ',');
               }
               if(ptr) {
                 *ptr = '\0'; /* zero terminate */
@@ -199,20 +197,10 @@ int formparse(struct Configurable *config,
               /* confusion, bail out of loop */
               break;
           }
-          /* find the following comma */
-          if(ptr)
-            sep = strchr(ptr, FORM_FILE_SEPARATOR);
-          else
-            sep = NULL;
+
+          sep = ptr;
         }
-        else {
-          sep = strchr(contp, FORM_FILE_SEPARATOR);
-        }
-        if(sep) {
-          /* the next file name starts here */
-          *sep = '\0';
-          sep++;
-        }
+
         /* if type == NULL curl_formadd takes care of the problem */
 
         if(!AddMultiFiles(contp, type, filename, &multi_start,
