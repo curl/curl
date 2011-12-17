@@ -40,12 +40,13 @@ contents
 <client>
 <server>
 http
+http-proxy
 </server>
  <name>
 HTTP over proxy-tunnel with site authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/83 -p -x %HOSTIP:%HTTPPORT --user iam:myself
+http://%HOSTIP:%HTTPPORT/we/want/that/page/83 -p -x %HOSTIP:%PROXYPORT --user iam:myself
 </command>
 </client>
 
@@ -55,12 +56,14 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/83 -p -x %HOSTIP:%HTTPPORT --user iam
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
+<proxy>
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
+</proxy>
+<protocol>
 GET /we/want/that/page/83 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3

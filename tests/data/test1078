@@ -31,12 +31,13 @@ contents
 <client>
 <server>
 http
+http-proxy
 </server>
  <name>
 HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
  </name>
  <command>
---proxy1.0 %HOSTIP:%HTTPPORT -p http://%HOSTIP:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP:%HTTPPORT/we/want/that/page/1078
+--proxy1.0 %HOSTIP:%PROXYPORT -p http://%HOSTIP:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP:%HTTPPORT/we/want/that/page/1078
 </command>
 </client>
 
@@ -46,11 +47,13 @@ HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
+<proxy>
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
+</proxy>
+<protocol>
 GET /we/want/that/page/1078 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

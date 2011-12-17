@@ -160,6 +160,7 @@ pop3
 smtp
 httptls+srp
 httptls+srp-ipv6
+http-proxy
 
 Give only one per line.  This subsection is mandatory.
 </server>
@@ -275,6 +276,7 @@ Available substitute variables include:
 %HOST6IP   - IPv6 address of the host running this test
 %HTTP6PORT - IPv6 port number of the HTTP server
 %HTTPSPORT - Port number of the HTTPS server
+%PROXYPORT - Port number of the HTTP proxy
 %FTPPORT   - Port number of the FTP server
 %FTP6PORT  - IPv6 port number of the FTP server
 %FTPSPORT  - Port number of the FTPS server
@@ -321,12 +323,26 @@ changing protocol data such as port numbers or user-agent strings.
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </strippart>
+
 <protocol [nonewline="yes"]>
-the protocol dump curl should transmit, if 'nonewline' is set, we will cut
-off the trailing newline of this given data before comparing with the one
-actually sent by the client
-Variables are substituted as in the <command> section.
+
+the protocol dump curl should transmit, if 'nonewline' is set, we will cut off
+the trailing newline of this given data before comparing with the one actually
+sent by the client Variables are substituted as in the <command> section.  The
+<strip> and <strippart> rules are applied before comparisons are made.
+
 </protocol>
+
+<proxy [nonewline="yes"]>
+
+The protocol dump curl should transmit to a HTTP proxy (when the http-proxy
+server is used), if 'nonewline' is set, we will cut off the trailing newline
+of this given data before comparing with the one actually sent by the client
+Variables are substituted as in the <command> section. The <strip> and
+<strippart> rules are applied before comparisons are made.
+
+</proxy>
+
 <stdout [mode="text"] [nonewline="yes"]>
 This verifies that this data was passed to stdout.  Variables are
 substituted as in the <command> section.

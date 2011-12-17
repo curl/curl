@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,6 +79,7 @@ static bool use_ipv6 = FALSE;
 static bool use_gopher = FALSE;
 static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
+static bool is_proxy = FALSE;
 
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
@@ -118,6 +119,7 @@ struct httprequest {
   int prot_version;  /* HTTP version * 10 */
   bool pipelining;   /* true if request is pipelined */
   int callcount;  /* times ProcessRequest() gets called */
+  int connect_port; /* the port number CONNECT used */
 };
 
 static int ProcessRequest(struct httprequest *req);
@@ -135,6 +137,11 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"
+
+/* when told to run as proxy, we store the logs in different files so that
+   they can co-exist with the same program running as a "server" */
+#define REQUEST_PROXY_DUMP  "log/proxy.input"
+#define RESPONSE_PROXY_DUMP "log/proxy.response"
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
@@ -476,9 +483,17 @@ static int ProcessRequest(struct httprequest *req)
     else {
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
+        char *portp;
+
         sprintf(logbuf, "Received a CONNECT %s HTTP/%d.%d request",
                 doc, prot_major, prot_minor);
         logmsg("%s", logbuf);
+
+        portp = strchr(doc, ':');
+        if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
+          req->connect_port = strtol(portp+1, NULL, 10);
+        else
+          req->connect_port = 0;
 
         if(req->prot_version == 10)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
@@ -486,15 +501,10 @@ static int ProcessRequest(struct httprequest *req)
         if(!strncmp(doc, "bad", 3))
           /* if the host name starts with bad, we fake an error here */
           req->testno = DOCNUMBER_BADCONNECT;
-        else if(!strncmp(doc, "test", 4)) {
+        else if(!strncmp(doc, "test", 4))
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
-          char *portp = strchr(doc, ':');
-          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
-            req->testno = strtol(portp+1, NULL, 10);
-          else
-            req->testno = DOCNUMBER_CONNECT;
-        }
+          req->testno = req->connect_port?req->connect_port:DOCNUMBER_CONNECT;
         else
           req->testno = DOCNUMBER_CONNECT;
       }
@@ -707,6 +717,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
   size_t written;
   size_t writeleft;
   FILE *dump;
+  const char *dumpfile=is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
 
   if (reqbuf == NULL)
     return;
@@ -714,12 +725,12 @@ static void storerequest(char *reqbuf, size_t totalsize)
     return;
 
   do {
-    dump = fopen(REQUEST_DUMP, "ab");
+    dump = fopen(dumpfile, "ab");
   } while ((dump == NULL) && ((error = ERRNO) == EINTR));
   if (dump == NULL) {
     logmsg("Error opening file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
-    logmsg("Failed to write request input to " REQUEST_DUMP);
+           dumpfile, error, strerror(error));
+    logmsg("Failed to write request input ");
     return;
   }
 
@@ -734,12 +745,12 @@ static void storerequest(char *reqbuf, size_t totalsize)
   } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to " REQUEST_DUMP, totalsize);
+    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
+           dumpfile, error, strerror(error));
     logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
-           totalsize-writeleft, totalsize, REQUEST_DUMP);
+           totalsize-writeleft, totalsize, dumpfile);
   }
 
 storerequest_cleanup:
@@ -749,7 +760,7 @@ storerequest_cleanup:
   } while(res && ((error = ERRNO) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
+           dumpfile, error, strerror(error));
 }
 
 /* return 0 on success, non-zero on failure */
@@ -788,6 +799,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->prot_version = 0;
   req->pipelining = FALSE;
   req->callcount = 0;
+  req->connect_port = 0;
 
   /*** end of httprequest init ***/
 
@@ -878,7 +890,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t responsesize;
   int error = 0;
   int res;
-
+  const char *responsedump = is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP;
   static char weare[256];
 
   char partbuf[80]="data";
@@ -1026,12 +1038,11 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   else
     prevbounce = FALSE;
 
-  dump = fopen(RESPONSE_DUMP, "ab");
+  dump = fopen(responsedump, "ab");
   if(!dump) {
     error = ERRNO;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", RESPONSE_DUMP);
-    logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    logmsg("Error opening file: %s", responsedump);
     if(ptr)
       free(ptr);
     if(cmd)
@@ -1073,7 +1084,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   } while(res && ((error = ERRNO) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           RESPONSE_DUMP, error, strerror(error));
+           responsedump, error, strerror(error));
 
   if(got_exit_signal) {
     if(ptr)
@@ -1093,8 +1104,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to " RESPONSE_DUMP,
-         responsesize);
+  logmsg("Response sent (%zu bytes) and written to %s",
+         responsesize, responsedump);
 
   if(ptr)
     free(ptr);
@@ -1146,6 +1157,287 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
+static curl_socket_t connect_to(const char *ipaddr, int port)
+{
+  int flag;
+  struct sockaddr_in sin;
+  curl_socket_t serverfd;
+  unsigned long hostaddr;
+
+  hostaddr = inet_addr(ipaddr);
+
+  if(hostaddr == ( in_addr_t)-1)
+    return -1;
+
+  logmsg("about to connect to %s:%d", ipaddr, port);
+
+  serverfd = socket(AF_INET, SOCK_STREAM, 0);
+
+#ifdef TCP_NODELAY
+  /*
+   * Disable the Nagle algorithm
+   */
+  flag = 1;
+  if (setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
+                 (void *)&flag, sizeof(flag)) == -1) {
+    logmsg("====> TCP_NODELAY for server conection failed");
+  }
+#endif
+
+  sin.sin_family = AF_INET;
+  sin.sin_port = htons((short)port);
+  sin.sin_addr.s_addr = hostaddr;
+  if (connect(serverfd, (struct sockaddr*)(&sin),
+              sizeof(struct sockaddr_in)) != 0) {
+    fprintf(stderr, "failed to connect!\n");
+    return -1;
+  }
+
+  logmsg("connected fine to %s:%d, now tunnel!", ipaddr, port);
+
+  return serverfd;
+}
+
+/*
+ * A CONNECT has been received, a CONNECT response has been sent.
+ *
+ * This function needs to connect to the server, and then pass data between
+ * the client and the server back and forth until the connection is closed by
+ * either end.
+ *
+ * When doing FTP through a CONNECT proxy, we expect that the data connection
+ * will be setup while the first connect is still being kept up. Therefor we
+ * must accept a new connection and deal with it appropriately.
+ */
+
+#define data_or_ctrl(x) ((x)?"DATA":"CTRL")
+
+static int http_connect(curl_socket_t infd,
+                        curl_socket_t rootfd,
+                        struct httprequest *req,
+                        const char *ipaddr)
+{
+  curl_socket_t serverfd[2];
+  curl_socket_t clientfd[2];
+  curl_socket_t datafd = CURL_SOCKET_BAD;
+  int toc[2] = {0, 0}; /* number of bytes to client */
+  int tos[2] = {0, 0}; /* number of bytes to server */
+  char readclient[2][256];
+  char readserver[2][256];
+  bool poll_client[2] = { TRUE, TRUE };
+  bool poll_server[2] = { TRUE, TRUE };
+  int control=0;
+  int i;
+
+  sleep(1); /* sleep here to make sure the client gets the CONNECT response
+               first and separate from the data that might follow here */
+
+  clientfd[0] = infd;
+  clientfd[1] = CURL_SOCKET_BAD;
+
+  serverfd[0] = connect_to(ipaddr, req->connect_port);
+  if(CURL_SOCKET_BAD == serverfd[0])
+    return 1; /* failure */
+  serverfd[1] = CURL_SOCKET_BAD; /* nothing there (yet) */
+
+  /* connected, now tunnel */
+  while(1) {
+    fd_set input;
+    fd_set output;
+    struct timeval timeout={1,0};
+    ssize_t rc;
+    int maxfd=0;
+    int used;
+
+    FD_ZERO(&input);
+    FD_ZERO(&output);
+
+    if(CURL_SOCKET_BAD != rootfd) {
+      FD_SET(rootfd, &input); /* monitor this for new connections */
+      maxfd=rootfd;
+    }
+
+    /* set sockets to wait for */
+    for(i=0; i<=control; i++) {
+      int mostfd = clientfd[i] > serverfd[i]? clientfd[i]: serverfd[i];
+      used = 0;
+      if(mostfd > maxfd)
+        maxfd = mostfd;
+
+      if(poll_client[i]) {
+        FD_SET(clientfd[i], &input);
+        used |= 1 << (i*4);
+      }
+
+      if(poll_server[i]) {
+        FD_SET(serverfd[i], &input);
+        used |= 2 << (i*4);
+      }
+
+      if(toc[i]) { /* if there is data to client, wait until we can write */
+        FD_SET(clientfd[i], &output);
+        used |= 4 << (i*4);
+      }
+      if(tos[i]) { /* if there is data to server, wait until we can write */
+        FD_SET(serverfd[i], &output);
+        used |= 8 << (i*4);
+      }
+    }
+
+    rc = select(maxfd+1, &input, &output, NULL, &timeout);
+
+    if(rc > 0) {
+      /* socket action */
+      size_t len;
+      int precontrol;
+
+      if((CURL_SOCKET_BAD != rootfd) &&
+         FD_ISSET(rootfd, &input)) {
+        /* a new connection! */
+        struct httprequest req2;
+        datafd = accept(rootfd, NULL, NULL);
+        if(CURL_SOCKET_BAD == datafd)
+          return 4; /* error! */
+        logmsg("====> Client connect DATA");
+        if(get_request(datafd, &req2))
+          /* non-zero means error, break out of loop */
+          break;
+
+        send_doc(datafd, &req2);
+
+        if(DOCNUMBER_CONNECT != req2.testno) {
+          /* eeek, not a CONNECT */
+          close(datafd);
+          break;
+        }
+
+        /* deal with the new connection */
+        rootfd = CURL_SOCKET_BAD; /* prevent new connections */
+        clientfd[1] = datafd;
+
+        /* connect to the server */
+        serverfd[1] = connect_to(ipaddr, req2.connect_port);
+        if(serverfd[1] == CURL_SOCKET_BAD) {
+          /* BADNESS, bail out */
+          break;
+        }
+        control = 1; /* now we have two connections to work with */
+      }
+
+      /* store the value before the loop starts */
+      precontrol = control;
+
+      for(i=0; i<=control; i++) {
+        len = sizeof(readclient[i])-tos[i];
+        if(len && FD_ISSET(clientfd[i], &input)) {
+          /* read from client */
+          rc = recv(clientfd[i], &readclient[i][tos[i]], len, 0);
+          if(rc <= 0) {
+            logmsg("[%s] got %d at %s:%d, STOP READING client", data_or_ctrl(i),
+                   rc, __FILE__, __LINE__);
+            poll_client[i] = FALSE;
+          }
+          else {
+            logmsg("[%s] READ %d bytes from client", data_or_ctrl(i), rc);
+            logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
+                   data_to_hex(&readclient[i][tos[i]], rc));
+            tos[i] += rc;
+          }
+        }
+
+        len = sizeof(readserver[i])-toc[i];
+        if(len && FD_ISSET(serverfd[i], &input)) {
+          /* read from server */
+          rc = recv(serverfd[i], &readserver[i][toc[i]], len, 0);
+          if(rc <= 0) {
+            logmsg("[%s] got %d at %s:%d, STOP READING server", data_or_ctrl(i),
+                   rc, __FILE__, __LINE__);
+            poll_server[i] = FALSE;
+          }
+          else {
+            logmsg("[%s] READ %d bytes from server", data_or_ctrl(i), rc);
+            logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
+                   data_to_hex(&readserver[i][toc[i]], rc));
+            toc[i] += rc;
+          }
+        }
+        if(toc[i] && FD_ISSET(clientfd[i], &output)) {
+          /* write to client */
+          rc = send(clientfd[i], readserver[i], toc[i], 0);
+          if(rc <= 0) {
+            logmsg("[%s] got %d at %s:%d", data_or_ctrl(i),
+                   rc, __FILE__, __LINE__);
+            control--;
+            break;
+          }
+          logmsg("[%s] SENT %d bytes to client", data_or_ctrl(i), rc);
+          logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
+                 data_to_hex(readserver[i], rc));
+          if(toc[i] - rc)
+            memmove(&readserver[i][0], &readserver[i][rc], toc[i]-rc);
+          toc[i] -= rc;
+        }
+        if(tos[i] && FD_ISSET(serverfd[i], &output)) {
+          /* write to server */
+          rc = send(serverfd[i], readclient[i], tos[i], 0);
+          if(rc <= 0) {
+            logmsg("[%s] got %d at %s:%d", data_or_ctrl(i),
+                   rc, __FILE__, __LINE__);
+            control--;
+            break;
+          }
+          logmsg("[%s] SENT %d bytes to server", data_or_ctrl(i), rc);
+          logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
+                 data_to_hex(readclient[i], rc));
+          if(tos - rc)
+            memmove(&readclient[i][0], &readclient[i][rc], tos[i]-rc);
+          tos[i] -= rc;
+        }
+
+        if(!toc[i] && !poll_server[i]) {
+          /* nothing to send to the client is left, and server polling is
+             switched off, bail out */
+          logmsg("[%s] ENDING1", data_or_ctrl(i));
+          control--;
+        }
+        if(!tos[i] && !poll_client[i]) {
+          /* nothing to send to the server is left, and client polling is
+             switched off, bail out */
+          logmsg("[%s] ENDING2", data_or_ctrl(i));
+          control--;
+        }
+      }
+      if(precontrol > control) {
+        /* if the value was decremented we close the "lost" sockets */
+        if(serverfd[precontrol] != CURL_SOCKET_BAD)
+          shutdown(serverfd[precontrol], SHUT_RDWR);
+        if(clientfd[precontrol] != CURL_SOCKET_BAD)
+          shutdown(clientfd[precontrol], SHUT_RDWR);
+
+        sleep(1);
+
+        if(serverfd[precontrol] != CURL_SOCKET_BAD)
+          close(serverfd[precontrol]);
+        if(clientfd[precontrol] != CURL_SOCKET_BAD)
+          close(clientfd[precontrol]);
+
+      }
+
+      if(control < 0)
+        break;
+    }
+  }
+#if 0
+  /* close all sockets we created */
+  for(i=0; i<2; i++) {
+    if(serverfd[i] != CURL_SOCKET_BAD)
+      close(serverfd[i]);
+    if(clientfd[i] != CURL_SOCKET_BAD)
+      close(clientfd[i]);
+  }
+#endif
+  return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -1161,6 +1453,7 @@ int main(int argc, char *argv[])
   int error;
   int arg=1;
   long pid;
+  const char *hostport = "127.0.0.1";
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
 #endif
@@ -1238,6 +1531,17 @@ int main(int argc, char *argv[])
         arg++;
       }
     }
+    else if(!strcmp("--connect", argv[arg])) {
+      /* store the connect host, but also use this as a hint that we
+         run as a proxy and do a few different internal choices */
+      arg++;
+      if(argc>arg) {
+        hostport = argv[arg];
+        arg++;
+        is_proxy = TRUE;
+        logmsg("Run as proxy, CONNECT to %s", hostport);
+      }
+    }
     else {
       puts("Usage: sws [option]\n"
            " --version\n"
@@ -1247,6 +1551,7 @@ int main(int argc, char *argv[])
            " --ipv6\n"
            " --port [port]\n"
            " --srcdir [path]\n"
+           " --connect [ip4-addr]\n"
            " --gopher\n"
            " --fork");
       return 0;
@@ -1316,7 +1621,7 @@ int main(int argc, char *argv[])
          use_gopher?"GOPHER":"HTTP", ipv_inuse, (int)port);
 
   /* start accepting connections */
-  rc = listen(sock, 5);
+  rc = listen(sock, 2);
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error: (%d) %s",
@@ -1416,6 +1721,12 @@ int main(int argc, char *argv[])
       send_doc(msgsock, &req);
       if(got_exit_signal)
         break;
+
+      if(DOCNUMBER_CONNECT == req.testno) {
+        /* a CONNECT request, setup and talk the tunnel */
+        http_connect(msgsock, sock, &req, hostport);
+        break;
+      }
 
       if((req.testno < 0) && (req.testno != DOCNUMBER_CONNECT)) {
         logmsg("special request received, no persistency");

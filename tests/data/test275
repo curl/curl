@@ -41,12 +41,13 @@ contents
 <client>
 <server>
 http
+http-proxy
 </server>
  <name>
 HTTP CONNECT with proxytunnel getting two URLs from the same host
  </name>
  <command>
-http://remotesite.com/we/want/that/page/275 -p -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com/we/want/that/page/275
+http://remotesite.com:%HTTPPORT/we/want/that/page/275 -p -x %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com:%HTTPPORT/we/want/that/page/275
 </command>
 </client>
 
@@ -56,21 +57,23 @@ http://remotesite.com/we/want/that/page/275 -p -x %HOSTIP:%HTTPPORT --user iam:m
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
-CONNECT remotesite.com:80 HTTP/1.1
-Host: remotesite.com:80
+<proxy>
+CONNECT remotesite.com:%HTTPPORT HTTP/1.1
+Host: remotesite.com:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Proxy-Connection: Keep-Alive
 
+</proxy>
+<protocol>
 GET /we/want/that/page/275 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
-Host: remotesite.com
+Host: remotesite.com:%HTTPPORT
 Accept: */*
 
 GET /we/want/that/page/275 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
-Host: remotesite.com
+Host: remotesite.com:%HTTPPORT
 Accept: */*
 
 </protocol>

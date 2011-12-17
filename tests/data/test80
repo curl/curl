@@ -43,12 +43,13 @@ contents
 <client>
 <server>
 http
+http-proxy
 </server>
  <name>
-HTTP 1.0 CONNECT with proxytunnel and host Basic authentication
+HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%HTTPPORT --user iam:myself --proxy-user youare:yourself
+http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
 </command>
 </client>
 
@@ -58,13 +59,15 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%HTTPPORT --
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
+<proxy>
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Proxy-Connection: Keep-Alive
 
+</proxy>
+<protocol>
 GET /we/want/that/page/80 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3

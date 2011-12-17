@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,6 +60,33 @@
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
+
+/* This function returns a pointer to STATIC memory. It converts the given
+ * binary lump to a hex formatted string usable for output in logs or
+ * whatever.
+ */
+char *data_to_hex(char *data, size_t len)
+{
+  static char buf[256*3];
+  size_t i;
+  char *optr = buf;
+  char *iptr = data;
+
+  if(len > 255)
+    len = 255;
+
+  for(i=0; i < len; i++) {
+    if((data[i] >= 0x20) && (data[i] < 0x7f))
+      *optr++ = *iptr++;
+    else {
+      sprintf(optr, "%%%02x", *iptr++);
+      optr+=3;
+    }
+  }
+  *optr=0; /* in case no sprintf() was used */
+
+  return buf;
+}
 
 void logmsg(const char *msg, ...)
 {
