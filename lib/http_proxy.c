@@ -202,11 +202,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       else {
         DEBUGF(infof(data,
                      "Multi mode finished polling for response from "
-                     "proxy CONNECT."));
+                     "proxy CONNECT\n"));
       }
     }
     else {
-      DEBUGF(infof(data, "Easy mode waiting response from proxy CONNECT."));
+      DEBUGF(infof(data, "Easy mode waiting response from proxy CONNECT\n"));
     }
 
     /* at this point, either:
