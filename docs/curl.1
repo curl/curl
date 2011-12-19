@@ -435,14 +435,14 @@ If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
 (SSL) Tells curl to use the specified certificate directory to verify the
 peer. Multiple paths can be provided by separating them with ":" (e.g.
-"path1:path2:path3"). The certificates must be in PEM format, and if curl
-is built against OpenSSL, the directory must have been processed using the
+\&"path1:path2:path3"). The certificates must be in PEM format, and if curl is
+built against OpenSSL, the directory must have been processed using the
 c_rehash utility supplied with OpenSSL. Using \fI--capath\fP can allow
-OpenSSL-powered curl to make SSL-connections much more efficiently than
-using \fI--cacert\fP if the \fI--cacert\fP file contains many CA certificates.
+OpenSSL-powered curl to make SSL-connections much more efficiently than using
+\fI--cacert\fP if the \fI--cacert\fP file contains many CA certificates.
 
-If this option is set, the default capath value will be ignored, and if it
-is used several times, the last one will be used.
+If this option is set, the default capath value will be ignored, and if it is
+used several times, the last one will be used.
 .IP "-f, --fail"
 (HTTP) Fail silently (no output at all) on server errors. This is mostly done
 to better enable scripts etc to better deal with failed attempts. In
