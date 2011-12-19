@@ -9,37 +9,37 @@ Curl and libcurl 7.24.0
 
 This release includes the following changes:
 
- o CURLOPT_QUOTE: SFTP supports the '*'-prefix now
- o CURLOPT_DNS_SERVERS: set name servers if possible
- o Add support for using nettle instead of gcrypt as gnutls backend
- o 
+ o CURLOPT_QUOTE: SFTP supports the '*'-prefix now [24]
+ o CURLOPT_DNS_SERVERS: set name servers if possible [23]
+ o Add support for using nettle instead of gcrypt as gnutls backend [22]
+ o CURLOPT_INTERFACE: avoid resolving interfaces names with magic prefixes [21]
 
 This release includes the following bugfixes:
 
- o SSL session share: move the age counter to the share object
- o -J -O: use -O name if no Content-Disposition header comes!
- o protocol_connect: show verbose connect and set connect time
- o query-part: ignore the URI part for given protocols
- o gnutls: only translate winsock errors for old versions
- o POP3: fix end of body detection
+ o SSL session share: move the age counter to the share object [1]
+ o -J -O: use -O name if no Content-Disposition header comes! [2]
+ o protocol_connect: show verbose connect and set connect time [3]
+ o query-part: ignore the URI part for given protocols [4]
+ o gnutls: only translate winsock errors for old versions [5]
+ o POP3: fix end of body detection [6]
  o POP3: detect when LIST returns no mails
- o TELNET: improved treatment of options
- o configure: add support for pkg-config detection of libidn
- o CyaSSL 2.0+ library initialization adjustment
+ o TELNET: improved treatment of options [7]
+ o configure: add support for pkg-config detection of libidn [8]
+ o CyaSSL 2.0+ library initialization adjustment [9]
  o multi interface: only use non-NULL socker function pointer
  o call opensocket callback properly for active FTP
- o don't call close socket callback for sockets created with accept()
- o differentiate better between host/proxy errors
- o SSH: fix CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5
- o multi: handle timeouts on DNS servers by checking for new sockets
+ o don't call close socket callback for sockets created with accept() [10]
+ o differentiate better between host/proxy errors [11]
+ o SSH: fix CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 and --hostpubmd5 [12]
+ o multi: handle timeouts on DNS servers by checking for new sockets [13]
  o CURLOPT_DNS_SERVERS: fix return code
- o POP3: fixed escaped dot not being stripped out
- o OpenSSL: check for the SSLv2 function in configure
- o MakefileBuild: fix the static build
- o create_conn: don't switch to HTTP protocol if tunneling is enabled
- o multi interface: fix block when CONNECT_ONLY option is used
- o Fix connection reuse for TLS upgraded connections
- o
+ o POP3: fixed escaped dot not being stripped out [14]
+ o OpenSSL: check for the SSLv2 function in configure [15]
+ o MakefileBuild: fix the static build [16]
+ o create_conn: don't switch to HTTP protocol if tunneling is enabled [17]
+ o multi interface: fix block when CONNECT_ONLY option is used [18]
+ o Fix connection reuse for TLS upgraded connections [19]
+ o multiple file upload with -F and custom type [20]
 
 This release includes the following known bugs:
 
@@ -51,6 +51,34 @@ advice from friends like these:
  Alejandro Alvarez Ayllon, Jason Glasgow, Jonas Schnelli, Mark Brand,
  Martin Storsjo, Yang Tse, Laurent Rabret, Jason Glasgow, Steve Holme,
  Reza Arbab, Jason Liu, Gokhan Sengun, Rob Ward, Dan Fandrich,
- Naveen Chandran, Ward Willats, Vladimir Grishchenko
+ Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
+ Alessandro Ghedini
 
         Thanks! (and sorry if I forgot to mention someone)
+
+References to bug reports and discussions on issues:
+
+ [1] = http://curl.haxx.se/mail/lib-2011-11/0116.html
+ [2] = http://curl.haxx.se/mail/archive-2011-11/0030.htm
+ [3] = http://curl.haxx.se/mail/archive-2011-11/0035.html
+ [4] = http://curl.haxx.se/mail/lib-2011-11/0218.html
+ [5] = http://curl.haxx.se/mail/lib-2011-11/0267.html
+ [6] = http://curl.haxx.se/mail/lib-2011-11/0279.html
+ [7] = http://curl.haxx.se/mail/lib-2011-11/0247.html
+ [8] = http://curl.haxx.se/mail/lib-2011-11/0294.html
+ [9] = http://curl.haxx.se/bug/view.cgi?id=3442068
+ [10] = http://curl.haxx.se/mail/lib-2011-12/0018.html
+ [11] = http://curl.haxx.se/mail/archive-2011-12/0010.html
+ [12] = http://curl.haxx.se/bug/view.cgi?id=3451592
+ [13] = http://curl.haxx.se/mail/lib-2011-11/0371.html
+ [14] = http://curl.haxx.se/mail/lib-2011-11/0368.html
+ [15] = http://curl.haxx.se/mail/archive-2011-12/0012.html
+ [16] = http://curl.haxx.se/mail/lib-2011-12/0063.html
+ [17] = http://curl.haxx.se/mail/lib-2011-12/0010.html
+ [18] = http://curl.haxx.se/mail/lib-2011-12/0070.html
+ [19] = http://curl.haxx.se/mail/lib-2011-11/0022.html
+ [20] = http://curl.haxx.se/mail/lib-2011-12/0121.html
+ [21] = http://curl.haxx.se/mail/lib-2011-12/0107.html
+ [22] = http://curl.haxx.se/mail/lib-2011-11/0164.html
+ [23] = http://curl.haxx.se/mail/lib-2011-11/0067.html
+ [24] = http://curl.haxx.se/mail/lib-2011-11/0205.html
