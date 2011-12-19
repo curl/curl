@@ -81,6 +81,12 @@ curl_easy_strerror(CURLcode error)
   case CURLE_REMOTE_ACCESS_DENIED:
     return "Access denied to remote resource";
 
+  case CURLE_FTP_ACCEPT_FAILED:
+    return "FTP: The server failed to connect to data port";
+
+  case CURLE_FTP_ACCEPT_TIMEOUT:
+    return "FTP: Accepting server connect has timed out";
+
   case CURLE_FTP_PRET_FAILED:
     return "FTP: The server did not accept the PRET command.";
 
@@ -284,8 +290,6 @@ curl_easy_strerror(CURLcode error)
     return "Chunk callback failed";
 
     /* error codes not used by current libcurl */
-  case CURLE_OBSOLETE10:
-  case CURLE_OBSOLETE12:
   case CURLE_OBSOLETE16:
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

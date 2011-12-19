@@ -1677,6 +1677,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.connecttimeout = va_arg(param, long);
     break;
 
+  case CURLOPT_ACCEPTTIMEOUT_MS:
+    /*
+     * The maximum time you allow curl to wait for server connect
+     */
+    data->set.accepttimeout = va_arg(param, long);
+    break;
+
   case CURLOPT_USERPWD:
     /*
      * user:password to use in the operation
@@ -5457,7 +5464,7 @@ CURLcode Curl_do_more(struct connectdata *conn)
   if(conn->handler->do_more)
     result = conn->handler->do_more(conn);
 
-  if(result == CURLE_OK)
+  if(result == CURLE_OK && conn->bits.wait_data_conn == FALSE)
     /* do_complete must be called after the protocol-specific DO function */
     do_complete(conn);
 

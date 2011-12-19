@@ -108,6 +108,8 @@
 #endif
 
 /* Local API functions */
+static void state(struct connectdata *conn,
+                  ftpstate newstate);
 static CURLcode ftp_sendquote(struct connectdata *conn,
                               struct curl_slist *quote);
 static CURLcode ftp_quit(struct connectdata *conn);
@@ -149,6 +151,11 @@ static void wc_data_dtor(void *ptr);
 
 static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
                                          curl_off_t filesize);
+
+static CURLcode ftp_readresp(curl_socket_t sockfd,
+                             struct pingpong *pp,
+                             int *ftpcode,
+                             size_t *size);
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z)    if((result = Curl_ftpsendf(x,y,z)) != CURLE_OK) \
@@ -310,19 +317,16 @@ static bool isBadFtpString(const char *string)
 
 /***********************************************************************
  *
- * AllowServerConnect()
+ * AcceptServerConnect()
  *
- * When we've issue the PORT command, we have told the server to connect
- * to us. This function will sit and wait here until the server has
- * connected.
+ * After connection request is received from the server this function is
+ * called to accept the connection and close the listening socket
  *
  */
-static CURLcode AllowServerConnect(struct connectdata *conn)
+static CURLcode AcceptServerConnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
-  long timeout_ms;
-  long interval_ms;
   curl_socket_t s = CURL_SOCKET_BAD;
 #ifdef ENABLE_IPV6
   struct Curl_sockaddr_storage add;
@@ -331,48 +335,220 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 #endif
   curl_socklen_t size = (curl_socklen_t) sizeof(add);
 
-  for(;;) {
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
+    size = sizeof(add);
 
-    if(timeout_ms < 0) {
-      /* if a timeout was already reached, bail out */
-      failf(data, "Timeout while waiting for server connect");
-      return CURLE_OPERATION_TIMEDOUT;
+    s=accept(sock, (struct sockaddr *) &add, &size);
+  }
+  Curl_closesocket(conn, sock); /* close the first socket */
+
+  if(CURL_SOCKET_BAD == s) {
+    failf(data, "Error accept()ing server connect");
+    return CURLE_FTP_PORT_FAILED;
+  }
+  infof(data, "Connection accepted from server\n");
+
+  conn->sock[SECONDARYSOCKET] = s;
+  curlx_nonblock(s, TRUE); /* enable non-blocking */
+  conn->sock_accepted[SECONDARYSOCKET] = TRUE;
+  return CURLE_OK;
+
+}
+
+/***********************************************************************
+ *
+ * ReceivedServerConnect()
+ *
+ * After allowing server to connect to us from data port, this function
+ * checks both data connection for connection establishment and ctrl
+ * connection for a negative response regarding a failure in connecting
+ *
+ */
+static CURLcode ReceivedServerConnect(struct connectdata* conn, bool* received)
+{
+  struct SessionHandle *data = conn->data;
+  curl_socket_t ctrl_sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t data_sock = conn->sock[SECONDARYSOCKET];
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
+  struct pingpong *pp = &ftpc->pp;
+  int result;
+  long timeout_ms;
+  ssize_t nread;
+  int ftpcode;
+
+  *received = FALSE;
+
+  timeout_ms = Curl_timeleft_accept(data);
+  infof(data, "Checking for server connect\n");
+  if(timeout_ms < 0) {
+    /* if a timeout was already reached, bail out */
+    failf(data, "Accept timeout occurred while waiting server connect");
+    return CURLE_FTP_ACCEPT_TIMEOUT;
+  }
+
+  /* First check whether there is a cached response from server */
+  if(pp->cache_size && pp->cache && pp->cache[0] > '3') {
+    /* Data connection could not be established, let's return */
+    infof(data, "There is negative response in cache while serv connect");
+    Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    return CURLE_FTP_ACCEPT_FAILED;
+  }
+
+  result = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
+
+  /* see if the connection request is already here */
+  switch (result) {
+  case -1: /* error */
+    /* let's die here */
+    failf(data, "Error while waiting for server connect");
+    return CURLE_FTP_ACCEPT_FAILED;
+  case 0:  /* Server connect is not received yet */
+    break; /* loop */
+  default:
+
+    if(result & CURL_CSELECT_IN2) {
+      infof(data, "Ready to accept data connection from server\n");
+      *received = TRUE;
+    }
+    else if(result & CURL_CSELECT_IN) {
+      infof(data, "Ctrl conn has data while waiting for data conn\n");
+      Curl_GetFTPResponse(&nread, conn, &ftpcode);
+
+      if(ftpcode/100 > 3)
+        return CURLE_FTP_ACCEPT_FAILED;
+
+      return CURLE_FTP_WEIRD_SERVER_REPLY;
     }
 
-    interval_ms = 1000;  /* use 1 second timeout intervals */
-    if(timeout_ms < interval_ms)
-      interval_ms = timeout_ms;
+    break;
+  } /* switch() */
 
-    switch (Curl_socket_ready(sock, CURL_SOCKET_BAD, interval_ms)) {
-    case -1: /* error */
-      /* let's die here */
-      failf(data, "Error while waiting for server connect");
-      return CURLE_FTP_PORT_FAILED;
-    case 0:  /* timeout */
-      break; /* loop */
-    default:
-      /* we have received data here */
-      if(0 == getsockname(sock, (struct sockaddr *) &add, &size)) {
-        size = sizeof(add);
+  return CURLE_OK;
+}
 
-        s=accept(sock, (struct sockaddr *) &add, &size);
-      }
-      Curl_closesocket(conn, sock); /* close the first socket */
 
-      if(CURL_SOCKET_BAD == s) {
-        failf(data, "Error accept()ing server connect");
-        return CURLE_FTP_PORT_FAILED;
-      }
-      infof(data, "Connection accepted from server\n");
+/***********************************************************************
+ *
+ * InitiateTransfer()
+ *
+ * After connection from server is accepted this function is called to
+ * setup transfer parameters and initiate the data transfer.
+ *
+ */
+static CURLcode InitiateTransfer(struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+  struct FTP *ftp = data->state.proto.ftp;
+  CURLcode result = CURLE_OK;
 
-      conn->sock[SECONDARYSOCKET] = s;
-      curlx_nonblock(s, TRUE); /* enable non-blocking */
-      conn->sock_accepted[SECONDARYSOCKET] = TRUE;
-      return CURLE_OK;
-    } /* switch() */
+  if(conn->ssl[SECONDARYSOCKET].use) {
+    /* since we only have a plaintext TCP connection here, we must now
+     * do the TLS stuff */
+    infof(data, "Doing the SSL/TLS handshake on the data stream\n");
+    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
+    if(result)
+      return result;
   }
-  /* never reaches this point */
+
+  if(conn->proto.ftpc.state_saved == FTP_STOR) {
+    *(ftp->bytecountp)=0;
+
+    /* When we know we're uploading a specified file, we can get the file
+       size prior to the actual upload. */
+
+    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+
+    /* set the SO_SNDBUF for the secondary socket for those who need it */
+    Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
+
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                        SECONDARYSOCKET, ftp->bytecountp);
+  }
+  else {
+    /* FTP download: */
+    Curl_setup_transfer(conn, SECONDARYSOCKET,
+        conn->proto.ftpc.retr_size_saved, FALSE,
+        ftp->bytecountp, -1, NULL); /* no upload here */
+  }
+
+  conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
+  state(conn, FTP_STOP);
+
+  return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * AllowServerConnect()
+ *
+ * When we've issue the PORT command, we have told the server to connect
+ * to us. This function
+ *   - will sit and wait here until the server has connected for easy interface
+ *   - will check whether data connection is established if so it is accepted
+ *   for multi interface
+ *
+ */
+static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
+{
+  struct SessionHandle *data = conn->data;
+  long timeout_ms;
+  long interval_ms;
+  CURLcode ret = CURLE_OK;
+
+  *connected = FALSE;
+  infof(data, "Preparing for accepting server on data port\n");
+
+  /* Save the time we start accepting server connect */
+  Curl_pgrsTime(data, TIMER_STARTACCEPT);
+
+  for(;;) {
+    timeout_ms = Curl_timeleft_accept(data);
+    if(timeout_ms < 0) {
+      /* if a timeout was already reached, bail out */
+      failf(data, "Accept timeout occurred while waiting server connect");
+      return CURLE_FTP_ACCEPT_TIMEOUT;
+    }
+
+    /* see if the connection request is already here */
+    ret = ReceivedServerConnect(conn, connected);
+    if(ret)
+      return ret;
+
+    if(*connected) {
+      ret = AcceptServerConnect(conn);
+      if(ret)
+        return ret;
+
+      ret = InitiateTransfer(conn);
+      if(ret)
+        return ret;
+
+      break; /* connection is accepted, break the loop */
+    }
+    else {
+      if(data->state.used_interface == Curl_if_easy) {
+        interval_ms = 1000;
+        if(timeout_ms < interval_ms)
+          interval_ms = timeout_ms;
+
+        /* sleep for 1 second and then continue */
+        Curl_socket_ready(CURL_SOCKET_BAD, CURL_SOCKET_BAD, interval_ms);
+      }
+      else {
+        /* Add timeout to multi handle and break out of the loop */
+        if(ret == CURLE_OK && *connected == FALSE) {
+          if(data->set.accepttimeout > 0)
+            Curl_expire(data, data->set.accepttimeout);
+          else
+            Curl_expire(data, DEFAULT_ACCEPT_TIMEOUT);
+        }
+
+        break; /* connection was not accepted immediately */
+      }
+    }
+  }
+
+  return ret;
 }
 
 /* macro to check for a three-digit ftp status code at the start of the
@@ -668,6 +844,10 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
   }
 
   socks[0] = conn->sock[SECONDARYSOCKET];
+  if(conn->bits.wait_data_conn) {
+    socks[1] = conn->sock[FIRSTSOCKET];
+    return GETSOCK_READSOCK(0) | GETSOCK_READSOCK(1);
+  }
 
   return GETSOCK_READSOCK(0);
 }
@@ -2153,11 +2333,10 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
 }
 
 static CURLcode ftp_state_stor_resp(struct connectdata *conn,
-                                    int ftpcode)
+                                    int ftpcode, ftpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *ftp = data->state.proto.ftp;
 
   if(ftpcode>=400) {
     failf(data, "Failed FTP upload: %0d", ftpcode);
@@ -2165,41 +2344,26 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
     return CURLE_UPLOAD_FAILED;
   }
 
+  conn->proto.ftpc.state_saved = instate;
+
+  /* PORT means we are now awaiting the server to connect to us. */
   if(data->set.ftp_use_port) {
-    /* BLOCKING */
-    /* PORT means we are now awaiting the server to connect to us. */
-    result = AllowServerConnect(conn);
+    bool connected;
+
+    result = AllowServerConnect(conn, &connected);
     if(result)
       return result;
+
+    if(!connected) {
+      infof(data, "Data conn was not available immediately\n");
+      state(conn, FTP_STOP);
+      conn->bits.wait_data_conn = TRUE;
+    }
+
+    return CURLE_OK;
   }
-
-  if(conn->ssl[SECONDARYSOCKET].use) {
-    /* since we only have a plaintext TCP connection here, we must now
-       do the TLS stuff */
-    infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-    /* BLOCKING */
-    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
-    if(result)
-      return result;
-  }
-
-  *(ftp->bytecountp)=0;
-
-  /* When we know we're uploading a specified file, we can get the file
-     size prior to the actual upload. */
-
-  Curl_pgrsSetUploadSize(data, data->set.infilesize);
-
-  /* set the SO_SNDBUF for the secondary socket for those who need it */
-  Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
-
-  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      SECONDARYSOCKET, ftp->bytecountp);
-  state(conn, FTP_STOP);
-
-  conn->proto.ftpc.pp.pending_resp = TRUE; /* expect a server response */
-
-  return result;
+  else
+    return InitiateTransfer(conn);
 }
 
 /* for LIST and RETR responses */
@@ -2280,22 +2444,6 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     else if(ftp->downloadsize > -1)
       size = ftp->downloadsize;
 
-    if(data->set.ftp_use_port) {
-      /* BLOCKING */
-      result = AllowServerConnect(conn);
-      if(result)
-        return result;
-    }
-
-    if(conn->ssl[SECONDARYSOCKET].use) {
-      /* since we only have a plaintext TCP connection here, we must now
-         do the TLS stuff */
-      infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-      result = Curl_ssl_connect(conn, SECONDARYSOCKET);
-      if(result)
-        return result;
-    }
-
     if(size > data->req.maxdownload && data->req.maxdownload > 0)
       size = data->req.size = data->req.maxdownload;
     else if((instate != FTP_LIST) && (data->set.prefer_ascii))
@@ -2307,11 +2455,24 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       infof(data, "Getting file with size: %" FORMAT_OFF_T "\n", size);
 
     /* FTP download: */
-    Curl_setup_transfer(conn, SECONDARYSOCKET, size, FALSE,
-                        ftp->bytecountp, -1, NULL); /* no upload here */
+    conn->proto.ftpc.state_saved = instate;
+    conn->proto.ftpc.retr_size_saved = size;
 
-    conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
-    state(conn, FTP_STOP);
+    if(data->set.ftp_use_port) {
+      bool connected;
+
+      result = AllowServerConnect(conn, &connected);
+      if(result)
+        return result;
+
+      if(!connected) {
+        infof(data, "Data conn was not available immediately\n");
+        state(conn, FTP_STOP);
+        conn->bits.wait_data_conn = TRUE;
+      }
+    }
+    else
+      return InitiateTransfer(conn);
   }
   else {
     if((instate == FTP_LIST) && (ftpcode == 450)) {
@@ -2459,7 +2620,6 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
 
-  /* we read a piece of response */
   result = ftp_readresp(sock, pp, &ftpcode, &nread);
   if(result)
     return result;
@@ -2865,7 +3025,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       break;
 
     case FTP_STOR:
-      result = ftp_state_stor_resp(conn, ftpcode);
+      result = ftp_state_stor_resp(conn, ftpcode, ftpc->state);
       break;
 
     case FTP_QUIT:
@@ -3081,6 +3241,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   case CURLE_BAD_DOWNLOAD_RESUME:
   case CURLE_FTP_WEIRD_PASV_REPLY:
   case CURLE_FTP_PORT_FAILED:
+  case CURLE_FTP_ACCEPT_FAILED:
+  case CURLE_FTP_ACCEPT_TIMEOUT:
   case CURLE_FTP_COULDNT_SET_TYPE:
   case CURLE_FTP_COULDNT_RETR_FILE:
   case CURLE_UPLOAD_FAILED:
@@ -3474,7 +3636,24 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
     /* a transfer is about to take place, or if not a file name was given
        so we'll do a SIZE on it later and then we need the right TYPE first */
 
-    if(data->set.upload) {
+    if(conn->bits.wait_data_conn == TRUE) {
+      bool serv_conned;
+
+      result = ReceivedServerConnect(conn, &serv_conned);
+      if(result)
+        return result; /* Failed to accept data connection */
+
+      if(serv_conned) {
+        /* It looks data connection is established */
+        result = AcceptServerConnect(conn);
+        conn->bits.wait_data_conn = FALSE;
+        if(result == CURLE_OK)
+          result = InitiateTransfer(conn);
+      }
+
+      return result;
+    }
+    else if(data->set.upload) {
       result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_STOR_TYPE);
       if(result)
         return result;
@@ -3513,7 +3692,6 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
        too! */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
-  /* end of transfer */
   DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
 
   return result;

@@ -1388,6 +1388,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_DO_DONE:
+
+      if(easy->easy_conn->bits.wait_data_conn == TRUE) {
+        multistate(easy, CURLM_STATE_DO_MORE);
+        result = CURLM_OK;
+        break;
+      }
+
       /* Move ourselves from the send to recv pipeline */
       moveHandleFromSendToRecvPipeline(data, easy->easy_conn);
       /* Check if we can move pending requests to send pipe */

@@ -64,7 +64,7 @@ STOR 593
 QUIT
 </protocol>
 <errorcode>
-28
+12
 </errorcode>
 <upload>
 </upload>

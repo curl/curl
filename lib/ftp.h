@@ -146,6 +146,9 @@ struct ftp_conn {
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
   ftpstate state; /* always use ftp.c:state() to change state! */
+  ftpstate state_saved; /* transfer type saved to be reloaded after
+                           data connection is established */
+  curl_off_t retr_size_saved; /* Size of retrieved file saved */
   char * server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set

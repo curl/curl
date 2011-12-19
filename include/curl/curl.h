@@ -411,9 +411,12 @@ typedef enum {
   CURLE_REMOTE_ACCESS_DENIED,    /* 9 a service was denied by the server
                                     due to lack of access - when login fails
                                     this is not returned. */
-  CURLE_OBSOLETE10,              /* 10 - NOT USED */
+  CURLE_FTP_ACCEPT_FAILED,       /* 10 - [was obsoleted in April 2006 for
+                                    7.15.4, reused in Dec 2011 for 7.24.0]*/
   CURLE_FTP_WEIRD_PASS_REPLY,    /* 11 */
-  CURLE_OBSOLETE12,              /* 12 - NOT USED */
+  CURLE_FTP_ACCEPT_TIMEOUT,      /* 12 - timeout occurred accepting server
+                                    [was obsoleted in August 2007 for 7.17.0,
+                                    reused in Dec 2011 for 7.24.0]*/
   CURLE_FTP_WEIRD_PASV_REPLY,    /* 13 */
   CURLE_FTP_WEIRD_227_FORMAT,    /* 14 */
   CURLE_FTP_CANT_GET_HOST,       /* 15 */
@@ -511,7 +514,6 @@ typedef enum {
   CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Ids */
   CURLE_FTP_BAD_FILE_LIST,       /* 87 - unable to parse FTP file list */
   CURLE_CHUNK_FAILED,            /* 88 - chunk callback reported error */
-
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -1488,6 +1490,10 @@ typedef enum {
 
   /* Set the name servers to use for DNS resolution */
   CINIT(DNS_SERVERS, OBJECTPOINT, 211),
+
+  /* Time-out accept operations (currently for FTP only) after this amount
+     of miliseconds. */
+  CINIT(ACCEPTTIMEOUT_MS, LONG, 212),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

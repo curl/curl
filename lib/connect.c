@@ -99,6 +99,34 @@ singleipconnect(struct connectdata *conn,
                 bool *connected);
 
 /*
+ * Curl_timeleft_accept() returns the amount of milliseconds left allowed for
+ * waiting server to connect. If the value is negative, the timeout time has
+ * already elapsed.
+ *
+ * The start time is stored in progress.t_acceptdata - as set with
+ * Curl_pgrsTime(..., TIMER_STARTACCEPT);
+ *
+ */
+long Curl_timeleft_accept(struct SessionHandle *data)
+{
+  long timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  struct timeval now;
+
+  if(data->set.accepttimeout > 0)
+    timeout_ms = data->set.accepttimeout;
+
+  now = Curl_tvnow();
+
+  /* subtract elapsed time */
+  timeout_ms -= Curl_tvdiff(now, data->progress.t_acceptdata);
+  if(!timeout_ms)
+    /* avoid returning 0 as that means no timeout! */
+    return -1;
+
+  return timeout_ms;
+}
+
+/*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is negative, the timeout time has already
  * elapsed.

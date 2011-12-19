@@ -169,6 +169,10 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     data->progress.t_startsingle = now;
     break;
 
+  case TIMER_STARTACCEPT:
+    data->progress.t_acceptdata = Curl_tvnow();
+    break;
+
   case TIMER_NAMELOOKUP:
     data->progress.t_nslookup =
       Curl_tvdiff_secs(now, data->progress.t_startsingle);
