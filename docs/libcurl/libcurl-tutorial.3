@@ -1303,9 +1303,7 @@ ones at any time), you start the transfers by calling
 
 \fIcurl_multi_perform(3)\fP is asynchronous. It will only execute as little as
 possible and then return back control to your program. It is designed to never
-block. If it returns CURLM_CALL_MULTI_PERFORM you better call it again soon,
-as that is a signal that it still has local data to send or remote data to
-receive.
+block.
 
 The best usage of this interface is when you do a select() on all possible
 file descriptors or sockets to know when to call libcurl again. This also
@@ -1341,9 +1339,21 @@ to figure out success on each individual transfer.
  [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
 
 .SH "Sharing Data Between Easy Handles"
+You can share some data between easy handles when the easy interface is used,
+and some data is share automatically when you use the multi interface.
 
- [ fill in ]
+When you add easy handles to a multi handle, these easy handles will
+automatically share a lot of the data that otherwise would be kept on a
+per-easy handle basis when the easy interface is used.
 
+The DNS cache is shared between handles within a multi handle, making
+subsequent name resolvings faster and the connection pool that is kept to
+better allow persistent connections and connection re-use is shared. If you're
+using the easy interface, you can still share these between specific easy
+handles by using the share interface, see \fIlibcurl-share(3)\fP.
+
+Some things are never shared automatically, not within multi handles, like for
+example cookies so the only way to share that is with the share interface.
 .SH "Footnotes"
 
 .IP "[1]"
