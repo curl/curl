@@ -2070,6 +2070,10 @@ This option requires that libcurl was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.
 
 (Added in 7.24.0)
+.IP CURLOPT_ACCEPTTIMOUT_MS
+Pass a long telling libcurl the maximum number of milliseconds to wait for a
+server to connect back to libcurl when an active FTP connection is used. If no
+timeout is set, the internal default of 60000 will be used. (Added in 7.24.0)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
