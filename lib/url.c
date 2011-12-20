@@ -5390,7 +5390,6 @@ static CURLcode do_init(struct connectdata *conn)
   k->hbufp = data->state.headerbuff;
   k->ignorebody=FALSE;
 
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
   Curl_speedinit(data);
 
   Curl_pgrsSetUploadCounter(data, 0);
@@ -5410,6 +5409,7 @@ static void do_complete(struct connectdata *conn)
   conn->data->req.chunk=FALSE;
   conn->data->req.maxfd = (conn->sockfd>conn->writesockfd?
                            conn->sockfd:conn->writesockfd)+1;
+  Curl_pgrsTime(conn->data, TIMER_PRETRANSFER);
 }
 
 CURLcode Curl_do(struct connectdata **connp, bool *done)
