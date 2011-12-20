@@ -153,7 +153,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                       long timeout_ms)       /* milliseconds to wait */
 {
 #ifdef HAVE_POLL_FINE
-  struct pollfd pfd[2];
+  struct pollfd pfd[3];
   int num;
 #else
   struct timeval pending_tv;
