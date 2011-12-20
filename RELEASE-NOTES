@@ -13,6 +13,8 @@ This release includes the following changes:
  o CURLOPT_DNS_SERVERS: set name servers if possible [23]
  o Add support for using nettle instead of gcrypt as gnutls backend [22]
  o CURLOPT_INTERFACE: avoid resolving interfaces names with magic prefixes [21]
+ o Added CURLOPT_ACCEPTTIMEOUT_MS
+ o configure: add symbols versioning option --enable-versioned-symbols
 
 This release includes the following bugfixes:
 
@@ -40,6 +42,11 @@ This release includes the following bugfixes:
  o multi interface: fix block when CONNECT_ONLY option is used [18]
  o Fix connection reuse for TLS upgraded connections [19]
  o multiple file upload with -F and custom type [20]
+ o multi interface: active FTP connections are no longer blocking [25]
+ o Android build fix [26]
+ o timer: restore PRETRANSFER timing [27]
+ o libcurl.m4: Fix quoting arguments of AC_LANG_PROGRAM [28]
+ o appconnect time fixed for non-blocking connect ssl backends [29]
 
 This release includes the following known bugs:
 
@@ -52,7 +59,8 @@ advice from friends like these:
  Martin Storsjo, Yang Tse, Laurent Rabret, Jason Glasgow, Steve Holme,
  Reza Arbab, Jason Liu, Gokhan Sengun, Rob Ward, Dan Fandrich,
  Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
- Alessandro Ghedini
+ Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
+ Sven Wegener
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -82,3 +90,8 @@ References to bug reports and discussions on issues:
  [22] = http://curl.haxx.se/mail/lib-2011-11/0164.html
  [23] = http://curl.haxx.se/mail/lib-2011-11/0067.html
  [24] = http://curl.haxx.se/mail/lib-2011-11/0205.html
+ [25] = http://curl.haxx.se/mail/lib-2011-12/0179.html
+ [26] = http://curl.haxx.se/mail/lib-2011-12/0215.html
+ [27] = http://curl.haxx.se/mail/archive-2011-12/0022.html
+ [28] = http://curl.haxx.se/mail/lib-2011-12/0218.html
+ [29] = http://curl.haxx.se/mail/lib-2011-12/0211.html
