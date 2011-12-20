@@ -134,7 +134,7 @@ static CURLcode ftp_done(struct connectdata *conn,
                          CURLcode, bool premature);
 static CURLcode ftp_connect(struct connectdata *conn, bool *done);
 static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection);
-static CURLcode ftp_nextconnect(struct connectdata *conn);
+static CURLcode ftp_do_more(struct connectdata *conn, bool *completed);
 static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
 static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks);
@@ -173,7 +173,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
-  ftp_nextconnect,                 /* do_more */
+  ftp_do_more,                     /* do_more */
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
@@ -200,7 +200,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
-  ftp_nextconnect,                 /* do_more */
+  ftp_do_more,                     /* do_more */
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
@@ -2356,6 +2356,8 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
 
     if(!connected) {
       infof(data, "Data conn was not available immediately\n");
+      /* as there's not necessarily an immediate action on the control
+         connection now, we halt the state machine */
       state(conn, FTP_STOP);
       conn->bits.wait_data_conn = TRUE;
     }
@@ -3615,22 +3617,33 @@ static CURLcode ftp_range(struct connectdata *conn)
 
 
 /*
- * ftp_nextconnect()
+ * ftp_do_more()
  *
  * This function shall be called when the second FTP (data) connection is
  * connected.
  */
 
-static CURLcode ftp_nextconnect(struct connectdata *conn)
+static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
 {
   struct SessionHandle *data=conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
+  bool connected = FALSE;
 
   /* the ftp struct is inited in ftp_connect() */
   struct FTP *ftp = data->state.proto.ftp;
 
-  DEBUGF(infof(data, "DO-MORE phase starts\n"));
+  /* if the second connection isn't done yet, wait for it */
+  if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
+    result = Curl_is_connected(conn, SECONDARYSOCKET, &connected);
+
+    /* Ready to do more? */
+    if(connected) {
+      DEBUGF(infof(data, "DO-MORE connected phase starts\n"));
+    }
+    else
+      return result;
+  }
 
   if(ftp->transfer <= FTPTRANSFER_INFO) {
     /* a transfer is about to take place, or if not a file name was given
@@ -3692,7 +3705,11 @@ static CURLcode ftp_nextconnect(struct connectdata *conn)
        too! */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
-  DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
+  if(!conn->bits.wait_data_conn) {
+    /* no waiting for the data connection so this is now complete */
+    *complete = TRUE;
+    DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
+  }
 
   return result;
 }
@@ -3974,6 +3991,7 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
   CURLcode retcode = CURLE_OK;
 
   *done = FALSE; /* default to false */
+  conn->bits.wait_data_conn = FALSE; /* default to no such wait */
 
   /*
     Since connections can be re-used between SessionHandles, this might be a
@@ -4343,8 +4361,10 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
   struct FTP *ftp = conn->data->state.proto.ftp;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  if(connected)
-    result = ftp_nextconnect(conn);
+  if(connected) {
+    bool completed;
+    result = ftp_do_more(conn, &completed);
+  }
 
   if(result && (conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD)) {
     /* Failure detected, close the second socket if it was created already */

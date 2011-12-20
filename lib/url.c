@@ -5457,14 +5457,25 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
   return result;
 }
 
-CURLcode Curl_do_more(struct connectdata *conn)
+/*
+ * Curl_do_more() is called during the DO_MORE multi state. It is basically a
+ * second stage DO state which (wrongly) was introduced to support FTP's
+ * second connection.
+ *
+ * TODO: A future libcurl should be able to work away this state.
+ *
+ */
+
+CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
 {
   CURLcode result=CURLE_OK;
 
-  if(conn->handler->do_more)
-    result = conn->handler->do_more(conn);
+  *completed = FALSE;
 
-  if(result == CURLE_OK && conn->bits.wait_data_conn == FALSE)
+  if(conn->handler->do_more)
+    result = conn->handler->do_more(conn, completed);
+
+  if(!result && completed)
     /* do_complete must be called after the protocol-specific DO function */
     do_complete(conn);
 

@@ -1361,40 +1361,31 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_DO_MORE:
-      /* Ready to do more? */
-      easy->result = Curl_is_connected(easy->easy_conn,
-                                       SECONDARYSOCKET,
-                                       &connected);
-      if(connected) {
-        /*
-         * When we are connected, DO MORE and then go DO_DONE
-         */
-        easy->result = Curl_do_more(easy->easy_conn);
+      /*
+       * When we are connected, DO MORE and then go DO_DONE
+       */
+      easy->result = Curl_do_more(easy->easy_conn, &dophase_done);
 
-        /* No need to remove ourselves from the send pipeline here since that
-           is done for us in Curl_done() */
-
-        if(CURLE_OK == easy->result) {
+      /* No need to remove this handle from the send pipeline here since that
+         is done in Curl_done() */
+      if(CURLE_OK == easy->result) {
+        if(dophase_done) {
           multistate(easy, CURLM_STATE_DO_DONE);
           result = CURLM_CALL_MULTI_PERFORM;
         }
-        else {
-          /* failure detected */
-          Curl_posttransfer(data);
-          Curl_done(&easy->easy_conn, easy->result, FALSE);
-          disconnect_conn = TRUE;
-        }
+        else
+          /* stay in DO_MORE */
+          result = CURLM_OK;
+      }
+      else {
+        /* failure detected */
+        Curl_posttransfer(data);
+        Curl_done(&easy->easy_conn, easy->result, FALSE);
+        disconnect_conn = TRUE;
       }
       break;
 
     case CURLM_STATE_DO_DONE:
-
-      if(easy->easy_conn->bits.wait_data_conn == TRUE) {
-        multistate(easy, CURLM_STATE_DO_MORE);
-        result = CURLM_OK;
-        break;
-      }
-
       /* Move ourselves from the send to recv pipeline */
       moveHandleFromSendToRecvPipeline(data, easy->easy_conn);
       /* Check if we can move pending requests to send pipe */
