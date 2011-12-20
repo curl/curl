@@ -156,4 +156,6 @@ struct ftp_conn {
                                 it */
 };
 
+#define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
+
 #endif /* HEADER_CURL_FTP_H */

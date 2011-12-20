@@ -355,6 +355,44 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
 
 }
 
+/*
+ * ftp_timeleft_accept() returns the amount of milliseconds left allowed for
+ * waiting server to connect. If the value is negative, the timeout time has
+ * already elapsed.
+ *
+ * The start time is stored in progress.t_acceptdata - as set with
+ * Curl_pgrsTime(..., TIMER_STARTACCEPT);
+ *
+ */
+static long ftp_timeleft_accept(struct SessionHandle *data)
+{
+  long timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  long other;
+  struct timeval now;
+
+  if(data->set.accepttimeout > 0)
+    timeout_ms = data->set.accepttimeout;
+
+  now = Curl_tvnow();
+
+  /* check if the generic timeout possibly is set shorter */
+  other =  Curl_timeleft(data, &now, FALSE);
+  if(other && (other < timeout_ms))
+    /* note that this also works fine for when other happens to be negative
+       due to it already having elapsed */
+    timeout_ms = other;
+  else {
+    /* subtract elapsed time */
+    timeout_ms -= Curl_tvdiff(now, data->progress.t_acceptdata);
+    if(!timeout_ms)
+      /* avoid returning 0 as that means no timeout! */
+      return -1;
+  }
+
+  return timeout_ms;
+}
+
+
 /***********************************************************************
  *
  * ReceivedServerConnect()
@@ -378,7 +416,7 @@ static CURLcode ReceivedServerConnect(struct connectdata* conn, bool* received)
 
   *received = FALSE;
 
-  timeout_ms = Curl_timeleft_accept(data);
+  timeout_ms = ftp_timeleft_accept(data);
   infof(data, "Checking for server connect\n");
   if(timeout_ms < 0) {
     /* if a timeout was already reached, bail out */
@@ -502,7 +540,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
   Curl_pgrsTime(data, TIMER_STARTACCEPT);
 
   for(;;) {
-    timeout_ms = Curl_timeleft_accept(data);
+    timeout_ms = ftp_timeleft_accept(data);
     if(timeout_ms < 0) {
       /* if a timeout was already reached, bail out */
       failf(data, "Accept timeout occurred while waiting server connect");

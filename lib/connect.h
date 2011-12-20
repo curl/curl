@@ -43,12 +43,7 @@ long Curl_timeleft(struct SessionHandle *data,
                    struct timeval *nowp,
                    bool duringconnect);
 
-/* function that returns how much time there's left to wait for incoming
-   server connect */
-long Curl_timeleft_accept(struct SessionHandle *data);
-
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
-#define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
 
 /*
  * Used to extract socket and connectdata struct for the most recent
