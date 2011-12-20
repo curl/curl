@@ -13,8 +13,8 @@ This release includes the following changes:
  o CURLOPT_DNS_SERVERS: set name servers if possible [23]
  o Add support for using nettle instead of gcrypt as gnutls backend [22]
  o CURLOPT_INTERFACE: avoid resolving interfaces names with magic prefixes [21]
- o Added CURLOPT_ACCEPTTIMEOUT_MS
- o configure: add symbols versioning option --enable-versioned-symbols
+ o Added CURLOPT_ACCEPTTIMEOUT_MS [30]
+ o configure: add symbols versioning option --enable-versioned-symbols [31]
 
 This release includes the following bugfixes:
 
@@ -95,3 +95,5 @@ References to bug reports and discussions on issues:
  [27] = http://curl.haxx.se/mail/archive-2011-12/0022.html
  [28] = http://curl.haxx.se/mail/lib-2011-12/0218.html
  [29] = http://curl.haxx.se/mail/lib-2011-12/0211.html
+ [30] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTACCEPTTIMOUTMS
+ [31] = http://curl.haxx.se/mail/lib-2011-12/0133.html
