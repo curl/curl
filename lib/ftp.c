@@ -844,7 +844,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
   }
 
   socks[0] = conn->sock[SECONDARYSOCKET];
-  if(conn->bits.wait_data_conn) {
+  if(ftpc->wait_data_conn) {
     socks[1] = conn->sock[FIRSTSOCKET];
     return GETSOCK_READSOCK(0) | GETSOCK_READSOCK(1);
   }
@@ -2355,11 +2355,12 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
       return result;
 
     if(!connected) {
+      struct ftp_conn *ftpc = &conn->proto.ftpc;
       infof(data, "Data conn was not available immediately\n");
       /* as there's not necessarily an immediate action on the control
          connection now, we halt the state machine */
       state(conn, FTP_STOP);
-      conn->bits.wait_data_conn = TRUE;
+      ftpc->wait_data_conn = TRUE;
     }
 
     return CURLE_OK;
@@ -2468,9 +2469,10 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
         return result;
 
       if(!connected) {
+        struct ftp_conn *ftpc = &conn->proto.ftpc;
         infof(data, "Data conn was not available immediately\n");
         state(conn, FTP_STOP);
-        conn->bits.wait_data_conn = TRUE;
+        ftpc->wait_data_conn = TRUE;
       }
     }
     else
@@ -3649,7 +3651,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
     /* a transfer is about to take place, or if not a file name was given
        so we'll do a SIZE on it later and then we need the right TYPE first */
 
-    if(conn->bits.wait_data_conn == TRUE) {
+    if(ftpc->wait_data_conn == TRUE) {
       bool serv_conned;
 
       result = ReceivedServerConnect(conn, &serv_conned);
@@ -3659,7 +3661,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
       if(serv_conned) {
         /* It looks data connection is established */
         result = AcceptServerConnect(conn);
-        conn->bits.wait_data_conn = FALSE;
+        ftpc->wait_data_conn = FALSE;
         if(result == CURLE_OK)
           result = InitiateTransfer(conn);
       }
@@ -3705,7 +3707,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
        too! */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
-  if(!conn->bits.wait_data_conn) {
+  if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
     *complete = TRUE;
     DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
@@ -3989,9 +3991,10 @@ static CURLcode wc_statemach(struct connectdata *conn)
 static CURLcode ftp_do(struct connectdata *conn, bool *done)
 {
   CURLcode retcode = CURLE_OK;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   *done = FALSE; /* default to false */
-  conn->bits.wait_data_conn = FALSE; /* default to no such wait */
+  ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
   /*
     Since connections can be re-used between SessionHandles, this might be a
