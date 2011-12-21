@@ -216,7 +216,7 @@ my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
 my $has_axtls;   # built with axTLS
 
-my $has_shared;  # built shared
+my $has_shared = "unknown";  # built shared
 
 my $ssllib;      # name of the lib we use (for human presentation)
 my $has_crypto;  # set if libcurl is built with cryptographic support
@@ -254,7 +254,7 @@ my $testnumcheck; # test number, set in singletest sub.
 my %oldenv;
 
 #######################################################################
-# variables the command line options may set
+# variables that command line options may set
 #
 
 my $short;
