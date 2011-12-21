@@ -21,9 +21,12 @@
 #
 ###########################################################################
 
+#--------------------------------------------------------------------------
+# die prints argument string to stdout and exits this shell script.
+#
 die(){
-	echo "$@"
-	exit
+  echo "buildconf: $@"
+  exit 1
 }
 
 #--------------------------------------------------------------------------
@@ -33,11 +36,8 @@ die(){
 findtool(){
   file="$1"
 
-  if { echo $file | grep "/" >/dev/null 2>&1; } then
-    # we only check for the explicit file name if the file is given
-    # including a slash. Use ./ for current dir. Previously this would
-    # otherwise always cause findtool to search the local dir first, which
-    # is wrong.
+  if { echo "$file" | grep "/" >/dev/null 2>&1; } then
+    # when file is given with a path check it first
     if test -f "$file"; then
       echo "$file"
       return
@@ -82,7 +82,8 @@ removethis(){
 if test ! -f configure.ac ||
   test ! -f src/tool_main.c ||
   test ! -f lib/urldata.h ||
-  test ! -f include/curl/curl.h; then
+  test ! -f include/curl/curl.h ||
+  test ! -f m4/curl-functions.m4; then
   echo "Can not run buildconf from outside of curl's source subdirectory!"
   echo "Change to the subdirectory where buildconf is found, and try again."
   exit 1
@@ -188,27 +189,24 @@ else
 fi
 
 #--------------------------------------------------------------------------
-# libtool check
+# GNU libtool preliminary check
 #
-LIBTOOL_WANTED_MAJOR=1
-LIBTOOL_WANTED_MINOR=4
-LIBTOOL_WANTED_PATCH=2
-LIBTOOL_WANTED_VERSION=1.4.2
+want_lt_major=1
+want_lt_minor=4
+want_lt_patch=2
+want_lt_version=1.4.2
 
-# this approach that tries 'glibtool' first is some kind of work-around for
-# some BSD-systems I believe that use to provide the GNU libtool named
-# glibtool, with 'libtool' being something completely different.
+# This approach that tries 'glibtool' first is intended for systems that
+# have GNU libtool named as 'glibtool' and libtool not being GNU's.
+
 libtool=`findtool glibtool 2>/dev/null`
 if test ! -x "$libtool"; then
   libtool=`findtool ${LIBTOOL:-libtool}`
 fi
-
-if test -z "$LIBTOOLIZE"; then
-  # set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
-  # $libtool is already the full path
-  libtoolize="${libtool}ize"
-else
-  libtoolize=`findtool $LIBTOOLIZE`
+if test -z "$libtool"; then
+  echo "buildconf: libtool not found."
+  echo "            You need GNU libtool $want_lt_version or newer installed."
+  exit 1
 fi
 
 lt_pver=`$libtool --version 2>/dev/null|head -n 1`
@@ -216,42 +214,53 @@ lt_qver=`echo $lt_pver|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g"`
 lt_version=`echo $lt_qver|sed -e "s/[- ].*//" -e "s/\([a-z]*\)$//"`
 if test -z "$lt_version"; then
   echo "buildconf: libtool not found."
-  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  echo "            You need GNU libtool $want_lt_version or newer installed."
   exit 1
 fi
 old_IFS=$IFS; IFS='.'; set $lt_version; IFS=$old_IFS
 lt_major=$1
 lt_minor=$2
 lt_patch=$3
-lt_status="good"
 
-if test "$lt_major" = "$LIBTOOL_WANTED_MAJOR"; then
-   if test "$lt_minor" -lt "$LIBTOOL_WANTED_MINOR"; then
-      lt_status="bad"
-   elif test -n "$LIBTOOL_WANTED_PATCH"; then
-       if test "$lt_minor" -gt "$LIBTOOL_WANTED_MINOR"; then
-         lt_status="good"
-       elif test -n "$lt_patch"; then
-          if test "$lt_patch" -lt "$LIBTOOL_WANTED_PATCH"; then
-             lt_status="bad"
-          fi
-       else
-          lt_status="bad"
-       fi
-   fi
+if test -z "$lt_major"; then
+  lt_status="bad"
+elif test "$lt_major" -gt "$want_lt_major"; then
+  lt_status="good"
+elif test "$lt_major" -lt "$want_lt_major"; then
+  lt_status="bad"
+elif test -z "$lt_minor"; then
+  lt_status="bad"
+elif test "$lt_minor" -gt "$want_lt_minor"; then
+  lt_status="good"
+elif test "$lt_minor" -lt "$want_lt_minor"; then
+  lt_status="bad"
+elif test -z "$lt_patch"; then
+  lt_status="bad"
+elif test "$lt_patch" -gt "$want_lt_patch"; then
+  lt_status="good"
+elif test "$lt_patch" -lt "$want_lt_patch"; then
+  lt_status="bad"
+else
+  lt_status="good"
 fi
-if test $lt_status != "good"; then
+if test "$lt_status" != "good"; then
   echo "buildconf: libtool version $lt_version found."
-  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  echo "            You need GNU libtool $want_lt_version or newer installed."
   exit 1
 fi
 
-echo "buildconf: libtool version $lt_version (ok)"
-
-if test -f "$libtoolize"; then
-  echo "buildconf: libtoolize found"
+#--------------------------------------------------------------------------
+# GNU libtoolize check
+#
+if test -z "$LIBTOOLIZE"; then
+  # use (g)libtoolize from same location as (g)libtool
+  libtoolize="${libtool}ize"
 else
-  echo "buildconf: libtoolize not found. Weird libtool installation!"
+  libtoolize=`findtool $LIBTOOLIZE`
+fi
+if test ! -f "$libtoolize"; then
+  echo "buildconf: libtoolize not found."
+  echo "            You need GNU libtoolize $want_lt_version or newer installed."
   exit 1
 fi
 
@@ -331,13 +340,8 @@ done
 # run the correct scripts now
 #
 
-if test ! -f m4/curl-functions.m4; then
-  echo "buildconf: cURL m4 macros not found"
-  exit 1
-fi
-
 echo "buildconf: running libtoolize"
-$libtoolize --copy --automake --force || die "The libtoolize command failed"
+${libtoolize} --copy --automake --force || die "libtoolize command failed"
 
 # When using libtool 1.5.X (X < 26) we copy libtool.m4 to our local m4
 # subdirectory and this local copy is patched to fix some warnings that
@@ -370,19 +374,19 @@ if test -f m4/libtool.m4; then
 fi
 
 echo "buildconf: running aclocal"
-${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "The aclocal command line failed"
+${ACLOCAL:-aclocal} -I m4 $ACLOCAL_FLAGS || die "aclocal command failed"
 
 echo "buildconf: converting all mv to mv -f in local aclocal.m4"
 $PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
 
 echo "buildconf: running autoheader"
-${AUTOHEADER:-autoheader} || die "The autoheader command failed"
+${AUTOHEADER:-autoheader} || die "autoheader command failed"
 
 echo "buildconf: cp lib/curl_config.h.in src/curl_config.h.in"
 cp lib/curl_config.h.in src/curl_config.h.in
 
 echo "buildconf: running autoconf"
-${AUTOCONF:-autoconf}     || die "The autoconf command failed"
+${AUTOCONF:-autoconf} || die "autoconf command failed"
 
 if test -d ares; then
   cd ares
@@ -392,14 +396,15 @@ if test -d ares; then
 fi
 
 echo "buildconf: running automake"
-${AUTOMAKE:-automake} -a -c  || die "The automake command failed"
+${AUTOMAKE:-automake} --add-missing --copy || die "automake command failed"
 
 #--------------------------------------------------------------------------
+# GNU libtool complementary check
+#
 # Depending on the libtool and automake versions being used, config.guess
 # might not be installed in the subdirectory until automake has finished.
 # So we can not attempt to use it until this very last buildconf stage.
 #
-
 if test ! -f ./config.guess; then
   echo "buildconf: config.guess not found"
 else
@@ -443,7 +448,7 @@ else
     if test "$lt_status" != "good"; then
       need_lt_version="$need_lt_major.$need_lt_minor.$need_lt_patch"
       echo "buildconf: libtool version $lt_version found."
-      echo "            $buildhost requires libtool $need_lt_version or newer installed."
+      echo "            $buildhost requires GNU libtool $need_lt_version or newer installed."
       rm -f configure
       exit 1
     fi
@@ -453,6 +458,5 @@ fi
 #--------------------------------------------------------------------------
 # Finished successfully.
 #
-
 echo "buildconf: OK"
 exit 0
