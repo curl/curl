@@ -17,6 +17,7 @@
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
  1.6 progress callback without doubles
+ 1.7 Happy Eyeball dual stack connect
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -146,6 +147,19 @@
  another progress callback option that take precedence over the old one and
  have both co-exist for a forseeable time until we can remove the double-using
  one.
+
+1.7 Happy Eyeball dual stack connect
+
+ In order to make alternative technologies not suffer when transitioning, like
+ when introducing IPv6 as an alternative to IPv4 and there are more than one
+ option existing simultaneously there are reasons to reconsider internal
+ choices.
+
+ To make libcurl do blazing fast IPv6 in a dual-stack configuration, this needs
+ to be addressed:
+
+    http://tools.ietf.org/html/draft-ietf-v6ops-happy-eyeballs-07
+
 
 2. libcurl - multi interface
 
