@@ -1233,7 +1233,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               RETRY_LAST /* not used */
             } retry = RETRY_NO;
             long response;
-            if(CURLE_OPERATION_TIMEDOUT == res)
+            if((CURLE_OPERATION_TIMEDOUT == res) || 
+               (CURLE_COULDNT_RESOLVE_HOST == res) ||
+               (CURLE_COULDNT_RESOLVE_PROXY == res) ||
+               (CURLE_FTP_ACCEPT_TIMEOUT == res))
               /* retry timeout always */
               retry = RETRY_TIMEOUT;
             else if((CURLE_OK == res) ||
