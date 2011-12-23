@@ -1244,7 +1244,6 @@ static CURLcode smtp_connect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct pingpong *pp = &smtpc->pp;
   const char *path = conn->data->state.path;
-  int len;
   char localhost[HOSTNAME_MAX + 1];
 
   *done = FALSE; /* default to not done yet */
@@ -1316,9 +1315,9 @@ static CURLcode smtp_connect(struct connectdata *conn,
   }
 
   /* url decode the path and use it as domain with EHLO */
-  smtpc->domain = curl_easy_unescape(conn->data, path, 0, &len);
-  if(!smtpc->domain)
-    return CURLE_OUT_OF_MEMORY;
+  result = Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
+  if(result)
+    return result;
 
   /* When we connect, we start in the state where we await the server greeting
    */

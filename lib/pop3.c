@@ -914,11 +914,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   const char *path = data->state.path;
 
   /* url decode the path and use this mailbox */
-  pop3c->mailbox = curl_easy_unescape(data, path, 0, NULL);
-  if(!pop3c->mailbox)
-    return CURLE_OUT_OF_MEMORY;
-
-  return CURLE_OK;
+  return Curl_urldecode(data, path, 0, &pop3c->mailbox, NULL, TRUE);
 }
 
 /* call this when the DO phase has completed */
