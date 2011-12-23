@@ -5466,7 +5466,7 @@ CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
   if(conn->handler->do_more)
     result = conn->handler->do_more(conn, completed);
 
-  if(!result && completed)
+  if(!result && *completed)
     /* do_complete must be called after the protocol-specific DO function */
     do_complete(conn);
 
