@@ -3703,8 +3703,6 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
         if(result == CURLE_OK)
           result = InitiateTransfer(conn);
       }
-
-      return result;
     }
     else if(data->set.upload) {
       result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_STOR_TYPE);
