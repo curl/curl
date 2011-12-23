@@ -200,4 +200,9 @@ extern sigjmp_buf curl_jmpenv;
  */
 CURLcode Curl_set_dns_servers(struct SessionHandle *data, char *servers);
 
+/*
+ * Destroy the hostcache of this handle.
+ */
+void Curl_hostcache_destroy(struct SessionHandle *data);
+
 #endif /* HEADER_CURL_HOSTIP_H */

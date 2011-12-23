@@ -721,4 +721,25 @@ struct curl_hash *Curl_mk_dnscache(void)
   return Curl_hash_alloc(7, Curl_hash_str, Curl_str_key_compare, freednsentry);
 }
 
+static int hostcache_inuse(void *data, void *hc)
+{
+  struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
+  if(c->inuse == 1)
+    Curl_resolv_unlock(data, c);
+
+  return 1; /* free all entries */
+}
+
+void Curl_hostcache_destroy(struct SessionHandle *data)
+{
+  /* Entries added to the hostcache with the CURLOPT_RESOLVE function are
+   * still present in the cache with the inuse counter set to 1. Detect them
+   * and cleanup!
+   */
+  Curl_hash_clean_with_criterium(data->dns.hostcache, data, hostcache_inuse);
+
+  Curl_hash_destroy(data->dns.hostcache);
+  data->dns.hostcachetype = HCACHE_NONE;
+  data->dns.hostcache = NULL;
+}

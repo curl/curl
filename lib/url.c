@@ -467,11 +467,8 @@ CURLcode Curl_close(struct SessionHandle *data)
     return CURLE_OK;
   }
 
-  if(data->dns.hostcachetype == HCACHE_PRIVATE) {
-    Curl_hash_destroy(data->dns.hostcache);
-    data->dns.hostcachetype = HCACHE_NONE;
-    data->dns.hostcache = NULL;
-  }
+  if(data->dns.hostcachetype == HCACHE_PRIVATE)
+    Curl_hostcache_destroy(data);
 
   if(data->state.rangestringalloc)
     free(data->state.range);
@@ -2131,7 +2128,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       if(data->share->hostcache) {
         /* use shared host cache, first free the private one if any */
         if(data->dns.hostcachetype == HCACHE_PRIVATE)
-          Curl_hash_destroy(data->dns.hostcache);
+          Curl_hostcache_destroy(data);
 
         data->dns.hostcache = data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
@@ -2625,12 +2622,6 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     Curl_resolv_unlock(data, conn->dns_entry);
     conn->dns_entry = NULL;
   }
-
-#if defined(DEBUGBUILD) && defined(AGGRESIVE_TEST)
-  /* scan for DNS cache entries still marked as in use */
-  Curl_hash_apply(data->hostcache,
-                  NULL, Curl_scan_cache_used);
-#endif
 
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
