@@ -249,6 +249,8 @@ if test "$lt_status" != "good"; then
   exit 1
 fi
 
+echo "buildconf: libtool version $lt_version (ok)"
+
 #--------------------------------------------------------------------------
 # GNU libtoolize check
 #
