@@ -2364,7 +2364,7 @@ Curl_setup_transfer(
          (data->state.proto.http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
-        k->start100 = k->start;
+        k->start100 = Curl_tvnow();
 
         /* set a timeout for the multi interface */
         Curl_expire(data, CURL_TIMEOUT_EXPECT_100);

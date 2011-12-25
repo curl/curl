@@ -47,6 +47,7 @@ This release includes the following bugfixes:
  o timer: restore PRETRANSFER timing [27]
  o libcurl.m4: Fix quoting arguments of AC_LANG_PROGRAM [28]
  o appconnect time fixed for non-blocking connect ssl backends [29]
+ o do not include SSL handshake into time spent waiting for 100-continue [32]
 
 This release includes the following known bugs:
 
@@ -97,3 +98,4 @@ References to bug reports and discussions on issues:
  [29] = http://curl.haxx.se/mail/lib-2011-12/0211.html
  [30] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTACCEPTTIMOUTMS
  [31] = http://curl.haxx.se/mail/lib-2011-12/0133.html
+ [32] = https://bugzilla.redhat.com/767490
