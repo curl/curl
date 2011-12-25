@@ -1428,8 +1428,6 @@ static CURLcode loadhostpairs(struct SessionHandle *data)
         infof(data, "Resolve %s found illegal!\n", hostp->data);
         continue;
       }
-      infof(data, "Added %s:%d:%s to DNS cache\n",
-            hostname, port, address);
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -1444,6 +1442,8 @@ static CURLcode loadhostpairs(struct SessionHandle *data)
         Curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
       }
+      infof(data, "Added %s:%d:%s to DNS cache\n",
+            hostname, port, address);
     }
   }
   data->change.resolve = NULL; /* dealt with now */
