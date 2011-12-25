@@ -264,6 +264,9 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
   struct curl_llist *list;
   int i;
 
+  if(!h)
+    return;
+
   for(i = 0; i < h->slots; ++i) {
     list = h->table[i];
     le = list->head; /* get first list entry */
