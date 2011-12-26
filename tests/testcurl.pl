@@ -431,12 +431,13 @@ if ($git) {
     unlink "autom4te.cache";
 
     # generate the build files
-#    logit "invoke buildconf, but filter off aclocal underquoted definition warnings";
     logit "invoke buildconf";
     open(F, "./buildconf 2>&1 |") or die;
     open(LOG, ">$buildlog") or die;
     while (<F>) {
-#      next if /warning: underquoted definition of/;
+      # ignore messages pertaining to third party m4 files we don't care
+      next if /aclocal\/gtk.m4/;
+      next if /aclocal\/gtkextra.m4/;
       print;
       print LOG;
     }
