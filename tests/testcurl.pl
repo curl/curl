@@ -338,6 +338,7 @@ logit "CFLAGS = ".$ENV{CFLAGS};
 logit "LDFLAGS = ".$ENV{LDFLAGS};
 logit "CC = ".$ENV{CC};
 logit "MAKEFLAGS = ".$ENV{MAKEFLAGS};
+logit "ACLOCAL_FLAGS = ".$ENV{ACLOCAL_FLAGS};
 logit "PKG_CONFIG_PATH = ".$ENV{PKG_CONFIG_PATH};
 logit "target = ".$targetos;
 logit "version = $version"; # script version
