@@ -1885,9 +1885,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       Curl_safefree(sshc->readdir_linkPath);
       sshc->readdir_linkPath = NULL;
 
-      new_readdir_line = realloc(sshc->readdir_line,
-                                 sshc->readdir_totalLen + 4 +
-                                 sshc->readdir_len);
+      /* get room for the filename and extra output */
+      sshc->readdir_totalLen += 4 + sshc->readdir_len:
+      new_readdir_line = realloc(sshc->readdir_line, sshc->readdir_totalLen);
       if(!new_readdir_line) {
         Curl_safefree(sshc->readdir_line);
         sshc->readdir_line = NULL;
