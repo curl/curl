@@ -112,7 +112,7 @@
 #endif
 
 #ifdef USE_CYASSL
-#include <openssl/ssl.h>
+#include <cyassl/openssl/ssl.h>
 #endif
 
 #ifdef USE_NSS

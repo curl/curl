@@ -404,14 +404,10 @@ size_t Curl_cyassl_version(char *buffer, size_t size)
 
 int Curl_cyassl_init(void)
 {
-#if (LIBCYASSL_VERSION_HEX >= 0x02000000)
-  if(SSL_library_init() != SSL_SUCCESS)
-    return 0;
-#else
-  InitCyaSSL();
-#endif
+  if(CyaSSL_Init() == 0)
+    return 1;
 
-  return 1;
+  return -1;
 }
 
 

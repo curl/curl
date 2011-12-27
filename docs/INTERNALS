@@ -39,7 +39,7 @@ Portability
  libssh2      0.16
  c-ares       1.6.0
  libidn       0.4.1
- cyassl       1.4.0
+ cyassl       2.0.0
  openldap     2.0
  MIT krb5 lib 1.2.4
  qsossl       V5R2M0

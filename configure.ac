@@ -1957,7 +1957,7 @@ OPT_CYASSL=no
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 AC_ARG_WITH(cyassl,dnl
-AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: /usr/local/cyassl)])
+AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
   OPT_CYASSL=$withval)
 
@@ -1970,14 +1970,9 @@ if test "$OPENSSL_ENABLED" != "1"; then
     fi
 
     if test -z "$OPT_CYASSL" ; then
-      dnl check for lib in default first
+      dnl check for lib in system default first
 
-      trycyassldir="/usr/local/cyassl"
-
-      LDFLAGS="$LDFLAGS -L$trycyassldir/lib"
-      CPPFLAGS="$CPPFLAGS -I$trycyassldir/include"
-
-      AC_CHECK_LIB(cyassl, InitCyaSSL,
+      AC_CHECK_LIB(cyassl, CyaSSL_Init,
       dnl libcyassl found, set the variable
        [
          AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
@@ -1999,7 +1994,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(cyassl, InitCyaSSL,
+      AC_CHECK_LIB(cyassl, CyaSSL_Init,
        [
        AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
        AC_SUBST(USE_CYASSL, [1])
