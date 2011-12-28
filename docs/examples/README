@@ -63,6 +63,8 @@ multi-single.c - a multi-interface app getting a single file
 multithread.c  - an example using multi-treading transferring multiple files
 opensslthreadlock.c - show how to do locking when using OpenSSL multi-threaded
 persistant.c   - request two URLs with a persistent connection
+pop3s.c        - POP3S transfer
+pop3slist.c    - POP3S LIST
 post-callback.c - send a HTTP POST using a callback
 postit2.c      - send a HTTP multipart formpost
 sampleconv.c   - showing how a program on a non-ASCII platform would invoke
