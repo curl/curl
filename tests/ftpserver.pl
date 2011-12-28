@@ -116,6 +116,8 @@ local *SFWRITE;   # used to write to primary connection
 local *DREAD;     # used to read from secondary connection
 local *DWRITE;    # used to write to secondary connection
 
+my $sockfilt_timeout = 5;  # default timeout for sockfilter eXsysreads
+
 #**********************************************************************
 # global vars which depend on server protocol selection
 #
@@ -220,6 +222,141 @@ sub ftpmsg {
   # better on windows/cygwin
 }
 
+#**********************************************************************
+# eXsysread is a wrapper around perl's sysread() function. This will
+# repeat the call to sysread() until it has actually read the complete
+# number of requested bytes or an unrecoverable condition occurs.
+# On success returns a positive value, the number of bytes requested.
+# On failure or timeout returns zero.
+#
+sub eXsysread {
+    my $FH      = shift;
+    my $scalar  = shift;
+    my $nbytes  = shift;
+    my $timeout = shift; # A zero timeout disables eXsysread() time limit
+    #
+    my $time_limited = 0;
+    my $timeout_rest = 0;
+    my $start_time = 0;
+    my $nread  = 0;
+    my $rc;
+
+    $$scalar = "";
+
+    if((not defined $nbytes) || ($nbytes < 1)) {
+        logmsg "Error: eXsysread() failure: " .
+               "length argument must be positive\n";
+        return 0;
+    }
+    if((not defined $timeout) || ($timeout < 0)) {
+        logmsg "Error: eXsysread() failure: " .
+               "timeout argument must be zero or positive\n";
+        return 0;
+    }
+    if($timeout > 0) {
+        # caller sets eXsysread() time limit
+        $time_limited = 1;
+        $timeout_rest = $timeout;
+        $start_time = int(time());
+    }
+
+    while($nread < $nbytes) {
+        if($time_limited) {
+            eval {
+                local $SIG{ALRM} = sub { die "alarm\n"; };
+                alarm $timeout_rest;
+                $rc = sysread($FH, $$scalar, $nbytes - $nread, $nread);
+                alarm 0;
+            };
+            $timeout_rest = $timeout - (int(time()) - $start_time);
+            if($timeout_rest < 1) {
+                logmsg "Error: eXsysread() failure: timed out\n";
+                return 0;
+            }
+        }
+        else {
+            $rc = sysread($FH, $$scalar, $nbytes - $nread, $nread);
+        }
+        if($got_exit_signal) {
+            logmsg "Error: eXsysread() failure: signalled to die\n";
+            return 0;
+        }
+        if(not defined $rc) {
+            if($!{EINTR}) {
+                logmsg "Warning: retrying sysread() interrupted system call\n";
+                next;
+            }
+            if($!{EAGAIN}) {
+                logmsg "Warning: retrying sysread() due to EAGAIN\n";
+                next;
+            }
+            if($!{EWOULDBLOCK}) {
+                logmsg "Warning: retrying sysread() due to EWOULDBLOCK\n";
+                next;
+            }
+            logmsg "Error: sysread() failure: $!\n";
+            return 0;
+        }
+        if($rc < 0) {
+            logmsg "Error: sysread() failure: returned negative value $rc\n";
+            return 0;
+        }
+        if($rc == 0) {
+            logmsg "Error: sysread() failure: read zero bytes\n";
+            return 0;
+        }
+        $nread += $rc;
+    }
+    return $nread;
+}
+
+#**********************************************************************
+# read_mainsockf attempts to read the given amount of output from the
+# sockfilter which is in use for the main or primary connection. This
+# reads untranslated sockfilt lingo which may hold data read from the
+# main or primary socket. On success returns 1, otherwise zero.
+#
+sub read_mainsockf {
+    my $scalar  = shift;
+    my $nbytes  = shift;
+    my $timeout = shift; # Optional argument, if zero blocks indefinitively
+    my $FH = \*SFREAD;
+
+    if(not defined $timeout) {
+        $timeout = $sockfilt_timeout + ($nbytes >> 12);
+    }
+    if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
+        my ($fcaller, $lcaller) = (caller)[1,2];
+        logmsg "Error: read_mainsockf() failure at $fcaller " .
+               "line $lcaller. Due to eXsysread() failure\n";
+        return 0;
+    }
+    return 1;
+}
+
+#**********************************************************************
+# read_datasockf attempts to read the given amount of output from the
+# sockfilter which is in use for the data or secondary connection. This
+# reads untranslated sockfilt lingo which may hold data read from the
+# data or secondary socket. On success returns 1, otherwise zero.
+#
+sub read_datasockf {
+    my $scalar = shift;
+    my $nbytes = shift;
+    my $timeout = shift; # Optional argument, if zero blocks indefinitively
+    my $FH = \*DREAD;
+
+    if(not defined $timeout) {
+        $timeout = $sockfilt_timeout + ($nbytes >> 12);
+    }
+    if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
+        my ($fcaller, $lcaller) = (caller)[1,2];
+        logmsg "Error: read_datasockf() failure at $fcaller " .
+               "line $lcaller. Due to eXsysread() failure\n";
+        return 0;
+    }
+    return 1;
+}
 
 sub sysread_or_die {
     my $FH     = shift;
@@ -566,7 +703,7 @@ sub DATA_smtp {
                 $size = hex($1);
             }
 
-            sysread \*SFREAD, $line, $size;
+            read_mainsockf(\$line, $size);
 
             $ulsize += $size;
             print FILE $line if(!$nosave);
@@ -1141,7 +1278,7 @@ sub STOR_ftp {
                 $size = hex($1);
             }
 
-            sysread DREAD, $line, $size;
+            read_datasockf(\$line, $size);
 
             #print STDERR "  GOT: $size bytes\n";
 
@@ -1242,7 +1379,7 @@ sub PASV_ftp {
     }
 
     # READ the response data
-    sysread_or_die(\*DREAD, \$i, $size);
+    read_datasockf(\$i, $size);
 
     # The data is in the format
     # IPvX/NNN
@@ -1816,38 +1953,38 @@ while(1) {
         }
 
         # data
-        sysread SFREAD, $_, $size;
+        read_mainsockf(\$input, $size);
 
-        ftpmsg $_;
+        ftpmsg $input;
 
         # Remove trailing CRLF.
-        s/[\n\r]+$//;
+        $input =~ s/[\n\r]+$//;
 
         my $FTPCMD;
         my $FTPARG;
-        my $full=$_;
+        my $full = $input;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            unless (m/^([^ ]+) ([^ ]+) (.*)/ ||
-                    m/^([^ ]+) ([^ ]+)/) {
-                sendcontrol "$1 '$_': command not understood.\r\n";
+            unless(($input =~ /^([^ ]+) ([^ ]+) (.*)/) ||
+                   ($input =~ /^([^ ]+) ([^ ]+)/)) {
+                sendcontrol "$1 '$input': command not understood.\r\n";
                 last;
             }
             $cmdid=$1; # set the global variable
             $FTPCMD=$2;
             $FTPARG=$3;
         }
-        elsif (m/^([A-Z]{3,4})(\s(.*))?$/i) {
+        elsif($input =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
             $FTPARG=$3;
         }
-        elsif($proto eq "smtp" && m/^[A-Z0-9+\/]{0,512}={0,2}$/i) {
+        elsif(($proto eq "smtp") && ($input =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
             # SMTP long "commands" are base64 authentication data.
-            $FTPCMD=$_;
+            $FTPCMD=$input;
             $FTPARG="";
         }
         else {
-            sendcontrol "500 '$_': command not understood.\r\n";
+            sendcontrol "500 '$input': command not understood.\r\n";
             last;
         }
 
