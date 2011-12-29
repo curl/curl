@@ -1926,6 +1926,8 @@ while(1) {
         }
     }
 
+    my $full = "";
+
     while(1) {
         my $i;
 
@@ -1957,34 +1959,38 @@ while(1) {
 
         ftpmsg $input;
 
+        $full .= $input;
+
+        # Loop until command completion
+        next unless($full =~ /\r\n$/);
+
         # Remove trailing CRLF.
-        $input =~ s/[\n\r]+$//;
+        $full =~ s/[\n\r]+$//;
 
         my $FTPCMD;
         my $FTPARG;
-        my $full = $input;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            unless(($input =~ /^([^ ]+) ([^ ]+) (.*)/) ||
-                   ($input =~ /^([^ ]+) ([^ ]+)/)) {
-                sendcontrol "$1 '$input': command not understood.\r\n";
+            unless(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
+                   ($full =~ /^([^ ]+) ([^ ]+)/)) {
+                sendcontrol "$1 '$full': command not understood.\r\n";
                 last;
             }
             $cmdid=$1; # set the global variable
             $FTPCMD=$2;
             $FTPARG=$3;
         }
-        elsif($input =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
+        elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
             $FTPARG=$3;
         }
-        elsif(($proto eq "smtp") && ($input =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
+        elsif(($proto eq "smtp") && ($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
             # SMTP long "commands" are base64 authentication data.
-            $FTPCMD=$input;
+            $FTPCMD=$full;
             $FTPARG="";
         }
         else {
-            sendcontrol "500 '$input': command not understood.\r\n";
+            sendcontrol "500 '$full': command not understood.\r\n";
             last;
         }
 
@@ -1993,6 +1999,8 @@ while(1) {
         if($verbose) {
             print STDERR "IN: $full\n";
         }
+
+        $full = "";
 
         my $delay = $delayreply{$FTPCMD};
         if($delay) {
