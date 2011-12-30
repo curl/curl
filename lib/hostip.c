@@ -201,14 +201,23 @@ Curl_printable_address(const Curl_addrinfo *ai, char *buf, size_t bufsize)
 }
 
 /*
- * Return a hostcache id string for the providing host + port, to be used by
+ * Return a hostcache id string for the provided host + port, to be used by
  * the DNS caching.
  */
 static char *
-create_hostcache_id(const char *server, int port)
+create_hostcache_id(const char *name, int port)
 {
   /* create and return the new allocated entry */
-  return aprintf("%s:%d", server, port);
+  char *id = aprintf("%s:%d", name, port);
+  char *ptr = id;
+  if(ptr) {
+    /* lower case the name part */
+    while(*ptr != ':') {
+      *ptr = (char)TOLOWER(*ptr);
+      ptr++;
+    }
+  }
+  return id;
 }
 
 struct hostcache_prune_data {
