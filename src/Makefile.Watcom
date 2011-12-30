@@ -184,8 +184,8 @@ $(LINK_ARG): $(__MAKEFILES__)
 !ifdef %use_rtmp
 	@%append $^@ library $(LIBRTMP_ROOT)$(DS)librtmp$(DS)librtmp.lib, winmm.lib
 !endif
-!ifdef %use_ssh2                                                                                                                    
-	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib                                                                      
+!ifdef %use_ssh2
+	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib
 !endif
 !ifdef %use_ssl
 	@%append $^@ library $(OPENSSL_ROOT)$(DS)out32$(DS)libeay32.lib, $(OPENSSL_ROOT)$(DS)out32$(DS)ssleay32.lib

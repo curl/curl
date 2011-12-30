@@ -110,7 +110,7 @@ for my $e (sort @syms) {
     # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
     # last entry in many enum series.
     #
-    
+
     if($e =~ /(OBSOLETE|^CURL_EXTERN|_LAST\z|_LASTENTRY\z)/) {
         $ignored++;
         next;
@@ -159,7 +159,6 @@ if($summary) {
     scalar(@syms)- $ignored;
     printf "%d symbols are listed in symbols-in-versions\n (out of which %d are listed as removed)\n", scalar(keys %doc), scalar(keys %rem);
     printf "%d symbols in symbols-in-versions should match the ones in headers\n", scalar(keys %doc) - scalar(keys %rem);
-    
 }
 
 if($misses) {

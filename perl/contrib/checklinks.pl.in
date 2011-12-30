@@ -221,7 +221,7 @@ sub GetLinks {
     while($in =~ /[^<]*(<[^>]+>)/g ) {
         # we have a tag in $1
         $tag = $1;
-    
+
         if($tag =~ /^<!--/) {
             # this is a comment tag, ignore it
         }

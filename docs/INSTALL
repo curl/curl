@@ -392,7 +392,7 @@ Win32
 
      set BCCDIR=c:\Borland\BCC55
 
-   In order to build a plain vanilla version of curl and libcurl run the 
+   In order to build a plain vanilla version of curl and libcurl run the
    following command from curl's root directory:
 
      make borland

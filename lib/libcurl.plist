@@ -3,17 +3,17 @@
 <plist version="0.9">
 <dict>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>	
-	
+	<string>6.0</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
-	
+
 	<key>CFBundleExecutable</key>
 	<string>curl</string>
-	
+
 	<key>CFBundleIdentifier</key>
 	<string>com.libcurl.libcurl</string>
-	
+
 	<key>CFBundleVersion</key>
 	<string>7.12.3</string>
 
@@ -21,14 +21,14 @@
 	<string>libcurl</string>
 
 	<key>CFBundlePackageType</key>
-	<string>FMWK</string>	
-	 
+	<string>FMWK</string>
+
 	<key>CFBundleSignature</key>
-	<string>????</string>	
-	
+	<string>????</string>
+
 	<key>CFBundleShortVersionString</key>
 	<string>libcurl 7.12.3</string>
-	
+
 	<key>CFBundleGetInfoString</key>
 	<string>libcurl.plist 7.12.3</string>
 </dict>

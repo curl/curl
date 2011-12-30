@@ -34,7 +34,7 @@ while(<STDIN>) {
         my $ref = $2;
         if ($ref =~ /refs\/tags\/curl-([0-9_]*)/) {
             $tag = $1;
-            $tag =~ tr/_/./; 
+            $tag =~ tr/_/./;
         } else {
             $tag = '';
         }

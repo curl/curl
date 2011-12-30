@@ -382,7 +382,7 @@ if(CMAKE_USE_OPENSSL)
   check_include_file_concat("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
 endif(CMAKE_USE_OPENSSL)
 
-if(NOT HAVE_LDAP_H) 
+if(NOT HAVE_LDAP_H)
   message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
   set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
 endif()
@@ -784,7 +784,7 @@ if(HAVE_SOCKLEN_T)
   check_type_size("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
   set(CMAKE_EXTRA_INCLUDE_FILES)
   if(NOT HAVE_CURL_SIZEOF_CURL_SOCKLEN_T)
-    message(FATAL_ERROR 
+    message(FATAL_ERROR
      "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")
   endif()
 else()

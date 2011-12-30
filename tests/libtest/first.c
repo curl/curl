@@ -38,7 +38,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
     return -1;
   }
 #ifdef USE_WINSOCK
-  /* 
+  /*
    * Winsock select() requires that at least one of the three fd_set
    * pointers is not NULL and points to a non-empty fdset. IOW Winsock
    * select() can not be used to sleep without a single fd_set.

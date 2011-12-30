@@ -38,7 +38,7 @@ endif
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
 endif
-# Edit the path below to point to the base of your MS idndlpackage. 
+# Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
 # http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ad6158d7-ddba-416a-9109-07607425a815
 ifndef WINIDN_PATH
