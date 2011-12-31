@@ -48,6 +48,12 @@ This release includes the following bugfixes:
  o libcurl.m4: Fix quoting arguments of AC_LANG_PROGRAM [28]
  o appconnect time fixed for non-blocking connect ssl backends [29]
  o do not include SSL handshake into time spent waiting for 100-continue [32]
+ o handle dns cache case insensitive
+ o use new host name casing for subsequent HTTP requests [33]
+ o CURLOPT_RESOLVE: avoid adding already present host names
+ o SFTP mkdir: use correct permission [34]
+ o resolve: don't leak pre-populated dns entries [35]
+ o --retry: Retry transfers on timeout and DNS errors
 
 This release includes the following known bugs:
 
@@ -61,7 +67,7 @@ advice from friends like these:
  Reza Arbab, Jason Liu, Gokhan Sengun, Rob Ward, Dan Fandrich,
  Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
- Sven Wegener
+ Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -99,3 +105,6 @@ References to bug reports and discussions on issues:
  [30] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTACCEPTTIMOUTMS
  [31] = http://curl.haxx.se/mail/lib-2011-12/0133.html
  [32] = https://bugzilla.redhat.com/767490
+ [33] = http://curl.haxx.se/mail/lib-2011-12/0314.html
+ [34] = http://curl.haxx.se/mail/lib-2011-12/0249.html
+ [35] = http://curl.haxx.se/bug/view.cgi?id=3463121
