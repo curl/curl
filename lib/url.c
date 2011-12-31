@@ -4666,14 +4666,10 @@ static void reuse_conn(struct connectdata *old_conn,
     old_conn->proxypasswd = NULL;
   }
 
-  /* host can change, when doing keepalive with a proxy ! */
-  if(conn->bits.proxy) {
-    Curl_safefree(conn->host.rawalloc);
-    conn->host=old_conn->host;
-  }
-  else
-    /* free the newly allocated name buffer */
-    Curl_safefree(old_conn->host.rawalloc);
+  /* host can change, when doing keepalive with a proxy or if the case is
+     different this time etc */
+  Curl_safefree(conn->host.rawalloc);
+  conn->host=old_conn->host;
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
