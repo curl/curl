@@ -98,6 +98,21 @@ The cURL Test Suite
   3 to 9. Any test numbers starting with ! are disabled, as are any test
   numbers found in the file data/DISABLED (one per line).
 
+  When -s is not present, each successful test will display on one line the
+  test number and description and on the next line a set of flags, the test
+  result, current test sequence, total number of tests to be run and an
+  estimated amount of time to complete the test run. The flags consist of
+  these letters describing what is checked in this test:
+
+    s stdout
+    d data
+    u upload
+    p protocol
+    o output
+    e exit code
+    m memory
+    v valgrind
+
  1.5 Shell startup scripts
 
   Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might be badly

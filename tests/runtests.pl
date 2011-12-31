@@ -149,8 +149,8 @@ my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $UNITDIR="./unit";
+# TODO: change this to use server_inputfilename()
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
-my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
@@ -2868,7 +2868,7 @@ sub singletest {
         $teststat[$testnum]=$why; # store reason for this test case
 
         if(!$short) {
-            printf "test %03d SKIPPED: $why\n", $testnum;
+            logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
         }
 
         timestampskippedevents($testnum);
@@ -2933,9 +2933,8 @@ sub singletest {
         chomp $tool;
     }
 
-    # remove server output logfiles
+    # remove server output logfile
     unlink($SERVERIN);
-    unlink($SERVER2IN);
 
     if(@ftpservercmd) {
         # write the instructions to file
@@ -3039,7 +3038,7 @@ sub singletest {
         }
 
         if(! -f $CMDLINE) {
-            print "The tool set in the test case for this: '$tool' does not exist\n";
+            logmsg "The tool set in the test case for this: '$tool' does not exist\n";
             timestampskippedevents($testnum);
             return -1;
         }
@@ -3493,8 +3492,8 @@ sub singletest {
     }
     else {
         if(!$short) {
-            printf("\n%s returned $cmdres, when expecting %s\n",
-                   (!$tool)?"curl":$tool, $errorcode);
+            logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
+                           (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " exit FAILED\n";
         # timestamp test result verification end
@@ -3585,7 +3584,7 @@ sub singletest {
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-    printf "OK (%-3d out of %-3d, %s)\n", $count, $total, $left;
+    logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
