@@ -205,4 +205,6 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data, char *servers);
  */
 void Curl_hostcache_destroy(struct SessionHandle *data);
 
+CURLcode Curl_loadhostpairs(struct SessionHandle *data);
+
 #endif /* HEADER_CURL_HOSTIP_H */
