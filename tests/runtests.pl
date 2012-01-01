@@ -3024,7 +3024,7 @@ sub singletest {
             $inc = "--include ";
         }
 
-        $cmdargs ="$out $inc--verbose --trace-time $cmd";
+        $cmdargs ="$out $inc--trace-ascii log/trace$testnum --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
