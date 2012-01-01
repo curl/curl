@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -197,7 +197,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(input_token) {
     in_buff_desc.ulVersion = 0;
     in_buff_desc.cBuffers  = 1;
-    in_buff_desc.pBuffers  = &out_sec_buff;
+    in_buff_desc.pBuffers  = &in_sec_buff;
 
     in_sec_buff.cbBuffer   = input_token_len;
     in_sec_buff.BufferType = SECBUFFER_TOKEN;
