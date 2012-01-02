@@ -782,8 +782,10 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
       /* Create an entry id, based upon the hostname and port */
       entry_id = create_hostcache_id(hostname, port);
       /* If we can't create the entry id, fail */
-      if(!entry_id)
+      if(!entry_id) {
+        Curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
+      }
 
       entry_len = strlen(entry_id);
 
