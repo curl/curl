@@ -212,7 +212,7 @@ create_hostcache_id(const char *name, int port)
   char *ptr = id;
   if(ptr) {
     /* lower case the name part */
-    while(*ptr != ':') {
+    while(*ptr && (*ptr != ':')) {
       *ptr = (char)TOLOWER(*ptr);
       ptr++;
     }
