@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2011 Daniel Stenberg
+ * Copyright (c) 2004 - 2012 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -313,10 +313,13 @@ krb5_auth(void *app_data, struct connectdata *conn)
 
 static void krb5_end(void *app_data)
 {
-    OM_uint32 maj, min;
+    OM_uint32 min;
     gss_ctx_id_t *context = app_data;
     if(*context != GSS_C_NO_CONTEXT) {
-      maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
+#ifdef DEBUGBUILD
+      OM_uint32 maj =
+#endif
+      gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
       DEBUGASSERT(maj == GSS_S_COMPLETE);
     }
 }
