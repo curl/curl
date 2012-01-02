@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -23,9 +23,9 @@
 .SH NAME
 curl_easy_strerror - return string describing error code
 .SH SYNOPSIS
-.nf
-.B #include <curl/curl.h>
-.BI "const char *curl_easy_strerror(CURLcode " errornum ");"
+#include <curl/curl.h>
+
+const char *curl_easy_strerror(CURLcode errornum);
 .SH DESCRIPTION
 The curl_easy_strerror() function returns a string describing the CURLcode
 error code passed in the argument \fIerrornum\fP.
