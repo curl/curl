@@ -4570,6 +4570,9 @@ sub displaylogs {
         if(($log =~ /^netrc\d+/) && ($log !~ /^netrc$testnum/)) {
             next; # skip netrcNnn of other tests
         }
+        if(($log =~ /^trace\d+/) && ($log !~ /^trace$testnum/)) {
+            next; # skip traceNnn of other tests
+        }
         if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests
         }
