@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -175,7 +175,6 @@ struct thread_sync_data {
 
 struct thread_data {
   curl_thread_t thread_hnd;
-  curl_socket_t dummy_sock;
   unsigned int poll_interval;
   int interval_end;
   struct thread_sync_data tsd;
@@ -329,9 +328,6 @@ static void destroy_async_data (struct Curl_async *async)
   if(async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
 
-    if(td->dummy_sock != CURL_SOCKET_BAD)
-      sclose(td->dummy_sock);
-
     if(td->thread_hnd != curl_thread_t_null)
       Curl_thread_join(&td->thread_hnd);
 
@@ -364,7 +360,6 @@ static bool init_resolve_thread (struct connectdata *conn,
   conn->async.done = FALSE;
   conn->async.status = 0;
   conn->async.dns = NULL;
-  td->dummy_sock = CURL_SOCKET_BAD;
   td->thread_hnd = curl_thread_t_null;
 
   if(!init_thread_sync_data(&td->tsd, hostname, port, hints))
@@ -374,16 +369,6 @@ static bool init_resolve_thread (struct connectdata *conn,
   conn->async.hostname = strdup(hostname);
   if(!conn->async.hostname)
     goto err_exit;
-
-#ifdef WIN32
-  /* This socket is only to keep Curl_resolver_fdset() and select() happy;
-   * should never become signalled for read since it's unbound but
-   * Windows needs at least 1 socket in select().
-   */
-  td->dummy_sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if(td->dummy_sock == CURL_SOCKET_BAD)
-    goto err_exit;
-#endif
 
 #ifdef HAVE_GETADDRINFO
   td->thread_hnd = Curl_thread_create(getaddrinfo_thread, &td->tsd);
@@ -574,17 +559,9 @@ int Curl_resolver_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
                           int numsocks)
 {
-  const struct thread_data *td =
-    (const struct thread_data *) conn->async.os_specific;
-
-  if(td && td->dummy_sock != CURL_SOCKET_BAD) {
-    if(numsocks) {
-      /* return one socket waiting for readable, even though this is just
-         a dummy */
-      socks[0] = td->dummy_sock;
-      return GETSOCK_READSOCK(0);
-    }
-  }
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
   return 0;
 }
 
