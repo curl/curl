@@ -354,8 +354,12 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(imapcode != 'O') {
-    failf(data, "STARTTLS denied. %c", imapcode);
-    result = CURLE_USE_SSL_FAILED;
+    if(data->set.use_ssl != CURLUSESSL_TRY) {
+      failf(data, "STARTTLS denied. %c", imapcode);
+      result = CURLE_USE_SSL_FAILED;
+    }
+    else
+      result = imap_state_login(conn);
   }
   else {
     if(data->state.used_interface == Curl_if_multi) {
