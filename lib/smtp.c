@@ -510,7 +510,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   if(smtpcode != 220) {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied. %c", smtpcode);
-      result = CURLE_LOGIN_DENIED;
+      result = CURLE_USE_SSL_FAILED;
     }
     else
       result = smtp_authenticate(conn);
