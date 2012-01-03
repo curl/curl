@@ -54,6 +54,8 @@ This release includes the following bugfixes:
  o SFTP mkdir: use correct permission [34]
  o resolve: don't leak pre-populated dns entries [35]
  o --retry: Retry transfers on timeout and DNS errors
+ o negotiate with SSPI backend: use the correct buffer for input [36]
+ o SFTP dir: increase buffer size counter to avoid cut off file names [37]
 
 This release includes the following known bugs:
 
@@ -67,7 +69,8 @@ advice from friends like these:
  Reza Arbab, Jason Liu, Gokhan Sengun, Rob Ward, Dan Fandrich,
  Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
- Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka
+ Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka, Patrice Guerin,
+ Armel Asselin
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -108,3 +111,5 @@ References to bug reports and discussions on issues:
  [33] = http://curl.haxx.se/mail/lib-2011-12/0314.html
  [34] = http://curl.haxx.se/mail/lib-2011-12/0249.html
  [35] = http://curl.haxx.se/bug/view.cgi?id=3463121
+ [36] = http://curl.haxx.se/bug/view.cgi?id=3466497
+ [37] = http://curl.haxx.se/mail/lib-2011-12/0249.html
