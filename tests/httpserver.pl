@@ -117,10 +117,10 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
+$flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--fork " if(defined($fork));
 $flags .= "--connect $connect " if($connect);
-$flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 if($verbose) {
