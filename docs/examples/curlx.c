@@ -239,8 +239,7 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm) {
   SSL_CTX_set_cipher_list(ctx,"RC4-MD5");
   SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
 
-  X509_STORE_add_cert(ctx->cert_store,sk_X509_value(p->ca,
-                                                    sk_X509_num(p->ca)-1));
+  X509_STORE_add_cert(SSL_CTX_get_cert_store(ctx), sk_X509_value(p->ca, sk_X509_num(p->ca)-1));
 
   SSL_CTX_set_verify_depth(ctx,2);
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1636,7 +1636,8 @@ ossl_connect_step1(struct connectdata *conn,
   if(data->set.str[STRING_SSL_CRLFILE]) {
     /* tell SSL where to find CRL file that is used to check certificate
      * revocation */
-    lookup=X509_STORE_add_lookup(connssl->ctx->cert_store,X509_LOOKUP_file());
+    lookup=X509_STORE_add_lookup(SSL_CTX_get_cert_store(connssl->ctx),
+                                 X509_LOOKUP_file());
     if(!lookup ||
        (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                             X509_FILETYPE_PEM)) ) {
@@ -1647,7 +1648,7 @@ ossl_connect_step1(struct connectdata *conn,
     else {
       /* Everything is fine. */
       infof(data, "successfully load CRL file:\n");
-      X509_STORE_set_flags(connssl->ctx->cert_store,
+      X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
                            X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
     }
     infof(data,
