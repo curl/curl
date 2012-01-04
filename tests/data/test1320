@@ -35,6 +35,9 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1320@foo --mail-rcpt 1320@foobar.examp
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
 <protocol>
 EHLO user
 MAIL FROM:<1320@from>

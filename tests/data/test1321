@@ -49,6 +49,9 @@ imap://%HOSTIP:%IMAPPORT/1321 -u user:secret -p -x %HOSTIP:%PROXYPORT
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
 <protocol>
 B LOGIN user secret
 C SELECT 1321
