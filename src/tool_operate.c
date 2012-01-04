@@ -767,11 +767,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* for uploads */
         input.fd = infd;
         input.config = config;
+        /* Note that if CURLOPT_READFUNCTION is fread (the default), then
+         * lib/telnet.c will Curl_poll() on the input file descriptor
+         * rather then calling the READFUNCTION at regular intervals.
+         * The circumstances in which it is preferable to enable this
+         * behaviour, by omitting to set the READFUNCTION & READDATA options,
+         * have not been determined.
+         */
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
-        if((outfile && !curlx_strequal("-", outfile)) ||
-           !checkprefix("telnet:", this_url))
-          my_setopt(curl, CURLOPT_READFUNCTION, tool_read_cb);
+        my_setopt(curl, CURLOPT_READFUNCTION, tool_read_cb);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
            CURLOPT_IOCTLFUNCTION/DATA pair previously provided for seeking */
