@@ -1299,6 +1299,7 @@ static int http_connect(curl_socket_t infd,
         if(CURL_SOCKET_BAD == datafd)
           return 4; /* error! */
         logmsg("====> Client connect DATA");
+        req2.pipelining = FALSE;
         if(get_request(datafd, &req2))
           /* non-zero means error, break out of loop */
           break;
