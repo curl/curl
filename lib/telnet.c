@@ -1569,12 +1569,13 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   pfd[0].fd = sockfd;
   pfd[0].events = POLLIN;
 
-  if(data->set.is_fread_set) {
+  if(conn->fread_func != (curl_read_callback)fread) {
     poll_cnt = 1;
     interval_ms = 100; /* poll user-supplied read function */
   }
   else {
-    pfd[1].fd = 0;
+    /* really using fread, so infile is a FILE* */
+    pfd[1].fd = fileno((FILE *)conn->fread_in);
     pfd[1].events = POLLIN;
     poll_cnt = 2;
     interval_ms = 1 * 1000;
@@ -1627,8 +1628,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
       nread = 0;
       if(poll_cnt == 2) {
-        if(pfd[1].revents & POLLIN) { /* read from stdin */
-          nread = read(0, buf, BUFSIZE - 1);
+        if(pfd[1].revents & POLLIN) { /* read from in file */
+          nread = read(pfd[1].fd, buf, BUFSIZE - 1);
         }
       }
       else {
