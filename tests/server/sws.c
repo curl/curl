@@ -58,6 +58,7 @@
    versions instead */
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
+#include "inet_pton.h"
 #include "util.h"
 #include "server_sockaddr.h"
 
@@ -119,7 +120,7 @@ struct httprequest {
   int prot_version;  /* HTTP version * 10 */
   bool pipelining;   /* true if request is pipelined */
   int callcount;  /* times ProcessRequest() gets called */
-  int connect_port; /* the port number CONNECT used */
+  unsigned short connect_port; /* the port number CONNECT used */
 };
 
 static int ProcessRequest(struct httprequest *req);
@@ -483,20 +484,36 @@ static int ProcessRequest(struct httprequest *req)
     else {
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
-        char *portp;
+        char *portp = NULL;
 
         sprintf(logbuf, "Received a CONNECT %s HTTP/%d.%d request",
                 doc, prot_major, prot_minor);
         logmsg("%s", logbuf);
 
-        portp = strchr(doc, ':');
-        if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
-          req->connect_port = strtol(portp+1, NULL, 10);
-        else
-          req->connect_port = 0;
-
         if(req->prot_version == 10)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
+
+        if(doc[0] == '[') {
+          char *p = &doc[1];
+          while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.')))
+            p++;
+          if(*p != ']')
+            logmsg("Invalid CONNECT IPv6 address format");
+          else if (*(p+1) != ':')
+            logmsg("Invalid CONNECT IPv6 port format");
+          else
+            portp = p+1;
+        }
+        else
+          portp = strchr(doc, ':');
+
+        if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1))) {
+          unsigned long ulnum = strtoul(portp+1, NULL, 10);
+          if(!ulnum || (ulnum > 65535UL))
+            logmsg("Invalid CONNECT port received");
+          else
+            req->connect_port = curlx_ultous(ulnum);
+        }
 
         if(!strncmp(doc, "bad", 3))
           /* if the host name starts with bad, we fake an error here */
@@ -506,7 +523,7 @@ static int ProcessRequest(struct httprequest *req)
              CONNECT line will be used as test number! */
           req->testno = req->connect_port?req->connect_port:DOCNUMBER_CONNECT;
         else
-          req->testno = DOCNUMBER_CONNECT;
+          req->testno = req->connect_port?DOCNUMBER_CONNECT:DOCNUMBER_BADCONNECT;
       }
       else {
         logmsg("Did not find test number in PATH");
@@ -1157,43 +1174,93 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
-static curl_socket_t connect_to(const char *ipaddr, int port)
+static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 {
-  int flag;
-  struct sockaddr_in sin;
+  srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
-  unsigned long hostaddr;
-
-  hostaddr = inet_addr(ipaddr);
-
-  if(hostaddr == ( in_addr_t)-1)
-    return -1;
-
-  logmsg("about to connect to %s:%d", ipaddr, port);
-
-  serverfd = socket(AF_INET, SOCK_STREAM, 0);
-
+  int error;
+  int rc;
+  const char *op_br = "";
+  const char *cl_br = "";
 #ifdef TCP_NODELAY
-  /*
-   * Disable the Nagle algorithm
-   */
-  flag = 1;
-  if (setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
-                 (void *)&flag, sizeof(flag)) == -1) {
-    logmsg("====> TCP_NODELAY for server conection failed");
+  curl_socklen_t flag = 1;
+  int level = IPPROTO_TCP;
+#endif
+
+#ifdef ENABLE_IPV6
+  if(use_ipv6) {
+    op_br = "[";
+    cl_br = "]";
   }
 #endif
 
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons((short)port);
-  sin.sin_addr.s_addr = hostaddr;
-  if (connect(serverfd, (struct sockaddr*)(&sin),
-              sizeof(struct sockaddr_in)) != 0) {
-    fprintf(stderr, "failed to connect!\n");
-    return -1;
+  if(!ipaddr)
+    return CURL_SOCKET_BAD;
+
+  logmsg("about to connect to %s%s%s:%hu",
+         op_br, ipaddr, cl_br, port);
+
+#ifdef ENABLE_IPV6
+  if(!use_ipv6)
+#endif
+    serverfd = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef ENABLE_IPV6
+  else
+    serverfd = socket(AF_INET6, SOCK_STREAM, 0);
+#endif
+  if(CURL_SOCKET_BAD == serverfd) {
+    error = SOCKERRNO;
+    logmsg("Error creating socket for server conection: (%d) %s",
+           error, strerror(error));
+    return CURL_SOCKET_BAD;
   }
 
-  logmsg("connected fine to %s:%d, now tunnel!", ipaddr, port);
+#ifdef TCP_NODELAY
+  /* Disable the Nagle algorithm */
+  if(setsockopt(serverfd, level, TCP_NODELAY, (void *)&flag, sizeof(flag)) < 0)
+    logmsg("====> TCP_NODELAY for server conection failed");
+#endif
+
+#ifdef ENABLE_IPV6
+  if(!use_ipv6) {
+#endif
+    memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
+    serveraddr.sa4.sin_family = AF_INET;
+    serveraddr.sa4.sin_port = htons(port);
+    serveraddr.sa4.sin_addr.s_addr = INADDR_ANY;
+    if(Curl_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
+      logmsg("Error inet_pton failed AF_INET conversion of '%s'", ipaddr);
+      sclose(serverfd);
+      return CURL_SOCKET_BAD;
+    }
+
+    rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa4));
+#ifdef ENABLE_IPV6
+  }
+  else {
+    memset(&serveraddr.sa6, 0, sizeof(serveraddr.sa6));
+    serveraddr.sa6.sin6_family = AF_INET6;
+    serveraddr.sa6.sin6_port = htons(port);
+    if(Curl_inet_pton(AF_INET6, ipaddr, &serveraddr.sa6.sin6_addr) < 1) {
+      logmsg("Error inet_pton failed AF_INET6 conversion of '%s'", ipaddr);
+      sclose(serverfd);
+      return CURL_SOCKET_BAD;
+    }
+
+    rc = connect(serverfd, &serveraddr.sa, sizeof(me.sa6));
+  }
+#endif /* ENABLE_IPV6 */
+
+  if(rc) {
+    error = SOCKERRNO;
+    logmsg("Error connecting to server port %hu: (%d) %s",
+           port, error, strerror(error));
+    sclose(serverfd);
+    return CURL_SOCKET_BAD;
+  }
+
+  logmsg("connected fine to %s%s%s:%hu, now tunnel",
+         op_br, ipaddr, cl_br, port);
 
   return serverfd;
 }
