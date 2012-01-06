@@ -1247,7 +1247,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       return CURL_SOCKET_BAD;
     }
 
-    rc = connect(serverfd, &serveraddr.sa, sizeof(me.sa6));
+    rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa6));
   }
 #endif /* ENABLE_IPV6 */
 
