@@ -1,5 +1,12 @@
 <testcase>
-# Server-side
+<info>
+<keywords>
+FTP
+CURLE_PARTIAL_FILE
+RETR
+PASV
+</keywords>
+</info>
 <reply>
 <data>
 1oooooooooooooooooooooooooooooooooooooooooo2
@@ -25,6 +32,8 @@ ftp://%HOSTIP:%FTPPORT/161
 
 # Verify data after the test has been "shot"
 <verify>
+# This gets QUIT sent because CURLE_PARTIAL_FILE does NOT mark the control
+# connection as bad
 <protocol>
 USER anonymous
 PASS ftp@example.com
@@ -33,6 +42,7 @@ EPSV
 TYPE I
 SIZE 161
 RETR 161
+QUIT
 </protocol>
 <errorcode>
 18

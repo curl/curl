@@ -3287,6 +3287,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   case CURLE_FTP_ACCEPT_TIMEOUT:
   case CURLE_FTP_COULDNT_SET_TYPE:
   case CURLE_FTP_COULDNT_RETR_FILE:
+  case CURLE_PARTIAL_FILE:
   case CURLE_UPLOAD_FAILED:
   case CURLE_REMOTE_ACCESS_DENIED:
   case CURLE_FILESIZE_EXCEEDED:
