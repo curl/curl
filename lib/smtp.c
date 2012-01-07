@@ -912,10 +912,11 @@ static CURLcode smtp_mail(struct connectdata *conn)
 
   /* calculate the optional AUTH parameter */
   if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] == '<')
+    if(data->set.str[STRING_MAIL_AUTH][0] != '\0')
       auth = aprintf("%s", data->set.str[STRING_MAIL_AUTH]);
     else
-      auth = aprintf("<%s>", data->set.str[STRING_MAIL_AUTH]);
+      /* empty AUTH, RFC-2554, sect. 5 */
+      auth = strdup("<>");
 
     if(!auth) {
       Curl_safefree(from);
