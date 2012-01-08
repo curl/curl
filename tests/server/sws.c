@@ -1227,7 +1227,6 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
     serveraddr.sa4.sin_family = AF_INET;
     serveraddr.sa4.sin_port = htons(port);
-    serveraddr.sa4.sin_addr.s_addr = INADDR_ANY;
     if(Curl_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
       logmsg("Error inet_pton failed AF_INET conversion of '%s'", ipaddr);
       sclose(serverfd);
@@ -1287,8 +1286,8 @@ static int http_connect(curl_socket_t infd,
   curl_socket_t serverfd[2];
   curl_socket_t clientfd[2];
   curl_socket_t datafd = CURL_SOCKET_BAD;
-  int toc[2] = {0, 0}; /* number of bytes to client */
-  int tos[2] = {0, 0}; /* number of bytes to server */
+  ssize_t toc[2] = {0, 0}; /* number of bytes to client */
+  ssize_t tos[2] = {0, 0}; /* number of bytes to server */
   char readclient[2][256];
   char readserver[2][256];
   bool poll_client[2] = { TRUE, TRUE };
@@ -1311,9 +1310,9 @@ static int http_connect(curl_socket_t infd,
   while(1) {
     fd_set input;
     fd_set output;
-    struct timeval timeout={1,0};
+    struct timeval timeout = {1,0};
     ssize_t rc;
-    int maxfd=0;
+    curl_socket_t maxfd = (curl_socket_t)-1;
     int used;
 
     FD_ZERO(&input);
@@ -1321,12 +1320,13 @@ static int http_connect(curl_socket_t infd,
 
     if(CURL_SOCKET_BAD != rootfd) {
       FD_SET(rootfd, &input); /* monitor this for new connections */
-      maxfd=rootfd;
+      maxfd = rootfd;
     }
 
     /* set sockets to wait for */
     for(i=0; i<=control; i++) {
-      int mostfd = clientfd[i] > serverfd[i]? clientfd[i]: serverfd[i];
+      curl_socket_t mostfd = clientfd[i] > serverfd[i] ?
+                             clientfd[i] : serverfd[i];
       used = 0;
       if(mostfd > maxfd)
         maxfd = mostfd;
@@ -1351,7 +1351,7 @@ static int http_connect(curl_socket_t infd,
       }
     }
 
-    rc = select(maxfd+1, &input, &output, NULL, &timeout);
+    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
 
     if(rc > 0) {
       /* socket action */
@@ -1375,7 +1375,7 @@ static int http_connect(curl_socket_t infd,
 
         if(DOCNUMBER_CONNECT != req2.testno) {
           /* eeek, not a CONNECT */
-          close(datafd);
+          sclose(datafd);
           break;
         }
 
@@ -1399,7 +1399,7 @@ static int http_connect(curl_socket_t infd,
         len = sizeof(readclient[i])-tos[i];
         if(len && FD_ISSET(clientfd[i], &input)) {
           /* read from client */
-          rc = recv(clientfd[i], &readclient[i][tos[i]], len, 0);
+          rc = sread(clientfd[i], &readclient[i][tos[i]], len);
           if(rc <= 0) {
             logmsg("[%s] got %d at %s:%d, STOP READING client", data_or_ctrl(i),
                    rc, __FILE__, __LINE__);
@@ -1416,7 +1416,7 @@ static int http_connect(curl_socket_t infd,
         len = sizeof(readserver[i])-toc[i];
         if(len && FD_ISSET(serverfd[i], &input)) {
           /* read from server */
-          rc = recv(serverfd[i], &readserver[i][toc[i]], len, 0);
+          rc = sread(serverfd[i], &readserver[i][toc[i]], len);
           if(rc <= 0) {
             logmsg("[%s] got %d at %s:%d, STOP READING server", data_or_ctrl(i),
                    rc, __FILE__, __LINE__);
@@ -1431,7 +1431,7 @@ static int http_connect(curl_socket_t infd,
         }
         if(toc[i] && FD_ISSET(clientfd[i], &output)) {
           /* write to client */
-          rc = send(clientfd[i], readserver[i], toc[i], 0);
+          rc = swrite(clientfd[i], readserver[i], toc[i]);
           if(rc <= 0) {
             logmsg("[%s] got %d at %s:%d", data_or_ctrl(i),
                    rc, __FILE__, __LINE__);
@@ -1447,7 +1447,7 @@ static int http_connect(curl_socket_t infd,
         }
         if(tos[i] && FD_ISSET(serverfd[i], &output)) {
           /* write to server */
-          rc = send(serverfd[i], readclient[i], tos[i], 0);
+          rc = swrite(serverfd[i], readclient[i], tos[i]);
           if(rc <= 0) {
             logmsg("[%s] got %d at %s:%d", data_or_ctrl(i),
                    rc, __FILE__, __LINE__);
@@ -1485,9 +1485,9 @@ static int http_connect(curl_socket_t infd,
         sleep(1);
 
         if(serverfd[precontrol] != CURL_SOCKET_BAD)
-          close(serverfd[precontrol]);
+          sclose(serverfd[precontrol]);
         if(clientfd[precontrol] != CURL_SOCKET_BAD)
-          close(clientfd[precontrol]);
+          sclose(clientfd[precontrol]);
 
       }
 
@@ -1499,9 +1499,9 @@ static int http_connect(curl_socket_t infd,
   /* close all sockets we created */
   for(i=0; i<2; i++) {
     if(serverfd[i] != CURL_SOCKET_BAD)
-      close(serverfd[i]);
+      sclose(serverfd[i]);
     if(clientfd[i] != CURL_SOCKET_BAD)
-      close(clientfd[i]);
+      sclose(clientfd[i]);
   }
 #endif
   return 0;
