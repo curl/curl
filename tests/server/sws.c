@@ -1083,18 +1083,21 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     else {
       logmsg("Sent off %zd bytes", written);
     }
-    if (req->writedelay) {
-      logmsg("Pausing %d seconds", req->writedelay);
-      sleep(req->writedelay);
-    }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
-    if(got_exit_signal)
-      break;
 
     count -= written;
     buffer += written;
-  } while(count>0);
+
+    if(req->writedelay) {
+      int quarters = req->writedelay * 4;
+      logmsg("Pausing %d seconds", req->writedelay);
+      while((quarters > 0) && !got_exit_signal) {
+        quarters--;
+        wait_ms(250);
+      }
+    }
+  } while((count > 0) && !got_exit_signal);
 
   do {
     res = fclose(dump);
@@ -1137,11 +1140,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
         if(!strcmp("wait", command)) {
           logmsg("Told to sleep for %d seconds", num);
           quarters = num * 4;
-          while(quarters > 0) {
+          while((quarters > 0) && !got_exit_signal) {
             quarters--;
             res = wait_ms(250);
-            if(got_exit_signal)
-              break;
             if(res) {
               /* should not happen */
               error = SOCKERRNO;
@@ -1250,6 +1251,11 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 #endif /* ENABLE_IPV6 */
 
+  if(got_exit_signal) {
+    sclose(serverfd);
+    return CURL_SOCKET_BAD;
+  }
+
   if(rc) {
     error = SOCKERRNO;
     logmsg("Error connecting to server port %hu: (%d) %s",
@@ -1278,10 +1284,10 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
 #define data_or_ctrl(x) ((x)?"DATA":"CTRL")
 
-static int http_connect(curl_socket_t infd,
-                        curl_socket_t rootfd,
-                        struct httprequest *req,
-                        const char *ipaddr)
+static void http_connect(curl_socket_t infd,
+                         curl_socket_t rootfd,
+                         struct httprequest *req,
+                         const char *ipaddr)
 {
   curl_socket_t serverfd[2];
   curl_socket_t clientfd[2];
@@ -1293,17 +1299,25 @@ static int http_connect(curl_socket_t infd,
   bool poll_client[2] = { TRUE, TRUE };
   bool poll_server[2] = { TRUE, TRUE };
   int control=0;
+  int quarters;
   int i;
 
-  sleep(1); /* sleep here to make sure the client gets the CONNECT response
-               first and separate from the data that might follow here */
+  /* sleep here to make sure the client gets the CONNECT response
+     first and separate from the data that might follow here */
+  quarters = 4;
+  while((quarters > 0) && !got_exit_signal) {
+    quarters--;
+    wait_ms(250);
+  }
+  if(got_exit_signal)
+    return;
 
   clientfd[0] = infd;
   clientfd[1] = CURL_SOCKET_BAD;
 
   serverfd[0] = connect_to(ipaddr, req->connect_port);
   if(CURL_SOCKET_BAD == serverfd[0])
-    return 1; /* failure */
+    return;
   serverfd[1] = CURL_SOCKET_BAD; /* nothing there (yet) */
 
   /* connected, now tunnel */
@@ -1364,7 +1378,8 @@ static int http_connect(curl_socket_t infd,
         struct httprequest req2;
         datafd = accept(rootfd, NULL, NULL);
         if(CURL_SOCKET_BAD == datafd)
-          return 4; /* error! */
+          return;
+
         logmsg("====> Client connect DATA");
         req2.pipelining = FALSE;
         if(get_request(datafd, &req2))
@@ -1482,7 +1497,11 @@ static int http_connect(curl_socket_t infd,
         if(clientfd[precontrol] != CURL_SOCKET_BAD)
           shutdown(clientfd[precontrol], SHUT_RDWR);
 
-        sleep(1);
+        quarters = 4;
+        while((quarters > 0) && !got_exit_signal) {
+          quarters--;
+          wait_ms(250);
+        }
 
         if(serverfd[precontrol] != CURL_SOCKET_BAD)
           sclose(serverfd[precontrol]);
@@ -1504,7 +1523,6 @@ static int http_connect(curl_socket_t infd,
       sclose(clientfd[i]);
   }
 #endif
-  return 0;
 }
 
 int main(int argc, char *argv[])
