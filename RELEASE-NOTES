@@ -56,6 +56,11 @@ This release includes the following bugfixes:
  o --retry: Retry transfers on timeout and DNS errors
  o negotiate with SSPI backend: use the correct buffer for input [36]
  o SFTP dir: increase buffer size counter to avoid cut off file names [37]
+ o TFTP: fix resending (again) [38]
+ o c-ares: don't include getaddrinfo-using code [39]
+ o FTP: CURLE_PARTIAL_FILE will not close the control channel [40]
+ o win32-threaded-resolver: stop using a dummy socket
+ o OpenSSL: remove reference to openssl internal struct [41]
 
 This release includes the following known bugs:
 
@@ -70,7 +75,7 @@ advice from friends like these:
  Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
  Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka, Patrice Guerin,
- Armel Asselin
+ Armel Asselin, Arthur Murray, Steve H Truong, Peter Sylvester
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -113,3 +118,7 @@ References to bug reports and discussions on issues:
  [35] = http://curl.haxx.se/bug/view.cgi?id=3463121
  [36] = http://curl.haxx.se/bug/view.cgi?id=3466497
  [37] = http://curl.haxx.se/mail/lib-2011-12/0249.html
+ [38] = http://curl.haxx.se/mail/lib-2012-01/0146.html
+ [39] = http://curl.haxx.se/mail/lib-2012-01/0160.html
+ [40] = http://curl.haxx.se/mail/lib-2012-01/0096.html
+ [41] = http://curl.haxx.se/mail/lib-2012-01/0049.html
