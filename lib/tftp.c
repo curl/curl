@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -727,7 +727,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
         }
         else {
           /* Re-send the data packet */
-          sbytes = sendto(state->sockfd, (void *)&state->spacket.data,
+          sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                           4+state->sbytes, SEND_4TH_ARG,
                           (struct sockaddr *)&state->remote_addr,
                           state->remote_addrlen);

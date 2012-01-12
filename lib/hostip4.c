@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,6 +118,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 }
 #endif /* CURLRES_SYNCH */
 #endif /* CURLRES_IPV4 */
+
+#if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
@@ -311,3 +313,4 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   return ai;
 }
+#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) */
