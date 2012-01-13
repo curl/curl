@@ -668,7 +668,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* fall-through */
 
     case SSH_S_STARTUP:
-      rc = libssh2_session_startup(sshc->ssh_session, sock);
+      rc = libssh2_session_startup(sshc->ssh_session, (int)sock);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
