@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "rawstr.h"
+#include "warnless.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
 #include "curl_memory.h"
@@ -189,7 +190,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   out_buff_desc.cBuffers  = 1;
   out_buff_desc.pBuffers  = &out_sec_buff;
 
-  out_sec_buff.cbBuffer   = neg_ctx->max_token_length;
+  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->max_token_length);
   out_sec_buff.BufferType = SECBUFFER_TOKEN;
   out_sec_buff.pvBuffer   = neg_ctx->output_token;
 
@@ -199,7 +200,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     in_buff_desc.cBuffers  = 1;
     in_buff_desc.pBuffers  = &in_sec_buff;
 
-    in_sec_buff.cbBuffer   = input_token_len;
+    in_sec_buff.cbBuffer   = curlx_uztoul(input_token_len);
     in_sec_buff.BufferType = SECBUFFER_TOKEN;
     in_sec_buff.pvBuffer   = input_token;
   }
