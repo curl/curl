@@ -1403,9 +1403,12 @@ static void http_connect(curl_socket_t *infdp,
 
     if(rc > 0) {
       /* socket action */
+      bool tcp_fin_wr;
 
       if(got_exit_signal)
         break;
+
+      tcp_fin_wr = FALSE;
 
       /* ---------------------------------------------------------- */
 
@@ -1505,6 +1508,7 @@ static void http_connect(curl_socket_t *infdp,
               logmsg("[%s] got %zd, STOP WRITING client", data_or_ctrl(i), rc);
               shutdown(clientfd[i], SHUT_WR);
               poll_client_wr[i] = FALSE;
+              tcp_fin_wr = TRUE;
             }
             else {
               logmsg("[%s] SENT %zd bytes to client", data_or_ctrl(i), rc);
@@ -1524,6 +1528,7 @@ static void http_connect(curl_socket_t *infdp,
               logmsg("[%s] got %zd, STOP WRITING server", data_or_ctrl(i), rc);
               shutdown(serverfd[i], SHUT_WR);
               poll_server_wr[i] = FALSE;
+              tcp_fin_wr = TRUE;
             }
             else {
               logmsg("[%s] SENT %zd bytes to server", data_or_ctrl(i), rc);
@@ -1557,7 +1562,34 @@ static void http_connect(curl_socket_t *infdp,
               logmsg("[%s] DISABLED WRITING client", data_or_ctrl(i));
               shutdown(clientfd[i], SHUT_WR);
               poll_client_wr[i] = FALSE;
+              tcp_fin_wr = TRUE;
             }
+          }
+          if(serverfd[i] != CURL_SOCKET_BAD) {
+            if(poll_server_rd[i] && !poll_client_wr[i]) {
+              logmsg("[%s] DISABLED READING server", data_or_ctrl(i));
+              shutdown(serverfd[i], SHUT_RD);
+              poll_server_rd[i] = FALSE;
+            }
+            if(poll_server_wr[i] && !poll_client_rd[i] && !tos[i]) {
+              logmsg("[%s] DISABLED WRITING server", data_or_ctrl(i));
+              shutdown(serverfd[i], SHUT_WR);
+              poll_server_wr[i] = FALSE;
+              tcp_fin_wr = TRUE;
+            }
+          }
+        }
+      }
+
+      if(tcp_fin_wr)
+        /* allow kernel to place FIN bit packet on the wire */
+        wait_ms(250);
+
+      /* socket clearing */
+      for(i = 0; i <= max_tunnel_idx; i++) {
+        int loop;
+        for(loop = 2; loop; loop--) {
+          if(clientfd[i] != CURL_SOCKET_BAD) {
             if(!poll_client_wr[i] && !poll_client_rd[i]) {
               logmsg("[%s] CLOSING client socket", data_or_ctrl(i));
               sclose(clientfd[i]);
@@ -1572,16 +1604,6 @@ static void http_connect(curl_socket_t *infdp,
             }
           }
           if(serverfd[i] != CURL_SOCKET_BAD) {
-            if(poll_server_rd[i] && !poll_client_wr[i]) {
-              logmsg("[%s] DISABLED READING server", data_or_ctrl(i));
-              shutdown(serverfd[i], SHUT_RD);
-              poll_server_rd[i] = FALSE;
-            }
-            if(poll_server_wr[i] && !poll_client_rd[i] && !tos[i]) {
-              logmsg("[%s] DISABLED WRITING server", data_or_ctrl(i));
-              shutdown(serverfd[i], SHUT_WR);
-              poll_server_wr[i] = FALSE;
-            }
             if(!poll_server_wr[i] && !poll_server_rd[i]) {
               logmsg("[%s] CLOSING server socket", data_or_ctrl(i));
               sclose(serverfd[i]);
