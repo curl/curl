@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -427,7 +427,7 @@ static CURLcode ReceivedServerConnect(struct connectdata* conn, bool* received)
   /* First check whether there is a cached response from server */
   if(pp->cache_size && pp->cache && pp->cache[0] > '3') {
     /* Data connection could not be established, let's return */
-    infof(data, "There is negative response in cache while serv connect");
+    infof(data, "There is negative response in cache while serv connect\n");
     Curl_GetFTPResponse(&nread, conn, &ftpcode);
     return CURLE_FTP_ACCEPT_FAILED;
   }
@@ -1153,7 +1153,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
          * the control connection instead and restart the port loop
          */
 
-        infof(data, "bind(port=%hu) on non-local address failed: %s", port,
+        infof(data, "bind(port=%hu) on non-local address failed: %s\n", port,
               Curl_strerror(conn, error) );
 
         sslen = sizeof(ss);

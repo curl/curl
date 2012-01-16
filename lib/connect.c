@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -863,7 +863,7 @@ singleipconnect(struct connectdata *conn,
     return CURLE_OK;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
-  infof(data, "  Trying %s... ", conn->ip_addr_str);
+  infof(data, "  Trying %s...\n", conn->ip_addr_str);
 
   Curl_persistconninfo(conn);
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -332,7 +332,7 @@ static void read_rewind(struct connectdata *conn,
     }
 
     DEBUGF(infof(conn->data,
-                 "Buffer after stream rewind (read_pos = %zu): [%s]",
+                 "Buffer after stream rewind (read_pos = %zu): [%s]\n",
                  conn->read_pos, buf));
   }
 #endif
@@ -606,7 +606,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
-            infof(conn->data, "Leftovers after chunking: %zu bytes", dataleft);
+            infof(conn->data, "Leftovers after chunking: %zu bytes\n",
+                  dataleft);
             if(conn->data->multi &&
                Curl_multi_canPipeline(conn->data->multi)) {
               /* only attempt the rewind if we truly are pipelining */
