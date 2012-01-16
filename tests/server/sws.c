@@ -1310,23 +1310,17 @@ static void http_connect(curl_socket_t *infdp,
   bool primary = FALSE;
   bool secondary = FALSE;
   int max_tunnel_idx; /* CTRL or DATA */
-#if 0
-  int quarters;
-#endif
+  int loop;
   int i;
 
   /* primary tunnel client endpoint already connected */
   clientfd[CTRL] = *infdp;
 
-#if 0
-  /* sleep here to make sure the client gets the CONNECT response
-     first and separate from the data that might follow here */
-  quarters = 4;
-  while((quarters > 0) && !got_exit_signal) {
-    quarters--;
+  /* Sleep here to make sure the client reads CONNECT response's
+     'end of headers' separate from the server data that follows.
+     This is done to prevent triggering libcurl known bug #39. */
+  for(loop = 2; loop && !got_exit_signal; loop--)
     wait_ms(250);
-  }
-#endif
   if(got_exit_signal)
     goto http_connect_cleanup;
 
@@ -1548,7 +1542,6 @@ static void http_connect(curl_socket_t *infdp,
 
       /* endpoint read/write disabling, endpoint closing and tunnel teardown */
       for(i = 0; i <= max_tunnel_idx; i++) {
-        int loop;
         for(loop = 2; loop; loop--) {
           /* loop twice to satisfy condition interdependencies without
              having to await select timeout or another socket event */
@@ -1587,7 +1580,6 @@ static void http_connect(curl_socket_t *infdp,
 
       /* socket clearing */
       for(i = 0; i <= max_tunnel_idx; i++) {
-        int loop;
         for(loop = 2; loop; loop--) {
           if(clientfd[i] != CURL_SOCKET_BAD) {
             if(!poll_client_wr[i] && !poll_client_rd[i]) {
