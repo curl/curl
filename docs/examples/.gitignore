@@ -18,6 +18,7 @@ http-post
 httpcustomheader
 httpput
 https
+imap
 multi-app
 multi-debugcallback
 multi-double
