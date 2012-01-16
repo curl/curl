@@ -1184,8 +1184,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   const char *op_br = "";
   const char *cl_br = "";
 #ifdef TCP_NODELAY
-  curl_socklen_t flag = 1;
-  int level = IPPROTO_TCP;
+  curl_socklen_t flag;
 #endif
 
 #ifdef ENABLE_IPV6
@@ -1218,9 +1217,12 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
 #ifdef TCP_NODELAY
   /* Disable the Nagle algorithm */
-  if(setsockopt(serverfd, level, TCP_NODELAY,
-                (void *)&flag, sizeof(flag)) < 0)
+  flag = 1;
+  if(0 != setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
+                     (void *)&flag, sizeof(flag)))
     logmsg("====> TCP_NODELAY for server conection failed");
+  else
+    logmsg("TCP_NODELAY set for server conection");
 #endif
 
 #ifdef ENABLE_IPV6
@@ -1304,8 +1306,7 @@ static void http_connect(curl_socket_t *infdp,
   bool poll_client_wr[2] = { TRUE, TRUE };
   bool poll_server_wr[2] = { TRUE, TRUE };
 #ifdef TCP_NODELAY
-  curl_socklen_t flag = 1;
-  int level = IPPROTO_TCP;
+  curl_socklen_t flag;
 #endif
   bool primary = FALSE;
   bool secondary = FALSE;
@@ -1319,7 +1320,7 @@ static void http_connect(curl_socket_t *infdp,
   /* Sleep here to make sure the client reads CONNECT response's
      'end of headers' separate from the server data that follows.
      This is done to prevent triggering libcurl known bug #39. */
-  for(loop = 2; loop && !got_exit_signal; loop--)
+  for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
     wait_ms(250);
   if(got_exit_signal)
     goto http_connect_cleanup;
@@ -1417,29 +1418,37 @@ static void http_connect(curl_socket_t *infdp,
           logmsg("====> Client connect DATA");
 #ifdef TCP_NODELAY
           /* Disable the Nagle algorithm */
-          if(setsockopt(datafd, level, TCP_NODELAY,
-                        (void *)&flag, sizeof(flag)) < 0)
-            logmsg("====> TCP_NODELAY for client conection failed");
+          flag = 1;
+          if(0 != setsockopt(datafd, IPPROTO_TCP, TCP_NODELAY,
+                             (void *)&flag, sizeof(flag)))
+            logmsg("====> TCP_NODELAY for client DATA conection failed");
+          else
+            logmsg("TCP_NODELAY set for client DATA conection");
 #endif
           req2.pipelining = FALSE;
           err = get_request(datafd, &req2);
           if(!err) {
             err = send_doc(datafd, &req2);
             if(!err && (req2.testno == DOCNUMBER_CONNECT)) {
-              /* connect to the server */
-              serverfd[DATA] = connect_to(ipaddr, req2.connect_port);
-              if(serverfd[DATA] != CURL_SOCKET_BAD) {
-                /* secondary tunnel established, now we have two connections */
-                poll_client_rd[DATA] = TRUE;
-                poll_client_wr[DATA] = TRUE;
-                poll_server_rd[DATA] = TRUE;
-                poll_server_wr[DATA] = TRUE;
-                max_tunnel_idx = DATA;
-                secondary = TRUE;
-                toc[DATA] = 0;
-                tos[DATA] = 0;
-                clientfd[DATA] = datafd;
-                datafd = CURL_SOCKET_BAD;
+              /* sleep to prevent triggering libcurl known bug #39. */
+              for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
+                wait_ms(250);
+              if(!got_exit_signal) {
+                /* connect to the server */
+                serverfd[DATA] = connect_to(ipaddr, req2.connect_port);
+                if(serverfd[DATA] != CURL_SOCKET_BAD) {
+                  /* secondary tunnel established, now we have two connections */
+                  poll_client_rd[DATA] = TRUE;
+                  poll_client_wr[DATA] = TRUE;
+                  poll_server_rd[DATA] = TRUE;
+                  poll_server_wr[DATA] = TRUE;
+                  max_tunnel_idx = DATA;
+                  secondary = TRUE;
+                  toc[DATA] = 0;
+                  tos[DATA] = 0;
+                  clientfd[DATA] = datafd;
+                  datafd = CURL_SOCKET_BAD;
+                }
               }
             }
           }
@@ -1542,7 +1551,7 @@ static void http_connect(curl_socket_t *infdp,
 
       /* endpoint read/write disabling, endpoint closing and tunnel teardown */
       for(i = 0; i <= max_tunnel_idx; i++) {
-        for(loop = 2; loop; loop--) {
+        for(loop = 2; loop > 0; loop--) {
           /* loop twice to satisfy condition interdependencies without
              having to await select timeout or another socket event */
           if(clientfd[i] != CURL_SOCKET_BAD) {
@@ -1580,7 +1589,7 @@ static void http_connect(curl_socket_t *infdp,
 
       /* socket clearing */
       for(i = 0; i <= max_tunnel_idx; i++) {
-        for(loop = 2; loop; loop--) {
+        for(loop = 2; loop > 0; loop--) {
           if(clientfd[i] != CURL_SOCKET_BAD) {
             if(!poll_client_wr[i] && !poll_client_rd[i]) {
               logmsg("[%s] CLOSING client socket", data_or_ctrl(i));
@@ -1791,8 +1800,8 @@ int main(int argc, char *argv[])
   }
 
   flag = 1;
-  if (0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *)&flag, sizeof(flag))) {
+  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                     (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
            error, strerror(error));
@@ -1891,10 +1900,11 @@ int main(int argc, char *argv[])
      * response in many small segments to torture the clients more.
      */
     flag = 1;
-    if (setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
-                   (void *)&flag, sizeof(flag)) == -1) {
+    if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
+                       (void *)&flag, sizeof(flag)))
       logmsg("====> TCP_NODELAY failed");
-    }
+    else
+      logmsg("TCP_NODELAY set");
 #endif
 
     /* initialization of httprequest struct is done in get_request(), but due
