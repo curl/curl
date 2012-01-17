@@ -1349,9 +1349,12 @@ static void http_connect(curl_socket_t *infdp,
     FD_ZERO(&output);
 
     if((clientfd[DATA] == CURL_SOCKET_BAD) &&
-       (serverfd[DATA] == CURL_SOCKET_BAD)) {
-      /* when secondary tunnel is not established the listener socket
-         is monitored to allow client to establish the secondary tunnel */
+       (serverfd[DATA] == CURL_SOCKET_BAD) &&
+       poll_client_rd[CTRL] && poll_client_wr[CTRL] &&
+       poll_server_rd[CTRL] && poll_server_wr[CTRL]) {
+      /* listener socket is monitored to allow client to establish
+         secondary tunnel only when this tunnel is not established
+         and primary one is fully operational */
       FD_SET(rootfd, &input);
       maxfd = rootfd;
     }
@@ -1837,7 +1840,7 @@ int main(int argc, char *argv[])
          use_gopher?"GOPHER":"HTTP", ipv_inuse, (int)port);
 
   /* start accepting connections */
-  rc = listen(sock, 2);
+  rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error: (%d) %s",
