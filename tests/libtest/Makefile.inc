@@ -2,6 +2,9 @@
 TESTUTIL = testutil.c testutil.h
 
 # files used only in some libcurl test programs
+TSTTRACE = testtrace.c testtrace.h
+
+# files used only in some libcurl test programs
 WARNLESS = $(top_srcdir)/lib/warnless.c $(top_srcdir)/lib/warnless.h
 
 # these files are used in every single test program below
@@ -23,7 +26,7 @@ chkhostname_LDADD = @CURL_NETWORK_LIBS@
 chkhostname_DEPENDENCIES =
 chkhostname_CFLAGS = $(AM_CFLAGS)
 
-lib500_SOURCES = lib500.c $(SUPPORTFILES)
+lib500_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE)
 
 lib501_SOURCES = lib501.c $(SUPPORTFILES)
 
@@ -155,7 +158,7 @@ lib571_SOURCES = lib571.c $(SUPPORTFILES)
 
 lib572_SOURCES = lib572.c $(SUPPORTFILES)
 
-lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(TSTTRACE)
 
 lib578_SOURCES = lib578.c $(SUPPORTFILES)
 
@@ -165,7 +168,7 @@ lib582_SOURCES = lib582.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 
 lib583_SOURCES = lib583.c $(SUPPORTFILES)
 
-lib585_SOURCES = lib500.c $(SUPPORTFILES)
+lib585_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE)
 lib585_CPPFLAGS = $(AM_CPPFLAGS) -DLIB585
 
 lib586_SOURCES = lib586.c $(SUPPORTFILES)
