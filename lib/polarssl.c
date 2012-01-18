@@ -276,10 +276,13 @@ Curl_polarssl_connect(struct connectdata *conn,
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
 #if POLARSSL_VERSION_NUMBER<0x01000000
-        ssl_get_cipher(&conn->ssl[sockindex].ssl));
+        ssl_get_cipher(&conn->ssl[sockindex].ssl)
+#elif POLARSSL_VERSION_NUMBER >= 0x01010000
+        ssl_get_ciphersuite(&conn->ssl[sockindex].ssl)
 #else
-        ssl_get_ciphersuite_name(&conn->ssl[sockindex].ssl));
+        ssl_get_ciphersuite_name(&conn->ssl[sockindex].ssl)
 #endif
+    );
 
   ret = ssl_get_verify_result(&conn->ssl[sockindex].ssl);
 
