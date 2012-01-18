@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+TELNET
+UPLOAD
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+telnet
+</features>
+ <name>
+TELNET check of upload with stdout redirected
+ </name>
+<stdin>
+GET /ignore/for/1327 HTTP/1.0
+
+</stdin>
+<file name="log/1327.txt">
+GET /we/want/1327 HTTP/1.0
+
+</file>
+ <command option="no-output">
+telnet://%HOSTIP:%HTTPPORT -T log/1327.txt
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /we/want/1327 HTTP/1.0
+
+</protocol>
+</verify>
+</testcase>
