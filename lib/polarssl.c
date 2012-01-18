@@ -137,7 +137,7 @@ Curl_polarssl_connect(struct connectdata *conn,
 
     if(ret) {
       failf(data, "Error reading ca cert file %s: -0x%04X",
-            data->set.str[STRING_SSL_CAFILE], -ret);
+            data->set.str[STRING_SSL_CAFILE], ret);
 
       if(data->set.ssl.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
