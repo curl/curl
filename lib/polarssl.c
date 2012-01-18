@@ -65,6 +65,15 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* version dependent differences */
+#if POLARSSL_VERSION_NUMBER < 0x01010000
+/* the old way */
+#define HAVEGE_RANDOM havege_rand
+#else
+/* from 1.1.0 */
+#define HAVEGE_RANDOM havege_random
+#endif
+
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
 
@@ -189,7 +198,7 @@ Curl_polarssl_connect(struct connectdata *conn,
   ssl_set_endpoint(&conn->ssl[sockindex].ssl, SSL_IS_CLIENT);
   ssl_set_authmode(&conn->ssl[sockindex].ssl, SSL_VERIFY_OPTIONAL);
 
-  ssl_set_rng(&conn->ssl[sockindex].ssl, havege_rand,
+  ssl_set_rng(&conn->ssl[sockindex].ssl, HAVEGE_RANDOM,
               &conn->ssl[sockindex].hs);
   ssl_set_bio(&conn->ssl[sockindex].ssl,
               net_recv, &conn->sock[sockindex],
