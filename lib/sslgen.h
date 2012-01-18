@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,7 @@ CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data);
 struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data);
 
 /* init the SSL session ID cache */
-CURLcode Curl_ssl_initsessions(struct SessionHandle *, long);
+CURLcode Curl_ssl_initsessions(struct SessionHandle *, size_t);
 size_t Curl_ssl_version(char *buffer, size_t size);
 bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex);
@@ -65,7 +65,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize);
 /* Kill a single session ID entry in the cache */
-int Curl_ssl_kill_session(struct curl_ssl_session *session);
+void Curl_ssl_kill_session(struct curl_ssl_session *session);
 /* delete a session from the cache */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
@@ -90,7 +90,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 #define Curl_ssl_check_cxn(x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
 #define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
-#define Curl_ssl_kill_session(x) 0
+#define Curl_ssl_kill_session(x) Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_SSLGEN_H */

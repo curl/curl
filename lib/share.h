@@ -1,6 +1,5 @@
-#ifndef __CURL_SHARE_H
-#define __CURL_SHARE_H
-
+#ifndef HEADER_CURL_SHARE_H
+#define HEADER_CURL_SHARE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,7 +50,7 @@ struct Curl_share {
 #endif
 
   struct curl_ssl_session *sslsession;
-  unsigned int nsslsession;
+  size_t max_ssl_sessions;
   long sessionage;
 };
 
@@ -59,4 +58,4 @@ CURLSHcode Curl_share_lock (struct SessionHandle *, curl_lock_data,
                             curl_lock_access);
 CURLSHcode Curl_share_unlock (struct SessionHandle *, curl_lock_data);
 
-#endif /* __CURL_SHARE_H */
+#endif /* HEADER_CURL_SHARE_H */

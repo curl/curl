@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,8 +88,8 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(!share->sslsession) {
-        share->nsslsession = 8;
-        share->sslsession = calloc(share->nsslsession,
+        share->max_ssl_sessions = 8;
+        share->sslsession = calloc(share->max_ssl_sessions,
                                    sizeof(struct curl_ssl_session));
         share->sessionage = 0;
         if(!share->sslsession)
@@ -132,11 +132,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
-      if(share->sslsession) {
-        free(share->sslsession);
-        share->sslsession = NULL;
-        share->nsslsession = 0;
-      }
+      Curl_safefree(share->sslsession);
       break;
 #else
       return CURLSHE_NOT_BUILT_IN;
@@ -202,8 +198,8 @@ curl_share_cleanup(CURLSH *sh)
 
 #ifdef USE_SSL
   if(share->sslsession) {
-    unsigned int i;
-    for(i = 0; i < share->nsslsession; ++i)
+    size_t i;
+    for(i = 0; i < share->max_ssl_sessions; i++)
       Curl_ssl_kill_session(&(share->sslsession[i]));
     free(share->sslsession);
   }

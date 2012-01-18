@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -235,7 +235,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
 {
   struct curl_ssl_session *check;
   struct SessionHandle *data = conn->data;
-  long i;
+  size_t i;
   long *general_age;
   bool no_match = TRUE;
 
@@ -253,7 +253,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
   else
     general_age = &data->state.sessionage;
 
-  for(i=0; i< data->set.ssl.numsessions; i++) {
+  for(i = 0; i < data->set.ssl.max_ssl_sessions; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
       /* not session ID means blank entry */
@@ -282,7 +282,7 @@ int Curl_ssl_getsessionid(struct connectdata *conn,
 /*
  * Kill a single session ID entry in the cache.
  */
-int Curl_ssl_kill_session(struct curl_ssl_session *session)
+void Curl_ssl_kill_session(struct curl_ssl_session *session)
 {
   if(session->sessionid) {
     /* defensive check */
@@ -290,18 +290,13 @@ int Curl_ssl_kill_session(struct curl_ssl_session *session)
     /* free the ID the SSL-layer specific way */
     curlssl_session_free(session->sessionid);
 
-    session->sessionid=NULL;
+    session->sessionid = NULL;
     session->age = 0; /* fresh */
 
     Curl_free_ssl_config(&session->ssl_config);
 
     Curl_safefree(session->name);
-    session->name = NULL; /* no name */
-
-    return 0; /* ok */
   }
-  else
-    return 1;
 }
 
 /*
@@ -309,14 +304,13 @@ int Curl_ssl_kill_session(struct curl_ssl_session *session)
  */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
 {
-  int i;
+  size_t i;
   struct SessionHandle *data=conn->data;
 
   if(SSLSESSION_SHARED(data))
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION,
-                    CURL_LOCK_ACCESS_SINGLE);
+    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
 
-  for(i=0; i< data->set.ssl.numsessions; i++) {
+  for(i = 0; i < data->set.ssl.max_ssl_sessions; i++) {
     struct curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
@@ -339,7 +333,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize)
 {
-  long i;
+  size_t i;
   struct SessionHandle *data=conn->data; /* the mother of all structs */
   struct curl_ssl_session *store = &data->state.session[0];
   long oldest_age=data->state.session[0].age; /* zero if unused */
@@ -367,14 +361,14 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   }
 
   /* find an empty slot for us, or find the oldest */
-  for(i=1; (i<data->set.ssl.numsessions) &&
+  for(i = 1; (i < data->set.ssl.max_ssl_sessions) &&
         data->state.session[i].sessionid; i++) {
     if(data->state.session[i].age < oldest_age) {
       oldest_age = data->state.session[i].age;
       store = &data->state.session[i];
     }
   }
-  if(i == data->set.ssl.numsessions)
+  if(i == data->set.ssl.max_ssl_sessions)
     /* cache is full, we must "kill" the oldest entry! */
     Curl_ssl_kill_session(store);
   else
@@ -407,16 +401,15 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 
 void Curl_ssl_close_all(struct SessionHandle *data)
 {
-  long i;
+  size_t i;
   /* kill the session ID cache if not shared */
   if(data->state.session && !SSLSESSION_SHARED(data)) {
-    for(i=0; i< data->set.ssl.numsessions; i++)
+    for(i = 0; i < data->set.ssl.max_ssl_sessions; i++)
       /* the single-killer function handles empty table slots */
       Curl_ssl_kill_session(&data->state.session[i]);
 
     /* free the cache data */
-    free(data->state.session);
-    data->state.session = NULL;
+    Curl_safefree(data->state.session);
   }
 
   curlssl_close_all(data);
@@ -466,7 +459,7 @@ struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data)
  * This sets up a session ID cache to the specified size. Make sure this code
  * is agnostic to what underlying SSL technology we use.
  */
-CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
+CURLcode Curl_ssl_initsessions(struct SessionHandle *data, size_t amount)
 {
   struct curl_ssl_session *session;
 
@@ -479,7 +472,7 @@ CURLcode Curl_ssl_initsessions(struct SessionHandle *data, long amount)
     return CURLE_OUT_OF_MEMORY;
 
   /* store the info in the SSL section */
-  data->set.ssl.numsessions = amount;
+  data->set.ssl.max_ssl_sessions = amount;
   data->state.session = session;
   data->state.sessionage = 1; /* this is brand new */
   return CURLE_OK;

@@ -1420,9 +1420,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   }
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
-     after the *_setopt() calls (that could change the size of the cache) but
+     after the *_setopt() calls (that could specify the size of the cache) but
      before any transfer takes place. */
-  res = Curl_ssl_initsessions(data, data->set.ssl.numsessions);
+  res = Curl_ssl_initsessions(data, data->set.ssl.max_ssl_sessions);
   if(res)
     return res;
 
