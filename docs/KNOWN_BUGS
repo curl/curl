@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+78. curl and libcurl don't always signal the client properly when "sending"
+  zero bytes files - it makes for example the command line client not creating
+  any file at all. Like when using FTP.
+  http://curl.haxx.se/bug/view.cgi?id=3438362
+
 77. CURLOPT_FORBID_REUSE on a handle prevents NTLM from working since it
   "absuses" the underlying connection re-use system and if connections are
   forced to close they break the NTLM support.
