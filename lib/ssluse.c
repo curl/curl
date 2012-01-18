@@ -466,6 +466,7 @@ int cert_stuff(struct connectdata *conn,
         failf(data, SSL_CLIENT_CERT_ERR);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
 
@@ -474,6 +475,7 @@ int cert_stuff(struct connectdata *conn,
               cert_file);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
 
@@ -482,6 +484,7 @@ int cert_stuff(struct connectdata *conn,
               "does not match certificate in same file", cert_file);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
       /* Set Certificate Verification chain */
@@ -491,12 +494,14 @@ int cert_stuff(struct connectdata *conn,
             failf(data, "cannot add certificate to certificate chain");
             EVP_PKEY_free(pri);
             X509_free(x509);
+            sk_X509_pop_free(ca, X509_free);
             return 0;
           }
           if(!SSL_CTX_add_client_CA(ctx, sk_X509_value(ca, i))) {
             failf(data, "cannot add certificate to client CA list");
             EVP_PKEY_free(pri);
             X509_free(x509);
+            sk_X509_pop_free(ca, X509_free);
             return 0;
           }
         }
@@ -504,6 +509,7 @@ int cert_stuff(struct connectdata *conn,
 
       EVP_PKEY_free(pri);
       X509_free(x509);
+      sk_X509_pop_free(ca, X509_free);
       cert_done = 1;
       break;
 #else
