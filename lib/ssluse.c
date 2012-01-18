@@ -1425,6 +1425,7 @@ ossl_connect_step1(struct connectdata *conn,
   X509_LOOKUP *lookup=NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  long ctx_options;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
 #ifdef ENABLE_IPV6
@@ -1530,20 +1531,33 @@ ossl_connect_step1(struct connectdata *conn,
      If someone writes an application with libcurl and openssl who wants to
      enable the feature, one can do this in the SSL callback.
 
+     SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG option enabling allowed proper
+     interoperability with web server Netscape Enterprise Server 2.0.1 which
+     was released back in 1996.
+
+     Due to CVE-2010-4180, option SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG has
+     become ineffective as of OpenSSL 0.9.8q and 1.0.0c. In order to mitigate
+     CVE-2010-4180 when using previous OpenSSL versions we no longer enable
+     this option regardless of OpenSSL version and SSL_OP_ALL definition.
   */
+
+  ctx_options = SSL_OP_ALL;
+
 #ifdef SSL_OP_NO_TICKET
-  /* expect older openssl releases to not have this define so only use it if
-     present */
-#define CURL_CTX_OPTIONS SSL_OP_ALL|SSL_OP_NO_TICKET
-#else
-#define CURL_CTX_OPTIONS SSL_OP_ALL
+  ctx_options |= SSL_OP_NO_TICKET;
 #endif
 
-  SSL_CTX_set_options(connssl->ctx, CURL_CTX_OPTIONS);
+#if defined(SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG) && \
+  (SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG == 0x00000008L)
+  /* mitigate CVE-2010-4180 */
+  ctx_options &= ~SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
+#endif
 
   /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
   if(data->set.ssl.version == CURL_SSLVERSION_DEFAULT)
-    SSL_CTX_set_options(connssl->ctx, SSL_OP_NO_SSLv2);
+    ctx_options |= SSL_OP_NO_SSLv2;
+
+  SSL_CTX_set_options(connssl->ctx, ctx_options);
 
 #if 0
   /*
