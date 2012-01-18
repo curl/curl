@@ -61,6 +61,11 @@ This release includes the following bugfixes:
  o FTP: CURLE_PARTIAL_FILE will not close the control channel [40]
  o win32-threaded-resolver: stop using a dummy socket
  o OpenSSL: remove reference to openssl internal struct [41]
+ o OpenSSL: SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG option no longer enabled
+ o OpenSSL: fix PKCS#12 certificate parsing related memory leak
+ o OpenLDAP: fix LDAP connection phase memory leak [42]
+ o Telnet: Use correct file descriptor for telnet upload
+ o Telnet: Remove bogus optimisation of telnet upload
 
 This release includes the following known bugs:
 
@@ -75,7 +80,8 @@ advice from friends like these:
  Naveen Chandran, Ward Willats, Vladimir Grishchenko, Colin Hogben,
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
  Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka, Patrice Guerin,
- Armel Asselin, Arthur Murray, Steve H Truong, Peter Sylvester
+ Armel Asselin, Arthur Murray, Steve H Truong, Peter Sylvester,
+ Johannes Bauer
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -122,3 +128,4 @@ References to bug reports and discussions on issues:
  [39] = http://curl.haxx.se/mail/lib-2012-01/0160.html
  [40] = http://curl.haxx.se/mail/lib-2012-01/0096.html
  [41] = http://curl.haxx.se/mail/lib-2012-01/0049.html
+ [42] = http://curl.haxx.se/bug/view.cgi?id=3474308
