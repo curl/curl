@@ -24,9 +24,9 @@ CFGSET=true
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
 !MESSAGE   USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
-!MESSAGE   USE_IPV6=<yes or no>         - Enable IPV6, default to yes
+!MESSAGE   ENABLE_IPV6=<yes or no>         - Enable IPV6, default to yes
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
-!MESSAGE   USE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
+!MESSAGE   ENABLE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
 !MESSAGE                                  or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols release build)
 !ERROR please choose a valid mode
@@ -49,11 +49,13 @@ CURL_OBJS=$(CURL_OBJS:.c=.obj)
 USE_SSPI=true
 !ENDIF
 
-!IFNDEF USE_IPV6
-USE_IPV6=true
+!IFNDEF ENABLE_IPV6
+USE_IPV6   =true
+!ELSEIF "$(ENABLE_IPV6)"=="yes"
+USE_IPV6   =true
 !ENDIF
 
-!IFNDEF USE_IDN
+!IFNDEF ENABLE_IDN
 USE_IDN=true
 !ENDIF
 
