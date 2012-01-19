@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -1324,8 +1324,7 @@ implementation does not.  The option \fI--socks5-gssapi-nec\fP allows the
 unprotected exchange of the protection mode negotiation. (Added in 7.19.4).
 .IP "--stderr <file>"
 Redirect all writes to stderr to the specified file instead. If the file name
-is a plain '-', it is instead written to stdout. This option has no point when
-you're using a shell with decent redirecting capabilities.
+is a plain '-', it is instead written to stdout.
 
 If this option is used several times, the last one will be used.
 .IP "-t, --telnet-option <OPT=val>"
