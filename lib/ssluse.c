@@ -1545,6 +1545,13 @@ ossl_connect_step1(struct connectdata *conn,
      become ineffective as of OpenSSL 0.9.8q and 1.0.0c. In order to mitigate
      CVE-2010-4180 when using previous OpenSSL versions we no longer enable
      this option regardless of OpenSSL version and SSL_OP_ALL definition.
+
+     OpenSSL added a work-around for a SSL 3.0/TLS 1.0 CBC vulnerability
+     (http://www.openssl.org/~bodo/tls-cbc.txt). In 0.9.6e they added a bit to
+     SSL_OP_ALL that _disables_ that work-around despite the fact that
+     SSL_OP_ALL is documented to do "rather harmless" workarounds. In order to
+     keep the secure work-around, the SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit
+     must not be set.
   */
 
   ctx_options = SSL_OP_ALL;
@@ -1556,6 +1563,10 @@ ossl_connect_step1(struct connectdata *conn,
 #ifdef SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
   /* mitigate CVE-2010-4180 */
   ctx_options &= ~SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
+#endif
+
+#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
+  ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
   /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
