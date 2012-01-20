@@ -137,7 +137,9 @@ static long ConnectionKillOne(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
-
+static CURLcode parse_url_userpass(struct SessionHandle *data,
+                                   struct connectdata *conn,
+                                   char *user, char *passwd);
 /*
  * Protocol table.
  */
@@ -3666,7 +3668,9 @@ static CURLcode findprotocol(struct SessionHandle *data,
  */
 static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                     struct connectdata *conn,
-                                    bool *prot_missing)
+                                    bool *prot_missing,
+                                    char *user,
+                                    char *passwd)
 {
   char *at;
   char *fragment;
@@ -3675,6 +3679,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   int rc;
   char protobuf[16];
   const char *protop;
+  CURLcode result;
 
   *prot_missing = FALSE;
 
@@ -3840,6 +3845,14 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     memmove(&path[1], path, strlen(path)+1);
     path[0] = '/';
   }
+
+  /*************************************************************
+   * Parse a user name and password in the URL and strip it out
+   * of the host name
+   *************************************************************/
+  result = parse_url_userpass(data, conn, user, passwd);
+  if(result != CURLE_OK)
+    return result;
 
   if(conn->host.name[0] == '[') {
     /* This looks like an IPv6 address literal.  See if there is an address
@@ -4783,7 +4796,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  result = parseurlandfillconn(data, conn, &prot_missing);
+  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd);
   if(result != CURLE_OK)
     return result;
 
@@ -4811,15 +4824,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     data->change.url = reurl;
     data->change.url_alloc = TRUE; /* free this later */
   }
-
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
-  if(result != CURLE_OK)
-    return result;
-
 
   /*************************************************************
    * If the protocol can't handle url query strings, then cut
