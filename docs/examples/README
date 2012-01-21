@@ -55,6 +55,7 @@ htmltitle.cc   - download a HTML file and extract the <title> tag from a HTML
 http-post.c    - HTTP POST
 httpput.c      - HTTP PUT a local file
 https.c        - simple HTTPS transfer
+imap.c         - simple IMAP transfer
 multi-app.c    - a multi-interface app
 multi-debugcallback.c - a multi-interface app using the debug callback
 multi-double.c - a multi-interface app doing two simultaneous transfers
@@ -75,4 +76,5 @@ simple.c       - the most simple download a URL source
 simplepost.c   - HTTP POST
 simplessl.c    - HTTPS example with certificates many options set
 synctime.c     - Sync local time by extracting date from remote HTTP servers
+url2file.c     - download a document and store it in a file
 10-at-a-time.c - Download many files simultaneously, 10 at a time.
