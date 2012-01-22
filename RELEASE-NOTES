@@ -66,6 +66,11 @@ This release includes the following bugfixes:
  o OpenLDAP: fix LDAP connection phase memory leak [42]
  o Telnet: Use correct file descriptor for telnet upload
  o Telnet: Remove bogus optimisation of telnet upload
+ o URL parse: user name with ipv6 numerical address
+ o polarssl: show cipher suite name correctly with 1.1.0
+ o polarssl: havege_rand is not present in version 1.1.0 WARNING, we still
+   use the old API which is said to be insecure. See
+   http://polarssl.org/trac/wiki/SecurityAdvisory201102
 
 This release includes the following known bugs:
 
@@ -81,7 +86,7 @@ advice from friends like these:
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
  Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka, Patrice Guerin,
  Armel Asselin, Arthur Murray, Steve H Truong, Peter Sylvester,
- Johannes Bauer
+ Johannes Bauer, Brandon Wang, Pierre Joye, Robert Schumann
 
         Thanks! (and sorry if I forgot to mention someone)
 
