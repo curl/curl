@@ -989,7 +989,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 {
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = CURL_SOCKET_BAD;
-  int aliasindex;
   Curl_addrinfo *ai;
   Curl_addrinfo *curr_addr;
 
@@ -1026,8 +1025,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with a Curl_addrinfo chain
    */
-  for(curr_addr = ai, aliasindex=0; curr_addr;
-      curr_addr = curr_addr->ai_next, aliasindex++) {
+  for(curr_addr = ai; curr_addr; curr_addr = curr_addr->ai_next) {
 
     /* start connecting to the IP curr_addr points to */
     CURLcode res =
