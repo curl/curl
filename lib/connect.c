@@ -732,6 +732,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
   next:
 
+  conn->timeoutms_per_addr = conn->ip_addr->ai_next == NULL ?
+                             allow : allow / 2;
   code = trynextip(conn, sockindex, connected);
 
   if(code) {
@@ -1012,9 +1014,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  /* Max time for each address */
   conn->num_addr = Curl_num_addresses(remotehost->addr);
-  conn->timeoutms_per_addr = timeout_ms / conn->num_addr;
 
   ai = remotehost->addr;
 
@@ -1026,14 +1026,17 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    * Connecting with a Curl_addrinfo chain
    */
   for(curr_addr = ai; curr_addr; curr_addr = curr_addr->ai_next) {
+    CURLcode res;
+
+    /* Max time for the next address */
+    conn->timeoutms_per_addr = curr_addr->ai_next == NULL ?
+                               timeout_ms : timeout_ms / 2;
 
     /* start connecting to the IP curr_addr points to */
-    CURLcode res =
-      singleipconnect(conn, curr_addr,
-                      /* don't hang when doing multi */
-                      (data->state.used_interface == Curl_if_multi)?0:
-                      conn->timeoutms_per_addr, &sockfd, connected);
-
+    res = singleipconnect(conn, curr_addr,
+                          /* don't hang when doing multi */
+                          (data->state.used_interface == Curl_if_multi)?0:
+                          conn->timeoutms_per_addr, &sockfd, connected);
     if(res)
       return res;
 
