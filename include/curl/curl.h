@@ -1499,6 +1499,13 @@ typedef enum {
      of miliseconds. */
   CINIT(ACCEPTTIMEOUT_MS, LONG, 212),
 
+  /* Set TCP keepalive */
+  CINIT(TCP_KEEPALIVE, LONG, 213),
+
+  /* non-universal keepalive knobs (Linux, AIX, HP-UX, more) */
+  CINIT(TCP_KEEPIDLE, LONG, 214),
+  CINIT(TCP_KEEPINTVL, LONG, 215),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

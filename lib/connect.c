@@ -91,6 +91,35 @@
 
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
+static void
+tcpkeepalive(struct SessionHandle *data,
+             int sockfd)
+{
+  int optval = data->set.tcp_keepalive;
+
+  /* only set IDLE and INTVL if setting KEEPALIVE is successful */
+  if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
+        (void *)&optval, sizeof(optval)) < 0) {
+    infof(data, "Failed to set SO_KEEPALIVE on fd %d\n", sockfd);
+  }
+  else {
+#ifdef TCP_KEEPIDLE
+    optval = data->set.tcp_keepidle;
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
+          (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPIDLE on fd %d\n", sockfd);
+    }
+#endif
+#ifdef TCP_KEEPINTVL
+    optval = data->set.tcp_keepintvl;
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
+          (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);
+    }
+#endif
+  }
+}
+
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai, /* start connecting to this */
@@ -875,6 +904,9 @@ singleipconnect(struct connectdata *conn,
   nosigpipe(conn, sockfd);
 
   Curl_sndbufset(sockfd);
+
+  if(data->set.tcp_keepalive)
+    tcpkeepalive(data, sockfd);
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */

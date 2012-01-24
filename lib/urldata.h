@@ -1539,6 +1539,10 @@ struct UserDefined {
 
   long gssapi_delegation; /* GSSAPI credential delegation, see the
                              documentation of CURLOPT_GSSAPI_DELEGATION */
+
+  bool tcp_keepalive;    /* use TCP keepalives */
+  long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
+  long tcp_keepintvl;    /* seconds between TCP keepalive probes */
 };
 
 struct Names {

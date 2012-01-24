@@ -748,6 +748,13 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
 
+  /* tcp keepalives are disabled by default, but provide reasonable values for
+   * the interval and idle times.
+   */
+  set->tcp_keepalive = 0;
+  set->tcp_keepintvl = 60;
+  set->tcp_keepidle = 60;
+
   return res;
 }
 
@@ -810,6 +817,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
        the first call to curl_easy_perform() or when the handle is added to a
        multi stack. */
   }
+
 
   if(res) {
     Curl_resolver_cleanup(data->state.resolver);
@@ -2543,6 +2551,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #endif
   case CURLOPT_DNS_SERVERS:
     result = Curl_set_dns_servers(data, va_arg(param, char *));
+    break;
+
+  case CURLOPT_TCP_KEEPALIVE:
+    data->set.tcp_keepalive = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
+  case CURLOPT_TCP_KEEPIDLE:
+    data->set.tcp_keepidle = va_arg(param, long);
+    break;
+  case CURLOPT_TCP_KEEPINTVL:
+    data->set.tcp_keepintvl = va_arg(param, long);
     break;
 
   default:

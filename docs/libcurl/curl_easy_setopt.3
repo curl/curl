@@ -915,6 +915,24 @@ overdone.
 .IP CURLOPT_ADDRESS_SCOPE
 Pass a long specifying the scope_id value to use when connecting to IPv6
 link-local or site-local addresses. (Added in 7.19.0)
+
+.IP CURLOPT_TCP_KEEPALIVE
+Pass a long. If set to 1, TCP keepalive probes will be sent. The delay and
+frequency of these probes can be controlled by the \fICURLOPT_TCP_KEEPIDLE\fP
+and \fICURLOPT_TCP_KEEPINTVL\fP options, provided the operating system supports
+them. Set to 0 (default behavior) to disable keepalive probes (Added in
+7.24.1).
+
+.IP CURLOPT_TCP_KEEPIDLE
+Pass a long. Sets the delay, in seconds, that the operating system will wait
+while the connection is idle before sending keepalive probes. Not all operating
+systems support this option. (Added in 7.24.1)
+
+.IP CURLOPT_TCP_KEEPINTVL
+Pass a long. Sets the interval, in seconds, that the operating system will wait
+between sending keepalive probes. Not all operating systems support this
+option. (Added in 7.24.1)
+
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
