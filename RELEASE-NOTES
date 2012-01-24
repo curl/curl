@@ -7,6 +7,13 @@ Curl and libcurl 7.24.0
  Known libcurl bindings:       39
  Contributors:                 907
 
+This release includes the following security fixes:
+
+ o curl was vulnerable to a data injection attack for certain protocols
+   http://curl.haxx.se/docs/adv_20120124.html
+ o curl was vulnerable to a SSL CBC IV vulnerability when built to use OpenSSL
+   http://curl.haxx.se/docs/adv_20120124B.html
+
 This release includes the following changes:
 
  o CURLOPT_QUOTE: SFTP supports the '*'-prefix now [24]
@@ -71,6 +78,7 @@ This release includes the following bugfixes:
  o polarssl: havege_rand is not present in version 1.1.0 WARNING, we still
    use the old API which is said to be insecure. See
    http://polarssl.org/trac/wiki/SecurityAdvisory201102
+ o gnutls: enforced use of SSLv3 [43]
 
 This release includes the following known bugs:
 
@@ -86,7 +94,8 @@ advice from friends like these:
  Alessandro Ghedini, Cedric Deltheil, Toni Moreno, Bernhard Reutner-Fischer,
  Sven Wegener, Alex Vinnik, Kamil Dudka, Mamoru Tasaka, Patrice Guerin,
  Armel Asselin, Arthur Murray, Steve H Truong, Peter Sylvester,
- Johannes Bauer, Brandon Wang, Pierre Joye, Robert Schumann
+ Johannes Bauer, Brandon Wang, Pierre Joye, Robert Schumann,
+ Christian Grothoff, Nikos Mavrogiannopoulos
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -134,3 +143,4 @@ References to bug reports and discussions on issues:
  [40] = http://curl.haxx.se/mail/lib-2012-01/0096.html
  [41] = http://curl.haxx.se/mail/lib-2012-01/0049.html
  [42] = http://curl.haxx.se/bug/view.cgi?id=3474308
+ [43] = http://curl.haxx.se/mail/lib-2012-01/0225.html
