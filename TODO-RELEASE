@@ -1,4 +1,4 @@
-To be addressed in 7.22.1
+To be addressed in 7.24.1
 =========================
 
 295 - "RTSP Authentication (#22)" https://github.com/bagder/curl/pull/22
@@ -8,4 +8,8 @@ To be addressed in 7.22.1
 300 - "Polling on stray socket on sequential transfers." Andrew S
       http://curl.haxx.se/mail/lib-2011-07/0053.html
 
-308 -
+308 - Revisit option --enable-threaded-resolver at least allow selection among
+      pthreads and Windows threads when building a Windows target.
+      http://curl.haxx.se/mail/lib-2012-01/0291.html
+
+309 - 
