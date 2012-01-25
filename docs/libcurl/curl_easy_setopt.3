@@ -266,7 +266,7 @@ If you forward the input arguments directly to "fseek" or "lseek", note that
 the data type for \fIoffset\fP is not the same as defined for curl_off_t on
 many systems! (Option added in 7.18.0)
 .IP CURLOPT_SEEKDATA
-Data pointer to pass to the file read function. If you use the
+Data pointer to pass to the file seek function. If you use the
 \fICURLOPT_SEEKFUNCTION\fP option, this is the pointer you'll get as input. If
 you don't specify a seek callback, NULL is passed. (Option added in 7.18.0)
 .IP CURLOPT_SOCKOPTFUNCTION
@@ -322,7 +322,7 @@ to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. Return 0 to signal success and
 1 if there was an error.  (Option added in 7.21.7)
 .IP CURLOPT_CLOSESOCKETDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the opensocket callback set with
+argument in the closesocket callback set with
 \fICURLOPT_CLOSESOCKETFUNCTION\fP.  (Option added in 7.21.7)
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
