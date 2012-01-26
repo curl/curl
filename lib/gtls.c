@@ -453,7 +453,13 @@ gtls_connect_step1(struct connectdata *conn,
     rc = gnutls_protocol_set_priority(session, protocol_priority);
 #else
     const char *err;
-    rc = gnutls_priority_set_direct(session, "-VERS-TLS-ALL:+VERS-SSL3.0",
+    /* the combination of the cipher ARCFOUR with SSL 3.0 and TLS 1.0 is not
+       vulnerable to attacks such as the BEAST, why this code now explicitly
+       asks for that
+    */
+    rc = gnutls_priority_set_direct(session,
+                                    "NORMAL:-VERS-TLS-ALL:+VERS-SSL3.0:"
+                                    "-CIPHER-ALL:+ARCFOUR-128",
                                     &err);
 #endif
     if(rc != GNUTLS_E_SUCCESS)
