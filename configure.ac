@@ -1824,6 +1824,9 @@ if test "$GNUTLS_ENABLED" = "1"; then
   if test "$USE_GNUTLS_NETTLE" = "1"; then
     AC_DEFINE(USE_GNUTLS_NETTLE, 1, [if GnuTLS uses nettle as crypto backend])
     AC_SUBST(USE_GNUTLS_NETTLE, [1])
+    LIBS="$LIBS -lnettle"
+  else
+    LIBS="$LIBS -lgcrypt"
   fi
 fi
 
