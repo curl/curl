@@ -116,6 +116,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(conn, "CONNECT", host_port, TRUE);
 
+      free(host_port);
+
       if(CURLE_OK == result) {
         char *host=(char *)"";
         const char *proxyconn="";
@@ -124,10 +126,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           "1.0" : "1.1";
 
         if(!Curl_checkheaders(data, "Host:")) {
-          host = aprintf("Host: %s\r\n", host_port);
+          host = aprintf("Host: %s%s%s:%hu\r\n", conn->bits.ipv6_ip?"[":"",
+                         hostname, conn->bits.ipv6_ip?"]":"",
+                         remote_port);
           if(!host) {
             free(req_buffer);
-            free(host_port);
             return CURLE_OUT_OF_MEMORY;
           }
         }
@@ -174,7 +177,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
       }
-      free(host_port);
+
       Curl_safefree(req_buffer);
       if(result)
         return result;
