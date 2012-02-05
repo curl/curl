@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "setup.h"
+#ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* global variable declarations, for easy-interface source code generation */
 
@@ -29,6 +30,8 @@ extern struct curl_slist *easysrc;
 extern struct curl_slist *easysrc_remarks;
 
 void dumpeasysrc(struct Configurable *config);
+
+#endif /* CURL_DISABLE_LIBCIRL_CMD */
 
 #endif /* HEADER_CURL_TOOL_EASYSRC_H */
 

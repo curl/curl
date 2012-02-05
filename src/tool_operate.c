@@ -354,6 +354,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   /* This is the first entry added to easysrc and it initializes the slist */
   easysrc = curl_slist_append(easysrc, "CURL *hnd = curl_easy_init();");
   if(!easysrc) {
@@ -361,6 +362,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
+#endif
 
   if(config->list_engines) {
     struct curl_slist *engines = NULL;
@@ -1246,10 +1248,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         retry_sleep = retry_sleep_default; /* ms */
         retrystart = tvnow();
 
+#ifndef CURL_DISABLE_LIBCURL_OPTION
         if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
           res = CURLE_OUT_OF_MEMORY;
           goto show_error;
         }
+#endif
 
         for(;;) {
           res = curl_easy_perform(curl);
@@ -1572,8 +1576,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     curl_easy_cleanup(curl);
     config->easy = curl = NULL;
   }
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   if(easysrc)
     curl_slist_append(easysrc, "curl_easy_cleanup(hnd);");
+#endif
 
   /* Close function-local opened file descriptors */
 
@@ -1585,10 +1591,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
 
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   /* Dump the libcurl code if previously enabled.
      NOTE: that this function relies on config->errors amongst other things
      so not everything can be closed and cleaned before this is called */
   dumpeasysrc(config);
+#endif
 
   if(config->errors_fopened && config->errors)
     fclose(config->errors);

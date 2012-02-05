@@ -110,7 +110,9 @@ static const char *const helptext[] = {
   "     --key KEY       Private key file name (SSL/SSH)",
   "     --key-type TYPE Private key file type (DER/PEM/ENG) (SSL)",
   "     --krb LEVEL     Enable Kerberos with specified security level (F)",
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   "     --libcurl FILE  Dump libcurl equivalent code of this command line",
+#endif
   "     --limit-rate RATE  Limit transfer speed to this rate",
   " -l, --list-only     List only names of an FTP directory (F)",
   "     --local-port RANGE  Force use of these local port numbers",

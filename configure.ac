@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -155,6 +155,7 @@ curl_tls_srp_msg="no      (--enable-tls-srp)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
+curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
@@ -650,6 +651,25 @@ AC_HELP_STRING([--disable-manual],[Disable built-in manual]),
 )
 dnl The actual use of the USE_MANUAL variable is done much later in this
 dnl script to allow other actions to disable it as well.
+
+dnl ************************************************************
+dnl disable C code generation support
+dnl
+AC_MSG_CHECKING([whether to enable generation of C code])
+AC_ARG_ENABLE(libcurl_option,
+AC_HELP_STRING([--enable-libcurl-option],[Enable --libcurl C code generation support])
+AC_HELP_STRING([--disable-libcurl-option],[Disable --libcurl C code generation support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_LIBCURL_OPTION, 1, [to disable --libcurl C code generation option])
+       curl_libcurl_msg="no"
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
 
 dnl **********************************************************************
 dnl Checks for libraries.
@@ -3306,31 +3326,32 @@ CURL_GENERATE_CONFIGUREHELP_PM
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
-  curl version:    ${CURLVERSION}
-  Host setup:      ${host}
-  Install prefix:  ${prefix}
-  Compiler:        ${CC}
-  SSL support:     ${curl_ssl_msg}
-  SSH support:     ${curl_ssh_msg}
-  zlib support:    ${curl_zlib_msg}
-  krb4 support:    ${curl_krb4_msg}
-  GSSAPI support:  ${curl_gss_msg}
-  SPNEGO support:  ${curl_spnego_msg}
-  TLS-SRP support: ${curl_tls_srp_msg}
-  resolver:        ${curl_res_msg}
-  ipv6 support:    ${curl_ipv6_msg}
-  IDN support:     ${curl_idn_msg}
-  Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
-  Built-in manual: ${curl_manual_msg}
-  Verbose errors:  ${curl_verbose_msg}
-  SSPI support:    ${curl_sspi_msg}
-  ca cert bundle:  ${ca}
-  ca cert path:    ${capath}
-  LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg}
-  RTSP support:    ${curl_rtsp_msg}
-  RTMP support:    ${curl_rtmp_msg}
-  Protocols:       ${SUPPORT_PROTOCOLS}
+  curl version:     ${CURLVERSION}
+  Host setup:       ${host}
+  Install prefix:   ${prefix}
+  Compiler:         ${CC}
+  SSL support:      ${curl_ssl_msg}
+  SSH support:      ${curl_ssh_msg}
+  zlib support:     ${curl_zlib_msg}
+  krb4 support:     ${curl_krb4_msg}
+  GSSAPI support:   ${curl_gss_msg}
+  SPNEGO support:   ${curl_spnego_msg}
+  TLS-SRP support:  ${curl_tls_srp_msg}
+  resolver:         ${curl_res_msg}
+  ipv6 support:     ${curl_ipv6_msg}
+  IDN support:      ${curl_idn_msg}
+  Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
+  Built-in manual:  ${curl_manual_msg}
+  --libcurl option: ${curl_libcurl_msg}
+  Verbose errors:   ${curl_verbose_msg}
+  SSPI support:     ${curl_sspi_msg}
+  ca cert bundle:   ${ca}
+  ca cert path:     ${capath}
+  LDAP support:     ${curl_ldap_msg}
+  LDAPS support:    ${curl_ldaps_msg}
+  RTSP support:     ${curl_rtsp_msg}
+  RTMP support:     ${curl_rtmp_msg}
+  Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 
 if test "x$soname_bump" = "xyes"; then
