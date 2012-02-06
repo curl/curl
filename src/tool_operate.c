@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -384,7 +384,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     URLGlob *inglob;
 
     outfiles = NULL;
-    infilenum = 0;
+    infilenum = 1;
     inglob = NULL;
 
     /* urlnode->url is the full URL (it might be NULL) */
@@ -422,7 +422,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     /* Here's the loop for uploading multiple files within the same
        single globbed string. If no upload, we enter the loop once anyway. */
-    for(up = 0 ;; up++) {
+    for(up = 0 ; up < infilenum; up++) {
 
       char *uploadfile; /* a single file, never a glob */
       int separator;
@@ -472,7 +472,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(i = 0 ;; i++) {
+      for(i = 0 ; i < urlnum; i++) {
 
         int infd;
         bool infdopen;
@@ -1463,10 +1463,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
-        /* upon error exit loop */
-        if(res)
-          break;
-
       } /* loop to the next URL */
 
       /* Free loop-local allocated memory */
@@ -1478,10 +1474,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         glob_cleanup(urls);
         urls = NULL;
       }
-
-      /* upon error exit loop */
-      if(res)
-        break;
 
     } /* loop to the next globbed upload file */
 
