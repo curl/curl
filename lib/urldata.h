@@ -1508,6 +1508,8 @@ struct UserDefined {
   bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to
                             us */
   bool connect_only;     /* make connection, let application use the socket */
+  bool ssl_enable_beast; /* especially allow this flaw for interoperability's
+                            sake*/
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */

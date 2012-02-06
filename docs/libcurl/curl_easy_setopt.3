@@ -2313,6 +2313,16 @@ this to 1 to enable it. By default all transfers are done using the
 cache. While nothing ever should get hurt by attempting to reuse SSL
 session-IDs, there seem to be broken SSL implementations in the wild that may
 require you to disable this in order for you to succeed. (Added in 7.16.0)
+.IP CURLOPT_SSL_OPTIONS
+Pass a long with a bitmask to tell libcurl about specific SSL behaviors.
+
+CURLSSLOPT_ALLOW_BEAST is the only supported bit and by setting this the user
+will tell libcurl to not attempt to use any work-arounds for a security flaw
+in the SSL3 and TLS1.0 protocols.  If this option isn't used or this bit is
+set to 0, the SSL layer libcurl uses may use a work-around for this flaw
+although it might cause interoperability problems with some (older) SSL
+implementations. WARNING: avoiding this work-around loosens the security, and
+by setting this option to 1 you ask for exactly that. (Added in 7.25.0)
 .IP CURLOPT_KRBLEVEL
 Pass a char * as parameter. Set the kerberos security level for FTP; this also
 enables kerberos awareness.  This is a string, \&'clear', \&'safe',

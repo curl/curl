@@ -1566,7 +1566,10 @@ ossl_connect_step1(struct connectdata *conn,
 #endif
 
 #ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
-  ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+  /* unless the user explicitly ask to allow the protocol vulnerability we
+     use the work-around */
+  if(!conn->data->set.ssl_enable_beast)
+    ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
   /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */

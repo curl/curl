@@ -838,6 +838,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 {
   char *argptr;
   CURLcode result = CURLE_OK;
+  long arg;
 #ifndef CURL_DISABLE_HTTP
   curl_off_t bigsize;
 #endif
@@ -847,12 +848,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.dns_cache_timeout = va_arg(param, long);
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
-  {
     /* remember we want this enabled */
-    long use_cache = va_arg(param, long);
-    data->set.global_dns_cache = (0 != use_cache)?TRUE:FALSE;
-  }
-  break;
+    arg = va_arg(param, long);
+    data->set.global_dns_cache = (0 != arg)?TRUE:FALSE;
+    break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
     result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
@@ -2189,6 +2188,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.use_ssl = (curl_usessl)va_arg(param, long);
     break;
+
+  case CURLOPT_SSL_OPTIONS:
+    arg = va_arg(param, long);
+    data->set.ssl_enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    break;
+
 #endif
   case CURLOPT_FTPSSLAUTH:
     /*
