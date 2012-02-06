@@ -1259,6 +1259,12 @@ connection if the server doesn't support SSL/TLS. (Added in 7.20.0)
 
 This option was formerly known as \fI--ftp-ssl-reqd\fP (added in 7.15.5). That
 option name can still be used but will be removed in a future version.
+.IP "--ssl-allow-beast"
+(SSL) This option tells curl to not work around a security flaw in the SSL3
+and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
+may use work-arounds known to cause interoperability problems with some older
+SSL implementations. WARNING: this option loosens the SSL security, and by
+using this flag you ask for exactly that.  (Added in 7.25.0)
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.15.2)

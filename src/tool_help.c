@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -187,6 +187,7 @@ static const char *const helptext[] = {
   "     --ssl-reqd      Require SSL/TLS (FTP, IMAP, POP3, SMTP)",
   " -2, --sslv2         Use SSLv2 (SSL)",
   " -3, --sslv3         Use SSLv3 (SSL)",
+  "     --ssl-allow-below Allow security flaw to improve interop (SSL)",
   "     --stderr FILE   Where to redirect stderr. - means stdout",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
   " -t, --telnet-option OPT=VAL  Set telnet option",

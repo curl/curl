@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -202,6 +202,7 @@ static const struct LongShort aliases[]= {
   {"Ek", "tlsuser",                  TRUE},
   {"El", "tlspassword",              TRUE},
   {"Em", "tlsauthtype",              TRUE},
+  {"En", "ssl-no-empty-fragments",   FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1143,6 +1144,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'n': /* no empty SSL fragments */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_allow_beast = toggle;
         break;
       default: /* certificate file */
       {
