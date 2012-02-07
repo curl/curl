@@ -102,6 +102,24 @@
   "If you'd like to turn off curl's verification of the certificate, use\n" \
   " the -k (or --insecure) option.\n"
 
+static int is_fatal_error(int code)
+{
+  switch(code) {
+  /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
+  case CURLE_FAILED_INIT:
+  case CURLE_OUT_OF_MEMORY:
+  case CURLE_UNKNOWN_OPTION:
+  case CURLE_FUNCTION_NOT_FOUND:
+  case CURLE_BAD_FUNCTION_ARGUMENT:
+    /* critical error */
+    return 1;
+  default:
+    break;
+  }
+  /* no error or not critical */
+  return 0;
+}
+
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
@@ -1463,6 +1481,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
+        if(urlnum > 1) {
+          /* when url globbing, exit loop upon critical error */
+          if(is_fatal_error(res))
+            break;
+        }
+        else if(res)
+          /* when not url globbing, exit loop upon any error */
+          break;
+
       } /* loop to the next URL */
 
       /* Free loop-local allocated memory */
@@ -1474,6 +1501,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         glob_cleanup(urls);
         urls = NULL;
       }
+
+      if(infilenum > 1) {
+        /* when file globbing, exit loop upon critical error */
+        if(is_fatal_error(res))
+          break;
+      }
+      else if(res)
+        /* when not file globbing, exit loop upon any error */
+        break;
 
     } /* loop to the next globbed upload file */
 
@@ -1494,21 +1530,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     Curl_safefree(urlnode->infile);
     urlnode->flags = 0;
 
-    /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
-
     /*
     ** Bail out upon critical errors
     */
-    switch(res) {
-    case CURLE_FAILED_INIT:
-    case CURLE_OUT_OF_MEMORY:
-    case CURLE_FUNCTION_NOT_FOUND:
-    case CURLE_BAD_FUNCTION_ARGUMENT:
+    if(is_fatal_error(res))
       goto quit_curl;
-    default:
-      /* Merrily loop to next URL */
-      break;
-    }
 
   } /* for-loop through all URLs */
 
