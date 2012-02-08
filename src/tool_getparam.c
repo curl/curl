@@ -202,7 +202,7 @@ static const struct LongShort aliases[]= {
   {"Ek", "tlsuser",                  TRUE},
   {"El", "tlspassword",              TRUE},
   {"Em", "tlsauthtype",              TRUE},
-  {"En", "ssl-no-empty-fragments",   FALSE},
+  {"En", "ssl-allow-beast",          FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},

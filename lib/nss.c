@@ -1158,6 +1158,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   PRBool ssl3 = PR_FALSE;
   PRBool tlsv1 = PR_FALSE;
   PRBool ssl_no_cache;
+  PRBool ssl_cbc_random_iv;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1265,6 +1266,18 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(SSL_OptionSet(model, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
     goto error;
+
+  ssl_cbc_random_iv = !data->set.ssl_enable_beast;
+#ifdef SSL_CBC_RANDOM_IV
+  /* unless the user explicitly asks to allow the protocol vulnerability, we
+     use the work-around */
+  if(SSL_OptionSet(model, SSL_CBC_RANDOM_IV, ssl_cbc_random_iv) != SECSuccess)
+    infof(data, "warning: failed to set SSL_CBC_RANDOM_IV = %d\n",
+          ssl_cbc_random_iv);
+#else
+  if(ssl_cbc_random_iv)
+    infof(data, "warning: support for SSL_CBC_RANDOM_IV not compiled in\n");
+#endif
 
   /* reset the flag to avoid an infinite loop */
   data->state.ssl_connect_retry = FALSE;

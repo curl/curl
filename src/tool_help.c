@@ -187,7 +187,7 @@ static const char *const helptext[] = {
   "     --ssl-reqd      Require SSL/TLS (FTP, IMAP, POP3, SMTP)",
   " -2, --sslv2         Use SSLv2 (SSL)",
   " -3, --sslv3         Use SSLv3 (SSL)",
-  "     --ssl-allow-below Allow security flaw to improve interop (SSL)",
+  "     --ssl-allow-beast Allow security flaw to improve interop (SSL)",
   "     --stderr FILE   Where to redirect stderr. - means stdout",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
   " -t, --telnet-option OPT=VAL  Set telnet option",
