@@ -22,7 +22,6 @@ CURL_CFILES = hugehelp.c \
 	tool_cb_prg.c \
 	tool_cb_rea.c \
 	tool_cb_see.c \
-	tool_cb_skt.c \
 	tool_cb_wrt.c \
 	tool_cfgable.c \
 	tool_convert.c \
@@ -62,7 +61,6 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_cb_prg.h \
 	tool_cb_rea.h \
 	tool_cb_see.h \
-	tool_cb_skt.h \
 	tool_cb_wrt.h \
 	tool_cfgable.h \
 	tool_convert.h \

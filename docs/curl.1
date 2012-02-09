@@ -711,7 +711,8 @@ currently effective on operating systems offering the TCP_KEEPIDLE and
 TCP_KEEPINTVL socket options (meaning Linux, recent AIX, HP-UX and more). This
 option has no effect if \fI--no-keepalive\fP is used. (Added in 7.18.0)
 
-If this option is used multiple times, the last occurrence sets the amount.
+If this option is used multiple times, the last occurrence sets the amount. If
+unspecified, the option defaults to 60 seconds.
 .IP "--key <key>"
 (SSL/SSH) Private key file name. Allows you to provide your private key in this
 separate file.

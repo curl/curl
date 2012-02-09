@@ -41,6 +41,10 @@
 #  include <locale.h>
 #endif
 
+#ifdef HAVE_NETINET_TCP_H
+#  include <netinet/tcp.h>
+#endif
+
 #include "rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -54,7 +58,6 @@
 #include "tool_cb_prg.h"
 #include "tool_cb_rea.h"
 #include "tool_cb_see.h"
-#include "tool_cb_skt.h"
 #include "tool_cb_wrt.h"
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
@@ -1165,9 +1168,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.17.1 */
         if(!config->nokeepalive) {
-          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, tool_sockopt_cb);
-          my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
+          my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+          if(config->alivetime != 0) {
+#if !defined(TCP_KEEPIDLE) || !defined(TCP_KEEPINTVL)
+            warnf(config, "Keep-alive functionality somewhat crippled due to "
+                "missing support in your operating system!\n");
+#endif
+            my_setopt(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
+            my_setopt(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
+          }
         }
+        else
+          my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 0L);
 
         /* curl 7.20.0 */
         if(config->tftp_blksize)
