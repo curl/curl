@@ -4224,20 +4224,16 @@ static CURLcode parse_proxy(struct SessionHandle *data,
 
       if(CURLE_OK == res) {
         conn->bits.proxy_user_passwd = TRUE; /* enable it */
-        atsign = strdup(atsign+1); /* the right side of the @-letter */
+        atsign++; /* the right side of the @-letter */
 
-        if(atsign) {
-          free(proxy); /* free the former proxy string */
+        if(atsign)
           proxy = proxyptr = atsign; /* now use this instead */
-        }
         else
           res = CURLE_OUT_OF_MEMORY;
       }
 
-      if(res) {
-        free(proxy); /* free the allocated proxy string */
+      if(res)
         return res;
-      }
     }
   }
 
@@ -4271,20 +4267,17 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     conn->port = strtol(prox_portno, NULL, 10);
   }
   else {
-    if(proxyptr[0]=='/') {
+    if(proxyptr[0]=='/')
       /* If the first character in the proxy string is a slash, fail
          immediately. The following code will otherwise clear the string which
          will lead to code running as if no proxy was set! */
-      free(proxy); /* free the former proxy string */
       return CURLE_COULDNT_RESOLVE_PROXY;
-    }
 
     /* without a port number after the host name, some people seem to use
        a slash so we strip everything from the first slash */
     atsign = strchr(proxyptr, '/');
-    if(atsign) {
+    if(atsign)
       *atsign = 0x0; /* cut off path part from host name */
-    }
 
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
@@ -4296,7 +4289,6 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   conn->proxy.rawalloc = strdup(proxyptr);
   conn->proxy.name = conn->proxy.rawalloc;
 
-  free(proxy);
   if(!conn->proxy.rawalloc)
     return CURLE_OUT_OF_MEMORY;
 
@@ -4927,8 +4919,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(proxy) {
     result = parse_proxy(data, conn, proxy);
 
-    /* parse_proxy has freed the proxy string, so don't try to use it again */
-    if(result != CURLE_OK)
+    free(proxy); /* parse_proxy copies the proxy string */
+
+    if(result)
       return result;
 
     if((conn->proxytype == CURLPROXY_HTTP) ||
