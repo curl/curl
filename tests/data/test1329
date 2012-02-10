@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+HTTP proxy
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+/-prefixed proxy name
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/that/page/1329 -x "/server"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 5 == CURLE_COULDNT_RESOLVE_PROXY
+<errorcode>
+5
+</errorcode>
+</verify>
+</testcase>

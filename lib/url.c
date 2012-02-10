@@ -4271,11 +4271,20 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     conn->port = strtol(prox_portno, NULL, 10);
   }
   else {
+    if(proxyptr[0]=='/') {
+      /* If the first character in the proxy string is a slash, fail
+         immediately. The following code will otherwise clear the string which
+         will lead to code running as if no proxy was set! */
+      free(proxy); /* free the former proxy string */
+      return CURLE_COULDNT_RESOLVE_PROXY;
+    }
+
     /* without a port number after the host name, some people seem to use
        a slash so we strip everything from the first slash */
     atsign = strchr(proxyptr, '/');
-    if(atsign)
+    if(atsign) {
       *atsign = 0x0; /* cut off path part from host name */
+    }
 
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
