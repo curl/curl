@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1364,25 +1364,25 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     conn->bits.close = TRUE; /* marked for closure */
     result = status;      /* use the already set error code */
   }
-  else
+  else if(!data->set.connect_only) {
+    struct smtp_conn *smtpc = &conn->proto.smtpc;
+    struct pingpong *pp = &smtpc->pp;
+
     /* TODO: make this work even when the socket is EWOULDBLOCK in this
        call! */
 
-    /* write to socket (send away data) */
+    /* Send the end of block data */
     result = Curl_write(conn,
                         conn->writesockfd,  /* socket to send to */
                         SMTP_EOB,           /* buffer pointer */
                         SMTP_EOB_LEN,       /* buffer size */
                         &bytes_written);    /* actually sent away */
 
-
-  if(status == CURLE_OK) {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-    struct pingpong *pp = &smtpc->pp;
     pp->response = Curl_tvnow(); /* timeout relative now */
 
     state(conn, SMTP_POSTDATA);
-    /* run the state-machine
+
+    /* Run the state-machine
 
        TODO: when the multi interface is used, this _really_ should be using
        the smtp_multi_statemach function but we have no general support for
@@ -1392,7 +1392,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = smtp_easy_statemach(conn);
   }
 
-  /* clear these for next connection */
+  /* Clear the transfer mode for the next connection */
   smtp->transfer = FTPTRANSFER_BODY;
 
   return result;
