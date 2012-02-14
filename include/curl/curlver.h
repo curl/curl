@@ -53,7 +53,7 @@
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
 */
-#define LIBCURL_VERSION_NUM 0x071901
+#define LIBCURL_VERSION_NUM 0x071900
 
 /*
  * This is the date and time when the full source package was created. The
