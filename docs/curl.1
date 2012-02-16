@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl 1 "14 April 2009" "Curl 7.21.6" "Curl Manual"
+.TH curl 1 "16 February 2012" "Curl 7.25.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -806,6 +806,12 @@ useful for preventing your batch jobs from hanging for hours due to slow
 networks or links going down.  See also the \fI--connect-timeout\fP option.
 
 If this option is used several times, the last one will be used.
+.IP "--mail-auth <address>"
+(SMTP) Specify a single address. This will be used to specify the
+authentication address (identity) of a submitted message that is being relayed
+to another server.
+
+(Added in 7.25.0)
 .IP "--mail-from <address>"
 (SMTP) Specify a single address that the given mail should get sent from.
 
