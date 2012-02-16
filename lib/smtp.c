@@ -109,7 +109,7 @@ static int smtp_getsock(struct connectdata *conn,
                         int numsocks);
 static CURLcode smtp_doing(struct connectdata *conn,
                            bool *dophase_done);
-static CURLcode smtp_setup_connection(struct connectdata * conn);
+static CURLcode smtp_setup_connection(struct connectdata *conn);
 static CURLcode smtp_state_upgrade_tls(struct connectdata *conn);
 
 /*
@@ -427,7 +427,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
     mech = "CRAM-MD5";
-    state1 = SMTP_AUTHCRAM;
+    state1 = SMTP_AUTHCRAMMD5;
     smtpc->authused = SMTP_AUTH_CRAM_MD5;
   }
   else
@@ -715,8 +715,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char * chlg64 = data->state.buffer;
-  unsigned char * chlg;
+  char *chlg64 = data->state.buffer;
+  unsigned char *chlg;
   size_t chlglen;
   size_t len = 0;
   char *rplyb64 = NULL;
@@ -1146,7 +1146,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    case SMTP_AUTHCRAM:
+    case SMTP_AUTHCRAMMD5:
       result = smtp_state_authcram_resp(conn, smtpcode, smtpc->state);
       break;
 #endif
@@ -1339,13 +1339,12 @@ static CURLcode smtp_connect(struct connectdata *conn,
       path = "localhost";
   }
 
-  /* url decode the path and use it as domain with EHLO */
+  /* Url decode the path and use it as the domain in our EHLO */
   result = Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
   if(result)
     return result;
 
-  /* When we connect, we start in the state where we await the server greeting
-   */
+  /* Set the state as we are waiting the server greeting */
   state(conn, SMTP_SERVERGREET);
 
   if(data->state.used_interface == Curl_if_multi)
@@ -1387,7 +1386,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
   if(status) {
     conn->bits.close = TRUE; /* marked for closure */
-    result = status;      /* use the already set error code */
+    result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only) {
     struct smtp_conn *smtpc = &conn->proto.smtpc;
@@ -1430,7 +1429,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  * This is the actual DO function for SMTP. Get a file/directory according to
  * the options previously setup.
  */
-
 static
 CURLcode smtp_perform(struct connectdata *conn,
                      bool *connected,  /* connect status after PASV / PORT */
@@ -1604,9 +1602,8 @@ static CURLcode smtp_doing(struct connectdata *conn,
  * Performs all commands done before a regular transfer between a local and a
  * remote host.
  */
-static
-CURLcode smtp_regular_transfer(struct connectdata *conn,
-                               bool *dophase_done)
+static CURLcode smtp_regular_transfer(struct connectdata *conn,
+                                      bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
@@ -1654,8 +1651,8 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     }
-    /*
-     * We explicitly mark this connection as persistent here as we're doing
+
+    /* We explicitly mark this connection as persistent here as we're doing
      * SMTP over HTTP and thus we accidentally avoid setting this value
      * otherwise.
      */
@@ -1688,10 +1685,10 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     failf (data, "Failed to alloc scratch buffer!");
     return CURLE_OUT_OF_MEMORY;
   }
+
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
   for(i = 0, si = 0; i < nread; i++) {
-
     if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
       smtpc->eob++;
     else if(smtpc->eob) {
@@ -1719,8 +1716,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     }
     else if(!smtpc->eob)
       data->state.scratch[si++] = data->req.upload_fromhere[i];
-
-  } /* for() */
+  }
 
   if(si != nread) {
     /* only use the new buffer if we replaced something */
