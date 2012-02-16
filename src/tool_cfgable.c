@@ -60,8 +60,10 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->proxy);
 
   Curl_safefree(config->noproxy);
+
   Curl_safefree(config->mail_from);
   curl_slist_free_all(config->mail_rcpt);
+  Curl_safefree(config->mail_auth);
 
   Curl_safefree(config->netrc_file);
 

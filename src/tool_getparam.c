@@ -170,6 +170,7 @@ static const struct LongShort aliases[]= {
   {"$E", "proto-redir",              TRUE},
   {"$F", "resolve",                  TRUE},
   {"$G", "delegation",               TRUE},
+  {"$H", "mail-auth",                TRUE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -812,6 +813,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'G': /* --delegation LEVEL */
         config->gssapi_delegation = delegation(config, nextarg);
+        break;
+      case 'H': /* --mail-auth */
+        GetStr(&config->mail_auth, nextarg);
         break;
       }
       break;

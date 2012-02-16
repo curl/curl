@@ -1240,6 +1240,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->ssl_allow_beast)
           my_setopt(curl, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_ALLOW_BEAST);
 
+        if(config->mail_auth)
+          my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */

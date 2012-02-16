@@ -121,6 +121,7 @@ static const char *const helptext[] = {
   " -M, --manual        Display the full manual",
   "     --mail-from FROM  Mail from this address",
   "     --mail-rcpt TO  Mail to this receiver(s)",
+  "     --mail-auth AUTH  Originator address of the original email",
   "     --max-filesize BYTES  Maximum file size to download (H/F)",
   "     --max-redirs NUM  Maximum number of redirects allowed (H)",
   " -m, --max-time SECONDS  Maximum time allowed for the transfer",
