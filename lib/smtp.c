@@ -1679,11 +1679,14 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data = conn->data;
 
-  if(data->state.scratch == NULL)
+  /* Do we need to allocate the scatch buffer? */
+  if(!data->state.scratch)  {
     data->state.scratch = malloc(2 * BUFSIZE);
-  if(data->state.scratch == NULL) {
-    failf (data, "Failed to alloc scratch buffer!");
-    return CURLE_OUT_OF_MEMORY;
+
+    if(!data->state.scratch) {
+      failf (data, "Failed to alloc scratch buffer!");
+      return CURLE_OUT_OF_MEMORY;
+    }
   }
 
   /* This loop can be improved by some kind of Boyer-Moore style of
@@ -1692,7 +1695,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
       smtpc->eob++;
     else if(smtpc->eob) {
-      /* previously a substring matched, output that first */
+      /* A previous substring matched so output that first */
       memcpy(&data->state.scratch[si], SMTP_EOB, smtpc->eob);
       si += smtpc->eob;
 
@@ -1716,6 +1719,13 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     }
     else if(!smtpc->eob)
       data->state.scratch[si++] = data->req.upload_fromhere[i];
+  }
+
+  if(smtpc->eob) {
+    /* A substring matched before processing ended so output that now */
+    memcpy(&data->state.scratch[si], SMTP_EOB, smtpc->eob);
+    si += smtpc->eob;
+    smtpc->eob = 0;
   }
 
   if(si != nread) {
