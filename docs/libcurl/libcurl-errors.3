@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -81,11 +81,6 @@ either a PASV or a EPSV command. The server is flawed.
 .IP "CURLE_FTP_WEIRD_227_FORMAT (14)"
 FTP servers return a 227-line as a response to a PASV command. If libcurl
 fails to parse that line, this return code is passed back.
-.IP "CURLE_FTP_PRET_FAILED (84)"
-The FTP server does not understand the PRET command at all or does not support
-the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST\fP, a
-custom LIST command will be sent with PRET CMD before PASV as well. (Added in
-7.20.0)
 .IP "CURLE_FTP_CANT_GET_HOST (15)"
 An internal failure to lookup the host used for the new connection.
 .IP "CURLE_FTP_COULDNT_SET_TYPE (17)"
@@ -233,7 +228,10 @@ Failed to load CRL file (Added in 7.19.0)
 .IP "CURLE_SSL_ISSUER_ERROR (83)"
 Issuer check failed (Added in 7.19.0)
 .IP "CURLE_FTP_PRET_FAILED (84)"
-PRET command failed
+The FTP server does not understand the PRET command at all or does not support
+the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST\fP, a
+custom LIST command will be sent with PRET CMD before PASV as well. (Added in
+7.20.0)
 .IP "CURLE_RTSP_CSEQ_ERROR (85)"
 Mismatch of RTSP CSeq numbers.
 .IP "CURLE_RTSP_SESSION_ERROR (86)"
