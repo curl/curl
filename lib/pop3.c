@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -755,7 +755,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(pop3c->mailbox);
   pop3c->mailbox = NULL;
 
-  /* clear these for next connection */
+  /* Clear the transfer mode for the next connection */
   pop3->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -1035,7 +1035,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
                          char *str,
                          size_t nread)
 {
-  /* This code could be made into a special function in the handler struct. */
+  /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
@@ -1131,10 +1131,15 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
   }
 
   if(pop3c->eob == POP3_EOB_LEN) {
-    /* We have a full match so the transfer is done! */
+    /* We have a full match so the transfer is done, however we must transfer
+    the CRLF at the start of the EOB as this is considered to be part of the
+    message as per RFC-1939, sect. 3 */
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB, 2);
+
     k->keepon &= ~KEEP_RECV;
     pop3c->eob = 0;
-    return CURLE_OK;
+
+    return result;
   }
 
   if(pop3c->eob)
