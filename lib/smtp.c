@@ -1035,6 +1035,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
 
     /* send DATA */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA");
+
     if(result)
       return result;
 
@@ -1392,9 +1393,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     struct smtp_conn *smtpc = &conn->proto.smtpc;
     struct pingpong *pp = &smtpc->pp;
 
-    /* TODO: make this work even when the socket is EWOULDBLOCK in this
-       call! */
-
     /* Send the end of block data */
     result = Curl_write(conn,
                         conn->writesockfd,  /* socket to send to */
@@ -1402,7 +1400,19 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
                         SMTP_EOB_LEN,       /* buffer size */
                         &bytes_written);    /* actually sent away */
 
-    pp->response = Curl_tvnow(); /* timeout relative now */
+    if(result)
+      return result;
+
+    if(bytes_written != SMTP_EOB_LEN) {
+      /* The whole chunk was not sent so keep it around and adjust the
+         pingpong structure accordingly */
+      pp->sendthis = strdup(SMTP_EOB);
+      pp->sendsize = SMTP_EOB_LEN;
+      pp->sendleft = SMTP_EOB_LEN - bytes_written;
+    }
+    else
+      /* Successfully sent so adjust the response timeout relative to now */
+      pp->response = Curl_tvnow();
 
     state(conn, SMTP_POSTDATA);
 
