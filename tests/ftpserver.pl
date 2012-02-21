@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -857,8 +857,9 @@ sub RETR_pop3 {
          sendcontrol $d;
      }
 
-     # end with the magic 5-byte end of mail marker
-     sendcontrol "\r\n.\r\n";
+     # end with the magic 3-byte end of mail marker, assumes that the
+     # mail body ends with a CRLF!
+     sendcontrol ".\r\n";
 
      return 0;
 }
@@ -880,8 +881,8 @@ my @pop3list=(
          sendcontrol $d;
      }
 
-     # end with the magic 5-byte end of listing marker
-     sendcontrol "\r\n.\r\n";
+     # end with the magic 3-byte end of listing marker
+     sendcontrol ".\r\n";
 
      return 0;
 }
