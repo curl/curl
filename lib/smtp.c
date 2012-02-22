@@ -1108,6 +1108,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
   if(result)
     return result;
 
+  if(smtpc->state != SMTP_QUIT)
+    /* store the latest code for later retrieval */
+    data->info.httpcode = smtpcode;
+
   if(smtpcode) {
     /* we have now received a full SMTP server response */
     switch(smtpc->state) {
@@ -1524,6 +1528,7 @@ static CURLcode smtp_quit(struct connectdata *conn)
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
   if(result)
     return result;
+
   state(conn, SMTP_QUIT);
 
   result = smtp_easy_statemach(conn);
@@ -1564,7 +1569,6 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
   /* This won't already be freed in some error cases */
   Curl_safefree(smtpc->domain);
-  smtpc->domain = NULL;
 
   return CURLE_OK;
 }
@@ -1581,8 +1585,7 @@ static CURLcode smtp_dophase_done(struct connectdata *conn,
     /* no data to transfer */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
-  free(smtpc->domain);
-  smtpc->domain = NULL;
+  Curl_safefree(smtpc->domain);
 
   return CURLE_OK;
 }

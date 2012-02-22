@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,11 +44,13 @@ The following information can be extracted:
 .IP CURLINFO_EFFECTIVE_URL
 Pass a pointer to a char pointer to receive the last used effective URL.
 .IP CURLINFO_RESPONSE_CODE
-Pass a pointer to a long to receive the last received HTTP or FTP code. This
-option was known as CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier. This
-will be zero if no server response code has been received. Note that a proxy's
-CONNECT response should be read with \fICURLINFO_HTTP_CONNECTCODE\fP and not
-this.
+Pass a pointer to a long to receive the last received HTTP, FTP or SMTP
+response code. This option was previously known as CURLINFO_HTTP_CODE in
+libcurl 7.10.7 and earlier. The value will be zero if no server response code
+has been received. Note that a proxy's CONNECT response should be read with
+\fICURLINFO_HTTP_CONNECTCODE\fP and not this.
+
+Support for SMTP responses added in 7.25.0.
 .IP CURLINFO_HTTP_CONNECTCODE
 Pass a pointer to a long to receive the last received proxy response code to a
 CONNECT request.
