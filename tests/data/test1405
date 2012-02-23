@@ -126,8 +126,10 @@ int main(int argc, char *argv[])
 <stripfile>
 # curl's default user-agent varies with version, libraries etc.
 s/(USERAGENT, \")[^\"]+/${1}stripped/
-# CURLOPT_SSL_VERIFYPEER varies with configuration - just ignore it
+# CURLOPT_SSL_VERIFYPEER and SSH_KNOWNHOSTS vary with configurations - just
+# ignore them
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
+$_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 </stripfile>
 </verify>
 </testcase>
