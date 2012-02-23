@@ -355,11 +355,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   }
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-  /* This is the first entry added to easysrc and it initializes the slist */
-  easysrc = curl_slist_append(easysrc, "CURL *hnd = curl_easy_init();");
-  if(!easysrc) {
+  res = easysrc_init();
+  if(res) {
     helpf(config->errors, "out of memory\n");
-    res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
 #endif
@@ -835,25 +833,25 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.5 */
           if(config->proxy)
-            my_setopt(curl, CURLOPT_PROXYTYPE, config->proxyver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->proxyver);
 
           /* new in libcurl 7.10 */
           if(config->socksproxy) {
             my_setopt_str(curl, CURLOPT_PROXY, config->socksproxy);
-            my_setopt(curl, CURLOPT_PROXYTYPE, config->socksver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->socksver);
           }
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
           else if(config->proxynegotiate)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
           else if(config->proxydigest)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
           else if(config->proxybasic)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
@@ -896,7 +894,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                       config->postfieldsize);
             break;
           case HTTPREQ_POST:
-            my_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
+            my_setopt_httppost(curl, CURLOPT_HTTPPOST, config->httppost);
             break;
           default:
             break;
@@ -905,18 +903,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_REFERER, config->referer);
           my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer);
           my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
-          my_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
+          my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
           /* new in libcurl 7.5 */
           my_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
 
           /* new in libcurl 7.9.1 */
           if(config->httpversion)
-            my_setopt(curl, CURLOPT_HTTP_VERSION, config->httpversion);
+            my_setopt_enum(curl, CURLOPT_HTTP_VERSION, config->httpversion);
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt(curl, CURLOPT_HTTPAUTH, config->authtype);
+            my_setopt_flags(curl, CURLOPT_HTTPAUTH, config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2) */
           my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
@@ -1011,9 +1009,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         my_setopt(curl, CURLOPT_CRLF, config->crlf);
-        my_setopt(curl, CURLOPT_QUOTE, config->quote);
-        my_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
-        my_setopt(curl, CURLOPT_PREQUOTE, config->prequote);
+        my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
+        my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
+        my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         {
@@ -1034,8 +1032,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 #endif
 
-        my_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
-        my_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
+        my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
+        my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         my_setopt(curl, CURLOPT_STDERR, config->errors);
@@ -1054,7 +1052,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         /* new in libcurl 7.6.2: */
-        my_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
+        my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
 
         /* new in libcurl 7.7: */
         my_setopt_str(curl, CURLOPT_RANDOM_FILE, config->random_file);
@@ -1118,7 +1116,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)
-          my_setopt(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
+          my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
         {
@@ -1191,16 +1189,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
 
         if(config->mail_rcpt)
-          my_setopt(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+          my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         /* curl 7.20.x */
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
 
         if(config->proto_present)
-          my_setopt(curl, CURLOPT_PROTOCOLS, config->proto);
+          my_setopt_flags(curl, CURLOPT_PROTOCOLS, config->proto);
         if(config->proto_redir_present)
-          my_setopt(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
+          my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if((urlnode->flags & GETOUT_USEREMOTE)
            && config->content_disposition) {
@@ -1216,7 +1214,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->resolve)
           /* new in 7.21.3 */
-          my_setopt(curl, CURLOPT_RESOLVE, config->resolve);
+          my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
 
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1252,8 +1250,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         retrystart = tvnow();
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-        if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
-          res = CURLE_OUT_OF_MEMORY;
+        res = easysrc_perform();
+        if(res) {
           goto show_error;
         }
 #endif
@@ -1580,8 +1578,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     config->easy = curl = NULL;
   }
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-  if(easysrc)
-    curl_slist_append(easysrc, "curl_easy_cleanup(hnd);");
+  easysrc_cleanup();
 #endif
 
   /* Close function-local opened file descriptors */
