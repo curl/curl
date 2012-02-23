@@ -124,6 +124,11 @@ sub getpart {
     return @this; #empty!
 }
 
+# Return entire document as list of lines
+sub getall {
+    return @xml;
+}
+
 sub loadtest {
     my ($file)=@_;
 
