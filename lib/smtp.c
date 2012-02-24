@@ -330,6 +330,7 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
     return result;
 
   state(conn, SMTP_EHLO);
+
   return CURLE_OK;
 }
 
@@ -348,6 +349,7 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
     return result;
 
   state(conn, SMTP_HELO);
+
   return CURLE_OK;
 }
 
@@ -561,8 +563,8 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
      !conn->bits.user_passwd)
       result = smtp_state_helo(conn);
     else {
-      failf(data, "Access denied: %d", smtpcode);
-      result = CURLE_LOGIN_DENIED;
+      failf(data, "Remote access denied: %d", smtpcode);
+      result = CURLE_REMOTE_ACCESS_DENIED;
     }
   }
   else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
@@ -588,8 +590,8 @@ static CURLcode smtp_state_helo_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
-    failf(data, "Access denied: %d", smtpcode);
-    result = CURLE_LOGIN_DENIED;
+    failf(data, "Remote access denied: %d", smtpcode);
+    result = CURLE_REMOTE_ACCESS_DENIED;
   }
   else {
     /* end the connect phase */
