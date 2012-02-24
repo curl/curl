@@ -124,11 +124,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         const char *useragent="";
         const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
+        char *hostheader= /* host:port with IPv6 support */
+          aprintf("%s%s%s:%hu", conn->bits.ipv6_ip?"[":"",
+                  hostname, conn->bits.ipv6_ip?"]":"",
+                  remote_port);
+        if(!hostheader)
+          return CURLE_OUT_OF_MEMORY;
 
         if(!Curl_checkheaders(data, "Host:")) {
-          host = aprintf("Host: %s%s%s:%hu\r\n", conn->bits.ipv6_ip?"[":"",
-                         hostname, conn->bits.ipv6_ip?"]":"",
-                         remote_port);
+          host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
             free(req_buffer);
             return CURLE_OUT_OF_MEMORY;
@@ -141,24 +145,24 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
            data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
 
-        /* Send the connect request to the proxy */
-        /* BLOCKING */
         result =
           Curl_add_bufferf(req_buffer,
-                      "CONNECT %s:%hu HTTP/%s\r\n"
-                      "%s"  /* Host: */
-                      "%s"  /* Proxy-Authorization */
-                      "%s"  /* User-Agent */
-                      "%s", /* Proxy-Connection */
-                      hostname, remote_port, http,
-                      host,
-                      conn->allocptr.proxyuserpwd?
-                      conn->allocptr.proxyuserpwd:"",
-                      useragent,
-                      proxyconn);
+                           "CONNECT %s HTTP/%s\r\n"
+                           "%s"  /* Host: */
+                           "%s"  /* Proxy-Authorization */
+                           "%s"  /* User-Agent */
+                           "%s", /* Proxy-Connection */
+                           hostheader,
+                           http,
+                           host,
+                           conn->allocptr.proxyuserpwd?
+                           conn->allocptr.proxyuserpwd:"",
+                           useragent,
+                           proxyconn);
 
         if(host && *host)
           free(host);
+        free(hostheader);
 
         if(CURLE_OK == result)
           result = Curl_add_custom_headers(conn, req_buffer);
@@ -168,7 +172,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           result = Curl_add_bufferf(req_buffer, "\r\n");
 
         if(CURLE_OK == result) {
-          /* Now send off the request */
+          /* Send the connect request to the proxy */
+          /* BLOCKING */
           result =
             Curl_add_buffer_send(req_buffer, conn,
                                  &data->info.request_size, 0, sockindex);
