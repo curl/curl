@@ -281,7 +281,7 @@ socket descriptor so additional setsockopt() calls can be done at the user's
 discretion.  Return 0 (zero) from the callback on success. Return 1 from the
 callback function to signal an unrecoverable error to the library and it will
 close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option added in
-7.15.6.)
+7.16.0)
 
 Added in 7.21.5, the callback function may return
 \fICURL_SOCKOPT_ALREADY_CONNECTED\fP, which tells libcurl that the socket is
@@ -289,7 +289,7 @@ in fact already connected and then libcurl will not attempt to connect it.
 .IP CURLOPT_SOCKOPTDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
-(Option added in 7.15.6.)
+(Option added in 7.16.0)
 .IP CURLOPT_OPENSOCKETFUNCTION
 Function pointer that should match the \fIcurl_opensocket_callback\fP
 prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
@@ -808,7 +808,7 @@ specified in the proxy string \fICURLOPT_PROXY\fP.
 .IP CURLOPT_PROXYTYPE
 Pass a long with this option to set type of the proxy. Available options for
 this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
-\fICURLPROXY_SOCKS4\fP (added in 7.15.2), \fICURLPROXY_SOCKS5\fP,
+\fICURLPROXY_SOCKS4\fP (added in 7.10), \fICURLPROXY_SOCKS5\fP,
 \fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and \fICURLPROXY_SOCKS5_HOSTNAME\fP
 (added in 7.18.0). The HTTP type is default. (Added in 7.10)
 
@@ -1552,7 +1552,7 @@ Pass a pointer to a linked list of FTP commands to pass to the server after
 the transfer type is set. The linked list should be a fully valid list of
 struct curl_slist structs properly filled in as described for
 \fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
-option. Before version 7.15.6, if you also set \fICURLOPT_NOBODY\fP to 1, this
+option. Before version 7.16.0, if you also set \fICURLOPT_NOBODY\fP to 1, this
 option didn't work.
 .IP CURLOPT_DIRLISTONLY
 A parameter set to 1 tells the library to just list the names of files in a

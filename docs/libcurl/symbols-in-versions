@@ -408,7 +408,7 @@ CURLOPT_OPENSOCKETFUNCTION      7.17.1
 CURLOPT_PASSWDDATA              7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWDFUNCTION          7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWORD                7.19.1
-CURLOPT_PASV_HOST               7.12.1        7.15.6      7.15.5
+CURLOPT_PASV_HOST               7.12.1        7.16.0      7.15.5
 CURLOPT_PORT                    7.1
 CURLOPT_POST                    7.1
 CURLOPT_POST301                 7.17.1        7.19.1
@@ -567,7 +567,7 @@ CURLSHOPT_SHARE                 7.10.3
 CURLSHOPT_UNLOCKFUNC            7.10.3
 CURLSHOPT_UNSHARE               7.10.3
 CURLSHOPT_USERDATA              7.10.3
-CURLSOCKTYPE_IPCXN              7.15.6
+CURLSOCKTYPE_IPCXN              7.16.0
 CURLSSH_AUTH_ANY                7.16.1
 CURLSSH_AUTH_DEFAULT            7.16.1
 CURLSSH_AUTH_HOST               7.16.1
