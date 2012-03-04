@@ -1485,6 +1485,11 @@ The variables available at this point are:
 The URL that was fetched last. This is most meaningful if you've told curl
 to follow location: headers.
 .TP
+.B filename_effective
+The ultimate filename that curl writes out to. This is only meaningful if curl
+is told to write to a file with the --remote-name or --output option. It's most
+useful in combination with the --remote-header-name option. (Added in 7.25.1)
+.TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
 FTP(s) transfer. In 7.18.2 the alias \fBresponse_code\fP was added to show the

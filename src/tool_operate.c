@@ -1391,7 +1391,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           fputs("\n", progressbar.out);
 
         if(config->writeout)
-          ourWriteOut(curl, config->writeout);
+          ourWriteOut(curl, &outs, config->writeout);
 
         if(config->writeenv)
           ourWriteEnv(curl);

@@ -26,6 +26,7 @@
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
+#include "tool_cfgable.h"
 #include "tool_writeout.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -54,6 +55,7 @@ typedef enum {
   VAR_FTP_ENTRY_PATH,
   VAR_REDIRECT_URL,
   VAR_SSL_VERIFY_RESULT,
+  VAR_EFFECTIVE_FILENAME,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -87,10 +89,11 @@ static const struct variable replacements[]={
   {"ftp_entry_path", VAR_FTP_ENTRY_PATH},
   {"redirect_url", VAR_REDIRECT_URL},
   {"ssl_verify_result", VAR_SSL_VERIFY_RESULT},
+  {"filename_effective", VAR_EFFECTIVE_FILENAME},
   {NULL, VAR_NONE}
 };
 
-void ourWriteOut(CURL *curl, const char *writeinfo)
+void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
 {
   FILE *stream = stdout;
   const char *ptr = writeinfo;
@@ -241,6 +244,10 @@ void ourWriteOut(CURL *curl, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
                                      &longinfo))
                   fprintf(stream, "%ld", longinfo);
+                break;
+              case VAR_EFFECTIVE_FILENAME:
+                if(outs->filename)
+                  fprintf(stream, "%s", outs->filename);
                 break;
               default:
                 break;

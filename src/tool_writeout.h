@@ -23,6 +23,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-void ourWriteOut(CURL *curl, const char *out);
+void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */
