@@ -148,9 +148,9 @@ option(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
 mark_as_advanced(ENABLE_IPV6)
 
 if(WIN32)
-  find_library(WSOCK32_LIBRARY wsock32)
-  find_library(WS2_32_LIBRARY ws2_32)
-  list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES ${WSOCK32_LIBRARY} ${WS2_32_LIBRARY})  # bufferoverflowu.lib
+  # Windows standard libraries are located in C:/Program Files/Microsoft SDKs/[...]
+  # They are already included in the default MSVC LIBPATH => no find_library is needed!
+  list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES wsock32.lib ws2_32.lib)  # bufferoverflowu.lib
   if(CURL_DISABLE_LDAP)
     # Remove wldap32.lib from space-separated list
     string(REPLACE " " ";" _LIST ${CMAKE_C_STANDARD_LIBRARIES})
