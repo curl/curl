@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1309,27 +1309,10 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
 
-#ifndef CURL_DISABLE_PROXY
-  /* If we are not using a proxy and we want a secure connection, perform SSL
-   * initialization & connection now.  If using a proxy with https, then we
-   * must tell the proxy to CONNECT to the host we want to talk to.  Only
-   * after the connect has occurred, can we start talking SSL
-   */
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-
-    /* either SSL over proxy, or explicitly asked for */
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name,
-                               conn->remote_port);
-    if(CURLE_OK != result)
-      return result;
-  }
-
   if(conn->bits.tunnel_connecting) {
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
   }
-#endif /* CURL_DISABLE_PROXY */
 
   if(conn->given->flags & PROTOPT_SSL) {
     /* perform SSL initialization */

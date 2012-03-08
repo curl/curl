@@ -670,33 +670,6 @@ static CURLcode pop3_connect(struct connectdata *conn,
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* for POP3 over HTTP proxy */
-    struct HTTP http_proxy;
-    struct FTP *pop3_save;
-
-    /* BLOCKING */
-    /* We want "seamless" POP3 operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want POP3 through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * POP3 pointer
-     */
-    pop3_save = data->state.proto.pop3;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->state.proto.http = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
-
-    data->state.proto.pop3 = pop3_save;
-
-    if(CURLE_OK != result)
-      return result;
-  }
-
   if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);

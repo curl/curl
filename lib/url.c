@@ -124,6 +124,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "socks.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
+#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -3385,12 +3386,44 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   Curl_verboseconnect(conn);
 
   if(!conn->bits.protoconnstart) {
+
+    /* Set start time here for timeout purposes in the connect procedure, it
+       is later set again for the progress meter purpose */
+    conn->now = Curl_tvnow();
+
+    if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
+#ifndef CURL_DISABLE_PROXY
+      /* for [protocol] tunneled through HTTP proxy */
+      struct HTTP http_proxy;
+      void *prot_save;
+
+      /* BLOCKING */
+      /* We want "seamless" operations through HTTP proxy tunnel */
+
+      /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
+       * member conn->proto.http; we want [protocol] through HTTP and we have
+       * to change the member temporarily for connecting to the HTTP
+       * proxy. After Curl_proxyCONNECT we have to set back the member to the
+       * original pointer
+       */
+      prot_save = data->state.proto.generic;
+      memset(&http_proxy, 0, sizeof(http_proxy));
+      data->state.proto.http = &http_proxy;
+
+      result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
+                                 conn->host.name, conn->remote_port);
+
+      data->state.proto.generic = prot_save;
+
+      if(CURLE_OK != result)
+        return result;
+#else
+      return CURLE_NOT_BUILT_IN;
+#endif
+    }
+
     if(conn->handler->connect_it) {
       /* is there a protocol-specific connect() procedure? */
-
-      /* Set start time here for timeout purposes in the connect procedure, it
-         is later set again for the progress meter purpose */
-      conn->now = Curl_tvnow();
 
       /* Call the protocol-specific connect function */
       result = conn->handler->connect_it(conn, protocol_done);

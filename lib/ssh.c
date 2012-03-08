@@ -90,7 +90,6 @@
 #include "multiif.h"
 #include "select.h"
 #include "warnless.h"
-#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -2659,33 +2658,6 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   /* If there already is a protocol-specific struct allocated for this
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
-
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* for SSH over HTTP proxy */
-    struct HTTP http_proxy;
-    struct SSHPROTO *ssh_save;
-
-    /* BLOCKING */
-    /* We want "seamless" SSH operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want SSH through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * SSH pointer
-     */
-    ssh_save = data->state.proto.ssh;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->state.proto.http = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
-
-    data->state.proto.ssh = ssh_save;
-
-    if(CURLE_OK != result)
-      return result;
-  }
 
   result = ssh_init(conn);
   if(result)

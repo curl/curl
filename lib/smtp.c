@@ -1294,33 +1294,6 @@ static CURLcode smtp_connect(struct connectdata *conn,
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* for SMTP over HTTP proxy */
-    struct HTTP http_proxy;
-    struct FTP *smtp_save;
-
-    /* BLOCKING */
-    /* We want "seamless" SMTP operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want SMTP through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * SMTP pointer
-     */
-    smtp_save = data->state.proto.smtp;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->state.proto.http = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
-
-    data->state.proto.smtp = smtp_save;
-
-    if(CURLE_OK != result)
-      return result;
-  }
-
   if((conn->handler->protocol & CURLPROTO_SMTPS) &&
       data->state.used_interface != Curl_if_multi) {
     /* SMTPS is simply smtp with SSL for the control channel */

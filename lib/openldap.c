@@ -208,33 +208,6 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
   ldap_set_option(li->ld, LDAP_OPT_PROTOCOL_VERSION, &proto);
 
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* for LDAP over HTTP proxy */
-    struct HTTP http_proxy;
-    ldapconninfo *li_save;
-    CURLcode result;
-
-    /* BLOCKING */
-    /* We want "seamless" LDAP operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want LDAP through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * LDAP pointer
-     */
-    li_save = data->state.proto.generic;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->state.proto.http = &http_proxy;
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
-
-    data->state.proto.generic = li_save;
-
-    if(CURLE_OK != result)
-      return result;
-  }
-
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode res;
