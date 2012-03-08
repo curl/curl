@@ -46,7 +46,6 @@
 #include "curl_ldap.h"
 #include "curl_memory.h"
 #include "curl_base64.h"
-#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

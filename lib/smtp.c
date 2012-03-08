@@ -87,7 +87,6 @@
 #include "curl_gethostname.h"
 #include "curl_ntlm_msgs.h"
 #include "warnless.h"
-#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

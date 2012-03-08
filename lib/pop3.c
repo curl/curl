@@ -79,7 +79,6 @@
 #include "url.h"
 #include "rawstr.h"
 #include "strtoofft.h"
-#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
