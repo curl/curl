@@ -623,7 +623,6 @@ int netware_init(void);
 #if defined(__LWIP_OPT_H__)
 #  if defined(SOCKET) || \
      defined(USE_WINSOCK) || \
-     defined(HAVE_ERRNO_H) || \
      defined(HAVE_WINSOCK_H) || \
      defined(HAVE_WINSOCK2_H) || \
      defined(HAVE_WS2TCPIP_H)
