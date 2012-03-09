@@ -44,6 +44,9 @@ typedef enum {
   SSH_AUTH_PKEY,
   SSH_AUTH_PASS_INIT,
   SSH_AUTH_PASS,
+  SSH_AUTH_AGENT_INIT,/* initialize then wait for connection to agent */
+  SSH_AUTH_AGENT_LIST,/* ask for list then wait for entire list to come */
+  SSH_AUTH_AGENT,     /* attempt one key at a time */
   SSH_AUTH_HOST_INIT,
   SSH_AUTH_HOST,
   SSH_AUTH_KEY_INIT,
@@ -138,6 +141,12 @@ struct ssh_conn {
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
   int orig_waitfor;             /* default READ/WRITE bits wait for */
+
+#ifdef HAVE_LIBSSH2_AGENT_API
+  LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
+  struct libssh2_agent_publickey *sshagent_identity,
+                                 *sshagent_prev_identity;
+#endif
 
   /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
      header */

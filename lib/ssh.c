@@ -324,7 +324,8 @@ static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
 static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
   (void)abstract; /* arg not used */
-  free(ptr);
+  if(ptr) /* ssh2 agent sometimes call free with null ptr */
+    free(ptr);
 }
 
 /*
@@ -345,6 +346,9 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_AUTH_PKEY",
     "SSH_AUTH_PASS_INIT",
     "SSH_AUTH_PASS",
+    "SSH_AUTH_AGENT_INIT",
+    "SSH_AUTH_AGENT_LIST",
+    "SSH_AUTH_AGENT",
     "SSH_AUTH_HOST_INIT",
     "SSH_AUTH_HOST",
     "SSH_AUTH_KEY_INIT",
@@ -893,12 +897,97 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         state(conn, SSH_AUTH_HOST);
       }
       else {
-        state(conn, SSH_AUTH_KEY_INIT);
+        state(conn, SSH_AUTH_AGENT_INIT);
       }
       break;
 
     case SSH_AUTH_HOST:
-      state(conn, SSH_AUTH_KEY_INIT);
+      state(conn, SSH_AUTH_AGENT_INIT);
+      break;
+
+    case SSH_AUTH_AGENT_INIT:
+#ifdef HAVE_LIBSSH2_AGENT_API
+      if((data->set.ssh_auth_types & CURLSSH_AUTH_AGENT)
+         && (strstr(sshc->authlist, "publickey") != NULL)) {
+
+        /* Connect to the ssh-agent */
+        /* The agent could be shared by a curl thread i believe
+           but nothing obvious as keys can be added/removed at any time */
+        if(!sshc->ssh_agent) {
+          sshc->ssh_agent = libssh2_agent_init(sshc->ssh_session);
+          if(!sshc->ssh_agent) {
+            infof(data, "Could not create agent object\n");
+
+            state(conn, SSH_AUTH_KEY_INIT);
+          }
+        }
+
+        rc = libssh2_agent_connect(sshc->ssh_agent);
+        if(rc == LIBSSH2_ERROR_EAGAIN)
+          break;
+        if(rc < 0) {
+          infof(data, "Failure connecting to agent\n");
+          state(conn, SSH_AUTH_KEY_INIT);
+        }
+        else {
+          state(conn, SSH_AUTH_AGENT_LIST);
+        }
+      }
+      else
+#endif /* HAVE_LIBSSH2_AGENT_API */
+        state(conn, SSH_AUTH_KEY_INIT);
+      break;
+
+    case SSH_AUTH_AGENT_LIST:
+      rc = libssh2_agent_list_identities(sshc->ssh_agent);
+
+      if(rc == LIBSSH2_ERROR_EAGAIN)
+        break;
+      if(rc < 0) {
+        infof(data, "Failure requesting identities to agent\n");
+        state(conn, SSH_AUTH_KEY_INIT);
+      }
+      else {
+        state(conn, SSH_AUTH_AGENT);
+        sshc->sshagent_prev_identity = NULL;
+      }
+      break;
+
+    case SSH_AUTH_AGENT:
+      /* as prev_identity evolves only after an identity user auth finished we
+         can safely request it again as long as EAGAIN is returned here or by
+         libssh2_agent_userauth */
+      rc = libssh2_agent_get_identity(sshc->ssh_agent,
+                                      &sshc->sshagent_identity,
+                                      sshc->sshagent_prev_identity);
+      if(rc == LIBSSH2_ERROR_EAGAIN)
+        break;
+
+      if(rc == 0) {
+        rc = libssh2_agent_userauth(sshc->ssh_agent, conn->user,
+                                    sshc->sshagent_identity);
+
+        if(rc < 0) {
+          if(rc != LIBSSH2_ERROR_EAGAIN) {
+            /* tried and failed? go to next identity */
+            sshc->sshagent_prev_identity = sshc->sshagent_identity;
+          }
+          break;
+        }
+      }
+
+      if(rc < 0)
+        infof(data, "Failure requesting identities to agent\n");
+      else if(rc == 1)
+        infof(data, "No identity would match\n");
+
+      if(rc == LIBSSH2_ERROR_NONE) {
+        sshc->authed = TRUE;
+        infof(data, "Agent based authentication successful\n");
+        state(conn, SSH_AUTH_DONE);
+      }
+      else
+        state(conn, SSH_AUTH_KEY_INIT);
       break;
 
     case SSH_AUTH_KEY_INIT:
@@ -2354,6 +2443,25 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(sshc->kh) {
         libssh2_knownhost_free(sshc->kh);
         sshc->kh = NULL;
+      }
+#endif
+
+#ifdef HAVE_LIBSSH2_AGENT_API
+      if(sshc->ssh_agent) {
+        rc = libssh2_agent_disconnect(sshc->ssh_agent);
+        if(rc == LIBSSH2_ERROR_EAGAIN) {
+          break;
+        }
+        else if(rc < 0) {
+          infof(data, "Failed to disconnect from libssh2 agent\n");
+        }
+        libssh2_agent_free (sshc->ssh_agent);
+        sshc->ssh_agent = NULL;
+
+        /* NB: there is no need to free identities, they are part of internal
+           agent stuff */
+        sshc->sshagent_identity = NULL;
+        sshc->sshagent_prev_identity = NULL;
       }
 #endif
 
