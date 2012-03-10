@@ -1840,9 +1840,19 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* ignore empty data */
       free(cookiehost);
     else {
-      char *colon = strchr(cookiehost, ':');
-      if(colon)
-        *colon = 0; /* The host must not include an embedded port number */
+      /* If the host begins with '[', we start searching for the port after
+         the bracket has been closed */
+      int startsearch = 0;
+      if(*cookiehost == '[') {
+        char *closingbracket = strchr(++cookiehost, ']');
+        if(closingbracket)
+          *closingbracket = 0;
+      }
+      else {
+        char *colon = strchr(cookiehost + startsearch, ':');
+        if(colon)
+          *colon = 0; /* The host must not include an embedded port number */
+      }
       Curl_safefree(conn->allocptr.cookiehost);
       conn->allocptr.cookiehost = cookiehost;
     }
