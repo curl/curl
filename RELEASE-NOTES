@@ -1,11 +1,11 @@
 Curl and libcurl 7.25.0
 
  Public curl releases:         127
- Command line options:         150
- curl_easy_setopt() options:   198
+ Command line options:         151
+ curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 907
+ Contributors:                 929
 
 This release includes the following changes:
 
@@ -13,6 +13,9 @@ This release includes the following changes:
  o --ssl-allow-beast and CURLOPT_SSL_OPTIONS added [2]
  o Added CURLOPT_TCP_KEEPALIVE, CURLOPT_TCP_KEEPIDLE, CURLOPT_TCP_KEEPINTVL [4]
  o curl: use new library-side TCP_KEEPALIVE options [5]
+ o Added a new CURLOPT_MAIL_AUTH option [13]
+ o Added support for --mail-auth [14]
+ o --libcurl now also works with -F and more! [15]
 
 This release includes the following bugfixes:
 
@@ -25,6 +28,19 @@ This release includes the following bugfixes:
  o Explicitly link to the nettle/gcrypt libraries [11]
  o more resilient connection times among IP addresses [12]
  o winbuild: fix IPV6 and IDN options
+ o SMTP: Fixed error when using CURLOPT_CONNECT_ONLY
+ o cyassl: update to CyaSSL 2.0.x API
+ o smtp: Fixed an issue with the EOB checking
+ o pop3: Fixed drop of final CRLF in EOB checking [16]
+ o smtp: Fixed an issue with writing postdata
+ o smtp: Added support for returning SMTP response codes
+ o CONNECT: fix ipv6 address in the Request-Line [17]
+ o curl-config: only provide libraries with --libs
+ o LWIP: don't consider HAVE_ERRNO_H to be winsock [19]
+ o ssh: tunnel through HTTP proxy if requested
+ o cookies: strip off [brackets] from numerical ipv6 host names [20]
+ o libcurl docs: version corrections [18]
+ o 
 
 This release includes the following known bugs:
 
@@ -35,8 +51,9 @@ advice from friends like these:
 
  Colin Hogben, Alessandro Ghedini, Kamil Dudka, Rob Ward, Dave Reisner,
  Martin Storsjo, Pierre Ynard, Pierre Joye, Yang Tse, Dan Fandrich,
- Michael Day, Juan Barreto, Chandrakant Bagul
-
+ Michael Day, Juan Barreto, Chandrakant Bagul, Steve Holme, Todd Ouska,
+ Rich Gray, John Joseph Bachir, Armel Asselin, Andrei Cipu
+ 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
@@ -53,3 +70,11 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/bug/view.cgi?id=3482093
  [11] = http://curl.haxx.se/mail/lib-2012-01/0303.html
  [12] = http://curl.haxx.se/mail/lib-2012-01/0190.html
+ [13] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTMAILAUTH
+ [14] = http://curl.haxx.se/docs/manpage.html#--mail-auth
+ [15] = http://curl.haxx.se/docs/manpage.html#--libcurl
+ [16] = http://curl.haxx.se/mail/lib-2012-02/0051.html
+ [17] = http://curl.haxx.se/bug/view.cgi?id=3493129
+ [18] = http://curl.haxx.se/bug/view.cgi?id=3494091
+ [19] = http://curl.haxx.se/mail/lib-2012-03/0046.html
+ [20] = http://curl.haxx.se/mail/lib-2012-03/0036.html
