@@ -582,13 +582,22 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     res->last_status = ARES_ENOTFOUND;
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
     if(family == PF_UNSPEC) {
-      res->num_pending = 2;
+      if(Curl_ipv6works()) {
+        res->num_pending = 2;
 
-      /* areschannel is already setup in the Curl_open() function */
-      ares_gethostbyname((ares_channel)data->state.resolver, hostname,
-                         PF_INET, query_completed_cb, conn);
-      ares_gethostbyname((ares_channel)data->state.resolver, hostname,
-                         PF_INET6, query_completed_cb, conn);
+        /* areschannel is already setup in the Curl_open() function */
+        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+                            PF_INET, query_completed_cb, conn);
+        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+                            PF_INET6, query_completed_cb, conn);
+      }
+      else {
+        res->num_pending = 1;
+
+        /* areschannel is already setup in the Curl_open() function */
+        ares_gethostbyname((ares_channel)data->state.resolver, hostname,
+                            PF_INET, query_completed_cb, conn);
+      }
     }
     else
 #endif /* CURLRES_IPV6 */
