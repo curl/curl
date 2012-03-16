@@ -2405,8 +2405,11 @@ GSS_C_DELEG_POLICY_FLAG was available at compile-time.
 .IP CURLOPT_SSH_AUTH_TYPES
 Pass a long set to a bitmask consisting of one or more of
 CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
-CURLSSH_AUTH_KEYBOARD. Set CURLSSH_AUTH_ANY to let libcurl pick one. Currently
-CURLSSH_AUTH_HOST has no effect. (Added in 7.16.1)
+CURLSSH_AUTH_KEYBOARD and CURLSSH_AUTH_AGENT. Set CURLSSH_AUTH_ANY to let
+libcurl pick a suitable one. Currently CURLSSH_AUTH_HOST has no effect. (Added
+in 7.16.1) If CURLSSH_AUTH_AGENT is used, libcurl attempts to connect to
+ssh-agent or pageant and let the agent attempt the authentication. (Added in
+7.28.0)
 .IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
 Pass a char * pointing to a string containing 32 hexadecimal digits. The
 string should be the 128 bit MD5 checksum of the remote host's public key, and
