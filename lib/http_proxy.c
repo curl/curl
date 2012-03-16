@@ -128,12 +128,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           aprintf("%s%s%s:%hu", conn->bits.ipv6_ip?"[":"",
                   hostname, conn->bits.ipv6_ip?"]":"",
                   remote_port);
-        if(!hostheader)
+        if(!hostheader) {
+          free(req_buffer);
           return CURLE_OUT_OF_MEMORY;
+        }
 
         if(!Curl_checkheaders(data, "Host:")) {
           host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
+            free(hostheader);
             free(req_buffer);
             return CURLE_OUT_OF_MEMORY;
           }
