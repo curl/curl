@@ -69,6 +69,7 @@
 #include "select.h"
 #include "strequal.h"
 #include "rawstr.h"
+#include "warnless.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

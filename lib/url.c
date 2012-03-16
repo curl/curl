@@ -752,7 +752,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   /* tcp keepalives are disabled by default, but provide reasonable values for
    * the interval and idle times.
    */
-  set->tcp_keepalive = 0;
+  set->tcp_keepalive = FALSE;
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
 

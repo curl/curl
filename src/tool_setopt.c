@@ -389,7 +389,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
 {
   va_list arg;
   char buf[256];
-  const char *value;
+  const char *value = NULL;
   bool remark = FALSE;
   bool skip = FALSE;
   bool escape = FALSE;

@@ -67,6 +67,7 @@
 #include <x509v3.h>
 #endif
 
+#include "warnless.h"
 #include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
@@ -254,7 +255,7 @@ static int ossl_seed(struct SessionHandle *data)
       if(!area)
         return 3; /* out of memory */
 
-      len = (int)strlen(area);
+      len = curlx_uztosi(strlen(area));
       RAND_add(area, len, (len >> 1));
 
       free(area); /* now remove the random junk */
@@ -1252,7 +1253,7 @@ static CURLcode verifyhost(struct connectdata *conn,
         else /* not a UTF8 name */
           j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
 
-        if(peer_CN && ((int)strlen((char *)peer_CN) != j)) {
+        if(peer_CN && (curlx_uztosi(strlen((char *)peer_CN)) != j)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");

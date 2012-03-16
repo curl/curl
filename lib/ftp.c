@@ -4244,7 +4244,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         return CURLE_OUT_OF_MEMORY;
 
       ftpc->dirs[0] = curl_easy_unescape(conn->data, slash_pos ? cur_pos : "/",
-                                         slash_pos?(int)(slash_pos-cur_pos):1,
+                                         slash_pos ?
+                                         curlx_sztosi(slash_pos-cur_pos) : 1,
                                          NULL);
       if(!ftpc->dirs[0]) {
         freedirs(ftpc);
@@ -4283,7 +4284,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
           /* we skip empty path components, like "x//y" since the FTP command
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
-          int len = (int)(slash_pos - cur_pos + absolute_dir);
+          int len = curlx_sztosi(slash_pos - cur_pos + absolute_dir);
           ftpc->dirs[ftpc->dirdepth] =
             curl_easy_unescape(conn->data, cur_pos - absolute_dir, len, NULL);
           if(!ftpc->dirs[ftpc->dirdepth]) { /* run out of memory ... */
@@ -4354,8 +4355,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
     }
 
-    dlen -= ftpc->file?(int)strlen(ftpc->file):0;
-    if((dlen == (int)strlen(ftpc->prevpath)) &&
+    dlen -= ftpc->file?curlx_uztosi(strlen(ftpc->file)):0;
+    if((dlen == curlx_uztosi(strlen(ftpc->prevpath))) &&
        strnequal(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;

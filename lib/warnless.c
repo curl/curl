@@ -287,6 +287,25 @@ size_t curlx_sotouz(curl_off_t sonum)
 }
 
 /*
+** signed ssize_t to signed int
+*/
+
+int curlx_sztosi(ssize_t sznum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  DEBUGASSERT(sznum >= 0);
+  return (int)(sznum & (ssize_t) CURL_MASK_SINT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
 ** signed int to unsigned size_t
 */
 
