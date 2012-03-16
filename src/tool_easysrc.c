@@ -124,7 +124,7 @@ CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...)
   return ret;
 }
 
-#define CHKRET(v) do {CURLcode ret = (v); if(ret) return ret;} while(0)
+#define CHKRET(v) do {CURLcode ret = (v); if(ret) return ret;} WHILE_FALSE
 
 CURLcode easysrc_init(void)
 {
