@@ -129,12 +129,12 @@ const NameValue setopt_nv_CURLPROTO[] = {
   ret = easysrc_add args; \
   if(ret) \
     goto nomem; \
-} while(0)
+} WHILE_FALSE
 #define ADDF(args) do { \
   ret = easysrc_addf args; \
   if(ret) \
     goto nomem; \
-} while(0)
+} WHILE_FALSE
 
 #define DECL0(s) ADD((&easysrc_decl, s))
 #define DECL1(f,a) ADDF((&easysrc_decl, f,a))
@@ -310,8 +310,10 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
          * these are linked through the 'more' pointer */
         char *e;
         e = c_escape(pp->contents);
-        if(!e)
+        if(!e) {
+          ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
+        }
         if(pp->flags & HTTPPOST_FILENAME) {
           /* file upload as for -F @filename */
           DATA1("             CURLFORM_FILE, \"%s\",", e);
@@ -325,15 +327,19 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
         free(e);
         if(pp->showfilename) {
           e = c_escape(pp->showfilename);
-          if(!e)
+          if(!e) {
+            ret = CURLE_OUT_OF_MEMORY;
             goto nomem;
+          }
           DATA1("             CURLFORM_FILENAME, \"%s\",", e);
           free(e);
         }
         if(pp->contenttype) {
           e = c_escape(pp->contenttype);
-          if(!e)
+          if(!e) {
+            ret = CURLE_OUT_OF_MEMORY;
             goto nomem;
+          }
           DATA1("             CURLFORM_CONTENTTYPE, \"%s\",", e);
           free(e);
         }
@@ -370,8 +376,10 @@ CURLcode tool_setopt_slist(CURL *curl, struct Configurable *config,
     CLEAN1("slist%d = NULL;", i);
     for(s=list; s; s=s->next) {
       char *e = c_escape(s->data);
-      if(!e)
+      if(!e) {
+        ret = CURLE_OUT_OF_MEMORY;
         goto nomem;
+      }
       DATA3("slist%d = curl_slist_append(slist%d, \"%s\");", i, i, e);
       free(e);
     }
@@ -456,8 +464,10 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
     else {
       if(escape) {
         char *escaped = c_escape(value);
-        if(!escaped)
+        if(!escaped) {
+          ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
+        }
         CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);
         free(escaped);
       }
