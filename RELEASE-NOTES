@@ -40,7 +40,9 @@ This release includes the following bugfixes:
  o ssh: tunnel through HTTP proxy if requested
  o cookies: strip off [brackets] from numerical ipv6 host names [20]
  o libcurl docs: version corrections [18]
- o 
+ o cmake: list_spaces_append_once failure [22]
+ o resolve with c-ares: don't resolve IPv6 when not working [21]
+ o smtp: changed error code for EHLO and HELO responses
 
 This release includes the following known bugs:
 
@@ -52,7 +54,8 @@ advice from friends like these:
  Colin Hogben, Alessandro Ghedini, Kamil Dudka, Rob Ward, Dave Reisner,
  Martin Storsjo, Pierre Ynard, Pierre Joye, Yang Tse, Dan Fandrich,
  Michael Day, Juan Barreto, Chandrakant Bagul, Steve Holme, Todd Ouska,
- Rich Gray, John Joseph Bachir, Armel Asselin, Andrei Cipu
+ Rich Gray, John Joseph Bachir, Armel Asselin, Andrei Cipu,
+ Maxim Prohorov
  
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -78,3 +81,5 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/view.cgi?id=3494091
  [19] = http://curl.haxx.se/mail/lib-2012-03/0046.html
  [20] = http://curl.haxx.se/mail/lib-2012-03/0036.html
+ [21] = http://curl.haxx.se/mail/lib-2012-03/0045.html
+ [22] = http://curl.haxx.se/bug/view.cgi?id=3494968
