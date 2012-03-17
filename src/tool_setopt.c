@@ -284,6 +284,7 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
                               struct curl_httppost *post)
 {
   CURLcode ret = CURLE_OK;
+  char *escaped = NULL;
   bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, post);
@@ -308,40 +309,39 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
       for(pp=p; pp; pp=pp->more) {
         /* May be several files uploaded for one name;
          * these are linked through the 'more' pointer */
-        char *e;
-        e = c_escape(pp->contents);
-        if(!e) {
+        Curl_safefree(escaped);
+        escaped = c_escape(pp->contents);
+        if(!escaped) {
           ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
         }
         if(pp->flags & HTTPPOST_FILENAME) {
           /* file upload as for -F @filename */
-          DATA1("             CURLFORM_FILE, \"%s\",", e);
+          DATA1("             CURLFORM_FILE, \"%s\",", escaped);
         }
         else if(pp->flags & HTTPPOST_READFILE) {
           /* content from file as for -F <filename */
-          DATA1("             CURLFORM_FILECONTENT, \"%s\",", e);
+          DATA1("             CURLFORM_FILECONTENT, \"%s\",", escaped);
         }
         else
-          DATA1("             CURLFORM_COPYCONTENTS, \"%s\",", e);
-        free(e);
+          DATA1("             CURLFORM_COPYCONTENTS, \"%s\",", escaped);
         if(pp->showfilename) {
-          e = c_escape(pp->showfilename);
-          if(!e) {
+          Curl_safefree(escaped);
+          escaped = c_escape(pp->showfilename);
+          if(!escaped) {
             ret = CURLE_OUT_OF_MEMORY;
             goto nomem;
           }
-          DATA1("             CURLFORM_FILENAME, \"%s\",", e);
-          free(e);
+          DATA1("             CURLFORM_FILENAME, \"%s\",", escaped);
         }
         if(pp->contenttype) {
-          e = c_escape(pp->contenttype);
-          if(!e) {
+          Curl_safefree(escaped);
+          escaped = c_escape(pp->contenttype);
+          if(!escaped) {
             ret = CURLE_OUT_OF_MEMORY;
             goto nomem;
           }
-          DATA1("             CURLFORM_CONTENTTYPE, \"%s\",", e);
-          free(e);
+          DATA1("             CURLFORM_CONTENTTYPE, \"%s\",", escaped);
         }
       }
       DATA0("             CURLFORM_END);");
@@ -350,6 +350,7 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
   }
 
  nomem:
+  Curl_safefree(escaped);
   return ret;
 }
 
@@ -359,6 +360,7 @@ CURLcode tool_setopt_slist(CURL *curl, struct Configurable *config,
                            struct curl_slist *list)
 {
   CURLcode ret = CURLE_OK;
+  char *escaped = NULL;
   bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, list);
@@ -375,18 +377,19 @@ CURLcode tool_setopt_slist(CURL *curl, struct Configurable *config,
     CLEAN1("curl_slist_free_all(slist%d);", i);
     CLEAN1("slist%d = NULL;", i);
     for(s=list; s; s=s->next) {
-      char *e = c_escape(s->data);
-      if(!e) {
+      Curl_safefree(escaped);
+      escaped = c_escape(s->data);
+      if(!escaped) {
         ret = CURLE_OUT_OF_MEMORY;
         goto nomem;
       }
-      DATA3("slist%d = curl_slist_append(slist%d, \"%s\");", i, i, e);
-      free(e);
+      DATA3("slist%d = curl_slist_append(slist%d, \"%s\");", i, i, escaped);
     }
     CODE2("curl_easy_setopt(hnd, %s, slist%d);", name, i);
   }
 
  nomem:
+  Curl_safefree(escaped);
   return ret;
 }
 
@@ -401,6 +404,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
   bool remark = FALSE;
   bool skip = FALSE;
   bool escape = FALSE;
+  char *escaped = NULL;
   CURLcode ret = CURLE_OK;
 
   va_start(arg, tag);
@@ -463,13 +467,12 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
       REM2("%s set to a %s", name, value);
     else {
       if(escape) {
-        char *escaped = c_escape(value);
+        escaped = c_escape(value);
         if(!escaped) {
           ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
         }
         CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);
-        free(escaped);
       }
       else
         CODE2("curl_easy_setopt(hnd, %s, %s);", name, value);
@@ -477,6 +480,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
   }
 
  nomem:
+  Curl_safefree(escaped);
   return ret;
 }
 
