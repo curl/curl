@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -144,7 +144,6 @@ RELEASE_OBJS= \
 	tool_cb_prgr.obj \
 	tool_cb_rear.obj \
 	tool_cb_seer.obj \
-	tool_cb_sktr.obj \
 	tool_cb_wrtr.obj \
 	tool_cfgabler.obj \
 	tool_convertr.obj \
@@ -188,7 +187,6 @@ DEBUG_OBJS= \
 	tool_cb_prgd.obj \
 	tool_cb_read.obj \
 	tool_cb_seed.obj \
-	tool_cb_sktd.obj \
 	tool_cb_wrtd.obj \
 	tool_cfgabled.obj \
 	tool_convertd.obj \
@@ -362,8 +360,6 @@ tool_cb_rear.obj: tool_cb_rea.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_rea.c
 tool_cb_seer.obj: tool_cb_see.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_see.c
-tool_cb_sktr.obj: tool_cb_skt.c
-	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_skt.c
 tool_cb_wrtr.obj: tool_cb_wrt.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
 tool_cfgabler.obj: tool_cfgable.c
@@ -448,8 +444,6 @@ tool_cb_read.obj: tool_cb_rea.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_rea.c
 tool_cb_seed.obj: tool_cb_see.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_see.c
-tool_cb_sktd.obj: tool_cb_skt.c
-	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_skt.c
 tool_cb_wrtd.obj: tool_cb_wrt.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
 tool_cfgabled.obj: tool_cfgable.c

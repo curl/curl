@@ -16,7 +16,6 @@ SOURCE \
     tool_cb_prg.c \
     tool_cb_rea.c \
     tool_cb_see.c \
-    tool_cb_skt.c \
     tool_cb_wrt.c \
     tool_cfgable.c \
     tool_convert.c \

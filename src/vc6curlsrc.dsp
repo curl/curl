@@ -183,10 +183,6 @@ SOURCE=.\tool_cb_see.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\tool_cb_skt.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\tool_cb_wrt.c
 # End Source File
 # Begin Source File
@@ -356,10 +352,6 @@ SOURCE=.\tool_cb_rea.h
 # Begin Source File
 
 SOURCE=.\tool_cb_see.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\tool_cb_skt.h
 # End Source File
 # Begin Source File
 
