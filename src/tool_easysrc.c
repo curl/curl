@@ -176,7 +176,7 @@ void dumpeasysrc(struct Configurable *config)
     FILE *out;
     bool fopened = FALSE;
     if(strcmp(o, "-")) {
-      out = fopen(o, "wt");
+      out = fopen(o, "w");
       fopened = TRUE;
     }
     else
