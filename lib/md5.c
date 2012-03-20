@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
+#include "warnless.h"
 
 #ifdef USE_GNUTLS_NETTLE
 
@@ -412,7 +413,7 @@ void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
 {
   MD5_CTX ctx;
   MD5_Init(&ctx);
-  MD5_Update(&ctx, input, (unsigned int)strlen((char *)input));
+  MD5_Update(&ctx, input, curlx_uztoui(strlen((char *)input)));
   MD5_Final(outbuffer, &ctx);
 }
 

@@ -91,11 +91,13 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   struct timeval tv;
   struct tm *now;
   char timebuf[20];
+  char *timestr;
   time_t secs;
 
   (void)handle;
 
   timebuf[0] = '\0';
+  timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
     tv = tutil_tvnow();
@@ -111,7 +113,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 
   switch (type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "%s== Info: %s", &timebuf[0], data);
+    fprintf(stderr, "%s== Info: %s", timestr, data);
   default: /* in case a new one is introduced to shock us */
     return 0;
 

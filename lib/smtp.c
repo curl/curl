@@ -757,7 +757,7 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   /* Compute digest. */
   ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
                         (const unsigned char *) conn->passwd,
-                        (unsigned int)(strlen(conn->passwd)));
+                        curlx_uztoui(strlen(conn->passwd)));
 
   if(!ctxt) {
     Curl_safefree(chlg);
@@ -765,7 +765,7 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   }
 
   if(chlglen > 0)
-    Curl_HMAC_update(ctxt, chlg, (unsigned int)(chlglen));
+    Curl_HMAC_update(ctxt, chlg, curlx_uztoui(chlglen));
 
   Curl_safefree(chlg);
 

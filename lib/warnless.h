@@ -30,6 +30,8 @@ int curlx_uztosi(size_t uznum);
 
 unsigned long curlx_uztoul(size_t uznum);
 
+unsigned int curlx_uztoui(size_t uznum);
+
 int curlx_sltosi(long slnum);
 
 unsigned int curlx_sltoui(long slnum);

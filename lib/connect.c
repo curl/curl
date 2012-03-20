@@ -93,7 +93,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 static void
 tcpkeepalive(struct SessionHandle *data,
-             int sockfd)
+             curl_socket_t sockfd)
 {
   int optval = data->set.tcp_keepalive?1:0;
 
@@ -104,14 +104,14 @@ tcpkeepalive(struct SessionHandle *data,
   }
   else {
 #ifdef TCP_KEEPIDLE
-    optval = data->set.tcp_keepidle;
+    optval = curlx_sltosi(data->set.tcp_keepidle);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd %d\n", sockfd);
     }
 #endif
 #ifdef TCP_KEEPINTVL
-    optval = data->set.tcp_keepintvl;
+    optval = curlx_sltosi(data->set.tcp_keepintvl);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);

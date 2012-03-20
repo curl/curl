@@ -225,7 +225,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
 #endif  /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     responses[0].text = strdup(conn->passwd);
-    responses[0].length = (unsigned int)strlen(conn->passwd);
+    responses[0].length = curlx_uztoui(strlen(conn->passwd));
   }
   (void)prompts;
   (void)abstract;
@@ -734,7 +734,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       sshc->authlist = libssh2_userauth_list(sshc->ssh_session,
                                              conn->user,
-                                             (unsigned int)strlen(conn->user));
+                                             curlx_uztoui(strlen(conn->user)));
 
       if(!sshc->authlist) {
         if((err = libssh2_session_last_errno(sshc->ssh_session)) ==
@@ -827,8 +827,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       rc = libssh2_userauth_publickey_fromfile_ex(sshc->ssh_session,
                                                   conn->user,
-                                                  (unsigned int)
-                                                  strlen(conn->user),
+                                                  curlx_uztoui(
+                                                    strlen(conn->user)),
                                                   sshc->rsa_pub,
                                                   sshc->rsa, sshc->passphrase);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -866,9 +866,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_AUTH_PASS:
       rc = libssh2_userauth_password_ex(sshc->ssh_session, conn->user,
-                                        (unsigned int)strlen(conn->user),
+                                        curlx_uztoui(strlen(conn->user)),
                                         conn->passwd,
-                                        (unsigned int)strlen(conn->passwd),
+                                        curlx_uztoui(strlen(conn->passwd)),
                                         NULL);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -911,8 +911,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* Authentication failed. Continue with keyboard-interactive now. */
       rc = libssh2_userauth_keyboard_interactive_ex(sshc->ssh_session,
                                                     conn->user,
-                                                    (unsigned int)
-                                                    strlen(conn->user),
+                                                    curlx_uztoui(
+                                                      strlen(conn->user)),
                                                     &kbd_callback);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -1271,7 +1271,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * first.  This takes an extra protocol round trip.
          */
         rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshc->quote_path2,
-                                  (unsigned int)strlen(sshc->quote_path2),
+                                  curlx_uztoui(strlen(sshc->quote_path2)),
                                   LIBSSH2_SFTP_STAT,
                                   &sshc->quote_attrs);
         if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -1350,7 +1350,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_SETSTAT:
       rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshc->quote_path2,
-                                (unsigned int)strlen(sshc->quote_path2),
+                                curlx_uztoui(strlen(sshc->quote_path2)),
                                 LIBSSH2_SFTP_SETSTAT,
                                 &sshc->quote_attrs);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -1374,9 +1374,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_SYMLINK:
       rc = libssh2_sftp_symlink_ex(sshc->sftp_session, sshc->quote_path1,
-                                   (unsigned int)strlen(sshc->quote_path1),
+                                   curlx_uztoui(strlen(sshc->quote_path1)),
                                    sshc->quote_path2,
-                                   (unsigned int)strlen(sshc->quote_path2),
+                                   curlx_uztoui(strlen(sshc->quote_path2)),
                                    LIBSSH2_SFTP_SYMLINK);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -1399,7 +1399,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_MKDIR:
       rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sshc->quote_path1,
-                                 (unsigned int)strlen(sshc->quote_path1),
+                                 curlx_uztoui(strlen(sshc->quote_path1)),
                                  data->set.new_directory_perms);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -1419,9 +1419,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_RENAME:
       rc = libssh2_sftp_rename_ex(sshc->sftp_session, sshc->quote_path1,
-                                  (unsigned int)strlen(sshc->quote_path1),
+                                  curlx_uztoui(strlen(sshc->quote_path1)),
                                   sshc->quote_path2,
-                                  (unsigned int)strlen(sshc->quote_path2),
+                                  curlx_uztoui(strlen(sshc->quote_path2)),
                                   LIBSSH2_SFTP_RENAME_OVERWRITE |
                                   LIBSSH2_SFTP_RENAME_ATOMIC |
                                   LIBSSH2_SFTP_RENAME_NATIVE);
@@ -1446,7 +1446,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_RMDIR:
       rc = libssh2_sftp_rmdir_ex(sshc->sftp_session, sshc->quote_path1,
-                                 (unsigned int)strlen(sshc->quote_path1));
+                                 curlx_uztoui(strlen(sshc->quote_path1)));
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -1465,7 +1465,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_UNLINK:
       rc = libssh2_sftp_unlink_ex(sshc->sftp_session, sshc->quote_path1,
-                                  (unsigned int)strlen(sshc->quote_path1));
+                                  curlx_uztoui(strlen(sshc->quote_path1)));
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -1509,7 +1509,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         LIBSSH2_SFTP_ATTRIBUTES attrs;
         if(data->state.resume_from < 0) {
           rc = libssh2_sftp_stat_ex(sshc->sftp_session, sftp_scp->path,
-                                    (unsigned int)strlen(sftp_scp->path),
+                                    curlx_uztoui(strlen(sftp_scp->path)),
                                     LIBSSH2_SFTP_STAT, &attrs);
           if(rc == LIBSSH2_ERROR_EAGAIN) {
             break;
@@ -1540,7 +1540,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sftp_scp->path,
-                             (unsigned int)strlen(sftp_scp->path),
+                             curlx_uztoui(strlen(sftp_scp->path)),
                              flags, data->set.new_file_perms,
                              LIBSSH2_SFTP_OPENFILE);
 
@@ -1699,7 +1699,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     case SSH_SFTP_CREATE_DIRS_MKDIR:
       /* 'mode' - parameter is preliminary - default to 0644 */
       rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sftp_scp->path,
-                                 (unsigned int)strlen(sftp_scp->path),
+                                 curlx_uztoui(strlen(sftp_scp->path)),
                                  data->set.new_directory_perms);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
@@ -1733,8 +1733,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       sshc->sftp_handle = libssh2_sftp_open_ex(sshc->sftp_session,
                                                sftp_scp->path,
-                                               (unsigned int)
-                                               strlen(sftp_scp->path),
+                                               curlx_uztoui(
+                                                 strlen(sftp_scp->path)),
                                                0, 0, LIBSSH2_SFTP_OPENDIR);
       if(!sshc->sftp_handle) {
         if(libssh2_session_last_errno(sshc->ssh_session) ==
@@ -1875,7 +1875,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       sshc->readdir_len =
         libssh2_sftp_symlink_ex(sshc->sftp_session,
                                 sshc->readdir_linkPath,
-                                (unsigned int) strlen(sshc->readdir_linkPath),
+                                curlx_uztoui(strlen(sshc->readdir_linkPath)),
                                 sshc->readdir_filename,
                                 PATH_MAX, LIBSSH2_SFTP_READLINK);
       if(sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
@@ -1961,7 +1961,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sftp_scp->path,
-                             (unsigned int)strlen(sftp_scp->path),
+                             curlx_uztoui(strlen(sftp_scp->path)),
                              LIBSSH2_FXF_READ, data->set.new_file_perms,
                              LIBSSH2_SFTP_OPENFILE);
       if(!sshc->sftp_handle) {
@@ -1988,7 +1988,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       LIBSSH2_SFTP_ATTRIBUTES attrs;
 
       rc = libssh2_sftp_stat_ex(sshc->sftp_session, sftp_scp->path,
-                                (unsigned int)strlen(sftp_scp->path),
+                                curlx_uztoui(strlen(sftp_scp->path)),
                                 LIBSSH2_SFTP_STAT, &attrs);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
