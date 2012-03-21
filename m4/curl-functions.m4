@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 68
+# serial 69
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2196,6 +2196,22 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
+    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+        ]],[[
+#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+          return 0;
+#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+          return 0;
+#else
+          force compilation error
+#endif
+        ]])
+      ],[
+        tst_tsafe_getaddrinfo="yes"
+      ])
+    fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
       CURL_CHECK_DEF_CC([h_errno], [
         $curl_includes_ws2tcpip
