@@ -1944,7 +1944,11 @@ int main(int argc, char *argv[])
 
       if(DOCNUMBER_CONNECT == req.testno) {
         /* a CONNECT request, setup and talk the tunnel */
-        http_connect(&msgsock, sock, &req, hostport);
+        if(!is_proxy) {
+          logmsg("received CONNECT but isn't running as proxy! EXIT");
+        }
+        else
+          http_connect(&msgsock, sock, &req, hostport);
         break;
       }
 
