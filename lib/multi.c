@@ -812,7 +812,7 @@ static int waitconnect_getsock(struct connectdata *conn,
 
   /* when we've sent a CONNECT to a proxy, we should rather wait for the
      socket to become readable to be able to get the response headers */
-  if(conn->bits.tunnel_connecting)
+  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
     return GETSOCK_READSOCK(0);
 
   return GETSOCK_WRITESOCK(0);
@@ -1066,7 +1066,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                          CURLM_STATE_WAITDO:CURLM_STATE_DO);
             else {
 #ifndef CURL_DISABLE_HTTP
-              if(easy->easy_conn->bits.tunnel_connecting)
+              if(easy->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
                 multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
               else
 #endif
@@ -1111,7 +1111,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                        CURLM_STATE_WAITDO:CURLM_STATE_DO);
           else {
 #ifndef CURL_DISABLE_HTTP
-            if(easy->easy_conn->bits.tunnel_connecting)
+            if(easy->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
               multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
             else
 #endif
@@ -1144,7 +1144,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(easy, CURLM_STATE_CONNECT);
       }
       else if(CURLE_OK == easy->result) {
-        if(!easy->easy_conn->bits.tunnel_connecting)
+        if(easy->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_COMPLETE)
           multistate(easy, CURLM_STATE_WAITCONNECT);
       }
       break;
@@ -1179,7 +1179,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
              BUT if we are using a proxy we must change to WAITPROXYCONNECT
           */
 #ifndef CURL_DISABLE_HTTP
-          if(easy->easy_conn->bits.tunnel_connecting)
+          if(easy->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
             multistate(easy, CURLM_STATE_WAITPROXYCONNECT);
           else
 #endif

@@ -1309,10 +1309,17 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
 
-  if(conn->bits.tunnel_connecting) {
+  if(data->state.used_interface == Curl_if_multi) {
+    /* when the multi interface is used, the CONNECT procedure might not have
+       been completed */
+    result = Curl_proxy_connect(conn);
+    if(result)
+      return result;
+  }
+
+  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
-  }
 
   if(conn->given->flags & PROTOPT_SSL) {
     /* perform SSL initialization */
