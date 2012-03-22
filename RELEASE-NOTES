@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o cmake: list_spaces_append_once failure [22]
  o resolve with c-ares: don't resolve IPv6 when not working [21]
  o smtp: changed error code for EHLO and HELO responses
+ o parsedate: fix a numeric overflow
 
 This release includes the following known bugs:
 
