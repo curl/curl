@@ -47,6 +47,10 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   res = curl_easy_perform(curl);
+  if(res) {
+    fprintf(stderr, "retrieve 1 failed\n");
+    goto test_cleanup;
+  }
 
   curl_easy_reset(curl);
 
@@ -55,6 +59,8 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   res = curl_easy_perform(curl);
+  if(res)
+    fprintf(stderr, "retrieve 2 failed\n");
 
 test_cleanup:
 
