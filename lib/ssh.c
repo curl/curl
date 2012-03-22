@@ -108,6 +108,10 @@
                          have their definition hidden well */
 #endif
 
+#define sftp_libssh2_realpath(s,p,t,m) \
+        libssh2_sftp_symlink_ex((s), (p), curlx_uztoui(strlen(p)), \
+                                (t), (m), LIBSSH2_SFTP_REALPATH)
+
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);
 static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
@@ -982,7 +986,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /*
        * Get the "home" directory
        */
-      rc = libssh2_sftp_realpath(sshc->sftp_session, ".",
+      rc = sftp_libssh2_realpath(sshc->sftp_session, ".",
                                  tempHome, PATH_MAX-1);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,6 +34,7 @@
 #include "url.h" /* for Curl_safefree() */
 #include "curl_memory.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -416,7 +417,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   */
   if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
     md5this = (unsigned char *)aprintf("%s:%.*s", request,
-                                       (int)(tmp - (char *)uripath), uripath);
+                                       curlx_sztosi(tmp - (char *)uripath),
+                                       uripath);
   }
   else
     md5this = (unsigned char *)aprintf("%s:%s", request, uripath);

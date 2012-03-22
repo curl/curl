@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,7 @@
 
 #include "test.h"
 
+#include "warnless.h"
 #include "memdebug.h"
 
 struct data {
@@ -136,7 +137,8 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  printf("%.*s", (int)(size * nmemb), (char *)ptr);
+  int amount = curlx_uztosi(size * nmemb);
+  printf("%.*s", amount, (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
