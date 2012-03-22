@@ -2,7 +2,10 @@
 <info>
 <keywords>
 HTTP
+HTTP GET
 HTTP Basic auth
+HTTP set cookie
+cookies
 --libcurl
 </keywords>
 </info>
