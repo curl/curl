@@ -22,8 +22,6 @@
  *
  ***************************************************************************/
 
-CURLcode Curl_proxy_connect(struct connectdata *conn);
-
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
@@ -33,8 +31,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
 
+CURLcode Curl_proxy_connect(struct connectdata *conn);
+
 #else
 #define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
+#define Curl_proxy_connect(x) CURLE_OK
 #endif
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */
