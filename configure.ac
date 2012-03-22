@@ -696,6 +696,17 @@ then
                ])
 fi
 
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl gethostbyname in the watt lib?
+  AC_CHECK_LIB(watt, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
+               LDFLAGS="-L/dev/env/WATT_ROOT/lib"
+               LIBS="$LIBS -lwatt"
+               ])
+fi
+
 dnl At least one system has been identified to require BOTH nsl and socket
 dnl libs at the same time to link properly.
 if test "$HAVE_GETHOSTBYNAME" != "1"
