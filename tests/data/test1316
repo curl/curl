@@ -4,7 +4,9 @@
 FTP
 PASV
 LIST
+HTTP
 HTTP CONNECT
+HTTP proxy
 </keywords>
 </info>
 #

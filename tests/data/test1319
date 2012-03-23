@@ -3,7 +3,9 @@
 <keywords>
 POP3
 RETR
+HTTP
 HTTP CONNECT
+HTTP proxy
 </keywords>
 </info>
 #

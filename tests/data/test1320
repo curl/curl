@@ -2,7 +2,9 @@
 <info>
 <keywords>
 SMTP
+HTTP
 HTTP CONNECT
+HTTP proxy
 </keywords>
 </info>
 

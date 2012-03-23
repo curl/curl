@@ -3,6 +3,9 @@
 <keywords>
 IMAP
 FETCH
+HTTP
+HTTP CONNECT
+HTTP proxy
 </keywords>
 </info>
 
