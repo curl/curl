@@ -3,6 +3,8 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP set cookie
+cookies
 CURLOPT_REFERER
 curl_easy_reset
 </keywords>
