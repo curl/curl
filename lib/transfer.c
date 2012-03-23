@@ -1924,7 +1924,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     break;
   }
   Curl_pgrsTime(data, TIMER_REDIRECT);
-  Curl_pgrsResetTimes(data);
+  Curl_pgrsResetTimesSizes(data);
 
   return CURLE_OK;
 #endif /* CURL_DISABLE_HTTP */
