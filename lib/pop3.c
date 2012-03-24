@@ -382,29 +382,31 @@ static CURLcode pop3_state_retr_resp(struct connectdata *conn,
   }
 
   /* POP3 download */
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
-                      pop3->bytecountp, -1, NULL); /* no upload here */
+  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
+                      -1, NULL); /* no upload here */
 
   if(pp->cache) {
-    /* At this point there is a bunch of data in the header "cache" that is
-       actually body content, send it as body and then skip it. Do note
-       that there may even be additional "headers" after the body. */
+    /* The header "cache" contains a bunch of data that is actually body
+       content so send it as such. Note that there may even be additional
+       "headers" after the body */
 
-    /* we may get the EOB already here! */
-    result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
-    if(result)
-      return result;
+    if(!data->set.opt_no_body) {
+      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
+      if(result)
+        return result;
+    }
 
-    /* cache is drained */
-    free(pp->cache);
-    pp->cache = NULL;
+    /* Free the cache */
+    Curl_safefree(pp->cache);
+
+    /* Reset the cache size */
     pp->cache_size = 0;
   }
 
   state(conn, POP3_STOP);
+
   return result;
 }
-
 
 /* for the list response */
 static CURLcode pop3_state_list_resp(struct connectdata *conn,
@@ -439,20 +441,24 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
                       -1, NULL); /* no upload here */
 
   if(pp->cache) {
-    /* cache holds the email ID listing */
+    /* The header "cache" contains a bunch of data that is actually list data
+       so send it as such */
 
-    /* we may get the EOB already here! */
-    result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
-    if(result)
-      return result;
+    if(!data->set.opt_no_body) {
+      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
+      if(result)
+        return result;
+    }
 
-    /* cache is drained */
-    free(pp->cache);
-    pp->cache = NULL;
+    /* Free the cache */
+    Curl_safefree(pp->cache);
+
+    /* Reset the cache size */
     pp->cache_size = 0;
   }
 
   state(conn, POP3_STOP);
+
   return result;
 }
 
