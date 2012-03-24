@@ -287,6 +287,34 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
+/* for the initial server greeting */
+static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
+                                            int pop3code,
+                                            pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != 'O') {
+    failf(data, "Got unexpected pop3-server response");
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
+  }
+
+  if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
+       to TLS connection now */
+    result = Curl_pp_sendf(&pop3c->pp, "STLS");
+    state(conn, POP3_STARTTLS);
+  }
+  else
+    result = pop3_state_user(conn);
+
+  return result;
+}
+
 /* for STARTTLS responses */
 static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
                                          int pop3code,
@@ -294,6 +322,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+
   (void)instate; /* no use for this yet */
 
   if(pop3code != 'O') {
@@ -316,6 +345,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       state(conn, POP3_STOP);
     }
   }
+
   return result;
 }
 
@@ -342,6 +372,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
     return result;
 
   state(conn, POP3_PASS);
+
   return result;
 }
 
@@ -360,6 +391,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
   }
 
   state(conn, POP3_STOP);
+
   return result;
 }
 
@@ -518,7 +550,6 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 {
   CURLcode result;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  struct SessionHandle *data=conn->data;
   int pop3code;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
@@ -536,21 +567,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
     /* we have now received a full POP3 server response */
     switch(pop3c->state) {
     case POP3_SERVERGREET:
-      if(pop3code != 'O') {
-        failf(data, "Got unexpected pop3-server response");
-        return CURLE_FTP_WEIRD_SERVER_REPLY;
-      }
-
-      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-        /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-           to TLS connection now */
-        result = Curl_pp_sendf(&pop3c->pp, "STLS");
-        state(conn, POP3_STARTTLS);
-      }
-      else
-        result = pop3_state_user(conn);
-      if(result)
-        return result;
+      result = pop3_state_servergreet_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_USER:
@@ -585,6 +602,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
     }
   }
+
   return result;
 }
 

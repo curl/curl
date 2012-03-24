@@ -499,6 +499,26 @@ static void smtp_to_smtps(struct connectdata *conn)
 #define smtp_to_smtps(x) Curl_nop_stmt
 #endif
 
+/* for the initial server greeting */
+static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
+                                            int smtpcode,
+                                            smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode/100 != 2) {
+    failf(data, "Got unexpected smtp-server response: %d", smtpcode);
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
+  }
+
+  result = smtp_state_ehlo(conn);
+
+  return result;
+}
+
 /* for STARTTLS responses */
 static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
                                          int smtpcode,
@@ -506,6 +526,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+
   (void)instate; /* no use for this yet */
 
   if(smtpcode != 220) {
@@ -1066,14 +1087,15 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
                       FIRSTSOCKET, smtp->bytecountp);
 
   state(conn, SMTP_STOP);
+
   return CURLE_OK;
 }
 
 /* for the POSTDATA response, which is received after the entire DATA
    part has been sent off to the server */
 static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
-                                     int smtpcode,
-                                     smtpstate instate)
+                                         int smtpcode,
+                                         smtpstate instate)
 {
   CURLcode result = CURLE_OK;
 
@@ -1117,14 +1139,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
     /* we have now received a full SMTP server response */
     switch(smtpc->state) {
     case SMTP_SERVERGREET:
-      if(smtpcode/100 != 2) {
-        failf(data, "Got unexpected smtp-server response: %d", smtpcode);
-        return CURLE_FTP_WEIRD_SERVER_REPLY;
-      }
-
-      result = smtp_state_ehlo(conn);
-      if(result)
-        return result;
+      result = smtp_state_servergreet_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_EHLO:
