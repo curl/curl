@@ -127,7 +127,6 @@ const struct Curl_handler Curl_handler_pop3 = {
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY /* flags */
 };
 
-
 #ifdef USE_SSL
 /*
  * POP3S protocol handler.
@@ -180,7 +179,6 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   PROTOPT_NONE                          /* flags */
 };
 
-
 #ifdef USE_SSL
 /*
  * HTTP-proxyed POP3S protocol handler.
@@ -208,7 +206,6 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 #endif
 #endif
 
-
 /* function that checks for a pop3 status code at the start of the given
    string */
 static int pop3_endofresp(struct pingpong *pp,
@@ -219,7 +216,7 @@ static int pop3_endofresp(struct pingpong *pp,
 
   if(((len >= 3) && !memcmp("+OK", line, 3)) ||
      ((len >= 4) && !memcmp("-ERR", line, 4))) {
-    *resp=line[1]; /* O or E */
+    *resp = line[1]; /* O or E */
     return TRUE;
   }
 
@@ -383,56 +380,12 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+
   (void)instate; /* no use for this yet */
 
   if(pop3code != 'O') {
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
-  }
-
-  state(conn, POP3_STOP);
-
-  return result;
-}
-
-/* for the retr response */
-static CURLcode pop3_state_retr_resp(struct connectdata *conn,
-                                     int pop3code,
-                                     pop3state instate)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-  struct pingpong *pp = &pop3c->pp;
-
-  (void)instate; /* no use for this yet */
-
-  if('O' != pop3code) {
-    state(conn, POP3_STOP);
-    return CURLE_RECV_ERROR;
-  }
-
-  /* POP3 download */
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
-                      -1, NULL); /* no upload here */
-
-  if(pp->cache) {
-    /* The header "cache" contains a bunch of data that is actually body
-       content so send it as such. Note that there may even be additional
-       "headers" after the body */
-
-    if(!data->set.opt_no_body) {
-      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
-      if(result)
-        return result;
-    }
-
-    /* Free the cache */
-    Curl_safefree(pp->cache);
-
-    /* Reset the cache size */
-    pp->cache_size = 0;
   }
 
   state(conn, POP3_STOP);
@@ -501,6 +454,7 @@ static CURLcode pop3_state_list_single_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+
   (void)instate; /* no use for this yet */
 
   if(pop3code != 'O') {
@@ -509,20 +463,52 @@ static CURLcode pop3_state_list_single_resp(struct connectdata *conn,
   }
 
   state(conn, POP3_STOP);
+
   return result;
 }
 
-/* start the DO phase for RETR */
-static CURLcode pop3_retr(struct connectdata *conn)
+/* for the retr response */
+static CURLcode pop3_state_retr_resp(struct connectdata *conn,
+                                     int pop3code,
+                                     pop3state instate)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct FTP *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
+  struct pingpong *pp = &pop3c->pp;
 
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "RETR %s", pop3c->mailbox);
-  if(result)
-    return result;
+  (void)instate; /* no use for this yet */
 
-  state(conn, POP3_RETR);
+  if('O' != pop3code) {
+    state(conn, POP3_STOP);
+    return CURLE_RECV_ERROR;
+  }
+
+  /* POP3 download */
+  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
+                      -1, NULL); /* no upload here */
+
+  if(pp->cache) {
+    /* The header "cache" contains a bunch of data that is actually body
+       content so send it as such. Note that there may even be additional
+       "headers" after the body */
+
+    if(!data->set.opt_no_body) {
+      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
+      if(result)
+        return result;
+    }
+
+    /* Free the cache */
+    Curl_safefree(pp->cache);
+
+    /* Reset the cache size */
+    pp->cache_size = 0;
+  }
+
+  state(conn, POP3_STOP);
+
   return result;
 }
 
@@ -543,6 +529,22 @@ static CURLcode pop3_list(struct connectdata *conn)
     state(conn, POP3_LIST_SINGLE);
   else
     state(conn, POP3_LIST);
+
+  return result;
+}
+
+/* start the DO phase for RETR */
+static CURLcode pop3_retr(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "RETR %s", pop3c->mailbox);
+  if(result)
+    return result;
+
+  state(conn, POP3_RETR);
+
   return result;
 }
 
@@ -582,16 +584,16 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
       break;
 
-    case POP3_RETR:
-      result = pop3_state_retr_resp(conn, pop3code, pop3c->state);
-      break;
-
     case POP3_LIST:
       result = pop3_state_list_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_LIST_SINGLE:
       result = pop3_state_list_single_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_RETR:
+      result = pop3_state_retr_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_QUIT:
@@ -668,7 +670,7 @@ static CURLcode pop3_init(struct connectdata *conn)
  * a part of the easy interface, it will always be TRUE.
  */
 static CURLcode pop3_connect(struct connectdata *conn,
-                                 bool *done) /* see description above */
+                             bool *done) /* see description above */
 {
   CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -732,7 +734,8 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   struct SessionHandle *data = conn->data;
   struct FTP *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
+
   (void)premature;
 
   if(!pop3)
@@ -749,7 +752,6 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   }
 
   Curl_safefree(pop3c->mailbox);
-  pop3c->mailbox = NULL;
 
   /* Clear the transfer mode for the next connection */
   pop3->transfer = FTPTRANSFER_BODY;
@@ -861,6 +863,7 @@ static CURLcode pop3_quit(struct connectdata *conn)
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT", NULL);
   if(result)
     return result;
+
   state(conn, POP3_QUIT);
 
   result = pop3_easy_statemach(conn);
@@ -888,7 +891,6 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && pop3c->pp.conn)
     (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
-
 
   Curl_pp_disconnect(&pop3c->pp);
 
@@ -939,6 +941,7 @@ static CURLcode pop3_doing(struct connectdata *conn,
 
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
   }
+
   return result;
 }
 
@@ -952,9 +955,8 @@ static CURLcode pop3_doing(struct connectdata *conn,
  * remote host.
  *
  */
-static
-CURLcode pop3_regular_transfer(struct connectdata *conn,
-                              bool *dophase_done)
+static CURLcode pop3_regular_transfer(struct connectdata *conn,
+                                      bool *dophase_done)
 {
   CURLcode result=CURLE_OK;
   bool connected=FALSE;
