@@ -26,6 +26,8 @@ unsigned short curlx_ultous(unsigned long ulnum);
 
 unsigned char curlx_ultouc(unsigned long ulnum);
 
+int curlx_ultosi(unsigned long ulnum);
+
 int curlx_uztosi(size_t uznum);
 
 unsigned long curlx_uztoul(size_t uznum);
