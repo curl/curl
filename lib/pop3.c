@@ -236,7 +236,6 @@ static void state(struct connectdata *conn,
     "PASS",
     "STARTTLS",
     "LIST",
-    "LIST_SINGLE",
     "RETR",
     "QUIT",
     /* LAST */
