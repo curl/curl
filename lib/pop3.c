@@ -258,7 +258,7 @@ static CURLcode pop3_state_user(struct connectdata *conn)
 
   /* send USER */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
-                         pop3->user?pop3->user:"");
+                         pop3->user ? pop3->user : "");
   if(result)
     return result;
 
@@ -364,7 +364,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
   else
     /* send PASS */
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
-                           pop3->passwd?pop3->passwd:"");
+                           pop3->passwd ? pop3->passwd : "");
   if(result)
     return result;
 
@@ -621,6 +621,7 @@ static CURLcode pop3_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *pop3 = data->state.proto.pop3;
+
   if(!pop3) {
     pop3 = data->state.proto.pop3 = calloc(sizeof(struct FTP), 1);
     if(!pop3)
@@ -653,7 +654,7 @@ static CURLcode pop3_connect(struct connectdata *conn,
 {
   CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  struct SessionHandle *data=conn->data;
+  struct SessionHandle *data = conn->data;
   struct pingpong *pp = &pop3c->pp;
 
   *done = FALSE; /* default to not done yet */
@@ -727,7 +728,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 
   if(status) {
     conn->bits.close = TRUE; /* marked for closure */
-    result = status;      /* use the already set error code */
+    result = status;         /* use the already set error code */
   }
 
   Curl_safefree(pop3c->mailbox);
@@ -752,7 +753,7 @@ CURLcode pop3_perform(struct connectdata *conn,
                      bool *dophase_done)
 {
   /* this is POP3 and no proxy */
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
@@ -937,8 +938,8 @@ static CURLcode pop3_doing(struct connectdata *conn,
 static CURLcode pop3_regular_transfer(struct connectdata *conn,
                                       bool *dophase_done)
 {
-  CURLcode result=CURLE_OK;
-  bool connected=FALSE;
+  CURLcode result = CURLE_OK;
+  bool connected = FALSE;
   struct SessionHandle *data = conn->data;
   data->req.size = -1; /* make sure this is unknown at this point */
 
@@ -948,7 +949,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   Curl_pgrsSetDownloadSize(data, 0);
 
   result = pop3_perform(conn,
-                        &connected, /* have we connected after PASV/PORT */
+                        &connected,    /* have we connected after PASV/PORT */
                         dophase_done); /* all commands in the DO-phase done? */
 
   if(CURLE_OK == result) {
