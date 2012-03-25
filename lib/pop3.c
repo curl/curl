@@ -447,26 +447,6 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
   return result;
 }
 
-/* for LIST response with a given message */
-static CURLcode pop3_state_list_single_resp(struct connectdata *conn,
-                                     int pop3code,
-                                     pop3state instate)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-
-  (void)instate; /* no use for this yet */
-
-  if(pop3code != 'O') {
-    failf(data, "Invalid message. %c", pop3code);
-    result = CURLE_REMOTE_FILE_NOT_FOUND;
-  }
-
-  state(conn, POP3_STOP);
-
-  return result;
-}
-
 /* for the retr response */
 static CURLcode pop3_state_retr_resp(struct connectdata *conn,
                                      int pop3code,
@@ -518,17 +498,20 @@ static CURLcode pop3_list(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  if(pop3c->mailbox[0] != '\0')
+  if(pop3c->mailbox[0] != '\0') {
+    /* Message specific LIST means no transfer */
+    struct FTP *pop3 = conn->data->state.proto.pop3;
+    pop3->transfer = FTPTRANSFER_INFO;
+
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  }
   else
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST");
+
   if(result)
     return result;
 
-  if(pop3c->mailbox[0] != '\0')
-    state(conn, POP3_LIST_SINGLE);
-  else
-    state(conn, POP3_LIST);
+  state(conn, POP3_LIST);
 
   return result;
 }
@@ -586,10 +569,6 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_LIST:
       result = pop3_state_list_resp(conn, pop3code, pop3c->state);
-      break;
-
-    case POP3_LIST_SINGLE:
-      result = pop3_state_list_single_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_RETR:
