@@ -33,7 +33,7 @@ pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-78
+56
 </errorcode>
 <protocol>
 USER user
