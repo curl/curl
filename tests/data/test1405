@@ -83,8 +83,6 @@ int main(int argc, char *argv[])
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, "ftp://%HOSTIP:%FTPPORT/1405");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_QUOTE, slist1);
   curl_easy_setopt(hnd, CURLOPT_POSTQUOTE, slist2);
   curl_easy_setopt(hnd, CURLOPT_PREQUOTE, slist3);
@@ -124,8 +122,10 @@ int main(int argc, char *argv[])
 /**** End of sample code ****/
 </file>
 <stripfile>
-# curl's default user-agent varies with version, libraries etc.
-s/(USERAGENT, \")[^\"]+/${1}stripped/
+# CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
+# support, IOW depends on configuration - just ignore these.
+$_ = '' if /CURLOPT_USERAGENT/
+$_ = '' if /CURLOPT_MAXREDIRS/
 # CURLOPT_SSL_VERIFYPEER and SSH_KNOWNHOSTS vary with configurations - just
 # ignore them
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
