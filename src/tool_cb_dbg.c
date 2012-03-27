@@ -108,19 +108,21 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
     switch(type) {
     case CURLINFO_HEADER_OUT:
-      for(i = 0; i < size - 1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
-            fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+      if(size > 0) {
+        for(i = 0; i < size - 1; i++) {
+          if(data[i] == '\n') { /* LF */
+            if(!newl) {
+              fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+            }
+            (void)fwrite(data + st, i - st + 1, 1, output);
+            st = i + 1;
+            newl = FALSE;
           }
-          (void)fwrite(data + st, i - st + 1, 1, output);
-          st = i + 1;
-          newl = FALSE;
         }
+        if(!newl)
+          fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+        (void)fwrite(data + st, i - st + 1, 1, output);
       }
-      if(!newl)
-        fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      (void)fwrite(data + st, i - st + 1, 1, output);
       newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
       traced_data = FALSE;
       break;
