@@ -261,6 +261,7 @@ struct ssl_connect_data {
   x509_cert clicert;
   x509_crl crl;
   rsa_context rsa;
+  ssl_connect_state connecting_state;
 #endif /* USE_POLARSSL */
 #ifdef USE_CYASSL
   SSL_CTX* ctx;
