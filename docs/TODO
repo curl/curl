@@ -67,7 +67,7 @@
  9.3 Initial response
  9.4 Pipelining
  
- 10 POP3
+ 10. POP3
  10.1 APOP Authentication
  10.2 Other authentication mechanims
  10.3 auth= in URLs
@@ -397,7 +397,7 @@ to provide the data to send.
 
  Add support for pipelining emails.
  
-10 POP3
+10. POP3
 
 10.1 APOP Authentication
 
