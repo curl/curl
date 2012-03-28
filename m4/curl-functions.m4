@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 69
+# serial 70
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2020,6 +2020,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   #
   tst_links_getaddrinfo="unknown"
   tst_proto_getaddrinfo="unknown"
@@ -2196,7 +2197,34 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
+    if test "$tst_tsafe_getaddrinfo" = "unknown" &&
+       test "$ac_cv_native_windows" = "yes"; then
+      tst_tsafe_getaddrinfo="yes"
+    fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      CURL_CHECK_DEF_CC([h_errno], [
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+        ], [silent])
+      if test "$curl_cv_have_def_h_errno" = "yes"; then
+        tst_h_errno_macro="yes"
+      else
+        tst_h_errno_macro="no"
+      fi
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_sys_socket
+          $curl_includes_netdb
+        ]],[[
+          h_errno = 2;
+          if(0 != h_errno)
+            return 1;
+        ]])
+      ],[
+        tst_h_errno_modifiable_lvalue="yes"
+      ],[
+        tst_h_errno_modifiable_lvalue="no"
+      ])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
@@ -2209,21 +2237,17 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 #endif
         ]])
       ],[
-        tst_tsafe_getaddrinfo="yes"
+        tst_h_errno_sbs_issue_7="yes"
+      ],[
+        tst_h_errno_sbs_issue_7="no"
       ])
-    fi
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      CURL_CHECK_DEF_CC([h_errno], [
-        $curl_includes_ws2tcpip
-        $curl_includes_sys_socket
-        $curl_includes_netdb
-        ], [silent])
-      if test "$curl_cv_have_def_h_errno" = "no"; then
+      if test "$tst_h_errno_macro" = "no" &&
+         test "$tst_h_errno_modifiable_lvalue" = "no" &&
+         test "$tst_h_errno_sbs_issue_7" = "no"; then
         tst_tsafe_getaddrinfo="no"
+      else
+        tst_tsafe_getaddrinfo="yes"
       fi
-    fi
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      tst_tsafe_getaddrinfo="yes"
     fi
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
