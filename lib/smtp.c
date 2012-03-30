@@ -743,8 +743,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   size_t len = 0;
   char *rplyb64 = NULL;
   HMAC_context *ctxt;
-  unsigned char digest[16];
-  char reply[MAX_CURL_USER_LENGTH + 32 /* 2 * size of MD5 digest */ + 1];
+  unsigned char digest[MD5_DIGEST_LEN];
+  char reply[MAX_CURL_USER_LENGTH + 2 * MD5_DIGEST_LEN + 1];
 
   (void)instate; /* no use for this yet */
 
