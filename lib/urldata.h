@@ -1368,9 +1368,9 @@ struct UserDefined {
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
-  bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a
-                        301 */
-  bool post302;      /* keep POSTs as POSTs after a 302 */
+
+  int keep_post;     /* keep POSTs as POSTs after a 30x request; each
+                        bit represents a request, from 301 to 303 */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   void *postfields;  /* if POST, set the fields' values here */

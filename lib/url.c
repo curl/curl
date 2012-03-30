@@ -1111,12 +1111,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
      * CURL_REDIR_POST_301 - POST is kept as POST after 301
      * CURL_REDIR_POST_302 - POST is kept as POST after 302
-     * CURL_REDIR_POST_ALL - POST is kept as POST after 301 and 302
+     * CURL_REDIR_POST_303 - POST is kept as POST after 303
+     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
      * other - POST is kept as POST after 301 and 302
      */
     long postRedir = va_arg(param, long);
-    data->set.post301 = (postRedir & CURL_REDIR_POST_301)?TRUE:FALSE;
-    data->set.post302 = (postRedir & CURL_REDIR_POST_302)?TRUE:FALSE;
+    data->set.keep_post = postRedir & CURL_REDIR_POST_ALL;
   }
   break;
 

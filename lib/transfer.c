@@ -1864,7 +1864,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
      */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
-       && !data->set.post301) {
+       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data,
             "Violate RFC 2616/10.3.2 and switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
@@ -1892,7 +1892,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
-       && !data->set.post302) {
+       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data,
             "Violate RFC 2616/10.3.3 and switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
@@ -1900,9 +1900,10 @@ CURLcode Curl_follow(struct SessionHandle *data,
     break;
 
   case 303: /* See Other */
-    /* Disable both types of POSTs, since doing a second POST when
-     * following isn't what anyone would want! */
-    if(data->set.httpreq != HTTPREQ_GET) {
+    /* Disable both types of POSTs, unless the user explicitely
+       asks for POST after POST */
+    if(data->set.httpreq != HTTPREQ_GET
+      && !(data->set.keep_post & CURL_REDIR_POST_303)) {
       data->set.httpreq = HTTPREQ_GET; /* enforce GET request */
       infof(data, "Disables POST, goes with %s\n",
             data->set.opt_no_body?"HEAD":"GET");

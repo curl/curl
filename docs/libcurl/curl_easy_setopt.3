@@ -1180,12 +1180,13 @@ Setting the limit to 0 will make libcurl refuse any redirect. Set it to -1 for
 an infinite number of redirects (which is the default)
 .IP CURLOPT_POSTREDIR
 Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
-301 or 302 response back.  A parameter with bit 0 set (value
+301, 302 or 303 response back.  A parameter with bit 0 set (value
 \fBCURL_REDIR_POST_301\fP) tells the library to respect RFC 2616/10.3.2 and
 not convert POST requests into GET requests when following a 301
 redirection. Setting bit 1 (value CURL_REDIR_POST_302) makes libcurl maintain
-the request method after a 302 redirect. CURL_REDIR_POST_ALL is a convenience
-define that sets both bits.
+the request method after a 302 redirect. Setting bit 2 (value
+\fBCURL_REDIR_POST_303) makes libcurl maintain the request method after a 302
+redirect. CURL_REDIR_POST_ALL is a convenience define that sets both bits.
 
 The non-RFC behaviour is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. However, a server may require a
