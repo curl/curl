@@ -407,6 +407,15 @@ const HMAC_params Curl_HMAC_MD5[] = {
   }
 };
 
+const MD5_params Curl_DIGEST_MD5[] = {
+  {
+    (Curl_MD5_init_func) MD5_Init,      /* Digest initialization function */
+    (Curl_MD5_update_func) MD5_Update,  /* Digest update function */
+    (Curl_MD5_final_func) MD5_Final,    /* Digest computation end function */
+    sizeof(MD5_CTX),                    /* Size of digest context struct */
+    16                                  /* Result size */
+  }
+};
 
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 const unsigned char *input)
@@ -415,6 +424,47 @@ void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
   MD5_Init(&ctx);
   MD5_Update(&ctx, input, curlx_uztoui(strlen((char *)input)));
   MD5_Final(outbuffer, &ctx);
+}
+
+MD5_context * Curl_MD5_init(const MD5_params *md5params)
+{
+  MD5_context* ctxt;
+
+  /* Create MD5 context */
+  ctxt = malloc(sizeof *ctxt);
+
+  if(!ctxt)
+    return ctxt;
+
+  ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
+
+  if(!ctxt->md5_hashctx)
+    return ctxt->md5_hashctx;
+
+  ctxt->md5_hash = md5params;
+
+  (*md5params->md5_init)(ctxt->md5_hashctx);
+
+  return ctxt;
+}
+
+int Curl_MD5_update(MD5_context *context,
+                    const unsigned char *data,
+                    unsigned int len)
+{
+  (*context->md5_hash->md5_update)(context->md5_hashctx, data, len);
+
+  return 0;
+}
+
+int Curl_MD5_final(MD5_context *context, unsigned char *result)
+{
+  (*context->md5_hash->md5_final)(result, context->md5_hashctx);
+
+  free(context->md5_hashctx);
+  free(context);
+
+  return 0;
 }
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */
