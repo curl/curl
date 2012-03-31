@@ -1839,16 +1839,20 @@ source file to the remote target file.
 Pass a curl_off_t as parameter. It contains the offset in number of bytes that
 you want the transfer to start from. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
-Pass a pointer to a zero terminated string as parameter. It will be used
-instead of GET or HEAD when doing a HTTP request, or instead of LIST or NLST
-when doing a FTP directory listing. This is useful for doing DELETE or other
-more or less obscure HTTP requests. Don't do this at will, make sure your
-server supports the command first.
+Pass a pointer to a zero terminated string as parameter. It can be used to
+specify the request instead of GET or HEAD when performing HTTP based
+requests, instead of LIST and NLST when performing FTP directory listings and
+instead of LIST and RETR when issuing POP3 based commands. This is
+particularly useful, for example, for performing a HTTP DELETE request or a
+POP3 DELE command.
 
+Please don't perform this at will, on HTTP based requests, by making sure
+your server supports the command you are sending first.
+ 
 When you change the request method by setting \fBCURLOPT_CUSTOMREQUEST\fP to
-something, you don't actually change how libcurl behaves or acts in regards to
-the particular request method, it will only change the actual string sent in
-the request.
+something, you don't actually change how libcurl behaves or acts in regards
+to the particular request method, it will only change the actual string sent
+in the request.
 
 For example: if you tell libcurl to do a HEAD request, but then change the
 request to a "GET" with \fBCURLOPT_CUSTOMREQUEST\fP you'll still see libcurl
@@ -1860,12 +1864,14 @@ POST, use \fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and so on.
 Restore to the internal default by setting this to NULL.
 
 Many people have wrongly used this option to replace the entire request with
-their own, including multiple headers and POST contents. While that might work
-in many cases, it will cause libcurl to send invalid requests and it could
-possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
+their own, including multiple headers and POST contents. While that might
+work in many cases, it will cause libcurl to send invalid requests and it
+could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
 \fICURLOPT_POSTFIELDS\fP to set POST data. Use \fICURLOPT_HTTPHEADER\fP to
 replace or extend the set of headers sent by libcurl. Use
 \fICURLOPT_HTTP_VERSION\fP to change HTTP version.
+
+(Support for POP3 added in 7.25.1)
 .IP CURLOPT_FILETIME
 Pass a long. If it is 1, libcurl will attempt to get the modification date of
 the remote document in this operation. This requires that the remote server
@@ -1874,11 +1880,11 @@ sends the time or replies to a time querying command. The
 can be used after a transfer to extract the received time (if any).
 .IP CURLOPT_NOBODY
 A parameter set to 1 tells the library to not include the body-part in the
-output. This is only relevant for protocols that have separate header and body
-parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
+output. This is only relevant for protocols that have separate header and
+body parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
 
-To change request to GET, you should use \fICURLOPT_HTTPGET\fP. Change request
-to POST with \fICURLOPT_POST\fP etc.
+To change request to GET, you should use \fICURLOPT_HTTPGET\fP. Change
+request to POST with \fICURLOPT_POST\fP etc.
 .IP CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is. This value should be passed
