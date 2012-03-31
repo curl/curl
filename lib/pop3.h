@@ -42,7 +42,8 @@ typedef enum {
    struct */
 struct pop3_conn {
   struct pingpong pp;
-  char *mailbox;     /* what to RETR */
+  char *mailbox;     /* message id */
+  char *custom;      /* custom request */
   size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
                         received thus far */
   size_t strip;      /* number of bytes from the start to ignore as non-body */

@@ -89,6 +89,7 @@
 
 /* Local API functions */
 static CURLcode pop3_parse_url_path(struct connectdata *conn);
+static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 static CURLcode pop3_regular_transfer(struct connectdata *conn, bool *done);
 static CURLcode pop3_do(struct connectdata *conn, bool *done);
 static CURLcode pop3_done(struct connectdata *conn,
@@ -502,10 +503,14 @@ static CURLcode pop3_list(struct connectdata *conn)
     struct FTP *pop3 = conn->data->state.proto.pop3;
     pop3->transfer = FTPTRANSFER_INFO;
 
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
+                           (pop3c->custom && pop3c->custom[0] != '\0' ?
+                            pop3c->custom : "LIST"), pop3c->mailbox);
   }
   else
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST");
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp,
+                           (pop3c->custom && pop3c->custom[0] != '\0' ?
+                            pop3c->custom : "LIST"));
 
   if(result)
     return result;
@@ -521,7 +526,9 @@ static CURLcode pop3_retr(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "RETR %s", pop3c->mailbox);
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
+                         (pop3c->custom && pop3c->custom[0] != '\0' ?
+                          pop3c->custom : "RETR"), pop3c->mailbox);
   if(result)
     return result;
 
@@ -730,7 +737,9 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
 
+  /* Clear our variables for the next connection */
   Curl_safefree(pop3c->mailbox);
+  Curl_safefree(pop3c->custom);
 
   /* Clear the transfer mode for the next connection */
   pop3->transfer = FTPTRANSFER_BODY;
@@ -817,7 +826,13 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
   if(retcode)
     return retcode;
 
+  /* Parse the URL path */
   retcode = pop3_parse_url_path(conn);
+  if(retcode)
+    return retcode;
+
+  /* Parse the custom request */
+  retcode = pop3_parse_custom_request(conn);
   if(retcode)
     return retcode;
 
@@ -890,8 +905,22 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   const char *path = data->state.path;
 
-  /* url decode the path and use this mailbox */
+  /* URL decode the path and use this mailbox */
   return Curl_urldecode(data, path, 0, &pop3c->mailbox, NULL, TRUE);
+}
+
+static CURLcode pop3_parse_custom_request(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  struct SessionHandle *data = conn->data;
+  const char *custom = conn->data->set.str[STRING_CUSTOMREQUEST];
+
+  /* URL decode the custom request */
+  if(custom)
+    result = Curl_urldecode(data, custom, 0, &pop3c->custom, NULL, TRUE);
+
+  return result;
 }
 
 /* call this when the DO phase has completed */
@@ -899,6 +928,7 @@ static CURLcode pop3_dophase_done(struct connectdata *conn,
                                   bool connected)
 {
   struct FTP *pop3 = conn->data->state.proto.pop3;
+
   (void)connected;
 
   if(pop3->transfer != FTPTRANSFER_BODY)
@@ -983,6 +1013,7 @@ static CURLcode pop3_setup_connection(struct connectdata * conn)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     }
+
     /*
      * We explicitly mark this connection as persistent here as we're doing
      * POP3 over HTTP and thus we accidentally avoid setting this value
