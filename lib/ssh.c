@@ -770,6 +770,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
          (strstr(sshc->authlist, "publickey") != NULL)) {
         char *home = NULL;
+        bool rsa_pub_empty_but_ok = FALSE;
 
         sshc->rsa_pub = sshc->rsa = NULL;
 
@@ -777,7 +778,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
            HOME environment variable etc? */
         home = curl_getenv("HOME");
 
-        if(data->set.str[STRING_SSH_PUBLIC_KEY])
+        if(data->set.str[STRING_SSH_PUBLIC_KEY] &&
+           !*data->set.str[STRING_SSH_PUBLIC_KEY])
+           rsa_pub_empty_but_ok = true;
+        else if(data->set.str[STRING_SSH_PUBLIC_KEY])
           sshc->rsa_pub = aprintf("%s", data->set.str[STRING_SSH_PUBLIC_KEY]);
         else if(home)
           sshc->rsa_pub = aprintf("%s/.ssh/id_dsa.pub", home);
@@ -785,7 +789,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* as a final resort, try current dir! */
           sshc->rsa_pub = strdup("id_dsa.pub");
 
-        if(sshc->rsa_pub == NULL) {
+        if(!rsa_pub_empty_but_ok && (sshc->rsa_pub == NULL)) {
           Curl_safefree(home);
           state(conn, SSH_SESSION_FREE);
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
