@@ -1228,7 +1228,7 @@ CURLcode Curl_socket(struct connectdata *conn,
 
   if(*sockfd == CURL_SOCKET_BAD)
     /* no socket, no connection */
-    return CURLE_FAILED_INIT;
+    return CURLE_COULDNT_CONNECT;
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(conn->scope && (addr->family == AF_INET6)) {
