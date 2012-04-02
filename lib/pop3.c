@@ -236,8 +236,7 @@ static void state(struct connectdata *conn,
     "USER",
     "PASS",
     "STARTTLS",
-    "LIST",
-    "RETR",
+    "COMMAND",
     "QUIT",
     /* LAST */
   };
@@ -393,10 +392,10 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
   return result;
 }
 
-/* for the list response */
-static CURLcode pop3_state_list_resp(struct connectdata *conn,
-                                     int pop3code,
-                                     pop3state instate)
+/* for the command response */
+static CURLcode pop3_state_command_resp(struct connectdata *conn,
+                                        int pop3code,
+                                        pop3state instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -426,50 +425,6 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
                       -1, NULL); /* no upload here */
 
   if(pp->cache) {
-    /* The header "cache" contains a bunch of data that is actually list data
-       so send it as such */
-
-    if(!data->set.opt_no_body) {
-      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
-      if(result)
-        return result;
-    }
-
-    /* Free the cache */
-    Curl_safefree(pp->cache);
-
-    /* Reset the cache size */
-    pp->cache_size = 0;
-  }
-
-  state(conn, POP3_STOP);
-
-  return result;
-}
-
-/* for the retr response */
-static CURLcode pop3_state_retr_resp(struct connectdata *conn,
-                                     int pop3code,
-                                     pop3state instate)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-  struct pingpong *pp = &pop3c->pp;
-
-  (void)instate; /* no use for this yet */
-
-  if('O' != pop3code) {
-    state(conn, POP3_STOP);
-    return CURLE_RECV_ERROR;
-  }
-
-  /* POP3 download */
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
-                      -1, NULL); /* no upload here */
-
-  if(pp->cache) {
     /* The header "cache" contains a bunch of data that is actually body
        content so send it as such. Note that there may even be additional
        "headers" after the body */
@@ -492,47 +447,40 @@ static CURLcode pop3_state_retr_resp(struct connectdata *conn,
   return result;
 }
 
-/* start the DO phase for LIST */
-static CURLcode pop3_list(struct connectdata *conn)
+/* start the DO phase for the command */
+static CURLcode pop3_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
+  const char *command = NULL;
 
-  if(pop3c->mailbox[0] != '\0') {
-    /* Message specific LIST means no transfer */
-    struct FTP *pop3 = conn->data->state.proto.pop3;
-    pop3->transfer = FTPTRANSFER_INFO;
+  /* Calculate the default command */
+  if(pop3c->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
+    command = "LIST";
 
+    if(pop3c->mailbox[0] != '\0') {
+      /* Message specific LIST so skip the BODY transfer */
+      struct FTP *pop3 = conn->data->state.proto.pop3;
+      pop3->transfer = FTPTRANSFER_INFO;
+    }
+  }
+  else
+    command = "RETR";
+
+  /* Send the command */
+  if(pop3c->mailbox[0] != '\0')
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
                            (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : "LIST"), pop3c->mailbox);
-  }
+                            pop3c->custom : command), pop3c->mailbox);
   else
     result = Curl_pp_sendf(&conn->proto.pop3c.pp,
                            (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : "LIST"));
+                            pop3c->custom : command));
 
   if(result)
     return result;
 
-  state(conn, POP3_LIST);
-
-  return result;
-}
-
-/* start the DO phase for RETR */
-static CURLcode pop3_retr(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
-                         (pop3c->custom && pop3c->custom[0] != '\0' ?
-                          pop3c->custom : "RETR"), pop3c->mailbox);
-  if(result)
-    return result;
-
-  state(conn, POP3_RETR);
+  state(conn, POP3_COMMAND);
 
   return result;
 }
@@ -573,12 +521,8 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
       break;
 
-    case POP3_LIST:
-      result = pop3_state_list_resp(conn, pop3code, pop3c->state);
-      break;
-
-    case POP3_RETR:
-      result = pop3_state_retr_resp(conn, pop3code, pop3c->state);
+    case POP3_COMMAND:
+      result = pop3_state_command_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_QUIT:
@@ -762,7 +706,6 @@ CURLcode pop3_perform(struct connectdata *conn,
 {
   /* this is POP3 and no proxy */
   CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -775,13 +718,7 @@ CURLcode pop3_perform(struct connectdata *conn,
   *dophase_done = FALSE; /* not done yet */
 
   /* start the first command in the DO phase */
-  /* If mailbox is empty, then assume user wants listing for mail IDs,
-   * otherwise, attempt to retrieve the mail-id stored in mailbox
-   */
-  if(strlen(pop3c->mailbox) && !conn->data->set.ftp_list_only)
-    result = pop3_retr(conn);
-  else
-    result = pop3_list(conn);
+  result = pop3_command(conn);
   if(result)
     return result;
 
