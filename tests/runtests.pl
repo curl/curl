@@ -2269,12 +2269,10 @@ sub checksystem {
            }
            elsif ($libcurl =~ /yassl/i) {
                $has_yassl=1;
-               $has_openssl=1;
                $ssllib="yassl";
            }
            elsif ($libcurl =~ /polarssl/i) {
                $has_polarssl=1;
-               $has_openssl=1;
                $ssllib="polarssl";
            }
            elsif ($libcurl =~ /axtls/i) {
