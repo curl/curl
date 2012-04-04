@@ -36,7 +36,7 @@ use LWP::UserAgent;
 use strict;
 use vars qw($opt_b $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v);
 
-my $url = 'https://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
+my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
