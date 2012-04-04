@@ -1852,12 +1852,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       int startsearch = 0;
       if(*cookiehost == '[') {
         char *closingbracket;
-        closingbracket = strchr(cookiehost+1, ']');
-        if(closingbracket)
-          *closingbracket = 0;
         /* since the 'cookiehost' is an allocated memory area that will be
            freed later we cannot simply increment the pointer */
         memmove(cookiehost, cookiehost + 1, strlen(cookiehost) - 1);
+        closingbracket = strchr(cookiehost, ']');
+        if(closingbracket)
+          *closingbracket = 0;
       }
       else {
         char *colon = strchr(cookiehost + startsearch, ':');
