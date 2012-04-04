@@ -3824,15 +3824,17 @@ static CURLcode init_wc_data(struct connectdata *conn)
      resources for wildcard transfer */
 
   /* allocate ftp protocol specific temporary wildcard data */
-  ftp_tmp = malloc(sizeof(struct ftp_wc_tmpdata));
+  ftp_tmp = calloc(1, sizeof(struct ftp_wc_tmpdata));
   if(!ftp_tmp) {
+    Curl_safefree(wildcard->pattern);
     return CURLE_OUT_OF_MEMORY;
   }
 
   /* INITIALIZE parselist structure */
   ftp_tmp->parser = Curl_ftp_parselist_data_alloc();
   if(!ftp_tmp->parser) {
-    free(ftp_tmp);
+    Curl_safefree(wildcard->pattern);
+    Curl_safefree(ftp_tmp);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -3846,7 +3848,20 @@ static CURLcode init_wc_data(struct connectdata *conn)
   /* try to parse ftp url */
   ret = ftp_parse_url_path(conn);
   if(ret) {
+    Curl_safefree(wildcard->pattern);
+    wildcard->tmp_dtor(wildcard->tmp);
+    wildcard->tmp_dtor = ZERO_NULL;
+    wildcard->tmp = NULL;
     return ret;
+  }
+
+  wildcard->path = strdup(conn->data->state.path);
+  if(!wildcard->path) {
+    Curl_safefree(wildcard->pattern);
+    wildcard->tmp_dtor(wildcard->tmp);
+    wildcard->tmp_dtor = ZERO_NULL;
+    wildcard->tmp = NULL;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* backup old write_function */
@@ -3857,11 +3872,6 @@ static CURLcode init_wc_data(struct connectdata *conn)
   ftp_tmp->backup.file_descriptor = conn->data->set.out;
   /* let the writefunc callback know what curl pointer is working with */
   conn->data->set.out = conn;
-
-  wildcard->path = strdup(conn->data->state.path);
-  if(!wildcard->path) {
-    return CURLE_OUT_OF_MEMORY;
-  }
 
   infof(conn->data, "Wildcard - Parsing started\n");
   return CURLE_OK;
@@ -3889,6 +3899,8 @@ static CURLcode wc_statemach(struct connectdata *conn)
     struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
     conn->data->set.fwrite_func = ftp_tmp->backup.write_function;
     conn->data->set.out = ftp_tmp->backup.file_descriptor;
+    ftp_tmp->backup.write_function = ZERO_NULL;
+    ftp_tmp->backup.file_descriptor = NULL;
     wildcard->state = CURLWC_DOWNLOADING;
 
     if(Curl_ftp_parselist_geterror(ftp_tmp->parser)) {
