@@ -23,16 +23,12 @@
 
 #include "memdebug.h"
 
-static double dl;
-
 static int progress_callback(void *clientp, double dltotal,
                              double dlnow, double ultotal, double ulnow)
 {
   (void)clientp;
   (void)ulnow;
   (void)ultotal;
-
-  dl = dltotal;
 
   if((dltotal > 0.0) && (dlnow > dltotal)) {
     /* this should not happen with test case 599 */
