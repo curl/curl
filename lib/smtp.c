@@ -934,20 +934,23 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   Curl_MD5_update(ctxt, (const unsigned char *) conn->user,
-                  strlen(conn->user));
+                  curlx_uztoui(strlen(conn->user)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) realm, strlen(realm));
+  Curl_MD5_update(ctxt, (const unsigned char *) realm,
+                  curlx_uztoui(strlen(realm)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) conn->passwd,
-                  strlen(conn->passwd));
+                  curlx_uztoui(strlen(conn->passwd)));
   Curl_MD5_final(ctxt, digest);
 
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) nonce, strlen(nonce));
+  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+                  curlx_uztoui(strlen(nonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) cnonce, strlen(cnonce));
+  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+                  curlx_uztoui(strlen(cnonce)));
   Curl_MD5_final(ctxt, digest);
 
   /* Convert calculated 16 octet hex into 32 bytes string */
@@ -959,9 +962,11 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  Curl_MD5_update(ctxt, (const unsigned char *) method, strlen(method));
+  Curl_MD5_update(ctxt, (const unsigned char *) method,
+                  curlx_uztoui(strlen(method)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) uri, strlen(uri));
+  Curl_MD5_update(ctxt, (const unsigned char *) uri,
+                  curlx_uztoui(strlen(uri)));
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
@@ -971,15 +976,18 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) nonce, strlen(nonce));
+  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+                  curlx_uztoui(strlen(nonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
 
   Curl_MD5_update(ctxt, (const unsigned char *) nonceCount,
-                         strlen(nonceCount));
+                  curlx_uztoui(strlen(nonceCount)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) cnonce, strlen(cnonce));
+  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+                  curlx_uztoui(strlen(cnonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) qop, strlen(qop));
+  Curl_MD5_update(ctxt, (const unsigned char *) qop,
+                  curlx_uztoui(strlen(qop)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA2_hex, 2 * MD5_DIGEST_LEN);
