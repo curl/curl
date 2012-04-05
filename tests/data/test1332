@@ -1,0 +1,80 @@
+# test case cloned from 1076 and then 302 was replaced with 303
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+followlocation
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 303 OK swsclose
+Location: moo.html&testcase=/13320002
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+</data>
+<data2>
+HTTP/1.1 200 OK swsclose
+Location: this should be ignored
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+body
+</data2>
+<datacheck>
+HTTP/1.1 303 OK swsclose
+Location: moo.html&testcase=/13320002
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+HTTP/1.1 200 OK swsclose
+Location: this should be ignored
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+body
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP POST with 303 redirect and --post303
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/blah/1332 -L -d "moo" --post303
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol nonewline="yes">
+POST /blah/1332 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+mooPOST /blah/moo.html&testcase=/13320002 HTTP/1.1
+User-Agent: curl/7.10 (i686-pc-linux-gnu) libcurl/7.10 OpenSSL/0.9.6c ipv6 zlib/1.1.3
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+moo
+</protocol>
+</verify>
+</testcase>
