@@ -187,6 +187,7 @@ struct Configurable {
   bool raw;
   bool post301;
   bool post302;
+  bool post303;
   bool nokeepalive;         /* for keepalive needs */
   long alivetime;
   bool content_disposition; /* use Content-disposition filename */

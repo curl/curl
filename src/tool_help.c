@@ -140,6 +140,8 @@ static const char *const helptext[] = {
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
   "Do not switch to GET after following a 302 redirect (H)",
+  "     --post303       "
+  "Do not switch to GET after following a 303 redirect (H)",
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable specified protocols",
   "     --proto-redir PROTOCOLS  "

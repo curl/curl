@@ -171,6 +171,7 @@ static const struct LongShort aliases[]= {
   {"$F", "resolve",                  TRUE},
   {"$G", "delegation",               TRUE},
   {"$H", "mail-auth",                TRUE},
+  {"$I", "post303",                  FALSE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -763,6 +764,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case '4': /* --post302 */
         config->post302 = toggle;
+        break;
+      case 'I': /* --post303 */
+        config->post303 = toggle;
         break;
       case '5': /* --noproxy */
         /* This specifies the noproxy list */

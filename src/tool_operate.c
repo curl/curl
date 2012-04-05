@@ -916,9 +916,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(config->authtype)
             my_setopt_flags(curl, CURLOPT_HTTPAUTH, config->authtype);
 
-          /* curl 7.19.1 (the 301 version existed in 7.18.2) */
-          my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
-                    (config->post302 ? CURL_REDIR_POST_302 : FALSE));
+          /* curl 7.19.1 (the 301 version existed in 7.18.2),
+             303 was added in 7.26.0 */
+          my_setopt(curl, CURLOPT_POSTREDIR,
+                    (config->post301 ? CURL_REDIR_POST_301 : 0) |
+                    (config->post302 ? CURL_REDIR_POST_302 : 0) |
+                    (config->post303 ? CURL_REDIR_POST_303 : 0));
 
           /* new in libcurl 7.21.6 */
           if(config->encoding)
