@@ -460,9 +460,6 @@
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
 
-/* if you have the function PK11_CreateGenericObject */
-/* #undef HAVE_PK11_CREATEGENERICOBJECT */
-
 /* Define to 1 if you have a working poll function. */
 /* #undef HAVE_POLL */
 

@@ -2091,13 +2091,6 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
         nssprefix=$OPT_NSS
     fi
 
-    dnl Check for functionPK11_CreateGenericObject
-    dnl this is needed for using the PEM PKCS#11 module
-    AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
-     [
-     AC_DEFINE(HAVE_PK11_CREATEGENERICOBJECT, 1, [if you have the function PK11_CreateGenericObject])
-     AC_SUBST(HAVE_PK11_CREATEGENERICOBJECT, [1])
-     ])
     if test -n "$addlib"; then
 
       CLEANLIBS="$LIBS"
@@ -2108,7 +2101,8 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(nss3, NSS_Initialize,
+      dnl The function PK11_CreateGenericObject is needed to load libnsspem.so
+      AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
        [
        AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
        AC_SUBST(USE_NSS, [1])

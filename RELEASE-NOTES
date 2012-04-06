@@ -9,6 +9,7 @@ Curl and libcurl 7.25.1
 
 This release includes the following changes:
 
+ o nss: the minimal supported version of NSS bumped to 3.12.x
  o 
 
 This release includes the following bugfixes:

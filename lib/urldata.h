@@ -272,10 +272,8 @@ struct ssl_connect_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct SessionHandle *data;
-#ifdef HAVE_PK11_CREATEGENERICOBJECT
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
-#endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
   SSLHandle *handle;

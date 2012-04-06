@@ -441,9 +441,6 @@
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE ${HAVE_PIPE}
 
-/* if you have the function PK11_CreateGenericObject */
-#cmakedefine HAVE_PK11_CREATEGENERICOBJECT ${HAVE_PK11_CREATEGENERICOBJECT}
-
 /* Define to 1 if you have a working poll function. */
 #cmakedefine HAVE_POLL ${HAVE_POLL}
 
