@@ -291,8 +291,10 @@ polarssl_connect_step2(struct connectdata *conn,
     if(ret & BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED\n");
 
-    if(ret & BADCERT_REVOKED)
+    if(ret & BADCERT_REVOKED) {
       failf(data, "Cert verify failed: BADCERT_REVOKED");
+      return CURLE_SSL_CACERT;
+    }
 
     if(ret & BADCERT_CN_MISMATCH)
       failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
