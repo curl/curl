@@ -311,10 +311,6 @@ SOURCE=.\hugehelp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\setup.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\nonblock.h
 # End Source File
 # Begin Source File
@@ -444,6 +440,10 @@ SOURCE=.\tool_sdecls.h
 # Begin Source File
 
 SOURCE=.\tool_setopt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_setup.h
 # End Source File
 # Begin Source File
 

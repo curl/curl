@@ -52,8 +52,7 @@ CURL_CFILES = hugehelp.c \
 	tool_writeout.c \
 	tool_xattr.c
 
-CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
-	config-riscos.h \
+CURL_HFILES = hugehelp.h \
 	tool_binmode.h \
 	tool_bname.h \
 	tool_cb_dbg.h \
@@ -84,6 +83,7 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_parsecfg.h \
 	tool_sdecls.h \
 	tool_setopt.h \
+	tool_setup.h \
 	tool_sleep.h \
 	tool_urlglob.h \
 	tool_util.h \

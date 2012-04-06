@@ -1,5 +1,5 @@
-#ifndef LIBCURL_CONFIG_AMIGAOS_H
-#define LIBCURL_CONFIG_AMIGAOS_H
+#ifndef HEADER_CURL_CONFIG_AMIGAOS_H
+#define HEADER_CURL_CONFIG_AMIGAOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+/* ================================================================ */
+/*               Hand crafted config file for AmigaOS               */
+/* ================================================================ */
 
 #ifdef __AMIGA__ /* Any AmigaOS flavour */
 
@@ -72,8 +76,6 @@
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1
-#define HAVE_TERMIOS_H 1
-#define HAVE_TERMIO_H 1
 #define HAVE_TIME_H 1
 #define HAVE_UNAME 1
 #define HAVE_UNISTD_H 1
@@ -89,10 +91,10 @@
 #define SIZEOF_SHORT 2
 #define SIZEOF_SIZE_T 4
 
+#define USE_MANUAL 1
 #define USE_OPENSSL 1
 #define USE_SSLEAY 1
 #define CURL_DISABLE_LDAP 1
-
 
 #define OS "AmigaOS"
 
@@ -114,8 +116,20 @@
 
 #define in_addr_t int
 
+#ifndef F_OK
+#  define F_OK 0
+#endif
+
 #ifndef O_RDONLY
-# define O_RDONLY 0x0000
+#  define O_RDONLY 0x0000
+#endif
+
+#ifndef LONG_MAX
+#  define LONG_MAX 0x7fffffffL
+#endif
+
+#ifndef LONG_MIN
+#  define LONG_MIN (-0x7fffffffL-1)
 #endif
 
 #define HAVE_GETNAMEINFO 1
@@ -150,4 +164,4 @@
 #define SEND_TYPE_RETV int
 
 #endif /* __AMIGA__ */
-#endif /* LIBCURL_CONFIG_AMIGAOS_H */
+#endif /* HEADER_CURL_CONFIG_AMIGAOS_H */

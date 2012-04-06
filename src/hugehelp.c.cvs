@@ -1,4 +1,4 @@
-#include "setup.h"
+#include "tool_setup.h"
 #include "hugehelp.h"
 void hugehelp(void)
 {

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_GETPARAM_H
-#define HEADER_CURL_TOOL_GETPARAM_H
+#ifndef HEADER_CURL_TOOL_SETUP_H
+#define HEADER_CURL_TOOL_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,26 +21,36 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-typedef enum {
-  PARAM_OK,
-  PARAM_OPTION_AMBIGUOUS,
-  PARAM_OPTION_UNKNOWN,
-  PARAM_REQUIRES_PARAMETER,
-  PARAM_BAD_USE,
-  PARAM_HELP_REQUESTED,
-  PARAM_GOT_EXTRA_PARAMETER,
-  PARAM_BAD_NUMERIC,
-  PARAM_LIBCURL_DOESNT_SUPPORT,
-  PARAM_NO_MEM,
-  PARAM_LAST
-} ParameterError;
+#define CURL_NO_OLDIES
 
-ParameterError getparameter(char *flag,
-                            char *nextarg,
-                            bool *usedarg,
-                            struct Configurable *config);
+#include "setup.h" /* from the lib directory */
 
-#endif /* HEADER_CURL_TOOL_GETPARAM_H */
+#if defined(macintosh) && defined(__MRC__)
+#  define main(x,y) curl_main(x,y)
+#endif
+
+#ifdef TPF
+#  undef select
+   /* change which select is used for the curl command line tool */
+#  define select(a,b,c,d,e) tpf_select_bsd(a,b,c,d,e)
+   /* and turn off the progress meter */
+#  define CONF_DEFAULT (0|CONF_NOPROGRESS)
+#endif
+
+#ifndef OS
+#  define OS "unknown"
+#endif
+
+#ifndef UNPRINTABLE_CHAR
+   /* define what to use for unprintable characters */
+#  define UNPRINTABLE_CHAR '.'
+#endif
+
+#ifndef HAVE_STRDUP
+#  include "strdup.h"
+#  define strdup(ptr) curlx_strdup(ptr)
+#endif
+
+#endif /* HEADER_CURL_TOOL_SETUP_H */
 

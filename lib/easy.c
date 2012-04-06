@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,6 +66,7 @@
 #include "curl_ntlm.h"
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
+#include "amigaos.h"
 #include "curl_rand.h"
 #include "non-ascii.h"
 #include "warnless.h"
@@ -238,8 +239,8 @@ CURLcode curl_global_init(long flags)
     }
 
 #ifdef __AMIGA__
-  if(!amiga_init()) {
-    DEBUGF(fprintf(stderr, "Error: amiga_init failed\n"));
+  if(!Curl_amiga_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
     return CURLE_FAILED_INIT;
   }
 #endif
@@ -328,9 +329,7 @@ void curl_global_cleanup(void)
   if(init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();
 
-#ifdef __AMIGA__
-  amiga_cleanup();
-#endif
+  Curl_amiga_cleanup();
 
 #if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_EXIT)
   (void)libssh2_exit();

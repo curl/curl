@@ -1,5 +1,5 @@
-#ifndef __LIB_CONFIG_MAC_H
-#define __LIB_CONFIG_MAC_H
+#ifndef HEADER_CURL_CONFIG_MAC_H
+#define HEADER_CURL_CONFIG_MAC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,12 +23,15 @@
  ***************************************************************************/
 
 /* =================================================================== */
-/*   lib/config-mac.h - Hand crafted config file for Mac OS 9          */
+/*                Hand crafted config file for Mac OS 9                */
 /* =================================================================== */
 /*  On Mac OS X you must run configure to generate curl_config.h file  */
 /* =================================================================== */
 
 #define OS "mac"
+
+/* Define if you want the built-in manual */
+#define USE_MANUAL              1
 
 #define HAVE_ERRNO_H            1
 #define HAVE_NETINET_IN_H       1
@@ -43,15 +46,16 @@
 #define HAVE_FCNTL_H            1
 #define HAVE_SYS_STAT_H         1
 #define HAVE_ALLOCA_H           1
-#define HAVE_TIME_H             1
 #define HAVE_STDLIB_H           1
+#define HAVE_TIME_H             1
 #define HAVE_UTIME_H            1
 #define HAVE_SYS_TIME_H         1
+#define HAVE_SYS_UTIME_H        1
 
 #define TIME_WITH_SYS_TIME      1
 
 #define HAVE_ALARM              1
-#define HAVE_STRDUP             1
+#define HAVE_FTRUNCATE          1
 #define HAVE_UTIME              1
 #define HAVE_SETVBUF            1
 #define HAVE_STRFTIME           1
@@ -61,14 +65,13 @@
 #define HAVE_SOCKET             1
 #define HAVE_STRUCT_TIMEVAL     1
 
-//#define HAVE_STRICMP          1
 #define HAVE_SIGACTION          1
 #define HAVE_SIGNAL_H           1
 #define HAVE_SIG_ATOMIC_T       1
 
 #ifdef MACOS_SSL_SUPPORT
-#       define USE_SSLEAY       1
-#       define USE_OPENSSL      1
+#  define USE_SSLEAY            1
+#  define USE_OPENSSL           1
 #endif
 
 #define CURL_DISABLE_LDAP       1
@@ -120,4 +123,4 @@
 #define HAVE_EXTRA_STRICMP_H 1
 #define HAVE_EXTRA_STRDUP_H  1
 
-#endif /* __LIB_CONFIG_MAC_H */
+#endif /* HEADER_CURL_CONFIG_MAC_H */

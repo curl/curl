@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,10 +20,13 @@
  *
  ***************************************************************************/
 
-#ifdef __AMIGA__ /* Any AmigaOS flavour */
+#include "setup.h"
+
+#if defined(__AMIGA__) && !defined(__ixemul__)
+
+#include <amitcp/socketbasetags.h>
 
 #include "amigaos.h"
-#include <amitcp/socketbasetags.h>
 
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
@@ -35,7 +38,7 @@ void __request(const char *msg);
 # define __request( msg )       Printf( msg "\n\a")
 #endif
 
-void amiga_cleanup()
+void Curl_amiga_cleanup()
 {
   if(SocketBase) {
     CloseLibrary(SocketBase);
@@ -43,7 +46,7 @@ void amiga_cleanup()
   }
 }
 
-BOOL amiga_init()
+bool Curl_amiga_init()
 {
   if(!SocketBase)
     SocketBase = OpenLibrary("bsdsocket.library", 4);
@@ -61,20 +64,14 @@ BOOL amiga_init()
   }
 
 #ifndef __libnix__
-  atexit(amiga_cleanup);
+  atexit(Curl_amiga_cleanup);
 #endif
 
   return TRUE;
 }
 
 #ifdef __libnix__
-ADD2EXIT(amiga_cleanup,-50);
+ADD2EXIT(Curl_amiga_cleanup,-50);
 #endif
 
-#else /* __AMIGA__ */
-
-#ifdef __POCC__
-#  pragma warn(disable:2024)  /* Disable warning #2024: Empty input file */
-#endif
-
-#endif /* __AMIGA__ */
+#endif /* __AMIGA__ && ! __ixemul__ */

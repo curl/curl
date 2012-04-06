@@ -104,9 +104,9 @@ Windows vs Unix
  Inside the source code, We make an effort to avoid '#ifdef [Your OS]'. All
  conditionals that deal with features *should* instead be in the format
  '#ifdef HAVE_THAT_WEIRD_FUNCTION'. Since Windows can't run configure scripts,
- we maintain two curl_config-win32.h files (one in lib/ and one in src/) that
- are supposed to look exactly as a curl_config.h file would have looked like on
- a Windows machine!
+ we maintain a curl_config-win32.h file in lib directory that is supposed to
+ look exactly as a curl_config.h file would have looked like on a Windows
+ machine!
 
  Generally speaking: always remember that this will be compiled on dozens of
  operating systems. Don't walk on the edge.

@@ -3,7 +3,7 @@
 #  Gisle Vanem <gvanem@broadpark.no>
 #
 
-DEPEND_PREREQ = curl_config.h # hugehelp.c
+DEPEND_PREREQ = # hugehelp.c
 
 top_srcdir = ..
 TOPDIR = ..
@@ -37,18 +37,11 @@ CFLAGS += -DUSE_ENVIRONMENT
 PROGRAM  = curl.exe
 OBJECTS += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
-all: $(OBJ_DIR) curl_config.h $(PROGRAM)
+all: $(OBJ_DIR) $(PROGRAM)
 	@echo Welcome to cURL
 
 $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 	$(CC) -o $@ $^ $(LDFLAGS) $(EX_LIBS)
-
-curl_config.h:
-ifeq ($(IS_UNIX_SHELL),1)
-	@echo '#include "../lib/config-dos.h"' > $@
-else
-	@echo #include "../lib/config-dos.h" > $@
-endif
 
 #
 # groff 1.18+ requires "-P -c"
@@ -60,7 +53,6 @@ hugehelp.c: ../docs/MANUAL ../docs/curl.1 mkhelp.pl
 # clean generated files
 #
 genclean:
-	- $(DELETE) curl_config.h
 	- $(DELETE) hugehelp.c
 
 # clean object files and subdir

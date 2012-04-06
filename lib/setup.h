@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_LIB_SETUP_H
-#define HEADER_CURL_LIB_SETUP_H
+#ifndef HEADER_CURL_SETUP_H
+#define HEADER_CURL_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -54,8 +54,12 @@
 #  include "config-mac.h"
 #endif
 
+#ifdef __riscos__
+#  include "config-riscos.h"
+#endif
+
 #ifdef __AMIGA__
-#  include "amigaos.h"
+#  include "config-amigaos.h"
 #endif
 
 #ifdef __SYMBIAN32__
@@ -279,6 +283,16 @@
 #ifdef __VXWORKS__
 #  include <sockLib.h>    /* for generic BSD socket functions */
 #  include <ioLib.h>      /* for basic I/O interface functions */
+#endif
+
+#ifdef __AMIGA__
+#  ifndef __ixemul__
+#    include <exec/types.h>
+#    include <exec/execbase.h>
+#    include <proto/exec.h>
+#    include <proto/dos.h>
+#    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#  endif
 #endif
 
 #include <stdio.h>
@@ -640,4 +654,4 @@ int netware_init(void);
 #  define SHUT_RDWR 0x02
 #endif
 
-#endif /* HEADER_CURL_LIB_SETUP_H */
+#endif /* HEADER_CURL_SETUP_H */
