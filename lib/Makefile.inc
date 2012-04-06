@@ -14,7 +14,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   curl_fnmatch.c fileinfo.c ftplistparser.c wildcard.c krb5.c		\
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
   content_encoding.c share.c http_digest.c md4.c md5.c curl_rand.c	\
-  http_negotiate.c inet_pton.c strtoofft.c strerror.c			\
+  http_negotiate.c inet_pton.c strtoofft.c strerror.c amigaos.c		\
   hostasyn.c hostip4.c hostip6.c hostsyn.c inet_ntop.c parsedate.c	\
   select.c gtls.c sslgen.c tftp.c splay.c strdup.c socks.c ssh.c nss.c	\
   qssl.c rawstr.c curl_addrinfo.c socks_gssapi.c socks_sspi.c		\
@@ -31,7 +31,7 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   getinfo.h strequal.h krb4.h memdebug.h http_chunks.h curl_rand.h	\
   curl_fnmatch.h wildcard.h fileinfo.h ftplistparser.h strtok.h		\
   connect.h llist.h hash.h content_encoding.h share.h curl_md4.h	\
-  curl_md5.h http_digest.h http_negotiate.h inet_pton.h			\
+  curl_md5.h http_digest.h http_negotiate.h inet_pton.h amigaos.h	\
   strtoofft.h strerror.h inet_ntop.h curlx.h curl_memory.h setup.h	\
   transfer.h select.h easyif.h multiif.h parsedate.h sslgen.h gtls.h	\
   tftp.h sockaddr.h splay.h strdup.h setup_once.h socks.h ssh.h nssg.h	\

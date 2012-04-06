@@ -11,7 +11,6 @@ CC	=	m68k-amigaos-gcc
 CFLAGS	=	-I$(ATCPSDKI) -m68020-60 -O2 -msoft-float -noixemul -g -I. -I../include -W -Wall
 
 include Makefile.inc
-CSOURCES += amigaos.c
 OBJS = $(CSOURCES:.c=.o)
 
 all:	$(OBJS)
