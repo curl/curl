@@ -27,8 +27,6 @@
 #  include <iconv.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "tool_convert.h"
 
 #include "memdebug.h" /* keep this as LAST include */

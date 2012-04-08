@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curl/curl.h>
-
 #include <sys/stat.h>
 
 #ifdef HAVE_UNISTD_H

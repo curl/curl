@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curl/curl.h>
-
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"

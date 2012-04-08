@@ -28,7 +28,6 @@
 #endif
 
 #ifdef WIN32
-#  include <curl/curl.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif

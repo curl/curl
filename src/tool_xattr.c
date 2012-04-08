@@ -25,8 +25,6 @@
 #  include <sys/xattr.h> /* header from libc, not from libattr */
 #endif
 
-#include <curl/curl.h>
-
 #include "tool_xattr.h"
 
 #include "memdebug.h" /* keep this as LAST include */

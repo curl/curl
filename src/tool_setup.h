@@ -24,6 +24,8 @@
 
 #define CURL_NO_OLDIES
 
+#include <curl/curl.h> /* external interface */
+
 #include "setup.h" /* from the lib directory */
 
 #if defined(macintosh) && defined(__MRC__)

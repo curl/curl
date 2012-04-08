@@ -28,8 +28,6 @@
 #include <unixlib.h>
 #endif
 
-#include <curl/curl.h>
-
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 

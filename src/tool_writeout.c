@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curl/curl.h>
-
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 

@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curl/curl.h>
-
 #include "tool_mfiles.h"
 
 #include "memdebug.h" /* keep this as LAST include */
