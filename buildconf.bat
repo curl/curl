@@ -27,11 +27,6 @@ if not exist include\curl\curlbuild.h.dist goto end_curlbuild_h
 copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h
 :end_curlbuild_h
 
-REM create src\config-win32.h
-if not exist lib\config-win32.h goto end_config_win32_h
-copy /Y lib\config-win32.h src\config-win32.h
-:end_config_win32_h
-
 REM setup c-ares git tree
 if not exist ares\buildconf.bat goto end_c_ares
 cd ares
