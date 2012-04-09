@@ -161,9 +161,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
 
   /* setup request flags */
   connssl->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-                       ISC_REQ_CONFIDENTIALITY | ISC_REQ_INTEGRITY |
-                       ISC_REQ_EXTENDED_ERROR | ISC_REQ_ALLOCATE_MEMORY |
-                       ISC_REQ_STREAM;
+                       ISC_REQ_CONFIDENTIALITY | ISC_REQ_EXTENDED_ERROR |
+                       ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
   sspi_status = s_pSecFn->InitializeSecurityContextA(&connssl->cred_handle,
@@ -372,9 +371,26 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
 
 static CURLcode
 schannel_connect_step3(struct connectdata *conn, int sockindex) {
+  struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+
+  if (connssl->ret_flags != connssl->req_flags) {
+    if(!(connssl->ret_flags & ISC_RET_SEQUENCE_DETECT))
+      failf(data, "schannel: failed to setup sequence detection\n");
+    if(!(connssl->ret_flags & ISC_RET_REPLAY_DETECT))
+      failf(data, "schannel: failed to setup replay detection\n");
+    if(!(connssl->ret_flags & ISC_RET_CONFIDENTIALITY))
+      failf(data, "schannel: failed to setup confidentiality\n");
+    if(!(connssl->ret_flags & ISC_RET_EXTENDED_ERROR))
+      failf(data, "schannel: failed to setup extended errors\n");
+    if(!(connssl->ret_flags & ISC_RET_ALLOCATED_MEMORY))
+      failf(data, "schannel: failed to setup memory allocation\n");
+    if(!(connssl->ret_flags & ISC_RET_STREAM))
+      failf(data, "schannel: failed to setup stream orientation\n");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
   connssl->connecting_state = ssl_connect_done;
 
