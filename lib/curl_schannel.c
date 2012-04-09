@@ -96,8 +96,18 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
   /* setup Schannel API options */
   memset(&schannel_cred, 0, sizeof(schannel_cred));
   schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
-  schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
-                          SCH_CRED_REVOCATION_CHECK_CHAIN;
+
+  if(data->set.ssl.verifypeer) {
+    schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
+                            SCH_CRED_REVOCATION_CHECK_CHAIN;
+    infof(data, "schannel: checking server certificate and revocation\n");
+  }
+  else {
+    schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
+                            SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+                            SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+    infof(data, "schannel: disable server certificate and revocation checks\n");
+  }
 
   if(Curl_inet_pton(AF_INET, conn->host.name, &addr) ||
 #ifdef ENABLE_IPV6
