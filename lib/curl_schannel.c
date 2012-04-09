@@ -38,7 +38,6 @@
 
 /*
  * TODO list for TLS/SSL implementation:
- * - implement session handling and re-use
  * - implement write buffering
  * - implement SSL/TLS shutdown
  * - special cases: renegotiation, certificates, algorithms
@@ -48,8 +47,6 @@
 
 #ifdef USE_WINDOWS_SSPI
 #ifdef USE_SCHANNEL
-
-#include <schnlsp.h>
 
 #include "urldata.h"
 #include "curl_sspi.h"
@@ -83,6 +80,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
   SecBufferDesc outbuf_desc;
   SCHANNEL_CRED schannel_cred;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  curl_schannel_cred *old_cred = NULL;
   struct in_addr addr;
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
@@ -91,60 +89,75 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
   infof(data, "schannel: Connecting to %s:%d (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
-  /* setup Schannel API options */
-  memset(&schannel_cred, 0, sizeof(schannel_cred));
-  schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
-
-  if(data->set.ssl.verifypeer) {
-    schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
-                            SCH_CRED_REVOCATION_CHECK_CHAIN;
-    infof(data, "schannel: checking server certificate and revocation\n");
+  /* check for an existing re-usable credential handle */
+  if(!Curl_ssl_getsessionid(conn, &old_cred, NULL)) {
+    connssl->cred = old_cred;
+    infof(data, "schannel: re-using existing credential handle\n");
   }
   else {
-    schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
-                            SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
-                            SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-    infof(data, "schannel: disable server certificate and revocation checks\n");
-  }
+    /* setup Schannel API options */
+    memset(&schannel_cred, 0, sizeof(schannel_cred));
+    schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
-  if(Curl_inet_pton(AF_INET, conn->host.name, &addr) ||
+    if(data->set.ssl.verifypeer) {
+      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
+                              SCH_CRED_REVOCATION_CHECK_CHAIN;
+      infof(data, "schannel: checking server certificate and revocation\n");
+    }
+    else {
+      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
+                              SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+                              SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+      infof(data, "schannel: disable server certificate and revocation checks\n");
+    }
+
+    if(Curl_inet_pton(AF_INET, conn->host.name, &addr) ||
 #ifdef ENABLE_IPV6
-     Curl_inet_pton(AF_INET6, conn->host.name, &addr6) ||
+       Curl_inet_pton(AF_INET6, conn->host.name, &addr6) ||
 #endif
-     data->set.ssl.verifyhost < 2) {
-    schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-    infof(data, "schannel: using IP address, disable SNI servername check\n");
+       data->set.ssl.verifyhost < 2) {
+      schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
+      infof(data, "schannel: using IP address, disable SNI servername check\n");
+    }
+
+    switch(data->set.ssl.version) {
+      case CURL_SSLVERSION_TLSv1:
+        schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
+                                              SP_PROT_TLS1_1_CLIENT |
+                                              SP_PROT_TLS1_2_CLIENT;
+        break;
+      case CURL_SSLVERSION_SSLv3:
+        schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
+        break;
+      case CURL_SSLVERSION_SSLv2:
+        schannel_cred.grbitEnabledProtocols = SP_PROT_SSL2_CLIENT;
+        break;
+    }
+
+    /* allocate memory for the re-usable credential handle */
+    connssl->cred = malloc(sizeof(curl_schannel_cred));
+    if (!connssl->cred) {
+      failf(data, "schannel: unable to allocate memory");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    memset(connssl->cred, 0, sizeof(curl_schannel_cred));
+
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
+    sspi_status = s_pSecFn->AcquireCredentialsHandleA(NULL,
+      UNISP_NAME_A, SECPKG_CRED_OUTBOUND, NULL, &schannel_cred, NULL, NULL,
+      &connssl->cred->cred_handle, &connssl->cred->time_stamp);
+
+    if(sspi_status != SEC_E_OK) {
+      if(sspi_status == SEC_E_WRONG_PRINCIPAL)
+        failf(data, "schannel: SNI or certificate check failed\n");
+      else
+        failf(data, "schannel: AcquireCredentialsHandleA failed: %d\n",
+              sspi_status);
+      free(connssl->cred);
+      connssl->cred = NULL;
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
-
-  switch(data->set.ssl.version) {
-    case CURL_SSLVERSION_TLSv1:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
-                                            SP_PROT_TLS1_1_CLIENT |
-                                            SP_PROT_TLS1_2_CLIENT;
-      break;
-    case CURL_SSLVERSION_SSLv3:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
-      break;
-    case CURL_SSLVERSION_SSLv2:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_SSL2_CLIENT;
-      break;
-  }
-
-  /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
-  sspi_status = s_pSecFn->AcquireCredentialsHandleA(NULL,
-    UNISP_NAME_A, SECPKG_CRED_OUTBOUND, NULL, &schannel_cred,
-    NULL, NULL, &connssl->cred_handle, &connssl->time_stamp);
-
-  if(sspi_status != SEC_E_OK) {
-    if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-      failf(data, "schannel: SNI or certificate check failed\n");
-    else
-      failf(data, "schannel: AcquireCredentialsHandleA failed: %d\n",
-            sspi_status);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
-  connssl->schannel = TRUE;
 
   /* setup output buffer */
   outbuf.pvBuffer = NULL;
@@ -160,11 +173,19 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
                        ISC_REQ_CONFIDENTIALITY | ISC_REQ_EXTENDED_ERROR |
                        ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
 
+  /* allocate memory for the security context handle */
+  connssl->ctxt = malloc(sizeof(curl_schannel_ctxt));
+  if (!connssl->ctxt) {
+    failf(data, "schannel: unable to allocate memory");
+    return CURLE_OUT_OF_MEMORY;
+  }
+  memset(connssl->ctxt, 0, sizeof(curl_schannel_ctxt));
+
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
-  sspi_status = s_pSecFn->InitializeSecurityContextA(&connssl->cred_handle,
-    NULL, conn->host.name, connssl->req_flags, 0, 0, NULL, 0,
-    &connssl->ctxt_handle, &outbuf_desc,
-    &connssl->ret_flags, &connssl->time_stamp);
+  sspi_status = s_pSecFn->InitializeSecurityContextA(
+    &connssl->cred->cred_handle, NULL, conn->host.name,
+    connssl->req_flags, 0, 0, NULL, 0, &connssl->ctxt->ctxt_handle,
+    &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
@@ -172,6 +193,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
     else
       failf(data, "schannel: initial InitializeSecurityContextA failed: %d\n",
             sspi_status);
+    free(connssl->ctxt);
+    connssl->ctxt = NULL;
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -280,9 +303,9 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
   sspi_status = s_pSecFn->InitializeSecurityContextA(
-    &connssl->cred_handle, &connssl->ctxt_handle, conn->host.name,
-    connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL, &outbuf_desc,
-    &connssl->ret_flags, &connssl->time_stamp);
+    &connssl->cred->cred_handle, &connssl->ctxt->ctxt_handle,
+    conn->host.name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
+    &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
   /* free buffer for received handshake data */
   free(inbuf[0].pvBuffer);
@@ -363,11 +386,15 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
 
 static CURLcode
 schannel_connect_step3(struct connectdata *conn, int sockindex) {
+  CURLcode retcode = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  curl_schannel_cred *old_cred = NULL;
+  int incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
+  /* check if the required context attributes are met */
   if(connssl->ret_flags != connssl->req_flags) {
     if(!(connssl->ret_flags & ISC_RET_SEQUENCE_DETECT))
       failf(data, "schannel: failed to setup sequence detection\n");
@@ -382,6 +409,27 @@ schannel_connect_step3(struct connectdata *conn, int sockindex) {
     if(!(connssl->ret_flags & ISC_RET_STREAM))
       failf(data, "schannel: failed to setup stream orientation\n");
     return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  /* save the current session data for possible re-use */
+  incache = !(Curl_ssl_getsessionid(conn, &old_cred, NULL));
+  if(incache) {
+    if(old_cred != connssl->cred) {
+      infof(data, "schannel: old credential handle is stale, removing\n");
+      Curl_ssl_delsessionid(conn, old_cred);
+      incache = FALSE;
+    }
+  }
+  if(!incache) {
+    retcode = Curl_ssl_addsessionid(conn, connssl->cred,
+                                    sizeof(curl_schannel_cred));
+    if(retcode) {
+      failf(data, "schannel: failed to store credential handle\n");
+      return retcode;
+    }
+    else {
+      infof(data, "schannel: stored crendential handle\n");
+    }
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -512,9 +560,9 @@ schannel_send(struct connectdata *conn, int sockindex,
 
   /* check if the maximum stream sizes were queried */
   if(connssl->stream_sizes.cbMaximumMessage == 0) {
-    sspi_status = s_pSecFn->QueryContextAttributesA(&connssl->ctxt_handle,
-                                                    SECPKG_ATTR_STREAM_SIZES,
-                                                    &connssl->stream_sizes);
+    sspi_status = s_pSecFn->QueryContextAttributesA(
+                              &connssl->ctxt->ctxt_handle,
+                              SECPKG_ATTR_STREAM_SIZES, &connssl->stream_sizes);
     if(sspi_status != SEC_E_OK) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -561,7 +609,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   memcpy(outbuf[1].pvBuffer, buf, len);
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
-  sspi_status = s_pSecFn->EncryptMessage(&connssl->ctxt_handle, 0,
+  sspi_status = s_pSecFn->EncryptMessage(&connssl->ctxt->ctxt_handle, 0,
                                          &outbuf_desc, 0);
 
   /* check if the message was encrypted */
@@ -681,7 +729,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
     inbuf_desc.ulVersion = SECBUFFER_VERSION;
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx */
-    sspi_status = s_pSecFn->DecryptMessage(&connssl->ctxt_handle,
+    sspi_status = s_pSecFn->DecryptMessage(&connssl->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
     infof(data, "schannel: DecryptMessage %d\n", sspi_status);
 
@@ -805,7 +853,7 @@ Curl_schannel_connect(struct connectdata *conn, int sockindex) {
 bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex) {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(connssl->schannel) /* SSL is in use */
+  if(connssl->use) /* SSL is in use */
     return (connssl->encdata_offset > 0 ||
             connssl->decdata_offset > 0 ) ? TRUE : FALSE;
   else
@@ -819,10 +867,11 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex) {
   infof(data, "schannel: Closing connection with %s:%d\n",
         conn->host.name, conn->remote_port);
 
-  /* free SSPI Schannel API context and handle */
-  if(connssl->schannel) {
-    s_pSecFn->DeleteSecurityContext(&connssl->ctxt_handle);
-    s_pSecFn->FreeCredentialsHandle(&connssl->cred_handle);
+  /* free SSPI Schannel API security context handle */
+  if(connssl->ctxt) {
+    s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
+    free(connssl->ctxt);
+    connssl->ctxt = NULL;
   }
 
   /* free internal buffer for received encrypted data */
@@ -844,6 +893,15 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex) {
 
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex) {
   return CURLE_NOT_BUILT_IN; /* TODO: implement SSL/TLS shutdown */
+}
+
+void Curl_schannel_session_free(void *ptr) {
+  curl_schannel_cred *cred = ptr;
+
+  if(cred) {
+    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+    free(cred);
+  }
 }
 
 int Curl_schannel_init() {

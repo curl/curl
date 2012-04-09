@@ -132,8 +132,8 @@
 #endif /* USE_AXTLS */
 
 #ifdef USE_SCHANNEL
-#include <schnlsp.h>
 #include "curl_sspi.h"
+#include "curl_schannel.h"
 #endif
 
 #ifdef HAVE_NETINET_IN_H
@@ -288,10 +288,8 @@ struct ssl_connect_data {
   SSL*     ssl;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
-  bool schannel;
-  TimeStamp time_stamp;
-  CredHandle cred_handle;
-  CtxtHandle ctxt_handle;
+  curl_schannel_cred *cred;
+  curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
   ssl_connect_state connecting_state;
   size_t encdata_length, decdata_length;
