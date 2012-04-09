@@ -33,6 +33,7 @@
    Curl_nss_ - prefix for NSS ones
    Curl_polarssl_ - prefix for PolarSSL ones
    Curl_cyassl_ - prefix for CyaSSL ones
+   Curl_schannel_ - prefix for Schannel SSPI ones
 
    Note that this source code uses curlssl_* functions, and they are all
    defines/macros #defined by the lib-specific header files.
@@ -57,6 +58,7 @@
 #include "polarssl.h" /* PolarSSL versions */
 #include "axtls.h"  /* axTLS versions */
 #include "cyassl.h"  /* CyaSSL versions */
+#include "curl_schannel.h" /* Schannel SSPI version */
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"

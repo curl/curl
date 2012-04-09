@@ -131,6 +131,11 @@
 #undef realloc
 #endif /* USE_AXTLS */
 
+#ifdef USE_SCHANNEL
+#include <schnlsp.h>
+#include "curl_sspi.h"
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -282,6 +287,18 @@ struct ssl_connect_data {
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
 #endif /* USE_AXTLS */
+#ifdef USE_SCHANNEL
+  bool schannel;
+  TimeStamp time_stamp;
+  CredHandle cred_handle;
+  CtxtHandle ctxt_handle;
+  SecPkgContext_StreamSizes stream_sizes;
+  ssl_connect_state connecting_state;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  unsigned long req_flags, ret_flags;
+#endif /* USE_SCHANNEL */
 };
 
 struct ssl_config_data {
