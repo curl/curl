@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -40,12 +40,12 @@ INCLUDES = -I$(top_builddir)/include/curl \
 
 LIBDIR = $(top_builddir)/lib
 
-if STATICLIB
-# we need this define when building with a static lib on Windows
-STATICCPPFLAGS = -DCURL_STATICLIB
-endif
+AM_CPPFLAGS = -DCURL_NO_OLDIES
 
-CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
+# Mostly for Windows build targets, when using static libcurl
+if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
+endif
 
 # Dependencies
 LDADD = $(LIBDIR)/libcurl.la

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -75,6 +75,18 @@ INCLUDES = -I$(top_builddir)/include/curl \
            -I$(top_srcdir)/include        \
            -I$(top_builddir)/lib          \
            -I$(top_srcdir)/lib
+endif
+
+AM_CPPFLAGS =
+
+# Mostly for Windows build targets, when building libcurl library
+if USE_CPPFLAG_BUILDING_LIBCURL
+AM_CPPFLAGS += -DBUILDING_LIBCURL
+endif
+
+# Mostly for Windows build targets, when building static libcurl
+if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 if SONAME_BUMP

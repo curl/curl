@@ -1,5 +1,5 @@
-#ifndef __LIBCONFIGTPF_H
-#define __LIBCONFIGTPF_H
+#ifndef HEADER_CURL_CONFIG_TPF_H
+#define HEADER_CURL_CONFIG_TPF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* ================================================================ */
-/*    lib/config-tpf.h - Hand crafted config file for TPF           */
+/*                 Hand crafted config file for TPF                 */
 /* ================================================================ */
 
 /* ---------------------------------------------------------------- */
@@ -31,9 +31,6 @@
 /* ---------------------------------------------------------------- */
 
 /* NOTE: Refer also to the .mak file for some of the flags below */
-
-/* when building libcurl itself */
-/* #undef BUILDING_LIBCURL */
 
 /* to disable cookies support */
 /* #undef CURL_DISABLE_COOKIES */
@@ -64,9 +61,6 @@
 
 /* to disable verbose strings */
 /* #undef CURL_DISABLE_VERBOSE_STRINGS */
-
-/* when not building a shared library */
-/* #undef CURL_STATICLIB */
 
 /* lber dynamic library file */
 /* #undef DL_LBER_FILE */
@@ -779,4 +773,4 @@
 #endif
 
 
-#endif /* __LIBCONFIGTPF_H */
+#endif /* HEADER_CURL_CONFIG_TPF_H */

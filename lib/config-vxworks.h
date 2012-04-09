@@ -1,5 +1,5 @@
-#ifndef __LIB_CONFIG_VXWORKS_H
-#define __LIB_CONFIG_VXWORKS_H
+#ifndef HEADER_CURL_CONFIG_VXWORKS_H
+#define HEADER_CURL_CONFIG_VXWORKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,11 +23,8 @@
  ***************************************************************************/
 
 /* =============================================================== */
-/*   lib/config-vxworks.h - Hand crafted config file for VxWorks   */
+/*               Hand crafted config file for VxWorks              */
 /* =============================================================== */
-
-/* when building libcurl itself */
-/* #undef BUILDING_LIBCURL */
 
 /* Location of default ca bundle */
 /* #undef CURL_CA_BUNDLE */
@@ -82,9 +79,6 @@
 
 /* Use Windows LDAP implementation */
 /* #undef CURL_LDAP_WIN */
-
-/* when not building a shared library */
-/* #undef CURL_STATICLIB */
 
 /* your Entropy Gathering Daemon socket pathname */
 /* #undef EGD_SOCKET */
@@ -952,4 +946,4 @@
 /* the signed version of size_t */
 /* #undef ssize_t */
 
-#endif /* __LIB_CONFIG_VXWORKS_H */
+#endif /* HEADER_CURL_CONFIG_VXWORKS_H */

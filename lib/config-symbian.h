@@ -1,4 +1,5 @@
-/* config-symbian.h.  Manually generated.  */
+#ifndef HEADER_CURL_CONFIG_SYMBIAN_H
+#define HEADER_CURL_CONFIG_SYMBIAN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -6,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,8 +22,9 @@
  *
  ***************************************************************************/
 
-/* when building libcurl itself */
-/* #undef BUILDING_LIBCURL */
+/* ================================================================ */
+/*               Hand crafted config file for Symbian               */
+/* ================================================================ */
 
 /* Location of default ca bundle */
 /* #define CURL_CA_BUNDLE "/etc/pki/tls/certs/ca-bundle.crt"*/
@@ -71,9 +73,6 @@
 
 /* Use Windows LDAP implementation */
 /* #undef CURL_LDAP_WIN */
-
-/* when not building a shared library */
-/* #undef CURL_STATICLIB */
 
 /* your Entropy Gathering Daemon socket pathname */
 /* #undef EGD_SOCKET */
@@ -830,3 +829,5 @@
 /* if OpenSSL is in use */
 #define USE_OPENSSL
 #endif
+
+#endif /* HEADER_CURL_CONFIG_SYMBIAN_H */

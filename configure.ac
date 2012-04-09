@@ -236,21 +236,18 @@ esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 
-dnl 'STATICLIB' is, in spite of its name, not generic but only for static-only
-dnl builds on Windows
-AM_CONDITIONAL(STATICLIB, false)
-
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
+use_cppflag_building_libcurl="no"
+use_cppflag_curl_staticlib="no"
 case $host in
   *-*-mingw*)
-    AC_DEFINE(BUILDING_LIBCURL, 1, [when building libcurl itself])
     AC_MSG_RESULT(yes)
+    use_cppflag_building_libcurl="yes"
     AC_MSG_CHECKING([if we need CURL_STATICLIB])
     if test "X$enable_shared" = "Xno"
     then
-      AC_DEFINE(CURL_STATICLIB, 1, [when not building a shared library])
       AC_MSG_RESULT(yes)
-      AM_CONDITIONAL(STATICLIB, true)
+      use_cppflag_curl_staticlib="yes"
     else
       AC_MSG_RESULT(no)
     fi
@@ -259,6 +256,8 @@ case $host in
     AC_MSG_RESULT(no)
     ;;
 esac
+AM_CONDITIONAL(USE_CPPFLAG_BUILDING_LIBCURL, test x$use_cppflag_building_libcurl = xyes)
+AM_CONDITIONAL(USE_CPPFLAG_CURL_STATICLIB, test x$use_cppflag_curl_staticlib = xyes)
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
