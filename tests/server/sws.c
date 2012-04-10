@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "server_setup.h"
 
 /* sws.c: simple (silly?) web server
 
@@ -26,10 +27,6 @@
    Wilke. Thanks a bunch!
 
  */
-
-#define CURL_NO_OLDIES
-
-#include "setup.h" /* portability help from the lib directory */
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>

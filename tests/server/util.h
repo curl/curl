@@ -1,5 +1,5 @@
-#ifndef __SERVER_UTIL_H
-#define __SERVER_UTIL_H
+#ifndef HEADER_CURL_SERVER_UTIL_H
+#define HEADER_CURL_SERVER_UTIL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "server_setup.h"
 
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...);
@@ -62,4 +63,4 @@ void set_advisor_read_lock(const char *filename);
 
 void clear_advisor_read_lock(const char *filename);
 
-#endif  /* __SERVER_UTIL_H */
+#endif  /* HEADER_CURL_SERVER_UTIL_H */

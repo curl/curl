@@ -1,5 +1,5 @@
-#ifndef HEADER_SERVER_SOCKADDR_H
-#define HEADER_SERVER_SOCKADDR_H
+#ifndef HEADER_CURL_SERVER_SOCKADDR_H
+#define HEADER_CURL_SERVER_SOCKADDR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "server_setup.h"
 
 typedef union {
   struct sockaddr      sa;
@@ -30,4 +31,4 @@ typedef union {
 #endif
 } srvr_sockaddr_union_t;
 
-#endif /* HEADER_SERVER_SOCKADDR_H */
+#endif /* HEADER_CURL_SERVER_SOCKADDR_H */

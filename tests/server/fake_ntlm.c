@@ -5,7 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Mandy Wu, <mandy.wu@intel.com>
+ * Copyright (C) 2010, Mandy Wu, <mandy.wu@intel.com>
+ * Copyright (C) 2011 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +20,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "server_setup.h"
 
 /*
  * This is a fake ntlm_auth, which is used for testing NTLM single-sign-on.
@@ -26,10 +28,6 @@
  * daemon helper /usr/bin/ntlm_auth. This tool will accept commands and
  * responses with a pre-written string saved in test case test2005.
  */
-
-#define CURL_NO_OLDIES
-
-#include "setup.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -19,6 +19,7 @@ CURLX_HDRS = \
 USEFUL = \
  getpart.c \
  getpart.h \
+ server_setup.h \
  $(top_srcdir)/lib/base64.c \
  $(top_srcdir)/lib/curl_base64.h \
  $(top_srcdir)/lib/memdebug.c \

@@ -19,10 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-#define CURL_NO_OLDIES
-
-#include "setup.h" /* portability help from the lib directory */
+#include "server_setup.h"
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>

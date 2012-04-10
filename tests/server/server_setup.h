@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SERVER_GETPART_H
-#define HEADER_CURL_SERVER_GETPART_H
+#ifndef HEADER_CURL_SERVER_SETUP_H
+#define HEADER_CURL_SERVER_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,14 +21,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "server_setup.h"
 
-#define GPE_NO_BUFFER_SPACE -2
-#define GPE_OUT_OF_MEMORY   -1
-#define GPE_OK               0
-#define GPE_END_OF_FILE      1
+#define CURL_NO_OLDIES
 
-int getpart(char **outbuf, size_t *outlen,
-            const char *main, const char *sub, FILE *stream);
+#include "setup.h" /* portability help from the lib directory */
 
-#endif /* HEADER_CURL_SERVER_GETPART_H */
+#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
+
+#endif /* HEADER_CURL_SERVER_SETUP_H */

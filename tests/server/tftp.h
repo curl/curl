@@ -1,5 +1,5 @@
-#ifndef __SERVER_TFTP_H
-#define __SERVER_TFTP_H
+#ifndef HEADER_CURL_SERVER_TFTP_H
+#define HEADER_CURL_SERVER_TFTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "server_setup.h"
 
 /* This file is a rewrite/clone of the arpa/tftp.h file for systems without
    it. */
@@ -54,4 +55,4 @@ struct tftphdr {
 #define EEXISTS   6
 #define ENOUSER   7
 
-#endif /* __SERVER_TFTP_H */
+#endif /* HEADER_CURL_SERVER_TFTP_H */

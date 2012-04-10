@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,10 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-#define CURL_NO_OLDIES
-
-#include "setup.h"
+#include "server_setup.h"
 
 #include "getpart.h"
 
