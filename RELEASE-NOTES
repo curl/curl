@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o nss: libcurl now uses NSS_InitContext() to prevent collisions if available [1]
  o 
 
 This release includes the following known bugs:
@@ -29,4 +30,5 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
+ [1] = https://bugzilla.redhat.com/738456
  

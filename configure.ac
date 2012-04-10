@@ -2118,6 +2118,14 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
       if test "x$USE_NSS" = "xyes"; then
         AC_MSG_NOTICE([detected NSS version $version])
 
+        dnl NSS_InitContext() was introduced in NSS 3.12.5 and helps to prevent
+        dnl collisions on NSS initialization/shutdown with other libraries
+        AC_CHECK_FUNC(NSS_InitContext,
+        [
+          AC_DEFINE(HAVE_NSS_INITCONTEXT, 1, [if you have the NSS_InitContext function])
+          AC_SUBST(HAVE_NSS_INITCONTEXT, [1])
+        ])
+
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
         dnl LD_LIBRARY_PATH to prevent further configure tests to fail
