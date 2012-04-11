@@ -63,6 +63,8 @@
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
+char* Curl_sspi_status(SECURITY_STATUS status);
+char* Curl_sspi_status_msg(SECURITY_STATUS status);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
 

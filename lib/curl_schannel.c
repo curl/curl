@@ -89,6 +89,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
   SCHANNEL_CRED schannel_cred;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   curl_schannel_cred *old_cred = NULL;
+  char *sspi_msg = NULL;
   struct in_addr addr;
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
@@ -156,11 +157,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
       &connssl->cred->cred_handle, &connssl->cred->time_stamp);
 
     if(sspi_status != SEC_E_OK) {
+      sspi_msg = Curl_sspi_status_msg(sspi_status);
       if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-        failf(data, "schannel: SNI or certificate check failed\n");
+        failf(data, "schannel: SNI or certificate check failed: %s\n",
+              sspi_msg);
       else
-        failf(data, "schannel: AcquireCredentialsHandleA failed: %d\n",
-              sspi_status);
+        failf(data, "schannel: AcquireCredentialsHandleA failed: %s\n",
+              sspi_msg);
+      free(sspi_msg);
       free(connssl->cred);
       connssl->cred = NULL;
       return CURLE_SSL_CONNECT_ERROR;
@@ -196,11 +200,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
+    sspi_msg = Curl_sspi_status_msg(sspi_status);
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-      failf(data, "schannel: SNI or certificate check failed\n");
+      failf(data, "schannel: SNI or certificate check failed: %s\n",
+            sspi_msg);
     else
-      failf(data, "schannel: initial InitializeSecurityContextA failed: %d\n",
-            sspi_status);
+      failf(data, "schannel: initial InitializeSecurityContextA failed: %s\n",
+            sspi_msg);
+    free(sspi_msg);
     free(connssl->ctxt);
     connssl->ctxt = NULL;
     return CURLE_SSL_CONNECT_ERROR;
@@ -236,6 +243,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  char *sspi_msg = NULL;
 
   infof(data, "schannel: connecting to %s:%d (step 2/3)\n",
         conn->host.name, conn->remote_port);
@@ -320,8 +328,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   /* check if the handshake was incomplete */
   if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
     connssl->connecting_state = ssl_connect_2_reading;
-    infof(data, "schannel: received incomplete message, need more data: %d\n",
-          sspi_status);
+    infof(data, "schannel: received incomplete message, need more data\n");
     return CURLE_OK;
   }
 
@@ -350,11 +357,14 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
     }
   }
   else {
+    sspi_msg = Curl_sspi_status_msg(sspi_status);
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-      failf(data, "schannel: SNI or certificate check failed\n");
+      failf(data, "schannel: SNI or certificate check failed: %s\n",
+            sspi_msg);
     else
-      failf(data, "schannel: next InitializeSecurityContextA failed: %d\n",
-            sspi_status);
+      failf(data, "schannel: next InitializeSecurityContextA failed: %s\n",
+            sspi_msg);
+    free(sspi_msg);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -653,6 +663,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
   SecBuffer inbuf[4];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  char *sspi_msg = NULL;
 
   infof(data, "schannel: client wants to read %d\n", len);
   *err = CURLE_OK;
@@ -853,7 +864,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
   /* check if something went wrong and we need to return an error */
   if(ret < 0 && sspi_status != SEC_E_OK) {
-    infof(data, "schannel: failed to read data from server\n");
+    sspi_msg = Curl_sspi_status_msg(sspi_status);
+    infof(data, "schannel: failed to read data from server: %s\n", sspi_msg);
+    free(sspi_msg);
     *err = CURLE_RECV_ERROR;
     return -1;
   }

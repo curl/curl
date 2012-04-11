@@ -53,98 +53,16 @@ static int check_sspi_err(struct SessionHandle *data,
                           SECURITY_STATUS minor_status,
                           const char* function)
 {
-  const char *txt;
+  char *sspi_msg = NULL;
   (void)minor_status;
 
   if(major_status != SEC_E_OK &&
      major_status != SEC_I_COMPLETE_AND_CONTINUE &&
      major_status != SEC_I_COMPLETE_NEEDED &&
      major_status != SEC_I_CONTINUE_NEEDED) {
-    failf(data, "SSPI error: %s failed: %d\n", function, major_status);
-    switch (major_status) {
-    case SEC_I_COMPLETE_AND_CONTINUE:
-      txt="SEC_I_COMPLETE_AND_CONTINUE";
-      break;
-    case SEC_I_COMPLETE_NEEDED:
-      txt="SEC_I_COMPLETE_NEEDED";
-      break;
-    case SEC_I_CONTINUE_NEEDED:
-      txt="SEC_I_CONTINUE_NEEDED";
-      break;
-    case SEC_I_CONTEXT_EXPIRED:
-      txt="SEC_I_CONTEXT_EXPIRED";
-      break;
-    case SEC_I_INCOMPLETE_CREDENTIALS:
-      txt="SEC_I_INCOMPLETE_CREDENTIALS";
-      break;
-    case SEC_I_RENEGOTIATE:
-      txt="SEC_I_RENEGOTIATE";
-      break;
-    case SEC_E_BUFFER_TOO_SMALL:
-      txt="SEC_E_BUFFER_TOO_SMALL";
-      break;
-    case SEC_E_CONTEXT_EXPIRED:
-      txt="SEC_E_CONTEXT_EXPIRED";
-      break;
-    case SEC_E_CRYPTO_SYSTEM_INVALID:
-      txt="SEC_E_CRYPTO_SYSTEM_INVALID";
-      break;
-    case SEC_E_INCOMPLETE_MESSAGE:
-      txt="SEC_E_INCOMPLETE_MESSAGE";
-      break;
-    case SEC_E_INSUFFICIENT_MEMORY:
-      txt="SEC_E_INSUFFICIENT_MEMORY";
-      break;
-    case SEC_E_INTERNAL_ERROR:
-      txt="SEC_E_INTERNAL_ERROR";
-      break;
-    case SEC_E_INVALID_HANDLE:
-      txt="SEC_E_INVALID_HANDLE";
-      break;
-    case SEC_E_INVALID_TOKEN:
-      txt="SEC_E_INVALID_TOKEN";
-      break;
-    case SEC_E_LOGON_DENIED:
-      txt="SEC_E_LOGON_DENIED";
-      break;
-    case SEC_E_MESSAGE_ALTERED:
-      txt="SEC_E_MESSAGE_ALTERED";
-      break;
-    case SEC_E_NO_AUTHENTICATING_AUTHORITY:
-      txt="SEC_E_NO_AUTHENTICATING_AUTHORITY";
-      break;
-    case SEC_E_NO_CREDENTIALS:
-      txt="SEC_E_NO_CREDENTIALS";
-      break;
-    case SEC_E_NOT_OWNER:
-      txt="SEC_E_NOT_OWNER";
-      break;
-    case SEC_E_OUT_OF_SEQUENCE:
-      txt="SEC_E_OUT_OF_SEQUENCE";
-      break;
-    case SEC_E_QOP_NOT_SUPPORTED:
-      txt="SEC_E_QOP_NOT_SUPPORTED";
-      break;
-    case SEC_E_SECPKG_NOT_FOUND:
-      txt="SEC_E_SECPKG_NOT_FOUND";
-      break;
-    case SEC_E_TARGET_UNKNOWN:
-      txt="SEC_E_TARGET_UNKNOWN";
-      break;
-    case SEC_E_UNKNOWN_CREDENTIALS:
-      txt="SEC_E_UNKNOWN_CREDENTIALS";
-      break;
-    case SEC_E_UNSUPPORTED_FUNCTION:
-      txt="SEC_E_UNSUPPORTED_FUNCTION";
-      break;
-    case SEC_E_WRONG_PRINCIPAL:
-      txt="SEC_E_WRONG_PRINCIPAL";
-      break;
-    default:
-      txt="Unknown error";
-
-    }
-    failf(data, "SSPI error: %s failed: %s\n", function, txt);
+    sspi_msg = Curl_sspi_status_msg(major_status);
+    failf(data, "SSPI error: %s failed: %s\n", function, sspi_msg);
+    free(sspi_msg);
     return 1;
   }
   return 0;
