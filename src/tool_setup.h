@@ -36,12 +36,6 @@
 #include "setup.h" /* from the lib directory */
 
 /*
- * Undefine macros intended for libcurl internal use only.
- */
-
-#undef CURL_HIDDEN_SYMBOLS
-
-/*
  * curl tool certainly uses libcurl's external interface.
  */
 

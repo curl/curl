@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
-
 #include "testutil.h"
 #include "memdebug.h"
 

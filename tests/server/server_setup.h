@@ -26,6 +26,4 @@
 
 #include "setup.h" /* portability help from the lib directory */
 
-#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
-
 #endif /* HEADER_CURL_SERVER_SETUP_H */

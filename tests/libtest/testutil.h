@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
-
 struct timeval tutil_tvnow(void);
 
 /*

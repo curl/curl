@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
-
 #include "curl_gethostname.h"
 
 #define HOSTNAME_MAX 1024

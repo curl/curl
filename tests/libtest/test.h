@@ -29,8 +29,6 @@
 
 #include "setup.h"
 
-#undef CURL_HIDDEN_SYMBOLS /* libcurl internal use only */
-
 #include <curl/curl.h>
 #include <stdio.h>
 #include <string.h>
