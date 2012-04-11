@@ -62,6 +62,7 @@
 #include <certdb.h>
 #include <base64.h>
 #include <cert.h>
+#include <prerror.h>
 
 #include "curl_memory.h"
 #include "rawstr.h"
@@ -175,6 +176,15 @@ static const int enable_ciphers_by_default[] = {
 
 static const char* pem_library = "libnsspem.so";
 SECMODModule* mod = NULL;
+
+static const char* nss_error_to_name(PRErrorCode code)
+{
+  const char *name = PR_ErrorToName(code);
+  if(name)
+    return name;
+
+  return "unknown error";
+}
 
 static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
                              char *cipher_list)
@@ -548,8 +558,11 @@ static CURLcode cert_stuff(struct connectdata *conn, int sockindex,
   if(cert_file) {
     rv = nss_load_cert(&conn->ssl[sockindex], cert_file, PR_FALSE);
     if(CURLE_OK != rv) {
-      if(!display_error(conn, PR_GetError(), cert_file))
-        failf(data, "Unable to load client cert %d.", PR_GetError());
+      const PRErrorCode err = PR_GetError();
+      if(!display_error(conn, err, cert_file)) {
+        const char *err_name = nss_error_to_name(err);
+        failf(data, "unable to load client cert: %d (%s)", err, err_name);
+      }
 
       return rv;
     }
@@ -562,8 +575,11 @@ static CURLcode cert_stuff(struct connectdata *conn, int sockindex,
       /* In case the cert file also has the key */
       rv = nss_load_key(conn, sockindex, cert_file);
     if(CURLE_OK != rv) {
-      if(!display_error(conn, PR_GetError(), key_file))
-        failf(data, "Unable to load client key %d.", PR_GetError());
+      const PRErrorCode err = PR_GetError();
+      if(!display_error(conn, err, key_file)) {
+        const char *err_name = nss_error_to_name(err);
+        failf(data, "unable to load client key: %d (%s)", err, err_name);
+      }
 
       return rv;
     }
@@ -1448,7 +1464,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(handle_cc_error(err, data))
     curlerr = CURLE_SSL_CERTPROBLEM;
   else
-    infof(data, "NSS error %d\n", err);
+    infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
 
   if(model)
     PR_Close(model);
@@ -1484,7 +1500,8 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
     else if(handle_cc_error(err, conn->data))
       *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
-      failf(conn->data, "SSL write: error %d", err);
+      const char *err_name = nss_error_to_name(err);
+      failf(conn->data, "SSL write: error %d (%s)", err, err_name);
       *curlcode = CURLE_SEND_ERROR;
     }
     return -1;
@@ -1510,7 +1527,8 @@ static ssize_t nss_recv(struct connectdata * conn, /* connection data */
     else if(handle_cc_error(err, conn->data))
       *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
-      failf(conn->data, "SSL read: errno %d", err);
+      const char *err_name = nss_error_to_name(err);
+      failf(conn->data, "SSL read: errno %d (%s)", err, err_name);
       *curlcode = CURLE_RECV_ERROR;
     }
     return -1;
