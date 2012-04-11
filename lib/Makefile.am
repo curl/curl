@@ -48,6 +48,8 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
+CFLAG_SYMBOL_HIDING = @CFLAG_SYMBOL_HIDING@
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
@@ -134,6 +136,14 @@ endif
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 
+if DOING_SYMBOL_HIDING
+libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
+libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_SYMBOL_HIDING)
+else
+libcurl_la_CPPFLAGS = $(AM_CPPFLAGS)
+libcurl_la_CFLAGS = $(AM_CFLAGS)
+endif
+
 # unit testing static library built only along with unit tests
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurlu.la
@@ -143,6 +153,7 @@ endif
 
 libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
 libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
+libcurlu_la_CFLAGS = $(AM_CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

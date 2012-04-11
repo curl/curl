@@ -71,11 +71,8 @@
 /* to disable verbose strings */
 /* #undef CURL_DISABLE_VERBOSE_STRINGS */
 
-/* to make a symbol visible */
+/* Definition to make a library symbol externally visible. */
 /* #undef CURL_EXTERN_SYMBOL */
-
-/* to enable hidden symbols */
-/* #undef CURL_HIDDEN_SYMBOLS */
 
 /* Use Windows LDAP implementation */
 /* #undef CURL_LDAP_WIN */

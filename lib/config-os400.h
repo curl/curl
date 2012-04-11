@@ -1,6 +1,5 @@
-/* ================================================================ */
-/*    lib/config-os400.h - Hand crafted config file for OS/400      */
-/* ================================================================ */
+#ifndef HEADER_CURL_CONFIG_OS400_H
+#define HEADER_CURL_CONFIG_OS400_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+/* ================================================================ */
+/*                Hand crafted config file for OS/400               */
+/* ================================================================ */
 
 #pragma enum(int)
 
@@ -434,10 +437,7 @@
 /* To disable LDAP */
 #undef CURL_DISABLE_LDAP
 
-/* To avoid external use of library hidden symbols */
-#define CURL_HIDDEN_SYMBOLS
-
-/* External symbols need no special keyword. */
+/* Definition to make a library symbol externally visible. */
 #define CURL_EXTERN_SYMBOL
 
 /* Define if you have the ldap_url_parse procedure. */
@@ -542,3 +542,4 @@
 #define qadrt_use_fread_inline         /* Generate fread() wrapper inline. */
 #define qadrt_use_fwrite_inline        /* Generate fwrite() wrapper inline. */
 
+#endif /* HEADER_CURL_CONFIG_OS400_H */

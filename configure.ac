@@ -44,6 +44,7 @@ CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_WERROR
 CURL_CHECK_OPTION_CURLDEBUG
+CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 
 CURL_CHECK_PATH_SEPARATOR_REQUIRED
@@ -299,6 +300,7 @@ fi
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+CURL_CHECK_COMPILER_SYMBOL_HIDING
 
 CURL_CHECK_NO_UNDEFINED
 AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
@@ -3060,48 +3062,9 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
 )
 
 dnl ************************************************************
-dnl Enable hiding of internal symbols in library to reduce its size and
-dnl speed dynamic linking of applications.  This currently is only supported
-dnl on gcc >= 4.0 and SunPro C.
+dnl hiding of library internal symbols
 dnl
-AC_MSG_CHECKING([whether to enable hidden symbols in the library])
-AC_ARG_ENABLE(hidden-symbols,
-AC_HELP_STRING([--enable-hidden-symbols],[Hide internal symbols in library])
-AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibility in library]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)
-       AC_MSG_CHECKING([whether $CC supports it])
-       if test "$GCC" = yes ; then
-         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ||
-           dnl clang always supports -fvisibility= but it doesn't show up
-           dnl under --help.
-           test "$compiler_id" = "CLANG"; then
-           AC_MSG_RESULT(yes)
-           AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-           AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
-           CFLAGS="$CFLAGS -fvisibility=hidden"
-         else
-            AC_MSG_RESULT(no)
-          fi
-
-       else
-         dnl Test for SunPro cc
-         if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
-           AC_MSG_RESULT(yes)
-           AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
-           AC_DEFINE(CURL_EXTERN_SYMBOL, [__global], [to make a symbol visible])
-           CFLAGS="$CFLAGS -xldscope=hidden"
-         else
-           AC_MSG_RESULT(no)
-         fi
-       fi
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
+CURL_CONFIGURE_SYMBOL_HIDING
 
 dnl ************************************************************
 dnl enforce SONAME bump

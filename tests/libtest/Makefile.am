@@ -53,6 +53,8 @@ endif
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
 test1022.pl Makefile.inc
 
+CFLAG_SYMBOL_HIDING = @CFLAG_SYMBOL_HIDING@
+
 # Dependencies (may need to be overriden)
 LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
@@ -86,3 +88,10 @@ libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
 libhostname_la_LDFLAGS = -module -avoid-version $(UNDEF) -rpath /nowhere
 
+if DOING_SYMBOL_HIDING
+libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
+libhostname_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_SYMBOL_HIDING)
+else
+libhostname_la_CPPFLAGS = $(AM_CPPFLAGS)
+libhostname_la_CFLAGS = $(AM_CFLAGS)
+endif

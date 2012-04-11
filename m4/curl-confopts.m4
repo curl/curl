@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 16
+# serial 17
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -258,6 +258,50 @@ AC_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
 ])
 
 
+dnl CURL_CHECK_OPTION_SYMBOL_HIDING
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-symbol-hiding or --disable-symbol-hiding,
+dnl setting shell variable want_symbol_hiding value.
+
+AC_DEFUN([CURL_CHECK_OPTION_SYMBOL_HIDING], [
+  AC_BEFORE([$0],[CURL_CHECK_COMPILER_SYMBOL_HIDING])dnl
+  AC_MSG_CHECKING([whether to enable hiding of library internal symbols])
+  OPT_SYMBOL_HIDING="default"
+  AC_ARG_ENABLE(symbol-hiding,
+AC_HELP_STRING([--enable-symbol-hiding],[Enable hiding of library internal symbols])
+AC_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal symbols]),
+  OPT_SYMBOL_HIDING=$enableval)
+  AC_ARG_ENABLE(hidden-symbols,
+AC_HELP_STRING([--enable-hidden-symbols],[To be deprecated, use --enable-symbol-hiding])
+AC_HELP_STRING([--disable-hidden-symbols],[To be deprecated, use --disable-symbol-hiding]),
+  OPT_SYMBOL_HIDING=$enableval)
+  case "$OPT_SYMBOL_HIDING" in
+    no)
+      dnl --disable-symbol-hiding option used.
+      dnl This is an indication to not attempt hiding of library internal
+      dnl symbols. Default symbol visibility will be used, which normally
+      dnl exposes all library internal symbols.
+      want_symbol_hiding="no"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure's symbol-hiding option not specified.
+      dnl Handle this as if --enable-symbol-hiding option was given.
+      want_symbol_hiding="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      dnl --enable-symbol-hiding option used.
+      dnl This is an indication to attempt hiding of library internal
+      dnl symbols. This is only supported on some compilers/linkers.
+      want_symbol_hiding="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
+
+
 dnl CURL_CHECK_OPTION_THREADS
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
@@ -408,6 +452,35 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
       [Define to disable non-blocking sockets.])
     AC_MSG_WARN([non-blocking sockets disabled.])
   fi
+])
+
+
+dnl CURL_CONFIGURE_SYMBOL_HIDING
+dnl -------------------------------------------------
+dnl Depending on --enable-symbol-hiding or --disable-symbol-hiding
+dnl configure option, and compiler capability to actually honor such
+dnl option, this will modify compiler flags as appropriate and also
+dnl provide needed definitions for configuration and Makefile.am files.
+dnl This macro should not be used until all compilation tests have
+dnl been done to prevent interferences on other tests.
+
+AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
+  AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
+  CFLAG_SYMBOL_HIDING=""
+  doing_symbol_hiding="no"
+  if test x"$ac_cv_native_windows" != "xyes" &&
+    test "$want_symbol_hiding" = "yes" &&
+    test "$supports_symbol_hiding" = "yes"; then
+    doing_symbol_hiding="yes"
+    CFLAG_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
+    AC_DEFINE_UNQUOTED(CURL_EXTERN_SYMBOL, $symbol_hiding_EXTERN,
+      [Definition to make a library symbol externally visible.])
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+  AM_CONDITIONAL(DOING_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
+  AC_SUBST(CFLAG_SYMBOL_HIDING)
 ])
 
 
