@@ -81,8 +81,8 @@ int formparse(struct Configurable *config,
      build a linked list with the info */
   char name[256];
   char *contents = NULL;
-  char major[128];
-  char minor[128];
+  char type_major[128];
+  char type_minor[128];
   char *contp;
   const char *type = NULL;
   char *sep;
@@ -146,7 +146,7 @@ int formparse(struct Configurable *config,
 
               /* verify that this is a fine type specifier */
               if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
-                             major, minor)) {
+                             type_major, type_minor)) {
                 warnf(config, "Illegally formatted content-type field!\n");
                 Curl_safefree(contents);
                 FreeMultiInfo(&multi_start, &multi_current);
@@ -154,7 +154,7 @@ int formparse(struct Configurable *config,
               }
 
               /* now point beyond the content-type specifier */
-              sep = (char *)type + strlen(major)+strlen(minor)+1;
+              sep = (char *)type + strlen(type_major)+strlen(type_minor)+1;
 
               /* there's a semicolon following - we check if it is a filename
                  specified and if not we simply assume that it is text that
