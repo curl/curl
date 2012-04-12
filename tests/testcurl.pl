@@ -724,8 +724,23 @@ if ($configurebuild && !$crosscompile) {
 }
 else {
   if($crosscompile) {
-    # build test harness programs for selected cross-compiles
     my $host_triplet = get_host_triplet();
+    # build example programs for selected cross-compiles
+    if($host_triplet =~ /([^-]+)-([^-]+)-mingw(.*)/) {
+      chdir "$pwd/$build/docs/examples";
+      logit_spaced "build examples";
+      open(F, "$make -i 2>&1 |") or die;
+      open(LOG, ">$buildlog") or die;
+      while (<F>) {
+        s/$pwd//g;
+        print;
+        print LOG;
+      }
+      close(F);
+      close(LOG);
+      chdir "$pwd/$build";
+    }
+    # build test harness programs for selected cross-compiles
     if($host_triplet =~ /([^-]+)-([^-]+)-mingw(.*)/) {
       chdir "$pwd/$build/tests";
       logit_spaced "build test harness";
