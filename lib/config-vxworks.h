@@ -736,9 +736,6 @@
 /* if you have the zlib.h header file */
 #define HAVE_ZLIB_H 1
 
-/* Define to 1 if you are building a native Windows target. */
-/* #undef NATIVE_WINDOWS */
-
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 /* #undef NEED_LBER_H */
 

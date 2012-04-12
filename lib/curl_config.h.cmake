@@ -721,9 +721,6 @@
    */
 #cmakedefine LT_OBJDIR ${LT_OBJDIR}
 
-/* Define to 1 if you are building a native Windows target. */
-#cmakedefine NATIVE_WINDOWS ${NATIVE_WINDOWS}
-
 /* If you lack a fine basename() prototype */
 #cmakedefine NEED_BASENAME_PROTO ${NEED_BASENAME_PROTO}
 
