@@ -27,6 +27,7 @@
 	curl_mprintf,
 	curl_msprintf,
 	curl_msnprintf,
+	curl_mvaprintf,
 	curl_mvfprintf,
 	curl_mvsnprintf,
 	curl_strequal,
