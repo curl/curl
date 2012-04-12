@@ -28,7 +28,7 @@ OPENSSL_LIBS = -leay32 -lssl32
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.0
+LIBSSH2_PATH = ../../libssh2-1.4.1
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH

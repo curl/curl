@@ -69,7 +69,7 @@ OPENSSL_PATH   = ../../openssl-0.9.8u
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
-LIBSSH2_PATH   = ../../libssh2-1.4.0
+LIBSSH2_PATH   = ../../libssh2-1.4.1
 !ENDIF
 
 !IFNDEF ZLIB_PATH
