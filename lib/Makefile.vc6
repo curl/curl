@@ -65,15 +65,15 @@
 !INCLUDE ..\Makefile.msvc.names
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8r
+OPENSSL_PATH   = ../../openssl-0.9.8u
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
-LIBSSH2_PATH   = ../../libssh2-1.2.8
+LIBSSH2_PATH   = ../../libssh2-1.4.0
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.5
+ZLIB_PATH  = ../../zlib-1.2.6
 !ENDIF
 
 !IFNDEF MACHINE

@@ -72,13 +72,13 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.5
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.6
 !endif
 
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.3.0
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.4.0
 !endif
 
 !ifdef %librtmp_root
@@ -90,7 +90,7 @@ LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8r
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8u
 !endif
 
 !ifdef %ares_root
