@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -73,7 +73,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2011-12-27';
+$version='2012-04-12';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -336,10 +336,17 @@ logit "CONFOPTS = $confopts";
 logit "CPPFLAGS = ".$ENV{CPPFLAGS};
 logit "CFLAGS = ".$ENV{CFLAGS};
 logit "LDFLAGS = ".$ENV{LDFLAGS};
+logit "LIBS = ".$ENV{LIBS};
 logit "CC = ".$ENV{CC};
+logit "TMPDIR = ".$ENV{TMPDIR};
 logit "MAKEFLAGS = ".$ENV{MAKEFLAGS};
 logit "ACLOCAL_FLAGS = ".$ENV{ACLOCAL_FLAGS};
 logit "PKG_CONFIG_PATH = ".$ENV{PKG_CONFIG_PATH};
+logit "DYLD_LIBRARY_PATH = ".$ENV{DYLD_LIBRARY_PATH};
+logit "LD_LIBRARY_PATH = ".$ENV{LD_LIBRARY_PATH};
+logit "LIBRARY_PATH = ".$ENV{LIBRARY_PATH};
+logit "SHLIB_PATH = ".$ENV{SHLIB_PATH};
+logit "LIBPATH = ".$ENV{LIBPATH};
 logit "target = ".$targetos;
 logit "version = $version"; # script version
 logit "date = $timestamp";  # When the test build starts
