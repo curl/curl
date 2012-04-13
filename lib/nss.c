@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -508,10 +508,11 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
 {
   PK11SlotInfo *slot;
   SECStatus status;
+  CURLcode rv;
   struct ssl_connect_data *ssl = conn->ssl;
   (void)sockindex; /* unused */
 
-  CURLcode rv = nss_create_object(ssl, CKO_PRIVATE_KEY, key_file, FALSE);
+  rv = nss_create_object(ssl, CKO_PRIVATE_KEY, key_file, FALSE);
   if(CURLE_OK != rv) {
     PR_SetError(SEC_ERROR_BAD_KEY, 0);
     return rv;
@@ -922,8 +923,8 @@ static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
   infof(data, "Initializing NSS with certpath: none\n");
 #ifdef HAVE_NSS_INITCONTEXT
   nss_context = NSS_InitContext("", "", "", "", &initparams, NSS_INIT_READONLY
-          | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
-          | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
+         | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
+         | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
   if(nss_context != NULL)
     return CURLE_OK;
 #else /* HAVE_NSS_INITCONTEXT */
