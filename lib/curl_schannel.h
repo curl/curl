@@ -32,6 +32,65 @@
 #define UNISP_NAME_A "Microsoft Unified Security Protocol Provider"
 #endif
 
+#ifndef UNISP_NAME_W
+#define UNISP_NAME_W L"Microsoft Unified Security Protocol Provider"
+#endif
+
+#ifndef UNISP_NAME
+#ifdef UNICODE
+#define UNISP_NAME  UNISP_NAME_W
+#else
+#define UNISP_NAME  UNISP_NAME_A
+#endif
+#endif
+
+#ifndef SP_PROT_SSL2_CLIENT
+#define SP_PROT_SSL2_CLIENT             0x00000008
+#endif
+
+#ifndef SP_PROT_SSL3_CLIENT
+#define SP_PROT_SSL3_CLIENT             0x00000008
+#endif
+
+#ifndef SP_PROT_TLS1_CLIENT
+#define SP_PROT_TLS1_CLIENT             0x00000080
+#endif
+
+#ifndef SP_PROT_TLS1_0_CLIENT
+#define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
+#endif
+
+#ifndef SP_PROT_TLS1_1_CLIENT
+#define SP_PROT_TLS1_1_CLIENT           0x00000200
+#endif
+
+#ifndef SP_PROT_TLS1_2_CLIENT
+#define SP_PROT_TLS1_2_CLIENT           0x00000800
+#endif
+
+#ifndef SECBUFFER_ALERT
+#define SECBUFFER_ALERT                 17
+#endif
+
+#ifndef ISC_RET_REPLAY_DETECT
+#define ISC_RET_REPLAY_DETECT           0x00000004
+#endif
+
+#ifndef ISC_RET_SEQUENCE_DETECT
+#define ISC_RET_SEQUENCE_DETECT         0x00000008
+#endif
+
+#ifndef ISC_RET_CONFIDENTIALITY
+#define ISC_RET_CONFIDENTIALITY         0x00000010
+#endif
+
+#ifndef ISC_RET_ALLOCATED_MEMORY
+#define ISC_RET_ALLOCATED_MEMORY        0x00000100
+#endif
+
+#ifndef ISC_RET_STREAM
+#define ISC_RET_STREAM                  0x00008000
+#endif
 
 
 CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex);
