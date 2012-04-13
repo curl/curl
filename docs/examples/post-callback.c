@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@ const char data[]="this is what we post to the silly web server";
 
 struct WriteThis {
   const char *readptr;
-  int sizeleft;
+  long sizeleft;
 };
 
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
@@ -96,7 +96,7 @@ int main(void)
 #else
     /* Set the expected POST size. If you want to POST large amounts of data,
        consider CURLOPT_POSTFIELDSIZE_LARGE */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (curl_off_t)pooh.sizeleft);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, pooh.sizeleft);
 #endif
 
 #ifdef DISABLE_EXPECT

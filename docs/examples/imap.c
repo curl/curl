@@ -25,7 +25,7 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   curl = curl_easy_init();
   if(curl) {
