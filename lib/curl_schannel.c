@@ -336,7 +336,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   if(sspi_status == SEC_I_CONTINUE_NEEDED || sspi_status == SEC_E_OK) {
     for(i = 0; i < 2; i++) {
       /* search for handshake tokens that need to be send */
-      if(outbuf[i].BufferType = SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
+      if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
         infof(data, "schannel: sending next handshake data: %d ...\n",
               outbuf[i].cbBuffer);
 
@@ -369,7 +369,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   }
 
   /* check if there was additional remaining encrypted data */
-  if(inbuf[1].BufferType = SECBUFFER_EXTRA) {
+  if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
     infof(data, "schannel: encrypted data length: %d\n", inbuf[1].cbBuffer);
 
     /* check if the remaining data is less than the total amount
@@ -789,7 +789,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
       }
 
       /* check for remaining encrypted data */
-      if(inbuf[3].BufferType = SECBUFFER_EXTRA) {
+      if(inbuf[3].BufferType == SECBUFFER_EXTRA && inbuf[3].cbBuffer > 0) {
         infof(data, "schannel: encrypted data length: %d\n", inbuf[3].cbBuffer);
 
         /* check if the remaining data is less than the total amount
