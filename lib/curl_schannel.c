@@ -56,7 +56,6 @@
 #ifdef USE_WINDOWS_SSPI
 #ifdef USE_SCHANNEL
 
-#include "urldata.h"
 #include "curl_sspi.h"
 #include "curl_schannel.h"
 #include "sslgen.h"

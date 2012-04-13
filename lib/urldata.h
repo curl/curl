@@ -133,7 +133,8 @@
 
 #ifdef USE_SCHANNEL
 #include "curl_sspi.h"
-#include "curl_schannel.h"
+#include <schnlsp.h>
+#include <schannel.h>
 #endif
 
 #ifdef HAVE_NETINET_IN_H
@@ -217,6 +218,19 @@ enum protection_level {
   PROT_CMD,
   PROT_LAST /* last in list */
 };
+#endif
+
+#ifdef USE_SCHANNEL
+/* Structs to store Schannel handles */
+typedef struct curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+} curl_schannel_cred;
+
+typedef struct curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+} curl_schannel_ctxt;
 #endif
 
 /* enum for the nonblocking SSL connection state machine */
