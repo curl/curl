@@ -840,7 +840,30 @@ VxWorks
 
 Android
 =======
-   See the build notes in the Android.mk file.
+   Method using the static makefile:
+      - see the build notes in the Android.mk file.
+
+   Method using a configure cross-compile (tested with Android NDK r7b):
+      - prepare the toolchain of the Android NDK for standalone use; this can
+        be done by invoking the script:
+        ./tools/make-standalone-toolchain.sh
+        which creates a usual cross-compile toolchain. Lets assume that you put
+        this toolchain below /opt then invoke configure with something like:
+        export PATH=/opt/arm-linux-androideabi-4.4.3/bin:$PATH
+        ./configure --host=arm-linux-androideabi [more configure options]
+        make
+      - if you want to compile directly from our GIT repo you might run into
+        this issue with older automake stuff:
+        checking host system type...
+        Invalid configuration `arm-linux-androideabi':
+        system `androideabi' not recognized
+        configure: error: /bin/sh ./config.sub arm-linux-androideabi failed
+        this issue can be fixed with using more recent versions of config.sub
+        and config.guess which can be obtained here:
+        http://git.savannah.gnu.org/gitweb/?p=config.git;a=tree
+        you need to replace your system-own versions which usually can be
+        found in your automake folder:
+        find /usr -name config.sub
 
 
 CROSS COMPILE
