@@ -73,7 +73,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2012-04-12';
+$version='2012-04-13';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -726,7 +726,8 @@ else {
   if($crosscompile) {
     my $host_triplet = get_host_triplet();
     # build example programs for selected cross-compiles
-    if($host_triplet =~ /([^-]+)-([^-]+)-mingw(.*)/) {
+    if(($host_triplet =~ /([^-]+)-([^-]+)-mingw(.*)/) ||
+       ($host_triplet =~ /([^-]+)-([^-]+)-android(.*)/)) {
       chdir "$pwd/$build/docs/examples";
       logit_spaced "build examples";
       open(F, "$make -i 2>&1 |") or die;
