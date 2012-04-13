@@ -99,7 +99,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
         conn->host.name, conn->remote_port);
 
   /* check for an existing re-usable credential handle */
-  if(!Curl_ssl_getsessionid(conn, &old_cred, NULL)) {
+  if(!Curl_ssl_getsessionid(conn, (void**)&old_cred, NULL)) {
     connssl->cred = old_cred;
     infof(data, "schannel: re-using existing credential handle\n");
   }
@@ -432,16 +432,16 @@ schannel_connect_step3(struct connectdata *conn, int sockindex) {
   }
 
   /* save the current session data for possible re-use */
-  incache = !(Curl_ssl_getsessionid(conn, &old_cred, NULL));
+  incache = !(Curl_ssl_getsessionid(conn, (void**)&old_cred, NULL));
   if(incache) {
     if(old_cred != connssl->cred) {
       infof(data, "schannel: old credential handle is stale, removing\n");
-      Curl_ssl_delsessionid(conn, old_cred);
+      Curl_ssl_delsessionid(conn, (void*)old_cred);
       incache = FALSE;
     }
   }
   if(!incache) {
-    retcode = Curl_ssl_addsessionid(conn, connssl->cred,
+    retcode = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
                                     sizeof(curl_schannel_cred));
     if(retcode) {
       failf(data, "schannel: failed to store credential handle\n");
