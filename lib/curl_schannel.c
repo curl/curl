@@ -151,8 +151,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
     memset(connssl->cred, 0, sizeof(curl_schannel_cred));
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
-    sspi_status = s_pSecFn->AcquireCredentialsHandleA(NULL,
-      UNISP_NAME_A, SECPKG_CRED_OUTBOUND, NULL, &schannel_cred, NULL, NULL,
+    sspi_status = s_pSecFn->AcquireCredentialsHandle(NULL,
+      UNISP_NAME, SECPKG_CRED_OUTBOUND, NULL, &schannel_cred, NULL, NULL,
       &connssl->cred->cred_handle, &connssl->cred->time_stamp);
 
     if(sspi_status != SEC_E_OK) {
@@ -193,7 +193,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
   memset(connssl->ctxt, 0, sizeof(curl_schannel_ctxt));
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
-  sspi_status = s_pSecFn->InitializeSecurityContextA(
+  sspi_status = s_pSecFn->InitializeSecurityContext(
     &connssl->cred->cred_handle, NULL, conn->host.name,
     connssl->req_flags, 0, 0, NULL, 0, &connssl->ctxt->ctxt_handle,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
@@ -316,7 +316,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   memcpy(inbuf[0].pvBuffer, connssl->encdata_buffer, connssl->encdata_offset);
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
-  sspi_status = s_pSecFn->InitializeSecurityContextA(
+  sspi_status = s_pSecFn->InitializeSecurityContext(
     &connssl->cred->cred_handle, &connssl->ctxt->ctxt_handle,
     conn->host.name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
@@ -579,7 +579,7 @@ schannel_send(struct connectdata *conn, int sockindex,
 
   /* check if the maximum stream sizes were queried */
   if(connssl->stream_sizes.cbMaximumMessage == 0) {
-    sspi_status = s_pSecFn->QueryContextAttributesA(
+    sspi_status = s_pSecFn->QueryContextAttributes(
                               &connssl->ctxt->ctxt_handle,
                               SECPKG_ATTR_STREAM_SIZES, &connssl->stream_sizes);
     if(sspi_status != SEC_E_OK) {
