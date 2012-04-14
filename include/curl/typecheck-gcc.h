@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -141,8 +141,9 @@ __extension__ ({                                                              \
 
 /* To define a new warning, use _CURL_WARNING(identifier, "message") */
 #define _CURL_WARNING(id, message)                                            \
-  static void __attribute__((warning(message))) __attribute__((unused))       \
-  __attribute__((noinline)) id(void) { __asm__(""); }
+  static void __attribute__((__warning__(message)))                           \
+  __attribute__((__unused__)) __attribute__((__noinline__))                   \
+  id(void) { __asm__(""); }
 
 _CURL_WARNING(_curl_easy_setopt_err_long,
   "curl_easy_setopt expects a long argument for this option")

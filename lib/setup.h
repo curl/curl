@@ -611,7 +611,7 @@ int netware_init(void);
 #ifndef __GNUC__
 #define UNUSED_PARAM /*NOTHING*/
 #else
-#define UNUSED_PARAM __attribute__((unused))
+#define UNUSED_PARAM __attribute__((__unused__))
 #endif
 
 /*
