@@ -605,13 +605,17 @@ int netware_init(void);
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
-/* Provide a mechanism to silence picky compilers, such as gcc 4.6+.
-   Parameters should of course normally not be unused, but for example when we
-   have multiple implementations of the same interface it may happen. */
-#ifndef __GNUC__
-#define UNUSED_PARAM /*NOTHING*/
+/*
+ * Provide a mechanism to silence picky compilers, such as gcc 4.6+.
+ * Parameters should of course normally not be unused, but for example when
+ * we have multiple implementations of the same interface it may happen.
+ */
+
+#if defined(__GNUC__) && ((__GNUC__ >= 3) || \
+  ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
+#  define UNUSED_PARAM __attribute__((__unused__))
 #else
-#define UNUSED_PARAM __attribute__((__unused__))
+#  define UNUSED_PARAM /*NOTHING*/
 #endif
 
 /*
