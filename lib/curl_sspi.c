@@ -120,6 +120,55 @@ Curl_sspi_global_cleanup(void)
 
 
 /*
+ * Curl_sspi_version()
+ *
+ * This function returns a string representing the SSPI library version.
+ * It will in any case return a usable string pointer which needs to be freed.
+ */
+char *
+Curl_sspi_version()
+{
+  VS_FIXEDFILEINFO *version_info = NULL;
+  LPTSTR version = NULL;
+  LPTSTR path = NULL;
+  LPVOID data = NULL;
+  DWORD size, handle;
+
+  if(s_hSecDll) {
+    path = malloc(MAX_PATH);
+    if(path) {
+      if(GetModuleFileName(s_hSecDll, path, MAX_PATH)) {
+        size = GetFileVersionInfoSize(path, &handle);
+        if(size) {
+          data = malloc(size);
+          if(data) {
+            if(GetFileVersionInfo(path, handle, size, data)) {
+              if(VerQueryValue(data, "\\", &version_info, &handle)) {
+                version = curl_maprintf("SSPI/%d.%d.%d.%d",
+                  (version_info->dwProductVersionMS>>16)&0xffff,
+                  (version_info->dwProductVersionMS>>0)&0xffff,
+                  (version_info->dwProductVersionLS>>16)&0xffff,
+                  (version_info->dwProductVersionLS>>0)&0xffff);
+              }
+            }
+            free(data);
+          }
+        }
+      }
+      free(path);
+    }
+    if(!version)
+      version = strdup("SSPI/Unknown");
+  }
+
+  if(!version)
+    version = strdup("");
+
+  return version;
+}
+
+
+/*
  * Curl_sspi_status(SECURIY_STATUS status)
  *
  * This function returns a string representing an SSPI status.
@@ -218,6 +267,7 @@ Curl_sspi_status(SECURITY_STATUS status)
 
   return curl_maprintf("%s (0x%08X)", status_const, status);
 }
+
 
 /*
  * Curl_sspi_status_msg(SECURITY_STATUS status)

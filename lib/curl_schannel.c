@@ -957,10 +957,10 @@ void Curl_schannel_cleanup() {
 
 size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  unsigned long version = s_pSecFn ? s_pSecFn->dwVersion : 0;
-  return snprintf(buffer, size, "Schannel/%d.%d.%d.%d",
-                  (version>>0)&0xff, (version>>8)&0xff,
-                  (version>>16)&0xff, (version>>24)&0xff);
+  char* version = Curl_sspi_version();
+  size = snprintf(buffer, size, "Schannel-%s", version);
+  free(version);
+  return size;
 }
 
 #endif /* USE_SCHANNEL */
