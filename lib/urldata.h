@@ -222,15 +222,15 @@ enum protection_level {
 
 #ifdef USE_SCHANNEL
 /* Structs to store Schannel handles */
-typedef struct curl_schannel_cred {
+struct curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
-} curl_schannel_cred;
+};
 
-typedef struct curl_schannel_ctxt {
+struct curl_schannel_ctxt {
   CtxtHandle ctxt_handle;
   TimeStamp time_stamp;
-} curl_schannel_ctxt;
+};
 #endif
 
 /* enum for the nonblocking SSL connection state machine */
@@ -302,8 +302,8 @@ struct ssl_connect_data {
   SSL*     ssl;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
-  curl_schannel_cred *cred;
-  curl_schannel_ctxt *ctxt;
+  struct curl_schannel_cred *cred;
+  struct curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
   ssl_connect_state connecting_state;
   size_t encdata_length, decdata_length;

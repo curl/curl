@@ -79,15 +79,16 @@ static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
 static CURLcode
-schannel_connect_step1(struct connectdata *conn, int sockindex) {
+schannel_connect_step1(struct connectdata *conn, int sockindex)
+{
   ssize_t write = -1;
   struct SessionHandle *data = conn->data;
-  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
   SCHANNEL_CRED schannel_cred;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  curl_schannel_cred *old_cred = NULL;
+  struct curl_schannel_cred *old_cred = NULL;
   char *sspi_msg = NULL;
   struct in_addr addr;
 #ifdef ENABLE_IPV6
@@ -110,13 +111,13 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
     if(data->set.ssl.verifypeer) {
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
                               SCH_CRED_REVOCATION_CHECK_CHAIN;
-      infof(data, "schannel: checking server certificate and revocation\n");
+      infof(data, "schannel: checking server certificate revocation\n");
     }
     else {
       schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
                               SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                               SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-      infof(data, "schannel: disable server certificate and revocation checks\n");
+      infof(data, "schannel: disable server certificate revocation checks\n");
     }
 
     if(Curl_inet_pton(AF_INET, conn->host.name, &addr) ||
@@ -143,12 +144,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
     }
 
     /* allocate memory for the re-usable credential handle */
-    connssl->cred = malloc(sizeof(curl_schannel_cred));
-    if (!connssl->cred) {
+    connssl->cred = malloc(sizeof(struct curl_schannel_cred));
+    if(!connssl->cred) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
-    memset(connssl->cred, 0, sizeof(curl_schannel_cred));
+    memset(connssl->cred, 0, sizeof(struct curl_schannel_cred));
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
     sspi_status = s_pSecFn->AcquireCredentialsHandle(NULL,
@@ -185,12 +186,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
                        ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
 
   /* allocate memory for the security context handle */
-  connssl->ctxt = malloc(sizeof(curl_schannel_ctxt));
-  if (!connssl->ctxt) {
+  connssl->ctxt = malloc(sizeof(struct curl_schannel_ctxt));
+  if(!connssl->ctxt) {
     failf(data, "schannel: unable to allocate memory");
     return CURLE_OUT_OF_MEMORY;
   }
-  memset(connssl->ctxt, 0, sizeof(curl_schannel_ctxt));
+  memset(connssl->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
   sspi_status = s_pSecFn->InitializeSecurityContext(
@@ -232,11 +233,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex) {
 }
 
 static CURLcode
-schannel_connect_step2(struct connectdata *conn, int sockindex) {
+schannel_connect_step2(struct connectdata *conn, int sockindex)
+{
   int i;
   ssize_t read = -1, write = -1;
   struct SessionHandle *data = conn->data;
-  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf[2];
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf[2];
@@ -250,7 +252,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
   /* buffer to store previously received and encrypted data */
   if(connssl->encdata_buffer == NULL) {
     connssl->encdata_offset = 0;
-    connssl->encdata_length = 4096;
+    connssl->encdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     connssl->encdata_buffer = malloc(connssl->encdata_length);
     if(connssl->encdata_buffer == NULL) {
       failf(data, "schannel: unable to allocate memory");
@@ -401,11 +403,12 @@ schannel_connect_step2(struct connectdata *conn, int sockindex) {
 }
 
 static CURLcode
-schannel_connect_step3(struct connectdata *conn, int sockindex) {
+schannel_connect_step3(struct connectdata *conn, int sockindex)
+{
   CURLcode retcode = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  curl_schannel_cred *old_cred = NULL;
+  struct curl_schannel_cred *old_cred = NULL;
   int incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -441,7 +444,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex) {
   }
   if(!incache) {
     retcode = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
-                                    sizeof(curl_schannel_cred));
+                                    sizeof(struct curl_schannel_cred));
     if(retcode) {
       failf(data, "schannel: failed to store credential handle\n");
       return retcode;
@@ -458,7 +461,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex) {
 
 static CURLcode
 schannel_connect_common(struct connectdata *conn, int sockindex,
-                        bool nonblocking, bool *done) {
+                        bool nonblocking, bool *done)
+{
   CURLcode retcode;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -568,7 +572,8 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 
 static ssize_t
 schannel_send(struct connectdata *conn, int sockindex,
-              const void *buf, size_t len, CURLcode *err) {
+              const void *buf, size_t len, CURLcode *err)
+{
   ssize_t ret = -1;
   size_t data_len = 0;
   unsigned char *data = NULL;
@@ -652,7 +657,8 @@ schannel_send(struct connectdata *conn, int sockindex,
 
 static ssize_t
 schannel_recv(struct connectdata *conn, int sockindex,
-              char *buf, size_t len, CURLcode *err) {
+              char *buf, size_t len, CURLcode *err)
+{
   size_t size = 0;
   ssize_t read = 0, ret = -1;
   CURLcode retcode;
@@ -670,7 +676,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
   /* buffer to store previously received and decrypted data */
   if(connssl->decdata_buffer == NULL) {
     connssl->decdata_offset = 0;
-    connssl->decdata_length = 4096;
+    connssl->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     connssl->decdata_buffer = malloc(connssl->decdata_length);
     if(connssl->decdata_buffer == NULL) {
       failf(data, "schannel: unable to allocate memory");
@@ -679,10 +685,10 @@ schannel_recv(struct connectdata *conn, int sockindex,
   }
 
   /* increase buffer in order to fit the requested amount of data */
-  while(connssl->encdata_length - connssl->encdata_offset < 2048 ||
-        connssl->encdata_length < len) {
+  while(connssl->encdata_length - connssl->encdata_offset <
+        CURL_SCHANNEL_BUFFER_STEP_SIZE || connssl->encdata_length < len) {
     /* increase internal encrypted data buffer */
-    connssl->encdata_length += 2048;
+    connssl->encdata_length += CURL_SCHANNEL_BUFFER_STEP_SIZE;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
                                       connssl->encdata_length);
     if(connssl->encdata_buffer == NULL) {
@@ -760,7 +766,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
         infof(data, "schannel: decrypted data length: %d\n", inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
-        size = inbuf[1].cbBuffer > 2048 ? inbuf[1].cbBuffer : 2048;
+        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_STEP_SIZE ?
+               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_STEP_SIZE;
         while(connssl->decdata_length - connssl->decdata_offset < size ||
               connssl->decdata_length < len) {
           /* increase internal decrypted data buffer */
@@ -839,15 +846,17 @@ schannel_recv(struct connectdata *conn, int sockindex,
   }
 
   /* reduce internal buffer length to reduce memory usage */
-  if(connssl->encdata_length > 4096) {
-    connssl->encdata_length = connssl->encdata_offset > 4096 ?
-                              connssl->encdata_offset : 4096;
+  if(connssl->encdata_length > CURL_SCHANNEL_BUFFER_INIT_SIZE) {
+    connssl->encdata_length =
+      connssl->encdata_offset > CURL_SCHANNEL_BUFFER_INIT_SIZE ?
+      connssl->encdata_offset : CURL_SCHANNEL_BUFFER_INIT_SIZE;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
                                       connssl->encdata_length);
   }
-  if(connssl->decdata_length > 4096) {
-    connssl->decdata_length = connssl->decdata_offset > 4096 ?
-                              connssl->decdata_offset : 4096;
+  if(connssl->decdata_length > CURL_SCHANNEL_BUFFER_INIT_SIZE) {
+    connssl->decdata_length =
+      connssl->decdata_offset > CURL_SCHANNEL_BUFFER_INIT_SIZE ?
+      connssl->decdata_offset : CURL_SCHANNEL_BUFFER_INIT_SIZE;
     connssl->decdata_buffer = realloc(connssl->decdata_buffer,
                                       connssl->decdata_length);
   }
@@ -875,12 +884,14 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
 CURLcode
 Curl_schannel_connect_nonblocking(struct connectdata *conn, int sockindex,
-                                  bool *done) {
+                                  bool *done)
+{
   return schannel_connect_common(conn, sockindex, TRUE, done);
 }
 
 CURLcode
-Curl_schannel_connect(struct connectdata *conn, int sockindex) {
+Curl_schannel_connect(struct connectdata *conn, int sockindex)
+{
   CURLcode retcode;
   bool done = FALSE;
 
@@ -893,7 +904,8 @@ Curl_schannel_connect(struct connectdata *conn, int sockindex) {
   return CURLE_OK;
 }
 
-bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex) {
+bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
+{
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   if(connssl->use) /* SSL is in use */
@@ -903,7 +915,8 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex) {
     return FALSE;
 }
 
-void Curl_schannel_close(struct connectdata *conn, int sockindex) {
+void Curl_schannel_close(struct connectdata *conn, int sockindex)
+{
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -934,12 +947,14 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex) {
   }
 }
 
-int Curl_schannel_shutdown(struct connectdata *conn, int sockindex) {
+int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
+{
   return CURLE_NOT_BUILT_IN; /* TODO: implement SSL/TLS shutdown */
 }
 
-void Curl_schannel_session_free(void *ptr) {
-  curl_schannel_cred *cred = ptr;
+void Curl_schannel_session_free(void *ptr)
+{
+  struct curl_schannel_cred *cred = ptr;
 
   if(cred) {
     s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
@@ -947,18 +962,20 @@ void Curl_schannel_session_free(void *ptr) {
   }
 }
 
-int Curl_schannel_init() {
+int Curl_schannel_init()
+{
   return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
 }
 
-void Curl_schannel_cleanup() {
+void Curl_schannel_cleanup()
+{
   Curl_sspi_global_cleanup();
 }
 
 size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  char* version = Curl_sspi_version();
-  size = snprintf(buffer, size, "Schannel-%s", version);
+  char *version = Curl_sspi_version();
+  size = snprintf(buffer, size, "Schannel/%s", version);
   free(version);
   return size;
 }
