@@ -882,10 +882,11 @@ isTLSIntoleranceError(PRInt32 err)
 static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
 {
 #ifdef HAVE_NSS_INITCONTEXT
+  NSSInitParameters initparams;
+
   if(nss_context != NULL)
     return CURLE_OK;
 
-  NSSInitParameters initparams;
   memset((void *) &initparams, '\0', sizeof(initparams));
   initparams.length = sizeof(initparams);
 #else /* HAVE_NSS_INITCONTEXT */
