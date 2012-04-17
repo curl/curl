@@ -48,7 +48,7 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-CFLAG_SYMBOL_HIDING = @CFLAG_SYMBOL_HIDING@
+CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -136,9 +136,9 @@ endif
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 
-if DOING_SYMBOL_HIDING
+if DOING_CURL_SYMBOL_HIDING
 libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_SYMBOL_HIDING)
+libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
 else
 libcurl_la_CPPFLAGS = $(AM_CPPFLAGS)
 libcurl_la_CFLAGS = $(AM_CFLAGS)

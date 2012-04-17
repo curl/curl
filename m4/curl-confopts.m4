@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 17
+# serial 18
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -466,21 +466,21 @@ dnl been done to prevent interferences on other tests.
 
 AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
-  CFLAG_SYMBOL_HIDING=""
+  CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
   if test x"$ac_cv_native_windows" != "xyes" &&
     test "$want_symbol_hiding" = "yes" &&
     test "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
-    CFLAG_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
+    CFLAG_CURL_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
     AC_DEFINE_UNQUOTED(CURL_EXTERN_SYMBOL, $symbol_hiding_EXTERN,
       [Definition to make a library symbol externally visible.])
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(DOING_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
-  AC_SUBST(CFLAG_SYMBOL_HIDING)
+  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
+  AC_SUBST(CFLAG_CURL_SYMBOL_HIDING)
 ])
 
 
