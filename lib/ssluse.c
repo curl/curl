@@ -695,6 +695,7 @@ int Curl_ossl_init(void)
 {
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
   ENGINE_load_builtin_engines();
+  ENGINE_register_all_complete();
 #endif
 
   /* Lets get nice error messages */
