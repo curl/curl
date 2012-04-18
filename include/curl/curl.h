@@ -598,18 +598,32 @@ typedef enum {
                                    in 7.18.0 */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
-#define CURLAUTH_NONE         0       /* nothing */
-#define CURLAUTH_BASIC        (1<<0)  /* Basic (default) */
-#define CURLAUTH_DIGEST       (1<<1)  /* Digest */
-#define CURLAUTH_GSSNEGOTIATE (1<<2)  /* GSS-Negotiate */
-#define CURLAUTH_NTLM         (1<<3)  /* NTLM */
-#define CURLAUTH_DIGEST_IE    (1<<4)  /* Digest with IE flavour */
-#define CURLAUTH_NTLM_WB      (1<<5)  /* NTLM delegating to winbind helper */
-#define CURLAUTH_ONLY         (1<<31) /* used together with a single other
-                                         type to force no auth or just that
-                                         single type */
-#define CURLAUTH_ANY (~CURLAUTH_DIGEST_IE)  /* all fine types set */
-#define CURLAUTH_ANYSAFE (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
+/*
+ * Bitmasks for CURLOPT_HTTPAUTH and CURLOPT_PROXYAUTH options:
+ *
+ * CURLAUTH_NONE         - No HTTP authentication
+ * CURLAUTH_BASIC        - HTTP Basic authentication (default)
+ * CURLAUTH_DIGEST       - HTTP Digest authentication
+ * CURLAUTH_GSSNEGOTIATE - HTTP GSS-Negotiate authentication
+ * CURLAUTH_NTLM         - HTTP NTLM authentication
+ * CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavour
+ * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
+ * CURLAUTH_ONLY         - Use together with a single other type to force no
+ *                         authentication or just that single type
+ * CURLAUTH_ANY          - All fine types set
+ * CURLAUTH_ANYSAFE      - All fine types except Basic
+ */
+
+#define CURLAUTH_NONE         ((unsigned long)0)
+#define CURLAUTH_BASIC        (((unsigned long)1)<<0)
+#define CURLAUTH_DIGEST       (((unsigned long)1)<<1)
+#define CURLAUTH_GSSNEGOTIATE (((unsigned long)1)<<2)
+#define CURLAUTH_NTLM         (((unsigned long)1)<<3)
+#define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
+#define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
+#define CURLAUTH_ONLY         (((unsigned long)1)<<31)
+#define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
+#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
 
 #define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */
