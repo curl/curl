@@ -37,7 +37,7 @@ struct Configurable {
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
-  long authtype;            /* auth bitmask */
+  unsigned long authtype;   /* auth bitmask */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;

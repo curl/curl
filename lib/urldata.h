@@ -986,8 +986,8 @@ struct PureInfo {
                      thus made the document NOT get fetched */
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
-  long proxyauthavail; /* what proxy auth types were announced */
-  long httpauthavail;  /* what host auth types were announced */
+  unsigned long proxyauthavail; /* what proxy auth types were announced */
+  unsigned long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
@@ -1089,11 +1089,11 @@ typedef enum {
 #define MAX_CURL_PASSWORD_LENGTH_TXT "255"
 
 struct auth {
-  long want;  /* Bitmask set to the authentication methods wanted by the app
-                 (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
-  long picked;
-  long avail; /* bitmask for what the server reports to support for this
-                 resource */
+  unsigned long want;  /* Bitmask set to the authentication methods wanted by
+                          app (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
+  unsigned long picked;
+  unsigned long avail; /* Bitmask for what the server reports to support for
+                          this resource */
   bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
                  request */
   bool multi; /* TRUE if this is not yet authenticated but within the auth
@@ -1361,8 +1361,8 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
-  long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
-  long proxyauth;    /* what kind of proxy authentication to use (bitmask) */
+  unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
+  unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */

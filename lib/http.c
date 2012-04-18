@@ -284,7 +284,7 @@ static bool pickoneauth(struct auth *pick)
 {
   bool picked;
   /* only deal with authentication we want */
-  long avail = pick->avail & pick->want;
+  unsigned long avail = pick->avail & pick->want;
   picked = TRUE;
 
   /* The order of these checks is highly relevant, as this will be the order
@@ -697,7 +697,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
    */
   struct SessionHandle *data = conn->data;
 
-  long *availp;
+  unsigned long *availp;
   const char *start;
   struct auth *authp;
 

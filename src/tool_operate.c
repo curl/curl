@@ -680,7 +680,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           int authbits = 0;
           int bitcheck = 0;
           while(bitcheck < 32) {
-            if(config->authtype & (1 << bitcheck++)) {
+            if(config->authtype & (1UL << bitcheck++)) {
               authbits++;
               if(authbits > 1) {
                 /* more than one, we're done! */
