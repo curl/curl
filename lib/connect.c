@@ -881,7 +881,10 @@ singleipconnect(struct connectdata *conn,
 
   res = Curl_socket(conn, ai, &addr, &sockfd);
   if(res)
-    return res;
+    /* Failed to create the socket, but still return OK since we signal the
+       lack of socket as well. This allows the parent function to keep looping
+       over alternative addresses/socket families etc. */
+    return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
   if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
