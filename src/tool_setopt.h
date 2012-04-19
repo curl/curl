@@ -41,13 +41,18 @@ typedef struct {
   long value;
 } NameValue;
 
+typedef struct {
+  const char *name;
+  unsigned long value;
+} NameValueUnsigned;
+
 extern const NameValue setopt_nv_CURLPROXY[];
-extern const NameValue setopt_nv_CURLAUTH[];
 extern const NameValue setopt_nv_CURL_HTTP_VERSION[];
 extern const NameValue setopt_nv_CURL_SSLVERSION[];
 extern const NameValue setopt_nv_CURL_TIMECOND[];
 extern const NameValue setopt_nv_CURLFTPSSL_CCC[];
 extern const NameValue setopt_nv_CURLPROTO[];
+extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 
 /* Map options to NameValue sets */
 #define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
@@ -68,6 +73,9 @@ CURLcode tool_setopt_enum(CURL *curl, struct Configurable *config,
 CURLcode tool_setopt_flags(CURL *curl, struct Configurable *config,
                            const char *name, CURLoption tag,
                            const NameValue *nv, long lval);
+CURLcode tool_setopt_bitmask(CURL *curl, struct Configurable *config,
+                             const char *name, CURLoption tag,
+                             const NameValueUnsigned *nv, long lval);
 CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
                               const char *name, CURLoption tag,
                               struct curl_httppost *httppost);
@@ -88,6 +96,9 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
 
 #define my_setopt_flags(x,y,z) \
   SETOPT_CHECK(tool_setopt_flags(x, config, #y, y, setopt_nv_ ## y, z))
+
+#define my_setopt_bitmask(x,y,z) \
+  SETOPT_CHECK(tool_setopt_bitmask(x, config, #y, y, setopt_nv_ ## y, z))
 
 #define my_setopt_httppost(x,y,z) \
   SETOPT_CHECK(tool_setopt_httppost(x, config, #y, y, z))
@@ -113,6 +124,9 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
   SETOPT_CHECK(curl_easy_setopt(x, y, z))
 
 #define my_setopt_flags(x,y,z) \
+  SETOPT_CHECK(curl_easy_setopt(x, y, z))
+
+#define my_setopt_bitmask(x,y,z) \
   SETOPT_CHECK(curl_easy_setopt(x, y, z))
 
 #define my_setopt_httppost(x,y,z) \

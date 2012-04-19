@@ -841,20 +841,20 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH,
-                            (long) CURLAUTH_ANY);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_ANY);
           else if(config->proxynegotiate)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH,
-                            (long) CURLAUTH_GSSNEGOTIATE);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH,
-                            (long) CURLAUTH_NTLM);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_NTLM);
           else if(config->proxydigest)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH,
-                            (long) CURLAUTH_DIGEST);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_DIGEST);
           else if(config->proxybasic)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH,
-                            (long) CURLAUTH_BASIC);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
@@ -919,7 +919,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt_flags(curl, CURLOPT_HTTPAUTH, (long) config->authtype);
+            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long) config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2),
              303 was added in 7.26.0 */

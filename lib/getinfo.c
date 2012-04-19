@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,6 +86,11 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     struct curl_certinfo * to_certinfo;
     struct curl_slist    * to_slist;
   } ptr;
+
+  union {
+    unsigned long *to_ulong;
+    long          *to_long;
+  } lptr;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -191,10 +196,12 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_charp = (char *) data->set.private_data;
     break;
   case CURLINFO_HTTPAUTH_AVAIL:
-    *param_longp = data->info.httpauthavail;
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.httpauthavail;
     break;
   case CURLINFO_PROXYAUTH_AVAIL:
-    *param_longp = data->info.proxyauthavail;
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.proxyauthavail;
     break;
   case CURLINFO_OS_ERRNO:
     *param_longp = data->state.os_errno;
