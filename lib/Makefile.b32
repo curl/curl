@@ -22,12 +22,12 @@ BCCDIR = $(MAKEDIR)\..
 
 # Edit the path below to point to the base of your Zlib sources.
 !ifndef ZLIB_PATH
-ZLIB_PATH = ..\..\zlib-1.2.5
+ZLIB_PATH = ..\..\zlib-1.2.6
 !endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 !ifndef OPENSSL_PATH
-OPENSSL_PATH = ..\..\openssl-0.9.8q
+OPENSSL_PATH = ..\..\openssl-0.9.8v
 !endif
 
 # Set libcurl static lib, dll and import lib

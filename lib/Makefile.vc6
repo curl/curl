@@ -65,7 +65,7 @@
 !INCLUDE ..\Makefile.msvc.names
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8u
+OPENSSL_PATH   = ../../openssl-0.9.8v
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
