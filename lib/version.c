@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,10 +64,16 @@
 char *curl_version(void)
 {
   static char version[200];
-  char *ptr=version;
+  char *ptr = version;
   size_t len;
   size_t left = sizeof(version);
-  strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
+#ifdef USE_WINDOWS_SSPI
+  int sspi_major = 0;
+  int sspi_minor = 0;
+  int sspi_build = 0;
+#endif;
+
+  strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION);
   len = strlen(ptr);
   left -= len;
   ptr += len;
@@ -82,6 +88,17 @@ char *curl_version(void)
     }
   }
 
+#ifdef USE_WINDOWS_SSPI
+  if(CURLE_OK == Curl_sspi_version(&sspi_major, &sspi_minor, &sspi_build,
+                                   NULL))
+    len = snprintf(ptr, left, " sspi/%d.%d.%d", sspi_major, sspi_minor,
+                 sspi_build);
+  else
+    len = snprintf(ptr, left, " sspi/unknown");
+
+  left -= len;
+  ptr += len;
+#endif
 #ifdef HAVE_LIBZ
   len = snprintf(ptr, left, " zlib/%s", zlibVersion());
   left -= len;
@@ -242,9 +259,6 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   | CURL_VERSION_NTLM_WB
-#endif
-#ifdef USE_WINDOWS_SSPI
-  | CURL_VERSION_SSPI
 #endif
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ

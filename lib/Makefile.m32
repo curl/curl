@@ -169,6 +169,7 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
+  DLL_LIBS += -lversion
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO

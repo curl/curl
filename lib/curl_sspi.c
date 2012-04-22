@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,6 +101,68 @@ Curl_sspi_global_init(void)
   return CURLE_OK;
 }
 
+/*
+ * Curl_sspi_version()
+ *
+ * This function returns the SSPI library version information.
+ */
+CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
+{
+  CURLcode result = CURLE_OK;
+  VS_FIXEDFILEINFO *version_info = NULL;
+  LPTSTR version = NULL;
+  LPTSTR path = NULL;
+  LPVOID data = NULL;
+  DWORD size, handle;
+
+  if(!s_hSecDll)
+    return CURLE_FAILED_INIT;
+
+  path = malloc(MAX_PATH);
+  if(!path)
+    return CURLE_OUT_OF_MEMORY;
+  
+  if(GetModuleFileName(s_hSecDll, path, MAX_PATH)) {
+    size = GetFileVersionInfoSize(path, &handle);
+    if(size) {
+      data = malloc(size);
+      if(data) {
+        if(GetFileVersionInfo(path, handle, size, data)) {
+          if(!VerQueryValue(data, "\\", &version_info, &handle))
+            result = CURLE_OUT_OF_MEMORY;
+        }
+        else
+          result = CURLE_OUT_OF_MEMORY;
+      }
+      else
+        result = CURLE_OUT_OF_MEMORY;
+    }
+    else
+      result = CURLE_OUT_OF_MEMORY;
+  }
+  else
+    result = CURLE_OUT_OF_MEMORY;
+
+  /* Set the out parameters */
+  if(!result) {
+    if(major)
+      *major = (version_info->dwProductVersionMS >> 16) & 0xffff;
+    
+    if(minor)
+      *minor = (version_info->dwProductVersionMS >> 0) & 0xffff;
+
+    if(build)
+      *build = (version_info->dwProductVersionLS >> 16) & 0xffff;
+
+    if(special)
+      *special = (version_info->dwProductVersionLS >> 0) & 0xffff;
+  }
+
+  Curl_safefree(data);
+  Curl_safefree(path);
+
+  return result;
+}
 
 /*
  * Curl_sspi_global_cleanup()
