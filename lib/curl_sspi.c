@@ -106,7 +106,6 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
 {
   CURLcode result = CURLE_OK;
   VS_FIXEDFILEINFO *version_info = NULL;
-  LPTSTR version = NULL;
   LPTSTR path = NULL;
   LPVOID data = NULL;
   DWORD size, handle;
