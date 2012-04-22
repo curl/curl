@@ -117,7 +117,7 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
   path = malloc(MAX_PATH);
   if(!path)
     return CURLE_OUT_OF_MEMORY;
-  
+
   if(GetModuleFileName(s_hSecDll, path, MAX_PATH)) {
     size = GetFileVersionInfoSize(path, &handle);
     if(size) {
@@ -143,7 +143,7 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
   if(!result) {
     if(major)
       *major = (version_info->dwProductVersionMS >> 16) & 0xffff;
-    
+
     if(minor)
       *minor = (version_info->dwProductVersionMS >> 0) & 0xffff;
 
