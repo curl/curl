@@ -168,7 +168,6 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  curl_LDADD += -lversion
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO
