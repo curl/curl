@@ -71,7 +71,7 @@ char *curl_version(void)
   int sspi_major = 0;
   int sspi_minor = 0;
   int sspi_build = 0;
-#endif
+#endif;
 
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION);
   len = strlen(ptr);
