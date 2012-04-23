@@ -3044,6 +3044,7 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
          AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
          AC_SUBST(USE_WINDOWS_SSPI, [1])
          curl_sspi_msg="enabled"
+         LIBS="$LIBS -lversion"
        else
          AC_MSG_RESULT(no)
          AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
