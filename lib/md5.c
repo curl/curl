@@ -426,9 +426,9 @@ void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
   MD5_Final(outbuffer, &ctx);
 }
 
-MD5_context * Curl_MD5_init(const MD5_params *md5params)
+MD5_context *Curl_MD5_init(const MD5_params *md5params)
 {
-  MD5_context* ctxt;
+  MD5_context *ctxt;
 
   /* Create MD5 context */
   ctxt = malloc(sizeof *ctxt);
@@ -438,12 +438,14 @@ MD5_context * Curl_MD5_init(const MD5_params *md5params)
 
   ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
 
-  if(!ctxt->md5_hashctx)
-    return ctxt->md5_hashctx;
+  if(!ctxt->md5_hashctx) {
+    free(ctxt);
+    return NULL;
+  }
 
   ctxt->md5_hash = md5params;
 
-  (*md5params->md5_init)(ctxt->md5_hashctx);
+  md5params->md5_init(ctxt->md5_hashctx);
 
   return ctxt;
 }
