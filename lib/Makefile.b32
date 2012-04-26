@@ -27,7 +27,7 @@ ZLIB_PATH = ..\..\zlib-1.2.6
 
 # Edit the path below to point to the base of your OpenSSL package.
 !ifndef OPENSSL_PATH
-OPENSSL_PATH = ..\..\openssl-0.9.8v
+OPENSSL_PATH = ..\..\openssl-0.9.8w
 !endif
 
 # Set libcurl static lib, dll and import lib
