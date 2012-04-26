@@ -388,6 +388,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
+#ifdef HAVE_LIBMETALINK
+  config->metalinkfile_last = config->metalinkfile_list;
+  config->metalink_last = config->metalink_list;
+#endif /* HAVE_LIBMETALINK */
+
   /*
   ** Nested loops start here.
   */
@@ -437,6 +442,24 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         Curl_safefree(outfiles);
         break;
       }
+    }
+
+    /* process metalink download in the separate function */
+    if(urlnode->flags & GETOUT_METALINK) {
+      struct OutStruct outs;
+      long retry_sleep_default;
+      struct getout *nextnode;
+
+      retry_sleep_default = (config->retry_delay) ?
+        config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
+      /* default output stream is stdout */
+      memset(&outs, 0, sizeof(struct OutStruct));
+      outs.stream = stdout;
+      outs.config = config;
+      operatemetalink(curl, urlnode, retry_sleep_default, outs, heads,
+                      outfiles, config);
+      /* move on to the next URL */
+      continue;
     }
 
     /* Here's the loop for uploading multiple files within the same
@@ -1607,6 +1630,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   if(config->errors_fopened && config->errors)
     fclose(config->errors);
+
+#ifdef HAVE_LIBMETALINK
+  /* Release metalink related resources here */
+  clean_metalink(config);
+#endif /* HAVE_LIBMETALINK */
 
   main_free(); /* cleanup */
 

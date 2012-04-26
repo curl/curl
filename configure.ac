@@ -164,6 +164,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
     init_ssl_msg=${curl_ssl_msg}
+curl_metalink_msg="no      (--with-libmetalink)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -2217,6 +2218,63 @@ dnl **********************************************************************
 CURL_CHECK_CA_BUNDLE
 
 dnl **********************************************************************
+dnl Check for libmetalink
+dnl **********************************************************************
+
+OPT_LIBMETALINK=no
+
+AC_ARG_WITH(libmetalink,dnl
+AC_HELP_STRING([--with-libmetalink=PATH],[where to look for libmetalink, PATH points to the installation root])
+AC_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
+  OPT_LIBMETALINK=$withval)
+
+if test X"$OPT_LIBMETALINK" != Xno; then
+
+  addlib=""
+  addld=""
+  addcflags=""
+  version=""
+  libmetalinklib=""
+  PKGTEST="no"
+  if test "x$OPT_LIBMETALINK" = "xyes"; then
+    dnl this is with no partiular path given
+    PKGTEST="yes"
+    CURL_CHECK_PKGCONFIG(libmetalink)
+  else
+    dnl When particular path is given, set PKG_CONFIG_LIBDIR using the path.
+    LIBMETALINK_PCDIR="$OPT_LIBMETALINK/lib/pkgconfig"
+    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$LIBMETALINK_PCDIR"])
+    if test -f "$LIBMETALINK_PCDIR/libmetalink.pc"; then
+      PKGTEST="yes"
+    fi
+    if test "$PKGTEST" = "yes"; then
+      CURL_CHECK_PKGCONFIG(libmetalink, [$LIBMETALINK_PCDIR])
+    fi
+  fi
+  if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
+    addlib=`$PKGCONFIG --libs-only-l libmetalink`
+    addld=`$PKGCONFIG --libs-only-L libmetalink`
+    addcflags=`$PKGCONFIG --cflags-only-I libmetalink`
+    version=`$PKGCONFIG --modversion libmetalink`
+    libmetalinklib=`echo $addld | $SED -e 's/-L//'`
+  fi
+  if test -n "$addlib"; then
+
+    AC_MSG_NOTICE([detected libmetalink version $version])
+    curl_metalink_msg="enabled"
+    LIBMETALINK_LIBS=$addlib
+    LIBMETALINK_LDFLAGS=$addld
+    LIBMETALINK_CFLAGS=$addcflags
+    AC_SUBST([LIBMETALINK_LIBS])
+    AC_SUBST([LIBMETALINK_LDFLAGS])
+    AC_SUBST([LIBMETALINK_CFLAGS])
+    AC_DEFINE(HAVE_LIBMETALINK, 1, [if libmetalink is available])
+
+  fi
+fi
+AM_CONDITIONAL([HAVE_LIBMETALINK], [test -n "x$LIBMETALINK_LIBS"])
+
+dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
 dnl **********************************************************************
 
@@ -3319,6 +3377,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
+  metalink support: ${curl_metalink_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 

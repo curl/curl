@@ -101,6 +101,9 @@ struct getout {
 #define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
 #define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
 #define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
+#ifdef HAVE_LIBMETALINK
+#define GETOUT_METALINK (1<<5) /* set when Metalink download */
+#endif /* HAVE_LIBMETALINK */
 
 
 /*
