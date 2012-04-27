@@ -1,0 +1,51 @@
+.Dd April 27, 2012
+.Dt MK-CA-BUNDLE 1
+.Os
+.Sh NAME
+.Nm mk-ca-bundle
+.Nd create a new ca-bundle.crt from mozilla's certdata.txt
+.Sh SYNOPSIS
+.Nm
+.Op Fl bilnqtuv
+.Or outputfile
+.Sh DESCRIPTION
+The
+.Nm
+tool downloads the certdata.txt file from Mozilla's source tree, then
+parses certdata.txt and extracts CA Root Certificates into PEM format.
+These are then processed with the OpenSSL commandline tool to produce the
+final ca-bundle.crt file.
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width _h
+.It Fl b
+backup an existing version of ca-bundle.crt
+.It Fl i
+print version info about used modules
+.It Fl l
+print license info about certdata.txt
+.It Fl n
+no download of certdata.txt (to use existing)
+.It Fl q
+be really quiet (no progress output at all)
+.It Fl t
+include plain text listing of certificates
+.It Fl u
+unlink (remove) certdata.txt after processing
+.It Fl v
+be verbose and print out processed CAs
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr curl 1
+.Sh HISTORY
+.Nm
+was based on the parse-certs script written by
+.An Roland Krikava
+and hacked by
+.An Guenter Knauf .
+This manual page was written by
+.An Jan Schaumann
+.Aq jschauma@netmeister.org .
