@@ -23,6 +23,7 @@ $datarootdir=@datarootdir@
 
 f 0644 cowo pppusers ${mandir}/man1/curl.1 ./docs/curl.1
 f 0644 cowo pppusers ${mandir}/man1/curl-config.1 ./docs/curl-config.1
+f 0644 cowo pppusers ${mandir}/man1/mk-ca-bundle.1 ./docs/mk-ca-bundle.1
 f 0644 cowo pppusers ${mandir}/man3/curl_easy_cleanup.3 ./docs/curl_easy_cleanup.3
 f 0644 cowo pppusers ${mandir}/man3/curl_easy_getinfo.3 ./docs/curl_easy_getinfo.3
 f 0644 cowo pppusers ${mandir}/man3/curl_easy_init.3 ./docs/curl_easy_init.3

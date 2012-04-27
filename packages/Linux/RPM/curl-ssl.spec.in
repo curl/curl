@@ -66,6 +66,7 @@ make DESTDIR=%{buildroot} install-strip
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/curl
 %attr(0644,root,root) %{_mandir}/man1/curl.1*
+%attr(0644,root,root) %{_mandir}/man1/mk-ca-bundle.1
 %{_libdir}/libcurl.so*
 %{_datadir}/curl/curl-ca-bundle.crt
 %doc CHANGES COPYING README testcurl.sh docs/BUGS docs/SSLCERTS
