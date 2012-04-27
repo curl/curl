@@ -105,6 +105,7 @@ make DESTDIR=%{buildroot} install-strip
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/curl
 %attr(0644,root,root) %{_mandir}/man1/curl.1*
+%attr(0644,root,root) %{_mandir}/man1/mk-ca-bundle.1
 %{_libdir}/libcurl.a
 %if %{SSL} == 1
 %{_datadir}/curl/curl-ca-bundle.crt
@@ -124,6 +125,7 @@ make DESTDIR=%{buildroot} install-strip
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/curl-config
 %attr(0644,root,root) %{_mandir}/man1/curl-config.1*
+%attr(0644,root,root) %{_mandir}/man1/mk-ca-bundle.1
 %attr(0644,root,root) %{_mandir}/man3/*
 %attr(0644,root,root) %{_includedir}/curl/*
 %{_libdir}/libcurl.la
