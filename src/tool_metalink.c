@@ -21,8 +21,22 @@
  ***************************************************************************/
 #include "tool_setup.h"
 #include "tool_metalink.h"
+#include "tool_getparam.h"
+#include "tool_paramhlp.h"
 
 #include "memdebug.h" /* keep this as LAST include */
+
+/* Copied from tool_getparam.c */
+#define GetStr(str,val) do { \
+  if(*(str)) { \
+    free(*(str)); \
+    *(str) = NULL; \
+  } \
+  if((val)) \
+    *(str) = strdup((val)); \
+  if(!(val)) \
+    return PARAM_NO_MEM; \
+} WHILE_FALSE
 
 struct metalinkfile *new_metalinkfile(metalink_file_t *metalinkfile) {
   struct metalinkfile *f;
@@ -63,4 +77,68 @@ void clean_metalink(struct Configurable *config)
     Curl_safefree(ml);
   }
   config->metalink_last = 0;
+}
+
+int parse_metalink(struct Configurable *config, const char *infile)
+{
+  metalink_error_t r;
+  metalink_t* metalink;
+  metalink_file_t **files;
+  struct metalink *ml;
+
+  r = metalink_parse_file(infile, &metalink);
+
+  if(r != 0) {
+    return -1;
+  }
+  ml = new_metalink(metalink);
+
+  if(config->metalink_list) {
+    config->metalink_last->next = ml;
+    config->metalink_last = ml;
+  }
+  else {
+    config->metalink_list = config->metalink_last = ml;
+  }
+
+  for(files = metalink->files; *files; ++files) {
+    struct getout *url;
+    /* Skip an entry which has no resource. */
+    if(!(*files)->resources[0]) continue;
+    if(config->url_get ||
+       ((config->url_get = config->url_list) != NULL)) {
+      /* there's a node here, if it already is filled-in continue to
+         find an "empty" node */
+      while(config->url_get && (config->url_get->flags & GETOUT_URL))
+        config->url_get = config->url_get->next;
+    }
+
+    /* now there might or might not be an available node to fill in! */
+
+    if(config->url_get)
+      /* existing node */
+      url = config->url_get;
+    else
+      /* there was no free node, create one! */
+      url=new_getout(config);
+
+    if(url) {
+      struct metalinkfile *mlfile;
+      /* Set name as url */
+      GetStr(&url->url, (*files)->name);
+
+      /* set flag metalink here */
+      url->flags |= GETOUT_URL | GETOUT_METALINK;
+      mlfile = new_metalinkfile(*files);
+
+      if(config->metalinkfile_list) {
+        config->metalinkfile_last->next = mlfile;
+        config->metalinkfile_last = mlfile;
+      }
+      else {
+        config->metalinkfile_list = config->metalinkfile_last = mlfile;
+      }
+    }
+  }
+  return 0;
 }

@@ -48,4 +48,6 @@ int count_next_metalink_resource(struct metalinkfile *mlfile);
 
 void clean_metalink(struct Configurable *config);
 
+int parse_metalink(struct Configurable *config, const char *infile);
+
 #endif /* HEADER_CURL_TOOL_METALINK_H */

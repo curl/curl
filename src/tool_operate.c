@@ -130,7 +130,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   struct OutStruct heads;
 
 #ifdef HAVE_LIBMETALINK
-  struct metalinkfile *mlfile_last;
+  struct metalinkfile *mlfile_last = NULL;
 #endif /* HAVE_LIBMETALINK */
 
   CURL *curl = NULL;
@@ -392,10 +392,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
-#ifdef HAVE_LIBMETALINK
-  mlfile_last = config->metalinkfile_list;
-#endif /* HAVE_LIBMETALINK */
-
   /*
   ** Nested loops start here.
   */
@@ -409,16 +405,23 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     char *outfiles;
     int infilenum;
     URLGlob *inglob;
+
+#ifdef HAVE_LIBMETALINK
     int metalink; /* nonzero for metalink download */
     struct metalinkfile *mlfile;
     metalink_resource_t **mlres;
+#endif /* HAVE_LIBMETALINK */
 
     outfiles = NULL;
     infilenum = 1;
     inglob = NULL;
 
+#ifdef HAVE_LIBMETALINK
     if(urlnode->flags & GETOUT_METALINK) {
       metalink = 1;
+      if(mlfile_last == NULL) {
+        mlfile_last = config->metalinkfile_list;
+      }
       mlfile = mlfile_last;
       mlfile_last = mlfile_last->next;
       mlres = mlfile->file->resources;
@@ -428,6 +431,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       mlfile = NULL;
       mlres = NULL;
     }
+#endif /* HAVE_LIBMETALINK */
 
     /* urlnode->url is the full URL (it might be NULL) */
 
@@ -497,12 +501,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           break;
       }
 
+#ifdef HAVE_LIBMETALINK
       if(metalink) {
         /* For Metalink download, we don't use glob. Instead we use
            the number of resources as urlnum. */
         urlnum = count_next_metalink_resource(mlfile);
       }
-      else if(!config->globoff) {
+      else
+#endif /* HAVE_LIBMETALINK */
+      if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         res = glob_url(&urls, urlnode->url, &urlnum,
@@ -533,20 +540,24 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_sleep;
         char *this_url;
         HeaderData hdrdata;
-        int metalink_next_res;
+#ifdef HAVE_LIBMETALINK
+        int metalink_next_res = 0;
+#endif /* HAVE_LIBMETALINK */
 
         outfile = NULL;
         infdopen = FALSE;
         infd = STDIN_FILENO;
         uploadfilesize = -1; /* -1 means unknown */
-        metalink_next_res = 0;
 
         /* default output stream is stdout */
         memset(&outs, 0, sizeof(struct OutStruct));
         outs.stream = stdout;
         outs.config = config;
 
+#ifdef HAVE_LIBMETALINK
         if(metalink) {
+          /* For Metalink download, use name in Metalink file as
+             filename. */
           outfile = strdup(mlfile->file->name);
           if(!outfile) {
             res = CURLE_OUT_OF_MEMORY;
@@ -559,6 +570,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
         else {
+#endif /* HAVE_LIBMETALINK */
           if(urls) {
             res = glob_next_url(&this_url, urls);
             if(res)
@@ -583,7 +595,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               goto show_error;
             }
           }
+#ifdef HAVE_LIBMETALINK
         }
+#endif /* HAVE_LIBMETALINK */
 
         if((urlnode->flags&GETOUT_USEREMOTE) ||
            (outfile && !curlx_strequal("-", outfile)) ) {
@@ -1429,6 +1443,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               continue; /* curl_easy_perform loop */
             }
           } /* if retry_numretries */
+#ifdef HAVE_LIBMETALINK
           else if(metalink) {
             /* Metalink: Decide to try the next resource or
                not. Basically, we want to try the next resource if
@@ -1451,6 +1466,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             else
               metalink_next_res = 1;
           }
+#endif /* HAVE_LIBMETALINK */
 
           /* In all ordinary cases, just break out of loop here */
           break; /* curl_easy_perform loop */
@@ -1562,10 +1578,21 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
 #ifdef HAVE_LIBMETALINK
         if(!metalink && res == CURLE_OK && outs.filename) {
+          /* Check the content-type header field and if it indicates
+             Metalink file, parse it and add getout for them. */
           char *content_type;
           curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
-          if(content_type != NULL) {
-            printf("file=%s, content-type=%s\n", outs.filename, content_type);
+          if(content_type &&
+             Curl_raw_equal("application/metalink+xml", content_type)) {
+            if(!(config->mute)) {
+              fprintf(config->errors, "\nParsing Metalink file: %s\n",
+                      outs.filename);
+            }
+            if(parse_metalink(config, outs.filename) == 0)
+              fprintf(config->errors,
+                      "Metalink file is parsed successfully\n");
+            else
+              fprintf(config->errors, "Could not parse Metalink file.\n");
           }
         }
 #endif /* HAVE_LIBMETALINK */
@@ -1586,14 +1613,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
+#ifdef HAVE_LIBMETALINK
         if(metalink) {
+          /* Should exit if error is fatal. */
           if(is_fatal_error(res)) {
             break;
           }
           if(!metalink_next_res || *(++mlres) == NULL)
             break;
         }
-        else if(urlnum > 1) {
+        else
+#endif /* HAVE_LIBMETALINK */
+        if(urlnum > 1) {
           /* when url globbing, exit loop upon critical error */
           if(is_fatal_error(res))
             break;

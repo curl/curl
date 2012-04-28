@@ -829,65 +829,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'J': /* --metalink */
         {
 #ifdef HAVE_LIBMETALINK
-          metalink_error_t r;
-          metalink_t* metalink;
-          metalink_file_t **files;
-          struct metalink *ml;
-
-          r = metalink_parse_file(nextarg, &metalink);
-
-          if(r != 0) {
-            fprintf(stderr, "ERROR: code=%d\n", r);
-            exit(EXIT_FAILURE);
-          }
-          ml = new_metalink(metalink);
-
-          if(config->metalink_list) {
-            config->metalink_last->next = ml;
-            config->metalink_last = ml;
-          }
-          else {
-            config->metalink_list = config->metalink_last = ml;
-          }
-
-          for(files = metalink->files; *files; ++files) {
-            struct getout *url;
-            /* Skip an entry which has no resource. */
-            if(!(*files)->resources[0]) continue;
-            if(config->url_get ||
-               ((config->url_get = config->url_list) != NULL)) {
-              /* there's a node here, if it already is filled-in continue to
-                 find an "empty" node */
-              while(config->url_get && (config->url_get->flags & GETOUT_URL))
-                config->url_get = config->url_get->next;
-            }
-
-            /* now there might or might not be an available node to fill in! */
-
-            if(config->url_get)
-              /* existing node */
-              url = config->url_get;
-            else
-              /* there was no free node, create one! */
-              url=new_getout(config);
-
-            if(url) {
-              struct metalinkfile *mlfile;
-              /* Set name as url */
-              GetStr(&url->url, (*files)->name);
-
-              /* set flag metalink here */
-              url->flags |= GETOUT_URL | GETOUT_METALINK;
-              mlfile = new_metalinkfile(*files);
-
-              if(config->metalinkfile_list) {
-                config->metalinkfile_last->next = mlfile;
-                config->metalinkfile_last = mlfile;
-              }
-              else {
-                config->metalinkfile_list = config->metalinkfile_last = mlfile;
-              }
-            }
+          if(parse_metalink(config, nextarg) == -1) {
+            warnf(config, "Could not parse Metalink file: %s\n", nextarg);
+            /* TODO Is PARAM_BAD_USE appropriate here? */
+            return PARAM_BAD_USE;
           }
 #else
           warnf(config, "--metalink option is ignored because the binary is "
