@@ -406,10 +406,25 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     char *outfiles;
     int infilenum;
     URLGlob *inglob;
+    int metalink; /* nonzero for metalink download */
+    struct metalinkfile *mlfile;
+    metalink_resource_t **mlres;
 
     outfiles = NULL;
     infilenum = 1;
     inglob = NULL;
+
+    if(urlnode->flags & GETOUT_METALINK) {
+      metalink = 1;
+      mlfile = config->metalinkfile_last;
+      mlres = mlfile->file->resources;
+      config->metalinkfile_last = config->metalinkfile_last->next;
+    }
+    else {
+      metalink = 0;
+      mlfile = NULL;
+      mlres = NULL;
+    }
 
     /* urlnode->url is the full URL (it might be NULL) */
 
@@ -442,24 +457,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         Curl_safefree(outfiles);
         break;
       }
-    }
-
-    /* process metalink download in the separate function */
-    if(urlnode->flags & GETOUT_METALINK) {
-      struct OutStruct outs;
-      long retry_sleep_default;
-      struct getout *nextnode;
-
-      retry_sleep_default = (config->retry_delay) ?
-        config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
-      /* default output stream is stdout */
-      memset(&outs, 0, sizeof(struct OutStruct));
-      outs.stream = stdout;
-      outs.config = config;
-      operatemetalink(curl, urlnode, retry_sleep_default, outs, heads,
-                      outfiles, config);
-      /* move on to the next URL */
-      continue;
     }
 
     /* Here's the loop for uploading multiple files within the same
@@ -497,7 +494,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           break;
       }
 
-      if(!config->globoff) {
+      if(metalink) {
+        /* For Metalink download, we don't use glob. Instead we use
+           the number of resources as urlnum. */
+        urlnum = count_next_metalink_resource(mlfile);
+      }
+      else if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         res = glob_url(&urls, urlnode->url, &urlnum,
@@ -528,39 +530,55 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_sleep;
         char *this_url;
         HeaderData hdrdata;
+        int metalink_next_res;
 
         outfile = NULL;
         infdopen = FALSE;
         infd = STDIN_FILENO;
         uploadfilesize = -1; /* -1 means unknown */
+        metalink_next_res = 0;
 
         /* default output stream is stdout */
         memset(&outs, 0, sizeof(struct OutStruct));
         outs.stream = stdout;
         outs.config = config;
 
-        if(urls) {
-          res = glob_next_url(&this_url, urls);
-          if(res)
+        if(metalink) {
+          outfile = strdup(mlfile->file->name);
+          if(!outfile) {
+            res = CURLE_OUT_OF_MEMORY;
             goto show_error;
-        }
-        else if(!i) {
-          this_url = strdup(urlnode->url);
+          }
+          this_url = strdup((*mlres)->url);
           if(!this_url) {
             res = CURLE_OUT_OF_MEMORY;
             goto show_error;
           }
         }
-        else
-          this_url = NULL;
-        if(!this_url)
-          break;
+        else {
+          if(urls) {
+            res = glob_next_url(&this_url, urls);
+            if(res)
+              goto show_error;
+          }
+          else if(!i) {
+            this_url = strdup(urlnode->url);
+            if(!this_url) {
+              res = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
+          }
+          else
+            this_url = NULL;
+          if(!this_url)
+            break;
 
-        if(outfiles) {
-          outfile = strdup(outfiles);
-          if(!outfile) {
-            res = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+          if(outfiles) {
+            outfile = strdup(outfiles);
+            if(!outfile) {
+              res = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
           }
         }
 
@@ -1408,6 +1426,28 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               continue; /* curl_easy_perform loop */
             }
           } /* if retry_numretries */
+          else if(metalink) {
+            /* Metalink: Decide to try the next resource or
+               not. Basically, we want to try the next resource if
+               download was not successful. */
+            long response;
+            if(CURLE_OK == res) {
+              /* TODO We want to try next resource when download was
+                 not successful. How to know that? */
+              char *effective_url = NULL;
+              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+              if(effective_url &&
+                 curlx_strnequal(effective_url, "http", 4)) {
+                /* This was HTTP(S) */
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+                if(response != 200 && response != 206) {
+                  metalink_next_res = 1;
+                }
+              }
+            }
+            else
+              metalink_next_res = 1;
+          }
 
           /* In all ordinary cases, just break out of loop here */
           break; /* curl_easy_perform loop */
@@ -1532,7 +1572,14 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
-        if(urlnum > 1) {
+        if(metalink) {
+          if(is_fatal_error(res)) {
+            break;
+          }
+          if(!metalink_next_res || *(++mlres) == NULL)
+            break;
+        }
+        else if(urlnum > 1) {
           /* when url globbing, exit loop upon critical error */
           if(is_fatal_error(res))
             break;

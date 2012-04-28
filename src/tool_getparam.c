@@ -826,9 +826,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'H': /* --mail-auth */
         GetStr(&config->mail_auth, nextarg);
         break;
-#ifdef HAVE_LIBMETALINK
       case 'J': /* --metalink */
         {
+#ifdef HAVE_LIBMETALINK
           metalink_error_t r;
           metalink_t* metalink;
           metalink_file_t **files;
@@ -889,9 +889,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
               }
             }
           }
+#else
+          warnf(config, "--metalink option is ignored because the binary is "
+                "built without the Metalink support.\n");
+#endif
           break;
         }
-#endif /* HAVE_LIBMETALINK */
       }
       break;
     case '#': /* --progress-bar */

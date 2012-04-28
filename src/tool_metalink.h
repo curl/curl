@@ -41,13 +41,10 @@ struct metalinkfile *new_metalinkfile(metalink_file_t *metalinkfile);
 
 struct metalink *new_metalink(metalink_t *metalink);
 
-int operatemetalink(CURL *curl,
-                    struct getout *urlnode,
-                    long retry_sleep_default,
-                    struct OutStruct outs,
-                    struct OutStruct heads,
-                    char *outfiles,
-                    struct Configurable *config);
+/*
+ * Counts the resource in the metalinkfile.
+ */
+int count_next_metalink_resource(struct metalinkfile *mlfile);
 
 void clean_metalink(struct Configurable *config);
 
