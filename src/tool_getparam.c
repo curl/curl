@@ -174,9 +174,7 @@ static const struct LongShort aliases[]= {
   {"$G", "delegation",               TRUE},
   {"$H", "mail-auth",                TRUE},
   {"$I", "post303",                  FALSE},
-#ifdef HAVE_LIBMETALINK
   {"$J", "metalink",                 TRUE},
-#endif /* HAVE_LIBMETALINK */
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
