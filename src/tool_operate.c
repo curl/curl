@@ -129,6 +129,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   struct OutStruct heads;
 
+#ifdef HAVE_LIBMETALINK
+  struct metalinkfile *mlfile_last;
+#endif /* HAVE_LIBMETALINK */
+
   CURL *curl = NULL;
   char *httpgetfields = NULL;
 
@@ -389,8 +393,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   }
 
 #ifdef HAVE_LIBMETALINK
-  config->metalinkfile_last = config->metalinkfile_list;
-  config->metalink_last = config->metalink_list;
+  mlfile_last = config->metalinkfile_list;
 #endif /* HAVE_LIBMETALINK */
 
   /*
@@ -416,9 +419,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     if(urlnode->flags & GETOUT_METALINK) {
       metalink = 1;
-      mlfile = config->metalinkfile_last;
+      mlfile = mlfile_last;
+      mlfile_last = mlfile_last->next;
       mlres = mlfile->file->resources;
-      config->metalinkfile_last = config->metalinkfile_last->next;
     }
     else {
       metalink = 0;
@@ -1556,6 +1559,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
 #endif
+
+#ifdef HAVE_LIBMETALINK
+        if(!metalink && res == CURLE_OK && outs.filename) {
+          char *content_type;
+          curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
+          if(content_type != NULL) {
+            printf("file=%s, content-type=%s\n", outs.filename, content_type);
+          }
+        }
+#endif /* HAVE_LIBMETALINK */
+
         /* No more business with this output struct */
         if(outs.alloc_filename)
           Curl_safefree(outs.filename);
