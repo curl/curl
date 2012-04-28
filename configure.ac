@@ -2252,10 +2252,14 @@ if test X"$OPT_LIBMETALINK" != Xno; then
     fi
   fi
   if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
-    addlib=`$PKGCONFIG --libs-only-l libmetalink`
-    addld=`$PKGCONFIG --libs-only-L libmetalink`
-    addcflags=`$PKGCONFIG --cflags-only-I libmetalink`
-    version=`$PKGCONFIG --modversion libmetalink`
+    addlib=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --libs-only-l libmetalink`
+    addld=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --libs-only-L libmetalink`
+    addcflags=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --cflags-only-I libmetalink`
+    version=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --modversion libmetalink`
     libmetalinklib=`echo $addld | $SED -e 's/-L//'`
   fi
   if test -n "$addlib"; then
