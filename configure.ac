@@ -2276,7 +2276,7 @@ if test X"$OPT_LIBMETALINK" != Xno; then
 
   fi
 fi
-AM_CONDITIONAL([HAVE_LIBMETALINK], [test -n "x$LIBMETALINK_LIBS"])
+AM_CONDITIONAL([HAVE_LIBMETALINK], [test -n "$LIBMETALINK_LIBS"])
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
