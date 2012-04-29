@@ -11,12 +11,35 @@ This release includes the following changes:
 
  o nss: the minimal supported version of NSS bumped to 3.12.x
  o nss: human-readable names are now provided for NSS errors if available
- o 
+ o add a manual page for mk-ca-bundle
+ o added --post303 and the CURL_REDIR_POST_303 option for CURLOPT_POSTREDIR
+ o smtp: Add support for DIGEST-MD5 authentication
+ o pop3: Added support for additional pop3 commands
 
 This release includes the following bugfixes:
 
- o nss: libcurl now uses NSS_InitContext() to prevent collisions if available [1]
- o 
+ o nss: libcurl now uses NSS_InitContext() to prevent collisions if available
+   [1]
+ o URL parse: reject numerical IPv6 addresses outside brackets [4]
+ o MD5: fix OOM memory leak [5]
+ o OpenSSL cert: provide more details when cert check fails
+ o HTTP: empty chunked POST ended up in two zero size chunks [6]
+ o fixed a regression when curl resolved to multiple addresses and the first
+   isn't supported [7]
+ o -# progress meter: avoid superfluous updates and duplicate lines [8]
+ o headers: surround GCC attribute names with double underscores [9]
+ o PolarSSL: correct return code for CRL matches
+ o PolarSSL: include version number in version string
+ o PolarSSL: add support for asynchronous connect
+ o mk-ca-bundle: revert the LWP usage [12]
+ o IPv6 cookie domain: get rid of the first bracket before the second
+ o connect.c: return changed to CURLE_COULDNT_CONNECT when opensocket fails
+ o OpenSSL: Made cert hostname check conform to RFC 6125 [10]
+ o HTTP: reset expected DL/UL sizes on redirects [11]
+ o CMake: fix Windows LDAP/LDAPS option handling [2]
+ o CMake: fix MS Visual Studio x64 unsigned long long literal suffix [3]
+ o configure: update detection logic of getaddrinfo() thread-safeness
+ o configure: check for gethostbyname in the watt lib
 
 This release includes the following known bugs:
 
@@ -25,11 +48,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Andrei Cipu, Armel Asselin, Benjamin Johnson, Dag Ekengren, Dave Reisner,
+ Gokhan Sengun, Guenter Knauf, Jan Schaumann, Jonathan Nieder, Kamil Dudka,
+ Lijo Antony, Olaf Flebbe, Rodrigo Silva, Steve Holme, Tatsuhiro Tsujikawa,
+ Tim Heckman, Yang Tse, Arnaud Compan, Blaise Potard, Daniel Theron,
+ Michael Mueller, Michael Wallner, Tim Heckman, Roman Mamedov
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = https://bugzilla.redhat.com/738456
- 
+ [2] = http://curl.haxx.se/mail/lib-2012-03/0278.html
+ [3] = http://curl.haxx.se/mail/lib-2012-03/0255.html
+ [4] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=670126
+ [5] = http://curl.haxx.se/mail/lib-2012-04/0246.html
+ [6] = http://curl.haxx.se/mail/archive-2012-04/0060.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=3516508
+ [8] = http://curl.haxx.se/bug/view.cgi?id=3517418
+ [9] = http://curl.haxx.se/mail/lib-2012-04/0127.html
+ [10] = http://tools.ietf.org/html/rfc6125#section-6.4.3
+ [11] = http://curl.haxx.se/bug/view.cgi?id=3510057
+ [12] = http://curl.haxx.se/mail/lib-2012-03/0238.html
+
