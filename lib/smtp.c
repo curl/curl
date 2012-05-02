@@ -933,6 +933,9 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
   Curl_MD5_update(ctxt, (const unsigned char *) conn->user,
                   curlx_uztoui(strlen(conn->user)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -944,6 +947,9 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
   Curl_MD5_final(ctxt, digest);
 
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
   Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) nonce,
@@ -962,6 +968,9 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
   Curl_MD5_update(ctxt, (const unsigned char *) method,
                   curlx_uztoui(strlen(method)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -974,6 +983,9 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) nonce,
