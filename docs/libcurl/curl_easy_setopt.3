@@ -1965,6 +1965,8 @@ SIGALRM to enable time-outing system calls.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL\fP is set.
+
+Default timeout is 0 (zero) which means it never times out.
 .IP CURLOPT_TIMEOUT_MS
 Like \fICURLOPT_TIMEOUT\fP but takes number of milliseconds instead. If
 libcurl is built to use the standard system name resolver, that portion
