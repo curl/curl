@@ -157,6 +157,9 @@ UNIX
      To get support for SCP and SFTP, build with --with-libssh2 and have
      libssh2 0.16 or later installed.
 
+     To get Metalink support, build with --with-libmetalink and have the 
+     libmetalink packages installed.
+
    SPECIAL CASES
    -------------
    Some versions of uClibc require configuring with CPPFLAGS=-D_GNU_SOURCE=1
