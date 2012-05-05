@@ -125,6 +125,7 @@ static const char *const helptext[] = {
   "     --max-filesize BYTES  Maximum file size to download (H/F)",
   "     --max-redirs NUM  Maximum number of redirects allowed (H)",
   " -m, --max-time SECONDS  Maximum time allowed for the transfer",
+  "     --metalink      Process local Metalink file and use mirrors",
   "     --negotiate     Use HTTP Negotiate Authentication (H)",
   " -n, --netrc         Must read .netrc for user name and password",
   "     --netrc-optional Use either .netrc or URL; overrides -n",
