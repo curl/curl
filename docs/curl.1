@@ -833,14 +833,22 @@ option to -1 to make it limitless.
 
 If this option is used several times, the last one will be used.
 .IP "--metalink"
-Makes curl parse and process a local Metalink file (RFC 5854) and make use
+If curl is built against the libmetalink library then this option can tell
+curl to parse and process a local Metalink file (RFC 5854) and make use
 of the mirrors listed within for failover if there are errors (such as the
 file or server not being available).
+
+Example to use a local Metalink file:
+\fBcurl\fP --metalink example.metalink
 
 If Metalink support is enabled, curl will also use remote Metalinks if they
 are offered with the correct MIME type (application/metalink+xml).
 
-(Added in 7.??.?)
+Example to use a remote Metalink file:
+\fBcurl\fP -O http://www.example.com/example.metalink
+
+
+(Added in 7.??.?, disabled by default)
 .IP "-n, --netrc"
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
@@ -1704,6 +1712,8 @@ authenticate with your current user and password.
 SRP (Secure Remote Password) authentication is supported for TLS.
 .IP "Metalink"
 This curl supports Metalink (RFC 5854), which describes mirrors and hashes.
+curl will use mirrors for failover if there are errors (such as the file or
+server not being available).
 .RE
 .SH FILES
 .I ~/.curlrc
