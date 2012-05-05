@@ -35,8 +35,8 @@ command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer
-resume and more. As you will see below, the number of features will make your
-head spin!
+resume, Metalink, and more. As you will see below, the number of features will
+make your head spin!
 
 curl is powered by libcurl for all transfer-related features. See
 .BR libcurl (3)
@@ -832,6 +832,15 @@ is used, this option can be used to prevent curl from following redirections
 option to -1 to make it limitless.
 
 If this option is used several times, the last one will be used.
+.IP "--metalink"
+Makes curl parse and process a local Metalink file (RFC 5854) and make use
+of the mirrors listed within for failover if there are errors (such as the
+file or server not being available).
+
+If Metalink support is enabled, curl will also use remote Metalinks if they
+are offered with the correct MIME type (application/metalink+xml).
+
+(Added in 7.??.?)
 .IP "-n, --netrc"
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
@@ -1693,6 +1702,8 @@ SSPI is supported. If you use NTLM and set a blank user name, curl will
 authenticate with your current user and password.
 .IP "TLS-SRP"
 SRP (Secure Remote Password) authentication is supported for TLS.
+.IP "Metalink"
+This curl supports Metalink (RFC 5854), which describes mirrors and hashes.
 .RE
 .SH FILES
 .I ~/.curlrc
