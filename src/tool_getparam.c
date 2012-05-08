@@ -1566,6 +1566,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           if(curlinfo->features & feats[i].bitmask)
             printf("%s ", feats[i].name);
         }
+#ifdef HAVE_LIBMETALINK
+        printf("Metalink ");
+#endif /* HAVE_LIBMETALINK */
         puts(""); /* newline */
       }
     }
