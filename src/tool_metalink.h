@@ -50,4 +50,10 @@ void clean_metalink(struct Configurable *config);
 
 int parse_metalink(struct Configurable *config, const char *infile);
 
+/*
+ * Returns nonzero if content_type includes "application/metalink+xml"
+ * media-type. The check is done in case-insensitive manner.
+ */
+int check_metalink_content_type(const char *content_type);
+
 #endif /* HEADER_CURL_TOOL_METALINK_H */

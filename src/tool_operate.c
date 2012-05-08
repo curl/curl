@@ -1582,8 +1582,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
              Metalink file, parse it and add getout for them. */
           char *content_type;
           curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
-          if(content_type &&
-             Curl_raw_equal("application/metalink+xml", content_type)) {
+          if(content_type && check_metalink_content_type(content_type)) {
             if(!(config->mute)) {
               fprintf(config->errors, "\nParsing Metalink file: %s\n",
                       outs.filename);

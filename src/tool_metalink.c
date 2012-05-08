@@ -20,6 +20,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
+#include "rawstr.h"
+
 #include "tool_metalink.h"
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
@@ -141,4 +144,25 @@ int parse_metalink(struct Configurable *config, const char *infile)
     }
   }
   return 0;
+}
+
+/*
+ * Returns nonzero if content_type includes mediatype.
+ */
+static int check_content_type(const char *content_type, const char *media_type)
+{
+  const char *ptr = content_type;
+  size_t media_type_len = strlen(media_type);
+  for(; *ptr && (*ptr == ' ' || *ptr == '\t'); ++ptr);
+  if(!*ptr) {
+    return 0;
+  }
+  return Curl_raw_nequal(ptr, media_type, media_type_len) &&
+    (*(ptr+media_type_len) == '\0' || *(ptr+media_type_len) == ' ' ||
+     *(ptr+media_type_len) == '\t' || *(ptr+media_type_len) == ';');
+}
+
+int check_metalink_content_type(const char *content_type)
+{
+  return check_content_type(content_type, "application/metalink+xml");
 }
