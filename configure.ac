@@ -2387,41 +2387,37 @@ dnl **********************************************************************
 dnl Check for linker switch for versioned symbols
 dnl **********************************************************************
 
-AC_MSG_CHECKING([if libraries can be versioned])
-GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
-if test -z "$GLD"; then
-    versioned_symbols_flavour=
-    AC_MSG_RESULT(no)
-    AC_MSG_WARN(***
-*** You need an ld version supporting the --version-script option.
-)
-else
-    AC_MSG_RESULT(yes)
-
-AC_MSG_CHECKING([whether versioned symbols are wanted])
 versioned_symbols_flavour=
-
+AC_MSG_CHECKING([whether versioned symbols are wanted])
 AC_ARG_ENABLE(versioned-symbols,
 AC_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
 AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shared library]),
 [ case "$enableval" in
   yes) AC_MSG_RESULT(yes)
-    if test "x$OPENSSL_ENABLED" = "x1"; then
-      versioned_symbols_flavour="OPENSSL_"
-    elif test "x$GNUTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="GNUTLS_"
-    elif test "x$NSS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="NSS_"
-    elif test "x$POLARSSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="POLARSSL_"
-    elif test "x$CYASSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="CYASSL_"
-    elif test "x$AXTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="AXTLS_"
+    AC_MSG_CHECKING([if libraries can be versioned])
+    GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+    if test -z "$GLD"; then
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([You need an ld version supporting the --version-script option])
     else
-      versioned_symbols_flavour=""
+        AC_MSG_RESULT(yes)
+        if test "x$OPENSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="OPENSSL_"
+        elif test "x$GNUTLS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="GNUTLS_"
+        elif test "x$NSS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="NSS_"
+        elif test "x$POLARSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="POLARSSL_"
+        elif test "x$CYASSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="CYASSL_"
+        elif test "x$AXTLS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="AXTLS_"
+        else
+          versioned_symbols_flavour=""
+        fi
+        versioned_symbols="yes"
     fi
-    versioned_symbols="yes"
     ;;
 
   *)   AC_MSG_RESULT(no)
