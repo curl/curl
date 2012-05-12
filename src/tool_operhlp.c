@@ -39,12 +39,7 @@
  */
 char *my_useragent(void)
 {
-  char useragent[256]; /* we don't want a larger default user agent */
-
-  snprintf(useragent, sizeof(useragent),
-           CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
-
-  return strdup(useragent);
+  return strdup( CURL_NAME "/" CURL_VERSION );
 }
 
 /*
