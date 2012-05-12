@@ -169,7 +169,7 @@
  To make libcurl do blazing fast IPv6 in a dual-stack configuration, this needs
  to be addressed:
 
-    http://tools.ietf.org/html/draft-ietf-v6ops-happy-eyeballs-07
+    http://tools.ietf.org/html/rfc6555
 
 
 2. libcurl - multi interface
