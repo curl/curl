@@ -1574,7 +1574,7 @@ means the verification was successful. (Added in 7.19.0)
 .RE
 
 If this option is used several times, the last one will be used.
-.IP "-x, --proxy <[protocol://][user@password]proxyhost[:port]>"
+.IP "-x, --proxy <[protocol://][user:password@]proxyhost[:port]>"
 Use the specified HTTP proxy. If the port number is not specified, it is
 assumed at port 1080.
 
@@ -1586,6 +1586,10 @@ All operations that are performed over a HTTP proxy will transparently be
 converted to HTTP. It means that certain protocol specific operations might
 not be available. This is not the case if you can tunnel through the proxy, as
 one with the \fI-p, --proxytunnel\fP option.
+
+User and password that might be provided in the proxy string are URL decoded
+by libcurl. This allows you to pass in special characters such as @ by using
+%40 or pass in a colon with %3a.
 
 The proxy host can be specified the exact same way as the proxy environment
 variables, including the protocol prefix (http://) and the embedded user +
