@@ -2427,7 +2427,6 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
 AC_MSG_RESULT(no)
 ]
 )
-fi
 
 AC_SUBST(VERSIONED_FLAVOUR, ["$versioned_symbols_flavour"])
 AM_CONDITIONAL(VERSIONED_SYMBOLS, test "x$versioned_symbols" = "xyes")
