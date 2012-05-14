@@ -94,6 +94,10 @@ int parse_metalink(struct Configurable *config, const char *infile)
   if(r != 0) {
     return -1;
   }
+  if(metalink->files == NULL) {
+    fprintf(config->errors, "\nMetalink does not contain any file.\n");
+    return 0;
+  }
   ml = new_metalink(metalink);
 
   if(config->metalink_list) {
@@ -107,7 +111,11 @@ int parse_metalink(struct Configurable *config, const char *infile)
   for(files = metalink->files; *files; ++files) {
     struct getout *url;
     /* Skip an entry which has no resource. */
-    if(!(*files)->resources[0]) continue;
+    if(!(*files)->resources) {
+      fprintf(config->errors, "\nFile %s does not have any resource.\n",
+              (*files)->name);
+      continue;
+    }
     if(config->url_get ||
        ((config->url_get = config->url_list) != NULL)) {
       /* there's a node here, if it already is filled-in continue to
