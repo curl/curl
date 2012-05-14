@@ -406,8 +406,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     int infilenum;
     URLGlob *inglob;
 
+    int metalink = 0; /* nonzero for metalink download. Put outside of
+                         HAVE_LIBMETALINK to reduce #ifdef */
 #ifdef HAVE_LIBMETALINK
-    int metalink; /* nonzero for metalink download */
     struct metalinkfile *mlfile;
     metalink_resource_t **mlres;
 #endif /* HAVE_LIBMETALINK */
@@ -427,7 +428,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       mlres = mlfile->file->resources;
     }
     else {
-      metalink = 0;
       mlfile = NULL;
       mlres = NULL;
     }
@@ -642,7 +642,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           /* Create the directory hierarchy, if not pre-existent to a multiple
              file output call */
 
-          if(config->create_dirs) {
+          if(config->create_dirs || metalink) {
             res = create_dir_hierarchy(outfile, config->errors);
             /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
             if(res == CURLE_WRITE_ERROR)
