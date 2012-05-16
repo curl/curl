@@ -306,41 +306,10 @@ FAQ
   We don't know how many users that downloaded or installed curl and then
   never use it.
 
-  Some facts to use as input to the math:
+  In May 2012 Daniel did a counting game and came up with a number that may
+  be completely wrong or somewhat accurate. 300 million!
 
-  curl packages are downloaded from the curl.haxx.se and mirrors over a
-  million times per year. curl is installed by default with most Linux
-  distributions. curl is installed by default with Mac OS X. curl and libcurl
-  as used by numerous applications that include libcurl binaries in their
-  distribution packages (like Adobe Acrobat Reader and Google Earth).
-
-  More than a hundred known named companies use curl in commercial
-  environments and products and more than a hundred known named open source
-  projects depend on (lib)curl.
-
-  In a poll on the curl web site mid-2005, more than 50% of the 300+ answers
-  estimated a user base of one million users or more.
-
-  In March 2005, the "Linux Counter project" estimated a total Linux user base
-  of some 29 millions, while Netcraft detected some 4 million "active" Linux
-  based web servers. A guess is that a fair amount of these Linux
-  installations have curl installed.
-
-  The Debian project maintains statistics on packages installed by people
-  who have voluntarily run their package counting application.  In mid-2010,
-  libcurl3 was installed on over 55000 such systems (62% of reporting systems)
-  and was one of the 320 most popular installed packages (out of about 107000
-  possible packages).
-
-  All this taken together, there is no doubt that there are millions of
-  (lib)curl users.
-
-  http://curl.haxx.se/docs/companies.html
-  http://curl.haxx.se/docs/programs.html
-  http://curl.haxx.se/libcurl/using/apps.html
-  http://counter.li.org/estimates.php
-  http://news.netcraft.com/archives/2005/03/14/fedora_makes_rapid_progress.html
-  http://qa.debian.org/popcon.php?package=curl
+  See http://daniel.haxx.se/blog/2012/05/16/300m-users/
 
   1.11 Why don't you update ca-bundle.crt
 
