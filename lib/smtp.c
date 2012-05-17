@@ -1929,17 +1929,19 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
 
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
 {
-  /* When sending SMTP payload, we must detect CRLF.CRLF sequences in
-   * the data and make sure it is sent as CRLF..CRLF instead, as
-   * otherwise it will wrongly be detected as end of data by the server.
-   */
+  /* When sending a SMTP payload we must detect CRLF. sequences making sure
+     they are sent as CRLF.. instead, as a . on the beginning of a line will
+     be deleted by the server when not part of an EOB terminator and a
+     genuine CRLF.CRLF which isn't escaped will wrongly be detected as end of
+     data by the server.
+  */
   ssize_t i;
   ssize_t si;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data = conn->data;
 
   /* Do we need to allocate the scatch buffer? */
-  if(!data->state.scratch)  {
+  if(!data->state.scratch) {
     data->state.scratch = malloc(2 * BUFSIZE);
 
     if(!data->state.scratch) {
@@ -1965,18 +1967,12 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
         smtpc->eob = 0;
     }
 
-    if(SMTP_EOB_LEN == smtpc->eob) {
-      /* It matched, copy the replacement data to the target buffer
-         instead. Note that the replacement does not contain the
-         trailing CRLF but we instead continue to match on that one
-         to deal with repeated sequences. Like CRLF.CRLF.CRLF etc
-      */
-      memcpy(&data->state.scratch[si], SMTP_EOB_REPL,
-             SMTP_EOB_REPL_LEN);
+    /* Do we have a match for CRLF. as per RFC-2821, sect. 4.5.2 */
+    if(SMTP_EOB_FIND_LEN == smtpc->eob) {
+      /* Copy the replacement data to the target buffer */
+      memcpy(&data->state.scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
       si += SMTP_EOB_REPL_LEN;
-
-      /* Start over at two bytes */
-      smtpc->eob = 2;
+      smtpc->eob = 0;
     }
     else if(!smtpc->eob)
       data->state.scratch[si++] = data->req.upload_fromhere[i];

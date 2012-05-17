@@ -82,6 +82,7 @@ extern const struct Curl_handler Curl_handler_smtps;
 /* this is the 5-bytes End-Of-Body marker for SMTP */
 #define SMTP_EOB "\x0d\x0a\x2e\x0d\x0a"
 #define SMTP_EOB_LEN 5
+#define SMTP_EOB_FIND_LEN 3
 
 /* if found in data, replace it with this string instead */
 #define SMTP_EOB_REPL "\x0d\x0a\x2e\x2e"
