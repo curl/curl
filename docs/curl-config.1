@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -93,7 +93,6 @@ What's the installed libcurl version?
 
 How do I build a single file with a one-line command?
 
-  $ `curl-config --cc --cflags --libs` -o example example.c
-
+  $ `curl-config --cc --cflags` -o example example.c `curl-config --libs`
 .SH "SEE ALSO"
 .BR curl (1)
