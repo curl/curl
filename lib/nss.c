@@ -670,11 +670,10 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 /**
  * Inform the application that the handshake is complete.
  */
-static SECStatus HandshakeCallback(PRFileDesc *sock, void *arg)
+static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   (void)sock;
   (void)arg;
-  return SECSuccess;
 }
 
 static void display_cert_info(struct SessionHandle *data,
@@ -1341,12 +1340,10 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   data->set.ssl.certverifyresult=0; /* not checked yet */
-  if(SSL_BadCertHook(model, (SSLBadCertHandler) BadCertHandler, conn)
-     != SECSuccess) {
+  if(SSL_BadCertHook(model, BadCertHandler, conn) != SECSuccess)
     goto error;
-  }
-  if(SSL_HandshakeCallback(model, (SSLHandshakeCallback) HandshakeCallback,
-                           NULL) != SECSuccess)
+
+  if(SSL_HandshakeCallback(model, HandshakeCallback, NULL) != SECSuccess)
     goto error;
 
   if(data->set.ssl.verifypeer) {
