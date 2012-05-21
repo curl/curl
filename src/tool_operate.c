@@ -1594,6 +1594,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               fprintf(config->errors, "Could not parse Metalink file.\n");
           }
         }
+        else if(metalink && res == CURLE_OK && !metalink_next_res) {
+          int rv = metalink_check_hash(config, mlfile, outs.filename);
+          if(rv == 0) {
+            metalink_next_res = 1;
+          }
+        }
 #endif /* HAVE_LIBMETALINK */
 
         /* No more business with this output struct */
@@ -1619,6 +1625,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             break;
           }
           if(!metalink_next_res || *(++mlres) == NULL)
+            /* TODO If metalink_next_res is 1 and mlres is NULL,
+             * set res to error code
+             */
             break;
         }
         else
