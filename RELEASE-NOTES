@@ -9,6 +9,7 @@ Curl and libcurl 7.26.1
 
 This release includes the following changes:
 
+ o nss: use human-readable error messages provided by NSS
  o 
 
 This release includes the following bugfixes:
