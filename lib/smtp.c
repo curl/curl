@@ -1840,14 +1840,15 @@ static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 /* called from multi.c while DOing */
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done)
 {
-  CURLcode result;
-  result = smtp_multi_statemach(conn, dophase_done);
+  CURLcode result = smtp_multi_statemach(conn, dophase_done);
 
-  if(*dophase_done) {
-    result = smtp_dophase_done(conn, FALSE /* not connected */);
-
+  if(result)
+    DEBUGF(infof(conn->data, "DO phase failed\n"));
+  else
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
-  }
+
+  if(*dophase_done)
+    smtp_dophase_done(conn, FALSE /* not connected */);
 
   return result;
 }
