@@ -1,15 +1,10 @@
-To be addressed in 7.24.1
-=========================
+To be addressed in 7.27
+=======================
 
-295 - "RTSP Authentication (#22)" https://github.com/bagder/curl/pull/22
+309 - metalink support for the curl tool
 
-296 - "OOM leak in multi code" (by Dan Fandrich)
+310 - a new authentication callback
 
-300 - "Polling on stray socket on sequential transfers." Andrew S
-      http://curl.haxx.se/mail/lib-2011-07/0053.html
+311 - support for SSPI schannel for SSL on windows
 
-308 - Revisit option --enable-threaded-resolver at least allow selection among
-      pthreads and Windows threads when building a Windows target.
-      http://curl.haxx.se/mail/lib-2012-01/0291.html
-
-309 - 
+312 - 
