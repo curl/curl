@@ -34,9 +34,9 @@ typedef void (* Curl_MD5_update_func)(void *context,
 typedef void (* Curl_MD5_final_func)(unsigned char *result, void *context);
 
 typedef struct {
-  Curl_MD5_init_func     md5_init;      /* Initialize context procedure */
-  Curl_MD5_update_func   md5_update;    /* Update context with data */
-  Curl_MD5_final_func    md5_final;     /* Get final result procedure */
+  Curl_MD5_init_func     md5_init_func;   /* Initialize context procedure */
+  Curl_MD5_update_func   md5_update_func; /* Update context with data */
+  Curl_MD5_final_func    md5_final_func;  /* Get final result procedure */
   unsigned int           md5_ctxtsize;  /* Context structure size */
   unsigned int           md5_resultlen; /* Result length (bytes) */
 } MD5_params;

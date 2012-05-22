@@ -145,7 +145,7 @@ static void setup_des_key(const unsigned char *key_56,
 {
   char key[8];
   extend_key_56_to_64(key_56, key);
-  des_set_key(des, key);
+  des_set_key(des, (const uint8_t*)key);
 }
 
 #elif defined(USE_GNUTLS)
@@ -389,7 +389,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
 #elif defined(USE_GNUTLS_NETTLE)
     struct md4_ctx MD4pw;
     md4_init(&MD4pw);
-    md4_update(&MD4pw, 2 * len, pw);
+    md4_update(&MD4pw, (unsigned int)(2 * len), pw);
     md4_digest(&MD4pw, MD4_DIGEST_SIZE, ntbuffer);
 #elif defined(USE_GNUTLS)
     gcry_md_hd_t MD4pw;
