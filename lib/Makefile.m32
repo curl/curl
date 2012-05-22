@@ -7,18 +7,18 @@
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
-## set ZLIB_PATH=c:/zlib-1.2.6
+## set ZLIB_PATH=c:/zlib-1.2.7
 ## set ZLIB=1
 #
 ###########################################################################
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.6
+ZLIB_PATH = ../../zlib-1.2.7
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8w
+OPENSSL_PATH = ../../openssl-0.9.8x
 endif
 ifndef OPENSSL_INCLUDE
 OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
@@ -31,7 +31,7 @@ OPENSSL_LIBS = -leay32 -lssl32
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.1
+LIBSSH2_PATH = ../../libssh2-1.4.2
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
