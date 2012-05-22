@@ -1,4 +1,4 @@
-Curl and libcurl 7.25.1
+Curl and libcurl 7.26.0
 
  Public curl releases:         127
  Command line options:         151
@@ -40,6 +40,12 @@ This release includes the following bugfixes:
  o CMake: fix MS Visual Studio x64 unsigned long long literal suffix [3]
  o configure: update detection logic of getaddrinfo() thread-safeness
  o configure: check for gethostbyname in the watt lib
+ o curl-config.1: fix curl-config usage in example [13]
+ o smtp: Fixed non-escaping of dot character at beginning of line
+ o MakefileBuild.vc: use the correct IDN variable
+ o autoconf: improve handling of versioned symbols
+ o curl.1: clarify -x usage
+ o curl: shorten user-agent
 
 This release includes the following known bugs:
 
@@ -52,7 +58,8 @@ advice from friends like these:
  Gokhan Sengun, Guenter Knauf, Jan Schaumann, Jonathan Nieder, Kamil Dudka,
  Lijo Antony, Olaf Flebbe, Rodrigo Silva, Steve Holme, Tatsuhiro Tsujikawa,
  Tim Heckman, Yang Tse, Arnaud Compan, Blaise Potard, Daniel Theron,
- Michael Mueller, Michael Wallner, Tim Heckman, Roman Mamedov
+ Michael Mueller, Michael Wallner, Tim Heckman, Roman Mamedov, Julian Taylor,
+ Claes Jakobsson, Pierre Chapuis
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -70,4 +77,4 @@ References to bug reports and discussions on issues:
  [10] = http://tools.ietf.org/html/rfc6125#section-6.4.3
  [11] = http://curl.haxx.se/bug/view.cgi?id=3510057
  [12] = http://curl.haxx.se/mail/lib-2012-03/0238.html
-
+ [13] = http://curl.haxx.se/bug/view.cgi?id=3528241
