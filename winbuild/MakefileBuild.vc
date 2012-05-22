@@ -163,7 +163,7 @@ CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
 LFLAGS    = $(LFLAGS) Normaliz.lib
 !ENDIF
 
-!IF "$(USE_IPV6)"=="yes"
+!IF "$(USE_IPV6)"=="true"
 CFLAGS = $(CFLAGS) /DUSE_IPV6
 USE_IPV6=true
 !ENDIF
