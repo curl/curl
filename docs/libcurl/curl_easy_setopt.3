@@ -1875,7 +1875,7 @@ could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
 replace or extend the set of headers sent by libcurl. Use
 \fICURLOPT_HTTP_VERSION\fP to change HTTP version.
 
-(Support for POP3 added in 7.25.1)
+(Support for POP3 added in 7.26.0)
 .IP CURLOPT_FILETIME
 Pass a long. If it is 1, libcurl will attempt to get the modification date of
 the remote document in this operation. This requires that the remote server
@@ -2388,7 +2388,7 @@ variable is set, and just "id_dsa.pub" in the current directory if HOME is not
 set.  (Added in 7.16.1)
 If an empty string is passed, libcurl will pass no public key to libssh2
 which then tries to compute it from the private key, this is known to work
-when libssh2 1.4.0+ is linked against OpenSSL. (Added in 7.25.1)
+when libssh2 1.4.0+ is linked against OpenSSL. (Added in 7.26.0)
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
 Pass a char * pointing to a file name for your private key. If not used,
 libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
