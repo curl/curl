@@ -745,6 +745,26 @@ user's home directory
 sftp://ssh.example.com/~/Documents/ - This requests a directory listing
 of the Documents directory under the user's home directory
 
+.B LDAP
+
+The path part of a LDAP request can be used to specify the: Distinguished
+Name, Attributes, Scope, Filter and Extension for an LDAP search. Each field
+is separated by a question mark and when that field is not required an empty
+string with the question mark separator should be included.
+
+ldap://ldap.example.com/o=My%20Organisation - This will perform a LDAP search
+with the DN as My Organisation.
+
+ldap://ldap.example.com/o=My%20Organisation?postalAddress - This will perform
+the same search but will only return postalAddress attributes.
+
+ldap://ldap.example.com/?rootDomainNamingContext - This specifies an empty DN
+and requests information about the rootDomainNamingContext attribute for an
+Active Directory server.
+
+For more information about the individual components of an LDAP URL please
+see RFC-4516.
+
 .B NOTES
 
 Starting with version 7.20.0, the fragment part of the URI will not be sent as
