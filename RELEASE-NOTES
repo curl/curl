@@ -46,6 +46,9 @@ This release includes the following bugfixes:
  o autoconf: improve handling of versioned symbols
  o curl.1: clarify -x usage
  o curl: shorten user-agent
+ o smtp: issue with the multi-interface always sending postdata [14]
+ o compile error with GnuTLS+Nettle fixed
+ o winbuild: fix IPv6 enabled build
 
 This release includes the following known bugs:
 
@@ -59,7 +62,7 @@ advice from friends like these:
  Lijo Antony, Olaf Flebbe, Rodrigo Silva, Steve Holme, Tatsuhiro Tsujikawa,
  Tim Heckman, Yang Tse, Arnaud Compan, Blaise Potard, Daniel Theron,
  Michael Mueller, Michael Wallner, Tim Heckman, Roman Mamedov, Julian Taylor,
- Claes Jakobsson, Pierre Chapuis
+ Claes Jakobsson, Pierre Chapuis, Jan Ehrhardt
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -78,3 +81,5 @@ References to bug reports and discussions on issues:
  [11] = http://curl.haxx.se/bug/view.cgi?id=3510057
  [12] = http://curl.haxx.se/mail/lib-2012-03/0238.html
  [13] = http://curl.haxx.se/bug/view.cgi?id=3528241
+ [14] = http://curl.haxx.se/mail/lib-2012-05/0108.html
+ 
