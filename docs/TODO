@@ -62,14 +62,14 @@
  8.4 non-gcrypt
 
  9. SMTP
- 9.1 Other authentication mechanims
+ 9.1 Other authentication mechanisms
  9.2 Specify the preferred authentication mechanism
  9.3 Initial response
  9.4 Pipelining
  
  10. POP3
  10.1 APOP Authentication
- 10.2 Other authentication mechanims
+ 10.2 Other authentication mechanisms
  10.3 auth= in URLs
  
  11. Other protocols
@@ -373,15 +373,14 @@ to provide the data to send.
 
 9. SMTP
 
-9.1 Other authentication mechanims
+9.1 Other authentication mechanisms
 
- Add support for other authentication mechanisms such as digest-md5 and
- gssapi.
+ Add support for gssapi.
 
 9.2 Specify the preferred authentication mechanism
 
  Add the ability to specify the preferred authentication mechanism or a list
- of mechanims that should be used. Not only that, but the order that is
+ of mechanisms that should be used. Not only that, but the order that is
  returned by the server during the EHLO response should be honored by curl.
  
 9.3 Initial response
@@ -396,7 +395,7 @@ to provide the data to send.
 9.4 Pipelining
 
  Add support for pipelining emails.
- 
+
 10. POP3
 
 10.1 APOP Authentication
@@ -406,7 +405,7 @@ to provide the data to send.
  is specified as "APOP <username> <md5 password>", however, it isn't
  supported by all mail servers.
  
-10.2 Other authentication mechanims
+10.2 Other authentication mechanisms
 
  SASL offers support for additional authentication mechanisms via the AUTH
  command. Detection of an email server's support for SASL authentication
