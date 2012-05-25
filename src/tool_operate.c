@@ -504,6 +504,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_sleep_default;
         long retry_sleep;
         char *this_url;
+        HeaderData hdrdata;
 
         outfile = NULL;
         infdopen = FALSE;
@@ -1211,17 +1212,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->proto_redir_present)
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
-        if((urlnode->flags & GETOUT_USEREMOTE)
-           && config->content_disposition) {
-          my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
-          my_setopt(curl, CURLOPT_HEADERDATA, &outs);
-        }
-        else {
-          /* if HEADERFUNCTION was set to something in the previous loop, it
-             is important that we set it (back) to NULL now */
-          my_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
-          my_setopt(curl, CURLOPT_HEADERDATA, config->headerfile?&heads:NULL);
-        }
+        hdrdata.urlnode = urlnode;
+        hdrdata.outs = &outs;
+        hdrdata.heads = &heads;
+
+        my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
+        my_setopt(curl, CURLOPT_HEADERDATA, &hdrdata);
 
         if(config->resolve)
           /* new in 7.21.3 */

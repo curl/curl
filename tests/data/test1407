@@ -75,6 +75,8 @@ int main(int argc, char *argv[])
   CURLOPT_STDERR set to a objectpointer
   CURLOPT_DEBUGFUNCTION set to a functionpointer
   CURLOPT_DEBUGDATA set to a objectpointer
+  CURLOPT_HEADERFUNCTION set to a functionpointer
+  CURLOPT_HEADERDATA set to a objectpointer
 
   */
 

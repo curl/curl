@@ -41,7 +41,10 @@ static char *parse_filename(const char *ptr, size_t len);
 
 size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
-  struct OutStruct *outs = userdata;
+  HeaderData *hdrdata = userdata;
+  struct getout *urlnode = hdrdata->urlnode;
+  struct OutStruct *outs = hdrdata->outs;
+  struct OutStruct *heads = hdrdata->heads;
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char*)ptr + cb;
@@ -63,8 +66,13 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
     return failure;
   }
 #endif
+  /* --dump-header option */
+  if(outs->config->headerfile) {
+    fwrite(ptr, size, nmemb, heads->stream);
+  }
 
-  if((cb > 20) && checkprefix("Content-disposition:", str)) {
+  if((urlnode->flags & GETOUT_USEREMOTE) && outs->config->content_disposition
+     && (cb > 20) && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter

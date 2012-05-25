@@ -23,6 +23,16 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+/* Structure to pass as userdata in tool_header_cb */
+typedef struct {
+  /* getout object pointer currently processing */
+  struct getout *urlnode;
+  /* output stream */
+  struct OutStruct *outs;
+  /* header output stream */
+  struct OutStruct *heads;
+} HeaderData;
+
 /*
 ** callback for CURLOPT_HEADERFUNCTION
 */
