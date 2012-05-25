@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,6 +24,7 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
+cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
 
 usage()
 {
@@ -128,10 +129,15 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	if test "X@includedir@" = "X/usr/include"; then
-          echo ""
+        if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
+          CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB "
         else
-          echo "-I@includedir@"
+          CPPFLAG_CURL_STATICLIB=""
+        fi
+       	if test "X@includedir@" = "X/usr/include"; then
+          echo "$(CPPFLAG_CURL_STATICLIB)"
+        else
+          echo "$(CPPFLAG_CURL_STATICLIB)-I@includedir@"
         fi
        	;;
 

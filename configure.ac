@@ -240,6 +240,7 @@ AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
 use_cppflag_building_libcurl="no"
 use_cppflag_curl_staticlib="no"
+CPPFLAG_CURL_STATICLIB=""
 case $host in
   *-*-mingw*)
     AC_MSG_RESULT(yes)
@@ -249,6 +250,7 @@ case $host in
     then
       AC_MSG_RESULT(yes)
       use_cppflag_curl_staticlib="yes"
+      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB"
     else
       AC_MSG_RESULT(no)
     fi
@@ -259,6 +261,7 @@ case $host in
 esac
 AM_CONDITIONAL(USE_CPPFLAG_BUILDING_LIBCURL, test x$use_cppflag_building_libcurl = xyes)
 AM_CONDITIONAL(USE_CPPFLAG_CURL_STATICLIB, test x$use_cppflag_curl_staticlib = xyes)
+AC_SUBST(CPPFLAG_CURL_STATICLIB)
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
