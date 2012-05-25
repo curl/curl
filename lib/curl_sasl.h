@@ -25,12 +25,12 @@
 #include "pingpong.h"
 
 /* Authentication mechanism flags */
-#define SMTP_AUTH_LOGIN         0x0001
-#define SMTP_AUTH_PLAIN         0x0002
-#define SMTP_AUTH_CRAM_MD5      0x0004
-#define SMTP_AUTH_DIGEST_MD5    0x0008
-#define SMTP_AUTH_GSSAPI        0x0010
-#define SMTP_AUTH_EXTERNAL      0x0020
-#define SMTP_AUTH_NTLM          0x0040
+#define SASL_AUTH_LOGIN         0x0001
+#define SASL_AUTH_PLAIN         0x0002
+#define SASL_AUTH_CRAM_MD5      0x0004
+#define SASL_AUTH_DIGEST_MD5    0x0008
+#define SASL_AUTH_GSSAPI        0x0010
+#define SASL_AUTH_EXTERNAL      0x0020
+#define SASL_AUTH_NTLM          0x0040
 
 #endif /* HEADER_CURL_SASL_H */

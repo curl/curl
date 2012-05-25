@@ -259,19 +259,19 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
         wordlen++;
 
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
-        smtpc->authmechs |= SMTP_AUTH_LOGIN;
+        smtpc->authmechs |= SASL_AUTH_LOGIN;
       else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
-        smtpc->authmechs |= SMTP_AUTH_PLAIN;
+        smtpc->authmechs |= SASL_AUTH_PLAIN;
       else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
-        smtpc->authmechs |= SMTP_AUTH_CRAM_MD5;
+        smtpc->authmechs |= SASL_AUTH_CRAM_MD5;
       else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
-        smtpc->authmechs |= SMTP_AUTH_DIGEST_MD5;
+        smtpc->authmechs |= SASL_AUTH_DIGEST_MD5;
       else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
-        smtpc->authmechs |= SMTP_AUTH_GSSAPI;
+        smtpc->authmechs |= SASL_AUTH_GSSAPI;
       else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
-        smtpc->authmechs |= SMTP_AUTH_EXTERNAL;
+        smtpc->authmechs |= SASL_AUTH_EXTERNAL;
       else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
-        smtpc->authmechs |= SMTP_AUTH_NTLM;
+        smtpc->authmechs |= SASL_AUTH_NTLM;
 
       line += wordlen;
       len -= wordlen;
@@ -457,40 +457,40 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   /* Check supported authentication mechanisms by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(smtpc->authmechs & SMTP_AUTH_DIGEST_MD5) {
+  if(smtpc->authmechs & SASL_AUTH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
     state1 = SMTP_AUTHDIGESTMD5;
-    smtpc->authused = SMTP_AUTH_DIGEST_MD5;
+    smtpc->authused = SASL_AUTH_DIGEST_MD5;
   }
-  else if(smtpc->authmechs & SMTP_AUTH_CRAM_MD5) {
+  else if(smtpc->authmechs & SASL_AUTH_CRAM_MD5) {
     mech = "CRAM-MD5";
     state1 = SMTP_AUTHCRAMMD5;
-    smtpc->authused = SMTP_AUTH_CRAM_MD5;
+    smtpc->authused = SASL_AUTH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-  if(smtpc->authmechs & SMTP_AUTH_NTLM) {
+  if(smtpc->authmechs & SASL_AUTH_NTLM) {
     mech = "NTLM";
     state1 = SMTP_AUTHNTLM;
     state2 = SMTP_AUTHNTLM_TYPE2MSG;
-    smtpc->authused = SMTP_AUTH_NTLM;
+    smtpc->authused = SASL_AUTH_NTLM;
     result = smtp_auth_ntlm_type1_message(conn, &initresp, &len);
   }
   else
 #endif
-  if(smtpc->authmechs & SMTP_AUTH_LOGIN) {
+  if(smtpc->authmechs & SASL_AUTH_LOGIN) {
     mech = "LOGIN";
     state1 = SMTP_AUTHLOGIN;
     state2 = SMTP_AUTHPASSWD;
-    smtpc->authused = SMTP_AUTH_LOGIN;
+    smtpc->authused = SASL_AUTH_LOGIN;
     result = smtp_auth_login_user(conn, &initresp, &len);
   }
-  else if(smtpc->authmechs & SMTP_AUTH_PLAIN) {
+  else if(smtpc->authmechs & SASL_AUTH_PLAIN) {
     mech = "PLAIN";
     state1 = SMTP_AUTHPLAIN;
     state2 = SMTP_AUTH;
-    smtpc->authused = SMTP_AUTH_PLAIN;
+    smtpc->authused = SASL_AUTH_PLAIN;
     result = smtp_auth_plain_data(conn, &initresp, &len);
   }
   else {
@@ -1811,7 +1811,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
 #ifdef USE_NTLM
   /* Cleanup the ntlm structure */
-  if(smtpc->authused == SMTP_AUTH_NTLM) {
+  if(smtpc->authused == SASL_AUTH_NTLM) {
     Curl_ntlm_sspi_cleanup(&conn->ntlm);
   }
 #endif
