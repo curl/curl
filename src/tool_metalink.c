@@ -36,6 +36,7 @@
 #include "tool_metalink.h"
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
+#include "tool_cfgable.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -273,45 +274,121 @@ int Curl_digest_final(digest_context *context, unsigned char *result)
   return 0;
 }
 
-struct metalinkfile *new_metalinkfile(metalink_file_t *metalinkfile) {
-  struct metalinkfile *f;
-  f = (struct metalinkfile*)malloc(sizeof(struct metalinkfile));
-  f->file = metalinkfile;
+static metalink_checksum *new_metalink_checksum(const char *hash_name,
+                                                const char *hash_value)
+{
+  metalink_checksum *chksum;
+  chksum = malloc(sizeof(metalink_checksum));
+  chksum->next = NULL;
+  chksum->hash_name = strdup(hash_name);
+  chksum->hash_value = strdup(hash_value);
+  return chksum;
+}
+
+static void delete_metalink_checksum(metalink_checksum *chksum)
+{
+  if(chksum == NULL) {
+    return;
+  }
+  Curl_safefree(chksum->hash_value);
+  Curl_safefree(chksum->hash_name);
+  Curl_safefree(chksum);
+}
+
+static metalink_resource *new_metalink_resource(const char *url)
+{
+  metalink_resource *res;
+  res = malloc(sizeof(metalink_resource));
+  res->next = NULL;
+  res->url = strdup(url);
+  return res;
+}
+
+static void delete_metalink_resource(metalink_resource *res)
+{
+  if(res == NULL) {
+    return;
+  }
+  Curl_safefree(res->url);
+  Curl_safefree(res);
+}
+
+static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
+{
+  metalinkfile *f;
+  f = (metalinkfile*)malloc(sizeof(metalinkfile));
   f->next = NULL;
+  f->filename = strdup(fileinfo->name);
+  f->checksum = NULL;
+  f->resource = NULL;
+  if(fileinfo->checksums) {
+    metalink_checksum_t **p;
+    metalink_checksum root, *tail;
+    root.next = NULL;
+    tail = &root;
+    for(p = fileinfo->checksums; *p; ++p) {
+      metalink_checksum *chksum;
+      chksum = new_metalink_checksum((*p)->type, (*p)->hash);
+      tail->next = chksum;
+      tail = chksum;
+    }
+    f->checksum = root.next;
+  }
+  if(fileinfo->resources) {
+    metalink_resource_t **p;
+    metalink_resource root, *tail;
+    root.next = NULL;
+    tail = &root;
+    for(p = fileinfo->resources; *p; ++p) {
+      metalink_resource *res;
+      res = new_metalink_resource((*p)->url);
+      tail->next = res;
+      tail = res;
+    }
+    f->resource = root.next;
+  }
   return f;
 }
 
-struct metalink *new_metalink(metalink_t *metalink) {
-  struct metalink *ml;
-  ml = (struct metalink*)malloc(sizeof(struct metalink));
-  ml->metalink = metalink;
-  ml->next = NULL;
-  return ml;
+static void delete_metalinkfile(metalinkfile *mlfile)
+{
+  metalink_checksum *mc;
+  metalink_resource *res;
+  if(mlfile == NULL) {
+    return;
+  }
+  Curl_safefree(mlfile->filename);
+  for(mc = mlfile->checksum; mc;) {
+    metalink_checksum *next;
+    next = mc->next;
+    delete_metalink_checksum(mc);
+    mc = next;
+  }
+  for(res = mlfile->resource; res;) {
+    metalink_resource *next;
+    next = res->next;
+    delete_metalink_resource(res);
+    res = next;
+  }
+  Curl_safefree(mlfile);
 }
 
-int count_next_metalink_resource(struct metalinkfile *mlfile)
+int count_next_metalink_resource(metalinkfile *mlfile)
 {
   int count = 0;
-  metalink_resource_t **mlres;
-  for(mlres = mlfile->file->resources; *mlres; ++mlres, ++count);
+  metalink_resource *res;
+  for(res = mlfile->resource; res; res = res->next, ++count);
   return count;
 }
 
 void clean_metalink(struct Configurable *config)
 {
   while(config->metalinkfile_list) {
-    struct metalinkfile *mlfile = config->metalinkfile_list;
+    metalinkfile *mlfile = config->metalinkfile_list;
     config->metalinkfile_list = config->metalinkfile_list->next;
-    Curl_safefree(mlfile);
+    delete_metalinkfile(mlfile);
   }
   config->metalinkfile_last = 0;
-  while(config->metalink_list) {
-    struct metalink *ml = config->metalink_list;
-    config->metalink_list = config->metalink_list->next;
-    metalink_delete(ml->metalink);
-    Curl_safefree(ml);
-  }
-  config->metalink_last = 0;
 }
 
 int parse_metalink(struct Configurable *config, const char *infile)
@@ -319,27 +396,16 @@ int parse_metalink(struct Configurable *config, const char *infile)
   metalink_error_t r;
   metalink_t* metalink;
   metalink_file_t **files;
-  struct metalink *ml;
 
   r = metalink_parse_file(infile, &metalink);
-
   if(r != 0) {
     return -1;
   }
   if(metalink->files == NULL) {
     fprintf(config->errors, "\nMetalink does not contain any file.\n");
+    metalink_delete(metalink);
     return 0;
   }
-  ml = new_metalink(metalink);
-
-  if(config->metalink_list) {
-    config->metalink_last->next = ml;
-    config->metalink_last = ml;
-  }
-  else {
-    config->metalink_list = config->metalink_last = ml;
-  }
-
   for(files = metalink->files; *files; ++files) {
     struct getout *url;
     /* Skip an entry which has no resource. */
@@ -363,16 +429,17 @@ int parse_metalink(struct Configurable *config, const char *infile)
       url = config->url_get;
     else
       /* there was no free node, create one! */
-      url=new_getout(config);
+      url = new_getout(config);
 
     if(url) {
-      struct metalinkfile *mlfile;
+      metalinkfile *mlfile;
+      mlfile = new_metalinkfile(*files);
+
       /* Set name as url */
-      GetStr(&url->url, (*files)->name);
+      GetStr(&url->url, mlfile->filename);
 
       /* set flag metalink here */
       url->flags |= GETOUT_URL | GETOUT_METALINK;
-      mlfile = new_metalinkfile(*files);
 
       if(config->metalinkfile_list) {
         config->metalinkfile_last->next = mlfile;
@@ -383,6 +450,7 @@ int parse_metalink(struct Configurable *config, const char *infile)
       }
     }
   }
+  metalink_delete(metalink);
   return 0;
 }
 
@@ -510,25 +578,25 @@ static int check_hash(const char *filename,
 }
 
 int metalink_check_hash(struct Configurable *config,
-                        struct metalinkfile *mlfile,
+                        metalinkfile *mlfile,
                         const char *filename)
 {
-  metalink_checksum_t **checksum;
+  metalink_checksum *chksum;
   const metalink_digest_alias *digest_alias;
   int rv;
-  if(!mlfile->file->checksums) {
+  if(mlfile->checksum == NULL) {
     return -2;
   }
   for(digest_alias = digest_aliases; digest_alias->alias_name;
       ++digest_alias) {
-    for(checksum = mlfile->file->checksums; *checksum; ++checksum) {
-      if(Curl_raw_equal(digest_alias->alias_name, (*checksum)->type) &&
-         strlen((*checksum)->hash) ==
+    for(chksum = mlfile->checksum; chksum; chksum = chksum->next) {
+      if(Curl_raw_equal(digest_alias->alias_name, chksum->hash_name) &&
+         strlen(chksum->hash_value) ==
          digest_alias->digest_def->dparams->digest_resultlen*2) {
         break;
       }
     }
-    if(*checksum) {
+    if(chksum) {
       break;
     }
   }
@@ -537,7 +605,7 @@ int metalink_check_hash(struct Configurable *config,
     return -2;
   }
   rv = check_hash(filename, digest_alias->digest_def,
-                  (*checksum)->hash, config->errors);
+                  chksum->hash_value, config->errors);
   if(rv == 1) {
     fprintf(config->errors, "Checksum matched\n");
   }

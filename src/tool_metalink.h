@@ -25,26 +25,31 @@
 
 #include <metalink/metalink_parser.h>
 
-#include "tool_cfgable.h"
+struct Configurable;
 
-struct metalinkfile {
+typedef struct metalink_checksum {
+  struct metalink_checksum *next;
+  char *hash_name;
+  /* Hex-encoded hash value */
+  char *hash_value;
+} metalink_checksum;
+
+typedef struct metalink_resource {
+  struct metalink_resource *next;
+  char *url;
+} metalink_resource;
+
+typedef struct metalinkfile {
   struct metalinkfile *next;
-  metalink_file_t *file;
-};
-
-struct metalink {
-  struct metalink *next;
-  metalink_t* metalink;
-};
-
-struct metalinkfile *new_metalinkfile(metalink_file_t *metalinkfile);
-
-struct metalink *new_metalink(metalink_t *metalink);
+  char *filename;
+  metalink_checksum *checksum;
+  metalink_resource *resource;
+} metalinkfile;
 
 /*
  * Counts the resource in the metalinkfile.
  */
-int count_next_metalink_resource(struct metalinkfile *mlfile);
+int count_next_metalink_resource(metalinkfile *mlfile);
 
 void clean_metalink(struct Configurable *config);
 
@@ -110,7 +115,7 @@ typedef struct {
  *   checksum.
  */
 int metalink_check_hash(struct Configurable *config,
-                        struct metalinkfile *mlfile,
+                        metalinkfile *mlfile,
                         const char *filename);
 
 #endif /* HEADER_CURL_TOOL_METALINK_H */

@@ -130,7 +130,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   struct OutStruct heads;
 
 #ifdef HAVE_LIBMETALINK
-  struct metalinkfile *mlfile_last = NULL;
+  metalinkfile *mlfile_last = NULL;
 #endif /* HAVE_LIBMETALINK */
 
   CURL *curl = NULL;
@@ -409,8 +409,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     int metalink = 0; /* nonzero for metalink download. Put outside of
                          HAVE_LIBMETALINK to reduce #ifdef */
 #ifdef HAVE_LIBMETALINK
-    struct metalinkfile *mlfile;
-    metalink_resource_t **mlres;
+    metalinkfile *mlfile;
+    metalink_resource *mlres;
 #endif /* HAVE_LIBMETALINK */
 
     outfiles = NULL;
@@ -425,7 +425,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       }
       mlfile = mlfile_last;
       mlfile_last = mlfile_last->next;
-      mlres = mlfile->file->resources;
+      mlres = mlfile->resource;
     }
     else {
       mlfile = NULL;
@@ -558,12 +558,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(metalink) {
           /* For Metalink download, use name in Metalink file as
              filename. */
-          outfile = strdup(mlfile->file->name);
+          outfile = strdup(mlfile->filename);
           if(!outfile) {
             res = CURLE_OUT_OF_MEMORY;
             goto show_error;
           }
-          this_url = strdup((*mlres)->url);
+          this_url = strdup(mlres->url);
           if(!this_url) {
             res = CURLE_OUT_OF_MEMORY;
             goto show_error;
@@ -1624,7 +1624,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           if(is_fatal_error(res)) {
             break;
           }
-          if(!metalink_next_res || *(++mlres) == NULL)
+          if(!metalink_next_res)
+            break;
+          mlres = mlres->next;
+          if(mlres == NULL)
             /* TODO If metalink_next_res is 1 and mlres is NULL,
              * set res to error code
              */

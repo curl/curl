@@ -203,11 +203,8 @@ struct Configurable {
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
 #ifdef HAVE_LIBMETALINK
-  struct metalinkfile *metalinkfile_list; /* point to the first node */
-  struct metalinkfile *metalinkfile_last; /* point to the last/current node */
-
-  struct metalink *metalink_list; /* point to the first node */
-  struct metalink *metalink_last; /* point to the last/current node */
+  metalinkfile *metalinkfile_list; /* point to the first node */
+  metalinkfile *metalinkfile_last; /* point to the last/current node */
 #endif /* HAVE_LIBMETALINK */
 }; /* struct Configurable */
 
