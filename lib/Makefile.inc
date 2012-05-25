@@ -39,4 +39,5 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   curl_memrchr.h imap.h pop3.h smtp.h pingpong.h rtsp.h curl_threads.h	\
   warnless.h curl_hmac.h polarssl.h curl_rtmp.h curl_gethostname.h	\
   gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h \
-  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h
+  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h 	\
+  curl_sasl.h

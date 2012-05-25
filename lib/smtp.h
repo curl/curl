@@ -67,15 +67,6 @@ struct smtp_conn {
   bool ssldone; /* is connect() over SSL done? only relevant in multi mode */
 };
 
-/* Authentication mechanism flags. */
-#define SMTP_AUTH_LOGIN         0x0001
-#define SMTP_AUTH_PLAIN         0x0002
-#define SMTP_AUTH_CRAM_MD5      0x0004
-#define SMTP_AUTH_DIGEST_MD5    0x0008
-#define SMTP_AUTH_GSSAPI        0x0010
-#define SMTP_AUTH_EXTERNAL      0x0020
-#define SMTP_AUTH_NTLM          0x0040
-
 extern const struct Curl_handler Curl_handler_smtp;
 extern const struct Curl_handler Curl_handler_smtps;
 

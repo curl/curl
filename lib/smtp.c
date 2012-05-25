@@ -88,6 +88,7 @@
 #include "curl_hmac.h"
 #include "curl_gethostname.h"
 #include "curl_ntlm_msgs.h"
+#include "curl_sasl.h"
 #include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
