@@ -625,18 +625,18 @@ authentication.
 
 For example the following types of authentication support this:
 
-http://user:password@www.domain.com
-ftp://user:password@ftp.domain.com
-pop3://user:password@mail.domain.com
+http://user:password@www.example.com
+ftp://user:password@ftp.example.com
+pop3://user:password@mail.example.com
 
 The port is optional and when not specified libcurl will use the default port
-based on the determined or specified protocol: 80 for http, 21 for ftp and 25
-for smtp, etc. The following examples show how to specify the port:
+based on the determined or specified protocol: 80 for HTTP, 21 for FTP and 25
+for SMTP, etc. The following examples show how to specify the port:
 
-http://www.weirdserver.com:8080/ - This will connect to a web server using
-port 8080.
+http://www.example.com:8080/ - This will connect to a web server using port
+8080 rather than 80.
 
-smtp://mail.domain.com:587/ - This will connect to a smtp server on the
+smtp://mail.example.com:587/ - This will connect to a SMTP server on the
 alternative mail port.
 
 The path part of the URL is protocol specific and whilst some examples are
@@ -651,13 +651,12 @@ retrieved for either the directory specified or the root directory. The
 exact resource returned for each URL is entirely dependent on the server's
 configuration.
 
-http://www.netscape.com - This gets the main page (index.html in this
-example) from Netscape's web server.
+http://www.example.com - This gets the main page from the web server.
 
-http://www.netscape.com/index.html - This returns the main page from Netscape
-by specifying the page to get.
+http://www.example.com/index.html - This returns the main page by explicitly
+requesting it.
 
-http://www.netscape.com/contactus/ - This returns the default document from
+http://www.example.com/contactus/ - This returns the default document from
 the contactus directory.
 
 .B FTP
@@ -667,15 +666,16 @@ directory. If the file part is omitted then libcurl downloads the directory
 listing for the directory specified. If the directory is omitted then
 the directory listing for the root / home directory will be returned.
 
-ftp://cool.haxx.se - This retrieves the directory listing for our FTP server.
+ftp://ftp.example.com - This retrieves the directory listing for the root
+directory.
 
-ftp://cool.haxx.se/readme.txt - This downloads the file readme.txt from the
+ftp://ftp.example.com/readme.txt - This downloads the file readme.txt from the
 root directory.
 
-ftp://cool.haxx.se/libcurl/readme.txt - This downloads readme.txt from the
+ftp://ftp.example.com/libcurl/readme.txt - This downloads readme.txt from the
 libcurl directory.
 
-ftp://user:password@my.example.com/readme.txt - This retrieves the readme.txt
+ftp://user:password@ftp.example.com/readme.txt - This retrieves the readme.txt
 file from the user's home directory. When a username and password is
 specified, everything that is specified in the path part is relative to the
 user's home directory. To retrieve files from the root directory or a
@@ -683,7 +683,7 @@ directory underneath the root directory then the absolute path must be
 specified by prepending an additional forward slash to the beginning of the
 path.
 
-ftp://user:password@my.example.com//readme.txt - This retrieves the readme.txt
+ftp://user:password@ftp.example.com//readme.txt - This retrieves the readme.txt
 from the root directory when logging in as a specified user.
 
 .B SMTP
@@ -696,11 +696,11 @@ and specifying this path allows you to set an alternative name, such as
 your machine's fully qualified domain name, which you might have obtained
 from an external function such as gethostname or getaddrinfo.
 
-smtp://mail.domain.com - This connects to the mail server at domain.com and
+smtp://mail.example.com - This connects to the mail server at example.com and
 sends your local computer's host name in the HELO / EHLO command.
 
-smtp://mail.domain.com/client.domain.com - This will send client.domain.com in
-the HELO / EHLO command to the mail server at domain.com.
+smtp://mail.example.com/client.example.com - This will send client.example.com in
+the HELO / EHLO command to the mail server at example.com.
 
 .B POP3
 
@@ -708,8 +708,8 @@ The path part of a POP3 request specifies the mailbox (message) to retrieve.
 If the mailbox is not specified then a list of waiting messages is returned
 instead.
 
-pop3://user:password@mail.domain.com - This lists the available messages
-pop3://user:password@mail.domain.com/1 - This retrieves the first message
+pop3://user:password@mail.example.com - This lists the available messages
+pop3://user:password@mail.example.com/1 - This retrieves the first message
 
 .B SCP
 
@@ -843,8 +843,9 @@ Pass a pointer to a zero terminated string. This should be a comma separated
 list of hosts which do not use a proxy, if one is specified.  The only
 wildcard is a single * character, which matches all hosts, and effectively
 disables the proxy. Each name in this list is matched as either a domain which
-contains the hostname, or the hostname itself. For example, local.com would
-match local.com, local.com:80, and www.local.com, but not www.notlocal.com.
+contains the hostname, or the hostname itself. For example, example.com
+would match example.com, example.com:80, and www.example.com, but not
+www.notanexample.com.
 (Added in 7.19.4)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to 1 to make the library tunnel all operations through a
