@@ -31,6 +31,8 @@
 #  include <fcntl.h>
 #endif
 
+#ifdef HAVE_LIBMETALINK
+
 #include <metalink/metalink_parser.h>
 
 #include "rawstr.h"
@@ -618,3 +620,5 @@ void clean_metalink(struct Configurable *config)
   }
   config->metalinkfile_last = 0;
 }
+
+#endif /* HAVE_LIBMETALINK */

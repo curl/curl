@@ -52,9 +52,14 @@ typedef struct metalinkfile {
 /*
  * Counts the resource in the metalinkfile.
  */
+#ifdef HAVE_LIBMETALINK
 int count_next_metalink_resource(metalinkfile *mlfile);
-
 void clean_metalink(struct Configurable *config);
+#else
+#define count_next_metalink_resource(x) 0
+#define clean_metalink(x)
+#endif
+
 
 int parse_metalink(struct Configurable *config, const char *infile);
 
