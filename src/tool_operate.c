@@ -1594,12 +1594,14 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               fprintf(config->errors, "Could not parse Metalink file.\n");
           }
         }
+#  ifdef METALINK_HASH_CHECK
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
           int rv = metalink_check_hash(config, mlfile, outs.filename);
           if(rv == 0) {
             metalink_next_res = 1;
           }
         }
+#  endif /* METALINK_HASH_CHECK */
 #endif /* HAVE_LIBMETALINK */
 
         /* No more business with this output struct */

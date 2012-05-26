@@ -27,6 +27,11 @@
 
 struct Configurable;
 
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS)
+/* Define 1 if hash check is enabled in Metalink transfer */
+#  define METALINK_HASH_CHECK 1
+#endif
+
 typedef struct metalink_checksum {
   struct metalink_checksum *next;
   char *hash_name;

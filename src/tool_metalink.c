@@ -182,24 +182,20 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX * ctx)
 
 #else
 
-#ifdef USE_SSLEAY
-
-#  ifdef USE_OPENSSL
-#    include <openssl/md5.h>
-#    include <openssl/sha.h>
-#  else
-/* TODO What to do if USE_OPENSSL is undefined? */
-#  endif
-
-#else /* USE_SSLEAY */
+#ifdef USE_OPENSSL
+#  include <openssl/md5.h>
+#  include <openssl/sha.h>
+#else /* USE_OPENSSL */
 
 /* TODO hash functions for other libraries here */
 
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
 
 #endif /* USE_GNUTLS */
 
 #endif /* USE_GNUTLS_NETTLE */
+
+#ifdef METALINK_HASH_CHECK
 
 const digest_params MD5_DIGEST_PARAMS[] = {
   {
@@ -273,6 +269,148 @@ int Curl_digest_final(digest_context *context, unsigned char *result)
 
   return 0;
 }
+
+static const metalink_digest_def SHA256_DIGEST_DEF[] = {
+  {"sha-256", SHA256_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def SHA1_DIGEST_DEF[] = {
+  {"sha-1", SHA1_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def MD5_DIGEST_DEF[] = {
+  {"md5", MD5_DIGEST_PARAMS}
+};
+
+/*
+ * The alias of supported hash functions in the order by preference
+ * (basically stronger hash comes first). We included "sha-256" and
+ * "sha256". The former is the name defined in the IANA registry named
+ * "Hash Function Textual Names". The latter is widely (and
+ * historically) used in Metalink version 3.
+ */
+static const metalink_digest_alias digest_aliases[] = {
+  {"sha-256", SHA256_DIGEST_DEF},
+  {"sha256", SHA256_DIGEST_DEF},
+  {"sha-1", SHA1_DIGEST_DEF},
+  {"sha1", SHA1_DIGEST_DEF},
+  {"md5", MD5_DIGEST_DEF},
+  {NULL, NULL}
+};
+
+static unsigned char hex_to_uint(const char *s)
+{
+  int v[2];
+  int i;
+  for(i = 0; i < 2; ++i) {
+    v[i] = Curl_raw_toupper(s[i]);
+    if('0' <= v[i] && v[i] <= '9') {
+      v[i] -= '0';
+    }
+    else if('A' <= v[i] && v[i] <= 'Z') {
+      v[i] -= 'A'-10;
+    }
+  }
+  return (unsigned char)((v[0] << 4) | v[1]);
+}
+
+/*
+ * Check checksum of file denoted by filename. The expected hash value
+ * is given in hex_hash which is hex-encoded string.
+ *
+ * This function returns 1 if it succeeds or one of the following
+ * integers:
+ *
+ * 0:
+ *   Checksum didn't match.
+ * -1:
+ *   Could not open file; or could not read data from file.
+ */
+static int check_hash(const char *filename,
+                      const metalink_digest_def *digest_def,
+                      const char *hex_hash, FILE *error)
+{
+  unsigned char *result;
+  digest_context *dctx;
+  int check_ok;
+  int fd;
+  size_t i;
+  fprintf(error, "Checking %s checksum of file %s\n", digest_def->hash_name,
+          filename);
+  fd = open(filename, O_RDONLY);
+  if(fd == -1) {
+    fprintf(error, "Could not open file %s: %s\n", filename, strerror(errno));
+    return -1;
+  }
+  dctx = Curl_digest_init(digest_def->dparams);
+  result = malloc(digest_def->dparams->digest_resultlen);
+  while(1) {
+    unsigned char buf[4096];
+    ssize_t len = read(fd, buf, sizeof(buf));
+    if(len == 0) {
+      break;
+    }
+    else if(len == -1) {
+      fprintf(error, "Could not read file %s: %s\n", filename,
+              strerror(errno));
+      Curl_digest_final(dctx, result);
+      close(fd);
+      return -1;
+    }
+    Curl_digest_update(dctx, buf, (unsigned int)len);
+  }
+  Curl_digest_final(dctx, result);
+  check_ok = 1;
+  for(i = 0; i < digest_def->dparams->digest_resultlen; ++i) {
+    if(hex_to_uint(&hex_hash[i*2]) != result[i]) {
+      check_ok = 0;
+      break;
+    }
+  }
+  free(result);
+  close(fd);
+  return check_ok;
+}
+
+int metalink_check_hash(struct Configurable *config,
+                        metalinkfile *mlfile,
+                        const char *filename)
+{
+  metalink_checksum *chksum;
+  const metalink_digest_alias *digest_alias;
+  int rv;
+  if(mlfile->checksum == NULL) {
+    return -2;
+  }
+  for(digest_alias = digest_aliases; digest_alias->alias_name;
+      ++digest_alias) {
+    for(chksum = mlfile->checksum; chksum; chksum = chksum->next) {
+      if(Curl_raw_equal(digest_alias->alias_name, chksum->hash_name) &&
+         strlen(chksum->hash_value) ==
+         digest_alias->digest_def->dparams->digest_resultlen*2) {
+        break;
+      }
+    }
+    if(chksum) {
+      break;
+    }
+  }
+  if(!digest_alias->alias_name) {
+    fprintf(config->errors, "No supported checksum in Metalink file\n");
+    return -2;
+  }
+  rv = check_hash(filename, digest_alias->digest_def,
+                  chksum->hash_value, config->errors);
+  if(rv == 1) {
+    fprintf(config->errors, "Checksum matched\n");
+  }
+  else if(rv == 0) {
+    fprintf(config->errors, "Checksum didn't match\n");
+  }
+  return rv;
+}
+
+#endif /* METALINK_HASH_CHECK */
 
 static metalink_checksum *new_metalink_checksum(const char *hash_name,
                                                 const char *hash_value)
@@ -473,144 +611,4 @@ static int check_content_type(const char *content_type, const char *media_type)
 int check_metalink_content_type(const char *content_type)
 {
   return check_content_type(content_type, "application/metalink+xml");
-}
-
-static const metalink_digest_def SHA256_DIGEST_DEF[] = {
-  {"sha-256", SHA256_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def SHA1_DIGEST_DEF[] = {
-  {"sha-1", SHA1_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def MD5_DIGEST_DEF[] = {
-  {"md5", MD5_DIGEST_PARAMS}
-};
-
-/*
- * The alias of supported hash functions in the order by preference
- * (basically stronger hash comes first). We included "sha-256" and
- * "sha256". The former is the name defined in the IANA registry named
- * "Hash Function Textual Names". The latter is widely (and
- * historically) used in Metalink version 3.
- */
-static const metalink_digest_alias digest_aliases[] = {
-  {"sha-256", SHA256_DIGEST_DEF},
-  {"sha256", SHA256_DIGEST_DEF},
-  {"sha-1", SHA1_DIGEST_DEF},
-  {"sha1", SHA1_DIGEST_DEF},
-  {"md5", MD5_DIGEST_DEF},
-  {NULL, NULL}
-};
-
-static unsigned char hex_to_uint(const char *s)
-{
-  int v[2];
-  int i;
-  for(i = 0; i < 2; ++i) {
-    v[i] = Curl_raw_toupper(s[i]);
-    if('0' <= v[i] && v[i] <= '9') {
-      v[i] -= '0';
-    }
-    else if('A' <= v[i] && v[i] <= 'Z') {
-      v[i] -= 'A'-10;
-    }
-  }
-  return (unsigned char)((v[0] << 4) | v[1]);
-}
-
-/*
- * Check checksum of file denoted by filename. The expected hash value
- * is given in hex_hash which is hex-encoded string.
- *
- * This function returns 1 if it succeeds or one of the following
- * integers:
- *
- * 0:
- *   Checksum didn't match.
- * -1:
- *   Could not open file; or could not read data from file.
- */
-static int check_hash(const char *filename,
-                      const metalink_digest_def *digest_def,
-                      const char *hex_hash, FILE *error)
-{
-  unsigned char *result;
-  digest_context *dctx;
-  int check_ok;
-  int fd;
-  size_t i;
-  fprintf(error, "Checking %s checksum of file %s\n", digest_def->hash_name,
-          filename);
-  fd = open(filename, O_RDONLY);
-  if(fd == -1) {
-    fprintf(error, "Could not open file %s: %s\n", filename, strerror(errno));
-    return -1;
-  }
-  dctx = Curl_digest_init(digest_def->dparams);
-  result = malloc(digest_def->dparams->digest_resultlen);
-  while(1) {
-    unsigned char buf[4096];
-    ssize_t len = read(fd, buf, sizeof(buf));
-    if(len == 0) {
-      break;
-    }
-    else if(len == -1) {
-      fprintf(error, "Could not read file %s: %s\n", filename,
-              strerror(errno));
-      Curl_digest_final(dctx, result);
-      close(fd);
-      return -1;
-    }
-    Curl_digest_update(dctx, buf, (unsigned int)len);
-  }
-  Curl_digest_final(dctx, result);
-  check_ok = 1;
-  for(i = 0; i < digest_def->dparams->digest_resultlen; ++i) {
-    if(hex_to_uint(&hex_hash[i*2]) != result[i]) {
-      check_ok = 0;
-      break;
-    }
-  }
-  free(result);
-  close(fd);
-  return check_ok;
-}
-
-int metalink_check_hash(struct Configurable *config,
-                        metalinkfile *mlfile,
-                        const char *filename)
-{
-  metalink_checksum *chksum;
-  const metalink_digest_alias *digest_alias;
-  int rv;
-  if(mlfile->checksum == NULL) {
-    return -2;
-  }
-  for(digest_alias = digest_aliases; digest_alias->alias_name;
-      ++digest_alias) {
-    for(chksum = mlfile->checksum; chksum; chksum = chksum->next) {
-      if(Curl_raw_equal(digest_alias->alias_name, chksum->hash_name) &&
-         strlen(chksum->hash_value) ==
-         digest_alias->digest_def->dparams->digest_resultlen*2) {
-        break;
-      }
-    }
-    if(chksum) {
-      break;
-    }
-  }
-  if(!digest_alias->alias_name) {
-    fprintf(config->errors, "No supported checksum in Metalink file\n");
-    return -2;
-  }
-  rv = check_hash(filename, digest_alias->digest_def,
-                  chksum->hash_value, config->errors);
-  if(rv == 1) {
-    fprintf(config->errors, "Checksum matched\n");
-  }
-  else if(rv == 0) {
-    fprintf(config->errors, "Checksum didn't match\n");
-  }
-  return rv;
 }
