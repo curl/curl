@@ -1205,17 +1205,17 @@ Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
 301, 302 or 303 response back.  A parameter with bit 0 set (value
 \fBCURL_REDIR_POST_301\fP) tells the library to respect RFC2616/10.3.2 and not
 convert POST requests into GET requests when following a 301 redirection.
-Setting bit 1 (value CURL_REDIR_POST_302) makes libcurl maintain the request
-method after a 302 redirect. Setting bit 2 (value \fBCURL_REDIR_POST_303)
-makes libcurl maintain the request method after a 302 redirect.
-CURL_REDIR_POST_ALL is a convenience define that sets both bits.
+Setting bit 1 (value \fBCURL_REDIR_POST_302\fP) makes libcurl maintain the
+request method after a 302 redirect whilst setting bit 2 (value
+\fBCURL_REDIR_POST_303\fP) makes libcurl maintain the request method after a
+303 redirect. The value \fBCURL_REDIR_POST_ALL\fP is a convenience define that
+sets all three bits.
 
 The non-RFC behaviour is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. However, a server may require a
 POST to remain a POST after such a redirection. This option is meaningful only
 when setting \fICURLOPT_FOLLOWLOCATION\fP.  (Added in 7.17.1) (This option was
-known as CURLOPT_POST301 up to 7.19.0 as it only supported the 301 way before
-then)
+known as CURLOPT_POST301 up to 7.19.0 as it only supported the 301 then)
 .IP CURLOPT_PUT
 A parameter set to 1 tells the library to use HTTP PUT to transfer data. The
 data should be set with \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP.
