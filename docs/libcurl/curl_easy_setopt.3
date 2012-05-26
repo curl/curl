@@ -498,7 +498,7 @@ exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl writes the
 interleaved header as well as the included data for each call. The first byte
 is always an ASCII dollar sign. The dollar sign is followed by a one byte
 channel identifier and then a 2 byte integer length in network byte order. See
-\fIRFC 2326 Section 10.12\fP for more information on how RTP interleaving
+\fIRFC2326 Section 10.12\fP for more information on how RTP interleaving
 behaves. If unset or set to NULL, curl will use the default write function.
 
 Interleaved RTP poses some challeneges for the client application. Since the
@@ -597,8 +597,7 @@ terminated string which must be URL-encoded in the following format:
 
 scheme://host:port/path
 
-For a greater explanation of the format please see RFC 3986
-(http://curl.haxx.se/rfc/rfc3986.txt).
+For a greater explanation of the format please see RFC3986.
 
 If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
 etc), libcurl will attempt to resolve which protocol to use based on the
@@ -748,7 +747,7 @@ of the Documents directory under the user's home directory
 .B LDAP
 
 The path part of a LDAP request can be used to specify the: Distinguished
-Name, Attributes, Scope, Filter and Extension for an LDAP search. Each field
+Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field
 is separated by a question mark and when that field is not required an empty
 string with the question mark separator should be included.
 
@@ -762,8 +761,8 @@ ldap://ldap.example.com/?rootDomainNamingContext - This specifies an empty DN
 and requests information about the rootDomainNamingContext attribute for an
 Active Directory server.
 
-For more information about the individual components of an LDAP URL please
-see RFC-4516.
+For more information about the individual components of a LDAP URL please
+see RFC4516.
 
 .B NOTES
 
@@ -858,7 +857,7 @@ default service name for a SOCKS5 server is rcmd/server-fqdn. This option
 allows you to change it. (Added in 7.19.4)
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
 Pass a long set to 1 to enable or 0 to disable. As part of the gssapi
-negotiation a protection mode is negotiated. The rfc1961 says in section
+negotiation a protection mode is negotiated. The RFC1961 says in section
 4.3/4.4 it should be protected, but the NEC reference implementation does not.
 If enabled, this option allows the unprotected exchange of the protection mode
 negotiation. (Added in 7.19.4).
@@ -1119,7 +1118,7 @@ authentication method(s) you want it to use for TLS authentication.
 .RS
 .IP CURLOPT_TLSAUTH_SRP
 TLS-SRP authentication. Secure Remote Password authentication for TLS is
-defined in RFC 5054 and provides mutual authentication if both sides have a
+defined in RFC5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
 \fICURLOPT_TLSAUTH_USERNAME\fP and \fICURLOPT_TLSAUTH_PASSWORD\fP options.
 
@@ -1204,12 +1203,12 @@ an infinite number of redirects (which is the default)
 .IP CURLOPT_POSTREDIR
 Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
 301, 302 or 303 response back.  A parameter with bit 0 set (value
-\fBCURL_REDIR_POST_301\fP) tells the library to respect RFC 2616/10.3.2 and
-not convert POST requests into GET requests when following a 301
-redirection. Setting bit 1 (value CURL_REDIR_POST_302) makes libcurl maintain
-the request method after a 302 redirect. Setting bit 2 (value
-\fBCURL_REDIR_POST_303) makes libcurl maintain the request method after a 302
-redirect. CURL_REDIR_POST_ALL is a convenience define that sets both bits.
+\fBCURL_REDIR_POST_301\fP) tells the library to respect RFC2616/10.3.2 and not
+convert POST requests into GET requests when following a 301 redirection.
+Setting bit 1 (value CURL_REDIR_POST_302) makes libcurl maintain the request
+method after a 302 redirect. Setting bit 2 (value \fBCURL_REDIR_POST_303)
+makes libcurl maintain the request method after a 302 redirect.
+CURL_REDIR_POST_ALL is a convenience define that sets both bits.
 
 The non-RFC behaviour is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. However, a server may require a
@@ -1507,7 +1506,7 @@ should be used for this parameter.
 Unlike CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT, the address should not be
 specified within a pair of angled brackets (<>). However, if an empty string
 is used then a pair of brackets will be sent by libcurl as required by
-RFC-2554.
+RFC2554.
 
 (Added in 7.24.0)
 .SH TFTP OPTIONS
@@ -1841,7 +1840,7 @@ want. It should be in the format "X-Y", where X or Y may be left out. HTTP
 transfers also support several intervals, separated with commas as in
 \fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
 server to send the response document in pieces (using standard MIME separation
-techniques). For RTSP, the formatting of a range should follow RFC 2326
+techniques). For RTSP, the formatting of a range should follow RFC2326
 Section 12.29. For RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges
 should be given in npt, utc, or smpte formats.
 
