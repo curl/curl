@@ -43,10 +43,7 @@
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_version.h"
-
-#ifdef HAVE_LIBMETALINK
-#  include "tool_metalink.h"
-#endif /* HAVE_LIBMETALINK */
+#include "tool_metalink.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

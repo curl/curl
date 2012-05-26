@@ -129,9 +129,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   struct OutStruct heads;
 
-#ifdef HAVE_LIBMETALINK
   metalinkfile *mlfile_last = NULL;
-#endif /* HAVE_LIBMETALINK */
 
   CURL *curl = NULL;
   char *httpgetfields = NULL;
@@ -406,18 +404,14 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     int infilenum;
     URLGlob *inglob;
 
-    int metalink = 0; /* nonzero for metalink download. Put outside of
-                         HAVE_LIBMETALINK to reduce #ifdef */
-#ifdef HAVE_LIBMETALINK
+    int metalink = 0; /* nonzero for metalink download. */
     metalinkfile *mlfile;
     metalink_resource *mlres;
-#endif /* HAVE_LIBMETALINK */
 
     outfiles = NULL;
     infilenum = 1;
     inglob = NULL;
 
-#ifdef HAVE_LIBMETALINK
     if(urlnode->flags & GETOUT_METALINK) {
       metalink = 1;
       if(mlfile_last == NULL) {
@@ -431,7 +425,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       mlfile = NULL;
       mlres = NULL;
     }
-#endif /* HAVE_LIBMETALINK */
 
     /* urlnode->url is the full URL (it might be NULL) */
 
@@ -501,14 +494,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           break;
       }
 
-#ifdef HAVE_LIBMETALINK
       if(metalink) {
         /* For Metalink download, we don't use glob. Instead we use
            the number of resources as urlnum. */
         urlnum = count_next_metalink_resource(mlfile);
       }
       else
-#endif /* HAVE_LIBMETALINK */
       if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
@@ -540,9 +531,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_sleep;
         char *this_url;
         HeaderData hdrdata;
-#ifdef HAVE_LIBMETALINK
         int metalink_next_res = 0;
-#endif /* HAVE_LIBMETALINK */
 
         outfile = NULL;
         infdopen = FALSE;
@@ -554,7 +543,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         outs.stream = stdout;
         outs.config = config;
 
-#ifdef HAVE_LIBMETALINK
         if(metalink) {
           /* For Metalink download, use name in Metalink file as
              filename. */
@@ -570,7 +558,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
         else {
-#endif /* HAVE_LIBMETALINK */
           if(urls) {
             res = glob_next_url(&this_url, urls);
             if(res)
@@ -595,9 +582,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               goto show_error;
             }
           }
-#ifdef HAVE_LIBMETALINK
         }
-#endif /* HAVE_LIBMETALINK */
 
         if((urlnode->flags&GETOUT_USEREMOTE) ||
            (outfile && !curlx_strequal("-", outfile)) ) {
@@ -1443,7 +1428,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               continue; /* curl_easy_perform loop */
             }
           } /* if retry_numretries */
-#ifdef HAVE_LIBMETALINK
           else if(metalink) {
             /* Metalink: Decide to try the next resource or
                not. Basically, we want to try the next resource if
@@ -1466,7 +1450,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             else
               metalink_next_res = 1;
           }
-#endif /* HAVE_LIBMETALINK */
 
           /* In all ordinary cases, just break out of loop here */
           break; /* curl_easy_perform loop */
@@ -1620,7 +1603,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
-#ifdef HAVE_LIBMETALINK
         if(metalink) {
           /* Should exit if error is fatal. */
           if(is_fatal_error(res)) {
@@ -1636,7 +1618,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             break;
         }
         else
-#endif /* HAVE_LIBMETALINK */
         if(urlnum > 1) {
           /* when url globbing, exit loop upon critical error */
           if(is_fatal_error(res))
@@ -1736,10 +1717,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   if(config->errors_fopened && config->errors)
     fclose(config->errors);
 
-#ifdef HAVE_LIBMETALINK
   /* Release metalink related resources here */
   clean_metalink(config);
-#endif /* HAVE_LIBMETALINK */
 
   main_free(); /* cleanup */
 

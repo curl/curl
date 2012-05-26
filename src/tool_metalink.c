@@ -31,6 +31,8 @@
 #  include <fcntl.h>
 #endif
 
+#include <metalink/metalink_parser.h>
+
 #include "rawstr.h"
 
 #include "tool_metalink.h"
@@ -412,6 +414,8 @@ int metalink_check_hash(struct Configurable *config,
 
 #endif /* METALINK_HASH_CHECK */
 
+#ifdef HAVE_LIBMETALINK
+
 static metalink_checksum *new_metalink_checksum(const char *hash_name,
                                                 const char *hash_value)
 {
@@ -423,16 +427,6 @@ static metalink_checksum *new_metalink_checksum(const char *hash_name,
   return chksum;
 }
 
-static void delete_metalink_checksum(metalink_checksum *chksum)
-{
-  if(chksum == NULL) {
-    return;
-  }
-  Curl_safefree(chksum->hash_value);
-  Curl_safefree(chksum->hash_name);
-  Curl_safefree(chksum);
-}
-
 static metalink_resource *new_metalink_resource(const char *url)
 {
   metalink_resource *res;
@@ -440,15 +434,6 @@ static metalink_resource *new_metalink_resource(const char *url)
   res->next = NULL;
   res->url = strdup(url);
   return res;
-}
-
-static void delete_metalink_resource(metalink_resource *res)
-{
-  if(res == NULL) {
-    return;
-  }
-  Curl_safefree(res->url);
-  Curl_safefree(res);
 }
 
 static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
@@ -486,47 +471,6 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
     f->resource = root.next;
   }
   return f;
-}
-
-static void delete_metalinkfile(metalinkfile *mlfile)
-{
-  metalink_checksum *mc;
-  metalink_resource *res;
-  if(mlfile == NULL) {
-    return;
-  }
-  Curl_safefree(mlfile->filename);
-  for(mc = mlfile->checksum; mc;) {
-    metalink_checksum *next;
-    next = mc->next;
-    delete_metalink_checksum(mc);
-    mc = next;
-  }
-  for(res = mlfile->resource; res;) {
-    metalink_resource *next;
-    next = res->next;
-    delete_metalink_resource(res);
-    res = next;
-  }
-  Curl_safefree(mlfile);
-}
-
-int count_next_metalink_resource(metalinkfile *mlfile)
-{
-  int count = 0;
-  metalink_resource *res;
-  for(res = mlfile->resource; res; res = res->next, ++count);
-  return count;
-}
-
-void clean_metalink(struct Configurable *config)
-{
-  while(config->metalinkfile_list) {
-    metalinkfile *mlfile = config->metalinkfile_list;
-    config->metalinkfile_list = config->metalinkfile_list->next;
-    delete_metalinkfile(mlfile);
-  }
-  config->metalinkfile_last = 0;
 }
 
 int parse_metalink(struct Configurable *config, const char *infile)
@@ -592,6 +536,8 @@ int parse_metalink(struct Configurable *config, const char *infile)
   return 0;
 }
 
+#endif /* HAVE_LIBMETALINK */
+
 /*
  * Returns nonzero if content_type includes mediatype.
  */
@@ -611,4 +557,64 @@ static int check_content_type(const char *content_type, const char *media_type)
 int check_metalink_content_type(const char *content_type)
 {
   return check_content_type(content_type, "application/metalink+xml");
+}
+
+int count_next_metalink_resource(metalinkfile *mlfile)
+{
+  int count = 0;
+  metalink_resource *res;
+  for(res = mlfile->resource; res; res = res->next, ++count);
+  return count;
+}
+
+static void delete_metalink_checksum(metalink_checksum *chksum)
+{
+  if(chksum == NULL) {
+    return;
+  }
+  Curl_safefree(chksum->hash_value);
+  Curl_safefree(chksum->hash_name);
+  Curl_safefree(chksum);
+}
+
+static void delete_metalink_resource(metalink_resource *res)
+{
+  if(res == NULL) {
+    return;
+  }
+  Curl_safefree(res->url);
+  Curl_safefree(res);
+}
+
+static void delete_metalinkfile(metalinkfile *mlfile)
+{
+  metalink_checksum *mc;
+  metalink_resource *res;
+  if(mlfile == NULL) {
+    return;
+  }
+  Curl_safefree(mlfile->filename);
+  for(mc = mlfile->checksum; mc;) {
+    metalink_checksum *next;
+    next = mc->next;
+    delete_metalink_checksum(mc);
+    mc = next;
+  }
+  for(res = mlfile->resource; res;) {
+    metalink_resource *next;
+    next = res->next;
+    delete_metalink_resource(res);
+    res = next;
+  }
+  Curl_safefree(mlfile);
+}
+
+void clean_metalink(struct Configurable *config)
+{
+  while(config->metalinkfile_list) {
+    metalinkfile *mlfile = config->metalinkfile_list;
+    config->metalinkfile_list = config->metalinkfile_list->next;
+    delete_metalinkfile(mlfile);
+  }
+  config->metalinkfile_last = 0;
 }

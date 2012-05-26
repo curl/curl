@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <metalink/metalink_parser.h>
-
 struct Configurable;
 
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS)

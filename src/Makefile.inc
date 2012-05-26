@@ -50,7 +50,8 @@ CURL_CFILES = hugehelp.c \
 	tool_vms.c \
 	tool_writeenv.c \
 	tool_writeout.c \
-	tool_xattr.c
+	tool_xattr.c \
+	tool_metalink.c
 
 CURL_HFILES = hugehelp.h \
 	tool_binmode.h \
@@ -91,7 +92,8 @@ CURL_HFILES = hugehelp.h \
 	tool_vms.h \
 	tool_writeenv.h \
 	tool_writeout.h \
-	tool_xattr.h
+	tool_xattr.h \
+	tool_metalink.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 

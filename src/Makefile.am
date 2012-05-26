@@ -50,9 +50,6 @@ AM_CPPFLAGS = -DCURL_STATICLIB
 endif
 
 include Makefile.inc
-if HAVE_LIBMETALINK
-include Makefile-metalink.inc
-endif # HAVE_LIBMETALINK
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
