@@ -407,15 +407,9 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
 }
 
 /* For AUTH responses */
-static CURLcode pop3_state_auth_resp(struct connectdata *conn,
-                                     int pop3code,
-                                     pop3state instate)
+static CURLcode pop3_state_auth_resp(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
-
-  (void)instate; /* no use for this yet */
 
   /* Proceed with clear text authentication as we used to for now */
   result = pop3_state_user(conn);
@@ -588,7 +582,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 
     case POP3_AUTH:
-      result = pop3_state_auth_resp(conn, pop3code, pop3c->state);
+      result = pop3_state_auth_resp(conn);
       break;
 
     case POP3_USER:
