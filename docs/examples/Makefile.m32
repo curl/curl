@@ -40,12 +40,6 @@ endif
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../../openssl-0.9.8x
 endif
-ifndef OPENSSL_LIBPATH
-OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-endif
-ifndef OPENSSL_LIBS
-OPENSSL_LIBS = -leay32 -lssl32
-endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../../libssh2-1.4.2
@@ -148,6 +142,7 @@ else
   curl_DEPENDENCIES = $(PROOT)/lib/libcurl.a
   curl_LDADD = -L$(PROOT)/lib -lcurl
   CFLAGS += -DCURL_STATICLIB
+  LDFLAGS += -static
 endif
 ifdef ARES
   ifndef DYN
@@ -165,7 +160,22 @@ ifdef SSH2
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
-  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
+  ifndef OPENSSL_LIBPATH
+    OPENSSL_LIBS = -lssl -lcrypto
+    ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
+      OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
+      ifdef DYN
+        OPENSSL_LIBS = -lssl32 -leay32
+      endif
+    endif
+    ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
+      OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
+    endif
+  endif
+  ifndef DYN
+    OPENSSL_LIBS += -lgdi32 -lcrypt32
+  endif
+  CFLAGS += -DUSE_SSLEAY
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
