@@ -10,6 +10,7 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
+REPLY AUTH -ERR unsupported command
 REPLY PASS -ERR invalid login
 </servercmd>
 </reply>
@@ -35,6 +36,7 @@ pop3://%HOSTIP:%POP3PORT/813 -u user:wrong
 67
 </errorcode>
 <protocol>
+AUTH
 USER user
 PASS wrong
 QUIT

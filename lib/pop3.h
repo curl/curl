@@ -29,6 +29,7 @@ typedef enum {
   POP3_STOP,         /* do nothing state, stops the state machine */
   POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
+  POP3_AUTH,
   POP3_USER,
   POP3_PASS,
   POP3_STARTTLS,
@@ -46,6 +47,7 @@ struct pop3_conn {
   size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
                         received thus far */
   size_t strip;      /* number of bytes from the start to ignore as non-body */
+  unsigned int authmechs; /* Accepted authentication methods */
   pop3state state;   /* always use pop3.c:state() to change state! */
 };
 

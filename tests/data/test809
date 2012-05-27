@@ -11,6 +11,7 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
+REPLY AUTH -ERR unsupported command
 REPLY LIST -ERR no such message
 </servercmd>
 </reply>
@@ -36,6 +37,7 @@ pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
 56
 </errorcode>
 <protocol>
+AUTH
 USER user
 PASS secret
 LIST 809

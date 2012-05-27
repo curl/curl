@@ -10,6 +10,7 @@ LIST
 # Server-side
 <reply>
 <servercmd>
+REPLY AUTH -ERR unsupported command
 REPLY LIST +OK 808 100
 </servercmd>
 </reply>
@@ -32,6 +33,7 @@ pop3://%HOSTIP:%POP3PORT/808 -l -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
+AUTH
 USER user
 PASS secret
 LIST 808

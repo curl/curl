@@ -9,6 +9,9 @@ RETR
 #
 # Server-side
 <reply>
+<servercmd>
+REPLY AUTH -ERR unsupported command
+</servercmd>
 <data>
 From: me@somewhere
 To: fake@nowhere
@@ -49,6 +52,7 @@ pop3://%HOSTIP:%POP3PORT/815 -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
+AUTH
 USER user
 PASS secret
 RETR 815

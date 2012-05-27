@@ -10,6 +10,7 @@ LIST
 # Server-side
 <reply>
 <servercmd>
+REPLY AUTH -ERR unsupported command
 REPLY LIST +OK but no messages\r\n.
 </servercmd>
 <datacheck>
@@ -34,6 +35,7 @@ pop3://%HOSTIP:%POP3PORT/ -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
+AUTH
 USER user
 PASS secret
 LIST
