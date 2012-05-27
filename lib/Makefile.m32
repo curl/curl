@@ -20,15 +20,6 @@ endif
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl-0.9.8x
 endif
-ifndef OPENSSL_INCLUDE
-OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
-endif
-ifndef OPENSSL_LIBPATH
-OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-endif
-ifndef OPENSSL_LIBS
-OPENSSL_LIBS = -leay32 -lssl32
-endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-1.4.2
@@ -145,6 +136,27 @@ ifdef SSH2
   DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
+  ifndef OPENSSL_INCLUDE
+    ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
+    endif
+    ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
+    endif
+  endif
+  ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
+  $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
+  endif
+  ifndef OPENSSL_LIBPATH
+    ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
+      OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
+      OPENSSL_LIBS = -leay32 -lssl32
+    endif
+    ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
+      OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
+      OPENSSL_LIBS = -lcrypto -lssl
+    endif
+  endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -DHAVE_OPENSSL_ENGINE_H -DHAVE_OPENSSL_PKCS12_H \
             -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5 \
