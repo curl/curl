@@ -1511,14 +1511,14 @@ specified within a pair of angled brackets (<>). However, if an empty string
 is used then a pair of brackets will be sent by libcurl as required by
 RFC2554.
 
-(Added in 7.24.0)
+(Added in 7.25.0)
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
-Specify block size to use for TFTP data transmission. Valid range as per RFC
-2348 is 8-65464 bytes. The default of 512 bytes will be used if this option is
-not specified. The specified block size will only be used pending support by
-the remote server. If the server does not return an option acknowledgement or
-returns an option acknowledgement with no blksize, the default of 512 bytes
+Specify block size to use for TFTP data transmission. Valid range as per
+RFC2348 is 8-65464 bytes. The default of 512 bytes will be used if this option
+is not specified. The specified block size will only be used pending support
+by the remote server. If the server does not return an option acknowledgement
+or returns an option acknowledgement with no blksize, the default of 512 bytes
 will be used. (added in 7.19.4)
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
