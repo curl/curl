@@ -126,6 +126,7 @@ else
   curl_DEPENDENCIES = $(PROOT)/lib/libcurl.a
   curl_LDADD = -L$(PROOT)/lib -lcurl
   CFLAGS += -DCURL_STATICLIB
+  LDFLAGS += -static
 endif
 ifdef ARES
   ifndef DYN
@@ -144,16 +145,21 @@ ifdef SSH2
 endif
 ifdef SSL
   ifndef OPENSSL_LIBPATH
+    OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      OPENSSL_LIBS = -leay32 -lssl32
+      ifdef DYN
+        OPENSSL_LIBS = -lssl32 -leay32
+      endif
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
-      OPENSSL_LIBS = -lcrypto -lssl
     endif
   endif
-  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
+  ifndef DYN
+    OPENSSL_LIBS += -lgdi32 -lcrypt32
+  endif
+  CFLAGS += -DUSE_SSLEAY
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
