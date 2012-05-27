@@ -207,26 +207,24 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 #endif
 #endif
 
-/* function that checks for a pop3 status code at the start of the given
-   string */
-static int pop3_endofresp(struct pingpong *pp,
-                          int *resp)
+/* Function that checks for an ending pop3 status code at the start of the
+   given string */
+static int pop3_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
   size_t len = pp->nread_resp;
 
-  if(((len >= 3) && !memcmp("+OK", line, 3)) ||
-     ((len >= 4) && !memcmp("-ERR", line, 4))) {
-    *resp = line[1]; /* O or E */
-    return TRUE;
-  }
+  if((len < 3 || memcmp("+OK", line, 3)) && 
+     (len < 4 || memcmp("-ERR", line, 4)))
+  return FALSE; /* Nothing for us */
 
-  return FALSE; /* nothing for us */
+  *resp = line[1]; /* O or E */
+
+  return TRUE;
 }
 
 /* This is the ONLY way to change POP3 state! */
-static void state(struct connectdata *conn,
-                  pop3state newstate)
+static void state(struct connectdata *conn, pop3state newstate)
 {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
@@ -267,8 +265,7 @@ static CURLcode pop3_state_user(struct connectdata *conn)
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
-static int pop3_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks)
 {
   return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
@@ -283,7 +280,7 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
-/* for the initial server greeting */
+/* For the initial server greeting */
 static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
                                             int pop3code,
                                             pop3state instate)
@@ -311,7 +308,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   return result;
 }
 
-/* for STARTTLS responses */
+/* For STARTTLS responses */
 static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
                                          int pop3code,
                                          pop3state instate)
@@ -345,7 +342,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   return result;
 }
 
-/* for USER responses */
+/* For USER responses */
 static CURLcode pop3_state_user_resp(struct connectdata *conn,
                                      int pop3code,
                                      pop3state instate)
@@ -372,7 +369,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
   return result;
 }
 
-/* for PASS responses */
+/* For PASS responses */
 static CURLcode pop3_state_pass_resp(struct connectdata *conn,
                                      int pop3code,
                                      pop3state instate)
@@ -392,7 +389,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
   return result;
 }
 
-/* for the command response */
+/* For the command response */
 static CURLcode pop3_state_command_resp(struct connectdata *conn,
                                         int pop3code,
                                         pop3state instate)
@@ -447,7 +444,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
   return result;
 }
 
-/* start the DO phase for the command */
+/* Start the DO phase for the command */
 static CURLcode pop3_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -537,7 +534,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
   return result;
 }
 
-/* called repeatedly until done from multi.c */
+/* Called repeatedly until done from multi.c */
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -563,10 +560,8 @@ static CURLcode pop3_easy_statemach(struct connectdata *conn)
   return result;
 }
 
-/*
- * Allocate and initialize the struct POP3 for the current SessionHandle.  If
- * need be.
- */
+/* Allocate and initialize the POP3 struct for the current SessionHandle if
+   required */
 static CURLcode pop3_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
@@ -591,16 +586,18 @@ static CURLcode pop3_init(struct connectdata *conn)
   return CURLE_OK;
 }
 
-/*
- * pop3_connect() should do everything that is to be considered a part of
- * the connection phase.
+/***********************************************************************
+ *
+ * pop3_connect()
+ *
+ * This function should do everything that is to be considered a part of the
+ * connection phase.
  *
  * The variable 'done' points to will be TRUE if the protocol-layer connect
  * phase is done when this function returns, or FALSE is not. When called as
  * a part of the easy interface, it will always be TRUE.
  */
-static CURLcode pop3_connect(struct connectdata *conn,
-                             bool *done) /* see description above */
+static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -698,11 +695,8 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
  * This is the actual DO function for POP3. Get a file/directory according to
  * the options previously setup.
  */
-
-static
-CURLcode pop3_perform(struct connectdata *conn,
-                     bool *connected,  /* connect status after PASV / PORT */
-                     bool *dophase_done)
+static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
+                             bool *dophase_done)
 {
   /* this is POP3 and no proxy */
   CURLcode result = CURLE_OK;
@@ -785,7 +779,6 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
  * This should be called before calling sclose().  We should then wait for the
  * response from the server before returning. The calling code should then try
  * to close the connection.
- *
  */
 static CURLcode pop3_quit(struct connectdata *conn)
 {
@@ -861,8 +854,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 }
 
 /* call this when the DO phase has completed */
-static CURLcode pop3_dophase_done(struct connectdata *conn,
-                                  bool connected)
+static CURLcode pop3_dophase_done(struct connectdata *conn, bool connected)
 {
   struct FTP *pop3 = conn->data->state.proto.pop3;
 
@@ -876,8 +868,7 @@ static CURLcode pop3_dophase_done(struct connectdata *conn,
 }
 
 /* called from multi.c while DOing */
-static CURLcode pop3_doing(struct connectdata *conn,
-                               bool *dophase_done)
+static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done)
 {
   CURLcode result;
   result = pop3_multi_statemach(conn, dophase_done);
@@ -899,7 +890,6 @@ static CURLcode pop3_doing(struct connectdata *conn,
  *
  * Performs all commands done before a regular transfer between a local and a
  * remote host.
- *
  */
 static CURLcode pop3_regular_transfer(struct connectdata *conn,
                                       bool *dophase_done)
@@ -951,11 +941,9 @@ static CURLcode pop3_setup_connection(struct connectdata * conn)
 #endif
     }
 
-    /*
-     * We explicitly mark this connection as persistent here as we're doing
-     * POP3 over HTTP and thus we accidentally avoid setting this value
-     * otherwise.
-     */
+    /* We explicitly mark this connection as persistent here as we're doing
+       POP3 over HTTP and thus we accidentally avoid setting this value
+       otherwise. */
     conn->bits.close = FALSE;
 #else
     failf(data, "POP3 over http proxy requires HTTP support built-in!");
@@ -967,10 +955,6 @@ static CURLcode pop3_setup_connection(struct connectdata * conn)
 
   return CURLE_OK;
 }
-
-/* this is the 5-bytes End-Of-Body marker for POP3 */
-#define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
-#define POP3_EOB_LEN 5
 
 /*
  * This function scans the body after the end-of-body and writes everything

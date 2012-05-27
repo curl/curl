@@ -26,15 +26,15 @@
  * POP3 unique setup
  ***************************************************************************/
 typedef enum {
-  POP3_STOP,        /* do nothing state, stops the state machine */
-  POP3_SERVERGREET, /* waiting for the initial greeting immediately after
-                       a connect */
+  POP3_STOP,         /* do nothing state, stops the state machine */
+  POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
+                        a connect */
   POP3_USER,
   POP3_PASS,
   POP3_STARTTLS,
   POP3_COMMAND,
   POP3_QUIT,
-  POP3_LAST  /* never used */
+  POP3_LAST          /* never used */
 } pop3state;
 
 /* pop3_conn is used for struct connection-oriented data in the connectdata
@@ -52,12 +52,12 @@ struct pop3_conn {
 extern const struct Curl_handler Curl_handler_pop3;
 extern const struct Curl_handler Curl_handler_pop3s;
 
-/*
- * This function scans the body after the end-of-body and writes everything
- * until the end is found.
- */
-CURLcode Curl_pop3_write(struct connectdata *conn,
-                         char *str,
-                         size_t nread);
+/* This is the 5-bytes End-Of-Body marker for POP3 */
+#define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
+#define POP3_EOB_LEN 5
+
+/* This function scans the body after the end-of-body and writes everything
+ * until the end is found */
+CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread);
 
 #endif /* HEADER_CURL_POP3_H */
