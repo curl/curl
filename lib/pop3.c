@@ -223,7 +223,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
      (len < 4 || memcmp("-ERR", line, 4)))
   return FALSE; /* Nothing for us */
 
-  *resp = line[1]; /* O or E */
+  *resp = line[0]; /* + or - */
 
   if(pop3c->state == POP3_AUTH && len >= 3 && !memcmp(line, "+OK", 3)) {
     line += 3;
@@ -355,7 +355,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code != 'O') {
+  if(pop3code != '+') {
     failf(data, "Got unexpected pop3-server response");
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
@@ -382,7 +382,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code != 'O') {
+  if(pop3code != '+') {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied. %c", pop3code);
       result = CURLE_USE_SSL_FAILED;
@@ -428,7 +428,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code != 'O') {
+  if(pop3code != '+') {
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
   }
@@ -454,7 +454,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code != 'O') {
+  if(pop3code != '+') {
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
   }
@@ -477,7 +477,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if('O' != pop3code) {
+  if(pop3code != '+') {
     state(conn, POP3_STOP);
     return CURLE_RECV_ERROR;
   }
