@@ -219,7 +219,8 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t wordlen;
 
-  if((len < 3 || memcmp("+OK", line, 3)) &&
+  if((len < 1 || memcmp("+", line, 1)) &&
+     (len < 3 || memcmp("+OK", line, 3)) &&
      (len < 4 || memcmp("-ERR", line, 4)))
   return FALSE; /* Nothing for us */
 
