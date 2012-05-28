@@ -276,10 +276,10 @@ static void state(struct connectdata *conn, pop3state newstate)
   static const char * const names[]={
     "STOP",
     "SERVERGREET",
+    "STARTTLS",
     "AUTH",
     "USER",
     "PASS",
-    "STARTTLS",
     "COMMAND",
     "QUIT",
     /* LAST */
@@ -581,6 +581,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_servergreet_resp(conn, pop3code, pop3c->state);
       break;
 
+    case POP3_STARTTLS:
+      result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
+      break;
+
     case POP3_AUTH:
       result = pop3_state_auth_resp(conn);
       break;
@@ -591,10 +595,6 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_PASS:
       result = pop3_state_pass_resp(conn, pop3code, pop3c->state);
-      break;
-
-    case POP3_STARTTLS:
-      result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_COMMAND:
@@ -905,7 +905,6 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
  * pop3_parse_url_path()
  *
  * Parse the URL path into separate path components.
- *
  */
 static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
@@ -983,9 +982,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
-  result = pop3_perform(conn,
-                        &connected,    /* have we connected after PASV/PORT */
-                        dophase_done); /* all commands in the DO-phase done? */
+  result = pop3_perform(conn, &connected, dophase_done);
 
   if(CURLE_OK == result) {
 
@@ -1035,13 +1032,9 @@ static CURLcode pop3_setup_connection(struct connectdata * conn)
   return CURLE_OK;
 }
 
-/*
- * This function scans the body after the end-of-body and writes everything
- * until the end is found.
- */
-CURLcode Curl_pop3_write(struct connectdata *conn,
-                         char *str,
-                         size_t nread)
+/* This function scans the body after the end-of-body and writes everything
+   until the end is found */
+CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
@@ -1142,7 +1135,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
     /* We have a full match so the transfer is done, however we must transfer
     the CRLF at the start of the EOB as this is considered to be part of the
     message as per RFC-1939, sect. 3 */
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB, 2);
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)POP3_EOB, 2);
 
     k->keepon &= ~KEEP_RECV;
     pop3c->eob = 0;

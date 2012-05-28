@@ -29,10 +29,10 @@ typedef enum {
   POP3_STOP,         /* do nothing state, stops the state machine */
   POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
+  POP3_STARTTLS,
   POP3_AUTH,
   POP3_USER,
   POP3_PASS,
-  POP3_STARTTLS,
   POP3_COMMAND,
   POP3_QUIT,
   POP3_LAST          /* never used */
