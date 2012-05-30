@@ -359,7 +359,7 @@ static void unicodecpy(unsigned char *dest,
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The ntlm data struct being used and modified.
- * outptr  [in/out] - The adress where a pointer to newly allocated memory
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
  *
@@ -580,7 +580,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The ntlm data struct being used and modified.
- * outptr  [in/out] - The adress where a pointer to newly allocated memory
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
  *
