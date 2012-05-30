@@ -33,4 +33,10 @@
 #define SASL_AUTH_EXTERNAL      0x0020
 #define SASL_AUTH_NTLM          0x0040
 
+/* This is to generate a base64 encoded plain authentication message */
+CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
+                                        const char* userp,
+                                        const char* passwdp,
+                                        char **outptr, size_t *outlen);
+
 #endif /* HEADER_CURL_SASL_H */

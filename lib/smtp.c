@@ -383,32 +383,6 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static CURLcode smtp_auth_plain_data(struct connectdata *conn,
-                                     char **outptr, size_t *outlen)
-{
-  char plainauth[2 * MAX_CURL_USER_LENGTH + MAX_CURL_PASSWORD_LENGTH];
-  size_t ulen;
-  size_t plen;
-
-  ulen = strlen(conn->user);
-  plen = strlen(conn->passwd);
-
-  if(2 * ulen + plen + 2 > sizeof(plainauth)) {
-    *outlen = 0;
-    *outptr = NULL;
-    return CURLE_OUT_OF_MEMORY; /* plainauth too small */
-  }
-
-  memcpy(plainauth, conn->user, ulen);
-  plainauth[ulen] = '\0';
-  memcpy(plainauth + ulen + 1, conn->user, ulen);
-  plainauth[2 * ulen + 1] = '\0';
-  memcpy(plainauth + 2 * ulen + 2, conn->passwd, plen);
-
-  return Curl_base64_encode(conn->data, plainauth, 2 * ulen + plen + 2,
-                            outptr, outlen);
-}
-
 static CURLcode smtp_auth_login_user(struct connectdata *conn,
                                      char **outptr, size_t *outlen)
 {
@@ -491,7 +465,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTHPLAIN;
     state2 = SMTP_AUTH;
     smtpc->authused = SASL_AUTH_PLAIN;
-    result = smtp_auth_plain_data(conn, &initresp, &len);
+    result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                            conn->passwd, &initresp, &len);
   }
   else {
     infof(conn->data, "No known auth mechanisms supported!\n");
@@ -675,7 +650,8 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = smtp_auth_plain_data(conn, &plainauth, &len);
+    result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                            conn->passwd, &plainauth, &len);
 
     if(!result) {
       if(plainauth) {
