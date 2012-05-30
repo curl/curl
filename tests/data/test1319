@@ -58,6 +58,7 @@ pop3://%HOSTIP:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
 ^User-Agent:
 </strip>
 <protocol>
+AUTH
 USER user
 PASS secret
 RETR 1319

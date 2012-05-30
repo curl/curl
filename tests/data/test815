@@ -9,9 +9,6 @@ RETR
 #
 # Server-side
 <reply>
-<servercmd>
-REPLY AUTH -ERR unsupported command
-</servercmd>
 <data>
 From: me@somewhere
 To: fake@nowhere

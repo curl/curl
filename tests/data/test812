@@ -11,7 +11,6 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
-REPLY AUTH -ERR unsupported command
 REPLY RETR -ERR no such message
 </servercmd>
 </reply>

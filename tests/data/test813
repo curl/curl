@@ -10,7 +10,6 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
-REPLY AUTH -ERR unsupported command
 REPLY PASS -ERR invalid login
 </servercmd>
 </reply>

@@ -10,7 +10,6 @@ LIST
 # Server-side
 <reply>
 <servercmd>
-REPLY AUTH -ERR unsupported command
 REPLY LIST +OK 808 100
 </servercmd>
 </reply>

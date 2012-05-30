@@ -34,6 +34,7 @@ pop3://%HOSTIP:%POP3PORT/1407 -l -u user:secret --libcurl log/test1407.c
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
+AUTH
 USER user
 PASS secret
 LIST 1407

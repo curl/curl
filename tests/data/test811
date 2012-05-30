@@ -10,7 +10,6 @@ LIST
 # Server-side
 <reply>
 <servercmd>
-REPLY AUTH -ERR unsupported command
 REPLY LIST +OK but no messages\r\n.
 </servercmd>
 <datacheck>

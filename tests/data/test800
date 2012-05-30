@@ -38,6 +38,7 @@ pop3://%HOSTIP:%POP3PORT/800 -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
+AUTH
 USER user
 PASS secret
 RETR 800

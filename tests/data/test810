@@ -13,7 +13,6 @@ LIST
 # packets
 <servercmd>
 SLOWDOWN
-REPLY AUTH -ERR unsupported command
 </servercmd>
 # When doing LIST, we get the default list output hard-coded in the test
 # POP3 server
