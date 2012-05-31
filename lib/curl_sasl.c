@@ -77,3 +77,39 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
   return Curl_base64_encode(data, plainauth, 2 * ulen + plen + 2, outptr,
                             outlen);
 }
+
+/*
+ * Curl_sasl_create_login_message()
+ *
+ * This is used to generate an already encoded login message containing the
+ * user name or password ready for sending to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
+                                        const char* valuep, char **outptr,
+                                        size_t *outlen)
+{
+  size_t vlen = strlen(valuep);
+
+  if(!vlen) {
+    *outptr = strdup("=");
+    if(*outptr) {
+      *outlen = (size_t) 1;
+      return CURLE_OK;
+    }
+
+    *outlen = 0;
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  return Curl_base64_encode(data, valuep, vlen, outptr, outlen);
+}
