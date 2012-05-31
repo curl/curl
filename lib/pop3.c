@@ -18,9 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * RFC1734 POP3 Authentication
  * RFC1939 POP3 protocol
  * RFC2384 POP URL Scheme
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
+ * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
 
@@ -279,6 +281,8 @@ static void state(struct connectdata *conn, pop3state newstate)
     "SERVERGREET",
     "STARTTLS",
     "AUTH",
+    "AUTH_PLAIN",
+    "AUTH_FINAL",
     "USER",
     "PASS",
     "COMMAND",
@@ -301,6 +305,7 @@ static CURLcode pop3_state_auth(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   pop3c->authmechs = 0;         /* No known authentication mechanisms yet */
+  pop3c->authused = 0;          /* Clear the authentication mechanism used */
 
   /* send AUTH */
   result = Curl_pp_sendf(&pop3c->pp, "AUTH");
@@ -327,6 +332,35 @@ static CURLcode pop3_state_user(struct connectdata *conn)
   state(conn, POP3_USER);
 
   return CURLE_OK;
+}
+
+static CURLcode pop3_authenticate(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  const char *mech = NULL;
+  pop3state authstate = POP3_STOP;
+
+  /* Check supported authentication mechanisms by decreasing order of
+     security */
+  if(pop3c->authmechs & SASL_AUTH_PLAIN) {
+    mech = "PLAIN";
+    authstate = POP3_AUTH_PLAIN;
+    pop3c->authused = SASL_AUTH_PLAIN;
+  }
+  else {
+    infof(conn->data, "No known SASL auth mechanisms supported!\n");
+    result = CURLE_LOGIN_DENIED;      /* Other mechanisms not supported */
+  }
+
+  if(!result) {
+    result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+
+    if(!result)
+      state(conn, authstate);
+  }
+
+  return result;
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
@@ -408,12 +442,72 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
 }
 
 /* For AUTH responses */
-static CURLcode pop3_state_auth_resp(struct connectdata *conn)
+static CURLcode pop3_state_auth_resp(struct connectdata *conn,
+                                     int pop3code,
+                                     pop3state instate)
 {
   CURLcode result = CURLE_OK;
 
-  /* Proceed with clear text authentication as we used to for now */
-  result = pop3_state_user(conn);
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+')
+    result = pop3_state_user(conn);
+  else
+    result = pop3_authenticate(conn);
+
+  return result;
+}
+
+/* For AUTH PLAIN responses */
+static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
+                                           int pop3code,
+                                           pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *plainauth = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied. %c", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                            conn->passwd, &plainauth, &len);
+
+    if(!result) {
+      if(plainauth) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", plainauth);
+
+        if(!result)
+          state(conn, POP3_AUTH_FINAL);
+      }
+      Curl_safefree(plainauth);
+    }
+  }
+
+  return result;
+}
+
+/* For final responses in the AUTH sequence */
+static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
+                                           int pop3code,
+                                           pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Authentication failed: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+
+  state(conn, POP3_STOP);  /* End of connect phase */
 
   return result;
 }
@@ -460,7 +554,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
 
-  state(conn, POP3_STOP);
+  state(conn, POP3_STOP);  /* End of connect phase */
 
   return result;
 }
@@ -587,7 +681,15 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 
     case POP3_AUTH:
-      result = pop3_state_auth_resp(conn);
+      result = pop3_state_auth_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_PLAIN:
+      result = pop3_state_auth_plain_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_FINAL:
+      result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_USER:

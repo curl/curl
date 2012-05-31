@@ -31,6 +31,8 @@ typedef enum {
                         a connect */
   POP3_STARTTLS,
   POP3_AUTH,
+  POP3_AUTH_PLAIN,
+  POP3_AUTH_FINAL,
   POP3_USER,
   POP3_PASS,
   POP3_COMMAND,
@@ -48,6 +50,7 @@ struct pop3_conn {
                         received thus far */
   size_t strip;      /* number of bytes from the start to ignore as non-body */
   unsigned int authmechs; /* Accepted authentication methods */
+  unsigned int authused;  /* Authentication method used for the connection */
   pop3state state;   /* always use pop3.c:state() to change state! */
 };
 
