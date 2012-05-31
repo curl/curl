@@ -383,22 +383,23 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static CURLcode smtp_auth_login_user(struct connectdata *conn,
-                                     char **outptr, size_t *outlen)
+static CURLcode smtp_auth_login(struct connectdata *conn, const char *valuep,
+                                char **outptr, size_t *outlen)
 {
-  size_t ulen = strlen(conn->user);
+  size_t vlen = strlen(valuep);
 
-  if(!ulen) {
+  if(!vlen) {
     *outptr = strdup("=");
     if(*outptr) {
       *outlen = (size_t) 1;
       return CURLE_OK;
     }
+
     *outlen = 0;
     return CURLE_OUT_OF_MEMORY;
   }
 
-  return Curl_base64_encode(conn->data, conn->user, ulen, outptr, outlen);
+  return Curl_base64_encode(conn->data, valuep, vlen, outptr, outlen);
 }
 
 #ifdef USE_NTLM
@@ -458,7 +459,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTHLOGIN;
     state2 = SMTP_AUTHPASSWD;
     smtpc->authused = SASL_AUTH_LOGIN;
-    result = smtp_auth_login_user(conn, &initresp, &len);
+    result = smtp_auth_login(conn, conn->user, &initresp, &len);
   }
   else if(smtpc->authmechs & SASL_AUTH_PLAIN) {
     mech = "PLAIN";
@@ -684,7 +685,7 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = smtp_auth_login_user(conn, &authuser, &len);
+    result = smtp_auth_login(conn, conn->user, &authuser, &len);
 
     if(!result) {
       if(authuser) {
