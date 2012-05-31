@@ -708,7 +708,6 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t plen;
   size_t len = 0;
   char *authpasswd = NULL;
 
@@ -719,22 +718,16 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    plen = strlen(conn->passwd);
+    result = smtp_auth_login(conn, conn->passwd, &authpasswd, &len);
 
-    if(!plen)
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "=");
-    else {
-      result = Curl_base64_encode(data, conn->passwd, plen, &authpasswd, &len);
+    if(!result) {
+      if(authpasswd) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
 
-      if(!result) {
-        if(authpasswd) {
-          result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
-
-          if(!result)
-            state(conn, SMTP_AUTH);
-        }
-        Curl_safefree(authpasswd);
+        if(!result)
+          state(conn, SMTP_AUTH);
       }
+      Curl_safefree(authpasswd);
     }
   }
 
