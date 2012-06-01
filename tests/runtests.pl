@@ -3496,53 +3496,55 @@ sub singletest {
         $ok .= "-"; # protocol not checked
     }
 
-    my @outfile=getpart("verify", "file");
-    if(@outfile) {
-        # we're supposed to verify a dynamically generated file!
-        my %hash = getpartattr("verify", "file");
+    my $outputok;
+    for my $partsuffix (('', '1', '2', '3', '4')) {
+        my @outfile=getpart("verify", "file".$partsuffix);
+        if(@outfile) {
+            # we're supposed to verify a dynamically generated file!
+            my %hash = getpartattr("verify", "file".$partsuffix);
 
-        my $filename=$hash{'name'};
-        if(!$filename) {
-            logmsg "ERROR: section verify=>file has no name attribute\n";
-            stopservers($verbose);
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-            return -1;
-        }
-        my @generated=loadarray($filename);
-
-        # what parts to cut off from the file
-        my @stripfile = getpart("verify", "stripfile");
-
-        my $filemode=$hash{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows means adding an extra
-            # strip expression
-            push @stripfile, "s/\r\n/\n/";
-        }
-
-        my $strip;
-        for $strip (@stripfile) {
-            chomp $strip;
-            for(@generated) {
-                eval $strip;
+            my $filename=$hash{'name'};
+            if(!$filename) {
+                logmsg "ERROR: section verify=>file$partsuffix ".
+                       "has no name attribute\n";
+                stopservers($verbose);
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                return -1;
             }
+            my @generated=loadarray($filename);
+
+            # what parts to cut off from the file
+            my @stripfile = getpart("verify", "stripfile".$partsuffix);
+
+            my $filemode=$hash{'mode'};
+            if($filemode && ($filemode eq "text") && $has_textaware) {
+                # text mode when running on windows means adding an extra
+                # strip expression
+                push @stripfile, "s/\r\n/\n/";
+            }
+
+            my $strip;
+            for $strip (@stripfile) {
+                chomp $strip;
+                for(@generated) {
+                    eval $strip;
+                }
+            }
+
+            @outfile = fixarray(@outfile);
+
+            $res = compare("output ($filename)", \@generated, \@outfile);
+            if($res) {
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                return 1;
+            }
+
+            $outputok = 1; # output checked
         }
-
-        @outfile = fixarray(@outfile);
-
-        $res = compare("output", \@generated, \@outfile);
-        if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-            return 1;
-        }
-
-        $ok .= "o";
     }
-    else {
-        $ok .= "-"; # output not checked
-    }
+    $ok .= ($outputok) ? "o" : "-"; # output checked or not
 
     # accept multiple comma-separated error codes
     my @splerr = split(/ *, */, $errorcode);
