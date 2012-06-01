@@ -282,6 +282,8 @@ static void state(struct connectdata *conn, pop3state newstate)
     "STARTTLS",
     "AUTH",
     "AUTH_PLAIN",
+    "AUTH_LOGIN",
+    "AUTH_LOGIN_PASSWD",
     "AUTH_FINAL",
     "USER",
     "PASS",
@@ -343,7 +345,12 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
-  if(pop3c->authmechs & SASL_AUTH_PLAIN) {
+  if(pop3c->authmechs & SASL_AUTH_LOGIN) {
+    mech = "LOGIN";
+    authstate = POP3_AUTH_LOGIN;
+    pop3c->authused = SASL_AUTH_LOGIN;
+  }
+  else if(pop3c->authmechs & SASL_AUTH_PLAIN) {
     mech = "PLAIN";
     authstate = POP3_AUTH_PLAIN;
     pop3c->authused = SASL_AUTH_PLAIN;
@@ -492,7 +499,75 @@ static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
   return result;
 }
 
-/* For final responses in the AUTH sequence */
+/* For AUTH LOGIN responses */
+static CURLcode pop3_state_auth_login_resp(struct connectdata *conn,
+                                           int pop3code,
+                                           pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *authuser = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_sasl_create_login_message(conn->data, conn->user,
+                                            &authuser, &len);
+
+    if(!result) {
+      if(authuser) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", authuser);
+
+        if(!result)
+          state(conn, POP3_AUTH_LOGIN_PASSWD);
+      }
+      Curl_safefree(authuser);
+    }
+  }
+
+  return result;
+}
+
+/* For AUTH LOGIN user entry responses */
+static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
+                                                    int pop3code,
+                                                    pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *authpasswd = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_sasl_create_login_message(conn->data, conn->passwd,
+                                            &authpasswd, &len);
+
+    if(!result) {
+      if(authpasswd) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", authpasswd);
+
+        if(!result)
+          state(conn, POP3_AUTH_FINAL);
+      }
+      Curl_safefree(authpasswd);
+    }
+  }
+
+  return result;
+}
+
+/* For final responses to the AUTH sequence */
 static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
                                            int pop3code,
                                            pop3state instate)
@@ -686,6 +761,14 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_AUTH_PLAIN:
       result = pop3_state_auth_plain_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_LOGIN:
+      result = pop3_state_auth_login_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_LOGIN_PASSWD:
+      result = pop3_state_auth_login_password_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH_FINAL:
