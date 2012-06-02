@@ -284,6 +284,8 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_PLAIN",
     "AUTH_LOGIN",
     "AUTH_LOGIN_PASSWD",
+    "AUTH_NTLM",
+    "AUTH_NTLM_TYPE2MSG",
     "AUTH_FINAL",
     "USER",
     "PASS",
@@ -345,6 +347,14 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
+#ifdef USE_NTLM
+  if(pop3c->authmechs & SASL_AUTH_NTLM) {
+    mech = "NTLM";
+    authstate = POP3_AUTH_NTLM;
+    pop3c->authused = SASL_AUTH_NTLM;
+  }
+  else
+#endif
   if(pop3c->authmechs & SASL_AUTH_LOGIN) {
     mech = "LOGIN";
     authstate = POP3_AUTH_LOGIN;
@@ -567,6 +577,80 @@ static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
   return result;
 }
 
+#ifdef USE_NTLM
+/* For AUTH NTLM responses */
+static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
+                                          int pop3code,
+                                          pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *type1msg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                 &conn->ntlm, &type1msg, &len);
+
+    if(!result) {
+      if(type1msg) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", type1msg);
+
+        if(!result)
+          state(conn, POP3_AUTH_NTLM_TYPE2MSG);
+      }
+
+      Curl_safefree(type1msg);
+    }
+  }
+
+  return result;
+}
+
+/* For the NTLM type-2 response (sent in reponse to our type-1 message) */
+static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
+                                                   int pop3code,
+                                                   pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *type3msg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_sasl_decode_ntlm_type2_message(data,
+                                                 data->state.buffer + 2,
+                                                 conn->user, conn->passwd,
+                                                 &conn->ntlm,
+                                                 &type3msg, &len);
+    if(!result) {
+      if(type3msg) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", type3msg);
+
+        if(!result)
+          state(conn, POP3_AUTH_FINAL);
+      }
+
+      Curl_safefree(type3msg);
+    }
+  }
+
+  return result;
+}
+#endif
+
 /* For final responses to the AUTH sequence */
 static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
                                            int pop3code,
@@ -769,6 +853,14 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_AUTH_LOGIN_PASSWD:
       result = pop3_state_auth_login_password_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_NTLM:
+      result = pop3_state_auth_ntlm_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_NTLM_TYPE2MSG:
+      result = pop3_state_auth_ntlm_type2msg_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH_FINAL:
@@ -1069,7 +1161,7 @@ static CURLcode pop3_quit(struct connectdata *conn)
  */
 static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
 {
-  struct pop3_conn *pop3c= &conn->proto.pop3c;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
@@ -1082,6 +1174,9 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
     (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&pop3c->pp);
+
+  /* Cleanup the sasl module */
+  Curl_sasl_cleanup(conn, pop3c->authused);
 
   return CURLE_OK;
 }
