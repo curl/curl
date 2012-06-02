@@ -314,7 +314,7 @@ static CURLcode pop3_state_auth(struct connectdata *conn)
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
   if(!conn->bits.user_passwd) {
-    state(conn, SMTP_STOP);
+    state(conn, POP3_STOP);
 
     return result;
   }
