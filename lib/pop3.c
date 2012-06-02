@@ -367,7 +367,7 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   }
   else {
     infof(conn->data, "No known SASL auth mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED;      /* Other mechanisms not supported */
+    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
   }
 
   if(!result) {
@@ -666,7 +666,8 @@ static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
 
-  state(conn, POP3_STOP);  /* End of connect phase */
+  /* End of connect phase */
+  state(conn, POP3_STOP);
 
   return result;
 }
@@ -713,7 +714,8 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
 
-  state(conn, POP3_STOP);  /* End of connect phase */
+  /* End of connect phase */
+  state(conn, POP3_STOP);
 
   return result;
 }
@@ -768,6 +770,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
     pp->cache_size = 0;
   }
 
+  /* End of do phase */
   state(conn, POP3_STOP);
 
   return result;
@@ -852,7 +855,8 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 
     case POP3_AUTH_LOGIN_PASSWD:
-      result = pop3_state_auth_login_password_resp(conn, pop3code, pop3c->state);
+      result = pop3_state_auth_login_password_resp(conn, pop3code,
+                                                   pop3c->state);
       break;
 
     case POP3_AUTH_NTLM:
@@ -860,7 +864,8 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 
     case POP3_AUTH_NTLM_TYPE2MSG:
-      result = pop3_state_auth_ntlm_type2msg_resp(conn, pop3code, pop3c->state);
+      result = pop3_state_auth_ntlm_type2msg_resp(conn, pop3code,
+                                                  pop3c->state);
       break;
 
     case POP3_AUTH_FINAL:
