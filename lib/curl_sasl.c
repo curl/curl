@@ -199,6 +199,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   if(authused == SASL_AUTH_NTLM) {
     Curl_ntlm_sspi_cleanup(&conn->ntlm);
   }
+  (void)conn;
 #else
   /* Reserved for future use */
   (void)conn;
