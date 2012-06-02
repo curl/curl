@@ -28,6 +28,7 @@
 #include "urldata.h"
 
 #include "curl_base64.h"
+#include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
 
 /* The last #include file should be: */
@@ -112,4 +113,95 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
   }
 
   return Curl_base64_encode(data, valuep, vlen, outptr, outlen);
+}
+
+#ifdef USE_NTLM
+/*
+ * Curl_sasl_create_ntlm_type1_message()
+ *
+ * This is used to generate an already encoded NTLM type-1 message ready for
+ * sending to the recipient.
+ *
+ * Note: This is a simple wrapper of the NTLM function which means that any
+ * SASL based protocols don't have to include the NTLM functions directly.
+ *
+ * Parameters:
+ *
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in/out] - The ntlm data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
+{
+  return Curl_ntlm_create_type1_message(userp, passwdp, ntlm, outptr,
+                                        outlen);
+}
+
+/*
+ * Curl_sasl_decode_ntlm_type2_message()
+ *
+ * This is used to decode a ntlm type-2 message received from a recipient and
+ * generate the already encoded NTLM type-3 message ready for sending back.
+ *
+ * Parameters:
+ *
+ * data    [in]     - Pointer to session handle.
+ * header  [in]     - Pointer to the input buffer.
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in/out] - The ntlm data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *header,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
+{
+  CURLcode result = Curl_ntlm_decode_type2_message(data, header, ntlm);
+
+  if(!result)
+    result = Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm,
+                                            outptr, outlen);
+
+  return result;
+}
+#endif /* USE_NTLM */
+
+/*
+ * Curl_sasl_cleanup()
+ *
+ * This is used to cleanup any libraries or curl modules used by the sasl
+ * functions.
+ *
+ * Parameters:
+ *
+ * conn     [in]     - Pointer to the connection data.
+ * authused [in]     - The authentication mechanism used.
+ */
+void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
+{
+#ifdef USE_NTLM
+  /* Cleanup the ntlm structure */
+  if(authused == SASL_AUTH_NTLM) {
+    Curl_ntlm_sspi_cleanup(&conn->ntlm);
+  }
+#else
+  /* Reserved for future use */
+  (void)conn;
+  (void)authused;
+#endif
 }

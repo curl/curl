@@ -87,7 +87,6 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curl_gethostname.h"
-#include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
 #include "warnless.h"
 
@@ -383,15 +382,6 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#ifdef USE_NTLM
-static CURLcode smtp_auth_ntlm_type1_message(struct connectdata *conn,
-                                             char **outptr, size_t *outlen)
-{
-  return Curl_ntlm_create_type1_message(conn->user, conn->passwd,
-                                        &conn->ntlm, outptr, outlen);
-}
-#endif
-
 static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -431,7 +421,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTHNTLM;
     state2 = SMTP_AUTHNTLM_TYPE2MSG;
     smtpc->authused = SASL_AUTH_NTLM;
-    result = smtp_auth_ntlm_type1_message(conn, &initresp, &len);
+    result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                 &conn->ntlm, &initresp, &len);
   }
   else
 #endif
@@ -1039,7 +1030,8 @@ static CURLcode smtp_state_auth_ntlm_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = smtp_auth_ntlm_type1_message(conn, &type1msg, &len);
+    result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                 &conn->ntlm, &type1msg, &len);
 
     if(!result) {
       if(type1msg) {
@@ -1073,22 +1065,20 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = Curl_ntlm_decode_type2_message(data, data->state.buffer + 4,
-                                            &conn->ntlm);
+    result = Curl_sasl_decode_ntlm_type2_message(data,
+                                                 data->state.buffer + 4,
+                                                 conn->user, conn->passwd,
+                                                 &conn->ntlm,
+                                                 &type3msg, &len);
     if(!result) {
-      result = Curl_ntlm_create_type3_message(conn->data, conn->user,
-                                              conn->passwd, &conn->ntlm,
-                                              &type3msg, &len);
-      if(!result) {
-        if(type3msg) {
-          result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
+      if(type3msg) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
 
-          if(!result)
-            state(conn, SMTP_AUTH);
-        }
-
-        Curl_safefree(type3msg);
+        if(!result)
+          state(conn, SMTP_AUTH);
       }
+
+      Curl_safefree(type3msg);
     }
   }
 
@@ -1763,12 +1753,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
   Curl_pp_disconnect(&smtpc->pp);
 
-#ifdef USE_NTLM
-  /* Cleanup the ntlm structure */
-  if(smtpc->authused == SASL_AUTH_NTLM) {
-    Curl_ntlm_sspi_cleanup(&conn->ntlm);
-  }
-#endif
+  Curl_sasl_cleanup(conn, smtpc->authused);
 
   /* This won't already be freed in some error cases */
   Curl_safefree(smtpc->domain);

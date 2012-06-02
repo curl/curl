@@ -45,4 +45,27 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
                                         const char* valuep, char **outptr,
                                         size_t *outlen);
 
+#ifdef USE_NTLM
+/* This is used to generate a base64 encoded NTLM type-1 message */
+CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr,
+                                             size_t *outlen);
+
+/* This is used to decode an incoming NTLM type-2 message and generate a
+   base64 encoded type-3 response */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen);
+
+#endif /* USE_NTLM */
+
+/* This is used to cleanup any libraries or curl modules used by the sasl
+   functions */
+void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused);
+
 #endif /* HEADER_CURL_SASL_H */
