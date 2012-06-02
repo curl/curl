@@ -305,11 +305,19 @@ static void state(struct connectdata *conn, pop3state newstate)
 
 static CURLcode pop3_state_auth(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   pop3c->authmechs = 0;         /* No known authentication mechanisms yet */
   pop3c->authused = 0;          /* Clear the authentication mechanism used */
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, SMTP_STOP);
+
+    return result;
+  }
 
   /* send AUTH */
   result = Curl_pp_sendf(&pop3c->pp, "AUTH");

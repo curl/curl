@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o pop3: Fixed the issue of having to supply the user name for all requests
  o 
 
 This release includes the following known bugs:
