@@ -37,7 +37,7 @@
 /*
  * Curl_sasl_create_plain_message()
  *
- * This is used to generate an already encoded plain message ready
+ * This is used to generate an already encoded PLAIN message ready
  * for sending to the recipient.
  *
  * Parameters:
@@ -82,7 +82,7 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
 /*
  * Curl_sasl_create_login_message()
  *
- * This is used to generate an already encoded login message containing the
+ * This is used to generate an already encoded LOGIN message containing the
  * user name or password ready for sending to the recipient.
  *
  * Parameters:
