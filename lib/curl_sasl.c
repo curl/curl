@@ -73,15 +73,19 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
   if(2 * ulen + plen + 2 > sizeof(plainauth)) {
     *outlen = 0;
     *outptr = NULL;
-    return CURLE_OUT_OF_MEMORY; /* plainauth too small */
+
+	/* Plainauth too small */
+    return CURLE_OUT_OF_MEMORY;
   }
 
+  /* Calculate the reply */
   memcpy(plainauth, userp, ulen);
   plainauth[ulen] = '\0';
   memcpy(plainauth + ulen + 1, userp, ulen);
   plainauth[2 * ulen + 1] = '\0';
   memcpy(plainauth + 2 * ulen + 2, passwdp, plen);
 
+  /* Base64 encode the reply */
   return Curl_base64_encode(data, plainauth, 2 * ulen + plen + 2, outptr,
                             outlen);
 }
@@ -109,6 +113,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
   size_t vlen = strlen(valuep);
 
   if(!vlen) {
+    /* Calculate an empty reply */
     *outptr = strdup("=");
     if(*outptr) {
       *outlen = (size_t) 1;
@@ -119,6 +124,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  /* Base64 encode the value */
   return Curl_base64_encode(data, valuep, vlen, outptr, outlen);
 }
 
@@ -149,7 +155,6 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 {
   CURLcode result = CURLE_OK;
   size_t chlg64len = strlen(chlg64);
-  size_t len = 0;
   unsigned char *chlg = (unsigned char *) NULL;
   size_t chlglen = 0;
   HMAC_context *ctxt;
