@@ -11,8 +11,9 @@ This release includes the following changes:
 
  o nss: use human-readable error messages provided by NSS
  o added --metalink for metalink download support
- o pop3: Added support for sasl ntlm authentication
  o pop3: Added support for sasl plain text authentication
+ o pop3: Added support for sasl login authentication 
+ o pop3: Added support for sasl ntlm authentication
  o pop3: Added support for sasl cram-md5 authentication
 
 This release includes the following bugfixes:
