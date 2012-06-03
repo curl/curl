@@ -74,7 +74,7 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
     *outlen = 0;
     *outptr = NULL;
 
-	/* Plainauth too small */
+    /* Plainauth too small */
     return CURLE_OUT_OF_MEMORY;
   }
 
