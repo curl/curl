@@ -20,6 +20,7 @@
  *
  * RFC1734 POP3 Authentication
  * RFC1939 POP3 protocol
+ * RFC2195 CRAM-MD5 authentication
  * RFC2384 POP URL Scheme
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  * RFC4616 PLAIN authentication
@@ -309,6 +310,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_PLAIN",
     "AUTH_LOGIN",
     "AUTH_LOGIN_PASSWD",
+    "AUTH_CRAMMD5",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
     "AUTH_FINAL",
@@ -380,6 +382,14 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  if(pop3c->authmechs & SASL_AUTH_CRAM_MD5) {
+    mech = "CRAM-MD5";
+    authstate = POP3_AUTH_CRAMMD5;
+    pop3c->authused = SASL_AUTH_CRAM_MD5;
+  }
+  else
+#endif
 #ifdef USE_NTLM
   if(pop3c->authmechs & SASL_AUTH_NTLM) {
     mech = "NTLM";
@@ -610,6 +620,58 @@ static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
   return result;
 }
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+/* For AUTH CRAM-MD5 responses */
+static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
+                                          int pop3code,
+                                          pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *chlg64 = data->state.buffer;
+  size_t len = 0;
+  char *rplyb64 = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  /* Get the challenge */
+  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
+    ;
+
+  /* Terminate the challenge */
+  if(*chlg64 != '=') {
+    for(len = strlen(chlg64); len--;)
+      if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
+         chlg64[len] != '\t')
+        break;
+
+    if(++len) {
+      chlg64[len] = '\0';
+    }
+  }
+
+  result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
+                                             conn->passwd, &rplyb64, &len);
+
+  if(!result) {
+    if(rplyb64) {
+      result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", rplyb64);
+
+      if(!result)
+        state(conn, POP3_AUTH_FINAL);
+    }
+    Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+#endif
+
 #ifdef USE_NTLM
 /* For AUTH NTLM responses */
 static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
@@ -618,8 +680,8 @@ static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *type1msg = NULL;
   size_t len = 0;
+  char *type1msg = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -653,8 +715,8 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *type3msg = NULL;
   size_t len = 0;
+  char *type3msg = NULL;
 
   (void)instate; /* no use for this yet */
 
@@ -891,6 +953,12 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_auth_login_password_resp(conn, pop3code,
                                                    pop3c->state);
       break;
+
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+    case POP3_AUTH_CRAMMD5:
+      result = pop3_state_auth_cram_resp(conn, pop3code, pop3c->state);
+      break;
+#endif
 
 #ifdef USE_NTLM
     case POP3_AUTH_NTLM:
