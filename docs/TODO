@@ -590,7 +590,7 @@ to provide the data to send.
  for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
  similar.
 
-18. Next major release
+19. Next major release
 
 19.1 cleanup return codes
 
