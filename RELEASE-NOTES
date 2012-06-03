@@ -1,21 +1,26 @@
-Curl and libcurl 7.26.1
+Curl and libcurl 7.27.0
 
  Public curl releases:         128
- Command line options:         151
+ Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 929
+ Contributors:                 953
 
 This release includes the following changes:
 
  o nss: use human-readable error messages provided by NSS
- o 
+ o added --metalink for metalink download support
+ o pop3: Added support for sasl ntlm authentication
+ o pop3: Added support for sasl plain text authentication
 
 This release includes the following bugfixes:
 
  o pop3: Fixed the issue of having to supply the user name for all requests
- o 
+ o configure: fix LDAPS disabling related misplaced closing parenthesis
+ o cmdline: made -D option work with -O and -J
+ o configure: Fix libcurl.pc and curl-config generation for static MingW*
+   cross builds
 
 This release includes the following known bugs:
 
@@ -24,7 +29,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
+ Yang Tse
 
         Thanks! (and sorry if I forgot to mention someone)
 
