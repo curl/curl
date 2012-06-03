@@ -45,6 +45,15 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
                                         const char* valuep, char **outptr,
                                         size_t *outlen);
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+/* This is used to generate a base64 encoded CRAM-MD5 message */
+CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
+                                           const char* chlg64,
+                                           const char* user,
+                                           const char* passwdp,
+                                           char **outptr, size_t *outlen);
+#endif
+
 #ifdef USE_NTLM
 /* This is used to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,

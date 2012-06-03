@@ -85,7 +85,6 @@
 #include "curl_base64.h"
 #include "curl_rand.h"
 #include "curl_md5.h"
-#include "curl_hmac.h"
 #include "curl_gethostname.h"
 #include "curl_sasl.h"
 #include "warnless.h"
@@ -710,7 +709,6 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-
 /* for AUTH CRAM-MD5 responses */
 static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
                                          int smtpcode,
@@ -719,13 +717,8 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   char *chlg64 = data->state.buffer;
-  unsigned char *chlg;
-  size_t chlglen;
   size_t len = 0;
   char *rplyb64 = NULL;
-  HMAC_context *ctxt;
-  unsigned char digest[MD5_DIGEST_LEN];
-  char reply[MAX_CURL_USER_LENGTH + 2 * MD5_DIGEST_LEN + 1];
 
   (void)instate; /* no use for this yet */
 
@@ -738,9 +731,7 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
   for(chlg64 += 4; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
     ;
 
-  chlg = (unsigned char *) NULL;
-  chlglen = 0;
-
+  /* Terminate the challenge */
   if(*chlg64 != '=') {
     for(len = strlen(chlg64); len--;)
       if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
@@ -749,40 +740,11 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
 
     if(++len) {
       chlg64[len] = '\0';
-
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-      if(result)
-        return result;
     }
   }
 
-  /* Compute digest */
-  ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
-                        (const unsigned char *) conn->passwd,
-                        curlx_uztoui(strlen(conn->passwd)));
-
-  if(!ctxt) {
-    Curl_safefree(chlg);
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  if(chlglen > 0)
-    Curl_HMAC_update(ctxt, chlg, curlx_uztoui(chlglen));
-
-  Curl_safefree(chlg);
-
-  Curl_HMAC_final(ctxt, digest);
-
-  /* Prepare the reply */
-  snprintf(reply, sizeof(reply),
-   "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-           conn->user, digest[0], digest[1], digest[2], digest[3], digest[4],
-           digest[5],
-           digest[6], digest[7], digest[8], digest[9], digest[10], digest[11],
-           digest[12], digest[13], digest[14], digest[15]);
-
-  /* Encode it to base64 and send it */
-  result = Curl_base64_encode(data, reply, 0, &rplyb64, &len);
+  result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
+                                             conn->passwd, &rplyb64, &len);
 
   if(!result) {
     if(rplyb64) {
