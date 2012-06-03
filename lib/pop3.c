@@ -216,38 +216,56 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 static int pop3_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
-  size_t len = pp->nread_resp;
+  size_t len = strlen(pp->linestart_resp);
   struct connectdata *conn = pp->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t wordlen;
 
-  if((len < 1 || memcmp("+", line, 1)) &&
-     (len < 3 || memcmp("+OK", line, 3)) &&
-     (len < 4 || memcmp("-ERR", line, 4)))
-  return FALSE; /* Nothing for us */
+  /* Do we have an error response? */
+  if(len >= 4 && !memcmp("-ERR", line, 4)) {
+    *resp = '-';
 
-  *resp = line[0]; /* + or - */
+    return FALSE;
+  }
 
-  if(pop3c->state == POP3_AUTH && len >= 3 && !memcmp(line, "+OK", 3)) {
-    line += 3;
-    len -= 3;
+  /* Are we processing reponses to our AUTH command */
+  if(pop3c->state == POP3_AUTH) {
 
+    /* Advance past our positive response if necessary */
+    if(len >= 3 && !memcmp(line, "+OK", 3)) {
+      line += 3;
+      len -= 3;
+    }
+
+    /* Loop through the data line */
     for(;;) {
       while(len &&
             (*line == ' ' || *line == '\t' ||
              *line == '\r' || *line == '\n')) {
+        if(*line == '\n')
+          return FALSE;
+
         line++;
         len--;
       }
 
-      if(!len || *line == '.')
+      if(!len)
         break;
 
+      /* Until we receive the terminating character */
+      if(*line == '.') {
+        *resp = '+';
+
+        return TRUE;
+      }
+
+      /* Extract the word */
       for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
             line[wordlen] != '\t' && line[wordlen] != '\r' &&
             line[wordlen] != '\n';)
         wordlen++;
 
+      /* Test the word for a matching authentication mechanism */
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
         pop3c->authmechs |= SASL_AUTH_LOGIN;
       else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
@@ -267,6 +285,13 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
       len -= wordlen;
     }
   }
+
+  if((len < 1 || memcmp("+", line, 1)) &&
+     (len < 3 || memcmp("+OK", line, 3)))
+  return FALSE; /* Nothing for us */
+
+  /* Otherwise it's a positive response */
+  *resp = '+';
 
   return TRUE;
 }
@@ -500,7 +525,7 @@ static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = Curl_sasl_create_plain_message(conn->data, conn->user,
+    result = Curl_sasl_create_plain_message(data, conn->user,
                                             conn->passwd, &plainauth, &len);
 
     if(!result) {
@@ -534,7 +559,7 @@ static CURLcode pop3_state_auth_login_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = Curl_sasl_create_login_message(conn->data, conn->user,
+    result = Curl_sasl_create_login_message(data, conn->user,
                                             &authuser, &len);
 
     if(!result) {
@@ -568,7 +593,7 @@ static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = Curl_sasl_create_login_message(conn->data, conn->passwd,
+    result = Curl_sasl_create_login_message(data, conn->passwd,
                                             &authpasswd, &len);
 
     if(!result) {
