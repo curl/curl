@@ -892,6 +892,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
                                                    pop3c->state);
       break;
 
+#ifdef USE_NTLM
     case POP3_AUTH_NTLM:
       result = pop3_state_auth_ntlm_resp(conn, pop3code, pop3c->state);
       break;
@@ -900,6 +901,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_auth_ntlm_type2msg_resp(conn, pop3code,
                                                   pop3c->state);
       break;
+#endif
 
     case POP3_AUTH_FINAL:
       result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
