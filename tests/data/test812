@@ -36,7 +36,7 @@ pop3://%HOSTIP:%POP3PORT/812 -u user:secret
 56
 </errorcode>
 <protocol>
-AUTH
+CAPA
 USER user
 PASS secret
 RETR 812

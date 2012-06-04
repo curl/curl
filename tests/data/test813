@@ -35,7 +35,7 @@ pop3://%HOSTIP:%POP3PORT/813 -u user:wrong
 67
 </errorcode>
 <protocol>
-AUTH
+CAPA
 USER user
 PASS wrong
 QUIT
