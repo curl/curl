@@ -30,7 +30,7 @@ typedef enum {
   POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
   POP3_STARTTLS,
-  POP3_AUTH,
+  POP3_CAPA,
   POP3_AUTH_PLAIN,
   POP3_AUTH_LOGIN,
   POP3_AUTH_LOGIN_PASSWD,

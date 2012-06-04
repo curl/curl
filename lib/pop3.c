@@ -213,7 +213,7 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 
 /* Function that checks for an ending pop3 status code at the start of the
    given string, but also detects the allowed authentication mechanisms
-   according to the AUTH response. */
+   according to the CAPA response. */
 static int pop3_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -229,20 +229,31 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
     return FALSE;
   }
 
-  /* Are we processing reponses to our AUTH command */
-  if(pop3c->state == POP3_AUTH) {
+  /* Are we processing reponses to our CAPA command? */
+  if(pop3c->state == POP3_CAPA) {
 
-    /* Advance past our positive response if necessary */
-    if(len >= 3 && !memcmp(line, "+OK", 3)) {
-      line += 3;
-      len -= 3;
+    /* Do we have the terminating character? */
+    if(len >= 1 && !memcmp(line, ".", 1)) {
+      *resp = '+';
+
+      return TRUE;
     }
+
+    /* We are only interested in the SASL line */
+    if(len < 4 || memcmp(line, "SASL", 3)) {
+      return FALSE;
+    }
+
+    /* Advance past the SASL keyword */
+    line += 4;
+    len -= 4;
 
     /* Loop through the data line */
     for(;;) {
       while(len &&
             (*line == ' ' || *line == '\t' ||
              *line == '\r' || *line == '\n')) {
+
         if(*line == '\n')
           return FALSE;
 
@@ -252,13 +263,6 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
 
       if(!len)
         break;
-
-      /* Until we receive the terminating character */
-      if(*line == '.') {
-        *resp = '+';
-
-        return TRUE;
-      }
 
       /* Extract the word */
       for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
@@ -306,7 +310,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "STOP",
     "SERVERGREET",
     "STARTTLS",
-    "AUTH",
+    "CAPA",
     "AUTH_PLAIN",
     "AUTH_LOGIN",
     "AUTH_LOGIN_PASSWD",
@@ -330,7 +334,7 @@ static void state(struct connectdata *conn, pop3state newstate)
   pop3c->state = newstate;
 }
 
-static CURLcode pop3_state_auth(struct connectdata *conn)
+static CURLcode pop3_state_capa(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -346,13 +350,13 @@ static CURLcode pop3_state_auth(struct connectdata *conn)
     return result;
   }
 
-  /* send AUTH */
-  result = Curl_pp_sendf(&pop3c->pp, "AUTH");
+  /* send CAPA */
+  result = Curl_pp_sendf(&pop3c->pp, "CAPA");
 
   if(result)
     return result;
 
-  state(conn, POP3_AUTH);
+  state(conn, POP3_CAPA);
 
   return CURLE_OK;
 }
@@ -462,7 +466,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     state(conn, POP3_STARTTLS);
   }
   else
-    result = pop3_state_auth(conn);
+    result = pop3_state_capa(conn);
 
   return result;
 }
@@ -484,14 +488,14 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       state(conn, POP3_STOP);
     }
     else
-      result = pop3_state_auth(conn);
+      result = pop3_state_capa(conn);
   }
   else {
     /* Curl_ssl_connect is BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(CURLE_OK == result) {
       pop3_to_pop3s(conn);
-      result = pop3_state_auth(conn);
+      result = pop3_state_capa(conn);
     }
     else {
       state(conn, POP3_STOP);
@@ -501,8 +505,8 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   return result;
 }
 
-/* For AUTH responses */
-static CURLcode pop3_state_auth_resp(struct connectdata *conn,
+/* For CAPA responses */
+static CURLcode pop3_state_capa_resp(struct connectdata *conn,
                                      int pop3code,
                                      pop3state instate)
 {
@@ -937,8 +941,8 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
       break;
 
-    case POP3_AUTH:
-      result = pop3_state_auth_resp(conn, pop3code, pop3c->state);
+    case POP3_CAPA:
+      result = pop3_state_capa_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH_PLAIN:
