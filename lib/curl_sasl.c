@@ -132,14 +132,14 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
 /*
  * Curl_sasl_create_cram_md5_message()
  *
- * This is used to generate an already encoded CRAM-MD5 message ready for
- * sending to the recipient.
+ * This is used to generate an already encoded CRAM-MD5 response message ready
+ * for sending to the recipient.
  *
  * Parameters:
  *
  * data    [in]     - The session handle.
  * chlg64  [in]     - Pointer to the input buffer.
- * userp   [in]     - The user name in the format User or Domain\User.
+ * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -149,7 +149,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
                                            const char* chlg64,
-                                           const char* user,
+                                           const char* userp,
                                            const char* passwdp,
                                            char **outptr, size_t *outlen)
 {
@@ -191,7 +191,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   /* Prepare the reply */
   snprintf(reply, sizeof(reply),
       "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-           user, digest[0], digest[1], digest[2], digest[3], digest[4],
+           userp, digest[0], digest[1], digest[2], digest[3], digest[4],
            digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
            digest[11], digest[12], digest[13], digest[14], digest[15]);
 
