@@ -848,7 +848,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    result = Curl_sasl_decode_ntlm_type2_message(data,
+    result = Curl_sasl_create_ntlm_type3_message(data,
                                                  data->state.buffer + 4,
                                                  conn->user, conn->passwd,
                                                  &conn->ntlm,

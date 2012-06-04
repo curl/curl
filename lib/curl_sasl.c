@@ -167,7 +167,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the input buffer.
+ * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
@@ -237,7 +237,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the input buffer.
+ * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * service [in]     - The service type such as www, smtp or pop
@@ -441,15 +441,15 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
 }
 
 /*
- * Curl_sasl_decode_ntlm_type2_message()
+ * Curl_sasl_create_ntlm_type3_message()
  *
- * This is used to decode a ntlm type-2 message received from a recipient and
- * generate the already encoded NTLM type-3 message ready for sending back.
+ * This is used to generate an already encoded NTLM type-3 message ready for
+ * sending to the recipient.
  *
  * Parameters:
  *
  * data    [in]     - Pointer to session handle.
- * header  [in]     - Pointer to the input buffer.
+ * header  [in]     - Pointer to the base64 encoded type-2 message buffer.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The ntlm data struct being used and modified.
@@ -459,7 +459,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                              const char *header,
                                              const char *userp,
                                              const char *passwdp,
