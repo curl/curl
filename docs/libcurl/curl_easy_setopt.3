@@ -147,10 +147,10 @@ Using the rules above, a file name pattern can be constructed:
 (This was added in 7.21.0)
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
-Function pointer that should match the following prototype: \fBsize_t
-function( char *ptr, size_t size, size_t nmemb, void *userdata);\fP This
-function gets called by libcurl as soon as there is data received that needs
-to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
+Pass a pointer to a function that matches the following prototype:
+\fBsize_t function( char *ptr, size_t size, size_t nmemb, void *userdata);\fP
+This function gets called by libcurl as soon as there is data received that
+needs to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
@@ -193,11 +193,11 @@ crashes.
 This option is also known with the older name \fICURLOPT_FILE\fP, the name
 \fICURLOPT_WRITEDATA\fP was introduced in 7.9.7.
 .IP CURLOPT_READFUNCTION
-Function pointer that should match the following prototype: \fBsize_t
-function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP This
-function gets called by libcurl as soon as it needs to read data in order to
-send it to the peer. The data area pointed at by the pointer \fIptr\fP may be
-filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
+Pass a pointer to a function that matches the following prototype:
+\fBsize_t function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP
+This function gets called by libcurl as soon as it needs to read data in order
+to send it to the peer. The data area pointed at by the pointer \fIptr\fP may
+be filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
 bytes. Your function must return the actual number of bytes that you stored in
 that memory area. Returning 0 will signal end-of-file to the library and cause
 it to stop the current transfer.
@@ -234,13 +234,13 @@ If you're using libcurl as a win32 DLL, you MUST use a
 This option was also known by the older name \fICURLOPT_INFILE\fP, the name
 \fICURLOPT_READDATA\fP was introduced in 7.9.7.
 .IP CURLOPT_IOCTLFUNCTION
-Function pointer that should match the \fIcurl_ioctl_callback\fP prototype
-found in \fI<curl/curl.h>\fP. This function gets called by libcurl when
-something special I/O-related needs to be done that the library can't do by
-itself. For now, rewinding the read data stream is the only action it can
-request. The rewinding of the read data stream may be necessary when doing a
-HTTP PUT or POST with a multi-pass authentication method.  (Option added in
-7.12.3).
+Pass a pointer to a function that matches the following prototype:
+\fBcurlioerr function(CURL *handle, int cmd, void *clientp);\fP. This function
+gets called by libcurl when something special I/O-related needs to be done
+that the library can't do by itself. For now, rewinding the read data stream
+is the only action it can request. The rewinding of the read data stream may
+be necessary when doing a HTTP PUT or POST with a multi-pass authentication
+method.  (Option added in 7.12.3).
 
 Use \fICURLOPT_SEEKFUNCTION\fP instead to provide seeking!
 .IP CURLOPT_IOCTLDATA
@@ -248,7 +248,7 @@ Pass a pointer that will be untouched by libcurl and passed as the 3rd
 argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.  (Option
 added in 7.12.3)
 .IP CURLOPT_SEEKFUNCTION
-Function pointer that should match the following prototype: \fIint
+Pass a pointer to a function that matches the following prototype: \fBint
 function(void *instream, curl_off_t offset, int origin);\fP This function gets
 called by libcurl to seek to a certain position in the input stream and can be
 used to fast forward a file in a resumed upload (instead of reading all
@@ -270,18 +270,18 @@ Data pointer to pass to the file seek function. If you use the
 \fICURLOPT_SEEKFUNCTION\fP option, this is the pointer you'll get as input. If
 you don't specify a seek callback, NULL is passed. (Option added in 7.18.0)
 .IP CURLOPT_SOCKOPTFUNCTION
-Function pointer that should match the \fIcurl_sockopt_callback\fP prototype
-found in \fI<curl/curl.h>\fP. This function gets called by libcurl after the
-socket() call but before the connect() call. The callback's \fIpurpose\fP
-argument identifies the exact purpose for this particular socket, and
-currently only one value is supported: \fICURLSOCKTYPE_IPCXN\fP for the
-primary connection (meaning the control connection in the FTP case). Future
-versions of libcurl may support more purposes. It passes the newly created
-socket descriptor so additional setsockopt() calls can be done at the user's
-discretion.  Return 0 (zero) from the callback on success. Return 1 from the
-callback function to signal an unrecoverable error to the library and it will
-close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option added in
-7.16.0)
+Pass a pointer to a function that matches the following prototype: \fBint
+function(void *clientp, curl_socket_t curlfd, curlsocktype purpose);\fP. This
+function gets called by libcurl after the socket() call but before the
+connect() call. The callback's \fIpurpose\fP argument identifies the exact
+purpose for this particular socket, and currently only one value is supported:
+\fICURLSOCKTYPE_IPCXN\fP for the primary connection (meaning the control
+connection in the FTP case). Future versions of libcurl may support more
+purposes. It passes the newly created socket descriptor so additional
+setsockopt() calls can be done at the user's discretion.  Return 0 (zero) from
+the callback on success. Return 1 from the callback function to signal an
+unrecoverable error to the library and it will close the socket and return
+\fICURLE_COULDNT_CONNECT\fP.  (Option added in 7.16.0)
 
 Added in 7.21.5, the callback function may return
 \fICURL_SOCKOPT_ALREADY_CONNECTED\fP, which tells libcurl that the socket is
@@ -291,20 +291,21 @@ Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
 (Option added in 7.16.0)
 .IP CURLOPT_OPENSOCKETFUNCTION
-Function pointer that should match the \fIcurl_opensocket_callback\fP
-prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
-instead of the \fIsocket(2)\fP call. The callback's \fIpurpose\fP argument
-identifies the exact purpose for this particular socket:
-\fICURLSOCKTYPE_IPCXN\fP is for IP based connections. Future versions of
-libcurl may support more purposes. It passes the resolved peer address as a
-\fIaddress\fP argument so the callback can modify the address or refuse to
-connect at all. The callback function should return the socket or
-\fICURL_SOCKET_BAD\fP in case no connection should be established or any error
-detected. Any additional \fIsetsockopt(2)\fP calls can be done on the socket
-at the user's discretion.  \fICURL_SOCKET_BAD\fP return value from the
-callback function will signal an unrecoverable error to the library and it
-will return \fICURLE_COULDNT_CONNECT\fP.  This return code can be used for IP
-address blacklisting.  The default behavior is:
+Pass a pointer to a function that matches the following prototype:
+\fBcurl_socket_t function(void *clientp, curlsocktype purpose, struct
+curl_sockaddr *address);\fP. This function gets called by libcurl instead of
+the \fIsocket(2)\fP call. The callback's \fIpurpose\fP argument identifies the
+exact purpose for this particular socket: \fICURLSOCKTYPE_IPCXN\fP is for IP
+based connections. Future versions of libcurl may support more purposes. It
+passes the resolved peer address as a \fIaddress\fP argument so the callback
+can modify the address or refuse to connect at all. The callback function
+should return the socket or \fICURL_SOCKET_BAD\fP in case no connection could
+be established or another error was detected. Any additional
+\fIsetsockopt(2)\fP calls can be done on the socket at the user's discretion.
+\fICURL_SOCKET_BAD\fP return value from the callback function will signal an
+unrecoverable error to the library and it will return
+\fICURLE_COULDNT_CONNECT\fP.  This return code can be used for IP address
+blacklisting.  The default behavior is:
 .nf
    return socket(addr->family, addr->socktype, addr->protocol);
 .fi
@@ -314,25 +315,26 @@ Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
 (Option added in 7.17.1.)
 .IP CURLOPT_CLOSESOCKETFUNCTION
-Function pointer that should match the \fIcurl_closesocket_callback\fP
-prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
-instead of the \fIclose(3)\fP or \fIclosesocket(3)\fP call when sockets are
-closed (not for any other file descriptors). This is pretty much the reverse
-to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. Return 0 to signal success and
-1 if there was an error.  (Option added in 7.21.7)
+Pass a pointer to a function that matches the following prototype: \fBint
+function(void *clientp, curl_socket_t item);\fP. This function gets called by
+libcurl instead of the \fIclose(3)\fP or \fIclosesocket(3)\fP call when
+sockets are closed (not for any other file descriptors). This is pretty much
+the reverse to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. Return 0 to signal
+success and 1 if there was an error.  (Option added in 7.21.7)
 .IP CURLOPT_CLOSESOCKETDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the closesocket callback set with
 \fICURLOPT_CLOSESOCKETFUNCTION\fP.  (Option added in 7.21.7)
 .IP CURLOPT_PROGRESSFUNCTION
-Function pointer that should match the \fIcurl_progress_callback\fP prototype
-found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
-its internal equivalent with a frequent interval during operation (roughly
-once per second or sooner) no matter if data is being transfered or not.
-Unknown/unused argument values passed to the callback will be set to zero
-(like if you only download data, the upload size will remain 0). Returning a
-non-zero value from this callback will cause libcurl to abort the transfer and
-return \fICURLE_ABORTED_BY_CALLBACK\fP.
+Pass a pointer to a function that matches the following prototype: \fBint
+function(void *clientp, double dltotal, double dlnow, double ultotal, double
+ulnow); \fP. This function gets called by libcurl instead of its internal
+equivalent with a frequent interval during operation (roughly once per second
+or sooner) no matter if data is being transfered or not.  Unknown/unused
+argument values passed to the callback will be set to zero (like if you only
+download data, the upload size will remain 0). Returning a non-zero value from
+this callback will cause libcurl to abort the transfer and return
+\fICURLE_ABORTED_BY_CALLBACK\fP.
 
 If you transfer data with the multi interface, this function will not be
 called during periods of idleness unless you call the appropriate libcurl
@@ -344,14 +346,14 @@ get called.
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 .IP CURLOPT_HEADERFUNCTION
-Function pointer that should match the following prototype: \fIsize_t
-function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP. This
-function gets called by libcurl as soon as it has received header data. The
-header callback will be called once for each header and only complete header
-lines are passed on to the callback. Parsing headers is very easy using
-this. The size of the data pointed to by \fIptr\fP is \fIsize\fP multiplied
-with \fInmemb\fP. Do not assume that the header line is zero terminated! The
-pointer named \fIuserdata\fP is the one you set with the
+Pass a pointer to a function that matches the following prototype:
+\fBsize_t function( void *ptr, size_t size, size_t nmemb, void
+*userdata);\fP. This function gets called by libcurl as soon as it has
+received header data. The header callback will be called once for each header
+and only complete header lines are passed on to the callback. Parsing headers
+is very easy using this. The size of the data pointed to by \fIptr\fP is
+\fIsize\fP multiplied with \fInmemb\fP. Do not assume that the header line is
+zero terminated! The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
@@ -391,7 +393,7 @@ the writing, this must be a valid FILE * as the internal default will then be
 a plain fwrite(). See also the \fICURLOPT_HEADERFUNCTION\fP option above on
 how to set a custom get-all-headers callback.
 .IP CURLOPT_DEBUGFUNCTION
-Function pointer that should match the following prototype: \fIint
+Pass a pointer to a function that matches the following prototype: \fBint
 curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
 \fICURLOPT_DEBUGFUNCTION\fP replaces the standard debug function used when
 \fICURLOPT_VERBOSE \fP is in effect. This callback receives debug information,
@@ -420,11 +422,11 @@ used by libcurl, it is only passed to the callback.
 This option does only function for libcurl powered by OpenSSL. If libcurl was
 built against another SSL library, this functionality is absent.
 
-Function pointer that should match the following prototype: \fBCURLcode
-sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function gets called
-by libcurl just before the initialization of a SSL connection after having
-processed all other SSL related options to give a last chance to an
-application to modify the behaviour of openssl's ssl initialization. The
+Pass a pointer to a function that matches the following prototype:
+\fBCURLcode sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function
+gets called by libcurl just before the initialization of a SSL connection
+after having processed all other SSL related options to give a last chance to
+an application to modify the behaviour of openssl's ssl initialization. The
 \fIsslctx\fP parameter is actually a pointer to an openssl \fISSL_CTX\fP. If
 an error is returned no attempt to establish a connection is made and the
 perform operation will return the error code from this callback function.  Set
@@ -447,8 +449,8 @@ parameter, otherwise \fBNULL\fP. (Added in 7.11.0)
 .IP CURLOPT_CONV_TO_NETWORK_FUNCTION
 .IP CURLOPT_CONV_FROM_NETWORK_FUNCTION
 .IP CURLOPT_CONV_FROM_UTF8_FUNCTION
-Function pointers that should match the following prototype: CURLcode
-function(char *ptr, size_t length);
+Pass a pointer to a function that matches the following prototype:
+\fBCURLcode function(char *ptr, size_t length);\fP
 
 These three options apply to non-ASCII platforms only.  They are available
 only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was built. When
@@ -490,16 +492,17 @@ follows:
 You will need to override these definitions if they are different on your
 system.
 .IP CURLOPT_INTERLEAVEFUNCTION
-Function pointer that should match the following prototype: \fIsize_t
-function( void *ptr, size_t size, size_t nmemb, void *userdata)\fP. This
-function gets called by libcurl as soon as it has received interleaved RTP
-data. This function gets called for each $ block and therefore contains
-exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl writes the
-interleaved header as well as the included data for each call. The first byte
-is always an ASCII dollar sign. The dollar sign is followed by a one byte
-channel identifier and then a 2 byte integer length in network byte order. See
-\fIRFC2326 Section 10.12\fP for more information on how RTP interleaving
-behaves. If unset or set to NULL, curl will use the default write function.
+Pass a pointer to a function that matches the following prototype:
+\fBsize_t function( void *ptr, size_t size, size_t nmemb, void
+*userdata)\fP. This function gets called by libcurl as soon as it has received
+interleaved RTP data. This function gets called for each $ block and therefore
+contains exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl
+writes the interleaved header as well as the included data for each call. The
+first byte is always an ASCII dollar sign. The dollar sign is followed by a
+one byte channel identifier and then a 2 byte integer length in network byte
+order. See \fIRFC2326 Section 10.12\fP for more information on how RTP
+interleaving behaves. If unset or set to NULL, curl will use the default write
+function.
 
 Interleaved RTP poses some challeneges for the client application. Since the
 stream data is sharing the RTSP control connection, it is critical to service
@@ -515,10 +518,10 @@ This is the userdata pointer that will be passed to
 \fICURLOPT_INTERLEAVEFUNCTION\fP when interleaved RTP data is received. (Added
 in 7.20.0)
 .IP CURLOPT_CHUNK_BGN_FUNCTION
-Function pointer that should match the following prototype: \fBlong function
-(const void *transfer_info, void *ptr, int remains)\fP. This function gets
-called by libcurl before a part of the stream is going to be transferred (if
-the transfer supports chunks).
+Pass a pointer to a function that matches the following prototype:
+\fBlong function (const void *transfer_info, void *ptr, int remains)\fP. This
+function gets called by libcurl before a part of the stream is going to be
+transferred (if the transfer supports chunks).
 
 This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH\fP
 option for now.
@@ -535,9 +538,9 @@ Return \fICURL_CHUNK_BGN_FUNC_OK\fP if everything is fine,
 \fICURL_CHUNK_BGN_FUNC_FAIL\fP to tell libcurl to stop if some error occurred.
 (This was added in 7.21.0)
 .IP CURLOPT_CHUNK_END_FUNCTION
-Function pointer that should match the following prototype: \fBlong
-function(void *ptr)\fP. This function gets called by libcurl as soon as a part
-of the stream has been transferred (or skipped).
+Pass a pointer to a function that matches the following prototype:
+\fBlong function(void *ptr)\fP. This function gets called by libcurl as soon
+as a part of the stream has been transferred (or skipped).
 
 Return \fICURL_CHUNK_END_FUNC_OK\fP if everything is fine or
 \fBCURL_CHUNK_END_FUNC_FAIL\fP to tell the lib to stop if some error occurred.
@@ -547,9 +550,9 @@ Pass a pointer that will be untouched by libcurl and passed as the ptr
 argument to the \fICURL_CHUNK_BGN_FUNTION\fP and \fICURL_CHUNK_END_FUNTION\fP.
 (This was added in 7.21.0)
 .IP CURLOPT_FNMATCH_FUNCTION
-Function pointer that should match \fBint function(void *ptr, const char
-*pattern, const char *string)\fP prototype (see \fIcurl/curl.h\fP). It is used
-internally for the wildcard matching feature.
+Pass a pointer to a function that matches the following prototype: \fBint
+function(void *ptr, const char *pattern, const char *string)\fP prototype (see
+\fIcurl/curl.h\fP). It is used internally for the wildcard matching feature.
 
 Return \fICURL_FNMATCHFUNC_MATCH\fP if pattern matches the string,
 \fICURL_FNMATCHFUNC_NOMATCH\fP if not or \fICURL_FNMATCHFUNC_FAIL\fP if an
@@ -563,11 +566,11 @@ Pass a char * to a buffer that the libcurl may store human readable error
 messages in. This may be more helpful than just the return code from
 \fIcurl_easy_perform\fP. The buffer must be at least CURL_ERROR_SIZE big.
 Although this argument is a 'char *', it does not describe an input string.
-Therefore the (probably undefined) contents of the buffer is NOT copied
-by the library. You should keep the associated storage available until
-libcurl no longer needs it. Failing to do so will cause very odd behavior
-or even crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP
-or you set the same option again to use a different pointer.
+Therefore the (probably undefined) contents of the buffer is NOT copied by the
+library. You must keep the associated storage available until libcurl no
+longer needs it. Failing to do so will cause very odd behavior or even
+crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP or you
+set the same option again to use a different pointer.
 
 Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
 debug/trace why errors happen.
@@ -592,8 +595,9 @@ detected, like when a "100-continue" is received as a response to a
 POST/PUT and a 401 or 407 is received immediately afterwards.
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
-The actual URL to deal with. The parameter should be a char * to a zero
-terminated string which must be URL-encoded in the following format:
+Pass in a pointer to the actual URL to deal with. The parameter should be a
+char * to a zero terminated string which must be URL-encoded in the following
+format:
 
 scheme://host:port/path
 
@@ -841,14 +845,14 @@ affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
 used for "regular" HTTP requests is instead controlled with
 \fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
-Pass a pointer to a zero terminated string. This should be a comma separated
-list of hosts which do not use a proxy, if one is specified.  The only
-wildcard is a single * character, which matches all hosts, and effectively
-disables the proxy. Each name in this list is matched as either a domain which
-contains the hostname, or the hostname itself. For example, example.com
-would match example.com, example.com:80, and www.example.com, but not
-www.notanexample.com.
-(Added in 7.19.4)
+Pass a pointer to a zero terminated string. The string consists of a comma
+separated list of host names that do not require a proxy to get reached, even
+if one is specified.  The only wildcard available is a single * character,
+which matches all hosts, and effectively disables the proxy. Each name in this
+list is matched as either a domain which contains the hostname, or the
+hostname itself. For example, example.com would match example.com,
+example.com:80, and www.example.com, but not www.notanexample.com.  (Added in
+7.19.4)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to 1 to make the library tunnel all operations through a
 given HTTP proxy. There is a big difference between using a proxy and to
@@ -883,7 +887,7 @@ connection. This can be used in combination with \fICURLOPT_INTERFACE\fP and
 you are recommended to use \fICURLOPT_LOCALPORTRANGE\fP as well when this is
 set. Valid port numbers are 1 - 65535. (Added in 7.15.2)
 .IP CURLOPT_LOCALPORTRANGE
-Pass a long. This is the number of attempts libcurl should make to find a
+Pass a long. This is the number of attempts libcurl will make to find a
 working local port number. It starts with the given \fICURLOPT_LOCALPORT\fP
 and adds one to the number for each retry. Setting this to 1 or below will
 make libcurl do only one try for the exact port number. Port numbers by nature
@@ -922,21 +926,20 @@ only makes sense to use this option if you want it smaller.
 Pass a long specifying what remote port number to connect to, instead of the
 one specified in the URL or the default port for the used protocol.
 .IP CURLOPT_TCP_NODELAY
-Pass a long specifying whether the TCP_NODELAY option should be set or
-cleared (1 = set, 0 = clear). The option is cleared by default. This
-will have no effect after the connection has been established.
+Pass a long specifying whether the TCP_NODELAY option is to be set or cleared
+(1 = set, 0 = clear). The option is cleared by default. This will have no
+effect after the connection has been established.
 
-Setting this option will disable TCP's Nagle algorithm. The purpose of
-this algorithm is to try to minimize the number of small packets on
-the network (where "small packets" means TCP segments less than the
-Maximum Segment Size (MSS) for the network).
+Setting this option will disable TCP's Nagle algorithm. The purpose of this
+algorithm is to try to minimize the number of small packets on the network
+(where "small packets" means TCP segments less than the Maximum Segment Size
+(MSS) for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
-amortizes the overhead of the send. However, in some cases (most
-notably telnet or rlogin) small segments may need to be sent
-without delay. This is less efficient than sending larger amounts of
-data at a time, and can contribute to congestion on the network if
-overdone.
+amortizes the overhead of the send. However, in some cases (most notably
+telnet or rlogin) small segments may need to be sent without delay. This is
+less efficient than sending larger amounts of data at a time, and can
+contribute to congestion on the network if overdone.
 .IP CURLOPT_ADDRESS_SCOPE
 Pass a long specifying the scope_id value to use when connecting to IPv6
 link-local or site-local addresses. (Added in 7.19.0)
