@@ -23,6 +23,7 @@
  * RFC2195 CRAM-MD5 authentication
  * RFC2384 POP URL Scheme
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
+ * RFC2831 DIGEST-MD5 authentication
  * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
@@ -315,6 +316,8 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_LOGIN",
     "AUTH_LOGIN_PASSWD",
     "AUTH_CRAMMD5",
+    "AUTH_DIGESTMD5",
+    "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
     "AUTH_FINAL",
@@ -387,7 +390,12 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   /* Check supported authentication mechanisms by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(pop3c->authmechs & SASL_AUTH_CRAM_MD5) {
+  if(pop3c->authmechs & SASL_AUTH_DIGEST_MD5) {
+    mech = "DIGEST-MD5";
+    authstate = POP3_AUTH_DIGESTMD5;
+    pop3c->authused = SASL_AUTH_DIGEST_MD5;
+  }
+  else if(pop3c->authmechs & SASL_AUTH_CRAM_MD5) {
     mech = "CRAM-MD5";
     authstate = POP3_AUTH_CRAMMD5;
     pop3c->authused = SASL_AUTH_CRAM_MD5;
@@ -670,6 +678,70 @@ static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
         state(conn, POP3_AUTH_FINAL);
     }
     Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+
+/* For AUTH DIGEST-MD5 challenge responses */
+static CURLcode pop3_state_auth_digest_resp(struct connectdata *conn,
+                                            int pop3code,
+                                            pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *chlg64 = data->state.buffer;
+  size_t len = 0;
+  char *rplyb64 = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  /* Get the challenge */
+  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
+    ;
+
+  result = Curl_sasl_create_digest_md5_message(data, chlg64, conn->user,
+                                               conn->passwd, "pop",
+                                               &rplyb64, &len);
+
+  if(!result) {
+    if(rplyb64) {
+      result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", rplyb64);
+
+      if(!result)
+        state(conn, POP3_AUTH_DIGESTMD5_RESP);
+    }
+
+    Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+
+/* For AUTH DIGEST-MD5 challenge-response responses */
+static CURLcode pop3_state_auth_digest_resp_resp(struct connectdata *conn,
+                                                 int pop3code,
+                                                 pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Authentication failed: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "");
+
+    if(!result)
+      state(conn, POP3_AUTH_FINAL);
   }
 
   return result;
@@ -961,6 +1033,14 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     case POP3_AUTH_CRAMMD5:
       result = pop3_state_auth_cram_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_DIGESTMD5:
+      result = pop3_state_auth_digest_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_DIGESTMD5_RESP:
+      result = pop3_state_auth_digest_resp_resp(conn, pop3code, pop3c->state);
       break;
 #endif
 

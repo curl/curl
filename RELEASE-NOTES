@@ -15,6 +15,7 @@ This release includes the following changes:
  o pop3: Added support for sasl login authentication 
  o pop3: Added support for sasl ntlm authentication
  o pop3: Added support for sasl cram-md5 authentication
+ o pop3: Added support for sasl digest-md5 authentication
 
 This release includes the following bugfixes:
 
@@ -32,7 +33,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
- Yang Tse
+ Yang Tse, Gokhan Sengun
 
         Thanks! (and sorry if I forgot to mention someone)
 
