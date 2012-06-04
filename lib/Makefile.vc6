@@ -512,16 +512,17 @@ X_OBJS= \
 	$(DIROBJ)\curl_ntlm_wb.obj \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
+	$(DIROBJ)\curl_sasl.obj \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
-	$(DIROBJ)\fileinfo.obj \
 	$(DIROBJ)\file.obj \
+	$(DIROBJ)\fileinfo.obj \
 	$(DIROBJ)\formdata.obj \
-	$(DIROBJ)\ftplistparser.obj \
 	$(DIROBJ)\ftp.obj \
+	$(DIROBJ)\ftplistparser.obj \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\getinfo.obj \
 	$(DIROBJ)\gopher.obj \
@@ -529,15 +530,15 @@ X_OBJS= \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\hmac.obj \
 	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
-	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\http.obj \
 	$(DIROBJ)\http_chunks.obj \
 	$(DIROBJ)\http_digest.obj \
 	$(DIROBJ)\http_negotiate.obj \
-        $(DIROBJ)\http_negotiate_sspi.obj \
-	$(DIROBJ)\http.obj \
+	$(DIROBJ)\http_negotiate_sspi.obj \
 	$(DIROBJ)\http_proxy.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\imap.obj \
@@ -565,8 +566,8 @@ X_OBJS= \
 	$(DIROBJ)\share.obj \
 	$(DIROBJ)\slist.obj \
 	$(DIROBJ)\smtp.obj \
-	$(DIROBJ)\socks_gssapi.obj \
 	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\socks_gssapi.obj \
 	$(DIROBJ)\socks_sspi.obj \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \
