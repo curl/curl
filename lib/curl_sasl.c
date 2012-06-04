@@ -188,7 +188,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   size_t chlglen = 0;
   HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
-  char reply[MAX_CURL_USER_LENGTH + 2 * MD5_DIGEST_LEN + 1];
+  char response[MAX_CURL_USER_LENGTH + 2 * MD5_DIGEST_LEN + 1];
 
   /* Decode the challenge if necessary */
   if(chlg64len && *chlg64 != '=') {
@@ -217,15 +217,15 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
 
-  /* Prepare the reply */
-  snprintf(reply, sizeof(reply),
+  /* Prepare the response */
+  snprintf(response, sizeof(response),
       "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
            userp, digest[0], digest[1], digest[2], digest[3], digest[4],
            digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
            digest[11], digest[12], digest[13], digest[14], digest[15]);
 
   /* Base64 encode the reply */
-  return Curl_base64_encode(data, reply, 0, outptr, outlen);
+  return Curl_base64_encode(data, response, 0, outptr, outlen);
 }
 
 /*
