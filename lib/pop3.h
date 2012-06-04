@@ -39,7 +39,7 @@ typedef enum {
   POP3_AUTH_DIGESTMD5_RESP,
   POP3_AUTH_NTLM,
   POP3_AUTH_NTLM_TYPE2MSG,
-  POP3_AUTH_FINAL,
+  POP3_AUTH,
   POP3_USER,
   POP3_PASS,
   POP3_COMMAND,
@@ -51,14 +51,15 @@ typedef enum {
    struct */
 struct pop3_conn {
   struct pingpong pp;
-  char *mailbox;     /* message id */
-  char *custom;      /* custom request */
-  size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
-                        received thus far */
-  size_t strip;      /* number of bytes from the start to ignore as non-body */
+  char *mailbox;          /* Message ID */
+  char *custom;           /* Custom Request */
+  size_t eob;             /* Number of bytes of the EOB (End Of Body) that
+                             have been received so far */
+  size_t strip;           /* Number of bytes from the start to ignore as
+                             non-body */
   unsigned int authmechs; /* Accepted authentication methods */
   unsigned int authused;  /* Authentication method used for the connection */
-  pop3state state;   /* always use pop3.c:state() to change state! */
+  pop3state state;        /* Always use pop3.c:state() to change state! */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;
