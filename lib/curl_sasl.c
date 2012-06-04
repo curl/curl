@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  * RFC2195 CRAM-MD5 authentication
+ * RFC2831 DIGEST-MD5 authentication
  * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
@@ -30,6 +31,7 @@
 
 #include "curl_base64.h"
 #include "curl_md5.h"
+#include "curl_rand.h"
 #include "curl_hmac.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
@@ -40,6 +42,33 @@
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+/* Retrieves the value for a corresponding key from the challenge string
+ * returns TRUE if the key could be found, FALSE if it does not exists
+ */
+static bool sasl_digest_get_key_value(const unsigned char *chlg,
+                                      const char *key,
+                                      char *value,
+                                      size_t max_val_len,
+                                      char end_char)
+{
+  char *find_pos;
+  size_t i;
+
+  find_pos = strstr((const char *) chlg, key);
+  if(!find_pos)
+    return FALSE;
+
+  find_pos += strlen(key);
+
+  for(i = 0; *find_pos && *find_pos != end_char && i < max_val_len - 1; ++i)
+    value[i] = *find_pos++;
+  value[i] = '\0';
+
+  return TRUE;
+}
+#endif
 
 /*
  * Curl_sasl_create_plain_message()
@@ -197,6 +226,183 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 
   /* Base64 encode the reply */
   return Curl_base64_encode(data, reply, 0, outptr, outlen);
+}
+
+/*
+ * Curl_sasl_create_digest_md5_message()
+ *
+ * This is used to generate an already encoded DIGEST-MD5 response message
+ * ready for sending to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * chlg64  [in]     - Pointer to the input buffer.
+ * userp   [in]     - The user name.
+ * passdwp [in]     - The user's password.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
+                                             const char* chlg64,
+                                             const char* userp,
+                                             const char* passwdp,
+                                             char **outptr, size_t *outlen)
+{
+  static const char table16[] = "0123456789abcdef";
+
+  CURLcode result = CURLE_OK;
+  unsigned char *chlg = (unsigned char *) NULL;
+  size_t chlglen = 0;
+  size_t i;
+  MD5_context *ctxt;
+  unsigned char digest[MD5_DIGEST_LEN];
+  char HA1_hex[2 * MD5_DIGEST_LEN + 1];
+  char HA2_hex[2 * MD5_DIGEST_LEN + 1];
+  char resp_hash_hex[2 * MD5_DIGEST_LEN + 1];
+
+  char nonce[64];
+  char realm[128];
+  char alg[64];
+  char nonceCount[] = "00000001";
+  char cnonce[]     = "12345678"; /* will be changed */
+  char method[]     = "AUTHENTICATE";
+  char qop[]        = "auth";
+  char uri[128]     = "smtp/";
+  char response[512];
+
+  result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+
+  if(result)
+    return result;
+
+  /* Retrieve nonce string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "nonce=\"", nonce,
+                                sizeof(nonce), '\"')) {
+    Curl_safefree(chlg);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  /* Retrieve realm string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "realm=\"", realm,
+                                sizeof(realm), '\"')) {
+    /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
+    strcpy(realm, "");
+  }
+
+  /* Retrieve algorithm string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "algorithm=", alg, sizeof(alg), ',')) {
+    Curl_safefree(chlg);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  Curl_safefree(chlg);
+
+  /* We do not support other algorithms */
+  if(strcmp(alg, "md5-sess") != 0)
+    return CURLE_LOGIN_DENIED;
+
+  /* Generate 64 bits of random data */
+  for(i = 0; i < 8; i++)
+    cnonce[i] = table16[Curl_rand()%16];
+
+  /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
+  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  Curl_MD5_update(ctxt, (const unsigned char *) userp,
+                  curlx_uztoui(strlen(userp)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) realm,
+                  curlx_uztoui(strlen(realm)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) passwdp,
+                  curlx_uztoui(strlen(passwdp)));
+  Curl_MD5_final(ctxt, digest);
+
+  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+                  curlx_uztoui(strlen(nonce)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+                  curlx_uztoui(strlen(cnonce)));
+  Curl_MD5_final(ctxt, digest);
+
+  /* Convert calculated 16 octet hex into 32 bytes string */
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
+    snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
+
+  /* Orepare URL string, append realm to the protocol */
+  strcat(uri, realm);
+
+  /* Calculate H(A2) */
+  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  Curl_MD5_update(ctxt, (const unsigned char *) method,
+                  curlx_uztoui(strlen(method)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) uri,
+                  curlx_uztoui(strlen(uri)));
+  Curl_MD5_final(ctxt, digest);
+
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
+    snprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
+
+  /* Now calculate the response hash */
+  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+                  curlx_uztoui(strlen(nonce)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+
+  Curl_MD5_update(ctxt, (const unsigned char *) nonceCount,
+                  curlx_uztoui(strlen(nonceCount)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+                  curlx_uztoui(strlen(cnonce)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *) qop,
+                  curlx_uztoui(strlen(qop)));
+  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+
+  Curl_MD5_update(ctxt, (const unsigned char *) HA2_hex, 2 * MD5_DIGEST_LEN);
+  Curl_MD5_final(ctxt, digest);
+
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
+    snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
+
+  strcpy(response, "username=\"");
+  strcat(response, userp);
+  strcat(response, "\",realm=\"");
+  strcat(response, realm);
+  strcat(response, "\",nonce=\"");
+  strcat(response, nonce);
+  strcat(response, "\",cnonce=\"");
+  strcat(response, cnonce);
+  strcat(response, "\",nc=");
+  strcat(response, nonceCount);
+  strcat(response, ",digest-uri=\"");
+  strcat(response, uri);
+  strcat(response, "\",response=");
+  strcat(response, resp_hash_hex);
+
+  /* Base64 encode the reply */
+  return Curl_base64_encode(data, response, 0, outptr, outlen);
 }
 #endif
 

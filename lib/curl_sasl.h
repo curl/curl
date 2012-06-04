@@ -52,6 +52,13 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
                                            const char* user,
                                            const char* passwdp,
                                            char **outptr, size_t *outlen);
+
+/* This is used to generate a base64 encoded DIGEST-MD5 response message */
+CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
+                                             const char* chlg64,
+                                             const char* user,
+                                             const char* passwdp,
+                                             char **outptr, size_t *outlen);
 #endif
 
 #ifdef USE_NTLM
