@@ -752,7 +752,8 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
     ;
 
   result = Curl_sasl_create_digest_md5_message(data, chlg64, conn->user,
-                                               conn->passwd, &rplyb64, &len);
+                                               conn->passwd, "smtp",
+                                               &rplyb64, &len);
 
   if(!result) {
     if(rplyb64) {

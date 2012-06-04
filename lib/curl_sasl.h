@@ -58,6 +58,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char* chlg64,
                                              const char* user,
                                              const char* passwdp,
+                                             const char* service,
                                              char **outptr, size_t *outlen);
 #endif
 

@@ -240,6 +240,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * chlg64  [in]     - Pointer to the input buffer.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
+ * service [in]     - The service type such as www, smtp or pop
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -250,6 +251,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char* chlg64,
                                              const char* userp,
                                              const char* passwdp,
+                                             const char* service,
                                              char **outptr, size_t *outlen)
 {
   static const char table16[] = "0123456789abcdef";
@@ -271,7 +273,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
   char qop[]        = "auth";
-  char uri[128]     = "smtp/";
+  char uri[128];
   char response[512];
 
   result = Curl_base64_decode(chlg64, &chlg, &chlglen);
@@ -341,7 +343,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
-  /* Orepare URL string, append realm to the protocol */
+  /* Prepare the URL string */
+  strcpy(uri, service);
+  strcat(uri, "/");
   strcat(uri, realm);
 
   /* Calculate H(A2) */
