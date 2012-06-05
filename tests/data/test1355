@@ -54,10 +54,7 @@ fooo
 mooo
 </file1>
 
-<file2 name="log/heads1355">
-</file2>
-
-<file3 name="log/stdout1355">
+<file2 name="log/stdout1355">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -72,13 +69,10 @@ mooo
 213 10
 150 Binary data connection for 1355 () (10 bytes).
 226 File transfer complete
-</file3>
-<stripfile3>
+</file2>
+<stripfile2>
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
-</stripfile3>
-
-<file4 name="log/name1355">
-</file4>
+</stripfile2>
 
 </verify>
 </testcase>

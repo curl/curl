@@ -41,6 +41,9 @@ CURL_TESTDIR=%PWD/log
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/1337 -O -D -
 </command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl %PWD/log/name1337
+</postcheck>
 </client>
 
 #

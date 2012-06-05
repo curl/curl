@@ -55,10 +55,7 @@ fooo
 mooo
 </file1>
 
-<file2 name="log/heads1352">
-</file2>
-
-<file3 name="log/stdout1352">
+<file2 name="log/stdout1352">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -74,13 +71,10 @@ mooo
 150 Binary data connection for 1352 () (10 bytes).
 226 File transfer complete
 curl: Saved to filename '%PWD/log/file1352'
-</file3>
-<stripfile3>
+</file2>
+<stripfile2>
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
-</stripfile3>
-
-<file4 name="log/name1352">
-</file4>
+</stripfile2>
 
 </verify>
 </testcase>

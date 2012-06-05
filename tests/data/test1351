@@ -79,8 +79,5 @@ s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 curl: Saved to filename '%PWD/log/file1351'
 </file3>
 
-<file4 name="log/name1351">
-</file4>
-
 </verify>
 </testcase>

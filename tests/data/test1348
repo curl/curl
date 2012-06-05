@@ -54,14 +54,8 @@ fooo
 mooo
 </file1>
 
-<file2 name="log/heads1348">
+<file2 name="log/stdout1348">
 </file2>
-
-<file3 name="log/stdout1348">
-</file3>
-
-<file4 name="log/name1348">
-</file4>
 
 </verify>
 </testcase>

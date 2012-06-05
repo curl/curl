@@ -51,7 +51,7 @@ INCLUDES = -I$(top_builddir)/include/curl \
 endif
 
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
-test1022.pl Makefile.inc
+test1022.pl Makefile.inc notexists.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 

@@ -41,6 +41,9 @@ CURL_TESTDIR=%PWD/log
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file1356 -O
 </command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl %PWD/log/name1356
+</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -69,14 +72,8 @@ Content-Disposition: filename=name1356; charset=funny; option=strange
 MOOOO
 </file1>
 
-<file2 name="log/heads1356">
+<file2 name="log/stdout1356">
 </file2>
-
-<file3 name="log/stdout1356">
-</file3>
-
-<file4 name="log/name1356">
-</file4>
 
 </verify>
 </testcase>

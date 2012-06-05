@@ -41,6 +41,9 @@ CURL_TESTDIR=%PWD/log
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file1361 -O -i -D log/heads1361
 </command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl %PWD/log/name1361
+</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -91,9 +94,6 @@ s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 
 <file3 name="log/stdout1361">
 </file3>
-
-<file4 name="log/name1361">
-</file4>
 
 </verify>
 </testcase>

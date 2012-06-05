@@ -77,8 +77,5 @@ s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 <file3 name="log/stdout1349">
 </file3>
 
-<file4 name="log/name1349">
-</file4>
-
 </verify>
 </testcase>
