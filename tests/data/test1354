@@ -25,7 +25,7 @@ debug
 ftp
 </server>
 <name>
-FTP download file without C-D inside, using -O -i -D stdout
+FTP download, file without C-D inside, using -O -i -D stdout
 </name>
 <setenv>
 CURL_TESTDIR=%PWD/log

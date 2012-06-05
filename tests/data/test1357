@@ -33,7 +33,7 @@ debug
 ftp
 </server>
 <name>
-FTP download file with C-D inside, using -O -D file
+FTP download, file with C-D inside, using -O -D file
 </name>
 <setenv>
 CURL_TESTDIR=%PWD/log

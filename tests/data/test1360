@@ -3,6 +3,7 @@
 <keywords>
 FTP
 RETR
+-J
 </keywords>
 </info>
 
@@ -33,7 +34,7 @@ debug
 ftp
 </server>
 <name>
-FTP download file with C-D inside, using -O -J -D stdout
+FTP download, file with C-D inside, using -O -J -D stdout
 </name>
 <setenv>
 CURL_TESTDIR=%PWD/log
