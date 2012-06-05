@@ -3499,7 +3499,7 @@ sub singletest {
     my $outputok;
     for my $partsuffix (('', '1', '2', '3', '4')) {
         my @outfile=getpart("verify", "file".$partsuffix);
-        if(@outfile) {
+        if(@outfile || partexists("verify", "file".$partsuffix) ) {
             # we're supposed to verify a dynamically generated file!
             my %hash = getpartattr("verify", "file".$partsuffix);
 

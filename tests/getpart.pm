@@ -124,6 +124,25 @@ sub getpart {
     return @this; #empty!
 }
 
+sub partexists {
+    my ($section, $part)=@_;
+
+    my $inside = 0;
+
+    for(@xml) {
+        if(!$inside && ($_ =~ /^ *\<$section/)) {
+            $inside++;
+        }
+        elsif((1 == $inside) && ($_ =~ /^ *\<$part[ \>]/)) {
+            return 1; # exists
+        }
+        elsif((1 == $inside) && ($_ =~ /^ *\<\/$section/)) {
+            return 0; # does not exist
+        }
+    }
+    return 0; # does not exist
+}
+
 # Return entire document as list of lines
 sub getall {
     return @xml;
