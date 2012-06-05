@@ -77,7 +77,6 @@
 #include "multiif.h"
 #include "url.h"
 #include "rawstr.h"
-#include "strtoofft.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

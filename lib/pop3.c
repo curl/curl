@@ -82,7 +82,6 @@
 #include "multiif.h"
 #include "url.h"
 #include "rawstr.h"
-#include "strtoofft.h"
 #include "curl_sasl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
