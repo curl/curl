@@ -505,6 +505,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = pop3_state_capa(conn);
     }
     else {
+      /* End of connect phase */
       state(conn, POP3_STOP);
     }
   }
@@ -582,11 +583,11 @@ static CURLcode pop3_state_auth_login_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
-    /* Create the login message */
+    /* Create the user message */
     result = Curl_sasl_create_login_message(data, conn->user,
                                             &authuser, &len);
 
-    /* Send the login */
+    /* Send the user */
     if(!result) {
       if(authuser) {
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", authuser);
@@ -776,10 +777,12 @@ static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
+    /* Create the type-1 message */
     result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
                                                  &conn->ntlm,
                                                  &type1msg, &len);
 
+    /* Send the message */
     if(!result) {
       if(type1msg) {
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", type1msg);
@@ -795,7 +798,7 @@ static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
   return result;
 }
 
-/* For the NTLM type-2 response (sent in reponse to our type-1 message) */
+/* For NTLM type-2 responses (sent in reponse to our type-1 message) */
 static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
                                                    int pop3code,
                                                    pop3state instate)
@@ -818,6 +821,7 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
                                                  conn->user, conn->passwd,
                                                  &conn->ntlm,
                                                  &type3msg, &len);
+
     /* Send the message */
     if(!result) {
       if(type3msg) {
@@ -904,7 +908,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
   return result;
 }
 
-/* For the command response */
+/* For command responses */
 static CURLcode pop3_state_command_resp(struct connectdata *conn,
                                         int pop3code,
                                         pop3state instate)
