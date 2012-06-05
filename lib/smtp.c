@@ -1257,7 +1257,7 @@ static CURLcode smtp_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *smtp = data->state.proto.smtp;
-  
+
   if(!smtp) {
     smtp = data->state.proto.smtp = calloc(sizeof(struct FTP), 1);
     if(!smtp)
