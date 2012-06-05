@@ -34,8 +34,8 @@ typedef enum {
   SMTP_EHLO,
   SMTP_HELO,
   SMTP_STARTTLS,
-  SMTP_UPGRADETLS, /* asynchronously upgrade the connection to SSL/TLS
-                      (multi mode only) */
+  SMTP_UPGRADETLS,  /* asynchronously upgrade the connection to SSL/TLS
+                       (multi mode only) */
   SMTP_AUTHPLAIN,
   SMTP_AUTHLOGIN,
   SMTP_AUTHPASSWD,
@@ -45,26 +45,27 @@ typedef enum {
   SMTP_AUTHNTLM,
   SMTP_AUTHNTLM_TYPE2MSG,
   SMTP_AUTH,
-  SMTP_MAIL, /* MAIL FROM */
-  SMTP_RCPT, /* RCPT TO */
+  SMTP_MAIL,        /* MAIL FROM */
+  SMTP_RCPT,        /* RCPT TO */
   SMTP_DATA,
   SMTP_POSTDATA,
   SMTP_QUIT,
-  SMTP_LAST  /* never used */
+  SMTP_LAST         /* never used */
 } smtpstate;
 
 /* smtp_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct smtp_conn {
   struct pingpong pp;
-  char *domain;    /* what to send in the EHLO */
-  size_t eob;         /* number of bytes of the EOB (End Of Body) that has been
-                         received thus far */
-  unsigned int authmechs;       /* Accepted authentication methods. */
-  unsigned int authused;  /* Authentication method used for the connection */
-  smtpstate state; /* always use smtp.c:state() to change state! */
-  struct curl_slist *rcpt;
-  bool ssldone; /* is connect() over SSL done? only relevant in multi mode */
+  char *domain;            /* Client address/name to send in the EHLO */
+  size_t eob;              /* Number of bytes of the EOB (End Of Body) that
+                              have been received so far */
+  unsigned int authmechs;  /* Accepted authentication methods */
+  unsigned int authused;   /* Authentication method used for the connection */
+  smtpstate state;         /* Always use smtp.c:state() to change state! */
+  struct curl_slist *rcpt; /* Recipient list */
+  bool ssldone;            /* Is connect() over SSL done? only relevant in
+                              multi mode */
 };
 
 extern const struct Curl_handler Curl_handler_smtp;
