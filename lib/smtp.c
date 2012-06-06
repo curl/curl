@@ -288,14 +288,14 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "HELO",
     "STARTTLS",
     "UPGRADETLS",
-    "AUTHPLAIN",
-    "AUTHLOGIN",
-    "AUTHPASSWD",
-    "AUTHCRAM",
-    "AUTHDIGESTMD5",
-    "AUTHDIGESTMD5_RESP",
-    "AUTHNTLM",
-    "AUTHNTLM_TYPE2MSG",
+    "AUTH_PLAIN",
+    "AUTH_LOGIN",
+    "AUTH_PASSWD",
+    "AUTH_CRAMMD5",
+    "AUTH_DIGESTMD5",
+    "AUTH_DIGESTMD5_RESP",
+    "AUTH_NTLM",
+    "AUTH_NTLM_TYPE2MSG",
     "AUTH",
     "MAIL",
     "RCPT",
@@ -373,12 +373,12 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(smtpc->authmechs & SASL_AUTH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
-    state1 = SMTP_AUTHDIGESTMD5;
+    state1 = SMTP_AUTH_DIGESTMD5;
     smtpc->authused = SASL_AUTH_DIGEST_MD5;
   }
   else if(smtpc->authmechs & SASL_AUTH_CRAM_MD5) {
     mech = "CRAM-MD5";
-    state1 = SMTP_AUTHCRAMMD5;
+    state1 = SMTP_AUTH_CRAMMD5;
     smtpc->authused = SASL_AUTH_CRAM_MD5;
   }
   else
@@ -386,8 +386,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
   if(smtpc->authmechs & SASL_AUTH_NTLM) {
     mech = "NTLM";
-    state1 = SMTP_AUTHNTLM;
-    state2 = SMTP_AUTHNTLM_TYPE2MSG;
+    state1 = SMTP_AUTH_NTLM;
+    state2 = SMTP_AUTH_NTLM_TYPE2MSG;
     smtpc->authused = SASL_AUTH_NTLM;
     result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
                                                  &conn->ntlm,
@@ -397,15 +397,15 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 #endif
   if(smtpc->authmechs & SASL_AUTH_LOGIN) {
     mech = "LOGIN";
-    state1 = SMTP_AUTHLOGIN;
-    state2 = SMTP_AUTHPASSWD;
+    state1 = SMTP_AUTH_LOGIN;
+    state2 = SMTP_AUTH_PASSWD;
     smtpc->authused = SASL_AUTH_LOGIN;
     result = Curl_sasl_create_login_message(conn->data, conn->user,
                                             &initresp, &len);
   }
   else if(smtpc->authmechs & SASL_AUTH_PLAIN) {
     mech = "PLAIN";
-    state1 = SMTP_AUTHPLAIN;
+    state1 = SMTP_AUTH_PLAIN;
     state2 = SMTP_AUTH;
     smtpc->authused = SASL_AUTH_PLAIN;
     result = Curl_sasl_create_plain_message(conn->data, conn->user,
@@ -638,7 +638,7 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
 
         if(!result)
-          state(conn, SMTP_AUTHPASSWD);
+          state(conn, SMTP_AUTH_PASSWD);
       }
       Curl_safefree(authuser);
     }
@@ -769,7 +769,7 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", rplyb64);
 
       if(!result)
-        state(conn, SMTP_AUTHDIGESTMD5_RESP);
+        state(conn, SMTP_AUTH_DIGESTMD5_RESP);
     }
 
     Curl_safefree(rplyb64);
@@ -834,7 +834,7 @@ static CURLcode smtp_state_auth_ntlm_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type1msg);
 
         if(!result)
-          state(conn, SMTP_AUTHNTLM_TYPE2MSG);
+          state(conn, SMTP_AUTH_NTLM_TYPE2MSG);
       }
 
       Curl_safefree(type1msg);
@@ -1151,38 +1151,38 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       result = smtp_state_starttls_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHPLAIN:
+    case SMTP_AUTH_PLAIN:
       result = smtp_state_authplain_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHLOGIN:
+    case SMTP_AUTH_LOGIN:
       result = smtp_state_authlogin_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHPASSWD:
+    case SMTP_AUTH_PASSWD:
       result = smtp_state_authpasswd_resp(conn, smtpcode, smtpc->state);
       break;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    case SMTP_AUTHCRAMMD5:
+    case SMTP_AUTH_CRAMMD5:
       result = smtp_state_authcram_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHDIGESTMD5:
+    case SMTP_AUTH_DIGESTMD5:
       result = smtp_state_authdigest_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHDIGESTMD5_RESP:
+    case SMTP_AUTH_DIGESTMD5_RESP:
       result = smtp_state_authdigest_resp_resp(conn, smtpcode, smtpc->state);
       break;
 #endif
 
 #ifdef USE_NTLM
-    case SMTP_AUTHNTLM:
+    case SMTP_AUTH_NTLM:
       result = smtp_state_auth_ntlm_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTHNTLM_TYPE2MSG:
+    case SMTP_AUTH_NTLM_TYPE2MSG:
       result = smtp_state_auth_ntlm_type2msg_resp(conn, smtpcode,
                                                   smtpc->state);
       break;
