@@ -868,6 +868,20 @@ Android
         found in your automake folder:
         find /usr -name config.sub
 
+   Wrapper for pkg-config
+      - In order to make proper use of pkg-config so that configure is able to
+        find all dependencies you should create a wrapper script for pkg-config;
+        file /opt/arm-linux-androideabi-4.4.3/bin/arm-linux-androideabi-pkg-config:
+
+        #!/bin/sh
+        SYSROOT=$(dirname ${0%/*})/sysroot
+        export PKG_CONFIG_DIR=
+        export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/local/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
+        export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
+        exec pkg-config "$@"
+
+        also create a copy or symlink with name arm-unknown-linux-androideabi-pkg-config.
+
 
 CROSS COMPILE
 =============
