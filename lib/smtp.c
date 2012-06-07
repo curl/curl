@@ -576,9 +576,9 @@ static CURLcode smtp_state_helo_resp(struct connectdata *conn,
 }
 
 /* For AUTH PLAIN (without initial response) responses */
-static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
-                                          int smtpcode,
-                                          smtpstate instate)
+static CURLcode smtp_state_auth_plain_resp(struct connectdata *conn,
+                                           int smtpcode,
+                                           smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -612,9 +612,9 @@ static CURLcode smtp_state_authplain_resp(struct connectdata *conn,
 }
 
 /* For AUTH LOGIN (without initial response) responses */
-static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
-                                          int smtpcode,
-                                          smtpstate instate)
+static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
+                                           int smtpcode,
+                                           smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -648,9 +648,9 @@ static CURLcode smtp_state_authlogin_resp(struct connectdata *conn,
 }
 
 /* For responses to user entry of AUTH LOGIN */
-static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
-                                           int smtpcode,
-                                           smtpstate instate)
+static CURLcode smtp_state_auth_passwd_resp(struct connectdata *conn,
+                                            int smtpcode,
+                                            smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -685,9 +685,9 @@ static CURLcode smtp_state_authpasswd_resp(struct connectdata *conn,
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 /* For AUTH CRAM-MD5 responses */
-static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
-                                         int smtpcode,
-                                         smtpstate instate)
+static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
+                                          int smtpcode,
+                                          smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -737,9 +737,9 @@ static CURLcode smtp_state_authcram_resp(struct connectdata *conn,
 }
 
 /* For AUTH DIGEST-MD5 challenge responses */
-static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
-                                           int smtpcode,
-                                           smtpstate instate)
+static CURLcode smtp_state_auth_digest_resp(struct connectdata *conn,
+                                            int smtpcode,
+                                            smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -779,9 +779,9 @@ static CURLcode smtp_state_authdigest_resp(struct connectdata *conn,
 }
 
 /* For AUTH DIGEST-MD5 challenge-response responses */
-static CURLcode smtp_state_authdigest_resp_resp(struct connectdata *conn,
-                                                int smtpcode,
-                                                smtpstate instate)
+static CURLcode smtp_state_auth_digest_resp_resp(struct connectdata *conn,
+                                                 int smtpcode,
+                                                 smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1152,28 +1152,28 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 
     case SMTP_AUTH_PLAIN:
-      result = smtp_state_authplain_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_plain_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_AUTH_LOGIN:
-      result = smtp_state_authlogin_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_login_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_AUTH_PASSWD:
-      result = smtp_state_authpasswd_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_passwd_resp(conn, smtpcode, smtpc->state);
       break;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     case SMTP_AUTH_CRAMMD5:
-      result = smtp_state_authcram_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_cram_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_AUTH_DIGESTMD5:
-      result = smtp_state_authdigest_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_digest_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_AUTH_DIGESTMD5_RESP:
-      result = smtp_state_authdigest_resp_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_digest_resp_resp(conn, smtpcode, smtpc->state);
       break;
 #endif
 
