@@ -158,6 +158,7 @@ RELEASE_OBJS= \
 	tool_homedirr.obj \
 	tool_libinfor.obj \
 	tool_mainr.obj \
+	tool_metalinkr.obj \
 	tool_mfilesr.obj \
 	tool_msgsr.obj \
 	tool_operater.obj \
@@ -201,6 +202,7 @@ DEBUG_OBJS= \
 	tool_homedird.obj \
 	tool_libinfod.obj \
 	tool_maind.obj \
+	tool_metalinkd.obj \
 	tool_mfilesd.obj \
 	tool_msgsd.obj \
 	tool_operated.obj \
@@ -388,6 +390,8 @@ tool_libinfor.obj: tool_libinfo.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_mainr.obj: tool_main.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_main.c
+tool_metalinkr.obj: tool_metalink.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_metalink.c
 tool_mfilesr.obj: tool_mfiles.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsr.obj: tool_msgs.c
@@ -472,6 +476,8 @@ tool_libinfod.obj: tool_libinfo.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_maind.obj: tool_main.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_main.c
+tool_metalinkd.obj: tool_metalink.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_metalink.c
 tool_mfilesd.obj: tool_mfiles.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
 tool_msgsd.obj: tool_msgs.c

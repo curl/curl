@@ -1559,7 +1559,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 #endif
 
-#ifdef HAVE_LIBMETALINK
+#ifdef USE_METALINK
         if(!metalink && res == CURLE_OK && outs.filename) {
           /* Check the content-type header field and if it indicates
              Metalink file, parse it and add getout for them. */
@@ -1585,7 +1585,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
 #  endif /* METALINK_HASH_CHECK */
-#endif /* HAVE_LIBMETALINK */
+#endif /* USE_METALINK */
 
         /* No more business with this output struct */
         if(outs.alloc_filename)

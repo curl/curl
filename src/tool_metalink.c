@@ -31,7 +31,7 @@
 #  include <fcntl.h>
 #endif
 
-#ifdef HAVE_LIBMETALINK
+#ifdef USE_METALINK
 
 #include <metalink/metalink_parser.h>
 
@@ -416,7 +416,7 @@ int metalink_check_hash(struct Configurable *config,
 
 #endif /* METALINK_HASH_CHECK */
 
-#ifdef HAVE_LIBMETALINK
+#ifdef USE_METALINK
 
 static metalink_checksum *new_metalink_checksum(const char *hash_name,
                                                 const char *hash_value)
@@ -538,7 +538,7 @@ int parse_metalink(struct Configurable *config, const char *infile)
   return 0;
 }
 
-#endif /* HAVE_LIBMETALINK */
+#endif /* USE_METALINK */
 
 /*
  * Returns nonzero if content_type includes mediatype.
@@ -621,4 +621,4 @@ void clean_metalink(struct Configurable *config)
   config->metalinkfile_last = 0;
 }
 
-#endif /* HAVE_LIBMETALINK */
+#endif /* USE_METALINK */

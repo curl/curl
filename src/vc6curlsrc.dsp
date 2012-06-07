@@ -239,6 +239,10 @@ SOURCE=.\tool_main.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_metalink.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_mfiles.c
 # End Source File
 # Begin Source File
@@ -404,6 +408,10 @@ SOURCE=.\tool_libinfo.h
 # Begin Source File
 
 SOURCE=.\tool_main.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_metalink.h
 # End Source File
 # Begin Source File
 

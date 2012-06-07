@@ -163,8 +163,9 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
+  curl_mtlnk_msg="no      (--with-libmetalink)"
+
     init_ssl_msg=${curl_ssl_msg}
-curl_metalink_msg="no      (--with-libmetalink)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -2265,18 +2266,17 @@ if test X"$OPT_LIBMETALINK" != Xno; then
   if test -n "$addlib"; then
 
     AC_MSG_NOTICE([detected libmetalink version $version])
-    curl_metalink_msg="enabled"
+    curl_mtlnk_msg="enabled"
     LIBMETALINK_LIBS=$addlib
     LIBMETALINK_LDFLAGS=$addld
     LIBMETALINK_CFLAGS=$addcflags
     AC_SUBST([LIBMETALINK_LIBS])
     AC_SUBST([LIBMETALINK_LDFLAGS])
     AC_SUBST([LIBMETALINK_CFLAGS])
-    AC_DEFINE(HAVE_LIBMETALINK, 1, [if libmetalink is available])
+    AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
 
   fi
 fi
-AM_CONDITIONAL([HAVE_LIBMETALINK], [test -n "$LIBMETALINK_LIBS"])
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
@@ -3381,7 +3381,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
-  metalink support: ${curl_metalink_msg}
+  metalink support: ${curl_mtlnk_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 

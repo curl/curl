@@ -823,7 +823,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'J': /* --metalink */
         {
-#ifdef HAVE_LIBMETALINK
+#ifdef USE_METALINK
           if(parse_metalink(config, nextarg) == -1) {
             warnf(config, "Could not parse Metalink file: %s\n", nextarg);
             /* TODO Is PARAM_BAD_USE appropriate here? */
@@ -1563,9 +1563,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           if(curlinfo->features & feats[i].bitmask)
             printf("%s ", feats[i].name);
         }
-#ifdef HAVE_LIBMETALINK
+#ifdef USE_METALINK
         printf("Metalink ");
-#endif /* HAVE_LIBMETALINK */
+#endif
         puts(""); /* newline */
       }
     }

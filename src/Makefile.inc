@@ -36,6 +36,7 @@ CURL_CFILES = hugehelp.c \
 	tool_homedir.c \
 	tool_libinfo.c \
 	tool_main.c \
+	tool_metalink.c \
 	tool_mfiles.c \
 	tool_msgs.c \
 	tool_operate.c \
@@ -50,8 +51,7 @@ CURL_CFILES = hugehelp.c \
 	tool_vms.c \
 	tool_writeenv.c \
 	tool_writeout.c \
-	tool_xattr.c \
-	tool_metalink.c
+	tool_xattr.c
 
 CURL_HFILES = hugehelp.h \
 	tool_binmode.h \
@@ -75,6 +75,7 @@ CURL_HFILES = hugehelp.h \
 	tool_homedir.h \
 	tool_libinfo.h \
 	tool_main.h \
+	tool_metalink.h \
 	tool_mfiles.h \
 	tool_msgs.h \
 	tool_operate.h \
@@ -92,8 +93,7 @@ CURL_HFILES = hugehelp.h \
 	tool_vms.h \
 	tool_writeenv.h \
 	tool_writeout.h \
-	tool_xattr.h \
-	tool_metalink.h
+	tool_xattr.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 
