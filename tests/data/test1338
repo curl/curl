@@ -71,7 +71,6 @@ Content-Type: text/html
 </file2>
 
 <file3 name="log/stdout1338">
-curl: Saved to filename '%PWD/log/1338'
 </file3>
 
 </verify>

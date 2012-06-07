@@ -42,7 +42,7 @@ CURL_TESTDIR=%PWD/log
 http://%HOSTIP:%HTTPPORT/1345 -i -O -D -
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl %PWD/log/name1345
+perl %SRCDIR/libtest/notexists.pl log/name1345
 </postcheck>
 </client>
 

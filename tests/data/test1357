@@ -42,7 +42,7 @@ CURL_TESTDIR=%PWD/log
 ftp://%HOSTIP:%FTPPORT/path/file1357 -O -D log/heads1357
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl %PWD/log/name1357
+perl %SRCDIR/libtest/notexists.pl log/name1357
 </postcheck>
 </client>
 

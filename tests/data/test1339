@@ -68,7 +68,6 @@ Content-Length: 6
 Connection: close
 Content-Type: text/html
 
-curl: Saved to filename '%PWD/log/1339'
 </file2>
 
 </verify>

@@ -43,7 +43,7 @@ CURL_TESTDIR=%PWD/log
 ftp://%HOSTIP:%FTPPORT/path/file1359 -O -J -D log/heads1359
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl %PWD/log/name1359
+perl %SRCDIR/libtest/notexists.pl log/name1359
 </postcheck>
 </client>
 
@@ -95,7 +95,6 @@ s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
 <file3 name="log/stdout1359">
-curl: Saved to filename '%PWD/log/file1359'
 </file3>
 
 </verify>
