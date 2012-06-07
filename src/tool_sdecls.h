@@ -34,6 +34,9 @@
  * 'alloc_filename' member is TRUE when string pointed by 'filename' has been
  * dynamically allocated and 'belongs' to this OutStruct, otherwise FALSE.
  *
+ * 'is_cd_filename' member is TRUE when string pointed by 'filename' has been
+ * set using a server-specified Content-Disposition filename, otherwise FALSE.
+ *
  * 's_isreg' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
  * 'filename' points to file name's string. For any standard stream member
@@ -57,6 +60,7 @@
 struct OutStruct {
   char *filename;
   bool alloc_filename;
+  bool is_cd_filename;
   bool s_isreg;
   bool fopened;
   FILE *stream;

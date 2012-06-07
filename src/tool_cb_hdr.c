@@ -71,8 +71,25 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
     fwrite(ptr, size, nmemb, heads->stream);
   }
 
-  if((urlnode->flags & GETOUT_USEREMOTE) && outs->config->content_disposition
-     && (cb > 20) && checkprefix("Content-disposition:", str)) {
+  /*
+  ** This callback callback MIGHT set the filename upon appropriate
+  ** conditions and server specifying filename in Content-Disposition.
+  */
+
+  if(!outs->config->content_disposition)
+    return cb;
+
+  if(!urlnode)
+    return failure;
+
+  if(!checkprefix("http://", urlnode->url) &&
+     !checkprefix("https://", urlnode->url))
+    return cb;
+
+  if(!(urlnode->flags & GETOUT_USEREMOTE))
+    return cb;
+
+  if((cb > 20) && checkprefix("Content-disposition:", str)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
@@ -102,6 +119,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       if(filename) {
         outs->filename = filename;
         outs->alloc_filename = TRUE;
+        outs->is_cd_filename = TRUE;
         outs->s_isreg = TRUE;
         outs->fopened = FALSE;
         outs->stream = NULL;

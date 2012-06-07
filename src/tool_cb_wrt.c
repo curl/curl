@@ -86,7 +86,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
       /* standard stream */
       if(!outs->stream || outs->s_isreg || outs->fopened)
         check_fails = TRUE;
-      if(outs->alloc_filename || outs->init)
+      if(outs->alloc_filename || outs->is_cd_filename || outs->init)
         check_fails = TRUE;
     }
     if(check_fails) {
@@ -104,7 +104,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
       return failure;
     }
 
-    if(config->content_disposition) {
+    if(outs->is_cd_filename) {
       /* don't overwrite existing files */
       file = fopen(outs->filename, "rb");
       if(file) {

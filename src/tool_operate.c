@@ -1309,7 +1309,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         for(;;) {
           res = curl_easy_perform(curl);
 
-          if(config->content_disposition && outs.stream && !config->mute &&
+          if(outs.is_cd_filename && outs.stream && !config->mute &&
              outs.filename)
             printf("curl: Saved to filename '%s'\n", outs.filename);
 
