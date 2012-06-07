@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# file1386 contents...
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1386; charset=funny; option=strange
+
+MOOOO
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP DL, file with Content-Disposition inside, using -o fname
+</name>
+<command option="no-output,no-include">
+ftp://%HOSTIP:%FTPPORT/path/file1386 -o log/download1386
+</command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/file1386 log/name1386
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPSV
+TYPE I
+SIZE file1386
+RETR file1386
+QUIT
+</protocol>
+
+<file1 name="log/download1386">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1386; charset=funny; option=strange
+
+MOOOO
+</file1>
+
+<file2 name="log/stdout1386">
+</file2>
+
+</verify>
+</testcase>

@@ -1,0 +1,89 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# file1388 contents...
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1388; charset=funny; option=strange
+
+MOOOO
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP DL, file with C-D inside, using -o fname -D stdout
+</name>
+<command option="no-output,no-include">
+ftp://%HOSTIP:%FTPPORT/path/file1388 -o log/download1388 -D -
+</command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/file1388 log/name1388
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPSV
+TYPE I
+SIZE file1388
+RETR file1388
+QUIT
+</protocol>
+
+<file1 name="log/download1388">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1388; charset=funny; option=strange
+
+MOOOO
+</file1>
+
+<file2 name="log/stdout1388">
+220-        _   _ ____  _     
+220-    ___| | | |  _ \| |    
+220-   / __| | | | |_) | |    
+220-  | (__| |_| |  _ <| |___ 
+220    \___|\___/|_| \_\_____|
+331 We are happy you popped in!
+230 Welcome you silly person
+257 "/" is current directory
+250 CWD command successful.
+229 Entering Passive Mode (stripped)
+200 I modify TYPE as you wanted
+213 214
+150 Binary data connection for 1388 () (214 bytes).
+226 File transfer complete
+221 bye bye baby
+</file2>
+<stripfile2>
+s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
+</stripfile2>
+
+</verify>
+</testcase>
