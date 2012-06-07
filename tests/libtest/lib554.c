@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,7 +88,7 @@ int test(char *URL)
                         &lastptr,
                         CURLFORM_COPYNAME, "sendfile",
                         CURLFORM_STREAM, &pooh,
-                        CURLFORM_CONTENTSLENGTH, pooh.sizeleft,
+                        CURLFORM_CONTENTSLENGTH, (long)pooh.sizeleft,
                         CURLFORM_FILENAME, "postit2.c",
                         CURLFORM_END);
 
@@ -106,7 +106,7 @@ int test(char *URL)
                         &lastptr,
                         CURLFORM_COPYNAME, "callbackdata",
                         CURLFORM_STREAM, &pooh2,
-                        CURLFORM_CONTENTSLENGTH, pooh2.sizeleft,
+                        CURLFORM_CONTENTSLENGTH, (long)pooh2.sizeleft,
                         CURLFORM_END);
 
   if(formrc)
@@ -149,7 +149,7 @@ int test(char *URL)
                         CURLFORM_COPYNAME, "somename",
                         CURLFORM_BUFFER, "somefile.txt",
                         CURLFORM_BUFFERPTR, "blah blah",
-                        CURLFORM_BUFFERLENGTH, 9,
+                        CURLFORM_BUFFERLENGTH, (long)9,
                         CURLFORM_END);
 
   if(formrc)
