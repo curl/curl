@@ -171,6 +171,8 @@ static CURLcode ldap_setup(struct connectdata *conn)
   ldap_free_urldesc(lud);
 
   li = calloc(1, sizeof(ldapconninfo));
+  if(!li)
+    return CURLE_OUT_OF_MEMORY;
   li->proto = proto;
   conn->proto.generic = li;
   conn->bits.close = FALSE;
@@ -386,6 +388,8 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
     return CURLE_LDAP_SEARCH_FAILED;
   }
   lr = calloc(1,sizeof(ldapreqinfo));
+  if(!lr)
+    return CURLE_OUT_OF_MEMORY;
   lr->msgid = msgid;
   data->state.proto.generic = lr;
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
