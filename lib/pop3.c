@@ -272,19 +272,19 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
 
       /* Test the word for a matching authentication mechanism */
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
-        pop3c->authmechs |= SASL_AUTH_LOGIN;
+        pop3c->authmechs |= SASL_MECH_LOGIN;
       else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
-        pop3c->authmechs |= SASL_AUTH_PLAIN;
+        pop3c->authmechs |= SASL_MECH_PLAIN;
       else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
-        pop3c->authmechs |= SASL_AUTH_CRAM_MD5;
+        pop3c->authmechs |= SASL_MECH_CRAM_MD5;
       else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
-        pop3c->authmechs |= SASL_AUTH_DIGEST_MD5;
+        pop3c->authmechs |= SASL_MECH_DIGEST_MD5;
       else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
-        pop3c->authmechs |= SASL_AUTH_GSSAPI;
+        pop3c->authmechs |= SASL_MECH_GSSAPI;
       else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
-        pop3c->authmechs |= SASL_AUTH_EXTERNAL;
+        pop3c->authmechs |= SASL_MECH_EXTERNAL;
       else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
-        pop3c->authmechs |= SASL_AUTH_NTLM;
+        pop3c->authmechs |= SASL_MECH_NTLM;
 
       line += wordlen;
       len -= wordlen;
@@ -389,38 +389,38 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   /* Check supported authentication mechanisms by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(pop3c->authmechs & SASL_AUTH_DIGEST_MD5) {
+  if(pop3c->authmechs & SASL_MECH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
     authstate = POP3_AUTH_DIGESTMD5;
-    pop3c->authused = SASL_AUTH_DIGEST_MD5;
+    pop3c->authused = SASL_MECH_DIGEST_MD5;
   }
-  else if(pop3c->authmechs & SASL_AUTH_CRAM_MD5) {
+  else if(pop3c->authmechs & SASL_MECH_CRAM_MD5) {
     mech = "CRAM-MD5";
     authstate = POP3_AUTH_CRAMMD5;
-    pop3c->authused = SASL_AUTH_CRAM_MD5;
+    pop3c->authused = SASL_MECH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-  if(pop3c->authmechs & SASL_AUTH_NTLM) {
+  if(pop3c->authmechs & SASL_MECH_NTLM) {
     mech = "NTLM";
     authstate = POP3_AUTH_NTLM;
-    pop3c->authused = SASL_AUTH_NTLM;
+    pop3c->authused = SASL_MECH_NTLM;
   }
   else
 #endif
-  if(pop3c->authmechs & SASL_AUTH_LOGIN) {
+  if(pop3c->authmechs & SASL_MECH_LOGIN) {
     mech = "LOGIN";
     authstate = POP3_AUTH_LOGIN;
-    pop3c->authused = SASL_AUTH_LOGIN;
+    pop3c->authused = SASL_MECH_LOGIN;
   }
-  else if(pop3c->authmechs & SASL_AUTH_PLAIN) {
+  else if(pop3c->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     authstate = POP3_AUTH_PLAIN;
-    pop3c->authused = SASL_AUTH_PLAIN;
+    pop3c->authused = SASL_MECH_PLAIN;
   }
   else {
-    infof(conn->data, "No known SASL auth mechanisms supported!\n");
+    infof(conn->data, "No known SASL authentication mechanisms supported!\n");
     result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
   }
 

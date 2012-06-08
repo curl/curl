@@ -253,19 +253,19 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
         wordlen++;
 
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
-        smtpc->authmechs |= SASL_AUTH_LOGIN;
+        smtpc->authmechs |= SASL_MECH_LOGIN;
       else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
-        smtpc->authmechs |= SASL_AUTH_PLAIN;
+        smtpc->authmechs |= SASL_MECH_PLAIN;
       else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
-        smtpc->authmechs |= SASL_AUTH_CRAM_MD5;
+        smtpc->authmechs |= SASL_MECH_CRAM_MD5;
       else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
-        smtpc->authmechs |= SASL_AUTH_DIGEST_MD5;
+        smtpc->authmechs |= SASL_MECH_DIGEST_MD5;
       else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
-        smtpc->authmechs |= SASL_AUTH_GSSAPI;
+        smtpc->authmechs |= SASL_MECH_GSSAPI;
       else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
-        smtpc->authmechs |= SASL_AUTH_EXTERNAL;
+        smtpc->authmechs |= SASL_MECH_EXTERNAL;
       else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
-        smtpc->authmechs |= SASL_AUTH_NTLM;
+        smtpc->authmechs |= SASL_MECH_NTLM;
 
       line += wordlen;
       len -= wordlen;
@@ -371,48 +371,48 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   /* Check supported authentication mechanisms by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(smtpc->authmechs & SASL_AUTH_DIGEST_MD5) {
+  if(smtpc->authmechs & SASL_MECH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
     state1 = SMTP_AUTH_DIGESTMD5;
-    smtpc->authused = SASL_AUTH_DIGEST_MD5;
+    smtpc->authused = SASL_MECH_DIGEST_MD5;
   }
-  else if(smtpc->authmechs & SASL_AUTH_CRAM_MD5) {
+  else if(smtpc->authmechs & SASL_MECH_CRAM_MD5) {
     mech = "CRAM-MD5";
     state1 = SMTP_AUTH_CRAMMD5;
-    smtpc->authused = SASL_AUTH_CRAM_MD5;
+    smtpc->authused = SASL_MECH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-  if(smtpc->authmechs & SASL_AUTH_NTLM) {
+  if(smtpc->authmechs & SASL_MECH_NTLM) {
     mech = "NTLM";
     state1 = SMTP_AUTH_NTLM;
     state2 = SMTP_AUTH_NTLM_TYPE2MSG;
-    smtpc->authused = SASL_AUTH_NTLM;
+    smtpc->authused = SASL_MECH_NTLM;
     result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
                                                  &conn->ntlm,
                                                  &initresp, &len);
   }
   else
 #endif
-  if(smtpc->authmechs & SASL_AUTH_LOGIN) {
+  if(smtpc->authmechs & SASL_MECH_LOGIN) {
     mech = "LOGIN";
     state1 = SMTP_AUTH_LOGIN;
     state2 = SMTP_AUTH_PASSWD;
-    smtpc->authused = SASL_AUTH_LOGIN;
+    smtpc->authused = SASL_MECH_LOGIN;
     result = Curl_sasl_create_login_message(conn->data, conn->user,
                                             &initresp, &len);
   }
-  else if(smtpc->authmechs & SASL_AUTH_PLAIN) {
+  else if(smtpc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     state1 = SMTP_AUTH_PLAIN;
     state2 = SMTP_AUTH;
-    smtpc->authused = SASL_AUTH_PLAIN;
+    smtpc->authused = SASL_MECH_PLAIN;
     result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                             conn->passwd, &initresp, &len);
   }
   else {
-    infof(conn->data, "No known auth mechanisms supported!\n");
+    infof(conn->data, "No known authentication mechanisms supported!\n");
     result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
   }
 

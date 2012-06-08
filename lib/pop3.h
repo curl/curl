@@ -57,7 +57,7 @@ struct pop3_conn {
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
                              non-body */
-  unsigned int authmechs; /* Accepted authentication methods */
+  unsigned int authmechs; /* Accepted SASL authentication mechanisms */
   unsigned int authused;  /* Authentication method used for the connection */
   pop3state state;        /* Always use pop3.c:state() to change state! */
 };

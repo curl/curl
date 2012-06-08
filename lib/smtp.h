@@ -60,7 +60,7 @@ struct smtp_conn {
   char *domain;            /* Client address/name to send in the EHLO */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
-  unsigned int authmechs;  /* Accepted authentication methods */
+  unsigned int authmechs;  /* Accepted authentication mechanisms */
   unsigned int authused;   /* Authentication method used for the connection */
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   struct curl_slist *rcpt; /* Recipient list */
