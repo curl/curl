@@ -37,6 +37,8 @@ typedef enum {
   PARAM_LAST
 } ParameterError;
 
+struct Configurable;
+
 ParameterError getparameter(char *flag,
                             char *nextarg,
                             bool *usedarg,
