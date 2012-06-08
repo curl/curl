@@ -28,6 +28,10 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
 endif
+# Edit the path below to point to the base of your libmetalink package.
+ifndef LIBMETALINK_PATH
+LIBMETALINK_PATH = ../../libmetalink-0.0.3
+endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
@@ -116,6 +120,9 @@ endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
 endif
+ifeq ($(findstring -metalink,$(CFG)),-metalink)
+METALINK = 1
+endif
 
 INCLUDES = -I. -I.. -I../include -I../lib
 
@@ -175,6 +182,11 @@ ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
   curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
 endif
+endif
+ifdef METALINK
+  INCLUDES += -I"$(LIBMETALINK_PATH)/include"
+  CFLAGS += -DUSE_METALINK
+  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
