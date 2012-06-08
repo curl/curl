@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o cmdline: made -D option work with -O and -J
  o configure: Fix libcurl.pc and curl-config generation for static MingW*
    cross builds
+ o ssl: fix duplicated SSL handshake with multi interface and proxy [1]
 
 This release includes the following known bugs:
 
@@ -39,4 +40,4 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- 
+ [1] = https://bugzilla.redhat.com/788526
