@@ -21,26 +21,43 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
-#include <sys/stat.h>
-
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-#endif
-
 #ifdef USE_METALINK
 
 #include <metalink/metalink_parser.h>
 
+#ifdef USE_SSLEAY
+#  ifdef USE_OPENSSL
+#    include <openssl/md5.h>
+#    include <openssl/sha.h>
+#  else
+#    include <md5.h>
+#    include <sha.h>
+#  endif
+#elif defined(USE_GNUTLS_NETTLE)
+#  include <nettle/md5.h>
+#  include <nettle/sha.h>
+#  define MD5_CTX    struct md5_ctx
+#  define SHA_CTX    struct sha1_ctx
+#  define SHA256_CTX struct sha256_ctx
+#elif defined(USE_GNUTLS)
+#  include <gcrypt.h>
+#  define MD5_CTX    gcry_md_hd_t
+#  define SHA_CTX    gcry_md_hd_t
+#  define SHA256_CTX gcry_md_hd_t
+#else
+#  error "Can't compile METALINK support without a crypto library."
+#endif
+
 #include "rawstr.h"
 
-#include "tool_metalink.h"
+#define ENABLE_CURLX_PRINTF
+/* use our own printf() functions */
+#include "curlx.h"
+
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_cfgable.h"
+#include "tool_metalink.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -55,151 +72,6 @@
   if(!(val)) \
     return PARAM_NO_MEM; \
 } WHILE_FALSE
-
-#ifdef USE_GNUTLS_NETTLE
-
-#include <nettle/md5.h>
-#include <nettle/sha.h>
-
-typedef struct md5_ctx MD5_CTX;
-
-static void MD5_Init(MD5_CTX * ctx)
-{
-  md5_init(ctx);
-}
-
-static void MD5_Update(MD5_CTX * ctx,
-                       const unsigned char * input,
-                       unsigned int inputLen)
-{
-  md5_update(ctx, inputLen, input);
-}
-
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
-{
-  md5_digest(ctx, 16, digest);
-}
-
-typedef struct sha1_ctx SHA_CTX;
-
-static void SHA1_Init(SHA_CTX *ctx)
-{
-  sha1_init(ctx);
-}
-
-static void SHA1_Update(SHA_CTX *ctx,
-                        const unsigned char * input,
-                        unsigned int inputLen)
-{
-  sha1_update(ctx, inputLen, input);
-}
-
-static void SHA1_Final(unsigned char digest[20], SHA_CTX * ctx)
-{
-  sha1_digest(ctx, 20, digest);
-}
-
-typedef struct sha256_ctx SHA256_CTX;
-
-static void SHA256_Init(SHA256_CTX *ctx)
-{
-  sha256_init(ctx);
-}
-
-static void SHA256_Update(SHA256_CTX *ctx,
-                          const unsigned char * input,
-                          unsigned int inputLen)
-{
-  sha256_update(ctx, inputLen, input);
-}
-
-static void SHA256_Final(unsigned char digest[32], SHA256_CTX * ctx)
-{
-  sha256_digest(ctx, 32, digest);
-}
-
-#else
-
-#ifdef USE_GNUTLS
-
-#include <gcrypt.h>
-
-typedef gcry_md_hd_t MD5_CTX;
-
-static void MD5_Init(MD5_CTX * ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_MD5, 0);
-}
-
-static void MD5_Update(MD5_CTX * ctx,
-                       const unsigned char * input,
-                       unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 16);
-  gcry_md_close(*ctx);
-}
-
-typedef gcry_md_hd_t SHA_CTX;
-
-static void SHA1_Init(SHA_CTX * ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_SHA1, 0);
-}
-
-static void SHA1_Update(SHA_CTX * ctx,
-                       const unsigned char * input,
-                       unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void SHA1_Final(unsigned char digest[20], SHA_CTX * ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 20);
-  gcry_md_close(*ctx);
-}
-
-typedef gcry_md_hd_t SHA256_CTX;
-
-static void SHA256_Init(SHA256_CTX * ctx)
-{
-  gcry_md_open(ctx, GCRY_MD_SHA256, 0);
-}
-
-static void SHA256_Update(SHA256_CTX * ctx,
-                       const unsigned char * input,
-                       unsigned int inputLen)
-{
-  gcry_md_write(*ctx, input, inputLen);
-}
-
-static void SHA256_Final(unsigned char digest[32], SHA256_CTX * ctx)
-{
-  memcpy(digest, gcry_md_read(*ctx, 0), 32);
-  gcry_md_close(*ctx);
-}
-
-#else
-
-#ifdef USE_OPENSSL
-#  include <openssl/md5.h>
-#  include <openssl/sha.h>
-#else /* USE_OPENSSL */
-
-/* TODO hash functions for other libraries here */
-
-#endif /* USE_OPENSSL */
-
-#endif /* USE_GNUTLS */
-
-#endif /* USE_GNUTLS_NETTLE */
-
-#ifdef METALINK_HASH_CHECK
 
 const digest_params MD5_DIGEST_PARAMS[] = {
   {
@@ -230,6 +102,145 @@ const digest_params SHA256_DIGEST_PARAMS[] = {
     32
   }
 };
+
+static const metalink_digest_def SHA256_DIGEST_DEF[] = {
+  {"sha-256", SHA256_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def SHA1_DIGEST_DEF[] = {
+  {"sha-1", SHA1_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def MD5_DIGEST_DEF[] = {
+  {"md5", MD5_DIGEST_PARAMS}
+};
+
+/*
+ * The alias of supported hash functions in the order by preference
+ * (basically stronger hash comes first). We included "sha-256" and
+ * "sha256". The former is the name defined in the IANA registry named
+ * "Hash Function Textual Names". The latter is widely (and
+ * historically) used in Metalink version 3.
+ */
+static const metalink_digest_alias digest_aliases[] = {
+  {"sha-256", SHA256_DIGEST_DEF},
+  {"sha256", SHA256_DIGEST_DEF},
+  {"sha-1", SHA1_DIGEST_DEF},
+  {"sha1", SHA1_DIGEST_DEF},
+  {"md5", MD5_DIGEST_DEF},
+  {NULL, NULL}
+};
+
+#ifdef USE_GNUTLS_NETTLE
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+  md5_init(ctx);
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *input,
+                       unsigned int inputLen)
+{
+  md5_update(ctx, inputLen, input);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+{
+  md5_digest(ctx, 16, digest);
+}
+
+static void SHA1_Init(SHA_CTX *ctx)
+{
+  sha1_init(ctx);
+}
+
+static void SHA1_Update(SHA_CTX *ctx,
+                        const unsigned char *input,
+                        unsigned int inputLen)
+{
+  sha1_update(ctx, inputLen, input);
+}
+
+static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
+{
+  sha1_digest(ctx, 20, digest);
+}
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  sha256_init(ctx);
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
+{
+  sha256_update(ctx, inputLen, input);
+}
+
+static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
+{
+  sha256_digest(ctx, 32, digest);
+}
+
+#elif defined(USE_GNUTLS)
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+  gcry_md_open(ctx, GCRY_MD_MD5, 0);
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *input,
+                       unsigned int inputLen)
+{
+  gcry_md_write(*ctx, input, inputLen);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+{
+  memcpy(digest, gcry_md_read(*ctx, 0), 16);
+  gcry_md_close(*ctx);
+}
+
+static void SHA1_Init(SHA_CTX *ctx)
+{
+  gcry_md_open(ctx, GCRY_MD_SHA1, 0);
+}
+
+static void SHA1_Update(SHA_CTX *ctx,
+                        const unsigned char *input,
+                        unsigned int inputLen)
+{
+  gcry_md_write(*ctx, input, inputLen);
+}
+
+static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
+{
+  memcpy(digest, gcry_md_read(*ctx, 0), 20);
+  gcry_md_close(*ctx);
+}
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  gcry_md_open(ctx, GCRY_MD_SHA256, 0);
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
+{
+  gcry_md_write(*ctx, input, inputLen);
+}
+
+static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
+{
+  memcpy(digest, gcry_md_read(*ctx, 0), 32);
+  gcry_md_close(*ctx);
+}
+
+#endif /* CRYPTO LIBS */
 
 digest_context *Curl_digest_init(const digest_params *dparams)
 {
@@ -273,34 +284,6 @@ int Curl_digest_final(digest_context *context, unsigned char *result)
 
   return 0;
 }
-
-static const metalink_digest_def SHA256_DIGEST_DEF[] = {
-  {"sha-256", SHA256_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def SHA1_DIGEST_DEF[] = {
-  {"sha-1", SHA1_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def MD5_DIGEST_DEF[] = {
-  {"md5", MD5_DIGEST_PARAMS}
-};
-
-/*
- * The alias of supported hash functions in the order by preference
- * (basically stronger hash comes first). We included "sha-256" and
- * "sha256". The former is the name defined in the IANA registry named
- * "Hash Function Textual Names". The latter is widely (and
- * historically) used in Metalink version 3.
- */
-static const metalink_digest_alias digest_aliases[] = {
-  {"sha-256", SHA256_DIGEST_DEF},
-  {"sha256", SHA256_DIGEST_DEF},
-  {"sha-1", SHA1_DIGEST_DEF},
-  {"sha1", SHA1_DIGEST_DEF},
-  {"md5", MD5_DIGEST_DEF},
-  {NULL, NULL}
-};
 
 static unsigned char hex_to_uint(const char *s)
 {
@@ -413,10 +396,6 @@ int metalink_check_hash(struct Configurable *config,
   }
   return rv;
 }
-
-#endif /* METALINK_HASH_CHECK */
-
-#ifdef USE_METALINK
 
 static metalink_checksum *new_metalink_checksum(const char *hash_name,
                                                 const char *hash_value)
@@ -537,8 +516,6 @@ int parse_metalink(struct Configurable *config, const char *infile)
   metalink_delete(metalink);
   return 0;
 }
-
-#endif /* USE_METALINK */
 
 /*
  * Returns nonzero if content_type includes mediatype.

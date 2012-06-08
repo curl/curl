@@ -23,13 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-struct Configurable;
-
-#if defined(USE_OPENSSL) || defined(USE_GNUTLS)
-/* Define 1 if hash check is enabled in Metalink transfer */
-#  define METALINK_HASH_CHECK 1
-#endif
-
 typedef struct metalink_checksum {
   struct metalink_checksum *next;
   char *hash_name;
@@ -49,17 +42,13 @@ typedef struct metalinkfile {
   metalink_resource *resource;
 } metalinkfile;
 
+#ifdef USE_METALINK
+
 /*
  * Counts the resource in the metalinkfile.
  */
-#ifdef USE_METALINK
 int count_next_metalink_resource(metalinkfile *mlfile);
 void clean_metalink(struct Configurable *config);
-#else
-#define count_next_metalink_resource(x) 0
-#define clean_metalink(x)
-#endif
-
 
 int parse_metalink(struct Configurable *config, const char *infile);
 
@@ -125,5 +114,12 @@ typedef struct {
 int metalink_check_hash(struct Configurable *config,
                         metalinkfile *mlfile,
                         const char *filename);
+
+#else /* USE_METALINK */
+
+#define count_next_metalink_resource(x)  0
+#define clean_metalink(x)  Curl_nop_stmt
+
+#endif /* USE_METALINK */
 
 #endif /* HEADER_CURL_TOOL_METALINK_H */

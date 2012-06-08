@@ -39,11 +39,11 @@
 #include "tool_help.h"
 #include "tool_helpers.h"
 #include "tool_libinfo.h"
+#include "tool_metalink.h"
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_version.h"
-#include "tool_metalink.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

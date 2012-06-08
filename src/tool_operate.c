@@ -65,6 +65,7 @@
 #include "tool_homedir.h"
 #include "tool_libinfo.h"
 #include "tool_main.h"
+#include "tool_metalink.h"
 #include "tool_msgs.h"
 #include "tool_operate.h"
 #include "tool_operhlp.h"
@@ -1577,14 +1578,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               fprintf(config->errors, "Could not parse Metalink file.\n");
           }
         }
-#  ifdef METALINK_HASH_CHECK
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
           int rv = metalink_check_hash(config, mlfile, outs.filename);
           if(rv == 0) {
             metalink_next_res = 1;
           }
         }
-#  endif /* METALINK_HASH_CHECK */
 #endif /* USE_METALINK */
 
         /* No more business with this output struct */
