@@ -2284,7 +2284,7 @@ static CURLcode servercert(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   X509 *issuer;
   FILE *fp;
-  char buffer[256];
+  char *buffer = data->state.buffer;
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
@@ -2301,7 +2301,7 @@ static CURLcode servercert(struct connectdata *conn,
   infof (data, "Server certificate:\n");
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
-                          buffer, sizeof(buffer));
+                         buffer, BUFSIZE);
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-subject!");
