@@ -1549,11 +1549,13 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
   if(!dead_connection && smtpc->pp.conn)
     (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
 
+  /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
 
+  /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, smtpc->authused);
 
-  /* This won't already be freed in some error cases */
+  /* Cleanup our connection based variables */
   Curl_safefree(smtpc->domain);
 
   return CURLE_OK;
@@ -1569,8 +1571,6 @@ static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-
-  Curl_safefree(smtpc->domain);
 
   return CURLE_OK;
 }
