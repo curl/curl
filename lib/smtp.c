@@ -1565,7 +1565,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 {
   struct FTP *smtp = conn->data->state.proto.smtp;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
+
   (void)connected;
 
   if(smtp->transfer != FTPTRANSFER_BODY)
