@@ -23,15 +23,26 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-/* Structure to pass as userdata in tool_header_cb */
-typedef struct {
-  /* getout object pointer currently processing */
-  struct getout *urlnode;
-  /* output stream */
+/*
+ * curl operates using a single HdrCbData struct variable, a
+ * pointer to this is passed as userdata pointer to tool_header_cb.
+ *
+ * 'outs' member is a pointer to the OutStruct variable used to keep
+ * track of information relative to curl's output writing.
+ *
+ * 'heads' member is a pointer to the OutStruct variable used to keep
+ * track of information relative to header response writing.
+ *
+ * 'honor_cd_filename' member is TRUE when tool_header_cb is allowed
+ * to honor Content-Disposition filename property and accordingly
+ * set 'outs' filename, otherwise FALSE;
+ */
+
+struct HdrCbData {
   struct OutStruct *outs;
-  /* header output stream */
   struct OutStruct *heads;
-} HeaderData;
+  bool honor_cd_filename;
+};
 
 /*
 ** callback for CURLOPT_HEADERFUNCTION

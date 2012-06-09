@@ -128,6 +128,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   struct ProgressData progressbar;
   struct getout *urlnode;
 
+  struct HdrCbData hdrcbdata;
   struct OutStruct heads;
 
   metalinkfile *mlfile_last = NULL;
@@ -141,6 +142,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   errorbuffer[0] = '\0';
   /* default headers output stream is stdout */
+  memset(&hdrcbdata, 0, sizeof(struct HdrCbData));
   memset(&heads, 0, sizeof(struct OutStruct));
   heads.stream = stdout;
   heads.config = config;
@@ -531,7 +533,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_sleep_default;
         long retry_sleep;
         char *this_url;
-        HeaderData hdrdata;
         int metalink_next_res = 0;
 
         outfile = NULL;
@@ -1256,12 +1257,19 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->proto_redir_present)
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
-        hdrdata.urlnode = urlnode;
-        hdrdata.outs = &outs;
-        hdrdata.heads = &heads;
+        if(config->content_disposition
+           && (urlnode->flags & GETOUT_USEREMOTE)
+           && (checkprefix("http://", this_url) ||
+               checkprefix("https://", this_url)))
+          hdrcbdata.honor_cd_filename = TRUE;
+        else
+          hdrcbdata.honor_cd_filename = FALSE;
+
+        hdrcbdata.outs = &outs;
+        hdrcbdata.heads = &heads;
 
         my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
-        my_setopt(curl, CURLOPT_HEADERDATA, &hdrdata);
+        my_setopt(curl, CURLOPT_HEADERDATA, &hdrcbdata);
 
         if(config->resolve)
           /* new in 7.21.3 */
@@ -1590,6 +1598,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(outs.alloc_filename)
           Curl_safefree(outs.filename);
         memset(&outs, 0, sizeof(struct OutStruct));
+        hdrcbdata.outs = NULL;
 
         /* Free loop-local allocated memory and close loop-local opened fd */
 
@@ -1695,6 +1704,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 #ifndef CURL_DISABLE_LIBCURL_OPTION
   easysrc_cleanup();
 #endif
+
+  hdrcbdata.heads = NULL;
 
   /* Close function-local opened file descriptors */
 
