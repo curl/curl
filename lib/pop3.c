@@ -84,6 +84,8 @@
 #include "url.h"
 #include "rawstr.h"
 #include "curl_sasl.h"
+#include "curl_md5.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -213,8 +215,9 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 #endif
 
 /* Function that checks for an ending pop3 status code at the start of the
-   given string, but also detects the supported authentication types as well
-   as the allowed SASL authentication mechanisms within the CAPA response. */
+   given string, but also detects the APOP timestamp from the server greeting
+   as well as the supported authentication types and allowed SASL mechanisms
+   from the CAPA response. */
 static int pop3_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -222,6 +225,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
   struct connectdata *conn = pp->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t wordlen;
+  size_t i;
 
   /* Do we have an error response? */
   if(len >= 4 && !memcmp("-ERR", line, 4)) {
@@ -230,8 +234,31 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
     return FALSE;
   }
 
-  /* Are we processing reponses to our CAPA command? */
-  if(pop3c->state == POP3_CAPA) {
+  /* Are we processing servergreet responses */
+  if(pop3c->state == POP3_SERVERGREET) {
+    /* Look for the APOP timestamp */
+    if(len >= 3 && line[len - 3] == '>') {
+      for(i = 0; i < len - 3; ++i) {
+        if(line[i] == '<') {
+          /* Calculate the length of the timestamp */
+          size_t timestamplen = len - 2 - i;
+
+          /* Allocate some memory for the timestamp */
+          pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
+
+          if(!pop3c->apoptimestamp)
+            break;
+
+          /* Copy the timestamp */
+          memcpy(pop3c->apoptimestamp, line + i, timestamplen);
+          pop3c->apoptimestamp[timestamplen] = '\0';
+          break;
+        }
+      }
+    }
+  }
+  /* Are we processing CAPA command responses? */
+  else if(pop3c->state == POP3_CAPA) {
 
     /* Do we have the terminating character? */
     if(len >= 1 && !memcmp(line, ".", 1)) {
@@ -334,6 +361,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
     "AUTH",
+    "APOP",
     "USER",
     "PASS",
     "COMMAND",
@@ -391,6 +419,40 @@ static CURLcode pop3_state_user(struct connectdata *conn)
   state(conn, POP3_USER);
 
   return CURLE_OK;
+}
+
+static CURLcode pop3_state_apop(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  size_t i;
+  MD5_context *ctxt;
+  unsigned char digest[MD5_DIGEST_LEN];
+  char secret[2 * MD5_DIGEST_LEN + 1];
+
+  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  Curl_MD5_update(ctxt, (const unsigned char *) pop3c->apoptimestamp,
+                  curlx_uztoui(strlen(pop3c->apoptimestamp)));
+
+  Curl_MD5_update(ctxt, (const unsigned char *) conn->passwd,
+                  curlx_uztoui(strlen(conn->passwd)));
+
+  /* Finalise the digest */
+  Curl_MD5_final(ctxt, digest);
+
+  /* Convert the calculated 16 octet digest into a 32 byte hex string */
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
+    snprintf(&secret[2 * i], 3, "%02x", digest[i]);
+
+  result = Curl_pp_sendf(&pop3c->pp, "APOP %s %s", conn->user, secret);
+
+  if(!result)
+    state(conn, POP3_APOP);
+
+  return result;
 }
 
 static CURLcode pop3_authenticate(struct connectdata *conn)
@@ -542,6 +604,8 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn,
     /* Check supported authentication types by decreasing order of security */
     if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL)
       result = pop3_authenticate(conn);
+    else if(conn->proto.pop3c.authtypes & POP3_TYPE_APOP)
+      result = pop3_state_apop(conn);
     else if(conn->proto.pop3c.authtypes & POP3_TYPE_CLEARTEXT)
       result = pop3_state_user(conn);
     else {
@@ -883,6 +947,26 @@ static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
   return result;
 }
 
+static CURLcode pop3_state_apop_resp(struct connectdata *conn,
+                                     int pop3code,
+                                     pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Authentication failed: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+
+  /* End of connect phase */
+  state(conn, POP3_STOP);
+
+  return result;
+}
+
 /* For USER responses */
 static CURLcode pop3_state_user_resp(struct connectdata *conn,
                                      int pop3code,
@@ -1098,6 +1182,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_AUTH:
       result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_APOP:
+      result = pop3_state_apop_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_USER:
@@ -1407,6 +1495,9 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
     (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&pop3c->pp);
+
+  /* Clear our variables */
+  Curl_safefree(pop3c->apoptimestamp);
 
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, pop3c->authused);

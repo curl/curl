@@ -16,6 +16,7 @@ This release includes the following changes:
  o pop3: Added support for sasl ntlm authentication
  o pop3: Added support for sasl cram-md5 authentication
  o pop3: Added support for sasl digest-md5 authentication
+ o pop3: Added support for apop authentication
 
 This release includes the following bugfixes:
 

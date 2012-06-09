@@ -40,6 +40,7 @@ typedef enum {
   POP3_AUTH_NTLM,
   POP3_AUTH_NTLM_TYPE2MSG,
   POP3_AUTH,
+  POP3_APOP,
   POP3_USER,
   POP3_PASS,
   POP3_COMMAND,
@@ -60,6 +61,7 @@ struct pop3_conn {
   unsigned int authtypes; /* Supported authentication types */
   unsigned int authmechs; /* Accepted SASL authentication mechanisms */
   unsigned int authused;  /* SASL auth mechanism used for the connection */
+  char *apoptimestamp;    /* APOP timestamp from the server greeting */
   pop3state state;        /* Always use pop3.c:state() to change state! */
 };
 
