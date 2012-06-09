@@ -47,6 +47,11 @@ ifndef FBOPENSSL_PATH
 FBOPENSSL_PATH = ../../fbopenssl-0.4
 endif
 
+# Edit the path below to point to the base of your libmetalink package.
+ifndef LIBMETALINK_PATH
+LIBMETALINK_PATH = ../../libmetalink-0.0.3
+endif
+
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
 LIBCARES_PATH = ../ares
@@ -214,6 +219,9 @@ endif
 ifeq ($(findstring -spnego,$(CFG)),-spnego)
 WITH_SPNEGO = 1
 endif
+ifeq ($(findstring -metalink,$(CFG)),-metalink)
+WITH_METALINK = 1
+endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
 endif
@@ -274,6 +282,11 @@ endif
 ifdef WITH_IDN
 	# INCLUDES += -I$(LIBIDN_PATH)/include
 	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
+endif
+ifdef WITH_METALINK
+	CFLAGS += -DUSE_METALINK
+	INCLUDES += -I$(METALINK_PATH)/include
+	LDLIBS += $(METALINK_PATH)/lib/libmetalink.$(LIBEXT)
 endif
 
 ifeq ($(LIBARCH),LIBC)
