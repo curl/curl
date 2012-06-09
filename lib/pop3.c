@@ -1356,7 +1356,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
 
-  /* Clear our variables for the next connection */
+  /* Cleanup our do based variables */
   Curl_safefree(pop3c->mailbox);
   Curl_safefree(pop3c->custom);
 
@@ -1494,13 +1494,14 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   if(!dead_connection && pop3c->pp.conn)
     (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
 
+  /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
-
-  /* Clear our variables */
-  Curl_safefree(pop3c->apoptimestamp);
 
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, pop3c->authused);
+
+  /* Cleanup our connection based variables */
+  Curl_safefree(pop3c->apoptimestamp);
 
   return CURLE_OK;
 }
