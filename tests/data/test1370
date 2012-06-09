@@ -25,25 +25,17 @@ Content-Disposition: filename=name1370; charset=funny; option=strange
 #
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -J output in, using the CURL_TESTDIR variable
-<features>
-debug
-</features>
 <server>
 http
 </server>
 <name>
 HTTP GET -o fname -J and Content-Disposition, -D file
 </name>
-<setenv>
-CURL_TESTDIR=%PWD/log
-</setenv>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/1370 -J -o log/outfile1370 -D log/heads1370
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/1370
+perl %SRCDIR/libtest/notexists.pl log/1370 log/name1370
 </postcheck>
 </client>
 
@@ -60,7 +52,7 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/name1370">
+<file1 name="log/outfile1370">
 12345
 </file1>
 
@@ -76,7 +68,6 @@ Content-Disposition: filename=name1370; charset=funny; option=strange
 </file2>
 
 <file3 name="log/stdout1370">
-curl: Saved to filename '%PWD/log/name1370'
 </file3>
 
 </verify>
