@@ -240,7 +240,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
     }
 
     /* We are only interested in the SASL line */
-    if(len < 4 || memcmp(line, "SASL", 3)) {
+    if(len < 4 || memcmp(line, "SASL", 4)) {
       return FALSE;
     }
 
