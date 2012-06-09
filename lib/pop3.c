@@ -22,6 +22,7 @@
  * RFC1939 POP3 protocol
  * RFC2195 CRAM-MD5 authentication
  * RFC2384 POP URL Scheme
+ * RFC2449 POP3 Extension Mechanism
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  * RFC2831 DIGEST-MD5 authentication
  * RFC4616 PLAIN authentication
@@ -212,8 +213,8 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 #endif
 
 /* Function that checks for an ending pop3 status code at the start of the
-   given string, but also detects the allowed authentication mechanisms
-   according to the CAPA response. */
+   given string, but also detects the supported authentication types as well
+   as the allowed SASL authentication mechanisms within the CAPA response. */
 static int pop3_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -239,10 +240,23 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
       return TRUE;
     }
 
-    /* We are only interested in the SASL line */
-    if(len < 4 || memcmp(line, "SASL", 4)) {
+    /* Does the server support clear text? */
+    if(len >= 4 && !memcmp(line, "USER", 4)) {
+      pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
       return FALSE;
     }
+
+    /* Does the server support APOP? */
+    if(len >= 4 && !memcmp(line, "APOP", 4)) {
+      pop3c->authtypes |= POP3_TYPE_APOP;
+      return FALSE;
+    }
+
+    /* Does the server support SASL? */
+    if(len < 4 || memcmp(line, "SASL", 4))
+      return FALSE;
+
+    pop3c->authtypes |= POP3_TYPE_SASL;
 
     /* Advance past the SASL keyword */
     line += 4;
@@ -524,8 +538,17 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn,
 
   if(pop3code != '+')
     result = pop3_state_user(conn);
-  else
-    result = pop3_authenticate(conn);
+  else {
+    /* Check supported authentication types by decreasing order of security */
+    if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL)
+      result = pop3_authenticate(conn);
+    else if(conn->proto.pop3c.authtypes & POP3_TYPE_CLEARTEXT)
+      result = pop3_state_user(conn);
+    else {
+      infof(conn->data, "No known authentication types supported!\n");
+      result = CURLE_LOGIN_DENIED; /* Other types not supported */
+    }
+  }
 
   return result;
 }
