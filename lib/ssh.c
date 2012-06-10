@@ -2820,7 +2820,8 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 
   if(sftp_scp)
     Curl_safefree(sftp_scp->path);
-  Curl_pgrsDone(conn);
+  if(Curl_pgrsDone(conn))
+    return CURLE_ABORTED_BY_CALLBACK;
 
   conn->data->req.keepon = 0; /* clear all bits */
   return result;

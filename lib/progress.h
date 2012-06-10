@@ -39,7 +39,7 @@ typedef enum {
   TIMER_LAST /* must be last */
 } timerid;
 
-void Curl_pgrsDone(struct connectdata *);
+int Curl_pgrsDone(struct connectdata *);
 void Curl_pgrsStartNow(struct SessionHandle *data);
 void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size);

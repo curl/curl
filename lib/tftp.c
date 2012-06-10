@@ -1036,7 +1036,8 @@ static CURLcode tftp_done(struct connectdata *conn, CURLcode status,
   (void)status; /* unused */
   (void)premature; /* not used */
 
-  Curl_pgrsDone(conn);
+  if(Curl_pgrsDone(conn))
+    return CURLE_ABORTED_BY_CALLBACK;
 
   /* If we have encountered an error */
   code = tftp_translate_code(state->error);
