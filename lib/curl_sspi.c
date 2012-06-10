@@ -35,7 +35,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-
 /* We use our own typedef here since some headers might lack these */
 typedef PSecurityFunctionTableA (APIENTRY *INITSECURITYINTERFACE_FN_A)(VOID);
 
@@ -44,7 +43,6 @@ HMODULE s_hSecDll = NULL;
 
 /* Pointer to SSPI dispatch table */
 PSecurityFunctionTableA s_pSecFn = NULL;
-
 
 /*
  * Curl_sspi_global_init()
@@ -57,20 +55,18 @@ PSecurityFunctionTableA s_pSecFn = NULL;
  * Once this function has been executed, Windows SSPI functions can be
  * called through the Security Service Provider Interface dispatch table.
  */
-
-CURLcode
-Curl_sspi_global_init(void)
+CURLcode Curl_sspi_global_init(void)
 {
   OSVERSIONINFO osver;
   INITSECURITYINTERFACE_FN_A pInitSecurityInterface;
 
   /* If security interface is not yet initialized try to do this */
-  if(s_hSecDll == NULL) {
+  if(!s_hSecDll) {
 
     /* Find out Windows version */
     memset(&osver, 0, sizeof(osver));
     osver.dwOSVersionInfoSize = sizeof(osver);
-    if(! GetVersionEx(&osver))
+    if(!GetVersionEx(&osver))
       return CURLE_FAILED_INIT;
 
     /* Security Service Provider Interface (SSPI) functions are located in
@@ -83,24 +79,23 @@ Curl_sspi_global_init(void)
       s_hSecDll = LoadLibrary("security.dll");
     else
       s_hSecDll = LoadLibrary("secur32.dll");
-    if(! s_hSecDll)
+    if(!s_hSecDll)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
     pInitSecurityInterface = (INITSECURITYINTERFACE_FN_A)
       GetProcAddress(s_hSecDll, "InitSecurityInterfaceA");
-    if(! pInitSecurityInterface)
+    if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 
     /* Get pointer to Security Service Provider Interface dispatch table */
     s_pSecFn = pInitSecurityInterface();
-    if(! s_pSecFn)
+    if(!s_pSecFn)
       return CURLE_FAILED_INIT;
-
   }
+
   return CURLE_OK;
 }
-
 
 /*
  * Curl_sspi_global_cleanup()
@@ -108,8 +103,7 @@ Curl_sspi_global_init(void)
  * This deinitializes the Security Service Provider Interface from libcurl.
  */
 
-void
-Curl_sspi_global_cleanup(void)
+void Curl_sspi_global_cleanup(void)
 {
   if(s_hSecDll) {
     FreeLibrary(s_hSecDll);
@@ -117,7 +111,6 @@ Curl_sspi_global_cleanup(void)
     s_pSecFn = NULL;
   }
 }
-
 
 /*
  * Curl_sspi_version()
@@ -181,15 +174,13 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
   return result;
 }
 
-
 /*
  * Curl_sspi_status(SECURIY_STATUS status)
  *
  * This function returns a string representing an SSPI status.
  * It will in any case return a usable string pointer which needs to be freed.
  */
-char*
-Curl_sspi_status(SECURITY_STATUS status)
+char* Curl_sspi_status(SECURITY_STATUS status)
 {
   const char* status_const;
 
@@ -279,10 +270,9 @@ Curl_sspi_status(SECURITY_STATUS status)
       status_const = "Unknown error";
   }
 
-  return curl_maprintf("%s (0x%04X%04X)", status_const,
-                       (status>>16)&0xffff, status&0xffff);
+  return aprintf("%s (0x%04X%04X)", status_const, (status >> 16) & 0xffff,
+                 status & 0xffff);
 }
-
 
 /*
  * Curl_sspi_status_msg(SECURITY_STATUS status)
@@ -290,9 +280,7 @@ Curl_sspi_status(SECURITY_STATUS status)
  * This function returns a message representing an SSPI status.
  * It will in any case return a usable string pointer which needs to be freed.
  */
-
-char*
-Curl_sspi_status_msg(SECURITY_STATUS status)
+char* Curl_sspi_status_msg(SECURITY_STATUS status)
 {
   LPSTR format_msg = NULL;
   char *status_msg = NULL, *status_const = NULL;
@@ -307,7 +295,7 @@ Curl_sspi_status_msg(SECURITY_STATUS status)
     status_msg = strdup(format_msg);
     LocalFree(format_msg);
 
-    /* remove trailing CR+LF */
+    /* Remove trailing CR+LF */
     if(status_len > 0) {
       if(status_msg[status_len-1] == '\n') {
         status_msg[status_len-1] = '\0';
@@ -322,7 +310,7 @@ Curl_sspi_status_msg(SECURITY_STATUS status)
 
   status_const = Curl_sspi_status(status);
   if(status_msg) {
-    status_msg = curl_maprintf("%s [%s]", status_msg, status_const);
+    status_msg = aprintf("%s [%s]", status_msg, status_const);
     free(status_const);
   }
   else {
