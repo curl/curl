@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
-char* Curl_sspi_version();
+CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special);
 char* Curl_sspi_status(SECURITY_STATUS status);
 char* Curl_sspi_status_msg(SECURITY_STATUS status);
 

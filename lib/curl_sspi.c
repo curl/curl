@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -122,50 +122,63 @@ Curl_sspi_global_cleanup(void)
 /*
  * Curl_sspi_version()
  *
- * This function returns a string representing the SSPI library version.
- * It will in any case return a usable string pointer which needs to be freed.
+ * This function returns the SSPI library version information.
  */
-char *
-Curl_sspi_version()
+CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
 {
+  CURLcode result = CURLE_OK;
   VS_FIXEDFILEINFO *version_info = NULL;
-  LPTSTR version = NULL;
   LPTSTR path = NULL;
   LPVOID data = NULL;
   DWORD size, handle;
-  UINT length;
 
-  if(s_hSecDll) {
-    path = malloc(MAX_PATH);
-    if(path) {
-      if(GetModuleFileName(s_hSecDll, path, MAX_PATH)) {
-        size = GetFileVersionInfoSize(path, &handle);
-        if(size) {
-          data = malloc(size);
-          if(data) {
-            if(GetFileVersionInfo(path, handle, size, data)) {
-              if(VerQueryValue(data, "\\", (LPVOID*)&version_info, &length)) {
-                version = curl_maprintf("%d.%d.%d.%d",
-                  (version_info->dwProductVersionMS>>16)&0xffff,
-                  (version_info->dwProductVersionMS>>0)&0xffff,
-                  (version_info->dwProductVersionLS>>16)&0xffff,
-                  (version_info->dwProductVersionLS>>0)&0xffff);
-              }
-            }
-            free(data);
-          }
+  if(!s_hSecDll)
+    return CURLE_FAILED_INIT;
+
+  path = (char *) malloc(MAX_PATH);
+  if(!path)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(GetModuleFileName(s_hSecDll, path, MAX_PATH)) {
+    size = GetFileVersionInfoSize(path, &handle);
+    if(size) {
+      data = malloc(size);
+      if(data) {
+        if(GetFileVersionInfo(path, handle, size, data)) {
+          if(!VerQueryValue(data, "\\", &version_info, &handle))
+            result = CURLE_OUT_OF_MEMORY;
         }
+        else
+          result = CURLE_OUT_OF_MEMORY;
       }
-      free(path);
+      else
+        result = CURLE_OUT_OF_MEMORY;
     }
-    if(!version)
-      version = curl_maprintf("%d", s_pSecFn ? s_pSecFn->dwVersion : 0);
+    else
+      result = CURLE_OUT_OF_MEMORY;
+  }
+  else
+    result = CURLE_OUT_OF_MEMORY;
+
+  /* Set the out parameters */
+  if(!result) {
+    if(major)
+      *major = (version_info->dwProductVersionMS >> 16) & 0xffff;
+  
+    if(minor)
+      *minor = (version_info->dwProductVersionMS >> 0) & 0xffff;
+
+    if(build)
+      *build = (version_info->dwProductVersionLS >> 16) & 0xffff;
+
+    if(special)
+      *special = (version_info->dwProductVersionLS >> 0) & 0xffff;
   }
 
-  if(!version)
-    version = strdup("");
+  Curl_safefree(data);
+  Curl_safefree(path);
 
-  return version;
+  return result;
 }
 
 

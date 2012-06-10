@@ -974,9 +974,14 @@ void Curl_schannel_cleanup()
 
 size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  char *version = Curl_sspi_version();
-  size = snprintf(buffer, size, "Schannel/%s", version);
-  free(version);
+  int sspi_major = 0, sspi_minor = 0, sspi_build = 0;
+
+  if(!Curl_sspi_version(&sspi_major, &sspi_minor, &sspi_build, NULL))
+    size = snprintf(buffer, size, "WinSSPI/%d.%d.%d", sspi_major, sspi_minor,
+                    sspi_build);
+  else
+    size = snprintf(buffer, size, "WinSSPI/unknown");
+
   return size;
 }
 
