@@ -23,12 +23,12 @@ CFGSET=true
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
-!MESSAGE   USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
-!MESSAGE   ENABLE_IPV6=<yes or no>         - Enable IPV6, default to yes
-!MESSAGE   DEBUG=<yes or no>            - Debug builds
+!MESSAGE   USE_SSPI=<yes or no>         - Enable SSPI support, default to yes
+!MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPV6, default to yes
 !MESSAGE   ENABLE_IDN=<yes or no>       - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
 !MESSAGE                                  or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols release build)
+!MESSAGE   DEBUG=<yes or no>            - Debug builds
 !ERROR please choose a valid mode
 
 !ENDIF
@@ -40,49 +40,55 @@ top_srcdir=..
 !INCLUDE "../src/Makefile.inc"
 
 # hugehelp has a special rule
-CURL_OBJS= $(CURL_CFILES:hugehelp.c=)
+CURL_OBJS=$(CURL_CFILES:hugehelp.c=)
 
 CURL_OBJS=$(CURL_OBJS:.c=.obj)
 
 # default options
 !IFNDEF USE_SSPI
-USE_SSPI=true
+USE_SSPI = true
 !ENDIF
 
 !IFNDEF ENABLE_IPV6
-USE_IPV6   = true
+USE_IPV6 = true
 !ELSEIF "$(ENABLE_IPV6)"=="yes"
-USE_IPV6   = true
+USE_IPV6 = true
+!ELSEIF "$(ENABLE_IPV6)"=="no"
+USE_IPV6 = false
 !ENDIF
 
 !IFNDEF ENABLE_IDN
-USE_IDN=true
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="yes"
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="no"
+USE_IDN = false
 !ENDIF
 
 CONFIG_NAME_LIB = libcurl
 
 !IF "$(WITH_SSL)"=="dll"
-USE_SSL      = true
-SSL=dll
+USE_SSL = true
+SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-USE_SSL      = true
-SSL=static
+USE_SSL = true
+SSL     = static
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
-USE_ZLIB     = true
-zlib=dll
+USE_ZLIB = true
+ZLIB     = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
-USE_ZLIB    = true
-ZLIB=static
+USE_ZLIB = true
+ZLIB     = static
 !ENDIF
 
 !IF "$(WITH_SSH2)"=="dll"
-USE_SSH2    = true
-SSH2=dll
+USE_SSH2 = true
+SSH2     = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
-USE_SSH2      = true
-SSH2=static
+USE_SSH2 = true
+SSH2     = static
 !ENDIF
 
 !IF "$(DEBUG)"=="yes"
@@ -133,6 +139,8 @@ $(MODE):
 	@SET MACRO_NAME=CURL_OBJS
 	@SET OUTFILE=CURL_OBJS.inc
 	@gen_resp_file.bat $(CURL_OBJS)
+	@SET USE_IPV6=$(USE_IPV6)
+	@SET USE_IDN=$(USE_IDN)
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 
 copy_from_lib:

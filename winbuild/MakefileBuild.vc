@@ -94,68 +94,80 @@ DEVEL_BIN      = $(WITH_DEVEL)/bin
 CFLAGS         = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
 LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 
+
 !IF "$(WITH_SSL)"=="dll"
 SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
-SSL=dll
+SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
 USE_SSL      = true
-SSL=static
+SSL          = static
 !ENDIF
 
 !IFDEF USE_SSL
 SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 !ENDIF
 
+
 !IF "$(WITH_ZLIB)"=="dll"
 ZLIB_LIBS   = zlib.lib
 ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
-USE_ZLIB     = true
-zlib=dll
+USE_ZLIB    = true
+ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 ZLIB_LIBS   = zlib_a.lib
 ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
-ZLIB=static
+ZLIB        = static
 !ENDIF
 
 !IFDEF USE_ZLIB
 ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 !ENDIF
 
+
 !IF "$(WITH_SSH2)"=="dll"
 SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
-SSH2=dll
+SSH2        = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
 SSH2_LIBS   = libssh2_a_debug.lib
 USE_SSH2    = true
-SSH2=static
+SSH2        = static
 !ENDIF
 
 !IFDEF USE_SSH2
-SSH2_CFLAGS   = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
-SSH2_CFLAGS   = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
+SSH2_CFLAGS = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
+SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
+
 !IFNDEF USE_SSPI
-USE_SSPI=yes
+USE_SSPI = yes
 !ENDIF
 
 !IF "$(USE_SSPI)"=="yes"
 CFLAGS_SSPI = /DUSE_WINDOWS_SSPI
-USE_SSPI=true
+USE_SSPI    = true
 !ENDIF
+
 
 !IFNDEF USE_IPV6
-USE_IPV6=true
+USE_IPV6  = true
+!ELSEIF "$(USE_IPV6)"=="yes"
+USE_IPV6  = true
 !ENDIF
 
+!IF "$(USE_IPV6)"=="true"
+CFLAGS    = $(CFLAGS) /DUSE_IPV6
+!ENDIF
+
+
 !IFNDEF USE_IDN
-USE_IDN   =true
+USE_IDN   = true
 !ELSEIF "$(USE_IDN)"=="yes"
-USE_IDN   =true
+USE_IDN   = true
 !ENDIF
 
 !IF "$(USE_IDN)"=="true"
@@ -163,10 +175,7 @@ CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
 LFLAGS    = $(LFLAGS) Normaliz.lib
 !ENDIF
 
-!IF "$(USE_IPV6)"=="true"
-CFLAGS = $(CFLAGS) /DUSE_IPV6
-USE_IPV6=true
-!ENDIF
+
 
 !IF "$(GEN_PDB)"=="yes"
 GEN_PDB=true
@@ -341,8 +350,11 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using SSPI: $(USE_SSPI)
-	@echo Using SSPI: $(LFLAGS)
-	@echo Gen PDB:    $(GEN_PDB)
+	@echo Using IPv6: $(USE_IPV6)
+	@echo Using IDN:  $(USE_IDN)
+	@echo CFLAGS:     $(CFLAGS)
+	@echo LFLAGS:     $(LFLAGS)
+	@echo GenPDB:     $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
 	$(LNK) $(LFLAGS) $(LIB_OBJS)
 	@echo Copying libs...
