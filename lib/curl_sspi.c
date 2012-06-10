@@ -124,6 +124,7 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
   LPTSTR path = NULL;
   LPVOID data = NULL;
   DWORD size, handle;
+  UINT length;
 
   if(!s_hSecDll)
     return CURLE_FAILED_INIT;
@@ -138,7 +139,7 @@ CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special)
       data = malloc(size);
       if(data) {
         if(GetFileVersionInfo(path, handle, size, data)) {
-          if(!VerQueryValue(data, "\\", &version_info, &handle))
+          if(!VerQueryValue(data, "\\", (LPVOID*) &version_info, &length))
             result = CURLE_OUT_OF_MEMORY;
         }
         else
