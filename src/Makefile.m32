@@ -126,7 +126,6 @@ endif
 ifeq ($(findstring -schannel,$(CFG)),-schannel)
 SCHANNEL = 1
 SSPI = 1
-SSL = 1
 endif
 
 INCLUDES = -I. -I.. -I../include -I../lib
@@ -156,9 +155,6 @@ ifdef SSH2
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
-ifdef SCHANNEL
-  CFLAGS += -DUSE_SSL -DUSE_SCHANNEL
-else
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
@@ -176,7 +172,6 @@ else
   endif
   CFLAGS += -DUSE_SSLEAY
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
-endif
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
@@ -200,6 +195,9 @@ endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
   curl_LDADD += -lversion
+ifdef SCHANNEL
+  CFLAGS += -DUSE_SCHANNEL
+endif
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO
