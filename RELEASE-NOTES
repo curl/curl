@@ -17,6 +17,8 @@ This release includes the following changes:
  o pop3: Added support for sasl cram-md5 authentication
  o pop3: Added support for sasl digest-md5 authentication
  o pop3: Added support for apop authentication
+ o sspi: Added support for Schannel SSL/TLS encryption
+ o sspi: Changed curl version information output
 
 This release includes the following bugfixes:
 
@@ -26,6 +28,7 @@ This release includes the following bugfixes:
  o configure: Fix libcurl.pc and curl-config generation for static MingW*
    cross builds
  o ssl: fix duplicated SSL handshake with multi interface and proxy [1]
+ o winbuild: Fix Makefile.vc ignoring USE_IPV6 and USE_IDN flags
 
 This release includes the following known bugs:
 
