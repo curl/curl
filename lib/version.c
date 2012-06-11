@@ -262,6 +262,9 @@ static curl_version_info_data version_info = {
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   | CURL_VERSION_NTLM_WB
 #endif
+#ifdef USE_WINDOWS_SSPI
+  | CURL_VERSION_SSPI
+#endif
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ
 #endif
