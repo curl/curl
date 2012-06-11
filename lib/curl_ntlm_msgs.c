@@ -438,7 +438,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
       return CURLE_OUT_OF_MEMORY;
 
-    ntlm->identity.PasswordLength = (unsigned long)strlen(passwdp);
+    ntlm->identity.PasswordLength = (unsigned long)passwdlen;
     if((ntlm->identity.Domain = malloc(domlen + 1)) == NULL)
       return CURLE_OUT_OF_MEMORY;
 
