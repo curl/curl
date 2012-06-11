@@ -153,7 +153,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                          &cred_handle,
                                          &expiry);
 
-  if(check_sspi_err(data, sspi_major_status,sspi_minor_status,
+  if(check_sspi_err(conn, sspi_major_status,sspi_minor_status,
                     "AcquireCredentialsHandleA") ) {
     failf(data, "Failed to acquire credentials.");
     free(service_name);
@@ -189,7 +189,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       sspi_recv_token.cbBuffer = 0;
     }
 
-    if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
+    if(check_sspi_err(conn,sspi_major_status,sspi_minor_status,
                       "InitializeSecurityContextA") ) {
       free(service_name);
       service_name=NULL;
@@ -320,7 +320,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                           SECPKG_CRED_ATTR_NAMES,
                                           &names);
   s_pSecFn->FreeCredentialsHandle(&cred_handle);
-  if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
+  if(check_sspi_err(conn,sspi_major_status,sspi_minor_status,
                     "QueryCredentialAttributes") ) {
     s_pSecFn->DeleteSecurityContext(&sspi_context);
     s_pSecFn->FreeContextBuffer(names.sUserName);
@@ -386,7 +386,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_major_status = s_pSecFn->QueryContextAttributesA( &sspi_context,
                                                            SECPKG_ATTR_SIZES,
                                                            &sspi_sizes);
-    if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
+    if(check_sspi_err(conn,sspi_major_status,sspi_minor_status,
                       "QueryContextAttributesA")) {
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       failf(data, "Failed to query security context attributes.");
@@ -424,7 +424,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                   KERB_WRAP_NO_ENCRYPT,
                                                   &wrap_desc,
                                                   0);
-    if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
+    if(check_sspi_err(conn,sspi_major_status,sspi_minor_status,
                       "EncryptMessage") ) {
       s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
       s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
@@ -552,7 +552,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                   0,
                                                   &qop);
 
-    if(check_sspi_err(data,sspi_major_status,sspi_minor_status,
+    if(check_sspi_err(conn,sspi_major_status,sspi_minor_status,
                       "DecryptMessage")) {
       s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
       s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
