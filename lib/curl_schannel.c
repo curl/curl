@@ -126,7 +126,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
        data->set.ssl.verifyhost < 2) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: using IP address, disable SNI servername check\n");
+      infof(data, "schannel: using IP address, disable SNI servername "
+            "check\n");
     }
 
     switch(data->set.ssl.version) {
@@ -220,7 +221,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   write = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if(write != outbuf.cbBuffer) {
-    failf(data, "schannel: failed to send initial handshake data: %d\n", write);
+    failf(data, "schannel: failed to send initial handshake data: %d\n",
+          write);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -275,7 +277,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       return CURLE_OK;
     }
     else if(read == 0) {
-      failf(data, "schannel: failed to receive handshake, connection failed\n");
+      failf(data, "schannel: failed to receive handshake, connection "
+            "failed\n");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -586,7 +589,8 @@ schannel_send(struct connectdata *conn, int sockindex,
   if(connssl->stream_sizes.cbMaximumMessage == 0) {
     sspi_status = s_pSecFn->QueryContextAttributes(
                               &connssl->ctxt->ctxt_handle,
-                              SECPKG_ATTR_STREAM_SIZES, &connssl->stream_sizes);
+                              SECPKG_ATTR_STREAM_SIZES,
+                              &connssl->stream_sizes);
     if(sspi_status != SEC_E_OK) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -758,12 +762,14 @@ schannel_recv(struct connectdata *conn, int sockindex,
       return -1;
     }
 
-    /* check if everything went fine (server may want to renegotiate context) */
+    /* check if everything went fine (server may want to renegotiate
+       context) */
     if(sspi_status == SEC_E_OK || sspi_status == SEC_I_RENEGOTIATE ||
                                   sspi_status == SEC_I_CONTEXT_EXPIRED) {
       /* check for successfully decrypted data */
       if(inbuf[1].BufferType == SECBUFFER_DATA) {
-        infof(data, "schannel: decrypted data length: %d\n", inbuf[1].cbBuffer);
+        infof(data, "schannel: decrypted data length: %d\n",
+              inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
         size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_STEP_SIZE ?
@@ -796,13 +802,15 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
       /* check for remaining encrypted data */
       if(inbuf[3].BufferType == SECBUFFER_EXTRA && inbuf[3].cbBuffer > 0) {
-        infof(data, "schannel: encrypted data length: %d\n", inbuf[3].cbBuffer);
+        infof(data, "schannel: encrypted data length: %d\n",
+              inbuf[3].cbBuffer);
 
         /* check if the remaining data is less than the total amount
          * and therefore begins after the already processed data
         */
         if(connssl->encdata_offset > inbuf[3].cbBuffer) {
-          /* move remaining encrypted data forward to the beginning of buffer */
+          /* move remaining encrypted data forward to the beginning of
+             buffer */
           memmove(connssl->encdata_buffer,
                   (connssl->encdata_buffer + connssl->encdata_offset) -
                     inbuf[3].cbBuffer, inbuf[3].cbBuffer);
