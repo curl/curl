@@ -97,19 +97,16 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 
 !IF "$(WITH_SSL)"=="dll"
 SSL_LIBS     = libeay32.lib ssleay32.lib
-SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
-SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 USE_SSL      = true
 SSL          = static
-!ELSEIF "$(WITH_SSL)"=="schannel"
-USE_SSL      = true
-USE_SSPI     = yes
-SSL_CFLAGS   = /DUSE_SSL /DUSE_SCHANNEL
-SSL          = schannel
+!ENDIF
+
+!IFDEF USE_SSL
+SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 !ENDIF
 
 
@@ -154,6 +151,9 @@ USE_SSPI = yes
 CFLAGS_SSPI = /DUSE_WINDOWS_SSPI
 LFLAGS_SSPI = version.lib
 USE_SSPI    = true
+!IFNDEF USE_SSL
+CFLAGS_SSPI = $(CFLAGS_SSPI) /DUSE_SCHANNEL
+!ENDIF
 !ENDIF
 
 
