@@ -2144,7 +2144,7 @@ typedef struct {
 #define CURL_VERSION_SPNEGO    (1<<8)  /* SPNEGO auth */
 #define CURL_VERSION_LARGEFILE (1<<9)  /* supports files bigger than 2GB */
 #define CURL_VERSION_IDN       (1<<10) /* International Domain Names support */
-#define CURL_VERSION_SSPI      (1<<11) /* SSPI is supported */
+#define CURL_VERSION_OBSOLETE11 (1<<11) /* NOT USED - removed in 7.27.0 */
 #define CURL_VERSION_CONV      (1<<12) /* character conversions supported */
 #define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
 #define CURL_VERSION_TLSAUTH_SRP (1<<14) /* TLS-SRP auth is supported */
