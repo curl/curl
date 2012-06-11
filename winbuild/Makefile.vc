@@ -73,6 +73,10 @@ SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL = true
 SSL     = static
+!ELSEIF "$(WITH_SSL)"=="schannel"
+USE_SSL      = true
+USE_SSPI     = true
+SSL          = schannel
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
