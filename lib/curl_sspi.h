@@ -60,12 +60,22 @@
 #ifndef SEC_E_OUT_OF_SEQUENCE
 # define SEC_E_OUT_OF_SEQUENCE ((HRESULT)0x80090310L)
 #endif
+#ifndef SEC_E_DELEGATION_POLICY
+# define SEC_E_DELEGATION_POLICY ((HRESULT)0x8009035EL)
+#endif
+#ifndef SEC_E_INVALID_PARAMETER
+# define SEC_E_INVALID_PARAMETER ((HRESULT)0x8009035DL)
+#endif
+#ifndef SEC_E_POLICY_NLTM_ONLY
+# define SEC_E_POLICY_NLTM_ONLY ((HRESULT)0x8009035FL)
+#endif
+#ifndef SEC_I_SIGNATURE_NEEDED
+# define SEC_I_SIGNATURE_NEEDED ((HRESULT)0x0009035CL)
+#endif
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special);
-char* Curl_sspi_status(SECURITY_STATUS status);
-char* Curl_sspi_status_msg(SECURITY_STATUS status);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
 

@@ -1,5 +1,5 @@
-#ifndef __CURL_STRERROR_H
-#define __CURL_STRERROR_H
+#ifndef HEADER_CURL_STRERROR_H
+#define HEADER_CURL_STRERROR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,4 +30,8 @@ const char *Curl_strerror (struct connectdata *conn, int err);
 const char *Curl_idn_strerror (struct connectdata *conn, int err);
 #endif
 
+#ifdef USE_WINDOWS_SSPI
+const char *Curl_sspi_strerror (struct connectdata *conn, int err);
 #endif
+
+#endif /* HEADER_CURL_STRERROR_H */

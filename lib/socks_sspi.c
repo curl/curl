@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +28,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "connect.h"
+#include "strerror.h"
 #include "timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
@@ -48,21 +50,19 @@
 /*
  * Helper sspi error functions.
  */
-static int check_sspi_err(struct SessionHandle *data,
+static int check_sspi_err(struct connectdata *conn,
                           SECURITY_STATUS major_status,
                           SECURITY_STATUS minor_status,
                           const char* function)
 {
-  char *sspi_msg = NULL;
   (void)minor_status;
 
   if(major_status != SEC_E_OK &&
      major_status != SEC_I_COMPLETE_AND_CONTINUE &&
      major_status != SEC_I_COMPLETE_NEEDED &&
      major_status != SEC_I_CONTINUE_NEEDED) {
-    sspi_msg = Curl_sspi_status_msg(major_status);
-    failf(data, "SSPI error: %s failed: %s\n", function, sspi_msg);
-    free(sspi_msg);
+    failf(conn->data, "SSPI error: %s failed: %s\n", function,
+          Curl_sspi_strerror(conn, major_status));
     return 1;
   }
   return 0;
