@@ -22,7 +22,7 @@
 
 # All files in the Makefile.vc* series are generated automatically from the
 # one made for MSVC version 6. Alas, if you want to do changes to any of the
-# fiels and send back to the project, edit the version six, make your diff and
+# files and send back to the project, edit the version six, make your diff and
 # mail curl-users.
 
 #############################################################
@@ -90,6 +90,7 @@ WINDOWS_SDK_PATH = "$(PROGRAMFILES)\Microsoft SDK"
 
 ########################################################
 ## Nothing more to do below this line!
+
 ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
 ZLIB_LFLAGS   = "/LIBPATH:$(ZLIB_PATH)"
 ZLIB_LIBS     = zlib.lib
@@ -99,6 +100,8 @@ SSL_CFLAGS     = /DUSE_SSLEAY
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
+
+WINLIBS        = ws2_32.lib wldap32.lib
 
 # Runtime library configuration
 RTLIB   = /MD
@@ -226,6 +229,9 @@ DEBUG_OBJS= \
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 
 #################################################
 # release dynamic library
@@ -243,6 +249,9 @@ CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -253,6 +262,9 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -273,6 +285,9 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -283,6 +298,9 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -293,6 +311,9 @@ CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_IMP_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -313,6 +334,9 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
+!IFDEF WINDOWS_SSPI
+WINLIBS = $(WINLIBS) version.lib
+!ENDIF
 !ENDIF
 
 #################################################
@@ -326,8 +350,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 
-LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib
+LINKLIBS       = $(LINKLIBS) $(WINLIBS)
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(WINLIBS)
 
 all : release
 
