@@ -786,10 +786,10 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
 const char *Curl_sspi_strerror (struct connectdata *conn, int err)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  char txtbuf[sizeof("Unknown error (0xffffffff)")];
+  char txtbuf[80];
   char msgbuf[sizeof(conn->syserr_buf)];
+  char *str, *msg = NULL;
   int old_errno;
-  char *msg = NULL;
 #endif
   const char *txt;
   char *outbuf;
@@ -1047,18 +1047,21 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
       txt = "SEC_I_SIGNATURE_NEEDED";
       break;
     default:
-      snprintf(txtbuf, sizeof(txtbuf), "Unknown error (0x%04X%04X)",
-               (err >> 16) & 0xffff, err & 0xffff);
-      txtbuf[sizeof(txtbuf)-1] = '\0';
-      txt = txtbuf;
+      txt = "Unknown error";
   }
 
-  if(err != SEC_E_OK) {
-    char *p;
+  if(err == SEC_E_OK)
+    strncpy(outbuf, txt, outmax);
+  else {
+    str = txtbuf;
+    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%04X%04X)",
+             txt, (err >> 16) & 0xffff, err & 0xffff);
+    txtbuf[sizeof(txtbuf)-1] = '\0';
     if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS,
                      NULL, err, LANG_NEUTRAL,
                      msgbuf, sizeof(msgbuf)-1, NULL)) {
+      char *p;
       msgbuf[sizeof(msgbuf)-1] = '\0';
       /* strip trailing '\r\n' or '\n' */
       if((p = strrchr(msgbuf,'\n')) != NULL && (p - msgbuf) >= 2)
@@ -1067,12 +1070,11 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
          *p = '\0';
       msg = msgbuf;
     }
+    if(msg)
+      snprintf(outbuf, outmax, "%s - %s", str, msg);
+    else
+      strncpy(outbuf, str, outmax);
   }
-
-  if(msg)
-    snprintf(outbuf, outmax, "%s - %s", txt, msg);
-  else
-    strncpy(outbuf, txt, outmax);
 
   if(old_errno != ERRNO)
     SET_ERRNO(old_errno);
