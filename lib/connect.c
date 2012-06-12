@@ -253,16 +253,12 @@ static CURLcode bindlocal(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
 
   struct Curl_sockaddr_storage sa;
+  struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
   curl_socklen_t sizeof_sa = 0; /* size of the data sock points to */
-
-  union sockaddr_u {
-    struct sockaddr sa;
-    struct sockaddr_in sa4;
+  struct sockaddr_in *si4 = (struct sockaddr_in *)&sa;
 #ifdef ENABLE_IPV6
-    struct sockaddr_in6 sa6;
+  struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
-  };
-  union sockaddr_u *sock = (union sockaddr_u *)&sa; /* bind to this address */
 
   struct Curl_dns_entry *h=NULL;
   unsigned short port = data->set.localport; /* use this port number, 0 for
@@ -377,18 +373,18 @@ static CURLcode bindlocal(struct connectdata *conn,
 #ifdef ENABLE_IPV6
       /* ipv6 address */
       if((af == AF_INET6) &&
-         (Curl_inet_pton(AF_INET6, myhost, &sock->sa6.sin6_addr) > 0)) {
-        sock->sa6.sin6_family = AF_INET6;
-        sock->sa6.sin6_port = htons(port);
+         (Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0)) {
+        si6->sin6_family = AF_INET6;
+        si6->sin6_port = htons(port);
         sizeof_sa = sizeof(struct sockaddr_in6);
       }
       else
 #endif
       /* ipv4 address */
       if((af == AF_INET) &&
-         (Curl_inet_pton(AF_INET, myhost, &sock->sa4.sin_addr) > 0)) {
-        sock->sa4.sin_family = AF_INET;
-        sock->sa4.sin_port = htons(port);
+         (Curl_inet_pton(AF_INET, myhost, &si4->sin_addr) > 0)) {
+        si4->sin_family = AF_INET;
+        si4->sin_port = htons(port);
         sizeof_sa = sizeof(struct sockaddr_in);
       }
     }
@@ -402,21 +398,21 @@ static CURLcode bindlocal(struct connectdata *conn,
     /* no device was given, prepare sa to match af's needs */
 #ifdef ENABLE_IPV6
     if(af == AF_INET6) {
-      sock->sa6.sin6_family = AF_INET6;
-      sock->sa6.sin6_port = htons(port);
+      si6->sin6_family = AF_INET6;
+      si6->sin6_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in6);
     }
     else
 #endif
     if(af == AF_INET) {
-      sock->sa4.sin_family = AF_INET;
-      sock->sa4.sin_port = htons(port);
+      si4->sin_family = AF_INET;
+      si4->sin_port = htons(port);
       sizeof_sa = sizeof(struct sockaddr_in);
     }
   }
 
   for(;;) {
-    if(bind(sockfd, &sock->sa, sizeof_sa) >= 0) {
+    if(bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
@@ -436,11 +432,11 @@ static CURLcode bindlocal(struct connectdata *conn,
       infof(data, "Bind to local port %hu failed, trying next\n", port);
       port++; /* try next port */
       /* We re-use/clobber the port variable here below */
-      if(sock->sa.sa_family == AF_INET)
-        sock->sa4.sin_port = ntohs(port);
+      if(sock->sa_family == AF_INET)
+        si4->sin_port = ntohs(port);
 #ifdef ENABLE_IPV6
       else
-        sock->sa6.sin6_port = ntohs(port);
+        si6->sin6_port = ntohs(port);
 #endif
     }
     else

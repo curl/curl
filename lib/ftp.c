@@ -955,18 +955,14 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   char myhost[256] = "";
 
   struct Curl_sockaddr_storage ss;
-  union sockaddr_u {
-    struct sockaddr sa;
-    struct sockaddr_in sa4;
-#ifdef ENABLE_IPV6
-    struct sockaddr_in6 sa6;
-#endif
-  };
-  union sockaddr_u *sock = (union sockaddr_u *)&ss;
-
   Curl_addrinfo *res, *ai;
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
+  struct sockaddr *sa=(struct sockaddr *)&ss;
+  struct sockaddr_in * const sa4 = (void *)sa;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 * const sa6 = (void *)sa;
+#endif
   char tmp[1024];
   static const char mode[][5] = { "EPRT", "PORT" };
   int rc;
@@ -1021,7 +1017,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     else if((ip_end = strchr(string_ftpport, ':')) != NULL) {
         /* either ipv6 or (ipv4|domain|interface):port(-range) */
 #ifdef ENABLE_IPV6
-      if(Curl_inet_pton(AF_INET6, string_ftpport, &sock->sa6) == 1) {
+      if(Curl_inet_pton(AF_INET6, string_ftpport, sa6) == 1) {
         /* ipv6 */
         port_min = port_max = 0;
         strcpy(addr, string_ftpport);
@@ -1077,22 +1073,20 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        the IP from the control connection */
 
     sslen = sizeof(ss);
-    if(getsockname(conn->sock[FIRSTSOCKET], &sock->sa, &sslen)) {
+    if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
       Curl_safefree(addr);
       return CURLE_FTP_PORT_FAILED;
     }
-    switch(sock->sa.sa_family) {
+    switch(sa->sa_family) {
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      Curl_inet_ntop(sock->sa.sa_family, &sock->sa6.sin6_addr, hbuf,
-                     sizeof(hbuf));
+      Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      Curl_inet_ntop(sock->sa.sa_family, &sock->sa4.sin_addr, hbuf,
-                     sizeof(hbuf));
+      Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
     host = hbuf; /* use this host name */
@@ -1140,18 +1134,18 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   /* step 3, bind to a suitable local address */
 
-  memcpy(&sock->sa, ai->ai_addr, ai->ai_addrlen);
+  memcpy(sa, ai->ai_addr, ai->ai_addrlen);
   sslen = ai->ai_addrlen;
 
   for(port = port_min; port <= port_max;) {
-    if(sock->sa.sa_family == AF_INET)
-      sock->sa4.sin_port = htons(port);
+    if(sa->sa_family == AF_INET)
+      sa4->sin_port = htons(port);
 #ifdef ENABLE_IPV6
     else
-      sock->sa6.sin6_port = htons(port);
+      sa6->sin6_port = htons(port);
 #endif
     /* Try binding the given address. */
-    if(bind(portsock, &sock->sa, sslen) ) {
+    if(bind(portsock, sa, sslen) ) {
       /* It failed. */
       error = SOCKERRNO;
       if(possibly_non_local && (error == EADDRNOTAVAIL)) {
@@ -1163,7 +1157,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
               Curl_strerror(conn, error) );
 
         sslen = sizeof(ss);
-        if(getsockname(conn->sock[FIRSTSOCKET], &sock->sa, &sslen)) {
+        if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
           failf(data, "getsockname() failed: %s",
                 Curl_strerror(conn, SOCKERRNO) );
           Curl_closesocket(conn, portsock);
@@ -1196,7 +1190,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
   sslen = sizeof(ss);
-  if(getsockname(portsock, (struct sockaddr *)&sock->sa, &sslen)) {
+  if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
     Curl_closesocket(conn, portsock);
@@ -1230,17 +1224,17 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       /* if disabled, goto next */
       continue;
 
-    if((PORT == fcmd) && sock->sa.sa_family != AF_INET)
+    if((PORT == fcmd) && sa->sa_family != AF_INET)
       /* PORT is ipv4 only */
       continue;
 
-    switch (sock->sa.sa_family) {
+    switch (sa->sa_family) {
     case AF_INET:
-      port = ntohs(sock->sa4.sin_port);
+      port = ntohs(sa4->sin_port);
       break;
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      port = ntohs(sock->sa6.sin6_port);
+      port = ntohs(sa6->sin6_port);
       break;
 #endif
     default:
@@ -1257,7 +1251,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
        */
 
       result = Curl_pp_sendf(&ftpc->pp, "%s |%d|%s|%hu|", mode[fcmd],
-                             sock->sa.sa_family == AF_INET?1:2,
+                             sa->sa_family == AF_INET?1:2,
                              myhost, port);
       if(result) {
         failf(data, "Failure sending EPRT command: %s",
