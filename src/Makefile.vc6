@@ -101,8 +101,6 @@ SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
 
-WINLIBS        = ws2_32.lib wldap32.lib
-
 # Runtime library configuration
 RTLIB   = /MD
 RTLIBD  = /MDd
@@ -229,9 +227,6 @@ DEBUG_OBJS= \
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 
 #################################################
 # release dynamic library
@@ -249,9 +244,6 @@ CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -262,9 +254,6 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -285,9 +274,6 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -298,9 +284,6 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -311,9 +294,6 @@ CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_IMP_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -334,9 +314,6 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
-!IFDEF WINDOWS_SSPI
-WINLIBS = $(WINLIBS) version.lib
-!ENDIF
 !ENDIF
 
 #################################################
@@ -350,8 +327,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 
-LINKLIBS       = $(LINKLIBS) $(WINLIBS)
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(WINLIBS)
+LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib
 
 all : release
 

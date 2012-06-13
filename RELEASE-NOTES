@@ -18,7 +18,6 @@ This release includes the following changes:
  o pop3: Added support for sasl digest-md5 authentication
  o pop3: Added support for apop authentication
  o sspi: Added support for Schannel SSL/TLS encryption
- o sspi: Changed curl version information output
 
 This release includes the following bugfixes:
 

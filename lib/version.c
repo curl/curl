@@ -67,11 +67,6 @@ char *curl_version(void)
   char *ptr = version;
   size_t len;
   size_t left = sizeof(version);
-#ifdef USE_WINDOWS_SSPI
-#ifndef USE_SCHANNEL
-  int sspi_major = 0, sspi_minor = 0, sspi_build = 0;
-#endif
-#endif
 
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION);
   len = strlen(ptr);
@@ -88,19 +83,6 @@ char *curl_version(void)
     }
   }
 
-#ifdef USE_WINDOWS_SSPI
-#ifndef USE_SCHANNEL
-  if(CURLE_OK == Curl_sspi_version(&sspi_major, &sspi_minor, &sspi_build,
-                                   NULL))
-    len = snprintf(ptr, left, " WinSSPI/%d.%d.%d", sspi_major, sspi_minor,
-                 sspi_build);
-  else
-    len = snprintf(ptr, left, " WinSSPI/unknown");
-
-  left -= len;
-  ptr += len;
-#endif
-#endif
 #ifdef HAVE_LIBZ
   len = snprintf(ptr, left, " zlib/%s", zlibVersion());
   left -= len;

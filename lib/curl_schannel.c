@@ -54,8 +54,11 @@
 
 #include "setup.h"
 
-#ifdef USE_WINDOWS_SSPI
 #ifdef USE_SCHANNEL
+
+#ifndef USE_WINDOWS_SSPI
+#  error "Can't compile SCHANNEL support without SSPI."
+#endif
 
 #include "curl_sspi.h"
 #include "curl_schannel.h"
@@ -974,16 +977,9 @@ void Curl_schannel_cleanup()
 
 size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  int sspi_major = 0, sspi_minor = 0, sspi_build = 0;
-
-  if(!Curl_sspi_version(&sspi_major, &sspi_minor, &sspi_build, NULL))
-    size = snprintf(buffer, size, "WinSSPI/%d.%d.%d", sspi_major, sspi_minor,
-                    sspi_build);
-  else
-    size = snprintf(buffer, size, "WinSSPI/unknown");
+  size = snprintf(buffer, size, "schannel");
 
   return size;
 }
 
 #endif /* USE_SCHANNEL */
-#endif /* USE_WINDOWS_SSPI */

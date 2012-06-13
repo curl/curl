@@ -42,7 +42,6 @@
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
-CURLcode Curl_sspi_version(int *major, int *minor, int *build, int *special);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
 

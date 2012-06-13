@@ -1,5 +1,5 @@
-#ifndef HEADER_SCHANNEL_H
-#define HEADER_SCHANNEL_H
+#ifndef HEADER_CURL_SCHANNEL_H
+#define HEADER_CURL_SCHANNEL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,6 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +24,6 @@
  ***************************************************************************/
 #include "setup.h"
 
-#ifdef USE_WINDOWS_SSPI
 #ifdef USE_SCHANNEL
 
 #include "urldata.h"
@@ -129,5 +129,4 @@ size_t Curl_schannel_version(char *buffer, size_t size);
 #define curlssl_data_pending Curl_schannel_data_pending
 
 #endif /* USE_SCHANNEL */
-#endif /* USE_WINDOWS_SSPI */
-#endif /* HEADER_SCHANNEL_H */
+#endif /* HEADER_CURL_SCHANNEL_H */
