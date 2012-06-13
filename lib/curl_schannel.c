@@ -977,7 +977,7 @@ void Curl_schannel_cleanup()
 
 size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  size = snprintf(buffer, size, "schannel");
+  size = snprintf(buffer, size, "SSL-Windows-native");
 
   return size;
 }
