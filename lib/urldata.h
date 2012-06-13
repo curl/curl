@@ -112,6 +112,8 @@
 #endif
 
 #ifdef USE_CYASSL
+#undef OCSP_REQUEST  /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
+#undef OCSP_RESPONSE /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
 #include <cyassl/openssl/ssl.h>
 #endif
 
