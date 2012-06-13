@@ -145,7 +145,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -1341,6 +1341,36 @@ else
   CPPFLAGS="$save_CPPFLAGS"
 fi
 
+dnl -------------------------------------------------
+dnl check winssl option before other SSL libraries
+dnl -------------------------------------------------
+
+OPT_WINSSL=no
+AC_ARG_WITH(winssl,dnl
+AC_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
+AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
+  OPT_WINSSL=$withval)
+
+AC_MSG_CHECKING([whether to enable Windows native SSL/TLS  (Windows native builds only)])
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_WINSSL" != "xno"  &&
+     test "x$ac_cv_native_windows" = "xyes"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
+    AC_SUBST(USE_SCHANNEL, [1])
+    curl_ssl_msg="enabled (Windows-native)"
+    WINSSL_ENABLED=1
+    # --with-winssl implies --enable-sspi
+    AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
+    AC_SUBST(USE_WINDOWS_SSPI, [1])
+    curl_sspi_msg="enabled"
+  else
+    AC_MSG_RESULT(no)
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+
 dnl **********************************************************************
 dnl Check for the presence of SSL libraries and headers
 dnl **********************************************************************
@@ -1354,7 +1384,7 @@ AC_HELP_STRING([--with-ssl=PATH],[Where to look for OpenSSL, PATH points to the 
 AC_HELP_STRING([--without-ssl], [disable OpenSSL]),
   OPT_SSL=$withval)
 
-if test X"$OPT_SSL" != Xno; then
+if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
   dnl backup the pre-ssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -1741,7 +1771,7 @@ AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to th
 AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
   OPT_GNUTLS=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_GNUTLS" != Xno; then
 
@@ -1837,7 +1867,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl GNUTLS not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ---
 dnl Check which crypto backend GnuTLS uses
@@ -1894,7 +1924,7 @@ AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points t
 AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
   OPT_POLARSSL=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_POLARSSL" != Xno; then
 
@@ -1962,7 +1992,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl PolarSSL not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ----------------------------------------------------
 dnl check for CyaSSL
@@ -1978,7 +2008,7 @@ AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to th
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
   OPT_CYASSL=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_CYASSL" != Xno; then
 
@@ -2047,7 +2077,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl CyaSSL not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
@@ -2061,7 +2091,7 @@ AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the inst
 AC_HELP_STRING([--without-nss], [disable NSS detection]),
   OPT_NSS=$withval)
 
-if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_NSS" != Xno; then
     if test "x$OPT_NSS" = "xyes"; then
@@ -2146,7 +2176,7 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
   fi dnl NSS not disabled
 
-fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
+fi dnl curl_ssl_msg = init_ssl_msg
 
 OPT_AXTLS=off
 
@@ -2203,9 +2233,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss or --with-axtls to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls or --with-winssl to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
@@ -2478,6 +2508,8 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="CYASSL_"
         elif test "x$AXTLS_ENABLED" == "x1"; then
           versioned_symbols_flavour="AXTLS_"
+        elif test "x$WINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="WINSSL_"
         else
           versioned_symbols_flavour=""
         fi
@@ -3050,10 +3082,20 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
        fi
        ;;
   *)
-       AC_MSG_RESULT(no)
+       if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         AC_MSG_RESULT(yes)
+       else
+         AC_MSG_RESULT(no)
+       fi
        ;;
   esac ],
-       AC_MSG_RESULT(no)
+       if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         AC_MSG_RESULT(yes)
+       else
+         AC_MSG_RESULT(no)
+       fi
 )
 
 dnl ************************************************************
@@ -3184,7 +3226,7 @@ AC_SUBST(ENABLE_SHARED)
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
-dnl since it is more cross-compile frient than curl-config
+dnl since it is more cross-compile friendly than curl-config
 dnl
 
 if test "x$USE_SSLEAY" = "x1"; then
