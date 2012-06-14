@@ -220,7 +220,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   /* send initial handshake data which is now stored in output buffer */
   written = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if(written != outbuf.cbBuffer) {
+  if(outbuf.cbBuffer != (size_t)written) {
     failf(data, "schannel: failed to send initial handshake data: %d\n",
           written);
     return CURLE_SSL_CONNECT_ERROR;
@@ -346,7 +346,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
         /* send handshake token to server */
         written = swrite(conn->sock[sockindex],
                          outbuf[i].pvBuffer, outbuf[i].cbBuffer);
-        if(written != outbuf[i].cbBuffer) {
+        if(outbuf[i].cbBuffer != (size_t)written) {
           failf(data, "schannel: failed to send next handshake data: %d\n",
                 written);
           return CURLE_SSL_CONNECT_ERROR;
