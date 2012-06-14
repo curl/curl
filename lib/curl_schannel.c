@@ -952,6 +952,8 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
 
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 {
+  (void)conn;
+  (void)sockindex;
   return CURLE_NOT_BUILT_IN; /* TODO: implement SSL/TLS shutdown */
 }
 
