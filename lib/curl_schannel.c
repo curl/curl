@@ -965,12 +965,12 @@ void Curl_schannel_session_free(void *ptr)
   }
 }
 
-int Curl_schannel_init()
+int Curl_schannel_init(void)
 {
   return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
 }
 
-void Curl_schannel_cleanup()
+void Curl_schannel_cleanup(void)
 {
   Curl_sspi_global_cleanup();
 }

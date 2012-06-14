@@ -108,8 +108,8 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex);
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex);
 void Curl_schannel_session_free(void *ptr);
 
-int Curl_schannel_init();
-void Curl_schannel_cleanup();
+int Curl_schannel_init(void);
+void Curl_schannel_cleanup(void);
 size_t Curl_schannel_version(char *buffer, size_t size);
 
 /* API setup for Schannel */
