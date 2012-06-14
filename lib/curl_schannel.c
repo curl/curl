@@ -86,7 +86,7 @@ static Curl_send schannel_send;
 static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
 {
-  ssize_t write = -1;
+  ssize_t written = -1;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf;
@@ -218,15 +218,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         outbuf.cbBuffer);
 
   /* send initial handshake data which is now stored in output buffer */
-  write = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
+  written = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if(write != outbuf.cbBuffer) {
+  if(written != outbuf.cbBuffer) {
     failf(data, "schannel: failed to send initial handshake data: %d\n",
-          write);
+          written);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "schannel: sent initial handshake data: %d\n", write);
+  infof(data, "schannel: sent initial handshake data: %d\n", written);
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -238,7 +238,7 @@ static CURLcode
 schannel_connect_step2(struct connectdata *conn, int sockindex)
 {
   int i;
-  ssize_t read = -1, write = -1;
+  ssize_t nread = -1, written = -1;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf[2];
@@ -262,20 +262,20 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
 
   /* read encrypted handshake data from socket */
-  read = sread(conn->sock[sockindex],
-               connssl->encdata_buffer + connssl->encdata_offset,
-               connssl->encdata_length - connssl->encdata_offset);
-  if(read > 0) {
+  nread = sread(conn->sock[sockindex],
+                connssl->encdata_buffer + connssl->encdata_offset,
+                connssl->encdata_length - connssl->encdata_offset);
+  if(nread > 0) {
     /* increase encrypted data buffer offset */
-    connssl->encdata_offset += read;
+    connssl->encdata_offset += nread;
   }
   else if(connssl->connecting_state != ssl_connect_2_writing) {
-    if(read < 0) {
+    if(nread < 0) {
       connssl->connecting_state = ssl_connect_2_reading;
       infof(data, "schannel: failed to receive handshake, need more data\n");
       return CURLE_OK;
     }
-    else if(read == 0) {
+    else if(nread == 0) {
       failf(data, "schannel: failed to receive handshake, connection "
             "failed\n");
       return CURLE_SSL_CONNECT_ERROR;
@@ -344,11 +344,11 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
               outbuf[i].cbBuffer);
 
         /* send handshake token to server */
-        write = swrite(conn->sock[sockindex],
-                       outbuf[i].pvBuffer, outbuf[i].cbBuffer);
-        if(write != outbuf[i].cbBuffer) {
+        written = swrite(conn->sock[sockindex],
+                         outbuf[i].pvBuffer, outbuf[i].cbBuffer);
+        if(written != outbuf[i].cbBuffer) {
           failf(data, "schannel: failed to send next handshake data: %d\n",
-                write);
+                written);
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -574,7 +574,7 @@ static ssize_t
 schannel_send(struct connectdata *conn, int sockindex,
               const void *buf, size_t len, CURLcode *err)
 {
-  ssize_t ret = -1;
+  ssize_t written = -1;
   size_t data_len = 0;
   unsigned char *data = NULL;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -641,7 +641,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   if(sspi_status == SEC_E_OK) {
     /* send the encrypted message including header, data and trailer */
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
-    ret = swrite(conn->sock[sockindex], data, len);
+    written = swrite(conn->sock[sockindex], data, len);
     /* TODO: implement write buffering */
   }
   else if(sspi_status == SEC_E_INSUFFICIENT_MEMORY) {
@@ -653,7 +653,7 @@ schannel_send(struct connectdata *conn, int sockindex,
 
   free(data);
 
-  return ret;
+  return written;
 }
 
 static ssize_t
@@ -661,7 +661,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
               char *buf, size_t len, CURLcode *err)
 {
   size_t size = 0;
-  ssize_t read = 0, ret = -1;
+  ssize_t nread = 0, ret = -1;
   CURLcode retcode;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -703,17 +703,17 @@ schannel_recv(struct connectdata *conn, int sockindex,
         connssl->encdata_offset, connssl->encdata_length);
   size = connssl->encdata_length - connssl->encdata_offset;
   if(size > 0) {
-    read = sread(conn->sock[sockindex],
-                 connssl->encdata_buffer + connssl->encdata_offset, size);
-    infof(data, "schannel: encrypted data received %d\n", read);
+    nread = sread(conn->sock[sockindex],
+                  connssl->encdata_buffer + connssl->encdata_offset, size);
+    infof(data, "schannel: encrypted data received %d\n", nread);
 
     /* check for received data */
-    if(read > 0) {
+    if(nread > 0) {
       /* increase encrypted data buffer offset */
-      connssl->encdata_offset += read;
+      connssl->encdata_offset += nread;
     }
     else if(connssl->encdata_offset == 0) {
-      if(read == 0)
+      if(nread == 0)
         ret = 0;
       else
         *err = CURLE_AGAIN;
