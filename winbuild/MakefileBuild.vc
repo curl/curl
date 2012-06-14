@@ -143,11 +143,22 @@ SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
 
-!IFDEF USE_WINSSL
+!IFNDEF USE_WINSSL
+!IF "$(USE_SSL)"=="true"
+USE_WINSSL  = false
+!ELSE
+USE_WINSSL  = true
+!ENDIF
+!ELSEIF "$(USE_WINSSL)"=="yes"
+USE_WINSSL  = true
+!ENDIF
+
+!IF "$(USE_WINSSL)"=="true"
 CFLAGS_SSPI  = /DUSE_SCHANNEL
 USE_SCHANNEL = true
 USE_SSPI     = yes
 !ENDIF
+
 
 !IFNDEF USE_SSPI
 USE_SSPI = yes
@@ -298,11 +309,11 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
 
 !IF "$(USE_SSPI)"=="true"
 CFLAGS = $(CFLAGS) $(CFLAGS_SSPI)
-!IF "$(USE_SCHANNEL)"=="true"
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi-schannel
-!ELSE
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
+
+!IF "$(USE_WINSSL)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
 
 !IF "$(GEN_PDB)"=="true"
@@ -362,6 +373,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSPI: $(USE_SSPI)
 	@echo Using IPv6: $(USE_IPV6)
 	@echo Using IDN:  $(USE_IDN)
+	@echo Using WinSSL: $(USE_WINSSL)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
 	@echo GenPDB:     $(GEN_PDB)
