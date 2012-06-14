@@ -99,7 +99,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   struct in6_addr addr6;
 #endif
 
-  infof(data, "schannel: connecting to %s:%d (step 1/3)\n",
+  infof(data, "schannel: connecting to %s:%hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
   /* check for an existing re-usable credential handle */
@@ -214,19 +214,20 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "schannel: sending initial handshake data: %d ...\n",
-        outbuf.cbBuffer);
+  infof(data, "schannel: sending initial handshake data: "
+        "sending %lu bytes...\n", outbuf.cbBuffer);
 
   /* send initial handshake data which is now stored in output buffer */
   written = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if(outbuf.cbBuffer != (size_t)written) {
-    failf(data, "schannel: failed to send initial handshake data: %d",
-          written);
+    failf(data, "schannel: failed to send initial handshake data: "
+          "sent %zd of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "schannel: sent initial handshake data: %d\n", written);
+  infof(data, "schannel: sent initial handshake data: "
+        "sent %zd bytes\n", written);
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -247,7 +248,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
 
-  infof(data, "schannel: connecting to %s:%d (step 2/3)\n",
+  infof(data, "schannel: connecting to %s:%hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
 
   /* buffer to store previously received and encrypted data */
@@ -281,8 +282,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     }
   }
 
-  infof(data, "schannel: encrypted data buffer %d/%d\n",
-    connssl->encdata_offset, connssl->encdata_length);
+  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
+        connssl->encdata_offset, connssl->encdata_length);
 
   /* setup input buffers */
   inbuf[0].pvBuffer = malloc(connssl->encdata_offset);
@@ -339,15 +340,15 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     for(i = 0; i < 2; i++) {
       /* search for handshake tokens that need to be send */
       if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
-        infof(data, "schannel: sending next handshake data: %d ...\n",
-              outbuf[i].cbBuffer);
+        infof(data, "schannel: sending next handshake data: "
+              "sending %lu bytes...\n", outbuf[i].cbBuffer);
 
         /* send handshake token to server */
         written = swrite(conn->sock[sockindex],
                          outbuf[i].pvBuffer, outbuf[i].cbBuffer);
         if(outbuf[i].cbBuffer != (size_t)written) {
-          failf(data, "schannel: failed to send next handshake data: %d",
-                written);
+          failf(data, "schannel: failed to send next handshake data: "
+                "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -370,7 +371,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
   /* check if there was additional remaining encrypted data */
   if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
-    infof(data, "schannel: encrypted data length: %d\n", inbuf[1].cbBuffer);
+    infof(data, "schannel: encrypted data length: %lu\n", inbuf[1].cbBuffer);
 
     /* check if the remaining data is less than the total amount
      * and therefore begins after the already processed data
@@ -412,7 +413,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  infof(data, "schannel: connecting to %s:%d (step 3/3)\n",
+  infof(data, "schannel: connecting to %s:%hu (step 3/3)\n",
         conn->host.name, conn->remote_port);
 
   /* check if the required context attributes are met */
@@ -669,7 +670,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
 
-  infof(data, "schannel: client wants to read %d\n", len);
+  infof(data, "schannel: client wants to read %zu bytes\n", len);
   *err = CURLE_OK;
 
   /* buffer to store previously received and decrypted data */
@@ -698,13 +699,13 @@ schannel_recv(struct connectdata *conn, int sockindex,
   }
 
   /* read encrypted data from socket */
-  infof(data, "schannel: encrypted data buffer %d/%d\n",
+  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
         connssl->encdata_offset, connssl->encdata_length);
   size = connssl->encdata_length - connssl->encdata_offset;
   if(size > 0) {
     nread = sread(conn->sock[sockindex],
                   connssl->encdata_buffer + connssl->encdata_offset, size);
-    infof(data, "schannel: encrypted data received %d\n", nread);
+    infof(data, "schannel: encrypted data got %zd\n", nread);
 
     /* check for received data */
     if(nread > 0) {
@@ -719,8 +720,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
     }
   }
 
-  infof(data, "schannel: encrypted data buffer %d/%d\n",
-    connssl->encdata_offset, connssl->encdata_length);
+  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
+        connssl->encdata_offset, connssl->encdata_length);
 
   /* check if we still have some data in our buffers */
   while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK) {
@@ -763,7 +764,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
                                   sspi_status == SEC_I_CONTEXT_EXPIRED) {
       /* check for successfully decrypted data */
       if(inbuf[1].BufferType == SECBUFFER_DATA) {
-        infof(data, "schannel: decrypted data length: %d\n",
+        infof(data, "schannel: decrypted data length: %lu\n",
               inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
@@ -790,14 +791,14 @@ schannel_recv(struct connectdata *conn, int sockindex,
           connssl->decdata_offset += size;
         }
 
-        infof(data, "schannel: decrypted data added: %d\n", size);
-        infof(data, "schannel: decrypted data cached: %d/%d\n",
+        infof(data, "schannel: decrypted data added: %zu\n", size);
+        infof(data, "schannel: decrypted data cached: offset %zu length %zu\n",
               connssl->decdata_offset, connssl->decdata_length);
       }
 
       /* check for remaining encrypted data */
       if(inbuf[3].BufferType == SECBUFFER_EXTRA && inbuf[3].cbBuffer > 0) {
-        infof(data, "schannel: encrypted data length: %d\n",
+        infof(data, "schannel: encrypted data length: %lu\n",
               inbuf[3].cbBuffer);
 
         /* check if the remaining data is less than the total amount
@@ -812,7 +813,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
           connssl->encdata_offset = inbuf[3].cbBuffer;
         }
 
-        infof(data, "schannel: encrypted data cached: %d/%d\n",
+        infof(data, "schannel: encrypted data cached: offset %zu length %zu\n",
               connssl->encdata_offset, connssl->encdata_length);
       }
       else{
@@ -922,7 +923,7 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  infof(data, "schannel: Closing connection with %s:%d\n",
+  infof(data, "schannel: Closing connection with %s:%hu\n",
         conn->host.name, conn->remote_port);
 
   /* free SSPI Schannel API security context handle */
