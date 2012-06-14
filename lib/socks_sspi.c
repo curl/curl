@@ -58,7 +58,7 @@ static int check_sspi_err(struct connectdata *conn,
      status != SEC_I_COMPLETE_AND_CONTINUE &&
      status != SEC_I_COMPLETE_NEEDED &&
      status != SEC_I_CONTINUE_NEEDED) {
-    failf(conn->data, "SSPI error: %s failed: %s\n", function,
+    failf(conn->data, "SSPI error: %s failed: %s", function,
           Curl_sspi_strerror(conn, status));
     return 1;
   }

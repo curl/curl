@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -90,7 +91,7 @@ static void polarssl_debug(void *context, int level, char *line)
 
   data = (struct SessionHandle *)context;
 
-  infof(data, "%s", line);
+  infof(data, "%s\n", line);
 }
 #else
 #endif
@@ -289,7 +290,7 @@ polarssl_connect_step2(struct connectdata *conn,
 
   if(ret && data->set.ssl.verifypeer) {
     if(ret & BADCERT_EXPIRED)
-      failf(data, "Cert verify failed: BADCERT_EXPIRED\n");
+      failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
     if(ret & BADCERT_REVOKED) {
       failf(data, "Cert verify failed: BADCERT_REVOKED");

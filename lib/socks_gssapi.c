@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -102,7 +103,7 @@ static int check_gss_err(struct SessionHandle *data,
       }
       gss_release_buffer(&min_stat, &status_string);
     }
-    failf(data, "GSSAPI error: %s failed:\n%s\n", function, buf);
+    failf(data, "GSSAPI error: %s failed:\n%s", function, buf);
     return(1);
   }
 

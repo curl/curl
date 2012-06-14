@@ -132,7 +132,7 @@ cyassl_connect_step1(struct connectdata *conn,
       if(data->set.ssl.verifypeer) {
         /* Fail if we insiste on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s\n",
+              "  CAfile: %s\n  CApath: %s",
               data->set.str[STRING_SSL_CAFILE]?
               data->set.str[STRING_SSL_CAFILE]: "none",
               data->set.str[STRING_SSL_CAPATH]?

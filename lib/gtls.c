@@ -413,7 +413,7 @@ gtls_connect_step1(struct connectdata *conn,
                                               data->set.ssl.CRLfile,
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
-      failf(data, "error reading crl file %s (%s)\n",
+      failf(data, "error reading crl file %s (%s)",
             data->set.ssl.CRLfile, gnutls_strerror(rc));
       return CURLE_SSL_CRL_BADFILE;
     }

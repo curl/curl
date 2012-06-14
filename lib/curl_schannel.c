@@ -163,10 +163,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
     if(sspi_status != SEC_E_OK) {
       if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-        failf(data, "schannel: SNI or certificate check failed: %s\n",
+        failf(data, "schannel: SNI or certificate check failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
       else
-        failf(data, "schannel: AcquireCredentialsHandleA failed: %s\n",
+        failf(data, "schannel: AcquireCredentialsHandleA failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
       free(connssl->cred);
       connssl->cred = NULL;
@@ -204,10 +204,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-      failf(data, "schannel: SNI or certificate check failed: %s\n",
+      failf(data, "schannel: SNI or certificate check failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     else
-      failf(data, "schannel: initial InitializeSecurityContextA failed: %s\n",
+      failf(data, "schannel: initial InitializeSecurityContextA failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     free(connssl->ctxt);
     connssl->ctxt = NULL;
@@ -221,7 +221,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   written = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if(outbuf.cbBuffer != (size_t)written) {
-    failf(data, "schannel: failed to send initial handshake data: %d\n",
+    failf(data, "schannel: failed to send initial handshake data: %d",
           written);
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -276,8 +276,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       return CURLE_OK;
     }
     else if(nread == 0) {
-      failf(data, "schannel: failed to receive handshake, connection "
-            "failed\n");
+      failf(data, "schannel: failed to receive handshake, connection failed");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -347,7 +346,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
         written = swrite(conn->sock[sockindex],
                          outbuf[i].pvBuffer, outbuf[i].cbBuffer);
         if(outbuf[i].cbBuffer != (size_t)written) {
-          failf(data, "schannel: failed to send next handshake data: %d\n",
+          failf(data, "schannel: failed to send next handshake data: %d",
                 written);
           return CURLE_SSL_CONNECT_ERROR;
         }
@@ -361,10 +360,10 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
   else {
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-      failf(data, "schannel: SNI or certificate check failed: %s\n",
+      failf(data, "schannel: SNI or certificate check failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     else
-      failf(data, "schannel: next InitializeSecurityContextA failed: %s\n",
+      failf(data, "schannel: next InitializeSecurityContextA failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -419,17 +418,17 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   /* check if the required context attributes are met */
   if(connssl->ret_flags != connssl->req_flags) {
     if(!(connssl->ret_flags & ISC_RET_SEQUENCE_DETECT))
-      failf(data, "schannel: failed to setup sequence detection\n");
+      failf(data, "schannel: failed to setup sequence detection");
     if(!(connssl->ret_flags & ISC_RET_REPLAY_DETECT))
-      failf(data, "schannel: failed to setup replay detection\n");
+      failf(data, "schannel: failed to setup replay detection");
     if(!(connssl->ret_flags & ISC_RET_CONFIDENTIALITY))
-      failf(data, "schannel: failed to setup confidentiality\n");
+      failf(data, "schannel: failed to setup confidentiality");
     if(!(connssl->ret_flags & ISC_RET_EXTENDED_ERROR))
-      failf(data, "schannel: failed to setup extended errors\n");
+      failf(data, "schannel: failed to setup extended errors");
     if(!(connssl->ret_flags & ISC_RET_ALLOCATED_MEMORY))
-      failf(data, "schannel: failed to setup memory allocation\n");
+      failf(data, "schannel: failed to setup memory allocation");
     if(!(connssl->ret_flags & ISC_RET_STREAM))
-      failf(data, "schannel: failed to setup stream orientation\n");
+      failf(data, "schannel: failed to setup stream orientation");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -446,7 +445,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     retcode = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
                                     sizeof(struct curl_schannel_cred));
     if(retcode) {
-      failf(data, "schannel: failed to store credential handle\n");
+      failf(data, "schannel: failed to store credential handle");
       return retcode;
     }
     else {

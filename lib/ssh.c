@@ -2540,7 +2540,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
 
     left = Curl_timeleft(data, NULL, duringconnect);
     if(left < 0) {
-      failf(data, "Operation timed out\n");
+      failf(data, "Operation timed out");
       return CURLE_OPERATION_TIMEDOUT;
     }
 

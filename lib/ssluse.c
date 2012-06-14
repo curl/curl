@@ -1653,7 +1653,7 @@ ossl_connect_step1(struct connectdata *conn,
       if(data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s\n",
+              "  CAfile: %s\n  CApath: %s",
               data->set.str[STRING_SSL_CAFILE]?
               data->set.str[STRING_SSL_CAFILE]: "none",
               data->set.str[STRING_SSL_CAPATH]?
@@ -1688,7 +1688,7 @@ ossl_connect_step1(struct connectdata *conn,
     if(!lookup ||
        (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                             X509_FILETYPE_PEM)) ) {
-      failf(data,"error loading CRL file: %s\n",
+      failf(data,"error loading CRL file: %s",
             data->set.str[STRING_SSL_CRLFILE]);
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -2346,7 +2346,7 @@ static CURLcode servercert(struct connectdata *conn,
       fp=fopen(data->set.str[STRING_SSL_ISSUERCERT],"r");
       if(!fp) {
         if(strict)
-          failf(data, "SSL: Unable to open issuer cert (%s)\n",
+          failf(data, "SSL: Unable to open issuer cert (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         connssl->server_cert = NULL;
@@ -2355,7 +2355,7 @@ static CURLcode servercert(struct connectdata *conn,
       issuer = PEM_read_X509(fp,NULL,ZERO_NULL,NULL);
       if(!issuer) {
         if(strict)
-          failf(data, "SSL: Unable to read issuer cert (%s)\n",
+          failf(data, "SSL: Unable to read issuer cert (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         X509_free(issuer);
@@ -2365,7 +2365,7 @@ static CURLcode servercert(struct connectdata *conn,
       fclose(fp);
       if(X509_check_issued(issuer,connssl->server_cert) != X509_V_OK) {
         if(strict)
-          failf(data, "SSL: Certificate issuer check failed (%s)\n",
+          failf(data, "SSL: Certificate issuer check failed (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         X509_free(issuer);
