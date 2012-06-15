@@ -141,7 +141,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   cred_handle.dwUpper = 0;
 
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                              TEXT("Kerberos"),
+                                              (SECURITY_PSTR) TEXT("Kerberos"),
                                               SECPKG_CRED_OUTBOUND,
                                               NULL,
                                               NULL,

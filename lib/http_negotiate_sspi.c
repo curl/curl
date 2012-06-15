@@ -138,7 +138,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if(!neg_ctx->output_token) {
     PSecPkgInfo SecurityPackage;
-    ret = s_pSecFn->QuerySecurityPackageInfo(TEXT("Negotiate"),
+    ret = s_pSecFn->QuerySecurityPackageInfo((SECURITY_PSTR) TEXT("Negotiate"),
                                              &SecurityPackage);
     if(ret != SEC_E_OK)
       return -1;
@@ -167,7 +167,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
 
     neg_ctx->status =
-      s_pSecFn->AcquireCredentialsHandle(NULL, TEXT("Negotiate"),
+      s_pSecFn->AcquireCredentialsHandle(NULL,
+                                         (SECURITY_PSTR) TEXT("Negotiate"),
                                          SECPKG_CRED_OUTBOUND, NULL, NULL,
                                          NULL, NULL, neg_ctx->credentials,
                                          &lifetime);

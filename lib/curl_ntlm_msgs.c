@@ -460,7 +460,8 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   else
     ntlm->p_identity = NULL;
 
-  status = s_pSecFn->AcquireCredentialsHandle(NULL, TEXT("NTLM"),
+  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+                                              (SECURITY_PSTR) TEXT("NTLM"),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
                                               &ntlm->handle, &tsDummy);
@@ -475,7 +476,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   buf.pvBuffer   = ntlmbuf;
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
-                                               TEXT(""),
+                                               (SECURITY_PSTR) TEXT(""),
                                                ISC_REQ_CONFIDENTIALITY |
                                                ISC_REQ_REPLAY_DETECT |
                                                ISC_REQ_CONNECTION,
@@ -651,7 +652,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
                                                &ntlm->c_handle,
-                                               TEXT(""),
+                                               (SECURITY_PSTR) TEXT(""),
                                                ISC_REQ_CONFIDENTIALITY |
                                                ISC_REQ_REPLAY_DETECT |
                                                ISC_REQ_CONNECTION,
