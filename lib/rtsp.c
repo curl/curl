@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -747,13 +747,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
 
   if(checkprefix("CSeq:", header)) {
     /* Store the received CSeq. Match is verified in rtsp_done */
-    int nc;
-    char *temp = strdup(header);
-    if(!temp)
-      return CURLE_OUT_OF_MEMORY;
-    Curl_strntoupper(temp, temp, sizeof(temp));
-    nc = sscanf(temp, "CSEQ: %ld", &CSeq);
-    free(temp);
+    int nc = sscanf(&header[4], ": %ld", &CSeq);
     if(nc == 1) {
       data->state.proto.rtsp->CSeq_recv = CSeq; /* mark the request */
       data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
