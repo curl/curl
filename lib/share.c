@@ -51,6 +51,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
   void *ptr;
+  CURLSHcode res = CURLSHE_OK;
 
   if(share->dirty)
     /* don't allow setting options while one or more handles are already
@@ -69,7 +70,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       if(!share->hostcache) {
         share->hostcache = Curl_mk_dnscache();
         if(!share->hostcache)
-          return CURLSHE_NOMEM;
+          res = CURLSHE_NOMEM;
       }
       break;
 
@@ -78,12 +79,12 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       if(!share->cookies) {
         share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
         if(!share->cookies)
-          return CURLSHE_NOMEM;
+          res = CURLSHE_NOMEM;
       }
-      break;
 #else   /* CURL_DISABLE_HTTP */
-      return CURLSHE_NOT_BUILT_IN;
+      res = CURLSHE_NOT_BUILT_IN;
 #endif
+      break;
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
@@ -93,17 +94,18 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
                                    sizeof(struct curl_ssl_session));
         share->sessionage = 0;
         if(!share->sslsession)
-          return CURLSHE_NOMEM;
+          res = CURLSHE_NOMEM;
       }
-      break;
 #else
-      return CURLSHE_NOT_BUILT_IN;
+      res = CURLSHE_NOT_BUILT_IN;
 #endif
+      break;
 
     case CURL_LOCK_DATA_CONNECT:     /* not supported (yet) */
+      break;
 
     default:
-      return CURLSHE_BAD_OPTION;
+      res = CURLSHE_BAD_OPTION;
     }
     break;
 
@@ -125,24 +127,25 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         Curl_cookie_cleanup(share->cookies);
         share->cookies = NULL;
       }
-      break;
 #else   /* CURL_DISABLE_HTTP */
-      return CURLSHE_NOT_BUILT_IN;
+      res = CURLSHE_NOT_BUILT_IN;
 #endif
+      break;
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       Curl_safefree(share->sslsession);
-      break;
 #else
-      return CURLSHE_NOT_BUILT_IN;
+      res = CURLSHE_NOT_BUILT_IN;
 #endif
+      break;
 
     case CURL_LOCK_DATA_CONNECT:
       break;
 
     default:
-      return CURLSHE_BAD_OPTION;
+      res = CURLSHE_BAD_OPTION;
+      break;
     }
     break;
 
@@ -162,10 +165,13 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     break;
 
   default:
-    return CURLSHE_BAD_OPTION;
+    res = CURLSHE_BAD_OPTION;
+    break;
   }
 
-  return CURLSHE_OK;
+  va_end(param);
+
+  return res;
 }
 
 CURLSHcode
