@@ -208,7 +208,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
 #ifdef UNICODE
   sname = Curl_convert_UTF8_to_wchar(neg_ctx->server_name);
-  if(!wserver)
+  if(!sname)
     return CURLE_OUT_OF_MEMORY;
 #else
   sname = neg_ctx->server_name;
