@@ -36,13 +36,24 @@
 #include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */
-typedef PSecurityFunctionTableA (APIENTRY *INITSECURITYINTERFACE_FN_A)(VOID);
+typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
+
+/* See definition of SECURITY_ENTRYPOINT in sspi.h */
+#ifdef UNICODE
+#  ifdef _WIN32_WCE
+#    define SECURITYENTRYPOINT L"InitSecurityInterfaceW"
+#  else
+#    define SECURITYENTRYPOINT "InitSecurityInterfaceW"
+#  endif
+#else
+#  define SECURITYENTRYPOINT "InitSecurityInterfaceA"
+#endif
 
 /* Handle of security.dll or secur32.dll, depending on Windows version */
 HMODULE s_hSecDll = NULL;
 
 /* Pointer to SSPI dispatch table */
-PSecurityFunctionTableA s_pSecFn = NULL;
+PSecurityFunctionTable s_pSecFn = NULL;
 
 /*
  * Curl_sspi_global_init()
@@ -58,7 +69,7 @@ PSecurityFunctionTableA s_pSecFn = NULL;
 CURLcode Curl_sspi_global_init(void)
 {
   OSVERSIONINFO osver;
-  INITSECURITYINTERFACE_FN_A pInitSecurityInterface;
+  INITSECURITYINTERFACE_FN pInitSecurityInterface;
 
   /* If security interface is not yet initialized try to do this */
   if(!s_hSecDll) {
@@ -76,15 +87,15 @@ CURLcode Curl_sspi_global_init(void)
     /* Load SSPI dll into the address space of the calling process */
     if(osver.dwPlatformId == VER_PLATFORM_WIN32_NT
       && osver.dwMajorVersion == 4)
-      s_hSecDll = LoadLibrary("security.dll");
+      s_hSecDll = LoadLibrary(TEXT("security.dll"));
     else
-      s_hSecDll = LoadLibrary("secur32.dll");
+      s_hSecDll = LoadLibrary(TEXT("secur32.dll"));
     if(!s_hSecDll)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
-    pInitSecurityInterface = (INITSECURITYINTERFACE_FN_A)
-      GetProcAddress(s_hSecDll, "InitSecurityInterfaceA");
+    pInitSecurityInterface = (INITSECURITYINTERFACE_FN)
+      GetProcAddress(s_hSecDll, SECURITYENTRYPOINT);
     if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 

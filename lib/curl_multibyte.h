@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_MULTIBYTE_H
+#define HEADER_CURL_MULTIBYTE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -19,43 +21,20 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "setup.h"
 
-#ifdef __VMS
-#include <unixlib.h>
-#endif
+#if defined(USE_WIN32_IDN) || \
+   (defined(USE_WINDOWS_SSPI) && (defined(_WIN32_WCE) || defined(UNICODE)))
 
-#include <curl/curl.h>
-#include "curl_memory.h"
+ /*
+  * MultiByte conversions using Windows kernel32 library.
+  */
 
-#include "memdebug.h"
+#include <tchar.h>
 
-static
-char *GetEnv(const char *variable)
-{
-#ifdef _WIN32_WCE
-  return NULL;
-#else
-#ifdef WIN32
-  char env[MAX_PATH]; /* MAX_PATH is from windef.h */
-  char *temp = getenv(variable);
-  env[0] = '\0';
-  if(temp != NULL)
-    ExpandEnvironmentStringsA(temp, env, sizeof(env));
-  return (env[0] != '\0')?strdup(env):NULL;
-#else
-  char *env = getenv(variable);
-#ifdef __VMS
-  if(env && strcmp("HOME",variable) == 0)
-    env = decc_translate_vms(env);
-#endif
-  return (env && env[0])?strdup(env):NULL;
-#endif
-#endif
-}
+wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8);
+const char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
 
-char *curl_getenv(const char *v)
-{
-  return GetEnv(v);
-}
+#endif /* USE_WIN32_IDN || (USE_WINDOWS_SSPI && (_WIN32_WCE || UNICODE)) */
+
+#endif /* HEADER_CURL_MULTIBYTE_H */

@@ -32,6 +32,7 @@
 #include "timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
+#include "curl_multibyte.h"
 #include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
@@ -139,17 +140,17 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   cred_handle.dwLower = 0;
   cred_handle.dwUpper = 0;
 
-  status = s_pSecFn->AcquireCredentialsHandleA(NULL,
-                                               (char *)"Kerberos",
-                                               SECPKG_CRED_OUTBOUND,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               &cred_handle,
-                                               &expiry);
+  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+                                              TEXT("Kerberos"),
+                                              SECPKG_CRED_OUTBOUND,
+                                              NULL,
+                                              NULL,
+                                              NULL,
+                                              NULL,
+                                              &cred_handle,
+                                              &expiry);
 
-  if(check_sspi_err(conn, status, "AcquireCredentialsHandleA")) {
+  if(check_sspi_err(conn, status, "AcquireCredentialsHandle")) {
     failf(data, "Failed to acquire credentials.");
     Curl_safefree(service_name);
     s_pSecFn->FreeCredentialsHandle(&cred_handle);
@@ -159,22 +160,33 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
   for(;;) {
+    LPTSTR sname;
+#ifdef UNICODE
+    sname = Curl_convert_UTF8_to_wchar(service_name);
+    if(!sname)
+      return CURLE_OUT_OF_MEMORY;
+#else
+    sname = service_name;
+#endif
+    status = s_pSecFn->InitializeSecurityContext(&cred_handle,
+                                                 context_handle,
+                                                 sname,
+                                                 ISC_REQ_MUTUAL_AUTH |
+                                                 ISC_REQ_ALLOCATE_MEMORY |
+                                                 ISC_REQ_CONFIDENTIALITY |
+                                                 ISC_REQ_REPLAY_DETECT,
+                                                 0,
+                                                 SECURITY_NATIVE_DREP,
+                                                 &input_desc,
+                                                 0,
+                                                 &sspi_context,
+                                                 &output_desc,
+                                                 &sspi_ret_flags,
+                                                 &expiry);
 
-    status = s_pSecFn->InitializeSecurityContextA(&cred_handle,
-                                                  context_handle,
-                                                  service_name,
-                                                  ISC_REQ_MUTUAL_AUTH |
-                                                  ISC_REQ_ALLOCATE_MEMORY |
-                                                  ISC_REQ_CONFIDENTIALITY |
-                                                  ISC_REQ_REPLAY_DETECT,
-                                                  0,
-                                                  SECURITY_NATIVE_DREP,
-                                                  &input_desc,
-                                                  0,
-                                                  &sspi_context,
-                                                  &output_desc,
-                                                  &sspi_ret_flags,
-                                                  &expiry);
+#ifdef UNICODE
+    Curl_safefree(sname);
+#endif
 
     if(sspi_recv_token.pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
@@ -182,7 +194,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       sspi_recv_token.cbBuffer = 0;
     }
 
-    if(check_sspi_err(conn, status, "InitializeSecurityContextA")) {
+    if(check_sspi_err(conn, status, "InitializeSecurityContext")) {
       Curl_safefree(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -365,10 +377,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq+2, &us_length, sizeof(short));
   }
   else {
-    status = s_pSecFn->QueryContextAttributesA(&sspi_context,
-                                               SECPKG_ATTR_SIZES,
-                                               &sspi_sizes);
-    if(check_sspi_err(conn, status, "QueryContextAttributesA")) {
+    status = s_pSecFn->QueryContextAttributes(&sspi_context,
+                                              SECPKG_ATTR_SIZES,
+                                              &sspi_sizes);
+    if(check_sspi_err(conn, status, "QueryContextAttributes")) {
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       failf(data, "Failed to query security context attributes.");
       return CURLE_COULDNT_CONNECT;

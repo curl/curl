@@ -1341,7 +1341,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* OK, so we have WinSock 2.0.  We need to dynamically */
   /* load ws2_32.dll and get the function pointers we need. */
-  wsock2 = LoadLibrary("WS2_32.DLL");
+  wsock2 = LoadLibrary(TEXT("WS2_32.DLL"));
   if(wsock2 == NULL) {
     failf(data,"failed to load WS2_32.DLL (%d)", ERRNO);
     return CURLE_FAILED_INIT;

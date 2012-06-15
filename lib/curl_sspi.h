@@ -46,7 +46,7 @@ void Curl_sspi_global_cleanup(void);
 /* Forward-declaration of global variables defined in curl_sspi.c */
 
 extern HMODULE s_hSecDll;
-extern PSecurityFunctionTableA s_pSecFn;
+extern PSecurityFunctionTable s_pSecFn;
 
 /* Provide some definitions missing in old headers */
 

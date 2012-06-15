@@ -89,6 +89,7 @@
 #include "curl_base64.h"
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
+#include "curl_multibyte.h"
 #include "curl_memory.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
@@ -394,7 +395,6 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   SecBufferDesc desc;
   SECURITY_STATUS status;
   ULONG attrs;
-  const char *dest = "";
   const char *user;
   const char *domain = "";
   size_t userlen = 0;
@@ -431,12 +431,22 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
      */
     ntlm->p_identity = &ntlm->identity;
     memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
+#ifdef UNICODE
+    if((ntlm->identity.User = Curl_convert_UTF8_to_wchar(user)) == NULL)
+      return CURLE_OUT_OF_MEMORY;
+#else
     if((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
       return CURLE_OUT_OF_MEMORY;
+#endif
 
     ntlm->identity.UserLength = (unsigned long)userlen;
+#ifdef UNICODE
+    if((ntlm->identity.Password = Curl_convert_UTF8_to_wchar(passwdp)) == NULL)
+      return CURLE_OUT_OF_MEMORY;
+#else
     if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
       return CURLE_OUT_OF_MEMORY;
+#endif
 
     ntlm->identity.PasswordLength = (unsigned long)passwdlen;
     if((ntlm->identity.Domain = malloc(domlen + 1)) == NULL)
@@ -450,10 +460,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   else
     ntlm->p_identity = NULL;
 
-  status = s_pSecFn->AcquireCredentialsHandleA(NULL, (void *)"NTLM",
-                                               SECPKG_CRED_OUTBOUND, NULL,
-                                               ntlm->p_identity, NULL, NULL,
-                                               &ntlm->handle, &tsDummy);
+  status = s_pSecFn->AcquireCredentialsHandle(NULL, TEXT("NTLM"),
+                                              SECPKG_CRED_OUTBOUND, NULL,
+                                              ntlm->p_identity, NULL, NULL,
+                                              &ntlm->handle, &tsDummy);
   if(status != SEC_E_OK)
     return CURLE_OUT_OF_MEMORY;
 
@@ -464,15 +474,15 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   buf.BufferType = SECBUFFER_TOKEN;
   buf.pvBuffer   = ntlmbuf;
 
-  status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle, NULL,
-                                                (void *)dest,
-                                                ISC_REQ_CONFIDENTIALITY |
-                                                ISC_REQ_REPLAY_DETECT |
-                                                ISC_REQ_CONNECTION,
-                                                0, SECURITY_NETWORK_DREP,
-                                                NULL, 0,
-                                                &ntlm->c_handle, &desc,
-                                                &attrs, &tsDummy);
+  status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
+                                               TEXT(""),
+                                               ISC_REQ_CONFIDENTIALITY |
+                                               ISC_REQ_REPLAY_DETECT |
+                                               ISC_REQ_CONNECTION,
+                                               0, SECURITY_NETWORK_DREP,
+                                               NULL, 0,
+                                               &ntlm->c_handle, &desc,
+                                               &attrs, &tsDummy);
 
   if(status == SEC_I_COMPLETE_AND_CONTINUE ||
      status == SEC_I_CONTINUE_NEEDED)
@@ -615,7 +625,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
-  const char *dest = "";
   SecBuffer type_2;
   SecBuffer type_3;
   SecBufferDesc type_2_desc;
@@ -640,17 +649,17 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_3.pvBuffer   = ntlmbuf;
   type_3.cbBuffer   = NTLM_BUFSIZE;
 
-  status = s_pSecFn->InitializeSecurityContextA(&ntlm->handle,
-                                                &ntlm->c_handle,
-                                                (void *)dest,
-                                                ISC_REQ_CONFIDENTIALITY |
-                                                ISC_REQ_REPLAY_DETECT |
-                                                ISC_REQ_CONNECTION,
-                                                0, SECURITY_NETWORK_DREP,
-                                                &type_2_desc,
-                                                0, &ntlm->c_handle,
-                                                &type_3_desc,
-                                                &attrs, &tsDummy);
+  status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
+                                               &ntlm->c_handle,
+                                               TEXT(""),
+                                               ISC_REQ_CONFIDENTIALITY |
+                                               ISC_REQ_REPLAY_DETECT |
+                                               ISC_REQ_CONNECTION,
+                                               0, SECURITY_NETWORK_DREP,
+                                               &type_2_desc,
+                                               0, &ntlm->c_handle,
+                                               &type_3_desc,
+                                               &attrs, &tsDummy);
   if(status != SEC_E_OK)
     return CURLE_RECV_ERROR;
 

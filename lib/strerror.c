@@ -635,7 +635,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     strncpy(buf, strerror(err), max);
   else {
     if(!get_winsock_error(err, buf, max) &&
-        !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+       !FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                        LANG_NEUTRAL, buf, (DWORD)max, NULL))
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
@@ -788,7 +788,8 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   char txtbuf[80];
   char msgbuf[sizeof(conn->syserr_buf)];
-  char *str, *msg = NULL;
+  char *p, *str, *msg = NULL;
+  bool msg_formatted = FALSE;
   int old_errno;
 #endif
   const char *txt;
@@ -1057,11 +1058,29 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
     snprintf(txtbuf, sizeof(txtbuf), "%s (0x%04X%04X)",
              txt, (err >> 16) & 0xffff, err & 0xffff);
     txtbuf[sizeof(txtbuf)-1] = '\0';
-    if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS,
-                     NULL, err, LANG_NEUTRAL,
-                     msgbuf, sizeof(msgbuf)-1, NULL)) {
-      char *p;
+
+#ifdef _WIN32_WCE
+    {
+      wchar_t wbuf[256];
+      wbuf[0] = L'\0';
+
+      if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+                       FORMAT_MESSAGE_IGNORE_INSERTS,
+                       NULL, err, LANG_NEUTRAL,
+                       wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+        wcstombs(msgbuf,wbuf,sizeof(msgbuf)-1);
+        msg_formatted = TRUE;
+      }
+    }
+#else
+    if(FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS,
+                      NULL, err, LANG_NEUTRAL,
+                      msgbuf, sizeof(msgbuf)-1, NULL)) {
+      msg_formatted = TRUE;
+    }
+#endif
+    if(msg_formatted) {
       msgbuf[sizeof(msgbuf)-1] = '\0';
       /* strip trailing '\r\n' or '\n' */
       if((p = strrchr(msgbuf,'\n')) != NULL && (p - msgbuf) >= 2)

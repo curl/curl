@@ -68,9 +68,11 @@
 #include "strerror.h"
 #include "select.h" /* for the socket readyness */
 #include "inet_pton.h" /* for IP addr SNI check */
+#include "curl_multibyte.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
+
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -98,6 +100,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
 #endif
+  LPTSTR host_name;
 
   infof(data, "schannel: connecting to %s:%hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
@@ -166,7 +169,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: SNI or certificate check failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
       else
-        failf(data, "schannel: AcquireCredentialsHandleA failed: %s",
+        failf(data, "schannel: AcquireCredentialsHandle failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
       free(connssl->cred);
       connssl->cred = NULL;
@@ -196,18 +199,31 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
   memset(connssl->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
+#ifdef UNICODE
+  host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+  if(!host_name)
+    return CURLE_OUT_OF_MEMORY;
+#else
+  host_name = conn->host.name;
+#endif
+
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
+
   sspi_status = s_pSecFn->InitializeSecurityContext(
-    &connssl->cred->cred_handle, NULL, conn->host.name,
+    &connssl->cred->cred_handle, NULL, host_name,
     connssl->req_flags, 0, 0, NULL, 0, &connssl->ctxt->ctxt_handle,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
+
+#ifdef UNICODE
+  free(host_name);
+#endif
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
       failf(data, "schannel: SNI or certificate check failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     else
-      failf(data, "schannel: initial InitializeSecurityContextA failed: %s",
+      failf(data, "schannel: initial InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     free(connssl->ctxt);
     connssl->ctxt = NULL;
@@ -247,6 +263,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  LPTSTR host_name;
 
   infof(data, "schannel: connecting to %s:%hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
@@ -319,11 +336,24 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   /* copy received handshake data into input buffer */
   memcpy(inbuf[0].pvBuffer, connssl->encdata_buffer, connssl->encdata_offset);
 
+#ifdef UNICODE
+  host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+  if(!host_name)
+    return CURLE_OUT_OF_MEMORY;
+#else
+  host_name = conn->host.name;
+#endif
+
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
+
   sspi_status = s_pSecFn->InitializeSecurityContext(
     &connssl->cred->cred_handle, &connssl->ctxt->ctxt_handle,
-    conn->host.name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
+    host_name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
+
+#ifdef UNICODE
+  free(host_name);
+#endif
 
   /* free buffer for received handshake data */
   free(inbuf[0].pvBuffer);
@@ -364,7 +394,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       failf(data, "schannel: SNI or certificate check failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     else
-      failf(data, "schannel: next InitializeSecurityContextA failed: %s",
+      failf(data, "schannel: next InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     return CURLE_SSL_CONNECT_ERROR;
   }
