@@ -325,13 +325,12 @@ static unsigned char hex_to_uint(const char *s)
  */
 static int check_hash(const char *filename,
                       const metalink_digest_def *digest_def,
-                      const char *hex_hash, FILE *error)
+                      const unsigned char *digest, FILE *error)
 {
   unsigned char *result;
   digest_context *dctx;
   int check_ok;
   int fd;
-  size_t i;
   fprintf(error, "Checking %s checksum of file %s\n", digest_def->hash_name,
           filename);
   fd = open(filename, O_RDONLY);
@@ -357,13 +356,8 @@ static int check_hash(const char *filename,
     Curl_digest_update(dctx, buf, (unsigned int)len);
   }
   Curl_digest_final(dctx, result);
-  check_ok = 1;
-  for(i = 0; i < digest_def->dparams->digest_resultlen; ++i) {
-    if(hex_to_uint(&hex_hash[i*2]) != result[i]) {
-      check_ok = 0;
-      break;
-    }
-  }
+  check_ok = memcmp(result, digest,
+                    digest_def->dparams->digest_resultlen) == 0;
   free(result);
   close(fd);
   return check_ok;
@@ -373,31 +367,12 @@ int metalink_check_hash(struct Configurable *config,
                         metalinkfile *mlfile,
                         const char *filename)
 {
-  metalink_checksum *chksum;
-  const metalink_digest_alias *digest_alias;
   int rv;
   if(mlfile->checksum == NULL) {
     return -2;
   }
-  for(digest_alias = digest_aliases; digest_alias->alias_name;
-      ++digest_alias) {
-    for(chksum = mlfile->checksum; chksum; chksum = chksum->next) {
-      if(Curl_raw_equal(digest_alias->alias_name, chksum->hash_name) &&
-         strlen(chksum->hash_value) ==
-         digest_alias->digest_def->dparams->digest_resultlen*2) {
-        break;
-      }
-    }
-    if(chksum) {
-      break;
-    }
-  }
-  if(!digest_alias->alias_name) {
-    fprintf(config->errors, "No supported checksum in Metalink file\n");
-    return -2;
-  }
-  rv = check_hash(filename, digest_alias->digest_def,
-                  chksum->hash_value, config->errors);
+  rv = check_hash(filename, mlfile->checksum->digest_def,
+                  mlfile->checksum->digest, config->errors);
   if(rv == 1) {
     fprintf(config->errors, "Checksum matched\n");
   }
@@ -407,14 +382,20 @@ int metalink_check_hash(struct Configurable *config,
   return rv;
 }
 
-static metalink_checksum *new_metalink_checksum(const char *hash_name,
-                                                const char *hash_value)
+static metalink_checksum *new_metalink_checksum_from_hex_digest
+(const metalink_digest_def *digest_def, const char *hex_digest)
 {
   metalink_checksum *chksum;
+  unsigned char *digest;
+  size_t i;
+  size_t len = strlen(hex_digest);
+  digest = malloc(len/2);
+  for(i = 0; i < len; i += 2) {
+    digest[i/2] = hex_to_uint(hex_digest+i);
+  }
   chksum = malloc(sizeof(metalink_checksum));
-  chksum->next = NULL;
-  chksum->hash_name = strdup(hash_name);
-  chksum->hash_value = strdup(hash_value);
+  chksum->digest_def = digest_def;
+  chksum->digest = digest;
   return chksum;
 }
 
@@ -427,6 +408,23 @@ static metalink_resource *new_metalink_resource(const char *url)
   return res;
 }
 
+/* Returns nonzero if hex_digest is properly formatted; that is each
+   letter is in [0-9A-Za-z] and the length of the string equals to the
+   result length of digest * 2. */
+static int check_hex_digest(const char *hex_digest,
+                            const metalink_digest_def *digest_def)
+{
+  size_t i;
+  for(i = 0; hex_digest[i]; ++i) {
+    char c = hex_digest[i];
+    if(!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z'))) {
+      return 0;
+    }
+  }
+  return digest_def->dparams->digest_resultlen * 2 == i;
+}
+
 static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
 {
   metalinkfile *f;
@@ -436,17 +434,23 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
   f->checksum = NULL;
   f->resource = NULL;
   if(fileinfo->checksums) {
-    metalink_checksum_t **p;
-    metalink_checksum root, *tail;
-    root.next = NULL;
-    tail = &root;
-    for(p = fileinfo->checksums; *p; ++p) {
-      metalink_checksum *chksum;
-      chksum = new_metalink_checksum((*p)->type, (*p)->hash);
-      tail->next = chksum;
-      tail = chksum;
+    const metalink_digest_alias *digest_alias;
+    for(digest_alias = digest_aliases; digest_alias->alias_name;
+        ++digest_alias) {
+      metalink_checksum_t **p;
+      for(p = fileinfo->checksums; *p; ++p) {
+        if(Curl_raw_equal(digest_alias->alias_name, (*p)->type) &&
+           check_hex_digest((*p)->hash, digest_alias->digest_def)) {
+          f->checksum =
+            new_metalink_checksum_from_hex_digest(digest_alias->digest_def,
+                                                  (*p)->hash);
+          break;
+        }
+      }
+      if(f->checksum) {
+        break;
+      }
     }
-    f->checksum = root.next;
   }
   if(fileinfo->resources) {
     metalink_resource_t **p;
@@ -561,8 +565,7 @@ static void delete_metalink_checksum(metalink_checksum *chksum)
   if(chksum == NULL) {
     return;
   }
-  Curl_safefree(chksum->hash_value);
-  Curl_safefree(chksum->hash_name);
+  Curl_safefree(chksum->digest);
   Curl_safefree(chksum);
 }
 
@@ -577,18 +580,12 @@ static void delete_metalink_resource(metalink_resource *res)
 
 static void delete_metalinkfile(metalinkfile *mlfile)
 {
-  metalink_checksum *mc;
   metalink_resource *res;
   if(mlfile == NULL) {
     return;
   }
   Curl_safefree(mlfile->filename);
-  for(mc = mlfile->checksum; mc;) {
-    metalink_checksum *next;
-    next = mc->next;
-    delete_metalink_checksum(mc);
-    mc = next;
-  }
+  delete_metalink_checksum(mlfile->checksum);
   for(res = mlfile->resource; res;) {
     metalink_resource *next;
     next = res->next;

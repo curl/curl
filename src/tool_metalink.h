@@ -23,41 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-typedef struct metalink_checksum {
-  struct metalink_checksum *next;
-  char *hash_name;
-  /* Hex-encoded hash value */
-  char *hash_value;
-} metalink_checksum;
-
-typedef struct metalink_resource {
-  struct metalink_resource *next;
-  char *url;
-} metalink_resource;
-
-typedef struct metalinkfile {
-  struct metalinkfile *next;
-  char *filename;
-  metalink_checksum *checksum;
-  metalink_resource *resource;
-} metalinkfile;
-
-#ifdef USE_METALINK
-
-/*
- * Counts the resource in the metalinkfile.
- */
-int count_next_metalink_resource(metalinkfile *mlfile);
-void clean_metalink(struct Configurable *config);
-
-int parse_metalink(struct Configurable *config, const char *infile);
-
-/*
- * Returns nonzero if content_type includes "application/metalink+xml"
- * media-type. The check is done in case-insensitive manner.
- */
-int check_metalink_content_type(const char *content_type);
-
 typedef void (* Curl_digest_init_func)(void *context);
 typedef void (* Curl_digest_update_func)(void *context,
                                          const unsigned char *data,
@@ -77,10 +42,6 @@ typedef struct {
   void                  *digest_hashctx;   /* Hash function context */
 } digest_context;
 
-extern const digest_params MD5_DIGEST_PARAMS[1];
-extern const digest_params SHA1_DIGEST_PARAMS[1];
-extern const digest_params SHA256_DIGEST_PARAMS[1];
-
 digest_context * Curl_digest_init(const digest_params *dparams);
 int Curl_digest_update(digest_context *context,
                        const unsigned char *data,
@@ -96,6 +57,44 @@ typedef struct {
   const char *alias_name;
   const metalink_digest_def *digest_def;
 } metalink_digest_alias;
+
+typedef struct metalink_checksum {
+  const metalink_digest_def *digest_def;
+  /* raw digest value, not ascii hex digest */
+  unsigned char *digest;
+} metalink_checksum;
+
+typedef struct metalink_resource {
+  struct metalink_resource *next;
+  char *url;
+} metalink_resource;
+
+typedef struct metalinkfile {
+  struct metalinkfile *next;
+  char *filename;
+  metalink_checksum *checksum;
+  metalink_resource *resource;
+} metalinkfile;
+
+#ifdef USE_METALINK
+
+extern const digest_params MD5_DIGEST_PARAMS[1];
+extern const digest_params SHA1_DIGEST_PARAMS[1];
+extern const digest_params SHA256_DIGEST_PARAMS[1];
+
+/*
+ * Counts the resource in the metalinkfile.
+ */
+int count_next_metalink_resource(metalinkfile *mlfile);
+void clean_metalink(struct Configurable *config);
+
+int parse_metalink(struct Configurable *config, const char *infile);
+
+/*
+ * Returns nonzero if content_type includes "application/metalink+xml"
+ * media-type. The check is done in case-insensitive manner.
+ */
+int check_metalink_content_type(const char *content_type);
 
 /*
  * Check checksum of file denoted by filename.
