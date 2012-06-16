@@ -90,7 +90,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   TimeStamp expiry;
   char *service_name = NULL;
   unsigned short us_length;
-  ULONG qop;
+  unsigned long qop;
   unsigned char socksreq[4]; /* room for gssapi exchange header only */
   char *service = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
 
@@ -141,7 +141,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   cred_handle.dwUpper = 0;
 
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (SECURITY_PSTR) TEXT("Kerberos"),
+                                              (TCHAR *) TEXT("Kerberos"),
                                               SECPKG_CRED_OUTBOUND,
                                               NULL,
                                               NULL,
@@ -160,7 +160,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
   for(;;) {
-    LPTSTR sname;
+    TCHAR *sname;
 #ifdef UNICODE
     sname = Curl_convert_UTF8_to_wchar(service_name);
     if(!sname)

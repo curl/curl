@@ -394,7 +394,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   SecBuffer buf;
   SecBufferDesc desc;
   SECURITY_STATUS status;
-  ULONG attrs;
+  unsigned long attrs;
   const char *user;
   const char *domain = "";
   size_t userlen = 0;
@@ -461,7 +461,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     ntlm->p_identity = NULL;
 
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (SECURITY_PSTR) TEXT("NTLM"),
+                                              (TCHAR *) TEXT("NTLM"),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
                                               &ntlm->handle, &tsDummy);
@@ -476,7 +476,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   buf.pvBuffer   = ntlmbuf;
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
-                                               (SECURITY_PSTR) TEXT(""),
+                                               (TCHAR *) TEXT(""),
                                                ISC_REQ_CONFIDENTIALITY |
                                                ISC_REQ_REPLAY_DETECT |
                                                ISC_REQ_CONNECTION,
@@ -631,7 +631,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   SecBufferDesc type_2_desc;
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
-  ULONG attrs;
+  unsigned long attrs;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
 
   (void)passwdp;
@@ -652,7 +652,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
                                                &ntlm->c_handle,
-                                               (SECURITY_PSTR) TEXT(""),
+                                               (TCHAR *) TEXT(""),
                                                ISC_REQ_CONFIDENTIALITY |
                                                ISC_REQ_REPLAY_DETECT |
                                                ISC_REQ_CONNECTION,

@@ -31,8 +31,8 @@
 #include "curl_multibyte.h"
 
 #ifdef WANT_IDN_PROTOTYPES
-WINBASEAPI int WINAPI IdnToAscii(DWORD, LPCWSTR, int, LPWSTR, int);
-WINBASEAPI int WINAPI IdnToUnicode(DWORD, LPCWSTR, int, LPWSTR, int);
+WINBASEAPI int WINAPI IdnToAscii(DWORD, const WCHAR *, int, WCHAR *, int);
+WINBASEAPI int WINAPI IdnToUnicode(DWORD, const WCHAR *, int, WCHAR *, int);
 #endif
 
 #define IDN_MAX_LENGTH 255

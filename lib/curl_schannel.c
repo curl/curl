@@ -100,7 +100,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #ifdef ENABLE_IPV6
   struct in6_addr addr6;
 #endif
-  LPTSTR host_name;
+  TCHAR *host_name;
 
   infof(data, "schannel: connecting to %s:%hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
@@ -263,7 +263,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  LPTSTR host_name;
+  TCHAR *host_name;
 
   infof(data, "schannel: connecting to %s:%hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
