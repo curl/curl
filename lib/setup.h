@@ -349,11 +349,13 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
-#  define fstat(fdes,stp)            _fstat(fdes, stp)
-#  define stat(fname,stp)            _stat(fname, stp)
-#  define struct_stat                struct _stat
+#  ifndef _WIN32_WCE
+#    undef  lseek
+#    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes,stp)            _fstat(fdes, stp)
+#    define stat(fname,stp)            _stat(fname, stp)
+#    define struct_stat                struct _stat
+#  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
 
