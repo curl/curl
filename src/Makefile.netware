@@ -49,7 +49,17 @@ endif
 
 # Edit the path below to point to the base of your libmetalink package.
 ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.0.3
+LIBMETALINK_PATH = ../../libmetalink-0.1.0
+endif
+
+# Edit the path below to point to the base of your libexpat package.
+ifndef LIBEXPAT_PATH
+LIBEXPAT_PATH = ../../expat-2.1.0
+endif
+
+# Edit the path below to point to the base of your libXML2 package.
+ifndef LIBXML2_PATH
+LIBXML2_PATH = ../../libxml2-2.8.0
 endif
 
 # Edit the path below to point to the base of your c-ares package.
@@ -218,9 +228,11 @@ WITH_IDN = 1
 endif
 ifeq ($(findstring -spnego,$(CFG)),-spnego)
 WITH_SPNEGO = 1
+WITH_SSL = 1
 endif
 ifeq ($(findstring -metalink,$(CFG)),-metalink)
 WITH_METALINK = 1
+WITH_SSL = 1
 endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
@@ -285,8 +297,22 @@ ifdef WITH_IDN
 endif
 ifdef WITH_METALINK
 	CFLAGS += -DUSE_METALINK
-	INCLUDES += -I$(METALINK_PATH)/include
-	LDLIBS += $(METALINK_PATH)/lib/libmetalink.$(LIBEXT)
+	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
+	INCLUDES += -I$(LIBMETALINK_PATH)/include
+	LDLIBS += $(LIBMETALINK_PATH)/lib/libmetalink.$(LIBEXT)
+ifdef WITH_LIBEXPAT
+	ifeq ($(LIBARCH),LIBC)
+		IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlbc.imp
+		MODULES += expatlbc
+	else
+		IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlib.imp
+		MODULES += expatlib
+	endif
+else
+ifdef WITH_LIBXML2
+	IMPORTS += @$(LIBXML2_PATH)/lib/libxml2.imp
+	MODULES += libxml2
+endif
 endif
 
 ifeq ($(LIBARCH),LIBC)
