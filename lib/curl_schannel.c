@@ -320,7 +320,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     }
   }
 
-  for (;;) {
+  for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
       code = Curl_read_plain(conn->sock[sockindex],
