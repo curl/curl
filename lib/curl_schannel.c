@@ -123,7 +123,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
 
-  infof(data, "schannel: connecting to %s:%hu (step 1/3)\n",
+  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
   /* check for an existing re-usable credential handle */
@@ -289,7 +289,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SECURITY_STATUS sspi_status = SEC_E_OK;
   TCHAR *host_name;
 
-  infof(data, "schannel: connecting to %s:%hu (step 2/3)\n",
+  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
 
   /* buffer to store previously received and encrypted data */
@@ -314,11 +314,13 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   else if(connssl->connecting_state != ssl_connect_2_writing) {
     if(nread < 0) {
       connssl->connecting_state = ssl_connect_2_reading;
-      infof(data, "schannel: failed to receive handshake, need more data\n");
+      infof(data, "schannel: failed to receive handshake, "
+            "need more data\n");
       return CURLE_OK;
     }
     else if(nread == 0) {
-      failf(data, "schannel: failed to receive handshake, connection failed");
+      failf(data, "schannel: failed to receive handshake, "
+            "SSL/TLS connection failed");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -435,7 +437,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   /* check if the handshake is complete */
   if(sspi_status == SEC_E_OK) {
     connssl->connecting_state = ssl_connect_3;
-    infof(data, "schannel: handshake complete\n");
+    infof(data, "schannel: SSL/TLS handshake complete\n");
   }
 
 #ifdef _WIN32_WCE
@@ -459,7 +461,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  infof(data, "schannel: connecting to %s:%hu (step 3/3)\n",
+  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
         conn->host.name, conn->remote_port);
 
   /* check if the required context attributes are met */
@@ -528,7 +530,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
-      failf(data, "SSL connection timeout");
+      failf(data, "SSL/TLS connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -546,7 +548,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
-      failf(data, "SSL connection timeout");
+      failf(data, "SSL/TLS connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -562,7 +564,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
       what = Curl_socket_ready(readfd, writefd, nonblocking ? 0 : timeout_ms);
       if(what < 0) {
         /* fatal error */
-        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+        failf(data, "select/poll on SSL/TLS socket, errno: %d", SOCKERRNO);
         return CURLE_SSL_CONNECT_ERROR;
       }
       else if(0 == what) {
@@ -572,7 +574,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
         }
         else {
           /* timeout */
-          failf(data, "SSL connection timeout");
+          failf(data, "SSL/TLS connection timeout");
           return CURLE_OPERATION_TIMEDOUT;
         }
       }
@@ -849,16 +851,20 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
     /* check if server wants to renegotiate the connection context */
     if(sspi_status == SEC_I_RENEGOTIATE) {
-      infof(data, "schannel: client needs to renegotiate with server\n");
+      infof(data, "schannel: remote party requests SSL/TLS renegotiation\n");
 
       /* begin renegotiation */
+      infof(data, "schannel: renegotiating SSL/TLS connection\n");
       connssl->state = ssl_connection_negotiating;
       connssl->connecting_state = ssl_connect_2_writing;
       retcode = schannel_connect_common(conn, sockindex, FALSE, &done);
       if(retcode)
         *err = retcode;
-      else /* now retry receiving data */
+      else {
+        infof(data, "schannel: SSL/TLS connection renegotiated\n");
+        /* now retry receiving data */
         return schannel_recv(conn, sockindex, buf, len, err);
+      }
     }
   }
 
@@ -936,7 +942,7 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(connssl->use) /* SSL is in use */
+  if(connssl->use) /* SSL/TLS is in use */
     return (connssl->encdata_offset > 0 ||
             connssl->decdata_offset > 0 ) ? TRUE : FALSE;
   else
@@ -946,7 +952,7 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
 void Curl_schannel_close(struct connectdata *conn, int sockindex)
 {
   if(conn->ssl[sockindex].use)
-    /* if the SSL channel hasn't been shut down yet, do that now. */
+    /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
     Curl_ssl_shutdown(conn, sockindex);
 }
 
@@ -958,7 +964,7 @@ http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  infof(data, "schannel: shutting down SSL connection with %s:%hu\n",
+  infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         conn->host.name, conn->remote_port);
 
   if(connssl->ctxt) {
@@ -1085,7 +1091,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
-  CCERT_CHAIN_CONTEXT *pChainContext = NULL;
+  const CERT_CHAIN_CONTEXT *pChainContext = NULL;
 
   status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
                                             SECPKG_ATTR_REMOTE_CERT_CONTEXT,
