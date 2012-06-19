@@ -122,6 +122,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   struct in6_addr addr6;
 #endif
   TCHAR *host_name;
+  CURLcode code;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
@@ -258,9 +259,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         "sending %lu bytes...\n", outbuf.cbBuffer);
 
   /* send initial handshake data which is now stored in output buffer */
-  written = swrite(conn->sock[sockindex], outbuf.pvBuffer, outbuf.cbBuffer);
+  code = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+                          outbuf.cbBuffer, &written);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if(outbuf.cbBuffer != (size_t)written) {
+  if((code != CURLE_OK) || (outbuf.cbBuffer != (size_t)written)) {
     failf(data, "schannel: failed to send initial handshake data: "
           "sent %zd of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
@@ -288,6 +290,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   TCHAR *host_name;
+  CURLcode code;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
@@ -304,26 +307,25 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
 
   /* read encrypted handshake data from socket */
-  nread = sread(conn->sock[sockindex],
-                connssl->encdata_buffer + connssl->encdata_offset,
-                connssl->encdata_length - connssl->encdata_offset);
-  if(nread > 0) {
-    /* increase encrypted data buffer offset */
-    connssl->encdata_offset += nread;
-  }
-  else if(connssl->connecting_state != ssl_connect_2_writing) {
-    if(nread < 0) {
+  code = Curl_read_plain(conn->sock[sockindex],
+                (char *) (connssl->encdata_buffer + connssl->encdata_offset),
+                          connssl->encdata_length - connssl->encdata_offset,
+                          &nread);
+  if(code == CURLE_AGAIN) {
+    if(connssl->connecting_state != ssl_connect_2_writing)
       connssl->connecting_state = ssl_connect_2_reading;
-      infof(data, "schannel: failed to receive handshake, "
-            "need more data\n");
-      return CURLE_OK;
-    }
-    else if(nread == 0) {
-      failf(data, "schannel: failed to receive handshake, "
-            "SSL/TLS connection failed");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+    infof(data, "schannel: failed to receive handshake, "
+          "need more data\n");
+    return CURLE_OK;
   }
+  else if((code != CURLE_OK) || (nread == 0)) {
+    failf(data, "schannel: failed to receive handshake, "
+          "SSL/TLS connection failed");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  /* increase encrypted data buffer offset */
+  connssl->encdata_offset += nread;
 
   infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
         connssl->encdata_offset, connssl->encdata_length);
@@ -385,9 +387,10 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
               "sending %lu bytes...\n", outbuf[i].cbBuffer);
 
         /* send handshake token to server */
-        written = swrite(conn->sock[sockindex],
-                         outbuf[i].pvBuffer, outbuf[i].cbBuffer);
-        if(outbuf[i].cbBuffer != (size_t)written) {
+        code = Curl_write_plain(conn, conn->sock[sockindex],
+                                outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                &written);
+        if((code != CURLE_OK) || (outbuf[i].cbBuffer != (size_t)written)) {
           failf(data, "schannel: failed to send next handshake data: "
                 "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
           return CURLE_SSL_CONNECT_ERROR;
@@ -629,6 +632,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   SecBuffer outbuf[4];
   SecBufferDesc outbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  CURLcode code;
 
   /* check if the maximum stream sizes were queried */
   if(connssl->stream_sizes.cbMaximumMessage == 0) {
@@ -679,7 +683,11 @@ schannel_send(struct connectdata *conn, int sockindex,
   if(sspi_status == SEC_E_OK) {
     /* send the encrypted message including header, data and trailer */
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
-    written = swrite(conn->sock[sockindex], data, len);
+    code = Curl_write_plain(conn, conn->sock[sockindex], data, len, &written);
+    if((code != CURLE_OK) || (len != (size_t)written))
+      *err = CURLE_SEND_ERROR;
+    if(code != CURLE_OK)
+      written = -1;
     /* TODO: implement write buffering */
   }
   else if(sspi_status == SEC_E_INSUFFICIENT_MEMORY) {
@@ -741,21 +749,19 @@ schannel_recv(struct connectdata *conn, int sockindex,
         connssl->encdata_offset, connssl->encdata_length);
   size = connssl->encdata_length - connssl->encdata_offset;
   if(size > 0) {
-    nread = sread(conn->sock[sockindex],
-                  connssl->encdata_buffer + connssl->encdata_offset, size);
-    infof(data, "schannel: encrypted data got %zd\n", nread);
-
+    *err = Curl_read_plain(conn->sock[sockindex],
+                  (char *) (connssl->encdata_buffer + connssl->encdata_offset),
+                           size, &nread);
     /* check for received data */
-    if(nread > 0) {
-      /* increase encrypted data buffer offset */
-      connssl->encdata_offset += nread;
+    if(*err != CURLE_OK)
+      ret = -1;
+    else {
+      if(nread > 0)
+        /* increase encrypted data buffer offset */
+        connssl->encdata_offset += nread;
+      ret = nread;
     }
-    else if(connssl->encdata_offset == 0) {
-      if(nread == 0)
-        ret = 0;
-      else
-        *err = CURLE_AGAIN;
-    }
+    infof(data, "schannel: encrypted data got %zd\n", ret);
   }
 
   infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
