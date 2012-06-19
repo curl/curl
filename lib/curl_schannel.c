@@ -41,7 +41,6 @@
 /*
  * TODO list for TLS/SSL implementation:
  * - implement write buffering
- * - implement SSL/TLS shutdown
  * - implement client certificate authentication
  * - implement custom server certificate validation
  * - implement cipher/algorithm option
@@ -946,17 +945,90 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
 
 void Curl_schannel_close(struct connectdata *conn, int sockindex)
 {
+  if(conn->ssl[sockindex].use)
+    /* if the SSL channel hasn't been shut down yet, do that now. */
+    Curl_ssl_shutdown(conn, sockindex);
+}
+
+int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
+{
+/* See
+http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
+   Shutting Down an Schannel Connection */
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  infof(data, "schannel: Closing connection with %s:%hu\n",
+  infof(data, "schannel: shutting down SSL connection with %s:%hu\n",
         conn->host.name, conn->remote_port);
 
-  /* free SSPI Schannel API security context handle */
   if(connssl->ctxt) {
-    s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
-    free(connssl->ctxt);
-    connssl->ctxt = NULL;
+    SecBufferDesc BuffDesc;
+    SecBuffer Buffer;
+    SECURITY_STATUS sspi_status;
+    SecBuffer outbuf;
+    SecBufferDesc outbuf_desc;
+    CURLcode code;
+    TCHAR *host_name;
+    DWORD dwshut = SCHANNEL_SHUTDOWN;
+
+    InitSecBuffer(&Buffer, SECBUFFER_TOKEN, &dwshut, sizeof(dwshut));
+    InitSecBufferDesc(&BuffDesc, &Buffer, 1);
+
+    sspi_status = s_pSecFn->ApplyControlToken(&connssl->ctxt->ctxt_handle,
+                                              &BuffDesc);
+
+    if(sspi_status != SEC_E_OK)
+      failf(data, "schannel: ApplyControlToken failure: %s",
+            Curl_sspi_strerror(conn, sspi_status));
+
+#ifdef UNICODE
+    host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+    if(!host_name)
+      return CURLE_OUT_OF_MEMORY;
+#else
+    host_name = conn->host.name;
+#endif
+
+    /* setup output buffer */
+    InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
+    InitSecBufferDesc(&outbuf_desc, &outbuf, 1);
+
+    sspi_status = s_pSecFn->InitializeSecurityContext(
+         &connssl->cred->cred_handle,
+         &connssl->ctxt->ctxt_handle,
+         host_name,
+         connssl->req_flags,
+         0,
+         0,
+         NULL,
+         0,
+         &connssl->ctxt->ctxt_handle,
+         &outbuf_desc,
+         &connssl->ret_flags,
+         &connssl->ctxt->time_stamp);
+
+#ifdef UNICODE
+    free(host_name);
+#endif
+
+    if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
+      /* send close message which is in output buffer */
+      ssize_t written;
+      code = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+                              outbuf.cbBuffer, &written);
+
+      s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
+      if((code != CURLE_OK) || (outbuf.cbBuffer != (size_t)written)) {
+        infof(data, "schannel: failed to send close msg: %s"
+              " (bytes written: %zd)\n", curl_easy_strerror(code), written);
+      }
+    }
+    /* free SSPI Schannel API security context handle */
+    if(connssl->ctxt) {
+      s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
+      free(connssl->ctxt);
+      connssl->ctxt = NULL;
+    }
   }
 
   /* free internal buffer for received encrypted data */
@@ -974,13 +1046,8 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
     connssl->decdata_length = 0;
     connssl->decdata_offset = 0;
   }
-}
 
-int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
-{
-  (void)conn;
-  (void)sockindex;
-  return CURLE_NOT_BUILT_IN; /* TODO: implement SSL/TLS shutdown */
+  return CURLE_OK;
 }
 
 void Curl_schannel_session_free(void *ptr)
