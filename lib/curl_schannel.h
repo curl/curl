@@ -93,8 +93,13 @@
 #endif
 
 
+#ifdef BUFSIZE
+#define CURL_SCHANNEL_BUFFER_INIT_SIZE  BUFSIZE
+#define CURL_SCHANNEL_BUFFER_STEP_SIZE  BUFSIZE/2
+#else
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE  4096
 #define CURL_SCHANNEL_BUFFER_STEP_SIZE  2048
+#endif
 
 
 CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex);
