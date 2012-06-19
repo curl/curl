@@ -886,22 +886,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
     connssl->decdata_offset -= size;
   }
 
-  /* reduce internal buffer length to reduce memory usage */
-  if(connssl->encdata_length > CURL_SCHANNEL_BUFFER_INIT_SIZE) {
-    connssl->encdata_length =
-      connssl->encdata_offset > CURL_SCHANNEL_BUFFER_INIT_SIZE ?
-      connssl->encdata_offset : CURL_SCHANNEL_BUFFER_INIT_SIZE;
-    connssl->encdata_buffer = realloc(connssl->encdata_buffer,
-                                      connssl->encdata_length);
-  }
-  if(connssl->decdata_length > CURL_SCHANNEL_BUFFER_INIT_SIZE) {
-    connssl->decdata_length =
-      connssl->decdata_offset > CURL_SCHANNEL_BUFFER_INIT_SIZE ?
-      connssl->decdata_offset : CURL_SCHANNEL_BUFFER_INIT_SIZE;
-    connssl->decdata_buffer = realloc(connssl->decdata_buffer,
-                                      connssl->decdata_length);
-  }
-
   /* check if the server closed the connection */
   if(ret <= 0 && ( /* special check for Windows 2000 Professional */
       sspi_status == SEC_I_CONTEXT_EXPIRED || (sspi_status == SEC_E_OK &&
