@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
+ * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
  * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -86,6 +87,10 @@
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
+#ifdef _WIN32_WCE
+static CURLcode verify_certificate(struct connectdata *conn, int sockindex);
+#endif
+
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
                           void *BufDataPtr, unsigned long BufByteSize)
 {
@@ -133,8 +138,16 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
     if(data->set.ssl.verifypeer) {
+#ifdef _WIN32_WCE
+      /* certificate validation on CE doesn't seem to work right; we'll
+         do it following a more manual process. */
+      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
+                              SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+                              SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+#else
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
                               SCH_CRED_REVOCATION_CHECK_CHAIN;
+#endif
       infof(data, "schannel: checking server certificate revocation\n");
     }
     else {
@@ -425,6 +438,13 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     connssl->connecting_state = ssl_connect_3;
     infof(data, "schannel: handshake complete\n");
   }
+
+#ifdef _WIN32_WCE
+  /* Windows CE doesn't do any server certificate validation.
+     We have to do it manually. */
+  if(data->set.ssl.verifypeer)
+    return verify_certificate(conn, sockindex);
+#endif
 
   return CURLE_OK;
 }
@@ -989,5 +1009,112 @@ size_t Curl_schannel_version(char *buffer, size_t size)
 
   return size;
 }
+
+#ifdef _WIN32_WCE
+static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
+{
+  SECURITY_STATUS status;
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CURLcode result = CURLE_OK;
+  CERT_CONTEXT *pCertContextServer = NULL;
+  CCERT_CHAIN_CONTEXT *pChainContext = NULL;
+
+  status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
+                                            SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                            &pCertContextServer);
+
+  if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    failf(data, "schannel: Failed to read remote certificate context: %s",
+          Curl_sspi_strerror(conn, status));
+    result = CURLE_PEER_FAILED_VERIFICATION;
+  }
+
+  if(result == CURLE_OK) {
+    CERT_CHAIN_PARA ChainPara;
+    memset(&ChainPara, 0, sizeof(ChainPara));
+    ChainPara.cbSize = sizeof(ChainPara);
+
+    if(!CertGetCertificateChain(NULL,
+                                pCertContextServer,
+                                NULL,
+                                pCertContextServer->hCertStore,
+                                &ChainPara,
+                                0,
+                                NULL,
+                                &pChainContext)) {
+      failf(data, "schannel: CertGetCertificateChain failed: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      pChainContext = NULL;
+      result = CURLE_PEER_FAILED_VERIFICATION;
+    }
+
+    if(result == CURLE_OK) {
+      CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
+      DWORD dwTrustErrorMask = ~(CERT_TRUST_IS_NOT_TIME_NESTED|
+                                 CERT_TRUST_REVOCATION_STATUS_UNKNOWN);
+      dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
+      if(dwTrustErrorMask) {
+        if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
+          failf(data, "schannel: CertGetCertificateChain trust error"
+                      " CERT_TRUST_IS_PARTIAL_CHAIN");
+        if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
+          failf(data, "schannel: CertGetCertificateChain trust error"
+                      " CERT_TRUST_IS_UNTRUSTED_ROOT");
+        if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
+          failf(data, "schannel: CertGetCertificateChain trust error"
+                      " CERT_TRUST_IS_NOT_TIME_VALID");
+        failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
+              dwTrustErrorMask);
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+    }
+  }
+
+  if(result == CURLE_OK) {
+    if(data->set.ssl.verifyhost == 1) {
+      infof(data, "warning: ignoring unsupported value (1) ssl.verifyhost\n");
+    }
+    else if(data->set.ssl.verifyhost == 2) {
+      WCHAR cert_hostname[128];
+      WCHAR *hostname = Curl_convert_UTF8_to_wchar(conn->host.name);
+      DWORD len;
+
+      len = CertGetNameStringW(pCertContextServer,
+                               CERT_NAME_DNS_TYPE,
+                               0,
+                               NULL,
+                               cert_hostname,
+                               128);
+      if(len > 0 && cert_hostname[0] == '*') {
+        /* this is a wildcard cert.  try matching the last len - 1 chars */
+        int hostname_len = strlen(conn->host.name);
+        if(wcsicmp(cert_hostname + 1, hostname + hostname_len - len + 2) != 0)
+          result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else if(len == 0 || wcsicmp(hostname, cert_hostname) != 0) {
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+      if(result == CURLE_PEER_FAILED_VERIFICATION) {
+        const char *_cert_hostname;
+        _cert_hostname = Curl_convert_wchar_to_UTF8(cert_hostname);
+        failf(data, "schannel: CertGetNameString() certificate hostname "
+              "(%s) did not match connection (%s)",
+              _cert_hostname, conn->host.name);
+        free(_cert_hostname);
+      }
+      free(hostname);
+    }
+  }
+
+  if(pChainContext)
+    CertFreeCertificateChain(pChainContext);
+
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  return result;
+}
+#endif /* _WIN32_WCE */
 
 #endif /* USE_SCHANNEL */
