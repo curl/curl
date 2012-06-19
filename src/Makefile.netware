@@ -314,6 +314,7 @@ ifdef WITH_LIBXML2
 	MODULES += libxml2
 endif
 endif
+endif
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(NDK_LIBC)/include
