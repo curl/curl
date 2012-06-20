@@ -290,7 +290,9 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SECURITY_STATUS sspi_status = SEC_E_OK;
   TCHAR *host_name;
   CURLcode code;
-  bool doread = connssl->connecting_state != ssl_connect_2_writing;
+  bool doread;
+
+  doread = (connssl->connecting_state != ssl_connect_2_writing)?TRUE:FALSE;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
