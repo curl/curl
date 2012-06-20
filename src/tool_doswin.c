@@ -81,6 +81,8 @@ __pragma(warning(pop))
 #  define _use_lfn(f) ALWAYS_TRUE   /* long file names always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define _use_lfn(f) ALWAYS_FALSE  /* long file names never available */
+#elif defined(__DJGPP__)
+#  include <fcntl.h>                /* _use_lfn(f) prototype */
 #endif
 
 static const char *msdosify (const char *file_name);
