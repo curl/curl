@@ -190,6 +190,20 @@ CFGSET   = TRUE
 !ENDIF
 
 ######################
+# release-ssl-ssh2-zlib
+
+!IF "$(CFG)" == "release-ssl-ssh2-zlib"
+TARGET   = $(LIBCURL_STA_LIB_REL)
+DIROBJ   = $(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LFLAGSSSH2 = "/LIBPATH:$(LIBSSH2_PATH)"
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSSSH2) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSSSH2) $(CFLAGSZLIB) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
 # release-ssl-dll
 
 !IF "$(CFG)" == "release-ssl-dll"
@@ -224,36 +238,6 @@ LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
 LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBSDLL) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
 CFGSET   = TRUE
-!ENDIF
-
-######################
-# release-ssl-ssh2-zlib
-
-!IF "$(CFG)" == "release-ssl-ssh2-zlib"
-TARGET   = $(LIB_NAME).lib
-DIROBJ   = $(CFG)
-LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LFLAGSSSH2 = "/LIBPATH:$(LIBSSH2_PATH)"
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSSSH2) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSSSH2) $(CFLAGSZLIB) $(CFLAGSLIB)
-CFGSET   = TRUE
-RESOURCE = $(LIBSSH2_PATH)/Release/src/libssh2.lib $(ZLIB_PATH)/zlib.lib
-!ENDIF
-
-######################
-# debug-ssl-ssh2-zlib
-
-!IF "$(CFG)" == "debug-ssl-ssh2-zlib"
-TARGET   = $(LIB_NAME_DEBUG).lib
-DIROBJ   = $(CFG)
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LFLAGSSSH2 = "/LIBPATH:$(LIBSSH2_PATH)"
-LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
-LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSSSH2) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
-CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSSSH2) $(CFLAGSZLIB) $(CFLAGSLIB)
-CFGSET   = TRUE
-RESOURCE = $(LIBSSH2_PATH)/Release/src/libssh2.lib $(ZLIB_PATH)/zlib.lib
 !ENDIF
 
 ######################
@@ -353,6 +337,20 @@ LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
 LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# debug-ssl-ssh2-zlib
+
+!IF "$(CFG)" == "debug-ssl-ssh2-zlib"
+TARGET   = $(LIBCURL_STA_LIB_DBG)
+DIROBJ   = $(CFG)
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LFLAGSSSH2 = "/LIBPATH:$(LIBSSH2_PATH)"
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
+LNK      = $(LNKLIB) $(ZLIBLIBS) $(LFLAGSSSL) $(LFLAGSSSH2) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCDEBUG) $(RTLIBD) $(CFLAGSSSL) $(CFLAGSSSH2) $(CFLAGSZLIB) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -463,11 +461,11 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !MESSAGE   release-dll-ssl-dll          - release dynamic library with dynamic ssl
 !MESSAGE   release-dll-zlib-dll         - release dynamic library with dynamic zlib
 !MESSAGE   release-dll-ssl-dll-zlib-dll - release dynamic library with dynamic ssl and dynamic zlib
-!MESSAGE   debug-ssl-ssh2-zlib          - debug static library with ssl, ssh2 and zlib
 !MESSAGE   debug                        - debug static library
 !MESSAGE   debug-ssl                    - debug static library with ssl
 !MESSAGE   debug-zlib                   - debug static library with zlib
 !MESSAGE   debug-ssl-zlib               - debug static library with ssl and zlib
+!MESSAGE   debug-ssl-ssh2-zlib          - debug static library with ssl, ssh2 and zlib
 !MESSAGE   debug-ssl-dll                - debug static library with dynamic ssl
 !MESSAGE   debug-zlib-dll               - debug static library with dynamic zlib
 !MESSAGE   debug-ssl-dll-zlib-dll       - debug static library with dynamic ssl and dynamic zlib
