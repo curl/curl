@@ -201,6 +201,7 @@ struct Configurable {
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
 
+  bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */
   metalinkfile *metalinkfile_last; /* point to the last/current node */
 }; /* struct Configurable */

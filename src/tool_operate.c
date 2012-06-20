@@ -586,8 +586,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
 
-        if((urlnode->flags&GETOUT_USEREMOTE) ||
-           (outfile && !curlx_strequal("-", outfile)) ) {
+        if(((urlnode->flags&GETOUT_USEREMOTE) ||
+            (outfile && !curlx_strequal("-", outfile))) &&
+           (metalink || !config->use_metalink)) {
 
           /*
            * We have specified a file name to store the result in, or we have
@@ -826,8 +827,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
-        /* what call to write */
-        my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
+        if(metalink || !config->use_metalink)
+          /* what call to write */
+          my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
+#ifdef USE_METALINK
+        else
+          /* Set Metalink specific write callback function to parse
+             XML data progressively. */
+          my_setopt(curl, CURLOPT_WRITEFUNCTION, metalink_write_cb);
+#endif /* USE_METALINK */
 
         /* for uploads */
         input.fd = infd;
@@ -1316,6 +1324,19 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
 
         for(;;) {
+#ifdef USE_METALINK
+          if(!metalink && config->use_metalink) {
+            /* If outs.metalink_parser is non-NULL, delete it first. */
+            if(outs.metalink_parser)
+              metalink_parser_context_delete(outs.metalink_parser);
+            outs.metalink_parser = metalink_parser_context_new();
+            if(outs.metalink_parser == NULL) {
+              res = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
+          }
+#endif /* USE_METALINK */
+
           res = curl_easy_perform(curl);
 
           if(outs.is_cd_filename && outs.stream && !config->mute &&
@@ -1569,22 +1590,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 #endif
 
 #ifdef USE_METALINK
-        if(!metalink && res == CURLE_OK && outs.filename) {
-          /* Check the content-type header field and if it indicates
-             Metalink file, parse it and add getout for them. */
-          char *content_type;
-          curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
-          if(content_type && check_metalink_content_type(content_type)) {
-            if(!(config->mute)) {
-              fprintf(config->errors, "\nParsing Metalink file: %s\n",
-                      outs.filename);
-            }
-            if(parse_metalink(config, outs.filename) == 0)
-              fprintf(config->errors,
-                      "Metalink file is parsed successfully\n");
-            else
-              fprintf(config->errors, "Could not parse Metalink file.\n");
-          }
+        if(!metalink && config->use_metalink && res == CURLE_OK) {
+          if(parse_metalink(config, &outs) == 0)
+            fprintf(config->errors,
+                    "Metalink XML is parsed successfully\n");
+          else
+            fprintf(config->errors, "Could not parse Metalink XML.\n");
         }
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
           int rv = metalink_check_hash(config, mlfile, outs.filename);
@@ -1597,6 +1608,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* No more business with this output struct */
         if(outs.alloc_filename)
           Curl_safefree(outs.filename);
+#ifdef USE_METALINK
+        if(outs.metalink_parser)
+          metalink_parser_context_delete(outs.metalink_parser);
+#endif /* USE_METALINK */
         memset(&outs, 0, sizeof(struct OutStruct));
         hdrcbdata.outs = NULL;
 

@@ -22,7 +22,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-
+#ifdef USE_METALINK
+#  include <metalink/metalink_parser.h>
+#endif /* USE_METALINK */
 
 /*
  * OutStruct variables keep track of information relative to curl's
@@ -55,6 +57,9 @@
  *
  * 'init' member holds original file size or offset at which truncation is
  * taking place. Always zero unless appending to a non-empty regular file.
+ *
+ * 'metalink_parser' member is a pointer to Metalink XML parser
+ * context.
  */
 
 struct OutStruct {
@@ -67,6 +72,9 @@ struct OutStruct {
   struct Configurable *config;
   curl_off_t bytes;
   curl_off_t init;
+#ifdef USE_METALINK
+  metalink_parser_context_t *metalink_parser;
+#endif /* USE_METALINK */
 };
 
 

@@ -171,7 +171,7 @@ static const struct LongShort aliases[]= {
   {"$G", "delegation",               TRUE},
   {"$H", "mail-auth",                TRUE},
   {"$I", "post303",                  FALSE},
-  {"$J", "metalink",                 TRUE},
+  {"$J", "metalink",                 FALSE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -824,11 +824,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'J': /* --metalink */
         {
 #ifdef USE_METALINK
-          if(parse_metalink(config, nextarg) == -1) {
-            warnf(config, "Could not parse Metalink file: %s\n", nextarg);
-            /* TODO Is PARAM_BAD_USE appropriate here? */
-            return PARAM_BAD_USE;
-          }
+          config->use_metalink = toggle;
 #else
           warnf(config, "--metalink option is ignored because the binary is "
                 "built without the Metalink support.\n");

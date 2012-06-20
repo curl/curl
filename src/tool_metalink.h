@@ -82,13 +82,21 @@ extern const digest_params MD5_DIGEST_PARAMS[1];
 extern const digest_params SHA1_DIGEST_PARAMS[1];
 extern const digest_params SHA256_DIGEST_PARAMS[1];
 
+#include <metalink/metalink_parser.h>
+
 /*
  * Counts the resource in the metalinkfile.
  */
 int count_next_metalink_resource(metalinkfile *mlfile);
 void clean_metalink(struct Configurable *config);
 
-int parse_metalink(struct Configurable *config, const char *infile);
+int parse_metalink(struct Configurable *config, struct OutStruct *outs);
+
+/*
+ * Callback function for CURLOPT_WRITEFUNCTION
+ */
+size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
+                         void *userdata);
 
 /*
  * Returns nonzero if content_type includes "application/metalink+xml"

@@ -33,8 +33,6 @@
 #  include <fcntl.h>
 #endif
 
-#include <metalink/metalink_parser.h>
-
 #ifdef USE_SSLEAY
 #  ifdef USE_OPENSSL
 #    include <openssl/md5.h>
@@ -68,6 +66,7 @@
 #include "tool_paramhlp.h"
 #include "tool_cfgable.h"
 #include "tool_metalink.h"
+#include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -331,8 +330,8 @@ static int check_hash(const char *filename,
   digest_context *dctx;
   int check_ok;
   int fd;
-  fprintf(error, "Checking %s checksum of file %s\n", digest_def->hash_name,
-          filename);
+  fprintf(error, "Validating %s checksum (This may take some time)...\n",
+          digest_def->hash_name);
   fd = open(filename, O_RDONLY);
   if(fd == -1) {
     fprintf(error, "Could not open file %s: %s\n", filename, strerror(errno));
@@ -358,6 +357,12 @@ static int check_hash(const char *filename,
   Curl_digest_final(dctx, result);
   check_ok = memcmp(result, digest,
                     digest_def->dparams->digest_resultlen) == 0;
+  /* sha*sum style verdict output */
+  if(check_ok)
+    fprintf(error, "%s: OK\n", filename);
+  else
+    fprintf(error, "%s: FAILED\n", filename);
+
   free(result);
   close(fd);
   return check_ok;
@@ -373,12 +378,6 @@ int metalink_check_hash(struct Configurable *config,
   }
   rv = check_hash(filename, mlfile->checksum->digest_def,
                   mlfile->checksum->digest, config->errors);
-  if(rv == 1) {
-    fprintf(config->errors, "Checksum matched\n");
-  }
-  else if(rv == 0) {
-    fprintf(config->errors, "Checksum didn't match\n");
-  }
   return rv;
 }
 
@@ -468,13 +467,15 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
   return f;
 }
 
-int parse_metalink(struct Configurable *config, const char *infile)
+int parse_metalink(struct Configurable *config, struct OutStruct *outs)
 {
   metalink_error_t r;
   metalink_t* metalink;
   metalink_file_t **files;
 
-  r = metalink_parse_file(infile, &metalink);
+  /* metlaink_parse_final deletes outs->metalink_parser */
+  r = metalink_parse_final(outs->metalink_parser, NULL, 0, &metalink);
+  outs->metalink_parser = NULL;
   if(r != 0) {
     return -1;
   }
@@ -529,6 +530,33 @@ int parse_metalink(struct Configurable *config, const char *infile)
   }
   metalink_delete(metalink);
   return 0;
+}
+
+size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
+                         void *userdata)
+{
+  struct OutStruct *outs = userdata;
+  struct Configurable *config = outs->config;
+  int rv;
+
+  /*
+   * Once that libcurl has called back tool_write_cb() the returned value
+   * is checked against the amount that was intended to be written, if
+   * it does not match then it fails with CURLE_WRITE_ERROR. So at this
+   * point returning a value different from sz*nmemb indicates failure.
+   */
+  const size_t failure = (sz * nmemb) ? 0 : 1;
+
+  if(!config)
+    return failure;
+
+  rv = metalink_parse_update(outs->metalink_parser, buffer, sz *nmemb);
+  if(rv == 0)
+    return sz * nmemb;
+  else {
+    warnf(config, "Failed to parse Metalink XML\n");
+    return failure;
+  }
 }
 
 /*
