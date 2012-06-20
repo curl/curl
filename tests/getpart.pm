@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -88,21 +88,27 @@ sub getpart {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        elsif((1 ==$inside) && ($_ =~ /^ *\<$part[ \>]/)) {
-            if($_ =~ /$part [^>]*base64=/) {
-                # attempt to detect base64 encoded parts
+        elsif(($inside >= 1) && ($_ =~ /^ *\<$part[ \>]/)) {
+            if($inside > 1) {
+                push @this, $_;
+            }
+            elsif($_ =~ /$part [^>]*base64=/) {
+                # attempt to detect our base64 encoded part
                 $base64=1;
             }
             $inside++;
         }
-        elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
+        elsif(($inside >= 2) && ($_ =~ /^ *\<\/$part[ \>]/)) {
+            if($inside > 2) {
+                push @this, $_;
+            }
             $inside--;
         }
-        elsif((1==$inside) && ($_ =~ /^ *\<\/$section/)) {
-            if($trace) {
+        elsif(($inside >= 1) && ($_ =~ /^ *\<\/$section/)) {
+            if($trace && @this) {
                 print STDERR "*** getpart.pm: $section/$part returned data!\n";
             }
-            if(!@this && $warning) {
+            if($warning && !@this) {
                 print STDERR "*** getpart.pm: $section/$part returned empty!\n";
             }
             if($base64) {
@@ -114,14 +120,21 @@ sub getpart {
             }
             return @this;
         }
-        elsif(2==$inside) {
+        elsif($inside >= 2) {
             push @this, $_;
         }
     }
-    if($warning) {
+    if($trace && @this) {
+        # section/part has data but end of section not detected,
+        # end of file implies end of section.
+        print STDERR "*** getpart.pm: $section/$part returned data!\n";
+    }
+    if($warning && !@this) {
+        # section/part does not exist or has no data without an end of
+        # section; end of file implies end of section.
         print STDERR "*** getpart.pm: $section/$part returned empty!\n";
     }
-    return @this; #empty!
+    return @this; # empty when end of section detected
 }
 
 sub partexists {
