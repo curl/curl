@@ -211,6 +211,7 @@ my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
+my $has_metalink;# set if curl is built with Metalink support
 
 my $has_openssl; # built with a lib using an OpenSSL-like API
 my $has_gnutls;  # built with GnuTLS
@@ -2339,6 +2340,10 @@ sub checksystem {
                 # TLS-SRP enabled
                 $has_tls_srp=1;
             }
+            if($feat =~ /Metalink/i) {
+                # Metalink enabled
+                $has_metalink=1;
+            }
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -2746,6 +2751,11 @@ sub singletest {
         }
         elsif($f eq "TLS-SRP") {
             if($has_tls_srp) {
+                next;
+            }
+        }
+        elsif($f eq "Metalink") {
+            if($has_metalink) {
                 next;
             }
         }
