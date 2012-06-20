@@ -140,6 +140,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   int res = 0;
   int i;
 
+  bool orig_noprogress = config->noprogress;
+  bool orig_isatty = config->isatty;
+
   errorbuffer[0] = '\0';
   /* default headers output stream is stdout */
   memset(&hdrcbdata, 0, sizeof(struct HdrCbData));
@@ -223,7 +226,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
        ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
-      char *origopt = argv[i];
+      char *orig_opt = argv[i];
 
       char *flag = argv[i];
 
@@ -239,7 +242,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           int retval = CURLE_OK;
           if(res != PARAM_HELP_REQUESTED) {
             const char *reason = param2text(res);
-            helpf(config->errors, "option %s: %s\n", origopt, reason);
+            helpf(config->errors, "option %s: %s\n", orig_opt, reason);
             retval = CURLE_FAILED_INIT;
           }
           res = retval;
@@ -766,6 +769,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           /* we send the output to a tty, therefore we switch off the progress
              meter */
           config->noprogress = config->isatty = TRUE;
+        else {
+          /* progress meter is per download, so restore config
+             values */
+          config->noprogress = orig_noprogress;
+          config->isatty = orig_isatty;
+        }
 
         if(urlnum > 1 && !(config->mute)) {
           fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
