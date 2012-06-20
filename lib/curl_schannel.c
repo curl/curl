@@ -309,13 +309,18 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
 
   /* if we need a bigger buffer to read a full message, increase buffer now */
-  if(connssl->encdata_offset == connssl->encdata_length) {
-    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_INIT_SIZE * 16)
+  if(connssl->encdata_length - connssl->encdata_offset <
+     CURL_SCHANNEL_BUFFER_FREE_SIZE) {
+    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
+      failf(data, "schannel: memory buffer size limit reached");
       return CURLE_OUT_OF_MEMORY;
+    }
+
     /* increase internal encrypted data buffer */
-    connssl->encdata_length *= 2;
+    connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
                                       connssl->encdata_length);
+
     if(connssl->encdata_buffer == NULL) {
       failf(data, "schannel: unable to re-allocate memory");
       return CURLE_OUT_OF_MEMORY;
@@ -826,17 +831,25 @@ schannel_recv(struct connectdata *conn, int sockindex,
     connssl->decdata_buffer = malloc(connssl->decdata_length);
     if(connssl->decdata_buffer == NULL) {
       failf(data, "schannel: unable to allocate memory");
-      return CURLE_OUT_OF_MEMORY;
+      *err = CURLE_OUT_OF_MEMORY;
+      return -1;
     }
   }
 
   /* increase buffer in order to fit the requested amount of data */
   while(connssl->encdata_length - connssl->encdata_offset <
-        CURL_SCHANNEL_BUFFER_STEP_SIZE || connssl->encdata_length < len) {
+        CURL_SCHANNEL_BUFFER_FREE_SIZE || connssl->encdata_length < len) {
+    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
+      failf(data, "schannel: memory buffer size limit reached");
+      *err = CURLE_OUT_OF_MEMORY;
+      return -1;
+    }
+
     /* increase internal encrypted data buffer */
-    connssl->encdata_length += CURL_SCHANNEL_BUFFER_STEP_SIZE;
+    connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
                                       connssl->encdata_length);
+
     if(connssl->encdata_buffer == NULL) {
       failf(data, "schannel: unable to re-allocate memory");
       *err = CURLE_OUT_OF_MEMORY;
@@ -901,14 +914,21 @@ schannel_recv(struct connectdata *conn, int sockindex,
               inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
-        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_STEP_SIZE ?
-               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_STEP_SIZE;
+        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
+               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
         while(connssl->decdata_length - connssl->decdata_offset < size ||
               connssl->decdata_length < len) {
+          if(connssl->decdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
+            failf(data, "schannel: memory buffer size limit reached");
+            *err = CURLE_OUT_OF_MEMORY;
+            return -1;
+          }
+
           /* increase internal decrypted data buffer */
-          connssl->decdata_length += size;
+          connssl->decdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
           connssl->decdata_buffer = realloc(connssl->decdata_buffer,
                                             connssl->decdata_length);
+
           if(connssl->decdata_buffer == NULL) {
             failf(data, "schannel: unable to re-allocate memory");
             *err = CURLE_OUT_OF_MEMORY;
