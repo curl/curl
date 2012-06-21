@@ -134,7 +134,7 @@ sub getpart {
         # section; end of file implies end of section.
         print STDERR "*** getpart.pm: $section/$part returned empty!\n";
     }
-    return @this; # empty when end of section detected
+    return @this;
 }
 
 sub partexists {
