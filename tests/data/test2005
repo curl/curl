@@ -35,7 +35,7 @@ file
 Metalink
 </features>
  <name>
-Metalink local XML file with HTTP resource
+Metalink local XML file, HTTP resource
  </name>
 <command option="no-output,no-include">
 --metalink file://%PWD/log/test2005.metalink
@@ -78,5 +78,13 @@ Data delivered from an HTTP resource
 </file1>
 <file2 name="log/stdout2005">
 </file2>
+<file3 name="log/stderr2005">
+Metalink: Metalink XML file was parsed successfully
+Metalink: Validating sha-256 checksum (This may take some time)...
+Metalink: log/download2005: OK
+</file3>
+<stripfile3>
+$_ = '' if ($_ !~ /^Metalink: /)
+</stripfile3>
 </verify>
 </testcase>
