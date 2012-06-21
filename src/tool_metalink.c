@@ -330,11 +330,13 @@ static int check_hash(const char *filename,
   digest_context *dctx;
   int check_ok;
   int fd;
-  fprintf(error, "Validating %s checksum (This may take some time)...\n",
+  fprintf(error,
+          "Metalink: Validating %s checksum (This may take some time)...\n",
           digest_def->hash_name);
   fd = open(filename, O_RDONLY);
   if(fd == -1) {
-    fprintf(error, "Could not open file %s: %s\n", filename, strerror(errno));
+    fprintf(error, "Metalink: Could not open file %s: %s\n", filename,
+            strerror(errno));
     return -1;
   }
   dctx = Curl_digest_init(digest_def->dparams);
@@ -346,7 +348,7 @@ static int check_hash(const char *filename,
       break;
     }
     else if(len == -1) {
-      fprintf(error, "Could not read file %s: %s\n", filename,
+      fprintf(error, "Metalink: Could not read file %s: %s\n", filename,
               strerror(errno));
       Curl_digest_final(dctx, result);
       close(fd);
@@ -359,9 +361,9 @@ static int check_hash(const char *filename,
                     digest_def->dparams->digest_resultlen) == 0;
   /* sha*sum style verdict output */
   if(check_ok)
-    fprintf(error, "%s: OK\n", filename);
+    fprintf(error, "Metalink: %s: OK\n", filename);
   else
-    fprintf(error, "%s: FAILED\n", filename);
+    fprintf(error, "Metalink: %s: FAILED\n", filename);
 
   free(result);
   close(fd);
@@ -480,7 +482,8 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs)
     return -1;
   }
   if(metalink->files == NULL) {
-    fprintf(config->errors, "\nMetalink does not contain any file.\n");
+    fprintf(config->errors,
+            "\nMetalink: Metalink XML file does not contain any file.\n");
     metalink_delete(metalink);
     return 0;
   }
@@ -488,7 +491,8 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs)
     struct getout *url;
     /* Skip an entry which has no resource. */
     if(!(*files)->resources) {
-      fprintf(config->errors, "\nFile %s does not have any resource.\n",
+      fprintf(config->errors,
+              "\nMetalink: File %s does not have any resource.\n",
               (*files)->name);
       continue;
     }
@@ -554,7 +558,7 @@ size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
   if(rv == 0)
     return sz * nmemb;
   else {
-    warnf(config, "Failed to parse Metalink XML\n");
+    warnf(config, "Metalink: Failed to parse Metalink XML file\n");
     return failure;
   }
 }

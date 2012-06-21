@@ -1602,9 +1602,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(!metalink && config->use_metalink && res == CURLE_OK) {
           if(parse_metalink(config, &outs) == 0)
             fprintf(config->errors,
-                    "Metalink XML is parsed successfully\n");
+                    "Metalink: Metalink XML file was parsed successfully\n");
           else
-            fprintf(config->errors, "Could not parse Metalink XML.\n");
+            fprintf(config->errors,
+                    "Metalink: Could not parse Metalink XML file\n");
         }
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
           int rv = metalink_check_hash(config, mlfile, outs.filename);
