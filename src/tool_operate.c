@@ -879,7 +879,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_NOBODY, 1);
           my_setopt(curl, CURLOPT_HEADER, 1);
         }
-        else
+        /* If --metalink is used, we ignore --include (headers in
+           output) option because mixing headers to the body will
+           confuse XML parser and/or hash check will fail. */
+        else if(!config->use_metalink)
           my_setopt(curl, CURLOPT_HEADER, config->include_headers);
 
 #if !defined(CURL_DISABLE_PROXY)
