@@ -833,19 +833,28 @@ option to -1 to make it limitless.
 
 If this option is used several times, the last one will be used.
 .IP "--metalink"
-If curl is built against the libmetalink library then this option can tell
-curl to parse and process a local Metalink file (RFC 5854) and make use
-of the mirrors listed within for failover if there are errors (such as the
-file or server not being available).
-
-Example to use a local Metalink file:
-\fBcurl\fP --metalink example.metalink
-
-If Metalink support is enabled, curl will also use remote Metalinks if they
-are offered with the correct MIME type (application/metalink+xml).
+If curl is built against the libmetalink library then this option can
+tell curl to parse and process a given URI as Metalink file (both
+version 3 and 4 (RFC 5854) are supported) and make use of the mirrors
+listed within for failover if there are errors (such as the file or
+server not being available). The Metalink file itself is downloaded
+and processed in memory and not stored in the local file system.
 
 Example to use a remote Metalink file:
-\fBcurl\fP -O http://www.example.com/example.metalink
+
+\fBcurl\fP --metalink http://www.example.com/example.metalink
+
+To use a Metalink file in the local file system, use FILE protocol
+(file://):
+
+\fBcurl\fP --metalink file://example.metalink
+
+Please note that if FILE protocol is disabled, there is no way to use
+a local Metalink file at the time of this writing. Also note that If
+--metalink and --include are used together, --include will be
+ignored. This is because including headers in the response will break
+Metalink parser and if the headers are included in the file described
+in Metalink file, hash check will fail.
 
 (Added in 7.27.0)
 .IP "-n, --netrc"
@@ -1710,9 +1719,9 @@ authenticate with your current user and password.
 .IP "TLS-SRP"
 SRP (Secure Remote Password) authentication is supported for TLS.
 .IP "Metalink"
-This curl supports Metalink (RFC 5854), which describes mirrors and hashes.
-curl will use mirrors for failover if there are errors (such as the file or
-server not being available).
+This curl supports Metalink (both version 3 and 4 (RFC 5854)), which
+describes mirrors and hashes.  curl will use mirrors for failover if
+there are errors (such as the file or server not being available).
 .RE
 .SH FILES
 .I ~/.curlrc
