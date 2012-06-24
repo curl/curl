@@ -1883,12 +1883,18 @@ something, you don't actually change how libcurl behaves or acts in regards
 to the particular request method, it will only change the actual string sent
 in the request.
 
-For example: if you tell libcurl to do a HEAD request, but then change the
-request to a "GET" with \fBCURLOPT_CUSTOMREQUEST\fP you'll still see libcurl
-act as if it sent a HEAD even when it does send a GET.
+For example:
 
-To switch to a proper HEAD, use \fICURLOPT_NOBODY\fP, to switch to a proper
-POST, use \fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and so on.
+With the HTTP protocol when you tell libcurl to do a HEAD request, but then
+specify a GET though a custom request libcurl will still act as if it sent a
+HEAD. To switch to a proper HEAD use \fICURLOPT_NOBODY\fP, to switch to a
+proper POST use \fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and to switch
+to a proper GET use CURLOPT_HTTPGET.
+
+With the POP3 protocol when you tell libcurl to use a custom request it will
+behave like a LIST or RETR command was sent where it expects data to be
+returned by the server. As such \fICURLOPT_NOBODY\fP should be used when
+specifing commands such as DELE and NOOP for example.
 
 Restore to the internal default by setting this to NULL.
 
