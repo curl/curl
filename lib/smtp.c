@@ -1011,8 +1011,8 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
-    failf(data, "Access denied: %d", smtpcode);
-    result = CURLE_LOGIN_DENIED;
+    failf(data, "MAIL failed: %d", smtpcode);
+    result = CURLE_SEND_ERROR;
     state(conn, SMTP_STOP);
   }
   else {
@@ -1036,8 +1036,8 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2) {
-    failf(data, "Access denied: %d", smtpcode);
-    result = CURLE_LOGIN_DENIED;
+    failf(data, "RCPT failed: %d", smtpcode);
+    result = CURLE_SEND_ERROR;
     state(conn, SMTP_STOP);
   }
   else {
@@ -1076,7 +1076,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
 
   if(smtpcode != 354) {
     state(conn, SMTP_STOP);
-    return CURLE_RECV_ERROR;
+    return CURLE_SEND_ERROR;
   }
 
   /* SMTP upload */
