@@ -348,6 +348,20 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
   }
   infof(data, "Connection accepted from server\n");
 
+  if(data->set.fsockopt) {
+    int error = 0;
+
+    /* activate callback for setting socket options */
+    error = data->set.fsockopt(data->set.sockopt_client,
+                               s,
+                               CURLSOCKTYPE_ACCEPT);
+
+    if(error) {
+      Curl_closesocket(conn, s); /* close the socket and bail out */
+      return CURLE_ABORTED_BY_CALLBACK;
+    }
+  }
+
   conn->sock[SECONDARYSOCKET] = s;
   curlx_nonblock(s, TRUE); /* enable non-blocking */
   conn->sock_accepted[SECONDARYSOCKET] = TRUE;

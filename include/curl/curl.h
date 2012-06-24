@@ -309,8 +309,9 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                       void *instream);
 
 typedef enum  {
-  CURLSOCKTYPE_IPCXN, /* socket created for a specific IP connection */
-  CURLSOCKTYPE_LAST   /* never use */
+  CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
+  CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
+  CURLSOCKTYPE_LAST    /* never use */
 } curlsocktype;
 
 /* The return code from the sockopt_callback can signal information back
