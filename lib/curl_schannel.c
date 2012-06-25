@@ -200,7 +200,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       else
         failf(data, "schannel: AcquireCredentialsHandle failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
-      free(connssl->cred);
+      Curl_safefree(connssl->cred);
       connssl->cred = NULL;
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -239,7 +239,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
 #ifdef UNICODE
-  free(host_name);
+  Curl_safefree(host_name);
 #endif
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
@@ -249,7 +249,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     else
       failf(data, "schannel: initial InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
-    free(connssl->ctxt);
+    Curl_safefree(connssl->ctxt);
     connssl->ctxt = NULL;
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -390,11 +390,11 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
 #ifdef UNICODE
-    free(host_name);
+    Curl_safefree(host_name);
 #endif
 
     /* free buffer for received handshake data */
-    free(inbuf[0].pvBuffer);
+    Curl_safefree(inbuf[0].pvBuffer);
 
     /* check if the handshake was incomplete */
     if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
@@ -797,7 +797,7 @@ schannel_send(struct connectdata *conn, int sockindex,
     *err = CURLE_SEND_ERROR;
   }
 
-  free(data);
+  Curl_safefree(data);
 
   if(len == (size_t)written)
     /* Encrypted message including header, data and trailer entirely sent.
@@ -1068,9 +1068,9 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
 
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 {
-/* See
-http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
-   Shutting Down an Schannel Connection */
+  /* See http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
+   * Shutting Down an Schannel Connection
+   */
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -1124,7 +1124,7 @@ http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
          &connssl->ctxt->time_stamp);
 
 #ifdef UNICODE
-    free(host_name);
+    Curl_safefree(host_name);
 #endif
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
@@ -1139,17 +1139,18 @@ http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
               " (bytes written: %zd)\n", curl_easy_strerror(code), written);
       }
     }
+
     /* free SSPI Schannel API security context handle */
     if(connssl->ctxt) {
       s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
-      free(connssl->ctxt);
+      Curl_safefree(connssl->ctxt);
       connssl->ctxt = NULL;
     }
   }
 
   /* free internal buffer for received encrypted data */
   if(connssl->encdata_buffer != NULL) {
-    free(connssl->encdata_buffer);
+    Curl_safefree(connssl->encdata_buffer);
     connssl->encdata_buffer = NULL;
     connssl->encdata_length = 0;
     connssl->encdata_offset = 0;
@@ -1157,7 +1158,7 @@ http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138(v=vs.85).aspx
 
   /* free internal buffer for received decrypted data */
   if(connssl->decdata_buffer != NULL) {
-    free(connssl->decdata_buffer);
+    Curl_safefree(connssl->decdata_buffer);
     connssl->decdata_buffer = NULL;
     connssl->decdata_length = 0;
     connssl->decdata_offset = 0;
@@ -1172,7 +1173,7 @@ void Curl_schannel_session_free(void *ptr)
 
   if(cred) {
     s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-    free(cred);
+    Curl_safefree(cred);
   }
 }
 
@@ -1284,9 +1285,9 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
         failf(data, "schannel: CertGetNameString() certificate hostname "
               "(%s) did not match connection (%s)",
               _cert_hostname, conn->host.name);
-        free((void *)_cert_hostname);
+        Curl_safefree((void *)_cert_hostname);
       }
-      free(hostname);
+      Curl_safefree(hostname);
     }
   }
 
