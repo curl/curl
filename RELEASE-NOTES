@@ -10,7 +10,7 @@ Curl and libcurl 7.27.0
 This release includes the following changes:
 
  o nss: use human-readable error messages provided by NSS
- o added --metalink for metalink download support
+ o added --metalink for metalink download support [5]
  o pop3: Added support for sasl plain text authentication
  o pop3: Added support for sasl login authentication 
  o pop3: Added support for sasl ntlm authentication
@@ -55,4 +55,4 @@ References to bug reports and discussions on issues:
  [2] = http://daniel.haxx.se/blog/2012/06/12/schannel-support-in-libcurl/
  [3] = http://curl.haxx.se/bug/view.cgi?id=3533045
  [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
- 
+ [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
