@@ -17,7 +17,7 @@ This release includes the following changes:
  o pop3: Added support for sasl cram-md5 authentication
  o pop3: Added support for sasl digest-md5 authentication
  o pop3: Added support for apop authentication
- o sspi: Added support for Schannel SSL/TLS encryption
+ o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
 
 This release includes the following bugfixes:
 
@@ -28,6 +28,12 @@ This release includes the following bugfixes:
    cross builds
  o ssl: fix duplicated SSL handshake with multi interface and proxy [1]
  o winbuild: Fix Makefile.vc ignoring USE_IPV6 and USE_IDN flags
+ o OpenSSL: support longer certificate subject names [3]
+ o openldap: OOM fixes
+ o log2changes.pl: fix the Version output
+ o lib554.c: use curl_formadd() properly [4]
+ o urldata.h: fix cyassl build clash with wincrypt.h
+ o 
 
 This release includes the following known bugs:
 
@@ -37,10 +43,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
- Yang Tse, Gokhan Sengun
+ Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
+ Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
+ Neil Bowers
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = https://bugzilla.redhat.com/788526
+ [2] = http://daniel.haxx.se/blog/2012/06/12/schannel-support-in-libcurl/
+ [3] = http://curl.haxx.se/bug/view.cgi?id=3533045
+ [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
+ 
