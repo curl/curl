@@ -201,7 +201,6 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: AcquireCredentialsHandle failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
       Curl_safefree(connssl->cred);
-      connssl->cred = NULL;
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -250,7 +249,6 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       failf(data, "schannel: initial InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(conn, sspi_status));
     Curl_safefree(connssl->ctxt);
-    connssl->ctxt = NULL;
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -1144,14 +1142,12 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     if(connssl->ctxt) {
       s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
       Curl_safefree(connssl->ctxt);
-      connssl->ctxt = NULL;
     }
   }
 
   /* free internal buffer for received encrypted data */
   if(connssl->encdata_buffer != NULL) {
     Curl_safefree(connssl->encdata_buffer);
-    connssl->encdata_buffer = NULL;
     connssl->encdata_length = 0;
     connssl->encdata_offset = 0;
   }
@@ -1159,7 +1155,6 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   /* free internal buffer for received decrypted data */
   if(connssl->decdata_buffer != NULL) {
     Curl_safefree(connssl->decdata_buffer);
-    connssl->decdata_buffer = NULL;
     connssl->decdata_length = 0;
     connssl->decdata_offset = 0;
   }
