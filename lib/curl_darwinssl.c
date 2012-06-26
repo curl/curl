@@ -36,6 +36,8 @@
 
 #ifdef USE_DARWINSSL
 #include <Security/Security.h>
+#include <Security/SecureTransport.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -147,8 +149,8 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   return ortn;
 }
 
-static CURLcode st_connect_step1(struct connectdata *conn,
-                                 int sockindex)
+static CURLcode darwinssl_connect_step1(struct connectdata *conn,
+                                        int sockindex)
 {
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -252,7 +254,7 @@ static CURLcode st_connect_step1(struct connectdata *conn,
 }
 
 static CURLcode
-st_connect_step2(struct connectdata *conn, int sockindex)
+darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 {
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -276,7 +278,7 @@ st_connect_step2(struct connectdata *conn, int sockindex)
 
       case errSSLServerAuthCompleted:
         /* the documentation says we need to call SSLHandshake() again */
-        return st_connect_step2(conn, sockindex);
+        return darwinssl_connect_step2(conn, sockindex);
 
       case errSSLXCertChainInvalid:
       case errSSLUnknownRootCert:
@@ -306,8 +308,8 @@ st_connect_step2(struct connectdata *conn, int sockindex)
 }
 
 static CURLcode
-st_connect_step3(struct connectdata *conn,
-                 int sockindex)
+darwinssl_connect_step3(struct connectdata *conn,
+                        int sockindex)
 {
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -344,14 +346,14 @@ st_connect_step3(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static Curl_recv st_recv;
-static Curl_send st_send;
+static Curl_recv darwinssl_recv;
+static Curl_send darwinssl_send;
 
 static CURLcode
-st_connect_common(struct connectdata *conn,
-                  int sockindex,
-                  bool nonblocking,
-                  bool *done)
+darwinssl_connect_common(struct connectdata *conn,
+                         int sockindex,
+                         bool nonblocking,
+                         bool *done)
 {
   CURLcode retcode;
   struct SessionHandle *data = conn->data;
@@ -375,7 +377,7 @@ st_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = st_connect_step1(conn, sockindex);
+    retcode = darwinssl_connect_step1(conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -432,26 +434,27 @@ st_connect_common(struct connectdata *conn,
      * before step2 has completed while ensuring that a client using select()
      * or epoll() will always have a valid fdset to wait on.
      */
-    retcode = st_connect_step2(conn, sockindex);
+    retcode = darwinssl_connect_step2(conn, sockindex);
     if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
+                    ssl_connect_2_writing == connssl->connecting_state ||
+                    ssl_connect_2_wouldblock == connssl->connecting_state)))
       return retcode;
 
   } /* repeat step2 until all transactions are done. */
 
 
   if(ssl_connect_3==connssl->connecting_state) {
-    retcode = st_connect_step3(conn, sockindex);
+    retcode = darwinssl_connect_step3(conn, sockindex);
     if(retcode)
       return retcode;
   }
 
   if(ssl_connect_done==connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = st_recv;
-    conn->send[sockindex] = st_send;
+    conn->recv[sockindex] = darwinssl_recv;
+    conn->send[sockindex] = darwinssl_send;
     *done = TRUE;
   }
   else
@@ -464,21 +467,21 @@ st_connect_common(struct connectdata *conn,
 }
 
 CURLcode
-Curl_st_connect_nonblocking(struct connectdata *conn,
-                            int sockindex,
-                            bool *done)
+Curl_darwinssl_connect_nonblocking(struct connectdata *conn,
+                                   int sockindex,
+                                   bool *done)
 {
-  return st_connect_common(conn, sockindex, TRUE, done);
+  return darwinssl_connect_common(conn, sockindex, TRUE, done);
 }
 
 CURLcode
-Curl_st_connect(struct connectdata *conn,
-                int sockindex)
+Curl_darwinssl_connect(struct connectdata *conn,
+                       int sockindex)
 {
   CURLcode retcode;
   bool done = FALSE;
 
-  retcode = st_connect_common(conn, sockindex, FALSE, &done);
+  retcode = darwinssl_connect_common(conn, sockindex, FALSE, &done);
 
   if(retcode)
     return retcode;
@@ -488,7 +491,7 @@ Curl_st_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_st_close(struct connectdata *conn, int sockindex)
+void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -498,13 +501,13 @@ void Curl_st_close(struct connectdata *conn, int sockindex)
   connssl->ssl_sockfd = 0;
 }
 
-void Curl_st_close_all(struct SessionHandle *data)
+void Curl_darwinssl_close_all(struct SessionHandle *data)
 {
   /* SecureTransport doesn't separate sessions from contexts, so... */
   (void)data;
 }
 
-int Curl_st_shutdown(struct connectdata *conn, int sockindex)
+int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
@@ -519,7 +522,7 @@ int Curl_st_shutdown(struct connectdata *conn, int sockindex)
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
 
-  Curl_st_close(conn, sockindex);
+  Curl_darwinssl_close(conn, sockindex);
 
   rc = 0;
 
@@ -558,7 +561,7 @@ int Curl_st_shutdown(struct connectdata *conn, int sockindex)
   return rc;
 }
 
-size_t Curl_st_version(char *buffer, size_t size)
+size_t Curl_darwinssl_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "SecureTransport");
 }
@@ -571,7 +574,7 @@ size_t Curl_st_version(char *buffer, size_t size)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int Curl_st_check_cxn(struct connectdata *conn)
+int Curl_darwinssl_check_cxn(struct connectdata *conn)
 {
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
   OSStatus err;
@@ -586,7 +589,8 @@ int Curl_st_check_cxn(struct connectdata *conn)
   return 0;
 }
 
-bool Curl_st_data_pending(const struct connectdata *conn, int connindex)
+bool Curl_darwinssl_data_pending(const struct connectdata *conn,
+                                 int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   OSStatus err;
@@ -602,11 +606,11 @@ bool Curl_st_data_pending(const struct connectdata *conn, int connindex)
     return false;
 }
 
-static ssize_t st_send(struct connectdata *conn,
-                       int sockindex,
-                       const void *mem,
-                       size_t len,
-                       CURLcode *curlcode)
+static ssize_t darwinssl_send(struct connectdata *conn,
+                              int sockindex,
+                              const void *mem,
+                              size_t len,
+                              CURLcode *curlcode)
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -630,11 +634,11 @@ static ssize_t st_send(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
-static ssize_t st_recv(struct connectdata *conn, /* connection data */
-                       int num,                  /* socketindex */
-                       char *buf,                /* store read data here */
-                       size_t buffersize,        /* max amount to read */
-                       CURLcode *curlcode)
+static ssize_t darwinssl_recv(struct connectdata *conn,
+                              int num,
+                              char *buf,
+                              size_t buffersize,
+                              CURLcode *curlcode)
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];

@@ -141,6 +141,9 @@
 
 #ifdef USE_DARWINSSL
 #include <Security/Security.h>
+/* For some reason, when building for iOS, the omnibus header above does
+ * not include SecureTransport.h as of iOS SDK 5.1. */
+#include <Security/SecureTransport.h>
 #endif
 
 #ifdef HAVE_NETINET_IN_H
@@ -245,13 +248,11 @@ typedef enum {
   ssl_connect_2,
   ssl_connect_2_reading,
   ssl_connect_2_writing,
-  ssl_connect_3,
 #ifdef USE_DARWINSSL
-  ssl_connect_done,
-  ssl_connect_2_wouldblock
-#else
-  ssl_connect_done
+  ssl_connect_2_wouldblock,
 #endif /* USE_DARWINSSL */
+  ssl_connect_3,
+  ssl_connect_done
 } ssl_connect_state;
 
 typedef enum {
