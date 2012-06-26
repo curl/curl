@@ -1,0 +1,661 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+
+/*
+ * Source file for all SecureTransport-specific code for the TLS/SSL layer.
+ * No code but sslgen.c should ever call or use these functions.
+ */
+
+#include "setup.h"
+
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
+#ifdef USE_DARWINSSL
+#include <Security/Security.h>
+#include "urldata.h"
+#include "sendf.h"
+#include "inet_pton.h"
+#include "connect.h"
+#include "select.h"
+#include "sslgen.h"
+#include "curl_darwinssl.h"
+
+/* From MacTypes.h (which we can't include because it isn't present in iOS: */
+#define ioErr -36
+
+/* The following two functions were ripped from Apple sample code,
+ * with some modifications: */
+static OSStatus SocketRead(SSLConnectionRef connection,
+                           void *data,          /* owned by
+                                                 * caller, data
+                                                 * RETURNED */
+                           size_t *dataLength)  /* IN/OUT */
+{
+  UInt32 bytesToGo = *dataLength;
+  UInt32 initLen = bytesToGo;
+  UInt8 *currData = (UInt8 *)data;
+  int sock = *(int *)connection;
+  OSStatus rtn = noErr;
+  UInt32 bytesRead;
+  int rrtn;
+  int theErr;
+
+  *dataLength = 0;
+
+  for(;;) {
+    bytesRead = 0;
+    rrtn = read(sock, currData, bytesToGo);
+    if(rrtn <= 0) {
+      /* this is guesswork... */
+      theErr = errno;
+      if((rrtn == 0) && (theErr == 0)) {
+        /* try fix for iSync */
+        rtn = errSSLClosedGraceful;
+      }
+      else /* do the switch */
+        switch(theErr) {
+          case ENOENT:
+            /* connection closed */
+            rtn = errSSLClosedGraceful;
+            break;
+          case ECONNRESET:
+            rtn = errSSLClosedAbort;
+            break;
+          case EAGAIN:
+            rtn = errSSLWouldBlock;
+            break;
+          default:
+            rtn = ioErr;
+            break;
+        }
+      break;
+    }
+    else {
+      bytesRead = rrtn;
+    }
+    bytesToGo -= bytesRead;
+    currData  += bytesRead;
+
+    if(bytesToGo == 0) {
+      /* filled buffer with incoming data, done */
+      break;
+    }
+  }
+  *dataLength = initLen - bytesToGo;
+
+  return rtn;
+}
+
+static OSStatus SocketWrite(SSLConnectionRef connection,
+                            const void *data,
+                            size_t *dataLength)  /* IN/OUT */
+{
+  UInt32 bytesSent = 0;
+  int sock = *(int *)connection;
+  int length;
+  UInt32 dataLen = *dataLength;
+  const UInt8 *dataPtr = (UInt8 *)data;
+  OSStatus ortn;
+  int theErr;
+
+  *dataLength = 0;
+
+  do {
+    length = write(sock,
+                   (char*)dataPtr + bytesSent,
+                   dataLen - bytesSent);
+  } while((length > 0) &&
+           ( (bytesSent += length) < dataLen) );
+
+  if(length <= 0) {
+    theErr = errno;
+    if(theErr == EAGAIN) {
+      ortn = errSSLWouldBlock;
+    }
+    else {
+      ortn = ioErr;
+    }
+  }
+  else {
+    ortn = noErr;
+  }
+  *dataLength = bytesSent;
+  return ortn;
+}
+
+static CURLcode st_connect_step1(struct connectdata *conn,
+                                 int sockindex)
+{
+  struct SessionHandle *data = conn->data;
+  curl_socket_t sockfd = conn->sock[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  bool sni = true;
+#ifdef ENABLE_IPV6
+  struct in6_addr addr;
+#else
+  struct in_addr addr;
+#endif
+  SSLConnectionRef ssl_connection;
+  OSStatus err = noErr;
+
+  if(connssl->ssl_ctx)
+    (void)SSLDisposeContext(connssl->ssl_ctx);
+  err = SSLNewContext(false, &(connssl->ssl_ctx));
+  if(err != noErr) {
+    failf(data, "SSL: couldn't create a context: OSStatus %d", err);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* check to see if we've been told to use an explicit SSL/TLS version */
+  (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
+  switch(data->set.ssl.version) {
+    default:
+    case CURL_SSLVERSION_DEFAULT:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kSSLProtocol3,
+                                         true);
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol1,
+                                         true);
+      break;
+    case CURL_SSLVERSION_TLSv1:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol1,
+                                         true);
+      break;
+    case CURL_SSLVERSION_SSLv2:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kSSLProtocol2,
+                                         true);
+      break;
+    case CURL_SSLVERSION_SSLv3:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kSSLProtocol3,
+                                         true);
+      break;
+  }
+
+  /* No need to load certificates here. SecureTransport uses the Keychain
+   * (which is also part of the Security framework) to evaluate trust. */
+
+  /* SSL always tries to verify the peer, this only says whether it should
+   * fail to connect if the verification fails, or if it should continue
+   * anyway. In the latter case the result of the verification is checked with
+   * SSL_get_verify_result() below. */
+  err = SSLSetEnableCertVerify(connssl->ssl_ctx,
+                               data->set.ssl.verifypeer?true:false);
+  if(err != noErr) {
+    failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
+#ifdef ENABLE_IPV6
+     (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
+#endif
+     sni) {
+    err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
+                               strlen(conn->host.name));
+    if(err != noErr) {
+      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
+            err);
+    }
+    else
+      infof(data, "WARNING: failed to configure "
+            "server name indication (SNI) TLS extension\n");
+  }
+
+  err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
+  if(err != noErr) {
+    failf(data, "SSL: SSLSetIOFuncs() failed: OSStatus %d", err);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  /* pass the raw socket into the SSL layers */
+  /* We need to store the FD in a constant memory address, because
+   * SSLSetConnection() will not copy that address. I've found that
+   * conn->sock[sockindex] may change on its own. */
+  connssl->ssl_sockfd = sockfd;
+  ssl_connection = &(connssl->ssl_sockfd);
+  err = SSLSetConnection(connssl->ssl_ctx, ssl_connection);
+  if(err != noErr) {
+    failf(data, "SSL: SSLSetConnection() failed: %d", err);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  connssl->connecting_state = ssl_connect_2;
+  return CURLE_OK;
+}
+
+static CURLcode
+st_connect_step2(struct connectdata *conn, int sockindex)
+{
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  OSStatus err;
+  SSLCipherSuite cipher;
+
+  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
+              || ssl_connect_2_reading == connssl->connecting_state
+              || ssl_connect_2_writing == connssl->connecting_state
+              || ssl_connect_2_wouldblock == connssl->connecting_state);
+
+  /* Here goes nothing: */
+  err = SSLHandshake(connssl->ssl_ctx);
+
+  if(err != noErr) {
+    switch (err) {
+      case errSSLWouldBlock:  /* they're not done with us yet */
+        connssl->connecting_state = ssl_connect_2_wouldblock;
+        return CURLE_OK;
+        break;
+
+      case errSSLServerAuthCompleted:
+        /* the documentation says we need to call SSLHandshake() again */
+        return st_connect_step2(conn, sockindex);
+
+      case errSSLXCertChainInvalid:
+      case errSSLUnknownRootCert:
+      case errSSLNoRootCert:
+      case errSSLCertExpired:
+        failf(data, "SSL certificate problem: OSStatus %d", err);
+        return CURLE_SSL_CACERT;
+        break;
+
+      default:
+        failf(data, "Unknown SSL protocol error in connection to %s:%d",
+              conn->host.name, err);
+        return CURLE_SSL_CONNECT_ERROR;
+        break;
+    }
+  }
+  else {
+    /* we have been connected fine, we're not waiting for anything else. */
+    connssl->connecting_state = ssl_connect_3;
+
+    /* Informational message */
+    (void)SSLGetNegotiatedCipher(connssl->ssl_ctx, &cipher);
+    infof (data, "SSL connection using cipher %u\n", cipher);
+
+    return CURLE_OK;
+  }
+}
+
+static CURLcode
+st_connect_step3(struct connectdata *conn,
+                 int sockindex)
+{
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CFStringRef server_cert_summary;
+  char server_cert_summary_c[128];
+  CFArrayRef server_certs;
+  SecCertificateRef server_cert;
+  OSStatus err;
+  CFIndex i, count;
+
+  /* There is no step 3!
+   * Well, okay, if verbose mode is on, let's print the details of the
+   * server certificates. */
+  err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
+  if(err == noErr) {
+    count = CFArrayGetCount(server_certs);
+    for(i = 0L ; i < count ; i++) {
+      server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
+
+      server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+      memset(server_cert_summary_c, 0, 128);
+      if(CFStringGetCString(server_cert_summary,
+                            server_cert_summary_c,
+                            128,
+                            kCFStringEncodingUTF8)) {
+        infof(data, "Server certificate: %s\n", server_cert_summary_c);
+      }
+      CFRelease(server_cert_summary);
+    }
+    CFRelease(server_certs);
+  }
+
+  connssl->connecting_state = ssl_connect_done;
+  return CURLE_OK;
+}
+
+static Curl_recv st_recv;
+static Curl_send st_send;
+
+static CURLcode
+st_connect_common(struct connectdata *conn,
+                  int sockindex,
+                  bool nonblocking,
+                  bool *done)
+{
+  CURLcode retcode;
+  struct SessionHandle *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  curl_socket_t sockfd = conn->sock[sockindex];
+  long timeout_ms;
+  int what;
+
+  /* check if the connection has already been established */
+  if(ssl_connection_complete == connssl->state) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  if(ssl_connect_1==connssl->connecting_state) {
+    /* Find out how much more time we're allowed */
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+    retcode = st_connect_step1(conn, sockindex);
+    if(retcode)
+      return retcode;
+  }
+
+  while(ssl_connect_2 == connssl->connecting_state ||
+        ssl_connect_2_reading == connssl->connecting_state ||
+        ssl_connect_2_writing == connssl->connecting_state ||
+        ssl_connect_2_wouldblock == connssl->connecting_state) {
+
+    /* check allowed time left */
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
+    /* if ssl is expecting something, check if it's available. */
+    if(connssl->connecting_state == ssl_connect_2_reading
+       || connssl->connecting_state == ssl_connect_2_writing
+       || connssl->connecting_state == ssl_connect_2_wouldblock) {
+
+      curl_socket_t writefd = ssl_connect_2_writing
+      || ssl_connect_2_wouldblock ==
+      connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      curl_socket_t readfd = ssl_connect_2_reading
+      || ssl_connect_2_wouldblock ==
+      connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+
+      what = Curl_socket_ready(readfd, writefd, nonblocking?0:timeout_ms);
+      if(what < 0) {
+        /* fatal error */
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      else if(0 == what) {
+        if(nonblocking) {
+          *done = FALSE;
+          return CURLE_OK;
+        }
+        else {
+          /* timeout */
+          failf(data, "SSL connection timeout");
+          return CURLE_OPERATION_TIMEDOUT;
+        }
+      }
+      /* socket is readable or writable */
+    }
+
+    /* Run transaction, and return to the caller if it failed or if this
+     * connection is done nonblocking and this loop would execute again. This
+     * permits the owner of a multi handle to abort a connection attempt
+     * before step2 has completed while ensuring that a client using select()
+     * or epoll() will always have a valid fdset to wait on.
+     */
+    retcode = st_connect_step2(conn, sockindex);
+    if(retcode || (nonblocking &&
+                   (ssl_connect_2 == connssl->connecting_state ||
+                    ssl_connect_2_reading == connssl->connecting_state ||
+                    ssl_connect_2_writing == connssl->connecting_state)))
+      return retcode;
+
+  } /* repeat step2 until all transactions are done. */
+
+
+  if(ssl_connect_3==connssl->connecting_state) {
+    retcode = st_connect_step3(conn, sockindex);
+    if(retcode)
+      return retcode;
+  }
+
+  if(ssl_connect_done==connssl->connecting_state) {
+    connssl->state = ssl_connection_complete;
+    conn->recv[sockindex] = st_recv;
+    conn->send[sockindex] = st_send;
+    *done = TRUE;
+  }
+  else
+    *done = FALSE;
+
+  /* Reset our connect state machine */
+  connssl->connecting_state = ssl_connect_1;
+
+  return CURLE_OK;
+}
+
+CURLcode
+Curl_st_connect_nonblocking(struct connectdata *conn,
+                            int sockindex,
+                            bool *done)
+{
+  return st_connect_common(conn, sockindex, TRUE, done);
+}
+
+CURLcode
+Curl_st_connect(struct connectdata *conn,
+                int sockindex)
+{
+  CURLcode retcode;
+  bool done = FALSE;
+
+  retcode = st_connect_common(conn, sockindex, FALSE, &done);
+
+  if(retcode)
+    return retcode;
+
+  DEBUGASSERT(done);
+
+  return CURLE_OK;
+}
+
+void Curl_st_close(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  (void)SSLClose(connssl->ssl_ctx);
+  (void)SSLDisposeContext(connssl->ssl_ctx);
+  connssl->ssl_ctx = NULL;
+  connssl->ssl_sockfd = 0;
+}
+
+void Curl_st_close_all(struct SessionHandle *data)
+{
+  /* SecureTransport doesn't separate sessions from contexts, so... */
+  (void)data;
+}
+
+int Curl_st_shutdown(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct SessionHandle *data = conn->data;
+  ssize_t nread;
+  int what;
+  int rc;
+  char buf[120];
+
+  if(!connssl->ssl_ctx)
+    return 0;
+
+  if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
+    return 0;
+
+  Curl_st_close(conn, sockindex);
+
+  rc = 0;
+
+  what = Curl_socket_ready(conn->sock[sockindex],
+                           CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+
+  for(;;) {
+    if(what < 0) {
+      /* anything that gets here is fatally bad */
+      failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+      rc = -1;
+      break;
+    }
+
+    if(!what) {                                /* timeout */
+      failf(data, "SSL shutdown timeout");
+      break;
+    }
+
+    /* Something to read, let's do it and hope that it is the close
+     notify alert from the server. No way to SSL_Read now, so use read(). */
+
+    nread = read(conn->sock[sockindex], buf, sizeof(buf));
+
+    if(nread < 0) {
+      failf(data, "read: %s", strerror(errno));
+      rc = -1;
+    }
+
+    if(nread <= 0)
+      break;
+
+    what = Curl_socket_ready(conn->sock[sockindex], CURL_SOCKET_BAD, 0);
+  }
+
+  return rc;
+}
+
+size_t Curl_st_version(char *buffer, size_t size)
+{
+  return snprintf(buffer, size, "SecureTransport");
+}
+
+/*
+ * This function uses SSLGetSessionState to determine connection status.
+ *
+ * Return codes:
+ *     1 means the connection is still in place
+ *     0 means the connection has been closed
+ *    -1 means the connection status is unknown
+ */
+int Curl_st_check_cxn(struct connectdata *conn)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+  OSStatus err;
+  SSLSessionState state;
+
+  if(connssl->ssl_ctx) {
+    err = SSLGetSessionState(connssl->ssl_ctx, &state);
+    if(err == noErr)
+      return state == kSSLConnected || state == kSSLHandshake;
+    return -1;
+  }
+  return 0;
+}
+
+bool Curl_st_data_pending(const struct connectdata *conn, int connindex)
+{
+  const struct ssl_connect_data *connssl = &conn->ssl[connindex];
+  OSStatus err;
+  size_t buffer;
+
+  if(connssl->ssl_ctx) {  /* SSL is in use */
+    err = SSLGetBufferedReadSize(connssl->ssl_ctx, &buffer);
+    if(err == noErr)
+      return buffer > 0UL;
+    return false;
+  }
+  else
+    return false;
+}
+
+static ssize_t st_send(struct connectdata *conn,
+                       int sockindex,
+                       const void *mem,
+                       size_t len,
+                       CURLcode *curlcode)
+{
+  /*struct SessionHandle *data = conn->data;*/
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  size_t processed;
+  OSStatus err = SSLWrite(connssl->ssl_ctx, mem, len, &processed);
+
+  if(err != noErr) {
+    switch (err) {
+      case errSSLWouldBlock:  /* we're not done yet; keep sending */
+        *curlcode = CURLE_AGAIN;
+        return -1;
+        break;
+
+      default:
+        failf(conn->data, "SSLWrite() return error %d", err);
+        *curlcode = CURLE_SEND_ERROR;
+        return -1;
+        break;
+    }
+  }
+  return (ssize_t)processed;
+}
+
+static ssize_t st_recv(struct connectdata *conn, /* connection data */
+                       int num,                  /* socketindex */
+                       char *buf,                /* store read data here */
+                       size_t buffersize,        /* max amount to read */
+                       CURLcode *curlcode)
+{
+  /*struct SessionHandle *data = conn->data;*/
+  struct ssl_connect_data *connssl = &conn->ssl[num];
+  size_t processed;
+  OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);
+
+  if(err != noErr) {
+    switch (err) {
+      case errSSLWouldBlock:  /* we're not done yet; keep reading */
+        *curlcode = CURLE_AGAIN;
+        return -1;
+        break;
+
+      default:
+        failf(conn->data, "SSLRead() return error %d", err);
+        *curlcode = CURLE_RECV_ERROR;
+        return -1;
+        break;
+    }
+  }
+  return (ssize_t)processed;
+}
+
+#endif /* USE_DARWINSSL */

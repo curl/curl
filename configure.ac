@@ -1371,6 +1371,29 @@ else
   AC_MSG_RESULT(no)
 fi
 
+OPT_DARWINSSL=no
+AC_ARG_WITH(darwinssl,dnl
+AC_HELP_STRING([--with-darwinssl],[enable iOS/Mac OS X native SSL/TLS])
+AC_HELP_STRING([--without-darwinssl], [disable iOS/Mac OS X native SSL/TLS]),
+  OPT_DARWINSSL=$withval)
+
+AC_MSG_CHECKING([whether to enable iOS/Mac OS X native SSL/TLS])
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_DARWINSSL" != "xno" &&
+     test -d "/System/Library/Frameworks/Security.framework"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(USE_DARWINSSL, 1, [to enable iOS/Mac OS X native SSL/TLS support])
+    AC_SUBST(USE_DARWINSSL, [1])
+    curl_ssl_msg="enabled (iOS/Mac OS X-native)"
+    DARWINSSL_ENABLED=1
+    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
+  else
+    AC_MSG_RESULT(no)
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+
 dnl **********************************************************************
 dnl Check for the presence of SSL libraries and headers
 dnl **********************************************************************
@@ -2233,7 +2256,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls or --with-winssl to address this.])
 else
@@ -2510,6 +2533,8 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="AXTLS_"
         elif test "x$WINSSL_ENABLED" == "x1"; then
           versioned_symbols_flavour="WINSSL_"
+        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="DARWINSSL_"
         else
           versioned_symbols_flavour=""
         fi

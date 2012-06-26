@@ -581,7 +581,8 @@ int netware_init(void);
 
 #if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || \
     defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL)
+    defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 

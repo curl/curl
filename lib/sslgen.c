@@ -34,6 +34,7 @@
    Curl_polarssl_ - prefix for PolarSSL ones
    Curl_cyassl_ - prefix for CyaSSL ones
    Curl_schannel_ - prefix for Schannel SSPI ones
+   Curl_st_ - prefix for SecureTransport (Darwin) ones
 
    Note that this source code uses curlssl_* functions, and they are all
    defines/macros #defined by the lib-specific header files.
@@ -59,6 +60,7 @@
 #include "axtls.h"  /* axTLS versions */
 #include "cyassl.h"  /* CyaSSL versions */
 #include "curl_schannel.h" /* Schannel SSPI version */
+#include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"

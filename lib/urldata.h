@@ -139,6 +139,10 @@
 #include <schannel.h>
 #endif
 
+#ifdef USE_DARWINSSL
+#include <Security/Security.h>
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -242,7 +246,12 @@ typedef enum {
   ssl_connect_2_reading,
   ssl_connect_2_writing,
   ssl_connect_3,
+#ifdef USE_DARWINSSL
+  ssl_connect_done,
+  ssl_connect_2_wouldblock
+#else
   ssl_connect_done
+#endif /* USE_DARWINSSL */
 } ssl_connect_state;
 
 typedef enum {
@@ -313,6 +322,11 @@ struct ssl_connect_data {
   unsigned char *encdata_buffer, *decdata_buffer;
   unsigned long req_flags, ret_flags;
 #endif /* USE_SCHANNEL */
+#ifdef USE_DARWINSSL
+  SSLContextRef ssl_ctx;
+  curl_socket_t ssl_sockfd;
+  ssl_connect_state connecting_state;
+#endif /* USE_DARWINSSL */
 };
 
 struct ssl_config_data {
