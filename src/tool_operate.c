@@ -1346,7 +1346,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               res = CURLE_OUT_OF_MEMORY;
               goto show_error;
             }
+            fprintf(config->errors, "Metalink: parsing (%s) metalink/XML...\n",
+                    this_url);
           }
+          else if(metalink)
+            fprintf(config->errors, "Metalink: fetching (%s) from (%s)...\n",
+                    mlfile->filename, this_url);
 #endif /* USE_METALINK */
 
           res = curl_easy_perform(curl);
@@ -1486,12 +1491,25 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
                 if(response != 200 && response != 206) {
                   metalink_next_res = 1;
+                  fprintf(config->errors,
+                          "Metalink: fetching (%s) from (%s) FAILED "
+                          "(HTTP status code %d)\n",
+                          mlfile->filename, this_url, response);
                 }
               }
             }
-            else
+            else {
               metalink_next_res = 1;
+              fprintf(config->errors,
+                      "Metalink: fetching (%s) from (%s) FAILED (%s)\n",
+                      mlfile->filename, this_url,
+                      (errorbuffer[0]) ?
+                      errorbuffer : curl_easy_strerror((CURLcode)res));
+            }
           }
+          if(metalink && !metalink_next_res)
+            fprintf(config->errors, "Metalink: fetching (%s) from (%s) OK\n",
+                    mlfile->filename, this_url);
 
           /* In all ordinary cases, just break out of loop here */
           break; /* curl_easy_perform loop */
@@ -1603,12 +1621,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && res == CURLE_OK) {
-          if(parse_metalink(config, &outs) == 0)
-            fprintf(config->errors,
-                    "Metalink: Metalink XML file was parsed successfully\n");
+          if(parse_metalink(config, &outs, this_url) == 0)
+            fprintf(config->errors, "Metalink: parsing (%s) OK\n",
+                    this_url);
           else
-            fprintf(config->errors,
-                    "Metalink: Could not parse Metalink XML file\n");
+            fprintf(config->errors, "Metalink: parsing (%s) FAILED\n",
+                    this_url);
         }
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
           int rv = metalink_check_hash(config, mlfile, outs.filename);

@@ -90,7 +90,8 @@ extern const digest_params SHA256_DIGEST_PARAMS[1];
 int count_next_metalink_resource(metalinkfile *mlfile);
 void clean_metalink(struct Configurable *config);
 
-int parse_metalink(struct Configurable *config, struct OutStruct *outs);
+int parse_metalink(struct Configurable *config, struct OutStruct *outs,
+                   const char *metalink_url);
 
 /*
  * Callback function for CURLOPT_WRITEFUNCTION
