@@ -24,14 +24,19 @@
 
 #include "setup.h"
 
-#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 struct Curl_sockaddr_storage {
-  struct sockaddr_storage buffer;
-};
-#else
-struct Curl_sockaddr_storage {
-  char buffer[256];   /* this should be big enough to fit a lot */
-};
+  union {
+    struct sockaddr sa;
+    struct sockaddr_in sa_in;
+#ifdef ENABLE_IPV6
+    struct sockaddr_in6 sa_in6;
 #endif
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
+    struct sockaddr_storage sa_stor;
+#else
+    char cbuf[256];   /* this should be big enough to fit a lot */
+#endif
+  } buffer;
+};
 
 #endif /* __SOCKADDR_H */
