@@ -33,56 +33,6 @@
 
 #define DEBUG_ME 0
 
-#ifdef USE_SSLEAY
-
-#  ifdef USE_OPENSSL
-#    include <openssl/des.h>
-#    ifndef OPENSSL_NO_MD4
-#      include <openssl/md4.h>
-#    endif
-#    include <openssl/md5.h>
-#    include <openssl/ssl.h>
-#    include <openssl/rand.h>
-#  else
-#    include <des.h>
-#    ifndef OPENSSL_NO_MD4
-#      include <md4.h>
-#    endif
-#    include <md5.h>
-#    include <ssl.h>
-#    include <rand.h>
-#  endif
-#  include "ssluse.h"
-
-#elif defined(USE_GNUTLS_NETTLE)
-
-#  include <nettle/md5.h>
-#  include <gnutls/gnutls.h>
-#  include <gnutls/crypto.h>
-#  define MD5_DIGEST_LENGTH 16
-
-#elif defined(USE_GNUTLS)
-
-#  include <gcrypt.h>
-#  include "gtls.h"
-#  define MD5_DIGEST_LENGTH 16
-#  define MD4_DIGEST_LENGTH 16
-
-#elif defined(USE_NSS)
-
-#  include <nss.h>
-#  include <pk11pub.h>
-#  include <hasht.h>
-#  include "nssg.h"
-#  include "curl_md4.h"
-#  define MD5_DIGEST_LENGTH MD5_LENGTH
-
-#elif defined(USE_WINDOWS_SSPI)
-#  include "curl_sspi.h"
-#else
-#  error "Can't compile NTLM support without a crypto library."
-#endif
-
 #include "urldata.h"
 #include "non-ascii.h"
 #include "sendf.h"
@@ -91,6 +41,12 @@
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
 #include "curl_memory.h"
+
+#if defined(USE_WINDOWS_SSPI)
+#  include "curl_sspi.h"
+#endif
+
+#include "sslgen.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
@@ -727,23 +683,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     unsigned char entropy[8];
 
     /* Need to create 8 bytes random data */
-#ifdef USE_SSLEAY
-    MD5_CTX MD5pw;
-    Curl_ossl_seed(data); /* Initiate the seed if not already done */
-    RAND_bytes(entropy, 8);
-#elif defined(USE_GNUTLS_NETTLE)
-    struct md5_ctx MD5pw;
-    gnutls_rnd(GNUTLS_RND_RANDOM, entropy, 8);
-#elif defined(USE_GNUTLS)
-    gcry_md_hd_t MD5pw;
-    Curl_gtls_seed(data); /* Initiate the seed if not already done */
-    gcry_randomize(entropy, 8, GCRY_STRONG_RANDOM);
-#elif defined(USE_NSS)
-    PK11Context *MD5pw;
-    unsigned int MD5len;
-    Curl_nss_seed(data);  /* Initiate the seed if not already done */
-    PK11_GenerateRandom(entropy, 8);
-#endif
+    Curl_ssl_random(data, entropy, sizeof(entropy));
 
     /* 8 bytes random data as challenge in lmresp */
     memcpy(lmresp, entropy, 8);
@@ -755,25 +695,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     memcpy(tmp, &ntlm->nonce[0], 8);
     memcpy(tmp + 8, entropy, 8);
 
-#ifdef USE_SSLEAY
-    MD5_Init(&MD5pw);
-    MD5_Update(&MD5pw, tmp, 16);
-    MD5_Final(md5sum, &MD5pw);
-#elif defined(USE_GNUTLS_NETTLE)
-    md5_init(&MD5pw);
-    md5_update(&MD5pw, 16, tmp);
-    md5_digest(&MD5pw, 16, md5sum);
-#elif defined(USE_GNUTLS)
-    gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
-    gcry_md_write(MD5pw, tmp, MD5_DIGEST_LENGTH);
-    memcpy(md5sum, gcry_md_read (MD5pw, 0), MD5_DIGEST_LENGTH);
-    gcry_md_close(MD5pw);
-#elif defined(USE_NSS)
-    MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
-    PK11_DigestOp(MD5pw, tmp, 16);
-    PK11_DigestFinal(MD5pw, md5sum, &MD5len, MD5_DIGEST_LENGTH);
-    PK11_DestroyContext(MD5pw, PR_TRUE);
-#endif
+    Curl_ssl_md5sum(tmp, 16, md5sum, MD5_DIGEST_LENGTH);
 
     /* We shall only use the first 8 bytes of md5sum, but the des
        code in Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */

@@ -23,6 +23,10 @@
  ***************************************************************************/
 #include "setup.h"
 
+#ifndef MD5_DIGEST_LENGTH
+#define MD5_DIGEST_LENGTH 16 /* fixed size */
+#endif
+
 bool Curl_ssl_config_matches(struct ssl_config_data* data,
                              struct ssl_config_data* needle);
 bool Curl_clone_ssl_config(struct ssl_config_data* source,
@@ -68,6 +72,14 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 void Curl_ssl_kill_session(struct curl_ssl_session *session);
 /* delete a session from the cache */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
+
+/* get N random bytes into the buffer */
+void Curl_ssl_random(struct SessionHandle *data, unsigned char *buffer,
+                     size_t length);
+void Curl_ssl_md5sum(unsigned char *tmp, /* input */
+                     size_t tmplen,
+                     unsigned char *md5sum, /* output */
+                     size_t md5len);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

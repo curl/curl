@@ -62,6 +62,7 @@
 #include <openssl/dsa.h>
 #include <openssl/dh.h>
 #include <openssl/err.h>
+#include <openssl/md5.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -2785,5 +2786,24 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
 #endif /* YASSL_VERSION */
+}
+
+void Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
+                      size_t length)
+{
+  Curl_ossl_seed(data); /* Initiate the seed if not already done */
+  RAND_bytes(entropy, length);
+}
+
+void Curl_ossl_md5sum(unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *md5sum /* output */,
+                      size_t unused)
+{
+  MD5_CTX MD5pw;
+  (void)unused;
+  MD5_Init(&MD5pw);
+  MD5_Update(&MD5pw, tmp, tmplen);
+  MD5_Final(md5sum, &MD5pw);
 }
 #endif /* USE_SSLEAY */
