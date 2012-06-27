@@ -78,9 +78,12 @@ Some contents delivered from an HTTP resource
 <file2 name="log/stdout2012">
 </file2>
 <file3 name="log/stderr2012">
-Metalink: Metalink XML file was parsed successfully
-Metalink: Validation not possible: missing hash
-Metalink: something should tell log/download2012 wasn't validated
+Metalink: parsing (file://%PWD/log/test2012.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test2012.metalink) WARNING (digest missing)
+Metalink: fetching (log/download2012) from (http://%HOSTIP:%HTTPPORT/2012)...
+Metalink: fetching (log/download2012) from (http://%HOSTIP:%HTTPPORT/2012) OK
+Metalink: validating (log/download2012)...
+Metalink: validating (log/download2012) FAILED (digest missing)
 </file3>
 <stripfile3>
 $_ = '' if ($_ !~ /^Metalink: /)

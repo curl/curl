@@ -92,9 +92,12 @@ Funny-head: yesyes
 <file3 name="log/stdout2009">
 </file3>
 <file4 name="log/stderr2009">
-Metalink: Metalink XML file was parsed successfully
-Metalink: Validating sha-256 checksum (This may take some time)...
-Metalink: log/download2009: OK
+Metalink: parsing (file://%PWD/log/test2009.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test2009.metalink) OK
+Metalink: fetching (log/download2009) from (http://%HOSTIP:%HTTPPORT/2009)...
+Metalink: fetching (log/download2009) from (http://%HOSTIP:%HTTPPORT/2009) OK
+Metalink: validating (log/download2009)...
+Metalink: validating (log/download2009) OK
 </file4>
 <stripfile4>
 $_ = '' if ($_ !~ /^Metalink: /)
