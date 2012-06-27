@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +28,8 @@
 
 #include "setup.h"
 
+#ifdef USE_DARWINSSL
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -34,11 +37,11 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef USE_DARWINSSL
 #include <Security/Security.h>
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
+
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -46,6 +49,13 @@
 #include "select.h"
 #include "sslgen.h"
 #include "curl_darwinssl.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
 /* From MacTypes.h (which we can't include because it isn't present in iOS: */
 #define ioErr -36

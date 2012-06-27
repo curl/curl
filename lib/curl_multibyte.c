@@ -31,6 +31,13 @@
 
 #include "curl_multibyte.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8)
 {
   wchar_t *str_w = NULL;
