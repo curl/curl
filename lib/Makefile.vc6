@@ -501,6 +501,7 @@ X_OBJS= \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
+	$(DIROBJ)\curl_darwinssl.obj \
 	$(DIROBJ)\curl_fnmatch.obj \
 	$(DIROBJ)\curl_gethostname.obj \
 	$(DIROBJ)\curl_memrchr.obj \
@@ -512,6 +513,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
 	$(DIROBJ)\curl_sasl.obj \
+	$(DIROBJ)\curl_schannel.obj \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\dict.obj \
