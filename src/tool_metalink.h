@@ -90,6 +90,16 @@ extern const digest_params SHA256_DIGEST_PARAMS[1];
 int count_next_metalink_resource(metalinkfile *mlfile);
 void clean_metalink(struct Configurable *config);
 
+/*
+ * Performs final parse operation and extracts information from
+ * Metalink and creates metalinkfile structs.
+ *
+ * This function returns 0 if it succeeds without warnings, or one of
+ * the following negative error codes:
+ *
+ * -1: Parsing failed; or no file is found
+ * -2: Parsing succeeded with some warnings.
+ */
 int parse_metalink(struct Configurable *config, struct OutStruct *outs,
                    const char *metalink_url);
 

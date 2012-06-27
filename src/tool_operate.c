@@ -1621,10 +1621,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && res == CURLE_OK) {
-          if(parse_metalink(config, &outs, this_url) == 0)
-            fprintf(config->errors, "Metalink: parsing (%s) OK\n",
-                    this_url);
-          else
+          int rv = parse_metalink(config, &outs, this_url);
+          if(rv == 0)
+            fprintf(config->errors, "Metalink: parsing (%s) OK\n", this_url);
+          else if(rv == -1)
             fprintf(config->errors, "Metalink: parsing (%s) FAILED\n",
                     this_url);
         }

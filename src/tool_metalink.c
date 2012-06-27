@@ -330,7 +330,6 @@ static int check_hash(const char *filename,
   digest_context *dctx;
   int check_ok;
   int fd;
-  fprintf(error, "Metalink: validating (%s)...\n", filename);
   fd = open(filename, O_RDONLY);
   if(fd == -1) {
     fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
@@ -374,7 +373,11 @@ int metalink_check_hash(struct Configurable *config,
                         const char *filename)
 {
   int rv;
+  fprintf(config->errors, "Metalink: validating (%s)...\n", filename);
   if(mlfile->checksum == NULL) {
+    fprintf(config->errors,
+            "Metalink: validating (%s) FAILED (digest missing)\n",
+            filename);
     return -2;
   }
   rv = check_hash(filename, mlfile->checksum->digest_def,
@@ -474,6 +477,7 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs,
   metalink_error_t r;
   metalink_t* metalink;
   metalink_file_t **files;
+  bool warnings = FALSE;
 
   /* metlaink_parse_final deletes outs->metalink_parser */
   r = metalink_parse_final(outs->metalink_parser, NULL, 0, &metalink);
@@ -482,17 +486,17 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs,
     return -1;
   }
   if(metalink->files == NULL) {
-    fprintf(config->errors, "\nMetalink: parsing (%s) WARNING "
+    fprintf(config->errors, "Metalink: parsing (%s) WARNING "
             "(missing or invalid file name)\n",
             metalink_url);
     metalink_delete(metalink);
-    return 0;
+    return -1;
   }
   for(files = metalink->files; *files; ++files) {
     struct getout *url;
     /* Skip an entry which has no resource. */
     if(!(*files)->resources) {
-      fprintf(config->errors, "\nMetalink: parsing (%s) WARNING "
+      fprintf(config->errors, "Metalink: parsing (%s) WARNING "
               "(missing or invalid resource)\n",
               metalink_url, (*files)->name);
       continue;
@@ -517,7 +521,12 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs,
     if(url) {
       metalinkfile *mlfile;
       mlfile = new_metalinkfile(*files);
-
+      if(!mlfile->checksum) {
+        warnings = TRUE;
+        fprintf(config->errors, "Metalink: parsing (%s) WARNING "
+                "(digest missing)\n",
+                metalink_url);
+      }
       /* Set name as url */
       GetStr(&url->url, mlfile->filename);
 
@@ -534,7 +543,7 @@ int parse_metalink(struct Configurable *config, struct OutStruct *outs,
     }
   }
   metalink_delete(metalink);
-  return 0;
+  return (warnings) ? -2 : 0;
 }
 
 size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
