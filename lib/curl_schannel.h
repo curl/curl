@@ -135,6 +135,7 @@ size_t Curl_schannel_version(char *buffer, size_t size);
 #define curlssl_version Curl_schannel_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
-
+#define curlssl_random /* not used with the schannel backend */
+#define curlssl_md5sum /* not used with the schannel backend */
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */
