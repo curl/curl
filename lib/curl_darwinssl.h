@@ -43,6 +43,14 @@ int Curl_darwinssl_check_cxn(struct connectdata *conn);
 bool Curl_darwinssl_data_pending(const struct connectdata *conn,
                                  int connindex);
 
+void Curl_darwinssl_random(struct SessionHandle *data,
+                           unsigned char *entropy,
+                           size_t length);
+void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
+                           size_t tmplen,
+                           unsigned char *md5sum, /* output */
+                           size_t md5len);
+
 /* API setup for SecureTransport */
 #define curlssl_init() (1)
 #define curlssl_cleanup() Curl_nop_stmt
@@ -58,6 +66,8 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
 #define curlssl_version Curl_darwinssl_version
 #define curlssl_check_cxn Curl_darwinssl_check_cxn
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
+#define curlssl_random(x,y,z) Curl_darwinssl_random(x,y,z)
+#define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
 
 #endif /* USE_DARWINSSL */
 #endif /* HEADER_CURL_DARWINSSL_H */

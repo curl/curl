@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,6 +81,11 @@
 #  include <hasht.h>
 #  include "curl_md4.h"
 #  define MD5_DIGEST_LENGTH MD5_LENGTH
+
+#elif defined(USE_DARWINSSL)
+
+#  include <CommonCrypto/CommonCryptor.h>
+#  include <CommonCrypto/CommonDigest.h>
 
 #else
 #  error "Can't compile NTLM support without a crypto library."
@@ -221,7 +226,23 @@ fail:
   return rv;
 }
 
-#endif /* defined(USE_NSS) */
+#elif defined(USE_DARWINSSL)
+
+static bool encrypt_des(const unsigned char *in, unsigned char *out,
+                        const unsigned char *key_56)
+{
+  char key[8];
+  size_t out_len;
+  CCCryptorStatus err;
+
+  extend_key_56_to_64(key_56, key);
+  err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
+                kCCKeySizeDES, NULL, in, 8 /* inbuflen */, out,
+                8 /* outbuflen */, &out_len);
+  return err == kCCSuccess;
+}
+
+#endif /* defined(USE_DARWINSSL) */
 
 #endif /* defined(USE_SSLEAY) */
 
@@ -273,7 +294,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, &des);
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
-#elif defined(USE_NSS)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
@@ -336,7 +357,7 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw + 7, &des);
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
-#elif defined(USE_NSS)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif
@@ -399,6 +420,8 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
     gcry_md_close(MD4pw);
 #elif defined(USE_NSS)
     Curl_md4it(ntbuffer, pw, 2 * len);
+#elif defined(USE_DARWINSSL)
+    (void)CC_MD4(pw, 2 * len, ntbuffer);
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);

@@ -593,7 +593,7 @@ int netware_init(void);
 /* Single point where USE_NTLM definition might be done */
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
-   defined(USE_GNUTLS) || defined(USE_NSS)
+    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL)
 #define USE_NTLM
 #endif
 #endif

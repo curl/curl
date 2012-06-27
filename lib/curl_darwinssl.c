@@ -21,8 +21,8 @@
  ***************************************************************************/
 
 /*
- * Source file for all SecureTransport-specific code for the TLS/SSL layer.
- * No code but sslgen.c should ever call or use these functions.
+ * Source file for all iOS and Mac OS X SecureTransport-specific code for the
+ * TLS/SSL layer. No code but sslgen.c should ever call or use these functions.
  */
 
 #include "setup.h"
@@ -38,6 +38,7 @@
 #include <Security/Security.h>
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <CommonCrypto/CommonDigest.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -604,6 +605,23 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
   }
   else
     return false;
+}
+
+void Curl_darwinssl_random(struct SessionHandle *data,
+                           unsigned char *entropy,
+                           size_t length)
+{
+  (void)data;
+  arc4random_buf(entropy, length);
+}
+
+void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
+                           size_t tmplen,
+                           unsigned char *md5sum, /* output */
+                           size_t md5len)
+{
+  (void)md5len;
+  (void)CC_MD5(tmp, tmplen, md5sum);
 }
 
 static ssize_t darwinssl_send(struct connectdata *conn,
