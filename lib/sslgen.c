@@ -555,6 +555,9 @@ void Curl_ssl_free_certinfo(struct SessionHandle *data)
   }
 }
 
+#ifndef USE_WINDOWS_SSPI
+/* these functions are not used when SSPI is used for NTLM */
+
 void Curl_ssl_random(struct SessionHandle *data,
                      unsigned char *entropy,
                      size_t length)
@@ -569,4 +572,6 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 {
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
 }
+#endif /* USE_WINDOWS_SSPI */
+
 #endif /* USE_SSL */
