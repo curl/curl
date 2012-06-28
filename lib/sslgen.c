@@ -165,39 +165,6 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
 
 #ifdef USE_SSL
 
-/* SSL 'backend' compile-time sanity checks */
-#if !defined(curlssl_init)
-# error "SSL backend lacks definition for curlssl_init"
-#elif !defined(curlssl_cleanup)
-# error "SSL backend lacks definition for curlssl_cleanup"
-#elif !defined(curlssl_connect) && !defined(curlssl_connect_nonblocking)
-# error "SSL backend lacks curlssl_connect or curlssl_connect_nonblocking"
-#elif !defined(curlssl_session_free)
-# error "SSL backend lacks definition for curlssl_session_free"
-#elif !defined(curlssl_close_all)
-# error "SSL backend lacks definition for curlssl_close_all"
-#elif !defined(curlssl_close)
-# error "SSL backend lacks definition for curlssl_close"
-#elif !defined(curlssl_shutdown)
-# error "SSL backend lacks definition for curlssl_shutdown"
-#elif !defined(curlssl_set_engine)
-# error "SSL backend lacks definition for curlssl_set_engine"
-#elif !defined(curlssl_set_engine_default)
-# error "SSL backend lacks definition for curlssl_set_engine_default"
-#elif !defined(curlssl_engines_list)
-# error "SSL backend lacks definition for curlssl_engines_list"
-#elif !defined(curlssl_version)
-# error "SSL backend lacks definition for curlssl_version"
-#elif !defined(curlssl_check_cxn)
-# error "SSL backend lacks definition for curlssl_check_cxn"
-#elif !defined(curlssl_data_pending)
-# error "SSL backend lacks definition for curlssl_data_pending"
-#elif !defined(curlssl_random)
-# error "SSL backend lacks definition for curlssl_random"
-#elif !defined(curlssl_md5sum)
-# error "SSL backend lacks definition for curlssl_md5sum"
-#endif
-
 /* "global" init done? */
 static bool init_ssl=FALSE;
 
@@ -555,8 +522,9 @@ void Curl_ssl_free_certinfo(struct SessionHandle *data)
   }
 }
 
-#ifndef USE_WINDOWS_SSPI
-/* these functions are not used when SSPI is used for NTLM */
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_NSS) || \
+    defined(USE_DARWINSSL)
+/* these functions are only used by some SSL backends */
 
 void Curl_ssl_random(struct SessionHandle *data,
                      unsigned char *entropy,
@@ -572,6 +540,6 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 {
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
 }
-#endif /* USE_WINDOWS_SSPI */
+#endif /* USE_SSLEAY || USE_GNUTLS || USE_NSS || USE_DARWINSSL */
 
 #endif /* USE_SSL */
