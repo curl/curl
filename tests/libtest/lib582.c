@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -172,7 +172,7 @@ static int checkForCompletion(CURLM* curl, int* success)
 static int getMicroSecondTimeout(struct timeval* timeout)
 {
   struct timeval now;
-  int result;
+  ssize_t result;
 
   gettimeofday(&now, 0);
   result = (timeout->tv_sec - now.tv_sec) * 1000000 +
@@ -180,7 +180,7 @@ static int getMicroSecondTimeout(struct timeval* timeout)
   if (result < 0)
     result = 0;
 
-  return result;
+  return curlx_sztosi(result);
 }
 
 /**
