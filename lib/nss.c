@@ -1538,7 +1538,7 @@ void Curl_nss_random(struct SessionHandle *data,
                      size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
-  PK11_GenerateRandom(entropy, length);
+  PK11_GenerateRandom(entropy, curlx_uztosi(length));
 }
 
 void Curl_nss_md5sum(unsigned char *tmp, /* input */
@@ -1548,8 +1548,8 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
 {
   PK11Context *MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
   unsigned int MD5out;
-  PK11_DigestOp(MD5pw, tmp, tmplen);
-  PK11_DigestFinal(MD5pw, md5sum, &MD5out, md5len);
+  PK11_DigestOp(MD5pw, tmp, curlx_uztoui(tmplen));
+  PK11_DigestFinal(MD5pw, md5sum, &MD5out, curlx_uztoui(md5len));
   PK11_DestroyContext(MD5pw, PR_TRUE);
 }
 
