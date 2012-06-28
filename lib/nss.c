@@ -27,6 +27,8 @@
 
 #include "setup.h"
 
+#ifdef USE_NSS
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -43,8 +45,6 @@
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
-
-#ifdef USE_NSS
 
 #include "nssg.h"
 #include <nspr.h>
@@ -66,6 +66,7 @@
 
 #include "curl_memory.h"
 #include "rawstr.h"
+#include "warnless.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
