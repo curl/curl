@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 62
+# serial 63
 
 
 dnl CURL_CHECK_COMPILER
@@ -856,8 +856,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
       CLANG)
         #
         if test "$want_warnings" = "yes"; then
-          dnl All versions of clang support the same warnings as at least
-          dnl gcc 4.2.1 except -Wunused.
           tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
           tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
@@ -875,7 +873,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -Wcast-align"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-system-headers"
           tmp_CFLAGS="$tmp_CFLAGS -Wshorten-64-to-32"
-          tmp_CFLAGS="$tmp_CFLAGS -Wstrict-aliasing=3"
           #
           dnl Only clang 1.1 or later
           if test "$compiler_num" -ge "101"; then
