@@ -86,7 +86,7 @@ Metalink: validating (log/download2012)...
 Metalink: validating (log/download2012) FAILED (digest missing)
 </file3>
 <stripfile3>
-$_ = '' if ($_ !~ /^Metalink: /)
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
 </stripfile3>
 </verify>
 </testcase>

@@ -106,7 +106,7 @@ Metalink: validating (log/download2006)...
 Metalink: validating (log/download2006) OK
 </file4>
 <stripfile4>
-$_ = '' if ($_ !~ /^Metalink: /)
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
 </stripfile4>
 </verify>
 </testcase>

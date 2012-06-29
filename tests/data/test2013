@@ -35,7 +35,7 @@ file
 Metalink
 </features>
  <name>
-Metalink local XML file, attempt absolute path
+Metalink local XML file, attempt UNIX absolute path
  </name>
 <command option="no-output,no-include">
 --metalink file://%PWD/log/test2013.metalink
@@ -72,7 +72,7 @@ Metalink: parsing (file://%PWD/log/test2013.metalink) WARNING (missing or invali
 Metalink: parsing (file://%PWD/log/test2013.metalink) FAILED
 </file2>
 <stripfile2>
-$_ = '' if ($_ !~ /^Metalink: /)
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
 </stripfile2>
 </verify>
 </testcase>
