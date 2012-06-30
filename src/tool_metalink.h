@@ -82,7 +82,7 @@ extern const digest_params MD5_DIGEST_PARAMS[1];
 extern const digest_params SHA1_DIGEST_PARAMS[1];
 extern const digest_params SHA256_DIGEST_PARAMS[1];
 
-#include <metalink/metalink_parser.h>
+#include <metalink/metalink.h>
 
 /*
  * Counts the resource in the metalinkfile.

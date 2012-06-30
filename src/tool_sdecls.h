@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 #ifdef USE_METALINK
-#  include <metalink/metalink_parser.h>
+#  include <metalink/metalink.h>
 #endif /* USE_METALINK */
 
 /*
