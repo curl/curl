@@ -78,6 +78,17 @@ typedef struct metalinkfile {
 
 #ifdef USE_METALINK
 
+/*
+ * curl requires libmetalink 0.1.0 or newer
+ */
+#define CURL_REQ_LIBMETALINK_MAJOR  0
+#define CURL_REQ_LIBMETALINK_MINOR  1
+#define CURL_REQ_LIBMETALINK_PATCH  0
+
+#define CURL_REQ_LIBMETALINK_VERS  ((CURL_REQ_LIBMETALINK_MAJOR * 10000) + \
+                                    (CURL_REQ_LIBMETALINK_MINOR * 100) + \
+                                     CURL_REQ_LIBMETALINK_PATCH)
+
 extern const digest_params MD5_DIGEST_PARAMS[1];
 extern const digest_params SHA1_DIGEST_PARAMS[1];
 extern const digest_params SHA256_DIGEST_PARAMS[1];
