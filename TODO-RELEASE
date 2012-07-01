@@ -1,10 +1,24 @@
-To be addressed in 7.27
-=======================
+Try to fix in 7.27
+==================
 
-309 - metalink support for the curl tool
+313 - host.name vs. host.dispname and "(nil)" outputs
+
+316 - CONNECT NTLM over proxy with SSPI build
+
+
+To be addressed in 7.28
+=======================
 
 310 - a new authentication callback
 
-311 - support for SSPI schannel for SSL on windows
+312 - custom Content-Length appears in CONNECT, solve it by offering a separate
+      option to provide headers for the CONNECT request
 
-312 - 
+314 - CURL_SOCKOPTFUNCTION for accept()ed connection
+
+315 - multiple receivers with SMTP and one fails
+
+317 - CURLINFO_SSL_TRUST to return SSL-specific data for a darwinssl build
+
+318 -
+
