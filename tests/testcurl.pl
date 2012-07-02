@@ -73,7 +73,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2012-04-13';
+$version='2012-07-02';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -357,14 +357,20 @@ $str1066os = undef;
 # off that path from all possible logs and error messages etc.
 $pwd = getcwd();
 
+my $have_embedded_ares = 0;
+
 if (-d $CURLDIR) {
   if ($git && -d "$CURLDIR/.git") {
     logit "$CURLDIR is verified to be a fine git source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
     unlink "$CURLDIR/src/hugehelp.c";
+    # find out if curl source dir has an in-tree c-ares repo
+    $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
   } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
     logit "$CURLDIR is verified to be a fine daily source dir"
+    # find out if curl source dir has an in-tree c-ares extracted tarball
+    $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");
   } else {
     mydie "$CURLDIR is not a daily source dir or checked out from git!"
   }
@@ -593,7 +599,8 @@ while (<F>) {
 }
 close(F);
 
-if (grepfile("^#define USE_ARES", "lib/$confheader")) {
+if (($have_embedded_ares) &&
+    (grepfile("^#define USE_ARES", "lib/$confheader"))) {
   print "\n";
   logit "setup to build ares";
 
