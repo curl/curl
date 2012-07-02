@@ -33,6 +33,10 @@
 
 #define DEBUG_ME 0
 
+#ifdef USE_WINDOWS_SSPI
+#  include <tchar.h>
+#endif
+
 #include "urldata.h"
 #include "non-ascii.h"
 #include "sendf.h"
@@ -42,7 +46,7 @@
 #include "curl_multibyte.h"
 #include "curl_memory.h"
 
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
 #  include "curl_sspi.h"
 #endif
 
