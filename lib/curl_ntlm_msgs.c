@@ -351,67 +351,88 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   SecBufferDesc desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  const char *user;
-  const char *domain = "";
-  size_t userlen = 0;
+  const TCHAR *useranddomain;
+  const TCHAR *user;
+  const TCHAR *passwd;
+  const TCHAR *domain = TEXT("");
   size_t domlen = 0;
-  size_t passwdlen = 0;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
 
   Curl_ntlm_sspi_cleanup(ntlm);
 
-  user = strchr(userp, '\\');
-  if(!user)
-    user = strchr(userp, '/');
+  if(userp && *userp) {
+#ifdef UNICODE
+    useranddomain = Curl_convert_UTF8_to_wchar(userp);
+    if(useranddomain == NULL)
+      return CURLE_OUT_OF_MEMORY;
+#else
+    useranddomain = userp;
+#endif
 
-  if(user) {
-    domain = userp;
-    domlen = user - userp;
-    user++;
-  }
-  else {
-    user = userp;
-    domain = "";
-    domlen = 0;
-  }
+    user = _tcschr(useranddomain, TEXT('\\'));
+    if(!user)
+      user = _tcschr(useranddomain, TEXT('/'));
 
-  if(user)
-    userlen = strlen(user);
+    if(user) {
+      domain = useranddomain;
+      domlen = user - useranddomain;
+      user++;
+    }
+    else {
+      user = useranddomain;
+      domain = TEXT("");
+      domlen = 0;
+    }
 
-  if(passwdp)
-    passwdlen = strlen(passwdp);
-
-  if(userlen > 0) {
     /* note: initialize all of this before doing the mallocs so that
      * it can be cleaned up later without leaking memory.
      */
     ntlm->p_identity = &ntlm->identity;
     memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
+
 #ifdef UNICODE
-    if((ntlm->identity.User = Curl_convert_UTF8_to_wchar(user)) == NULL)
+    if((ntlm->identity.User = (unsigned short *)_wcsdup(user)) == NULL) {
+      free((void *)useranddomain);
       return CURLE_OUT_OF_MEMORY;
+    }
 #else
     if((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
       return CURLE_OUT_OF_MEMORY;
 #endif
+    ntlm->identity.UserLength = (unsigned long)_tcslen(user);
 
-    ntlm->identity.UserLength = (unsigned long)userlen;
+    ntlm->identity.Domain = malloc(sizeof(TCHAR) * (domlen + 1));
+    if(ntlm->identity.Domain == NULL) {
 #ifdef UNICODE
-    if((ntlm->identity.Password = Curl_convert_UTF8_to_wchar(passwdp)) == NULL)
+      free((void *)useranddomain);
+#endif
+      return CURLE_OUT_OF_MEMORY;
+    }
+    _tcsncpy((TCHAR *)ntlm->identity.Domain, domain, domlen);
+    ntlm->identity.Domain[domlen] = TEXT('\0');
+    ntlm->identity.DomainLength = (unsigned long)domlen;
+
+#ifdef UNICODE
+    free((void *)useranddomain);
+#endif
+
+#ifdef UNICODE
+    ntlm->identity.Password = (unsigned short *)
+      Curl_convert_UTF8_to_wchar(passwdp);
+    if(ntlm->identity.Password == NULL)
       return CURLE_OUT_OF_MEMORY;
 #else
     if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
       return CURLE_OUT_OF_MEMORY;
 #endif
+    ntlm->identity.PasswordLength =
+      (unsigned long)_tcslen((TCHAR *)ntlm->identity.Password);
 
-    ntlm->identity.PasswordLength = (unsigned long)passwdlen;
-    if((ntlm->identity.Domain = malloc(domlen + 1)) == NULL)
-      return CURLE_OUT_OF_MEMORY;
-
-    strncpy((char *)ntlm->identity.Domain, domain, domlen);
-    ntlm->identity.Domain[domlen] = '\0';
-    ntlm->identity.DomainLength = (unsigned long)domlen;
+#ifdef UNICODE
+    ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
+#else
     ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
+#endif
   }
   else
     ntlm->p_identity = NULL;
