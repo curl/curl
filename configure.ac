@@ -2318,15 +2318,42 @@ if test X"$OPT_LIBMETALINK" != Xno; then
   fi
   if test -n "$addlib"; then
 
-    AC_MSG_NOTICE([detected libmetalink version $version])
-    curl_mtlnk_msg="enabled"
-    LIBMETALINK_LIBS=$addlib
-    LIBMETALINK_LDFLAGS=$addld
-    LIBMETALINK_CFLAGS=$addcflags
-    AC_SUBST([LIBMETALINK_LIBS])
-    AC_SUBST([LIBMETALINK_LDFLAGS])
-    AC_SUBST([LIBMETALINK_CFLAGS])
-    AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
+    clean_LIBS="$LIBS"
+    CPPFLAGS="$addcflags $clean_CPPFLAGS"
+    LDFLAGS="$addld $clean_LDFLAGS"
+    LIBS="$addlib $clean_LIBS"
+    AC_MSG_CHECKING([if libmetalink is recent enough])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+#       include <metalink/metalink.h>
+      ]],[[
+        if(0 != metalink_strerror(0)) /* added in 0.1.0 */
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes ($version)])
+      want_metalink="yes"
+    ],[
+      AC_MSG_RESULT([no ($version)])
+      AC_MSG_NOTICE([libmetalink library defective or too old])
+      want_metalink="no"
+    ])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+    if test "$want_metalink" = "yes"; then
+      dnl finally libmetalink will be used
+      AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
+      LIBMETALINK_LIBS=$addlib
+      LIBMETALINK_LDFLAGS=$addld
+      LIBMETALINK_CFLAGS=$addcflags
+      AC_SUBST([LIBMETALINK_LIBS])
+      AC_SUBST([LIBMETALINK_LDFLAGS])
+      AC_SUBST([LIBMETALINK_CFLAGS])
+      curl_mtlnk_msg="enabled"
+    fi
 
   fi
 fi
