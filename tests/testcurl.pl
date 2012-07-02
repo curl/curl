@@ -368,7 +368,7 @@ if (-d $CURLDIR) {
     # find out if curl source dir has an in-tree c-ares repo
     $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
   } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
-    logit "$CURLDIR is verified to be a fine daily source dir"
+    logit "$CURLDIR is verified to be a fine daily source dir";
     # find out if curl source dir has an in-tree c-ares extracted tarball
     $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");
   } else {
