@@ -357,7 +357,6 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   unsigned long attrs;
   const TCHAR *useranddomain;
   const TCHAR *user;
-  const TCHAR *passwd;
   const TCHAR *domain = TEXT("");
   size_t domlen = 0;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
