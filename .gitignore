@@ -42,3 +42,11 @@ TAGS
 *~
 aclocal.m4.bak
 CHANGES.dist
+.project
+.cproject
+.settings
+*.a
+*.res
+*.idb
+winbuild/*.inc
+
