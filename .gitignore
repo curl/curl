@@ -45,8 +45,3 @@ CHANGES.dist
 .project
 .cproject
 .settings
-*.a
-*.res
-*.idb
-winbuild/*.inc
-

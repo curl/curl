@@ -11,3 +11,5 @@ libcurl.vcproj
 vc6libcurl.dsp
 Makefile.vc10.dist
 libcurl.vers
+*.a
+*.res

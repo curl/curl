@@ -9,3 +9,5 @@ version.h.dist
 tool_version.h.dist
 Makefile.vc10.dist
 config-win32.h
+*.a
+*.res
