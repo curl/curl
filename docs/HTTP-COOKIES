@@ -1,45 +1,58 @@
-                                  HTTP Cookies
+Updated: July 3, 2012 (http://curl.haxx.se/docs/http-cookies.html)
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
 
-Overview
-========
 
-HTTP cookies are pieces of 'name=contents' snippets that a server tells the
-client to hold and then the client sends back those the server on subsequent
-requests to the same domains/paths for which the cookies were set.
+HTTP Cookies
 
-Cookies are either "session cookies" which typically are forgotten when the
-session is over which is often translated to equal when browser quits, or the
-cookies aren't session cookies they have expiration dates after which the
-client will throw them away.
+ 1. Cookie overview
+ 2. Cookies saved to disk
+ 3. Cookies with curl the command line tool
+ 4. Cookies with libcurl
+ 5. Cookies with javascript
 
-Cookies are set to the client with the Set-Cookie: header and are sent to
-servers with the Cookie: header.
+==============================================================================
 
-For a very long time, the only spec explaining how to use cookies was the
-original Netscape spec from 1994: http://curl.haxx.se/rfc/cookie_spec.html
+1. Cookie overview
 
-In 2011, RFC6265 (http://www.ietf.org/rfc/rfc6265.txt) was finally published
-and details how cookies work within HTTP.
+  HTTP cookies are pieces of 'name=contents' snippets that a server tells the
+  client to hold and then the client sends back those the server on subsequent
+  requests to the same domains/paths for which the cookies were set.
 
-cookies saved to disk
-=====================
+  Cookies are either "session cookies" which typically are forgotten when the
+  session is over which is often translated to equal when browser quits, or
+  the cookies aren't session cookies they have expiration dates after which
+  the client will throw them away.
 
-Netscape once created a file format for storing cookies on disk so that they
-would survive browser restarts. curl adopted that file format to allow sharing
-the cookies with browsers, only to see browsers move away from that
-format. Modern browsers no longer use it, while curl still does.
+  Cookies are set to the client with the Set-Cookie: header and are sent to
+  servers with the Cookie: header.
 
-The cookie file format stores one cookie per physical line in the file with a
-bunch of associated meta data, each field separated with TAB. That file is
-called the cookiejar in curl terminology.
+  For a very long time, the only spec explaining how to use cookies was the
+  original Netscape spec from 1994: http://curl.haxx.se/rfc/cookie_spec.html
 
-cookies with curl the command line tool
-=======================================
+  In 2011, RFC6265 (http://www.ietf.org/rfc/rfc6265.txt) was finally published
+  and details how cookies work within HTTP.
 
-curl has a full cookie "engine" built in. If you just activate it, you can
-have curl receive and send cookies exactly as mandated in the specs.
+2. Cookies saved to disk
 
-Command line options:
+  Netscape once created a file format for storing cookies on disk so that they
+  would survive browser restarts. curl adopted that file format to allow
+  sharing the cookies with browsers, only to see browsers move away from that
+  format. Modern browsers no longer use it, while curl still does.
+
+  The cookie file format stores one cookie per physical line in the file with
+  a bunch of associated meta data, each field separated with TAB. That file is
+  called the cookiejar in curl terminology.
+
+3. Cookies with curl the command line tool
+
+  curl has a full cookie "engine" built in. If you just activate it, you can
+  have curl receive and send cookies exactly as mandated in the specs.
+
+  Command line options:
 
   -b, --cookie
 
@@ -57,10 +70,9 @@ Command line options:
     tell curl to start the cookie engine and write cookies to the given file
     after the request(s)
 
-cookies with libcurl
-====================
+4. Cookies with libcurl
 
-libcurl options:
+  libcurl options:
 
   CURLOPT_COOKIE
 
@@ -89,16 +101,15 @@ libcurl options:
     Extract cookie information from the internal cookie storage as a linked
     list.
 
-cookies with javascript
-=======================
+5. Cookies with javascript
 
-These days a lot of the web is built up by javascript. The webbrowser loads
-complete programs that render the page you see. These javascript programs can
-also set and access cookies.
+  These days a lot of the web is built up by javascript. The webbrowser loads
+  complete programs that render the page you see. These javascript programs
+  can also set and access cookies.
 
-Since curl and libcurl are plain HTTP clients without any knowledge of or
-capability to handle javascript, such cookies will not be detected or used.
+  Since curl and libcurl are plain HTTP clients without any knowledge of or
+  capability to handle javascript, such cookies will not be detected or used.
 
-Often, if you want to mimic what a browser does on such web sites, you can
-record web browser HTTP traffic when using such a site and then repeat the
-cookie operations using curl or libcurl.
+  Often, if you want to mimic what a browser does on such web sites, you can
+  record web browser HTTP traffic when using such a site and then repeat the
+  cookie operations using curl or libcurl.
