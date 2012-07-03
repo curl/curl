@@ -55,22 +55,47 @@ ifndef ARCH
 ARCH = w32
 endif
 
-CC = gcc
-CFLAGS = -g -O2 -Wall
-CFLAGS += -fno-strict-aliasing
+CC	= $(CROSSPREFIX)gcc
+CFLAGS	= -g -O2 -Wall
+CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
-CFLAGS += -D_AMD64_
+CFLAGS	+= -D_AMD64_
 endif
 # comment LDFLAGS below to keep debug info
-LDFLAGS = -s
-AR = ar
-RANLIB = ranlib
-RC = windres
-RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF -i
-STRIP = strip -g
+LDFLAGS	= -s
+AR	= $(CROSSPREFIX)ar
+RANLIB	= $(CROSSPREFIX)ranlib
+RC	= $(CROSSPREFIX)windres
+RCFLAGS	= --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF -i
+STRIP	= strip -g
 
-RM = del /q /f 2>NUL
-CP = copy
+# Platform-dependent helper tool macros
+ifeq ($(findstring /sh,$(SHELL)),/sh)
+DEL	= rm -f $1
+RMDIR	= rm -fr $1
+MKDIR	= mkdir -p $1
+COPY	= -cp -afv $1 $2
+#COPYR	= -cp -afr $1/* $2
+COPYR	= -rsync -aC $1/* $2
+TOUCH	= touch $1
+CAT	= cat
+ECHONL	= echo ""
+DL	= '
+else
+ifeq "$(OS)" "Windows_NT"
+DEL	= -del 2>NUL /q /f $(subst /,\,$1)
+RMDIR	= -rd 2>NUL /q /s $(subst /,\,$1)
+else
+DEL	= -del 2>NUL $(subst /,\,$1)
+RMDIR	= -deltree 2>NUL /y $(subst /,\,$1)
+endif
+MKDIR	= -md 2>NUL $(subst /,\,$1)
+COPY	= -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+COPYR	= -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
+TOUCH	= copy 2>&1>NUL /b $(subst /,\,$1) +,,
+CAT	= type
+ECHONL	= $(ComSpec) /c echo.
+endif
 
 ########################################################
 ## Nothing more to do below this line!
@@ -115,7 +140,7 @@ endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
 endif
-ifeq ($(findstring -schannel,$(CFG)),-schannel)
+ifeq ($(findstring -winssl,$(CFG)),-winssl)
 SCHANNEL = 1
 SSPI = 1
 endif
@@ -185,9 +210,9 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-ifdef SCHANNEL
-  CFLAGS += -DUSE_SCHANNEL
-endif
+  ifdef SCHANNEL
+    CFLAGS += -DUSE_SCHANNEL
+  endif
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO
@@ -231,7 +256,7 @@ RESOURCE = libcurl.res
 all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	-$(RM) $@
+	@$(call DEL, $@)
 	$(AR) cru $@ $(libcurl_a_OBJECTS)
 	$(RANLIB) $@
 	$(STRIP) $@
@@ -239,7 +264,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 # remove the last line above to keep debug info
 
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIES)
-	-$(RM) $@
+	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -Wl,--out-implib,$(libcurl_dll_a_LIBRARY) \
 	  -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
@@ -251,17 +276,18 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 
 clean:
 ifeq "$(wildcard $(PROOT)/include/curl/curlbuild.h.dist)" "$(PROOT)/include/curl/curlbuild.h.dist"
-	-$(RM) $(subst /,\,$(PROOT)/include/curl/curlbuild.h)
+	@$(call DEL, $(PROOT)/include/curl/curlbuild.h)
 endif
-	-$(RM) $(libcurl_a_OBJECTS) $(RESOURCE)
+	@$(call DEL, $(libcurl_a_OBJECTS) $(RESOURCE))
 
 distclean vclean: clean
-	-$(RM) $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY)
+	@$(call DEL, $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_a_LIBRARY))
+
+$(PROOT)/include/curl/curlbuild.h:
+	@echo Creating $@
+	@$(call COPY, $@.dist, $@)
 
 $(LIBCARES_PATH)/libcares.a:
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.m32
 
-$(PROOT)/include/curl/curlbuild.h:
-	@echo Creating $@
-	@$(CP) $(subst /,\,$@).dist $(subst /,\,$@)
 

@@ -75,19 +75,44 @@ ifndef ARCH
 ARCH = w32
 endif
 
-CC = gcc
-CFLAGS = -g -O2 -Wall
-CFLAGS += -fno-strict-aliasing
+CC	= $(CROSSPREFIX)gcc
+CFLAGS	= -g -O2 -Wall
+CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
-CFLAGS += -D_AMD64_
+CFLAGS	+= -D_AMD64_
 endif
 # comment LDFLAGS below to keep debug info
-LDFLAGS = -s
-RC = windres
-RCFLAGS = --include-dir=$(PROOT)/include -O COFF -i
+LDFLAGS	= -s
+RC	= $(CROSSPREFIX)windres
+RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -i
 
-RM = del /q /f 2>NUL
-CP = copy
+# Platform-dependent helper tool macros
+ifeq ($(findstring /sh,$(SHELL)),/sh)
+DEL	= rm -f $1
+RMDIR	= rm -fr $1
+MKDIR	= mkdir -p $1
+COPY	= -cp -afv $1 $2
+#COPYR	= -cp -afr $1/* $2
+COPYR	= -rsync -aC $1/* $2
+TOUCH	= touch $1
+CAT	= cat
+ECHONL	= echo ""
+DL	= '
+else
+ifeq "$(OS)" "Windows_NT"
+DEL	= -del 2>NUL /q /f $(subst /,\,$1)
+RMDIR	= -rd 2>NUL /q /s $(subst /,\,$1)
+else
+DEL	= -del 2>NUL $(subst /,\,$1)
+RMDIR	= -deltree 2>NUL /y $(subst /,\,$1)
+endif
+MKDIR	= -md 2>NUL $(subst /,\,$1)
+COPY	= -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+COPYR	= -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
+TOUCH	= copy 2>&1>NUL /b $(subst /,\,$1) +,,
+CAT	= type
+ECHONL	= $(ComSpec) /c echo.
+endif
 
 ########################################################
 ## Nothing more to do below this line!
@@ -131,6 +156,13 @@ LDAPS = 1
 endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
+endif
+ifeq ($(findstring -metalink,$(CFG)),-metalink)
+METALINK = 1
+endif
+ifeq ($(findstring -winssl,$(CFG)),-winssl)
+SCHANNEL = 1
+SSPI = 1
 endif
 
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
@@ -194,6 +226,9 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
+  ifdef SCHANNEL
+    CFLAGS += -DUSE_SCHANNEL
+  endif
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO
@@ -225,6 +260,8 @@ include Makefile.inc
 check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 check_PROGRAMS += ftpuploadresume.exe synctime.exe
 
+.PRECIOUS: %.o
+
 
 all: $(check_PROGRAMS)
 
@@ -238,8 +275,8 @@ all: $(check_PROGRAMS)
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
-	-$(RM) $(check_PROGRAMS:.exe=.o)
+	@$(call DEL, $(check_PROGRAMS:.exe=.o))
 
 distclean vclean: clean
-	-$(RM) $(check_PROGRAMS)
+	@$(call DEL, $(check_PROGRAMS))
 
