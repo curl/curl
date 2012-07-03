@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -132,8 +132,8 @@ timeout value to use when waiting for socket activities.
 them for activity. This can be done through your application code, or by way
 of an external library such as libevent or glib.
 
-6. Call curl_multi_socket_action() to kickstart everything. To get one or more
-callbacks called.
+6. Call curl_multi_socket_action(...CURL_SOCKET_TIMEOUT...) to kickstart
+everything. To get one or more callbacks called.
 
 7. Wait for activity on any of libcurl's sockets, use the timeout value your
 callback has been told
