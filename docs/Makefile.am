@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -36,7 +36,7 @@ EXTRA_DIST = MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS SSLCERTS	 \
  README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS	 \
  KNOWN_BUGS BINDINGS $(man_MANS) $(HTMLPAGES) HISTORY INSTALL		 \
  $(PDFPAGES) LICENSE-MIXING README.netware DISTRO-DILEMMA INSTALL.devcpp \
- MAIL-ETIQUETTE
+ MAIL-ETIQUETTE HTTP-COOKIES
 
 MAN2HTML= roffit < $< >$@
 
