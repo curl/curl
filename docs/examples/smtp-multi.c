@@ -96,7 +96,6 @@ int main(void)
    CURLM *mcurl;
    int still_running = 1;
    struct timeval mp_start;
-   char mp_timedout = 0;
    struct WriteThis pooh;
    struct curl_slist* rcpt_list = NULL;
 
@@ -132,7 +131,6 @@ int main(void)
    curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
    curl_multi_add_handle(mcurl, curl);
 
-   mp_timedout = 0;
    mp_start = tvnow();
 
   /* we start some action by calling perform right away */
