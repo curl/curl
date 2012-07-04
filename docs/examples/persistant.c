@@ -37,12 +37,24 @@ int main(void)
 
     /* get the first document */
     curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+
+    /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
 
     /* get another document from the same server using the same
        connection */
     curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/docs/");
+
+    /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
 
     /* always cleanup */
     curl_easy_cleanup(curl);

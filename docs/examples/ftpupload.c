@@ -122,6 +122,10 @@ int main(void)
 
     /* Now run off and do what you've been told! */
     res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
 
     /* clean up the FTP commands list */
     curl_slist_free_all (headerlist);

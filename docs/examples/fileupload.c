@@ -64,14 +64,21 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK) {
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
 
-    /* now extract transfer info */
-    curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
-    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+    }
+    else {
+      /* now extract transfer info */
+      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
+      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
 
-    fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
-            speed_upload, total_time);
+      fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
+              speed_upload, total_time);
 
+    }
     /* always cleanup */
     curl_easy_cleanup(curl);
   }

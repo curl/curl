@@ -118,7 +118,13 @@ int main(void)
       /* disconnect if we can't validate server's cert */
       curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,1L);
 
+      /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
+      /* Check for errors */
+      if(res != CURLE_OK)
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+
       break;                   /* we are done... */
     }
     /* always cleanup */
