@@ -824,9 +824,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'J': /* --metalink */
         {
 #ifdef USE_METALINK
-          int major, minor, patch;
-          metalink_get_version(&major, &minor, &patch);
-          if((major*10000)+(minor*100)+patch < CURL_REQ_LIBMETALINK_VERS) {
+          int mlmaj, mlmin, mlpatch;
+          metalink_get_version(&mlmaj, &mlmin, &mlpatch);
+          if((mlmaj*10000)+(mlmin*100)+mlpatch < CURL_REQ_LIBMETALINK_VERS) {
             warnf(config,
                   "--metalink option cannot be used because the version of "
                   "the linked libmetalink library is too old. "
@@ -834,7 +834,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
                   CURL_REQ_LIBMETALINK_MAJOR,
                   CURL_REQ_LIBMETALINK_MINOR,
                   CURL_REQ_LIBMETALINK_PATCH,
-                  major, minor, patch);
+                  mlmaj, mlmin, mlpatch);
             return PARAM_BAD_USE;
           }
           else
