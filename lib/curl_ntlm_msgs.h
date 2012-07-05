@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -162,6 +162,14 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm);
 
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */
+
+#ifdef UNICODE
+#  define SECFLAG_WINNT_AUTH_IDENTITY \
+     (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
+#else
+#  define SECFLAG_WINNT_AUTH_IDENTITY \
+     (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
+#endif
 
 #endif /* BUILDING_CURL_NTLM_MSGS_C */
 

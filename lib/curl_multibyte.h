@@ -23,18 +23,68 @@
  ***************************************************************************/
 #include "setup.h"
 
-#if defined(USE_WIN32_IDN) || \
-   (defined(USE_WINDOWS_SSPI) && (defined(_WIN32_WCE) || defined(UNICODE)))
+#if defined(USE_WIN32_IDN) || (defined(USE_WINDOWS_SSPI) && defined(UNICODE))
 
  /*
   * MultiByte conversions using Windows kernel32 library.
   */
 
-#include <tchar.h>
-
 wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8);
-const char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
+char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
 
-#endif /* USE_WIN32_IDN || (USE_WINDOWS_SSPI && (_WIN32_WCE || UNICODE)) */
+#endif /* USE_WIN32_IDN || (USE_WINDOWS_SSPI && UNICODE) */
+
+
+#if defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI)
+
+/*
+ * Macros Curl_convert_UTF8_to_tchar(), Curl_convert_tchar_to_UTF8()
+ * and Curl_unicodefree() main purpose is to minimize the number of
+ * preprocessor conditional directives needed by code using these
+ * to differentiate UNICODE from non-UNICODE builds.
+ *
+ * When building with UNICODE defined, this two macros
+ * Curl_convert_UTF8_to_tchar() and Curl_convert_tchar_to_UTF8()
+ * return a pointer to a newly allocated memory area holding result.
+ * When the result is no longer needed, allocated memory is intended
+ * to be free'ed with Curl_unicodefree().
+ *
+ * When building without UNICODE defined, this macros
+ * Curl_convert_UTF8_to_tchar() and Curl_convert_tchar_to_UTF8()
+ * return the pointer received as argument. Curl_unicodefree() does
+ * no actual free'ing of this pointer it is simply set to NULL.
+ */
+
+#ifdef UNICODE
+
+#define Curl_convert_UTF8_to_tchar(ptr) Curl_convert_UTF8_to_wchar((ptr))
+#define Curl_convert_tchar_to_UTF8(ptr) Curl_convert_wchar_to_UTF8((ptr))
+#define Curl_unicodefree(ptr) \
+  do {if((ptr)) {free((ptr)); (ptr) = NULL;}} WHILE_FALSE
+
+typedef union {
+  unsigned short       *tchar_ptr;
+  const unsigned short *const_tchar_ptr;
+  unsigned short       *tbyte_ptr;
+  const unsigned short *const_tbyte_ptr;
+} xcharp_u;
+
+#else
+
+#define Curl_convert_UTF8_to_tchar(ptr) (ptr)
+#define Curl_convert_tchar_to_UTF8(ptr) (ptr)
+#define Curl_unicodefree(ptr) \
+  do {(ptr) = NULL;} WHILE_FALSE
+
+typedef union {
+  char                *tchar_ptr;
+  const char          *const_tchar_ptr;
+  unsigned char       *tbyte_ptr;
+  const unsigned char *const_tbyte_ptr;
+} xcharp_u;
+
+#endif /* UNICODE */
+
+#endif /* USE_WIN32_IDN || USE_WINDOWS_SSPI */
 
 #endif /* HEADER_CURL_MULTIBYTE_H */

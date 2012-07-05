@@ -1,5 +1,5 @@
-#ifndef __LIB_CONFIG_WIN32CE_H
-#define __LIB_CONFIG_WIN32CE_H
+#ifndef HEADER_CURL_CONFIG_WIN32CE_H
+#define HEADER_CURL_CONFIG_WIN32CE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -427,6 +427,14 @@
 /*                       WinCE                                      */
 /* ---------------------------------------------------------------- */
 
+#ifndef UNICODE
+#  define UNICODE
+#endif
+
+#ifndef _UNICODE
+#  define _UNICODE
+#endif
+
 #define CURL_DISABLE_FILE 1
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
@@ -437,4 +445,4 @@
 
 extern int stat(const char *path,struct stat *buffer );
 
-#endif /* __LIB_CONFIG_WIN32CE_H */
+#endif /* HEADER_CURL_CONFIG_WIN32CE_H */

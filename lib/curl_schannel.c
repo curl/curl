@@ -189,7 +189,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     memset(connssl->cred, 0, sizeof(struct curl_schannel_cred));
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
-    sspi_status = s_pSecFn->AcquireCredentialsHandle(NULL, (void *)UNISP_NAME,
+    sspi_status = s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
       SECPKG_CRED_OUTBOUND, NULL, &schannel_cred, NULL, NULL,
       &connssl->cred->cred_handle, &connssl->cred->time_stamp);
 
@@ -222,13 +222,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
   memset(connssl->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
-#ifdef UNICODE
-  host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+  host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
-#else
-  host_name = conn->host.name;
-#endif
 
   /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
 
@@ -237,9 +233,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     connssl->req_flags, 0, 0, NULL, 0, &connssl->ctxt->ctxt_handle,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
-#ifdef UNICODE
-  Curl_safefree(host_name);
-#endif
+  Curl_unicodefree(host_name);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     if(sspi_status == SEC_E_WRONG_PRINCIPAL)
@@ -372,13 +366,9 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     memcpy(inbuf[0].pvBuffer, connssl->encdata_buffer,
            connssl->encdata_offset);
 
-#ifdef UNICODE
-    host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
-#else
-  host_name = conn->host.name;
-#endif
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
 
@@ -387,9 +377,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       host_name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
       &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
-#ifdef UNICODE
-    Curl_safefree(host_name);
-#endif
+    Curl_unicodefree(host_name);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -1095,13 +1083,9 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       failf(data, "schannel: ApplyControlToken failure: %s",
             Curl_sspi_strerror(conn, sspi_status));
 
-#ifdef UNICODE
-    host_name = Curl_convert_UTF8_to_wchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
-#else
-    host_name = conn->host.name;
-#endif
 
     /* setup output buffer */
     InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
@@ -1121,9 +1105,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
          &connssl->ret_flags,
          &connssl->ctxt->time_stamp);
 
-#ifdef UNICODE
-    Curl_safefree(host_name);
-#endif
+    Curl_unicodefree(host_name);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
@@ -1230,7 +1212,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 
     if(result == CURLE_OK) {
       CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
-      DWORD dwTrustErrorMask = ~(CERT_TRUST_IS_NOT_TIME_NESTED|
+      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED|
                                  CERT_TRUST_REVOCATION_STATUS_UNKNOWN);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
       if(dwTrustErrorMask) {
@@ -1255,34 +1237,41 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
       infof(data, "warning: ignoring unsupported value (1) ssl.verifyhost\n");
     }
     else if(data->set.ssl.verifyhost == 2) {
-      WCHAR cert_hostname[128];
-      WCHAR *hostname = Curl_convert_UTF8_to_wchar(conn->host.name);
+      TCHAR cert_hostname_buff[128];
+      xcharp_u hostname;
+      xcharp_u cert_hostname;
       DWORD len;
 
-      len = CertGetNameStringW(pCertContextServer,
-                               CERT_NAME_DNS_TYPE,
-                               0,
-                               NULL,
-                               cert_hostname,
-                               128);
-      if(len > 0 && cert_hostname[0] == '*') {
+      cert_hostname.const_tchar_ptr = cert_hostname_buff;
+      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn->host.name);
+
+      len = CertGetNameString(pCertContextServer,
+                              CERT_NAME_DNS_TYPE,
+                              0,
+                              NULL,
+                              cert_hostname.tchar_ptr,
+                              128);
+      if(len > 0 && *cert_hostname.tchar_ptr == '*') {
         /* this is a wildcard cert.  try matching the last len - 1 chars */
         int hostname_len = strlen(conn->host.name);
-        if(wcsicmp(cert_hostname + 1, hostname + hostname_len - len + 2) != 0)
+        cert_hostname.tchar_ptr++;
+        if(_tcsicmp(cert_hostname.const_tchar_ptr,
+                    hostname.const_tchar_ptr + hostname_len - len + 2) != 0)
           result = CURLE_PEER_FAILED_VERIFICATION;
       }
-      else if(len == 0 || wcsicmp(hostname, cert_hostname) != 0) {
+      else if(len == 0 || _tcsicmp(hostname.const_tchar_ptr,
+                                   cert_hostname.const_tchar_ptr) != 0) {
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
       if(result == CURLE_PEER_FAILED_VERIFICATION) {
-        const char *_cert_hostname;
-        _cert_hostname = Curl_convert_wchar_to_UTF8(cert_hostname);
+        char *_cert_hostname;
+        _cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname.tchar_ptr);
         failf(data, "schannel: CertGetNameString() certificate hostname "
               "(%s) did not match connection (%s)",
               _cert_hostname, conn->host.name);
-        Curl_safefree((void *)_cert_hostname);
+        Curl_safefree(_cert_hostname);
       }
-      Curl_safefree(hostname);
+      Curl_unicodefree(hostname.tchar_ptr);
     }
   }
 

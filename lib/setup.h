@@ -223,6 +223,12 @@
  */
 
 #ifdef HAVE_WINDOWS_H
+#  if defined(UNICODE) && !defined(_UNICODE)
+#    define _UNICODE
+#  endif
+#  if defined(_UNICODE) && !defined(UNICODE)
+#    define UNICODE
+#  endif
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
@@ -237,6 +243,7 @@
 #      include <winsock.h>
 #    endif
 #  endif
+#  include <tchar.h>
 #endif
 
 /*

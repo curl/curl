@@ -207,13 +207,9 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     in_sec_buff.pvBuffer   = input_token;
   }
 
-#ifdef UNICODE
-  sname = Curl_convert_UTF8_to_wchar(neg_ctx->server_name);
+  sname = Curl_convert_UTF8_to_tchar(neg_ctx->server_name);
   if(!sname)
     return CURLE_OUT_OF_MEMORY;
-#else
-  sname = neg_ctx->server_name;
-#endif
 
   neg_ctx->status = s_pSecFn->InitializeSecurityContext(
     neg_ctx->credentials,
@@ -229,9 +225,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &context_attributes,
     &lifetime);
 
-#ifdef UNICODE
-  free(sname);
-#endif
+  Curl_unicodefree(sname);
 
   if(GSS_ERROR(neg_ctx->status))
     return -1;

@@ -161,13 +161,11 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* errors, keep sending it...                                            */
   for(;;) {
     TCHAR *sname;
-#ifdef UNICODE
-    sname = Curl_convert_UTF8_to_wchar(service_name);
+
+    sname = Curl_convert_UTF8_to_tchar(service_name);
     if(!sname)
       return CURLE_OUT_OF_MEMORY;
-#else
-    sname = service_name;
-#endif
+
     status = s_pSecFn->InitializeSecurityContext(&cred_handle,
                                                  context_handle,
                                                  sname,
@@ -184,9 +182,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                  &sspi_ret_flags,
                                                  &expiry);
 
-#ifdef UNICODE
-    Curl_safefree(sname);
-#endif
+    Curl_unicodefree(sname);
 
     if(sspi_recv_token.pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);

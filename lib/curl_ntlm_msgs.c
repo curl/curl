@@ -33,10 +33,6 @@
 
 #define DEBUG_ME 0
 
-#ifdef USE_WINDOWS_SSPI
-#  include <tchar.h>
-#endif
-
 #include "urldata.h"
 #include "non-ascii.h"
 #include "sendf.h"
@@ -44,6 +40,7 @@
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
+#include "warnless.h"
 #include "curl_memory.h"
 
 #ifdef USE_WINDOWS_SSPI
@@ -242,7 +239,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
     free(buffer);
     return CURLE_OUT_OF_MEMORY;
   }
-  ntlm->n_type_2 = (unsigned long)size;
+  ntlm->n_type_2 = curlx_uztoul(size);
   memcpy(ntlm->type_2, buffer, size);
 #else
   ntlm->flags = 0;
@@ -276,19 +273,16 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
 #ifdef USE_WINDOWS_SSPI
 void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 {
-  if(ntlm->type_2) {
-    free(ntlm->type_2);
-    ntlm->type_2 = NULL;
-  }
+  Curl_safefree(ntlm->type_2);
   if(ntlm->has_handles) {
     s_pSecFn->DeleteSecurityContext(&ntlm->c_handle);
     s_pSecFn->FreeCredentialsHandle(&ntlm->handle);
     ntlm->has_handles = 0;
   }
   if(ntlm->p_identity) {
-    if(ntlm->identity.User) free(ntlm->identity.User);
-    if(ntlm->identity.Password) free(ntlm->identity.Password);
-    if(ntlm->identity.Domain) free(ntlm->identity.Domain);
+    Curl_safefree(ntlm->identity.User);
+    Curl_safefree(ntlm->identity.Password);
+    Curl_safefree(ntlm->identity.Domain);
     ntlm->p_identity = NULL;
   }
 }
@@ -355,87 +349,83 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   SecBufferDesc desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  const TCHAR *useranddomain;
-  const TCHAR *user;
-  const TCHAR *domain = TEXT("");
+  xcharp_u useranddomain;
+  xcharp_u user, dup_user;
+  xcharp_u domain, dup_domain;
+  xcharp_u passwd, dup_passwd;
   size_t domlen = 0;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+
+  domain.const_tchar_ptr = TEXT("");
 
   Curl_ntlm_sspi_cleanup(ntlm);
 
   if(userp && *userp) {
-#ifdef UNICODE
-    useranddomain = Curl_convert_UTF8_to_wchar(userp);
-    if(useranddomain == NULL)
-      return CURLE_OUT_OF_MEMORY;
-#else
-    useranddomain = userp;
-#endif
 
-    user = _tcschr(useranddomain, TEXT('\\'));
-    if(!user)
-      user = _tcschr(useranddomain, TEXT('/'));
-
-    if(user) {
-      domain = useranddomain;
-      domlen = user - useranddomain;
-      user++;
-    }
-    else {
-      user = useranddomain;
-      domain = TEXT("");
-      domlen = 0;
-    }
-
-    /* note: initialize all of this before doing the mallocs so that
-     * it can be cleaned up later without leaking memory.
-     */
+    /* null initialize ntlm identity's data to allow proper cleanup */
     ntlm->p_identity = &ntlm->identity;
     memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
 
-#ifdef UNICODE
-    if((ntlm->identity.User = (unsigned short *)_wcsdup(user)) == NULL) {
-      free((void *)useranddomain);
+    useranddomain.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)userp);
+    if(!useranddomain.tchar_ptr)
+      return CURLE_OUT_OF_MEMORY;
+
+    user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('\\'));
+    if(!user.const_tchar_ptr)
+      user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('/'));
+
+    if(user.tchar_ptr) {
+      domain.tchar_ptr = useranddomain.tchar_ptr;
+      domlen = user.tchar_ptr - useranddomain.tchar_ptr;
+      user.tchar_ptr++;
+    }
+    else {
+      user.tchar_ptr = useranddomain.tchar_ptr;
+      domain.const_tchar_ptr = TEXT("");
+      domlen = 0;
+    }
+
+    /* setup ntlm identity's user and length */
+    dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
+    if(!dup_user.tchar_ptr) {
+      Curl_unicodefree(useranddomain.tchar_ptr);
       return CURLE_OUT_OF_MEMORY;
     }
-#else
-    if((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
-      return CURLE_OUT_OF_MEMORY;
-#endif
-    ntlm->identity.UserLength = (unsigned long)_tcslen(user);
+    ntlm->identity.User = dup_user.tbyte_ptr;
+    ntlm->identity.UserLength = curlx_uztoul(_tcslen(dup_user.tchar_ptr));
+    dup_user.tchar_ptr = NULL;
 
-    ntlm->identity.Domain = malloc(sizeof(TCHAR) * (domlen + 1));
-    if(ntlm->identity.Domain == NULL) {
-#ifdef UNICODE
-      free((void *)useranddomain);
-#endif
+    /* setup ntlm identity's domain and length */
+    dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
+    if(!dup_domain.tchar_ptr) {
+      Curl_unicodefree(useranddomain.tchar_ptr);
       return CURLE_OUT_OF_MEMORY;
     }
-    _tcsncpy((TCHAR *)ntlm->identity.Domain, domain, domlen);
-    ntlm->identity.Domain[domlen] = TEXT('\0');
-    ntlm->identity.DomainLength = (unsigned long)domlen;
+    _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
+    *(dup_domain.tchar_ptr + domlen) = TEXT('\0');
+    ntlm->identity.Domain = dup_domain.tbyte_ptr;
+    ntlm->identity.DomainLength = curlx_uztoul(domlen);
+    dup_domain.tchar_ptr = NULL;
 
-#ifdef UNICODE
-    free((void *)useranddomain);
-#endif
+    Curl_unicodefree(useranddomain.tchar_ptr);
 
-#ifdef UNICODE
-    ntlm->identity.Password = (unsigned short *)
-      Curl_convert_UTF8_to_wchar(passwdp);
-    if(ntlm->identity.Password == NULL)
+    /* setup ntlm identity's password and length */
+    passwd.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)passwdp);
+    if(!passwd.tchar_ptr)
       return CURLE_OUT_OF_MEMORY;
-#else
-    if((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
+    dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
+    if(!dup_passwd.tchar_ptr) {
+      Curl_unicodefree(passwd.tchar_ptr);
       return CURLE_OUT_OF_MEMORY;
-#endif
-    ntlm->identity.PasswordLength =
-      (unsigned long)_tcslen((TCHAR *)ntlm->identity.Password);
+    }
+    ntlm->identity.Password = dup_passwd.tbyte_ptr;
+    ntlm->identity.PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
+    dup_passwd.tchar_ptr = NULL;
 
-#ifdef UNICODE
-    ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
-#else
-    ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
-#endif
+    Curl_unicodefree(passwd.tchar_ptr);
+
+    /* setup ntlm identity's flags */
+    ntlm->identity.Flags = SECFLAG_WINNT_AUTH_IDENTITY;
   }
   else
     ntlm->p_identity = NULL;
