@@ -314,6 +314,105 @@ static void restore_signal_handlers(void)
 #endif
 }
 
+/* based on the testno, parse the correct server commands */
+static int parse_servercmd(struct httprequest *req)
+{
+  FILE *stream;
+  char *filename;
+  int error;
+
+  filename = test2file(req->testno);
+
+  stream=fopen(filename, "rb");
+  if(!stream) {
+    error = ERRNO;
+    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("Error opening file: %s", filename);
+    logmsg("Couldn't open test file %ld", req->testno);
+    req->open = FALSE; /* closes connection */
+    return 1; /* done */
+  }
+  else {
+    char *orgcmd = NULL;
+    char *cmd = NULL;
+    size_t cmdsize = 0;
+    int num=0;
+
+    /* get the custom server control "commands" */
+    error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
+    fclose(stream);
+    if(error) {
+      logmsg("getpart() failed with error: %d", error);
+      req->open = FALSE; /* closes connection */
+      return 1; /* done */
+    }
+
+    cmd = orgcmd;
+    while(cmd && cmdsize) {
+      char *check;
+
+      if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
+        logmsg("instructed to require authorization header");
+        req->auth_req = TRUE;
+      }
+      else if(!strncmp(CMD_IDLE, cmd, strlen(CMD_IDLE))) {
+        logmsg("instructed to idle");
+        req->rcmd = RCMD_IDLE;
+        req->open = TRUE;
+      }
+      else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
+        logmsg("instructed to stream");
+        req->rcmd = RCMD_STREAM;
+      }
+      else if(!strncmp(CMD_CONNECTIONMONITOR, cmd,
+                       strlen(CMD_CONNECTIONMONITOR))) {
+        logmsg("enabled connection monitoring");
+        req->connmon = TRUE;
+      }
+      else if(1 == sscanf(cmd, "pipe: %d", &num)) {
+        logmsg("instructed to allow a pipe size of %d", num);
+        if(num < 0)
+          logmsg("negative pipe size ignored");
+        else if(num > 0)
+          req->pipe = num-1; /* decrease by one since we don't count the
+                                first request in this number */
+      }
+      else if(1 == sscanf(cmd, "skip: %d", &num)) {
+        logmsg("instructed to skip this number of bytes %d", num);
+        req->skip = num;
+      }
+      else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+        logmsg("instructed to delay %d secs between packets", num);
+        req->writedelay = num;
+      }
+      else {
+        logmsg("Unknown <servercmd> instruction found: %s", cmd);
+      }
+      /* try to deal with CRLF or just LF */
+      check = strchr(cmd, '\r');
+      if(!check)
+        check = strchr(cmd, '\n');
+
+      if(check) {
+        /* get to the letter following the newline */
+        while((*check == '\r') || (*check == '\n'))
+          check++;
+
+        if(!*check)
+          /* if we reached a zero, get out */
+          break;
+        cmd = check;
+      }
+      else
+        break;
+    }
+    if(orgcmd)
+      free(orgcmd);
+  }
+
+  return 0; /* OK! */
+}
+
 static int ProcessRequest(struct httprequest *req)
 {
   char *line=&req->reqbuf[req->checkindex];
@@ -322,9 +421,7 @@ static int ProcessRequest(struct httprequest *req)
   static char doc[MAXDOCNAMELEN];
   char logbuf[456];
   int prot_major, prot_minor;
-  char *end;
-  int error;
-  end = strstr(line, end_of_headers);
+  char *end = strstr(line, end_of_headers);
 
   req->callcount++;
 
@@ -358,9 +455,6 @@ static int ProcessRequest(struct httprequest *req)
 
     /* get the number after it */
     if(ptr) {
-      FILE *stream;
-      char *filename;
-
       if((strlen(doc) + strlen(request)) < 400)
         sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
                 request, doc, prot_major, prot_minor);
@@ -400,94 +494,9 @@ static int ProcessRequest(struct httprequest *req)
               req->testno, req->partno);
       logmsg("%s", logbuf);
 
-      filename = test2file(req->testno);
+      /* find and parse <servercmd> for this test */
+      parse_servercmd(req);
 
-      stream=fopen(filename, "rb");
-      if(!stream) {
-        error = ERRNO;
-        logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", filename);
-        logmsg("Couldn't open test file %ld", req->testno);
-        req->open = FALSE; /* closes connection */
-        return 1; /* done */
-      }
-      else {
-        char *orgcmd = NULL;
-        char *cmd = NULL;
-        size_t cmdsize = 0;
-        int num=0;
-
-        /* get the custom server control "commands" */
-        error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-        fclose(stream);
-        if(error) {
-          logmsg("getpart() failed with error: %d", error);
-          req->open = FALSE; /* closes connection */
-          return 1; /* done */
-        }
-
-        cmd = orgcmd;
-        while(cmd && cmdsize) {
-          char *check;
-
-          if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
-            logmsg("instructed to require authorization header");
-            req->auth_req = TRUE;
-          }
-          else if(!strncmp(CMD_IDLE, cmd, strlen(CMD_IDLE))) {
-            logmsg("instructed to idle");
-            req->rcmd = RCMD_IDLE;
-            req->open = TRUE;
-          }
-          else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
-            logmsg("instructed to stream");
-            req->rcmd = RCMD_STREAM;
-          }
-          else if(!strncmp(CMD_CONNECTIONMONITOR, cmd,
-                           strlen(CMD_CONNECTIONMONITOR))) {
-            logmsg("enabled connection monitoring");
-            req->connmon = TRUE;
-          }
-          else if(1 == sscanf(cmd, "pipe: %d", &num)) {
-            logmsg("instructed to allow a pipe size of %d", num);
-            if(num < 0)
-              logmsg("negative pipe size ignored");
-            else if(num > 0)
-              req->pipe = num-1; /* decrease by one since we don't count the
-                                    first request in this number */
-          }
-          else if(1 == sscanf(cmd, "skip: %d", &num)) {
-            logmsg("instructed to skip this number of bytes %d", num);
-            req->skip = num;
-          }
-          else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
-            logmsg("instructed to delay %d secs between packets", num);
-            req->writedelay = num;
-          }
-          else {
-            logmsg("funny instruction found: %s", cmd);
-          }
-          /* try to deal with CRLF or just LF */
-          check = strchr(cmd, '\r');
-          if(!check)
-            check = strchr(cmd, '\n');
-
-          if(check) {
-            /* get to the letter following the newline */
-            while((*check == '\r') || (*check == '\n'))
-              check++;
-
-            if(!*check)
-              /* if we reached a zero, get out */
-              break;
-            cmd = check;
-          }
-          else
-            break;
-        }
-        if(orgcmd)
-          free(orgcmd);
-      }
     }
     else {
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
@@ -532,6 +541,9 @@ static int ProcessRequest(struct httprequest *req)
           req->testno = req->connect_port?req->connect_port:DOCNUMBER_CONNECT;
         else
           req->testno = req->connect_port?DOCNUMBER_CONNECT:DOCNUMBER_BADCONNECT;
+
+        /* find and parse <servercmd> for this test */
+        parse_servercmd(req);
       }
       else {
         logmsg("Did not find test number in PATH");
@@ -1979,7 +1991,7 @@ int main(int argc, char *argv[])
     if(got_exit_signal)
       break;
 
-    logmsg("====> Client disconnect");
+    logmsg("====> Client disconnect %d", req.connmon);
 
     if(req.connmon) {
       const char *keepopen="[DISCONNECT]\n";
