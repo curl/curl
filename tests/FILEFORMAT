@@ -133,7 +133,15 @@ skip: [num]     instructs the server to ignore reading this many bytes from a PU
 rtp: part [num] channel [num] size [num]
                stream a fake RTP packet for the given part on a chosen channel
                with the given payload size
-connection-monitor
+
+connection-monitor When used, this will log [DISCONNECT] to the server.input
+               log if the connection is disconnected while the given request
+               is handled. Note that if the connection isn't disconnected and
+               the server loops and waits for the next request on the
+               persistent connection then the internal boolean for connection
+               monitoring will be reset to default and if then the connection
+               gets discconected nothing will be output.
+
 </servercmd>
 </reply>
 
