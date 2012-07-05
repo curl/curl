@@ -65,10 +65,14 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
      * to change the member temporarily for connecting to the HTTP
      * proxy. After Curl_proxyCONNECT we have to set back the member to the
      * original pointer
+     *
+     * This function might be called several times in the multi interface case
+     * if the proxy's CONNTECT response is not instant.
      */
     prot_save = conn->data->state.proto.generic;
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->state.proto.http = &http_proxy;
+    conn->bits.close = FALSE;
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
                                conn->host.name, conn->remote_port);
     conn->data->state.proto.generic = prot_save;
@@ -357,6 +361,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   /* we're done reading chunks! */
                   infof(data, "chunk reading DONE\n");
                   keepon = FALSE;
+                  /* we did the full CONNECT treatment, go COMPLETE */
+                  conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
                 }
                 else
                   infof(data, "Read %zd bytes of chunk, continue\n",
@@ -445,6 +451,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                           /* we're done reading chunks! */
                           infof(data, "chunk reading DONE\n");
                           keepon = FALSE;
+                          /* we did the full CONNECT treatment, go to
+                             COMPLETE */
+                          conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
                         }
                         else
                           infof(data, "Read %zd bytes of chunk, continue\n",
@@ -466,6 +475,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                                 gotbytes - (i+1));
                       }
                     }
+                    /* we did the full CONNECT treatment, go to COMPLETE */
+                    conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
                     break; /* breaks out of for-loop, not switch() */
                   }
 
@@ -544,6 +555,17 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         break;
       }
     } /* END NEGOTIATION PHASE */
+
+    /* If we are supposed to continue and request a new URL, which basically
+     * means the HTTP authentication is still going on so if the tunnel
+     * is complete we start over in INIT state */
+    if(data->req.newurl &&
+       (TUNNEL_COMPLETE == conn->tunnel_state[sockindex])) {
+      conn->tunnel_state[sockindex] = TUNNEL_INIT;
+      infof(data, "TUNNEL_STATE switched to: %d\n",
+            conn->tunnel_state[sockindex]);
+    }
+
   } while(data->req.newurl);
 
   if(200 != data->req.httpcode) {
