@@ -155,17 +155,17 @@ USE_WINSSL  = true
 
 !IF "$(USE_WINSSL)"=="true"
 SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
-USE_SCHANNEL = true
-USE_SSPI     = yes
+USE_SSPI    = true
 !ENDIF
 
 
 !IFNDEF USE_SSPI
-USE_SSPI = yes
+USE_SSPI  = true
+!ELSEIF "$(USE_SSPI)"=="yes"
+USE_SSPI  = true
 !ENDIF
 
-!IF "$(USE_SSPI)"=="yes"
-USE_SSPI    = true
+!IF "$(USE_SSPI)"=="true"
 SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
 !ENDIF
 
