@@ -143,22 +143,6 @@ SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
 
-!IFNDEF USE_WINSSL
-!IF "$(USE_SSL)"=="true"
-USE_WINSSL  = false
-!ELSE
-USE_WINSSL  = true
-!ENDIF
-!ELSEIF "$(USE_WINSSL)"=="yes"
-USE_WINSSL  = true
-!ENDIF
-
-!IF "$(USE_WINSSL)"=="true"
-SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
-USE_SSPI    = true
-!ENDIF
-
-
 !IFNDEF USE_SSPI
 USE_SSPI  = true
 !ELSEIF "$(USE_SSPI)"=="yes"
@@ -190,6 +174,24 @@ USE_IDN   = true
 !IF "$(USE_IDN)"=="true"
 CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
 LFLAGS    = $(LFLAGS) Normaliz.lib
+!ENDIF
+
+
+!IFNDEF USE_WINSSL
+!IF "$(USE_SSL)"=="true"
+USE_WINSSL  = false
+!ELSE
+USE_WINSSL  = $(USE_SSPI)
+!ENDIF
+!ELSEIF "$(USE_WINSSL)"=="yes"
+USE_WINSSL  = true
+!ENDIF
+
+!IF "$(USE_WINSSL)"=="true"
+!IF "$(USE_SSPI)"!="true"
+!ERROR cannot build with WinSSL without SSPI
+!ENDIF
+SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
 !ENDIF
 
 
