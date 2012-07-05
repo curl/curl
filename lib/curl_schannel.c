@@ -1269,7 +1269,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
         failf(data, "schannel: CertGetNameString() certificate hostname "
               "(%s) did not match connection (%s)",
               _cert_hostname, conn->host.name);
-        Curl_safefree(_cert_hostname);
+        Curl_unicodefree(_cert_hostname);
       }
       Curl_unicodefree(hostname.tchar_ptr);
     }
