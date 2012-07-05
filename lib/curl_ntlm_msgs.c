@@ -419,7 +419,8 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
       return CURLE_OUT_OF_MEMORY;
     }
     ntlm->identity.Password = dup_passwd.tbyte_ptr;
-    ntlm->identity.PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
+    ntlm->identity.PasswordLength =
+      curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
     dup_passwd.tchar_ptr = NULL;
 
     Curl_unicodefree(passwd.tchar_ptr);
