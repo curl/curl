@@ -12,6 +12,9 @@ HTTP proxy Digest auth
 
 # Server-side
 <reply>
+<servercmd>
+connection-monitor
+</servercmd>
 
 # this is returned first since we get no proxy-auth
 <data>
