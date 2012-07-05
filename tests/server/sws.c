@@ -118,6 +118,7 @@ struct httprequest {
   bool pipelining;   /* true if request is pipelined */
   int callcount;  /* times ProcessRequest() gets called */
   unsigned short connect_port; /* the port number CONNECT used */
+  bool connmon;   /* monitor the state of the connection, log disconnects */
 };
 
 static int ProcessRequest(struct httprequest *req);
@@ -156,6 +157,11 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 /* 'stream' means to send a never-ending stream of data */
 #define CMD_STREAM "stream"
+
+/* 'connection-monitor' will output when a server/proxy connection gets
+   disconnected as for some cases it is important that it gets done at the
+   proper point - like with NTLM */
+#define CMD_CONNECTIONMONITOR "connection-monitor"
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -436,6 +442,11 @@ static int ProcessRequest(struct httprequest *req)
           else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
             logmsg("instructed to stream");
             req->rcmd = RCMD_STREAM;
+          }
+          else if(!strncmp(CMD_CONNECTIONMONITOR, cmd,
+                           strlen(CMD_CONNECTIONMONITOR))) {
+            logmsg("enabled connection monitoring");
+            req->connmon = TRUE;
           }
           else if(1 == sscanf(cmd, "pipe: %d", &num)) {
             logmsg("instructed to allow a pipe size of %d", num);
@@ -814,6 +825,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->pipelining = FALSE;
   req->callcount = 0;
   req->connect_port = 0;
+  req->connmon = FALSE;
 
   /*** end of httprequest init ***/
 
@@ -1960,10 +1972,6 @@ int main(int argc, char *argv[])
 
       if(req.open) {
         logmsg("=> persistant connection request ended, awaits new request\n");
-        /*
-        const char *keepopen="[KEEPING CONNECTION OPEN]";
-        storerequest((char *)keepopen, strlen(keepopen));
-        */
       }
       /* if we got a CONNECT, loop and get another request as well! */
     } while(req.open || (req.testno == DOCNUMBER_CONNECT));
@@ -1972,6 +1980,11 @@ int main(int argc, char *argv[])
       break;
 
     logmsg("====> Client disconnect");
+
+    if(req.connmon) {
+      const char *keepopen="[DISCONNECT]\n";
+      storerequest((char *)keepopen, strlen(keepopen));
+    }
 
     if(!req.open)
       /* When instructed to close connection after server-reply we

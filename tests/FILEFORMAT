@@ -133,6 +133,7 @@ skip: [num]     instructs the server to ignore reading this many bytes from a PU
 rtp: part [num] channel [num] size [num]
                stream a fake RTP packet for the given part on a chosen channel
                with the given payload size
+connection-monitor
 </servercmd>
 </reply>
 

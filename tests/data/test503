@@ -13,6 +13,9 @@ multi
 
 # Server-side
 <reply>
+<servercmd>
+connection-monitor
+</servercmd>
 <data>
 HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
