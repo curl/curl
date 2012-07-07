@@ -18,6 +18,7 @@ This release includes the following changes:
  o pop3: Added support for sasl digest-md5 authentication
  o pop3: Added support for apop authentication
  o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
+ o Added support for Dwarin SSL (Native Mac OS X and iOS) [6]
 
 This release includes the following bugfixes:
 
@@ -33,7 +34,9 @@ This release includes the following bugfixes:
  o log2changes.pl: fix the Version output
  o lib554.c: use curl_formadd() properly [4]
  o urldata.h: fix cyassl build clash with wincrypt.h
- o 
+ o cookies: changed the URL in the cookiejar headers
+ o http-proxy: keep CONNECT connections alive (for NTLM)
+ o NTLM SSPI: fixed to work with unicode user names and passwords
 
 This release includes the following known bugs:
 
@@ -45,7 +48,7 @@ advice from friends like these:
  Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
  Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
  Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
- Neil Bowers
+ Neil Bowers, Marcel Raad, Christian Hägele
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -56,3 +59,4 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/bug/view.cgi?id=3533045
  [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
  [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
+ [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
