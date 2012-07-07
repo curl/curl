@@ -160,6 +160,222 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   return ortn;
 }
 
+CF_INLINE const char *CipherNameForNumber(SSLCipherSuite cipher) {
+  switch (cipher) {
+    case SSL_RSA_WITH_NULL_MD5:
+      return "SSL_RSA_WITH_NULL_MD5";
+      break;
+    case SSL_RSA_WITH_NULL_SHA:
+      return "SSL_RSA_WITH_NULL_SHA";
+      break;
+    case SSL_RSA_EXPORT_WITH_RC4_40_MD5:
+      return "SSL_RSA_EXPORT_WITH_RC4_40_MD5";
+      break;
+    case SSL_RSA_WITH_RC4_128_MD5:
+      return "SSL_RSA_WITH_RC4_128_MD5";
+      break;
+    case SSL_RSA_WITH_RC4_128_SHA:
+      return "SSL_RSA_WITH_RC4_128_SHA";
+      break;
+    case SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5:
+      return "SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5";
+      break;
+    case SSL_RSA_WITH_IDEA_CBC_SHA:
+      return "SSL_RSA_WITH_IDEA_CBC_SHA";
+      break;
+    case SSL_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_RSA_WITH_DES_CBC_SHA:
+      return "SSL_RSA_WITH_DES_CBC_SHA";
+      break;
+    case SSL_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_DH_DSS_WITH_DES_CBC_SHA:
+      return "SSL_DH_DSS_WITH_DES_CBC_SHA";
+      break;
+    case SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_DH_RSA_WITH_DES_CBC_SHA:
+      return "SSL_DH_RSA_WITH_DES_CBC_SHA";
+      break;
+    case SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_DHE_DSS_WITH_DES_CBC_SHA:
+      return "SSL_DHE_DSS_WITH_DES_CBC_SHA";
+      break;
+    case SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_DHE_RSA_WITH_DES_CBC_SHA:
+      return "SSL_DHE_RSA_WITH_DES_CBC_SHA";
+      break;
+    case SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5:
+      return "SSL_DH_anon_EXPORT_WITH_RC4_40_MD5";
+      break;
+    case SSL_DH_anon_WITH_RC4_128_MD5:
+      return "SSL_DH_anon_WITH_RC4_128_MD5";
+      break;
+    case SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA:
+      return "SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA";
+      break;
+    case SSL_DH_anon_WITH_DES_CBC_SHA:
+      return "SSL_DH_anon_WITH_DES_CBC_SHA";
+      break;
+    case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
+      return "SSL_DH_anon_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_FORTEZZA_DMS_WITH_NULL_SHA:
+      return "SSL_FORTEZZA_DMS_WITH_NULL_SHA";
+      break;
+    case SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA:
+      return "SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA";
+      break;
+    case TLS_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_DSS_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
+      return "TLS_DHE_DSS_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_DHE_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_anon_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_anon_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_DSS_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
+      return "TLS_DHE_DSS_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_DHE_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_anon_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_anon_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_ECDH_ECDSA_WITH_NULL_SHA:
+      return "TLS_ECDH_ECDSA_WITH_NULL_SHA";
+      break;
+    case TLS_ECDH_ECDSA_WITH_RC4_128_SHA:
+      return "TLS_ECDH_ECDSA_WITH_RC4_128_SHA";
+      break;
+    case TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA:
+      return "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA:
+      return "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_NULL_SHA:
+      return "TLS_ECDHE_ECDSA_WITH_NULL_SHA";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_RC4_128_SHA:
+      return "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
+      return "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
+      return "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_ECDH_RSA_WITH_NULL_SHA:
+      return "TLS_ECDH_RSA_WITH_NULL_SHA";
+      break;
+    case TLS_ECDH_RSA_WITH_RC4_128_SHA:
+      return "TLS_ECDH_RSA_WITH_RC4_128_SHA";
+      break;
+    case TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_ECDHE_RSA_WITH_NULL_SHA:
+      return "TLS_ECDHE_RSA_WITH_NULL_SHA";
+      break;
+    case TLS_ECDHE_RSA_WITH_RC4_128_SHA:
+      return "TLS_ECDHE_RSA_WITH_RC4_128_SHA";
+      break;
+    case TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_ECDH_anon_WITH_NULL_SHA:
+      return "TLS_ECDH_anon_WITH_NULL_SHA";
+      break;
+    case TLS_ECDH_anon_WITH_RC4_128_SHA:
+      return "TLS_ECDH_anon_WITH_RC4_128_SHA";
+      break;
+    case TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_ECDH_anon_WITH_AES_128_CBC_SHA:
+      return "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
+      return "TLS_ECDH_anon_WITH_AES_256_CBC_SHA";
+      break;
+    case SSL_RSA_WITH_RC2_CBC_MD5:
+      return "SSL_RSA_WITH_RC2_CBC_MD5";
+      break;
+    case SSL_RSA_WITH_IDEA_CBC_MD5:
+      return "SSL_RSA_WITH_IDEA_CBC_MD5";
+      break;
+    case SSL_RSA_WITH_DES_CBC_MD5:
+      return "SSL_RSA_WITH_DES_CBC_MD5";
+      break;
+    case SSL_RSA_WITH_3DES_EDE_CBC_MD5:
+      return "SSL_RSA_WITH_3DES_EDE_CBC_MD5";
+      break;
+  }
+  return "(NONE)";
+}
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -226,6 +442,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+  /* If this is a domain name and not an IP address, then configure SNI: */
   if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
@@ -237,9 +454,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
             err);
     }
-    else
-      infof(data, "WARNING: failed to configure "
-            "server name indication (SNI) TLS extension\n");
   }
 
   err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
@@ -312,7 +526,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 
     /* Informational message */
     (void)SSLGetNegotiatedCipher(connssl->ssl_ctx, &cipher);
-    infof (data, "SSL connection using cipher %u\n", cipher);
+    infof (data, "SSL connection using %s\n", CipherNameForNumber(cipher));
 
     return CURLE_OK;
   }
