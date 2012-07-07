@@ -835,8 +835,19 @@ void Curl_darwinssl_random(struct SessionHandle *data,
                            unsigned char *entropy,
                            size_t length)
 {
+  /* arc4random_buf() isn't available on cats older than Lion, so let's
+     do this manually for the benefit of the older cats. */
+  size_t i;
+  u_int32_t random = 0;
+
+  for(i = 0 ; i < length ; i++) {
+    if(i % sizeof(u_int32_t) == 0)
+      random = arc4random();
+    entropy[i] = random & 0xFF;
+    random >>= 8;
+  }
+  i = random = 0;
   (void)data;
-  arc4random_buf(entropy, length);
 }
 
 void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
