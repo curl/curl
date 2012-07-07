@@ -17,9 +17,14 @@ may have been fixed since this was written!
   curl_easy_getinfo() to return a socket properly with the CURLINFO_LASTSOCKET
   option as for all other operating systems.
 
-75. NTLM authentication involving unicode user name or password.
+75. NTLM authentication involving unicode user name or password only works
+  properly if built with UNICODE defined together with the schannel/winssl
+  backend. The original problem was mentioned in:
   http://curl.haxx.se/mail/lib-2009-10/0024.html
   http://curl.haxx.se/bug/view.cgi?id=2944325
+
+  The schannel version verified to work as mentioned in
+  http://curl.haxx.se/mail/lib-2012-07/0073.html
 
 73. if a connection is made to a FTP server but the server then just never
   sends the 220 response or otherwise is dead slow, libcurl will not
