@@ -45,24 +45,26 @@ Once you are in the console, go to the winbuild directory in the Curl
 sources:
     cd curl-src\winbuild
 
-Then you can call nmake /f makefile with the desired options (see below).
+Then you can call nmake /f Makefile.vc with the desired options (see below).
 The builds will be in the top src directory, builds\ directory, in 
 a directory named using the options given to the nmake call.
 
-nmake /f makefile.vc mode=<static or dll> <options>
+nmake /f Makefile.vc mode=<static or dll> <options>
+
 where <options> is one or many of:
   VC=<6,7,8,9,10>              - VC versions
   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
-                                 Default to sibbling directory deps: ../deps
+                                 Defaults to sibbling directory deps: ../deps
                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
-  WITH_ZLIB=<dll or static>    - Enable ZLib support, DLL or static
-  WITH_SSH2=<dll or static>    - Enable LIbSSH2 support, DLL or static
-  USE_SSSPI=<yes or no>        - Enable SSPI support, default to yes
-  USE_IPV6=<yes or no>         - Enable IPV6, default to yes
+  WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
+  WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
+  ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
+  ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
+  ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
+                                 Requires Windows Vista or later, or installation from:
+                                 http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+  ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
+  GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
   DEBUG=<yes or no>            - Debug builds
-  USE_IDN=<yes or no>          - Wheter or not to use IDN Windows APIs. Requires Windows Vista or later.
-                                 or to install http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
-  GEN_PDB=<yes or no>          - Generate Program Database (debug symbols release build)
-
