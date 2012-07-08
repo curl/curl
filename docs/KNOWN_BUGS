@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+80. Curl doesn't recognize certificates in DER format in keychain, but it
+  works with PEM.
+  http://curl.haxx.se/bug/view.cgi?id=3439999
+
 79. SMTP. When sending data to multiple recipients, curl will abort and return
   failure if one of the recipients indicate failure (on the "RCPT TO"
   command). Ordinary mail programs would proceed and still send to the ones
