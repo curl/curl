@@ -3,9 +3,6 @@ Try to fix in 7.27
 
 313 - host.name vs. host.dispname and "(nil)" outputs
 
-316 - CONNECT NTLM over proxy with SSPI build
-
-
 To be addressed in 7.28
 =======================
 
