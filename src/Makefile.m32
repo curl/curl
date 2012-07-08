@@ -153,7 +153,7 @@ SCHANNEL = 1
 SSPI = 1
 endif
 
-INCLUDES = -I. -I.. -I../include -I../lib
+INCLUDES = -I. -I../include -I../lib
 
 ifdef DYN
   curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
