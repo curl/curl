@@ -882,7 +882,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
     for(i=0; co; co = co->next)
       array[i++] = co;
 
-    /* now sort the cookie pointers in path lenth order */
+    /* now sort the cookie pointers in path length order */
     qsort(array, matches, sizeof(struct Cookie *), cookie_sort);
 
     /* remake the linked list order according to the new order */
