@@ -34,7 +34,7 @@ This release includes the following bugfixes:
  o log2changes.pl: fix the Version output
  o lib554.c: use curl_formadd() properly [4]
  o urldata.h: fix cyassl build clash with wincrypt.h
- o cookies: changed the URL in the cookiejar headers
+ o cookies: changed the URL in the cookiejar headers [7]
  o http-proxy: keep CONNECT connections alive (for NTLM)
  o NTLM SSPI: fixed to work with unicode user names and passwords
 
@@ -60,3 +60,4 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
  [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
  [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
+ [7] = http://daniel.haxx.se/blog/2012/07/08/curls-new-http-cookies-docs/
