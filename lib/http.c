@@ -1371,9 +1371,9 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 }
 #endif
 
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS)
-/* This function is for OpenSSL and GnuTLS only. It should be made to query
-   the generic SSL layer instead. */
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL)
+/* This function is for OpenSSL, GnuTLS and schannel only. It should be
+   made to query the generic SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
@@ -1409,7 +1409,7 @@ static int https_getsock(struct connectdata *conn,
   return GETSOCK_BLANK;
 }
 #endif /* USE_SSL */
-#endif /* USE_SSLEAY || USE_GNUTLS */
+#endif /* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL */
 
 /*
  * Curl_http_done() gets called from Curl_done() after a single HTTP request
