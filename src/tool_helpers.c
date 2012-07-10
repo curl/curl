@@ -54,6 +54,8 @@ const char *param2text(int res)
     return "is badly used here";
   case PARAM_BAD_NUMERIC:
     return "expected a proper numerical parameter";
+  case PARAM_NEGATIVE_NUMERIC:
+    return "expected a positive numerical parameter";
   case PARAM_LIBCURL_DOESNT_SUPPORT:
     return "the installed libcurl version doesn't support this";
   case PARAM_NO_MEM:

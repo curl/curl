@@ -32,6 +32,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file);
 void cleanarg(char *str);
 
 int str2num(long *val, const char *str);
+int str2unum(long *val, const char *str); /* for unsigned input numbers */
 
 long proto2num(struct Configurable *config, long *val, const char *str);
 

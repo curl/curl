@@ -146,8 +146,8 @@ void cleanarg(char *str)
 }
 
 /*
- * Parse the string and write the integer in the given address. Return
- * non-zero on failure, zero on success.
+ * Parse the string and write the long in the given address. Return non-zero
+ * on failure, zero on success.
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
@@ -161,10 +161,26 @@ int str2num(long *val, const char *str)
     long num = strtol(str, &endptr, 10);
     if((endptr != str) && (endptr == str + strlen(str))) {
       *val = num;
-      return 0;  /* Ok */
+      return PARAM_OK;  /* Ok */
     }
   }
-  return 1; /* badness */
+  return PARAM_BAD_NUMERIC; /* badness */
+}
+
+/*
+ * Parse the string and write the long in the given address. Return non-zero
+ * on failure, zero on success. ONLY ACCEPTS POSITIVE NUMBERS!
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+int str2unum(long *val, const char *str)
+{
+  if(str[0]=='-')
+    return PARAM_NEGATIVE_NUMERIC; /* badness */
+  return str2num(val, str);
 }
 
 /*
@@ -274,8 +290,8 @@ long proto2num(struct Configurable *config, long *val, const char *str)
 }
 
 /**
- * Parses the given string looking for an offset (which may be
- * a larger-than-integer value).
+ * Parses the given string looking for an offset (which may be a
+ * larger-than-integer value). The offset CANNOT be negative!
  *
  * @param val  the offset to populate
  * @param str  the buffer containing the offset
@@ -283,16 +299,24 @@ long proto2num(struct Configurable *config, long *val, const char *str)
  */
 int str2offset(curl_off_t *val, const char *str)
 {
+  char *endptr;
+  if(str[0] == '-')
+    /* offsets aren't negative, this indicates weird input */
+    return PARAM_NEGATIVE_NUMERIC;
+
 #if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
-  *val = curlx_strtoofft(str, NULL, 0);
+  *val = curlx_strtoofft(str, &endptr, 0);
   if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (ERRNO == ERANGE))
-    return 1;
+    return PARAM_BAD_NUMERIC;
 #else
-  *val = strtol(str, NULL, 0);
+  *val = strtol(str, &endptr, 0);
   if((*val == LONG_MIN || *val == LONG_MAX) && ERRNO == ERANGE)
-    return 1;
+    return PARAM_BAD_NUMERIC;
 #endif
-  return 0;
+  if((endptr != str) && (endptr == str + strlen(str)))
+    return 0;  /* Ok */
+
+  return PARAM_BAD_NUMERIC;
 }
 
 ParameterError checkpasswd(const char *kind, /* for what purpose */
