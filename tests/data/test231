@@ -17,7 +17,7 @@ file
 file:// with resume
  </name>
  <command>
-file://localhost/%PWD/log/test231.txt -C 10-
+file://localhost/%PWD/log/test231.txt -C 10
 </command>
 <file name="log/test231.txt">
 A01234567
