@@ -330,7 +330,7 @@ $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/version.inc: ../include/curl/curlver.h $(OBJDIR)
+$(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
 	@$(AWK) -f ../packages/NetWare/get_ver.awk $< > $@
 
