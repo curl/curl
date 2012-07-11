@@ -365,7 +365,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-$(TARGET).nlm: $(OBJDIR)/$(TARGET).def $(OBJL) $(XDCDATA)
+$(TARGET).nlm: $(OBJDIR)/$(TARGET).def $(OBJL) $(EXPORTF) $(XDCDATA)
 	@echo Linking $@
 	@-$(RM) $@
 	@$(LD) $(LDFLAGS) $<
