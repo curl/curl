@@ -1440,6 +1440,7 @@ static void http_connect(curl_socket_t *infdp,
         if(datafd != CURL_SOCKET_BAD) {
           struct httprequest req2;
           int err;
+          memset(&req2, 0, sizeof(req2));
           logmsg("====> Client connect DATA");
 #ifdef TCP_NODELAY
           /* Disable the Nagle algorithm */
@@ -1698,6 +1699,8 @@ int main(int argc, char *argv[])
 #ifdef CURL_SWS_FORK_ENABLED
   bool use_fork = FALSE;
 #endif
+
+  memset(&req, 0, sizeof(req));
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
