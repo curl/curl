@@ -141,7 +141,7 @@ ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 IPV6 = 1
 endif
 ifeq ($(findstring -winssl,$(CFG)),-winssl)
-SCHANNEL = 1
+WINSSL = 1
 SSPI = 1
 endif
 
@@ -210,7 +210,7 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  ifdef SCHANNEL
+  ifdef WINSSL
     CFLAGS += -DUSE_SCHANNEL
   endif
 endif

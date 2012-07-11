@@ -149,7 +149,7 @@ ifeq ($(findstring -metalink,$(CFG)),-metalink)
 METALINK = 1
 endif
 ifeq ($(findstring -winssl,$(CFG)),-winssl)
-SCHANNEL = 1
+WINSSL = 1
 SSPI = 1
 endif
 
@@ -219,7 +219,7 @@ ifdef METALINK
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  ifdef SCHANNEL
+  ifdef WINSSL
     CFLAGS += -DUSE_SCHANNEL
   endif
 endif
