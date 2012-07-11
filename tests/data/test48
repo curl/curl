@@ -9,10 +9,12 @@ HTTP HEAD
 #
 # Server-side
 <reply>
+<servercmd>
+connection-monitor
+</servercmd>
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Connection: close
 
 </data>
 </reply>
@@ -27,7 +29,7 @@ http
 HTTP with -d and -G and -I
  </name>
  <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/48 -G -I
+-d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/48 -G -I http://%HOSTIP:%HTTPPORT/48
 </command>
 </client>
 
@@ -42,6 +44,11 @@ HEAD /48?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
+HEAD /48?foo=moo&moo=poo HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
 </protocol>
 </verify>
 </testcase>
