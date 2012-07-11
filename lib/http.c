@@ -2851,7 +2851,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
         if((k->size == -1) && !k->chunk && !conn->bits.close &&
            (conn->httpversion >= 11) &&
-           !(conn->handler->protocol & CURLPROTO_RTSP)) {
+           !(conn->handler->protocol & CURLPROTO_RTSP) &&
+           data->set.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
              Content-Length nor Content-Encoding chunked have been
              received, according to RFC2616 section 4.4 point 5, we
