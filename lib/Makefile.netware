@@ -64,7 +64,8 @@ DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= none
-EXPORTS	= @libcurl.imp
+EXPORTF	= $(OBJDIR)/libcurl.imp
+EXPORTS	= @$(EXPORTF)
 
 # Uncomment the next line to enable linking with POSIX semantics.
 # POSIXFL = 1
@@ -660,6 +661,10 @@ else
 	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
 endif
 
+$(EXPORTF): $(CURL_INC)/curl/curl.h $(CURL_INC)/curl/easy.h $(CURL_INC)/curl/multi.h $(CURL_INC)/curl/mprintf.h
+	@echo Creating $@
+	@$(AWK) -f ../packages/NetWare/get_exp.awk $^ > $@
+
 FORCE: ;
 
 info: $(OBJDIR)/version.inc
@@ -695,13 +700,6 @@ ifdef ENABLE_IPV6
 else
 	@echo ipv6 support:    no
 endif
-
-$(LIBCARES_PATH)/libcares.$(LIBEXT):
-	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.netware lib
-
-ca-bundle.crt: mk-ca-bundle.pl
-	@echo Creating $@
-	@-$(PERL) $< -b -n $@
 
 $(CURL_INC)/curl/curlbuild.h: Makefile.netware FORCE
 	@echo Creating $@
@@ -740,4 +738,11 @@ endif
 	@echo $(DL)typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;$(DL) >> $@
 	@echo $(DL)typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;$(DL) >> $@
 	@echo $(DL)#endif /* __CURL_CURLBUILD_H */$(DL) >> $@
+
+$(LIBCARES_PATH)/libcares.$(LIBEXT):
+	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.netware lib
+
+ca-bundle.crt: mk-ca-bundle.pl
+	@echo Creating $@
+	@-$(PERL) $< -b -n $@
 
