@@ -200,6 +200,9 @@ Win32
    first to rebuild every single library your app uses as well as your
    app using the debug multithreaded dynamic C runtime.
 
+   If you get linkage errors read section 5.7 of the FAQ document.
+
+
    MingW32
    -------
 
