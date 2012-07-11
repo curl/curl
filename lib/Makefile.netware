@@ -64,7 +64,7 @@ DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= none
-EXPORTF	= $(OBJDIR)/libcurl.imp
+EXPORTF	= $(TARGET).imp
 EXPORTS	= @$(EXPORTF)
 
 # Uncomment the next line to enable linking with POSIX semantics.
@@ -351,7 +351,7 @@ clean:
 	-$(RM) -r $(OBJDIR)
 
 distclean vclean: clean
-	-$(RM) $(TARGET).$(LIBEXT) $(TARGET).nlm
+	-$(RM) $(TARGET).$(LIBEXT) $(TARGET).nlm $(TARGET).imp
 	-$(RM) certdata.txt ca-bundle.crt
 
 $(OBJDIR) $(INSTDIR):
