@@ -37,8 +37,8 @@ BEGIN {
     else if (match ($0, /^#define LIBCURL_VERSION_PATCH [0-9]+$/))
       version_patch = $3
   }
-  print "LIBCURL_VERSION = " version_major "," version_minor "," version_patch ""
-  print "LIBCURL_VERSION_STR = " version_string ""
-  print "LIBCURL_COPYRIGHT_STR = " copyright_string ""
+  print "LIBCURL_VERSION = " version_major "," version_minor "," version_patch
+  print "LIBCURL_VERSION_STR = " version_string
+  print "LIBCURL_COPYRIGHT_STR = " copyright_string
 }
 
