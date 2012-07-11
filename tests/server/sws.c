@@ -347,6 +347,8 @@ static int parse_servercmd(struct httprequest *req)
       return 1; /* done */
     }
 
+    req->connmon = FALSE;
+
     cmd = orgcmd;
     while(cmd && cmdsize) {
       char *check;
@@ -837,7 +839,6 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->pipelining = FALSE;
   req->callcount = 0;
   req->connect_port = 0;
-  req->connmon = FALSE;
 
   /*** end of httprequest init ***/
 
