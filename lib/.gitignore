@@ -13,3 +13,5 @@ Makefile.vc10.dist
 libcurl.vers
 *.a
 *.res
+*.imp
+*.nlm

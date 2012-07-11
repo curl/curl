@@ -11,3 +11,4 @@ Makefile.vc10.dist
 config-win32.h
 *.a
 *.res
+*.nlm
