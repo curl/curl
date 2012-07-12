@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -66,6 +66,10 @@ Initialize the Win32 socket libraries.
 .TP
 .B CURL_GLOBAL_NOTHING
 Initialise nothing extra. This sets no bit.
+.TP
+.B CURL_GLOBAL_DEFAULT
+A sensible default. It will init both SSL and Win32. Right now, this equals
+the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.
