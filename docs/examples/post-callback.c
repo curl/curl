@@ -61,7 +61,13 @@ int main(void)
   pooh.sizeleft = strlen(data);
 
   /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_DEFAULT);
+  /* Check for errors */
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed: %s\n",
+            curl_easy_strerror(res));
+    return 1;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
