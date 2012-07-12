@@ -268,9 +268,9 @@ curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_OBJECTS) $(curl_LDADD)
 
 # We don't have nroff normally under win32
-# hugehelp.c: $(PROOT)/README.curl $(PROOT)/curl.1 mkhelp.pl
-# 	-$(RM) hugehelp.c
-# 	$(NROFF) -man $(PROOT)/curl.1 | $(PERL) mkhelp.pl $(PROOT)/README.curl > hugehelp.c
+# hugehelp.c: $(PROOT)/docs/MANUAL $(PROOT)/docs/curl.1 mkhelp.pl
+#	@$(call DEL, hugehelp.c)
+# 	$(NROFF) -man $(PROOT)/docs/curl.1 | $(PERL) mkhelp.pl $(PROOT)/docs/MANUAL > hugehelp.c
 
 hugehelp.c:
 	@echo Creating $@

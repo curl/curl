@@ -67,7 +67,7 @@ AR	= $(CROSSPREFIX)ar
 RANLIB	= $(CROSSPREFIX)ranlib
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF -i
-STRIP	= strip -g
+STRIP	= $(CROSSPREFIX)strip -g
 
 # Platform-dependent helper tool macros
 ifeq ($(findstring /sh,$(SHELL)),/sh)
