@@ -60,6 +60,10 @@ int main(void)
   pooh.readptr = data;
   pooh.sizeleft = strlen(data);
 
+  /* In windows, this will init the winsock stuff */
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+
+  /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. */
@@ -128,5 +132,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }
