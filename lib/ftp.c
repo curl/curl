@@ -3674,8 +3674,11 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
         /* It looks data connection is established */
         result = AcceptServerConnect(conn);
         ftpc->wait_data_conn = FALSE;
-        if(result == CURLE_OK)
+        if(!result)
           result = InitiateTransfer(conn);
+
+        if(result)
+          return result;
       }
     }
     else if(data->set.upload) {
