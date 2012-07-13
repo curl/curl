@@ -56,10 +56,11 @@
     free(*(str)); \
     *(str) = NULL; \
   } \
-  if((val)) \
+  if((val)) {              \
     *(str) = strdup((val)); \
-  if(!(val)) \
-    return PARAM_NO_MEM; \
+    if(!(*(str)))          \
+      return PARAM_NO_MEM; \
+  } \
 } WHILE_FALSE
 
 struct LongShort {
