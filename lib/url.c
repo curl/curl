@@ -4273,7 +4273,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
         atsign++; /* the right side of the @-letter */
 
         if(atsign)
-          proxy = proxyptr = atsign; /* now use this instead */
+          proxyptr = atsign; /* now use this instead */
         else
           res = CURLE_OUT_OF_MEMORY;
       }
