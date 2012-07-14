@@ -148,6 +148,18 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
 
+/*
+ * Name:     curl_multi_fdvec()
+ *
+ * Desc:     Retreive a vector of fds contained in the multi handle
+ *
+ * Returns:  CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_fdvec(CURLM *multi_handle,
+                                       int *read_fds,
+                                       int *write_fds,
+                                       int *ex_fds);
+
  /*
   * Name:    curl_multi_perform()
   *
