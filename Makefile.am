@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -86,9 +86,13 @@ endif
 examples:
 	@(cd docs/examples; $(MAKE) check)
 
+# This is a hook to have 'make clean' also clean up the dosc and the tests
+# dir. The extra check for the Makefiles being present is necessary because
+# 'make distcheck' will make clean first in these directories _before_ it runs
+# this hook.
 clean-local:
-	@(cd tests; $(MAKE) clean)
-	@(cd docs; $(MAKE) clean)
+	@(if test -f tests/Makefile; then cd tests; $(MAKE) clean; fi)
+	@(if test -f docs/Makefile; then cd docs; $(MAKE) clean; fi)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
