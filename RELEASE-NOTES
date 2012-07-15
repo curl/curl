@@ -37,6 +37,12 @@ This release includes the following bugfixes:
  o cookies: changed the URL in the cookiejar headers [7]
  o http-proxy: keep CONNECT connections alive (for NTLM)
  o NTLM SSPI: fixed to work with unicode user names and passwords
+ o OOM fix in the curl tool when cloning cmdline options
+ o fixed some examples to use curl_global_init() properly
+ o cmdline: stricter numerical option parser
+ o HTTP HEAD: don't force-close after response-headers
+ o test231: fix wrong -C use
+ o docs: switch to proper UTF-8 for text file encoding
 
 This release includes the following known bugs:
 
@@ -48,7 +54,8 @@ advice from friends like these:
  Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
  Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
  Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
- Neil Bowers, Marcel Raad, Christian Hägele
+ Neil Bowers, Marcel Raad, Christian Hägele, Philip Craig, Nick Zitzmann,
+ Eelco Dolstra
 
         Thanks! (and sorry if I forgot to mention someone)
 
