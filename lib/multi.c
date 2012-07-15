@@ -984,6 +984,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
     }
 
+    if(!easy->easy_conn &&
+       easy->state > CURLM_STATE_CONNECT &&
+       easy->state < CURLM_STATE_DONE) {
+      /* In all these states, the code will blindly access 'easy->easy_conn'
+         so this is precaution that it isn't NULL. And it silences static
+         analyzers. */
+      failf(data, "In state %d with no easy_conn, bail out!\n", easy->state);
+      return CURLM_INTERNAL_ERROR;
+    }
+
     if(easy->easy_conn && easy->state > CURLM_STATE_CONNECT &&
        easy->state < CURLM_STATE_COMPLETED)
       /* Make sure we set the connection's current owner */
