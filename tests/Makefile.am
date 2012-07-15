@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -30,14 +30,19 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
  certs/srp-verifier-conf certs/srp-verifier-db
 
+# we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
+# added twice as then targets such as 'distclean' misbehave and try to
+# do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
 BUILD_UNIT = unit
+DIST_UNIT =
 else
 BUILD_UNIT =
+DIST_UNIT = unit
 endif
 
 SUBDIRS = data server libtest $(BUILD_UNIT)
-DIST_SUBDIRS = $(SUBDIRS) unit
+DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
 
