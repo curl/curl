@@ -2206,7 +2206,7 @@ sub checksystem {
                 # given path to the "actual" windows path.
 
                 my @m = `mount`;
-                my $matchlen;
+                my $matchlen = 0;
                 my $bestmatch;
                 my $mount;
 
