@@ -219,6 +219,7 @@ my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
 my $has_axtls;   # built with axTLS
+my $has_winssl;  # built with WinSSL (Schannel/SSPI)
 
 my $has_shared = "unknown";  # built shared
 
@@ -2280,6 +2281,10 @@ sub checksystem {
                $has_axtls=1;
                $ssllib="axTLS";
            }
+           elsif ($libcurl =~ /winssl/i) {
+               $has_winssl=1;
+               $ssllib="WinSSL";
+           }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2696,6 +2701,11 @@ sub singletest {
         }
         elsif($f eq "axTLS") {
             if($has_axtls) {
+                next;
+            }
+        }
+        elsif($f eq "WinSSL") {
+            if($has_winssl) {
                 next;
             }
         }
