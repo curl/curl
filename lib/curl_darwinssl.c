@@ -71,7 +71,9 @@ static OSStatus SocketRead(SSLConnectionRef connection,
   UInt32 bytesToGo = *dataLength;
   UInt32 initLen = bytesToGo;
   UInt8 *currData = (UInt8 *)data;
-  int sock = *(int *)connection;
+  /*int sock = *(int *)connection;*/
+  struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
+  int sock = connssl->ssl_sockfd;
   OSStatus rtn = noErr;
   UInt32 bytesRead;
   int rrtn;
@@ -100,6 +102,7 @@ static OSStatus SocketRead(SSLConnectionRef connection,
             break;
           case EAGAIN:
             rtn = errSSLWouldBlock;
+            connssl->ssl_direction = false;
             break;
           default:
             rtn = ioErr;
@@ -128,7 +131,9 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
                             size_t *dataLength)  /* IN/OUT */
 {
   UInt32 bytesSent = 0;
-  int sock = *(int *)connection;
+  /*int sock = *(int *)connection;*/
+  struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
+  int sock = connssl->ssl_sockfd;
   int length;
   UInt32 dataLen = *dataLength;
   const UInt8 *dataPtr = (UInt8 *)data;
@@ -148,6 +153,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
     theErr = errno;
     if(theErr == EAGAIN) {
       ortn = errSSLWouldBlock;
+      connssl->ssl_direction = true;
     }
     else {
       ortn = ioErr;
@@ -388,7 +394,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
-  SSLConnectionRef ssl_connection;
+  /*SSLConnectionRef ssl_connection;*/
   OSStatus err = noErr;
 
   if(connssl->ssl_ctx)
@@ -467,8 +473,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * SSLSetConnection() will not copy that address. I've found that
    * conn->sock[sockindex] may change on its own. */
   connssl->ssl_sockfd = sockfd;
-  ssl_connection = &(connssl->ssl_sockfd);
-  err = SSLSetConnection(connssl->ssl_ctx, ssl_connection);
+  /*ssl_connection = &(connssl->ssl_sockfd);
+  err = SSLSetConnection(connssl->ssl_ctx, ssl_connection);*/
+  err = SSLSetConnection(connssl->ssl_ctx, connssl);
   if(err != noErr) {
     failf(data, "SSL: SSLSetConnection() failed: %d", err);
     return CURLE_SSL_CONNECT_ERROR;
@@ -488,8 +495,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
-              || ssl_connect_2_writing == connssl->connecting_state
-              || ssl_connect_2_wouldblock == connssl->connecting_state);
+              || ssl_connect_2_writing == connssl->connecting_state);
 
   /* Here goes nothing: */
   err = SSLHandshake(connssl->ssl_ctx);
@@ -497,7 +503,8 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   if(err != noErr) {
     switch (err) {
       case errSSLWouldBlock:  /* they're not done with us yet */
-        connssl->connecting_state = ssl_connect_2_wouldblock;
+        connssl->connecting_state = connssl->ssl_direction ?
+            ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
         break;
 
@@ -609,8 +616,7 @@ darwinssl_connect_common(struct connectdata *conn,
 
   while(ssl_connect_2 == connssl->connecting_state ||
         ssl_connect_2_reading == connssl->connecting_state ||
-        ssl_connect_2_writing == connssl->connecting_state ||
-        ssl_connect_2_wouldblock == connssl->connecting_state) {
+        ssl_connect_2_writing == connssl->connecting_state) {
 
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -623,14 +629,11 @@ darwinssl_connect_common(struct connectdata *conn,
 
     /* if ssl is expecting something, check if it's available. */
     if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing
-       || connssl->connecting_state == ssl_connect_2_wouldblock) {
+       || connssl->connecting_state == ssl_connect_2_writing) {
 
-      curl_socket_t writefd = ssl_connect_2_writing
-      || ssl_connect_2_wouldblock ==
+      curl_socket_t writefd = ssl_connect_2_writing ==
       connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading
-      || ssl_connect_2_wouldblock ==
+      curl_socket_t readfd = ssl_connect_2_reading ==
       connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_ready(readfd, writefd, nonblocking?0:timeout_ms);
@@ -663,8 +666,7 @@ darwinssl_connect_common(struct connectdata *conn,
     if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state ||
-                    ssl_connect_2_wouldblock == connssl->connecting_state)))
+                    ssl_connect_2_writing == connssl->connecting_state)))
       return retcode;
 
   } /* repeat step2 until all transactions are done. */

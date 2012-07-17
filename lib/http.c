@@ -1371,9 +1371,10 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 }
 #endif
 
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL)
-/* This function is for OpenSSL, GnuTLS and schannel only. It should be
-   made to query the generic SSL layer instead. */
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL)
+/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only.
+   It should be made to query the generic SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)

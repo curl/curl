@@ -248,9 +248,6 @@ typedef enum {
   ssl_connect_2,
   ssl_connect_2_reading,
   ssl_connect_2_writing,
-#ifdef USE_DARWINSSL
-  ssl_connect_2_wouldblock,
-#endif /* USE_DARWINSSL */
   ssl_connect_3,
   ssl_connect_done
 } ssl_connect_state;
@@ -327,6 +324,7 @@ struct ssl_connect_data {
   SSLContextRef ssl_ctx;
   curl_socket_t ssl_sockfd;
   ssl_connect_state connecting_state;
+  bool ssl_direction; /* true if writing, false if reading */
 #endif /* USE_DARWINSSL */
 };
 
