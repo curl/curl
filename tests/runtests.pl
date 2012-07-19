@@ -2257,6 +2257,10 @@ sub checksystem {
                # through a shell.
                chomp($pwd = `cygpath -m $pwd`);
            }
+           if ($libcurl =~ /winssl/i) {
+               $has_winssl=1;
+               $ssllib="WinSSL";
+           }
            elsif ($libcurl =~ /openssl/i) {
                $has_openssl=1;
                $ssllib="OpenSSL";
@@ -2280,10 +2284,6 @@ sub checksystem {
            elsif ($libcurl =~ /axtls/i) {
                $has_axtls=1;
                $ssllib="axTLS";
-           }
-           elsif ($libcurl =~ /winssl/i) {
-               $has_winssl=1;
-               $ssllib="WinSSL";
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
