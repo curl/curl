@@ -330,7 +330,7 @@ Pass a pointer to a function that matches the following prototype: \fBint
 function(void *clientp, double dltotal, double dlnow, double ultotal, double
 ulnow); \fP. This function gets called by libcurl instead of its internal
 equivalent with a frequent interval during operation (roughly once per second
-or sooner) no matter if data is being transfered or not.  Unknown/unused
+or sooner) no matter if data is being transferred or not.  Unknown/unused
 argument values passed to the callback will be set to zero (like if you only
 download data, the upload size will remain 0). Returning a non-zero value from
 this callback will cause libcurl to abort the transfer and return
@@ -504,7 +504,7 @@ order. See \fIRFC2326 Section 10.12\fP for more information on how RTP
 interleaving behaves. If unset or set to NULL, curl will use the default write
 function.
 
-Interleaved RTP poses some challeneges for the client application. Since the
+Interleaved RTP poses some challenges for the client application. Since the
 stream data is sharing the RTSP control connection, it is critical to service
 the RTP in a timely fashion. If the RTP data is not handled quickly,
 subsequent response processing may become unreasonably delayed and the
@@ -1173,8 +1173,8 @@ the server is ignored. See the special file lib/README.encoding for details.
 .IP CURLOPT_TRANSFER_ENCODING
 Adds a request for compressed Transfer Encoding in the outgoing HTTP
 request. If the server supports this and so desires, it can respond with the
-HTTP resonse sent using a compressed Transfer-Encoding that will be
-automatically uncompressed by libcurl on receival.
+HTTP response sent using a compressed Transfer-Encoding that will be
+automatically uncompressed by libcurl on reception.
 
 Transfer-Encoding differs slightly from the Content-Encoding you ask for with
 \fBCURLOPT_ACCEPT_ENCODING\fP in that a Transfer-Encoding is strictly meant to
@@ -1636,7 +1636,7 @@ already exists or lack of permissions prevents creation. (Added in 7.16.3)
 
 Starting with 7.19.4, you can also set this value to 2, which will make
 libcurl retry the CWD command again if the subsequent MKD command fails. This
-is especially useful if you're doing many simultanoes connections against the
+is especially useful if you're doing many simultaneous connections against the
 same server and they all have this option enabled, as then CWD may first fail
 but then another connection does MKD before this connection and thus MKD fails
 but trying CWD works! 7.19.4 also introduced the \fICURLFTP_CREATE_DIR\fP and
@@ -1723,7 +1723,7 @@ initialized. (Added in 7.20.0)
 .RS
 .IP CURL_RTSPREQ_OPTIONS
 Used to retrieve the available methods of the server. The application is
-responsbile for parsing and obeying the response. \fB(The session ID is not
+responsible for parsing and obeying the response. \fB(The session ID is not
 needed for this method.)\fP  (Added in 7.20.0)
 .IP CURL_RTSPREQ_DESCRIBE
 Used to get the low level description of a stream. The application should note
@@ -1894,7 +1894,7 @@ to a proper GET use CURLOPT_HTTPGET.
 With the POP3 protocol when you tell libcurl to use a custom request it will
 behave like a LIST or RETR command was sent where it expects data to be
 returned by the server. As such \fICURLOPT_NOBODY\fP should be used when
-specifing commands such as DELE and NOOP for example.
+specifying commands such as DELE and NOOP for example.
 
 Restore to the internal default by setting this to NULL.
 
@@ -2379,7 +2379,7 @@ require you to disable this in order for you to succeed. (Added in 7.16.0)
 Pass a long with a bitmask to tell libcurl about specific SSL behaviors.
 
 CURLSSLOPT_ALLOW_BEAST is the only supported bit and by setting this the user
-will tell libcurl to not attempt to use any work-arounds for a security flaw
+will tell libcurl to not attempt to use any workarounds for a security flaw
 in the SSL3 and TLS1.0 protocols.  If this option isn't used or this bit is
 set to 0, the SSL layer libcurl uses may use a work-around for this flaw
 although it might cause interoperability problems with some (older) SSL

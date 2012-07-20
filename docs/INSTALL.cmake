@@ -11,7 +11,7 @@ Building with CMake
    This document describes how to compile, build and install curl and libcurl
    from source code using the CMake build tool. To build with CMake, you will
    of course have to first install CMake.  The minimum required version of
-   CMake is specifed in the file CMakeLists.txt found in the top of the curl
+   CMake is specified in the file CMakeLists.txt found in the top of the curl
    source tree. Once the correct version of CMake is installed you can follow
    the instructions below for the platform you are building on.
 
@@ -39,7 +39,7 @@ Command Line CMake
        cd curl-build
        # now run CMake from the build tree, giving it the path to the top of
        # the Curl source tree.  CMake will pick a compiler for you. If you
-       # want to specifiy the compile, you can set the CC environment
+       # want to specify the compile, you can set the CC environment
        # variable prior to running CMake.
        cmake ../curl
        make
@@ -51,7 +51,7 @@ Command Line CMake
 ccmake
 =========
      CMake comes with a curses based interface called ccmake.  To run ccmake on
-     a curl use the instructions for the command line cmake, but substitue
+     a curl use the instructions for the command line cmake, but substitute
      ccmake ../curl for cmake ../curl.  This will bring up a curses interface
      with instructions on the bottom of the screen. You can press the "c" key
      to configure the project, and the "g" key to generate the project. After
@@ -65,7 +65,7 @@ cmake-gui
         the curl source tree.
         2. Fill in the "Where to build the binaries" combo box with the path
         to the directory for your build tree, ideally this should not be the
-        same as the source tree, but a parallel diretory called curl-build or
+        same as the source tree, but a parallel directory called curl-build or
         something similar.
         3. Once the source and binary directories are specified, press the
         "Configure" button.
@@ -73,5 +73,5 @@ cmake-gui
         5. At this point you can change any of the options presented in the
         GUI.  Once you have selected all the options you want, click the
         "Generate" button.
-        6. Run the native build tool that you used CMake to genratate.
+        6. Run the native build tool that you used CMake to generate.
 

@@ -18,7 +18,7 @@ This release includes the following changes:
  o pop3: Added support for sasl digest-md5 authentication
  o pop3: Added support for apop authentication
  o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
- o Added support for Dwarin SSL (Native Mac OS X and iOS) [6]
+ o Added support for Darwin SSL (Native Mac OS X and iOS) [6]
 
 This release includes the following bugfixes:
 

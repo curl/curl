@@ -279,7 +279,7 @@
 
 3.6 Please don't send pull requests
 
- With git (and expecially github) it is easy and tempting to send a pull
+ With git (and especially github) it is easy and tempting to send a pull
  request to one or more people in the curl project to have changes merged this
  way instead of mailing patches to the curl-library mailing list.
 
@@ -294,7 +294,7 @@
 
  - Commit messages can be tweaked and changed if merged locally instead of
    using github. Merges directly on github requires the changes to be perfect
-   already, which they seldomly are.
+   already, which they seldom are.
 
  - Merges on github prevents rebases and even enforces --no-ff which is a git
    style we don't otherwise use in the project

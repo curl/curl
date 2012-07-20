@@ -546,7 +546,7 @@ VMS
    Curl seems to work with FTP & HTTP other protocols are not tested.  (the
    perl http/ftp testing server supplied as testing too cannot work on VMS
    because vms has no concept of fork(). [ I tried to give it a whack, but
-   thats of no use.
+   that's of no use.
 
    SSL stuff has not been ported.
 
@@ -679,7 +679,7 @@ NetWare
      you can find precompiled packages at:
      http://www.gknw.net/development/ossl/netware/
      for CLIB-based builds OpenSSL 0.9.8h or later is required  - earlier versions
-     dont support buildunf with CLIB BSD sockets.
+     don't support buildunf with CLIB BSD sockets.
    - optional SSH2 sources (version 0.17 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make

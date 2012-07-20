@@ -220,7 +220,7 @@ Library
  done" loop. It loops if there's a Location: to follow.
 
  When completed, the curl_easy_cleanup() should be called to free up used
- resources. It runs Curl_disconnect() on all open connectons.
+ resources. It runs Curl_disconnect() on all open connections.
 
  A quick roundup on internal function sequences (many of these call
  protocol-specific function-pointers):

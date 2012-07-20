@@ -613,7 +613,7 @@ SFTP and SCP and PATH NAMES
 FTP and firewalls
 
   The FTP protocol requires one of the involved parties to open a second
-  connection as soon as data is about to get transfered. There are two ways to
+  connection as soon as data is about to get transferred. There are two ways to
   do this.
 
   The default way for curl is to issue the PASV command which causes the

@@ -26,7 +26,7 @@ exists for a Unix/linux command line environments. This is of little help when
 it comes to Windows O/S.
 
 Secondly the help that does exist for the Windows O/S focused around mingw
-thru a command line argument environment.
+through a command line argument environment.
 
 You may ask "Why is this a problem?"
 

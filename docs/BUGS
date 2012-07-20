@@ -91,7 +91,7 @@ BUGS
   your problem and to work on a fix (if we agree it truly is a problem).
 
   Lots of problems that appear to be libcurl problems are actually just abuses
-  of the libcurl API or other malfunctions in your applications. It is adviced
+  of the libcurl API or other malfunctions in your applications. It is advised
   that you run your problematic program using a memory debug tool like
   valgrind or similar before you post memory-related or "crashing" problems to
   us.

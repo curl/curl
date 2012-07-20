@@ -19,7 +19,7 @@ may have been fixed since this was written!
   http://curl.haxx.se/bug/view.cgi?id=3438362
 
 77. CURLOPT_FORBID_REUSE on a handle prevents NTLM from working since it
-  "absuses" the underlying connection re-use system and if connections are
+  "abuses" the underlying connection re-use system and if connections are
   forced to close they break the NTLM support.
 
 76. The SOCKET type in Win64 is 64 bits large (and thus so is curl_socket_t on

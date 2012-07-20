@@ -138,7 +138,7 @@ FAQ
 
     libcurl is highly portable, it builds and works identically on numerous
     platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
-    IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOs, Mac
+    IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOS, Mac
     OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS, Symbian, OSF,
     Android, Minix, IBM TPF and more...
 
@@ -807,7 +807,7 @@ FAQ
 
     4.5.3 "403 Forbidden"
 
-    The server understood the request, but is refusing to fulfill it.
+    The server understood the request, but is refusing to fulfil it.
     Authorization will not help and the request SHOULD NOT be repeated.
 
     4.5.4 "404 Not Found"
