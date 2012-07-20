@@ -2204,44 +2204,10 @@ sub checksystem {
             $libcurl = $2;
             if($curl =~ /mingw32/) {
                 # This is a windows minw32 build, we need to translate the
-                # given path to the "actual" windows path.
-
-                my @m = `mount`;
-                my $matchlen = 0;
-                my $bestmatch;
-                my $mount;
-
-# example mount output:
-# C:\DOCUME~1\Temp on /tmp type user (binmode,noumount)
-# c:\ActiveState\perl on /perl type user (binmode)
-# C:\msys\1.0\bin on /usr/bin type user (binmode,cygexec,noumount)
-# C:\msys\1.0\bin on /bin type user (binmode,cygexec,noumount)
-
-                foreach $mount (@m) {
-                    if( $mount =~ /(.*) on ([^ ]*) type /) {
-                        my ($mingw, $real)=($2, $1);
-                        if($pwd =~ /^$mingw/) {
-                            # the path we got from pwd starts with the path
-                            # we found on this line in the mount output
-
-                            my $len = length($real);
-                            if($len > $matchlen) {
-                                # we remember the match that is the longest
-                                $matchlen = $len;
-                                $bestmatch = $real;
-                            }
-                        }
-                    }
-                }
-                if(!$matchlen) {
-                    logmsg "Serious error, can't find our \"real\" path\n";
-                }
-                else {
-                    # now prepend the prefix from the mount command to build
-                    # our "actual path"
-                    $pwd = "$bestmatch$pwd";
-                }
-                $pwd =~ s#\\#/#g;
+                # given path to the "actual" windows path. The MSYS shell
+                # has a builtin 'pwd -W' command which converts the path.
+                $pwd = `sh -c "echo \$(pwd -W)"`;
+                chomp($pwd);
             }
             elsif ($curl =~ /win32/) {
                # Native Windows builds don't understand the
