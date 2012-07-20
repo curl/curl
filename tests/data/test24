@@ -24,7 +24,7 @@ http
 HTTP GET fail silently on HTTP error return
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/24 --fail
+http://%HOSTIP:%HTTPPORT/24 --fail --silent --show-error
 </command>
 </client>
 
@@ -43,5 +43,8 @@ Accept: */*
 <errorcode>
 22
 </errorcode>
+<file2 name="log/stderr24">
+curl: (22) The requested URL returned error: 404 BAD BOY
+</file2>
 </verify>
 </testcase>

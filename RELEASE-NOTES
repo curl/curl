@@ -19,6 +19,7 @@ This release includes the following changes:
  o pop3: Added support for apop authentication
  o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
  o Added support for Darwin SSL (Native Mac OS X and iOS) [6]
+ o http: print reason phrase from HTTP status line on error [8]
 
 This release includes the following bugfixes:
 
@@ -68,3 +69,4 @@ References to bug reports and discussions on issues:
  [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
  [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
  [7] = http://daniel.haxx.se/blog/2012/07/08/curls-new-http-cookies-docs/
+ [8] = https://bugzilla.redhat.com/676596
