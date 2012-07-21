@@ -140,8 +140,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   int res = 0;
   int i;
 
-  bool orig_noprogress = config->noprogress;
-  bool orig_isatty = config->isatty;
+  bool orig_noprogress;
+  bool orig_isatty;
 
   errorbuffer[0] = '\0';
   /* default headers output stream is stdout */
@@ -395,6 +395,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       }
     }
   }
+
+  /* save the values of noprogress and isatty to restore them later on */
+  orig_noprogress = config->noprogress;
+  orig_isatty = config->isatty;
 
   /*
   ** Nested loops start here.
