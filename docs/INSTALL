@@ -679,7 +679,7 @@ NetWare
      you can find precompiled packages at:
      http://www.gknw.net/development/ossl/netware/
      for CLIB-based builds OpenSSL 0.9.8h or later is required  - earlier versions
-     don't support buildunf with CLIB BSD sockets.
+     don't support building with CLIB BSD sockets.
    - optional SSH2 sources (version 0.17 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make
