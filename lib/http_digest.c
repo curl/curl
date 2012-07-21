@@ -477,7 +477,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "uri=\"%s\", "
                "cnonce=\"%s\", "
                "nc=%08x, "
-               "qop=\"%s\", "
+               "qop=%s, "
                "response=\"%s\"",
                proxy?"Proxy-":"",
                userp,
