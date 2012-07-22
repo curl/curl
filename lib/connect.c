@@ -91,6 +91,13 @@
 
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
+#ifdef __DragonFly__
+/* DragonFlyBSD uses millisecond as KEEPIDLE and KEEPINTVL units */
+#define KEEPALIVE_FACTOR(x) (x *= 1000)
+#else
+#define KEEPALIVE_FACTOR(x)
+#endif
+
 static void
 tcpkeepalive(struct SessionHandle *data,
              curl_socket_t sockfd)
@@ -105,6 +112,7 @@ tcpkeepalive(struct SessionHandle *data,
   else {
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd %d\n", sockfd);
@@ -112,6 +120,7 @@ tcpkeepalive(struct SessionHandle *data,
 #endif
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
+    KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);
