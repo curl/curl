@@ -80,7 +80,7 @@ int main(void)
 
     curl_multi_perform(multi_handle, &still_running);
 
-    while(still_running) {
+    do {
       struct timeval timeout;
       int rc; /* select() return code */
 
@@ -131,7 +131,7 @@ int main(void)
         printf("running: %d!\n", still_running);
         break;
       }
-    }
+    } while(still_running);
 
     curl_multi_cleanup(multi_handle);
 

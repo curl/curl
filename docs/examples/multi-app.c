@@ -70,7 +70,7 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  while(still_running) {
+  do {
     struct timeval timeout;
     int rc; /* select() return code */
 
@@ -118,7 +118,7 @@ int main(void)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  }
+  } while(still_running);
 
   /* See how the transfers went */
   while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
