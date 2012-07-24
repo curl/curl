@@ -833,11 +833,11 @@ option to -1 to make it limitless.
 
 If this option is used several times, the last one will be used.
 .IP "--metalink"
-If curl is built against the libmetalink library then this option can
-tell curl to parse and process a given URI as Metalink file (both
+This option can tell curl to parse and process a given URI as Metalink file (both
 version 3 and 4 (RFC 5854) are supported) and make use of the mirrors
 listed within for failover if there are errors (such as the file or
-server not being available). The Metalink file itself is downloaded
+server not being available). It will also verify the hashe of the file
+after the download completes. The Metalink file itself is downloaded
 and processed in memory and not stored in the local file system.
 
 Example to use a remote Metalink file:
@@ -856,7 +856,7 @@ ignored. This is because including headers in the response will break
 Metalink parser and if the headers are included in the file described
 in Metalink file, hash check will fail.
 
-(Added in 7.27.0)
+(Added in 7.27.0, if built against the libmetalink library.)
 .IP "-n, --netrc"
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
@@ -1248,7 +1248,7 @@ using \fI--retry-delay\fP you disable this exponential backoff algorithm. See
 also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Added in 7.12.3)
 
-If this option is used multiple times, the last occurrence decide the amount.
+If this option is used multiple times, the last occurrence determines the amount.
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
