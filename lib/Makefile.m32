@@ -119,6 +119,9 @@ endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 SSL = 1
 endif
+ifeq ($(findstring -srp,$(CFG)),-srp)
+SRP = 1
+endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
@@ -191,6 +194,11 @@ ifdef SSL
             -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5 \
             -DCURL_WANTS_CA_BUNDLE_ENV
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
+  ifdef SRP
+    ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
+      CFLAGS += -DHAVE_SSLEAY_SRP -DUSE_TLS_SRP
+    endif
+  endif
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
