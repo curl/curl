@@ -102,7 +102,7 @@ char *curl_version(void)
   }
 #endif
 #ifdef USE_WIN32_IDN
-  len = snprintf(ptr, left, " IDN-Windows-native");
+  len = snprintf(ptr, left, " WinIDN");
   left -= len;
   ptr += len;
 #endif
