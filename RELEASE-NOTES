@@ -45,7 +45,6 @@ This release includes the following bugfixes:
  o test231: fix wrong -C use
  o docs: switch to proper UTF-8 for text file encoding
  o keepalive: DragonFly uses milliseconds [9]
- o --silent was ignored when standard output was redirected to a file
  o HTTP Digest: Client's "qop" value should not be quoted
  o make distclean works again
 
