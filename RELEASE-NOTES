@@ -44,6 +44,10 @@ This release includes the following bugfixes:
  o HTTP HEAD: don't force-close after response-headers
  o test231: fix wrong -C use
  o docs: switch to proper UTF-8 for text file encoding
+ o keepalive: DragonFly uses milliseconds [9]
+ o --silent was ignored when standard output was redirected to a file
+ o HTTP Digest: Client's "qop" value should not be quoted
+ o make distclean works again
 
 This release includes the following known bugs:
 
@@ -56,7 +60,7 @@ advice from friends like these:
  Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
  Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
  Neil Bowers, Marcel Raad, Christian Hägele, Philip Craig, Nick Zitzmann,
- Eelco Dolstra
+ Eelco Dolstra, Anton Yabchinskiy, Santhana Todatry, John Marino
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -70,3 +74,4 @@ References to bug reports and discussions on issues:
  [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
  [7] = http://daniel.haxx.se/blog/2012/07/08/curls-new-http-cookies-docs/
  [8] = https://bugzilla.redhat.com/676596
+ [9] = http://curl.haxx.se/bug/view.cgi?id=3546257
