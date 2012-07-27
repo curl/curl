@@ -134,6 +134,19 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        int *max_fd);
 
  /*
+  * Name:    curl_multi_select()
+  *
+  * Desc:    Calls select() or poll() internally so app can call
+  *          curl_multi_perform() as soon as one of them is ready. This is to
+  *          fix FD_SETSIZE problem curl_multi_fdset() has.
+  *
+  * Returns: CURLMcode type, general multi error code.
+  */
+CURL_EXTERN CURLMcode curl_multi_select(CURLM *multi_handle,
+                                        int timeout_ms,
+                                        int *ret);
+
+ /*
   * Name:    curl_multi_perform()
   *
   * Desc:    When the app thinks there's data available for curl it calls this

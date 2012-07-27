@@ -941,6 +941,80 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_select(CURLM *multi_handle, int timeout_ms, int *ret) {
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
+  int bitmap;
+  int i;
+  unsigned int nfds = 0;
+  struct pollfd *ufds;
+  int nret = -1;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  easy=multi->easy.next;
+  while(easy != &multi->easy) {
+    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      curl_socket_t s = CURL_SOCKET_BAD;
+
+      if(bitmap & GETSOCK_READSOCK(i)) {
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(bitmap & GETSOCK_WRITESOCK(i)) {
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(s == CURL_SOCKET_BAD) {
+        break;
+      }
+    }
+
+    easy = easy->next; /* check next handle */
+  }
+
+  ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
+  nfds = 0;
+
+  easy=multi->easy.next;
+  while(easy != &multi->easy) {
+    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      curl_socket_t s = CURL_SOCKET_BAD;
+
+      if(bitmap & GETSOCK_READSOCK(i)) {
+        ufds[nfds].fd = sockbunch[i];
+        ufds[nfds].events = POLLIN;
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(bitmap & GETSOCK_WRITESOCK(i)) {
+        ufds[nfds].fd = sockbunch[i];
+        ufds[nfds].events = POLLOUT;
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(s == CURL_SOCKET_BAD) {
+        break;
+      }
+    }
+
+    easy = easy->next; /* check next handle */
+  }
+
+  nret = Curl_poll(ufds, nfds, timeout_ms);
+  free(ufds);
+  if (ret) {
+    *ret = nret;
+  }
+  return CURLM_OK;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct Curl_one_easy *easy)
