@@ -61,6 +61,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out)
 
 int curl_win32_ascii_to_idn(const char *in, size_t in_len, char **out_utf8)
 {
+  (void)in_len; /* unused */
   if(in) {
     WCHAR unicode[IDN_MAX_LENGTH];
 
