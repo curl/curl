@@ -37,6 +37,9 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD, const WCHAR *, int, WCHAR *, int);
 
 #define IDN_MAX_LENGTH 255
 
+int curl_win32_idn_to_ascii(const char *in, char **out);
+int curl_win32_ascii_to_idn(const char *in, size_t in_len, char **out_utf8);
+
 int curl_win32_idn_to_ascii(const char *in, char **out)
 {
   wchar_t *in_w = Curl_convert_UTF8_to_wchar(in);
