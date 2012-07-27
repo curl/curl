@@ -1,6 +1,6 @@
-Curl and libcurl 7.27.0
+Curl and libcurl 7.2x.x
 
- Public curl releases:         128
+ Public curl releases:         129
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
@@ -9,44 +9,11 @@ Curl and libcurl 7.27.0
 
 This release includes the following changes:
 
- o nss: use human-readable error messages provided by NSS
- o added --metalink for metalink download support [5]
- o pop3: Added support for sasl plain text authentication
- o pop3: Added support for sasl login authentication 
- o pop3: Added support for sasl ntlm authentication
- o pop3: Added support for sasl cram-md5 authentication
- o pop3: Added support for sasl digest-md5 authentication
- o pop3: Added support for apop authentication
- o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
- o Added support for Darwin SSL (Native Mac OS X and iOS) [6]
- o http: print reason phrase from HTTP status line on error [8]
+ o 
 
 This release includes the following bugfixes:
 
- o pop3: Fixed the issue of having to supply the user name for all requests
- o configure: fix LDAPS disabling related misplaced closing parenthesis
- o cmdline: made -D option work with -O and -J
- o configure: Fix libcurl.pc and curl-config generation for static MingW*
-   cross builds
- o ssl: fix duplicated SSL handshake with multi interface and proxy [1]
- o winbuild: Fix Makefile.vc ignoring USE_IPV6 and USE_IDN flags
- o OpenSSL: support longer certificate subject names [3]
- o openldap: OOM fixes
- o log2changes.pl: fix the Version output
- o lib554.c: use curl_formadd() properly [4]
- o urldata.h: fix cyassl build clash with wincrypt.h
- o cookies: changed the URL in the cookiejar headers [7]
- o http-proxy: keep CONNECT connections alive (for NTLM)
- o NTLM SSPI: fixed to work with unicode user names and passwords
- o OOM fix in the curl tool when cloning cmdline options
- o fixed some examples to use curl_global_init() properly
- o cmdline: stricter numerical option parser
- o HTTP HEAD: don't force-close after response-headers
- o test231: fix wrong -C use
- o docs: switch to proper UTF-8 for text file encoding
- o keepalive: DragonFly uses milliseconds [9]
- o HTTP Digest: Client's "qop" value should not be quoted
- o make distclean works again
+ o 
 
 This release includes the following known bugs:
 
@@ -55,22 +22,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
- Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
- Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
- Neil Bowers, Marcel Raad, Christian Hägele, Philip Craig, Nick Zitzmann,
- Eelco Dolstra, Anton Yabchinskiy, Santhana Todatry, John Marino
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://bugzilla.redhat.com/788526
- [2] = http://daniel.haxx.se/blog/2012/06/12/schannel-support-in-libcurl/
- [3] = http://curl.haxx.se/bug/view.cgi?id=3533045
- [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
- [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
- [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
- [7] = http://daniel.haxx.se/blog/2012/07/08/curls-new-http-cookies-docs/
- [8] = https://bugzilla.redhat.com/676596
- [9] = http://curl.haxx.se/bug/view.cgi?id=3546257
+ 
