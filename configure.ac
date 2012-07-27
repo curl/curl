@@ -154,7 +154,7 @@ dnl initialize all the info variables
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
-    curl_idn_msg="no      (--with-libidn)"
+    curl_idn_msg="no      (--with-{libidn,winidn})"
  curl_manual_msg="no      (--enable-manual)"
 curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
@@ -1351,7 +1351,7 @@ AC_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
 AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
   OPT_WINSSL=$withval)
 
-AC_MSG_CHECKING([whether to enable Windows native SSL/TLS  (Windows native builds only)])
+AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test "x$OPT_WINSSL" != "xno"  &&
      test "x$ac_cv_native_windows" = "xyes"; then
@@ -2580,6 +2580,78 @@ AC_MSG_RESULT(no)
 AC_SUBST(VERSIONED_FLAVOUR, ["$versioned_symbols_flavour"])
 AM_CONDITIONAL(VERSIONED_SYMBOLS, test "x$versioned_symbols" = "xyes")
 
+dnl -------------------------------------------------
+dnl check winidn option before other IDN libraries
+dnl -------------------------------------------------
+
+AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+OPT_WINIDN="default"
+AC_ARG_WITH(winidn,
+AC_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+AC_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+  OPT_WINIDN=$withval)
+case "$OPT_WINIDN" in
+  no|default)
+    dnl --without-winidn option used or configure option not specified
+    want_winidn="no"
+    AC_MSG_RESULT([no])
+    ;;
+  yes)
+    dnl --with-winidn option used without path
+    want_winidn="yes"
+    want_winidn_path="default"
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    dnl --with-winidn option used with path
+    want_winidn="yes"
+    want_winidn_path="$withval"
+    AC_MSG_RESULT([yes ($withval)])
+    ;;
+esac
+
+if test "$want_winidn" = "yes"; then
+  dnl winidn library support has been requested
+  clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  WINIDN_LIBS="-lnormaliz"
+  #
+  if test "$want_winidn_path" != "default"; then
+    dnl path has been specified
+    dnl pkg-config not available or provides no info
+    WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
+    WINIDN_CPPFLAGS="-I$want_winidn_path/include"
+    WINIDN_DIR="$want_winidn_path/lib$libsuff"
+  fi
+  #
+  CPPFLAGS="$WINIDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$WINIDN_LDFLAGS $LDFLAGS"
+  LIBS="$WINIDN_LIBS $LIBS"
+  #
+  AC_MSG_CHECKING([if IdnToUnicode can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([IdnToUnicode])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_winidn="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_winidn="no"
+  ])
+  #
+  if test "$tst_links_winidn" = "yes"; then
+    AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
+    AC_DEFINE(WANT_IDN_PROTOTYPES, 1, [Define to 1 to provide own prototypes.])
+    AC_SUBST([IDN_ENABLED], [1])
+    curl_idn_msg="enabled (Windows-native)"
+  else
+    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
