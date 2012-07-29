@@ -34,5 +34,9 @@ Others:
 
 324 - curl_multi_select() vs curl_multi_fdvec() etc
 
-326 - 
+326 - Improve testsuite for better results when running on MSYS/MinGW.
+      Fix crahses with tests lib547, lib548, lib590 and curl.
+      Fix socketflt for Win32. Fix hung with test 1326.
+
+327 - 
 
