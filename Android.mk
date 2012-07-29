@@ -1,5 +1,7 @@
 # Google Android makefile for curl and libcurl
 #
+# Please read also the Android section in docs/INSTALL for alternate methods!
+#
 # Place the curl source (including this makefile) into external/curl/ in the
 # Android source tree.  Then build them with 'make curl' or just 'make libcurl'
 # from the Android root. Tested with Android versions 1.5, 2.1-2.3
