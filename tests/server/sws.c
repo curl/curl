@@ -110,6 +110,7 @@ struct httprequest {
   int callcount;  /* times ProcessRequest() gets called */
   unsigned short connect_port; /* the port number CONNECT used */
   bool connmon;   /* monitor the state of the connection, log disconnects */
+  int done_processing;
 };
 
 static int ProcessRequest(struct httprequest *req);
@@ -793,27 +794,15 @@ storerequest_cleanup:
            dumpfile, error, strerror(error));
 }
 
-/* return 0 on success, non-zero on failure */
-static int get_request(curl_socket_t sock, struct httprequest *req)
+static void init_httprequest(struct httprequest *req)
 {
-  int error;
-  int fail = 0;
-  int done_processing = 0;
-  char *reqbuf = req->reqbuf;
-  ssize_t got = 0;
-
-  char *pipereq = NULL;
-  size_t pipereq_length = 0;
-
-  if(req->pipelining) {
-    pipereq = reqbuf + req->checkindex;
-    pipereq_length = req->offset - req->checkindex;
+  /* Pipelining is already set, so do not initialize it here. Only initialize
+     checkindex and offset if pipelining is not set, since in a pipeline they
+     need to be inherited from the previous request. */
+  if(!req->pipelining) {
+    req->checkindex = 0;
+    req->offset = 0;
   }
-
-  /*** Init the httprequest structure properly for the upcoming request ***/
-
-  req->checkindex = 0;
-  req->offset = 0;
   req->testno = DOCNUMBER_NOTHING;
   req->partno = 0;
   req->open = TRUE;
@@ -827,13 +816,39 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   req->writedelay = 0;
   req->rcmd = RCMD_NORMALREQ;
   req->prot_version = 0;
-  req->pipelining = FALSE;
   req->callcount = 0;
   req->connect_port = 0;
+  req->done_processing = 0;
+}
 
-  /*** end of httprequest init ***/
+/* return 0 on success, non-zero on failure */
+static int get_request(curl_socket_t sock, struct httprequest *req)
+{
+  int error;
+  int fail = 0;
+  char *reqbuf = req->reqbuf;
+  ssize_t got = 0;
+  int overflow = 0;
 
-  while(!done_processing && (req->offset < REQBUFSIZ-1)) {
+  char *pipereq = NULL;
+  size_t pipereq_length = 0;
+
+  if(req->pipelining) {
+    pipereq = reqbuf + req->checkindex;
+    pipereq_length = req->offset - req->checkindex;
+
+    /* Now that we've got the pipelining info we can reset the
+       pipelining-related vars which were skipped in init_httprequest */
+    req->pipelining = FALSE;
+    req->checkindex = 0;
+    req->offset = 0;
+  }
+
+  if(req->offset >= REQBUFSIZ-1) {
+    /* buffer is already full; do nothing */
+    overflow = 1;
+  }
+  else {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
       got = curlx_uztosz(pipereq_length);
@@ -871,17 +886,17 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
 
-    done_processing = ProcessRequest(req);
+    req->done_processing = ProcessRequest(req);
     if(got_exit_signal)
       return 1;
-    if(done_processing && req->pipe) {
+    if(req->done_processing && req->pipe) {
       logmsg("Waiting for another piped request");
-      done_processing = 0;
+      req->done_processing = 0;
       req->pipe--;
     }
   }
 
-  if((req->offset == REQBUFSIZ-1) && (got > 0)) {
+  if(overflow || (req->offset == REQBUFSIZ-1 && got > 0)) {
     logmsg("Request would overflow buffer, closing connection");
     /* dump request received so far to external file anyway */
     reqbuf[REQBUFSIZ-1] = '\0';
@@ -896,8 +911,9 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   else
     reqbuf[req->offset] = '\0';
 
-  /* dump the request to an external file */
-  storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
+  /* at the end of a request dump it to an external file */
+  if (fail || req->done_processing)
+    storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
   if(got_exit_signal)
     return 1;
 
@@ -1443,7 +1459,12 @@ static void http_connect(curl_socket_t *infdp,
             logmsg("TCP_NODELAY set for client DATA conection");
 #endif
           req2.pipelining = FALSE;
-          err = get_request(datafd, &req2);
+          init_httprequest(&req2);
+          while(!req2.done_processing) {
+            err = get_request(datafd, &req2);
+            if(err)
+              break;
+          }
           if(!err) {
             err = send_doc(datafd, &req2);
             if(!err && (req2.testno == DOCNUMBER_CONNECT)) {
@@ -1727,9 +1748,13 @@ static int service_connection(int msgsock, struct httprequest *req,
   if(got_exit_signal)
     return 1;
 
-  if(get_request(msgsock, req))
-    /* non-zero means error, break out of loop */
-    return 1;
+  init_httprequest(req);
+  while(!req->done_processing) {
+    if (get_request(msgsock, req)) {
+      /* non-zero means error, break out of loop */
+      return 1;
+    }
+  }
 
   if(prevbounce) {
     /* bounce treatment requested */
@@ -1974,9 +1999,9 @@ int main(int argc, char *argv[])
     if (CURL_SOCKET_BAD == msgsock)
       goto sws_cleanup;
 
-    /* initialization of httprequest struct is done in get_request(), but due
-       to pipelining treatment the pipelining struct field must be initialized
-       previously to FALSE every time a new connection arrives. */
+    /* initialization of httprequest struct is done before get_request(), but
+       the pipelining struct field must be initialized previously to FALSE
+       every time a new connection arrives. */
 
     req.pipelining = FALSE;
 
