@@ -1672,6 +1672,115 @@ http_connect_cleanup:
   *infdp = CURL_SOCKET_BAD;
 }
 
+static int accept_connection(int sock)
+{
+  curl_socket_t msgsock = CURL_SOCKET_BAD;
+  int error;
+  int flag;
+
+  msgsock = accept(sock, NULL, NULL);
+
+  if(got_exit_signal) {
+    if(CURL_SOCKET_BAD != msgsock)
+      sclose(msgsock);
+    return CURL_SOCKET_BAD;
+  }
+
+  if(CURL_SOCKET_BAD == msgsock) {
+    error = SOCKERRNO;
+    logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
+           error, strerror(error));
+    return CURL_SOCKET_BAD;
+  }
+
+  /*
+  ** As soon as this server acepts a connection from the test harness it
+  ** must set the server logs advisor read lock to indicate that server
+  ** logs should not be read until this lock is removed by this server.
+  */
+
+  set_advisor_read_lock(SERVERLOGS_LOCK);
+  serverlogslocked = 1;
+
+  logmsg("====> Client connect");
+
+#ifdef TCP_NODELAY
+  /*
+   * Disable the Nagle algorithm to make it easier to send out a large
+   * response in many small segments to torture the clients more.
+   */
+  flag = 1;
+  if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
+                     (void *)&flag, sizeof(flag)))
+    logmsg("====> TCP_NODELAY failed");
+  else
+    logmsg("TCP_NODELAY set");
+#endif
+
+  return msgsock;
+}
+
+/* returns 0 if the connection should be serviced again, non-zero if it is done */
+static int service_connection(int msgsock, struct httprequest *req,
+                              int listensock, const char *hostport)
+{
+  if(got_exit_signal)
+    return 1;
+
+  if(get_request(msgsock, req))
+    /* non-zero means error, break out of loop */
+    return 1;
+
+  if(prevbounce) {
+    /* bounce treatment requested */
+    if((req->testno == prevtestno) &&
+       (req->partno == prevpartno)) {
+      req->partno++;
+      logmsg("BOUNCE part number to %ld", req->partno);
+    }
+    else {
+      prevbounce = FALSE;
+      prevtestno = -1;
+      prevpartno = -1;
+    }
+  }
+
+  send_doc(msgsock, req);
+  if(got_exit_signal)
+    return 1;
+
+  if(DOCNUMBER_CONNECT == req->testno) {
+    /* a CONNECT request, setup and talk the tunnel */
+    if(!is_proxy) {
+      logmsg("received CONNECT but isn't running as proxy! EXIT");
+    }
+    else
+      http_connect(&msgsock, listensock, req, hostport);
+    return 1;
+  }
+
+  if((req->testno < 0) && (req->testno != DOCNUMBER_CONNECT)) {
+    logmsg("special request received, no persistency");
+    return 1;
+  }
+  if(!req->open) {
+    logmsg("instructed to close connection after server-reply");
+    return 1;
+  }
+
+  /* if we got a CONNECT, loop and get another request as well! */
+
+  if(req->open) {
+    logmsg("=> persistant connection request ended, awaits new request\n");
+    return 0;
+  }
+
+  if(req->testno == DOCNUMBER_CONNECT)
+    return 0;
+
+  return 1;
+}
+
 int main(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
@@ -1861,40 +1970,9 @@ int main(int argc, char *argv[])
     goto sws_cleanup;
 
   for (;;) {
-    msgsock = accept(sock, NULL, NULL);
-
-    if(got_exit_signal)
-      break;
-    if (CURL_SOCKET_BAD == msgsock) {
-      error = SOCKERRNO;
-      logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
-             error, strerror(error));
-      break;
-    }
-
-    /*
-    ** As soon as this server acepts a connection from the test harness it
-    ** must set the server logs advisor read lock to indicate that server
-    ** logs should not be read until this lock is removed by this server.
-    */
-
-    set_advisor_read_lock(SERVERLOGS_LOCK);
-    serverlogslocked = 1;
-
-    logmsg("====> Client connect");
-
-#ifdef TCP_NODELAY
-    /*
-     * Disable the Nagle algorithm to make it easier to send out a large
-     * response in many small segments to torture the clients more.
-     */
-    flag = 1;
-    if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
-                       (void *)&flag, sizeof(flag)))
-      logmsg("====> TCP_NODELAY failed");
-    else
-      logmsg("TCP_NODELAY set");
-#endif
+    msgsock = accept_connection(sock);
+    if (CURL_SOCKET_BAD == msgsock)
+      goto sws_cleanup;
 
     /* initialization of httprequest struct is done in get_request(), but due
        to pipelining treatment the pipelining struct field must be initialized
@@ -1903,85 +1981,39 @@ int main(int argc, char *argv[])
     req.pipelining = FALSE;
 
     do {
+      rc = service_connection(msgsock, &req, sock, hostport);
       if(got_exit_signal)
-        break;
+        goto sws_cleanup;
 
-      if(get_request(msgsock, &req))
-        /* non-zero means error, break out of loop */
-        break;
+      if (!rc) {
+        logmsg("====> Client disconnect %d", req.connmon);
 
-      if(prevbounce) {
-        /* bounce treatment requested */
-        if((req.testno == prevtestno) &&
-           (req.partno == prevpartno)) {
-          req.partno++;
-          logmsg("BOUNCE part number to %ld", req.partno);
+        if(req.connmon) {
+          const char *keepopen="[DISCONNECT]\n";
+          storerequest((char *)keepopen, strlen(keepopen));
         }
-        else {
-          prevbounce = FALSE;
-          prevtestno = -1;
-          prevpartno = -1;
+
+        if(!req.open)
+          /* When instructed to close connection after server-reply we
+             wait a very small amount of time before doing so. If this
+             is not done client might get an ECONNRESET before reading
+             a single byte of server-reply. */
+          wait_ms(50);
+
+        if(msgsock != CURL_SOCKET_BAD) {
+          sclose(msgsock);
+          msgsock = CURL_SOCKET_BAD;
         }
-      }
 
-      send_doc(msgsock, &req);
-      if(got_exit_signal)
-        break;
-
-      if(DOCNUMBER_CONNECT == req.testno) {
-        /* a CONNECT request, setup and talk the tunnel */
-        if(!is_proxy) {
-          logmsg("received CONNECT but isn't running as proxy! EXIT");
+        if(serverlogslocked) {
+          serverlogslocked = 0;
+          clear_advisor_read_lock(SERVERLOGS_LOCK);
         }
-        else
-          http_connect(&msgsock, sock, &req, hostport);
-        break;
+
+        if (req.testno == DOCNUMBER_QUIT)
+          goto sws_cleanup;
       }
-
-      if((req.testno < 0) && (req.testno != DOCNUMBER_CONNECT)) {
-        logmsg("special request received, no persistency");
-        break;
-      }
-      if(!req.open) {
-        logmsg("instructed to close connection after server-reply");
-        break;
-      }
-
-      if(req.open) {
-        logmsg("=> persistant connection request ended, awaits new request\n");
-      }
-      /* if we got a CONNECT, loop and get another request as well! */
-    } while(req.open || (req.testno == DOCNUMBER_CONNECT));
-
-    if(got_exit_signal)
-      break;
-
-    logmsg("====> Client disconnect %d", req.connmon);
-
-    if(req.connmon) {
-      const char *keepopen="[DISCONNECT]\n";
-      storerequest((char *)keepopen, strlen(keepopen));
-    }
-
-    if(!req.open)
-      /* When instructed to close connection after server-reply we
-         wait a very small amount of time before doing so. If this
-         is not done client might get an ECONNRESET before reading
-         a single byte of server-reply. */
-      wait_ms(50);
-
-    if(msgsock != CURL_SOCKET_BAD) {
-      sclose(msgsock);
-      msgsock = CURL_SOCKET_BAD;
-    }
-
-    if(serverlogslocked) {
-      serverlogslocked = 0;
-      clear_advisor_read_lock(SERVERLOGS_LOCK);
-    }
-
-    if (req.testno == DOCNUMBER_QUIT)
-      break;
+    } while (rc);
   }
 
 sws_cleanup:
