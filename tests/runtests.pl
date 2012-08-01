@@ -187,7 +187,6 @@ my $memanalyze="$perl $srcdir/memanalyze.pl";
 my $pwd = getcwd();          # current working directory
 
 my $start;
-my $forkserver=0;
 my $ftpchecktime=1; # time it took to verify our test FTP server
 
 my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
@@ -1198,7 +1197,6 @@ sub runhttpserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    $flags .= "--fork " if($forkserver);
     $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= "--verbose " if($debugprotocol);
@@ -4269,12 +4267,6 @@ while(@ARGV) {
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
-    }
-    elsif ($ARGV[0] eq "-f") {
-        # run fork-servers, which makes the server fork for all new
-        # connections This is NOT what you wanna do without knowing exactly
-        # why and for what
-        $forkserver=1;
     }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb

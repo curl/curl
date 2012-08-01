@@ -62,15 +62,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#if !defined(CURL_SWS_FORK_ENABLED) && defined(HAVE_FORK)
-/*
- * The normal sws build for the plain standard curl test suite has no use for
- * fork(), but if you feel wild and crazy and want to setup some more exotic
- * tests. Define this and run...
- */
-#define CURL_SWS_FORK_ENABLED
-#endif
-
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
@@ -1696,18 +1687,12 @@ int main(int argc, char *argv[])
   int arg=1;
   long pid;
   const char *hostport = "127.0.0.1";
-#ifdef CURL_SWS_FORK_ENABLED
-  bool use_fork = FALSE;
-#endif
 
   memset(&req, 0, sizeof(req));
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("sws IPv4%s"
-#ifdef CURL_SWS_FORK_ENABLED
-             " FORK"
-#endif
              "\n"
              ,
 #ifdef ENABLE_IPV6
@@ -1747,12 +1732,6 @@ int main(int argc, char *argv[])
 #endif
       arg++;
     }
-#ifdef CURL_SWS_FORK_ENABLED
-    else if(!strcmp("--fork", argv[arg])) {
-      use_fork=TRUE;
-      arg++;
-    }
-#endif
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc>arg) {
@@ -1796,8 +1775,7 @@ int main(int argc, char *argv[])
            " --port [port]\n"
            " --srcdir [path]\n"
            " --connect [ip4-addr]\n"
-           " --gopher\n"
-           " --fork");
+           " --gopher");
       return 0;
     }
   }
@@ -1903,23 +1881,6 @@ int main(int argc, char *argv[])
     set_advisor_read_lock(SERVERLOGS_LOCK);
     serverlogslocked = 1;
 
-#ifdef CURL_SWS_FORK_ENABLED
-    if(use_fork) {
-      /* The fork enabled version just forks off the child and don't care
-         about it anymore, so don't assume otherwise. Beware and don't do
-         this at home. */
-      rc = fork();
-      if(-1 == rc) {
-        printf("MAJOR ERROR: fork() failed!\n");
-        break;
-      }
-    }
-    else
-      /* not a fork, just set rc so the following proceeds nicely */
-      rc = 0;
-    /* 0 is returned to the child */
-    if(0 == rc) {
-#endif
     logmsg("====> Client connect");
 
 #ifdef TCP_NODELAY
@@ -2021,9 +1982,6 @@ int main(int argc, char *argv[])
 
     if (req.testno == DOCNUMBER_QUIT)
       break;
-#ifdef CURL_SWS_FORK_ENABLED
-    }
-#endif
   }
 
 sws_cleanup:
