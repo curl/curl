@@ -821,7 +821,8 @@ static void init_httprequest(struct httprequest *req)
   req->done_processing = 0;
 }
 
-/* return 0 on success, non-zero on failure */
+/* returns 1 if the connection should be serviced again immediately, 0 if there
+   is no data waiting, or < 0 if it should be closed */
 static int get_request(curl_socket_t sock, struct httprequest *req)
 {
   int error;
@@ -864,13 +865,17 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
         got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
     }
     if(got_exit_signal)
-      return 1;
+      return -1;
     if(got == 0) {
       logmsg("Connection closed by client");
       fail = 1;
     }
     else if(got < 0) {
       error = SOCKERRNO;
+      if (EAGAIN == error || EWOULDBLOCK == error) {
+        /* nothing to read at the moment */
+        return 0;
+      }
       logmsg("recv() returned error: (%d) %s", error, strerror(error));
       fail = 1;
     }
@@ -878,7 +883,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
       storerequest(reqbuf, req->offset);
-      return 1;
+      return -1;
     }
 
     logmsg("Read %zd bytes", got);
@@ -888,7 +893,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
     req->done_processing = ProcessRequest(req);
     if(got_exit_signal)
-      return 1;
+      return -1;
     if(req->done_processing && req->pipe) {
       logmsg("Waiting for another piped request");
       req->done_processing = 0;
@@ -915,9 +920,9 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   if (fail || req->done_processing)
     storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
   if(got_exit_signal)
-    return 1;
+    return -1;
 
-  return fail; /* return 0 on success */
+  return fail ? -1 : 1;
 }
 
 /* returns -1 on failure */
@@ -1462,10 +1467,14 @@ static void http_connect(curl_socket_t *infdp,
           init_httprequest(&req2);
           while(!req2.done_processing) {
             err = get_request(datafd, &req2);
-            if(err)
+            if(err < 0) {
+              /* this socket must be closed, done or not */
               break;
+            }
           }
-          if(!err) {
+
+          /* skip this and close the socket if err < 0 */
+          if(err >= 0) {
             err = send_doc(datafd, &req2);
             if(!err && (req2.testno == DOCNUMBER_CONNECT)) {
               /* sleep to prevent triggering libcurl known bug #39. */
@@ -1693,6 +1702,8 @@ http_connect_cleanup:
   *infdp = CURL_SOCKET_BAD;
 }
 
+/* returns a socket handle, or 0 if there are no more waiting sockets,
+   or < 0 if there was an error */
 static int accept_connection(int sock)
 {
   curl_socket_t msgsock = CURL_SOCKET_BAD;
@@ -1709,6 +1720,10 @@ static int accept_connection(int sock)
 
   if(CURL_SOCKET_BAD == msgsock) {
     error = SOCKERRNO;
+    if(EAGAIN == error || EWOULDBLOCK == error) {
+      /* nothing to accept */
+      return 0;
+    }
     logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
            error, strerror(error));
     return CURL_SOCKET_BAD;
@@ -1741,18 +1756,20 @@ static int accept_connection(int sock)
   return msgsock;
 }
 
-/* returns 0 if the connection should be serviced again, non-zero if it is done */
+/* returns 1 if the connection should be serviced again immediately, 0 if there
+   is no data waiting, or < 0 if it should be closed */
 static int service_connection(int msgsock, struct httprequest *req,
                               int listensock, const char *hostport)
 {
   if(got_exit_signal)
-    return 1;
+    return -1;
 
   init_httprequest(req);
   while(!req->done_processing) {
-    if (get_request(msgsock, req)) {
-      /* non-zero means error, break out of loop */
-      return 1;
+    int rc = get_request(msgsock, req);
+    if (rc <= 0) {
+      /* Nothing further to read now (possibly because the socket was closed */
+      return rc;
     }
   }
 
@@ -1772,7 +1789,7 @@ static int service_connection(int msgsock, struct httprequest *req,
 
   send_doc(msgsock, req);
   if(got_exit_signal)
-    return 1;
+    return -1;
 
   if(DOCNUMBER_CONNECT == req->testno) {
     /* a CONNECT request, setup and talk the tunnel */
@@ -1781,29 +1798,29 @@ static int service_connection(int msgsock, struct httprequest *req,
     }
     else
       http_connect(&msgsock, listensock, req, hostport);
-    return 1;
+    return -1;
   }
 
   if((req->testno < 0) && (req->testno != DOCNUMBER_CONNECT)) {
     logmsg("special request received, no persistency");
-    return 1;
+    return -1;
   }
   if(!req->open) {
     logmsg("instructed to close connection after server-reply");
-    return 1;
+    return -1;
   }
 
   /* if we got a CONNECT, loop and get another request as well! */
 
   if(req->open) {
     logmsg("=> persistant connection request ended, awaits new request\n");
-    return 0;
+    return 1;
   }
 
   if(req->testno == DOCNUMBER_CONNECT)
-    return 0;
+    return 1;
 
-  return 1;
+  return -1;
 }
 
 int main(int argc, char *argv[])
@@ -1995,9 +2012,11 @@ int main(int argc, char *argv[])
     goto sws_cleanup;
 
   for (;;) {
-    msgsock = accept_connection(sock);
-    if (CURL_SOCKET_BAD == msgsock)
-      goto sws_cleanup;
+    do {
+      msgsock = accept_connection(sock);
+      if (CURL_SOCKET_BAD == msgsock)
+        goto sws_cleanup;
+    } while (msgsock >= 0);
 
     /* initialization of httprequest struct is done before get_request(), but
        the pipelining struct field must be initialized previously to FALSE
@@ -2010,7 +2029,7 @@ int main(int argc, char *argv[])
       if(got_exit_signal)
         goto sws_cleanup;
 
-      if (!rc) {
+      if (rc < 0) {
         logmsg("====> Client disconnect %d", req.connmon);
 
         if(req.connmon) {
@@ -2038,7 +2057,7 @@ int main(int argc, char *argv[])
         if (req.testno == DOCNUMBER_QUIT)
           goto sws_cleanup;
       }
-    } while (rc);
+    } while (rc > = 0);
   }
 
 sws_cleanup:
