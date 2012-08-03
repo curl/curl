@@ -95,7 +95,13 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
     }
     else {
-      if(ntlm->state >= NTLMSTATE_TYPE1) {
+      if(ntlm->state == NTLMSTATE_TYPE3) {
+        infof(conn->data, "NTLM handshake rejected\n");
+        Curl_http_ntlm_cleanup(conn);
+        ntlm->state = NTLMSTATE_NONE;
+        return CURLE_REMOTE_ACCESS_DENIED;
+      }
+      else if(ntlm->state >= NTLMSTATE_TYPE1) {
         infof(conn->data, "NTLM handshake failure (internal error)\n");
         return CURLE_REMOTE_ACCESS_DENIED;
       }
