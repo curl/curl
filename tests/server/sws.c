@@ -50,7 +50,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#include <fcntl.h>
 #include <poll.h>
 
 #define ENABLE_CURLX_PRINTF
@@ -1742,9 +1741,9 @@ static int accept_connection(int sock)
     return CURL_SOCKET_BAD;
   }
 
-  if(0 != fcntl(msgsock, F_SETFL, O_NONBLOCK)) {
+  if(0 != curlx_nonblock(msgsock, TRUE)) {
     error = SOCKERRNO;
-    logmsg("fcntl(O_NONBLOCK) failed with error: (%d) %s",
+    logmsg("curlx_nonblock failed with error: (%d) %s",
            error, strerror(error));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
@@ -2004,9 +2003,9 @@ int main(int argc, char *argv[])
            error, strerror(error));
     goto sws_cleanup;
   }
-  if(0 != fcntl(sock, F_SETFL, O_NONBLOCK)) {
+  if(0 != curlx_nonblock(sock, TRUE)) {
     error = SOCKERRNO;
-    logmsg("fcntl(O_NONBLOCK) failed with error: (%d) %s",
+    logmsg("curlx_nonblock failed with error: (%d) %s",
            error, strerror(error));
     goto sws_cleanup;
   }
