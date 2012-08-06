@@ -39,7 +39,7 @@ static int send_request(CURL *curl, const char *url, int seq, long auth_scheme, 
   }
 
   sprintf(full_url, "%s%04d", url, seq);
-  fprintf(stderr, "Sending new request %d to %s with credential %s (auth %d)\n", seq, full_url, userpwd, auth_scheme);
+  fprintf(stderr, "Sending new request %d to %s with credential %s (auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
