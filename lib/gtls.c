@@ -34,7 +34,10 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
-#ifndef USE_GNUTLS_NETTLE
+#ifdef USE_GNUTLS_NETTLE
+#include <gnutls/crypto.h>
+#include <nettle/md5.h>
+#else
 #include <gcrypt.h>
 #endif
 
