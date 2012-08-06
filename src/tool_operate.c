@@ -1654,11 +1654,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         Curl_safefree(outfile);
         Curl_safefree(this_url);
 
-        if(infdopen) {
+        if(infdopen)
           close(infd);
-          infdopen = FALSE;
-          infd = STDIN_FILENO;
-        }
 
         if(metalink) {
           /* Should exit if error is fatal. */
