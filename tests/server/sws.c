@@ -50,8 +50,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#include <poll.h>
-
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
    versions instead */
@@ -117,8 +115,8 @@ struct httprequest {
 
 #define MAX_SOCKETS 1024
 
-static struct pollfd all_sockets[MAX_SOCKETS];
-static nfds_t num_sockets = 0;
+static curl_socket_t all_sockets[MAX_SOCKETS];
+static size_t num_sockets = 0;
 
 static int ProcessRequest(struct httprequest *req);
 static void storerequest(char *reqbuf, size_t totalsize);
@@ -1770,9 +1768,7 @@ static int accept_connection(int sock)
 
   logmsg("====> Client connect");
 
-  all_sockets[num_sockets].fd = msgsock;
-  all_sockets[num_sockets].events = POLLIN;
-  all_sockets[num_sockets].revents = 0;
+  all_sockets[num_sockets] = msgsock;
   num_sockets += 1;
 
 #ifdef TCP_NODELAY
@@ -1871,7 +1867,7 @@ int main(int argc, char *argv[])
   int arg=1;
   long pid;
   const char *hostport = "127.0.0.1";
-  nfds_t socket_idx;
+  size_t socket_idx;
 
   memset(&req, 0, sizeof(req));
 
@@ -1983,9 +1979,7 @@ int main(int argc, char *argv[])
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  all_sockets[0].fd = sock;
-  all_sockets[0].events = POLLIN;
-  all_sockets[0].revents = 0;
+  all_sockets[0] = sock;
   num_sockets = 1;
 
   if(CURL_SOCKET_BAD == sock) {
@@ -2064,9 +2058,14 @@ int main(int argc, char *argv[])
   init_httprequest(&req);
 
   for(;;) {
+    fd_set input;
+    fd_set output;
+    struct timeval timeout = {0, 250000L}; /* 250 ms */
+    curl_socket_t maxfd = (curl_socket_t)-1;
+
     /* Clear out closed sockets */
     for (socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
-      if (CURL_SOCKET_BAD == all_sockets[socket_idx].fd) {
+      if (CURL_SOCKET_BAD == all_sockets[socket_idx]) {
         char* dst = (char *) all_sockets + socket_idx;
         char* src = (char *) all_sockets + socket_idx + 1;
         char* end = (char *) all_sockets + num_sockets;
@@ -2075,17 +2074,41 @@ int main(int argc, char *argv[])
       }
     }
 
-    rc = poll(all_sockets, num_sockets, -1);
+    if(got_exit_signal)
+      goto sws_cleanup;
 
+    /* Set up for select*/
+    FD_ZERO(&input);
+    FD_ZERO(&output);
+
+    for (socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
+      /* Listen on all sockets */
+      FD_SET(all_sockets[socket_idx], &input);
+      if(all_sockets[socket_idx] > maxfd)
+        maxfd = all_sockets[socket_idx];
+    }
+
+    if(got_exit_signal)
+      goto sws_cleanup;
+
+    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
     if (rc < 0) {
       error = SOCKERRNO;
-      logmsg("poll() failed with error: (%d) %s",
+      logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
       goto sws_cleanup;
     }
 
+    if(got_exit_signal)
+      goto sws_cleanup;
+
+    if (rc == 0) {
+      /* Timed out - try again*/
+      continue;
+    }
+
     /* Check if the listening socket is ready to accept */
-    if ((all_sockets[0].revents & POLLIN) == POLLIN) {
+    if (FD_ISSET(all_sockets[0], &input)) {
       /* Service all queued connections */
       curl_socket_t msgsock;
       do {
@@ -2095,22 +2118,17 @@ int main(int argc, char *argv[])
           goto sws_cleanup;
       } while (msgsock > 0);
     }
-    else if (all_sockets[0].revents != 0) {
-      logmsg("unexpected poll event on listening socket: %d",
-             all_sockets[0].revents);
-      goto sws_cleanup;
-    }
 
     /* Service all connections that are ready */
     for (socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
-      if ((all_sockets[socket_idx].revents & POLLIN) == POLLIN) {
+      if (FD_ISSET(all_sockets[socket_idx], &input)) {
         if(got_exit_signal)
           goto sws_cleanup;
 
         /* Service this connection until it has nothing available */
         do {
-          rc = service_connection(all_sockets[socket_idx].fd, &req, sock, hostport);
-          logmsg("service_connection %d returned %d", all_sockets[socket_idx].fd, rc);
+          rc = service_connection(all_sockets[socket_idx], &req, sock, hostport);
+          logmsg("service_connection %d returned %d", all_sockets[socket_idx], rc);
           if(got_exit_signal)
             goto sws_cleanup;
 
@@ -2129,9 +2147,9 @@ int main(int argc, char *argv[])
                  a single byte of server-reply. */
               wait_ms(50);
 
-            if(all_sockets[socket_idx].fd != CURL_SOCKET_BAD) {
-              sclose(all_sockets[socket_idx].fd);
-              all_sockets[socket_idx].fd = CURL_SOCKET_BAD;
+            if(all_sockets[socket_idx] != CURL_SOCKET_BAD) {
+              sclose(all_sockets[socket_idx]);
+              all_sockets[socket_idx] = CURL_SOCKET_BAD;
             }
 
             serverlogslocked -= 1;
@@ -2147,11 +2165,6 @@ int main(int argc, char *argv[])
             init_httprequest(&req);
         } while (rc > 0);
       }
-      else if (all_sockets[socket_idx].revents != 0) {
-        logmsg("unexpected poll event on socket %d: %d",
-               socket_idx, all_sockets[socket_idx].revents);
-        goto sws_cleanup;
-      }
     }
 
     if(got_exit_signal)
@@ -2161,9 +2174,9 @@ int main(int argc, char *argv[])
 sws_cleanup:
 
   for (socket_idx = 1; socket_idx < num_sockets; ++socket_idx)
-    if((all_sockets[socket_idx].fd != sock) &&
-     (all_sockets[socket_idx].fd != CURL_SOCKET_BAD))
-      sclose(all_sockets[socket_idx].fd);
+    if((all_sockets[socket_idx] != sock) &&
+     (all_sockets[socket_idx] != CURL_SOCKET_BAD))
+      sclose(all_sockets[socket_idx]);
 
   if(sock != CURL_SOCKET_BAD)
     sclose(sock);
