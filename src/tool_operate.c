@@ -479,7 +479,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       int urlnum;
 
       uploadfile = NULL;
-      separator = 0;
       urls = NULL;
       urlnum = 0;
 
