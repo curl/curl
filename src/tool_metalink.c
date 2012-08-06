@@ -82,64 +82,6 @@
     return PARAM_NO_MEM; \
 } WHILE_FALSE
 
-const digest_params MD5_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) MD5_Init,
-    (Curl_digest_update_func) MD5_Update,
-    (Curl_digest_final_func) MD5_Final,
-    sizeof(MD5_CTX),
-    16
-  }
-};
-
-const digest_params SHA1_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) SHA1_Init,
-    (Curl_digest_update_func) SHA1_Update,
-    (Curl_digest_final_func) SHA1_Final,
-    sizeof(SHA_CTX),
-    20
-  }
-};
-
-const digest_params SHA256_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) SHA256_Init,
-    (Curl_digest_update_func) SHA256_Update,
-    (Curl_digest_final_func) SHA256_Final,
-    sizeof(SHA256_CTX),
-    32
-  }
-};
-
-static const metalink_digest_def SHA256_DIGEST_DEF[] = {
-  {"sha-256", SHA256_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def SHA1_DIGEST_DEF[] = {
-  {"sha-1", SHA1_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def MD5_DIGEST_DEF[] = {
-  {"md5", MD5_DIGEST_PARAMS}
-};
-
-/*
- * The alias of supported hash functions in the order by preference
- * (basically stronger hash comes first). We included "sha-256" and
- * "sha256". The former is the name defined in the IANA registry named
- * "Hash Function Textual Names". The latter is widely (and
- * historically) used in Metalink version 3.
- */
-static const metalink_digest_alias digest_aliases[] = {
-  {"sha-256", SHA256_DIGEST_DEF},
-  {"sha256", SHA256_DIGEST_DEF},
-  {"sha-1", SHA1_DIGEST_DEF},
-  {"sha1", SHA1_DIGEST_DEF},
-  {"md5", MD5_DIGEST_DEF},
-  {NULL, NULL}
-};
-
 #ifdef USE_GNUTLS_NETTLE
 
 static void MD5_Init(MD5_CTX *ctx)
@@ -250,6 +192,64 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 }
 
 #endif /* CRYPTO LIBS */
+
+const digest_params MD5_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) MD5_Init,
+    (Curl_digest_update_func) MD5_Update,
+    (Curl_digest_final_func) MD5_Final,
+    sizeof(MD5_CTX),
+    16
+  }
+};
+
+const digest_params SHA1_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) SHA1_Init,
+    (Curl_digest_update_func) SHA1_Update,
+    (Curl_digest_final_func) SHA1_Final,
+    sizeof(SHA_CTX),
+    20
+  }
+};
+
+const digest_params SHA256_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) SHA256_Init,
+    (Curl_digest_update_func) SHA256_Update,
+    (Curl_digest_final_func) SHA256_Final,
+    sizeof(SHA256_CTX),
+    32
+  }
+};
+
+static const metalink_digest_def SHA256_DIGEST_DEF[] = {
+  {"sha-256", SHA256_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def SHA1_DIGEST_DEF[] = {
+  {"sha-1", SHA1_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def MD5_DIGEST_DEF[] = {
+  {"md5", MD5_DIGEST_PARAMS}
+};
+
+/*
+ * The alias of supported hash functions in the order by preference
+ * (basically stronger hash comes first). We included "sha-256" and
+ * "sha256". The former is the name defined in the IANA registry named
+ * "Hash Function Textual Names". The latter is widely (and
+ * historically) used in Metalink version 3.
+ */
+static const metalink_digest_alias digest_aliases[] = {
+  {"sha-256", SHA256_DIGEST_DEF},
+  {"sha256", SHA256_DIGEST_DEF},
+  {"sha-1", SHA1_DIGEST_DEF},
+  {"sha1", SHA1_DIGEST_DEF},
+  {"md5", MD5_DIGEST_DEF},
+  {NULL, NULL}
+};
 
 digest_context *Curl_digest_init(const digest_params *dparams)
 {
