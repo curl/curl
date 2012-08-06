@@ -2065,9 +2065,9 @@ int main(int argc, char *argv[])
     /* Clear out closed sockets */
     for (socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
       if (CURL_SOCKET_BAD == all_sockets[socket_idx]) {
-        char* dst = (char *) all_sockets + socket_idx;
-        char* src = (char *) all_sockets + socket_idx + 1;
-        char* end = (char *) all_sockets + num_sockets;
+        char* dst = (char *) (all_sockets + socket_idx);
+        char* src = (char *) (all_sockets + socket_idx + 1);
+        char* end = (char *) (all_sockets + num_sockets);
         memmove(dst, src, end - src);
         num_sockets -= 1;
       }
