@@ -1796,7 +1796,6 @@ static int service_connection(int msgsock, struct httprequest *req,
 
   while(!req->done_processing) {
     int rc = get_request(msgsock, req);
-    logmsg("get_request %d returned %d", msgsock, rc);
     if (rc <= 0) {
       /* Nothing further to read now (possibly because the socket was closed */
       return rc;
@@ -2128,7 +2127,6 @@ int main(int argc, char *argv[])
         /* Service this connection until it has nothing available */
         do {
           rc = service_connection(all_sockets[socket_idx], &req, sock, hostport);
-          logmsg("service_connection %d returned %d", all_sockets[socket_idx], rc);
           if(got_exit_signal)
             goto sws_cleanup;
 
