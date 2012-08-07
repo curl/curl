@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -306,8 +306,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if(pending_ms <= 0)
+      if(pending_ms <= 0) {
+        r = 0;  /* Simulate a "call timed out" case */
         break;
+      }
     }
   } while(r == -1);
 
