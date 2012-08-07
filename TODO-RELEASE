@@ -5,10 +5,6 @@ Bugs:
 
 313 - host.name vs. host.dispname and "(nil)" outputs
 
-318 - bug #3546353 "Curl crashes with > 9 glob patterns"
-
-319 - bug #3545398 "auth status not being cleared when handles are reset"
-
 320 - bug #3544688 "crash during retry with libcurl and SFTP"
 
 323 - patch - select.c / Curl_socket_check() interrupted
