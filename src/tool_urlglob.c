@@ -64,7 +64,10 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   pat->content.Set.ptr_s = 0;
   pat->content.Set.elements = NULL;
 
-  ++glob->size;
+  if(++glob->size > (GLOB_PATTERN_NUM*2)) {
+    snprintf(glob->errormsg, sizeof(glob->errormsg), "too many globs used\n");
+    return GLOB_ERROR;
+  }
 
   while(!done) {
     switch (*pattern) {
@@ -181,7 +184,10 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
 
   pat = &glob->pattern[glob->size / 2];
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
-  ++glob->size;
+  if(++glob->size > (GLOB_PATTERN_NUM*2)) {
+    snprintf(glob->errormsg, sizeof(glob->errormsg), "too many globs used\n");
+    return GLOB_ERROR;
+  }
 
   if(ISALPHA(*pattern)) {
     /* character range detected */

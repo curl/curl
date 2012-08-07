@@ -53,9 +53,12 @@ typedef struct {
   } content;
 } URLPattern;
 
+/* the total number of globs supported */
+#define GLOB_PATTERN_NUM 9
+
 typedef struct {
   char *literal[10];
-  URLPattern pattern[9];
+  URLPattern pattern[GLOB_PATTERN_NUM+1];
   size_t size;
   size_t urllen;
   char *glob_buffer;
