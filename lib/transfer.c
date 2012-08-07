@@ -2060,7 +2060,9 @@ CURLcode Curl_retry_request(struct connectdata *conn,
                                 error just because nothing has been
                                 transferred! */
 
-    if(data->state.proto.http->writebytecount)
+
+    if((conn->handler->protocol&CURLPROTO_HTTP) &&
+       data->state.proto.http->writebytecount)
       return Curl_readrewind(conn);
   }
   return CURLE_OK;
