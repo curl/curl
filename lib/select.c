@@ -221,8 +221,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
       break;
     if(timeout_ms > 0) {
       pending_ms = (int)(timeout_ms - elapsed_ms);
-      if(pending_ms <= 0)
+      if(pending_ms <= 0) {
+        r = 0;  /* Simulate a "call timed out" case */
         break;
+      }
     }
   } while(r == -1);
 
