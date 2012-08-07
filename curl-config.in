@@ -135,9 +135,9 @@ while test $# -gt 0; do
           CPPFLAG_CURL_STATICLIB=""
         fi
        	if test "X@includedir@" = "X/usr/include"; then
-          echo "$(CPPFLAG_CURL_STATICLIB)"
+          echo "$CPPFLAG_CURL_STATICLIB"
         else
-          echo "$(CPPFLAG_CURL_STATICLIB)-I@includedir@"
+          echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
         fi
        	;;
 
