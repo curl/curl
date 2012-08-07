@@ -13,7 +13,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o WSAPoll disabled on Windows builds due to its bugs [8]
+ o segfault on request retries [1]
+ o curl-config: parentheses fix [2]
+ o VC build: add define for openssl [3]
+ o globbing: fix segfault when >9 globs were used [4]
+ o fixed a few clang-analyzer warnings
+ o metalink: change code order to build with gnutls-nettle [5]
+ o gtls: fix build failure by including nettle-specific headers [5]
+ o change preferred HTTP auth on a handle previously used for another auth
+ o file: use fdopen() to avoid race condition [6]
+ o Added DWANT_IDN_PROTOTYPES define for MSVC too [7]
 
 This release includes the following known bugs:
 
@@ -22,10 +32,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Guenter Knauf, Joe Mason, Kamil Dudka, Steve Holme, Anthony G. Basile,
+ Edward Sheldrake, Jan Koen Annot
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- 
+ [1] = http://curl.haxx.se/bug/view.cgi?id=3544688
+ [2] = http://curl.haxx.se/bug/view.cgi?id=3551460
+ [3] = http://curl.haxx.se/bug/view.cgi?id=3552997
+ [4] = http://curl.haxx.se/bug/view.cgi?id=3546353
+ [5] = http://curl.haxx.se/bug/view.cgi?id=3554668
+ [6] = https://bugzilla.redhat.com/844385
+ [7] = http://curl.haxx.se/mail/lib-2012-07/0271.html
+ [8] = http://curl.haxx.se/mail/lib-2012-07/0310.html
