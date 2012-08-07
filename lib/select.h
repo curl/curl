@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,24 +28,6 @@
 #include <sys/poll.h>
 #elif defined(HAVE_POLL_H)
 #include <poll.h>
-#endif
-
-/*
- * poll() function on Windows Vista and later is called WSAPoll()
- */
-
-#if defined(USE_WINSOCK) && (USE_WINSOCK > 1) && \
-    defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
-#  undef  HAVE_POLL
-#  define HAVE_POLL 1
-#  undef  HAVE_POLL_FINE
-#  define HAVE_POLL_FINE 1
-#  define poll(x,y,z) WSAPoll((x),(y),(z))
-#  if defined(_MSC_VER) && defined(POLLRDNORM)
-#    undef  POLLPRI
-#    define POLLPRI POLLRDBAND
-#    define HAVE_STRUCT_POLLFD 1
-#  endif
 #endif
 
 /*
