@@ -5,10 +5,6 @@ Bugs:
 
 313 - host.name vs. host.dispname and "(nil)" outputs
 
-323 - patch - select.c / Curl_socket_check() interrupted
-
-325 - Avoid leak of local device string when reusing connection
-
 Others:
 
 310 - a new authentication callback
