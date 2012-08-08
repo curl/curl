@@ -1,4 +1,4 @@
-Curl and libcurl 7.2x.x
+Curl and libcurl 7.28.0
 
  Public curl releases:         129
  Command line options:         152
@@ -9,7 +9,7 @@ Curl and libcurl 7.2x.x
 
 This release includes the following changes:
 
- o 
+ o SSH: added agent based authentication
 
 This release includes the following bugfixes:
 
@@ -24,6 +24,11 @@ This release includes the following bugfixes:
  o change preferred HTTP auth on a handle previously used for another auth [9]
  o file: use fdopen() to avoid race condition [6]
  o Added DWANT_IDN_PROTOTYPES define for MSVC too [7]
+ o verbose messages: fixed (nil) output of hostnames in re-used connections [10]
+ o metalink: Un-broke the build when building --with-darwinssl
+ o curl man page cleanup
+ o Avoid leak of local device string when reusing connection
+ o Curl_socket_check: fix return code for timeout [11]
 
 This release includes the following known bugs:
 
@@ -33,7 +38,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Guenter Knauf, Joe Mason, Kamil Dudka, Steve Holme, Anthony G. Basile,
- Edward Sheldrake, Jan Koen Annot
+ Edward Sheldrake, Jan Koen Annot, Maxime Larocque, Mike Crowe, Anthony Bryan,
+ Nick Zitzmann, Gisle Vanem, Armel Asselin
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -48,3 +54,5 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/mail/lib-2012-07/0271.html
  [8] = http://curl.haxx.se/mail/lib-2012-07/0310.html
  [9] = http://curl.haxx.se/bug/view.cgi?id=3545398
+ [10] = http://curl.haxx.se/mail/lib-2012-07/0111.html
+ [11] = http://curl.haxx.se/mail/lib-2012-07/0122.html
