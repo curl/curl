@@ -2079,14 +2079,14 @@ static CURLMcode add_next_timeout(struct timeval now,
       break;
     e = n;
   }
-  if(!list->size)  {
+  e = list->head;
+  if(!e) {
     /* clear the expire times within the handles that we remove from the
        splay tree */
     tv->tv_sec = 0;
     tv->tv_usec = 0;
   }
   else {
-    e = list->head;
     /* copy the first entry to 'tv' */
     memcpy(tv, e->ptr, sizeof(*tv));
 
