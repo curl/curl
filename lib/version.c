@@ -132,11 +132,14 @@ char *curl_version(void)
     else
       suff[0] = '\0';
 
-    len = snprintf(ptr, left, " librtmp/%d.%d%s",
-      RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff, suff);
+    snprintf(ptr, left, " librtmp/%d.%d%s",
+             RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
+             suff);
 /*
   If another lib version is added below this one, this code would
   also have to do:
+
+    len = what snprintf() returned
 
     left -= len;
     ptr += len;
