@@ -21,7 +21,7 @@ This release includes the following bugfixes:
  o fixed a few clang-analyzer warnings
  o metalink: change code order to build with gnutls-nettle [5]
  o gtls: fix build failure by including nettle-specific headers [5]
- o change preferred HTTP auth on a handle previously used for another auth
+ o change preferred HTTP auth on a handle previously used for another auth [9]
  o file: use fdopen() to avoid race condition [6]
  o Added DWANT_IDN_PROTOTYPES define for MSVC too [7]
 
@@ -47,3 +47,4 @@ References to bug reports and discussions on issues:
  [6] = https://bugzilla.redhat.com/844385
  [7] = http://curl.haxx.se/mail/lib-2012-07/0271.html
  [8] = http://curl.haxx.se/mail/lib-2012-07/0310.html
+ [9] = http://curl.haxx.se/bug/view.cgi?id=3545398
