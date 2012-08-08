@@ -1,12 +1,6 @@
 To be addressed in 7.28
 =======================
 
-Bugs:
-
-313 - host.name vs. host.dispname and "(nil)" outputs
-
-Others:
-
 310 - a new authentication callback
 
 312 - custom Content-Length appears in CONNECT, solve it by offering a separate
