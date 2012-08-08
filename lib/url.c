@@ -4659,13 +4659,12 @@ static CURLcode resolve_server(struct SessionHandle *data,
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
-  if(conn->bits.reuse) {
-    /* We're reusing the connection - no need to resolve anything */
+  if(conn->bits.reuse)
+    /* We're reusing the connection - no need to resolve anything, and
+       fix_hostname() was called already in create_conn() for the re-use
+       case. */
     *async = FALSE;
 
-    if(conn->bits.proxy)
-      fix_hostname(data, conn, &conn->host);
-  }
   else {
     /* this is a fresh connect */
     int rc;
@@ -5136,6 +5135,10 @@ static CURLcode create_conn(struct SessionHandle *data,
     free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
+
+    /* set a pointer to the hostname we display */
+    fix_hostname(data, conn, &conn->host);
+
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
           conn->proxy.name?conn->proxy.dispname:conn->host.dispname);

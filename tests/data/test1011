@@ -10,10 +10,10 @@ followlocation
 # Server-side
 <reply>
 <data>
-HTTP/1.1 301 OK swsclose
+HTTP/1.1 301 OK
 Location: moo.html&testcase=/10110002
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Connection: close
+Content-Length: 0
 
 </data>
 <data2>
@@ -25,10 +25,10 @@ Connection: close
 body
 </data2>
 <datacheck>
-HTTP/1.1 301 OK swsclose
+HTTP/1.1 301 OK
 Location: moo.html&testcase=/10110002
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Connection: close
+Content-Length: 0
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
