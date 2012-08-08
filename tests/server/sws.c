@@ -1709,7 +1709,7 @@ http_connect_cleanup:
 
 /* returns a socket handle, or 0 if there are no more waiting sockets,
    or < 0 if there was an error */
-static int accept_connection(int sock)
+static curl_socket_t accept_connection(curl_socket_t sock)
 {
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int error;
@@ -1788,8 +1788,8 @@ static int accept_connection(int sock)
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
-static int service_connection(int msgsock, struct httprequest *req,
-                              int listensock, const char *hostport)
+static int service_connection(curl_socket_t msgsock, struct httprequest *req,
+                              curl_socket_t listensock, const char *hostport)
 {
   if(got_exit_signal)
     return -1;
