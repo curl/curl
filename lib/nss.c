@@ -89,7 +89,6 @@ volatile int initialized = 0;
 typedef struct {
   const char *name;
   int num;
-  PRInt32 version; /* protocol version valid for this cipher */
 } cipher_s;
 
 #define PK11_SETATTRS(_attr, _idx, _type, _val, _len) do {  \
@@ -101,65 +100,63 @@ typedef struct {
 
 #define CERT_NewTempCertificate __CERT_NewTempCertificate
 
-enum sslversion { SSL2 = 1, SSL3 = 2, TLS = 4 };
-
 #define NUM_OF_CIPHERS sizeof(cipherlist)/sizeof(cipherlist[0])
 static const cipher_s cipherlist[] = {
   /* SSL2 cipher suites */
-  {"rc4", SSL_EN_RC4_128_WITH_MD5, SSL2},
-  {"rc4-md5", SSL_EN_RC4_128_WITH_MD5, SSL2},
-  {"rc4export", SSL_EN_RC4_128_EXPORT40_WITH_MD5, SSL2},
-  {"rc2", SSL_EN_RC2_128_CBC_WITH_MD5, SSL2},
-  {"rc2export", SSL_EN_RC2_128_CBC_EXPORT40_WITH_MD5, SSL2},
-  {"des", SSL_EN_DES_64_CBC_WITH_MD5, SSL2},
-  {"desede3", SSL_EN_DES_192_EDE3_CBC_WITH_MD5, SSL2},
+  {"rc4",                        SSL_EN_RC4_128_WITH_MD5},
+  {"rc4-md5",                    SSL_EN_RC4_128_WITH_MD5},
+  {"rc4export",                  SSL_EN_RC4_128_EXPORT40_WITH_MD5},
+  {"rc2",                        SSL_EN_RC2_128_CBC_WITH_MD5},
+  {"rc2export",                  SSL_EN_RC2_128_CBC_EXPORT40_WITH_MD5},
+  {"des",                        SSL_EN_DES_64_CBC_WITH_MD5},
+  {"desede3",                    SSL_EN_DES_192_EDE3_CBC_WITH_MD5},
   /* SSL3/TLS cipher suites */
-  {"rsa_rc4_128_md5", SSL_RSA_WITH_RC4_128_MD5, SSL3 | TLS},
-  {"rsa_rc4_128_sha", SSL_RSA_WITH_RC4_128_SHA, SSL3 | TLS},
-  {"rsa_3des_sha", SSL_RSA_WITH_3DES_EDE_CBC_SHA, SSL3 | TLS},
-  {"rsa_des_sha", SSL_RSA_WITH_DES_CBC_SHA, SSL3 | TLS},
-  {"rsa_rc4_40_md5", SSL_RSA_EXPORT_WITH_RC4_40_MD5, SSL3 | TLS},
-  {"rsa_rc2_40_md5", SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5, SSL3 | TLS},
-  {"rsa_null_md5", SSL_RSA_WITH_NULL_MD5, SSL3 | TLS},
-  {"rsa_null_sha", SSL_RSA_WITH_NULL_SHA, SSL3 | TLS},
-  {"fips_3des_sha", SSL_RSA_FIPS_WITH_3DES_EDE_CBC_SHA, SSL3 | TLS},
-  {"fips_des_sha", SSL_RSA_FIPS_WITH_DES_CBC_SHA, SSL3 | TLS},
-  {"fortezza", SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA, SSL3 | TLS},
-  {"fortezza_rc4_128_sha", SSL_FORTEZZA_DMS_WITH_RC4_128_SHA, SSL3 | TLS},
-  {"fortezza_null", SSL_FORTEZZA_DMS_WITH_NULL_SHA, SSL3 | TLS},
+  {"rsa_rc4_128_md5",            SSL_RSA_WITH_RC4_128_MD5},
+  {"rsa_rc4_128_sha",            SSL_RSA_WITH_RC4_128_SHA},
+  {"rsa_3des_sha",               SSL_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"rsa_des_sha",                SSL_RSA_WITH_DES_CBC_SHA},
+  {"rsa_rc4_40_md5",             SSL_RSA_EXPORT_WITH_RC4_40_MD5},
+  {"rsa_rc2_40_md5",             SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5},
+  {"rsa_null_md5",               SSL_RSA_WITH_NULL_MD5},
+  {"rsa_null_sha",               SSL_RSA_WITH_NULL_SHA},
+  {"fips_3des_sha",              SSL_RSA_FIPS_WITH_3DES_EDE_CBC_SHA},
+  {"fips_des_sha",               SSL_RSA_FIPS_WITH_DES_CBC_SHA},
+  {"fortezza",                   SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA},
+  {"fortezza_rc4_128_sha",       SSL_FORTEZZA_DMS_WITH_RC4_128_SHA},
+  {"fortezza_null",              SSL_FORTEZZA_DMS_WITH_NULL_SHA},
   /* TLS 1.0: Exportable 56-bit Cipher Suites. */
-  {"rsa_des_56_sha", TLS_RSA_EXPORT1024_WITH_DES_CBC_SHA, SSL3 | TLS},
-  {"rsa_rc4_56_sha", TLS_RSA_EXPORT1024_WITH_RC4_56_SHA, SSL3 | TLS},
+  {"rsa_des_56_sha",             TLS_RSA_EXPORT1024_WITH_DES_CBC_SHA},
+  {"rsa_rc4_56_sha",             TLS_RSA_EXPORT1024_WITH_RC4_56_SHA},
   /* AES ciphers. */
-  {"rsa_aes_128_sha", TLS_RSA_WITH_AES_128_CBC_SHA, SSL3 | TLS},
-  {"rsa_aes_256_sha", TLS_RSA_WITH_AES_256_CBC_SHA, SSL3 | TLS},
+  {"rsa_aes_128_sha",            TLS_RSA_WITH_AES_128_CBC_SHA},
+  {"rsa_aes_256_sha",            TLS_RSA_WITH_AES_256_CBC_SHA},
 #ifdef NSS_ENABLE_ECC
   /* ECC ciphers. */
-  {"ecdh_ecdsa_null_sha", TLS_ECDH_ECDSA_WITH_NULL_SHA, TLS},
-  {"ecdh_ecdsa_rc4_128_sha", TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS},
-  {"ecdh_ecdsa_3des_sha", TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS},
-  {"ecdh_ecdsa_aes_128_sha", TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS},
-  {"ecdh_ecdsa_aes_256_sha", TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA, TLS},
-  {"ecdhe_ecdsa_null_sha", TLS_ECDHE_ECDSA_WITH_NULL_SHA, TLS},
-  {"ecdhe_ecdsa_rc4_128_sha", TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS},
-  {"ecdhe_ecdsa_3des_sha", TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS},
-  {"ecdhe_ecdsa_aes_128_sha", TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS},
-  {"ecdhe_ecdsa_aes_256_sha", TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, TLS},
-  {"ecdh_rsa_null_sha", TLS_ECDH_RSA_WITH_NULL_SHA, TLS},
-  {"ecdh_rsa_128_sha", TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS},
-  {"ecdh_rsa_3des_sha", TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, TLS},
-  {"ecdh_rsa_aes_128_sha", TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS},
-  {"ecdh_rsa_aes_256_sha", TLS_ECDH_RSA_WITH_AES_256_CBC_SHA, TLS},
-  {"echde_rsa_null", TLS_ECDHE_RSA_WITH_NULL_SHA, TLS},
-  {"ecdhe_rsa_rc4_128_sha", TLS_ECDHE_RSA_WITH_RC4_128_SHA, TLS},
-  {"ecdhe_rsa_3des_sha", TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, TLS},
-  {"ecdhe_rsa_aes_128_sha", TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS},
-  {"ecdhe_rsa_aes_256_sha", TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS},
-  {"ecdh_anon_null_sha", TLS_ECDH_anon_WITH_NULL_SHA, TLS},
-  {"ecdh_anon_rc4_128sha", TLS_ECDH_anon_WITH_RC4_128_SHA, TLS},
-  {"ecdh_anon_3des_sha", TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA, TLS},
-  {"ecdh_anon_aes_128_sha", TLS_ECDH_anon_WITH_AES_128_CBC_SHA, TLS},
-  {"ecdh_anon_aes_256_sha", TLS_ECDH_anon_WITH_AES_256_CBC_SHA, TLS},
+  {"ecdh_ecdsa_null_sha",        TLS_ECDH_ECDSA_WITH_NULL_SHA},
+  {"ecdh_ecdsa_rc4_128_sha",     TLS_ECDH_ECDSA_WITH_RC4_128_SHA},
+  {"ecdh_ecdsa_3des_sha",        TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA},
+  {"ecdh_ecdsa_aes_128_sha",     TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA},
+  {"ecdh_ecdsa_aes_256_sha",     TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA},
+  {"ecdhe_ecdsa_null_sha",       TLS_ECDHE_ECDSA_WITH_NULL_SHA},
+  {"ecdhe_ecdsa_rc4_128_sha",    TLS_ECDHE_ECDSA_WITH_RC4_128_SHA},
+  {"ecdhe_ecdsa_3des_sha",       TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA},
+  {"ecdhe_ecdsa_aes_128_sha",    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA},
+  {"ecdhe_ecdsa_aes_256_sha",    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA},
+  {"ecdh_rsa_null_sha",          TLS_ECDH_RSA_WITH_NULL_SHA},
+  {"ecdh_rsa_128_sha",           TLS_ECDH_RSA_WITH_RC4_128_SHA},
+  {"ecdh_rsa_3des_sha",          TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"ecdh_rsa_aes_128_sha",       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA},
+  {"ecdh_rsa_aes_256_sha",       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA},
+  {"echde_rsa_null",             TLS_ECDHE_RSA_WITH_NULL_SHA},
+  {"ecdhe_rsa_rc4_128_sha",      TLS_ECDHE_RSA_WITH_RC4_128_SHA},
+  {"ecdhe_rsa_3des_sha",         TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA},
+  {"ecdhe_rsa_aes_128_sha",      TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA},
+  {"ecdhe_rsa_aes_256_sha",      TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA},
+  {"ecdh_anon_null_sha",         TLS_ECDH_anon_WITH_NULL_SHA},
+  {"ecdh_anon_rc4_128sha",       TLS_ECDH_anon_WITH_RC4_128_SHA},
+  {"ecdh_anon_3des_sha",         TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA},
+  {"ecdh_anon_aes_128_sha",      TLS_ECDH_anon_WITH_AES_128_CBC_SHA},
+  {"ecdh_anon_aes_256_sha",      TLS_ECDH_anon_WITH_AES_256_CBC_SHA},
 #endif
 };
 
@@ -248,7 +245,7 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   for(i=0; i<NUM_OF_CIPHERS; i++) {
     rv = SSL_CipherPrefSet(model, cipherlist[i].num, cipher_state[i]);
     if(rv != SECSuccess) {
-      failf(data, "Unknown cipher in cipher list");
+      failf(data, "cipher-suite not supported by NSS: %s", cipherlist[i].name);
       return SECFailure;
     }
   }
@@ -1084,7 +1081,7 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
-/* return true if NSS can provide error code (and possibly msg) for the error */
+/* true if NSS can provide error code (and possibly a message) for the error */
 static bool is_nss_error(CURLcode err)
 {
   switch(err) {
