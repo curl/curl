@@ -1084,17 +1084,31 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
+/* return true if NSS can provide error code (and possibly msg) for the error */
+static bool is_nss_error(CURLcode err)
+{
+  switch(err) {
+  case CURLE_PEER_FAILED_VERIFICATION:
+  case CURLE_SSL_CACERT:
+  case CURLE_SSL_CACERT_BADFILE:
+  case CURLE_SSL_CERTPROBLEM:
+  case CURLE_SSL_CONNECT_ERROR:
+  case CURLE_SSL_CRL_BADFILE:
+  case CURLE_SSL_ISSUER_ERROR:
+    return true;
+
+  default:
+    return false;
+  }
+}
+
 /* return true if the given error code is related to a client certificate */
 static bool is_cc_error(PRInt32 err)
 {
   switch(err) {
   case SSL_ERROR_BAD_CERT_ALERT:
-    return true;
-
-  case SSL_ERROR_REVOKED_CERT_ALERT:
-    return true;
-
   case SSL_ERROR_EXPIRED_CERT_ALERT:
+  case SSL_ERROR_REVOKED_CERT_ALERT:
     return true;
 
   default:
@@ -1388,6 +1402,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   time_left = Curl_timeleft(data, NULL, TRUE);
   if(time_left < 0L) {
     failf(data, "timed out before SSL handshake");
+    curlerr = CURLE_OPERATION_TIMEDOUT;
     goto error;
   }
   timeout = PR_MillisecondsToInterval((PRUint32) time_left);
@@ -1432,15 +1447,18 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   /* reset the flag to avoid an infinite loop */
   data->state.ssl_connect_retry = FALSE;
 
-  err = PR_GetError();
-  if(is_cc_error(err))
-    curlerr = CURLE_SSL_CERTPROBLEM;
+  if(is_nss_error(curlerr)) {
+    /* read NSPR error code */
+    err = PR_GetError();
+    if(is_cc_error(err))
+      curlerr = CURLE_SSL_CERTPROBLEM;
 
-  /* print the error number and error string */
-  infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
+    /* print the error number and error string */
+    infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
 
-  /* print a human-readable message describing the error if available */
-  nss_print_error_message(data, err);
+    /* print a human-readable message describing the error if available */
+    nss_print_error_message(data, err);
+  }
 
   if(model)
     PR_Close(model);

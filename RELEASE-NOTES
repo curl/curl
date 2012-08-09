@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o curl man page cleanup
  o Avoid leak of local device string when reusing connection
  o Curl_socket_check: fix return code for timeout [11]
+ o nss: do not print misleading NSS error codes
 
 This release includes the following known bugs:
 
