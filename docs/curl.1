@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl 1 "16 February 2012" "Curl 7.25.0" "Curl Manual"
+.TH curl 1 "27 July 2012" "Curl 7.27.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -142,8 +142,7 @@ done CGIs fail if this field isn't set to "Mozilla/4.0". To encode blanks in
 the string, surround the string with single quote marks. This can also be set
 with the \fI-H, --header\fP option of course.
 
-If this option is set more than once, the last one will be the one that's
-used.
+If this option is used several times, the last one will be used.
 .IP "--anyauth"
 (HTTP) Tells curl to figure out authentication method by itself, and use the
 most secure one the remote site claims to support. This is done by first
@@ -175,8 +174,7 @@ input. No cookies will be stored in the file. To store cookies, use the
 \fI-c, --cookie-jar\fP option or you could even save the HTTP headers to a file
 using \fI-D, --dump-header\fP!
 
-If this option is set more than once, the last one will be the one that's
-used.
+If this option is used several times, the last one will be used.
 .IP "-B, --use-ascii"
 (FTP/LDAP) Enable ASCII transfer. For FTP, this can also be
 enforced by using an URL that ends with ";type=A". This option causes data
@@ -224,7 +222,7 @@ NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of
 NSS ciphers is in the NSSCipherSuite entry at this URL:
 \fIhttp://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
 
-If this option is used several times, the last one will override the others.
+If this option is used several times, the last one will be used.
 .IP "--compressed"
 (HTTP) Request a compressed response using one of the algorithms libcurl
 supports, and save the uncompressed document.  If this option is used and the
@@ -494,7 +492,7 @@ This option can be used multiple times.
 has been provided, this data is sent off using the ACCT command. (Added in
 7.13.0)
 
-If this option is used twice, the second will override the previous use.
+If this option is used several times, the last one will be used.
 .IP "--ftp-alternative-to-user <command>"
 (FTP) If authenticating with the USER and PASS commands fails, send this
 command.  When connecting to Tumbleweed's Secure Transport server over FTPS
@@ -707,7 +705,7 @@ currently effective on operating systems offering the TCP_KEEPIDLE and
 TCP_KEEPINTVL socket options (meaning Linux, recent AIX, HP-UX and more). This
 option has no effect if \fI--no-keepalive\fP is used. (Added in 7.18.0)
 
-If this option is used multiple times, the last occurrence sets the amount. If
+If this option is used several times, the last one will be used. If
 unspecified, the option defaults to 60 seconds.
 .IP "--key <key>"
 (SSL/SSH) Private key file name. Allows you to provide your private key in this
@@ -1242,7 +1240,7 @@ using \fI--retry-delay\fP you disable this exponential backoff algorithm. See
 also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Added in 7.12.3)
 
-If this option is used multiple times, the last occurrence determines the amount.
+If this option is used several times, the last one will be used.
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
@@ -1250,7 +1248,7 @@ between retries). This option is only interesting if \fI--retry\fP is also
 used. Setting this delay to zero will make curl use the default backoff time.
 (Added in 7.12.3)
 
-If this option is used multiple times, the last occurrence determines the amount.
+If this option is used several times, the last one will be used.
 .IP "--retry-max-time <seconds>"
 The retry timer is reset before the first transfer attempt. Retries will be
 done as usual (see \fI--retry\fP) as long as the timer hasn't reached this
@@ -1259,8 +1257,7 @@ will be made and while performing, it may take longer than this given time
 period. To limit a single request\'s maximum time, use \fI-m, --max-time\fP.
 Set this option to zero to not timeout retries. (Added in 7.12.3)
 
-If this option is used multiple times, the last occurrence determines the
-amount.
+If this option is used several times, the last one will be used.
 .IP "-s, --silent"
 Silent or quiet mode. Don't show progress meter or error messages.  Makes
 Curl mute.
