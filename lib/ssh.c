@@ -939,6 +939,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_AUTH_AGENT_LIST:
+#ifdef HAVE_LIBSSH2_AGENT_API
       rc = libssh2_agent_list_identities(sshc->ssh_agent);
 
       if(rc == LIBSSH2_ERROR_EAGAIN)
@@ -951,9 +952,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         state(conn, SSH_AUTH_AGENT);
         sshc->sshagent_prev_identity = NULL;
       }
+#endif
       break;
 
     case SSH_AUTH_AGENT:
+#ifdef HAVE_LIBSSH2_AGENT_API
       /* as prev_identity evolves only after an identity user auth finished we
          can safely request it again as long as EAGAIN is returned here or by
          libssh2_agent_userauth */
@@ -988,6 +991,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else
         state(conn, SSH_AUTH_KEY_INIT);
+#endif
       break;
 
     case SSH_AUTH_KEY_INIT:
