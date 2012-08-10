@@ -1081,7 +1081,8 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
-/* true if NSS can provide error code (and possibly a message) for the error */
+/* return true if NSS can provide error code (and possibly msg) for the
+   error */
 static bool is_nss_error(CURLcode err)
 {
   switch(err) {
