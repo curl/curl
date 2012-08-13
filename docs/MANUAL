@@ -19,7 +19,7 @@ SIMPLE USAGE
 
         curl http://www.weirdserver.com:8000/
 
-  Get a list of a directory of an FTP site:
+  Get a directory listing of an FTP site:
 
         curl ftp://cool.haxx.se/
 
@@ -54,7 +54,7 @@ SIMPLE USAGE
 
 DOWNLOAD TO A FILE
 
-  Get a web page and store in a local file:
+  Get a web page and store in a local file with a specific name:
 
         curl -o thatpage.html http://www.netscape.com/
 
@@ -133,7 +133,7 @@ PROXY
 
         curl -x my-proxy:888 ftp://ftp.leachsite.com/README
 
- Get a file from a HTTP server that requires user and password, using the
+ Get a file from an HTTP server that requires user and password, using the
  same proxy as above:
 
         curl -u user:passwd -x my-proxy:888 http://www.get.this/
@@ -171,7 +171,7 @@ PROXY
 
 RANGES
 
-  With HTTP 1.1 byte-ranges were introduced. Using this, a client can request
+  HTTP 1.1 introduced byte-ranges. Using this, a client can request
   to get only one or more subparts of a specified document. Curl supports
   this with the -r flag.
 
@@ -202,8 +202,8 @@ UPLOADING
 
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/myfile
 
-  Upload a local file to the remote site, and use the local file name remote
-  too:
+  Upload a local file to the remote site, and use the local file name at the remote
+  site too:
 
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/
 
@@ -219,14 +219,14 @@ UPLOADING
 
  HTTP
 
-  Upload all data on stdin to a specified http site:
+  Upload all data on stdin to a specified HTTP site:
 
         curl -T - http://www.upload.com/myfile
 
-  Note that the http server must have been configured to accept PUT before
+  Note that the HTTP server must have been configured to accept PUT before
   this can be done successfully.
 
-  For other ways to do http data upload, see the POST section below.
+  For other ways to do HTTP data upload, see the POST section below.
 
 VERBOSE / DEBUG
 
@@ -289,7 +289,7 @@ POST (HTTP)
   The 'variable' names are the names set with "name=" in the <input> tags, and
   the data is the contents you want to fill in for the inputs. The data *must*
   be properly URL encoded. That means you replace space with + and that you
-  write weird letters with %XX where XX is the hexadecimal representation of
+  replace weird letters with %XX where XX is the hexadecimal representation of
   the letter's ASCII code.
 
   Example:
@@ -361,8 +361,8 @@ POST (HTTP)
 
 REFERRER
 
-  A HTTP request has the option to include information about which address
-  that referred to actual page.  Curl allows you to specify the
+  An HTTP request has the option to include information about which address
+  referred it to the actual page.  Curl allows you to specify the
   referrer to be used on the command line. It is especially useful to
   fool or trick stupid servers or CGI scripts that rely on that information
   being available or contain certain data.
@@ -373,7 +373,7 @@ REFERRER
 
 USER AGENT
 
-  A HTTP request has the option to include information about the browser
+  An HTTP request has the option to include information about the browser
   that generated the request. Curl allows it to be specified on the command
   line. It is especially useful to fool or trick stupid servers or CGI
   scripts that only accept certain browsers.
@@ -618,16 +618,16 @@ FTP and firewalls
 
   The default way for curl is to issue the PASV command which causes the
   server to open another port and await another connection performed by the
-  client. This is good if the client is behind a firewall that don't allow
+  client. This is good if the client is behind a firewall that doesn't allow
   incoming connections.
 
         curl ftp.download.com
 
-  If the server for example, is behind a firewall that don't allow connections
-  on other ports than 21 (or if it just doesn't support the PASV command), the
+  If the server, for example, is behind a firewall that doesn't allow connections
+  on ports other than 21 (or if it just doesn't support the PASV command), the
   other way to do it is to use the PORT command and instruct the server to
-  connect to the client on the given (as parameters to the PORT command) IP
-  number and port.
+  connect to the client on the given IP number and port (as parameters to the
+  PORT command).
 
   The -P flag to curl supports a few different options. Your machine may have
   several IP-addresses and/or network interfaces and curl allows you to select
@@ -685,8 +685,8 @@ HTTPS
   If you neglect to specify the password on the command line, you will be
   prompted for the correct password before any data can be received.
 
-  Many older SSL-servers have problems with SSLv3 or TLS, that newer versions
-  of OpenSSL etc is using, therefore it is sometimes useful to specify what
+  Many older SSL-servers have problems with SSLv3 or TLS, which newer versions
+  of OpenSSL etc use, therefore it is sometimes useful to specify what
   SSL-version curl should use. Use -3, -2 or -1 to specify that exact SSL
   version to use (for SSLv3, SSLv2 or TLSv1 respectively):
 
@@ -695,14 +695,13 @@ HTTPS
   Otherwise, curl will first attempt to use v3 and then v2.
 
   To use OpenSSL to convert your favourite browser's certificate into a PEM
-  formatted one that curl can use, do something like this (assuming netscape,
-  but IE is likely to work similarly):
+  formatted one that curl can use, do something like this:
 
-    You start with hitting the 'security' menu button in netscape.
+    In Netscape, you start with hitting the 'Security' menu button.
 
     Select 'certificates->yours' and then pick a certificate in the list
 
-    Press the 'export' button
+    Press the 'Export' button
 
     enter your PIN code for the certs
 
@@ -713,11 +712,21 @@ HTTPS
 
      # ./apps/openssl pkcs12 -in [file you saved] -clcerts -out [PEMfile]
 
+    In Firefox, select Options, then Advanced, then the Encryption tab,
+    View Certificates. This opens the Certificate Manager, where you can
+    Export. Be sure to select PEM for the Save as type.
+
+    In Internet Explorer, select Internet Options, then the Content tab, then
+    Certificates. Then you can Export, and depending on the format you may
+    need to convert to PEM.
+
+    In Chrome, select Settings, then Show Advanced Settings. Under HTTPS/SSL
+    select Manage Certificates.
 
 RESUMING FILE TRANSFERS
 
  To continue a file transfer where it was previously aborted, curl supports
- resume on http(s) downloads as well as ftp uploads and downloads.
+ resume on HTTP(S) downloads as well as FTP uploads and downloads.
 
  Continue downloading a document:
 
@@ -731,7 +740,7 @@ RESUMING FILE TRANSFERS
 
         curl -C - -o file http://www.server.com/
 
- (*1) = This requires that the ftp server supports the non-standard command
+ (*1) = This requires that the FTP server supports the non-standard command
         SIZE. If it doesn't, curl will say so.
 
  (*2) = This requires that the web server supports at least HTTP/1.1. If it
@@ -740,7 +749,7 @@ RESUMING FILE TRANSFERS
 TIME CONDITIONS
 
  HTTP allows a client to specify a time condition for the document it
- requests. It is If-Modified-Since or If-Unmodified-Since. Curl allow you to
+ requests. It is If-Modified-Since or If-Unmodified-Since. Curl allows you to
  specify them with the -z/--time-cond flag.
 
  For example, you can easily make a download that only gets performed if the
@@ -788,7 +797,7 @@ LDAP
   and offer ldap:// support.
 
   LDAP is a complex thing and writing an LDAP query is not an easy task. I do
-  advice you to dig up the syntax description for that elsewhere. Two places
+  advise you to dig up the syntax description for that elsewhere. Two places
   that might suit you are:
 
   Netscape's "Netscape Directory SDK 3.0 for C Programmer's Guide Chapter 10:
@@ -797,7 +806,7 @@ LDAP
 
   RFC 2255, "The LDAP URL Format" http://curl.haxx.se/rfc/rfc2255.txt
 
-  To show you an example, this is now I can get all people from my local LDAP
+  To show you an example, this is how I can get all people from my local LDAP
   server that has a certain sub-domain in their email address:
 
         curl -B "ldap://ldap.frontec.se/o=frontec??sub?mail=*sth.frontec.se"
@@ -831,15 +840,15 @@ ENVIRONMENT VARIABLES
 NETRC
 
   Unix introduced the .netrc concept a long time ago. It is a way for a user
-  to specify name and password for commonly visited ftp sites in a file so
+  to specify name and password for commonly visited FTP sites in a file so
   that you don't have to type them in each time you visit those sites. You
   realize this is a big security risk if someone else gets hold of your
   passwords, so therefore most unix programs won't read this file unless it is
   only readable by yourself (curl doesn't care though).
 
-  Curl supports .netrc files if told so (using the -n/--netrc and
-  --netrc-optional options). This is not restricted to only ftp,
-  but curl can use it for all protocols where authentication is used.
+  Curl supports .netrc files if told to (using the -n/--netrc and
+  --netrc-optional options). This is not restricted to just FTP,
+  so curl can use it for all protocols where authentication is used.
 
   A very simple .netrc file could look something like:
 
@@ -860,7 +869,7 @@ KERBEROS FTP TRANSFER
 
   Curl supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need
   the kerberos package installed and used at curl build time for it to be
-  used.
+  available.
 
   First, get the krb-ticket the normal way, like with the kinit/kauth tool.
   Then use curl in way similar to:
@@ -895,7 +904,7 @@ TELNET
 
    - NEW_ENV=<var,val> Sets an environment variable.
 
-  NOTE: the telnet protocol does not specify any way to login with a specified
+  NOTE: The telnet protocol does not specify any way to login with a specified
   user and password so curl can't do that automatically. To do that, you need
   to track when the login prompt is received and send the username and
   password accordingly.
@@ -914,7 +923,7 @@ PERSISTENT CONNECTIONS
   Note that curl cannot use persistent connections for transfers that are used
   in subsequence curl invokes. Try to stuff as many URLs as possible on the
   same command line if they are using the same host, as that'll make the
-  transfers faster. If you use a http proxy for file transfers, practically
+  transfers faster. If you use an HTTP proxy for file transfers, practically
   all transfers will be persistent.
 
 MULTIPLE TRANSFERS WITH A SINGLE COMMAND LINE
@@ -955,6 +964,28 @@ IPv6
   IPv6 addresses provided other than in URLs (e.g. to the --proxy, --interface
   or --ftp-port options) should not be URL encoded.
 
+METALINK
+
+  Curl supports Metalink (both version 3 and 4 (RFC 5854) are supported), a way
+  to list multiple URIs and hashes for a file. Curl will make use of the mirrors
+  listed within for failover if there are errors (such as the file or server not
+  being available). It will also verify the hash of the file after the download
+  completes. The Metalink file itself is downloaded and processed in memory and
+  not stored in the local file system.
+
+  Example to use a remote Metalink file:
+
+    curl --metalink http://www.example.com/example.metalink
+
+  To use a Metalink file in the local file system, use FILE protocol (file://):
+
+    curl --metalink file://example.metalink
+
+  Please note that if FILE protocol is disabled, there is no way to use a local
+  Metalink file at the time of this writing. Also note that if --metalink and
+  --include are used together, --include will be ignored. This is because including
+  headers in the response will break Metalink parser and if the headers are included
+  in the file described in Metalink file, hash check will fail.
 
 MAILING LISTS
 
