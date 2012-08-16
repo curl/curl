@@ -6,8 +6,6 @@ To be addressed in 7.28
 312 - custom Content-Length appears in CONNECT, solve it by offering a separate
       option to provide headers for the CONNECT request
 
-314 - CURL_SOCKOPTFUNCTION for accept()ed connection, see Gokhan Sengun's patch
-
 315 - multiple receivers with SMTP and one fails
 
 317 - CURLINFO_SSL_TRUST to return SSL-specific data for a darwinssl build

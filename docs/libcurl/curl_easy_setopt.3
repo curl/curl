@@ -274,14 +274,18 @@ Pass a pointer to a function that matches the following prototype: \fBint
 function(void *clientp, curl_socket_t curlfd, curlsocktype purpose);\fP. This
 function gets called by libcurl after the socket() call but before the
 connect() call. The callback's \fIpurpose\fP argument identifies the exact
-purpose for this particular socket, and currently only one value is supported:
-\fICURLSOCKTYPE_IPCXN\fP for the primary connection (meaning the control
-connection in the FTP case). Future versions of libcurl may support more
-purposes. It passes the newly created socket descriptor so additional
-setsockopt() calls can be done at the user's discretion.  Return 0 (zero) from
-the callback on success. Return 1 from the callback function to signal an
-unrecoverable error to the library and it will close the socket and return
-\fICURLE_COULDNT_CONNECT\fP.  (Option added in 7.16.0)
+purpose for this particular socket:
+
+\fICURLSOCKTYPE_IPCXN\fP for actively created connections or since 7.28.0
+\fICURLSOCKTYPE_ACCEPT\fP for FTP when the connection was setup with PORT/EPSV
+(in earlier versions these sockets weren't passed to this callback).
+
+Future versions of libcurl may support more purposes. It passes the newly
+created socket descriptor so additional setsockopt() calls can be done at the
+user's discretion.  Return 0 (zero) from the callback on success. Return 1
+from the callback function to signal an unrecoverable error to the library and
+it will close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option
+added in 7.16.0)
 
 Added in 7.21.5, the callback function may return
 \fICURL_SOCKOPT_ALREADY_CONNECTED\fP, which tells libcurl that the socket is
