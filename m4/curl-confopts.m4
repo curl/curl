@@ -169,39 +169,6 @@ AC_HELP_STRING([--disable-debug],[Disable debug build options]),
   AC_MSG_RESULT([$want_debug])
 ])
 
-
-dnl CURL_CHECK_OPTION_NONBLOCKING
-dnl -------------------------------------------------
-dnl Verify if configure has been invoked with option
-dnl --enable-nonblocking or --disable-nonblocking, and
-dnl set shell variable want_nonblocking as appropriate.
-
-AC_DEFUN([CURL_CHECK_OPTION_NONBLOCKING], [
-  AC_BEFORE([$0],[CURL_CHECK_NONBLOCKING_SOCKET])dnl
-  AC_MSG_CHECKING([whether to enable non-blocking communications])
-  OPT_NONBLOCKING="default"
-  AC_ARG_ENABLE(nonblocking,
-AC_HELP_STRING([--enable-nonblocking],[Enable non-blocking communications])
-AC_HELP_STRING([--disable-nonblocking],[Disable non-blocking communications]),
-  OPT_NONBLOCKING=$enableval)
-  case "$OPT_NONBLOCKING" in
-    no)
-      dnl --disable-nonblocking option used
-      want_nonblocking="no"
-      ;;
-    default)
-      dnl configure option not specified
-      want_nonblocking="yes"
-      ;;
-    *)
-      dnl --enable-nonblocking option used
-      want_nonblocking="yes"
-      ;;
-  esac
-  AC_MSG_RESULT([$want_nonblocking])
-])
-
-
 dnl CURL_CHECK_OPTION_OPTIMIZE
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
@@ -421,7 +388,6 @@ dnl -------------------------------------------------
 dnl Check for how to set a socket into non-blocking state.
 
 AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
-  AC_REQUIRE([CURL_CHECK_OPTION_NONBLOCKING])dnl
   AC_REQUIRE([CURL_CHECK_FUNC_FCNTL])dnl
   AC_REQUIRE([CURL_CHECK_FUNC_IOCTL])dnl
   AC_REQUIRE([CURL_CHECK_FUNC_IOCTLSOCKET])dnl
@@ -429,28 +395,22 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   AC_REQUIRE([CURL_CHECK_FUNC_SETSOCKOPT])dnl
   #
   tst_method="unknown"
-  if test "$want_nonblocking" = "yes"; then
-    AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-    if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
-      tst_method="fcntl O_NONBLOCK"
-    elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
-      tst_method="ioctl FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
-      tst_method="ioctlsocket FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
-      tst_method="IoctlSocket FIONBIO"
-    elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
-      tst_method="setsockopt SO_NONBLOCK"
-    fi
-    AC_MSG_RESULT([$tst_method])
-    if test "$tst_method" = "unknown"; then
-      AC_MSG_WARN([cannot determine non-blocking socket method.])
-    fi
+
+  AC_MSG_CHECKING([how to set a socket into non-blocking mode])
+  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+    tst_method="fcntl O_NONBLOCK"
+  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+    tst_method="ioctl FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+    tst_method="ioctlsocket FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+    tst_method="IoctlSocket FIONBIO"
+  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+    tst_method="setsockopt SO_NONBLOCK"
   fi
+  AC_MSG_RESULT([$tst_method])
   if test "$tst_method" = "unknown"; then
-    AC_DEFINE_UNQUOTED(USE_BLOCKING_SOCKETS, 1,
-      [Define to disable non-blocking sockets.])
-    AC_MSG_WARN([non-blocking sockets disabled.])
+    AC_MSG_WARN([cannot determine non-blocking socket method.])
   fi
 ])
 

@@ -3074,10 +3074,6 @@ if test "$ipv6" = "yes"; then
   CURL_CHECK_NI_WITHSCOPEID
 fi
 
-dnl ************************************************************
-dnl enable non-blocking communications
-dnl
-CURL_CHECK_OPTION_NONBLOCKING
 CURL_CHECK_NONBLOCKING_SOCKET
 
 dnl ************************************************************
