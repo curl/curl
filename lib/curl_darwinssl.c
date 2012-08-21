@@ -561,6 +561,28 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case TLS_EMPTY_RENEGOTIATION_INFO_SCSV:
       return "TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
       break;
+#else
+    case SSL_RSA_WITH_NULL_MD5:
+      return "TLS_RSA_WITH_NULL_MD5";
+      break;
+    case SSL_RSA_WITH_NULL_SHA:
+      return "TLS_RSA_WITH_NULL_SHA";
+      break;
+    case SSL_RSA_WITH_RC4_128_MD5:
+      return "TLS_RSA_WITH_RC4_128_MD5";
+      break;
+    case SSL_RSA_WITH_RC4_128_SHA:
+      return "TLS_RSA_WITH_RC4_128_SHA";
+      break;
+    case SSL_RSA_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_RSA_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case SSL_DH_anon_WITH_RC4_128_MD5:
+      return "TLS_DH_anon_WITH_RC4_128_MD5";
+      break;
+    case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA";
+      break;
 #endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
   }
   return "TLS_NULL_WITH_NULL_NULL";
@@ -592,7 +614,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#elif !defined(TARGET_OS_EMBEDDED)
+#elif TARGET_OS_EMBEDDED == 0
   if(connssl->ssl_ctx)
     (void)SSLDisposeContext(connssl->ssl_ctx);
   err = SSLNewContext(false, &(connssl->ssl_ctx));
@@ -627,7 +649,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if !defined(TARGET_OS_EMBEDDED)
+#if TARGET_OS_EMBEDDED == 0
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
@@ -668,7 +690,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
     }
-#endif  /* TARGET_OS_EMBEDDED */
+#endif  /* TARGET_OS_EMBEDDED == 0 */
   }
 #else
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
@@ -718,7 +740,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#elif !defined(TARGET_OS_EMBEDDED)
+#elif TARGET_OS_EMBEDDED == 0
   err = SSLSetEnableCertVerify(connssl->ssl_ctx,
                                data->set.ssl.verifypeer?true:false);
   if(err != noErr) {
@@ -888,7 +910,7 @@ darwinssl_connect_step3(struct connectdata *conn,
     }
   }
   else {
-#elif !defined(TARGET_OS_EMBEDDED)
+#elif TARGET_OS_EMBEDDED == 0
 #pragma unused(trust)
   err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
   if(err == noErr) {
@@ -1066,10 +1088,10 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 #if defined(__MAC_10_8) || defined(__IPHONE_5_0)
     if(SSLCreateContext != NULL)
       CFRelease(connssl->ssl_ctx);
-#if !defined(TARGET_OS_EMBEDDED)
+#if TARGET_OS_EMBEDDED == 0
     else
       (void)SSLDisposeContext(connssl->ssl_ctx);
-#endif  /* !defined(TARGET_OS_EMBEDDED */
+#endif  /* TARGET_OS_EMBEDDED == 0 */
 #else
     (void)SSLDisposeContext(connssl->ssl_ctx);
 #endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
