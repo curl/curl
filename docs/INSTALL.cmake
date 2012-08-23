@@ -18,6 +18,25 @@ Building with CMake
    CMake builds can be configured either from the command line, or from one
    of CMake's GUI's.
 
+Current flaws in the curl CMake build
+=====================================
+
+   Missing features in the cmake build:
+
+   - Builds libcurl without large file support
+   - It doesn't build src/hugehelp.c which creates the --manual output
+   - Can't select which SSL library to build with, only OpenSSL
+   - Doesn't build with SCP and SFTP support (libssh2)
+   - Doesn't allow different resolver backends (no c-ares build support)
+   - No RTMP support built
+   - Doesn't allow build curl and libcurl debug enabled
+   - Doesn't allow a custom CA bundle path
+   - Doesn't allow you to disable specific protocols from the build
+   - Doesn't properly enable IPv6 support by default
+   - Doesn't find or use krb4 or GSS
+   - Rebuilds test files too eagerly, but still can't run the tests
+
+
 Important notice
 ==================
    If you got your curl sources from a distribution tarball, make sure to
@@ -31,22 +50,28 @@ Important notice
 
 Command Line CMake
 ==================
-   A command line build of Curl is similar to the autotools build of Curl. It
+   A CMake build of curl is similar to the autotools build of curl. It
    consists of the following steps after you have unpacked the source.
-       # 1st create an out of source build tree parallel to the curl source
-       # tree and change into that directory
-       mkdir curl-build
-       cd curl-build
-       # now run CMake from the build tree, giving it the path to the top of
-       # the Curl source tree.  CMake will pick a compiler for you. If you
-       # want to specify the compile, you can set the CC environment
-       # variable prior to running CMake.
-       cmake ../curl
-       make
-       # currently make test is not implemented
-       #make test
-       # Install to default location:
-       make install
+
+    1. Create an out of source build tree parallel to the curl source
+       tree and change into that directory
+
+    $ mkdir curl-build
+    $ cd curl-build
+
+    2. Run CMake from the build tree, giving it the path to the top of
+       the curl source tree.  CMake will pick a compiler for you. If you
+       want to specify the compile, you can set the CC environment
+       variable prior to running CMake.
+
+    $ cmake ../curl
+    $ make
+
+    3. Install to default location:
+
+    $ make install
+
+    (The teste suit does not work with the cmake build)
 
 ccmake
 =========
