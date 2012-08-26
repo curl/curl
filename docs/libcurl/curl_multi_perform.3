@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,21 +28,24 @@ curl_multi_perform - reads/writes available data from each easy handle
 CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles);
 .ad
 .SH DESCRIPTION
-When the app thinks there's data available for the multi_handle, it should
-call this function to read/write whatever there is to read or write right
-now. curl_multi_perform() returns as soon as the reads/writes are done. This
+This function handles transfers on all the added handles that need attention
+in an non-blocking fashion.
+
+When an application has found out there's data available for the multi_handle
+or a timeout has elapsed, the application should call this function to
+read/write whatever there is to read or write right now etc.
+curl_multi_perform() returns as soon as the reads/writes are done. This
 function does not require that there actually is any data available for
 reading or that data can be written, it can be called just in case. It will
 write the number of handles that still transfer data in the second argument's
 integer-pointer.
 
-When you call curl_multi_perform() and the amount of \fIrunning_handles\fP is
-changed from the previous call (or is less than the amount of easy handles
-you've added to the multi handle), you know that there is one or more
-transfers less "running". You can then call \fIcurl_multi_info_read(3)\fP to
-get information about each individual completed transfer, and that returned
-info includes CURLcode and more. If an added handle fails very quickly, it may
-never be counted as a running_handle.
+If the amount of \fIrunning_handles\fP is changed from the previous call (or
+is less than the amount of easy handles you've added to the multi handle), you
+know that there is one or more transfers less "running". You can then call
+\fIcurl_multi_info_read(3)\fP to get information about each individual
+completed transfer, and that returned info includes CURLcode and more. If an
+added handle fails very quickly, it may never be counted as a running_handle.
 
 When \fIrunning_handles\fP is set to zero (0) on the return of this function,
 there is no longer any transfers in progress.
@@ -61,12 +64,14 @@ need to wait for \&"action" and then call this function again.
 
 This function only returns errors etc regarding the whole multi stack.
 Problems still might have occurred on individual transfers even when this
-function returns \fICURLM_OK\fP.
+function returns \fICURLM_OK\fP. Use \fIcurl_multi_info_read(3)\fP to figure
+out how individual transfers did.
 .SH "TYPICAL USAGE"
 Most applications will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
-file descriptors, then it'll wait for action on them using \fBselect(3)\fP and
-as soon as one or more of them are ready, \fIcurl_multi_perform(3)\fP gets
-called.
+file descriptors, and \fIcurl_multi_timeout(3)\fP to get a suitable timeout
+period, then it'll wait for action on the file descriptors using
+\fBselect(3)\fP. As soon as one or more file descriptor is ready,
+\fIcurl_multi_perform(3)\fP gets called.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
