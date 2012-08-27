@@ -34,6 +34,7 @@ resolve
 rtsp
 sendrecv
 sepheaders
+sftpget
 simple
 simplepost
 simplesmtp
