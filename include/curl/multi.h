@@ -133,6 +133,19 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
 
+/*
+ * Name:     curl_multi_wait()
+ *
+ * Desc:     Poll on all fds within a CURLM set as well as any
+ *           additional fds passed to the function.
+ *
+ * Returns:  CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+                                      struct curl_waitfd extra_fds[],
+                                      unsigned int extra_nfds,
+                                      int timeout_ms);
+
  /*
   * Name:    curl_multi_perform()
   *
