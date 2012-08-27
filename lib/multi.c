@@ -941,6 +941,38 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_fdvec(CURLM *multi_handle,
+                           int *read_fds,
+                           int *write_fds, 
+                           int *ex_fds)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  int rfds = 0, wfds = 0, xfds = 0;
+  (void)ex_fds; /* not used */
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  for(easy = multi->easy.next;
+      easy != &multi->easy;
+      easy = easy->next) {
+    curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
+    int i, bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      if (read_fds && (bitmap & GETSOCK_READSOCK(i))) {
+        read_fds[rfds++] = sockbunch[i];
+      }
+      if (write_fds && (bitmap & GETSOCK_WRITESOCK(i))) {
+        write_fds[wfds++] = sockbunch[i];
+      }
+    }
+  }
+
+  return CURLM_OK;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct Curl_one_easy *easy)
@@ -2265,6 +2297,71 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     res = CURLM_UNKNOWN_OPTION;
     break;
   }
+  va_end(param);
+  return res;
+}
+
+static unsigned long curl_multi_count_fds(struct Curl_multi *multi,
+                     char readH, char writeH, char exH)
+{
+  struct Curl_one_easy *easy;
+  int nfds = 0;
+  (void)exH; /* not used */
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  for(easy = multi->easy.next;
+      easy != &multi->easy;
+      easy = easy->next) {
+    curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
+    int i, bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      if ((readH  && (bitmap & GETSOCK_READSOCK(i))) ||
+          (writeH && (bitmap & GETSOCK_WRITESOCK(i)))) {
+        nfds++;
+      }
+    }
+  }
+
+  return nfds;
+}
+
+#undef curl_multi_getinfo
+CURLMcode curl_multi_getinfo(CURLM *multi_handle,
+                             CURLMINFO info, ...)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  CURLMcode res = CURLM_OK;
+  va_list param;
+  void *voidp;
+  long *longp;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  va_start(param, info);
+  voidp = va_arg(param, void *);
+  longp = (long*)voidp;
+
+  switch(info) {
+  case CURLMINFO_NUM_READ_FDS:
+    *longp = curl_multi_count_fds(multi, 1, 0, 0);
+    break;
+  case CURLMINFO_NUM_WRITE_FDS:
+    *longp = curl_multi_count_fds(multi, 0, 1, 0);
+    break;
+  case CURLMINFO_NUM_EX_FDS:
+    *longp = curl_multi_count_fds(multi, 0, 0, 1);
+    break;
+  case CURLMINFO_NUM_FDS:
+    *longp = curl_multi_count_fds(multi, 1, 1, 1);
+    break;
+  default:
+    res = CURLM_UNKNOWN_OPTION;
+  }
+
   va_end(param);
   return res;
 }

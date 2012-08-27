@@ -67,6 +67,21 @@ typedef enum {
   CURLM_LAST
 } CURLMcode;
 
+#define CURLMINFO_STRING   CURLINFO_STRING
+#define CURLMINFO_LONG     CURLINFO_LONG
+#define CURLMINFO_DOUBLE   CURLINFO_DOUBLE
+#define CURLMINFO_SLIST    CURLINFO_SLIST
+#define CURLMINFO_MASK     CURLINFO_MASK
+#define CURLMINFO_TYPEMASK CURLINFO_TYPEMASK
+
+typedef enum {
+  CURLMINFO_NONE,
+  CURLMINFO_NUM_READ_FDS    = CURLMINFO_LONG + 1,
+  CURLMINFO_NUM_WRITE_FDS   = CURLMINFO_LONG + 2,
+  CURLMINFO_NUM_EX_FDS      = CURLMINFO_LONG + 3,
+  CURLMINFO_NUM_FDS         = CURLMINFO_LONG + 4
+} CURLMINFO;
+
 /* just to make code nicer when using curl_multi_socket() you can now check
    for CURLM_CALL_MULTI_SOCKET too in the same style it works for
    curl_multi_perform() and CURLM_CALL_MULTI_PERFORM */
@@ -132,6 +147,18 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *write_fd_set,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
+
+/*
+ * Name:     curl_multi_fdvec()
+ *
+ * Desc:     Retreive a vector of fds contained in the multi handle
+ *
+ * Returns:  CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_fdvec(CURLM *multi_handle,
+                                       int *read_fds,
+                                       int *write_fds,
+                                       int *ex_fds);
 
  /*
   * Name:    curl_multi_perform()
@@ -325,6 +352,15 @@ typedef enum {
 CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
                                         CURLMoption option, ...);
 
+/*
+ * Name:    curl_multi_getinfo()
+ *
+ * Desc:    Retreives info from a multi handle.
+ *
+ * Returns: CURLM error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_getinfo(CURLM *multi_handle,
+                                         CURLMINFO info, ...);
 
 /*
  * Name:    curl_multi_assign()
