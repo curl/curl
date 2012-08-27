@@ -28,7 +28,7 @@
 #undef DISABLE_SSH_AGENT
 
 /*
- * This is an example showing how to get a single file from an SSH FTP server.
+ * This is an example showing how to get a single file from an SFTP server.
  * It delays the actual destination file creation until the first write
  * callback so that it won't create an empty file in case the remote file
  * doesn't exist or something else fails.
