@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,8 +41,7 @@ You create a shared object with \fIcurl_share_init(3)\fP. It returns a handle
 for a newly created one.
 
 You tell the shared object what data you want it to share by using
-\fIcurl_share_setopt(3)\fP. Currently you can only share DNS and/or COOKIE
-data.
+\fIcurl_share_setopt(3)\fP.
 
 Since you can use this share from multiple threads, and libcurl has no
 internal thread synchronization, you must provide mutex callbacks if you're
