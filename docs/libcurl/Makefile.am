@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3	 \
  curl_easy_unescape.3 curl_multi_setopt.3 curl_multi_socket.3		 \
  curl_multi_timeout.3 curl_formget.3 curl_multi_assign.3		 \
  curl_easy_pause.3 curl_easy_recv.3 curl_easy_send.3			 \
- curl_multi_socket_action.3
+ curl_multi_socket_action.3 curl_multi_wait.3
 
 HTMLPAGES = curl_easy_cleanup.html curl_easy_getinfo.html		\
  curl_easy_init.html curl_easy_perform.html curl_easy_setopt.html	\
@@ -58,7 +58,7 @@ HTMLPAGES = curl_easy_cleanup.html curl_easy_getinfo.html		\
  curl_easy_unescape.html curl_multi_setopt.html curl_multi_socket.html	\
  curl_multi_timeout.html curl_formget.html curl_multi_assign.html	\
  curl_easy_pause.html curl_easy_recv.html curl_easy_send.html		\
- curl_multi_socket_action.html
+ curl_multi_socket_action.html curl_multi_wait.html
 
 PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			 \
  curl_easy_init.pdf curl_easy_perform.pdf curl_easy_setopt.pdf		 \
@@ -77,7 +77,7 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			 \
  curl_easy_escape.pdf curl_easy_unescape.pdf curl_multi_setopt.pdf	 \
  curl_multi_socket.pdf curl_multi_timeout.pdf curl_formget.pdf		 \
  curl_multi_assign.pdf curl_easy_pause.pdf curl_easy_recv.pdf		 \
- curl_easy_send.pdf curl_multi_socket_action.pdf
+ curl_easy_send.pdf curl_multi_socket_action.pdf curl_multi_wait.pdf
 
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
