@@ -1223,9 +1223,9 @@ typedef enum {
   CINIT(NETRC_FILE, OBJECTPOINT, 118),
 
   /* Enable SSL/TLS for FTP, pick one of:
-     CURLFTPSSL_TRY     - try using SSL, proceed anyway otherwise
-     CURLFTPSSL_CONTROL - SSL for the control connection or fail
-     CURLFTPSSL_ALL     - SSL for all communication or fail
+     CURLUSESSL_TRY     - try using SSL, proceed anyway otherwise
+     CURLUSESSL_CONTROL - SSL for the control connection or fail
+     CURLUSESSL_ALL     - SSL for all communication or fail
   */
   CINIT(USE_SSL, LONG, 119),
 
