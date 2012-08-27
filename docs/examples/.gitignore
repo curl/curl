@@ -11,6 +11,7 @@ ftp-wildcard
 ftpget
 ftpgetinfo
 ftpgetresp
+ftpsget
 ftpupload
 getinfo
 getinmemory
