@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,6 +89,19 @@ struct CURLMsg {
 };
 typedef struct CURLMsg CURLMsg;
 
+/* Based on poll(2) structure and values.
+ * We don't use pollfd and POLL* constants explicitly
+ * to cover platforms without poll(). */
+#define CURL_WAIT_POLLIN    0x0001
+#define CURL_WAIT_POLLPRI   0x0002
+#define CURL_WAIT_POLLOUT   0x0004
+
+struct curl_waitfd {
+  curl_socket_t fd;
+  short events;
+  short revents; /* not supported yet */
+};
+
 /*
  * Name:    curl_multi_init()
  *
@@ -132,6 +145,19 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *write_fd_set,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
+
+/*
+ * Name:     curl_multi_wait()
+ *
+ * Desc:     Poll on all fds within a CURLM set as well as any
+ *           additional fds passed to the function.
+ *
+ * Returns:  CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+                                      struct curl_waitfd extra_fds[],
+                                      unsigned int extra_nfds,
+                                      int timeout_ms);
 
  /*
   * Name:    curl_multi_perform()
