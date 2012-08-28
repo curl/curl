@@ -2204,6 +2204,19 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
+/* Based on poll(2) structure and values.
+ * We don't use pollfd and POLL* constants explicitly
+ * to cover platforms without poll(). */
+#define CURL_WAIT_POLLIN    0x0001
+#define CURL_WAIT_POLLPRI   0x0002
+#define CURL_WAIT_POLLOUT   0x0004
+
+struct curl_waitfd {
+  int fd;
+  short events;
+  /* No use for revents(yet?) */
+};
+
 #ifdef  __cplusplus
 }
 #endif

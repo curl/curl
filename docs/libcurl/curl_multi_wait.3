@@ -1,0 +1,66 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_multi_wait 3 "12 Jul 2012" "libcurl 7.27.0" "libcurl Manual"
+.SH NAME
+curl_multi_select - polls on all easy handles in a multi handle
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLMcode curl_multi_wait(CURLM *multi_handle,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms);
+.ad
+.SH DESCRIPTION
+This function polls on all file descriptors used by the curl easy handles
+contained in the given multi handle set.  It will block until activity is
+detected on at least one of the handles or \fItimeout_ms\fP has passed.
+
+The calling application may pass additional curl_waitfd structures
+which are similar to \fIpoll(2)\fP's pollfd structure to be waited
+on in the same call.
+
+.SH curl_waitfd
+
+struct curl_waitfd {
+  int fd;
+  short events;
+};
+
+.IP CURL_WAIT_POLLIN
+Bit flag to curl_waitfd.events indicating the socket should poll on
+read events such as new data received.
+
+.IP CURL_WAIT_POLLPRI
+Bit flag to curl_waitfd.events indicating the socket should poll on
+high priority read events such as out of band data.
+
+.IP CURL_WAIT_POLLOUT
+Bit flag to curl_waitfd.events indicating the socket should poll on
+write events such as the socket being clear to write without blocking.
+
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code. See
+\fIlibcurl-errors(3)\fP
+.SH "SEE ALSO"
+.BR curl_multi_fdset "(3), " curl_multi_perform "(3)"
