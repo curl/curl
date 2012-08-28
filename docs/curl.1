@@ -1499,18 +1499,21 @@ space with \\t.
 The %-symbol is a special symbol in the win32-environment, where all
 occurrences of % must be doubled when using this option.
 
-The variables available at this point are:
+The variables available are:
 .RS
 .TP 15
-.B url_effective
-The URL that was fetched last. This is most meaningful if you've told curl
-to follow location: headers.
+.B content_type
+The Content-Type of the requested document, if there was any.
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the \fI--remote-name\fP or \fI--output\fP
 option. It's most useful in combination with the \fI--remote-header-name\fP
 option. (Added in 7.25.1)
+.TP
+.B ftp_entry_path
+The initial path curl ended up in when logging on to the remote FTP
+server. (Added in 7.15.4)
 .TP
 .B http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
@@ -1521,21 +1524,51 @@ same info.
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
 .TP
-.B time_total
-The total time, in seconds, that the full operation lasted. The time will be
-displayed with millisecond resolution.
+.B num_connects
+Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
-.B time_namelookup
-The time, in seconds, it took from the start until the name resolving was
-completed.
+.B num_redirects
+Number of redirects that were followed in the request. (Added in 7.12.3)
+.TP
+.B redirect_url
+When an HTTP request was made without -L to follow redirects, this variable
+will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
+.TP
+.B size_download
+The total amount of bytes that were downloaded.
+.TP
+.B size_header
+The total amount of bytes of the downloaded headers.
+.TP
+.B size_request
+The total amount of bytes that were sent in the HTTP request.
+.TP
+.B size_upload
+The total amount of bytes that were uploaded.
+.TP
+.B speed_download
+The average download speed that curl measured for the complete download. Bytes
+per second.
+.TP
+.B speed_upload
+The average upload speed that curl measured for the complete upload. Bytes per
+second.
+.TP
+.B ssl_verify_result
+The result of the SSL peer certificate verification that was requested. 0
+means the verification was successful. (Added in 7.19.0)
+.TP
+.B time_appconnect
+The time, in seconds, it took from the start until the SSL/SSH/etc
+connect/handshake to the remote host was completed. (Added in 7.19.0)
 .TP
 .B time_connect
 The time, in seconds, it took from the start until the TCP connect to the
 remote host (or proxy) was completed.
 .TP
-.B time_appconnect
-The time, in seconds, it took from the start until the SSL/SSH/etc
-connect/handshake to the remote host was completed. (Added in 7.19.0)
+.B time_namelookup
+The time, in seconds, it took from the start until the name resolving was
+completed.
 .TP
 .B time_pretransfer
 The time, in seconds, it took from the start until the file transfer was just
@@ -1553,46 +1586,13 @@ The time, in seconds, it took from the start until the first byte was just
 about to be transferred. This includes time_pretransfer and also the time the
 server needed to calculate the result.
 .TP
-.B size_download
-The total amount of bytes that were downloaded.
+.B time_total
+The total time, in seconds, that the full operation lasted. The time will be
+displayed with millisecond resolution.
 .TP
-.B size_upload
-The total amount of bytes that were uploaded.
-.TP
-.B size_header
-The total amount of bytes of the downloaded headers.
-.TP
-.B size_request
-The total amount of bytes that were sent in the HTTP request.
-.TP
-.B speed_download
-The average download speed that curl measured for the complete download. Bytes
-per second.
-.TP
-.B speed_upload
-The average upload speed that curl measured for the complete upload. Bytes per
-second.
-.TP
-.B content_type
-The Content-Type of the requested document, if there was any.
-.TP
-.B num_connects
-Number of new connects made in the recent transfer. (Added in 7.12.3)
-.TP
-.B num_redirects
-Number of redirects that were followed in the request. (Added in 7.12.3)
-.TP
-.B redirect_url
-When an HTTP request was made without -L to follow redirects, this variable
-will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
-.TP
-.B ftp_entry_path
-The initial path curl ended up in when logging on to the remote FTP
-server. (Added in 7.15.4)
-.TP
-.B ssl_verify_result
-The result of the SSL peer certificate verification that was requested. 0
-means the verification was successful. (Added in 7.19.0)
+.B url_effective
+The URL that was fetched last. This is most meaningful if you've told curl
+to follow location: headers.
 .RE
 
 If this option is used several times, the last one will be used.
