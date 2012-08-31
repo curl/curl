@@ -221,7 +221,7 @@ int test(char *url)
       /* if there's no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
          sense */
-      if(num_handles == 3) {
+      if(num_handles == MAX_EASY_HANDLES) {
         break;
       }
     }
