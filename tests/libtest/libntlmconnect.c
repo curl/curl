@@ -207,6 +207,9 @@ int test(char *url)
 
     /* At this point, timeout is guaranteed to be greater or equal than -1. */
 
+    fprintf(stderr, "%s:%d num_handles %d timeout %ld\n",
+            __FILE__, __LINE__, num_handles, timeout);
+
     if(timeout != -1L) {
       interval.tv_sec = timeout/1000;
       interval.tv_usec = (timeout%1000)*1000;
@@ -214,6 +217,13 @@ int test(char *url)
     else {
       interval.tv_sec = TEST_HANG_TIMEOUT/1000+1;
       interval.tv_usec = 0;
+
+      /* if there's no timeout and we get here on the last handle, we may
+         already have read the last part of the stream so waiting makes no
+         sense */
+      if(num_handles == 3) {
+        break;
+      }
     }
 
     select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);

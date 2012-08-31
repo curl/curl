@@ -134,13 +134,6 @@ may have been fixed since this was written!
 38. Kumar Swamy Bhatt's problem in ftp/ssl "LIST" operation:
   http://curl.haxx.se/mail/lib-2007-01/0103.html
 
-37. Having more than one connection to the same host when doing NTLM
-  authentication (with performs multiple "passes" and authenticates a
-  connection rather than a HTTP request), and particularly when using the
-  multi interface, there's a risk that libcurl will re-use a wrong connection
-  when doing the different passes in the NTLM negotiation and thus fail to
-  negotiate (in seemingly mysterious ways).
-
 35. Both SOCKS5 and SOCKS4 proxy connections are done blocking, which is very
   bad when used with the multi interface.
 
