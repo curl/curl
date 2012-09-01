@@ -1,4 +1,5 @@
 chkhostname
 lib5[0-9][0-9]
+lib1500
 libauthretry
 libntlmconnect

@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 all good!
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 12
+Connection: close
+
+Hello World
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+# tool is what to use instead of 'curl'
+<tool>
+lib1500
+</tool>
+
+ <name>
+curl_multi_wait
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1500
+</command>
+</client>
+</testcase>
