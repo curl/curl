@@ -699,4 +699,7 @@ CURL_VERSION_SPNEGO             7.10.8
 CURL_VERSION_SSL                7.10
 CURL_VERSION_SSPI               7.13.2
 CURL_VERSION_TLSAUTH_SRP        7.21.4
+CURL_WAIT_POLLIN                7.28.0
+CURL_WAIT_POLLOUT               7.28.0
+CURL_WAIT_POLLPRI               7.28.0
 CURL_WRITEFUNC_PAUSE            7.18.0
