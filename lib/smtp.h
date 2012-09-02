@@ -66,6 +66,8 @@ struct smtp_conn {
   struct curl_slist *rcpt; /* Recipient list */
   bool ssldone;            /* Is connect() over SSL done? only relevant in
                               multi mode */
+  bool size_supported;     /* If server supports SIZE extension according to
+                              RFC 1870 */
 };
 
 extern const struct Curl_handler Curl_handler_smtp;

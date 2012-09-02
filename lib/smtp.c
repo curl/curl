@@ -232,6 +232,11 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   line += 4;
   len -= 4;
 
+  if(smtpc->state == SMTP_EHLO && len >= 4 && !memcmp(line, "SIZE", 4)) {
+    DEBUGF(infof(conn->data, "Server supports SIZE extension.\n"));
+    smtpc->size_supported = true;
+  }
+
   if(smtpc->state == SMTP_EHLO && len >= 5 && !memcmp(line, "AUTH ", 5)) {
     line += 5;
     len -= 5;
@@ -943,7 +948,7 @@ static CURLcode smtp_mail(struct connectdata *conn)
   }
 
   /* calculate the optional SIZE parameter */
-  if(conn->data->set.infilesize > 0) {
+  if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
     size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
 
     if(!size) {
