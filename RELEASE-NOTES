@@ -10,6 +10,9 @@ Curl and libcurl 7.28.0
 This release includes the following changes:
 
  o SSH: added agent based authentication
+ o ftp: active conn, allow application to set sockopt after accept() call
+   with CURLSOCKTYPE_ACCEPT
+ o multi: add curl_multi_wait() [12]
 
 This release includes the following bugfixes:
 
@@ -30,6 +33,9 @@ This release includes the following bugfixes:
  o Avoid leak of local device string when reusing connection
  o Curl_socket_check: fix return code for timeout [11]
  o nss: do not print misleading NSS error codes
+ o configure: remove the --enable/disable-nonblocking options
+ o darwinssl: add TLS 1.1 and 1.2 support, replace deprecated functions
+ o NTLM: re-use existing connection better
 
 This release includes the following known bugs:
 
@@ -40,7 +46,8 @@ advice from friends like these:
 
  Guenter Knauf, Joe Mason, Kamil Dudka, Steve Holme, Anthony G. Basile,
  Edward Sheldrake, Jan Koen Annot, Maxime Larocque, Mike Crowe, Anthony Bryan,
- Nick Zitzmann, Gisle Vanem, Armel Asselin
+ Nick Zitzmann, Gisle Vanem, Armel Asselin, Dan Fandrich, Dave Reisner,
+ Gokhan Sengun, Sara Golemon, Olivier Berger
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,3 +64,4 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/bug/view.cgi?id=3545398
  [10] = http://curl.haxx.se/mail/lib-2012-07/0111.html
  [11] = http://curl.haxx.se/mail/lib-2012-07/0122.html
+ [12] = http://daniel.haxx.se/blog/2012/09/03/introducing-curl_multi_wait/
