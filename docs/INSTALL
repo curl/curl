@@ -970,8 +970,9 @@ REDUCING SIZE
    The GNU compiler and linker have a number of options that can reduce the
    size of the libcurl dynamic libraries on some platforms even further.
    Specify them by providing appropriate CFLAGS and LDFLAGS variables on the
-   configure command-line:
-     CFLAGS="-ffunction-sections -fdata-sections" \
+   configure command-line, e.g.
+     CFLAGS="-Os -ffunction-sections -fdata-sections \
+             -fno-unwind-tables -fno-asynchronous-unwind-tables" \
      LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
 
    Be sure also to strip debugging symbols from your binaries after
@@ -981,9 +982,9 @@ REDUCING SIZE
    .comment section).
 
    Using these techniques it is possible to create a basic HTTP-only shared
-   libcurl library for i386 Linux platforms that is only 101 KiB in size, and
-   an FTP-only library that is 105 KiB in size (as of libcurl version 7.21.5,
-   using gcc 4.4.3).
+   libcurl library for i386 Linux platforms that is only 106 KiB in size, and
+   an FTP-only library that is 108 KiB in size (as of libcurl version 7.27.0,
+   using gcc 4.6.3).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size than dynamically linking.

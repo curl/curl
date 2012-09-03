@@ -1,6 +1,9 @@
 # Google Android makefile for curl and libcurl
 #
-# Please read also the Android section in docs/INSTALL for alternate methods!
+# This file can be used when building curl using the full Android source
+# release or the NDK. Most users do not want or need to do this; please
+# instead read the Android section in docs/INSTALL for alternate
+# methods.
 #
 # Place the curl source (including this makefile) into external/curl/ in the
 # Android source tree.  Then build them with 'make curl' or just 'make libcurl'
