@@ -1,0 +1,61 @@
+<testcase>
+# Similar to 1406
+# N.B. --libcurl output not sufficient to deal with uploaded files.
+<info>
+<keywords>
+SMTP
+--libcurl
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+# the key in this response is that it doesn't include SIZE support
+<servercmd>
+REPLY EHLO 250 mooo
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP without SIZE support
+ </name>
+<file name="log/test1411.eml">
+From: different
+To: another
+
+body
+</file>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1411@foo --mail-rcpt 1411@foobar.example --mail-from 1411@from -T log/test1411.eml
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO user
+MAIL FROM:<1411@from>
+RCPT TO:<1411@foo>
+RCPT TO:<1411@foobar.example>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+
+.
+</upload>
+
+</verify>
+</testcase>
