@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -123,6 +123,8 @@ print "Processing  '$txt' ...\n" if (!$opt_q);
 my $caname;
 my $certnum = 0;
 my $skipnum = 0;
+my $start_of_cert = 0;
+
 open(TXT,"$txt") or die "Couldn't open $txt: $!";
 while (<TXT>) {
   if (/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
@@ -143,11 +145,16 @@ while (<TXT>) {
     print CRT "# $1\n";
     close(CRT) or die "Couldn't close $crt: $!";
   }
-  if (/^CKA_LABEL\s+[A-Z0-9]+\s+\"(.*)\"/) {
+
+  # this is a match for the start of a certificate
+  if (/^CKA_CLASS CK_OBJECT_CLASS CKO_CERTIFICATE/) {
+    $start_of_cert = 1
+  }
+  if ($start_of_cert && /^CKA_LABEL UTF8 \"(.*)\"/) {
     $caname = $1;
   }
   my $untrusted = 0;
-  if (/^CKA_VALUE MULTILINE_OCTAL/) {
+  if ($start_of_cert && /^CKA_VALUE MULTILINE_OCTAL/) {
     my $data;
     while (<TXT>) {
       last if (/^END/);
@@ -158,10 +165,18 @@ while (<TXT>) {
         $data .= chr(oct);
       }
     }
+    # scan forwards until the trust part
     while (<TXT>) {
-      last if (/^#$/);
-      $untrusted = 1 if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/
-                     or /^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_TRUST_UNKNOWN$/);
+      last if (/^CKA_CLASS CK_OBJECT_CLASS CKO_NSS_TRUST/);
+      chomp;
+    }
+    # now scan the trust part for untrusted certs
+    while (<TXT>) {
+      last if (/^#/);
+      if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/
+          or /^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_TRUST_UNKNOWN$/) {
+          $untrusted = 1;
+      }
     }
     if ($untrusted) {
       $skipnum ++;
@@ -183,6 +198,7 @@ while (<TXT>) {
       }
       print "Parsing: $caname\n" if ($opt_v);
       $certnum ++;
+      $start_of_cert = 0;
     }
   }
 }
