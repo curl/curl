@@ -601,7 +601,7 @@ sub protocolsetup {
             'RCPT' => \&RCPT_smtp,
         );
         %displaytext = (
-            'EHLO' => '230 We are happy you popped in!',
+            'EHLO' => "250-SIZE\r\n250 Welcome visitor, stay a while staaaaaay forever",
             'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
             'QUIT' => '200 byebye',
