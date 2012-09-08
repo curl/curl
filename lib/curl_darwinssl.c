@@ -614,16 +614,23 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#elif TARGET_OS_EMBEDDED == 0
+#if TARGET_OS_EMBEDDED == 0 /* the older API does not exist on iOS */
+    if(connssl->ssl_ctx)
+      (void)SSLDisposeContext(connssl->ssl_ctx);
+    err = SSLNewContext(false, &(connssl->ssl_ctx));
+    if(err != noErr) {
+      failf(data, "SSL: couldn't create a context: OSStatus %d", err);
+      return CURLE_OUT_OF_MEMORY;
+    }
+#endif /* TARGET_OS_EMBEDDED == 0 */
+  }
+#else
   if(connssl->ssl_ctx)
     (void)SSLDisposeContext(connssl->ssl_ctx);
   err = SSLNewContext(false, &(connssl->ssl_ctx));
   if(err != noErr) {
     failf(data, "SSL: couldn't create a context: OSStatus %d", err);
     return CURLE_OUT_OF_MEMORY;
-  }
-#endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
   }
 #endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
 
@@ -740,15 +747,21 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#elif TARGET_OS_EMBEDDED == 0
+#if TARGET_OS_EMBEDDED == 0
+    err = SSLSetEnableCertVerify(connssl->ssl_ctx,
+                                 data->set.ssl.verifypeer?true:false);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+#endif /* TARGET_OS_EMBEDDED == 0 */
+  }
+#else
   err = SSLSetEnableCertVerify(connssl->ssl_ctx,
                                data->set.ssl.verifypeer?true:false);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;
-  }
-#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
-#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
   }
 #endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
@@ -889,7 +902,7 @@ darwinssl_connect_step3(struct connectdata *conn,
    * Well, okay, if verbose mode is on, let's print the details of the
    * server certificates. */
 #if defined(__MAC_10_7) || defined(__IPHONE_5_0)
-  if(SecTrustGetCertificateCount != NULL) {
+  if(SecTrustEvaluateAsync != NULL) {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
     if(err == noErr) {
@@ -910,7 +923,29 @@ darwinssl_connect_step3(struct connectdata *conn,
     }
   }
   else {
-#elif TARGET_OS_EMBEDDED == 0
+#if TARGET_OS_EMBEDDED == 0
+    err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
+    if(err == noErr) {
+      count = CFArrayGetCount(server_certs);
+      for(i = 0L ; i < count ; i++) {
+        server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
+                                                                i);
+
+        server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+        memset(server_cert_summary_c, 0, 128);
+        if(CFStringGetCString(server_cert_summary,
+                              server_cert_summary_c,
+                              128,
+                              kCFStringEncodingUTF8)) {
+          infof(data, "Server certificate: %s\n", server_cert_summary_c);
+        }
+        CFRelease(server_cert_summary);
+      }
+      CFRelease(server_certs);
+    }
+#endif /* TARGET_OS_EMBEDDED == 0 */
+  }
+#else
 #pragma unused(trust)
   err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
   if(err == noErr) {
@@ -929,9 +964,6 @@ darwinssl_connect_step3(struct connectdata *conn,
       CFRelease(server_cert_summary);
     }
     CFRelease(server_certs);
-  }
-#endif /* defined(__MAC_10_7) || defined(__IPHONE_5_0) */
-#if defined(__MAC_10_7) || defined(__IPHONE_5_0)
   }
 #endif /* defined(__MAC_10_7) || defined(__IPHONE_5_0) */
 
