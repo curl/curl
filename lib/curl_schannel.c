@@ -509,6 +509,13 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+  /* increment the reference counter of the credential/session handle */
+  if(connssl->cred && connssl->ctxt) {
+    connssl->cred->refcount++;
+    infof(data, "schannel: incremented credential handle refcount = %d\n",
+          connssl->cred->refcount);
+  }
+
   /* save the current session data for possible re-use */
   incache = !(Curl_ssl_getsessionid(conn, (void**)&old_cred, NULL));
   if(incache) {
@@ -526,7 +533,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       return retcode;
     }
     else {
-      infof(data, "schannel: stored crendential handle\n");
+      infof(data, "schannel: stored credential handle in session cache\n");
     }
   }
 
@@ -1063,7 +1070,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         conn->host.name, conn->remote_port);
 
-  if(connssl->ctxt) {
+  if(connssl->cred && connssl->ctxt) {
     SecBufferDesc BuffDesc;
     SecBuffer Buffer;
     SECURITY_STATUS sspi_status;
@@ -1125,6 +1132,13 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
       Curl_safefree(connssl->ctxt);
     }
+
+    /* decrement the reference counter of the credential/session handle */
+    if(connssl->cred && connssl->cred->refcount > 0) {
+      connssl->cred->refcount--;
+      infof(data, "schannel: decremented credential handle refcount = %d\n",
+            connssl->cred->refcount);
+    }
   }
 
   /* free internal buffer for received encrypted data */
@@ -1148,7 +1162,7 @@ void Curl_schannel_session_free(void *ptr)
 {
   struct curl_schannel_cred *cred = ptr;
 
-  if(cred) {
+  if(cred && cred->refcount == 0) {
     s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
     Curl_safefree(cred);
   }
