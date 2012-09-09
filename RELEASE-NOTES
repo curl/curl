@@ -36,6 +36,12 @@ This release includes the following bugfixes:
  o configure: remove the --enable/disable-nonblocking options
  o darwinssl: add TLS 1.1 and 1.2 support, replace deprecated functions
  o NTLM: re-use existing connection better
+ o schannel crash on multi and easy handle cleanup
+ o SOCKS: truly disable it if CURL_DISABLE_PROXY is defined [13]
+ o mk-ca-bundle: detect start of trust section better [14]
+ o gnutls: do not fail on non-fatal handshake errors [15]
+ o SMTP: only send SIZE if supported [16]
+ o ftpserver: respond with a 250 to SMTP EHLO
 
 This release includes the following known bugs:
 
@@ -47,7 +53,8 @@ advice from friends like these:
  Guenter Knauf, Joe Mason, Kamil Dudka, Steve Holme, Anthony G. Basile,
  Edward Sheldrake, Jan Koen Annot, Maxime Larocque, Mike Crowe, Anthony Bryan,
  Nick Zitzmann, Gisle Vanem, Armel Asselin, Dan Fandrich, Dave Reisner,
- Gokhan Sengun, Sara Golemon, Olivier Berger
+ Gokhan Sengun, Sara Golemon, Olivier Berger, Marc Hoersken, David Blaikie,
+ Alessandro Ghedini, František Kučera, Marcel Raad
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -65,3 +72,7 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/mail/lib-2012-07/0111.html
  [11] = http://curl.haxx.se/mail/lib-2012-07/0122.html
  [12] = http://daniel.haxx.se/blog/2012/09/03/introducing-curl_multi_wait/
+ [13] = http://curl.haxx.se/bug/view.cgi?id=3561305
+ [14] = http://curl.haxx.se/mail/lib-2012-09/0019.html
+ [15] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685402
+ [16] = http://curl.haxx.se/bug/view.cgi?id=3564114
