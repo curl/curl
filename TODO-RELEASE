@@ -10,11 +10,7 @@ To be addressed in 7.28
 
 317 - CURLINFO_SSL_TRUST to return SSL-specific data for a darwinssl build
 
-321 - CURLSSH_AUTH_AGENT patch by Armel Asselin
-
 322 - pipelining improvements
-
-324 - curl_multi_select() vs curl_multi_fdvec() etc
 
 326 - Improve testsuite for better results when running on MSYS/MinGW.
       Fix crahses with tests lib547, lib548, lib590 and curl.
