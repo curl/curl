@@ -113,9 +113,10 @@ USING PASSWORDS
    ones out of the ones that the server accepts for the given URL, by using
    --anyauth.
 
-   NOTE! Since HTTP URLs don't support user and password, you can't use that
-   style when using Curl via a proxy. You _must_ use the -u style fetch
-   during such circumstances.
+   NOTE! According to the URL specification, HTTP URLs can not contain a user
+   and password, so that style will not work when using curl via a proxy, even
+   though curl allows it at other times. When using a proxy, you _must_ use
+   the -u style for user and password.
 
  HTTPS
 
