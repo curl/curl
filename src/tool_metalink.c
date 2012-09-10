@@ -61,6 +61,25 @@
    and later. If you're building for an older cat, well, sorry. */
 #  define COMMON_DIGEST_FOR_OPENSSL
 #  include <CommonCrypto/CommonDigest.h>
+#elif defined(_WIN32)
+/* For Windows: If no other crypto library is provided, we fallback
+   to the hash functions provided within the Microsoft Windows CryptoAPI */
+#  include <WinCrypt.h>
+/* Custom structure in order to store the required provider and hash handle */
+struct win32_crypto_hash {
+  HCRYPTPROV hCryptProv;
+  HCRYPTHASH hHash;
+};
+/* Custom Microsoft AES Cryptographic Provider defines required for MinGW */
+#  ifndef ALG_SID_SHA_256
+#    define ALG_SID_SHA_256  12
+#  endif
+#  ifndef CALG_SHA_256
+#    define CALG_SHA_256 (ALG_CLASS_HASH | ALG_TYPE_ANY | ALG_SID_SHA_256)
+#  endif
+#  define MD5_CTX    struct win32_crypto_hash
+#  define SHA_CTX    struct win32_crypto_hash
+#  define SHA256_CTX struct win32_crypto_hash
 #else
 #  error "Can't compile METALINK support without a crypto library."
 #endif
@@ -198,6 +217,82 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), 32);
   gcry_md_close(*ctx);
+}
+
+#elif defined(_WIN32)
+
+static void win32_crypto_final(struct win32_crypto_hash *ctx,
+                               unsigned char *digest,
+                               unsigned int digestLen)
+{
+  unsigned long length;
+  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+  if(length == digestLen)
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(ctx->hHash)
+    CryptDestroyHash(ctx->hHash);
+  if(ctx->hCryptProv)
+    CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
+  }
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *input,
+                       unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 16);
+}
+
+static void SHA1_Init(SHA_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_SHA1, 0, 0, &ctx->hHash);
+  }
+}
+
+static void SHA1_Update(SHA_CTX *ctx,
+                        const unsigned char *input,
+                        unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 20);
+}
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
+  }
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 32);
 }
 
 #endif /* CRYPTO LIBS */
