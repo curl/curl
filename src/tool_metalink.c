@@ -339,7 +339,8 @@ static int check_hash(const char *filename,
   digest_context *dctx;
   int check_ok;
   int fd;
-  fd = open(filename, O_RDONLY);
+  /* O_BINARY is required in order to avoid binary EOF in text mode */
+  fd = open(filename, O_RDONLY | O_BINARY);
   if(fd == -1) {
     fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
             strerror(errno));
