@@ -23,11 +23,11 @@ CFGSET=true
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
-!MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
-!MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
 !MESSAGE                                  Requires Windows Vista or later, or installation from:
 !MESSAGE                                  http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+!MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
+!MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
@@ -53,12 +53,12 @@ ENABLE_SSPI = $(USE_SSPI)
 !ENDIF
 
 # default options
-!IFNDEF ENABLE_SSPI
-USE_SSPI = true
-!ELSEIF "$(ENABLE_SSPI)"=="yes"
-USE_SSPI = true
-!ELSEIF "$(ENABLE_SSPI)"=="no"
-USE_SSPI = false
+!IFNDEF ENABLE_IDN
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="yes"
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="no"
+USE_IDN = false
 !ENDIF
 
 !IFNDEF ENABLE_IPV6
@@ -69,12 +69,12 @@ USE_IPV6 = true
 USE_IPV6 = false
 !ENDIF
 
-!IFNDEF ENABLE_IDN
-USE_IDN = true
-!ELSEIF "$(ENABLE_IDN)"=="yes"
-USE_IDN = true
-!ELSEIF "$(ENABLE_IDN)"=="no"
-USE_IDN = false
+!IFNDEF ENABLE_SSPI
+USE_SSPI = true
+!ELSEIF "$(ENABLE_SSPI)"=="yes"
+USE_SSPI = true
+!ELSEIF "$(ENABLE_SSPI)"=="no"
+USE_SSPI = false
 !ENDIF
 
 !IFNDEF ENABLE_WINSSL
@@ -163,9 +163,9 @@ $(MODE):
 	@SET MACRO_NAME=CURL_OBJS
 	@SET OUTFILE=CURL_OBJS.inc
 	@gen_resp_file.bat $(CURL_OBJS)
-	@SET USE_SSPI=$(USE_SSPI)
-	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_IDN=$(USE_IDN)
+	@SET USE_IPV6=$(USE_IPV6)
+	@SET USE_SSPI=$(USE_SSPI)
 	@SET USE_WINSSL=$(USE_WINSSL)
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 

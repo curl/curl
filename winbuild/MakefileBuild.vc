@@ -143,14 +143,15 @@ SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
 
-!IFNDEF USE_SSPI
-USE_SSPI  = true
-!ELSEIF "$(USE_SSPI)"=="yes"
-USE_SSPI  = true
+!IFNDEF USE_IDN
+USE_IDN   = true
+!ELSEIF "$(USE_IDN)"=="yes"
+USE_IDN   = true
 !ENDIF
 
-!IF "$(USE_SSPI)"=="true"
-SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
+!IF "$(USE_IDN)"=="true"
+CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+LFLAGS    = $(LFLAGS) Normaliz.lib
 !ENDIF
 
 
@@ -165,15 +166,14 @@ IPV6_CFLAGS = $(IPV6_CFLAGS) /DUSE_IPV6
 !ENDIF
 
 
-!IFNDEF USE_IDN
-USE_IDN   = true
-!ELSEIF "$(USE_IDN)"=="yes"
-USE_IDN   = true
+!IFNDEF USE_SSPI
+USE_SSPI  = true
+!ELSEIF "$(USE_SSPI)"=="yes"
+USE_SSPI  = true
 !ENDIF
 
-!IF "$(USE_IDN)"=="true"
-CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
-LFLAGS    = $(LFLAGS) Normaliz.lib
+!IF "$(USE_SSPI)"=="true"
+SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
 !ENDIF
 
 
@@ -372,9 +372,9 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
-	@echo Using SSPI: $(USE_SSPI)
-	@echo Using IPv6: $(USE_IPV6)
 	@echo Using IDN:  $(USE_IDN)
+	@echo Using IPv6: $(USE_IPV6)
+	@echo Using SSPI: $(USE_SSPI)
 	@echo Using WinSSL: $(USE_WINSSL)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
