@@ -659,13 +659,37 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_COULDNT_CONNECT;
   }
   if(socksreq[1] != 0) { /* Anything besides 0 is an error */
+    if(socksreq[3] == 1) {
       failf(data,
             "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
             ((socksreq[8] << 8) | socksreq[9]),
             socksreq[1]);
-      return CURLE_COULDNT_CONNECT;
+    }
+    else if(socksreq[3] == 3) {
+      failf(data,
+            "Can't complete SOCKS5 connection to %s:%d. (%d)",
+            hostname,
+            ((socksreq[8] << 8) | socksreq[9]),
+            socksreq[1]);
+    }
+    else if(socksreq[3] == 4) {
+      failf(data,
+            "Can't complete SOCKS5 connection to %02x%02x:%02x%02x:"
+            "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%d. (%d)",
+            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+            (unsigned char)socksreq[8], (unsigned char)socksreq[9],
+            (unsigned char)socksreq[10], (unsigned char)socksreq[11],
+            (unsigned char)socksreq[12], (unsigned char)socksreq[13],
+            (unsigned char)socksreq[14], (unsigned char)socksreq[15],
+            (unsigned char)socksreq[16], (unsigned char)socksreq[17],
+            (unsigned char)socksreq[18], (unsigned char)socksreq[19],
+            ((socksreq[8] << 8) | socksreq[9]),
+            socksreq[1]);
+    }
+    return CURLE_COULDNT_CONNECT;
   }
 
   /* Fix: in general, returned BND.ADDR is variable length parameter by RFC
