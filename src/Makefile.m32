@@ -30,7 +30,7 @@ LIBRTMP_PATH = ../../librtmp-2.3
 endif
 # Edit the path below to point to the base of your libmetalink package.
 ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.0.3
+LIBMETALINK_PATH = ../../libmetalink-0.1.2
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
@@ -213,9 +213,9 @@ ifdef WINIDN
 endif
 endif
 ifdef METALINK
-  INCLUDES += -I"$(LIBMETALINK_PATH)/include"
+  INCLUDES += -I"$(LIBMETALINK_PATH)/lib/includes"
   CFLAGS += -DUSE_METALINK
-  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
+  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib/.libs" -lmetalink.dll
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
