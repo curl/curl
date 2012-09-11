@@ -442,8 +442,8 @@ static int check_hash(const char *filename,
 
   fd = open(filename, flags);
   if(fd == -1) {
-    fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
-            strerror(errno));
+    fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
+            digest_def->hash_name, strerror(errno));
     return -1;
   }
   dctx = Curl_digest_init(digest_def->dparams);
@@ -455,8 +455,8 @@ static int check_hash(const char *filename,
       break;
     }
     else if(len == -1) {
-      fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
-              strerror(errno));
+      fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
+              digest_def->hash_name, strerror(errno));
       Curl_digest_final(dctx, result);
       close(fd);
       return -1;
@@ -468,10 +468,11 @@ static int check_hash(const char *filename,
                     digest_def->dparams->digest_resultlen) == 0;
   /* sha*sum style verdict output */
   if(check_ok)
-    fprintf(error, "Metalink: validating (%s) OK\n", filename);
+    fprintf(error, "Metalink: validating (%s) [%s] OK\n", filename,
+            digest_def->hash_name);
   else
-    fprintf(error, "Metalink: validating (%s) FAILED (digest mismatch)\n",
-            filename);
+    fprintf(error, "Metalink: validating (%s) [%s] FAILED (digest mismatch)\n",
+            filename, digest_def->hash_name);
 
   free(result);
   close(fd);
