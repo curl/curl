@@ -1171,7 +1171,7 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
 
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
-  PRInt32 err;
+  PRErrorCode err = 0;
   PRFileDesc *model = NULL;
   PRBool ssl2 = PR_FALSE;
   PRBool ssl3 = PR_FALSE;
