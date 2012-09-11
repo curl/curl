@@ -28,6 +28,12 @@
 #define TEST_HANG_TIMEOUT 5 * 1000
 #define MAX_EASY_HANDLES 3
 
+/* On Windows INVALID_SOCKET represents an invalid socket, not -1:
+   http://msdn.microsoft.com/en-us/library/windows/desktop/ms740516.aspx */
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET -1
+#endif
+
 CURL *easy[MAX_EASY_HANDLES];
 curl_socket_t sockets[MAX_EASY_HANDLES];
 int res = 0;
@@ -49,8 +55,8 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
     return 0;
   }
   /* sock will only be set for NTLM requests; for others it is -1 */
-  if (sock != -1) {
-    if (sockets[idx] == -1) {
+  if (sock != INVALID_SOCKET) {
+    if (sockets[idx] == INVALID_SOCKET) {
       /* Data was written for this request before the socket was detected by
          multi_fdset. Record the socket now. */
       sockets[idx] = sock;
@@ -106,7 +112,7 @@ int test(char *url)
     fd_set fdwrite;
     fd_set fdexcep;
     long timeout = -99;
-    curl_socket_t maxfd = -99;
+    curl_socket_t curfd, maxfd = INVALID_SOCKET;
     bool found_new_socket = FALSE;
 
     /* Start a new handle if we aren't at the max */
@@ -152,16 +158,16 @@ int test(char *url)
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
     /* Any socket which is new in fdread is associated with the new handle */
-    for (i = 0; i <= maxfd; ++i) {
+    for (curfd = 0; curfd <= maxfd; ++curfd) {
       bool socket_exists = FALSE;
-      if (!FD_ISSET(i, &fdread)) {
+      if (!FD_ISSET(curfd, &fdread)) {
         continue;
       }
 
       /* Check if this socket was already detected for an earlier handle (or
          for this handle, num_handles-1, in the callback */
       for (j = 0; j < num_handles; ++j) {
-        if (sockets[j] == i) {
+        if (sockets[j] == curfd) {
           socket_exists = TRUE;
           break;
         }
@@ -177,17 +183,17 @@ int test(char *url)
       }
 
       /* Now we know the socket is for the most recent handle, num_handles-1 */
-      if (sockets[num_handles-1] != -1) {
+      if (sockets[num_handles-1] != INVALID_SOCKET) {
         /* A socket for this handle was already detected in the callback; if it
            matched socket_exists should be true and we would never get here */
-        assert(i != sockets[num_handles-1]);
+        assert(curfd != sockets[num_handles-1]);
         fprintf(stderr, "Handle %d wrote to socket %d then detected on %d\n",
-                num_handles-1, sockets[num_handles-1], i);
+                num_handles-1, sockets[num_handles-1], curfd);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
       else {
-        sockets[num_handles-1] = i;
+        sockets[num_handles-1] = curfd;
         found_new_socket = TRUE;
         /* continue to make sure there's only one new handle */
       }
