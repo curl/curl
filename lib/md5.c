@@ -86,7 +86,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 
 #elif defined(_WIN32)
 
-#include <WinCrypt.h>
+#include <wincrypt.h>
 
 typedef struct {
   HCRYPTPROV hCryptProv;

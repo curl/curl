@@ -64,7 +64,7 @@
 #elif defined(_WIN32)
 /* For Windows: If no other crypto library is provided, we fallback
    to the hash functions provided within the Microsoft Windows CryptoAPI */
-#  include <WinCrypt.h>
+#  include <wincrypt.h>
 /* Custom structure in order to store the required provider and hash handle */
 struct win32_crypto_hash {
   HCRYPTPROV hCryptProv;
