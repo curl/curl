@@ -59,7 +59,7 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
     sock = INVALID_SOCKET;
   }
   else {
-    sock = (curl_socket_t)lastsocket;
+    sock = (curl_socket_t)lastsock;
   }
   /* sock will only be set for NTLM requests; for others it is -1 */
   if (sock != INVALID_SOCKET) {
@@ -160,7 +160,7 @@ int test(char *url)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, (int *)&maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
