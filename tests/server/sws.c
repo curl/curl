@@ -1456,7 +1456,7 @@ static void http_connect(curl_socket_t *infdp,
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
           struct httprequest req2;
-          int err;
+          int err = 0;
           memset(&req2, 0, sizeof(req2));
           logmsg("====> Client connect DATA");
 #ifdef TCP_NODELAY
