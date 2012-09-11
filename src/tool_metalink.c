@@ -337,10 +337,15 @@ static int check_hash(const char *filename,
 {
   unsigned char *result;
   digest_context *dctx;
-  int check_ok;
-  int fd;
+  int check_ok, flags, fd;
+
+  flags = O_RDONLY;
+#ifdef O_BINARY
   /* O_BINARY is required in order to avoid binary EOF in text mode */
-  fd = open(filename, O_RDONLY | O_BINARY);
+  flags |= O_BINARY;
+#endif
+
+  fd = open(filename, flags);
   if(fd == -1) {
     fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
             strerror(errno));
