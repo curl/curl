@@ -28,7 +28,7 @@
 #include "curl_hmac.h"
 #include "warnless.h"
 
-#ifdef USE_GNUTLS_NETTLE
+#if defined(USE_GNUTLS_NETTLE)
 
 #include <nettle/md5.h>
 
@@ -50,9 +50,8 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 {
   md5_digest(ctx, 16, digest);
 }
-#else
 
-#ifdef USE_GNUTLS
+#elif defined(USE_GNUTLS)
 
 #include <gcrypt.h>
 
@@ -76,9 +75,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
   gcry_md_close(*ctx);
 }
 
-#else
-
-#ifdef USE_SSLEAY
+#elif defined(USE_SSLEAY)
 /* When OpenSSL is available we use the MD5-function from OpenSSL */
 
 #  ifdef USE_OPENSSL
@@ -87,8 +84,44 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #    include <md5.h>
 #  endif
 
-#else /* USE_SSLEAY */
-/* When OpenSSL is not available we use this code segment */
+#elif defined(_WIN32)
+
+#include <WinCrypt.h>
+
+typedef struct {
+  HCRYPTPROV hCryptProv;
+  HCRYPTHASH hHash;
+} MD5_CTX;
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
+  }
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *input,
+                       unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+{
+  unsigned long length;
+  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+  if(length == 16)
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(ctx->hHash)
+    CryptDestroyHash(ctx->hHash);
+  if(ctx->hCryptProv)
+    CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
+#else
+/* When no other crypto library is available we use this code segment */
 
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
@@ -390,11 +423,7 @@ static void Decode (UINT4 *output,
       (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
 }
 
-#endif /* USE_SSLEAY */
-
-#endif /* USE_GNUTLS */
-
-#endif /* USE_GNUTLS_NETTLE */
+#endif /* CRYPTO LIBS */
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {
