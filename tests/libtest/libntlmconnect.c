@@ -42,6 +42,7 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
 {
   int idx = ((CURL **) data) - easy;
   curl_socket_t sock;
+  long lastsock;
 
   char *output = malloc(size * nmemb + 1);
   memcpy(output, ptr, size * nmemb);
@@ -49,10 +50,16 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
   fprintf(stdout, "%s", output);
   free(output);
 
-  res = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &sock);
+  res = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &lastsock);
   if (CURLE_OK != res) {
     fprintf(stderr, "Error reading CURLINFO_LASTSOCKET\n");
     return 0;
+  }
+  if (lastsock == -1) {
+    sock = INVALID_SOCKET;
+  }
+  else {
+    sock = (curl_socket_t)lastsocket;
   }
   /* sock will only be set for NTLM requests; for others it is -1 */
   if (sock != INVALID_SOCKET) {
