@@ -650,19 +650,25 @@ static bool ssh_check_fingerprint(struct connectdata *conn)
   const char *fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
       LIBSSH2_HOSTKEY_HASH_MD5);
 
-  /* The fingerprint points to static storage (!), don't free() it. */
-  for(i = 0; i < 16; i++)
-    snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
-  infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+  if(fingerprint) {
+    /* The fingerprint points to static storage (!), don't free() it. */
+    for(i = 0; i < 16; i++)
+      snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
+    infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+  }
 
   /* Before we authenticate we check the hostkey's MD5 fingerprint
    * against a known fingerprint, if available.
    */
   if(pubkey_md5 && strlen(pubkey_md5) == 32) {
-    if(!strequal(md5buffer, pubkey_md5)) {
-      failf(data,
-          "Denied establishing ssh session: mismatch md5 fingerprint. "
-          "Remote %s is not equal to %s", md5buffer, pubkey_md5);
+    if(!fingerprint || !strequal(md5buffer, pubkey_md5)) {
+      if(fingerprint)
+        failf(data,
+            "Denied establishing ssh session: mismatch md5 fingerprint. "
+            "Remote %s is not equal to %s", md5buffer, pubkey_md5);
+      else
+        failf(data,
+            "Denied establishing ssh session: md5 fingerprint not available");
       state(conn, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;

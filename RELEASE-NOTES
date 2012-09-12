@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o gnutls: do not fail on non-fatal handshake errors [15]
  o SMTP: only send SIZE if supported [16]
  o ftpserver: respond with a 250 to SMTP EHLO
+ o ssh: do not crash if MD5 fingerprint is not provided by libssh2
 
 This release includes the following known bugs:
 
