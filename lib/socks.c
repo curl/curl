@@ -562,7 +562,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   if(!socks5_resolve_local) {
     socksreq[len++] = 3; /* ATYP: domain name = 3 */
     socksreq[len++] = (char) hostname_len; /* address length */
-    memcpy(&socksreq[len], hostname, hostname_len); /* address bytes w/o NULL */
+    memcpy(&socksreq[len], hostname, hostname_len); /* address str w/o NULL */
     len += hostname_len;
   }
   else {
@@ -592,7 +592,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       int i;
 
       if(hp->ai_family == AF_INET) {
-        socksreq[len++] = 1; /* IPv4 = 1 */
+        socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
         saddr_in = (struct sockaddr_in*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
@@ -601,7 +601,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
         }
       }
       else if(hp->ai_family == AF_INET6) {
-        socksreq[len++] = 4; /* IPv6 = 4 */
+        socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
         saddr_in6 = (struct sockaddr_in6*)hp->ai_addr;
         for(i = 0; i < 16; i++) {
