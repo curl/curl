@@ -4249,7 +4249,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
       conn->proxytype = CURLPROXY_SOCKS5;
     else if(checkprefix("socks4a", proxy))
       conn->proxytype = CURLPROXY_SOCKS4A;
-    else if(checkprefix("socks4", proxy))
+    else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
       conn->proxytype = CURLPROXY_SOCKS4;
     /* Any other xxx:// : change to http proxy */
   }
