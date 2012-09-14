@@ -588,7 +588,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       hp=dns->addr;
     if(hp) {
       struct sockaddr_in *saddr_in;
+#ifdef ENABLE_IPV6
       struct sockaddr_in6 *saddr_in6;
+#endif
       int i;
 
       if(hp->ai_family == AF_INET) {
@@ -600,6 +602,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
           infof(data, "%d\n", socksreq[len-1]);
         }
       }
+#ifdef ENABLE_IPV6
       else if(hp->ai_family == AF_INET6) {
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
@@ -608,6 +611,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
           socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
         }
       }
+#endif
       else
         hp = NULL; /* fail! */
 
