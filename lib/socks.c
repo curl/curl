@@ -563,7 +563,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     socksreq[len++] = 3; /* ATYP: domain name = 3 */
     socksreq[len++] = (char) hostname_len; /* address length */
     memcpy(&socksreq[len], hostname, hostname_len); /* address str w/o NULL */
-    len += hostname_len;
+    len += (int)hostname_len;
   }
   else {
     struct Curl_dns_entry *dns;
