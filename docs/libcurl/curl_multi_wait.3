@@ -29,7 +29,8 @@ curl_multi_select - polls on all easy handles in a multi handle
 CURLMcode curl_multi_wait(CURLM *multi_handle,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
-                          int timeout_ms);
+                          int timeout_ms,
+                          int *ret);
 .ad
 .SH DESCRIPTION
 This function polls on all file descriptors used by the curl easy handles
@@ -38,6 +39,9 @@ detected on at least one of the handles or \fItimeout_ms\fP has passed.
 
 The calling application may pass additional curl_waitfd structures which are
 similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
+
+On completion, if \fIret\fI is supplied, it will be populated with the
+number of file descriptors on which interesting events occured.
 
 This function is encouraged to be used instead of select(3) when using the
 multi interface to allow applications to easier circumvent the common problem

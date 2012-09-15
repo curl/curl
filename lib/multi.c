@@ -944,7 +944,8 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 CURLMcode curl_multi_wait(CURLM *multi_handle,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
-                          int timeout_ms)
+                          int timeout_ms,
+                          int *ret)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
@@ -1023,8 +1024,10 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   }
 
   /* wait... */
-  Curl_poll(ufds, nfds, timeout_ms);
+  i = Curl_poll(ufds, nfds, timeout_ms);
   free(ufds);
+  if(ret)
+    *ret = i;
   return CURLM_OK;
 }
 
