@@ -54,9 +54,15 @@ int test(char *URL)
   abort_on_test_timeout();
 
   while(still_running) {
-    res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT);
+    int num;
+    res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
     if (res != CURLM_OK) {
       printf("curl_multi_wait() returned %d\n", res);
+      res = -1;
+      goto test_cleanup;
+    }
+    if (num != 1) {
+      printf("curl_multi_wait() returned on %d handle(s), expected 1\n", num);
       res = -1;
       goto test_cleanup;
     }
