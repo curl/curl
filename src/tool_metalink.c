@@ -573,9 +573,24 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
     tail = &root;
     for(p = fileinfo->resources; *p; ++p) {
       metalink_resource *res;
-      res = new_metalink_resource((*p)->url);
-      tail->next = res;
-      tail = res;
+      /* Filter by type if it is non-NULL. In Metalink v3, type
+         includes the type of the resource. In curl, we are only
+         interested in HTTP, HTTPS and FTP. In addition to them,
+         Metalink v3 file may contain bittorrent type URL, which
+         points to the BitTorrent metainfo file. We ignore it here.
+         In Metalink v4, type was deprecated and all
+         fileinfo->resources point to the target file. BitTorrent
+         metainfo file URL may be appeared in fileinfo->metaurls.
+      */
+      if((*p)->type == NULL ||
+         Curl_raw_equal((*p)->type, "http") ||
+         Curl_raw_equal((*p)->type, "https") ||
+         Curl_raw_equal((*p)->type, "ftp") ||
+         Curl_raw_equal((*p)->type, "ftps")) {
+        res = new_metalink_resource((*p)->url);
+        tail->next = res;
+        tail = res;
+      }
     }
     f->resource = root.next;
   }
