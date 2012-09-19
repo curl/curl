@@ -84,7 +84,7 @@ Metalink: parsing (file://%PWD/log/test2005.metalink) OK
 Metalink: fetching (log/download2005) from (http://%HOSTIP:%HTTPPORT/2005)...
 Metalink: fetching (log/download2005) from (http://%HOSTIP:%HTTPPORT/2005) OK
 Metalink: validating (log/download2005)...
-Metalink: validating (log/download2005) OK
+Metalink: validating (log/download2005) [sha-256] OK
 </file3>
 <stripfile3>
 $_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))

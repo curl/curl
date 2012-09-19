@@ -639,7 +639,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
   return result;
 }
 
-static bool ssh_check_fingerprint(struct connectdata *conn)
+static CURLcode ssh_check_fingerprint(struct connectdata *conn)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   struct SessionHandle *data = conn->data;
@@ -740,7 +740,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        * whatever) is up to us.
        */
       result = ssh_check_fingerprint(conn);
-      if(!result)
+      if(result == CURLE_OK)
         state(conn, SSH_AUTHLIST);
       break;
 

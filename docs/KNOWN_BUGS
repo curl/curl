@@ -163,7 +163,6 @@ may have been fixed since this was written!
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
 
 23. SOCKS-related problems:
-  A) libcurl doesn't support SOCKS for IPv6.
   B) libcurl doesn't support FTPS over a SOCKS proxy.
   E) libcurl doesn't support active FTP over a SOCKS proxy
 
