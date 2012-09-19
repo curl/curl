@@ -188,6 +188,24 @@
 #  ifndef CURL_DISABLE_RTSP
 #    define CURL_DISABLE_RTSP
 #  endif
+#  ifndef CURL_DISABLE_POP3
+#    define CURL_DISABLE_POP3
+#  endif
+#  ifndef CURL_DISABLE_IMAP
+#    define CURL_DISABLE_IMAP
+#  endif
+#  ifndef CURL_DISABLE_SMTP
+#    define CURL_DISABLE_SMTP
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#    define CURL_DISABLE_RTSP
+#  endif
+#  ifndef CURL_DISABLE_RTMP
+#    define CURL_DISABLE_RTMP
+#  endif
+#  ifndef CURL_DISABLE_GOPHER
+#    define CURL_DISABLE_GOPHER
+#  endif
 #endif
 
 /*
