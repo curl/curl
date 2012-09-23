@@ -116,7 +116,7 @@ LFLAGS     = /nologo /machine:$(MACHINE)
 SSLLIBS    = libeay32.lib ssleay32.lib
 ZLIBLIBSDLL= zdll.lib
 ZLIBLIBS   = zlib.lib
-WINLIBS    = ws2_32.lib wldap32.lib
+WINLIBS    = ws2_32.lib wldap32.lib advapi32.lib
 CFLAGS     = $(CFLAGS)
 
 CFGSET     = FALSE
