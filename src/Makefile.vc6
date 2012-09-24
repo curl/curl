@@ -99,7 +99,7 @@ ZLIB_IMP_LIBS = zdll.lib
 SSL_CFLAGS     = /DUSE_SSLEAY
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
-SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
+SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib
 
 # Runtime library configuration
 RTLIB   = /MD
@@ -327,8 +327,8 @@ LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 
-LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib
+LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib advapi32.lib
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib advapi32.lib
 
 all : release
 
