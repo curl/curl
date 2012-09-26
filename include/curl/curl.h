@@ -1047,9 +1047,8 @@ typedef enum {
   /* Set to the Entropy Gathering Daemon socket pathname */
   CINIT(EGDSOCKET, OBJECTPOINT, 77),
 
-  /* Time-out connect operations after this amount of seconds, if connects
-     are OK within this time, then fine... This only aborts the connect
-     phase. [Only works on unix-style/SIGALRM operating systems] */
+  /* Time-out connect operations after this amount of seconds, if connects are
+     OK within this time, then fine... This only aborts the connect phase. */
   CINIT(CONNECTTIMEOUT, LONG, 78),
 
   /* Function that will be called to store headers (instead of fwrite). The
