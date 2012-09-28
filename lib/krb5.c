@@ -53,6 +53,7 @@
 #include "sendf.h"
 #include "krb4.h"
 #include "curl_memory.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -103,7 +104,7 @@ krb5_decode(void *app_data, void *buf, int len,
   }
 
   memcpy(buf, dec.value, dec.length);
-  len = dec.length;
+  len = curlx_uztosi(dec.length);
   gss_release_buffer(&min, &dec);
 
   return len;
@@ -151,7 +152,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to,
   if(!*to)
     return -1;
   memcpy(*to, enc.value, enc.length);
-  len = enc.length;
+  len = curlx_uztosi(enc.length);
   gss_release_buffer(&min, &enc);
   return len;
 }
