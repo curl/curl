@@ -13,6 +13,10 @@ This release includes the following changes:
  o ftp: active conn, allow application to set sockopt after accept() call
    with CURLSOCKTYPE_ACCEPT
  o multi: add curl_multi_wait() [12]
+ o metalink: Added support for Microsoft Windows CryptoAPI
+ o md5: Added support for Microsoft Windows CryptoAPI
+ o parse_proxy: treat "socks://x" as a socks4 proxy [17]
+ o socks: Added support for IPv6 connections through SOCKSv5 proxy
 
 This release includes the following bugfixes:
 
@@ -27,7 +31,7 @@ This release includes the following bugfixes:
  o change preferred HTTP auth on a handle previously used for another auth [9]
  o file: use fdopen() to avoid race condition [6]
  o Added DWANT_IDN_PROTOTYPES define for MSVC too [7]
- o verbose messages: fixed (nil) output of hostnames in re-used connections [10]
+ o verbose: fixed (nil) output of hostnames in re-used connections [10]
  o metalink: Un-broke the build when building --with-darwinssl
  o curl man page cleanup
  o Avoid leak of local device string when reusing connection
@@ -43,6 +47,15 @@ This release includes the following bugfixes:
  o SMTP: only send SIZE if supported [16]
  o ftpserver: respond with a 250 to SMTP EHLO
  o ssh: do not crash if MD5 fingerprint is not provided by libssh2
+ o winbuild: Added support for building with SPNEGO enabled
+ o metalink: Fixed validation of binary files containing EOF
+ o setup.h: fixed for MS VC10 build [18]
+ o cmake: use standard findxxx modules for cmake v2.8+
+ o HTTP_ONLY: disable more protocols [19]
+ o Curl_reconnect_request: clear pointer on failure [20]
+ o https.c example: remember to call curl_global_init()
+ o metalink: Filter resource URLs by type
+ o multi interface: CURLOPT_LOW_SPEED_* fix during rate limitation [21]
 
 This release includes the following known bugs:
 
@@ -55,7 +68,8 @@ advice from friends like these:
  Edward Sheldrake, Jan Koen Annot, Maxime Larocque, Mike Crowe, Anthony Bryan,
  Nick Zitzmann, Gisle Vanem, Armel Asselin, Dan Fandrich, Dave Reisner,
  Gokhan Sengun, Sara Golemon, Olivier Berger, Marc Hoersken, David Blaikie,
- Alessandro Ghedini, František Kučera, Marcel Raad
+ Alessandro Ghedini, František Kučera, Marcel Raad, Scott Bailey, Ho-chi Chen,
+ Tomas Mlcoch, Jie He, Tatsuhiro Tsujikawa, Sergei Nikulov
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -77,3 +91,8 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/mail/lib-2012-09/0019.html
  [15] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685402
  [16] = http://curl.haxx.se/bug/view.cgi?id=3564114
+ [17] = http://curl.haxx.se/bug/view.cgi?id=3566860
+ [18] = http://curl.haxx.se/bug/view.cgi?id=3568327
+ [19] = http://curl.haxx.se/mail/lib-2012-09/0127.html
+ [20] = http://curl.haxx.se/mail/lib-2012-09/0188.html
+ [21] = http://curl.haxx.se/mail/lib-2012-09/0081.html
