@@ -302,7 +302,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
   /* if we need a bigger buffer to read a full message, increase buffer now */
   if(connssl->encdata_length - connssl->encdata_offset <
-     CURL_SCHANNEL_BUFFER_FREE_SIZE) {
+     CURL_SCHANNEL_BUFFER_MIN_SIZE) {
     if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
       failf(data, "schannel: memory buffer size limit reached");
       return CURLE_OUT_OF_MEMORY;
@@ -831,7 +831,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
   /* increase buffer in order to fit the requested amount of data */
   while(connssl->encdata_length - connssl->encdata_offset <
-        CURL_SCHANNEL_BUFFER_FREE_SIZE || connssl->encdata_length < len) {
+        CURL_SCHANNEL_BUFFER_MIN_SIZE || connssl->encdata_length < len) {
     if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
       failf(data, "schannel: memory buffer size limit reached");
       *err = CURLE_OUT_OF_MEMORY;
@@ -907,8 +907,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
               inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
-        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
-               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
+        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_MIN_SIZE ?
+               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_MIN_SIZE;
         while(connssl->decdata_length - connssl->decdata_offset < size ||
               connssl->decdata_length < len) {
           if(connssl->decdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
