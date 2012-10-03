@@ -100,7 +100,7 @@ SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
+SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib
 USE_SSL      = true
 SSL          = static
 !ENDIF
@@ -240,7 +240,7 @@ AS_DLL = true
 CFGSET = true
 !ENDIF
 
-WIN_LIBS    = ws2_32.lib wldap32.lib
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 !IF "$(CFGSET)" == "FALSE"
 !ERROR please choose a valid mode
 !ENDIF
