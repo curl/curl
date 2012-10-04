@@ -370,7 +370,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   long timeout;
   bool socks5_resolve_local = (conn->proxytype == CURLPROXY_SOCKS5)?TRUE:FALSE;
   const size_t hostname_len = strlen(hostname);
-  ssize_t len = 0, packetsize = 0;
+  ssize_t len = 0;
 
   /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
   if(!socks5_resolve_local && hostname_len > 255) {
@@ -626,22 +626,20 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   socksreq[len++] = (unsigned char)((remote_port >> 8) & 0xff); /* PORT MSB */
   socksreq[len++] = (unsigned char)(remote_port & 0xff);        /* PORT LSB */
 
-  packetsize = len;
-
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   if(conn->socks5_gssapi_enctype) {
     failf(data, "SOCKS5 gssapi protection not yet implemented.");
   }
   else
 #endif
-    code = Curl_write_plain(conn, sock, (char *)socksreq, packetsize,
-                            &written);
-  if((code != CURLE_OK) || (written != packetsize)) {
+    code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
+
+  if((code != CURLE_OK) || (len != written)) {
     failf(data, "Failed to send SOCKS5 connect request.");
     return CURLE_COULDNT_CONNECT;
   }
 
-  packetsize = 10; /* minimum packet size is 10 */
+  len = 10; /* minimum packet size is 10 */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   if(conn->socks5_gssapi_enctype) {
@@ -649,9 +647,10 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
   else
 #endif
-    result = Curl_blockread_all(conn, sock, (char *)socksreq, packetsize,
-                                &actualread);
-  if((result != CURLE_OK) || (actualread != packetsize)) {
+    result = Curl_blockread_all(conn, sock, (char *)socksreq,
+                                len, &actualread);
+
+  if((result != CURLE_OK) || (len != actualread)) {
     failf(data, "Failed to receive SOCKS5 connect request ack.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -715,11 +714,11 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   if(socksreq[3] == 3) {
     /* domain name */
     int addrlen = (int) socksreq[4];
-    packetsize = 5 + addrlen + 2;
+    len = 5 + addrlen + 2;
   }
   else if(socksreq[3] == 4) {
     /* IPv6 */
-    packetsize = 4 + 16 + 2;
+    len = 4 + 16 + 2;
   }
 
   /* At this point we already read first 10 bytes */
@@ -727,11 +726,11 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   if(!conn->socks5_gssapi_enctype) {
     /* decrypt_gssapi_blockread already read the whole packet */
 #endif
-    if(packetsize > 10) {
-      packetsize -= 10;
+    if(len > 10) {
+      len -= 10;
       result = Curl_blockread_all(conn, sock, (char *)&socksreq[10],
-                                  packetsize, &actualread);
-      if((result != CURLE_OK) || (actualread != packetsize)) {
+                                  len, &actualread);
+      if((result != CURLE_OK) || (len != actualread)) {
         failf(data, "Failed to receive SOCKS5 connect request ack.");
         return CURLE_COULDNT_CONNECT;
       }
