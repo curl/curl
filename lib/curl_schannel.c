@@ -697,7 +697,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   InitSecBuffer(&outbuf[0], SECBUFFER_STREAM_HEADER,
                 data, connssl->stream_sizes.cbHeader);
   InitSecBuffer(&outbuf[1], SECBUFFER_DATA,
-                data + connssl->stream_sizes.cbHeader, len);
+                data + connssl->stream_sizes.cbHeader, curlx_uztoul(len));
   InitSecBuffer(&outbuf[2], SECBUFFER_STREAM_TRAILER,
                 data + connssl->stream_sizes.cbHeader + len,
                 connssl->stream_sizes.cbTrailer);
