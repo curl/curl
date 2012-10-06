@@ -284,7 +284,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   CURLcode code;
   bool doread;
 
-  doread = (connssl->connecting_state != ssl_connect_2_writing)?TRUE:FALSE;
+  doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
@@ -302,12 +302,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
   /* if we need a bigger buffer to read a full message, increase buffer now */
   if(connssl->encdata_length - connssl->encdata_offset <
-     CURL_SCHANNEL_BUFFER_MIN_SIZE) {
-    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-      failf(data, "schannel: memory buffer size limit reached");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
+     CURL_SCHANNEL_BUFFER_FREE_SIZE) {
     /* increase internal encrypted data buffer */
     connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
@@ -831,13 +826,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
   /* increase buffer in order to fit the requested amount of data */
   while(connssl->encdata_length - connssl->encdata_offset <
-        CURL_SCHANNEL_BUFFER_MIN_SIZE || connssl->encdata_length < len) {
-    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-      failf(data, "schannel: memory buffer size limit reached");
-      *err = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
-
+        CURL_SCHANNEL_BUFFER_FREE_SIZE || connssl->encdata_length < len) {
     /* increase internal encrypted data buffer */
     connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
@@ -907,16 +896,10 @@ schannel_recv(struct connectdata *conn, int sockindex,
               inbuf[1].cbBuffer);
 
         /* increase buffer in order to fit the received amount of data */
-        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_MIN_SIZE ?
-               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_MIN_SIZE;
+        size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
+               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
         while(connssl->decdata_length - connssl->decdata_offset < size ||
               connssl->decdata_length < len) {
-          if(connssl->decdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-            failf(data, "schannel: memory buffer size limit reached");
-            *err = CURLE_OUT_OF_MEMORY;
-            return -1;
-          }
-
           /* increase internal decrypted data buffer */
           connssl->decdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
           connssl->decdata_buffer = realloc(connssl->decdata_buffer,
