@@ -863,7 +863,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
         connssl->encdata_offset, connssl->encdata_length);
 
   /* check if we still have some data in our buffers */
-  while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK) {
+  while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK &&
+        connssl->decdata_offset < len) {
     /* prepare data buffer for DecryptMessage call */
     InitSecBuffer(&inbuf[0], SECBUFFER_DATA, connssl->encdata_buffer,
                   curlx_uztoul(connssl->encdata_offset));
@@ -970,6 +971,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
     }
   }
 
+  infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
+        connssl->decdata_offset, connssl->decdata_length);
+
   /* copy requested decrypted data to supplied buffer */
   size = len < connssl->decdata_offset ? len : connssl->decdata_offset;
   if(size > 0) {
@@ -980,6 +984,10 @@ schannel_recv(struct connectdata *conn, int sockindex,
     memmove(connssl->decdata_buffer, connssl->decdata_buffer + size,
             connssl->decdata_offset - size);
     connssl->decdata_offset -= size;
+
+    infof(data, "schannel: decrypted data returned %zd\n", size);
+    infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
+          connssl->decdata_offset, connssl->decdata_length);
   }
 
   /* check if the server closed the connection */
