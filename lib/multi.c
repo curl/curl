@@ -1024,8 +1024,12 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     ++nfds;
   }
 
-  /* wait... */
-  i = Curl_poll(ufds, nfds, timeout_ms);
+  if(nfds)
+    /* wait... */
+    i = Curl_poll(ufds, nfds, timeout_ms);
+  else
+    i = 0;
+
   free(ufds);
   if(ret)
     *ret = i;

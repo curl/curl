@@ -43,6 +43,9 @@ similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
 On completion, if \fInumfds\fP is supplied, it will be populated with the
 number of file descriptors on which interesting events occured.
 
+If no extra file descriptors are provided and libcurl has no file descriptor
+to offer to wait for, this function will return immediately.
+
 This function is encouraged to be used instead of select(3) when using the
 multi interface to allow applications to easier circumvent the common problem
 with 1024 maximum file descriptors.
@@ -67,6 +70,6 @@ events such as the socket being clear to write without blocking.
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH AVAILABILITY
-This function was added in libcurl 7.28.0
+This function was added in libcurl 7.28.0.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_perform "(3)"
