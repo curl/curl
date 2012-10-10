@@ -1,62 +1,19 @@
-Curl and libcurl 7.28.0
+Curl and libcurl 7.28.1
 
- Public curl releases:         129
+ Public curl releases:         130
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 953
+ Contributors:                 979
 
 This release includes the following changes:
 
- o SSH: added agent based authentication
- o ftp: active conn, allow application to set sockopt after accept() call
-   with CURLSOCKTYPE_ACCEPT
- o multi: add curl_multi_wait() [12]
- o metalink: Added support for Microsoft Windows CryptoAPI
- o md5: Added support for Microsoft Windows CryptoAPI
- o parse_proxy: treat "socks://x" as a socks4 proxy [17]
- o socks: Added support for IPv6 connections through SOCKSv5 proxy
+ o 
 
 This release includes the following bugfixes:
 
- o WSAPoll disabled on Windows builds due to its bugs [8]
- o segfault on request retries [1]
- o curl-config: parentheses fix [2]
- o VC build: add define for openssl [3]
- o globbing: fix segfault when >9 globs were used [4]
- o fixed a few clang-analyzer warnings
- o metalink: change code order to build with gnutls-nettle [5]
- o gtls: fix build failure by including nettle-specific headers [5]
- o change preferred HTTP auth on a handle previously used for another auth [9]
- o file: use fdopen() to avoid race condition [6]
- o Added DWANT_IDN_PROTOTYPES define for MSVC too [7]
- o verbose: fixed (nil) output of hostnames in re-used connections [10]
- o metalink: Un-broke the build when building --with-darwinssl
- o curl man page cleanup
- o Avoid leak of local device string when reusing connection
- o Curl_socket_check: fix return code for timeout [11]
- o nss: do not print misleading NSS error codes
- o configure: remove the --enable/disable-nonblocking options
- o darwinssl: add TLS 1.1 and 1.2 support, replace deprecated functions
- o NTLM: re-use existing connection better
- o schannel crash on multi and easy handle cleanup
- o SOCKS: truly disable it if CURL_DISABLE_PROXY is defined [13]
- o mk-ca-bundle: detect start of trust section better [14]
- o gnutls: do not fail on non-fatal handshake errors [15]
- o SMTP: only send SIZE if supported [16]
- o ftpserver: respond with a 250 to SMTP EHLO
- o ssh: do not crash if MD5 fingerprint is not provided by libssh2
- o winbuild: Added support for building with SPNEGO enabled
- o metalink: Fixed validation of binary files containing EOF
- o setup.h: fixed for MS VC10 build [18]
- o cmake: use standard findxxx modules for cmake v2.8+
- o HTTP_ONLY: disable more protocols [19]
- o Curl_reconnect_request: clear pointer on failure [20]
- o https.c example: remember to call curl_global_init()
- o metalink: Filter resource URLs by type
- o multi interface: CURLOPT_LOW_SPEED_* fix during rate limitation [21]
- o curl_schannel: Removed buffer limit and optimized buffer strategy
+ o 
 
 This release includes the following known bugs:
 
@@ -65,35 +22,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Guenter Knauf, Joe Mason, Kamil Dudka, Steve Holme, Anthony G. Basile,
- Edward Sheldrake, Jan Koen Annot, Maxime Larocque, Mike Crowe, Anthony Bryan,
- Nick Zitzmann, Gisle Vanem, Armel Asselin, Dan Fandrich, Dave Reisner,
- Gokhan Sengun, Sara Golemon, Olivier Berger, Marc Hoersken, David Blaikie,
- Alessandro Ghedini, František Kučera, Marcel Raad, Scott Bailey, Ho-chi Chen,
- Tomas Mlcoch, Jie He, Tatsuhiro Tsujikawa, Sergei Nikulov, Mark Tully
-
+ 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=3544688
- [2] = http://curl.haxx.se/bug/view.cgi?id=3551460
- [3] = http://curl.haxx.se/bug/view.cgi?id=3552997
- [4] = http://curl.haxx.se/bug/view.cgi?id=3546353
- [5] = http://curl.haxx.se/bug/view.cgi?id=3554668
- [6] = https://bugzilla.redhat.com/844385
- [7] = http://curl.haxx.se/mail/lib-2012-07/0271.html
- [8] = http://curl.haxx.se/mail/lib-2012-07/0310.html
- [9] = http://curl.haxx.se/bug/view.cgi?id=3545398
- [10] = http://curl.haxx.se/mail/lib-2012-07/0111.html
- [11] = http://curl.haxx.se/mail/lib-2012-07/0122.html
- [12] = http://daniel.haxx.se/blog/2012/09/03/introducing-curl_multi_wait/
- [13] = http://curl.haxx.se/bug/view.cgi?id=3561305
- [14] = http://curl.haxx.se/mail/lib-2012-09/0019.html
- [15] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685402
- [16] = http://curl.haxx.se/bug/view.cgi?id=3564114
- [17] = http://curl.haxx.se/bug/view.cgi?id=3566860
- [18] = http://curl.haxx.se/bug/view.cgi?id=3568327
- [19] = http://curl.haxx.se/mail/lib-2012-09/0127.html
- [20] = http://curl.haxx.se/mail/lib-2012-09/0188.html
- [21] = http://curl.haxx.se/mail/lib-2012-09/0081.html
+ 
