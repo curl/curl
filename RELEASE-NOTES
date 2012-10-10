@@ -56,6 +56,7 @@ This release includes the following bugfixes:
  o https.c example: remember to call curl_global_init()
  o metalink: Filter resource URLs by type
  o multi interface: CURLOPT_LOW_SPEED_* fix during rate limitation [21]
+ o curl_schannel: Removed buffer limit and optimized buffer strategy
 
 This release includes the following known bugs:
 
@@ -69,7 +70,7 @@ advice from friends like these:
  Nick Zitzmann, Gisle Vanem, Armel Asselin, Dan Fandrich, Dave Reisner,
  Gokhan Sengun, Sara Golemon, Olivier Berger, Marc Hoersken, David Blaikie,
  Alessandro Ghedini, František Kučera, Marcel Raad, Scott Bailey, Ho-chi Chen,
- Tomas Mlcoch, Jie He, Tatsuhiro Tsujikawa, Sergei Nikulov
+ Tomas Mlcoch, Jie He, Tatsuhiro Tsujikawa, Sergei Nikulov, Mark Tully
 
         Thanks! (and sorry if I forgot to mention someone)
 
