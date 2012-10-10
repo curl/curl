@@ -34,13 +34,12 @@ EXTRA_DIST = README Makefile.example Makefile.inc Makefile.m32 \
 # $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 
-INCLUDES = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_builddir)/include/curl \
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include \
+              -DCURL_NO_OLDIES
 
 LIBDIR = $(top_builddir)/lib
-
-AM_CPPFLAGS = -DCURL_NO_OLDIES
 
 # Mostly for Windows build targets, when using static libcurl
 if USE_CPPFLAG_CURL_STATICLIB

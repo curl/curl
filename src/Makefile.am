@@ -34,19 +34,19 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
 # $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
 
-INCLUDES = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include        \
-           -I$(top_builddir)/lib          \
-           -I$(top_builddir)/src          \
-           -I$(top_srcdir)/lib            \
-           -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_builddir)/include/curl \
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_builddir)/src          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl
 
 # Mostly for Windows build targets, when using static libcurl
 if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS = -DCURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 include Makefile.inc
