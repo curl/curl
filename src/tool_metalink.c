@@ -219,7 +219,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   gcry_md_close(*ctx);
 }
 
-#elif defined(_WIN32)
+#elif defined(_WIN32) && !defined(USE_SSLEAY)
 
 static void win32_crypto_final(struct win32_crypto_hash *ctx,
                                unsigned char *digest,
