@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o TFTP: handle resends
  o autoconf: don't force-disable compiler debug option
  o winbuild: Fix PDB file output [17]
+ o test2032: spurious failure caused by premature termination [18]
 
 This release includes the following known bugs:
 
@@ -81,3 +82,4 @@ References to bug reports and discussions on issues:
  [15] = https://github.com/bagder/curl/pull/50
  [16] = http://curl.haxx.se/mail/lib-2012-11/0125.html
  [17] = http://curl.haxx.se/bug/view.cgi?id=3586741
+ [18] = http://curl.haxx.se/mail/lib-2012-11/0095.html

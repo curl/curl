@@ -207,7 +207,7 @@ int test(char *url)
     }
 
     if (state == NeedSocketForNewHandle) {
-      if (found_new_socket) {
+      if(!found_new_socket) {
         fprintf(stderr, "Warning: socket did not open immediately for new "
                 "handle (trying again)\n");
         continue;
@@ -234,7 +234,7 @@ int test(char *url)
       /* if there's no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
          sense */
-      if(num_handles == MAX_EASY_HANDLES) {
+      if(!running && num_handles == MAX_EASY_HANDLES) {
         break;
       }
     }
