@@ -52,10 +52,10 @@
 #  define MD5_CTX    gcry_md_hd_t
 #  define SHA_CTX    gcry_md_hd_t
 #  define SHA256_CTX gcry_md_hd_t
-#elif defined(USE_DARWINSSL)
-/* For darwinssl: CommonCrypto has the functions we need. The library's
-   headers are even backward-compatible with OpenSSL's headers as long as
-   we define COMMON_DIGEST_FOR_OPENSSL first.
+#elif defined(__MAC_10_4) || defined(__IPHONE_5_0)
+/* For Apple operating systems: CommonCrypto has the functions we need.
+   The library's headers are even backward-compatible with OpenSSL's
+   headers as long as we define COMMON_DIGEST_FOR_OPENSSL first.
 
    These functions are available on Tiger and later, as well as iOS 5.0
    and later. If you're building for an older cat, well, sorry. */
