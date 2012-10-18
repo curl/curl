@@ -26,7 +26,7 @@
  * Kowalczyk.
  *
  * The parser is found at
- * http://code.google.com/p/streamhtmlparser/
+ * http://code.google.com/p/htmlstreamparser/
  */
 
 #include <stdio.h>
