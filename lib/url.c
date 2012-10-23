@@ -2589,7 +2589,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_TYPE:
-    if(strncmp((char *)va_arg(param, char *), "SRP", strlen("SRP")) == 0)
+    if(strnequal((char *)va_arg(param, char *), "SRP", strlen("SRP")))
       data->set.ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
