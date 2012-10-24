@@ -304,10 +304,30 @@ static CURLcode handshake(struct connectdata *conn,
         return CURLE_OK;
     }
     else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
-      failf(data, "gnutls_handshake() warning: %s", gnutls_strerror(rc));
+      char *strerr = NULL;
+
+      if(rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
+        int alert = gnutls_alert_get(session);
+        strerr = gnutls_alert_get_name(alert);
+      }
+
+      if(strerr == NULL)
+        strerr = gnutls_strerror(rc);
+
+      failf(data, "gnutls_handshake() warning: %s", strerr);
     }
     else if(rc < 0) {
-      failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
+      char *strerr = NULL;
+
+      if(rc == GNUTLS_E_FATAL_ALERT_RECEIVED) {
+        int alert = gnutls_alert_get(session);
+        strerr = gnutls_alert_get_name(alert);
+      }
+
+      if(strerr == NULL)
+        strerr = gnutls_strerror(rc);
+
+      failf(data, "gnutls_handshake() failed: %s", strerr);
       return CURLE_SSL_CONNECT_ERROR;
     }
 
