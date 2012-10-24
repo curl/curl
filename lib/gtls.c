@@ -299,21 +299,21 @@ static CURLcode handshake(struct connectdata *conn,
       connssl->connecting_state =
         gnutls_record_get_direction(session)?
         ssl_connect_2_writing:ssl_connect_2_reading;
+      continue;
       if(nonblocking)
         return CURLE_OK;
     }
-    else if((rc < 0) && gnutls_error_is_fatal(rc)) {
+    else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
       failf(data, "gnutls_handshake() warning: %s", gnutls_strerror(rc));
     }
     else if(rc < 0) {
       failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
       return CURLE_SSL_CONNECT_ERROR;
     }
-    else {
-      /* Reset our connect state machine */
-      connssl->connecting_state = ssl_connect_1;
-      return CURLE_OK;
-    }
+
+    /* Reset our connect state machine */
+    connssl->connecting_state = ssl_connect_1;
+    return CURLE_OK;
   }
 }
 
