@@ -32,6 +32,7 @@ CFGSET=true
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
+!MESSAGE   MACHINE=<X86 or X64>         - Target architecture (default x86)
 !ERROR please choose a valid mode
 
 !ENDIF
