@@ -112,12 +112,10 @@ SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 
 !IF "$(WITH_ZLIB)"=="dll"
 ZLIB_LIBS   = zlib.lib
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 ZLIB_LIBS   = zlib_a.lib
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF
