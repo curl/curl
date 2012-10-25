@@ -68,3 +68,4 @@ where <options> is one or many of:
   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
   DEBUG=<yes or no>            - Debug builds
+  MACHINE=<X86 or X64>         - Target architecture (default is X86)
