@@ -66,6 +66,7 @@ LFLAGS_PDB = /incremental:no /opt:ref,icf
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 LIB_NAME_STATIC        = libcurl_a.lib
 LIB_NAME_STATIC_DEBUG  = libcurl_a_debug.lib
 LIB_NAME_DLL           = libcurl.dll
@@ -148,8 +149,8 @@ USE_IDN   = true
 !ENDIF
 
 !IF "$(USE_IDN)"=="true"
-CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
-LFLAGS    = $(LFLAGS) Normaliz.lib
+IDN_CFLAGS = $(IDN_CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+WIN_LIBS   = $(WIN_LIBS) Normaliz.lib
 !ENDIF
 
 
@@ -196,13 +197,13 @@ USE_WINSSL  = $(USE_SSPI)
 USE_WINSSL  = true
 !ENDIF
 
+
 !IF "$(USE_WINSSL)"=="true"
 !IF "$(USE_SSPI)"!="true"
 !ERROR cannot build with WinSSL without SSPI
 !ENDIF
 SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
 !ENDIF
-
 
 
 !IF "$(GEN_PDB)"=="yes"
@@ -235,7 +236,6 @@ AS_DLL = true
 CFGSET = true
 !ENDIF
 
-WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 !IF "$(CFGSET)" == "FALSE"
 !ERROR please choose a valid mode
 !ENDIF
@@ -301,6 +301,10 @@ LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS) $(ZLIB_LIBS)
 !IF "$(USE_SSH2)"=="true"
 CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
+!ENDIF
+
+!IF "$(USE_IDN)"=="true"
+CFLAGS = $(CFLAGS) $(IDN_CFLAGS)
 !ENDIF
 
 !IF "$(USE_IPV6)"=="true"
