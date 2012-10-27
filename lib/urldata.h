@@ -332,10 +332,9 @@ struct ssl_connect_data {
 struct ssl_config_data {
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
-  long verifypeer;       /* set TRUE if this is desired */
-  long verifyhost;       /* 0: no verify
-                            1: check that CN exists
-                            2: CN must match hostname */
+
+  bool verifypeer;       /* set TRUE if this is desired */
+  bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   const char *CRLfile;   /* CRL to check certificate revocation */
@@ -994,8 +993,8 @@ struct connectdata {
   int socks5_gssapi_enctype;
 #endif
 
-  long verifypeer;
-  long verifyhost;
+  bool verifypeer;
+  bool verifyhost;
 
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is

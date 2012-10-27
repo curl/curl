@@ -1292,14 +1292,9 @@ static CURLcode verifyhost(struct connectdata *conn,
       res = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
-      if(data->set.ssl.verifyhost > 1) {
-        failf(data, "SSL: certificate subject name '%s' does not match "
-              "target host name '%s'", peer_CN, conn->host.dispname);
-        res = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      else
-        infof(data, "\t common name: %s (does not match '%s')\n",
-              peer_CN, conn->host.dispname);
+      failf(data, "SSL: certificate subject name '%s' does not match "
+            "target host name '%s'", peer_CN, conn->host.dispname);
+      res = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
       infof(data, "\t common name: %s (matched)\n", peer_CN);

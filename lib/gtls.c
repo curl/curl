@@ -681,7 +681,7 @@ gtls_connect_step3(struct connectdata *conn,
   rc = gnutls_x509_crt_check_hostname(x509_cert, conn->host.name);
 
   if(!rc) {
-    if(data->set.ssl.verifyhost > 1) {
+    if(data->set.ssl.verifyhost) {
       failf(data, "SSL: certificate subject name (%s) does not match "
             "target host name '%s'", certbuf, conn->host.dispname);
       gnutls_x509_crt_deinit(x509_cert);

@@ -632,7 +632,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  bool sni = true;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -809,7 +808,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
 #endif
-     sni) {
+     data->set.ssl.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
                                strlen(conn->host.name));
     if(err != noErr) {

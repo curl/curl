@@ -160,7 +160,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #ifdef ENABLE_IPV6
        Curl_inet_pton(AF_INET6, conn->host.name, &addr6) ||
 #endif
-       data->set.ssl.verifyhost < 2) {
+       !data->set.ssl.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
       infof(data, "schannel: using IP address, disable SNI servername "
             "check\n");
@@ -1238,10 +1238,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   }
 
   if(result == CURLE_OK) {
-    if(data->set.ssl.verifyhost == 1) {
-      infof(data, "warning: ignoring unsupported value (1) ssl.verifyhost\n");
-    }
-    else if(data->set.ssl.verifyhost == 2) {
+    if(data->set.ssl.verifyhost) {
       TCHAR cert_hostname_buff[128];
       xcharp_u hostname;
       xcharp_u cert_hostname;
