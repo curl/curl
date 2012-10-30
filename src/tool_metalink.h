@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-typedef void (* Curl_digest_init_func)(void *context);
+typedef int (* Curl_digest_init_func)(void *context);
 typedef void (* Curl_digest_update_func)(void *context,
                                          const unsigned char *data,
                                          unsigned int len);
@@ -137,8 +137,8 @@ int check_metalink_content_type(const char *content_type);
  * -1:
  *   Could not open file; or could not read data from file.
  * -2:
- *   No checksum in Metalink supported; or Metalink does not contain
- *   checksum.
+ *   No checksum in Metalink supported, hash algorithm not available, or
+ *   Metalink does not contain checksum.
  */
 int metalink_check_hash(struct Configurable *config,
                         metalinkfile *mlfile,

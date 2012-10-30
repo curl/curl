@@ -112,9 +112,10 @@ struct win32_crypto_hash {
 
 #ifdef USE_GNUTLS_NETTLE
 
-static void MD5_Init(MD5_CTX *ctx)
+static int MD5_Init(MD5_CTX *ctx)
 {
   md5_init(ctx);
+  return 0;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -129,9 +130,10 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-static void SHA1_Init(SHA_CTX *ctx)
+static int SHA1_Init(SHA_CTX *ctx)
 {
   sha1_init(ctx);
+  return 0;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -146,9 +148,10 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
   sha1_digest(ctx, 20, digest);
 }
 
-static void SHA256_Init(SHA256_CTX *ctx)
+static int SHA256_Init(SHA256_CTX *ctx)
 {
   sha256_init(ctx);
+  return 0;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -165,9 +168,10 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 
 #elif defined(USE_GNUTLS)
 
-static void MD5_Init(MD5_CTX *ctx)
+static int MD5_Init(MD5_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_MD5, 0);
+  return 0;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -183,9 +187,10 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   gcry_md_close(*ctx);
 }
 
-static void SHA1_Init(SHA_CTX *ctx)
+static int SHA1_Init(SHA_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_SHA1, 0);
+  return 0;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -201,9 +206,10 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
   gcry_md_close(*ctx);
 }
 
-static void SHA256_Init(SHA256_CTX *ctx)
+static int SHA256_Init(SHA256_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_SHA256, 0);
+  return 0;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -235,12 +241,13 @@ static void win32_crypto_final(struct win32_crypto_hash *ctx,
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
-static void MD5_Init(MD5_CTX *ctx)
+static int MD5_Init(MD5_CTX *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
                          PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
   }
+  return 0;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -255,12 +262,13 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   win32_crypto_final(ctx, digest, 16);
 }
 
-static void SHA1_Init(SHA_CTX *ctx)
+static int SHA1_Init(SHA_CTX *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
                          PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA1, 0, 0, &ctx->hHash);
   }
+  return 0;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -275,12 +283,13 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
   win32_crypto_final(ctx, digest, 20);
 }
 
-static void SHA256_Init(SHA256_CTX *ctx)
+static int SHA256_Init(SHA256_CTX *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
                          PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
   }
+  return 0;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -374,7 +383,10 @@ digest_context *Curl_digest_init(const digest_params *dparams)
 
   ctxt->digest_hash = dparams;
 
-  dparams->digest_init(ctxt->digest_hashctx);
+  if(dparams->digest_init(ctxt->digest_hashctx) != 0) {
+    free(ctxt);
+    return NULL;
+  }
 
   return ctxt;
 }
@@ -425,6 +437,8 @@ static unsigned char hex_to_uint(const char *s)
  *   Checksum didn't match.
  * -1:
  *   Could not open file; or could not read data from file.
+ * -2:
+ *   Hash algorithm not available.
  */
 static int check_hash(const char *filename,
                       const metalink_digest_def *digest_def,
@@ -446,7 +460,15 @@ static int check_hash(const char *filename,
             digest_def->hash_name, strerror(errno));
     return -1;
   }
+
   dctx = Curl_digest_init(digest_def->dparams);
+  if(!dctx) {
+    fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
+            digest_def->hash_name, "failed to initialize hash algorithm");
+    close(fd);
+    return -2;
+  }
+
   result = malloc(digest_def->dparams->digest_resultlen);
   while(1) {
     unsigned char buf[4096];
