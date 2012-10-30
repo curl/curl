@@ -52,6 +52,15 @@
 #  define MD5_CTX    gcry_md_hd_t
 #  define SHA_CTX    gcry_md_hd_t
 #  define SHA256_CTX gcry_md_hd_t
+#elif defined(USE_NSS)
+#  include <nss.h>
+#  include <pk11pub.h>
+#  define MD5_CTX    void *
+#  define SHA_CTX    void *
+#  define SHA256_CTX void *
+#  ifdef HAVE_NSS_INITCONTEXT
+     static NSSInitContext *nss_context;
+#  endif
 #elif defined(__MAC_10_4) || defined(__IPHONE_5_0)
 /* For Apple operating systems: CommonCrypto has the functions we need.
    The library's headers are even backward-compatible with OpenSSL's
@@ -223,6 +232,95 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), 32);
   gcry_md_close(*ctx);
+}
+
+#elif defined(USE_NSS)
+
+static int nss_hash_init(void **pctx, SECOidTag hash_alg)
+{
+  PK11Context *ctx;
+
+  /* we have to initialize NSS if not initialized alraedy */
+#ifdef HAVE_NSS_INITCONTEXT
+  if(!NSS_IsInitialized() && !nss_context) {
+    static NSSInitParameters params;
+    params.length = sizeof params;
+    nss_context = NSS_InitContext("", "", "", "", &params, NSS_INIT_READONLY
+        | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
+        | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
+  }
+#endif
+
+  ctx = PK11_CreateDigestContext(hash_alg);
+  if(!ctx)
+    return -1;
+
+  if(PK11_DigestBegin(ctx) != SECSuccess) {
+    PK11_DestroyContext(ctx, PR_TRUE);
+    return -1;
+  }
+
+  *pctx = ctx;
+  return 0;
+}
+
+static void nss_hash_final(void **pctx, unsigned char *out, unsigned int len)
+{
+  PK11Context *ctx = *pctx;
+  unsigned int outlen;
+  PK11_DigestFinal(ctx, out, &outlen, len);
+  PK11_DestroyContext(ctx, PR_TRUE);
+}
+
+static int MD5_Init(MD5_CTX *pctx)
+{
+  return nss_hash_init(pctx, SEC_OID_MD5);
+}
+
+static void MD5_Update(MD5_CTX *pctx,
+                       const unsigned char *input,
+                       unsigned int input_len)
+{
+  PK11_DigestOp(*pctx, input, input_len);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *pctx)
+{
+  nss_hash_final(pctx, digest, 16);
+}
+
+static int SHA1_Init(SHA_CTX *pctx)
+{
+  return nss_hash_init(pctx, SEC_OID_SHA1);
+}
+
+static void SHA1_Update(SHA_CTX *pctx,
+                        const unsigned char *input,
+                        unsigned int input_len)
+{
+  PK11_DigestOp(*pctx, input, input_len);
+}
+
+static void SHA1_Final(unsigned char digest[20], SHA_CTX *pctx)
+{
+  nss_hash_final(pctx, digest, 20);
+}
+
+static int SHA256_Init(SHA256_CTX *pctx)
+{
+  return nss_hash_init(pctx, SEC_OID_SHA256);
+}
+
+static void SHA256_Update(SHA256_CTX *pctx,
+                          const unsigned char *input,
+                          unsigned int input_len)
+{
+  PK11_DigestOp(*pctx, input, input_len);
+}
+
+static void SHA256_Final(unsigned char digest[32], SHA256_CTX *pctx)
+{
+  nss_hash_final(pctx, digest, 32);
 }
 
 #elif defined(_WIN32) && !defined(USE_SSLEAY)
@@ -797,6 +895,12 @@ void clean_metalink(struct Configurable *config)
 
 void metalink_cleanup(void)
 {
+#if defined(USE_NSS) && defined(HAVE_NSS_INITCONTEXT)
+  if(nss_context) {
+    NSS_ShutdownContext(nss_context);
+    nss_context = NULL;
+  }
+#endif
 }
 
 #endif /* USE_METALINK */

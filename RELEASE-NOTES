@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o OpenSSL: show full issuer string [10]
  o fix HTTP auth regression [11]
  o CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value [12]
+ o build failure when configured with --with-nss --with-libmetalink [13]
 
 This release includes the following known bugs:
 
@@ -61,3 +62,4 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/bug/view.cgi?id=3579286
  [11] = http://curl.haxx.se/bug/view.cgi?id=3582718
  [12] = http://daniel.haxx.se/blog/2012/10/25/libcurl-claimed-to-be-dangerous/
+ [13] = http://sourceforge.net/tracker/?func=detail&atid=100976&aid=3578163&group_id=976
