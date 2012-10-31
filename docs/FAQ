@@ -1,4 +1,3 @@
-Updated: December 7, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -97,6 +96,7 @@ FAQ
   5.13 How do I stop an ongoing transfer?
   5.14 Using C++ non-static functions for callbacks?
   5.15 How do I get an FTP directory listing?
+  5.16 I want a different time-out!
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -1293,6 +1293,22 @@ FAQ
   list parser is available at http://cr.yp.to/ftpparse.html  Versions of
   libcurl since 7.21.0 also provide the ability to specify a wildcard to
   download multiple files from one FTP directory.
+
+  5.16 I want a different time-out!
+
+  Time and time again users realize that CURLOPT_TIMEOUT and
+  CURLOPT_CONNECTIMEOUT are not sufficiently advanced or flexible to cover all
+  the various use cases and scenarios applications end up with.
+
+  libcurl offers many more ways to time-out operations. A common alternative
+  is to use the CURLOPT_LOW_SPEED_LIMIT and CURLOPT_LOW_SPEED_TIME options to
+  specify the lowest possible speed to accept before to consider the transfer
+  timed out.
+
+  The most flexible way is by writing your own time-out logic and using
+  CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
+  use that to figure out exactly when the right condition is met when the
+  transfer should get stopped.
 
 
 6. License Issues

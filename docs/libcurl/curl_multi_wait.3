@@ -21,7 +21,7 @@
 .\" **************************************************************************
 .TH curl_multi_wait 3 "12 Jul 2012" "libcurl 7.28.0" "libcurl Manual"
 .SH NAME
-curl_multi_select - polls on all easy handles in a multi handle
+curl_multi_wait - polls on all easy handles in a multi handle
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -30,7 +30,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
-                          int *ret);
+                          int *numfds);
 .ad
 .SH DESCRIPTION
 This function polls on all file descriptors used by the curl easy handles
@@ -40,8 +40,11 @@ detected on at least one of the handles or \fItimeout_ms\fP has passed.
 The calling application may pass additional curl_waitfd structures which are
 similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
 
-On completion, if \fIret\fI is supplied, it will be populated with the
+On completion, if \fInumfds\fP is supplied, it will be populated with the
 number of file descriptors on which interesting events occured.
+
+If no extra file descriptors are provided and libcurl has no file descriptor
+to offer to wait for, this function will return immediately.
 
 This function is encouraged to be used instead of select(3) when using the
 multi interface to allow applications to easier circumvent the common problem
@@ -67,6 +70,6 @@ events such as the socket being clear to write without blocking.
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH AVAILABILITY
-This function was added in libcurl 7.28.0
+This function was added in libcurl 7.28.0.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_perform "(3)"

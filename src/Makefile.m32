@@ -180,6 +180,17 @@ ifdef SSH2
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef SSL
+  ifndef OPENSSL_INCLUDE
+    ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
+    endif
+    ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
+    endif
+  endif
+  ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
+  $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
+  endif
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
@@ -195,7 +206,8 @@ ifdef SSL
   ifndef DYN
     OPENSSL_LIBS += -lgdi32 -lcrypt32
   endif
-  CFLAGS += -DUSE_SSLEAY
+  INCLUDES += -I"$(OPENSSL_INCLUDE)"
+  CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
@@ -213,9 +225,9 @@ ifdef WINIDN
 endif
 endif
 ifdef METALINK
-  INCLUDES += -I"$(LIBMETALINK_PATH)/lib/includes"
+  INCLUDES += -I"$(LIBMETALINK_PATH)/include"
   CFLAGS += -DUSE_METALINK
-  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib/.libs" -lmetalink.dll
+  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI

@@ -52,10 +52,10 @@
 #  define MD5_CTX    gcry_md_hd_t
 #  define SHA_CTX    gcry_md_hd_t
 #  define SHA256_CTX gcry_md_hd_t
-#elif defined(USE_DARWINSSL)
-/* For darwinssl: CommonCrypto has the functions we need. The library's
-   headers are even backward-compatible with OpenSSL's headers as long as
-   we define COMMON_DIGEST_FOR_OPENSSL first.
+#elif defined(__MAC_10_4) || defined(__IPHONE_5_0)
+/* For Apple operating systems: CommonCrypto has the functions we need.
+   The library's headers are even backward-compatible with OpenSSL's
+   headers as long as we define COMMON_DIGEST_FOR_OPENSSL first.
 
    These functions are available on Tiger and later, as well as iOS 5.0
    and later. If you're building for an older cat, well, sorry. */
@@ -219,7 +219,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   gcry_md_close(*ctx);
 }
 
-#elif defined(_WIN32)
+#elif defined(_WIN32) && !defined(USE_SSLEAY)
 
 static void win32_crypto_final(struct win32_crypto_hash *ctx,
                                unsigned char *digest,
@@ -573,9 +573,24 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
     tail = &root;
     for(p = fileinfo->resources; *p; ++p) {
       metalink_resource *res;
-      res = new_metalink_resource((*p)->url);
-      tail->next = res;
-      tail = res;
+      /* Filter by type if it is non-NULL. In Metalink v3, type
+         includes the type of the resource. In curl, we are only
+         interested in HTTP, HTTPS and FTP. In addition to them,
+         Metalink v3 file may contain bittorrent type URL, which
+         points to the BitTorrent metainfo file. We ignore it here.
+         In Metalink v4, type was deprecated and all
+         fileinfo->resources point to the target file. BitTorrent
+         metainfo file URL may be appeared in fileinfo->metaurls.
+      */
+      if((*p)->type == NULL ||
+         Curl_raw_equal((*p)->type, "http") ||
+         Curl_raw_equal((*p)->type, "https") ||
+         Curl_raw_equal((*p)->type, "ftp") ||
+         Curl_raw_equal((*p)->type, "ftps")) {
+        res = new_metalink_resource((*p)->url);
+        tail->next = res;
+        tail = res;
+      }
     }
     f->resource = root.next;
   }

@@ -66,6 +66,7 @@
 #else
 #include <rand.h>
 #include <x509v3.h>
+#include <md5.h>
 #endif
 
 #include "warnless.h"

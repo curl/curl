@@ -284,7 +284,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   CURLcode code;
   bool doread;
 
-  doread = (connssl->connecting_state != ssl_connect_2_writing)?TRUE:FALSE;
+  doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
@@ -303,11 +303,6 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   /* if we need a bigger buffer to read a full message, increase buffer now */
   if(connssl->encdata_length - connssl->encdata_offset <
      CURL_SCHANNEL_BUFFER_FREE_SIZE) {
-    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-      failf(data, "schannel: memory buffer size limit reached");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
     /* increase internal encrypted data buffer */
     connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
@@ -697,7 +692,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   InitSecBuffer(&outbuf[0], SECBUFFER_STREAM_HEADER,
                 data, connssl->stream_sizes.cbHeader);
   InitSecBuffer(&outbuf[1], SECBUFFER_DATA,
-                data + connssl->stream_sizes.cbHeader, len);
+                data + connssl->stream_sizes.cbHeader, curlx_uztoul(len));
   InitSecBuffer(&outbuf[2], SECBUFFER_STREAM_TRAILER,
                 data + connssl->stream_sizes.cbHeader + len,
                 connssl->stream_sizes.cbTrailer);
@@ -832,12 +827,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
   /* increase buffer in order to fit the requested amount of data */
   while(connssl->encdata_length - connssl->encdata_offset <
         CURL_SCHANNEL_BUFFER_FREE_SIZE || connssl->encdata_length < len) {
-    if(connssl->encdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-      failf(data, "schannel: memory buffer size limit reached");
-      *err = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
-
     /* increase internal encrypted data buffer */
     connssl->encdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
     connssl->encdata_buffer = realloc(connssl->encdata_buffer,
@@ -874,7 +863,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
         connssl->encdata_offset, connssl->encdata_length);
 
   /* check if we still have some data in our buffers */
-  while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK) {
+  while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK &&
+        connssl->decdata_offset < len) {
     /* prepare data buffer for DecryptMessage call */
     InitSecBuffer(&inbuf[0], SECBUFFER_DATA, connssl->encdata_buffer,
                   curlx_uztoul(connssl->encdata_offset));
@@ -911,12 +901,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
                inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
         while(connssl->decdata_length - connssl->decdata_offset < size ||
               connssl->decdata_length < len) {
-          if(connssl->decdata_length >= CURL_SCHANNEL_BUFFER_MAX_SIZE) {
-            failf(data, "schannel: memory buffer size limit reached");
-            *err = CURLE_OUT_OF_MEMORY;
-            return -1;
-          }
-
           /* increase internal decrypted data buffer */
           connssl->decdata_length *= CURL_SCHANNEL_BUFFER_STEP_FACTOR;
           connssl->decdata_buffer = realloc(connssl->decdata_buffer,
@@ -987,6 +971,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
     }
   }
 
+  infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
+        connssl->decdata_offset, connssl->decdata_length);
+
   /* copy requested decrypted data to supplied buffer */
   size = len < connssl->decdata_offset ? len : connssl->decdata_offset;
   if(size > 0) {
@@ -997,6 +984,10 @@ schannel_recv(struct connectdata *conn, int sockindex,
     memmove(connssl->decdata_buffer, connssl->decdata_buffer + size,
             connssl->decdata_offset - size);
     connssl->decdata_offset -= size;
+
+    infof(data, "schannel: decrypted data returned %zd\n", size);
+    infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
+          connssl->decdata_offset, connssl->decdata_length);
   }
 
   /* check if the server closed the connection */

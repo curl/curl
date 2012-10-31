@@ -28,6 +28,7 @@
 #include "nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
+#include "warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
@@ -279,7 +280,7 @@ static ssize_t rtmp_recv(struct connectdata *conn, int sockindex, char *buf,
 
   (void)sockindex; /* unused */
 
-  nread = RTMP_Read(r, buf, len);
+  nread = RTMP_Read(r, buf, curlx_uztosi(len));
   if(nread < 0) {
     if(r->m_read.status == RTMP_READ_COMPLETE ||
         r->m_read.status == RTMP_READ_EOF) {
@@ -300,7 +301,7 @@ static ssize_t rtmp_send(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* unused */
 
-  num = RTMP_Write(r, (char *)buf, len);
+  num = RTMP_Write(r, (char *)buf, curlx_uztosi(len));
   if(num < 0)
     *err = CURLE_SEND_ERROR;
 

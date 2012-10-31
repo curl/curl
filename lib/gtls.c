@@ -309,10 +309,11 @@ static CURLcode handshake(struct connectdata *conn,
       failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
       return CURLE_SSL_CONNECT_ERROR;
     }
-
-    /* Reset our connect state machine */
-    connssl->connecting_state = ssl_connect_1;
-    return CURLE_OK;
+    else {
+      /* Reset our connect state machine */
+      connssl->connecting_state = ssl_connect_1;
+      return CURLE_OK;
+    }
   }
 }
 

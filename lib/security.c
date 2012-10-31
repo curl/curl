@@ -340,10 +340,10 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
                          const char *buffer, size_t length)
 {
   /* FIXME: Check for overflow */
-  ssize_t len = conn->buffer_size;
-  int tx = 0;
+  ssize_t tx = 0, len = conn->buffer_size;
 
-  len -= conn->mech->overhead(conn->app_data, conn->data_prot, len);
+  len -= conn->mech->overhead(conn->app_data, conn->data_prot,
+                              curlx_sztosi(len));
   if(len <= 0)
     len = length;
   while(length) {
@@ -351,7 +351,7 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
       /* FIXME: Check for overflow. */
       len = length;
     }
-    do_sec_send(conn, fd, buffer, len);
+    do_sec_send(conn, fd, buffer, curlx_sztosi(len));
     length -= len;
     buffer += len;
     tx += len;

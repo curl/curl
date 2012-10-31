@@ -1985,7 +1985,9 @@ Curl_reconnect_request(struct connectdata **connp)
   conn->bits.close = TRUE; /* enforce close of this connection */
   result = Curl_done(&conn, result, FALSE); /* we are so done with this */
 
-  /* conn may no longer be a good pointer */
+  /* conn may no longer be a good pointer, clear it to avoid mistakes by
+     parent functions */
+  *connp = NULL;
 
   /*
    * According to bug report #1330310. We need to check for CURLE_SEND_ERROR
