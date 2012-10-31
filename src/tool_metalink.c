@@ -773,4 +773,8 @@ void clean_metalink(struct Configurable *config)
   config->metalinkfile_last = 0;
 }
 
+void metalink_cleanup(void)
+{
+}
+
 #endif /* USE_METALINK */

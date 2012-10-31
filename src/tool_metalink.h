@@ -144,6 +144,11 @@ int metalink_check_hash(struct Configurable *config,
                         metalinkfile *mlfile,
                         const char *filename);
 
+/*
+ * Release resources allocated at global scope.
+ */
+void metalink_cleanup(void);
+
 #else /* USE_METALINK */
 
 #define count_next_metalink_resource(x)  0
