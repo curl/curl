@@ -32,6 +32,7 @@ CFGSET=true
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
+!MESSAGE   MACHINE=<X86 or X64>         - Target architecture (default x86)
 !ERROR please choose a valid mode
 
 !ENDIF
@@ -54,6 +55,10 @@ ENABLE_SSPI = $(USE_SSPI)
 !ENDIF
 
 # default options
+!IFNDEF MACHINE
+MACHINE = X86
+!ENDIF
+
 !IFNDEF ENABLE_IDN
 USE_IDN = true
 !ELSEIF "$(ENABLE_IDN)"=="yes"
@@ -120,6 +125,8 @@ USE_SSH2 = true
 SSH2     = static
 !ENDIF
 
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-$(MACHINE)
+
 !IF "$(DEBUG)"=="yes"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 !ELSE
@@ -168,14 +175,18 @@ CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
-	@SET LIBCURL_DIROBJ=$(LIBCURL_DIROBJ)
+	@SET DIROBJ=$(LIBCURL_DIROBJ)
 	@SET MACRO_NAME=LIBCURL_OBJS
 	@SET OUTFILE=LIBCURL_OBJS.inc
 	@gen_resp_file.bat $(LIBCURL_OBJS)
-	@SET LIBCURL_DIROBJ=$(CURL_DIROBJ)
+	
+	@SET DIROBJ=$(CURL_DIROBJ)
 	@SET MACRO_NAME=CURL_OBJS
 	@SET OUTFILE=CURL_OBJS.inc
 	@gen_resp_file.bat $(CURL_OBJS)
+	
+	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
+	@SET MACHINE=$(MACHINE)
 	@SET USE_IDN=$(USE_IDN)
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)

@@ -66,6 +66,7 @@ LFLAGS_PDB = /incremental:no /opt:ref,icf
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 LIB_NAME_STATIC        = libcurl_a.lib
 LIB_NAME_STATIC_DEBUG  = libcurl_a_debug.lib
 LIB_NAME_DLL           = libcurl.dll
@@ -112,12 +113,10 @@ SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 
 !IF "$(WITH_ZLIB)"=="dll"
 ZLIB_LIBS   = zlib.lib
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 ZLIB_LIBS   = zlib_a.lib
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF
@@ -150,8 +149,8 @@ USE_IDN   = true
 !ENDIF
 
 !IF "$(USE_IDN)"=="true"
-CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
-LFLAGS    = $(LFLAGS) Normaliz.lib
+IDN_CFLAGS = $(IDN_CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+WIN_LIBS   = $(WIN_LIBS) Normaliz.lib
 !ENDIF
 
 
@@ -198,6 +197,7 @@ USE_WINSSL  = $(USE_SSPI)
 USE_WINSSL  = true
 !ENDIF
 
+
 !IF "$(USE_WINSSL)"=="true"
 !IF "$(USE_SSPI)"!="true"
 !ERROR cannot build with WinSSL without SSPI
@@ -206,14 +206,10 @@ SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
 !ENDIF
 
 
-
 !IF "$(GEN_PDB)"=="yes"
 GEN_PDB = true
 !ENDIF
 
-!IFNDEF MACHINE
-MACHINE = X86
-!ENDIF
 
 !IFDEF EMBEND_MANIFEST
 MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
@@ -240,12 +236,11 @@ AS_DLL = true
 CFGSET = true
 !ENDIF
 
-WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 !IF "$(CFGSET)" == "FALSE"
 !ERROR please choose a valid mode
 !ENDIF
 
-CONFIG_NAME_LIB = libcurl
+
 
 # CURL_XX macros are for the curl.exe command
 
@@ -255,14 +250,12 @@ CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
 
 CURL_CC         = $(CC)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 !ELSE
 RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CC              = $(CC_NODEBUG) $(RTLIB)
 
 CURL_CC         = $(CC)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release
 !ENDIF
 
 CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
@@ -280,7 +273,6 @@ LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
 RESOURCE = $(LIB_DIROBJ)\libcurl.res
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
 
 # AS_DLL
 !ELSE
@@ -292,7 +284,6 @@ TARGET   = $(LIB_NAME_STATIC)
 !ENDIF
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 
 # AS_DLL
 !ENDIF
@@ -300,38 +291,36 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 !IF "$(USE_SSL)"=="true"
 CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSL_LFLAGS) $(SSL_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl-$(SSL)
 !ENDIF
 
 !IF "$(USE_ZLIB)"=="true"
 CFLAGS = $(CFLAGS) $(ZLIB_CFLAGS)
 LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS) $(ZLIB_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib-$(ZLIB)
 !ENDIF
 
 !IF "$(USE_SSH2)"=="true"
 CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssh2-$(SSH2)
+!ENDIF
+
+!IF "$(USE_IDN)"=="true"
+CFLAGS = $(CFLAGS) $(IDN_CFLAGS)
 !ENDIF
 
 !IF "$(USE_IPV6)"=="true"
 CFLAGS = $(CFLAGS) $(IPV6_CFLAGS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
 !ENDIF
 
 !IF "$(USE_SSPI)"=="true"
 CFLAGS = $(CFLAGS) $(SSPI_CFLAGS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
 !IF "$(USE_SPNEGO)"=="true"
 CFLAGS = $(CFLAGS) $(SPNEGO_CFLAGS)
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-spnego
 !ENDIF
 
 !IF "$(USE_WINSSL)"=="true"
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
+#
 !ENDIF
 
 !IF "$(GEN_PDB)"=="true"
@@ -397,6 +386,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo LFLAGS:     $(LFLAGS)
 	@echo GenPDB:     $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
+	@echo Machine:    $(MACHINE)
 	$(LNK) $(LFLAGS) $(LIB_OBJS)
 	@echo Copying libs...
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
