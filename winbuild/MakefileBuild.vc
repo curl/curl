@@ -132,7 +132,7 @@ SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
 SSH2        = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
-SSH2_LIBS   = libssh2_a_debug.lib
+SSH2_LIBS   = libssh2_a.lib user32.lib
 USE_SSH2    = true
 SSH2        = static
 !ENDIF
