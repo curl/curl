@@ -47,7 +47,7 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
-#include "rawstr.h"
+#include "hostcheck.h"
 
 
 /* SSL_read is opied from axTLS compat layer */
