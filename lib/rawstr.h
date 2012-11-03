@@ -42,4 +42,9 @@ char Curl_raw_toupper(char in);
 #define checkprefix(a,b)    Curl_raw_nequal(a,b,strlen(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
+
+#define CURL_HOST_NOMATCH 0
+#define CURL_HOST_MATCH   1
+int Curl_hostmatch(const char *hostname, const char *pattern);
+int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 #endif
