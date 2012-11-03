@@ -162,15 +162,16 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
       ) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: using IP address, Schannel will ignore "
+      infof(data, "schannel: using IP address, SNI is being disabled by "
+                  "disabling the servername check against the "
                   "subject names in server certificates.\n");
     }
 
     if(data->set.ssl.verifyhost < 2) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: verifyhost setting prevents Schannel "
-                  "from comparing the supplied target name with the "
-                  "subject names in server certificates.\n");
+      infof(data, "schannel: verifyhost setting prevents Schannel from "
+                  "comparing the supplied target name with the subject "
+                  "names in server certificates. Also disables SNI.\n");
     }
 
     switch(data->set.ssl.version) {
