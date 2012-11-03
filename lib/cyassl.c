@@ -53,6 +53,8 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+#include <cyassl/ssl.h>
+#include <cyassl/error.h>
 
 
 static Curl_recv cyassl_recv;
@@ -237,6 +239,13 @@ cyassl_connect_step2(struct connectdata *conn,
   conn->recv[sockindex] = cyassl_recv;
   conn->send[sockindex] = cyassl_send;
 
+  /* Enable RFC2818 checks */
+  if(data->set.ssl.verifyhost) {
+    ret = CyaSSL_check_domain_name(conssl->handle, conn->host.name);
+    if(ret == SSL_FAILURE)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
   ret = SSL_connect(conssl->handle);
   if(ret != 1) {
     char error_buffer[80];
@@ -246,15 +255,43 @@ cyassl_connect_step2(struct connectdata *conn,
       conssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
-
-    if(SSL_ERROR_WANT_WRITE == detail) {
+    else if(SSL_ERROR_WANT_WRITE == detail) {
       conssl->connecting_state = ssl_connect_2_writing;
       return CURLE_OK;
     }
-
-    failf(data, "SSL_connect failed with error %d: %s", detail,
+    /* There is no easy way to override only the CN matching.
+     * This will enable the override of both mismatching SubjectAltNames
+     * as also mismatching CN fields */
+    else if(DOMAIN_NAME_MISMATCH == detail) {
+#if 1
+      failf(data, "\tsubject alt name(s) or common name do not match \"%s\"\n",
+            conn->host.dispname);
+      return CURLE_PEER_FAILED_VERIFICATION;
+#else
+      /* When the CyaSSL_check_domain_name() is used and you desire to continue
+       * on a DOMAIN_NAME_MISMATCH, i.e. 'data->set.ssl.verifyhost == 0',
+       * CyaSSL version 2.4.0 will fail with an INCOMPLETE_DATA error. The only
+       * way to do this is currently to switch the CyaSSL_check_domain_name()
+       * in and out based on the 'data->set.ssl.verifyhost' value. */
+      if(data->set.ssl.verifyhost) {
+        failf(data,
+              "\tsubject alt name(s) or common name do not match \"%s\"\n",
+              conn->host.dispname);
+        return CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else {
+        infof(data,
+              "\tsubject alt name(s) and/or common name do not match \"%s\"\n",
+              conn->host.dispname);
+        return CURLE_OK;
+      }
+#endif
+    }
+    else {
+      failf(data, "SSL_connect failed with error %d: %s", detail,
           ERR_error_string(detail, error_buffer));
-    return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
 
   conssl->connecting_state = ssl_connect_3;
