@@ -50,6 +50,7 @@
 #include "select.h"
 #include "sslgen.h"
 #include "rawstr.h"
+#include "hostcheck.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
