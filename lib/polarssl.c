@@ -213,7 +213,7 @@ polarssl_connect_step1(struct connectdata *conn,
   }
 
 /* PolarSSL SVN revision r1316 to r1317 */
-#if POLARSSL_VERSION_NUMBER<=0x01010100
+#if POLARSSL_VERSION_NUMBER<=0x01010400
   ssl_set_session(&connssl->ssl, 1, 600,
                   &connssl->ssn);
 #else
@@ -313,7 +313,7 @@ polarssl_connect_step2(struct connectdata *conn,
   }
 
 /* PolarSSL SVN revision r1316 to r1317 */
-#if POLARSSL_VERSION_NUMBER<=0x01010100
+#if POLARSSL_VERSION_NUMBER<=0x01010400
   if(conn->ssl[sockindex].ssl.peer_cert) {
 #else
   if(connssl->ssl.session->peer_cert) {
@@ -322,7 +322,7 @@ polarssl_connect_step2(struct connectdata *conn,
     memset(buffer, 0, sizeof(buffer));
 
 /* PolarSSL SVN revision r1316 to r1317 */
-#if POLARSSL_VERSION_NUMBER<=0x01010100
+#if POLARSSL_VERSION_NUMBER<=0x01010400
     if(x509parse_cert_info(buffer, sizeof(buffer), (char *)"* ",
                            conn->ssl[sockindex].ssl.peer_cert) != -1)
 #else
