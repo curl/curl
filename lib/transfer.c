@@ -1433,10 +1433,6 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   data->state.ssl_connect_retry = FALSE;
 
-  /* zero out auth state */
-  memset(&data->state.authhost, 0, sizeof(struct auth));
-  memset(&data->state.authproxy, 0, sizeof(struct auth));
-
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
