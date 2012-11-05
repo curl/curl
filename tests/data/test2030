@@ -13,6 +13,18 @@ HTTP NTLM auth
 <!-- Alternate the order that Digest and NTLM headers appear in responses to
 ensure that the order doesn't matter. -->
 
+<!--
+
+ Explanation for the duplicate 400 requests:
+
+ libcurl doesn't detect that a given Digest password is wrong already on the
+ first 401 response (as the data400 gives). libcurl will instead consider the
+ new response just as a duplicate and it sends another and detects the auth
+ problem on the second 401 response!
+
+-->
+
+
 <!-- First request has NTLM auth, wrong password -->
 <data100>
 HTTP/1.1 401 Need Digest or NTLM auth
@@ -186,6 +198,13 @@ Content-Length: 29
 WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="7"
 
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: NTLM
+WWW-Authenticate: Digest realm="testrealm", nonce="7"
+
 This is a bad password page!
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
@@ -251,6 +270,11 @@ Accept: */*
 
 GET /20300300 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /20300400 HTTP/1.1
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
