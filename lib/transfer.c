@@ -1469,6 +1469,12 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
     if(data->set.connecttimeout)
       Curl_expire(data, data->set.connecttimeout);
+
+    /* In case the handle is re-used and an authentication method was picked
+       in the session we need to make sure we only use the one(s) we now
+       consider to be fine */
+    data->state.authhost.picked &= data->state.authhost.want;
+    data->state.authproxy.picked &= data->state.authproxy.want;
   }
 
   return res;
