@@ -3987,8 +3987,16 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
      last part of the URI. We are looking for the first '#' so that we deal
      gracefully with non conformant URI such as http://example.com#foo#bar. */
   fragment = strchr(path, '#');
-  if(fragment)
+  if(fragment) {
     *fragment = 0;
+
+    /* we know the path part ended with a fragment, so we know the full URL
+       string does too and we need to cut it off from there so it isn't used
+       over proxy */
+    fragment = strchr(data->change.url, '#');
+    if(fragment)
+      *fragment = 0;
+  }
 
   /*
    * So if the URL was A://B/C#D,
