@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,6 +53,9 @@ int main(void)
 
     /* always cleanup */
     curl_easy_cleanup(curl);
+
+    /* free the custom headers */
+    curl_slist_free_all(chunk);
   }
   return 0;
 }

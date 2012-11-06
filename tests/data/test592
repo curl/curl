@@ -52,6 +52,7 @@ Moooooooooooo for 592
 s/^PORT (.*)/PORT/
 s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>
+# a 421 response must prevent further commands from being sent
 <protocol>
 USER anonymous
 PASS ftp@example.com
@@ -61,10 +62,10 @@ EPRT |1|
 PORT
 TYPE I
 STOR 592
-QUIT
 </protocol>
+# 28 == CURLE_OPERATION_TIMEDOUT
 <errorcode>
-10
+28
 </errorcode>
 <upload>
 </upload>

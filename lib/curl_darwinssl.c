@@ -803,12 +803,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
-  /* If this is a domain name and not an IP address, then configure SNI: */
+  /* If this is a domain name and not an IP address, then configure SNI.
+   * Also: the verifyhost setting influences SNI usage */
   if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr))
 #ifdef ENABLE_IPV6
      && (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr))
 #endif
-    ) {
+     && data->set.ssl.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
                                strlen(conn->host.name));
     if(err != noErr) {

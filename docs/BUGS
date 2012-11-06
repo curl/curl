@@ -35,9 +35,11 @@ BUGS
   have a go at a solution. You can optionally also post your bug/problem at
   curl's bug tracking system over at
 
-        http://sourceforge.net/bugs/?group_id=976
+        http://sourceforge.net/tracker/?group_id=976&atid=100976
 
-  (but please read the sections below first before doing that)
+  Please read the rest of this document below first before doing that! Also,
+  you need to login to your sourceforge account before being able to submit a
+  bug report (necessary evil done to avoid spam).
 
   If you feel you need to ask around first, find a suitable mailing list and
   post there. The lists are available on http://curl.haxx.se/mail/
