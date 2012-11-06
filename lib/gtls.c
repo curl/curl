@@ -304,7 +304,7 @@ static CURLcode handshake(struct connectdata *conn,
         return CURLE_OK;
     }
     else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
-      char *strerr = NULL;
+      const char *strerr = NULL;
 
       if(rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
         int alert = gnutls_alert_get(session);
@@ -317,7 +317,7 @@ static CURLcode handshake(struct connectdata *conn,
       failf(data, "gnutls_handshake() warning: %s", strerr);
     }
     else if(rc < 0) {
-      char *strerr = NULL;
+      const char *strerr = NULL;
 
       if(rc == GNUTLS_E_FATAL_ALERT_RECEIVED) {
         int alert = gnutls_alert_get(session);
