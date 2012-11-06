@@ -2303,11 +2303,11 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "\t subject: %s\n", buffer);
 
   certdate = X509_get_notBefore(connssl->server_cert);
-  asn1_output(certdate, buffer, sizeof(buffer));
+  asn1_output(certdate, buffer, BUFSIZE);
   infof(data, "\t start date: %s\n", buffer);
 
   certdate = X509_get_notAfter(connssl->server_cert);
-  asn1_output(certdate, buffer, sizeof(buffer));
+  asn1_output(certdate, buffer, BUFSIZE);
   infof(data, "\t expire date: %s\n", buffer);
 
   if(data->set.ssl.verifyhost) {
@@ -2320,7 +2320,7 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
   rc = x509_name_oneline(X509_get_issuer_name(connssl->server_cert),
-                         buffer, sizeof(buffer));
+                         buffer, BUFSIZE);
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");
