@@ -1051,7 +1051,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(curlinfo->features & CURL_VERSION_SSL) {
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
+            my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
           }
           else {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
