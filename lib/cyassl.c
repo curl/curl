@@ -240,7 +240,7 @@ cyassl_connect_step2(struct connectdata *conn,
   conn->send[sockindex] = cyassl_send;
 
   /* Enable RFC2818 checks */
-  if(data->set.ssl.verifyhost > 1) {
+  if(data->set.ssl.verifyhost) {
     ret = CyaSSL_check_domain_name(conssl->handle, conn->host.name);
     if (ret == SSL_FAILURE) {
       return CURLE_OUT_OF_MEMORY;
@@ -273,7 +273,7 @@ cyassl_connect_step2(struct connectdata *conn,
        * CyaSSL version 2.4.0 will fail with an INCOMPLETE_DATA error. The only
        * way to do this is currently to switch the CyaSSL_check_domain_name()
        * in and out based on the 'data->set.ssl.verifyhost' value. */
-      if(data->set.ssl.verifyhost > 1) {
+      if(data->set.ssl.verifyhost) {
         failf(data, "\tsubject alt name(s) and/or common name do not match \"%s\"\n", conn->host.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
       }

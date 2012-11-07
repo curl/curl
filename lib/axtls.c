@@ -344,7 +344,7 @@ Curl_axtls_connect(struct connectdata *conn,
     }
     else {
       if(!Curl_cert_hostcheck((const char *)peer_CN, conn->host.name)) {
-        if(data->set.ssl.verifyhost > 1) {
+        if(data->set.ssl.verifyhost) {
           /* Break connection ! */
           Curl_axtls_close(conn, sockindex);
           failf(data, "\tcommon name \"%s\" does not match \"%s\"\n", peer_CN, conn->host.dispname);
