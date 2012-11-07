@@ -15,7 +15,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o Fix broken libmetalink-aware OpenSSL build
- o gnutls: put reset code into else block [1]
+ o gnutls: fix the error is fatal logic [1]
  o darwinssl: un-broke iOS build, fix error on server disconnect
  o asyn-ares: restore functionality with c-ares < 1.6.1 [2]
  o tlsauthtype: deal with the string case insensitively [3]
@@ -26,6 +26,12 @@ This release includes the following bugfixes:
  o FTP: prevent the multi interface from blocking [5]
  o uniformly use AM_CPPFLAGS, avoid deprecated INCLUDES
  o httpcustomheader.c: free the headers after use
+ o fix >2000 bytes POST over NTLM-using proxy [7]
+ o redirects to URLs with fragments [8]
+ o don't send '#' fragments when using proxy [9]
+ o OpenSSL: show full issuer string [10]
+ o fix HTTP auth regression [11]
+ o CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value [12]
 
 This release includes the following known bugs:
 
@@ -36,7 +42,8 @@ advice from friends like these:
 
  Guenter Knauf, Alessandro Ghedini, Nick Zitzmann, Michal Kowalczyk,
  Jeff Connelly, Oscar Norlander, Guido Berhoerster, Marc Hoersken,
- Dave Reisner, Jan Ehrhardt
+ Dave Reisner, Jan Ehrhardt, John Suprock, Alessandro Ghedini,
+ Lars Buitinck
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -48,3 +55,9 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/bug/view.cgi?id=3582408
  [5] = http://curl.haxx.se/bug/view.cgi?id=3579064
  [6] = http://curl.haxx.se/bug/view.cgi?id=3582407
+ [7] = http://curl.haxx.se/bug/view.cgi?id=3582321
+ [8] = http://curl.haxx.se/bug/view.cgi?id=3581898
+ [9] = http://curl.haxx.se/bug/view.cgi?id=3579813
+ [10] = http://curl.haxx.se/bug/view.cgi?id=3579286
+ [11] = http://curl.haxx.se/bug/view.cgi?id=3582718
+ [12] = http://daniel.haxx.se/blog/2012/10/25/libcurl-claimed-to-be-dangerous/
