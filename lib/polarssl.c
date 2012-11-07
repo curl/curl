@@ -316,7 +316,7 @@ polarssl_connect_step2(struct connectdata *conn,
 #if POLARSSL_VERSION_NUMBER<0x01020000
   if(conn->ssl[sockindex].ssl.peer_cert) {
 #else
-  if(connssl->ssl.session->peer_cert) {
+  if(ssl_get_peer_cert(&(connssl->ssl))) {
 #endif
     /* If the session was resumed, there will be no peer certs */
     memset(buffer, 0, sizeof(buffer));
@@ -327,7 +327,7 @@ polarssl_connect_step2(struct connectdata *conn,
                            conn->ssl[sockindex].ssl.peer_cert) != -1)
 #else
     if(x509parse_cert_info(buffer, sizeof(buffer), (char *)"* ",
-                           connssl->ssl.session->peer_cert) != -1)
+                           ssl_get_peer_cert(&(connssl->ssl))) != -1)
 #endif
       infof(data, "Dumping cert info:\n%s\n", buffer);
   }
