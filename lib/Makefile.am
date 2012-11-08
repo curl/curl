@@ -99,9 +99,9 @@ if SONAME_BUMP
 #
 # This conditional soname bump SHOULD be removed at next "proper" bump.
 #
-VERSIONINFO=-version-info 7:0:2
+VERSIONINFO=-version-info 8:0:3
 else
-VERSIONINFO=-version-info 6:0:2
+VERSIONINFO=-version-info 7:0:3
 endif
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
