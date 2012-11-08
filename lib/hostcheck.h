@@ -1,5 +1,5 @@
-#ifndef __RAWSTR_H
-#define __RAWSTR_H
+#ifndef __HOSTCHECK_H
+#define __HOSTCHECK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,23 +24,10 @@
 
 #include <curl/curl.h>
 
-/*
- * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
- * to be locale independent and only compare strings we know are safe for
- * this.
- *
- * The function is capable of comparing a-z case insensitively even for
- * non-ascii.
- */
-int Curl_raw_equal(const char *first, const char *second);
-int Curl_raw_nequal(const char *first, const char *second, size_t max);
-
-char Curl_raw_toupper(char in);
-
-/* checkprefix() is a shorter version of the above, used when the first
-   argument is zero-byte terminated */
-#define checkprefix(a,b)    Curl_raw_nequal(a,b,strlen(a))
-
-void Curl_strntoupper(char *dest, const char *src, size_t n);
+#define CURL_HOST_NOMATCH 0
+#define CURL_HOST_MATCH   1
+int Curl_hostmatch(const char *hostname, const char *pattern);
+int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 
 #endif
+
