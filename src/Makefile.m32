@@ -32,6 +32,14 @@ endif
 ifndef LIBMETALINK_PATH
 LIBMETALINK_PATH = ../../libmetalink-0.1.2
 endif
+# Edit the path below to point to the base of your libexpat package.
+ifndef LIBEXPAT_PATH
+LIBEXPAT_PATH = ../../expat-2.1.0
+endif
+# Edit the path below to point to the base of your libxml2 package.
+ifndef LIBXML2_PATH
+LIBXML2_PATH = ../../libxml2-2.9.0
+endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../libidn-1.18
@@ -67,6 +75,7 @@ CFLAGS	+= -D_AMD64_
 endif
 # comment LDFLAGS below to keep debug info
 LDFLAGS	= -s
+AR	= $(CROSSPREFIX)ar
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -i
 
@@ -228,6 +237,13 @@ ifdef METALINK
   INCLUDES += -I"$(LIBMETALINK_PATH)/include"
   CFLAGS += -DUSE_METALINK
   curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
+  ifndef DYN
+    ifeq ($(findstring libexpat_metalink_parser.o,$(shell $(AR) t "$(LIBMETALINK_PATH)/lib/libmetalink.a")),libexpat_metalink_parser.o)
+      curl_LDADD += -L"$(LIBEXPAT_PATH)/lib" -lexpat
+    else
+      curl_LDADD += -L"$(LIBXML2_PATH)/lib" -lxml2
+    endif
+  endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
