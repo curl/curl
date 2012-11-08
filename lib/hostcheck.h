@@ -26,7 +26,6 @@
 
 #define CURL_HOST_NOMATCH 0
 #define CURL_HOST_MATCH   1
-int Curl_hostmatch(const char *hostname, const char *pattern);
 int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 
 #endif

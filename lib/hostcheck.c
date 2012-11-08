@@ -22,6 +22,9 @@
 
 #include "setup.h"
 
+#if defined(USE_SSLEAY) || defined(USE_AXTLS)
+/* these two backends use functions from this file */
+
 #include "hostcheck.h"
 #include "rawstr.h"
 
@@ -34,7 +37,7 @@
  * http://tools.ietf.org/html/rfc6125#section-6.4.3
  */
 
-int Curl_hostmatch(const char *hostname, const char *pattern)
+static int hostmatch(const char *hostname, const char *pattern)
 {
   const char *pattern_label_end, *pattern_wildcard, *hostname_label_end;
   int wildcard_enabled;
@@ -85,7 +88,9 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   if(Curl_raw_equal(hostname, match_pattern)) /* trivial case */
     return 1;
 
-  if(Curl_hostmatch(hostname,match_pattern) == CURL_HOST_MATCH)
+  if(hostmatch(hostname,match_pattern) == CURL_HOST_MATCH)
     return 1;
   return 0;
 }
+
+#endif /* SSLEAY or AXTLS */
