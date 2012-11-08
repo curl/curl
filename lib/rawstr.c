@@ -140,3 +140,5 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
     *dest++ = Curl_raw_toupper(*src);
   } while(*src++ && --n);
 }
+
+
