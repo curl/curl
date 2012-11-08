@@ -1030,12 +1030,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(result || *done)
       return result;
   }
-  else if(k->keepon & KEEP_RECV) {
-    DEBUGF(infof(data, "additional stuff not fine %s:%d: %d %d\n",
-                 __FILE__, __LINE__,
-                 select_res & CURL_CSELECT_IN,
-                 conn->bits.stream_was_rewound));
-  }
 
   /* If we still have writing to do, we check if we have a writable socket. */
   if((k->keepon & KEEP_SEND) && (select_res & CURL_CSELECT_OUT)) {
