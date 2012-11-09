@@ -280,7 +280,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char *md5this;
   unsigned char *ha1;
   unsigned char ha2[33];/* 32 digits and 1 zero byte */
-  char cnoncebuf[7];
+  char cnoncebuf[33];
   char *cnonce = NULL;
   size_t cnonce_sz = 0;
   char *tmp = NULL;
@@ -344,7 +344,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(!d->cnonce) {
     /* Generate a cnonce */
     now = Curl_tvnow();
-    snprintf(cnoncebuf, sizeof(cnoncebuf), "%06ld", (long)now.tv_sec);
+    snprintf(cnoncebuf, sizeof(cnoncebuf), "%32ld",
+             (long)now.tv_sec + now.tv_usec);
 
     rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                             &cnonce, &cnonce_sz);
