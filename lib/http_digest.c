@@ -344,7 +344,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(!d->cnonce) {
     /* Generate a cnonce */
     now = Curl_tvnow();
-    snprintf(cnoncebuf, sizeof(cnoncebuf), "%06ld", (long)now.tv_sec);
+    snprintf(cnoncebuf, sizeof(cnoncebuf), "%06ld", (long)now.tv_sec + now.tv_usec);
 
     rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                             &cnonce, &cnonce_sz);
