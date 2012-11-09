@@ -207,7 +207,9 @@ The cURL Test Suite
      800 - 899   POP3, IMAP, SMTP
      1000 - 1299 miscellaneous*
      1300 - 1399 unit tests*
-     1400 - 1999 miscellaneous*
+     1400 - 1499 miscellaneous*
+     1500 - 1599 libcurl source code tests, not using the curl command tool
+                 (same as 5xx)
      2000 - x    multiple sequential protocols per test case*
 
   Since 30-apr-2003, there's nothing in the system that requires us to keep

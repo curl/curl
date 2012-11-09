@@ -29,7 +29,7 @@ http
 HTTP over proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/5 -x %HOSTIP:%HTTPPORT
+http://%HOSTIP:%HTTPPORT/we/want/that/page/5#5 -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 

@@ -1030,12 +1030,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(result || *done)
       return result;
   }
-  else if(k->keepon & KEEP_RECV) {
-    DEBUGF(infof(data, "additional stuff not fine %s:%d: %d %d\n",
-                 __FILE__, __LINE__,
-                 select_res & CURL_CSELECT_IN,
-                 conn->bits.stream_was_rewound));
-  }
 
   /* If we still have writing to do, we check if we have a writable socket. */
   if((k->keepon & KEEP_SEND) && (select_res & CURL_CSELECT_OUT)) {
@@ -1433,10 +1427,6 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   data->state.ssl_connect_retry = FALSE;
 
-  /* zero out auth state */
-  memset(&data->state.authhost, 0, sizeof(struct auth));
-  memset(&data->state.authproxy, 0, sizeof(struct auth));
-
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
@@ -1473,6 +1463,12 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
     if(data->set.connecttimeout)
       Curl_expire(data, data->set.connecttimeout);
+
+    /* In case the handle is re-used and an authentication method was picked
+       in the session we need to make sure we only use the one(s) we now
+       consider to be fine */
+    data->state.authhost.picked &= data->state.authhost.want;
+    data->state.authproxy.picked &= data->state.authproxy.want;
   }
 
   return res;

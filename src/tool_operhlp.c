@@ -32,6 +32,11 @@
 #include "tool_operhlp.h"
 #include "tool_version.h"
 
+#ifdef USE_METALINK
+/* import the declaration of metalink_cleanup() */
+#  include "tool_metalink.h"
+#endif
+
 #include "memdebug.h" /* keep this as LAST include */
 
 /*
@@ -215,6 +220,9 @@ void main_free(void)
 {
   curl_global_cleanup();
   convert_cleanup();
+#ifdef USE_METALINK
+  metalink_cleanup();
+#endif
 }
 
 #ifdef CURLDEBUG

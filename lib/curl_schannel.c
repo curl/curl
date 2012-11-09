@@ -156,14 +156,22 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "schannel: disable server certificate revocation checks\n");
     }
 
-    if(Curl_inet_pton(AF_INET, conn->host.name, &addr) ||
+    if(Curl_inet_pton(AF_INET, conn->host.name, &addr)
 #ifdef ENABLE_IPV6
-       Curl_inet_pton(AF_INET6, conn->host.name, &addr6) ||
+       || Curl_inet_pton(AF_INET6, conn->host.name, &addr6)
 #endif
-       data->set.ssl.verifyhost < 2) {
+      ) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: using IP address, disable SNI servername "
-            "check\n");
+      infof(data, "schannel: using IP address, SNI is being disabled by "
+                  "disabling the servername check against the "
+                  "subject names in server certificates.\n");
+    }
+
+    if(!data->set.ssl.verifyhost) {
+      schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
+      infof(data, "schannel: verifyhost setting prevents Schannel from "
+                  "comparing the supplied target name with the subject "
+                  "names in server certificates. Also disables SNI.\n");
     }
 
     switch(data->set.ssl.version) {
@@ -1238,10 +1246,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   }
 
   if(result == CURLE_OK) {
-    if(data->set.ssl.verifyhost == 1) {
-      infof(data, "warning: ignoring unsupported value (1) ssl.verifyhost\n");
-    }
-    else if(data->set.ssl.verifyhost == 2) {
+    if(data->set.ssl.verifyhost) {
       TCHAR cert_hostname_buff[128];
       xcharp_u hostname;
       xcharp_u cert_hostname;

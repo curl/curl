@@ -28,7 +28,8 @@
 
 #include "memdebug.h"
 
-static int send_request(CURL *curl, const char *url, int seq, long auth_scheme, const char *userpwd)
+static int send_request(CURL *curl, const char *url, int seq,
+                        long auth_scheme, const char *userpwd)
 {
   CURLcode res;
   char* full_url = malloc(strlen(url) + 4 + 1);
@@ -39,7 +40,8 @@ static int send_request(CURL *curl, const char *url, int seq, long auth_scheme, 
   }
 
   sprintf(full_url, "%s%04d", url, seq);
-  fprintf(stderr, "Sending new request %d to %s with credential %s (auth %ld)\n", seq, full_url, userpwd, auth_scheme);
+  fprintf(stderr, "Sending new request %d to %s with credential %s "
+          "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
@@ -50,16 +52,18 @@ static int send_request(CURL *curl, const char *url, int seq, long auth_scheme, 
   res = curl_easy_perform(curl);
 
 test_cleanup:
-  free(full_url); 
+  free(full_url);
   return res;
 }
 
-static int send_wrong_password(CURL *curl, const char *url, int seq, long auth_scheme)
+static int send_wrong_password(CURL *curl, const char *url, int seq,
+                               long auth_scheme)
 {
     return send_request(curl, url, seq, auth_scheme, "testuser:wrongpass");
 }
 
-static int send_right_password(CURL *curl, const char *url, int seq, long auth_scheme)
+static int send_right_password(CURL *curl, const char *url, int seq,
+                               long auth_scheme)
 {
     return send_request(curl, url, seq, auth_scheme, "testuser:testpass");
 }
@@ -87,7 +91,7 @@ int test(char *url)
   long fallback_auth_scheme = parse_auth_name(libtest_arg3);
 
   if (main_auth_scheme == CURLAUTH_NONE ||
-   fallback_auth_scheme == CURLAUTH_NONE) {
+      fallback_auth_scheme == CURLAUTH_NONE) {
     fprintf(stderr, "auth schemes not found on commandline\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

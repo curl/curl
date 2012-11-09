@@ -387,7 +387,8 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
        (data->state.authproxy.picked == CURLAUTH_NTLM_WB) ||
        (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
       if(((expectsend - bytessent) < 2000) ||
-         (conn->ntlm.state != NTLMSTATE_NONE)) {
+         (conn->ntlm.state != NTLMSTATE_NONE) ||
+         (conn->proxyntlm.state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started *OR* there is just a little (<2K)
            data left to send, keep on sending. */
 
@@ -407,7 +408,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
             " bytes\n", (curl_off_t)(expectsend - bytessent));
     }
 
-    /* This is not NTLM or NTLM with many bytes left to send: close
+    /* This is not NTLM or many bytes left to send: close
      */
     conn->bits.close = TRUE;
     data->req.size = 0; /* don't download any more than 0 bytes */

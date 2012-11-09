@@ -632,7 +632,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  bool sni = true;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -804,12 +803,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
+  /* If this is a domain name and not an IP address, then configure SNI.
+   * Also: the verifyhost setting influences SNI usage */
   /* If this is a domain name and not an IP address, then configure SNI: */
   if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
 #endif
-     sni) {
+     data->set.ssl.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
                                strlen(conn->host.name));
     if(err != noErr) {
@@ -863,7 +864,6 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         connssl->connecting_state = connssl->ssl_direction ?
             ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
-        break;
 
       case errSSLServerAuthCompleted:
         /* the documentation says we need to call SSLHandshake() again */
@@ -875,13 +875,16 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLCertExpired:
         failf(data, "SSL certificate problem: OSStatus %d", err);
         return CURLE_SSL_CACERT;
-        break;
+
+      case errSSLHostNameMismatch:
+        failf(data, "SSL certificate peer verification failed, the "
+              "certificate did not match \"%s\"\n", conn->host.dispname);
+        return CURLE_PEER_FAILED_VERIFICATION;
 
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
               conn->host.name, err);
         return CURLE_SSL_CONNECT_ERROR;
-        break;
     }
   }
   else {

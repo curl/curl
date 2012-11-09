@@ -63,8 +63,9 @@ TYPE I
 STOR 591
 QUIT
 </protocol>
+# CURLE_UPLOAD_FAILED = 25
 <errorcode>
-10
+25
 </errorcode>
 <upload>
 </upload>

@@ -708,7 +708,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    * switched off unless wanted.
    */
   set->ssl.verifypeer = TRUE;
-  set->ssl.verifyhost = 2;
+  set->ssl.verifyhost = TRUE;
 #ifdef USE_TLS_SRP
   set->ssl.authtype = CURL_TLSAUTH_NONE;
 #endif
@@ -2049,13 +2049,25 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Enable peer SSL verifying.
      */
-    data->set.ssl.verifypeer = va_arg(param, long);
+    data->set.ssl.verifypeer = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
   case CURLOPT_SSL_VERIFYHOST:
     /*
-     * Enable verification of the CN contained in the peer certificate
+     * Enable verification of the host name in the peer certificate
      */
-    data->set.ssl.verifyhost = va_arg(param, long);
+    arg = va_arg(param, long);
+
+    /* Obviously people are not reading documentation and too many thought
+       this argument took a boolean when it wasn't and misused it. We thus ban
+       1 as a sensible input and we warn about its use. Then we only have the
+       2 action internally stored as TRUE. */
+
+    if(1 == arg) {
+      failf(data, "CURLOPT_SSL_VERIFYHOST no longer supports 1 as value!");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+
+    data->set.ssl.verifyhost = (0 != arg)?TRUE:FALSE;
     break;
 #ifdef USE_SSLEAY
     /* since these two options are only possible to use on an OpenSSL-
@@ -3975,8 +3987,16 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
      last part of the URI. We are looking for the first '#' so that we deal
      gracefully with non conformant URI such as http://example.com#foo#bar. */
   fragment = strchr(path, '#');
-  if(fragment)
+  if(fragment) {
     *fragment = 0;
+
+    /* we know the path part ended with a fragment, so we know the full URL
+       string does too and we need to cut it off from there so it isn't used
+       over proxy */
+    fragment = strchr(data->change.url, '#');
+    if(fragment)
+      *fragment = 0;
+  }
 
   /*
    * So if the URL was A://B/C#D,

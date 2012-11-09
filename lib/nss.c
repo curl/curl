@@ -1316,8 +1316,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(!data->set.ssl.verifypeer && data->set.ssl.verifyhost)
     infof(data, "warning: ignoring value of ssl.verifyhost\n");
-  else if(data->set.ssl.verifyhost == 1)
-    infof(data, "warning: ignoring unsupported value (1) of ssl.verifyhost\n");
 
   /* bypass the default SSL_AuthCertificate() hook in case we do not want to
    * verify peer */

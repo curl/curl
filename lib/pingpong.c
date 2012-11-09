@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -424,6 +424,9 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
            it may actually contain another end of response already! */
         clipamount = gotbytes - i;
         restart = TRUE;
+        DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+                     "server response left\n",
+                     (int)clipamount));
       }
       else if(keepon) {
 

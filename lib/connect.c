@@ -1101,7 +1101,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   if(sockfd == CURL_SOCKET_BAD) {
     /* no good connect was made */
-    failf(data, "couldn't connect to host");
+    failf(data, "couldn't connect to %s at %s:%d",
+          conn->bits.proxy?"proxy":"host",
+          conn->bits.proxy?conn->proxy.name:conn->host.name, conn->port);
     return CURLE_COULDNT_CONNECT;
   }
 

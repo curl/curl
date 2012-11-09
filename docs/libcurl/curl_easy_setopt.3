@@ -2323,8 +2323,9 @@ Curl considers the server the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the host name in the
 URL to which you told Curl to connect.
 
-When the value is 1, the certificate must contain a Common Name field, but it
-doesn't matter what name it says.  (This is not ordinarily a useful setting).
+When the value is 1, libcurl will return a failure. It was previously (in
+7.28.0 and earlier) a debug option of some sorts, but it is no longer
+supported due to frequently leading to programmer mistakes.
 
 When the value is 0, the connection succeeds regardless of the names in the
 certificate.

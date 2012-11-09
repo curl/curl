@@ -9,6 +9,17 @@ HTTP Digest auth
 # Server-side
 <reply>
 
+<!--
+
+ Explanation for the duplicate 400 requests:
+
+ libcurl doesn't detect that a given Digest password is wrong already on the
+ first 401 response (as the data400 gives). libcurl will instead consider the
+ new response just as a duplicate and it sends another and detects the auth
+ problem on the second 401 response!
+
+-->
+
 <!-- First request has Digest auth, wrong password -->
 <data100>
 HTTP/1.1 401 Need Digest auth
@@ -93,16 +104,6 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
-<data500>
-HTTP/1.1 401 Need Digest auth (5)
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 27
-WWW-Authenticate: Digest realm="testrealm", nonce="8"
-
-This is not the real page!
-</data500>
-
 <data1500>
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
@@ -145,6 +146,12 @@ Content-Length: 29
 WWW-Authenticate: Digest realm="testrealm", nonce="5"
 
 This is a bad password page!
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Digest realm="testrealm", nonce="7"
+
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -214,6 +221,11 @@ Accept: */*
 
 GET /20270300 HTTP/1.1
 Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/20270300", response="4c735d2360fd6848e7cb32a11ae3612b"
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /20270400 HTTP/1.1
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20270400", response="f5906785511fb60a2af8b1cd53008ead"
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
