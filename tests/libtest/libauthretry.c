@@ -25,7 +25,7 @@
  */
 
 #include "test.h"
-
+#include "strequal.h"
 #include "memdebug.h"
 
 static int send_request(CURL *curl, const char *url, int seq,
@@ -72,11 +72,11 @@ static long parse_auth_name(const char *arg)
 {
   if (!arg)
     return CURLAUTH_NONE;
-  if (strcasecmp(arg, "basic") == 0)
+  if (strequal(arg, "basic") == 0)
     return CURLAUTH_BASIC;
-  if (strcasecmp(arg, "digest") == 0)
+  if (strequal(arg, "digest") == 0)
     return CURLAUTH_DIGEST;
-  if (strcasecmp(arg, "ntlm") == 0)
+  if (strequal(arg, "ntlm") == 0)
     return CURLAUTH_NTLM;
   return CURLAUTH_NONE;
 }

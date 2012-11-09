@@ -133,7 +133,7 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 
   (void)multi; /* unused */
   if (timeout_ms != -1) {
-    gettimeofday(timeout, 0);
+    *timeout = tutil_tvnow();
     timeout->tv_usec += timeout_ms * 1000;
   }
   else {
@@ -173,8 +173,7 @@ static int getMicroSecondTimeout(struct timeval* timeout)
 {
   struct timeval now;
   ssize_t result;
-
-  gettimeofday(&now, 0);
+  now = tutil_tvnow();
   result = (timeout->tv_sec - now.tv_sec) * 1000000 +
     timeout->tv_usec - now.tv_usec;
   if (result < 0)
