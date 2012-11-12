@@ -2982,6 +2982,10 @@ static ssize_t scp_send(struct connectdata *conn, int sockindex,
     *err = CURLE_AGAIN;
     nwrite = 0;
   }
+  else if(nwrite < LIBSSH2_ERROR_NONE) {
+    *err = libssh2_session_error_to_CURLE(nwrite);
+    nwrite = -1;
+  }
 
   return nwrite;
 }
@@ -3125,6 +3129,10 @@ static ssize_t sftp_send(struct connectdata *conn, int sockindex,
   if(nwrite == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nwrite = 0;
+  }
+  else if(nwrite < LIBSSH2_ERROR_NONE) {
+    *err = libssh2_session_error_to_CURLE(nwrite);
+    nwrite = -1;
   }
 
   return nwrite;
