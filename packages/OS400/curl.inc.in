@@ -173,6 +173,8 @@
      d                 c                   X'00000004'
      d CURLSSH_AUTH_KEYBOARD...
      d                 c                   X'00000008'
+     d CURLSSH_AUTH_AGENT...
+     d                 c                   X'00000010'
      d CURLSSH_AUTH_DEFAULT...
      d                 c                   X'7FFFFFFF'                          CURLSSH_AUTH_ANY
       *
@@ -236,8 +238,10 @@
      d                 c                   1
      d CURL_REDIR_POST_302...
      d                 c                   2
+     d CURL_REDIR_POST_303...
+     d                 c                   4
      d CURL_REDIR_POST_ALL...
-     d                 c                   3
+     d                 c                   7
       *
      d CURL_POLL_NONE  c                   0
      d CURL_POLL_IN    c                   1
@@ -299,6 +303,13 @@
      d CURL_FNMATCHFUNC_FAIL...
      d                 c                   2
       *
+     d CURL_WAIT_POLLIN...
+     d                 c                   X'0001'
+     d CURL_WAIT_POLLPRI...
+     d                 c                   X'0002'
+     d CURL_WAIT_POLLOUT...
+     d                 c                   X'0004'
+      *
       **************************************************************************
       *                                Types
       **************************************************************************
@@ -327,11 +338,11 @@
      d                 c                   8
      d  CURLE_REMOTE_ACCESS_DENIED...
      d                 c                   9
-     d  CURLE_OBSOLETE10...
+     d  CURLE_FTP_ACCEPT_FAILED...
      d                 c                   10
      d  CURLE_FTP_WEIRD_PASS_REPLY...
      d                 c                   11
-     d  CURLE_OBSOLETE12...
+     d  CURLE_FTP_ACCEPT_TIMEOUT...
      d                 c                   12
      d  CURLE_FTP_WEIRD_PASV_REPLY...
      d                 c                   13
@@ -640,6 +651,9 @@
      d                 c                   2
      d  CURLUSESSL_ALL...
      d                 c                   3
+      *
+     d CURLSSLOPT_ALLOW_BEAST...
+     d                 c                   1
       *
       /if not defined(CURL_NO_OLDIES)
      d curl_ftpssl     s                   like(curl_usessl)
@@ -1124,6 +1138,20 @@
      d                 c                   10209
      d  CURLOPT_GSSAPI_DELEGATION...
      d                 c                   00210
+     d  CURLOPT_DNS_SERVERS...
+     d                 c                   10211
+     d  CURLOPT_ACCEPTTIMEOUT_MS...
+     d                 c                   00212
+     d  CURLOPT_TCP_KEEPALIVE...
+     d                 c                   00213
+     d  CURLOPT_TCP_KEEPIDLE...
+     d                 c                   00214
+     d  CURLOPT_TCP_KEEPINTVL...
+     d                 c                   00215
+     d  CURLOPT_SSL_OPTIONS...
+     d                 c                   00216
+     d  CURLOPT_MAIL_AUTH...
+     d                 c                   10217
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_SSLKEYPASSWD...
@@ -1385,6 +1413,8 @@
      d curlsocktype    s             10i 0 based(######ptr######)               Enum
      d  CURLSOCKTYPE_IPCXN...
      d                 c                   0
+     d  CURLSOCKTYPE_ACCEPT...
+     d                 c                   1
       *
      d  CURL_SOCKOPT_OK...
      d                 c                   0
@@ -1470,6 +1500,13 @@
      d  data                           *
      d   whatever                      *   overlay(data)                        void *
      d   result                            overlay(data) like(CURLcode)
+      *
+     d curl_waitfd...
+     d                 ds                  based(######ptr######)
+     d                                     qualified
+     d  fd                                 like(curl_socket_t)
+     d  events                        5i 0
+     d  revents                       5i 0
       *
      d curl_http_post...
      d                 ds                  based(######ptr######)
@@ -1915,6 +1952,15 @@
      d  write_fd_set              65535    options(*varsize)                    fd_set
      d  exc_fd_set                65535    options(*varsize)                    fd_set
      d  max_fd                       10i 0
+      *
+     d curl_multi_wait...
+     d                 pr                  extproc('curl_multi_wait')
+     d                                     like(CURLMcode)
+     d  multi_handle                   *   value                                CURLM *
+     d  extra_fds                      *   value                                curl_waitfd *
+     d  extra_nfds                   10u 0 value
+     d  timeout_ms                   10i 0 value
+     d  ret                          10i 0 options(*omit)
       *
      d curl_multi_perform...
      d                 pr                  extproc('curl_multi_perform')

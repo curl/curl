@@ -1032,7 +1032,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 #ifdef USE_TLS_SRP
     if ((int) STRING_LAST != (int) STRING_TLSAUTH_PASSWORD + 1)
 #else
-    if ((int) STRING_LAST != (int) STRING_MAIL_FROM + 1)
+    if ((int) STRING_LAST != (int) STRING_MAIL_AUTH + 1)
 #endif
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1051,6 +1051,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_COOKIELIST:
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
+  case CURLOPT_DNS_SERVERS:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
   case CURLOPT_FTP_ACCOUNT:
@@ -1061,6 +1062,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_KEYPASSWD:
   case CURLOPT_KRBLEVEL:
   case CURLOPT_MAIL_FROM:
+  case CURLOPT_MAIL_AUTH:
   case CURLOPT_NETRC_FILE:
   case CURLOPT_NOPROXY:
   case CURLOPT_PASSWORD:
