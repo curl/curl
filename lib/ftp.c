@@ -157,6 +157,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
                              int *ftpcode,
                              size_t *size);
 
+static CURLcode ftp_epsv_disable(struct connectdata *conn);
+
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z)    if((result = Curl_ftpsendf(x,y,z)) != CURLE_OK) \
                               return result
@@ -1982,19 +1984,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   Curl_resolv_unlock(data, addr); /* we're done using this address */
 
-  if(result && ftpc->count1 == 0 && ftpcode == 229) {
-    infof(data, "got positive EPSV response, but can't connect. "
-          "Disabling EPSV\n");
-    /* disable it for next transfer */
-    conn->bits.ftp_use_epsv = FALSE;
-    data->state.errorbuf = FALSE; /* allow error message to get rewritten */
-    PPSENDF(&ftpc->pp, "PASV", NULL);
-    ftpc->count1++;
-    /* remain in the FTP_PASV state */
-    return result;
- }
-
-  if(result)
+  if(result && ftpc->count1 == 0 && ftpcode == 229)
+    return ftp_epsv_disable(conn);
+  if (result)
     return result;
 
   conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
@@ -2035,7 +2027,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     break;
   }
 
-  if(result)
+  if(result && ftpc->count1 == 0 && ftpcode == 229)
+    return ftp_epsv_disable(conn);
+  if (result)
     return result;
 
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
@@ -4587,5 +4581,22 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
 
   return CURLE_OK;
 }
+
+
+/* called from ftp_state_pasv_resp to switch to PASV in case of EPSV connectoin error */
+static CURLcode ftp_epsv_disable(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  infof(conn->data, "got positive EPSV response, but can't connect. "
+                    "Disabling EPSV\n");
+  /* disable it for next transfer */
+  conn->bits.ftp_use_epsv = FALSE;
+  conn->data->state.errorbuf = FALSE; /* allow error message to get rewritten */
+  PPSENDF(&conn->proto.ftpc.pp, "PASV", NULL);
+  conn->proto.ftpc.count1++;
+  /* remain in the FTP_PASV state */
+  return result;
+};
+
 
 #endif /* CURL_DISABLE_FTP */
