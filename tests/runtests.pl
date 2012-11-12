@@ -2865,7 +2865,10 @@ sub singletest {
         $teststat[$testnum]=$why; # store reason for this test case
 
         if(!$short) {
-            logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+            if($skipped{$why} <= 3) {
+                # show only the first three skips for each reason
+                logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+            }
         }
 
         timestampskippedevents($testnum);
@@ -4738,13 +4741,19 @@ if($skipped && !$short) {
         # now show all test case numbers that had this reason for being
         # skipped
         my $c=0;
+        my $max = 9;
         for(0 .. scalar @teststat) {
             my $t = $_;
             if($teststat[$_] && ($teststat[$_] eq $r)) {
-                logmsg ", " if($c);
-                logmsg $_;
+                if($c < $max) {
+                    logmsg ", " if($c);
+                    logmsg $_;
+                }
                 $c++;
             }
+        }
+        if($c > $max) {
+            logmsg " and ".($c-$max)." more";
         }
         logmsg ")\n";
     }
