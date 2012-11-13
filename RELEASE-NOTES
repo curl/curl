@@ -33,6 +33,11 @@ This release includes the following bugfixes:
  o fix HTTP auth regression [11]
  o CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value [12]
  o build failure when configured with --with-nss --with-libmetalink [13]
+ o ftp: EPSV-disable fix over SOCKS [14]
+ o Digest: Add microseconds into nounce calculation [15]
+ o SCP/SFTP: improve error code used for send failures
+ o SSL: Several SSL-backend related fixes
+ o removed the notorious "additional stuff not fine" debug output
 
 This release includes the following known bugs:
 
@@ -44,7 +49,8 @@ advice from friends like these:
  Guenter Knauf, Alessandro Ghedini, Nick Zitzmann, Michal Kowalczyk,
  Jeff Connelly, Oscar Norlander, Guido Berhoerster, Marc Hoersken,
  Dave Reisner, Jan Ehrhardt, John Suprock, Alessandro Ghedini,
- Lars Buitinck
+ Lars Buitinck, Anton Malov, Sergei Nikulov, Patrick Monnerat,
+ Gabriel Sjoberg, Oscar Koeroo, Fabian Keil, Johnny Luong
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -62,4 +68,6 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/bug/view.cgi?id=3579286
  [11] = http://curl.haxx.se/bug/view.cgi?id=3582718
  [12] = http://daniel.haxx.se/blog/2012/10/25/libcurl-claimed-to-be-dangerous/
- [13] = http://sourceforge.net/tracker/?func=detail&atid=100976&aid=3578163&group_id=976
+ [13] = http://curl.haxx.se/bug/view.cgi?id=3578163
+ [14] = http://curl.haxx.se/bug/view.cgi?id=3586338
+ [15] = https://github.com/bagder/curl/pull/50
