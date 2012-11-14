@@ -56,7 +56,8 @@
 # These should be the only variables that might be needed to get edited:
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, ".");
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # run time statistics needs Time::HiRes
     eval {
         no warnings "all";

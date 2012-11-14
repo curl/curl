@@ -39,7 +39,8 @@
 #
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, '.');
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # sub second timestamping needs Time::HiRes
     eval {
         no warnings "all";
