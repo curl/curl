@@ -38,6 +38,8 @@ This release includes the following bugfixes:
  o SCP/SFTP: improve error code used for send failures
  o SSL: Several SSL-backend related fixes
  o removed the notorious "additional stuff not fine" debug output
+ o OpenSSL: Disable SSL/TLS compression - avoid the "CRIME" attack
+ o FILE: Make upload-writes unbuffered
 
 This release includes the following known bugs:
 
@@ -50,7 +52,8 @@ advice from friends like these:
  Jeff Connelly, Oscar Norlander, Guido Berhoerster, Marc Hoersken,
  Dave Reisner, Jan Ehrhardt, John Suprock, Alessandro Ghedini,
  Lars Buitinck, Anton Malov, Sergei Nikulov, Patrick Monnerat,
- Gabriel Sjoberg, Oscar Koeroo, Fabian Keil, Johnny Luong
+ Gabriel Sjoberg, Oscar Koeroo, Fabian Keil, Johnny Luong, Cristian Rodríguez,
+ Sebastian Rasmussen
 
         Thanks! (and sorry if I forgot to mention someone)
 
