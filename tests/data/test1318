@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+--resolve
 </keywords>
 </info>
 
@@ -32,7 +33,7 @@ Content-Length: 0
 http
 </server>
  <name>
-HTTP with same host name using different cases
+HTTP with --resolve and same host name using different cases
  </name>
  <command>
 --resolve MiXeDcAsE.cOm:%HTTPPORT:%HOSTIP http://MiXeDcAsE.cOm:%HTTPPORT/1318 http://mixedcase.com:%HTTPPORT/13180001
