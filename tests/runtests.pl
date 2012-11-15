@@ -1583,7 +1583,7 @@ sub runhttpserver {
     } else {
         $flags .= "--ipv$ipvnum --port 0 ";
     }
-    $flags .= "--srcdir \"$srcdir\"";
+    $flags .= "--srcdir \"$TESTDIR/..\"";
 
     my $cmd = "$exe $flags";
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -5957,6 +5957,49 @@ my $all = $total + $skipped;
 
 runtimestats($lasttest);
 
+if($all) {
+    logmsg "TESTDONE: $all tests were considered during ".
+        sprintf("%.0f", $sofar) ." seconds.\n";
+}
+
+if($skipped && !$short) {
+    my $s=0;
+    # Temporary hash to print the restraints sorted by the number
+    # of their occurences
+    my %restraints;
+    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
+
+    for(keys %skipped) {
+        my $r = $_;
+        my $skip_count = $skipped{$r};
+        my $log_line = sprintf("TESTINFO: \"%s\" %d time%s (", $r, $skip_count,
+                           ($skip_count == 1) ? "" : "s");
+
+        # now gather all test case numbers that had this reason for being
+        # skipped
+        my $c=0;
+        my $max = 9;
+        for(0 .. scalar @teststat) {
+            my $t = $_;
+            if($teststat[$t] && ($teststat[$t] eq $r)) {
+                if($c < $max) {
+                    $log_line .= ", " if($c);
+                    $log_line .= $t;
+                }
+                $c++;
+            }
+        }
+        if($c > $max) {
+            $log_line .= " and ".($c-$max)." more";
+        }
+        $log_line .= ")\n";
+        $restraints{$log_line} = $skip_count;
+    }
+    foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a}} keys %restraints) {
+        logmsg $log_line;
+    }
+}
+
 if($total) {
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
@@ -5973,40 +6016,6 @@ else {
             logmsg "$_ ";
         }
         logmsg "\n";
-    }
-}
-
-if($all) {
-    logmsg "TESTDONE: $all tests were considered during ".
-        sprintf("%.0f", $sofar) ." seconds.\n";
-}
-
-if($skipped && !$short) {
-    my $s=0;
-    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
-
-    for(keys %skipped) {
-        my $r = $_;
-        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$_};
-
-        # now show all test case numbers that had this reason for being
-        # skipped
-        my $c=0;
-        my $max = 9;
-        for(0 .. scalar @teststat) {
-            my $t = $_;
-            if($teststat[$_] && ($teststat[$_] eq $r)) {
-                if($c < $max) {
-                    logmsg ", " if($c);
-                    logmsg $_;
-                }
-                $c++;
-            }
-        }
-        if($c > $max) {
-            logmsg " and ".($c-$max)." more";
-        }
-        logmsg ")\n";
     }
 }
 
