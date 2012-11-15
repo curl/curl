@@ -5957,25 +5957,6 @@ my $all = $total + $skipped;
 
 runtimestats($lasttest);
 
-if($total) {
-    logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
-                   $ok/$total*100);
-
-    if($ok != $total) {
-        logmsg "\nTESTFAIL: These test cases failed: $failed\n\n";
-    }
-}
-else {
-    logmsg "\nTESTFAIL: No tests were performed\n\n";
-    if(scalar(keys %enabled_keywords)) {
-        logmsg "TESTFAIL: Nothing matched these keywords: ";
-        for(keys %enabled_keywords) {
-            logmsg "$_ ";
-        }
-        logmsg "\n";
-    }
-}
-
 if($all) {
     logmsg "TESTDONE: $all tests were considered during ".
         sprintf("%.0f", $sofar) ." seconds.\n";
@@ -6007,6 +5988,25 @@ if($skipped && !$short) {
             logmsg " and ".($c-$max)." more";
         }
         logmsg ")\n";
+    }
+}
+
+if($total) {
+    logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
+                   $ok/$total*100);
+
+    if($ok != $total) {
+        logmsg "\nTESTFAIL: These test cases failed: $failed\n\n";
+    }
+}
+else {
+    logmsg "\nTESTFAIL: No tests were performed\n\n";
+    if(scalar(keys %enabled_keywords)) {
+        logmsg "TESTFAIL: Nothing matched these keywords: ";
+        for(keys %enabled_keywords) {
+            logmsg "$_ ";
+        }
+        logmsg "\n";
     }
 }
 
