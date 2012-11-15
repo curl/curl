@@ -35,8 +35,8 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
-Set-Cookie: foobar=name; domain=127.0.0.1; path=/;
-Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
+Set-Cookie: foobar=name; domain=%HOSTIP; path=/;
+Set-Cookie: mismatch=this; domain=%HOSTIP; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/w;
 Set-Cookie: duplicate=test; domain=.0.0.1; domain=.0.0.1; path=/donkey;
 Set-Cookie: cookie=yes; path=/we;
@@ -45,6 +45,9 @@ Set-Cookie: nocookie=yes; path=/WE;
 Set-Cookie: blexp=yesyes; domain=.0.0.1; domain=.0.0.1; expiry=totally bad;
 
 </file>
+<precheck>
+perl -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs ending with .0.0.1"; exit(1)}'
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"
