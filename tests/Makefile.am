@@ -28,7 +28,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  sshserver.pl sshhelp.pm testcurl.1 runtests.1 $(HTMLPAGES) $(PDFPAGES) \
  CMakeLists.txt certs/scripts/*.sh certs/Server* certs/EdelCurlRoot* \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
- certs/srp-verifier-conf certs/srp-verifier-db
+ certs/srp-verifier-conf certs/srp-verifier-db mem-include-scan.pl
 
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to

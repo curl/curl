@@ -30,6 +30,10 @@
 
 #include "curl_multibyte.h"
 
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 #ifdef WANT_IDN_PROTOTYPES
 WINBASEAPI int WINAPI IdnToAscii(DWORD, const WCHAR *, int, WCHAR *, int);
 WINBASEAPI int WINAPI IdnToUnicode(DWORD, const WCHAR *, int, WCHAR *, int);
