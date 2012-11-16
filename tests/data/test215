@@ -1,4 +1,10 @@
 <testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
 # Server-side
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
