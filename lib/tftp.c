@@ -591,15 +591,14 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_DATA:
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
-    if( NEXT_BLOCKNUM(state->block) == rblock ) {
+    if(NEXT_BLOCKNUM(state->block) == rblock) {
       /* This is the expected block.  Reset counters and ACK it. */
       state->retries = 0;
     }
-    else if( state->block == rblock ) {
-      /* This is the last recently received block again. Log it and ACK it again. */
-      infof(data,
-            "Received last DATA packet block %d again.\n",
-            rblock);
+    else if(state->block == rblock) {
+      /* This is the last recently received block again. Log it and ACK it
+         again. */
+      infof(data, "Received last DATA packet block %d again.\n", rblock);
     }
     else {
       /* totally unexpected, just log it */
