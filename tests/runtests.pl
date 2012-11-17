@@ -5972,7 +5972,8 @@ if($skipped && !$short) {
     for(keys %skipped) {
         my $r = $_;
         my $skip_count = $skipped{$r};
-        my $log_line = sprintf("TESTINFO: \"%s\" %d times (", $r, $skip_count);
+        my $log_line = sprintf("TESTINFO: \"%s\" %d time%s (", $r, $skip_count,
+                           ($skip_count == 1) ? "" : "s");
 
         # now gather all test case numbers that had this reason for being
         # skipped
