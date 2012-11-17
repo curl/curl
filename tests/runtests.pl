@@ -5964,13 +5964,17 @@ if($all) {
 
 if($skipped && !$short) {
     my $s=0;
+    # Temporary hash to print the restraints sorted by the number
+    # of their occurences
+    my %restraints;
     logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
 
     for(keys %skipped) {
         my $r = $_;
-        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$r};
+        my $skip_count = $skipped{$r};
+        my $log_line = sprintf("TESTINFO: \"%s\" %d times (", $r, $skip_count);
 
-        # now show all test case numbers that had this reason for being
+        # now gather all test case numbers that had this reason for being
         # skipped
         my $c=0;
         my $max = 9;
@@ -5978,16 +5982,20 @@ if($skipped && !$short) {
             my $t = $_;
             if($teststat[$t] && ($teststat[$t] eq $r)) {
                 if($c < $max) {
-                    logmsg ", " if($c);
-                    logmsg $t;
+                    $log_line .= ", " if($c);
+                    $log_line .= $t;
                 }
                 $c++;
             }
         }
         if($c > $max) {
-            logmsg " and ".($c-$max)." more";
+            $log_line .= " and ".($c-$max)." more";
         }
-        logmsg ")\n";
+        $log_line .= ")\n";
+        $restraints{$log_line} = $skip_count;
+    }
+    foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a}} keys %restraints) {
+        logmsg $log_line;
     }
 }
 
