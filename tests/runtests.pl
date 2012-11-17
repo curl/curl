@@ -5968,7 +5968,7 @@ if($skipped && !$short) {
 
     for(keys %skipped) {
         my $r = $_;
-        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$_};
+        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$r};
 
         # now show all test case numbers that had this reason for being
         # skipped
@@ -5976,10 +5976,10 @@ if($skipped && !$short) {
         my $max = 9;
         for(0 .. scalar @teststat) {
             my $t = $_;
-            if($teststat[$_] && ($teststat[$_] eq $r)) {
+            if($teststat[$t] && ($teststat[$t] eq $r)) {
                 if($c < $max) {
                     logmsg ", " if($c);
-                    logmsg $_;
+                    logmsg $t;
                 }
                 $c++;
             }
