@@ -40,6 +40,10 @@ This release includes the following bugfixes:
  o removed the notorious "additional stuff not fine" debug output
  o OpenSSL: Disable SSL/TLS compression - avoid the "CRIME" attack
  o FILE: Make upload-writes unbuffered
+ o custom memory callbacks failure with HTTP proxy (and more) [16]
+ o TFTP: handle resends
+ o autoconf: don't force-disable compiler debug option
+ o winbuild: Fix PDB file output [17]
 
 This release includes the following known bugs:
 
@@ -53,7 +57,8 @@ advice from friends like these:
  Dave Reisner, Jan Ehrhardt, John Suprock, Alessandro Ghedini,
  Lars Buitinck, Anton Malov, Sergei Nikulov, Patrick Monnerat,
  Gabriel Sjoberg, Oscar Koeroo, Fabian Keil, Johnny Luong, Cristian Rodríguez,
- Sebastian Rasmussen
+ Sebastian Rasmussen, Mark Snelling, Christian Vogt, Marcin Adamski,
+ Ajit Dhumale
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -74,3 +79,5 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/bug/view.cgi?id=3578163
  [14] = http://curl.haxx.se/bug/view.cgi?id=3586338
  [15] = https://github.com/bagder/curl/pull/50
+ [16] = http://curl.haxx.se/mail/lib-2012-11/0125.html
+ [17] = http://curl.haxx.se/bug/view.cgi?id=3586741
