@@ -165,6 +165,7 @@ my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
 my $use_external_proxy = 0;
 my $proxy_address;
+my %custom_skip_reasons;
 
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 my $VERSION;             # curl's reported version number
@@ -3597,6 +3598,31 @@ sub singletest {
         }
     }
 
+    if (!$why && defined $custom_skip_reasons{test}{$testnum}) {
+        $why = $custom_skip_reasons{test}{$testnum};
+    }
+
+    if (!$why && defined $custom_skip_reasons{tool}) {
+        foreach my $tool (getpart("client", "tool")) {
+            foreach my $tool_skip_pattern (keys %{$custom_skip_reasons{tool}}) {
+                if ($tool =~ /$tool_skip_pattern/i) {
+                    $why = $custom_skip_reasons{tool}{$tool_skip_pattern};
+                }
+            }
+        }
+    }
+
+    if (!$why && defined $custom_skip_reasons{keyword}) {
+        foreach my $keyword (getpart("info", "keywords")) {
+            foreach my $keyword_skip_pattern (keys %{$custom_skip_reasons{keyword}}) {
+                if ($keyword =~ /$keyword_skip_pattern/i) {
+                    $why = $custom_skip_reasons{keyword}{$keyword_skip_pattern};
+                }
+            }
+        }
+    }
+
+
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
     # variables and still bail out fine on errors
@@ -5328,6 +5354,28 @@ while(@ARGV) {
         # run the tests cases event based if possible
         $run_event_based=1;
     }
+    elsif($ARGV[0] eq "-E") {
+        # load additional reasons to skip tests
+        shift @ARGV;
+        my $exclude_file = $ARGV[0];
+        open(my $fd, "<", $exclude_file) or die "Couldn't open '$exclude_file': $!";
+        while(my $line = <$fd>) {
+            next if ($line =~ /^#/);
+            chomp $line;
+            my ($type, $patterns, $skip_reason) = split(/\s*:\s*/, $line, 3);
+
+            die "Unsupported type: $type\n" if($type !~ /^keyword|test|tool$/);
+
+            foreach my $pattern (split(/,/, $patterns)) {
+                if($type =~ /^test$/) {
+                    # Strip leading zeros in the test number
+                    $pattern = int($pattern);
+                }
+                $custom_skip_reasons{$type}{$pattern} = $skip_reason;
+            }
+        }
+        close($fd);
+    }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
         $gdbthis=1;
@@ -5439,6 +5487,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -c path  use this curl executable
   -d       display server debug info
   -e       event-based execution
+  -E file  load the specified file to exclude certain tests
   -g       run the test case with gdb
   -gw      run the test case with gdb as a windowed application
   -h       this help text
