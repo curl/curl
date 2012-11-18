@@ -207,7 +207,7 @@ int test(char *url)
     }
 
     if (state == NeedSocketForNewHandle) {
-      if(!found_new_socket) {
+      if(maxfd != -1 && !found_new_socket) {
         fprintf(stderr, "Warning: socket did not open immediately for new "
                 "handle (trying again)\n");
         continue;
