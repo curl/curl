@@ -1789,12 +1789,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   } WHILE_FALSE; /* just to break out from! */
 
   if(CURLM_STATE_COMPLETED == easy->state) {
-    if(data->dns.hostcachetype == HCACHE_MULTI) {
-      /* clear out the usage of the shared DNS cache */
-      data->dns.hostcache = NULL;
-      data->dns.hostcachetype = HCACHE_NONE;
-    }
-
     /* now fill in the Curl_message with this info */
     msg = &easy->msg;
 
@@ -1911,9 +1905,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       cl= n;
     }
 
-    Curl_hash_destroy(multi->hostcache);
-    multi->hostcache = NULL;
-
     Curl_hash_destroy(multi->sockhash);
     multi->sockhash = NULL;
 
@@ -1930,6 +1921,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       nexteasy=easy->next;
       if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
         /* clear out the usage of the shared DNS cache */
+        Curl_hostcache_clean(easy->easy_handle);
         easy->easy_handle->dns.hostcache = NULL;
         easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
       }
@@ -1942,6 +1934,9 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       free(easy);
       easy = nexteasy;
     }
+
+    Curl_hash_destroy(multi->hostcache);
+    multi->hostcache = NULL;
 
     free(multi);
 

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -201,10 +201,18 @@ extern sigjmp_buf curl_jmpenv;
 CURLcode Curl_set_dns_servers(struct SessionHandle *data, char *servers);
 
 /*
+ * Clean off entries from the cache
+ */
+void Curl_hostcache_clean(struct SessionHandle *data);
+
+/*
  * Destroy the hostcache of this handle.
  */
 void Curl_hostcache_destroy(struct SessionHandle *data);
 
+/*
+ * Populate the cache with specified entries from CURLOPT_RESOLVE.
+ */
 CURLcode Curl_loadhostpairs(struct SessionHandle *data);
 
 #endif /* HEADER_CURL_HOSTIP_H */
