@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--fail
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data nocheck="yes">

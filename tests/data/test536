@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTP
+HTTP GET
 pipelining
 multi
 </keywords>

@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP/1.0
+</keywords>
+</info>
+
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose

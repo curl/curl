@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--anyauth
+</keywords>
+</info>
+
 # Server-side
 <reply>
 <data>

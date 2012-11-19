@@ -1,6 +1,8 @@
 <testcase>
 <info>
 <keywords>
+HTTP
+HTTP POST
 --data-urlencode
 </keywords>
 </info>
