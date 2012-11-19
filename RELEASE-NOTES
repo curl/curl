@@ -11,6 +11,7 @@ This release includes the following changes:
 
  o metalink/md5: Use CommonCrypto on Apple operating systems
  o href_extractor: new example code extracting href elements
+ o NSS can be used for metalink hashing [13]
 
 This release includes the following bugfixes:
 
@@ -32,7 +33,6 @@ This release includes the following bugfixes:
  o OpenSSL: show full issuer string [10]
  o fix HTTP auth regression [11]
  o CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value [12]
- o build failure when configured with --with-nss --with-libmetalink [13]
  o ftp: EPSV-disable fix over SOCKS [14]
  o Digest: Add microseconds into nounce calculation [15]
  o SCP/SFTP: improve error code used for send failures
