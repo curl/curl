@@ -1,4 +1,10 @@
 <testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
 # Server-side
 <reply>
 # 16 bytes to check

@@ -1,4 +1,11 @@
 <testcase>
+<info>
+<keywords>
+FILE
+FAILURE
+</keywords>
+</info>
+
 # no Server-side
 
 # Client-side
