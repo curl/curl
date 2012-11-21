@@ -531,6 +531,7 @@ X_OBJS= \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\hmac.obj \
 	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostcheck.obj \
 	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
