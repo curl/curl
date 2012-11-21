@@ -9,7 +9,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
-COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cc cacertinmem.c	   \
+COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	   \
   ftpuploadresume.c ghiper.c hiperfifo.c htmltidy.c multithread.c	   \
   opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
   smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp
