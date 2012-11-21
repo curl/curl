@@ -20,6 +20,7 @@ connection-monitor
 <data>
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Content-Length: 33
 
 And you should ignore this data.
 </data>
@@ -46,6 +47,7 @@ Server: no
 <datacheck>
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Content-Length: 33
 
 HTTP/1.1 200 OK swsbounce
 Server: no
