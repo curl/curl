@@ -81,6 +81,9 @@ test-full:
 test-torture:
 	@(cd tests; $(MAKE) all torture-test)
 
+test-am:
+	@(cd tests; $(MAKE) all am-test)
+
 endif
 
 examples:

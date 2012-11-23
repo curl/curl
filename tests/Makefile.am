@@ -55,26 +55,31 @@ curl:
 
 if CROSSCOMPILING
 TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
-TEST_Q =
-TEST_F =
-TEST_T =
 else # if not cross-compiling:
 TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 TEST_Q = -a -s
+TEST_AM = -a -am
 TEST_F = -a -p -r
 TEST_T = -a -t
 endif
 
-test: all
+# make sure that PERL is pointing to an executable
+perlcheck:
+	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
+
+test: perhcheck all
 	$(TEST)
 
-quiet-test: all
+quiet-test: perlcheck all
 	$(TEST) $(TEST_Q)
 
-full-test: all
+am-test: perlcheck all
+	$(TEST) $(TEST_AM)
+
+full-test: perlcheck all
 	$(TEST) $(TEST_F)
 
-torture-test: all
+torture-test: perlcheck all
 	$(TEST) $(TEST_T)
 
 .1.html:
