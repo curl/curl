@@ -336,51 +336,39 @@ static curl_socket_t opensocket(void *clientp,
 
   curl_socket_t sockfd = CURL_SOCKET_BAD;
 
-  struct sockaddr_in * addr = (struct sockaddr_in *)&(address->addr);
-  char * ip_addr_str = inet_ntoa(addr->sin_addr);
-  unsigned short port = ntohs(addr->sin_port);
-
-  /* create a tcp socket object */
-  boost::asio::ip::address ip_addr = boost::asio::ip::address::from_string(ip_addr_str);
-  boost::asio::ip::tcp::endpoint endpoint(ip_addr, port);
-  boost::asio::ip::tcp::socket * tcp_socket = new boost::asio::ip::tcp::socket(io_service);
-
-  /* connect */
-  boost::system::error_code ec;
-  tcp_socket->connect(endpoint, ec);
-
-  if (ec)
+  /* restrict to ipv4 */
+  if (purpose == CURLSOCKTYPE_IPCXN && address->family == AF_INET)
   {
-    //An error occurred
-    std::cout << std::endl << "Couldn't connect to remote endpoint '" << endpoint << "' [" << ec << "][" << ec.message() << "]";
-    fprintf(MSG_OUT, "\nERROR: Returning CURL_SOCKET_BAD to signal error");
-  }
-  else
-  {
-    sockfd = tcp_socket->native_handle();
-    std::cout << std::endl << "Connected to remote endpoint '" << endpoint << "', with socket : " << sockfd;
+    /* create a tcp socket object */
+    boost::asio::ip::tcp::socket *tcp_socket = new boost::asio::ip::tcp::socket(io_service);
 
-    /* save it for monitoring */
-    socket_map.insert(std::pair<curl_socket_t, boost::asio::ip::tcp::socket *>(sockfd, tcp_socket));
+    /* open it and get the native handle*/
+    boost::system::error_code ec;
+    tcp_socket->open(boost::asio::ip::tcp::v4(), ec);
+
+    if (ec)
+    {
+      //An error occurred
+      std::cout << std::endl << "Couldn't open socket [" << ec << "][" << ec.message() << "]";
+      fprintf(MSG_OUT, "\nERROR: Returning CURL_SOCKET_BAD to signal error");
+    }
+    else
+    {
+      sockfd = tcp_socket->native_handle();
+      fprintf(MSG_OUT, "\nOpened socket %d", sockfd);
+
+      /* save it for monitoring */
+      socket_map.insert(std::pair<curl_socket_t, boost::asio::ip::tcp::socket *>(sockfd, tcp_socket));
+    }
   }
 
   return sockfd;
 }
 
-/* CURLOPT_SOCKOPTFUNCTION */
-static int sockopt_callback(void *clientp, curl_socket_t curlfd,
-                            curlsocktype purpose)
-{
-  fprintf(MSG_OUT, "\nsockopt_callback :");
-
-  /* This return code was added in libcurl 7.21.5 */
-  return CURL_SOCKOPT_ALREADY_CONNECTED;
-}
-
 /* CURLOPT_CLOSESOCKETFUNCTION */
 static int closesocket(void *clientp, curl_socket_t item)
 {
-  fprintf(MSG_OUT, "\nclosesocket :");
+  fprintf(MSG_OUT, "\nclosesocket : %d", item);
 
   std::map<curl_socket_t, boost::asio::ip::tcp::socket *>::iterator it = socket_map.find(item);
 
@@ -427,8 +415,7 @@ static void new_conn(char *url, GlobalInfo *g )
   /* call this function to get a socket */
   curl_easy_setopt(conn->easy, CURLOPT_OPENSOCKETFUNCTION, opensocket);
 
-  /* call this function to set options for the socket */
-  curl_easy_setopt(conn->easy, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
+  /* call this function to close a socket */
   curl_easy_setopt(conn->easy, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
 
   fprintf(MSG_OUT,
