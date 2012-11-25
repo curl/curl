@@ -79,7 +79,6 @@ Accept: */*
 Transfer-Encoding: chunked
 Content-Type: application/x-www-form-urlencoded
 
-
 0
 
 POST /565 HTTP/1.1

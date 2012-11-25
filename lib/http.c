@@ -2484,15 +2484,19 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(postsize) {
             /* Append the POST data chunky-style */
             result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
-            if(CURLE_OK == result)
+            if(CURLE_OK == result) {
               result = Curl_add_buffer(req_buffer, data->set.postfields,
                                        (size_t)postsize);
+              if(CURLE_OK == result)
+                 result = Curl_add_buffer(req_buffer, "\r\n", 2);
+              included_body = postsize + 2;
+            }
           }
           if(CURLE_OK == result)
             result = Curl_add_buffer(req_buffer,
-                                     "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
-          /* CR  LF   0  CR  LF  CR  LF */
-          included_body = postsize + 7;
+                                     "\x30\x0d\x0a\x0d\x0a", 5);
+          /* 0  CR  LF  CR  LF */
+          included_body += 5;
         }
         if(result)
           return result;
@@ -2526,8 +2530,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* Chunky upload is selected and we're negotiating auth still, send
            end-of-data only */
         result = Curl_add_buffer(req_buffer,
-                                 "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);
-        /* CR  LF   0  CR  LF  CR  LF */
+                                 "\x30\x0d\x0a\x0d\x0a", 5);
+        /* 0  CR  LF  CR  LF */
         if(result)
           return result;
       }
