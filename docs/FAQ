@@ -481,9 +481,10 @@ FAQ
   You can tell curl to perform optional commands both before and/or after a
   file transfer. Study the -Q/--quote option.
 
-  Since curl is used for file transfers, you don't use curl to just perform
-  FTP commands without transferring anything. Therefore you must always specify
-  a URL to transfer to/from even when doing custom FTP commands.
+  Since curl is used for file transfers, you don't normally use curl to
+  perform FTP commands without transferring anything. Therefore you must
+  always specify a URL to transfer to/from even when doing custom FTP
+  commands, or use -I which implies the "no body" option sent to libcurl.
 
   3.5 How can I disable the Accept: */* header?
 
