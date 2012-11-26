@@ -1017,10 +1017,13 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
     ufds[nfds].fd = extra_fds[i].fd;
-    ufds[nfds].events = (short) (
-      ((extra_fds[i].events & CURL_WAIT_POLLIN)  ? POLLIN  : 0) |
-      ((extra_fds[i].events & CURL_WAIT_POLLPRI) ? POLLPRI : 0) |
-      ((extra_fds[i].events & CURL_WAIT_POLLOUT) ? POLLOUT : 0) );
+    ufds[nfds].events = 0;
+    if(extra_fds[i].events & CURL_WAIT_POLLIN)
+      ufds[nfds].events |= POLLIN;
+    if(extra_fds[i].events & CURL_WAIT_POLLPRI)
+      ufds[nfds].events |= POLLPRI;
+    if(extra_fds[i].events & CURL_WAIT_POLLOUT)
+      ufds[nfds].events |= POLLOUT;
     ++nfds;
   }
 
