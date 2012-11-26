@@ -31,12 +31,12 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file);
 
 void cleanarg(char *str);
 
-int str2num(long *val, const char *str);
-int str2unum(long *val, const char *str); /* for unsigned input numbers */
+ParameterError str2num(long *val, const char *str);
+ParameterError str2unum(long *val, const char *str);
 
 long proto2num(struct Configurable *config, long *val, const char *str);
 
-int str2offset(curl_off_t *val, const char *str);
+ParameterError str2offset(curl_off_t *val, const char *str);
 
 ParameterError checkpasswd(const char *kind, char **userpwd);
 

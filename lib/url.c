@@ -2943,7 +2943,7 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *chosen = 0;
   bool canPipeline = IsPipeliningPossible(data, needle);
   bool wantNTLM = (data->state.authhost.want==CURLAUTH_NTLM) ||
-                  (data->state.authhost.want==CURLAUTH_NTLM_WB);
+                  (data->state.authhost.want==CURLAUTH_NTLM_WB) ? TRUE : FALSE;
 
   for(i=0; i< data->state.connc->num; i++) {
     bool match = FALSE;

@@ -398,9 +398,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->egd_file, nextarg);
         break;
       case 'c': /* connect-timeout */
-        rc=str2unum(&config->connecttimeout, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->connecttimeout, nextarg);
+        if(err)
+          return err;
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);
@@ -545,9 +545,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 's': /* --max-redirs */
         /* specified max no of redirects (http(s)), this accepts -1 as a
            special condition */
-        rc = str2num(&config->maxredirs, nextarg);
-        if(rc)
-          return rc;
+        err = str2num(&config->maxredirs, nextarg);
+        if(err)
+          return err;
         if(config->maxredirs < -1)
           return PARAM_BAD_NUMERIC;
         break;
@@ -592,9 +592,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'y': /* --max-filesize */
-        rc = str2offset(&config->max_filesize, nextarg);
-        if(rc)
-          return rc;
+        err = str2offset(&config->max_filesize, nextarg);
+        if(err)
+          return err;
         break;
       case 'z': /* --disable-eprt */
         config->disable_eprt = toggle;
@@ -670,19 +670,19 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->proxybasic = toggle;
         break;
       case 'g': /* --retry */
-        rc = str2unum(&config->req_retry, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->req_retry, nextarg);
+        if(err)
+          return err;
         break;
       case 'h': /* --retry-delay */
-        rc = str2unum(&config->retry_delay, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->retry_delay, nextarg);
+        if(err)
+          return err;
         break;
       case 'i': /* --retry-max-time */
-        rc = str2unum(&config->retry_maxtime, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->retry_maxtime, nextarg);
+        if(err)
+          return err;
         break;
 
       case 'k': /* --proxy-negotiate */
@@ -769,9 +769,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->nokeepalive = (!toggle)?TRUE:FALSE;
         break;
       case '3': /* --keepalive-time */
-        rc = str2unum(&config->alivetime, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->alivetime, nextarg);
+        if(err)
+          return err;
         break;
       case '4': /* --post302 */
         config->post302 = toggle;
@@ -797,9 +797,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->proxyver = CURLPROXY_HTTP_1_0;
         break;
       case '9': /* --tftp-blksize */
-        rc = str2unum(&config->tftp_blksize, nextarg);
-        if(rc)
-          return rc;
+        err = str2unum(&config->tftp_blksize, nextarg);
+        if(err)
+          return err;
         break;
       case 'A': /* --mail-from */
         GetStr(&config->mail_from, nextarg);
@@ -924,9 +924,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case 'C':
       /* This makes us continue an ftp transfer at given position */
       if(!curlx_strequal(nextarg, "-")) {
-        rc = str2offset(&config->resume_from, nextarg);
-        if(rc)
-          return rc;
+        err = str2offset(&config->resume_from, nextarg);
+        if(err)
+          return err;
         config->resume_from_current = FALSE;
       }
       else {
@@ -1317,9 +1317,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'm':
       /* specified max time */
-      rc = str2unum(&config->timeout, nextarg);
-      if(rc)
-        return rc;
+      err = str2unum(&config->timeout, nextarg);
+      if(err)
+        return err;
       break;
     case 'M': /* M for manual, huge help */
       if(toggle) { /* --no-manual shows no manual... */
@@ -1633,17 +1633,17 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'y':
       /* low speed time */
-      rc = str2unum(&config->low_speed_time, nextarg);
-      if(rc)
-        return rc;
+      err = str2unum(&config->low_speed_time, nextarg);
+      if(err)
+        return err;
       if(!config->low_speed_limit)
         config->low_speed_limit = 1;
       break;
     case 'Y':
       /* low speed limit */
-      rc = str2unum(&config->low_speed_limit, nextarg);
-      if(rc)
-        return rc;
+      err = str2unum(&config->low_speed_limit, nextarg);
+      if(err)
+        return err;
       if(!config->low_speed_time)
         config->low_speed_time = 30;
       break;

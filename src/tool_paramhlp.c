@@ -146,15 +146,15 @@ void cleanarg(char *str)
 }
 
 /*
- * Parse the string and write the long in the given address. Return non-zero
- * on failure, zero on success.
+ * Parse the string and write the long in the given address. Return PARAM_OK
+ * on success, otherwise a parameter specific error enum.
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-int str2num(long *val, const char *str)
+ParameterError str2num(long *val, const char *str)
 {
   if(str) {
     char *endptr;
@@ -168,15 +168,15 @@ int str2num(long *val, const char *str)
 }
 
 /*
- * Parse the string and write the long in the given address. Return non-zero
- * on failure, zero on success. ONLY ACCEPTS POSITIVE NUMBERS!
+ * Parse the string and write the long in the given address. Return PARAM_OK
+ * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-int str2unum(long *val, const char *str)
+ParameterError str2unum(long *val, const char *str)
 {
   if(str[0]=='-')
     return PARAM_NEGATIVE_NUMERIC; /* badness */
@@ -295,9 +295,9 @@ long proto2num(struct Configurable *config, long *val, const char *str)
  *
  * @param val  the offset to populate
  * @param str  the buffer containing the offset
- * @return zero if successful, non-zero if failure.
+ * @return PARAM_OK if successful, a parameter specific error enum if failure.
  */
-int str2offset(curl_off_t *val, const char *str)
+ParameterError str2offset(curl_off_t *val, const char *str)
 {
   char *endptr;
   if(str[0] == '-')
@@ -314,7 +314,7 @@ int str2offset(curl_off_t *val, const char *str)
     return PARAM_BAD_NUMERIC;
 #endif
   if((endptr != str) && (endptr == str + strlen(str)))
-    return 0;  /* Ok */
+    return PARAM_OK;
 
   return PARAM_BAD_NUMERIC;
 }
