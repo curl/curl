@@ -51,7 +51,7 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl \
 endif
 
 if DOING_NATIVE_WINDOWS
-AM_CPPFLAGS = -DCURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 # Makefile.inc provides neat definitions

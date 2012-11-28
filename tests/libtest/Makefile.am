@@ -61,7 +61,7 @@ DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
 # Mostly for Windows build targets, when using static libcurl
 if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS = -DCURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
