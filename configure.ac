@@ -753,7 +753,7 @@ then
     fi
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
-      LIBS="$winsock_LIB $LIBS"
+      LIBS="$LIBS $winsock_LIB"
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
@@ -869,10 +869,11 @@ CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 
 dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
-dnl servers (for providing networking support).  Save the list of required
-dnl libraries at this point for use while linking those test servers.
+dnl servers and libtest cases which require networking and clock_gettime
+dnl support.  Save the list of required libraries at this point for use
+dnl while linking those test servers and programs.
 dnl **********************************************************************
-TEST_SERVER_LIBS=$LIBS
+CURL_NETWORK_AND_TIME_LIBS=$LIBS
 
 dnl **********************************************************************
 AC_MSG_CHECKING([whether to use libgcc])
@@ -3322,22 +3323,20 @@ if test ! -z "$winsock_LIB"; then
   dnl end.
 
   LIBS="$LIBS $winsock_LIB"
-  TEST_SERVER_LIBS="$TEST_SERVER_LIBS $winsock_LIB"
 
 fi
 
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl Those in $CURL_LIBS apply to the curl command-line client only.
-dnl Those in $TEST_SERVER_LIBS apply to test servers only.
 dnl Those in $ALL_LIBS apply to all targets, including test targets.
 dnl
 LIBCURL_LIBS=$LIBS
 
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_LIBS)
-AC_SUBST(TEST_SERVER_LIBS)
 AC_SUBST(CURL_NETWORK_LIBS)
+AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
 LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
@@ -3473,8 +3472,8 @@ squeeze LIBS
 
 squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
-squeeze TEST_SERVER_LIBS
 squeeze CURL_NETWORK_LIBS
+squeeze CURL_NETWORK_AND_TIME_LIBS
 
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS

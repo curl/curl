@@ -2103,6 +2103,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     #
     curl_cv_save_LIBS="$LIBS"
     curl_cv_gclk_LIBS="unknown"
+    curl_cv_save_CURL_LIBS="$CURL_LIBS"
     #
     for x_xlibs in '' '-lrt' '-lposix4' ; do
       if test "$curl_cv_gclk_LIBS" = "unknown"; then
@@ -2196,6 +2197,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
         ac_cv_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
+        CURL_LIBS="$curl_cv_save_CURL_LIBS"
       ])
     fi
     #

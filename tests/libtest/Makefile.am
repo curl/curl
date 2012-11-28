@@ -56,7 +56,7 @@ test1022.pl Makefile.inc notexists.pl
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
 # Dependencies (may need to be overriden)
-LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
+LDADD = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
 # Mostly for Windows build targets, when using static libcurl
