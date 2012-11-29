@@ -3339,6 +3339,13 @@ AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
 LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
+dnl BLANK_AT_MAKETIME might be used in some of our Makefile.am files to
+dnl blank LIBS variable used in generated makefile at makefile processing
+dnl time. Our test server's Makefile.am uses this to prevent global LIBS
+dnl from being used for any test server build target.
+BLANK_AT_MAKETIME=
+AC_SUBST(BLANK_AT_MAKETIME)
+
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
 dnl yes or no

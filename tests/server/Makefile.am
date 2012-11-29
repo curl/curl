@@ -50,6 +50,10 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl \
               -I$(top_srcdir)/lib
 endif
 
+# Prevent global LIBS from influencing test server build targets
+BLANK_AT_MAKETIME = @BLANK_AT_MAKETIME@
+LIBS = $(BLANK_AT_MAKETIME)
+
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
