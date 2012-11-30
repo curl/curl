@@ -1539,6 +1539,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_PERFORM:
+      {
+      char *newurl = NULL;
+      bool retry = FALSE;
+
       /* check if over send speed */
       if((data->set.max_send_speed > 0) &&
          (data->progress.ulspeed > data->set.max_send_speed)) {
@@ -1586,13 +1590,29 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->easy_conn->writechannel_inuse = FALSE;
       }
 
+      if(done || (easy->result == CURLE_RECV_ERROR)) {
+        /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
+         * condition and the server closed the re-used connection exactly when
+         * we wanted to use it, so figure out if that is indeed the case.
+         */
+        CURLcode ret = Curl_retry_request(easy->easy_conn, &newurl);
+        if(!ret)
+          retry = (newurl)?TRUE:FALSE;
+
+        if(retry)
+          /* if we are to retry, set the result to OK */
+          easy->result = CURLE_OK;
+      }
+
       if(easy->result) {
-        /* The transfer phase returned error, we mark the connection to get
+        /*
+         * The transfer phase returned error, we mark the connection to get
          * closed to prevent being re-used. This is because we can't possibly
          * know if the connection is in a good shape or not now.  Unless it is
          * a protocol which uses two "channels" like FTP, as then the error
          * happened in the data connection.
          */
+
         if(!(easy->easy_conn->handler->flags & PROTOPT_DUAL))
           easy->easy_conn->bits.close = TRUE;
 
@@ -1600,13 +1620,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_done(&easy->easy_conn, easy->result, FALSE);
       }
       else if(done) {
-        char *newurl = NULL;
-        bool retry = FALSE;
         followtype follow=FOLLOW_NONE;
-
-        easy->result = Curl_retry_request(easy->easy_conn, &newurl);
-        if(!easy->result)
-          retry = (newurl)?TRUE:FALSE;
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(data);
@@ -1640,11 +1654,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(CURLE_OK == easy->result) {
             multistate(easy, CURLM_STATE_CONNECT);
             result = CURLM_CALL_MULTI_PERFORM;
+            newurl = NULL; /* handed over the memory ownership to
+                              Curl_follow(), make sure we don't free() it
+                              here */
           }
-          else if(newurl)
-            /* Since we "took it", we are in charge of freeing this on
-               failure */
-            free(newurl);
         }
         else {
           /* after the transfer is done, go DONE */
@@ -1652,13 +1665,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* but first check to see if we got a location info even though we're
              not following redirects */
           if(data->req.location) {
+            if(newurl)
+              free(newurl);
             newurl = data->req.location;
             data->req.location = NULL;
             easy->result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            if(easy->result) {
+            newurl = NULL; /* allocation was handed over */
+            if(easy->result)
               disconnect_conn = TRUE;
-              free(newurl);
-            }
           }
 
           multistate(easy, CURLM_STATE_DONE);
@@ -1666,7 +1680,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
 
+      if(newurl)
+        free(newurl);
       break;
+      }
 
     case CURLM_STATE_DONE:
 
