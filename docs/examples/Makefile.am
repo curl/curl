@@ -36,18 +36,27 @@ EXTRA_DIST = README Makefile.example Makefile.inc Makefile.m32 \
 
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \
               -I$(top_builddir)/include      \
-              -I$(top_srcdir)/include \
-              -DCURL_NO_OLDIES
+              -I$(top_srcdir)/include
 
 LIBDIR = $(top_builddir)/lib
+
+# Avoid libcurl obsolete stuff
+AM_CPPFLAGS += -DCURL_NO_OLDIES
 
 # Mostly for Windows build targets, when using static libcurl
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
+# Prevent global LIBS from influencing examples build targets
+LIBS = $(BLANK_AT_MAKETIME)
+
 # Dependencies
+if USE_EXPLICIT_LIB_DEPS
+LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
+else
 LDADD = $(LIBDIR)/libcurl.la
+endif
 
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc
