@@ -273,6 +273,7 @@ else
     REQUIRE_LIB_DEPS=yes
 fi
 AC_SUBST(REQUIRE_LIB_DEPS)
+AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$REQUIRE_LIB_DEPS = xyes)
 
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
