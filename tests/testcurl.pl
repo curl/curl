@@ -73,7 +73,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2012-07-02';
+$version='2012-11-30';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -702,6 +702,26 @@ if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
 }
 
 if ($configurebuild && !$crosscompile) {
+  my $host_triplet = get_host_triplet();
+  # build example programs for selected build targets
+  if(($host_triplet =~ /([^-]+)-([^-]+)-irix(.*)/) ||
+     ($host_triplet =~ /([^-]+)-([^-]+)-aix(.*)/) ||
+     ($host_triplet =~ /([^-]+)-([^-]+)-osf(.*)/) ||
+     ($host_triplet =~ /([^-]+)-([^-]+)-solaris2(.*)/)) {
+    chdir "$pwd/$build/docs/examples";
+    logit_spaced "build examples";
+    open(F, "$make -i 2>&1 |") or die;
+    open(LOG, ">$buildlog") or die;
+    while (<F>) {
+      s/$pwd//g;
+      print;
+      print LOG;
+    }
+    close(F);
+    close(LOG);
+    chdir "$pwd/$build";
+  }
+  # build and run full test suite
   my $o;
   if($runtestopts) {
       $o = "TEST_F=\"$runtestopts\" ";
