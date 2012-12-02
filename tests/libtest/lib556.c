@@ -52,6 +52,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   res = curl_easy_perform(curl);
 
