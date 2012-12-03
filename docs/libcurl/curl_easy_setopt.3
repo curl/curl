@@ -2093,11 +2093,12 @@ Resolve to IPv6 addresses.
 .IP CURLOPT_CONNECT_ONLY
 Pass a long. If the parameter equals 1, it tells the library to perform all
 the required proxy authentication and connection setup, but no data transfer.
-This option is useful only on HTTP URLs.
+This option is implemented for HTTP, SMTP and POP3.
 
-This option is useful with the \fICURLINFO_LASTSOCKET\fP option to
-\fIcurl_easy_getinfo(3)\fP. The library can set up the connection and then the
-application can obtain the most recently used socket for special data
+The option can be used to simply test a connection to a server, but is more
+useful when used with the \fICURLINFO_LASTSOCKET\fP option to
+\fIcurl_easy_getinfo(3)\fP as the library can set up the connection and then
+the application can obtain the most recently used socket for special data
 transfers. (Added in 7.15.2)
 .IP CURLOPT_USE_SSL
 Pass a long using one of the values from below, to make libcurl use your

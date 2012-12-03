@@ -1,4 +1,10 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
 #
 # Server-side
 <reply>

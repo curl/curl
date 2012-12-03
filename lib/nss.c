@@ -757,6 +757,8 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     static const char pem_slotname[] = "PEM Token #1";
     SECItem cert_der = { 0, NULL, 0 };
     void *proto_win = SSL_RevealPinArg(sock);
+    struct CERTCertificateStr *cert;
+    struct SECKEYPrivateKeyStr *key;
 
     PK11SlotInfo *slot = PK11_FindSlotByName(pem_slotname);
     if(NULL == slot) {
@@ -771,24 +773,27 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
       return SECFailure;
     }
 
-    *pRetCert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
+    cert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
     SECITEM_FreeItem(&cert_der, PR_FALSE);
-    if(NULL == *pRetCert) {
+    if(NULL == cert) {
       failf(data, "NSS: client certificate from file not found");
       PK11_FreeSlot(slot);
       return SECFailure;
     }
 
-    *pRetKey = PK11_FindPrivateKeyFromCert(slot, *pRetCert, NULL);
+    key = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
     PK11_FreeSlot(slot);
-    if(NULL == *pRetKey) {
+    if(NULL == key) {
       failf(data, "NSS: private key from file not found");
-      CERT_DestroyCertificate(*pRetCert);
+      CERT_DestroyCertificate(cert);
       return SECFailure;
     }
 
     infof(data, "NSS: client certificate from file\n");
-    display_cert_info(data, *pRetCert);
+    display_cert_info(data, cert);
+
+    *pRetCert = cert;
+    *pRetKey = key;
     return SECSuccess;
   }
 

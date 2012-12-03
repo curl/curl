@@ -34,6 +34,9 @@ HTTP with cookie parser and header recording
  <command>
 "http://%HOSTIP:%HTTPPORT/we/want/1105?parm1=this*that/other/thing&parm2=foobar/1105" -c log/cookie1105.txt -d "userid=myname&password=mypassword"
 </command>
+<precheck>
+perl -e 'if ("%HOSTIP" !~ /127\.0\.0\.1$/) {print "Test only works for HOSTIP 127.0.0.1"; exit(1)}'
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"

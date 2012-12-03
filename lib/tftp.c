@@ -591,16 +591,25 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
   case TFTP_EVENT_DATA:
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
-    if(NEXT_BLOCKNUM(state->block) != rblock) {
-      /* No, log it */
+    if(NEXT_BLOCKNUM(state->block) == rblock) {
+      /* This is the expected block.  Reset counters and ACK it. */
+      state->retries = 0;
+    }
+    else if(state->block == rblock) {
+      /* This is the last recently received block again. Log it and ACK it
+         again. */
+      infof(data, "Received last DATA packet block %d again.\n", rblock);
+    }
+    else {
+      /* totally unexpected, just log it */
       infof(data,
             "Received unexpected DATA packet block %d, expecting block %d\n",
             rblock, NEXT_BLOCKNUM(state->block));
       break;
     }
-    /* This is the expected block.  Reset counters and ACK it. */
+
+    /* ACK this block. */
     state->block = (unsigned short)rblock;
-    state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_ACK);
     setpacketblock(&state->spacket, state->block);
     sbytes = sendto(state->sockfd, (void *)state->spacket.data,

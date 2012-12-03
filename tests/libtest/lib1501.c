@@ -98,13 +98,13 @@ int test(char *URL)
     abort_on_test_timeout();
 
     fprintf(stderr, "ping\n");
-    gettimeofday(&before, 0);
+    before = tutil_tvnow();
 
     multi_perform(mhandle, &still_running);
 
     abort_on_test_timeout();
 
-    gettimeofday(&after, 0);
+    after = tutil_tvnow();
     e = elapsed(&before, &after);
     fprintf(stderr, "pong = %d\n", e);
 

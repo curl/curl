@@ -1,38 +1,19 @@
-Curl and libcurl 7.28.1
+Curl and libcurl 7.28.2
 
- Public curl releases:         130
+ Public curl releases:         131
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 979
+ Contributors:                 993
 
 This release includes the following changes:
 
- o metalink/md5: Use CommonCrypto on Apple operating systems
- o href_extractor: new example code extracting href elements
+ o 
 
 This release includes the following bugfixes:
 
- o Fix broken libmetalink-aware OpenSSL build
- o gnutls: fix the error is fatal logic [1]
- o darwinssl: un-broke iOS build, fix error on server disconnect
- o asyn-ares: restore functionality with c-ares < 1.6.1 [2]
- o tlsauthtype: deal with the string case insensitively [3]
- o Fixed MSVC libssh2 static build
- o evhiperfifo: fix the pointer passed to WRITEDATA [6]
- o BUGS: fix the bug tracker URL [4]
- o winbuild: Use machine type of development environment
- o FTP: prevent the multi interface from blocking [5]
- o uniformly use AM_CPPFLAGS, avoid deprecated INCLUDES
- o httpcustomheader.c: free the headers after use
- o fix >2000 bytes POST over NTLM-using proxy [7]
- o redirects to URLs with fragments [8]
- o don't send '#' fragments when using proxy [9]
- o OpenSSL: show full issuer string [10]
- o fix HTTP auth regression [11]
- o CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value [12]
- o build failure when configured with --with-nss --with-libmetalink [13]
+ o nss: prevent NSS from crashing on client auth hook failure
 
 This release includes the following known bugs:
 
@@ -41,25 +22,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Guenter Knauf, Alessandro Ghedini, Nick Zitzmann, Michal Kowalczyk,
- Jeff Connelly, Oscar Norlander, Guido Berhoerster, Marc Hoersken,
- Dave Reisner, Jan Ehrhardt, John Suprock, Alessandro Ghedini,
- Lars Buitinck
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=690551
- [2] = http://curl.haxx.se/bug/view.cgi?id=3577710
- [3] = http://curl.haxx.se/bug/view.cgi?id=3578418
- [4] = http://curl.haxx.se/bug/view.cgi?id=3582408
- [5] = http://curl.haxx.se/bug/view.cgi?id=3579064
- [6] = http://curl.haxx.se/bug/view.cgi?id=3582407
- [7] = http://curl.haxx.se/bug/view.cgi?id=3582321
- [8] = http://curl.haxx.se/bug/view.cgi?id=3581898
- [9] = http://curl.haxx.se/bug/view.cgi?id=3579813
- [10] = http://curl.haxx.se/bug/view.cgi?id=3579286
- [11] = http://curl.haxx.se/bug/view.cgi?id=3582718
- [12] = http://daniel.haxx.se/blog/2012/10/25/libcurl-claimed-to-be-dangerous/
- [13] = http://sourceforge.net/tracker/?func=detail&atid=100976&aid=3578163&group_id=976
+ 

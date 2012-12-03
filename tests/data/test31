@@ -72,6 +72,9 @@ TZ=GMT
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/31 -b none -c log/jar31.txt
 </command>
+<precheck>
+perl -e 'if ("%HOSTIP" !~ /127\.0\.0\.1$/) {print "Test only works for HOSTIP 127.0.0.1"; exit(1)}'
+</precheck>
 </client>
 
 # Verify data after the test has been "shot"

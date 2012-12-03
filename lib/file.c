@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -310,7 +310,8 @@ static CURLcode file_upload(struct connectdata *conn)
 {
   struct FILEPROTO *file = conn->data->state.proto.file;
   const char *dir = strchr(file->path, DIRSEP);
-  FILE *fp;
+  int fd;
+  int mode;
   CURLcode res=CURLE_OK;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
@@ -333,33 +334,21 @@ static CURLcode file_upload(struct connectdata *conn)
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
   if(!dir[1])
-     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
+    return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
+
+#ifdef O_BINARY
+#define MODE_DEFAULT O_WRONLY|O_CREAT|O_BINARY
+#else
+#define MODE_DEFAULT O_WRONLY|O_CREAT
+#endif
 
   if(data->state.resume_from)
-    fp = fopen( file->path, "ab" );
-  else {
-    int fd;
+    mode = MODE_DEFAULT|O_APPEND;
+  else
+    mode = MODE_DEFAULT|O_TRUNC;
 
-#ifdef DOS_FILESYSTEM
-    fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,
-              conn->data->set.new_file_perms);
-#else
-    fd = open(file->path, O_WRONLY|O_CREAT|O_TRUNC,
-              conn->data->set.new_file_perms);
-#endif
-    if(fd < 0) {
-      failf(data, "Can't open %s for writing", file->path);
-      return CURLE_WRITE_ERROR;
-    }
-#ifdef HAVE_FDOPEN
-    fp = fdopen(fd, "wb");
-#else
-    close(fd);
-    fp = fopen(file->path, "wb");
-#endif
-  }
-
-  if(!fp) {
+  fd = open(file->path, mode, conn->data->set.new_file_perms);
+  if(fd < 0) {
     failf(data, "Can't open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
   }
@@ -370,8 +359,8 @@ static CURLcode file_upload(struct connectdata *conn)
 
   /* treat the negative resume offset value as the case of "-" */
   if(data->state.resume_from < 0) {
-    if(fstat(fileno(fp), &file_stat)) {
-      fclose(fp);
+    if(fstat(fd, &file_stat)) {
+      close(fd);
       failf(data, "Can't get the size of %s", file->path);
       return CURLE_WRITE_ERROR;
     }
@@ -407,7 +396,7 @@ static CURLcode file_upload(struct connectdata *conn)
       buf2 = buf;
 
     /* write the data to the target */
-    nwrite = fwrite(buf2, 1, nread, fp);
+    nwrite = write(fd, buf2, nread);
     if(nwrite != nread) {
       res = CURLE_SEND_ERROR;
       break;
@@ -425,7 +414,7 @@ static CURLcode file_upload(struct connectdata *conn)
   if(!res && Curl_pgrsUpdate(conn))
     res = CURLE_ABORTED_BY_CALLBACK;
 
-  fclose(fp);
+  close(fd);
 
   return res;
 }

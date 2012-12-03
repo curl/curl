@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -740,14 +740,18 @@ static int hostcache_inuse(void *data, void *hc)
   return 1; /* free all entries */
 }
 
-void Curl_hostcache_destroy(struct SessionHandle *data)
+void Curl_hostcache_clean(struct SessionHandle *data)
 {
   /* Entries added to the hostcache with the CURLOPT_RESOLVE function are
    * still present in the cache with the inuse counter set to 1. Detect them
    * and cleanup!
    */
   Curl_hash_clean_with_criterium(data->dns.hostcache, data, hostcache_inuse);
+}
 
+void Curl_hostcache_destroy(struct SessionHandle *data)
+{
+  Curl_hostcache_clean(data);
   Curl_hash_destroy(data->dns.hostcache);
   data->dns.hostcachetype = HCACHE_NONE;
   data->dns.hostcache = NULL;

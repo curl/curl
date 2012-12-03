@@ -25,11 +25,11 @@
  */
 
 #include "test.h"
-
+#include "strequal.h"
 #include "memdebug.h"
 
-static int send_request(CURL *curl, const char *url, int seq,
-                        long auth_scheme, const char *userpwd)
+static CURLcode send_request(CURL *curl, const char *url, int seq,
+                             long auth_scheme, const char *userpwd)
 {
   CURLcode res;
   char* full_url = malloc(strlen(url) + 4 + 1);
@@ -56,14 +56,14 @@ test_cleanup:
   return res;
 }
 
-static int send_wrong_password(CURL *curl, const char *url, int seq,
-                               long auth_scheme)
+static CURLcode send_wrong_password(CURL *curl, const char *url, int seq,
+                                    long auth_scheme)
 {
     return send_request(curl, url, seq, auth_scheme, "testuser:wrongpass");
 }
 
-static int send_right_password(CURL *curl, const char *url, int seq,
-                               long auth_scheme)
+static CURLcode send_right_password(CURL *curl, const char *url, int seq,
+                                    long auth_scheme)
 {
     return send_request(curl, url, seq, auth_scheme, "testuser:testpass");
 }
@@ -72,11 +72,11 @@ static long parse_auth_name(const char *arg)
 {
   if (!arg)
     return CURLAUTH_NONE;
-  if (strcasecmp(arg, "basic") == 0)
+  if (strequal(arg, "basic"))
     return CURLAUTH_BASIC;
-  if (strcasecmp(arg, "digest") == 0)
+  if (strequal(arg, "digest"))
     return CURLAUTH_DIGEST;
-  if (strcasecmp(arg, "ntlm") == 0)
+  if (strequal(arg, "ntlm"))
     return CURLAUTH_NTLM;
   return CURLAUTH_NONE;
 }
@@ -85,7 +85,6 @@ int test(char *url)
 {
   CURLcode res;
   CURL *curl = NULL;
-  bool curl_is_init = FALSE;
 
   long main_auth_scheme = parse_auth_name(libtest_arg2);
   long fallback_auth_scheme = parse_auth_name(libtest_arg3);
@@ -93,29 +92,27 @@ int test(char *url)
   if (main_auth_scheme == CURLAUTH_NONE ||
       fallback_auth_scheme == CURLAUTH_NONE) {
     fprintf(stderr, "auth schemes not found on commandline\n");
-    res = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
+    return TEST_ERR_MAJOR_BAD;
   }
-  curl_is_init = TRUE;
 
   /* Send wrong password, then right password */
 
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
   }
 
   res = send_wrong_password(curl, url, 100, main_auth_scheme);
   if (res != CURLE_OK)
       goto test_cleanup;
   curl_easy_reset(curl);
+
   res = send_right_password(curl, url, 200, fallback_auth_scheme);
   if (res != CURLE_OK)
       goto test_cleanup;
@@ -127,8 +124,8 @@ int test(char *url)
 
   if ((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
   }
 
   res = send_wrong_password(curl, url, 300, main_auth_scheme);
@@ -140,6 +137,7 @@ int test(char *url)
   if (res != CURLE_OK)
       goto test_cleanup;
   curl_easy_reset(curl);
+
   res = send_right_password(curl, url, 500, fallback_auth_scheme);
   if (res != CURLE_OK)
       goto test_cleanup;
@@ -147,10 +145,8 @@ int test(char *url)
 
 test_cleanup:
 
-  if (curl)
-    curl_easy_cleanup(curl);
-  if (curl_is_init)
-    curl_global_cleanup();
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
 
   return (int)res;
 }

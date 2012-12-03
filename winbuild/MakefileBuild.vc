@@ -67,12 +67,23 @@ LFLAGS_PDB = /incremental:no /opt:ref,icf
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
 WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
-LIB_NAME_STATIC        = libcurl_a.lib
-LIB_NAME_STATIC_DEBUG  = libcurl_a_debug.lib
-LIB_NAME_DLL           = libcurl.dll
-LIB_NAME_IMP           = libcurl.lib
-LIB_NAME_DLL_DEBUG     = libcurl_debug.dll
-LIB_NAME_IMP_DEBUG     = libcurl_debug.lib
+
+BASE_NAME              = libcurl
+BASE_NAME_DEBUG        = $(BASE_NAME)_debug
+BASE_NAME_STATIC       = $(BASE_NAME)_a
+BASE_NAME_STATIC_DEBUG = $(BASE_NAME_STATIC)_debug
+
+LIB_NAME_STATIC        = $(BASE_NAME_STATIC).lib
+LIB_NAME_STATIC_DEBUG  = $(BASE_NAME_STATIC_DEBUG).lib
+LIB_NAME_DLL           = $(BASE_NAME).dll
+LIB_NAME_IMP           = $(BASE_NAME).lib
+LIB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).dll
+LIB_NAME_IMP_DEBUG     = $(BASE_NAME_DEBUG).lib
+
+PDB_NAME_STATIC        = $(BASE_NAME_STATIC).pdb
+PDB_NAME_STATIC_DEBUG  = $(BASE_NAME_STATIC_DEBUG).pdb
+PDB_NAME_DLL           = $(BASE_NAME).pdb
+PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME = curl.exe
@@ -262,25 +273,29 @@ CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
 
 !IF "$(AS_DLL)" == "true"
 
-LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+PDB       = $(PDB_NAME_DLL_DEBUG)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 !ELSE
 TARGET    = $(LIB_NAME_DLL)
 LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+PDB       = $(PDB_NAME_DLL)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
-RESOURCE = $(LIB_DIROBJ)\libcurl.res
+RESOURCE  = $(LIB_DIROBJ)\libcurl.res
 
 # AS_DLL
 !ELSE
 
 !IF "$(DEBUG)"=="yes"
 TARGET   = $(LIB_NAME_STATIC_DEBUG)
+PDB      = $(PDB_NAME_STATIC_DEBUG)
 !ELSE
 TARGET   = $(LIB_NAME_STATIC)
+PDB      = $(PDB_NAME_STATIC)
 !ENDIF
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
@@ -320,7 +335,7 @@ CFLAGS = $(CFLAGS) $(SPNEGO_CFLAGS)
 !ENDIF
 
 !IF "$(GEN_PDB)"=="true"
-CFLAGS = $(CFLAGS) $(CFLAGS_PDB)
+CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
 !ENDIF
 

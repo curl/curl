@@ -24,7 +24,7 @@
 #include "tool_setup.h"
 
 typedef enum {
-  PARAM_OK,
+  PARAM_OK = 0,
   PARAM_OPTION_AMBIGUOUS,
   PARAM_OPTION_UNKNOWN,
   PARAM_REQUIRES_PARAMETER,

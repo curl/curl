@@ -150,6 +150,7 @@ AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
 #endif])
   AC_BEFORE([$0], [AC_SYS_LARGEFILE])dnl
   AC_BEFORE([$0], [CURL_CONFIGURE_REENTRANT])dnl
+  AC_BEFORE([$0], [CURL_CONFIGURE_PULL_SYS_POLL])dnl
   AC_MSG_CHECKING([if OS is AIX (to define _ALL_SOURCE)])
   AC_EGREP_CPP([yes_this_is_aix],[
 #ifdef _AIX
@@ -2102,6 +2103,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     #
     curl_cv_save_LIBS="$LIBS"
     curl_cv_gclk_LIBS="unknown"
+    curl_cv_save_CURL_LIBS="$CURL_LIBS"
     #
     for x_xlibs in '' '-lrt' '-lposix4' ; do
       if test "$curl_cv_gclk_LIBS" = "unknown"; then
@@ -2195,6 +2197,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
         ac_cv_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
+        CURL_LIBS="$curl_cv_save_CURL_LIBS"
       ])
     fi
     #
@@ -2310,6 +2313,8 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   #
+  AC_BEFORE([$0], [CURL_CONFIGURE_PULL_SYS_POLL])dnl
+  #
   AC_MSG_CHECKING([for curl_socklen_t data type])
   curl_typeof_curl_socklen_t="unknown"
   for arg1 in int SOCKET; do
@@ -2415,6 +2420,45 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   esac
   CURL_DEFINE_UNQUOTED([CURL_TYPEOF_CURL_SOCKLEN_T], [$curl_typeof_curl_socklen_t])
   CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_SOCKLEN_T], [$curl_sizeof_curl_socklen_t])
+])
+
+
+dnl CURL_CONFIGURE_PULL_SYS_POLL
+dnl -------------------------------------------------
+dnl Find out if system header file sys/poll.h must be included by the
+dnl external interface, making appropriate definitions for template file
+dnl include/curl/curlbuild.h.in to properly configure and use the library.
+dnl
+dnl The need for the sys/poll.h inclusion arises mainly to properly
+dnl interface AIX systems which define macros 'events' and 'revents'.
+
+AC_DEFUN([CURL_CONFIGURE_PULL_SYS_POLL], [
+  AC_REQUIRE([CURL_INCLUDES_POLL])dnl
+  #
+  tst_poll_events_macro_defined="unknown"
+  #
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_poll
+    ]],[[
+#if defined(events) || defined(revents)
+      return 0;
+#else
+      force compilation error
+#endif
+    ]])
+  ],[
+    tst_poll_events_macro_defined="yes"
+  ],[
+    tst_poll_events_macro_defined="no"
+  ])
+  #
+  if test "$tst_poll_events_macro_defined" = "yes"; then
+    if test "x$ac_cv_header_sys_poll_h" = "xyes"; then
+      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_POLL_H])
+    fi
+  fi
+  #
 ])
 
 

@@ -264,7 +264,7 @@ CURLcode Curl_write(struct connectdata *conn,
 
   default:
     /* we got a specific curlcode, forward it */
-    return (CURLcode)curlcode;
+    return curlcode;
   }
 }
 

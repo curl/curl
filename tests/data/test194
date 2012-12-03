@@ -13,7 +13,7 @@ Resume
 <data>
 HTTP/1.1 416 Requested Range Not Satisfiable swsclose
 Date: Fri, 24 Oct 2003 21:33:12 GMT
-Server: Apache/1.3.19 (Unix)  (Red-Hat/Linux) mod_ssl/2.8.1 OpenSSL/0.9.6 PHP/4.3.1
+Server: Apache/1.3.19 (Unix) (Red-Hat/Linux) mod_ssl/2.8.1 OpenSSL/0.9.6 PHP/4.3.1
 Last-Modified: Fri, 24 Oct 2003 18:01:23 GMT
 ETag: "ab57a-507-3f9968f3"
 Accept-Ranges: bytes

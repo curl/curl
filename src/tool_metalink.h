@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+/* returns 1 for success, 0 otherwise (we use OpenSSL *_Init fncs directly) */
 typedef int (* Curl_digest_init_func)(void *context);
+
 typedef void (* Curl_digest_update_func)(void *context,
                                          const unsigned char *data,
                                          unsigned int len);

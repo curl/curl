@@ -124,7 +124,7 @@ struct win32_crypto_hash {
 static int MD5_Init(MD5_CTX *ctx)
 {
   md5_init(ctx);
-  return 0;
+  return 1;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -142,7 +142,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 static int SHA1_Init(SHA_CTX *ctx)
 {
   sha1_init(ctx);
-  return 0;
+  return 1;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -160,7 +160,7 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
 static int SHA256_Init(SHA256_CTX *ctx)
 {
   sha256_init(ctx);
-  return 0;
+  return 1;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -180,7 +180,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 static int MD5_Init(MD5_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_MD5, 0);
-  return 0;
+  return 1;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -199,7 +199,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 static int SHA1_Init(SHA_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_SHA1, 0);
-  return 0;
+  return 1;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -218,7 +218,7 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
 static int SHA256_Init(SHA256_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_SHA256, 0);
-  return 0;
+  return 1;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -253,15 +253,15 @@ static int nss_hash_init(void **pctx, SECOidTag hash_alg)
 
   ctx = PK11_CreateDigestContext(hash_alg);
   if(!ctx)
-    return -1;
+    return /* failure */ 0;
 
   if(PK11_DigestBegin(ctx) != SECSuccess) {
     PK11_DestroyContext(ctx, PR_TRUE);
-    return -1;
+    return /* failure */ 0;
   }
 
   *pctx = ctx;
-  return 0;
+  return /* success */ 1;
 }
 
 static void nss_hash_final(void **pctx, unsigned char *out, unsigned int len)
@@ -345,7 +345,7 @@ static int MD5_Init(MD5_CTX *ctx)
                          PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
   }
-  return 0;
+  return 1;
 }
 
 static void MD5_Update(MD5_CTX *ctx,
@@ -366,7 +366,7 @@ static int SHA1_Init(SHA_CTX *ctx)
                          PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA1, 0, 0, &ctx->hHash);
   }
-  return 0;
+  return 1;
 }
 
 static void SHA1_Update(SHA_CTX *ctx,
@@ -387,7 +387,7 @@ static int SHA256_Init(SHA256_CTX *ctx)
                          PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
   }
-  return 0;
+  return 1;
 }
 
 static void SHA256_Update(SHA256_CTX *ctx,
@@ -481,7 +481,7 @@ digest_context *Curl_digest_init(const digest_params *dparams)
 
   ctxt->digest_hash = dparams;
 
-  if(dparams->digest_init(ctxt->digest_hashctx) != 0) {
+  if(dparams->digest_init(ctxt->digest_hashctx) != 1) {
     free(ctxt);
     return NULL;
   }
