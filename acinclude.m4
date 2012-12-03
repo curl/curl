@@ -130,7 +130,7 @@ int main (void)
     ]])
   ],[
     tst_lib_xnet_required="yes"
-    LIBS="$LIBS -lxnet"
+    LIBS="-lxnet $LIBS"
   ])
   AC_MSG_RESULT([$tst_lib_xnet_required])
 ])
@@ -2103,7 +2103,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     #
     curl_cv_save_LIBS="$LIBS"
     curl_cv_gclk_LIBS="unknown"
-    curl_cv_save_CURL_LIBS="$CURL_LIBS"
     #
     for x_xlibs in '' '-lrt' '-lposix4' ; do
       if test "$curl_cv_gclk_LIBS" = "unknown"; then
@@ -2155,7 +2154,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         else
           LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
         fi
-        CURL_LIBS="$CURL_LIBS $curl_cv_gclk_LIBS"
         AC_MSG_RESULT([$curl_cv_gclk_LIBS])
         ac_cv_func_clock_gettime="yes"
         ;;
@@ -2197,7 +2195,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
         ac_cv_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
-        CURL_LIBS="$curl_cv_save_CURL_LIBS"
       ])
     fi
     #

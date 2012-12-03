@@ -148,14 +148,14 @@ while test $# -gt 0; do
 	   CURLLIBDIR=""
 	fi
 	if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
-	  echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@ @LIBS@
+	  echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
 	else
-	  echo ${CURLLIBDIR}-lcurl @LIBS@
+	  echo ${CURLLIBDIR}-lcurl
 	fi
 	;;
 
     --static-libs)
-	echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@ @LIBS@
+	echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
 	;;
 
     --configure)

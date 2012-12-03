@@ -54,7 +54,15 @@ include Makefile.inc
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
 
-curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@ @LIBMETALINK_LIBS@
+# Prevent global LIBS from influencing src build targets
+LIBS = $(BLANK_AT_MAKETIME)
+
+if USE_EXPLICIT_LIB_DEPS
+curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
+else
+curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
+endif
+
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
