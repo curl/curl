@@ -13,7 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o nss: prevent NSS from crashing on client auth hook failure
 
 This release includes the following known bugs:
 
