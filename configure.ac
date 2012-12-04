@@ -168,6 +168,39 @@ curl_verbose_msg="enabled (--disable-verbose)"
     init_ssl_msg=${curl_ssl_msg}
 
 dnl
+dnl LIBS should only specify libraries
+dnl
+tst_bad_libspec="no"
+for word1 in $LIBS; do
+  case "$word1" in
+    -l*)
+      :
+      ;;
+    *)
+      tst_bad_libspec="yes"
+      ;;
+  esac
+done
+if test "$tst_bad_libspec" = "yes"; then
+  AC_MSG_ERROR([linker flags present in LIBS must be specified via LDFLAGS.])
+fi
+
+dnl
+dnl LDFLAGS should only specify linker flags
+dnl
+tst_bad_libspec="no"
+for word1 in $LDFLAGS; do
+  case "$word1" in
+    -l*)
+      tst_bad_libspec="yes"
+      ;;
+  esac
+done
+if test "$tst_bad_libspec" = "yes"; then
+  AC_MSG_ERROR([libraries present in LDFLAGS must be specified via LIBS.])
+fi
+
+dnl
 dnl Save some initial values the user might have provided
 dnl
 INITIAL_LDFLAGS=$LDFLAGS
@@ -3322,19 +3355,6 @@ AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
         AC_MSG_RESULT($soname_bump)
 )
 AM_CONDITIONAL(SONAME_BUMP, test x$soname_bump = xyes)
-
-
-dnl ************************************************************
-if test ! -z "$winsock_LIB"; then
-
-  dnl If ws2_32 is wanted, make sure it is the _last_ lib in LIBS (makes
-  dnl things work when built with c-ares). But we can't just move it last
-  dnl since then other stuff (SSL) won't build. So we simply append it to the
-  dnl end.
-
-  LIBS="$LIBS $winsock_LIB"
-
-fi
 
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
