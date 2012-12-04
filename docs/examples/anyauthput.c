@@ -27,7 +27,11 @@
 #  ifdef __VMS
      typedef int intptr_t;
 #  endif
-#  include <stdint.h>
+#  if defined(_AIX) || defined(__sgi) || defined(__osf)
+     typedef long intptr_t;
+#  else
+#    include <stdint.h>
+#  endif
 #  include <unistd.h>
 #endif
 #include <sys/types.h>

@@ -59,7 +59,7 @@ static int progress(void *p,
 int main(void)
 {
   CURL *curl;
-  CURLcode res=0;
+  CURLcode res = CURLE_OK;
   struct myprogress prog;
 
   curl = curl_easy_init();
@@ -74,7 +74,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     res = curl_easy_perform(curl);
 
-    if(res)
+    if(res != CURLE_OK)
       fprintf(stderr, "%s\n", curl_easy_strerror(res));
 
     /* always cleanup */
