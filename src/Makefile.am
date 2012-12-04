@@ -54,7 +54,7 @@ include Makefile.inc
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
 
-# Prevent global LIBS from influencing src build targets
+# Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_EXPLICIT_LIB_DEPS

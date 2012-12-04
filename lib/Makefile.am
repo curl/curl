@@ -132,7 +132,7 @@ if VERSIONED_SYMBOLS
 VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
 endif
 
-# Prevent global LIBS from influencing lib build targets
+# Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)

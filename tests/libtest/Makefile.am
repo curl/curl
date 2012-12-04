@@ -55,8 +55,7 @@ test1022.pl Makefile.inc notexists.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
-# Prevent global LIBS from influencing libtest build targets
-BLANK_AT_MAKETIME = @BLANK_AT_MAKETIME@
+# Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_EXPLICIT_LIB_DEPS

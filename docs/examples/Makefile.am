@@ -48,7 +48,7 @@ if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
-# Prevent global LIBS from influencing examples build targets
+# Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies

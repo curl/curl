@@ -3364,12 +3364,11 @@ LIBCURL_LIBS=$LIBS
 AC_SUBST(LIBCURL_LIBS)
 AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
-dnl LIBS is a magic variable that's used for every link
 
-dnl BLANK_AT_MAKETIME might be used in some of our Makefile.am files to
-dnl blank LIBS variable used in generated makefile at makefile processing
-dnl time. Our test server's Makefile.am uses this to prevent global LIBS
-dnl from being used for any test server build target.
+dnl BLANK_AT_MAKETIME may be used in our Makefile.am files to blank
+dnl LIBS variable used in generated makefile at makefile processing
+dnl time. Doing this functionally prevents LIBS from being used for
+dnl all link targets in given makefile.
 BLANK_AT_MAKETIME=
 AC_SUBST(BLANK_AT_MAKETIME)
 

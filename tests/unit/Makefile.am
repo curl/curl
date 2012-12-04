@@ -54,7 +54,10 @@ endif
 
 EXTRA_DIST = Makefile.inc
 
-LDADD = $(top_builddir)/lib/libcurlu.la @LDFLAGS@ @LIBCURL_LIBS@ @LIBS@
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
+
+LDADD = $(top_builddir)/lib/libcurlu.la @LDFLAGS@ @LIBCURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
 AM_CPPFLAGS += -DUNITTESTS
 
