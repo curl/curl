@@ -27,9 +27,7 @@
 #  ifdef __VMS
      typedef int intptr_t;
 #  endif
-#  if defined(_AIX) || defined(__sgi) || defined(__osf)
-     typedef long intptr_t;
-#  else
+#  if !defined(_AIX) && !defined(__sgi) && !defined(__DECC)
 #    include <stdint.h>
 #  endif
 #  include <unistd.h>
@@ -53,6 +51,12 @@
 
 #ifndef TRUE
 #define TRUE 1
+#endif
+
+#if defined(_AIX) || defined(__sgi) || defined(__DECC)
+#ifndef intptr_t
+#define intptr_t long
+#endif
 #endif
 
 /*
