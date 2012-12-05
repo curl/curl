@@ -421,6 +421,7 @@ static CURLcode pop3_state_user(struct connectdata *conn)
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 static CURLcode pop3_state_apop(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -454,6 +455,7 @@ static CURLcode pop3_state_apop(struct connectdata *conn)
 
   return result;
 }
+#endif
 
 static CURLcode pop3_authenticate(struct connectdata *conn)
 {
@@ -604,8 +606,10 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn,
     /* Check supported authentication types by decreasing order of security */
     if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL)
       result = pop3_authenticate(conn);
+#ifndef CURL_DISABLE_CRYPTO_AUTH
     else if(conn->proto.pop3c.authtypes & POP3_TYPE_APOP)
       result = pop3_state_apop(conn);
+#endif
     else if(conn->proto.pop3c.authtypes & POP3_TYPE_CLEARTEXT)
       result = pop3_state_user(conn);
     else {
