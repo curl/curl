@@ -21,8 +21,13 @@
  ***************************************************************************/
 #include "test.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <assert.h>
+
 #include "testutil.h"
+#include "warnless.h"
 #include "memdebug.h"
 
 #define TEST_HANG_TIMEOUT 5 * 1000
@@ -40,7 +45,7 @@ int res = 0;
 
 static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
 {
-  int idx = ((CURL **) data) - easy;
+  ssize_t idx = ((CURL **) data) - easy;
   curl_socket_t sock;
   long lastsock;
 
@@ -69,8 +74,8 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
       sockets[idx] = sock;
     }
     else if (sock != sockets[idx]) {
-      fprintf(stderr, "Handle %d started on socket %d and moved to %d\n", idx,
-              sockets[idx], sock);
+      fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
+              curlx_sztosi(idx), (int)sockets[idx], (int)sock);
       res = TEST_ERR_MAJOR_BAD;
       return 0;
     }
@@ -195,7 +200,7 @@ int test(char *url)
            matched socket_exists should be true and we would never get here */
         assert(curfd != sockets[num_handles-1]);
         fprintf(stderr, "Handle %d wrote to socket %d then detected on %d\n",
-                num_handles-1, sockets[num_handles-1], curfd);
+                num_handles-1, (int)sockets[num_handles-1], (int)curfd);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -224,8 +229,9 @@ int test(char *url)
             __FILE__, __LINE__, num_handles, timeout);
 
     if(timeout != -1L) {
-      interval.tv_sec = timeout/1000;
-      interval.tv_usec = (timeout%1000)*1000;
+      int itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+      interval.tv_sec = itimeout/1000;
+      interval.tv_usec = (itimeout%1000)*1000;
     }
     else {
       interval.tv_sec = TEST_HANG_TIMEOUT/1000+1;

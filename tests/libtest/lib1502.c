@@ -26,6 +26,10 @@
 
 #include "test.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -92,11 +96,12 @@ int test(char *URL)
 
     curl_multi_timeout(multi_handle, &curl_timeo);
     if(curl_timeo >= 0) {
-      timeout.tv_sec = curl_timeo / 1000;
+      int itimeout = (curl_timeo > (long)INT_MAX) ? INT_MAX : (int)curl_timeo;
+      timeout.tv_sec = itimeout / 1000;
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        timeout.tv_usec = (itimeout % 1000) * 1000;
     }
 
     /* get file descriptors from the transfers */

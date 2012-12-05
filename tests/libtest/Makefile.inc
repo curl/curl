@@ -220,5 +220,5 @@ lib1502_SOURCES = lib1502.c $(SUPPORTFILES)
 
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
 
-libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL)
+libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
