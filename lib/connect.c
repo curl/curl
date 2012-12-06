@@ -1131,10 +1131,8 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  if((data->state.lastconnect != -1) &&
-     (data->state.connc->connects[data->state.lastconnect] != NULL)) {
-    struct connectdata *c =
-      data->state.connc->connects[data->state.lastconnect];
+  if(data->state.lastconnect) {
+    struct connectdata *c = data->state.lastconnect;
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;

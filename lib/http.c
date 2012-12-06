@@ -3170,6 +3170,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
+
           /* If HTTP version is >= 1.1 and connection is persistent
              server supports pipelining. */
           DEBUGF(infof(data,
