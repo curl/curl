@@ -3256,8 +3256,8 @@ AC_DEFUN([CURL_EXPORT_PCDIR], [
 
 dnl CURL_CHECK_PKGCONFIG ($module, [$pcdir])
 dnl ------------------------
-dnl search for the pkg-config tool (if not cross-compiling). Set the PKGCONFIG
-dnl variable to hold the path to it, or 'no' if not found/present.
+dnl search for the pkg-config tool. Set the PKGCONFIG variable to hold the
+dnl path to it, or 'no' if not found/present.
 dnl
 dnl If pkg-config is present, check that it has info about the $module or
 dnl return "no" anyway!
@@ -3269,15 +3269,7 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 
     PKGCONFIG="no"
 
-    if test x$cross_compiling = xyes; then
-      dnl see if there's a pkg-specific for this host setup
-      AC_PATH_PROG( PKGCONFIG, ${host}-pkg-config, no,
-                    $PATH:/usr/bin:/usr/local/bin)
-    fi
-
-    if test x$PKGCONFIG = xno; then
-      AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
-    fi
+    AC_PATH_TOOL( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
 
     if test x$PKGCONFIG != xno; then
       AC_MSG_CHECKING([for $1 options with pkg-config])
