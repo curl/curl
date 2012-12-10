@@ -497,6 +497,8 @@ X_OBJS= \
 	$(DIROBJ)\asyn-ares.obj \
 	$(DIROBJ)\asyn-thread.obj \
 	$(DIROBJ)\base64.obj \
+	$(DIROBJ)\bundles.obj \
+	$(DIROBJ)\conncache.obj \
 	$(DIROBJ)\connect.obj \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
