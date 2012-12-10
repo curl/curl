@@ -47,6 +47,10 @@
 #define IPADDR "127.0.0.1"
 #define PORTNUM 80
 
+#ifndef INADDR_NONE
+#define INADDR_NONE 0xffffffff
+#endif
+
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   int written = fwrite(ptr, size, nmemb, (FILE *)stream);
