@@ -46,7 +46,7 @@ static void free_bundle_hash_entry(void *freethis)
   Curl_bundle_destroy(b);
 }
 
-struct conncache *Curl_conncache_init(int type)
+struct conncache *Curl_conncache_init(conncachetype type)
 {
   struct conncache *connc;
 

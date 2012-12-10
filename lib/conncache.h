@@ -1,5 +1,5 @@
-#ifndef __CONNCACHE_H
-#define __CONNCACHE_H
+#ifndef HEADER_CURL_CONNCACHE_H
+#define HEADER_CURL_CONNCACHE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,16 +22,18 @@
  *
  ***************************************************************************/
 
+typedef enum {
+  CONNCACHE_PRIVATE, /* used for an easy handle alone */
+  CONNCACHE_MULTI    /* shared within a multi handle */
+} conncachetype;
+
 struct conncache {
   struct curl_hash *hash;
-  enum {
-    CONNCACHE_PRIVATE, /* used for an easy handle alone */
-    CONNCACHE_MULTI    /* shared within a multi handle */
-  } type;
+  conncachetype type;
   size_t num_connections;
 };
 
-struct conncache *Curl_conncache_init(int type);
+struct conncache *Curl_conncache_init(conncachetype type);
 
 void Curl_conncache_destroy(struct conncache *connc);
 
@@ -53,4 +55,4 @@ Curl_conncache_find_first_connection(struct conncache *connc);
 
 void Curl_conncache_print(struct conncache *connc);
 
-#endif /* __CONNCACHE_H */
+#endif /* HEADER_CURL_CONNCACHE_H */
