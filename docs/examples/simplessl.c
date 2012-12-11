@@ -43,6 +43,7 @@
 
 int main(void)
 {
+  int i;
   CURL *curl;
   CURLcode res;
   FILE *headerfile;
@@ -76,7 +77,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://your.favourite.ssl.site");
     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, headerfile);
 
-    for(;;)                    /* do some ugly short cut... */
+    for(i = 0; i < 1; i++) /* single-iteration loop, just to break out from */
     {
       if (pEngine)             /* use crypto engine */
       {
@@ -125,7 +126,7 @@ int main(void)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
 
-      break;                   /* we are done... */
+      /* we are done... */
     }
     /* always cleanup */
     curl_easy_cleanup(curl);
