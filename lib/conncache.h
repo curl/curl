@@ -48,7 +48,8 @@ void Curl_conncache_remove_conn(struct conncache *connc,
 
 void Curl_conncache_foreach(struct conncache *connc,
                             void *param,
-                            void (*func)(void *, void *));
+                            int (*func)(struct connectdata *conn,
+                                        void *param));
 
 struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
