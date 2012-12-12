@@ -317,6 +317,18 @@ struct timeval {
 
 
 /*
+ * Some HP-UX system headers require TRUE defined to 1 and FALSE to 0.
+ */
+
+#if defined(__hpux)
+#undef TRUE
+#define TRUE 1
+#undef FALSE
+#define FALSE 0
+#endif
+
+
+/*
  * Macro WHILE_FALSE may be used to build single-iteration do-while loops,
  * avoiding compiler warnings. Mostly intended for other macro definitions.
  */
