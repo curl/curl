@@ -75,15 +75,15 @@ static OSStatus SocketRead(SSLConnectionRef connection,
                                                  * RETURNED */
                            size_t *dataLength)  /* IN/OUT */
 {
-  UInt32 bytesToGo = *dataLength;
-  UInt32 initLen = bytesToGo;
+  size_t bytesToGo = *dataLength;
+  size_t initLen = bytesToGo;
   UInt8 *currData = (UInt8 *)data;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   int sock = connssl->ssl_sockfd;
   OSStatus rtn = noErr;
-  UInt32 bytesRead;
-  int rrtn;
+  size_t bytesRead;
+  ssize_t rrtn;
   int theErr;
 
   *dataLength = 0;
@@ -137,12 +137,12 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
                             const void *data,
                             size_t *dataLength)  /* IN/OUT */
 {
-  UInt32 bytesSent = 0;
+  size_t bytesSent = 0;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   int sock = connssl->ssl_sockfd;
-  int length;
-  UInt32 dataLen = *dataLength;
+  ssize_t length;
+  size_t dataLen = *dataLength;
   const UInt8 *dataPtr = (UInt8 *)data;
   OSStatus ortn;
   int theErr;
@@ -1327,7 +1327,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t md5len)
 {
   (void)md5len;
-  (void)CC_MD5(tmp, tmplen, md5sum);
+  (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
 }
 
 static ssize_t darwinssl_send(struct connectdata *conn,
