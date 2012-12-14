@@ -87,8 +87,28 @@
 #include <unistd.h>
 #endif
 
+#ifdef __hpux
+#  if !defined(_XOPEN_SOURCE_EXTENDED) || defined(_KERNEL)
+#    ifdef _APP32_64BIT_OFF_T
+#      define OLD_APP32_64BIT_OFF_T _APP32_64BIT_OFF_T
+#      undef _APP32_64BIT_OFF_T
+#    else
+#      undef OLD_APP32_64BIT_OFF_T
+#    endif
+#  endif
+#endif
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+
+#ifdef __hpux
+#  if !defined(_XOPEN_SOURCE_EXTENDED) || defined(_KERNEL)
+#    ifdef OLD_APP32_64BIT_OFF_T
+#      define _APP32_64BIT_OFF_T OLD_APP32_64BIT_OFF_T
+#      undef OLD_APP32_64BIT_OFF_T
+#    endif
+#  endif
 #endif
 
 
