@@ -50,10 +50,6 @@
 #include <krb.h>
 #include <des.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h> /* for getpid() */
-#endif
-
 #include "urldata.h"
 #include "curl_base64.h"
 #include "ftp.h"

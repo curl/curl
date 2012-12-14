@@ -21,10 +21,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"

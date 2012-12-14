@@ -83,6 +83,14 @@
 #include <stdbool.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 
 /*
  * Definition of timeval struct for platforms that don't have it.

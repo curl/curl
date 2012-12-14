@@ -25,10 +25,6 @@
 #  include <sys/select.h>
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
-#endif
-
 #ifdef HAVE_SYS_POLL_H
 #  include <sys/poll.h>
 #elif defined(HAVE_POLL_H)

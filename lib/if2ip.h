@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,7 +27,6 @@ bool Curl_if_is_interface_name(const char *interf);
 char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size);
 
 #ifdef __INTERIX
-#include <sys/socket.h>
 
 /* Nedelcho Stanev's work-around for SFU 3.0 */
 struct ifreq {
@@ -61,6 +60,7 @@ struct ifreq {
 #define ifr_mtu ifr_ifru.ifru_mtu /* mtu */
 
 #define SIOCGIFADDR _IOW('s', 102, struct ifreq) /* Get if addr */
-#endif /* interix */
+
+#endif /* __INTERIX */
 
 #endif /* HEADER_CURL_IF2IP_H */

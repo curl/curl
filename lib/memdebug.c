@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,19 +23,12 @@
 #include "setup.h"
 
 #ifdef CURLDEBUG
-#include <curl/curl.h>
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
+#include <curl/curl.h>
 
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 #include "urldata.h"
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
 #include "curl_memory.h"

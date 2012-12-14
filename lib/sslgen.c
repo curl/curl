@@ -45,10 +45,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
 #include "urldata.h"
 #define SSLGEN_C
 #include "sslgen.h" /* generic SSL protos etc */

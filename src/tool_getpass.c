@@ -24,10 +24,6 @@
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
 #ifdef HAVE_FCNTL_H
 #  include <fcntl.h>
 #endif
