@@ -1554,7 +1554,7 @@ static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done)
   CURLcode result;
   result = pop3_multi_statemach(conn, dophase_done);
 
-  if(*dophase_done) {
+  if(!result && *dophase_done) {
     result = pop3_dophase_done(conn, FALSE /* not connected */);
 
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
