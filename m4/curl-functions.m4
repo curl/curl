@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 70
+# serial 71
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2891,6 +2891,34 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       AC_MSG_RESULT([no])
       tst_compi_gethostname="no"
     ])
+  fi
+  #
+  if test "$tst_compi_gethostname" = "yes"; then
+    AC_MSG_CHECKING([for gethostname arg 2 data type])
+    tst_gethostname_type_arg2="unknown"
+    for tst_arg1 in 'char *' 'unsigned char *' 'void *'; do
+      for tst_arg2 in 'int' 'unsigned int' 'size_t'; do
+        if test "$tst_gethostname_type_arg2" = "unknown"; then
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([[
+              $curl_includes_winsock2
+              $curl_includes_unistd
+            ]],[[
+              int gethostname($tst_arg1 name, $tst_arg2 namelen);
+              if(0 != gethostname(0, 0))
+                return 1;
+            ]])
+          ],[
+            tst_gethostname_type_arg2="$tst_arg2"
+          ])
+        fi
+      done
+    done
+    AC_MSG_RESULT([$tst_gethostname_type_arg2])
+    if test "$tst_gethostname_type_arg2" != "unknown"; then
+      AC_DEFINE_UNQUOTED(GETHOSTNAME_TYPE_ARG2, $tst_gethostname_type_arg2,
+        [Define to the type of arg 2 for gethostname.])
+    fi
   fi
   #
   if test "$tst_compi_gethostname" = "yes"; then
