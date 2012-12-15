@@ -204,7 +204,9 @@ unsigned long curlx_uztoul(size_t uznum)
 # pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
+#if (CURL_SIZEOF_LONG < SIZEOF_SIZE_T)
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_ULONG);
+#endif
   return (unsigned long)(uznum & (size_t) CURL_MASK_ULONG);
 
 #ifdef __INTEL_COMPILER
@@ -223,7 +225,9 @@ unsigned int curlx_uztoui(size_t uznum)
 # pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
+#if (SIZEOF_INT < SIZEOF_SIZE_T)
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_UINT);
+#endif
   return (unsigned int)(uznum & (size_t) CURL_MASK_UINT);
 
 #ifdef __INTEL_COMPILER
@@ -243,7 +247,9 @@ int curlx_sltosi(long slnum)
 #endif
 
   DEBUGASSERT(slnum >= 0);
+#if (SIZEOF_INT < CURL_SIZEOF_LONG)
   DEBUGASSERT((unsigned long) slnum <= (unsigned long) CURL_MASK_SINT);
+#endif
   return (int)(slnum & (long) CURL_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
@@ -263,7 +269,9 @@ unsigned int curlx_sltoui(long slnum)
 #endif
 
   DEBUGASSERT(slnum >= 0);
+#if (SIZEOF_INT < CURL_SIZEOF_LONG)
   DEBUGASSERT((unsigned long) slnum <= (unsigned long) CURL_MASK_UINT);
+#endif
   return (unsigned int)(slnum & (long) CURL_MASK_UINT);
 
 #ifdef __INTEL_COMPILER
@@ -341,7 +349,9 @@ int curlx_sztosi(ssize_t sznum)
 #endif
 
   DEBUGASSERT(sznum >= 0);
+#if (SIZEOF_INT < SIZEOF_SIZE_T)
   DEBUGASSERT((size_t) sznum <= (size_t) CURL_MASK_SINT);
+#endif
   return (int)(sznum & (ssize_t) CURL_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
