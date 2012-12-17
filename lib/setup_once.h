@@ -305,6 +305,18 @@ struct timeval {
 
 
 /*
+ * 'bool' stuff compatible with HP-UX headers.
+ */
+
+#if defined(__hpux) && !defined(HAVE_BOOL_T)
+   typedef int bool;
+#  define false 0
+#  define true 1
+#  define HAVE_BOOL_T
+#endif
+
+
+/*
  * 'bool' exists on platforms with <stdbool.h>, i.e. C99 platforms.
  * On non-C99 platforms there's no bool, so define an enum for that.
  * On C99 platforms 'false' and 'true' also exist. Enum uses a
@@ -341,18 +353,6 @@ struct timeval {
 #endif
 #ifndef FALSE
 #define FALSE false
-#endif
-
-
-/*
- * Some HP-UX system headers require TRUE defined to 1 and FALSE to 0.
- */
-
-#if defined(__hpux)
-#undef TRUE
-#define TRUE 1
-#undef FALSE
-#define FALSE 0
 #endif
 
 
