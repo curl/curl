@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 71
+# serial 72
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2837,6 +2837,7 @@ dnl HAVE_GETHOSTNAME will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2903,8 +2904,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
             AC_LANG_PROGRAM([[
               $curl_includes_winsock2
               $curl_includes_unistd
+              $curl_preprocess_callconv
+              extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
-              int gethostname($tst_arg1 name, $tst_arg2 namelen);
               if(0 != gethostname(0, 0))
                 return 1;
             ]])
@@ -6210,8 +6212,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
             $curl_includes_string
-          ]],[[
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
+          ]],[[
             if(0 != strerror_r(0, 0, 0))
               return 1;
           ]])
@@ -6271,8 +6273,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
             $curl_includes_string
-          ]],[[
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
+          ]],[[
             if(0 != strerror_r(0, 0, 0))
               return 1;
           ]])
