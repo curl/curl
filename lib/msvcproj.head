@@ -55,8 +55,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
-# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
+# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
+# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Release"
 
@@ -84,8 +84,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
-# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
+# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
+# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 LIB Debug"
 
