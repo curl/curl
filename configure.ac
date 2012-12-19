@@ -1846,6 +1846,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test X"$OPT_GNUTLS" != Xno; then
 
     addld=""
+    addlib=""
+    gtlslib=""
+    version=""
+    addcflags=""
+
     if test "x$OPT_GNUTLS" = "xyes"; then
       dnl this is with no partiular path given
       CURL_CHECK_PKGCONFIG(gnutls)
@@ -2016,6 +2021,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         ])
     fi
 
+    addld=""
+    addlib=""
+    addcflags=""
+    polarssllib=""
+
     if test "x$USE_POLARSSL" != "xyes"; then
       dnl add the path and test again
       addld=-L$OPT_POLARSSL/lib$libsuff
@@ -2099,6 +2109,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         ])
     fi
 
+    addld=""
+    addlib=""
+    addcflags=""
+    cyassllib=""
+
     if test "x$USE_CYASSL" != "xyes"; then
       dnl add the path and test again
       addld=-L$OPT_CYASSL/lib$libsuff
@@ -2162,6 +2177,13 @@ AC_HELP_STRING([--without-nss], [disable NSS detection]),
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_NSS" != Xno; then
+
+    addld=""
+    addlib=""
+    addcflags=""
+    nssprefix=""
+    version=""
+
     if test "x$OPT_NSS" = "xyes"; then
 
       CURL_CHECK_PKGCONFIG(nss)
@@ -2329,11 +2351,12 @@ AC_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
 
 if test X"$OPT_LIBMETALINK" != Xno; then
 
-  addlib=""
   addld=""
+  addlib=""
   addcflags=""
   version=""
   libmetalinklib=""
+
   PKGTEST="no"
   if test "x$OPT_LIBMETALINK" = "xyes"; then
     dnl this is with no partiular path given
