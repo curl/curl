@@ -432,6 +432,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   struct Curl_one_easy *easy;
   struct Curl_multi *multi = (struct Curl_multi *)multi_handle;
   struct SessionHandle *data = (struct SessionHandle *)easy_handle;
+  struct SessionHandle *new_closure = NULL;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -447,15 +448,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     /* possibly we should create a new unique error code for this condition */
     return CURLM_BAD_EASY_HANDLE;
 
-  /* This is a good time to allocate a fresh easy handle to use when closing
-     cached connections */
-  if(!multi->closure_handle) {
-    multi->closure_handle =
-      (struct SessionHandle *)curl_easy_init();
-    Curl_easy_addmulti(easy_handle, multi_handle);
-    multi->closure_handle->state.conn_cache = multi->conn_cache;
-  }
-
   /* Allocate and initialize timeout list for easy handle */
   timeoutlist = Curl_llist_alloc(multi_freetimeout);
   if(!timeoutlist)
@@ -469,12 +461,31 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     return CURLM_OUT_OF_MEMORY;
   }
 
+  /* In case multi handle has no closure_handle yet, allocate
+     a new easy handle to use when closing cached connections */
+  if(!multi->closure_handle) {
+    new_closure = (struct SessionHandle *)curl_easy_init();
+    if(!new_closure) {
+      free(easy);
+      Curl_llist_destroy(timeoutlist, NULL);
+      return CURLM_OUT_OF_MEMORY;
+    }
+  }
+
   /*
   ** No failure allowed in this function beyond this point. And
   ** no modification of easy nor multi handle allowed before this
   ** except for potential multi's connection cache growing which
   ** won't be undone in this function no matter what.
   */
+
+  /* In case a new closure handle has been initialized above, it
+     is associated now with the multi handle which lacked one. */
+  if(new_closure) {
+    multi->closure_handle = new_closure;
+    Curl_easy_addmulti(multi->closure_handle, multi_handle);
+    multi->closure_handle->state.conn_cache = multi->conn_cache;
+  }
 
   /* Make easy handle use timeout list initialized above */
   data->state.timeoutlist = timeoutlist;

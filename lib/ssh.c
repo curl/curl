@@ -2495,6 +2495,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
       DEBUGASSERT(sshc->kh == NULL);
 #endif
+#ifdef HAVE_LIBSSH2_AGENT_API
+      DEBUGASSERT(sshc->ssh_agent == NULL);
+#endif
 
       Curl_safefree(sshc->rsa_pub);
       Curl_safefree(sshc->rsa);

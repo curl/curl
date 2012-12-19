@@ -372,9 +372,14 @@ CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
 
 CURLcode Curl_close(struct SessionHandle *data)
 {
-  struct Curl_multi *m = data->multi;
+  struct Curl_multi *m;
+
+  if(!data)
+    return CURLE_OK;
 
   Curl_expire(data, 0); /* shut off timers */
+
+  m = data->multi;
 
   if(m)
     /* This handle is still part of a multi handle, take care of this first
@@ -3060,11 +3065,17 @@ static CURLcode ConnectionStore(struct SessionHandle *data,
 {
   static int connection_id_counter = 0;
 
+  CURLcode result;
+
   /* Assign a number to the connection for easier tracking in the log
      output */
   conn->connection_id = connection_id_counter++;
 
-  return Curl_conncache_add_conn(data->state.conn_cache, conn);
+  result = Curl_conncache_add_conn(data->state.conn_cache, conn);
+  if(result != CURLE_OK)
+    conn->connection_id = -1;
+
+  return result;
 }
 
 /* after a TCP connection to the proxy has been verified, this function does
@@ -5239,8 +5250,12 @@ CURLcode Curl_done(struct connectdata **connp,
      state it is for re-using, so we're forced to close it. In a perfect world
      we can add code that keep track of if we really must close it here or not,
      but currently we have no such detail knowledge.
+
+     connection_id == -1 here means that the connection has not been added
+     to the connection cache (OOM) and thus we must disconnect it here.
   */
-  if(data->set.reuse_forbid || conn->bits.close || premature) {
+  if(data->set.reuse_forbid || conn->bits.close || premature ||
+     (-1 == conn->connection_id)) {
     CURLcode res2 = Curl_disconnect(conn, premature); /* close connection */
 
     /* If we had an error already, make sure we return that one. But

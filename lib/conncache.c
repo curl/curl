@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,8 +71,11 @@ struct conncache *Curl_conncache_init(conncachetype type)
 
 void Curl_conncache_destroy(struct conncache *connc)
 {
-  Curl_hash_destroy(connc->hash);
-  free(connc);
+  if(connc) {
+    Curl_hash_destroy(connc->hash);
+    connc->hash = NULL;
+    free(connc);
+  }
 }
 
 struct connectbundle *Curl_conncache_find_bundle(struct conncache *connc,
@@ -125,23 +129,30 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
 {
   CURLcode result;
   struct connectbundle *bundle;
+  struct connectbundle *new_bundle = NULL;
   struct SessionHandle *data = conn->data;
 
   bundle = Curl_conncache_find_bundle(data->state.conn_cache,
                                       conn->host.name);
   if(!bundle) {
-    result = Curl_bundle_create(data, &bundle);
+    result = Curl_bundle_create(data, &new_bundle);
     if(result != CURLE_OK)
       return result;
 
     if(!conncache_add_bundle(data->state.conn_cache,
-                             conn->host.name, bundle))
+                             conn->host.name, new_bundle)) {
+      Curl_bundle_destroy(new_bundle);
       return CURLE_OUT_OF_MEMORY;
+    }
+    bundle = new_bundle;
   }
 
   result = Curl_bundle_add_conn(bundle, conn);
-  if(result != CURLE_OK)
+  if(result != CURLE_OK) {
+    if(new_bundle)
+      conncache_remove_bundle(data->state.conn_cache, new_bundle);
     return result;
+  }
 
   connc->num_connections++;
 

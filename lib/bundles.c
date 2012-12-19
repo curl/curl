@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,6 +49,7 @@ CURLcode Curl_bundle_create(struct SessionHandle *data,
                             struct connectbundle **cb_ptr)
 {
   (void)data;
+  DEBUGASSERT(*cb_ptr == NULL);
   *cb_ptr = malloc(sizeof(struct connectbundle));
   if(!*cb_ptr)
     return CURLE_OUT_OF_MEMORY;
@@ -56,15 +58,22 @@ CURLcode Curl_bundle_create(struct SessionHandle *data,
   (*cb_ptr)->server_supports_pipelining = FALSE;
 
   (*cb_ptr)->conn_list = Curl_llist_alloc((curl_llist_dtor) conn_llist_dtor);
-  if(!(*cb_ptr)->conn_list)
+  if(!(*cb_ptr)->conn_list) {
+    Curl_safefree(*cb_ptr);
     return CURLE_OUT_OF_MEMORY;
+  }
   return CURLE_OK;
 }
 
 void Curl_bundle_destroy(struct connectbundle *cb_ptr)
 {
-  if(cb_ptr->conn_list)
+  if(!cb_ptr)
+    return;
+
+  if(cb_ptr->conn_list) {
     Curl_llist_destroy(cb_ptr->conn_list, NULL);
+    cb_ptr->conn_list = NULL;
+  }
   Curl_safefree(cb_ptr);
 }
 
