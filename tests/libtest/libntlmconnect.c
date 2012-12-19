@@ -33,51 +33,58 @@
 #define TEST_HANG_TIMEOUT 5 * 1000
 #define MAX_EASY_HANDLES 3
 
-/* On Windows INVALID_SOCKET represents an invalid socket, not -1:
-   http://msdn.microsoft.com/en-us/library/windows/desktop/ms740516.aspx */
-#ifndef INVALID_SOCKET
-#define INVALID_SOCKET -1
-#endif
-
-CURL *easy[MAX_EASY_HANDLES];
-curl_socket_t sockets[MAX_EASY_HANDLES];
-int res = 0;
+static CURL *easy[MAX_EASY_HANDLES];
+static curl_socket_t sockets[MAX_EASY_HANDLES];
+static int res = 0;
 
 static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
 {
   ssize_t idx = ((CURL **) data) - easy;
   curl_socket_t sock;
-  long lastsock;
+  long longdata;
+  CURLcode code;
+
+  const size_t failure = (size * nmemb) ? 0 : 1;
 
   char *output = malloc(size * nmemb + 1);
+  if (!output) {
+    fprintf(stderr, "output, malloc() failed\n");
+    res = TEST_ERR_MAJOR_BAD;
+    return failure;
+  }
+
   memcpy(output, ptr, size * nmemb);
   output[size * nmemb] = '\0';
   fprintf(stdout, "%s", output);
   free(output);
 
-  res = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &lastsock);
-  if (CURLE_OK != res) {
-    fprintf(stderr, "Error reading CURLINFO_LASTSOCKET\n");
-    return 0;
+  /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
+  code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
+  if (CURLE_OK != code) {
+    fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
+            "with code %d (%s)\n",
+            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    res = TEST_ERR_MAJOR_BAD;
+    return failure;
   }
-  if (lastsock == -1) {
-    sock = INVALID_SOCKET;
-  }
-  else {
-    sock = (curl_socket_t)lastsock;
-  }
-  /* sock will only be set for NTLM requests; for others it is -1 */
-  if (sock != INVALID_SOCKET) {
-    if (sockets[idx] == INVALID_SOCKET) {
-      /* Data was written for this request before the socket was detected by
-         multi_fdset. Record the socket now. */
+  if (longdata == -1L)
+    sock = CURL_SOCKET_BAD;
+  else
+    sock = (curl_socket_t)longdata;
+
+  if (sock != CURL_SOCKET_BAD) {
+    /* Track relationship between this easy handle and the socket. */
+    if (sockets[idx] == CURL_SOCKET_BAD) {
+      /* An easy handle without previous socket, record the socket. */
       sockets[idx] = sock;
     }
     else if (sock != sockets[idx]) {
+      /* An easy handle with a socket different to previously
+         tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
               curlx_sztosi(idx), (int)sockets[idx], (int)sock);
       res = TEST_ERR_MAJOR_BAD;
-      return 0;
+      return failure;
     }
   }
   return size * nmemb;
@@ -102,17 +109,17 @@ int test(char *url)
 
   if (!full_url) {
     fprintf(stderr, "Not enough memory for full url\n");
-    return CURLE_OUT_OF_MEMORY;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   for (i = 0; i < MAX_EASY_HANDLES; ++i) {
     easy[i] = NULL;
-    sockets[i] = -1;
+    sockets[i] = CURL_SOCKET_BAD;
   }
 
-  res = 0;
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
+    free(full_url);
     return res;
   }
 
@@ -124,7 +131,7 @@ int test(char *url)
     fd_set fdwrite;
     fd_set fdexcep;
     long timeout = -99;
-    curl_socket_t curfd, maxfd = INVALID_SOCKET;
+    int maxfd = -99;
     bool found_new_socket = FALSE;
 
     /* Start a new handle if we aren't at the max */
@@ -153,8 +160,6 @@ int test(char *url)
     }
 
     multi_perform(multi, &running);
-    if (0 != res)
-      break;
 
     abort_on_test_timeout();
 
@@ -165,13 +170,15 @@ int test(char *url)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, (int *)&maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
     /* Any socket which is new in fdread is associated with the new handle */
-    for (curfd = 0; curfd <= maxfd; ++curfd) {
+    for (i = 0; i <= maxfd; ++i) {
       bool socket_exists = FALSE;
+      curl_socket_t curfd = (curl_socket_t)i;
+
       if (!FD_ISSET(curfd, &fdread)) {
         continue;
       }
@@ -195,7 +202,7 @@ int test(char *url)
       }
 
       /* Now we know the socket is for the most recent handle, num_handles-1 */
-      if (sockets[num_handles-1] != INVALID_SOCKET) {
+      if (sockets[num_handles-1] != CURL_SOCKET_BAD) {
         /* A socket for this handle was already detected in the callback; if it
            matched socket_exists should be true and we would never get here */
         assert(curfd != sockets[num_handles-1]);
@@ -252,24 +259,17 @@ int test(char *url)
 
 test_cleanup:
 
-  for (i = 0; i < MAX_EASY_HANDLES; ++i) {
-    if (easy[i]) {
-       if (multi) {
-         curl_multi_remove_handle(multi, easy[i]);
-       }
-       curl_easy_cleanup(easy[i]);
-    }
+  /* proper cleanup sequence - type PB */
+
+  for(i = 0; i < MAX_EASY_HANDLES; i++) {
+    curl_multi_remove_handle(multi, easy[i]);
+    curl_easy_cleanup(easy[i]);
   }
 
-  if (multi) {
-    curl_multi_cleanup(multi);
-  }
-
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  if (full_url) {
-    free(full_url);
-  }
+  free(full_url);
 
   return res;
 }
