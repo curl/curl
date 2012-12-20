@@ -170,34 +170,114 @@ curl_verbose_msg="enabled (--disable-verbose)"
 dnl
 dnl LIBS should only specify libraries
 dnl
-tst_bad_libspec="no"
+tst_bad_spec="no"
 for word1 in $LIBS; do
   case "$word1" in
-    -l*)
+    -l* | --library=*)
       :
       ;;
     *)
-      tst_bad_libspec="yes"
+      tst_bad_spec="yes"
       ;;
   esac
 done
-if test "$tst_bad_libspec" = "yes"; then
-  AC_MSG_ERROR([linker flags present in LIBS must be specified via LDFLAGS.])
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid LIBS: $LIBS])
+  AC_MSG_ERROR([LIBS may only be used to specify libraries (-lname).])
 fi
 
 dnl
 dnl LDFLAGS should only specify linker flags
 dnl
-tst_bad_libspec="no"
+tst_bad_msg=""
+tst_bad_spec="no"
 for word1 in $LDFLAGS; do
   case "$word1" in
-    -l*)
-      tst_bad_libspec="yes"
+    -D*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
+      ;;
+    -U*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
+      ;;
+    -I*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not include directories. Use CPPFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
       ;;
   esac
 done
-if test "$tst_bad_libspec" = "yes"; then
-  AC_MSG_ERROR([libraries present in LDFLAGS must be specified via LIBS.])
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid LDFLAGS: $LDFLAGS])
+  AC_MSG_ERROR([LDFLAGS may only be used to specify linker flags, $tst_bad_msg])
+fi
+
+dnl
+dnl CPPFLAGS should only specify C preprocessor flags
+dnl
+tst_bad_msg=""
+tst_bad_spec="no"
+for word1 in $CPPFLAGS; do
+  case "$word1" in
+    -rpath*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
+      ;;
+    -L* | --library-path=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library directories. Use LDFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid CPPFLAGS: $CPPFLAGS])
+  AC_MSG_ERROR([CPPFLAGS may only be used to specify C preprocessor flags, $tst_bad_msg])
+fi
+
+dnl
+dnl CFLAGS should only specify C compiler flags
+dnl
+tst_bad_msg=""
+tst_bad_spec="no"
+for word1 in $CFLAGS; do
+  case "$word1" in
+    -D*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
+      ;;
+    -U*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
+      ;;
+    -I*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not include directories. Use CPPFLAGS for these."
+      ;;
+    -rpath*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
+      ;;
+    -L* | --library-path=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library directories. Use LDFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid CFLAGS: $CFLAGS])
+  AC_MSG_ERROR([CFLAGS may only be used to specify C compiler flags, $tst_bad_msg])
 fi
 
 dnl
