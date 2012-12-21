@@ -1616,8 +1616,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             easy->result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            newurl = NULL; /* allocation was handed over */
-            if(easy->result)
+            if(CURLE_OK == easy->result)
+              newurl = NULL; /* allocation was handed over Curl_follow() */
+            else
               disconnect_conn = TRUE;
           }
 
