@@ -1981,7 +1981,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
-      CLEADLDFLAGS="$LDFLAGS"
+      CLEANLDFLAGS="$LDFLAGS"
 
       LIBS="$addlib $LIBS"
       LDFLAGS="$LDFLAGS $addld"
@@ -2496,10 +2496,10 @@ if test X"$OPT_LIBMETALINK" != Xno; then
       AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
       LIBMETALINK_LIBS=$addlib
       LIBMETALINK_LDFLAGS=$addld
-      LIBMETALINK_CFLAGS=$addcflags
+      LIBMETALINK_CPPFLAGS=$addcflags
       AC_SUBST([LIBMETALINK_LIBS])
       AC_SUBST([LIBMETALINK_LDFLAGS])
-      AC_SUBST([LIBMETALINK_CFLAGS])
+      AC_SUBST([LIBMETALINK_CPPFLAGS])
       curl_mtlnk_msg="enabled"
     fi
 

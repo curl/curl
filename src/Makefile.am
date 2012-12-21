@@ -52,7 +52,7 @@ endif
 include Makefile.inc
 
 # This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
+CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -64,7 +64,9 @@ curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @ZLIB_LIBS@ @CURL
 endif
 
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
+curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
 # Use the C locale to ensure that only ASCII characters appear in the
