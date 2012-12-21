@@ -422,9 +422,9 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
-    if((working_path_len > 1) && (working_path[1] == '~'))
-      /* It is referenced to the home directory, so strip the leading '/' */
-      memcpy(real_path, working_path+1, 1 + working_path_len-1);
+    if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
+      /* It is referenced to the home directory, so strip the leading '/~/' */
+      memcpy(real_path, working_path+3, 4 + working_path_len-3);
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
