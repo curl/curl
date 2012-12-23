@@ -35,7 +35,7 @@ http
 lib1502
 </tool>
  <name>
-HTTP multi with CURLOPT_RESOLVE
+HTTP multi with CURLOPT_RESOLVE, cleanup sequence UA
  </name>
  <command>
 http://google.com:%HTTPPORT/1502 %HTTPPORT %HOSTIP

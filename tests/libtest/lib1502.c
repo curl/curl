@@ -20,8 +20,8 @@
  *
  ***************************************************************************/
 /*
- * Test case converted from bug report #3575448, identifying a memory leak in
- * the CURLOPT_RESOLVE handling with the multi interface.
+ * Test case 1502 converted from bug report #3575448, identifying a memory
+ * leak in the CURLOPT_RESOLVE handling with the multi interface.
  */
 
 #include "test.h"
@@ -30,107 +30,89 @@
 #include <limits.h>
 #endif
 
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
+
+#define TEST_HANG_TIMEOUT 60 * 1000
+
 int test(char *URL)
 {
-  CURL *ehandle;
-  CURLM *multi_handle;
-  char redirect[160];
-  CURLcode result = CURLE_NOT_BUILT_IN;
-  int still_running; /* keep number of running handles */
+  CURL* easy = NULL;
+  CURLM* multi = NULL;
+  int still_running;
+  int res = 0;
 
-  CURLMsg *msg; /* for picking up messages with the transfer status */
-  int msgs_left; /* how many messages are left */
+  char redirect[160];
 
   /* DNS cache injection */
   struct curl_slist *dns_cache_list;
 
   sprintf(redirect, "google.com:%s:%s", libtest_arg2, libtest_arg3);
 
-  fprintf(stderr, "Redirect: %s\n", redirect);
+  start_test_timing();
 
   dns_cache_list = curl_slist_append(NULL, redirect);
+  if(!dns_cache_list) {
+    fprintf(stderr, "curl_slist_append() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-  /* Allocate one CURL handle per transfer */
-  ehandle = curl_easy_init();
+  res_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    curl_slist_free_all(dns_cache_list);
+    return res;
+  }
 
-  /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(ehandle, CURLOPT_URL, URL);
-  curl_easy_setopt(ehandle, CURLOPT_HEADER, 1L);
+  easy_init(easy);
 
-  curl_easy_setopt(ehandle, CURLOPT_RESOLVE, dns_cache_list);
+  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(easy, CURLOPT_HEADER, 1L);
+  easy_setopt(easy, CURLOPT_RESOLVE, dns_cache_list);
 
-  /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi_init(multi);
 
-  /* add the individual transfers */
-  curl_multi_add_handle(multi_handle, ehandle);
+  multi_add_handle(multi, easy);
 
-  /* we start some action by calling perform right away */
-  curl_multi_perform(multi_handle, &still_running);
+  multi_perform(multi, &still_running);
 
-  do {
+  abort_on_test_timeout();
+
+  while(still_running) {
     struct timeval timeout;
-    int rc; /* select() return code */
-
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcep;
-    int maxfd = -1;
-
-    long curl_timeo = -1;
+    int maxfd = -99;
 
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
-
-    /* set a suitable timeout to play around with */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    curl_multi_timeout(multi_handle, &curl_timeo);
-    if(curl_timeo >= 0) {
-      int itimeout = (curl_timeo > (long)INT_MAX) ? INT_MAX : (int)curl_timeo;
-      timeout.tv_sec = itimeout / 1000;
-      if(timeout.tv_sec > 1)
-        timeout.tv_sec = 1;
-      else
-        timeout.tv_usec = (itimeout % 1000) * 1000;
-    }
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    /* get file descriptors from the transfers */
-    curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    /* In a real-world program you OF COURSE check the return code of the
-       function calls.  On success, the value of maxfd is guaranteed to be
-       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-       case of (maxfd == -1), we call select(0, ...), which is basically equal
-       to sleep. */
+    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    abort_on_test_timeout();
 
-    switch(rc) {
-    case -1:
-      /* select error */
-      break;
-    case 0: /* timeout */
-    default: /* action */
-      curl_multi_perform(multi_handle, &still_running);
-      break;
-    }
-  } while(still_running);
+    multi_perform(multi, &still_running);
 
-  /* See how the transfers went */
-  while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
-    if (msg->msg == CURLMSG_DONE)
-      result = msg->data.result;
+    abort_on_test_timeout();
   }
 
-  curl_multi_cleanup(multi_handle);
+test_cleanup:
 
-  /* Free the CURL handles */
-  curl_easy_cleanup(ehandle);
+  /* undocumented cleanup sequence - type UA */
+
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   curl_slist_free_all(dns_cache_list);
 
-  return (int)result;
+  return res;
 }
