@@ -106,11 +106,22 @@ int test(char *URL)
 
 test_cleanup:
 
+#ifdef LIB1502
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
+#endif
+
+#ifdef LIB1503
+  /* proper cleanup sequence - type PA */
+
+  curl_multi_remove_handle(multi, easy);
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
+#endif
 
   curl_slist_free_all(dns_cache_list);
 
