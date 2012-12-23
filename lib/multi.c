@@ -900,7 +900,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   int bitmap;
   unsigned int i;
   unsigned int nfds = extra_nfds;
-  struct pollfd *ufds;
+  struct pollfd *ufds = NULL;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -929,7 +929,8 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     easy = easy->next; /* check next handle */
   }
 
-  ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
+  if(nfds)
+    ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
   nfds = 0;
 
   /* Add the curl handles to our pollfds first */
@@ -979,7 +980,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   else
     i = 0;
 
-  free(ufds);
+  Curl_safefree(ufds);
   if(ret)
     *ret = i;
   return CURLM_OK;
