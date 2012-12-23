@@ -929,8 +929,11 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     easy = easy->next; /* check next handle */
   }
 
-  if(nfds)
-    ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
+  if(nfds) {
+    ufds = malloc(nfds * sizeof(struct pollfd));
+    if(!ufds)
+      return CURLM_OUT_OF_MEMORY;
+  }
   nfds = 0;
 
   /* Add the curl handles to our pollfds first */
