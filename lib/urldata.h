@@ -795,8 +795,8 @@ struct connectdata {
                  consideration (== only for pipelining). */
 
   /**** Fields set when inited and not modified again */
-  long connectindex; /* what index in the connection cache connects index this
-                        particular struct has */
+  long connection_id; /* Contains a unique number to make it easier to
+                         track the connections in the log output */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -924,7 +924,6 @@ struct connectdata {
                               handle */
   bool server_supports_pipelining; /* TRUE if server supports pipelining,
                                       set after first response */
-
   struct curl_llist *send_pipe; /* List of handles waiting to
                                    send on this pipeline */
   struct curl_llist *recv_pipe; /* List of handles waiting to read
@@ -934,7 +933,6 @@ struct connectdata {
   struct curl_llist *done_pipe; /* Handles that are finished, but
                                    still reference this connectdata */
 #define MAX_PIPELINE_LENGTH 5
-
   char* master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
@@ -1011,6 +1009,8 @@ struct connectdata {
     TUNNEL_CONNECT, /* CONNECT has been sent off */
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state[2]; /* two separate ones to allow FTP */
+
+   struct connectbundle *bundle; /* The bundle we are member of */
 };
 
 /* The end of connectdata. */
@@ -1146,18 +1146,6 @@ struct auth {
                    be RFC compliant */
 };
 
-struct conncache {
-  /* 'connects' will be an allocated array with pointers. If the pointer is
-     set, it holds an allocated connection. */
-  struct connectdata **connects;
-  long num;           /* number of entries of the 'connects' array */
-  enum {
-    CONNCACHE_PRIVATE, /* used for an easy handle alone */
-    CONNCACHE_MULTI    /* shared within a multi handle */
-  } type;
-};
-
-
 struct UrlState {
   enum {
     Curl_if_none,
@@ -1165,13 +1153,20 @@ struct UrlState {
     Curl_if_multi
   } used_interface;
 
-  struct conncache *connc; /* points to the connection cache this handle
-                              uses */
+  /* Points to the connection cache */
+  struct conncache *conn_cache;
 
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
 
-  long lastconnect;  /* index of most recent connect or -1 if undefined */
+  struct connectdata *pending_conn; /* This points to the connection we want
+                                       to open when we are waiting in the
+                                       CONNECT_PEND state in the multi
+                                       interface. This to avoid recreating it
+                                       when we enter the CONNECT state again.
+                                    */
+
+  struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */
   size_t headersize;   /* size of the allocation */
@@ -1250,14 +1245,6 @@ struct UrlState {
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
   curl_off_t crlf_conversions;
 #endif
-  /* If set to non-NULL, there's a connection in a shared connection cache
-     that uses this handle so we can't kill this SessionHandle just yet but
-     must keep it around and add it to the list of handles to kill once all
-     its connections are gone */
-  void *shared_conn;
-  bool closed; /* set to TRUE when curl_easy_cleanup() has been called on this
-                  handle, but it is kept around as mentioned for
-                  shared_conn */
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
                       area */
@@ -1593,6 +1580,8 @@ struct UserDefined {
   bool tcp_keepalive;    /* use TCP keepalives */
   long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
+
+  size_t maxconnects;  /* Max idle connections in the connection cache */
 };
 
 struct Names {

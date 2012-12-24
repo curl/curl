@@ -46,15 +46,6 @@ CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done);
 
-/* create a connection cache */
-struct conncache *Curl_mk_connc(int type, long amount);
-/* free a connection cache */
-void Curl_rm_connc(struct conncache *c);
-/* Change number of entries of a connection cache */
-CURLcode Curl_ch_connc(struct SessionHandle *data,
-                       struct conncache *c,
-                       long newamount);
-
 int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
                           int numsocks);

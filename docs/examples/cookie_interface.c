@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,7 +89,7 @@ main(void)
 #endif
     /* Netscape format cookie */
     snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
-      ".google.com", "TRUE", "/", "FALSE", time(NULL) + 31337, "PREF", "hello google, i like you very much!");
+      ".google.com", "TRUE", "/", "FALSE", (unsigned long)time(NULL) + 31337UL, "PREF", "hello google, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if (res != CURLE_OK) {
       fprintf(stderr, "Curl curl_easy_setopt failed: %s\n", curl_easy_strerror(res));

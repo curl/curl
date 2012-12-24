@@ -56,7 +56,8 @@
 # These should be the only variables that might be needed to get edited:
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, ".");
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # run time statistics needs Time::HiRes
     eval {
         no warnings "all";
@@ -1363,8 +1364,8 @@ sub runhttptlsserver {
     $flags .= "--http ";
     $flags .= "--debug 1 " if($debugprotocol);
     $flags .= "--port $port ";
-    $flags .= "--srppasswd certs/srp-verifier-db ";
-    $flags .= "--srppasswdconf certs/srp-verifier-conf";
+    $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
+    $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 
     my $cmd = "$httptlssrv $flags > $logfile 2>&1";
     my ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1); # fake pidfile

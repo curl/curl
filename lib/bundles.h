@@ -1,3 +1,5 @@
+#ifndef __BUNDLES_H
+#define __BUNDLES_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,37 +21,24 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
-#include "curlx.h"
+struct connectbundle {
+  bool server_supports_pipelining; /* TRUE if server supports pipelining,
+                                      set after first response */
+  size_t num_connections;       /* Number of connections in the bundle */
+  struct curl_llist *conn_list; /* The connectdata members of the bundle */
+};
 
-#include "tool_cfgable.h"
-#include "tool_cb_rea.h"
+CURLcode Curl_bundle_create(struct SessionHandle *data,
+                            struct connectbundle **cb_ptr);
 
-#include "memdebug.h" /* keep this as LAST include */
+void Curl_bundle_destroy(struct connectbundle *cb_ptr);
 
-/*
-** callback for CURLOPT_READFUNCTION
-*/
+CURLcode Curl_bundle_add_conn(struct connectbundle *cb_ptr,
+                              struct connectdata *conn);
 
-size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
-{
-  ssize_t rc;
-  struct InStruct *in = userdata;
+int Curl_bundle_remove_conn(struct connectbundle *cb_ptr,
+                            struct connectdata *conn);
 
-  rc = read(in->fd, buffer, sz*nmemb);
-  if(rc < 0) {
-    if(errno == EAGAIN) {
-      errno = 0;
-      in->config->readbusy = TRUE;
-      return CURL_READFUNC_PAUSE;
-    }
-    /* since size_t is unsigned we can't return negative values fine */
-    rc = 0;
-  }
-  in->config->readbusy = FALSE;
-  return (size_t)rc;
-}
 
+#endif /* __BUNDLES_H */

@@ -322,34 +322,77 @@ size_t Curl_str_key_compare(void*k1, size_t key1_len, void*k2, size_t key2_len)
   return 0;
 }
 
+void Curl_hash_start_iterate(struct curl_hash *hash,
+                             struct curl_hash_iterator *iter)
+{
+  iter->hash = hash;
+  iter->slot_index = 0;
+  iter->current_element = NULL;
+}
+
+struct curl_hash_element *
+Curl_hash_next_element(struct curl_hash_iterator *iter)
+{
+  int i;
+  struct curl_hash *h = iter->hash;
+
+  /* Get the next element in the current list, if any */
+  if(iter->current_element)
+    iter->current_element = iter->current_element->next;
+
+  /* If we have reached the end of the list, find the next one */
+  if(!iter->current_element) {
+    for(i = iter->slot_index;i < h->slots;i++) {
+      if(h->table[i]->head) {
+        iter->current_element = h->table[i]->head;
+        iter->slot_index = i+1;
+        break;
+      }
+    }
+  }
+
+  if(iter->current_element) {
+    struct curl_hash_element *he = iter->current_element->ptr;
+    return he;
+  }
+  else {
+    iter->current_element = NULL;
+    return NULL;
+  }
+}
+
 #if 0 /* useful function for debugging hashes and their contents */
 void Curl_hash_print(struct curl_hash *h,
                      void (*func)(void *))
 {
-  int i;
-  struct curl_llist_element *le;
-  struct curl_llist *list;
-  struct curl_hash_element  *he;
+  struct curl_hash_iterator iter;
+  struct curl_hash_element *he;
+  int last_index = -1;
+
   if(!h)
     return;
 
   fprintf(stderr, "=Hash dump=\n");
 
-  for(i = 0; i < h->slots; i++) {
-    list = h->table[i];
-    le = list->head; /* get first list entry */
-    if(le) {
-      fprintf(stderr, "index %d:", i);
-      while(le) {
-        he = le->ptr;
-        if(func)
-          func(he->ptr);
-        else
-          fprintf(stderr, " [%p]", he->ptr);
-        le = le->next;
+  Curl_hash_start_iterate(h, &iter);
+
+  he = Curl_hash_next_element(&iter);
+  while(he) {
+    if(iter.slot_index != last_index) {
+      fprintf(stderr, "index %d:", iter.slot_index);
+      if(last_index >= 0) {
+        fprintf(stderr, "\n");
       }
-      fprintf(stderr, "\n");
+      last_index = iter.slot_index;
     }
+
+    if(func)
+      func(he->ptr);
+    else
+      fprintf(stderr, " [%p]", he->ptr);
+
+    he = Curl_hash_next_element(&iter);
   }
+  fprintf(stderr, "\n");
 }
 #endif

@@ -23,7 +23,8 @@
 
 use strict;
 
-@INC=(@INC, $ENV{'srcdir'}, ".");
+push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+push(@INC, ".");
 
 require "getpart.pm"; # array functions
 

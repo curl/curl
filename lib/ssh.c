@@ -33,17 +33,10 @@
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -429,9 +422,9 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
-    if((working_path_len > 1) && (working_path[1] == '~'))
-      /* It is referenced to the home directory, so strip the leading '/' */
-      memcpy(real_path, working_path+1, 1 + working_path_len-1);
+    if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
+      /* It is referenced to the home directory, so strip the leading '/~/' */
+      memcpy(real_path, working_path+3, 4 + working_path_len-3);
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
@@ -2501,6 +2494,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       DEBUGASSERT(sshc->sftp_handle == NULL);
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
       DEBUGASSERT(sshc->kh == NULL);
+#endif
+#ifdef HAVE_LIBSSH2_AGENT_API
+      DEBUGASSERT(sshc->ssh_agent == NULL);
 #endif
 
       Curl_safefree(sshc->rsa_pub);

@@ -34,10 +34,6 @@
 #include <limits.h>
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"

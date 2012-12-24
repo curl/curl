@@ -130,7 +130,7 @@ int main (void)
     ]])
   ],[
     tst_lib_xnet_required="yes"
-    LIBS="$LIBS -lxnet"
+    LIBS="-lxnet $LIBS"
   ])
   AC_MSG_RESULT([$tst_lib_xnet_required])
 ])
@@ -2103,7 +2103,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     #
     curl_cv_save_LIBS="$LIBS"
     curl_cv_gclk_LIBS="unknown"
-    curl_cv_save_CURL_LIBS="$CURL_LIBS"
     #
     for x_xlibs in '' '-lrt' '-lposix4' ; do
       if test "$curl_cv_gclk_LIBS" = "unknown"; then
@@ -2155,7 +2154,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         else
           LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
         fi
-        CURL_LIBS="$CURL_LIBS $curl_cv_gclk_LIBS"
         AC_MSG_RESULT([$curl_cv_gclk_LIBS])
         ac_cv_func_clock_gettime="yes"
         ;;
@@ -2197,7 +2195,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
         ac_cv_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
-        CURL_LIBS="$curl_cv_save_CURL_LIBS"
       ])
     fi
     #
@@ -3259,8 +3256,8 @@ AC_DEFUN([CURL_EXPORT_PCDIR], [
 
 dnl CURL_CHECK_PKGCONFIG ($module, [$pcdir])
 dnl ------------------------
-dnl search for the pkg-config tool (if not cross-compiling). Set the PKGCONFIG
-dnl variable to hold the path to it, or 'no' if not found/present.
+dnl search for the pkg-config tool. Set the PKGCONFIG variable to hold the
+dnl path to it, or 'no' if not found/present.
 dnl
 dnl If pkg-config is present, check that it has info about the $module or
 dnl return "no" anyway!
@@ -3272,15 +3269,7 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 
     PKGCONFIG="no"
 
-    if test x$cross_compiling = xyes; then
-      dnl see if there's a pkg-specific for this host setup
-      AC_PATH_PROG( PKGCONFIG, ${host}-pkg-config, no,
-                    $PATH:/usr/bin:/usr/local/bin)
-    fi
-
-    if test x$PKGCONFIG = xno; then
-      AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
-    fi
+    AC_PATH_TOOL( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
 
     if test x$PKGCONFIG != xno; then
       AC_MSG_CHECKING([for $1 options with pkg-config])

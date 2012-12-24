@@ -22,14 +22,8 @@
 
 #include "setup.h"
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -70,6 +64,7 @@
 #include "curl_rand.h"
 #include "non-ascii.h"
 #include "warnless.h"
+#include "conncache.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -526,10 +521,10 @@ CURLcode curl_easy_perform(CURL *curl)
 
   }
 
-  if(!data->state.connc) {
-    /* oops, no connection cache, make one up */
-    data->state.connc = Curl_mk_connc(CONNCACHE_PRIVATE, -1L);
-    if(!data->state.connc)
+  if(!data->state.conn_cache) {
+    /* Oops, no connection cache, create one */
+    data->state.conn_cache = Curl_conncache_init(CONNCACHE_PRIVATE);
+    if(!data->state.conn_cache)
       return CURLE_OUT_OF_MEMORY;
   }
 
@@ -616,9 +611,9 @@ CURL *curl_easy_duphandle(CURL *incurl)
     goto fail;
 
   /* the connection cache is setup on demand */
-  outcurl->state.connc = NULL;
+  outcurl->state.conn_cache = NULL;
 
-  outcurl->state.lastconnect = -1;
+  outcurl->state.lastconnect = NULL;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
@@ -674,11 +669,6 @@ CURL *curl_easy_duphandle(CURL *incurl)
   fail:
 
   if(outcurl) {
-    if(outcurl->state.connc &&
-       (outcurl->state.connc->type == CONNCACHE_PRIVATE)) {
-      Curl_rm_connc(outcurl->state.connc);
-      outcurl->state.connc = NULL;
-    }
     curl_slist_free_all(outcurl->change.cookielist);
     outcurl->change.cookielist = NULL;
     Curl_safefree(outcurl->state.headerbuff);

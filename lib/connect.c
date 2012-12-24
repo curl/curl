@@ -22,9 +22,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
 #endif
@@ -36,9 +33,6 @@
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -1131,10 +1125,8 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  if((data->state.lastconnect != -1) &&
-     (data->state.connc->connects[data->state.lastconnect] != NULL)) {
-    struct connectdata *c =
-      data->state.connc->connects[data->state.lastconnect];
+  if(data->state.lastconnect) {
+    struct connectdata *c = data->state.lastconnect;
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;

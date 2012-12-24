@@ -22,9 +22,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif

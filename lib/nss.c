@@ -29,10 +29,6 @@
 
 #ifdef USE_NSS
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */

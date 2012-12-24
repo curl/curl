@@ -168,9 +168,123 @@ curl_verbose_msg="enabled (--disable-verbose)"
     init_ssl_msg=${curl_ssl_msg}
 
 dnl
-dnl Save anything in $LIBS for later
+dnl LIBS should only specify libraries
 dnl
-ALL_LIBS=$LIBS
+tst_bad_spec="no"
+for word1 in $LIBS; do
+  case "$word1" in
+    -l* | --library=*)
+      :
+      ;;
+    *)
+      tst_bad_spec="yes"
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid LIBS: $LIBS])
+  AC_MSG_ERROR([LIBS may only be used to specify libraries (-lname).])
+fi
+
+dnl
+dnl LDFLAGS should only specify linker flags
+dnl
+tst_bad_msg=""
+tst_bad_spec="no"
+for word1 in $LDFLAGS; do
+  case "$word1" in
+    -D*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
+      ;;
+    -U*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
+      ;;
+    -I*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not include directories. Use CPPFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid LDFLAGS: $LDFLAGS])
+  AC_MSG_ERROR([LDFLAGS may only be used to specify linker flags, $tst_bad_msg])
+fi
+
+dnl
+dnl CPPFLAGS should only specify C preprocessor flags
+dnl
+tst_bad_msg=""
+tst_bad_spec="no"
+for word1 in $CPPFLAGS; do
+  case "$word1" in
+    -rpath*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
+      ;;
+    -L* | --library-path=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library directories. Use LDFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid CPPFLAGS: $CPPFLAGS])
+  AC_MSG_ERROR([CPPFLAGS may only be used to specify C preprocessor flags, $tst_bad_msg])
+fi
+
+dnl
+dnl CFLAGS should only specify C compiler flags
+dnl
+tst_bad_msg=""
+tst_bad_spec="no"
+for word1 in $CFLAGS; do
+  case "$word1" in
+    -D*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
+      ;;
+    -U*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
+      ;;
+    -I*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not include directories. Use CPPFLAGS for these."
+      ;;
+    -rpath*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
+      ;;
+    -L* | --library-path=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not library directories. Use LDFLAGS for these."
+      ;;
+    -l* | --library=*)
+      tst_bad_spec="yes"
+      tst_bad_msg="not libraries. Use LIBS for these."
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([invalid CFLAGS: $CFLAGS])
+  AC_MSG_ERROR([CFLAGS may only be used to specify C compiler flags, $tst_bad_msg])
+fi
+
+dnl
+dnl Save some initial values the user might have provided
+dnl
+INITIAL_LDFLAGS=$LDFLAGS
+INITIAL_LIBS=$LIBS
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -306,6 +420,7 @@ fi
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
 CURL_CHECK_COMPILER_SYMBOL_HIDING
 
 CURL_CHECK_NO_UNDEFINED
@@ -682,6 +797,20 @@ dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 
+AC_MSG_CHECKING([whether to use libgcc])
+AC_ARG_ENABLE(libgcc,
+AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
+[ case "$enableval" in
+  yes)
+       LIBS="-lgcc $LIBS"
+       AC_MSG_RESULT(yes)
+       ;;
+  *)   AC_MSG_RESULT(no)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
 CURL_CHECK_LIB_XNET
 
 dnl gethostbyname without lib or in the nsl lib?
@@ -690,7 +819,7 @@ AC_CHECK_FUNC(gethostbyname,
               ],
               [ AC_CHECK_LIB(nsl, gethostbyname,
                              [HAVE_GETHOSTBYNAME="1"
-                             LIBS="$LIBS -lnsl"
+                             LIBS="-lnsl $LIBS"
                              ])
               ])
 
@@ -699,7 +828,7 @@ then
   dnl gethostbyname in the socket lib?
   AC_CHECK_LIB(socket, gethostbyname,
                [HAVE_GETHOSTBYNAME="1"
-               LIBS="$LIBS -lsocket"
+               LIBS="-lsocket $LIBS"
                ])
 fi
 
@@ -710,7 +839,7 @@ then
                [HAVE_GETHOSTBYNAME="1"
                CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
                LDFLAGS="-L/dev/env/WATT_ROOT/lib"
-               LIBS="$LIBS -lwatt"
+               LIBS="-lwatt $LIBS"
                ])
 fi
 
@@ -754,7 +883,7 @@ then
     fi
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
-      LIBS="$LIBS $winsock_LIB"
+      LIBS="$winsock_LIB $LIBS"
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
@@ -829,7 +958,7 @@ then
   dnl gethostbyname in the network lib - for Haiku OS
   AC_CHECK_LIB(network, gethostbyname,
                [HAVE_GETHOSTBYNAME="1"
-               LIBS="$LIBS -lnetwork"
+               LIBS="-lnetwork $LIBS"
                ])
 fi
 
@@ -838,7 +967,7 @@ then
   dnl gethostbyname in the net lib - for BeOS
   AC_CHECK_LIB(net, gethostbyname,
                [HAVE_GETHOSTBYNAME="1"
-               LIBS="$LIBS -lnet"
+               LIBS="-lnet $LIBS"
                ])
 fi
 
@@ -877,19 +1006,101 @@ dnl **********************************************************************
 CURL_NETWORK_AND_TIME_LIBS=$LIBS
 
 dnl **********************************************************************
-AC_MSG_CHECKING([whether to use libgcc])
-AC_ARG_ENABLE(libgcc,
-AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
-[ case "$enableval" in
-  yes)
-        ALL_LIBS="$ALL_LIBS -lgcc"
-       AC_MSG_RESULT(yes)
-       ;;
-  *)   AC_MSG_RESULT(no)
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
+dnl Check for the presence of ZLIB libraries and headers
+dnl **********************************************************************
+
+dnl Check for & handle argument to --with-zlib.
+
+clean_CPPFLAGS=$CPPFLAGS
+clean_LDFLAGS=$LDFLAGS
+clean_LIBS=$LIBS
+ZLIB_LIBS=""
+AC_ARG_WITH(zlib,
+AC_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
+AC_HELP_STRING([--without-zlib],[disable use of zlib]),
+               [OPT_ZLIB="$withval"])
+
+if test "$OPT_ZLIB" = "no" ; then
+    AC_MSG_WARN([zlib disabled])
+else
+  if test "$OPT_ZLIB" = "yes" ; then
+    OPT_ZLIB=""
+  fi
+
+  if test -z "$OPT_ZLIB" ; then
+    dnl check for the lib first without setting any new path, since many
+    dnl people have it in the default path
+
+    AC_CHECK_LIB(z, inflateEnd,
+                   dnl libz found, set the variable
+                   [HAVE_LIBZ="1"
+                    LIBS="-lz $LIBS"],
+                   dnl if no lib found, try /usr/local
+                   [OPT_ZLIB="/usr/local"])
+
+  fi
+
+  dnl Add a nonempty path to the compiler flags
+  if test -n "$OPT_ZLIB"; then
+     CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+     LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib$libsuff"
+  fi
+
+  AC_CHECK_HEADER(zlib.h,
+    [
+    dnl zlib.h was found
+    HAVE_ZLIB_H="1"
+    dnl if the lib wasn't found already, try again with the new paths
+    if test "$HAVE_LIBZ" != "1"; then
+      AC_CHECK_LIB(z, gzread,
+                   [
+                   dnl the lib was found!
+                   HAVE_LIBZ="1"
+                   LIBS="-lz $LIBS"
+                   ],
+                   [ CPPFLAGS=$clean_CPPFLAGS
+                   LDFLAGS=$clean_LDFLAGS])
+    fi
+    ],
+    [
+      dnl zlib.h was not found, restore the flags
+      CPPFLAGS=$clean_CPPFLAGS
+      LDFLAGS=$clean_LDFLAGS]
+    )
+
+  if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
+  then
+    AC_MSG_WARN([configure found only the libz lib, not the header file!])
+    HAVE_LIBZ=""
+    CPPFLAGS=$clean_CPPFLAGS
+    LDFLAGS=$clean_LDFLAGS
+    LIBS=$clean_LIBS
+  elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
+  then
+    AC_MSG_WARN([configure found only the libz header file, not the lib!])
+    CPPFLAGS=$clean_CPPFLAGS
+    LDFLAGS=$clean_LDFLAGS
+    LIBS=$clean_LIBS
+  elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
+  then
+    dnl both header and lib were found!
+    AC_SUBST(HAVE_LIBZ)
+    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
+    AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
+
+    ZLIB_LIBS="-lz"
+    LIBS="-lz $clean_LIBS"
+
+    dnl replace 'HAVE_LIBZ' in the automake makefile.ams
+    AMFIXLIB="1"
+    AC_MSG_NOTICE([found both libz and libz.h header])
+    curl_zlib_msg="enabled"
+  fi
+fi
+
+dnl set variable for use in automakefile(s)
+AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
+AC_SUBST(ZLIB_LIBS)
 
 dnl **********************************************************************
 dnl Check for LDAP
@@ -1315,29 +1526,29 @@ if test x"$want_gss" = xyes; then
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-    LIBS="$LIBS -lgss"
+    LIBS="-lgss $LIBS"
   elif test -z "$GSSAPI_LIB_DIR"; then
      case $host in
      *-*-darwin*)
-        LIBS="$LIBS -lgssapi_krb5 -lresolv"
+        LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
      *)
         if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
            gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-           LIBS="$LIBS $gss_libs"
+           LIBS="$gss_libs $LIBS"
         elif test "$GSSAPI_ROOT" != "yes"; then
            LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-           LIBS="$LIBS -lgssapi"
+           LIBS="-lgssapi $LIBS"
         else
-           LIBS="$LIBS -lgssapi"
+           LIBS="-lgssapi $LIBS"
         fi
         ;;
      esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-     LIBS="$LIBS -lgssapi"
+     LIBS="-lgssapi $LIBS"
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
@@ -1484,7 +1695,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
       dnl the argument to --with-ssl we don't know what
       dnl additional libs may be necessary.  Hope that we
       dnl don't need any.
-      LIBS="$LIBS $SSL_LIBS"
+      LIBS="$SSL_LIBS $LIBS"
     fi
   fi
 
@@ -1536,7 +1747,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
         dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
         AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
         OLIBS=$LIBS
-        LIBS="$LIBS -lRSAglue -lrsaref"
+        LIBS="-lRSAglue -lrsaref $LIBS"
         AC_CHECK_LIB(ssl, SSL_connect)
         if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
             dnl still no SSL_connect
@@ -1652,92 +1863,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
 fi
 
 dnl **********************************************************************
-dnl Check for the presence of ZLIB libraries and headers
-dnl **********************************************************************
-
-dnl Check for & handle argument to --with-zlib.
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(zlib,
-AC_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
-AC_HELP_STRING([--without-zlib],[disable use of zlib]),
-               [OPT_ZLIB="$withval"])
-
-if test "$OPT_ZLIB" = "no" ; then
-    AC_MSG_WARN([zlib disabled])
-else
-  if test "$OPT_ZLIB" = "yes" ; then
-     OPT_ZLIB=""
-  fi
-
-  if test -z "$OPT_ZLIB" ; then
-    dnl check for the lib first without setting any new path, since many
-    dnl people have it in the default path
-
-    AC_CHECK_LIB(z, inflateEnd,
-                   dnl libz found, set the variable
-                   [HAVE_LIBZ="1"],
-                   dnl if no lib found, try /usr/local
-                   [OPT_ZLIB="/usr/local"])
-
-  fi
-
-  dnl Add a nonempty path to the compiler flags
-  if test -n "$OPT_ZLIB"; then
-     CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-     LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib$libsuff"
-  fi
-
-  AC_CHECK_HEADER(zlib.h,
-    [
-    dnl zlib.h was found
-    HAVE_ZLIB_H="1"
-    dnl if the lib wasn't found already, try again with the new paths
-    if test "$HAVE_LIBZ" != "1"; then
-      AC_CHECK_LIB(z, gzread,
-                   [
-                   dnl the lib was found!
-                   HAVE_LIBZ="1"
-                   ],
-                   [ CPPFLAGS=$_cppflags
-                   LDFLAGS=$_ldflags])
-    fi
-    ],
-    [
-      dnl zlib.h was not found, restore the flags
-      CPPFLAGS=$_cppflags
-      LDFLAGS=$_ldflags]
-    )
-
-  if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
-  then
-    AC_MSG_WARN([configure found only the libz lib, not the header file!])
-    HAVE_LIBZ=""
-  elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
-  then
-    AC_MSG_WARN([configure found only the libz header file, not the lib!])
-  elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
-  then
-    dnl both header and lib were found!
-    AC_SUBST(HAVE_LIBZ)
-    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
-    AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
-
-    CURL_LIBS="$CURL_LIBS -lz"
-    LIBS="$LIBS -lz"
-
-    dnl replace 'HAVE_LIBZ' in the automake makefile.ams
-    AMFIXLIB="1"
-    AC_MSG_NOTICE([found both libz and libz.h header])
-    curl_zlib_msg="enabled"
-  fi
-fi
-
-dnl set variable for use in automakefile(s)
-AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
-
-dnl **********************************************************************
 dnl Check for the random seed preferences
 dnl **********************************************************************
 
@@ -1801,6 +1926,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test X"$OPT_GNUTLS" != Xno; then
 
     addld=""
+    addlib=""
+    gtlslib=""
+    version=""
+    addcflags=""
+
     if test "x$OPT_GNUTLS" = "xyes"; then
       dnl this is with no partiular path given
       CURL_CHECK_PKGCONFIG(gnutls)
@@ -1851,9 +1981,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
-      CLEADLDFLAGS="$LDFLAGS"
+      CLEANLDFLAGS="$LDFLAGS"
 
-      LIBS="$LIBS $addlib"
+      LIBS="$addlib $LIBS"
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
@@ -1918,9 +2048,9 @@ if test "$GNUTLS_ENABLED" = "1"; then
   if test "$USE_GNUTLS_NETTLE" = "1"; then
     AC_DEFINE(USE_GNUTLS_NETTLE, 1, [if GnuTLS uses nettle as crypto backend])
     AC_SUBST(USE_GNUTLS_NETTLE, [1])
-    LIBS="$LIBS -lnettle"
+    LIBS="-lnettle $LIBS"
   else
-    LIBS="$LIBS -lgcrypt"
+    LIBS="-lgcrypt $LIBS"
   fi
 fi
 
@@ -1971,6 +2101,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         ])
     fi
 
+    addld=""
+    addlib=""
+    addcflags=""
+    polarssllib=""
+
     if test "x$USE_POLARSSL" != "xyes"; then
       dnl add the path and test again
       addld=-L$OPT_POLARSSL/lib$libsuff
@@ -1999,8 +2134,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test "x$USE_POLARSSL" = "xyes"; then
       AC_MSG_NOTICE([detected PolarSSL])
 
-      CURL_LIBS="$CURL_LIBS -lpolarssl"
-      LIBS="$LIBS -lpolarssl"
+      LIBS="-lpolarssl $LIBS"
 
       if test -n "$polarssllib"; then
         dnl when shared libs were found in a path that the run-time
@@ -2055,6 +2189,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         ])
     fi
 
+    addld=""
+    addlib=""
+    addcflags=""
+    cyassllib=""
+
     if test "x$USE_CYASSL" != "xyes"; then
       dnl add the path and test again
       addld=-L$OPT_CYASSL/lib$libsuff
@@ -2083,8 +2222,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test "x$USE_CYASSL" = "xyes"; then
       AC_MSG_NOTICE([detected CyaSSL])
 
-      CURL_LIBS="$CURL_LIBS -lcyassl -lm"
-      LIBS="$LIBS -lcyassl -lm"
+      LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
         dnl when shared libs were found in a path that the run-time
@@ -2119,6 +2257,13 @@ AC_HELP_STRING([--without-nss], [disable NSS detection]),
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_NSS" != Xno; then
+
+    addld=""
+    addlib=""
+    addcflags=""
+    nssprefix=""
+    version=""
+
     if test "x$OPT_NSS" = "xyes"; then
 
       CURL_CHECK_PKGCONFIG(nss)
@@ -2156,7 +2301,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
 
-      LIBS="$LIBS $addlib"
+      LIBS="$addlib $LIBS"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
@@ -2286,11 +2431,12 @@ AC_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
 
 if test X"$OPT_LIBMETALINK" != Xno; then
 
-  addlib=""
   addld=""
+  addlib=""
   addcflags=""
   version=""
   libmetalinklib=""
+
   PKGTEST="no"
   if test "x$OPT_LIBMETALINK" = "xyes"; then
     dnl this is with no partiular path given
@@ -2350,10 +2496,10 @@ if test X"$OPT_LIBMETALINK" != Xno; then
       AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
       LIBMETALINK_LIBS=$addlib
       LIBMETALINK_LDFLAGS=$addld
-      LIBMETALINK_CFLAGS=$addcflags
+      LIBMETALINK_CPPFLAGS=$addcflags
       AC_SUBST([LIBMETALINK_LIBS])
       AC_SUBST([LIBMETALINK_LDFLAGS])
-      AC_SUBST([LIBMETALINK_CFLAGS])
+      AC_SUBST([LIBMETALINK_CPPFLAGS])
       curl_mtlnk_msg="enabled"
     fi
 
@@ -2410,7 +2556,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   LDFLAGS="$LDFLAGS $LD_SSH2"
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
-  LIBS="$LIBS $LIB_SSH2"
+  LIBS="$LIB_SSH2 $LIBS"
 
   AC_CHECK_LIB(ssh2, libssh2_channel_open_ex)
 
@@ -2506,7 +2652,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
 
   LDFLAGS="$LDFLAGS $LD_RTMP"
   CPPFLAGS="$CPPFLAGS $CPP_RTMP"
-  LIBS="$LIBS $LIB_RTMP"
+  LIBS="$LIB_RTMP $LIBS"
 
   AC_CHECK_LIB(rtmp, RTMP_Init,
     [
@@ -3314,36 +3460,19 @@ AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
 )
 AM_CONDITIONAL(SONAME_BUMP, test x$soname_bump = xyes)
 
-
-dnl ************************************************************
-if test ! -z "$winsock_LIB"; then
-
-  dnl If ws2_32 is wanted, make sure it is the _last_ lib in LIBS (makes
-  dnl things work when built with c-ares). But we can't just move it last
-  dnl since then other stuff (SSL) won't build. So we simply append it to the
-  dnl end.
-
-  LIBS="$LIBS $winsock_LIB"
-
-fi
-
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
-dnl Those in $CURL_LIBS apply to the curl command-line client only.
-dnl Those in $ALL_LIBS apply to all targets, including test targets.
 dnl
 LIBCURL_LIBS=$LIBS
 
 AC_SUBST(LIBCURL_LIBS)
-AC_SUBST(CURL_LIBS)
 AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
-LIBS=$ALL_LIBS  dnl LIBS is a magic variable that's used for every link
 
-dnl BLANK_AT_MAKETIME might be used in some of our Makefile.am files to
-dnl blank LIBS variable used in generated makefile at makefile processing
-dnl time. Our test server's Makefile.am uses this to prevent global LIBS
-dnl from being used for any test server build target.
+dnl BLANK_AT_MAKETIME may be used in our Makefile.am files to blank
+dnl LIBS variable used in generated makefile at makefile processing
+dnl time. Doing this functionally prevents LIBS from being used for
+dnl all link targets in given makefile.
 BLANK_AT_MAKETIME=
 AC_SUBST(BLANK_AT_MAKETIME)
 
@@ -3478,13 +3607,107 @@ squeeze DEFS
 squeeze LDFLAGS
 squeeze LIBS
 
-squeeze CURL_LIBS
 squeeze LIBCURL_LIBS
 squeeze CURL_NETWORK_LIBS
 squeeze CURL_NETWORK_AND_TIME_LIBS
 
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
+
+dnl
+dnl Some sanity checks for LIBS, LDFLAGS, CPPFLAGS and CFLAGS values that
+dnl configure is going to feed into makefiles generated by automake. Due
+dnl to automake placement and usage of these variables we have to follow
+dnl its rules or we may get funny results later on at make-time.
+dnl
+
+dnl
+dnl LIBS should only specify libraries
+dnl
+AC_MSG_NOTICE([using LIBS: $LIBS])
+tst_bad_spec="no"
+for word1 in $LIBS; do
+  case "$word1" in
+    -l* | --library=*)
+      :
+      ;;
+    *)
+      tst_bad_spec="yes"
+      ;;
+  esac
+done
+if test "$tst_bad_spec" = "yes"; then
+  AC_MSG_WARN([oops, LIBS should only specify libraries.])
+fi
+
+dnl
+dnl LDFLAGS should only specify linker flags
+dnl
+AC_MSG_NOTICE([using LDFLAGS: $LDFLAGS])
+tst_bad_msg="oops, LDFLAGS should only specify linker flags, not"
+for word1 in $LDFLAGS; do
+  case "$word1" in
+    -D*)
+      AC_MSG_WARN([$tst_bad_msg macro definitions. Use CPPFLAGS for: $word1])
+      ;;
+    -U*)
+      AC_MSG_WARN([$tst_bad_msg macro suppressions. Use CPPFLAGS for: $word1])
+      ;;
+    -I*)
+      AC_MSG_WARN([$tst_bad_msg include directories. Use CPPFLAGS for: $word1])
+      ;;
+    -l* | --library=*)
+      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
+      ;;
+  esac
+done
+
+dnl
+dnl CPPFLAGS should only specify C preprocessor flags
+dnl
+AC_MSG_NOTICE([using CPPFLAGS: $CPPFLAGS])
+tst_bad_msg="oops, CPPFLAGS should only specify C preprocessor flags, not"
+for word1 in $CPPFLAGS; do
+  case "$word1" in
+    -rpath*)
+      AC_MSG_WARN([$tst_bad_msg library runtime directories. Use LDFLAGS for: $word1])
+      ;;
+    -L* | --library-path=*)
+      AC_MSG_WARN([$tst_bad_msg library directories. Use LDFLAGS for: $word1])
+      ;;
+    -l* | --library=*)
+      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
+      ;;
+  esac
+done
+
+dnl
+dnl CFLAGS should only specify C compiler flags
+dnl
+AC_MSG_NOTICE([using CFLAGS: $CFLAGS])
+tst_bad_msg="oops, CFLAGS should only specify C compiler flags, not"
+for word1 in $CFLAGS; do
+  case "$word1" in
+    -D*)
+      AC_MSG_WARN([$tst_bad_msg macro definitions. Use CPPFLAGS for: $word1])
+      ;;
+    -U*)
+      AC_MSG_WARN([$tst_bad_msg macro suppressions. Use CPPFLAGS for: $word1])
+      ;;
+    -I*)
+      AC_MSG_WARN([$tst_bad_msg include directories. Use CPPFLAGS for: $word1])
+      ;;
+    -rpath*)
+      AC_MSG_WARN([$tst_bad_msg library runtime directories. Use LDFLAGS for: $word1])
+      ;;
+    -L* | --library-path=*)
+      AC_MSG_WARN([$tst_bad_msg library directories. Use LDFLAGS for: $word1])
+      ;;
+    -l* | --library=*)
+      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
+      ;;
+  esac
+done
 
 if test "x$want_curldebug_assumed" = "xyes" &&
   test "x$want_curldebug" = "xyes" && test "x$USE_ARES" = "x1"; then

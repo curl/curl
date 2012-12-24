@@ -34,15 +34,12 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
+
 #ifdef USE_GNUTLS_NETTLE
 #include <gnutls/crypto.h>
 #include <nettle/md5.h>
 #else
 #include <gcrypt.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
 #endif
 
 #include "urldata.h"

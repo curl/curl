@@ -22,7 +22,8 @@
 #***************************************************************************
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, '.');
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
 }
 
 use strict;

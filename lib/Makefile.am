@@ -132,6 +132,9 @@ if VERSIONED_SYMBOLS
 VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
 endif
 
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
+
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 
 if DOING_CURL_SYMBOL_HIDING

@@ -30,20 +30,10 @@
 #include "setup.h"
 
 #include <curl/curl.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_SYS_SELECT_H
 /* since so many tests use select(), we can just as well include it here */
 #include <sys/select.h>
-#endif
-#ifdef HAVE_UNISTD_H
-/* at least somewhat oldish FreeBSD systems need this for select() */
-#include <unistd.h>
 #endif
 
 #ifdef TPF

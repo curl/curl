@@ -32,10 +32,6 @@
 #include <axTLS/ssl.h>
 #include "axtls.h"
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
 #include "sendf.h"
 #include "inet_pton.h"
 #include "sslgen.h"

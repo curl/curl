@@ -58,7 +58,7 @@ int main(void)
   struct WriteThis pooh;
 
   pooh.readptr = data;
-  pooh.sizeleft = strlen(data);
+  pooh.sizeleft = (long)strlen(data);
 
   /* In windows, this will init the winsock stuff */
   res = curl_global_init(CURL_GLOBAL_DEFAULT);
