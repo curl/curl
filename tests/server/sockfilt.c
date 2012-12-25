@@ -587,6 +587,8 @@ static bool juggle(curl_socket_t *sockfdp,
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
 
+  FD_SET(fileno(stdin), &fds_read);
+
   switch(*mode) {
 
   case PASSIVE_LISTEN:
