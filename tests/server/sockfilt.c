@@ -400,6 +400,146 @@ static void lograw(unsigned char *buffer, ssize_t len)
 }
 
 /*
+ * WinSock select() does not support standard file descriptors,
+ * it can only check SOCKETs. The following function is an attempt
+ * to re-create a select() function with support for other handle types.
+ */
+#ifdef USE_WINSOCK
+/*
+ * select() function with support for WINSOCK2 sockets and all
+ * other handle types supported by WaitForMultipleObjectsEx().
+ *
+ * TODO: Differentiate between read/write/except for non-SOCKET handles.
+ *
+ * http://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
+ * http://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
+ */
+static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
+                     fd_set *exceptfds, struct timeval *timeout)
+{
+  int ret = 0, fds = 0, nfd = 0, idx = 0, wsa = 0, error = 0;
+  long networkevents;
+  DWORD milliseconds, wait;
+  WSAEVENT wsaevent, *wsaevents;
+  WSANETWORKEVENTS wsanetevents;
+  HANDLE *handles;
+  int *fdarr;
+
+  /* allocate internal array for the original input handles */
+  fdarr = malloc(sizeof(int)*nfds);
+  if(fdarr == NULL) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  /* allocate internal array for the internal event handles */
+  handles = malloc(sizeof(HANDLE)*nfds);
+  if(handles == NULL) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  /* allocate internal array for the internal WINSOCK2 events */
+  wsaevents = malloc(sizeof(WSAEVENT)*nfds);
+  if(wsaevents == NULL) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  /* loop over the handles in the input descriptor sets */
+  for(fds = 0; fds < nfds; fds++) {
+    networkevents = 0;
+    handles[nfd] = 0;
+
+    if(FD_ISSET(fds, readfds))
+      networkevents |= FD_READ;
+
+    if(FD_ISSET(fds, writefds))
+      networkevents |= FD_WRITE;
+
+    if(FD_ISSET(fds, exceptfds))
+      networkevents |= FD_CLOSE;
+
+    if(networkevents) {
+      fdarr[nfd] = fds;
+      if(fds == fileno(stdin)) {
+        handles[nfd] = GetStdHandle(STD_INPUT_HANDLE);
+      }
+      else if(fds == fileno(stdout)) {
+        handles[nfd] = GetStdHandle(STD_OUTPUT_HANDLE);
+      }
+      else if(fds == fileno(stderr)) {
+        handles[nfd] = GetStdHandle(STD_ERROR_HANDLE);
+      }
+      else {
+        wsaevent = WSACreateEvent();
+        if(wsaevent != WSA_INVALID_EVENT) {
+          error = WSAEventSelect(fds, wsaevent, networkevents);
+          if(error != SOCKET_ERROR) {
+            handles[nfd] = wsaevent;
+            wsaevents[wsa++] = wsaevent;
+          }
+          else {
+            handles[nfd] = (HANDLE) fds;
+            WSACloseEvent(wsaevent);
+          }
+        }
+      }
+      nfd++;
+    }
+  }
+
+  /* convert struct timeval to milliseconds */
+  if(timeout) {
+    milliseconds = ((timeout->tv_sec * 1000) + (timeout->tv_usec / 1000));
+  }
+  else {
+    milliseconds = INFINITE;
+  }
+
+  /* wait for one of the internal handles to trigger */
+  wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, milliseconds, FALSE);
+
+  /* loop over the internal handles returned in the descriptors */
+  for(idx = 0; idx < nfd; idx++) {
+    if(wait != WAIT_OBJECT_0 + idx) {
+      /* remove from all descriptor sets since this handle did not trigger */
+      FD_CLR(fdarr[idx], readfds);
+      FD_CLR(fdarr[idx], writefds);
+      FD_CLR(fdarr[idx], exceptfds);
+    }
+    else {
+      /* first try to handle the event with the WINSOCK2 functions */
+      error = WSAEnumNetworkEvents(fdarr[idx], NULL, &wsanetevents);
+      if(error != SOCKET_ERROR) {
+        /* remove from descriptor set if not ready for read */
+        if(!(wsanetevents.lNetworkEvents & FD_READ))
+          FD_CLR(fdarr[idx], readfds);
+
+        /* remove from descriptor set if not ready for write */
+        if(!(wsanetevents.lNetworkEvents & FD_WRITE))
+          FD_CLR(fdarr[idx], writefds);
+
+        /* remove from descriptor set if not exceptional */
+        if(!(wsanetevents.lNetworkEvents & FD_CLOSE))
+          FD_CLR(fdarr[idx], exceptfds);
+      }
+      ret++;
+    }
+  }
+
+  for(idx = 0; idx < wsa; idx++)
+    WSACloseEvent(wsaevents[idx]);
+
+  free(wsaevents);
+  free(handles);
+  free(fdarr);
+
+  return ret;
+}
+#endif
+
+/*
   sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
@@ -446,18 +586,6 @@ static bool juggle(curl_socket_t *sockfdp,
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
-
-#ifdef USE_WINSOCK
-  /*
-  ** WinSock select() does not support standard file descriptors,
-  ** it can only check SOCKETs. Since this program in its current
-  ** state will not work on WinSock based systems, next line is
-  ** commented out to allow warning-free compilation awaiting the
-  ** day it will be fixed to also run on WinSock systems.
-  */
-#else
-  FD_SET(fileno(stdin), &fds_read);
-#endif
 
   switch(*mode) {
 
@@ -511,7 +639,11 @@ static bool juggle(curl_socket_t *sockfdp,
 
   do {
 
+#ifdef USE_WINSOCK
+    rc = select_ws((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+#else
     rc = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+#endif
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
