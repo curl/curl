@@ -649,6 +649,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     }
 
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
+      if(multi->num_easy == 1) {
+        Curl_hostcache_destroy(easy->easy_handle);
+        multi->hostcache = NULL;
+      }
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->dns.hostcache = NULL;
       easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
