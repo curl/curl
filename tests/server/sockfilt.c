@@ -417,30 +417,41 @@ static void lograw(unsigned char *buffer, ssize_t len)
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
-  int ret = 0, fds = 0, nfd = 0, idx = 0, wsa = 0, error = 0;
   long networkevents;
-  DWORD milliseconds, wait;
+  DWORD milliseconds, wait, idx;
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
   HANDLE *handles;
-  int *fdarr;
+  int error, fds, *fdarr;
+  DWORD nfd = 0, wsa = 0;
+  int ret = 0;
+
+  if(nfds < 0) {
+    SET_SOCKERRNO(EINVAL);
+    return -1;
+  }
+
+  if(!nfds) {
+    Sleep(1000*tv->tv_sec + tv->tv_usec/1000);
+    return 0;
+  }
 
   /* allocate internal array for the original input handles */
-  fdarr = malloc(sizeof(int)*nfds);
+  fdarr = malloc(nfds * sizeof(int));
   if(fdarr == NULL) {
     errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal event handles */
-  handles = malloc(sizeof(HANDLE)*nfds);
+  handles = malloc(nfds * sizeof(HANDLE));
   if(handles == NULL) {
     errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal WINSOCK2 events */
-  wsaevents = malloc(sizeof(WSAEVENT)*nfds);
+  wsaevents = malloc(nfds * sizeof(WSAEVENT));
   if(wsaevents == NULL) {
     errno = ENOMEM;
     return -1;
@@ -537,6 +548,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   return ret;
 }
+#define select(a,b,c,d,e) select_ws(a,b,c,d,e)
 #endif
 
 /*
@@ -554,7 +566,7 @@ static bool juggle(curl_socket_t *sockfdp,
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t sockfd = CURL_SOCKET_BAD;
-  curl_socket_t maxfd = CURL_SOCKET_BAD;
+  int maxfd = -99;
   ssize_t rc;
   ssize_t nread_socket;
   ssize_t bytes_written;
@@ -597,7 +609,7 @@ static bool juggle(curl_socket_t *sockfdp,
     sockfd = listenfd;
     /* there's always a socket to wait for */
     FD_SET(sockfd, &fds_read);
-    maxfd = sockfd;
+    maxfd = (int)sockfd;
     break;
 
   case PASSIVE_CONNECT:
@@ -611,7 +623,7 @@ static bool juggle(curl_socket_t *sockfdp,
     else {
       /* there's always a socket to wait for */
       FD_SET(sockfd, &fds_read);
-      maxfd = sockfd;
+      maxfd = (int)sockfd;
     }
     break;
 
@@ -621,7 +633,7 @@ static bool juggle(curl_socket_t *sockfdp,
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
     if(CURL_SOCKET_BAD != sockfd) {
       FD_SET(sockfd, &fds_read);
-      maxfd = sockfd;
+      maxfd = (int)sockfd;
     }
     else {
       logmsg("No socket to read on");
@@ -641,11 +653,9 @@ static bool juggle(curl_socket_t *sockfdp,
 
   do {
 
-#ifdef USE_WINSOCK
-    rc = select_ws((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-#else
-    rc = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
-#endif
+    /* select() blocking behavior call on blocking descriptors please */
+
+    rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
