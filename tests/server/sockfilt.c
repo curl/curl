@@ -422,7 +422,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
   HANDLE *handles;
-  int error, fds, *fdarr;
+  curl_socket_t *fdarr;
+  int error, fds;
   DWORD nfd = 0, wsa = 0;
   int ret = 0;
 
@@ -437,7 +438,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* allocate internal array for the original input handles */
-  fdarr = malloc(nfds * sizeof(int));
+  fdarr = malloc(nfds * sizeof(curl_socket_t));
   if(fdarr == NULL) {
     errno = ENOMEM;
     return -1;
@@ -472,7 +473,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       networkevents |= FD_CLOSE;
 
     if(networkevents) {
-      fdarr[nfd] = fds;
+      fdarr[nfd] = (curl_socket_t)fds;
       if(fds == fileno(stdin)) {
         handles[nfd] = GetStdHandle(STD_INPUT_HANDLE);
       }
@@ -599,7 +600,7 @@ static bool juggle(curl_socket_t *sockfdp,
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
 
-  FD_SET(fileno(stdin), &fds_read);
+  FD_SET((curl_socket_t)fileno(stdin), &fds_read);
 
   switch(*mode) {
 
