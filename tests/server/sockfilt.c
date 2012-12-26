@@ -432,7 +432,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   if(!nfds) {
-    Sleep(1000*tv->tv_sec + tv->tv_usec/1000);
+    Sleep(1000*timeout->tv_sec + timeout->tv_usec/1000);
     return 0;
   }
 
