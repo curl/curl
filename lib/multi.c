@@ -433,6 +433,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   struct Curl_multi *multi = (struct Curl_multi *)multi_handle;
   struct SessionHandle *data = (struct SessionHandle *)easy_handle;
   struct SessionHandle *new_closure = NULL;
+  struct curl_hash *hostcache = NULL;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -461,11 +462,22 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     return CURLM_OUT_OF_MEMORY;
   }
 
+  /* In case multi handle has no hostcache yet, allocate one */
+  if(!multi->hostcache) {
+    hostcache = Curl_mk_dnscache();
+    if(!hostcache) {
+      free(easy);
+      Curl_llist_destroy(timeoutlist, NULL);
+      return CURLM_OUT_OF_MEMORY;
+    }
+  }
+
   /* In case multi handle has no closure_handle yet, allocate
      a new easy handle to use when closing cached connections */
   if(!multi->closure_handle) {
     new_closure = (struct SessionHandle *)curl_easy_init();
     if(!new_closure) {
+      Curl_hash_destroy(hostcache);
       free(easy);
       Curl_llist_destroy(timeoutlist, NULL);
       return CURLM_OUT_OF_MEMORY;
@@ -486,6 +498,11 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     Curl_easy_addmulti(multi->closure_handle, multi_handle);
     multi->closure_handle->state.conn_cache = multi->conn_cache;
   }
+
+  /* In case hostcache has been allocated above,
+     it is associated now with the multi handle. */
+  if(hostcache)
+    multi->hostcache = hostcache;
 
   /* Make easy handle use timeout list initialized above */
   data->state.timeoutlist = timeoutlist;
@@ -650,6 +667,13 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       if(multi->num_easy == 1) {
+        if(easy_owns_conn) {
+          Curl_resolver_cancel(easy->easy_conn);
+          if(easy->easy_conn->dns_entry) {
+            Curl_resolv_unlock(easy->easy_handle, easy->easy_conn->dns_entry);
+            easy->easy_conn->dns_entry = NULL;
+          }
+        }
         Curl_hostcache_destroy(easy->easy_handle);
         multi->hostcache = NULL;
       }
