@@ -139,10 +139,6 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\hugehelp.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\nonblock.c
 # End Source File
 # Begin Source File
@@ -231,6 +227,10 @@ SOURCE=.\tool_homedir.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tool_hugehelp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tool_libinfo.c
 # End Source File
 # Begin Source File
@@ -308,10 +308,6 @@ SOURCE=.\tool_xattr.c
 # Begin Source File
 
 SOURCE=".\config-win32.h"
-# End Source File
-# Begin Source File
-
-SOURCE=.\hugehelp.h
 # End Source File
 # Begin Source File
 
@@ -400,6 +396,10 @@ SOURCE=.\tool_helpers.h
 # Begin Source File
 
 SOURCE=.\tool_homedir.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tool_hugehelp.h
 # End Source File
 # Begin Source File
 

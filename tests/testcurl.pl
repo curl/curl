@@ -364,7 +364,7 @@ if (-d $CURLDIR) {
     logit "$CURLDIR is verified to be a fine git source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
-    unlink "$CURLDIR/src/hugehelp.c";
+    unlink "$CURLDIR/src/tool_hugehelp.c";
     # find out if curl source dir has an in-tree c-ares repo
     $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
   } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {

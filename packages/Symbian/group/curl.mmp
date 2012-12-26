@@ -8,7 +8,6 @@ UID           0x00000000 0xF0206442
 
 SOURCEPATH  ../../../src
 SOURCE \
-    hugehelp.c \
     tool_binmode.c \
     tool_bname.c \
     tool_cb_dbg.c \
@@ -28,6 +27,7 @@ SOURCE \
     tool_help.c \
     tool_helpers.c \
     tool_homedir.c \
+    tool_hugehelp.c \
     tool_libinfo.c \
     tool_main.c \
     tool_metalink.c \

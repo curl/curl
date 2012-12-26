@@ -28,7 +28,7 @@
 #include "curlx.h"
 
 #ifdef USE_MANUAL
-#  include "hugehelp.h"
+#  include "tool_hugehelp.h"
 #endif
 
 #include "tool_binmode.h"

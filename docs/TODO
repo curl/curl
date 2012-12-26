@@ -512,7 +512,7 @@ to provide the data to send.
 17.1 roffit
 
  Consider extending 'roffit' to produce decent ASCII output, and use that
- instead of (g)nroff when building src/hugehelp.c
+ instead of (g)nroff when building src/tool_hugehelp.c
 
 18. Test suite
 

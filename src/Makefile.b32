@@ -86,7 +86,7 @@ OBJECTS  = $(CSOURCES:.c=.obj)
 .c.obj:
 	$(CC_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$@ $<
 
-all:	$(OBJDIR) hugehelp $(PROGNAME)
+all:	$(OBJDIR) tool_hugehelp $(PROGNAME)
 
 clean:
 	cd $(OBJDIR)
@@ -101,13 +101,13 @@ $(OBJDIR):
 	@-$(MKDIR) $(OBJDIR)
 
 !ifdef WITH_ZLIB
-hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
-        groff -Tascii -man -P -c ../docs/curl.1 > hugehelp.tmp
-        perl -w mkhelp.pl -c ../docs/MANUAL < hugehelp.tmp > hugehelp.c
-	@-$(RM) hugehelp.tmp
+tool_hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
+        groff -Tascii -man -P -c ../docs/curl.1 > tool_hugehelp.tmp
+        perl -w mkhelp.pl -c ../docs/MANUAL < tool_hugehelp.tmp > tool_hugehelp.c
+	@-$(RM) tool_hugehelp.tmp
 !else
-hugehelp:
-	$(COPY) hugehelp.c.cvs hugehelp.c
+tool_hugehelp:
+	$(COPY) tool_hugehelp.c.cvs tool_hugehelp.c
 !endif
 
 $(PROGNAME): $(OBJECTS) $(LIBCURL_LIB) $(LINKLIB)

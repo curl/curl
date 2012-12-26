@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HUGEHELP_H
-#define HEADER_CURL_HUGEHELP_H
+#ifndef HEADER_CURL_TOOL_HUGEHELP_H
+#define HEADER_CURL_TOOL_HUGEHELP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,4 +25,4 @@
 
 void hugehelp(void);
 
-#endif /* HEADER_CURL_HUGEHELP_H */
+#endif /* HEADER_CURL_TOOL_HUGEHELP_H */

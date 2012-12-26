@@ -43,8 +43,8 @@ LIBCURL_OBJS=$(CSOURCES:.c=.obj)
 top_srcdir=..
 !INCLUDE "../src/Makefile.inc"
 
-# hugehelp has a special rule
-CURL_OBJS=$(CURL_CFILES:hugehelp.c=)
+# tool_hugehelp has a special rule
+CURL_OBJS=$(CURL_CFILES:tool_hugehelp.c=)
 
 CURL_OBJS=$(CURL_OBJS:.c=.obj)
 
