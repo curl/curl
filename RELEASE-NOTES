@@ -1,4 +1,4 @@
-Curl and libcurl 7.28.2
+Curl and libcurl 7.29.0
 
  Public curl releases:         131
  Command line options:         152
@@ -9,11 +9,25 @@ Curl and libcurl 7.28.2
 
 This release includes the following changes:
 
+ o test: offer "automake" output and check for perl better
  o 
 
 This release includes the following bugfixes:
 
  o nss: prevent NSS from crashing on client auth hook failure
+ o darwinssl: Fixed inability to disable peer verification on Snow Leopard
+   and Lion
+ o curl_multi_remove_handle: fix memory leak triggered with CURLOPT_RESOLVE
+ o SCP: relative path didn't work as documented
+ o setup_once.h: HP-UX <sys/socket.h> issue workaround
+ o configure: fix cross pkg-config detection
+ o runtests: Do not add undefined values to @INC
+ o build: fix compilation with CURL_DISABLE_CRYPTO_AUTH flag
+ o multi: fix re-sending request on early connection close
+ o HTTP: remove stray CRLF in chunk-encoded content-free request bodies
+ o build: fix AIX compilation and usage of events/revents
+ o VC Makefiles: add missing hostcheck
+ o 
 
 This release includes the following known bugs:
 
@@ -22,7 +36,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Nick Zitzmann, Colin Watson, Fabian Keil, Kamil Dudka, Lijo Antony,
+ Linus Nielsen Feltzing, Marc Hoersken, Nick Zitzmann, Stanislav Ivochkin,
+ Steve Holme, Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea
 
         Thanks! (and sorry if I forgot to mention someone)
 
