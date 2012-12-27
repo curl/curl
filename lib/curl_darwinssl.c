@@ -38,6 +38,9 @@
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#include <sys/sysctl.h>
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -623,6 +626,41 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
   return "TLS_NULL_WITH_NULL_NULL";
 }
 
+CF_INLINE bool IsRunningMountainLionOrLater(void)
+{
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  int mib[2];
+  char *os_version;
+  size_t os_version_len;
+  char *os_version_major/*, *os_version_minor, *os_version_point*/;
+  int os_version_major_int;
+
+  /* Get the Darwin kernel version from the kernel using sysctl(): */
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_OSRELEASE;
+  if(sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
+    return false;
+  os_version = malloc(os_version_len*sizeof(char));
+  if(!os_version)
+    return false;
+  if(sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1) {
+    free(os_version);
+    return false;
+  }
+
+  /* Parse the version. If it's version 12.0.0 or later, then this user is
+     using Mountain Lion. */
+  os_version_major = strtok(os_version, ".");
+  /*os_version_minor = strtok(NULL, ".");
+  os_version_point = strtok(NULL, ".");*/
+  os_version_major_int = atoi(os_version_major);
+  free(os_version);
+  return os_version_major_int >= 12;
+#else
+  return true;  /* iOS users: this doesn't concern you */
+#endif
+}
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -772,7 +810,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
 #if defined(__MAC_10_6) || defined(__IPHONE_5_0)
-  if(SSLSetSessionOption != NULL) {
+  /* Snow Leopard introduced the SSLSetSessionOption() function, but due to
+     a library bug with the way the kSSLSessionOptionBreakOnServerAuth flag
+     works, it doesn't work as expected under Snow Leopard or Lion.
+     So we need to call SSLSetEnableCertVerify() on those older cats in order
+     to disable certificate validation if the user turned that off.
+     (SecureTransport will always validate the certificate chain by
+     default.) */
+  if(SSLSetSessionOption != NULL && IsRunningMountainLionOrLater()) {
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               data->set.ssl.verifypeer?false:true);
