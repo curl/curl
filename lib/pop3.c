@@ -92,17 +92,16 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn);
 static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 static CURLcode pop3_regular_transfer(struct connectdata *conn, bool *done);
 static CURLcode pop3_do(struct connectdata *conn, bool *done);
-static CURLcode pop3_done(struct connectdata *conn,
-                          CURLcode, bool premature);
+static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
+                          bool premature);
 static CURLcode pop3_connect(struct connectdata *conn, bool *done);
 static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
 static int pop3_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
                         int numsocks);
-static CURLcode pop3_doing(struct connectdata *conn,
-                           bool *dophase_done);
-static CURLcode pop3_setup_connection(struct connectdata * conn);
+static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
+static CURLcode pop3_setup_connection(struct connectdata *conn);
 
 /*
  * POP3 protocol handler.
@@ -338,6 +337,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
 /* This is the ONLY way to change POP3 state! */
 static void state(struct connectdata *conn, pop3state newstate)
 {
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
@@ -361,13 +361,12 @@ static void state(struct connectdata *conn, pop3state newstate)
     "QUIT",
     /* LAST */
   };
-#endif
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+
   if(pop3c->state != newstate)
     infof(conn->data, "POP3 %p state change from %s to %s\n",
           pop3c, names[pop3c->state], names[newstate]);
 #endif
+
   pop3c->state = newstate;
 }
 
@@ -643,6 +642,7 @@ static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
         if(!result)
           state(conn, POP3_AUTH);
       }
+
       Curl_safefree(plainauth);
     }
   }
@@ -679,6 +679,7 @@ static CURLcode pop3_state_auth_login_resp(struct connectdata *conn,
         if(!result)
           state(conn, POP3_AUTH_LOGIN_PASSWD);
       }
+
       Curl_safefree(authuser);
     }
   }
@@ -715,6 +716,7 @@ static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
         if(!result)
           state(conn, POP3_AUTH);
       }
+
       Curl_safefree(authpasswd);
     }
   }
@@ -769,6 +771,7 @@ static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
       if(!result)
         state(conn, POP3_AUTH);
     }
+
     Curl_safefree(rplyb64);
   }
 
@@ -1012,6 +1015,44 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn,
   return result;
 }
 
+/* Start the DO phase for the command */
+static CURLcode pop3_command(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  const char *command = NULL;
+
+  /* Calculate the default command */
+  if(pop3c->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
+    command = "LIST";
+
+    if(pop3c->mailbox[0] != '\0') {
+      /* Message specific LIST so skip the BODY transfer */
+      struct FTP *pop3 = conn->data->state.proto.pop3;
+      pop3->transfer = FTPTRANSFER_INFO;
+    }
+  }
+  else
+    command = "RETR";
+
+  /* Send the command */
+  if(pop3c->mailbox[0] != '\0')
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
+                           (pop3c->custom && pop3c->custom[0] != '\0' ?
+                            pop3c->custom : command), pop3c->mailbox);
+  else
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp,
+                           (pop3c->custom && pop3c->custom[0] != '\0' ?
+                            pop3c->custom : command));
+
+  if(result)
+    return result;
+
+  state(conn, POP3_COMMAND);
+
+  return result;
+}
+
 /* For command responses */
 static CURLcode pop3_state_command_resp(struct connectdata *conn,
                                         int pop3code,
@@ -1064,44 +1105,6 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 
   /* End of do phase */
   state(conn, POP3_STOP);
-
-  return result;
-}
-
-/* Start the DO phase for the command */
-static CURLcode pop3_command(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-  const char *command = NULL;
-
-  /* Calculate the default command */
-  if(pop3c->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
-    command = "LIST";
-
-    if(pop3c->mailbox[0] != '\0') {
-      /* Message specific LIST so skip the BODY transfer */
-      struct FTP *pop3 = conn->data->state.proto.pop3;
-      pop3->transfer = FTPTRANSFER_INFO;
-    }
-  }
-  else
-    command = "RETR";
-
-  /* Send the command */
-  if(pop3c->mailbox[0] != '\0')
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
-                           (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : command), pop3c->mailbox);
-  else
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp,
-                           (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : command));
-
-  if(result)
-    return result;
-
-  state(conn, POP3_COMMAND);
 
   return result;
 }
@@ -1298,16 +1301,17 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   pp->conn = conn;
 
   if(conn->handler->flags & PROTOPT_SSL) {
-    /* BLOCKING */
+    /* POP3S is simply pop3 with SSL for the control channel */
+    /* so perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
   }
 
-  Curl_pp_init(pp); /* init the response reader stuff */
+  /* Initialise the response reader stuff */
+  Curl_pp_init(pp);
 
-  /* When we connect, we start in the state where we await the server greet
-     response */
+  /* Start off waiting for the server greeting response */
   state(conn, POP3_SERVERGREET);
 
   if(data->state.used_interface == Curl_if_multi)
@@ -1590,7 +1594,6 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   result = pop3_perform(conn, &connected, dophase_done);
 
   if(CURLE_OK == result) {
-
     if(!*dophase_done)
       /* The DO phase has not completed yet */
       return CURLE_OK;
