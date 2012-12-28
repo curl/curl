@@ -64,7 +64,7 @@ struct smtp_conn {
   unsigned int authused;   /* Auth mechanism used for the connection */
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   struct curl_slist *rcpt; /* Recipient list */
-  bool ssldone;            /* Is connect() over SSL done? only relevant in
+  bool ssldone;            /* Is connect() over SSL done? Only relevant in
                               multi mode */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */

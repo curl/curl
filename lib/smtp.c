@@ -204,9 +204,8 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
 #endif
 
 /* Function that checks for an ending smtp status code at the start of the
-   given string.
-   As a side effect, it also flags allowed authentication mechanisms according
-   to EHLO AUTH response. */
+   given string, but also detects the supported authentication mechanisms
+   from  the EHLO AUTH response. */
 static int smtp_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -302,10 +301,12 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "QUIT",
     /* LAST */
   };
+
   if(smtpc->state != newstate)
     infof(conn->data, "SMTP %p state change from %s to %s\n",
           smtpc, names[smtpc->state], names[newstate]);
 #endif
+
   smtpc->state = newstate;
 }
 
@@ -492,7 +493,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   else {
     if(data->state.used_interface == Curl_if_multi) {
       state(conn, SMTP_UPGRADETLS);
-      return smtp_state_upgrade_tls(conn);
+      result = smtp_state_upgrade_tls(conn);
     }
     else {
       result = Curl_ssl_connect(conn, FIRSTSOCKET);
@@ -602,6 +603,7 @@ static CURLcode smtp_state_auth_plain_resp(struct connectdata *conn,
         if(!result)
           state(conn, SMTP_AUTH);
       }
+
       Curl_safefree(plainauth);
     }
   }
@@ -638,6 +640,7 @@ static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
         if(!result)
           state(conn, SMTP_AUTH_PASSWD);
       }
+
       Curl_safefree(authuser);
     }
   }
@@ -674,6 +677,7 @@ static CURLcode smtp_state_auth_passwd_resp(struct connectdata *conn,
         if(!result)
           state(conn, SMTP_AUTH);
       }
+
       Curl_safefree(authpasswd);
     }
   }
@@ -728,6 +732,7 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
       if(!result)
         state(conn, SMTP_AUTH);
     }
+
     Curl_safefree(rplyb64);
   }
 
@@ -1114,6 +1119,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
   struct pingpong *pp = &smtpc->pp;
   size_t nread = 0;
 
+  /* Busy upgrading the connection; right now all I/O is SSL/TLS, not SMTP */
   if(smtpc->state == SMTP_UPGRADETLS)
     return smtp_state_upgrade_tls(conn);
 
@@ -1131,7 +1137,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
     data->info.httpcode = smtpcode;
 
   if(smtpcode) {
-    /* we have now received a full SMTP server response */
+    /* We have now received a full SMTP server response */
     switch(smtpc->state) {
     case SMTP_SERVERGREET:
       result = smtp_state_servergreet_resp(conn, smtpcode, smtpc->state);
@@ -1250,7 +1256,7 @@ static CURLcode smtp_easy_statemach(struct connectdata *conn)
 }
 
 /* Allocate and initialize the SMTP struct for the current SessionHandle if
- * required */
+   required */
 static CURLcode smtp_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
@@ -1316,7 +1322,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   if((conn->handler->protocol & CURLPROTO_SMTPS) &&
       data->state.used_interface != Curl_if_multi) {
     /* SMTPS is simply smtp with SSL for the control channel */
-    /* now, perform the SSL initialization for this socket */
+    /* so perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
@@ -1325,11 +1331,13 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   /* Initialise the response reader stuff */
   Curl_pp_init(pp);
 
-  pp->response_time = RESP_TIMEOUT; /* set default response time-out */
+  /* Set the default response time-out */
+  pp->response_time = RESP_TIMEOUT;
   pp->statemach_act = smtp_statemach_act;
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
+  /* Calculate the path if necessary */
   if(!*path) {
     if(!Curl_gethostname(localhost, sizeof(localhost)))
       path = localhost;
@@ -1342,7 +1350,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  /* Set the state as we are waiting the server greeting */
+  /* Start off waiting for the server greeting response */
   state(conn, SMTP_SERVERGREET);
 
   if(data->state.used_interface == Curl_if_multi)
@@ -1372,6 +1380,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   struct FTP *smtp = data->state.proto.smtp;
   CURLcode result = CURLE_OK;
   ssize_t bytes_written;
+
   (void)premature;
 
   if(!smtp)
@@ -1457,7 +1466,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   if(result)
     return result;
 
-  /* run the state-machine */
+  /* Run the state-machine */
   if(conn->data->state.used_interface == Curl_if_multi)
     result = smtp_multi_statemach(conn, dophase_done);
   else {
@@ -1604,7 +1613,9 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
   struct SessionHandle *data = conn->data;
-  data->req.size = -1; /* make sure this is unknown at this point */
+
+  /* Make sure size is unknown at this point */
+  data->req.size = -1;
 
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
@@ -1614,7 +1625,6 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
   result = smtp_perform(conn, &connected, dophase_done);
 
   if(CURLE_OK == result) {
-
     if(!*dophase_done)
       /* The DO phase has not completed yet */
       return CURLE_OK;
