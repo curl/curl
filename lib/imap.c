@@ -319,14 +319,6 @@ static char* imap_atom(const char* str)
   return newstr;
 }
 
-/* For the IMAP "protocol connect" and "doing" phases only */
-static int imap_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks)
-{
-  return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
-}
-
 /* Function that checks for an ending imap status code at the start of the
    given string. */
 static int imap_endofresp(struct pingpong *pp, int *resp)
@@ -404,6 +396,14 @@ static CURLcode imap_state_login(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/* For the IMAP "protocol connect" and "doing" phases only */
+static int imap_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
+{
+  return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
+}
+
 #ifdef USE_SSL
 static void imap_to_imaps(struct connectdata *conn)
 {
@@ -431,9 +431,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
   if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
-    const char *str;
-
-    str = getcmdid(conn);
+    const char *str = getcmdid(conn);
     result = imap_sendf(conn, str, "%s STARTTLS", str);
     state(conn, IMAP_STARTTLS);
   }
@@ -517,7 +515,69 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
   return result;
 }
 
-/* for the (first line of) FETCH BODY[TEXT] response */
+/* Start the DO phase */
+static CURLcode imap_select(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *str = getcmdid(conn);
+
+  result = imap_sendf(conn, str, "%s SELECT %s", str,
+                      imapc->mailbox?imapc->mailbox:"");
+  if(result)
+    return result;
+
+  state(conn, IMAP_SELECT);
+
+  return result;
+}
+
+static CURLcode imap_fetch(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  const char *str = getcmdid(conn);
+
+  /* TODO: make this select the correct mail
+   * Use "1 body[text]" to get the full mail body of mail 1
+   */
+  result = imap_sendf(conn, str, "%s FETCH 1 BODY[TEXT]", str);
+  if(result)
+    return result;
+
+  /*
+   * When issued, the server will respond with a single line similar to
+   * '* 1 FETCH (BODY[TEXT] {2021}'
+   *
+   * Identifying the fetch and how many bytes of contents we can expect. We
+   * must extract that number before continuing to "download as usual".
+   */
+
+  state(conn, IMAP_FETCH);
+
+  return result;
+}
+
+/* For SELECT responses */
+static CURLcode imap_state_select_resp(struct connectdata *conn,
+                                       int imapcode,
+                                       imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != 'O') {
+    failf(data, "Select failed");
+    result = CURLE_LOGIN_DENIED;
+  }
+  else
+    result = imap_fetch(conn);
+
+  return result;
+}
+
+/* For the (first line of) FETCH BODY[TEXT] response */
 static CURLcode imap_state_fetch_resp(struct connectdata *conn,
                                       int imapcode,
                                       imapstate instate)
@@ -597,68 +657,6 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
 
   state(conn, IMAP_STOP);
 
-  return result;
-}
-
-/* start the DO phase */
-static CURLcode imap_select(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
-  const char *str;
-
-  str = getcmdid(conn);
-
-  result = imap_sendf(conn, str, "%s SELECT %s", str,
-                      imapc->mailbox?imapc->mailbox:"");
-  if(result)
-    return result;
-
-  state(conn, IMAP_SELECT);
-  return result;
-}
-
-static CURLcode imap_fetch(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  const char *str;
-
-  str = getcmdid(conn);
-
-  /* TODO: make this select the correct mail
-   * Use "1 body[text]" to get the full mail body of mail 1
-   */
-  result = imap_sendf(conn, str, "%s FETCH 1 BODY[TEXT]", str);
-  if(result)
-    return result;
-
-  /*
-   * When issued, the server will respond with a single line similar to
-   * '* 1 FETCH (BODY[TEXT] {2021}'
-   *
-   * Identifying the fetch and how many bytes of contents we can expect. We
-   * must extract that number before continuing to "download as usual".
-   */
-
-  state(conn, IMAP_FETCH);
-  return result;
-}
-
-/* for SELECT responses */
-static CURLcode imap_state_select_resp(struct connectdata *conn,
-                                       int imapcode,
-                                       imapstate instate)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  (void)instate; /* no use for this yet */
-
-  if(imapcode != 'O') {
-    failf(data, "Select failed");
-    result = CURLE_LOGIN_DENIED;
-  }
-  else
-    result = imap_fetch(conn);
   return result;
 }
 
@@ -969,9 +967,7 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
 static CURLcode imap_logout(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const char *str;
-
-  str = getcmdid(conn);
+  const char *str = getcmdid(conn);
 
   result = imap_sendf(conn, str, "%s LOGOUT", str, NULL);
   if(result)
@@ -1052,6 +1048,9 @@ static CURLcode imap_dophase_done(struct connectdata *conn, bool connected)
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done)
 {
   CURLcode result = imap_multi_statemach(conn, dophase_done);
+
+  if(result)
+    DEBUGF(infof(conn->data, "DO phase failed\n"));
 
   if(*dophase_done) {
     result = imap_dophase_done(conn, FALSE /* not connected */);
