@@ -564,7 +564,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  
+
   (void)instate; /* no use for this yet */
 
   if(imapcode != 'O') {
