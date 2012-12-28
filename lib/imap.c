@@ -203,23 +203,22 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
 
 /***********************************************************************
  *
- * imapsendf()
+ * imap_sendf()
  *
- * Sends the formated string as an IMAP command to a server
+ * Sends the formated string as an IMAP command to the server.
  *
  * Designed to never block.
  */
-static CURLcode imapsendf(struct connectdata *conn,
-                          const char *idstr, /* id to wait for at the
-                                                completion of this command */
-                          const char *fmt, ...)
+static CURLcode imap_sendf(struct connectdata *conn,
+                           const char *idstr, /* command id to wait for */
+                           const char *fmt, ...)
 {
   CURLcode res;
   struct imap_conn *imapc = &conn->proto.imapc;
   va_list ap;
   va_start(ap, fmt);
 
-  imapc->idstr = idstr; /* this is the thing */
+  imapc->idstr = idstr;
 
   res = Curl_pp_vsendf(&imapc->pp, fmt, ap);
 
@@ -391,8 +390,8 @@ static CURLcode imap_state_login(struct connectdata *conn)
   char *passwd = imap_atom(imap->passwd);
 
   /* send USER and password */
-  result = imapsendf(conn, str, "%s LOGIN %s %s", str,
-                     user ? user : "", passwd ? passwd : "");
+  result = imap_sendf(conn, str, "%s LOGIN %s %s", str,
+                      user ? user : "", passwd ? passwd : "");
 
   Curl_safefree(user);
   Curl_safefree(passwd);
@@ -435,7 +434,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
     const char *str;
 
     str = getcmdid(conn);
-    result = imapsendf(conn, str, "%s STARTTLS", str);
+    result = imap_sendf(conn, str, "%s STARTTLS", str);
     state(conn, IMAP_STARTTLS);
   }
   else
@@ -608,8 +607,8 @@ static CURLcode imap_select(struct connectdata *conn)
 
   str = getcmdid(conn);
 
-  result = imapsendf(conn, str, "%s SELECT %s", str,
-                     imapc->mailbox?imapc->mailbox:"");
+  result = imap_sendf(conn, str, "%s SELECT %s", str,
+                      imapc->mailbox?imapc->mailbox:"");
   if(result)
     return result;
 
@@ -627,7 +626,7 @@ static CURLcode imap_fetch(struct connectdata *conn)
   /* TODO: make this select the correct mail
    * Use "1 body[text]" to get the full mail body of mail 1
    */
-  result = imapsendf(conn, str, "%s FETCH 1 BODY[TEXT]", str);
+  result = imap_sendf(conn, str, "%s FETCH 1 BODY[TEXT]", str);
   if(result)
     return result;
 
@@ -968,7 +967,7 @@ static CURLcode imap_logout(struct connectdata *conn)
 
   str = getcmdid(conn);
 
-  result = imapsendf(conn, str, "%s LOGOUT", str, NULL);
+  result = imap_sendf(conn, str, "%s LOGOUT", str, NULL);
   if(result)
     return result;
   state(conn, IMAP_LOGOUT);
