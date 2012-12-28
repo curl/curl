@@ -1,5 +1,5 @@
-#ifndef __STREQUAL_H
-#define __STREQUAL_H
+#ifndef HEADER_CURL_STREQUAL_H
+#define HEADER_CURL_STREQUAL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -32,4 +32,5 @@
 #endif
 size_t strlcat(char *dst, const char *src, size_t siz);
 
-#endif
+#endif /* HEADER_CURL_STREQUAL_H */
+

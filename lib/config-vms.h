@@ -1,5 +1,5 @@
-#ifndef HEADER_CONFIG_VMS_H
-#define HEADER_CONFIG_VMS_H
+#ifndef HEADER_CURL_CONFIG_VMS_H
+#define HEADER_CURL_CONFIG_VMS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -395,4 +395,5 @@
 /* Define to hide dollar sign from compilers in strict ansi mode. */
 #define decc_translate_vms(__s) decc$translate_vms(__s)
 
-#endif /* HEADER_CONFIG_VMS_H */
+#endif /* HEADER_CURL_CONFIG_VMS_H */
+

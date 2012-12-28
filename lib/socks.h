@@ -1,5 +1,5 @@
-#ifndef __CURL_SOCKS_H
-#define __CURL_SOCKS_H
+#ifndef HEADER_CURL_SOCKS_H
+#define HEADER_CURL_SOCKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -73,4 +73,5 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
 #endif /* CURL_DISABLE_PROXY */
 
-#endif  /* __CURL_SOCKS_H */
+#endif  /* HEADER_CURL_SOCKS_H */
+

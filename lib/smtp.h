@@ -1,5 +1,5 @@
-#ifndef __SMTP_H
-#define __SMTP_H
+#ifndef HEADER_CURL_SMTP_H
+#define HEADER_CURL_SMTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -84,4 +84,5 @@ extern const struct Curl_handler Curl_handler_smtps;
 
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread);
 
-#endif /* __SMTP_H */
+#endif /* HEADER_CURL_SMTP_H */
+

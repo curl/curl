@@ -1,6 +1,5 @@
-#ifndef __RTSP_H_
-#define __RTSP_H_
-
+#ifndef HEADER_CURL_RTSP_H
+#define HEADER_CURL_RTSP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -66,4 +65,5 @@ struct RTSP {
 };
 
 
-#endif /* __RTSP_H_ */
+#endif /* HEADER_CURL_RTSP_H */
+

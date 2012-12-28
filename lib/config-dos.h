@@ -1,5 +1,5 @@
-#ifndef HEADER_CONFIG_DOS_H
-#define HEADER_CONFIG_DOS_H
+#ifndef HEADER_CURL_CONFIG_DOS_H
+#define HEADER_CURL_CONFIG_DOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -188,5 +188,5 @@
 #undef word
 #undef byte
 
-#endif /* HEADER_CONFIG_DOS_H */
+#endif /* HEADER_CURL_CONFIG_DOS_H */
 

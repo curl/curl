@@ -1,5 +1,5 @@
-#ifndef __SELECT_H
-#define __SELECT_H
+#ifndef HEADER_CURL_SELECT_H
+#define HEADER_CURL_SELECT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -104,4 +104,5 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
 } WHILE_FALSE
 #endif
 
-#endif /* __SELECT_H */
+#endif /* HEADER_CURL_SELECT_H */
+

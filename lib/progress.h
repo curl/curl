@@ -1,5 +1,5 @@
-#ifndef __PROGRESS_H
-#define __PROGRESS_H
+#ifndef HEADER_CURL_PROGRESS_H
+#define HEADER_CURL_PROGRESS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -68,4 +68,5 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer);
 #define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
 
 
-#endif /* __PROGRESS_H */
+#endif /* HEADER_CURL_PROGRESS_H */
+

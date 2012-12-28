@@ -1,5 +1,5 @@
-#ifndef __SLIST_H
-#define __SLIST_H
+#ifndef HEADER_CURL_SLIST_H
+#define HEADER_CURL_SLIST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -29,4 +29,5 @@
  */
 struct curl_slist *Curl_slist_duplicate(struct curl_slist *inlist);
 
-#endif /* __SLIST_H */
+#endif /* HEADER_CURL_SLIST_H */
+

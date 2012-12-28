@@ -1,5 +1,5 @@
-#ifndef __BUNDLES_H
-#define __BUNDLES_H
+#ifndef HEADER_CURL_BUNDLES_H
+#define HEADER_CURL_BUNDLES_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -41,4 +41,5 @@ int Curl_bundle_remove_conn(struct connectbundle *cb_ptr,
                             struct connectdata *conn);
 
 
-#endif /* __BUNDLES_H */
+#endif /* HEADER_CURL_BUNDLES_H */
+

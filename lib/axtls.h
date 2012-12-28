@@ -1,5 +1,5 @@
-#ifndef __AXTLS_H
-#define __AXTLS_H
+#ifndef HEADER_CURL_AXTLS_H
+#define HEADER_CURL_AXTLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -59,4 +59,5 @@ int Curl_axtls_check_cxn(struct connectdata *conn);
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 
 #endif /* USE_AXTLS */
-#endif
+#endif /* HEADER_CURL_AXTLS_H */
+

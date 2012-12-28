@@ -1,5 +1,5 @@
-#ifndef __SETUP_ONCE_H
-#define __SETUP_ONCE_H
+#ifndef HEADER_CURL_SETUP_ONCE_H
+#define HEADER_CURL_SETUP_ONCE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -566,4 +566,5 @@ typedef int sig_atomic_t;
 #define ZERO_NULL 0
 
 
-#endif /* __SETUP_ONCE_H */
+#endif /* HEADER_CURL_SETUP_ONCE_H */
+

@@ -1,5 +1,5 @@
-#ifndef __TIMEVAL_H
-#define __TIMEVAL_H
+#ifndef HEADER_CURL_TIMEVAL_H
+#define HEADER_CURL_TIMEVAL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -54,4 +54,5 @@ long Curl_tvlong(struct timeval t1);
 #define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
 #define Curl_tvdiff_secs(x,y) curlx_tvdiff_secs(x,y)
 
-#endif
+#endif /* HEADER_CURL_TIMEVAL_H */
+

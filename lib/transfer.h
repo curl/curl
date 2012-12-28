@@ -1,5 +1,5 @@
-#ifndef __TRANSFER_H
-#define __TRANSFER_H
+#ifndef HEADER_CURL_TRANSFER_H
+#define HEADER_CURL_TRANSFER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -66,4 +66,5 @@ Curl_setup_transfer (struct connectdata *data,
 long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
                      int pkt_size);
 
-#endif
+#endif /* HEADER_CURL_TRANSFER_H */
+

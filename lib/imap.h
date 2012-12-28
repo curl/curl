@@ -1,5 +1,5 @@
-#ifndef __IMAP_H
-#define __IMAP_H
+#ifndef HEADER_CURL_IMAP_H
+#define HEADER_CURL_IMAP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -55,4 +55,5 @@ struct imap_conn {
 extern const struct Curl_handler Curl_handler_imap;
 extern const struct Curl_handler Curl_handler_imaps;
 
-#endif /* __IMAP_H */
+#endif /* HEADER_CURL_IMAP_H */
+

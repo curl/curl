@@ -1,5 +1,5 @@
-#ifndef __SOCKADDR_H
-#define __SOCKADDR_H
+#ifndef HEADER_CURL_SOCKADDR_H
+#define HEADER_CURL_SOCKADDR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -39,4 +39,5 @@ struct Curl_sockaddr_storage {
   } buffer;
 };
 
-#endif /* __SOCKADDR_H */
+#endif /* HEADER_CURL_SOCKADDR_H */
+

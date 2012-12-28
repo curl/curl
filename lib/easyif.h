@@ -1,5 +1,5 @@
-#ifndef __EASYIF_H
-#define __EASYIF_H
+#ifndef HEADER_CURL_EASYIF_H
+#define HEADER_CURL_EASYIF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -29,4 +29,5 @@ void Curl_easy_addmulti(struct SessionHandle *data, void *multi);
 
 void Curl_easy_initHandleData(struct SessionHandle *data);
 
-#endif /* __EASYIF_H */
+#endif /* HEADER_CURL_EASYIF_H */
+
