@@ -245,6 +245,82 @@ static const char *getcmdid(struct connectdata *conn)
   return ids[imapc->cmdid];
 }
 
+/***********************************************************************
+ *
+ * imap_atom()
+ *
+ * Checks the input string for characters that need escaping and returns an
+ * atom ready for sending to the server.
+ *
+ * The returned string needs to be freed.
+ *
+ */
+static char* imap_atom(const char* str)
+{
+  const char *p1;
+  char *p2;
+  size_t backsp_count = 0;
+  size_t quote_count = 0;
+  bool space_exists = FALSE;
+  size_t newlen = 0;
+  char *newstr = NULL;
+
+  if(!str)
+    return NULL;
+
+  /* Count any unescapped characters */
+  p1 = str;
+  while(*p1) {
+    if(*p1 == '\\')
+      backsp_count++;
+    else if(*p1 == '"')
+      quote_count++;
+    else if(*p1 == ' ')
+      space_exists = TRUE;
+
+    p1++;
+  }
+
+  /* Does the input contain any unescapped characters? */
+  if(!backsp_count && !quote_count && !space_exists)
+    return strdup(str);
+
+  /* Calculate the new string length */
+  newlen = strlen(str) + backsp_count + quote_count + (space_exists ? 2 : 0);
+
+  /* Allocate the new string */
+  newstr = (char *) malloc((newlen + 1) * sizeof(char));
+  if(!newstr)
+    return NULL;
+
+  /* Surround the string in quotes if necessary */
+  p2 = newstr;
+  if(space_exists) {
+    newstr[0] = '"';
+    newstr[newlen - 1] = '"';
+    p2++;
+  }
+
+  /* Copy the string, escaping backslash and quote characters along the way */
+  p1 = str;
+  while(*p1) {
+    if(*p1 == '\\' || *p1 == '"') {
+      *p2 = '\\';
+      p2++;
+    }
+
+   *p2 = *p1;
+
+    p1++;
+    p2++;
+  }
+
+  /* Terminate the string */
+  newstr[newlen] = '\0';
+
+  return newstr;
+}
+
 /* For the IMAP "protocol connect" and "doing" phases only */
 static int imap_getsock(struct connectdata *conn,
                         curl_socket_t *socks,
@@ -310,14 +386,17 @@ static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result;
   struct FTP *imap = conn->data->state.proto.imap;
-  const char *str;
-
-  str = getcmdid(conn);
+  const char *str = getcmdid(conn);
+  char *user = imap_atom(imap->user);
+  char *passwd = imap_atom(imap->passwd);
 
   /* send USER and password */
   result = imapsendf(conn, str, "%s LOGIN %s %s", str,
-                     imap->user?imap->user:"",
-                     imap->passwd?imap->passwd:"");
+                     user ? user : "", passwd ? passwd : "");
+
+  Curl_safefree(user);
+  Curl_safefree(passwd);
+
   if(result)
     return result;
 
