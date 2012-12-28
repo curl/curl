@@ -23,7 +23,7 @@
 
 #include "tool_cfgable.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 void free_config_fields(struct Configurable *config)
 {

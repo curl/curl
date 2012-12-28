@@ -43,8 +43,8 @@
 #include <fcntl.h>
 
 #include "testutil.h"
-#include "warnless.h"
-#include "memdebug.h"
+#include "curl_warnless.h"
+#include "curl_memdebug.h"
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 

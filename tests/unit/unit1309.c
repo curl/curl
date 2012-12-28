@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "splay.h"
+#include "curl_splay.h"
 
 
 static CURLcode unit_setup(void)

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -30,18 +30,18 @@
 #endif
 
 #include <curl/curl.h>
-#include "netrc.h"
+#include "curl_netrc.h"
 
-#include "strequal.h"
-#include "strtok.h"
+#include "curl_strequal.h"
+#include "curl_strtok.h"
 #include "curl_memory.h"
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Get user and password from .netrc when given a machine name */
 

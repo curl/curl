@@ -35,7 +35,7 @@
  * page at http://daniel.haxx.se/trio/
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(DJGPP) && (DJGPP_MINOR < 4)
 #undef _MPRINTF_REPLACE /* don't use x_was_used() here */
@@ -45,7 +45,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0

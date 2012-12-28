@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_NTLM
 
@@ -33,21 +33,21 @@
 
 #define DEBUG_ME 0
 
-#include "urldata.h"
-#include "non-ascii.h"
-#include "sendf.h"
+#include "curl_urldata.h"
+#include "curl_non-ascii.h"
+#include "curl_sendf.h"
 #include "curl_base64.h"
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 #include "curl_memory.h"
 
 #ifdef USE_WINDOWS_SSPI
 #  include "curl_sspi.h"
 #endif
 
-#include "sslgen.h"
+#include "curl_sslgen.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
@@ -56,7 +56,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"

@@ -26,24 +26,24 @@
  * but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_AXTLS
 #include <axTLS/ssl.h>
-#include "axtls.h"
+#include "curl_axtls.h"
 
-#include "sendf.h"
-#include "inet_pton.h"
-#include "sslgen.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "select.h"
+#include "curl_sendf.h"
+#include "curl_inet_pton.h"
+#include "curl_sslgen.h"
+#include "curl_parsedate.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_select.h"
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
-#include "hostcheck.h"
+#include "curl_memdebug.h"
+#include "curl_hostcheck.h"
 
 
 /* SSL_read is opied from axTLS compat layer */
@@ -65,14 +65,14 @@ static int SSL_read(SSL *ssl, void *buf, int num)
 int Curl_axtls_init(void)
 {
 /* axTLS has no global init.  Everything is done through SSL and SSL_CTX
- * structs stored in connectdata structure.  Perhaps can move to axtls.h.
+ * structs stored in connectdata structure.  Perhaps can move to curl_axtls.h.
  */
   return 1;
 }
 
 int Curl_axtls_cleanup(void)
 {
-  /* axTLS has no global cleanup.  Perhaps can move this to axtls.h. */
+  /* axTLS has no global cleanup.  Perhaps can move this to curl_axtls.h. */
   return 1;
 }
 

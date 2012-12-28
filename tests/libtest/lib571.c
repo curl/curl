@@ -39,8 +39,8 @@
 
 #include <curl/mprintf.h>
 
-#include "warnless.h"
-#include "memdebug.h"
+#include "curl_warnless.h"
+#include "curl_memdebug.h"
 
 #define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
 

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static const char *post[]={
   "one",

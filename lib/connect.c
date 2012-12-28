@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
@@ -59,24 +59,24 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "urldata.h"
-#include "sendf.h"
-#include "if2ip.h"
-#include "strerror.h"
-#include "connect.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_if2ip.h"
+#include "curl_strerror.h"
+#include "curl_connect.h"
 #include "curl_memory.h"
-#include "select.h"
-#include "url.h" /* for Curl_safefree() */
-#include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "inet_ntop.h"
-#include "inet_pton.h"
-#include "sslgen.h" /* for Curl_ssl_check_cxn() */
-#include "progress.h"
-#include "warnless.h"
+#include "curl_select.h"
+#include "curl_url.h"
+#include "curl_multiif.h"
+#include "curl_sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "curl_inet_ntop.h"
+#include "curl_inet_pton.h"
+#include "curl_sslgen.h" /* for Curl_ssl_check_cxn() */
+#include "curl_progress.h"
+#include "curl_warnless.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef __SYMBIAN32__
 /* This isn't actually supported under Symbian OS */

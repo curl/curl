@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
+#include "curl_pingpong.h"
 
 /* Authentication mechanism flags */
 #define SASL_MECH_LOGIN         0x0001

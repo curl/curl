@@ -20,12 +20,12 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_GSSAPI
 
 #include "curl_gssapi.h"
-#include "sendf.h"
+#include "curl_sendf.h"
 
 OM_uint32 Curl_gss_init_sec_context(
     struct SessionHandle *data,

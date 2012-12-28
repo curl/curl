@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
@@ -45,15 +45,15 @@
 #endif
 
 #include "curl_addrinfo.h"
-#include "inet_pton.h"
-#include "warnless.h"
+#include "curl_inet_pton.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 
 /*

@@ -20,17 +20,17 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "hash.h"
-#include "llist.h"
+#include "curl_hash.h"
+#include "curl_llist.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static void
 hash_element_dtor(void *user, void *element)

@@ -20,34 +20,34 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
-#include "urldata.h"
-#include "sendf.h"
-#include "connect.h"
-#include "sslgen.h"
-#include "ssh.h"
-#include "multiif.h"
-#include "non-ascii.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_connect.h"
+#include "curl_sslgen.h"
+#include "curl_ssh.h"
+#include "curl_multiif.h"
+#include "curl_non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
 /* the krb4 functions only exists for FTP and if krb4 or gssapi is defined */
 #if !defined(CURL_DISABLE_FTP) && (defined(HAVE_KRB4) || defined(HAVE_GSSAPI))
-#include "krb4.h"
+#include "curl_krb4.h"
 #else
 #define Curl_sec_send(a,b,c,d) -1
 #define Curl_sec_read(a,b,c,d) -1
 #endif
 
 #include "curl_memory.h"
-#include "strerror.h"
+#include "curl_strerror.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef CURL_DO_LINEEND_CONV
 /*
@@ -385,7 +385,7 @@ static CURLcode pausewrite(struct SessionHandle *data,
 /* Curl_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
-   The defines are in sendf.h of course.
+   The defines are in curl_sendf.h of course.
 
    If CURL_DO_LINEEND_CONV is enabled, data is converted IN PLACE to the
    local character encoding.  This is a problem and should be changed in

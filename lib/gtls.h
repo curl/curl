@@ -22,11 +22,11 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_GNUTLS
 
-#include "urldata.h"
+#include "curl_urldata.h"
 
 int Curl_gtls_init(void);
 int Curl_gtls_cleanup(void);

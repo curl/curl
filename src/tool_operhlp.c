@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -37,7 +37,7 @@
 #  include "tool_metalink.h"
 #endif
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 /*
  * my_useragent: returns allocated string with default user agent

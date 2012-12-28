@@ -26,7 +26,7 @@
  *
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_CYASSL
 
@@ -34,21 +34,21 @@
 #include <limits.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
-#include "cyassl.h"
-#include "sslgen.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "select.h"
-#include "rawstr.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_inet_pton.h"
+#include "curl_cyassl.h"
+#include "curl_sslgen.h"
+#include "curl_parsedate.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_select.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 #include <cyassl/ssl.h>
 #include <cyassl/error.h>
 

@@ -28,7 +28,7 @@
  * since they were not present in 1.0.X.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_GNUTLS
 
@@ -42,21 +42,21 @@
 #include <gcrypt.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
-#include "gtls.h"
-#include "sslgen.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "select.h"
-#include "rawstr.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_inet_pton.h"
+#include "curl_gtls.h"
+#include "curl_sslgen.h"
+#include "curl_parsedate.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_select.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  Some hackish cast macros based on:
@@ -94,7 +94,7 @@ static bool gtls_inited = FALSE;
 /*
  * Custom push and pull callback functions used by GNU TLS to read and write
  * to the socket.  These functions are simple wrappers to send() and recv()
- * (although here using the sread/swrite macros as defined by setup_once.h).
+ * (although here using sread/swrite macros as defined by curl_setup_once.h).
  * We use custom functions rather than the GNU TLS defaults because it allows
  * us to get specific about the fourth "flags" argument, and to use arbitrary
  * private data with gnutls_transport_set_ptr if we wish.

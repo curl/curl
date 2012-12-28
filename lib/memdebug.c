@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef CURLDEBUG
 
@@ -28,11 +28,11 @@
 
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
-#include "urldata.h"
+#include "curl_urldata.h"
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
 #include "curl_memory.h"
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef HAVE_ASSERT_H
 #  define assert(x) Curl_nop_stmt

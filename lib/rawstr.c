@@ -20,9 +20,9 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 /* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
    its behavior is altered by the current locale. */

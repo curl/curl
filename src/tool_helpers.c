@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -32,7 +32,7 @@
 #include "tool_getparam.h"
 #include "tool_helpers.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 /*
 ** Helper functions that are used from more tha one source file.

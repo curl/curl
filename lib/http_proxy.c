@@ -20,21 +20,21 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "http_proxy.h"
-#include "sendf.h"
-#include "http.h"
-#include "url.h"
-#include "select.h"
-#include "rawstr.h"
-#include "progress.h"
-#include "non-ascii.h"
-#include "connect.h"
+#include "curl_http_proxy.h"
+#include "curl_sendf.h"
+#include "curl_http.h"
+#include "curl_url.h"
+#include "curl_select.h"
+#include "curl_rawstr.h"
+#include "curl_progress.h"
+#include "curl_non-ascii.h"
+#include "curl_connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -43,7 +43,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 CURLcode Curl_proxy_connect(struct connectdata *conn)
 {

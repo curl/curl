@@ -20,32 +20,32 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
-#include "urldata.h"
-#include "transfer.h"
-#include "url.h"
-#include "connect.h"
-#include "progress.h"
-#include "easyif.h"
-#include "multiif.h"
-#include "sendf.h"
-#include "timeval.h"
-#include "http.h"
-#include "select.h"
-#include "warnless.h"
-#include "speedcheck.h"
-#include "conncache.h"
-#include "bundles.h"
+#include "curl_urldata.h"
+#include "curl_transfer.h"
+#include "curl_url.h"
+#include "curl_connect.h"
+#include "curl_progress.h"
+#include "curl_easyif.h"
+#include "curl_multiif.h"
+#include "curl_sendf.h"
+#include "curl_timeval.h"
+#include "curl_http.h"
+#include "curl_select.h"
+#include "curl_warnless.h"
+#include "curl_speedcheck.h"
+#include "curl_conncache.h"
+#include "curl_bundles.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
   CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97

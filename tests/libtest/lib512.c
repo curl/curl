@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Test case code based on source in a bug report filed by James Bursa on
    28 Apr 2004 */

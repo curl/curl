@@ -29,7 +29,7 @@
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 /*
 ** callback for CURLOPT_WRITEFUNCTION

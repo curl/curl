@@ -37,7 +37,7 @@
 
 #include "tool_sleep.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 void tool_go_sleep(long ms)
 {

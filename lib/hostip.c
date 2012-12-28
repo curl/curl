@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -47,22 +47,22 @@
 #include <process.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "hash.h"
-#include "share.h"
-#include "strerror.h"
-#include "url.h"
-#include "inet_ntop.h"
-#include "warnless.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_hostip.h"
+#include "curl_hash.h"
+#include "curl_share.h"
+#include "curl_strerror.h"
+#include "curl_url.h"
+#include "curl_inet_ntop.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #if defined(CURLRES_SYNCH) && \
     defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
@@ -105,8 +105,8 @@
  * asyn-ares.c   - functions for ares-using name resolves
  * asyn-thread.c - functions for threaded name resolves
 
- * The hostip.h is the united header file for all this. It defines the
- * CURLRES_* defines based on the config*.h and setup.h defines.
+ * The curl_hostip.h is the united header file for all this. It defines the
+ * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
 /* These two symbols are for the global DNS cache */

@@ -22,9 +22,9 @@
 /*
  * This file is 'mem-include-scan' clean. See test 1132.
  */
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "strdup.h"
+#include "curl_strdup.h"
 
 #ifndef HAVE_STRDUP
 char *curlx_strdup(const char *str)

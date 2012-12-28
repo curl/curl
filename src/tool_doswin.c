@@ -35,7 +35,7 @@
 #include "tool_bname.h"
 #include "tool_doswin.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 /*
  * Macros ALWAYS_TRUE and ALWAYS_FALSE are used to avoid compiler warnings.

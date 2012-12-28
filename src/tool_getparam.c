@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -45,7 +45,7 @@
 #include "tool_parsecfg.h"
 #include "tool_version.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 #ifdef MSDOS
 #  define USE_WATT32

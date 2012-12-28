@@ -21,13 +21,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 /*
  * This header should only be needed to get included by sslgen.c and qssl.c
  */
 
-#include "urldata.h"
+#include "curl_urldata.h"
 
 #ifdef USE_QSOSSL
 int Curl_qsossl_init(void);

@@ -20,17 +20,17 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIBZ
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "sendf.h"
-#include "content_encoding.h"
+#include "curl_sendf.h"
+#include "curl_content_encoding.h"
 #include "curl_memory.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Comment this out if zlib is always going to be at least ver. 1.2.0.4
    (doing so will reduce code size slightly). */

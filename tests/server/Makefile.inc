@@ -10,11 +10,11 @@ CURLX_SRCS = \
 
 CURLX_HDRS = \
  $(top_srcdir)/lib/curlx.h \
- $(top_srcdir)/lib/nonblock.h \
- $(top_srcdir)/lib/strequal.h \
- $(top_srcdir)/lib/strtoofft.h \
- $(top_srcdir)/lib/timeval.h \
- $(top_srcdir)/lib/warnless.h
+ $(top_srcdir)/lib/curl_nonblock.h \
+ $(top_srcdir)/lib/curl_strequal.h \
+ $(top_srcdir)/lib/curl_strtoofft.h \
+ $(top_srcdir)/lib/curl_timeval.h \
+ $(top_srcdir)/lib/curl_warnless.h
 
 USEFUL = \
  getpart.c \
@@ -23,7 +23,7 @@ USEFUL = \
  $(top_srcdir)/lib/base64.c \
  $(top_srcdir)/lib/curl_base64.h \
  $(top_srcdir)/lib/memdebug.c \
- $(top_srcdir)/lib/memdebug.h
+ $(top_srcdir)/lib/curl_memdebug.h
 
 UTIL = \
  util.c \
@@ -62,7 +62,7 @@ sws_CFLAGS = $(AM_CFLAGS)
 tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
  tftpd.c \
- tftp.h
+ server_tftp.h
 tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 tftpd_CFLAGS = $(AM_CFLAGS)
 

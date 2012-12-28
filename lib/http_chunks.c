@@ -20,23 +20,23 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
 
-#include "urldata.h" /* it includes http_chunks.h */
-#include "sendf.h"   /* for the client write stuff */
+#include "curl_urldata.h" /* it includes curl_http_chunks.h */
+#include "curl_sendf.h"   /* for the client write stuff */
 
-#include "content_encoding.h"
-#include "http.h"
+#include "curl_content_encoding.h"
+#include "curl_http.h"
 #include "curl_memory.h"
-#include "non-ascii.h" /* for Curl_convert_to_network prototype */
+#include "curl_non-ascii.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Chunk format (simplified):

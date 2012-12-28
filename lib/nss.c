@@ -25,24 +25,24 @@
  * but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_NSS
 
-#include "urldata.h"
-#include "sendf.h"
-#include "formdata.h" /* for the boundary function */
-#include "url.h" /* for the ssl config check function */
-#include "connect.h"
-#include "strequal.h"
-#include "select.h"
-#include "sslgen.h"
-#include "llist.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_formdata.h" /* for the boundary function */
+#include "curl_url.h" /* for the ssl config check function */
+#include "curl_connect.h"
+#include "curl_strequal.h"
+#include "curl_select.h"
+#include "curl_sslgen.h"
+#include "curl_llist.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
-#include "nssg.h"
+#include "curl_nssg.h"
 #include <nspr.h>
 #include <nss.h>
 #include <ssl.h>
@@ -61,11 +61,11 @@
 #include <prerror.h>
 
 #include "curl_memory.h"
-#include "rawstr.h"
-#include "warnless.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define SSL_DIR "/etc/pki/nssdb"
 

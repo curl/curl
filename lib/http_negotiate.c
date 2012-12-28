@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_OLD_GSSMIT
@@ -30,14 +30,14 @@
 
 #ifndef CURL_DISABLE_HTTP
 
-#include "urldata.h"
-#include "sendf.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
 #include "curl_gssapi.h"
-#include "rawstr.h"
+#include "curl_rawstr.h"
 #include "curl_base64.h"
-#include "http_negotiate.h"
+#include "curl_http_negotiate.h"
 #include "curl_memory.h"
-#include "url.h"
+#include "curl_url.h"
 
 #ifdef HAVE_SPNEGO
 #  include <spnegohelp.h>
@@ -56,7 +56,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static int
 get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)

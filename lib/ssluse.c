@@ -30,24 +30,24 @@
  * Sampo Kellomaki 1998.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "formdata.h" /* for the boundary function */
-#include "url.h" /* for the ssl config check function */
-#include "inet_pton.h"
-#include "ssluse.h"
-#include "connect.h"
-#include "strequal.h"
-#include "select.h"
-#include "sslgen.h"
-#include "rawstr.h"
-#include "hostcheck.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_formdata.h" /* for the boundary function */
+#include "curl_url.h" /* for the ssl config check function */
+#include "curl_inet_pton.h"
+#include "curl_ssluse.h"
+#include "curl_connect.h"
+#include "curl_strequal.h"
+#include "curl_select.h"
+#include "curl_sslgen.h"
+#include "curl_rawstr.h"
+#include "curl_hostcheck.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -67,12 +67,12 @@
 #include <md5.h>
 #endif
 
-#include "warnless.h"
+#include "curl_warnless.h"
 #include "curl_memory.h"
-#include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
+#include "curl_non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef OPENSSL_VERSION_NUMBER
 #error "OPENSSL_VERSION_NUMBER not defined"

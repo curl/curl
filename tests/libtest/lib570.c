@@ -23,7 +23,7 @@
 
 #include <curl/mprintf.h>
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* build request url */
 static char *suburl(const char *base, int i)

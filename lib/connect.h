@@ -21,10 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
-#include "sockaddr.h"
+#include "curl_nonblock.h"
+#include "curl_sockaddr.h"
 
 CURLcode Curl_is_connected(struct connectdata *conn,
                            int sockindex,

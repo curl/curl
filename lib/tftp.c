@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_TFTP
 
@@ -44,27 +44,27 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sendf.h"
-#include "tftp.h"
-#include "progress.h"
-#include "connect.h"
-#include "strerror.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
-#include "url.h"
-#include "rawstr.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
+#include "curl_tftp.h"
+#include "curl_progress.h"
+#include "curl_connect.h"
+#include "curl_strerror.h"
+#include "curl_sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "curl_multiif.h"
+#include "curl_url.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
-#include "select.h"
+#include "curl_select.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512

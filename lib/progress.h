@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "timeval.h"
+#include "curl_timeval.h"
 
 
 typedef enum {

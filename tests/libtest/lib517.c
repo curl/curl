@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static const char * const dates[]={
   "Sun, 06 Nov 1994 08:49:37 GMT",

@@ -34,8 +34,8 @@
 #include "getpart.h"
 #include "util.h"
 
-/* include memdebug.h last */
-#include "memdebug.h"
+/* include curl_memdebug.h last */
+#include "curl_memdebug.h"
 
 #ifndef DEFAULT_LOGFILE
 #define DEFAULT_LOGFILE "log/fake_ntlm.log"

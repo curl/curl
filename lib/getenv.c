@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef __VMS
 #include <unixlib.h>
@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 #include "curl_memory.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static
 char *GetEnv(const char *variable)

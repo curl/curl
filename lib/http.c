@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -45,40 +45,40 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sendf.h"
-#include "formdata.h"
-#include "progress.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
+#include "curl_formdata.h"
+#include "curl_progress.h"
 #include "curl_base64.h"
-#include "cookie.h"
-#include "strequal.h"
-#include "sslgen.h"
-#include "http_digest.h"
+#include "curl_cookie.h"
+#include "curl_strequal.h"
+#include "curl_sslgen.h"
+#include "curl_http_digest.h"
 #include "curl_ntlm.h"
 #include "curl_ntlm_wb.h"
-#include "http_negotiate.h"
-#include "url.h"
-#include "share.h"
-#include "hostip.h"
-#include "http.h"
+#include "curl_http_negotiate.h"
+#include "curl_url.h"
+#include "curl_share.h"
+#include "curl_hostip.h"
+#include "curl_http.h"
 #include "curl_memory.h"
-#include "select.h"
-#include "parsedate.h" /* for the week day and month names */
-#include "strtoofft.h"
-#include "multiif.h"
-#include "rawstr.h"
-#include "content_encoding.h"
-#include "http_proxy.h"
-#include "warnless.h"
-#include "non-ascii.h"
+#include "curl_select.h"
+#include "curl_parsedate.h" /* for the week day and month names */
+#include "curl_strtoofft.h"
+#include "curl_multiif.h"
+#include "curl_rawstr.h"
+#include "curl_content_encoding.h"
+#include "curl_http_proxy.h"
+#include "curl_warnless.h"
+#include "curl_non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Forward declarations.

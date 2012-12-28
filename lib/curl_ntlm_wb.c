@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
 
@@ -40,19 +40,19 @@
 #include <signal.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "select.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_select.h"
 #include "curl_ntlm_wb.h"
-#include "url.h"
-#include "strerror.h"
+#include "curl_url.h"
+#include "curl_strerror.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x

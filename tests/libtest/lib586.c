@@ -23,7 +23,7 @@
 
 #include <curl/mprintf.h>
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define THREADS 2
 

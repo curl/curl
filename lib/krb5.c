@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_GSSAPI
@@ -46,20 +46,20 @@
 #include <netdb.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include "curl_base64.h"
-#include "ftp.h"
+#include "curl_ftp.h"
 #include "curl_gssapi.h"
-#include "sendf.h"
-#include "krb4.h"
+#include "curl_sendf.h"
+#include "curl_krb4.h"
 #include "curl_memory.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define LOCAL_ADDR (&conn->local_addr)
 #define REMOTE_ADDR conn->ip_addr->ai_addr

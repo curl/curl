@@ -20,20 +20,20 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef CURL_DOES_CONVERSIONS
 
 #include <curl/curl.h>
 
-#include "non-ascii.h"
-#include "formdata.h"
-#include "sendf.h"
-#include "urldata.h"
+#include "curl_non-ascii.h"
+#include "curl_formdata.h"
+#include "curl_sendf.h"
+#include "curl_urldata.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef HAVE_ICONV
 #include <iconv.h>

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
@@ -91,9 +91,9 @@
 #  error "Can't compile NTLM support without a crypto library."
 #endif
 
-#include "urldata.h"
-#include "non-ascii.h"
-#include "rawstr.h"
+#include "curl_urldata.h"
+#include "curl_non-ascii.h"
+#include "curl_rawstr.h"
 #include "curl_memory.h"
 #include "curl_ntlm_core.h"
 
@@ -101,7 +101,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef USE_SSLEAY
 /*

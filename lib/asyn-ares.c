@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -51,23 +51,23 @@
 /***********************************************************************
  * Only for ares-enabled builds
  * And only for functions that fulfill the asynch resolver backend API
- * as defined in asyn.h, nothing else belongs in this file!
+ * as defined in curl_asyn.h, nothing else belongs in this file!
  **********************************************************************/
 
 #ifdef CURLRES_ARES
 
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "hash.h"
-#include "share.h"
-#include "strerror.h"
-#include "url.h"
-#include "multiif.h"
-#include "inet_pton.h"
-#include "connect.h"
-#include "select.h"
-#include "progress.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_hostip.h"
+#include "curl_hash.h"
+#include "curl_share.h"
+#include "curl_strerror.h"
+#include "curl_url.h"
+#include "curl_multiif.h"
+#include "curl_inet_pton.h"
+#include "curl_connect.h"
+#include "curl_select.h"
+#include "curl_progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -87,7 +87,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 struct ResolverResults {
   int num_pending; /* number of ares_gethostbyname() requests */

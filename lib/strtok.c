@@ -20,12 +20,12 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_STRTOK_R
 #include <stddef.h>
 
-#include "strtok.h"
+#include "curl_strtok.h"
 
 char *
 Curl_strtok_r(char *ptr, const char *sep, char **end)

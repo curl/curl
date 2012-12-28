@@ -19,10 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "testutil.h"
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #if defined(WIN32) && !defined(MSDOS)
 

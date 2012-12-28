@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
+#include "curl_pingpong.h"
 
 #ifndef CURL_DISABLE_FTP
 extern const struct Curl_handler Curl_handler_ftp;

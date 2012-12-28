@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
 
@@ -54,23 +54,23 @@
 # endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "sendf.h"
-#include "escape.h"
-#include "progress.h"
-#include "transfer.h"
-#include "strequal.h"
-#include "strtok.h"
+#include "curl_sendf.h"
+#include "curl_escape.h"
+#include "curl_progress.h"
+#include "curl_transfer.h"
+#include "curl_strequal.h"
+#include "curl_strtok.h"
 #include "curl_ldap.h"
 #include "curl_memory.h"
 #include "curl_base64.h"
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef HAVE_LDAP_URL_PARSE
 

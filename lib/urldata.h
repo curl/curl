@@ -24,7 +24,7 @@
 
 /* This file is for lib internal stuff */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #define PORT_FTP 21
 #define PORT_FTPS 990
@@ -66,8 +66,8 @@
 */
 #define RESP_TIMEOUT (1800*1000)
 
-#include "cookie.h"
-#include "formdata.h"
+#include "curl_cookie.h"
+#include "curl_formdata.h"
 
 #ifdef USE_SSLEAY
 #ifdef USE_OPENSSL
@@ -150,7 +150,7 @@
 #include <netinet/in.h>
 #endif
 
-#include "timeval.h"
+#include "curl_timeval.h"
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>               /* for content-encoding */
@@ -162,20 +162,20 @@
 
 #include <curl/curl.h>
 
-#include "http_chunks.h" /* for the structs and enum stuff */
-#include "hostip.h"
-#include "hash.h"
-#include "splay.h"
+#include "curl_http_chunks.h" /* for the structs and enum stuff */
+#include "curl_hostip.h"
+#include "curl_hash.h"
+#include "curl_splay.h"
 
-#include "imap.h"
-#include "pop3.h"
-#include "smtp.h"
-#include "ftp.h"
-#include "file.h"
-#include "ssh.h"
-#include "http.h"
-#include "rtsp.h"
-#include "wildcard.h"
+#include "curl_imap.h"
+#include "curl_pop3.h"
+#include "curl_smtp.h"
+#include "curl_ftp.h"
+#include "curl_file.h"
+#include "curl_ssh.h"
+#include "curl_http.h"
+#include "curl_rtsp.h"
+#include "curl_wildcard.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -1068,7 +1068,7 @@ struct Progress {
 
   bool callback;  /* set when progress callback is used */
   int width; /* screen width at download start */
-  int flags; /* see progress.h */
+  int flags; /* see curl_progress.h */
 
   double timespent;
 

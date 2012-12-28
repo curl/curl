@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static int progress_callback(void *clientp, double dltotal,
                              double dlnow, double ultotal, double ulnow)

@@ -23,21 +23,21 @@
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
 #include "curl_memory.h"
-#include "urldata.h"
-#include "warnless.h"
-#include "non-ascii.h"
-#include "escape.h"
+#include "curl_urldata.h"
+#include "curl_warnless.h"
+#include "curl_non-ascii.h"
+#include "curl_escape.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Portable character check (remember EBCDIC). Do not use isalnum() because
    its behavior is altered by the current locale.

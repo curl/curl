@@ -20,16 +20,16 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "share.h"
-#include "sslgen.h"
+#include "curl_urldata.h"
+#include "curl_share.h"
+#include "curl_sslgen.h"
 #include "curl_memory.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 CURLSH *
 curl_share_init(void)

@@ -77,26 +77,26 @@ Example set of cookies:
 ****/
 
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
 
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 
-#include "urldata.h"
-#include "cookie.h"
-#include "strequal.h"
-#include "strtok.h"
-#include "sendf.h"
+#include "curl_urldata.h"
+#include "curl_cookie.h"
+#include "curl_strequal.h"
+#include "curl_strtok.h"
+#include "curl_sendf.h"
 #include "curl_memory.h"
-#include "share.h"
-#include "strtoofft.h"
-#include "rawstr.h"
+#include "curl_share.h"
+#include "curl_strtoofft.h"
+#include "curl_rawstr.h"
 #include "curl_memrchr.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static void freecookie(struct Cookie *co)
 {

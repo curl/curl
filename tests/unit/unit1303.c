@@ -21,9 +21,9 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "urldata.h"
-#include "connect.h"
-#include "memdebug.h" /* LAST include file */
+#include "curl_urldata.h"
+#include "curl_connect.h"
+#include "curl_memdebug.h" /* LAST include file */
 
 static struct SessionHandle *data;
 

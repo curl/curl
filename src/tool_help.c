@@ -24,7 +24,7 @@
 #include "tool_panykey.h"
 #include "tool_help.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 #ifdef MSDOS
 #  define USE_WATT32

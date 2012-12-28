@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_TELNET
 
@@ -44,13 +44,13 @@
 #include <sys/param.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sendf.h"
-#include "telnet.h"
-#include "connect.h"
-#include "progress.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
+#include "curl_telnet.h"
+#include "curl_connect.h"
+#include "curl_progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -58,15 +58,15 @@
 #define  TELOPTS
 #define  TELCMDS
 
-#include "arpa_telnet.h"
+#include "curl_arpa_telnet.h"
 #include "curl_memory.h"
-#include "select.h"
-#include "strequal.h"
-#include "rawstr.h"
-#include "warnless.h"
+#include "curl_select.h"
+#include "curl_strequal.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define SUBBUFSIZE 512
 

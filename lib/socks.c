@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_PROXY)
 
@@ -31,16 +31,16 @@
 #include <arpa/inet.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "strequal.h"
-#include "select.h"
-#include "connect.h"
-#include "timeval.h"
-#include "socks.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_strequal.h"
+#include "curl_select.h"
+#include "curl_connect.h"
+#include "curl_timeval.h"
+#include "curl_socks.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it

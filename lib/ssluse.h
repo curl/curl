@@ -22,14 +22,14 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SSLEAY
 /*
  * This header should only be needed to get included by sslgen.c and ssluse.c
  */
 
-#include "urldata.h"
+#include "curl_urldata.h"
 
 CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,

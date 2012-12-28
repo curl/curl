@@ -35,19 +35,19 @@
  * 01-29-97 11:32PM <DIR> prog
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 
 #include <curl/curl.h>
 
-#include "urldata.h"
-#include "fileinfo.h"
-#include "llist.h"
-#include "strtoofft.h"
-#include "rawstr.h"
-#include "ftp.h"
-#include "ftplistparser.h"
+#include "curl_urldata.h"
+#include "curl_fileinfo.h"
+#include "curl_llist.h"
+#include "curl_strtoofft.h"
+#include "curl_rawstr.h"
+#include "curl_ftp.h"
+#include "curl_ftplistparser.h"
 #include "curl_fnmatch.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -55,7 +55,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* allocs buffer which will contain one line of LIST command response */
 #define FTP_BUFFER_ALLOCSIZE 160

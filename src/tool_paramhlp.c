@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "curl_rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -34,7 +34,7 @@
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 struct getout *new_getout(struct Configurable *config)
 {

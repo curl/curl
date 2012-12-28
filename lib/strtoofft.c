@@ -20,9 +20,9 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "strtoofft.h"
+#include "curl_strtoofft.h"
 
 /*
  * NOTE:

@@ -311,15 +311,15 @@ SOURCE=".\config-win32.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\nonblock.h
+SOURCE=..\lib\curl_nonblock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\rawstr.h
+SOURCE=..\lib\curl_rawstr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\strtoofft.h
+SOURCE=..\lib\curl_strtoofft.h
 # End Source File
 # Begin Source File
 

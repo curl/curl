@@ -41,7 +41,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
@@ -54,17 +54,17 @@
 #include <limits.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
-#include "krb4.h"
-#include "ftp.h"
-#include "sendf.h"
-#include "rawstr.h"
-#include "warnless.h"
+#include "curl_krb4.h"
+#include "curl_ftp.h"
+#include "curl_sendf.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static const struct {
   enum protection_level level;

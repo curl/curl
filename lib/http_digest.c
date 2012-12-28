@@ -20,27 +20,27 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
-#include "urldata.h"
-#include "sendf.h"
-#include "rawstr.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_rawstr.h"
 #include "curl_base64.h"
 #include "curl_md5.h"
-#include "http_digest.h"
-#include "strtok.h"
-#include "url.h" /* for Curl_safefree() */
+#include "curl_http_digest.h"
+#include "curl_strtok.h"
+#include "curl_url.h"
 #include "curl_memory.h"
-#include "non-ascii.h" /* included for Curl_convert_... prototypes */
-#include "warnless.h"
+#include "curl_non-ascii.h" /* included for Curl_convert_... prototypes */
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define MAX_VALUE_LENGTH 256
 #define MAX_CONTENT_LENGTH 1024

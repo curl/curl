@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "timeval.h"
+#include "curl_timeval.h"
 
 #if defined(WIN32) && !defined(MSDOS)
 

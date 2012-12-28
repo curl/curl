@@ -73,16 +73,16 @@
 
 */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 
 #include <curl/curl.h>
-#include "rawstr.h"
-#include "warnless.h"
-#include "parsedate.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
+#include "curl_parsedate.h"
 
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};

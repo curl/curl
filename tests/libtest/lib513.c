@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 {

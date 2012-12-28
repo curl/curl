@@ -20,18 +20,18 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "wildcard.h"
-#include "llist.h"
-#include "fileinfo.h"
+#include "curl_wildcard.h"
+#include "curl_llist.h"
+#include "curl_fileinfo.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc)
 {

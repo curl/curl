@@ -20,11 +20,11 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "strtoofft.h"
-#include "strequal.h"
-#include "rawstr.h"
+#include "curl_strtoofft.h"
+#include "curl_strequal.h"
+#include "curl_rawstr.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -57,35 +57,35 @@
 #error "We can't compile without socket() support!"
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "netrc.h"
+#include "curl_netrc.h"
 
-#include "content_encoding.h"
-#include "hostip.h"
-#include "transfer.h"
-#include "sendf.h"
-#include "speedcheck.h"
-#include "progress.h"
-#include "http.h"
-#include "url.h"
-#include "getinfo.h"
-#include "sslgen.h"
-#include "http_digest.h"
+#include "curl_content_encoding.h"
+#include "curl_hostip.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
+#include "curl_speedcheck.h"
+#include "curl_progress.h"
+#include "curl_http.h"
+#include "curl_url.h"
+#include "curl_getinfo.h"
+#include "curl_sslgen.h"
+#include "curl_http_digest.h"
 #include "curl_ntlm.h"
-#include "http_negotiate.h"
-#include "share.h"
+#include "curl_http_negotiate.h"
+#include "curl_share.h"
 #include "curl_memory.h"
-#include "select.h"
-#include "multiif.h"
-#include "connect.h"
-#include "non-ascii.h"
+#include "curl_select.h"
+#include "curl_multiif.h"
+#include "curl_connect.h"
+#include "curl_non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define CURL_TIMEOUT_EXPECT_100 1000 /* counting ms here */
 
@@ -1725,7 +1725,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
                      char *newurl, /* this 'newurl' is the Location: string,
                                       and it must be malloc()ed before passed
                                       here */
-                     followtype type) /* see transfer.h */
+                     followtype type) /* see curl_transfer.h */
 {
 #ifdef CURL_DISABLE_HTTP
   (void)data;

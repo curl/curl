@@ -22,7 +22,7 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 typedef struct {
   int remains;

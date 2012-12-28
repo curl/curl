@@ -31,5 +31,5 @@
  hostip4.c  - ipv4-specific functions
  hostip6.c  - ipv6-specific functions
 
- The hostip.h is the single united header file for all this. It defines the
- CURLRES_* defines based on the config*.h and setup.h defines.
+ The curl_hostip.h is the single united header file for all this. It defines
+ the CURLRES_* defines based on the config*.h and curl_setup.h defines.

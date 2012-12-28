@@ -34,11 +34,11 @@
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 
-#include "hash.h"
-#include "hostip.h"
+#include "curl_hash.h"
+#include "curl_hostip.h"
 
 #include "curl_memory.h"
-#include "memdebug.h" /* LAST include file */
+#include "curl_memdebug.h" /* LAST include file */
 
 static struct SessionHandle *data;
 static struct curl_hash *hp;

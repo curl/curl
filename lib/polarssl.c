@@ -27,7 +27,7 @@
  *
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_POLARSSL
 
@@ -49,21 +49,21 @@
 #define POLARSSL_ERR_NET_WANT_WRITE POLARSSL_ERR_NET_TRY_AGAIN
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
-#include "polarssl.h"
-#include "sslgen.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "select.h"
-#include "rawstr.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_inet_pton.h"
+#include "curl_polarssl.h"
+#include "curl_sslgen.h"
+#include "curl_parsedate.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_select.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* version dependent differences */
 #if POLARSSL_VERSION_NUMBER < 0x01010000

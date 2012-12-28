@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(__AMIGA__) && !defined(__ixemul__)
 
 #include <amitcp/socketbasetags.h>
 
-#include "amigaos.h"
+#include "curl_amigaos.h"
 
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;

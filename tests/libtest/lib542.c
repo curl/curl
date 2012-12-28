@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #endif
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * FTP get with NOBODY but no HEADER

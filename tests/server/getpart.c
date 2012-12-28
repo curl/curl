@@ -36,8 +36,8 @@ struct SessionHandle {
 #include "curl_base64.h"
 #include "curl_memory.h"
 
-/* include memdebug.h last */
-#include "memdebug.h"
+/* include curl_memdebug.h last */
+#include "curl_memdebug.h"
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 

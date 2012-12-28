@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #endif
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * This example shows an FTP upload, with a rename of the file just after

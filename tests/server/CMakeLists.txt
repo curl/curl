@@ -5,8 +5,8 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(
-    ${CURL_SOURCE_DIR}/lib              # To be able to reach "setup_once.h"
-    ${CURL_BINARY_DIR}/lib              # To be able to reach "curl_config.h"
+    ${CURL_SOURCE_DIR}/lib      # To be able to reach "curl_setup_once.h"
+    ${CURL_BINARY_DIR}/lib      # To be able to reach "curl_config.h"
     ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curlbuild.h"
     )
   if(CURL_USE_ARES)
@@ -67,5 +67,5 @@ endforeach()
 # SETUP_EXECUTABLE(resolve resolve.c util.c util.h ${useful})
 # SETUP_EXECUTABLE(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
 # SETUP_EXECUTABLE(getpart testpart.c ${useful})
-# SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} tftp.h)
+# SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} server_tftp.h)
 

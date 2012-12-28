@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
@@ -33,18 +33,18 @@
 #include <libgen.h>
 #endif
 
-#include "urldata.h" /* for struct SessionHandle */
-#include "formdata.h"
+#include "curl_urldata.h" /* for struct SessionHandle */
+#include "curl_formdata.h"
 #include "curl_rand.h"
-#include "strequal.h"
+#include "curl_strequal.h"
 #include "curl_memory.h"
-#include "sendf.h"
+#include "curl_sendf.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
 

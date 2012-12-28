@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_DICT
 
@@ -48,22 +48,22 @@
 #include <sys/select.h>
 #endif
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sendf.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
 
-#include "progress.h"
-#include "strequal.h"
-#include "dict.h"
-#include "rawstr.h"
+#include "curl_progress.h"
+#include "curl_strequal.h"
+#include "curl_dict.h"
+#include "curl_rawstr.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Forward declarations.

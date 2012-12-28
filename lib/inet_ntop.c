@@ -18,7 +18,7 @@
  * Original code by Paul Vixie. "curlified" by Gisle Vanem.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -35,7 +35,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "inet_ntop.h"
+#include "curl_inet_ntop.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4

@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
 
-#include "strequal.h"
+#include "curl_strequal.h"
 
 /*
  * @unittest: 1301

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -74,61 +74,61 @@ void idn_free (void *ptr);
 int curl_win32_idn_to_ascii(const char *in, char **out);
 #endif  /* USE_LIBIDN */
 
-#include "urldata.h"
-#include "netrc.h"
+#include "curl_urldata.h"
+#include "curl_netrc.h"
 
-#include "formdata.h"
-#include "sslgen.h"
-#include "hostip.h"
-#include "transfer.h"
-#include "sendf.h"
-#include "progress.h"
-#include "cookie.h"
-#include "strequal.h"
-#include "strerror.h"
-#include "escape.h"
-#include "strtok.h"
-#include "share.h"
-#include "content_encoding.h"
-#include "http_digest.h"
-#include "http_negotiate.h"
-#include "select.h"
-#include "multiif.h"
-#include "easyif.h"
-#include "speedcheck.h"
-#include "rawstr.h"
-#include "warnless.h"
-#include "non-ascii.h"
-#include "inet_pton.h"
+#include "curl_formdata.h"
+#include "curl_sslgen.h"
+#include "curl_hostip.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
+#include "curl_progress.h"
+#include "curl_cookie.h"
+#include "curl_strequal.h"
+#include "curl_strerror.h"
+#include "curl_escape.h"
+#include "curl_strtok.h"
+#include "curl_share.h"
+#include "curl_content_encoding.h"
+#include "curl_http_digest.h"
+#include "curl_http_negotiate.h"
+#include "curl_select.h"
+#include "curl_multiif.h"
+#include "curl_easyif.h"
+#include "curl_speedcheck.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
+#include "curl_non-ascii.h"
+#include "curl_inet_pton.h"
 
 /* And now for the protocols */
-#include "ftp.h"
-#include "dict.h"
-#include "telnet.h"
-#include "tftp.h"
-#include "http.h"
-#include "file.h"
+#include "curl_ftp.h"
+#include "curl_dict.h"
+#include "curl_telnet.h"
+#include "curl_tftp.h"
+#include "curl_http.h"
+#include "curl_file.h"
 #include "curl_ldap.h"
-#include "ssh.h"
-#include "imap.h"
-#include "url.h"
-#include "connect.h"
-#include "inet_ntop.h"
+#include "curl_ssh.h"
+#include "curl_imap.h"
+#include "curl_url.h"
+#include "curl_connect.h"
+#include "curl_inet_ntop.h"
 #include "curl_ntlm.h"
 #include "curl_ntlm_wb.h"
-#include "socks.h"
+#include "curl_socks.h"
 #include "curl_rtmp.h"
-#include "gopher.h"
-#include "http_proxy.h"
-#include "bundles.h"
-#include "conncache.h"
+#include "curl_gopher.h"
+#include "curl_http_proxy.h"
+#include "curl_bundles.h"
+#include "curl_conncache.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Local static prototypes */
 static bool ConnectionKillOne(struct SessionHandle *data);
@@ -508,7 +508,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   /* Set the default size of the SSL session ID cache */
   set->ssl.max_ssl_sessions = 5;
 
-  set->proxyport = CURL_DEFAULT_PROXY_PORT; /* from url.h */
+  set->proxyport = CURL_DEFAULT_PROXY_PORT; /* from curl_url.h */
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
   set->proxyauth = CURLAUTH_BASIC; /* defaults to basic */

@@ -33,7 +33,7 @@
 
 #include "tool_dirhie.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 #ifdef NETWARE
 #  ifndef __NOVELL_LIBC__

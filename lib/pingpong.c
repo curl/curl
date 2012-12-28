@@ -23,23 +23,23 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "urldata.h"
-#include "sendf.h"
-#include "select.h"
-#include "progress.h"
-#include "speedcheck.h"
-#include "pingpong.h"
-#include "multiif.h"
-#include "non-ascii.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_select.h"
+#include "curl_progress.h"
+#include "curl_speedcheck.h"
+#include "curl_pingpong.h"
+#include "curl_multiif.h"
+#include "curl_non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef USE_PINGPONG
 

@@ -26,7 +26,7 @@
 
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #define POSTLEN 40960
 

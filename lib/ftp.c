@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 
@@ -47,47 +47,47 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "if2ip.h"
-#include "hostip.h"
-#include "progress.h"
-#include "transfer.h"
-#include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
-#include "ftp.h"
-#include "fileinfo.h"
-#include "ftplistparser.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_if2ip.h"
+#include "curl_hostip.h"
+#include "curl_progress.h"
+#include "curl_transfer.h"
+#include "curl_escape.h"
+#include "curl_http.h" /* for HTTP proxy tunnel stuff */
+#include "curl_socks.h"
+#include "curl_ftp.h"
+#include "curl_fileinfo.h"
+#include "curl_ftplistparser.h"
 
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-#include "krb4.h"
+#include "curl_krb4.h"
 #endif
 
-#include "strtoofft.h"
-#include "strequal.h"
-#include "sslgen.h"
-#include "connect.h"
-#include "strerror.h"
-#include "inet_ntop.h"
-#include "inet_pton.h"
-#include "select.h"
-#include "parsedate.h" /* for the week day and month names */
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
-#include "url.h"
-#include "rawstr.h"
-#include "speedcheck.h"
-#include "warnless.h"
-#include "http_proxy.h"
-#include "non-ascii.h"
+#include "curl_strtoofft.h"
+#include "curl_strequal.h"
+#include "curl_sslgen.h"
+#include "curl_connect.h"
+#include "curl_strerror.h"
+#include "curl_inet_ntop.h"
+#include "curl_inet_pton.h"
+#include "curl_select.h"
+#include "curl_parsedate.h" /* for the week day and month names */
+#include "curl_sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "curl_multiif.h"
+#include "curl_url.h"
+#include "curl_rawstr.h"
+#include "curl_speedcheck.h"
+#include "curl_warnless.h"
+#include "curl_http_proxy.h"
+#include "curl_non-ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025

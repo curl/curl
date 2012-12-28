@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 #include <stddef.h>
 
 typedef void (*curl_llist_dtor)(void *, void *);

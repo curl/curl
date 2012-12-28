@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_QSOSSL
 
@@ -31,15 +31,15 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "qssl.h"
-#include "sslgen.h"
-#include "connect.h" /* for the connect timeout */
-#include "select.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_qssl.h"
+#include "curl_sslgen.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_select.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 
 int Curl_qsossl_init(void)

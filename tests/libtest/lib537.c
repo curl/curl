@@ -31,8 +31,8 @@
 #include <limits.h>
 #endif
 
-#include "warnless.h"
-#include "memdebug.h"
+#include "curl_warnless.h"
+#include "curl_memdebug.h"
 
 #if !defined(HAVE_POLL_FINE)    && \
     !defined(USE_WINSOCK)       && \

@@ -22,19 +22,19 @@
 
 /* Base64 encoding/decoding */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "urldata.h" /* for the SessionHandle definition */
-#include "warnless.h"
+#include "curl_urldata.h" /* for the SessionHandle definition */
+#include "curl_warnless.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
-#include "non-ascii.h"
+#include "curl_non-ascii.h"
 
-/* include memdebug.h last */
-#include "memdebug.h"
+/* include curl_memdebug.h last */
+#include "curl_memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
 static const char table64[]=

@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #endif
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Two FTP uploads, the second with no content sent.

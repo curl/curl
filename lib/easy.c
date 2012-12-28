@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -42,35 +42,35 @@
 #include <sys/param.h>
 #endif
 
-#include "strequal.h"
-#include "urldata.h"
+#include "curl_strequal.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sslgen.h"
-#include "url.h"
-#include "getinfo.h"
-#include "hostip.h"
-#include "share.h"
-#include "strdup.h"
+#include "curl_transfer.h"
+#include "curl_sslgen.h"
+#include "curl_url.h"
+#include "curl_getinfo.h"
+#include "curl_hostip.h"
+#include "curl_share.h"
+#include "curl_strdup.h"
 #include "curl_memory.h"
-#include "progress.h"
-#include "easyif.h"
-#include "select.h"
-#include "sendf.h" /* for failf function prototype */
+#include "curl_progress.h"
+#include "curl_easyif.h"
+#include "curl_select.h"
+#include "curl_sendf.h" /* for failf function prototype */
 #include "curl_ntlm.h"
-#include "connect.h" /* for Curl_getconnectinfo */
-#include "slist.h"
-#include "amigaos.h"
+#include "curl_connect.h" /* for Curl_getconnectinfo */
+#include "curl_slist.h"
+#include "curl_amigaos.h"
 #include "curl_rand.h"
-#include "non-ascii.h"
-#include "warnless.h"
-#include "conncache.h"
+#include "curl_non-ascii.h"
+#include "curl_warnless.h"
+#include "curl_conncache.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */

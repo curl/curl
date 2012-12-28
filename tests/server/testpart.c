@@ -26,8 +26,8 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-/* include memdebug.h last */
-#include "memdebug.h"
+/* include curl_memdebug.h last */
+#include "curl_memdebug.h"
 
 int main(int argc, char **argv)
 {

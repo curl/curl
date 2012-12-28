@@ -29,16 +29,6 @@
  */
 
 /*
- * Based upon the PolarSSL implementation in polarssl.c and polarssl.h:
- *   Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- *
- * Based upon the CyaSSL implementation in cyassl.c and cyassl.h:
- *   Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
- *
- * Thanks for code and inspiration!
- */
-
-/*
  * TODO list for TLS/SSL implementation:
  * - implement client certificate authentication
  * - implement custom server certificate validation
@@ -51,7 +41,7 @@
  *   http://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -61,21 +51,21 @@
 
 #include "curl_sspi.h"
 #include "curl_schannel.h"
-#include "sslgen.h"
-#include "sendf.h"
-#include "connect.h" /* for the connect timeout */
-#include "strerror.h"
-#include "select.h" /* for the socket readyness */
-#include "inet_pton.h" /* for IP addr SNI check */
+#include "curl_sslgen.h"
+#include "curl_sendf.h"
+#include "curl_connect.h" /* for the connect timeout */
+#include "curl_strerror.h"
+#include "curl_select.h" /* for the socket readyness */
+#include "curl_inet_pton.h" /* for IP addr SNI check */
 #include "curl_multibyte.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Uncomment to force verbose output
  * #define infof(x, y, ...) printf(y, __VA_ARGS__)

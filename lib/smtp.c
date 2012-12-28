@@ -27,7 +27,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_SMTP
 
@@ -54,36 +54,36 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "if2ip.h"
-#include "hostip.h"
-#include "progress.h"
-#include "transfer.h"
-#include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
-#include "smtp.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_if2ip.h"
+#include "curl_hostip.h"
+#include "curl_progress.h"
+#include "curl_transfer.h"
+#include "curl_escape.h"
+#include "curl_http.h" /* for HTTP proxy tunnel stuff */
+#include "curl_socks.h"
+#include "curl_smtp.h"
 
-#include "strtoofft.h"
-#include "strequal.h"
-#include "sslgen.h"
-#include "connect.h"
-#include "strerror.h"
-#include "select.h"
-#include "multiif.h"
-#include "url.h"
-#include "rawstr.h"
+#include "curl_strtoofft.h"
+#include "curl_strequal.h"
+#include "curl_sslgen.h"
+#include "curl_connect.h"
+#include "curl_strerror.h"
+#include "curl_select.h"
+#include "curl_multiif.h"
+#include "curl_url.h"
+#include "curl_rawstr.h"
 #include "curl_gethostname.h"
 #include "curl_sasl.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* Local API functions */
 static CURLcode smtp_regular_transfer(struct connectdata *conn, bool *done);

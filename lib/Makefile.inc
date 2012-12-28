@@ -27,20 +27,104 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   curl_multibyte.c curl_darwinssl.c hostcheck.c                         \
   bundles.c conncache.c
 
-HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
-  progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
-  if2ip.h speedcheck.h urldata.h curl_ldap.h ssluse.h escape.h telnet.h	\
-  getinfo.h strequal.h krb4.h memdebug.h http_chunks.h curl_rand.h	\
-  curl_fnmatch.h wildcard.h fileinfo.h ftplistparser.h strtok.h		\
-  connect.h llist.h hash.h content_encoding.h share.h curl_md4.h	\
-  curl_md5.h http_digest.h http_negotiate.h inet_pton.h amigaos.h	\
-  strtoofft.h strerror.h inet_ntop.h curlx.h curl_memory.h setup.h	\
-  transfer.h select.h easyif.h multiif.h parsedate.h sslgen.h gtls.h	\
-  tftp.h sockaddr.h splay.h strdup.h setup_once.h socks.h ssh.h nssg.h	\
-  curl_base64.h rawstr.h curl_addrinfo.h curl_sspi.h slist.h nonblock.h	\
-  curl_memrchr.h imap.h pop3.h smtp.h pingpong.h rtsp.h curl_threads.h	\
-  warnless.h curl_hmac.h polarssl.h curl_rtmp.h curl_gethostname.h	\
-  gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h	\
-  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h	\
-  curl_sasl.h curl_schannel.h curl_multibyte.h curl_darwinssl.h	\
-  hostcheck.h bundles.h conncache.h
+HHEADERS = \
+  curl_addrinfo.h \
+  curl_amigaos.h \
+  curl_arpa_telnet.h \
+  curl_asyn.h \
+  curl_axtls.h \
+  curl_base64.h \
+  curl_bundles.h \
+  curl_conncache.h \
+  curl_connect.h \
+  curl_content_encoding.h \
+  curl_cookie.h \
+  curl_cyassl.h \
+  curl_darwinssl.h \
+  curl_dict.h \
+  curl_easyif.h \
+  curl_escape.h \
+  curl_file.h \
+  curl_fileinfo.h \
+  curl_fnmatch.h \
+  curl_formdata.h \
+  curl_ftp.h \
+  curl_ftplistparser.h \
+  curl_gethostname.h \
+  curl_getinfo.h \
+  curl_gopher.h \
+  curl_gssapi.h \
+  curl_gtls.h \
+  curl_hash.h \
+  curl_hmac.h \
+  curl_hostcheck.h \
+  curl_hostip.h \
+  curl_http.h \
+  curl_http_chunks.h \
+  curl_http_digest.h \
+  curl_http_negotiate.h \
+  curl_http_proxy.h \
+  curl_if2ip.h \
+  curl_imap.h \
+  curl_inet_ntop.h \
+  curl_inet_pton.h \
+  curl_krb4.h \
+  curl_ldap.h \
+  curl_llist.h \
+  curl_md4.h \
+  curl_md5.h \
+  curl_memdebug.h \
+  curl_memory.h \
+  curl_memrchr.h \
+  curl_multibyte.h \
+  curl_multiif.h \
+  curl_netrc.h \
+  curl_non-ascii.h \
+  curl_nonblock.h \
+  curl_nssg.h \
+  curl_ntlm.h \
+  curl_ntlm_core.h \
+  curl_ntlm_msgs.h \
+  curl_ntlm_wb.h \
+  curl_parsedate.h \
+  curl_pingpong.h \
+  curl_polarssl.h \
+  curl_pop3.h \
+  curl_progress.h \
+  curl_qssl.h \
+  curl_rand.h \
+  curl_rawstr.h \
+  curl_rtmp.h \
+  curl_rtsp.h \
+  curl_sasl.h \
+  curl_schannel.h \
+  curl_select.h \
+  curl_sendf.h \
+  curl_setup.h \
+  curl_setup_once.h \
+  curl_share.h \
+  curl_slist.h \
+  curl_smtp.h \
+  curl_sockaddr.h \
+  curl_socks.h \
+  curl_speedcheck.h \
+  curl_splay.h \
+  curl_ssh.h \
+  curl_sslgen.h \
+  curl_ssluse.h \
+  curl_sspi.h \
+  curl_strdup.h \
+  curl_strequal.h \
+  curl_strerror.h \
+  curl_strtok.h \
+  curl_strtoofft.h \
+  curl_telnet.h \
+  curl_tftp.h \
+  curl_threads.h \
+  curl_timeval.h \
+  curl_transfer.h \
+  curl_url.h \
+  curl_urldata.h \
+  curl_wildcard.h \
+  curlx.h
+

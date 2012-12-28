@@ -23,7 +23,7 @@
 
 #include <curl/mprintf.h>
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static const char *HOSTHEADER = "Host: www.host.foo.com";
 static const char *JAR = "log/jar506";

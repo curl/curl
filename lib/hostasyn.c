@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -40,20 +40,20 @@
 #include <process.h>
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "hash.h"
-#include "share.h"
-#include "strerror.h"
-#include "url.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_hostip.h"
+#include "curl_hash.h"
+#include "curl_share.h"
+#include "curl_strerror.h"
+#include "curl_url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /***********************************************************************
  * Only for builds using asynchronous name resolves

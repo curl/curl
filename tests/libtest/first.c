@@ -27,7 +27,7 @@
 
 #ifdef CURLDEBUG
 #  define MEMDEBUG_NODEFINES
-#  include "memdebug.h"
+#  include "curl_memdebug.h"
 #endif
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,

@@ -31,8 +31,8 @@
 #include <limits.h>
 #endif
 
-#include "warnless.h"
-#include "memdebug.h"
+#include "curl_warnless.h"
+#include "curl_memdebug.h"
 
 #ifndef FD_SETSIZE
 #error "this test requires FD_SETSIZE"

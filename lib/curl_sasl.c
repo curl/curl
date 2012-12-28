@@ -24,10 +24,10 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
-#include "urldata.h"
+#include "curl_urldata.h"
 
 #include "curl_base64.h"
 #include "curl_md5.h"
@@ -35,14 +35,14 @@
 #include "curl_hmac.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 /* Retrieves the value for a corresponding key from the challenge string

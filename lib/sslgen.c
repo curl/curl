@@ -43,28 +43,28 @@
    http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html
 */
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #define SSLGEN_C
-#include "sslgen.h" /* generic SSL protos etc */
-#include "ssluse.h" /* OpenSSL versions */
-#include "gtls.h"   /* GnuTLS versions */
-#include "nssg.h"   /* NSS versions */
-#include "qssl.h"   /* QSOSSL versions */
-#include "polarssl.h" /* PolarSSL versions */
-#include "axtls.h"  /* axTLS versions */
-#include "cyassl.h"  /* CyaSSL versions */
+#include "curl_sslgen.h" /* generic SSL protos etc */
+#include "curl_ssluse.h" /* OpenSSL versions */
+#include "curl_gtls.h"   /* GnuTLS versions */
+#include "curl_nssg.h"   /* NSS versions */
+#include "curl_qssl.h"   /* QSOSSL versions */
+#include "curl_polarssl.h" /* PolarSSL versions */
+#include "curl_axtls.h"  /* axTLS versions */
+#include "curl_cyassl.h"  /* CyaSSL versions */
 #include "curl_schannel.h" /* Schannel SSPI version */
 #include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
-#include "sendf.h"
-#include "rawstr.h"
-#include "url.h"
+#include "curl_sendf.h"
+#include "curl_rawstr.h"
+#include "curl_url.h"
 #include "curl_memory.h"
-#include "progress.h"
-#include "share.h"
+#include "curl_progress.h"
+#include "curl_share.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* convenience macro to check if this handle is using a shared SSL session */
 #define SSLSESSION_SHARED(data) (data->share &&                        \

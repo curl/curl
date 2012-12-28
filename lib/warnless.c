@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
@@ -35,7 +35,7 @@
 
 #define BUILDING_WARNLESS_C 1
 
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #define CURL_MASK_SCHAR  0x7F
 #define CURL_MASK_UCHAR  0xFF

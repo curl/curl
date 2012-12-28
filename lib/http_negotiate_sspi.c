@@ -20,18 +20,18 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_WINDOWS_SSPI
 
 #ifndef CURL_DISABLE_HTTP
 
-#include "urldata.h"
-#include "sendf.h"
-#include "rawstr.h"
-#include "warnless.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_rawstr.h"
+#include "curl_warnless.h"
 #include "curl_base64.h"
-#include "http_negotiate.h"
+#include "curl_http_negotiate.h"
 #include "curl_memory.h"
 #include "curl_multibyte.h"
 
@@ -39,7 +39,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 static int
 get_gss_name(struct connectdata *conn, bool proxy,

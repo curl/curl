@@ -20,20 +20,20 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
-#include "urldata.h"
-#include "getinfo.h"
+#include "curl_urldata.h"
+#include "curl_getinfo.h"
 
 #include "curl_memory.h"
-#include "sslgen.h"
-#include "connect.h" /* Curl_getconnectinfo() */
-#include "progress.h"
+#include "curl_sslgen.h"
+#include "curl_connect.h" /* Curl_getconnectinfo() */
+#include "curl_progress.h"
 
 /* Make this the last #include */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * This is supposed to be called in the beginning of a perform() session

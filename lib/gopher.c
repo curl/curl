@@ -20,29 +20,29 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_GOPHER
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "transfer.h"
-#include "sendf.h"
+#include "curl_transfer.h"
+#include "curl_sendf.h"
 
-#include "progress.h"
-#include "strequal.h"
-#include "gopher.h"
-#include "rawstr.h"
-#include "select.h"
-#include "url.h"
-#include "warnless.h"
+#include "curl_progress.h"
+#include "curl_strequal.h"
+#include "curl_gopher.h"
+#include "curl_rawstr.h"
+#include "curl_select.h"
+#include "curl_url.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Forward declarations.

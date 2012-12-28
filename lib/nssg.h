@@ -21,14 +21,14 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_NSS
 /*
  * This header should only be needed to get included by sslgen.c and nss.c
  */
 
-#include "urldata.h"
+#include "curl_urldata.h"
 
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,

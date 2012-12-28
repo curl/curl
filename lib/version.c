@@ -20,11 +20,11 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sslgen.h"
+#include "curl_urldata.h"
+#include "curl_sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>

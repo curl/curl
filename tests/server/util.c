@@ -46,7 +46,7 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "timeval.h"
+#include "curl_timeval.h"
 
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};

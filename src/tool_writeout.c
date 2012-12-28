@@ -27,7 +27,7 @@
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 typedef enum {
   VAR_NONE,       /* must be the first */

@@ -27,7 +27,7 @@
 #include "tool_urlglob.h"
 #include "tool_vms.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "curl_memdebug.h" /* keep this as LAST include */
 
 typedef enum {
   GLOB_OK,

@@ -26,7 +26,7 @@
 
 #include "test.h"
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef CURL_DOES_CONVERSIONS
    /* ASCII representation with escape sequences for non-ASCII platforms */

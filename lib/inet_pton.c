@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_PTON
 
@@ -30,7 +30,7 @@
 #include <arpa/inet.h>
 #endif
 
-#include "inet_pton.h"
+#include "curl_inet_pton.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4

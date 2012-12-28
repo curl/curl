@@ -22,9 +22,9 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "timeval.h"
+#include "curl_timeval.h"
 
 void Curl_speedinit(struct SessionHandle *data);
 CURLcode Curl_speedcheck(struct SessionHandle *data,

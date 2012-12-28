@@ -20,11 +20,11 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "urldata.h"
-#include "sendf.h"
-#include "progress.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

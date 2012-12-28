@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "curl_memory.h"
-#include "slist.h"
+#include "curl_slist.h"
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)

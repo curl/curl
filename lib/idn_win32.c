@@ -24,7 +24,7 @@
   * IDN conversions using Windows kernel32 and normaliz libraries.
   */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_WIN32_IDN
 
@@ -32,7 +32,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef WANT_IDN_PROTOTYPES
 WINBASEAPI int WINAPI IdnToAscii(DWORD, const WCHAR *, int, WCHAR *, int);

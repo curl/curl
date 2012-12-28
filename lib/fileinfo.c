@@ -20,17 +20,17 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include "strdup.h"
-#include "fileinfo.h"
+#include "curl_strdup.h"
+#include "curl_fileinfo.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 struct curl_fileinfo *Curl_fileinfo_alloc(void)
 {

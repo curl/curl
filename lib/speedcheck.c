@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "multiif.h"
-#include "speedcheck.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_multiif.h"
+#include "curl_speedcheck.h"
 
 void Curl_speedinit(struct SessionHandle *data)
 {

@@ -22,7 +22,7 @@
 
 /* #define CURL_LIBSSH2_DEBUG */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_LIBSSH2
 
@@ -60,36 +60,36 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "progress.h"
-#include "transfer.h"
-#include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
-#include "ssh.h"
-#include "url.h"
-#include "speedcheck.h"
-#include "getinfo.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_hostip.h"
+#include "curl_progress.h"
+#include "curl_transfer.h"
+#include "curl_escape.h"
+#include "curl_http.h" /* for HTTP proxy tunnel stuff */
+#include "curl_ssh.h"
+#include "curl_url.h"
+#include "curl_speedcheck.h"
+#include "curl_getinfo.h"
 
-#include "strequal.h"
-#include "sslgen.h"
-#include "connect.h"
-#include "strerror.h"
-#include "inet_ntop.h"
-#include "parsedate.h" /* for the week day and month names */
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "strtoofft.h"
-#include "multiif.h"
-#include "select.h"
-#include "warnless.h"
+#include "curl_strequal.h"
+#include "curl_sslgen.h"
+#include "curl_connect.h"
+#include "curl_strerror.h"
+#include "curl_inet_ntop.h"
+#include "curl_parsedate.h" /* for the week day and month names */
+#include "curl_sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "curl_strtoofft.h"
+#include "curl_multiif.h"
+#include "curl_select.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef WIN32
 #  undef  PATH_MAX

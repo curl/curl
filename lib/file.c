@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FILE
 
@@ -48,26 +48,26 @@
 #include <fcntl.h>
 #endif
 
-#include "strtoofft.h"
-#include "urldata.h"
+#include "curl_strtoofft.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "progress.h"
-#include "sendf.h"
-#include "escape.h"
-#include "file.h"
-#include "speedcheck.h"
-#include "getinfo.h"
-#include "transfer.h"
-#include "url.h"
+#include "curl_progress.h"
+#include "curl_sendf.h"
+#include "curl_escape.h"
+#include "curl_file.h"
+#include "curl_speedcheck.h"
+#include "curl_getinfo.h"
+#include "curl_transfer.h"
+#include "curl_url.h"
 #include "curl_memory.h"
-#include "parsedate.h" /* for the week day and month names */
-#include "warnless.h"
+#include "curl_parsedate.h" /* for the week day and month names */
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || \
   defined(__SYMBIAN32__)

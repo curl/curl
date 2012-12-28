@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
 
@@ -38,11 +38,11 @@
 
 #include <ldap.h>
 
-#include "urldata.h"
+#include "curl_urldata.h"
 #include <curl/curl.h>
-#include "sendf.h"
-#include "sslgen.h"
-#include "transfer.h"
+#include "curl_sendf.h"
+#include "curl_sslgen.h"
+#include "curl_transfer.h"
 #include "curl_ldap.h"
 #include "curl_memory.h"
 #include "curl_base64.h"
@@ -50,7 +50,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifndef _LDAP_PVT_H
 extern int ldap_pvt_url_scheme2proto(const char *);

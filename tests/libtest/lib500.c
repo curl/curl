@@ -22,7 +22,7 @@
 #include "test.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 #ifdef LIB585
 

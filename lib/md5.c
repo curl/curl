@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #include "curl_memory.h"
 
@@ -34,7 +34,7 @@
 
 #include <nettle/md5.h>
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 typedef struct md5_ctx MD5_CTX;
 
@@ -59,7 +59,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 
 #include <gcrypt.h>
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 typedef gcry_md_hd_t MD5_CTX;
 
@@ -443,7 +443,7 @@ static void Decode (UINT4 *output,
 #endif /* CRYPTO LIBS */
 
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {

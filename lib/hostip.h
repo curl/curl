@@ -22,10 +22,10 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
-#include "hash.h"
+#include "curl_setup.h"
+#include "curl_hash.h"
 #include "curl_addrinfo.h"
-#include "asyn.h"
+#include "curl_asyn.h"
 
 #ifdef HAVE_SETJMP_H
 #include <setjmp.h>

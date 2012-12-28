@@ -21,26 +21,26 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_PROXY)
 
-#include "urldata.h"
-#include "sendf.h"
-#include "connect.h"
-#include "strerror.h"
-#include "timeval.h"
-#include "socks.h"
+#include "curl_urldata.h"
+#include "curl_sendf.h"
+#include "curl_connect.h"
+#include "curl_strerror.h"
+#include "curl_timeval.h"
+#include "curl_socks.h"
 #include "curl_sspi.h"
 #include "curl_multibyte.h"
-#include "warnless.h"
+#include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_memdebug.h"
 
 /*
  * Definitions required from ntsecapi.h are directly provided below this point

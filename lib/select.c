@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -41,10 +41,10 @@
 
 #include <curl/curl.h>
 
-#include "urldata.h"
-#include "connect.h"
-#include "select.h"
-#include "warnless.h"
+#include "curl_urldata.h"
+#include "curl_connect.h"
+#include "curl_select.h"
+#include "curl_warnless.h"
 
 /* Convenience local macros */
 
