@@ -1086,6 +1086,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn,
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
                       FIRSTSOCKET, smtp->bytecountp);
 
+  /* End of do phase */
   state(conn, SMTP_STOP);
 
   return CURLE_OK;
@@ -1104,6 +1105,7 @@ static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
   if(smtpcode != 250)
     result = CURLE_RECV_ERROR;
 
+  /* End of done phase */
   state(conn, SMTP_STOP);
 
   return result;
