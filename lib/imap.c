@@ -462,7 +462,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
   else {
     if(data->state.used_interface == Curl_if_multi) {
       state(conn, IMAP_UPGRADETLS);
-      return imap_state_upgrade_tls(conn);
+      result = imap_state_upgrade_tls(conn);
     }
     else {
       result = Curl_ssl_connect(conn, FIRSTSOCKET);
@@ -472,8 +472,6 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       }
     }
   }
-
-  state(conn, IMAP_STOP);
 
   return result;
 }
@@ -488,7 +486,6 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
   if(imapc->ssldone) {
     imap_to_imaps(conn);
     result = imap_state_login(conn);
-    state(conn, IMAP_STOP);
   }
 
   return result;
@@ -508,9 +505,9 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
     failf(data, "Access denied. %c", imapcode);
     result = CURLE_LOGIN_DENIED;
   }
-
-  /* End of connect phase */
-  state(conn, IMAP_STOP);
+  else
+    /* End of connect phase */
+    state(conn, IMAP_STOP);
 
   return result;
 }
@@ -655,6 +652,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
     /* We don't know how to parse this line */
     result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
 
+  /* End of do phase */
   state(conn, IMAP_STOP);
 
   return result;
