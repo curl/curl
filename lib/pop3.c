@@ -562,7 +562,6 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
     if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied. %c", pop3code);
       result = CURLE_USE_SSL_FAILED;
-      state(conn, POP3_STOP);
     }
     else
       result = pop3_state_capa(conn);
@@ -573,10 +572,6 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
     if(CURLE_OK == result) {
       pop3_to_pop3s(conn);
       result = pop3_state_capa(conn);
-    }
-    else {
-      /* End of connect phase */
-      state(conn, POP3_STOP);
     }
   }
 
