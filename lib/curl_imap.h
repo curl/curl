@@ -31,10 +31,10 @@ typedef enum {
   IMAP_STOP,         /* do nothing state, stops the state machine */
   IMAP_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
-  IMAP_LOGIN,
   IMAP_STARTTLS,
   IMAP_UPGRADETLS,   /* asynchronously upgrade the connection to SSL/TLS
                        (multi mode only) */
+  IMAP_LOGIN,
   IMAP_SELECT,
   IMAP_FETCH,
   IMAP_LOGOUT,

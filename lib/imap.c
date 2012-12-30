@@ -329,15 +329,18 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
   const char *id = imapc->idstr;
   size_t id_len = strlen(id);
 
+  /* Do we have a generic command response? */
   if(len >= id_len + 3) {
     if(!memcmp(id, line, id_len) && (line[id_len] == ' ') ) {
-      /* end of response */
       *resp = line[id_len+1]; /* O, N or B */
       return TRUE;
     }
-    else if((imapc->state == IMAP_FETCH) &&
-            !memcmp("* ", line, 2) ) {
-      /* FETCH response we're interested in */
+  }
+
+  /* Are we processing FETCH command responses? */
+  if(imapc->state == IMAP_FETCH) {
+    /* Do we have a valid response? */
+    if(len >= 2 && !memcmp("* ", line, 2)) {
       *resp = '*';
       return TRUE;
     }
@@ -356,9 +359,9 @@ static void state(struct connectdata *conn,
   static const char * const names[]={
     "STOP",
     "SERVERGREET",
-    "LOGIN",
     "STARTTLS",
     "UPGRADETLS",
+    "LOGIN",
     "SELECT",
     "FETCH",
     "LOGOUT",
@@ -687,12 +690,12 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       result = imap_state_servergreet_resp(conn, imapcode, imapc->state);
       break;
 
-    case IMAP_LOGIN:
-      result = imap_state_login_resp(conn, imapcode, imapc->state);
-      break;
-
     case IMAP_STARTTLS:
       result = imap_state_starttls_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_LOGIN:
+      result = imap_state_login_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_FETCH:
