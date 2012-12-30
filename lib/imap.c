@@ -331,8 +331,8 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
 
   /* Do we have a generic command response? */
   if(len >= id_len + 3) {
-    if(!memcmp(id, line, id_len) && (line[id_len] == ' ') ) {
-      *resp = line[id_len+1]; /* O, N or B */
+    if(!memcmp(id, line, id_len) && line[id_len] == ' ') {
+      *resp = line[id_len + 1]; /* O, N or B */
       return TRUE;
     }
   }
@@ -602,7 +602,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn,
     ptr++;
 
   if(*ptr == '{') {
-    curl_off_t filesize = curlx_strtoofft(ptr+1, NULL, 10);
+    curl_off_t filesize = curlx_strtoofft(ptr + 1, NULL, 10);
     if(filesize)
       Curl_pgrsSetDownloadSize(data, filesize);
 
