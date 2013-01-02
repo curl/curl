@@ -135,21 +135,18 @@ UNIX
      default. But if you want to alter it, you can select how to deal with
      each individual library.
 
-     To build with GnuTLS support instead of OpenSSL for SSL/TLS, note that
-     you need to use both --without-ssl and --with-gnutls.
+     To build with GnuTLS for SSL/TLS, use both --without-ssl and
+     --with-gnutls.
 
-     To build with yassl support instead of OpenSSL or GnuTLS, you must build
-     yassl with its OpenSSL emulation enabled and point to that directory root
-     with configure --with-ssl.
+     To build with Cyassl for SSL/TLS, use both --without-ssl and
+     --with-cyassl.
 
-     To build with NSS support instead of OpenSSL for SSL/TLS, note that
-     you need to use both --without-ssl and --with-nss.
+     To build with NSS for SSL/TLS, use both --without-ssl and --with-nss.
 
-     To build with PolarSSL support instead of OpenSSL for SSL/TLS, note that
-     you need to use both --without-ssl and --with-polarssl.
+     To build with PolarSSL for SSL/TLS, use both --without-ssl and
+     --with-polarssl.
 
-     To build with axTLS support instead of OpenSSL for TLS, note that you
-     need to use both --without-ssl and --with-axtls.
+     To build with axTLS for SSL/TLS, use both --without-ssl and --with-axtls.
 
      To get GSSAPI support, build with --with-gssapi and have the MIT or
      Heimdal Kerberos 5 packages installed.
