@@ -3026,6 +3026,13 @@ sub singletest {
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
+    elsif($cmdtype eq "shell") {
+        # run the command line prepended with "/bin/sh"
+        $cmdargs ="$cmd";
+        $CMDLINE = "/bin/sh ";
+        $tool=$CMDLINE;
+        $disablevalgrind=1;
+    }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
         $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
