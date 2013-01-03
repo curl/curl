@@ -47,9 +47,6 @@ Portability
  axTLS        1.2.7
  Heimdal      ?
 
- * = only partly functional, but that's due to bugs in the third party lib, not
-     because of libcurl code
-
  On systems where configure runs, we aim at working on them all - if they have
  a suitable C compiler. On systems that don't run configure, we strive to keep
  curl running fine on:
