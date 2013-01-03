@@ -97,6 +97,7 @@ FAQ
   5.14 Using C++ non-static functions for callbacks?
   5.15 How do I get an FTP directory listing?
   5.16 I want a different time-out!
+  5.17 Can I write a server with libcurl?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -1310,6 +1311,15 @@ FAQ
   CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
   use that to figure out exactly when the right condition is met when the
   transfer should get stopped.
+
+  5.17 Can I write a server with libcurl?
+
+  No. libcurl offers no functions or building blocks to build any kind of
+  internet protocol server. libcurl is only a client-side library. For server
+  libraries, you need to continue your search elsewhere but there exist many
+  good open source ones out there for most protocols you could possibly want a
+  server for. And there are really good stand-alone ones that have been tested
+  and proven for many years. There's no need for you to reinvent them!
 
 
 6. License Issues
