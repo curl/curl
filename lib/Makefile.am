@@ -66,7 +66,8 @@ EXTRA_DIST = \
  mk-ca-bundle.vbs \
  msvcproj.foot \
  msvcproj.head \
- objnames-test.sh \
+ objnames-test08.sh \
+ objnames-test10.sh \
  objnames.inc \
  setup-os400.h \
  vc6libcurl.dsw

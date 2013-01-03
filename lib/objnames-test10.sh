@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -32,19 +32,25 @@
 # argument validation
 #
 
-if ! test $# -eq 1; then
+if test $# -eq 1; then
+  :
+else
   echo "Usage: ${0} srcdir"
   exit 1
 fi
 
-if ! test -f "${1}/runtests.pl"; then
+if test -f "${1}/runtests.pl"; then
+  :
+else
   echo "${0}: Wrong srcdir"
   exit 1
 fi
 
 srcdir=${1}
 
-if ! test -f "$srcdir/../lib/objnames.inc"; then
+if test -f "$srcdir/../lib/objnames.inc"; then
+  :
+else
   echo "$0: Missing objnames.inc"
   exit 1
 fi
@@ -208,4 +214,4 @@ rm -f $list_obj
 rm -f $list_obj_c
 rm -f $list_obj_uniq
 
-# end of objnames-test.sh
+# end of objnames-test10.sh

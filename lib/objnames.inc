@@ -82,4 +82,26 @@ curl_10char_object_name() {
    -e 's:^\(..........\).*:\1:'
 }
 
+#
+# curl_8char_object_name
+#
+# Same as curl_10char_object_name() description and details above, except
+# that object name is limited to 8 charcters maximum.
+#
+
+curl_8char_object_name() {
+  echo "${1}" | \
+  sed -e 's:.*/::' \
+   -e 's:[.].*::' \
+   -e 'y:abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:' \
+   -e 's:[^ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_]:_:g' \
+   -e 's:__*:_:g' \
+   -e 's:\([^_]\)[^_]*_\(.*\):\1\2:' \
+   -e 's:\([^_]\)\([^_]\)[^_]*_\(.*\):\1\2\3:' \
+   -e 's:\([^_]\)\([^_]\)\([^_]\)[^_]*_\(.*\):\1\2\3\4:' \
+   -e 's:\([^_]\)\([^_]\)\([^_]\)\([^_]\)[^_]*_\(.*\):\1\2\3\4\5:' \
+   -e 's:\([^_]\)\([^_]\)\([^_]\)\([^_]\)\([^_]\)[^_]*_\(.*\):\1\2\3\4\5\6:' \
+   -e 's:^\(........\).*:\1:'
+}
+
 # end of objectname.inc
