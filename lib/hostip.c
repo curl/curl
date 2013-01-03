@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,10 +71,10 @@
 #endif
 
 /*
- * hostip.c explained
- * ==================
+ * curl_hostip.c explained
+ * =======================
  *
- * The main COMPILE-TIME DEFINES to keep in mind when reading the host*.c
+ * The main COMPILE-TIME DEFINES to keep in mind when reading the curl_host*.c
  * source file are these:
  *
  * CURLRES_IPV6 - this host has getaddrinfo() and family, and thus we use
@@ -93,17 +93,17 @@
  * libcurl is not built to use an asynchronous resolver, CURLRES_SYNCH is
  * defined.
  *
- * The host*.c sources files are split up like this:
+ * The curl_host*.c sources files are split up like this:
  *
- * hostip.c   - method-independent resolver functions and utility functions
- * hostasyn.c - functions for asynchronous name resolves
- * hostsyn.c  - functions for synchronous name resolves
- * hostip4.c  - ipv4-specific functions
- * hostip6.c  - ipv6-specific functions
+ * curl_hostip.c   - method-independent resolver and utility functions
+ * curl_hostasyn.c - functions for asynchronous name resolves
+ * curl_hostsyn.c  - functions for synchronous name resolves
+ * curl_hostip4.c  - ipv4-specific functions
+ * curl_hostip6.c  - ipv6-specific functions
  *
  * The two asynchronous name resolver backends are implemented in:
- * asyn-ares.c   - functions for ares-using name resolves
- * asyn-thread.c - functions for threaded name resolves
+ * curl_asyn_ares.c   - functions for ares-using name resolves
+ * curl_asyn_thread.c - functions for threaded name resolves
 
  * The curl_hostip.h is the united header file for all this. It defines the
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.

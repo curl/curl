@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -598,7 +598,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
  *
  * Curl_hash_print(multi->sockhash, debug_print_sock_hash);
  *
- * Enable the hash print function first by editing hash.c
+ * Enable the hash print function first by editing curl_hash.c
  */
 static void debug_print_sock_hash(void *p)
 {

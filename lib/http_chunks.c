@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@
 #include "curl_content_encoding.h"
 #include "curl_http.h"
 #include "curl_memory.h"
-#include "curl_non-ascii.h" /* for Curl_convert_to_network prototype */
+#include "curl_non_ascii.h" /* for Curl_convert_to_network prototype */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -315,7 +315,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
       }
       else {
-        /* conn->trailer is assumed to be freed in url.c on a
+        /* conn->trailer is assumed to be freed in curl_url.c on a
            connection basis */
         if(conn->trlPos >= conn->trlMax) {
           /* we always allocate three extra bytes, just because when the full

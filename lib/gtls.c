@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 /*
  * Source file for all GnuTLS-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but curl_sslgen.c should ever call or use these functions.
  *
  * Note: don't use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.

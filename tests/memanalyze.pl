@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,9 +23,9 @@
 #
 # Example input:
 #
-# MEM mprintf.c:1094 malloc(32) = e5718
-# MEM mprintf.c:1103 realloc(e5718, 64) = e6118
-# MEM sendf.c:232 free(f6520)
+# MEM curl_mprintf.c:1094 malloc(32) = e5718
+# MEM curl_mprintf.c:1103 realloc(e5718, 64) = e6118
+# MEM curl_sendf.c:232 free(f6520)
 
 my $mallocs=0;
 my $callocs=0;
@@ -224,7 +224,7 @@ while(<FILE>) {
             print "Not recognized input line: $function\n";
         }
     }
-    # FD url.c:1282 socket() = 5
+    # FD curl_url.c:1282 socket() = 5
     elsif($_ =~ /^FD ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
@@ -259,7 +259,7 @@ while(<FILE>) {
             }
         }
     }
-    # FILE url.c:1282 fopen("blabla") = 0x5ddd
+    # FILE curl_url.c:1282 fopen("blabla") = 0x5ddd
     elsif($_ =~ /^FILE ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
@@ -287,12 +287,12 @@ while(<FILE>) {
             }
         }
     }
-    # GETNAME url.c:1901 getnameinfo()
+    # GETNAME curl_url.c:1901 getnameinfo()
     elsif($_ =~ /^GETNAME ([^ ]*):(\d*) (.*)/) {
         # not much to do
     }
 
-    # ADDR url.c:1282 getaddrinfo() = 0x5ddd
+    # ADDR curl_url.c:1282 getaddrinfo() = 0x5ddd
     elsif($_ =~ /^ADDR ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;

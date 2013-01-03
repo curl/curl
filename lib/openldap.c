@@ -1,12 +1,12 @@
 /***************************************************************************
- *                      _   _ ____  _
- *  Project         ___| | | |  _ \| |
- *                 / __| | | | |_) | |
- *                | (__| |_| |  _ <| |___
- *                 \___|\___/|_| \_\_____|
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,8 +28,8 @@
 /*
  * Notice that USE_OPENLDAP is only a source code selection switch. When
  * libcurl is built with USE_OPENLDAP defined the libcurl source code that
- * gets compiled is the code from openldap.c, otherwise the code that gets
- * compiled is the code from ldap.c.
+ * gets compiled is the code from curl_openldap.c, otherwise the code that
+ * gets compiled is the code from curl_ldap.c.
  *
  * When USE_OPENLDAP is defined a recent version of the OpenLDAP library
  * might be required for compilation and runtime. In order to use ancient

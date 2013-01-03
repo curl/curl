@@ -5,7 +5,7 @@ TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 
 # files used only in some libcurl test programs
-WARNLESS = $(top_srcdir)/lib/warnless.c $(top_srcdir)/lib/curl_warnless.h
+WARNLESS = $(top_srcdir)/lib/curl_warnless.c $(top_srcdir)/lib/curl_warnless.h
 
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h

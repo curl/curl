@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,8 @@
 
 #ifdef USE_NSS
 /*
- * This header should only be needed to get included by sslgen.c and nss.c
+ * This header should only be needed to get included by curl_sslgen.c and
+ * curl_nss.c
  */
 
 #include "curl_urldata.h"

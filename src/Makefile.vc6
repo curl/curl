@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -134,9 +134,9 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
 RELEASE_OBJS= \
-	nonblockr.obj \
-	rawstrr.obj \
-	strtoofftr.obj \
+	curl_nonblockr.obj \
+	curl_rawstrr.obj \
+	curl_strtoofftr.obj \
 	tool_binmoder.obj \
 	tool_bnamer.obj \
 	tool_cb_dbgr.obj \
@@ -178,9 +178,9 @@ RELEASE_OBJS= \
 	curlr.res
 
 DEBUG_OBJS= \
-	nonblockd.obj \
-	rawstrd.obj \
-	strtoofftd.obj \
+	curl_nonblockd.obj \
+	curl_rawstrd.obj \
+	curl_strtoofftd.obj \
 	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
@@ -341,12 +341,12 @@ debug: $(DEBUG_OBJS)
         $(MANIFESTTOOL)
 
 ## Release
-nonblockr.obj: ../lib/nonblock.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrr.obj: ../lib/rawstr.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
-strtoofftr.obj: ../lib/strtoofft.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+curl_nonblockr.obj: ../lib/curl_nonblock.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/curl_nonblock.c
+curl_rawstrr.obj: ../lib/curl_rawstr.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/curl_rawstr.c
+curl_strtoofftr.obj: ../lib/curl_strtoofft.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/curl_strtoofft.c
 tool_binmoder.obj: tool_binmode.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamer.obj: tool_bname.c
@@ -427,12 +427,12 @@ curlr.res : curl.rc
 	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
 ## Debug
-nonblockd.obj: ../lib/nonblock.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrd.obj: ../lib/rawstr.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
-strtoofftd.obj: ../lib/strtoofft.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+curl_nonblockd.obj: ../lib/curl_nonblock.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/curl_nonblock.c
+curl_rawstrd.obj: ../lib/curl_rawstr.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/curl_rawstr.c
+curl_strtoofftd.obj: ../lib/curl_strtoofft.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/curl_strtoofft.c
 tool_binmoded.obj: tool_binmode.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamed.obj: tool_bname.c

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -80,7 +80,7 @@
 #include "curl_speedcheck.h"
 #include "curl_warnless.h"
 #include "curl_http_proxy.h"
-#include "curl_non-ascii.h"
+#include "curl_non_ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -3109,7 +3109,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 }
 
 
-/* called repeatedly until done from multi.c */
+/* called repeatedly until done from curl_multi.c */
 static CURLcode ftp_multi_statemach(struct connectdata *conn,
                                     bool *done)
 {
@@ -4461,7 +4461,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* called from multi.c while DOing */
+/* called from curl_multi.c while DOing */
 static CURLcode ftp_doing(struct connectdata *conn,
                           bool *dophase_done)
 {

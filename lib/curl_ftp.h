@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,7 +79,7 @@ typedef enum {
   FTP_LAST  /* never used */
 } ftpstate;
 
-struct ftp_parselist_data; /* defined later in ftplistparser.c */
+struct ftp_parselist_data; /* defined later in curl_ftplistparser.c */
 
 struct ftp_wc_tmpdata {
   struct ftp_parselist_data *parser;
@@ -146,7 +146,7 @@ struct ftp_conn {
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  ftpstate state; /* always use ftp.c:state() to change state! */
+  ftpstate state; /* always use curl_ftp.c:state() to change state! */
   ftpstate state_saved; /* transfer type saved to be reloaded after
                            data connection is established */
   curl_off_t retr_size_saved; /* Size of retrieved file saved */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2620,7 +2620,7 @@ static void ssh_block2waitfor(struct connectdata *conn, bool block)
 #define ssh_block2waitfor(x,y) Curl_nop_stmt
 #endif
 
-/* called repeatedly until done from multi.c */
+/* called repeatedly until done from curl_multi.c */
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -2844,7 +2844,7 @@ CURLcode scp_perform(struct connectdata *conn,
   return result;
 }
 
-/* called from multi.c while DOing */
+/* called from curl_multi.c while DOing */
 static CURLcode scp_doing(struct connectdata *conn,
                                bool *dophase_done)
 {
@@ -3053,7 +3053,7 @@ CURLcode sftp_perform(struct connectdata *conn,
   return result;
 }
 
-/* called from multi.c while DOing */
+/* called from curl_multi.c while DOing */
 static CURLcode sftp_doing(struct connectdata *conn,
                            bool *dophase_done)
 {
@@ -3154,7 +3154,7 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   return nread;
 }
 
-/* The get_pathname() function is being borrowed from OpenSSH sftp.c
+/* The get_pathname() function is being borrowed from OpenSSH-sftp.c
    version 4.6p1. */
 /*
  * Copyright (c) 2001-2004 Damien Miller <djm@openbsd.org>

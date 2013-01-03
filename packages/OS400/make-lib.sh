@@ -13,7 +13,7 @@ cd "${TOPDIR}/lib"
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(user, __DATE__)' >> os400.c
 echo '#pragma comment(user, __TIME__)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2012 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
+echo '#pragma comment(copyright, "Copyright (C) 1998-2013 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
 make_module     OS400           os400.c
 LINK=                           # No need to rebuild service program yet.
 MODULES=
@@ -151,13 +151,13 @@ fi
 
 if [ "${TEST_FORMDATA}" ]
 then    MODULES=
-        make_module TFORMDATA   formdata.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTREQUAL   strequal.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMEMDEBUG   memdebug.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMPRINTF    mprintf.c       "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTRERROR   strerror.c      "'_FORM_DEBUG' 'CURLDEBUG'"
+        make_module TFORMDATA   curl_formdata.c  "'_FORM_DEBUG' 'CURLDEBUG'"
+        make_module TSTREQUAL   curl_strequal.c  "'_FORM_DEBUG' 'CURLDEBUG'"
+        make_module TMEMDEBUG   curl_memdebug.c  "'_FORM_DEBUG' 'CURLDEBUG'"
+        make_module TMPRINTF    curl_mprintf.c   "'_FORM_DEBUG' 'CURLDEBUG'"
+        make_module TSTRERROR   curl_strerror.c  "'_FORM_DEBUG' 'CURLDEBUG'"
         #       The following modules should not be needed (see comment in
-        #               formdata.c. However, there are some unsatisfied
+        #               curl_formdata.c. However, there are some unsatisfied
         #               external references leading in the following
         #               modules to be (recursively) needed.
         MODULES="${MODULES} EASY STRDUP SSLGEN QSSL HOSTIP HOSTIP4 HOSTIP6"

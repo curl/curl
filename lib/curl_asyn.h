@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,8 +34,8 @@ struct Curl_dns_entry;
 /*
  * This header defines all functions in the internal asynch resolver interface.
  * All asynch resolvers need to provide these functions.
- * asyn-ares.c and asyn-thread.c are the current implementations of asynch
- * resolver backends.
+ * curl_asyn_ares.c and curl_asyn_thread.c are the current implementations of
+ * asynch resolver backends.
  */
 
 /*

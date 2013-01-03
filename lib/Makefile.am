@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -30,16 +30,46 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)              \
- vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h         \
- config-mac.h curl_config.h.in makefile.dj config-dos.h libcurl.plist   \
- libcurl.rc config-amigaos.h makefile.amiga                             \
- Makefile.netware nwlib.c nwos.c msvcproj.head msvcproj.foot		\
- config-win32ce.h config-os400.h setup-os400.h config-symbian.h		\
- Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		\
- mk-ca-bundle.vbs firefox-db2pem.sh $(CMAKE_DIST) config-vxworks.h	\
- Makefile.vxworks config-vms.h checksrc.pl objnames-test.sh		\
- objnames.inc
+EXTRA_DIST = \
+ $(CMAKE_DIST) \
+ $(DOCS) \
+ $(DSP) \
+ $(VCPROJ) \
+ Makefile.Watcom \
+ Makefile.b32 \
+ Makefile.m32 \
+ Makefile.netware \
+ Makefile.vc6 \
+ Makefile.vxworks \
+ checksrc.pl \
+ config-amigaos.h \
+ config-dos.h \
+ config-mac.h \
+ config-os400.h \
+ config-riscos.h \
+ config-symbian.h \
+ config-tpf.h \
+ config-vms.h \
+ config-vxworks.h \
+ config-win32.h \
+ config-win32ce.h \
+ config-win32ce.h \
+ curl_config.h.in \
+ curl_nwlib.c \
+ curl_nwos.c \
+ firefox-db2pem.sh \
+ libcurl.plist \
+ libcurl.rc \
+ makefile.amiga \
+ makefile.dj \
+ mk-ca-bundle.pl \
+ mk-ca-bundle.vbs \
+ msvcproj.foot \
+ msvcproj.head \
+ objnames-test.sh \
+ objnames.inc \
+ setup-os400.h \
+ vc6libcurl.dsw
 
 CLEANFILES = $(DSP) $(VCPROJ)
 

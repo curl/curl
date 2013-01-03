@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,7 +72,7 @@
 #include "curl_content_encoding.h"
 #include "curl_http_proxy.h"
 #include "curl_warnless.h"
-#include "curl_non-ascii.h"
+#include "curl_non_ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -679,8 +679,8 @@ Curl_http_output_auth(struct connectdata *conn,
 
 /*
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
- * headers. They are dealt with both in the transfer.c main loop and in the
- * proxy CONNECT loop.
+ * headers. They are dealt with both in the curl_transfer.c main loop and in
+ * the proxy CONNECT loop.
  */
 
 CURLcode Curl_http_input_auth(struct connectdata *conn,
@@ -936,7 +936,7 @@ static int http_should_fail(struct connectdata *conn)
  * readmoredata() is a "fread() emulation" to provide POST and/or request
  * data. It is used when a huge POST is to be made and the entire chunk wasn't
  * sent in the first send(). This function will then be called from the
- * transfer.c loop when more data is to be sent to the peer.
+ * curl_transfer.c loop when more data is to be sent to the peer.
  *
  * Returns the amount of bytes it filled the buffer with.
  */
@@ -1536,7 +1536,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
            checkprefix("Host:", headers->data))
           ;
         else if(conn->data->set.httpreq == HTTPREQ_POST_FORM &&
-                /* this header (extended by formdata.c) is sent later */
+                /* this header (extended by curl_formdata.c) is sent later */
                 checkprefix("Content-Type:", headers->data))
           ;
         else if(conn->bits.authneg &&
@@ -1728,10 +1728,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 
-  /* The User-Agent string might have been allocated in url.c already, because
-     it might have been used in the proxy connect, but if we have got a header
-     with the user-agent string specified, we erase the previously made string
-     here. */
+  /* The User-Agent string might have been allocated in curl_url.c already,
+     because it might have been used in the proxy connect, but if we have
+     got a header with the user-agent string specified, we erase the
+     previously made string here. */
   if(Curl_checkheaders(data, "User-Agent:") && conn->allocptr.uagent) {
     free(conn->allocptr.uagent);
     conn->allocptr.uagent=NULL;

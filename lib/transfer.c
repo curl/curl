@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,7 +79,7 @@
 #include "curl_select.h"
 #include "curl_multiif.h"
 #include "curl_connect.h"
-#include "curl_non-ascii.h"
+#include "curl_non_ascii.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -683,7 +683,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         if(k->badheader < HEADER_ALLBAD) {
           /* This switch handles various content encodings. If there's an
              error here, be sure to check over the almost identical code
-             in http_chunks.c.
+             in curl_http_chunks.c.
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
 #ifdef HAVE_LIBZ

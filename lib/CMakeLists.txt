@@ -18,18 +18,18 @@ if(MSVC)
 endif()
 
 # SET(CSOURCES
-# #  memdebug.c -not used
-# # nwlib.c - Not used
-# # strtok.c - specify later
-# # strtoofft.c - specify later
+# # curl_memdebug.c -not used
+# # curl_nwlib.c - Not used
+# # curl_strtok.c - specify later
+# # curl_strtoofft.c - specify later
 # )
 
 # # if we have Kerberos 4, right now this is never on
 # #OPTION(CURL_KRB4 "Use Kerberos 4" OFF)
 # IF(CURL_KRB4)
 # SET(CSOURCES ${CSOURCES}
-# krb4.c
-# security.c
+# curl_krb4.c
+# curl_security.c
 # )
 # ENDIF(CURL_KRB4)
 
@@ -37,33 +37,33 @@ endif()
 # MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
 # IF(CURL_MALLOC_DEBUG)
 # SET(CSOURCES ${CSOURCES}
-# memdebug.c
+# curl_memdebug.c
 # )
 # ENDIF(CURL_MALLOC_DEBUG)
 
 # # only build compat strtoofft if we need to
 # IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 # SET(CSOURCES ${CSOURCES}
-# strtoofft.c
+# curl_strtoofft.c
 # )
 # ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 
 if(HAVE_FEATURES_H)
   set_source_files_properties(
-    cookie.c
-    easy.c
-    formdata.c
-    getenv.c
-    nonblock.c
-    hash.c
-    http.c
-    if2ip.c
-    mprintf.c
-    multi.c
-    sendf.c
-    telnet.c
-    transfer.c
-    url.c
+    curl_cookie.c
+    curl_easy.c
+    curl_formdata.c
+    curl_getenv.c
+    curl_nonblock.c
+    curl_hash.c
+    curl_http.c
+    curl_if2ip.c
+    curl_mprintf.c
+    curl_multi.c
+    curl_sendf.c
+    curl_telnet.c
+    curl_transfer.c
+    curl_url.c
     COMPILE_FLAGS -D_BSD_SOURCE)
 endif(HAVE_FEATURES_H)
 

@@ -541,8 +541,8 @@ to provide the data to send.
 
 19.1 http-style HEAD output for ftp
 
- #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
- from being output in NOBODY requests over ftp
+ #undef CURL_FTP_HTTPSTYLE_HEAD in lib/curl_ftp.c to remove the HTTP-style
+ headers from being output in NOBODY requests over ftp
 
 19.2 combine error codes
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,7 +33,7 @@
 #include "curl_strtok.h"
 #include "curl_url.h"
 #include "curl_memory.h"
-#include "curl_non-ascii.h" /* included for Curl_convert_... prototypes */
+#include "curl_non_ascii.h" /* included for Curl_convert_... prototypes */
 #include "curl_warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */

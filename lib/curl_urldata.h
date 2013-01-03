@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -664,7 +664,7 @@ struct SingleRequest {
 
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
-                         http.c for details. */
+                         curl_http.c for details. */
 };
 
 /*
@@ -731,8 +731,8 @@ struct Curl_handler {
    */
   CURLcode (*disconnect)(struct connectdata *, bool dead_connection);
 
-  /* If used, this function gets called from transfer.c:readwrite_data() to
-     allow the protocol to do extra reads/writes */
+  /* If used, this function gets called from curl_transfer.c:readwrite_data()
+     to allow the protocol to do extra reads/writes */
   CURLcode (*readwrite)(struct SessionHandle *data, struct connectdata *conn,
                         ssize_t *nread, bool *readmore);
 
@@ -1276,7 +1276,7 @@ struct UrlState {
     struct FTP *ftp;
     /* void *tftp;    not used */
     struct FILEPROTO *file;
-    void *telnet;        /* private for telnet.c-eyes only */
+    void *telnet;        /* private for curl_telnet.c-eyes only */
     void *generic;
     struct SSHPROTO *ssh;
     struct FTP *imap;
@@ -1317,8 +1317,8 @@ struct DynamicStatic {
  * the 'DynamicStatic' struct.
  * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
-struct Curl_one_easy; /* declared and used only in multi.c */
-struct Curl_multi;    /* declared and used only in multi.c */
+struct Curl_one_easy; /* declared and used only in curl_multi.c */
+struct Curl_multi;    /* declared and used only in curl_multi.c */
 
 enum dupstring {
   STRING_CERT,            /* client certificate file name */

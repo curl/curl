@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -98,7 +98,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_speedcheck.h"
 #include "curl_rawstr.h"
 #include "curl_warnless.h"
-#include "curl_non-ascii.h"
+#include "curl_non_ascii.h"
 #include "curl_inet_pton.h"
 
 /* And now for the protocols */
@@ -2190,7 +2190,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_SSH_KEYFUNCTION:
-    /* setting to NULL is fine since the ssh.c functions themselves will
+    /* setting to NULL is fine since the curl_ssh.c functions themselves will
        then rever to use the internal default */
     data->set.ssh_keyfunc = va_arg(param, curl_sshkeycallback);
     break;
@@ -3688,7 +3688,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        */
 
       /* Note: if you add a new protocol, please update the list in
-       * lib/version.c too! */
+       * lib/curl_version.c too! */
 
       if(checkprefix("FTP.", conn->host.name))
         protop = "ftp";
@@ -5356,7 +5356,7 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->handler->do_it(conn, done);
 
-    /* This was formerly done in transfer.c, but we better do it here */
+    /* This was formerly done in curl_transfer.c, but we better do it here */
     if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
       /*
        * If the connection is using an easy handle, call reconnect

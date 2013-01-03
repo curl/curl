@@ -455,9 +455,9 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 !ENDIF
 
 CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
- $(CURL_DIROBJ)\nonblock.obj \
- $(CURL_DIROBJ)\rawstr.obj \
- $(CURL_DIROBJ)\strtoofft.obj
+ $(CURL_DIROBJ)\curl_nonblock.obj \
+ $(CURL_DIROBJ)\curl_rawstr.obj \
+ $(CURL_DIROBJ)\curl_strtoofft.obj
  
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -468,12 +468,12 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 
 $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
-$(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
-$(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/rawstr.c
-$(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
+$(CURL_DIROBJ)\curl_nonblock.obj: ../lib/curl_nonblock.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_nonblock.c
+$(CURL_DIROBJ)\curl_rawstr.obj: ../lib/curl_rawstr.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_rawstr.c
+$(CURL_DIROBJ)\curl_strtoofft.obj: ../lib/curl_strtoofft.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_strtoofft.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 

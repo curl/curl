@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,8 +65,8 @@
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the
- * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't want to include in memdebug.c
+ * family otherwise present in curl_memdebug.c. I put these ones here since
+ * they require a bunch of structs I didn't want to include there.
  */
 
 /*

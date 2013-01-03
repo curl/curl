@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -718,7 +718,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
   return result;
 }
 
-/* Called repeatedly until done from multi.c */
+/* Called repeatedly until done from curl_multi.c */
 static CURLcode imap_multi_statemach(struct connectdata *conn,
                                          bool *done)
 {
@@ -1045,7 +1045,7 @@ static CURLcode imap_dophase_done(struct connectdata *conn, bool connected)
   return CURLE_OK;
 }
 
-/* Called from multi.c while DOing */
+/* Called from curl_multi.c while DOing */
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done)
 {
   CURLcode result = imap_multi_statemach(conn, dophase_done);

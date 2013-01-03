@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, DirecTV
- * contact: Eric Hu <ehu@directv.com>
+ * Copyright (C) 2010, DirecTV * contact: Eric Hu <ehu@directv.com>
+ * Copyright (C) 2010 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
 
 /*
  * Source file for all axTLS-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but curl_sslgen.c should ever call or use these functions.
  */
 
 #include "curl_setup.h"
@@ -199,7 +199,7 @@ Curl_axtls_connect(struct connectdata *conn,
       infof(data, "found certificates in %s\n", data->set.ssl.CAfile);
   }
 
-  /* gtls.c tasks we're skipping for now:
+  /* curl_gtls.c tasks we're skipping for now:
    * 1) certificate revocation list checking
    * 2) dns name assignment to host
    * 3) set protocol priority.  axTLS is TLSv1 only, so can probably ignore
@@ -255,7 +255,7 @@ Curl_axtls_connect(struct connectdata *conn,
     }
   }
 
-  /* gtls.c does more here that is being left out for now
+  /* curl_gtls.c does more here that is being left out for now
    * 1) set session credentials.  can probably ignore since axtls puts this
    *    info in the ssl_ctx struct
    * 2) setting up callbacks.  these seem gnutls specific
@@ -280,7 +280,7 @@ Curl_axtls_connect(struct connectdata *conn,
   }
   infof (data, "handshake completed successfully\n");
 
-  /* Here, gtls.c gets the peer certificates and fails out depending on
+  /* Here, curl_gtls.c gets the peer certificates and fails out depending on
    * settings in "data."  axTLS api doesn't have get cert chain fcn, so omit?
    */
 
@@ -295,10 +295,10 @@ Curl_axtls_connect(struct connectdata *conn,
   else
     infof(data, "\t server certificate verification SKIPPED\n");
 
-  /* Here, gtls.c does issuer verification. axTLS has no straightforward
+  /* Here, curl_gtls.c does issuer verification. axTLS has no straightforward
    * equivalent, so omitting for now.*/
 
-  /* Here, gtls.c does the following
+  /* Here, curl_gtls.c does the following
    * 1) x509 hostname checking per RFC2818.  axTLS doesn't support this, but
    *    it seems useful. This is now implemented, by Oscar Koeroo
    * 2) checks cert validity based on time.  axTLS does this in ssl_verify_cert
@@ -408,10 +408,10 @@ void Curl_axtls_close(struct connectdata *conn, int sockindex)
 
   infof(conn->data, "  Curl_axtls_close\n");
   if(connssl->ssl) {
-    /* line from ssluse.c: (void)SSL_shutdown(connssl->ssl);
+    /* line from curl_ssluse.c: (void)SSL_shutdown(connssl->ssl);
        axTLS compat layer does nothing for SSL_shutdown */
 
-    /* The following line is from ssluse.c.  There seems to be no axTLS
+    /* The following line is from curl_ssluse.c.  There seems to be no axTLS
        equivalent.  ssl_free and ssl_ctx_free close things.
        SSL_set_connect_state(connssl->handle); */
 
@@ -430,8 +430,9 @@ void Curl_axtls_close(struct connectdata *conn, int sockindex)
  */
 int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 {
-  /* Outline taken from ssluse.c since functions are in axTLS compat layer.
-     axTLS's error set is much smaller, so a lot of error-handling was removed.
+  /* Outline taken from curl_ssluse.c since functions are in axTLS compat
+     layer.  axTLS's error set is much smaller, so a lot of error-handling
+     was removed.
    */
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -521,7 +522,8 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
  */
 int Curl_axtls_check_cxn(struct connectdata *conn)
 {
-  /* ssluse.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
+  /* curl_ssluse.c line:
+     rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
      axTLS compat layer always returns the last argument, so connection is
      always alive? */
 
@@ -533,8 +535,8 @@ void Curl_axtls_session_free(void *ptr)
 {
   (void)ptr;
   /* free the ID */
-  /* both ssluse.c and gtls.c do something here, but axTLS's OpenSSL
-     compatibility layer does nothing, so we do nothing too. */
+  /* both curl_ssluse.c and curl_gtls.c do something here, but axTLS's
+     OpenSSL compatibility layer does nothing, so we do nothing too. */
 }
 
 size_t Curl_axtls_version(char *buffer, size_t size)

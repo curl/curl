@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -187,7 +187,7 @@ Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
 #endif
 
 #ifdef HAVE_SIGSETJMP
-/* Forward-declaration of variable defined in hostip.c. Beware this
+/* Forward-declaration of variable defined in curl_hostip.c. Beware this
  * is a global and unique instance. This is used to store the return
  * address that we can jump back to from inside a signal handler.
  * This is not thread-safe stuff.

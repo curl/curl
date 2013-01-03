@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -381,10 +381,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     }
   }
 
-  /* The User-Agent string might have been allocated in url.c already, because
-     it might have been used in the proxy connect, but if we have got a header
-     with the user-agent string specified, we erase the previously made string
-     here. */
+  /* The User-Agent string might have been allocated in curl_url.c already,
+     because it might have been used in the proxy connect, but if we have
+     got a header with the user-agent string specified, we erase the
+     previously made string here. */
   if(Curl_checkheaders(data, "User-Agent:") && conn->allocptr.uagent) {
     Curl_safefree(conn->allocptr.uagent);
     conn->allocptr.uagent = NULL;

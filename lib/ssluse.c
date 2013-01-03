@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 /*
  * Source file for all OpenSSL-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but curl_sslgen.c should ever call or use these functions.
  */
 
 /*
@@ -69,7 +69,7 @@
 
 #include "curl_warnless.h"
 #include "curl_memory.h"
-#include "curl_non-ascii.h" /* for Curl_convert_from_utf8 prototype */
+#include "curl_non_ascii.h" /* for Curl_convert_from_utf8 prototype */
 
 /* The last #include file should be: */
 #include "curl_memdebug.h"

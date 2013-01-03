@@ -139,15 +139,15 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\lib\nonblock.c
+SOURCE=..\lib\curl_nonblock.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\rawstr.c
+SOURCE=..\lib\curl_rawstr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\strtoofft.c
+SOURCE=..\lib\curl_strtoofft.c
 # End Source File
 # Begin Source File
 

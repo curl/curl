@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#include "curl_non-ascii.h"
+#include "curl_non_ascii.h"
 #include "curl_formdata.h"
 #include "curl_sendf.h"
 #include "curl_urldata.h"
@@ -314,8 +314,8 @@ void Curl_convert_close(struct SessionHandle *data)
 }
 
 /*
- * Curl_convert_form() is used from http.c, this converts any form items that
-   need to be sent in the network encoding.  Returns CURLE_OK on success.
+ * Curl_convert_form() is used from curl_http.c, this converts any form items
+ * that need to be sent in the network encoding.  Returns CURLE_OK on success.
  */
 CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
 {
