@@ -81,7 +81,7 @@ removethis(){
 #
 if test ! -f configure.ac ||
   test ! -f src/tool_main.c ||
-  test ! -f lib/curl_urldata.h ||
+  test ! -f lib/urldata.h ||
   test ! -f include/curl/curl.h ||
   test ! -f m4/curl-functions.m4; then
   echo "Can not run buildconf from outside of curl's source subdirectory!"

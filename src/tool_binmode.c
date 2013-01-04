@@ -33,7 +33,7 @@
 
 #include "tool_binmode.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 void set_binmode(FILE *stream)
 {

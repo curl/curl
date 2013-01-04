@@ -33,7 +33,7 @@
 
 #include "tool_panykey.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 void tool_pressanykey(void)
 {

@@ -23,7 +23,7 @@
 
 #include "tool_bname.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifndef HAVE_BASENAME
 

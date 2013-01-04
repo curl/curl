@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -494,14 +494,14 @@ clean:
 # A config was provided, so the library can be built.
 #
 X_OBJS= \
-	$(DIROBJ)\curl_asyn_ares.obj \
-	$(DIROBJ)\curl_asyn_thread.obj \
-	$(DIROBJ)\curl_base64.obj \
-	$(DIROBJ)\curl_bundles.obj \
-	$(DIROBJ)\curl_conncache.obj \
-	$(DIROBJ)\curl_connect.obj \
-	$(DIROBJ)\curl_content_encoding.obj \
-	$(DIROBJ)\curl_cookie.obj \
+	$(DIROBJ)\asyn-ares.obj \
+	$(DIROBJ)\asyn-thread.obj \
+	$(DIROBJ)\base64.obj \
+	$(DIROBJ)\bundles.obj \
+	$(DIROBJ)\conncache.obj \
+	$(DIROBJ)\connect.obj \
+	$(DIROBJ)\content_encoding.obj \
+	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
 	$(DIROBJ)\curl_darwinssl.obj \
 	$(DIROBJ)\curl_fnmatch.obj \
@@ -518,78 +518,78 @@ X_OBJS= \
 	$(DIROBJ)\curl_schannel.obj \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
-	$(DIROBJ)\curl_dict.obj \
-	$(DIROBJ)\curl_easy.obj \
-	$(DIROBJ)\curl_escape.obj \
-	$(DIROBJ)\curl_file.obj \
-	$(DIROBJ)\curl_fileinfo.obj \
-	$(DIROBJ)\curl_formdata.obj \
-	$(DIROBJ)\curl_ftp.obj \
-	$(DIROBJ)\curl_ftplistparser.obj \
-	$(DIROBJ)\curl_getenv.obj \
-	$(DIROBJ)\curl_getinfo.obj \
-	$(DIROBJ)\curl_gopher.obj \
-	$(DIROBJ)\curl_gtls.obj \
-	$(DIROBJ)\curl_hash.obj \
-	$(DIROBJ)\curl_hmac.obj \
-	$(DIROBJ)\curl_hostasyn.obj \
-	$(DIROBJ)\curl_hostcheck.obj \
-	$(DIROBJ)\curl_hostip.obj \
-	$(DIROBJ)\curl_hostip4.obj \
-	$(DIROBJ)\curl_hostip6.obj \
-	$(DIROBJ)\curl_hostsyn.obj \
-	$(DIROBJ)\curl_http.obj \
-	$(DIROBJ)\curl_http_chunks.obj \
-	$(DIROBJ)\curl_http_digest.obj \
-	$(DIROBJ)\curl_http_negotiate.obj \
-	$(DIROBJ)\curl_http_negotiate_sspi.obj \
-	$(DIROBJ)\curl_http_proxy.obj \
-	$(DIROBJ)\curl_if2ip.obj \
-	$(DIROBJ)\curl_imap.obj \
-	$(DIROBJ)\curl_inet_ntop.obj \
-	$(DIROBJ)\curl_inet_pton.obj \
-	$(DIROBJ)\curl_ldap.obj \
-	$(DIROBJ)\curl_llist.obj \
-	$(DIROBJ)\curl_md4.obj \
-	$(DIROBJ)\curl_md5.obj \
-	$(DIROBJ)\curl_memdebug.obj \
-	$(DIROBJ)\curl_mprintf.obj \
-	$(DIROBJ)\curl_multi.obj \
-	$(DIROBJ)\curl_netrc.obj \
-	$(DIROBJ)\curl_nonblock.obj \
-	$(DIROBJ)\curl_openldap.obj \
-	$(DIROBJ)\curl_parsedate.obj \
-	$(DIROBJ)\curl_pingpong.obj \
-	$(DIROBJ)\curl_polarssl.obj \
-	$(DIROBJ)\curl_pop3.obj \
-	$(DIROBJ)\curl_progress.obj \
-	$(DIROBJ)\curl_rawstr.obj \
-	$(DIROBJ)\curl_rtsp.obj \
-	$(DIROBJ)\curl_select.obj \
-	$(DIROBJ)\curl_sendf.obj \
-	$(DIROBJ)\curl_share.obj \
-	$(DIROBJ)\curl_slist.obj \
-	$(DIROBJ)\curl_smtp.obj \
-	$(DIROBJ)\curl_socks.obj \
-	$(DIROBJ)\curl_socks_gssapi.obj \
-	$(DIROBJ)\curl_socks_sspi.obj \
-	$(DIROBJ)\curl_speedcheck.obj \
-	$(DIROBJ)\curl_splay.obj \
-	$(DIROBJ)\curl_ssh.obj \
-	$(DIROBJ)\curl_sslgen.obj \
-	$(DIROBJ)\curl_ssluse.obj \
-	$(DIROBJ)\curl_strequal.obj \
-	$(DIROBJ)\curl_strerror.obj \
-	$(DIROBJ)\curl_strtok.obj \
-	$(DIROBJ)\curl_strtoofft.obj \
-	$(DIROBJ)\curl_telnet.obj \
-	$(DIROBJ)\curl_tftp.obj \
-	$(DIROBJ)\curl_timeval.obj \
-	$(DIROBJ)\curl_transfer.obj \
-	$(DIROBJ)\curl_url.obj \
-	$(DIROBJ)\curl_version.obj \
-	$(DIROBJ)\curl_warnless.obj \
-	$(DIROBJ)\curl_wildcard.obj \
+	$(DIROBJ)\dict.obj \
+	$(DIROBJ)\easy.obj \
+	$(DIROBJ)\escape.obj \
+	$(DIROBJ)\file.obj \
+	$(DIROBJ)\fileinfo.obj \
+	$(DIROBJ)\formdata.obj \
+	$(DIROBJ)\ftp.obj \
+	$(DIROBJ)\ftplistparser.obj \
+	$(DIROBJ)\getenv.obj \
+	$(DIROBJ)\getinfo.obj \
+	$(DIROBJ)\gopher.obj \
+	$(DIROBJ)\gtls.obj \
+	$(DIROBJ)\hash.obj \
+	$(DIROBJ)\hmac.obj \
+	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostcheck.obj \
+	$(DIROBJ)\hostip.obj \
+	$(DIROBJ)\hostip4.obj \
+	$(DIROBJ)\hostip6.obj \
+	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\http.obj \
+	$(DIROBJ)\http_chunks.obj \
+	$(DIROBJ)\http_digest.obj \
+	$(DIROBJ)\http_negotiate.obj \
+	$(DIROBJ)\http_negotiate_sspi.obj \
+	$(DIROBJ)\http_proxy.obj \
+	$(DIROBJ)\if2ip.obj \
+	$(DIROBJ)\imap.obj \
+	$(DIROBJ)\inet_ntop.obj \
+	$(DIROBJ)\inet_pton.obj \
+	$(DIROBJ)\ldap.obj \
+	$(DIROBJ)\llist.obj \
+	$(DIROBJ)\md4.obj \
+	$(DIROBJ)\md5.obj \
+	$(DIROBJ)\memdebug.obj \
+	$(DIROBJ)\mprintf.obj \
+	$(DIROBJ)\multi.obj \
+	$(DIROBJ)\netrc.obj \
+	$(DIROBJ)\nonblock.obj \
+	$(DIROBJ)\openldap.obj \
+	$(DIROBJ)\parsedate.obj \
+	$(DIROBJ)\pingpong.obj \
+	$(DIROBJ)\polarssl.obj \
+	$(DIROBJ)\pop3.obj \
+	$(DIROBJ)\progress.obj \
+	$(DIROBJ)\rawstr.obj \
+	$(DIROBJ)\rtsp.obj \
+	$(DIROBJ)\select.obj \
+	$(DIROBJ)\sendf.obj \
+	$(DIROBJ)\share.obj \
+	$(DIROBJ)\slist.obj \
+	$(DIROBJ)\smtp.obj \
+	$(DIROBJ)\socks.obj \
+	$(DIROBJ)\socks_gssapi.obj \
+	$(DIROBJ)\socks_sspi.obj \
+	$(DIROBJ)\speedcheck.obj \
+	$(DIROBJ)\splay.obj \
+	$(DIROBJ)\ssh.obj \
+	$(DIROBJ)\sslgen.obj \
+	$(DIROBJ)\ssluse.obj \
+	$(DIROBJ)\strequal.obj \
+	$(DIROBJ)\strerror.obj \
+	$(DIROBJ)\strtok.obj \
+	$(DIROBJ)\strtoofft.obj \
+	$(DIROBJ)\telnet.obj \
+	$(DIROBJ)\tftp.obj \
+	$(DIROBJ)\timeval.obj \
+	$(DIROBJ)\transfer.obj \
+	$(DIROBJ)\url.obj \
+	$(DIROBJ)\version.obj \
+	$(DIROBJ)\warnless.obj \
+	$(DIROBJ)\wildcard.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

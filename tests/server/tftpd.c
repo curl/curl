@@ -67,7 +67,7 @@
 #ifdef HAVE_ARPA_TFTP_H
 #include <arpa/tftp.h>
 #else
-#include "server_tftp.h"
+#include "tftp.h"
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -91,8 +91,8 @@
 #include "util.h"
 #include "server_sockaddr.h"
 
-/* include curl_memdebug.h last */
-#include "curl_memdebug.h"
+/* include memdebug.h last */
+#include "memdebug.h"
 
 /*****************************************************************************
 *                      STRUCT DECLARATIONS AND DEFINES                       *

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /*
  * Test a simple OPTIONS request with a custom header

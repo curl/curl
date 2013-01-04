@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curl_strequal.h"
+#include "strequal.h"
 
 static CURLcode unit_setup( void ) {return CURLE_OK;}
 static void unit_stop( void ) {}

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #ifdef USE_WINDOWS_SSPI
 
@@ -33,7 +33,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */
 typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);

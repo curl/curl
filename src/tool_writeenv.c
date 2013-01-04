@@ -32,7 +32,7 @@
 
 #include "tool_writeenv.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 static const struct
 {

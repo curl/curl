@@ -114,7 +114,7 @@ LINK_ARG = $(OBJ_DIR)$(DS)wlink.arg
 !endif
 # For now we still define the CURLX_ONES sources here unless we know how
 # to split off the prefixed path.
-CURLX_SOURCES = curl_rawstr.c curl_nonblock.c
+CURLX_SOURCES = rawstr.c nonblock.c
 
 OBJS = $(CURL_CFILES:.c=.obj)
 !ifdef %curl_static

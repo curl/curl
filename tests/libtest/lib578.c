@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
 static char data[]="this is a short string.\n";

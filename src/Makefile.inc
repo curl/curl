@@ -9,11 +9,10 @@
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
-CURLX_ONES = \
-	$(top_srcdir)/lib/curl_nonblock.c \
-	$(top_srcdir)/lib/curl_rawstr.c \
-	$(top_srcdir)/lib/curl_strdup.c \
-	$(top_srcdir)/lib/curl_strtoofft.c
+CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
+	$(top_srcdir)/lib/strdup.c \
+	$(top_srcdir)/lib/rawstr.c \
+	$(top_srcdir)/lib/nonblock.c
 
 CURL_CFILES = \
 	tool_binmode.c \

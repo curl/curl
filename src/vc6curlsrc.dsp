@@ -139,15 +139,15 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\lib\curl_nonblock.c
+SOURCE=..\lib\nonblock.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\curl_rawstr.c
+SOURCE=..\lib\rawstr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\curl_strtoofft.c
+SOURCE=..\lib\strtoofft.c
 # End Source File
 # Begin Source File
 
@@ -311,15 +311,15 @@ SOURCE=".\config-win32.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\curl_nonblock.h
+SOURCE=..\lib\nonblock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\curl_rawstr.h
+SOURCE=..\lib\rawstr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\curl_strtoofft.h
+SOURCE=..\lib\strtoofft.h
 # End Source File
 # Begin Source File
 

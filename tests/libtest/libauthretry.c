@@ -25,8 +25,8 @@
  */
 
 #include "test.h"
-#include "curl_strequal.h"
-#include "curl_memdebug.h"
+#include "strequal.h"
+#include "memdebug.h"
 
 static CURLcode send_request(CURL *curl, const char *url, int seq,
                              long auth_scheme, const char *userpwd)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #ifdef USE_NTLM
 
@@ -33,21 +33,21 @@
 
 #define DEBUG_ME 0
 
-#include "curl_urldata.h"
-#include "curl_non_ascii.h"
-#include "curl_sendf.h"
+#include "urldata.h"
+#include "non-ascii.h"
+#include "sendf.h"
 #include "curl_base64.h"
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
-#include "curl_warnless.h"
+#include "warnless.h"
 #include "curl_memory.h"
 
 #ifdef USE_WINDOWS_SSPI
 #  include "curl_sspi.h"
 #endif
 
-#include "curl_sslgen.h"
+#include "sslgen.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
@@ -56,7 +56,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"

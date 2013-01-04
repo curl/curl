@@ -25,8 +25,8 @@
 
 #include "test.h"
 
-#include "curl_warnless.h"
-#include "curl_memdebug.h"
+#include "warnless.h"
+#include "memdebug.h"
 
 struct data {
   char trace_ascii; /* 1 or 0 */

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curl_llist.h"
+#include "llist.h"
 
 static struct curl_llist *llist;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@
 #  include <netinet/tcp.h>
 #endif
 
-#include "curl_rawstr.h"
+#include "rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -74,7 +74,7 @@
 #include "tool_writeout.h"
 #include "tool_xattr.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #define CURLseparator  "--_curl_--"
 
@@ -849,7 +849,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         input.fd = infd;
         input.config = config;
         /* Note that if CURLOPT_READFUNCTION is fread (the default), then
-         * lib/curl_telnet.c will Curl_poll() on the input file descriptor
+         * lib/telnet.c will Curl_poll() on the input file descriptor
          * rather then calling the READFUNCTION at regular intervals.
          * The circumstances in which it is preferable to enable this
          * behaviour, by omitting to set the READFUNCTION & READDATA options,

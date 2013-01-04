@@ -27,7 +27,7 @@
 
 #include "testutil.h"
 #include "testtrace.h"
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 struct libtest_trace_cfg libtest_debug_config;
 

@@ -46,7 +46,7 @@ sub scanfile {
         if($_ =~ /(free|alloc|strdup)\(/) {
             $memfunc++;
         }
-        elsif($_ =~ /^ *# *include \"curl_memdebug.h\"/) {
+        elsif($_ =~ /^ *# *include \"memdebug.h\"/) {
             $memdebug++;
         }
         elsif($_ =~ /^ *# *include \"curl_memory.h\"/) {
@@ -70,7 +70,7 @@ sub scanfile {
         }
         else {
             if(!$memdebug) {
-                print STDERR "$file doesn't include \"curl_memdebug.h\"!\n";
+                print STDERR "$file doesn't include \"memdebug.h\"!\n";
             }
             if(!$curlmem) {
                 print STDERR "$file doesn't include \"curl_memory.h\"!\n";

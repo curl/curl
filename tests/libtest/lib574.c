@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 static int new_fnmatch(const char *pattern, const char *string)
 {

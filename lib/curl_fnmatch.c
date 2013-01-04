@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #include "curl_fnmatch.h"
 
@@ -29,7 +29,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)

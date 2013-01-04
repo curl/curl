@@ -89,7 +89,7 @@ struct win32_crypto_hash {
 #  error "Can't compile METALINK support without a crypto library."
 #endif
 
-#include "curl_rawstr.h"
+#include "rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -101,7 +101,7 @@ struct win32_crypto_hash {
 #include "tool_metalink.h"
 #include "tool_msgs.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /* Copied from tool_getparam.c */
 #define GetStr(str,val) do { \

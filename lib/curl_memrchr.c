@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #include "curl_memrchr.h"
 
@@ -29,7 +29,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 #ifndef HAVE_MEMRCHR
 

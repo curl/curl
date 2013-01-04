@@ -22,8 +22,8 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "curl_warnless.h"
-#include "curl_memdebug.h"
+#include "warnless.h"
+#include "memdebug.h"
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 

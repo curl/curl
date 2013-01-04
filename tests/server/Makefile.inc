@@ -1,29 +1,29 @@
 noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm
 
 CURLX_SRCS = \
- $(top_srcdir)/lib/curl_mprintf.c \
- $(top_srcdir)/lib/curl_nonblock.c \
- $(top_srcdir)/lib/curl_strequal.c \
- $(top_srcdir)/lib/curl_strtoofft.c \
- $(top_srcdir)/lib/curl_timeval.c \
- $(top_srcdir)/lib/curl_warnless.c
+ $(top_srcdir)/lib/mprintf.c \
+ $(top_srcdir)/lib/nonblock.c \
+ $(top_srcdir)/lib/strequal.c \
+ $(top_srcdir)/lib/strtoofft.c \
+ $(top_srcdir)/lib/timeval.c \
+ $(top_srcdir)/lib/warnless.c
 
 CURLX_HDRS = \
  $(top_srcdir)/lib/curlx.h \
- $(top_srcdir)/lib/curl_nonblock.h \
- $(top_srcdir)/lib/curl_strequal.h \
- $(top_srcdir)/lib/curl_strtoofft.h \
- $(top_srcdir)/lib/curl_timeval.h \
- $(top_srcdir)/lib/curl_warnless.h
+ $(top_srcdir)/lib/nonblock.h \
+ $(top_srcdir)/lib/strequal.h \
+ $(top_srcdir)/lib/strtoofft.h \
+ $(top_srcdir)/lib/timeval.h \
+ $(top_srcdir)/lib/warnless.h
 
 USEFUL = \
  getpart.c \
  getpart.h \
  server_setup.h \
- $(top_srcdir)/lib/curl_base64.c \
+ $(top_srcdir)/lib/base64.c \
  $(top_srcdir)/lib/curl_base64.h \
- $(top_srcdir)/lib/curl_memdebug.c \
- $(top_srcdir)/lib/curl_memdebug.h
+ $(top_srcdir)/lib/memdebug.c \
+ $(top_srcdir)/lib/memdebug.h
 
 UTIL = \
  util.c \
@@ -48,21 +48,21 @@ rtspd_CFLAGS = $(AM_CFLAGS)
 sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
  sockfilt.c \
- $(top_srcdir)/lib/curl_inet_pton.c
+ $(top_srcdir)/lib/inet_pton.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
 sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
  sws.c \
- $(top_srcdir)/lib/curl_inet_pton.c
+ $(top_srcdir)/lib/inet_pton.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
 
 tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
  tftpd.c \
- server_tftp.h
+ tftp.h
 tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 tftpd_CFLAGS = $(AM_CFLAGS)
 

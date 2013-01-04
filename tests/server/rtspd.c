@@ -51,8 +51,8 @@
 #include "util.h"
 #include "server_sockaddr.h"
 
-/* include curl_memdebug.h last */
-#include "curl_memdebug.h"
+/* include memdebug.h last */
+#include "memdebug.h"
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;

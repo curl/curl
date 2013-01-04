@@ -28,7 +28,7 @@
 
 #include <sys/stat.h>
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 int test(char *URL)
 {

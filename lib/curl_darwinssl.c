@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,11 +23,10 @@
 
 /*
  * Source file for all iOS and Mac OS X SecureTransport-specific code for the
- * TLS/SSL layer. No code but curl_sslgen.c should ever call or use these
- * functions.
+ * TLS/SSL layer. No code but sslgen.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #ifdef USE_DARWINSSL
 
@@ -43,12 +42,12 @@
 #include <sys/sysctl.h>
 #endif
 
-#include "curl_urldata.h"
-#include "curl_sendf.h"
-#include "curl_inet_pton.h"
-#include "curl_connect.h"
-#include "curl_select.h"
-#include "curl_sslgen.h"
+#include "urldata.h"
+#include "sendf.h"
+#include "inet_pton.h"
+#include "connect.h"
+#include "select.h"
+#include "sslgen.h"
 #include "curl_darwinssl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -56,7 +55,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /* From MacTypes.h (which we can't include because it isn't present in iOS: */
 #define ioErr -36

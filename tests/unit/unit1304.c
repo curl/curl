@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curl_netrc.h"
+#include "netrc.h"
 
 static char login[LOGINSIZE];
 static char password[PASSWORDSIZE];

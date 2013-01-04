@@ -23,7 +23,7 @@
 
 #include "tool_mfiles.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 static void AppendNode(struct multi_files **first,
                        struct multi_files **last,

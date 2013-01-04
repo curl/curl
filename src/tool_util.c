@@ -23,7 +23,7 @@
 
 #include "tool_util.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #if defined(WIN32) && !defined(MSDOS)
 

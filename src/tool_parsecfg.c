@@ -32,7 +32,7 @@
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #define CURLRC DOT_CHAR "curlrc"
 #define ISSEP(x) (((x) == '=') || ((x) == ':'))

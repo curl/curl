@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,8 @@
 #include <limits.h>
 #endif
 
-#include "curl_warnless.h"
-#include "curl_memdebug.h"
+#include "warnless.h"
+#include "memdebug.h"
 
 #ifndef FD_SETSIZE
 #error "this test requires FD_SETSIZE"
@@ -386,7 +386,7 @@ static int rlimit(int keep_open)
    * when using select() instead of poll() we cannot test
    * libcurl functionality with a socket number equal or
    * greater than FD_SETSIZE. In any case, macro VERIFY_SOCK
-   * in lib/curl_select.c enforces this check and protects libcurl
+   * in lib/select.c enforces this check and protects libcurl
    * from a possible crash. The effect of this protection
    * is that test 518 will always fail, since the actual
    * call to select() never takes place. We skip test 518

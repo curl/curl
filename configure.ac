@@ -34,7 +34,7 @@ AC_COPYRIGHT([Copyright (c) 1998 - 2012 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
-AC_CONFIG_SRCDIR([lib/curl_urldata.h])
+AC_CONFIG_SRCDIR([lib/urldata.h])
 AC_CONFIG_HEADERS(lib/curl_config.h include/curl/curlbuild.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 static char teststring[] =
 #ifdef CURL_DOES_CONVERSIONS

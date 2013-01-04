@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #ifdef USE_NTLM
 
@@ -33,26 +33,26 @@
 
 #define DEBUG_ME 0
 
-#include "curl_urldata.h"
-#include "curl_sendf.h"
-#include "curl_rawstr.h"
+#include "urldata.h"
+#include "sendf.h"
+#include "rawstr.h"
 #include "curl_ntlm.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_ntlm_wb.h"
-#include "curl_url.h"
+#include "url.h"
 #include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #if defined(USE_NSS)
-#include "curl_nssg.h"
+#include "nssg.h"
 #elif defined(USE_WINDOWS_SSPI)
 #include "curl_sspi.h"
 #endif
 
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x

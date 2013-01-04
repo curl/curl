@@ -51,8 +51,8 @@
 #include "curlx.h" /* from the private lib dir */
 #include "util.h"
 
-/* include curl_memdebug.h last */
-#include "curl_memdebug.h"
+/* include memdebug.h last */
+#include "memdebug.h"
 
 static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
       hints.ai_socktype = SOCK_STREAM;
       hints.ai_flags = AI_CANONNAME;
       /* Use parenthesis around function to stop it from being replaced by
-      the macro in curl_memdebug.h */
+      the macro in memdebug.h */
       rc = (getaddrinfo)(host, "80", &hints, &ai);
     }
 

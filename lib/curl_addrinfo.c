@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #include <curl/curl.h>
 
@@ -45,15 +45,15 @@
 #endif
 
 #include "curl_addrinfo.h"
-#include "curl_inet_pton.h"
-#include "curl_warnless.h"
+#include "inet_pton.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 
 /*
@@ -482,8 +482,8 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
  * curl_dofreeaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
- * family otherwise present in curl_memdebug.c. I put these ones here since
- * they require a bunch of structs I didn't want to include there.
+ * family otherwise present in memdebug.c. I put these ones here since they
+ * require a bunch of structs I didn't want to include in memdebug.c
  */
 
 void
@@ -502,8 +502,8 @@ curl_dofreeaddrinfo(struct addrinfo *freethis,
  * curl_dogetaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
- * family otherwise present in curl_memdebug.c. I put these ones here since
- * they require a bunch of structs I didn't want to include there.
+ * family otherwise present in memdebug.c. I put these ones here since they
+ * require a bunch of structs I didn't want to include in memdebug.c
  */
 
 int

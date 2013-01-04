@@ -30,7 +30,7 @@
 
 #include "tool_homedir.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 static char *GetEnv(const char *variable, char do_expand)
 {

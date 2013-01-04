@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "setup.h"
 
 #if defined(USE_WIN32_IDN) || (defined(USE_WINDOWS_SSPI) && defined(UNICODE))
 

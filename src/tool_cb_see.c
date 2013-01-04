@@ -28,7 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_cb_see.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /* OUR_MAX_SEEK_L has 'long' data type, OUR_MAX_SEEK_O has 'curl_off_t,
    both represent the same value. Maximum offset used here when we lseek

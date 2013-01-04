@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #if defined(USE_THREADS_POSIX)
 #  ifdef HAVE_PTHREAD_H
@@ -39,7 +39,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 #if defined(USE_THREADS_POSIX)
 

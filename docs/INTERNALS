@@ -114,15 +114,15 @@ Library
  There are plenty of entry points to the library, namely each publicly defined
  function that libcurl offers to applications. All of those functions are
  rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
- put in the lib/curl_easy.c file.
+ put in the lib/easy.c file.
 
  curl_global_init_() and curl_global_cleanup() should be called by the
  application to initialize and clean up global stuff in the library. As of
  today, it can handle the global SSL initing if SSL is enabled and it can init
  the socket layer on windows machines. libcurl itself has no "global" scope.
 
- All printf()-style functions use the supplied clones in lib/curl_mprintf.c.
- This makes sure we stay absolutely platform independent.
+ All printf()-style functions use the supplied clones in lib/mprintf.c. This
+ makes sure we stay absolutely platform independent.
 
  curl_easy_init() allocates an internal struct and makes some initializations.
  The returned handle does not reveal internals. This is the 'SessionHandle'
@@ -137,17 +137,17 @@ Library
 
  curl_easy_perform() does a whole lot of things:
 
- It starts off in the lib/curl_easy.c file by calling Curl_perform() and the
- main work then continues in lib/curl_url.c. The flow continues with a call to
+ It starts off in the lib/easy.c file by calling Curl_perform() and the main
+ work then continues in lib/url.c. The flow continues with a call to
  Curl_connect() to connect to the remote site.
 
  o Curl_connect()
 
    ... analyzes the URL, it separates the different components and connects to
    the remote host. This may involve using a proxy and/or using SSL. The
-   Curl_resolv() function in lib/curl_hostip.c is used for looking up host
-   names (it does then use the proper underlying method, which may vary
-   between platforms and builds).
+   Curl_resolv() function in lib/hostip.c is used for looking up host names
+   (it does then use the proper underlying method, which may vary between
+   platforms and builds).
 
    When Curl_connect is done, we are connected to the remote site. Then it is
    time to tell the server to get a document/file. Curl_do() arranges this.
@@ -162,15 +162,15 @@ Library
    Curl_do() makes sure the proper protocol-specific function is called. The
    functions are named after the protocols they handle. Curl_ftp(),
    Curl_http(), Curl_dict(), etc. They all reside in their respective files
-   (curl_ftp.c, curl_http.c and curl_dict.c). HTTPS is handled by Curl_http()
-   and FTPS by Curl_ftp().
+   (ftp.c, http.c and dict.c). HTTPS is handled by Curl_http() and FTPS by
+   Curl_ftp().
 
    The protocol-specific functions of course deal with protocol-specific
    negotiations and setup. They have access to the Curl_sendf() (from
-   lib/curl_sendf.c) function to send printf-style formatted data to the
-   remote host and when they're ready to make the actual file transfer they
-   call the Curl_Transfer() function (in lib/curl_transfer.c) to setup the
-   transfer and returns.
+   lib/sendf.c) function to send printf-style formatted data to the remote
+   host and when they're ready to make the actual file transfer they call the
+   Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
+   returns.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO
@@ -184,13 +184,13 @@ Library
 
  o Transfer()
 
-   Curl_perform() then calls Transfer() in lib/curl_transfer.c that performs
-   the entire file transfer.
+   Curl_perform() then calls Transfer() in lib/transfer.c that performs the
+   entire file transfer.
 
-   During transfer, the progress functions in lib/curl_progress.c are called
-   at a frequent interval (or at the user's choice, a specified callback
-   might get called). The speedcheck functions in lib/curl_speedcheck.c are
-   also used to verify that the transfer is as fast as required.
+   During transfer, the progress functions in lib/progress.c are called at a
+   frequent interval (or at the user's choice, a specified callback might get
+   called). The speedcheck functions in lib/speedcheck.c are also used to
+   verify that the transfer is as fast as required.
 
  o Curl_done()
 
@@ -238,11 +238,11 @@ Library
  HTTP(S)
 
  HTTP offers a lot and is the protocol in curl that uses the most lines of
- code. There is a special file (lib/curl_formdata.c) that offers all the
- multipart post functions.
+ code. There is a special file (lib/formdata.c) that offers all the multipart
+ post functions.
 
- base64-functions for user+password stuff (and more) is in (lib/curl_base64.c)
- and all functions for parsing and sending cookies in (lib/curl_cookie.c).
+ base64-functions for user+password stuff (and more) is in (lib/base64.c) and
+ all functions for parsing and sending cookies are found in (lib/cookie.c).
 
  HTTPS uses in almost every means the same procedure as HTTP, with only two
  exceptions: the connect procedure is different and the function used to read
@@ -250,8 +250,8 @@ Library
  the source by the use of Curl_read() for reading and Curl_write() for writing
  data to the remote server.
 
- curl_http_chunks.c contains functions that understands HTTP 1.1 chunked
- transfer encoding.
+ http_chunks.c contains functions that understands HTTP 1.1 chunked transfer
+ encoding.
 
  An interesting detail with the HTTP(S) request, is the Curl_add_buffer()
  series of functions we use. They append data to one single buffer, and when
@@ -261,7 +261,7 @@ Library
  FTP
 
  The Curl_if2ip() function can be used for getting the IP number of a
- specified network interface, and it resides in lib/curl_if2ip.c.
+ specified network interface, and it resides in lib/if2ip.c.
 
  Curl_ftpsendf() is used for sending FTP commands to the remote server. It was
  made a separate function to prevent us programmers from forgetting that they
@@ -270,42 +270,41 @@ Library
 
  Kerberos
 
- The kerberos support is mainly in lib/curl_krb4.c and lib/curl_security.c.
+ The kerberos support is mainly in lib/krb4.c and lib/security.c.
 
  TELNET
 
- Telnet is implemented in lib/curl_telnet.c.
+ Telnet is implemented in lib/telnet.c.
 
  FILE
 
- The file:// protocol is dealt with in lib/curl_file.c.
+ The file:// protocol is dealt with in lib/file.c.
 
  LDAP
 
- Everything LDAP is in lib/curl_ldap.c and lib/curl_openldap.c
+ Everything LDAP is in lib/ldap.c and lib/openldap.c
 
  GENERAL
 
  URL encoding and decoding, called escaping and unescaping in the source code,
- is found in lib/curl_escape.c.
+ is found in lib/escape.c.
 
  While transferring data in Transfer() a few functions might get used.
- curl_getdate() in lib/curl_parsedate.c is for HTTP date comparisons (and
- more).
+ curl_getdate() in lib/parsedate.c is for HTTP date comparisons (and more).
 
- lib/curl_getenv.c offers curl_getenv() which is for reading environment
- variables in a neat platform independent way. That's used in the client,
- but also in lib/curl_url.c when checking the proxy environment variables.
- Note that contrary to the normal unix getenv(), this returns an allocated
- buffer that must be free()ed after use.
+ lib/getenv.c offers curl_getenv() which is for reading environment variables
+ in a neat platform independent way. That's used in the client, but also in
+ lib/url.c when checking the proxy environment variables. Note that contrary
+ to the normal unix getenv(), this returns an allocated buffer that must be
+ free()ed after use.
 
- lib/curl_netrc.c holds the .netrc parser
+ lib/netrc.c holds the .netrc parser
 
- lib/curl_timeval.c features replacement functions for systems that don't have
+ lib/timeval.c features replacement functions for systems that don't have
  gettimeofday() and a few support functions for timeval conversions.
 
  A function named curl_version() that returns the full curl version string is
- found in lib/curl_version.c.
+ found in lib/version.c.
 
 Persistent Connections
 ======================
@@ -409,10 +408,10 @@ API/ABI
 Client
 ======
 
- main() resides in src/tool_main.c together with most of the client code.
+ main() resides in src/main.c together with most of the client code.
 
  src/tool_hugehelp.c is automatically generated by the mkhelp.pl perl script
- to display the complete "manual" and the src/tool_urlglob.c file holds the
+ to display the complete "manual" and the src/urlglob.c file holds the
  functions used for the URL-"globbing" support. Globbing in the sense that
  the {} and [] expansion stuff is there.
 
@@ -421,10 +420,10 @@ Client
  control after the curl_easy_perform() it cleans up the library, checks status
  and exits.
 
- When the operation is done, the ourWriteOut() function in
- src/tool_writeout.c may be called to report about the operation. That
- function is using the curl_easy_getinfo() function to extract useful
- information from the curl session.
+ When the operation is done, the ourWriteOut() function in src/writeout.c may
+ be called to report about the operation. That function is using the
+ curl_easy_getinfo() function to extract useful information from the curl
+ session.
 
  Recent versions may loop and do all this several times if many URLs were
  specified on the command line or config file.
@@ -432,12 +431,12 @@ Client
 Memory Debugging
 ================
 
- The file lib/curl_memdebug.c contains debug-versions of a few functions.
- Functions such as malloc, free, fopen, fclose, etc that somehow deal with
- resources that might give us problems if we "leak" them. The functions in
- the memory tracking system do nothing fancy, they do their normal function
- and then log information about what they just did. The logged data can then
- be analyzed after a complete session,
+ The file lib/memdebug.c contains debug-versions of a few functions. Functions
+ such as malloc, free, fopen, fclose, etc that somehow deal with resources
+ that might give us problems if we "leak" them. The functions in the memdebug
+ system do nothing fancy, they do their normal function and then log
+ information about what they just did. The logged data can then be analyzed
+ after a complete session,
 
  memanalyze.pl is the perl script present in tests/ that analyzes a log file
  generated by the memory tracking system. It detects if resources are

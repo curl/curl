@@ -98,12 +98,12 @@
    versions instead */
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
-#include "curl_inet_pton.h"
+#include "inet_pton.h"
 #include "util.h"
 #include "server_sockaddr.h"
 
-/* include curl_memdebug.h last */
-#include "curl_memdebug.h"
+/* include memdebug.h last */
+#include "memdebug.h"
 
 #define DEFAULT_PORT 8999
 

@@ -29,7 +29,7 @@
 
 #include <curl/mprintf.h>
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 
 #if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)

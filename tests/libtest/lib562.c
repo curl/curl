@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #endif
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /*
  * From "KNOWN_BUGS" April 2009:

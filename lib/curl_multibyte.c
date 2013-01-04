@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "setup.h"
 
 #if defined(USE_WIN32_IDN) || (defined(USE_WINDOWS_SSPI) && defined(UNICODE))
 
@@ -35,7 +35,7 @@
 
 #include "curl_memory.h"
 /* The last #include file should be: */
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8)
 {

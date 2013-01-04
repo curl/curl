@@ -28,7 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /*
 ** callback for CURLOPT_READFUNCTION

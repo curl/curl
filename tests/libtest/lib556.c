@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "curl_memdebug.h"
+#include "memdebug.h"
 
 /* For Windows, mainly (may be moved in a config file?) */
 #ifndef STDIN_FILENO

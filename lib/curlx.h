@@ -34,29 +34,29 @@
    functions while they still are offered publicly. They will be made library-
    private one day */
 
-#include "curl_strequal.h"
-/* "curl_strequal.h" provides the strequal protos */
+#include "strequal.h"
+/* "strequal.h" provides the strequal protos */
 
-#include "curl_strtoofft.h"
-/* "curl_strtoofft.h" provides this function: curlx_strtoofft(), returns a
+#include "strtoofft.h"
+/* "strtoofft.h" provides this function: curlx_strtoofft(), returns a
    curl_off_t number from a given string.
 */
 
-#include "curl_timeval.h"
+#include "timeval.h"
 /*
-  "curl_timeval.h" sets up a 'struct timeval' even for platforms that
-   otherwise don't have one and has protos for these functions:
+  "timeval.h" sets up a 'struct timeval' even for platforms that otherwise
+  don't have one and has protos for these functions:
 
   curlx_tvnow()
   curlx_tvdiff()
   curlx_tvdiff_secs()
 */
 
-#include "curl_nonblock.h"
-/* "curl_nonblock.h" provides curlx_nonblock() */
+#include "nonblock.h"
+/* "nonblock.h" provides curlx_nonblock() */
 
-#include "curl_warnless.h"
-/* "curl_warnless.h" provides functions:
+#include "warnless.h"
+/* "warnless.h" provides functions:
 
   curlx_ultous()
   curlx_ultouc()

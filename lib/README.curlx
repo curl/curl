@@ -19,7 +19,7 @@ We provide them through a single header file for easy access for apps:
 
    A macro that converts a string containing a number to a curl_off_t number.
    This might use the curlx_strtoll() function which is provided as source
-   code in curl_strtoofft.c. Note that the function is only provided if no
+   code in strtoofft.c. Note that the function is only provided if no
    strtoll() (or equivalent) function exist on your platform. If curl_off_t
    is only a 32 bit number on your platform, this macro uses strtol().
 

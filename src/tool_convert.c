@@ -29,7 +29,7 @@
 
 #include "tool_convert.h"
 
-#include "curl_memdebug.h" /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef HAVE_ICONV
 

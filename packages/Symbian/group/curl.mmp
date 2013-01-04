@@ -49,8 +49,7 @@ SOURCE \
 
 SOURCEPATH  ../../../lib
 SOURCE \
-    curl_nonblock.c \
-    curl_rawstr.c
+    rawstr.c nonblock.c
 
 USERINCLUDE ../../../src ../../../lib ../../../include/curl
 
