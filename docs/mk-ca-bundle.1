@@ -1,20 +1,36 @@
-.Dd Jan 5, 2013
-.Dt MK-CA-BUNDLE 1
-.Os
-.Sh NAME
-.Nm mk-ca-bundle
-.Nd convert mozilla's certdata.txt to PEM format
-.Sh SYNOPSIS
-.Nm
-.Op Fl bilnqtuv
-[outputfile]
-.Sh DESCRIPTION
-The
-.Nm
-tool downloads the certdata.txt file from Mozilla's source tree over HTTP,
-then parses certdata.txt and extracts CA Root Certificates into PEM format.
-These are then processed with the OpenSSL commandline tool to produce the
-final ca-bundle file.
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 2008 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH mk-ca-bundle 1 "5 Jan 2013" "version 1.17" "mk-ca-bundle manual"
+.SH NAME
+mk-ca-bundle \- convert mozilla's certdata.txt to PEM format
+.SH SYNOPSIS
+mk-ca-bundle [bilnqtuv]
+.I [outputfile]
+.SH DESCRIPTION
+The mk-ca-bundle tool downloads the certdata.txt file from Mozilla's source
+tree over HTTP, then parses certdata.txt and extracts CA Root Certificates
+into PEM format.  These are then processed with the OpenSSL commandline tool
+to produce the final ca-bundle file.
 
 The default \fIoutputfile\fP name is \fBca-bundle.crt\fP. By setting it to '-'
 (a single dash) you will get the output sent to STDOUT instead of a file.
@@ -22,41 +38,33 @@ The default \fIoutputfile\fP name is \fBca-bundle.crt\fP. By setting it to '-'
 The PEM format this scripts uses for output makes the result readily available
 for use by just about all OpenSSL or GnuTLS powered applications, such as
 curl, wget and more.
-.Sh OPTIONS
-The following options are supported by
-.Nm :
-.Bl -tag -width _h
-.It Fl b
-backup an existing version of \fIoutputfilename\fP.
-.It Fl f
+.SH OPTIONS
+The following options are supported:
+.IP -b
+backup an existing version of \fIoutputfilename\fP
+.IP -f
 force rebuild even if certdata.txt is current (Added in version 1.17)
-.It Fl i
+.IP -i
 print version info about used modules
-.It Fl l
+.IP -l
 print license info about certdata.txt
-.It Fl n
+.IP -n
 no download of certdata.txt (to use existing)
-.It Fl q
+.IP -q
 be really quiet (no progress output at all)
-.It Fl t
+.IP -t
 include plain text listing of certificates
-.It Fl u
+.IP -u
 unlink (remove) certdata.txt after processing
-.It Fl v
+.IP -v
 be verbose and print out processed CAs
-.El
-.Sh EXIT STATUS
-.Ex -std
-.Sh SEE ALSO
-.Xr curl 1
-.Sh HISTORY
-.Nm
-is a command line tool that is shipped as part of every curl and libcurl
-release (see http://curl.haxx.se/). It was originally based on the parse-certs
-script written by
-.An Roland Krikava
-and was later much improved by
-.An Guenter Knauf .
-This manual page was written by
-.An Jan Schaumann
-.Aq jschauma@netmeister.org .
+.SH EXIT STATUS
+Returns 0 on success. Returns 1 if it fails to download data.
+.SH SEE ALSO
+.BR curl (1)
+.SH HISTORY
+\fBmk-ca-bundle\fP is a command line tool that is shipped as part of every
+curl and libcurl release (see http://curl.haxx.se/). It was originally based
+on the parse-certs script written by Roland Krikava and was later much
+improved by Guenter Knauf.  This manual page was written by Jan Schaumann
+\&<jschauma@netmeister.org>.
