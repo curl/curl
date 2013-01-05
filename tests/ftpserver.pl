@@ -781,7 +781,7 @@ sub CAPABILITY_imap {
     return 0;
 }
 
-sub SELECT_IMAP {
+sub SELECT_imap {
     my ($testno) = @_;
     my @data;
     my $size;
