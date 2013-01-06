@@ -645,9 +645,7 @@ int netware_init(void);
  * Include macros and defines that should only be processed once.
  */
 
-#ifndef __SETUP_ONCE_H
-#include "setup_once.h"
-#endif
+#include "curl_setup_once.h"
 
 /*
  * Definition of our NOP statement Object-like macro

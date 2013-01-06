@@ -27,11 +27,11 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # might possibly already be installed in the system.
 #
 # $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
-# $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
+# $(top_builddir)/include for generated curlbuild.h inc. from lib/curl_setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_builddir)/src is for curl's generated src/curl_config.h file
-# $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
+# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 # $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
 
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \

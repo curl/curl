@@ -22,7 +22,7 @@
 
 /* Base64 encoding/decoding */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

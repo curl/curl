@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 #include "urldata.h"
 
 #ifdef HAVE_GSSAPI

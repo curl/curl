@@ -33,7 +33,7 @@
  * therefore we must include setup.h before curl.h when building curl.
  */
 
-#include "setup.h" /* from the lib directory */
+#include "curl_setup.h" /* from the lib directory */
 
 /*
  * curl tool certainly uses libcurl's external interface.

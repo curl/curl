@@ -41,7 +41,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 #if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)

@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_INET_PTON
 

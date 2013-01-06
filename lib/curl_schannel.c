@@ -51,7 +51,7 @@
  *   http://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 

@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 

@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
 

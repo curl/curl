@@ -22,7 +22,7 @@
 
 /* #define CURL_LIBSSH2_DEBUG */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_LIBSSH2
 

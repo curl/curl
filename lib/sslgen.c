@@ -43,7 +43,7 @@
    http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html
 */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "urldata.h"
 #define SSLGEN_C

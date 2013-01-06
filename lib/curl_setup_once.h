@@ -23,16 +23,6 @@
  ***************************************************************************/
 
 
-/********************************************************************
- *                              NOTICE                              *
- *                             ========                             *
- *                                                                  *
- *  Content of header files lib/setup_once.h and ares/setup_once.h  *
- *  must be kept in sync. Modify the other one if you change this.  *
- *                                                                  *
- ********************************************************************/
-
-
 /*
  * Inclusion of common header files.
  */

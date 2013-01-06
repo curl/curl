@@ -24,7 +24,7 @@
   * IDN conversions using Windows kernel32 and normaliz libraries.
   */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_WIN32_IDN
 

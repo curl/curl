@@ -31,7 +31,7 @@ EXTRA_DIST = README Makefile.example Makefile.inc Makefile.m32 \
 # might possibly already be installed in the system.
 #
 # $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
-# $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
+# $(top_builddir)/include for generated curlbuild.h inc. from lib/curl_setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \

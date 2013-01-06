@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
 #include "sockaddr.h"

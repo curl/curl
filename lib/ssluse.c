@@ -30,7 +30,7 @@
  * Sampo Kellomaki 1998.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>

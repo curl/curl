@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef CURL_DISABLE_PROXY
 #define Curl_SOCKS4(a,b,c,d,e,f) CURLE_NOT_BUILT_IN

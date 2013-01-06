@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -106,7 +106,7 @@
  * asyn-thread.c - functions for threaded name resolves
 
  * The hostip.h is the united header file for all this. It defines the
- * CURLRES_* defines based on the config*.h and setup.h defines.
+ * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
 /* These two symbols are for the global DNS cache */

@@ -23,7 +23,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "urldata.h"
 #include "sendf.h"

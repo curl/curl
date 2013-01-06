@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 8
+# serial 10
 
 dnl Note 1
 dnl ------
@@ -467,7 +467,7 @@ dnl This macro ensures that configuration tests done
 dnl after this will execute with preprocessor symbol
 dnl _REENTRANT defined. This macro also ensures that
 dnl the generated config file defines NEED_REENTRANT
-dnl and that in turn setup.h will define _REENTRANT.
+dnl and that in turn curl_setup.h will define _REENTRANT.
 dnl Internal macro for CURL_CONFIGURE_REENTRANT.
 
 AC_DEFUN([CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT], [
@@ -487,7 +487,7 @@ dnl This macro ensures that configuration tests done
 dnl after this will execute with preprocessor symbol
 dnl _THREAD_SAFE defined. This macro also ensures that
 dnl the generated config file defines NEED_THREAD_SAFE
-dnl and that in turn setup.h will define _THREAD_SAFE.
+dnl and that in turn curl_setup.h will define _THREAD_SAFE.
 dnl Internal macro for CURL_CONFIGURE_THREAD_SAFE.
 
 AC_DEFUN([CURL_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE], [

@@ -464,7 +464,7 @@ Win32
    possibilities:
 
    - Modify lib/config-win32.h
-   - Modify lib/setup.h
+   - Modify lib/curl_setup.h
    - Modify lib/Makefile.vc6
    - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
      in the vc6libcurl.dsw/vc6libcurl.dsp Visual C++ 6 IDE project.

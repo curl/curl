@@ -25,7 +25,7 @@
  * but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_NSS
 

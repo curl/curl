@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_GSSAPI
