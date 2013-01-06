@@ -420,43 +420,53 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
   long networkevents;
-  DWORD milliseconds, wait, idx;
+  DWORD milliseconds, wait, idx, avail, events, inputs;
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
-  HANDLE *handles;
-  curl_socket_t *fdarr;
+  INPUT_RECORD *inputrecords;
+  HANDLE handle, *handles;
+  curl_socket_t *fdarr, *wsasocks;
   int error, fds;
   DWORD nfd = 0, wsa = 0;
   int ret = 0;
 
+  /* check if the input value is valid */
   if(nfds < 0) {
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
 
+  /* check if we got descriptors, sleep in case we got none */
   if(!nfds) {
-    Sleep(1000*timeout->tv_sec + timeout->tv_usec/1000);
+    Sleep((timeout->tv_sec * 1000) + (timeout->tv_usec / 1000));
     return 0;
   }
 
   /* allocate internal array for the original input handles */
   fdarr = malloc(nfds * sizeof(curl_socket_t));
   if(fdarr == NULL) {
-    errno = ENOMEM;
+    SET_SOCKERRNO(ENOMEM);
     return -1;
   }
 
   /* allocate internal array for the internal event handles */
   handles = malloc(nfds * sizeof(HANDLE));
   if(handles == NULL) {
-    errno = ENOMEM;
+    SET_SOCKERRNO(ENOMEM);
+    return -1;
+  }
+
+  /* allocate internal array for the internal socket handles */
+  wsasocks = malloc(nfds * sizeof(curl_socket_t));
+  if(wsasocks == NULL) {
+    SET_SOCKERRNO(ENOMEM);
     return -1;
   }
 
   /* allocate internal array for the internal WINSOCK2 events */
   wsaevents = malloc(nfds * sizeof(WSAEVENT));
   if(wsaevents == NULL) {
-    errno = ENOMEM;
+    SET_SOCKERRNO(ENOMEM);
     return -1;
   }
 
@@ -466,14 +476,15 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     handles[nfd] = 0;
 
     if(FD_ISSET(fds, readfds))
-      networkevents |= FD_READ;
+      networkevents |= FD_READ|FD_ACCEPT|FD_CLOSE;
 
     if(FD_ISSET(fds, writefds))
-      networkevents |= FD_WRITE;
+      networkevents |= FD_WRITE|FD_CONNECT;
 
     if(FD_ISSET(fds, exceptfds))
-      networkevents |= FD_CLOSE;
+      networkevents |= FD_OOB;
 
+    /* only wait for events for which we actually care */
     if(networkevents) {
       fdarr[nfd] = (curl_socket_t)fds;
       if(fds == fileno(stdin)) {
@@ -491,10 +502,12 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           error = WSAEventSelect(fds, wsaevent, networkevents);
           if(error != SOCKET_ERROR) {
             handles[nfd] = wsaevent;
-            wsaevents[wsa++] = wsaevent;
+            wsasocks[wsa] = (curl_socket_t)fds;
+            wsaevents[wsa] = wsaevent;
+            wsa++;
           }
           else {
-            handles[nfd] = (HANDLE) fds;
+            handles[nfd] = (HANDLE)fds;
             WSACloseEvent(wsaevent);
           }
         }
@@ -516,36 +529,97 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* loop over the internal handles returned in the descriptors */
   for(idx = 0; idx < nfd; idx++) {
-    if(wait != WAIT_OBJECT_0 + idx) {
-      /* remove from all descriptor sets since this handle did not trigger */
-      FD_CLR(fdarr[idx], readfds);
-      FD_CLR(fdarr[idx], writefds);
-      FD_CLR(fdarr[idx], exceptfds);
+    fds = fdarr[idx];
+    handle = handles[idx];
+
+    /* check if the current internal handle was triggered */
+    if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) >= idx &&
+       WaitForSingleObjectEx(handle, 0, FALSE) == WAIT_OBJECT_0) {
+      /* try to handle the event with STD* handle functions */
+      if(fds == fileno(stdin)) {
+        /* check if there is no data in the input buffer */
+        if(!stdin->_cnt) {
+          /* check if we are getting data from a PIPE */
+          if(!GetConsoleMode(handle, &avail)) {
+            /* check if there is no data from PIPE input */
+            if(!PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL))
+              avail = 0;
+            if(!avail)
+              FD_CLR(fds, readfds);
+          } /* check if there is no data from keyboard input */
+          else if (!_kbhit()) {
+            /* check if there are INPUT_RECORDs in the input buffer */
+            if(GetNumberOfConsoleInputEvents(handle, &events)) {
+              if(events > 0) {
+                /* remove INPUT_RECORDs from the input buffer */
+                inputrecords = (INPUT_RECORD*)malloc(events *
+                                                     sizeof(INPUT_RECORD));
+                if(inputrecords) {
+                  if(!ReadConsoleInput(handle, inputrecords,
+                                       events, &inputs))
+                    inputs = 0;
+                  free(inputrecords);
+                }
+
+                /* check if we got all inputs, otherwise clear buffer */
+                if(events != inputs)
+                  FlushConsoleInputBuffer(handle);
+              }
+            }
+
+            /* remove from descriptor set since there is no real data */
+            FD_CLR(fds, readfds);
+          }
+        }
+
+        /* stdin is never ready for write or exceptional */
+        FD_CLR(fds, writefds);
+        FD_CLR(fds, exceptfds);
+      }
+      else if(fds == fileno(stdout) || fds == fileno(stderr)) {
+        /* stdout and stderr are never ready for read or exceptional */
+        FD_CLR(fds, readfds);
+        FD_CLR(fds, exceptfds);
+      }
+      else {
+        /* try to handle the event with the WINSOCK2 functions */
+        error = WSAEnumNetworkEvents(fds, NULL, &wsanetevents);
+        if(error != SOCKET_ERROR) {
+          /* remove from descriptor set if not ready for read/accept/close */
+          if(!(wsanetevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
+            FD_CLR(fds, readfds);
+
+          /* remove from descriptor set if not ready for write/connect */
+          if(!(wsanetevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
+            FD_CLR(fds, writefds);
+
+          /* remove from descriptor set if not exceptional */
+          if(!(wsanetevents.lNetworkEvents & FD_OOB))
+            FD_CLR(fds, exceptfds);
+        }
+      }
+
+      /* check if the event has not been filtered using specific tests */
+      if(FD_ISSET(fds, readfds) || FD_ISSET(fds, writefds) ||
+         FD_ISSET(fds, exceptfds)) {
+        ret++;
+      }
     }
     else {
-      /* first try to handle the event with the WINSOCK2 functions */
-      error = WSAEnumNetworkEvents(fdarr[idx], NULL, &wsanetevents);
-      if(error != SOCKET_ERROR) {
-        /* remove from descriptor set if not ready for read */
-        if(!(wsanetevents.lNetworkEvents & FD_READ))
-          FD_CLR(fdarr[idx], readfds);
-
-        /* remove from descriptor set if not ready for write */
-        if(!(wsanetevents.lNetworkEvents & FD_WRITE))
-          FD_CLR(fdarr[idx], writefds);
-
-        /* remove from descriptor set if not exceptional */
-        if(!(wsanetevents.lNetworkEvents & FD_CLOSE))
-          FD_CLR(fdarr[idx], exceptfds);
-      }
-      ret++;
+      /* remove from all descriptor sets since this handle did not trigger */
+      FD_CLR(fds, readfds);
+      FD_CLR(fds, writefds);
+      FD_CLR(fds, exceptfds);
     }
   }
 
-  for(idx = 0; idx < wsa; idx++)
+  for(idx = 0; idx < wsa; idx++) {
+    WSAEventSelect(wsasocks[idx], NULL, 0);
     WSACloseEvent(wsaevents[idx]);
+  }
 
   free(wsaevents);
+  free(wsasocks);
   free(handles);
   free(fdarr);
 
