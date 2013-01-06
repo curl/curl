@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -588,9 +588,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code != '+')
-    result = pop3_state_user(conn);
-  else {
+  if(pop3code == '+' && conn->proto.pop3c.authtypes) {
     /* Check supported authentication types by decreasing order of security */
     if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL)
       result = pop3_authenticate(conn);
@@ -605,6 +603,8 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn,
       result = CURLE_LOGIN_DENIED; /* Other types not supported */
     }
   }
+  else
+    result = pop3_state_user(conn);
 
   return result;
 }
