@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,7 @@
  * RFC3207 SMTP over TLS
  * RFC4954 SMTP Authentication
  * RFC2195 CRAM-MD5 authentication
+ * RFC2222 Simple Authentication and Security Layer (SASL)
  * RFC2831 DIGEST-MD5 authentication
  * RFC4616 PLAIN authentication
  *
@@ -218,6 +219,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   if(len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
     return FALSE;       /* Nothing for us */
 
+  /* Extract the response code if necessary */
   if((result = (line[3] == ' ')) != 0)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
@@ -319,7 +321,7 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   smtpc->authused = 0;          /* Clear the authentication mechanism used
                                    for esmtp connections */
 
-  /* send EHLO */
+  /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
 
   if(result)
@@ -338,7 +340,7 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   smtpc->authused = 0;          /* No authentication mechanism used in smtp
                                    connections */
 
-  /* send HELO */
+  /* Send the HELO command */
   result = Curl_pp_sendf(&smtpc->pp, "HELO %s", smtpc->domain);
 
   if(result)
