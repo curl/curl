@@ -340,6 +340,13 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
     }
   }
 
+  /* Do we have a generic continuation response? */
+  if((len == 3 && !memcmp("+", line, 1)) ||
+     (len >= 2 && !memcmp("+ ", line, 2))) {
+    *resp = '+';
+    return TRUE;
+  }
+
   /* Are we processing CAPABILITY command responses? */
   if(imapc->state == IMAP_CAPABILITY) {
     /* Do we have a valid response? */
