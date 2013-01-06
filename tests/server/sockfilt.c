@@ -1087,6 +1087,10 @@ int main(int argc, char *argv[])
 #ifdef WIN32
   win32_init();
   atexit(win32_cleanup);
+
+  setmode(fileno(stdin), O_BINARY);
+  setmode(fileno(stdout), O_BINARY);
+  setmode(fileno(stderr), O_BINARY);
 #endif
 
   install_signal_handlers();
