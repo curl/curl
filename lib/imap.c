@@ -18,7 +18,9 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * RFC2222 Simple Authentication and Security Layer (SASL)
  * RFC3501 IMAPv4 protocol
+ * RFC4616 PLAIN authentication
  * RFC5092 IMAP URL Scheme
  *
  ***************************************************************************/
@@ -430,6 +432,8 @@ static void state(struct connectdata *conn,
     "STARTTLS",
     "UPGRADETLS",
     "CAPABILITY",
+    "AUTHENTICATE_PLAIN",
+    "AUTHENTICATE",
     "LOGIN",
     "SELECT",
     "FETCH",
@@ -452,6 +456,7 @@ static CURLcode imap_state_capability(struct connectdata *conn)
   const char *str;
 
   imapc->authmechs = 0;         /* No known authentication mechanisms yet */
+  imapc->authused = 0;          /* Clear the authentication mechanism used */
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
@@ -495,6 +500,37 @@ static CURLcode imap_state_login(struct connectdata *conn)
   state(conn, IMAP_LOGIN);
 
   return CURLE_OK;
+}
+
+static CURLcode imap_authenticate(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *mech = NULL;
+  imapstate authstate = IMAP_STOP;
+
+  /* Check supported authentication mechanisms by decreasing order of
+     security */
+  if(imapc->authmechs & SASL_MECH_PLAIN) {
+    mech = "PLAIN";
+    authstate = IMAP_AUTHENTICATE_PLAIN;
+    imapc->authused = SASL_MECH_PLAIN;
+  }
+  else {
+    infof(conn->data, "No known authentication mechanisms supported!\n");
+    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
+  }
+
+  if(!result) {
+    const char *str = getcmdid(conn);
+
+    result = imap_sendf(conn, str, "%s AUTHENTICATE %s", str, mech);
+
+    if(!result)
+      state(conn, authstate);
+  }
+
+  return result;
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */
@@ -597,10 +633,76 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
                                            int imapcode,
                                            imapstate instate)
 {
-  (void)imapcode; /* no use for this yet */
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+
   (void)instate; /* no use for this yet */
 
-  return imap_state_login(conn);
+  if(imapcode == 'O' && imapc->authmechs)
+    result = imap_authenticate(conn);
+  else
+    result = imap_state_login(conn);
+
+  return result;
+}
+
+/* For AUTHENTICATE PLAIN responses */
+static CURLcode imap_state_auth_plain_resp(struct connectdata *conn,
+                                           int imapcode,
+                                           imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *plainauth = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied. %c", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the authorisation message */
+    result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,
+                                            &plainauth, &len);
+
+    /* Send the message */
+    if(!result) {
+      if(plainauth) {
+        result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", plainauth);
+
+        if(!result)
+          state(conn, IMAP_AUTHENTICATE);
+      }
+
+      Curl_safefree(plainauth);
+    }
+  }
+
+  return result;
+}
+
+
+/* For final responses to the AUTHENTICATE sequence */
+static CURLcode imap_state_auth_final_resp(struct connectdata *conn,
+                                           int imapcode,
+                                           imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != 'O') {
+    failf(data, "Authentication failed: %d", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+
+  /* End of connect phase */
+  state(conn, IMAP_STOP);
+
+  return result;
 }
 
 /* For LOGIN responses */
@@ -805,6 +907,14 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_CAPABILITY:
       result = imap_state_capability_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_PLAIN:
+      result = imap_state_auth_plain_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE:
+      result = imap_state_auth_final_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGIN:
@@ -1116,6 +1226,9 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);
+
+  /* Cleanup the SASL module */
+  Curl_sasl_cleanup(conn, imapc->authused);
 
   /* Cleanup our connection based variables */
   Curl_safefree(imapc->mailbox);
