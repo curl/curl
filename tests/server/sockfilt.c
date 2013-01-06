@@ -265,7 +265,8 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
       error = ERRNO;
       if((error == EINTR) || (error == EAGAIN))
         continue;
-      logmsg("unrecoverable read() failure: %s", strerror(error));
+      logmsg("unrecoverable read() failure: (%d) %s",
+             error, strerror(error));
       return -1;
     }
 
@@ -309,7 +310,8 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
       error = ERRNO;
       if((error == EINTR) || (error == EAGAIN))
         continue;
-      logmsg("unrecoverable write() failure: %s", strerror(error));
+      logmsg("unrecoverable write() failure: (%d) %s",
+             error, strerror(error));
       return -1;
     }
 
@@ -780,9 +782,13 @@ static bool juggle(curl_socket_t *sockfdp,
     if(*mode == PASSIVE_LISTEN) {
       /* there's no stream set up yet, this is an indication that there's a
          client connecting. */
-      sockfd = accept(sockfd, NULL, NULL);
-      if(CURL_SOCKET_BAD == sockfd)
-        logmsg("accept() failed");
+      listenfd = sockfd;
+      sockfd = accept(listenfd, NULL, NULL);
+      if(CURL_SOCKET_BAD == sockfd) {
+        error = SOCKERRNO;
+        logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
+               listenfd, error, strerror(error));
+      }
       else {
         logmsg("====> Client connect");
         if(!write_stdout("CNCT\n", 5))
@@ -954,8 +960,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen() failed with error: (%d) %s",
-           error, strerror(error));
+    logmsg("listen(%d, 5) failed with error: (%d) %s",
+           sock, error, strerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
