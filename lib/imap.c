@@ -433,6 +433,8 @@ static void state(struct connectdata *conn,
     "UPGRADETLS",
     "CAPABILITY",
     "AUTHENTICATE_PLAIN",
+    "AUTHENTICATE_LOGIN",
+    "AUTHENTICATE_LOGIN_PASSWD",
     "AUTHENTICATE",
     "LOGIN",
     "SELECT",
@@ -511,7 +513,12 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
-  if(imapc->authmechs & SASL_MECH_PLAIN) {
+  if(imapc->authmechs & SASL_MECH_LOGIN) {
+    mech = "LOGIN";
+    authstate = IMAP_AUTHENTICATE_LOGIN;
+    imapc->authused = SASL_MECH_LOGIN;
+  }
+  else if(imapc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     authstate = IMAP_AUTHENTICATE_PLAIN;
     imapc->authused = SASL_MECH_PLAIN;
@@ -683,6 +690,79 @@ static CURLcode imap_state_auth_plain_resp(struct connectdata *conn,
   return result;
 }
 
+/* For AUTHENTICATE LOGIN responses */
+static CURLcode imap_state_auth_login_resp(struct connectdata *conn,
+                                           int imapcode,
+                                           imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *authuser = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied: %d", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the user message */
+    result = Curl_sasl_create_login_message(data, conn->user,
+                                            &authuser, &len);
+
+    /* Send the user */
+    if(!result) {
+      if(authuser) {
+        result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", authuser);
+
+        if(!result)
+          state(conn, IMAP_AUTHENTICATE_LOGIN_PASSWD);
+      }
+
+      Curl_safefree(authuser);
+    }
+  }
+
+  return result;
+}
+
+/* For AUTHENTICATE LOGIN user entry responses */
+static CURLcode imap_state_auth_login_password_resp(struct connectdata *conn,
+                                                    int imapcode,
+                                                    imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *authpasswd = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied: %d", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the password message */
+    result = Curl_sasl_create_login_message(data, conn->passwd,
+                                            &authpasswd, &len);
+
+    /* Send the password */
+    if(!result) {
+      if(authpasswd) {
+        result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", authpasswd);
+
+        if(!result)
+          state(conn, IMAP_AUTHENTICATE);
+      }
+
+      Curl_safefree(authpasswd);
+    }
+  }
+
+  return result;
+}
 
 /* For final responses to the AUTHENTICATE sequence */
 static CURLcode imap_state_auth_final_resp(struct connectdata *conn,
@@ -911,6 +991,15 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_AUTHENTICATE_PLAIN:
       result = imap_state_auth_plain_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_LOGIN:
+      result = imap_state_auth_login_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_LOGIN_PASSWD:
+      result = imap_state_auth_login_password_resp(conn, imapcode,
+                                                   imapc->state);
       break;
 
     case IMAP_AUTHENTICATE:
