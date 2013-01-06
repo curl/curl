@@ -38,10 +38,11 @@ imap://%HOSTIP:%IMAPPORT/801 -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-B LOGIN user secret
-C SELECT 801
-D FETCH 1 BODY[TEXT]
-A LOGOUT
+B CAPABILITY
+C LOGIN user secret
+D SELECT 801
+A FETCH 1 BODY[TEXT]
+B LOGOUT
 </protocol>
 </verify>
 </testcase>

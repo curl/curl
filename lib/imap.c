@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,6 +70,7 @@
 #include "multiif.h"
 #include "url.h"
 #include "rawstr.h"
+#include "curl_sasl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -320,7 +321,8 @@ static char* imap_atom(const char* str)
 }
 
 /* Function that checks for an ending imap status code at the start of the
-   given string. */
+   given string but also detects the supported mechanisms from the CAPABILITY
+   response. */
 static int imap_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -328,12 +330,71 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
   struct imap_conn *imapc = &pp->conn->proto.imapc;
   const char *id = imapc->idstr;
   size_t id_len = strlen(id);
+  size_t wordlen;
 
   /* Do we have a generic command response? */
   if(len >= id_len + 3) {
     if(!memcmp(id, line, id_len) && line[id_len] == ' ') {
       *resp = line[id_len + 1]; /* O, N or B */
       return TRUE;
+    }
+  }
+
+  /* Are we processing CAPABILITY command responses? */
+  if(imapc->state == IMAP_CAPABILITY) {
+    /* Do we have a valid response? */
+    if(len >= 2 && !memcmp("* ", line, 2)) {
+      line += 2;
+      len -= 2;
+
+      /* Loop through the data line */
+      for(;;) {
+        while(len &&
+              (*line == ' ' || *line == '\t' ||
+               *line == '\r' || *line == '\n')) {
+
+          if(*line == '\n')
+            return FALSE;
+
+          line++;
+          len--;
+        }
+
+        if(!len)
+          break;
+
+        /* Extract the word */
+        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
+              line[wordlen] != '\t' && line[wordlen] != '\r' &&
+              line[wordlen] != '\n';)
+          wordlen++;
+
+        /* Do we have an AUTH capability? */
+        if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
+          line += 5;
+          len -= 5;
+          wordlen -= 5;
+
+          /* Test the word for a matching authentication mechanism */
+          if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+            imapc->authmechs |= SASL_MECH_LOGIN;
+          if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+            imapc->authmechs |= SASL_MECH_PLAIN;
+          else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+            imapc->authmechs |= SASL_MECH_CRAM_MD5;
+          else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+            imapc->authmechs |= SASL_MECH_DIGEST_MD5;
+          else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+            imapc->authmechs |= SASL_MECH_GSSAPI;
+          else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+            imapc->authmechs |= SASL_MECH_EXTERNAL;
+          else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+            imapc->authmechs |= SASL_MECH_NTLM;
+        }
+
+        line += wordlen;
+        len -= wordlen;
+      }
     }
   }
 
@@ -346,7 +407,7 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
     }
   }
 
-  return FALSE; /* nothing for us */
+  return FALSE; /* Nothing for us */
 }
 
 /* This is the ONLY way to change IMAP state! */
@@ -361,6 +422,7 @@ static void state(struct connectdata *conn,
     "SERVERGREET",
     "STARTTLS",
     "UPGRADETLS",
+    "CAPABILITY",
     "LOGIN",
     "SELECT",
     "FETCH",
@@ -374,6 +436,35 @@ static void state(struct connectdata *conn,
 #endif
 
   imapc->state = newstate;
+}
+
+static CURLcode imap_state_capability(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *str;
+
+  imapc->authmechs = 0;         /* No known authentication mechanisms yet */
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, IMAP_STOP);
+
+    return result;
+  }
+
+  str = getcmdid(conn);
+
+  /* Send the CAPABILITY command */
+  result = imap_sendf(conn, str, "%s CAPABILITY", str);
+
+  if(result)
+    return result;
+
+  state(conn, IMAP_CAPABILITY);
+
+  return CURLE_OK;
 }
 
 static CURLcode imap_state_login(struct connectdata *conn)
@@ -439,7 +530,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
     state(conn, IMAP_STARTTLS);
   }
   else
-    result = imap_state_login(conn);
+    result = imap_state_capability(conn);
 
   return result;
 }
@@ -460,7 +551,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = imap_state_login(conn);
+      result = imap_state_capability(conn);
   }
   else {
     if(data->state.used_interface == Curl_if_multi) {
@@ -471,7 +562,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       result = Curl_ssl_connect(conn, FIRSTSOCKET);
       if(CURLE_OK == result) {
         imap_to_imaps(conn);
-        result = imap_state_login(conn);
+        result = imap_state_capability(conn);
       }
     }
   }
@@ -488,10 +579,21 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 
   if(imapc->ssldone) {
     imap_to_imaps(conn);
-    result = imap_state_login(conn);
+    result = imap_state_capability(conn);
   }
 
   return result;
+}
+
+/* For CAPABILITY responses */
+static CURLcode imap_state_capability_resp(struct connectdata *conn,
+                                           int imapcode,
+                                           imapstate instate)
+{
+  (void)imapcode; /* no use for this yet */
+  (void)instate; /* no use for this yet */
+
+  return imap_state_login(conn);
 }
 
 /* For LOGIN responses */
@@ -692,6 +794,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_STARTTLS:
       result = imap_state_starttls_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_CAPABILITY:
+      result = imap_state_capability_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGIN:

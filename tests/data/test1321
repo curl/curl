@@ -56,10 +56,11 @@ imap://%HOSTIP:%IMAPPORT/1321 -u user:secret -p -x %HOSTIP:%PROXYPORT
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-B LOGIN user secret
-C SELECT 1321
-D FETCH 1 BODY[TEXT]
-A LOGOUT
+B CAPABILITY
+C LOGIN user secret
+D SELECT 1321
+A FETCH 1 BODY[TEXT]
+B LOGOUT
 </protocol>
 <proxy>
 CONNECT %HOSTIP:%IMAPPORT HTTP/1.1
