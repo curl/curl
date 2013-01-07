@@ -93,6 +93,11 @@
 #include <netdb.h>
 #endif
 
+#ifdef WIN32
+#include <conio.h>
+#include <fcntl.h>
+#endif
+
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
    versions instead */
