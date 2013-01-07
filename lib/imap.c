@@ -20,6 +20,7 @@
  *
  * RFC2195 CRAM-MD5 authentication
  * RFC2222 Simple Authentication and Security Layer (SASL)
+ * RFC2595 Using TLS with IMAP, POP3 and ACAP
  * RFC2831 DIGEST-MD5 authentication
  * RFC3501 IMAPv4 protocol
  * RFC4616 PLAIN authentication
