@@ -18,6 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * RFC2195 CRAM-MD5 authentication
  * RFC2222 Simple Authentication and Security Layer (SASL)
  * RFC3501 IMAPv4 protocol
  * RFC4616 PLAIN authentication
@@ -435,6 +436,7 @@ static void state(struct connectdata *conn,
     "AUTHENTICATE_PLAIN",
     "AUTHENTICATE_LOGIN",
     "AUTHENTICATE_LOGIN_PASSWD",
+    "AUTHENTICATE_CRAMMD5",
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
     "AUTHENTICATE",
@@ -515,6 +517,14 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
+    mech = "CRAM-MD5";
+    authstate = IMAP_AUTHENTICATE_CRAMMD5;
+    imapc->authused = SASL_MECH_CRAM_MD5;
+  }
+  else
+#endif
 #ifdef USE_NTLM
   if(imapc->authmechs & SASL_MECH_NTLM) {
     mech = "NTLM";
@@ -773,6 +783,61 @@ static CURLcode imap_state_auth_login_password_resp(struct connectdata *conn,
 
   return result;
 }
+
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+/* For AUTHENTICATE CRAM-MD5 responses */
+static CURLcode imap_state_auth_cram_resp(struct connectdata *conn,
+                                          int imapcode,
+                                          imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *chlg64 = data->state.buffer;
+  size_t len = 0;
+  char *rplyb64 = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied: %d", imapcode);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  /* Get the challenge */
+  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
+    ;
+
+  /* Terminate the challenge */
+  if(*chlg64 != '=') {
+    for(len = strlen(chlg64); len--;)
+      if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
+         chlg64[len] != '\t')
+        break;
+
+    if(++len) {
+      chlg64[len] = '\0';
+    }
+  }
+
+  /* Create the response message */
+  result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
+                                             conn->passwd, &rplyb64, &len);
+
+  /* Send the response */
+  if(!result) {
+    if(rplyb64) {
+      result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", rplyb64);
+
+      if(!result)
+        state(conn, IMAP_AUTHENTICATE);
+    }
+
+    Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+#endif
 
 #ifdef USE_NTLM
 /* For AUTHENTICATE NTLM responses */
@@ -1091,6 +1156,12 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       result = imap_state_auth_login_password_resp(conn, imapcode,
                                                    imapc->state);
       break;
+
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+    case IMAP_AUTHENTICATE_CRAMMD5:
+      result = imap_state_auth_cram_resp(conn, imapcode, imapc->state);
+      break;
+#endif
 
 #ifdef USE_NTLM
     case IMAP_AUTHENTICATE_NTLM:
