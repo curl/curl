@@ -506,6 +506,38 @@ Win32
    dynamic import symbols.
 
 
+Apple iOS and Mac OS X
+======================
+   On recent Apple operating systems, curl can be built to use Apple's
+   SSL/TLS implementation, Secure Transport, instead of OpenSSL. To build with
+   Secure Transport for SSL/TLS, use the configure option --with-darwinssl. (It
+   is not necessary to use the option --without-ssl.) This feature requires iOS
+   5.0 or later, or OS X 10.5 ("Leopard") or later.
+
+   When Secure Transport is in use, the curl options --cacert and --capath and
+   their libcurl equivalents, will be ignored, because Secure Transport uses
+   the certificates stored in the Keychain to evaluate whether or not to trust
+   the server. This, of course, includes the root certificates that ship with
+   the OS. The --cert and --engine options, and their libcurl equivalents, are
+   currently unimplemented in curl with Secure Transport.
+
+   For OS X users: In OS X 10.8 ("Mountain Lion"), Apple made a major
+   overhaul to the Secure Transport API that, among other things, added
+   support for the newer TLS 1.1 and 1.2 protocols. To get curl to support
+   TLS 1.1 and 1.2, you must build curl on Mountain Lion or later, or by
+   using the equivalent SDK. If you set the MACOSX_DEPLOYMENT_TARGET
+   environmental variable to an earlier version of OS X prior to building curl,
+   then curl will use the new Secure Transport API on Mountain Lion and later,
+   and fall back on the older API when the same curl binary is executed on
+   older cats. For example, running these commands in curl's directory in the
+   shell will build the code such that it will run on cats as old as OS X 10.6
+   ("Snow Leopard") (using bash):
+
+      export MACOSX_DEPLOYMENT_TARGET="10.6"
+      ./configure --with-darwinssl
+      make
+
+
 IBM OS/2
 ========
    Building under OS/2 is not much different from building under unix.
@@ -1015,7 +1047,7 @@ PORTS
         - AVR32 Linux
         - ARM Android 1.5, 2.1
         - ARM INTEGRITY
-        - ARM iPhone OS
+        - ARM iOS
         - Cell Linux
         - Cell Cell OS
         - HP-PA HP-UX 9.X 10.X 11.X
@@ -1053,6 +1085,7 @@ PORTS
         - i386 HURD
         - i386 Haiku OS
         - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4, 2.6
+        - i386 Mac OS X
         - i386 MINIX 3.1
         - i386 NetBSD
         - i386 Novell NetWare

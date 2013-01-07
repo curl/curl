@@ -145,7 +145,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
