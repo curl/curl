@@ -430,7 +430,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   WSANETWORKEVENTS wsanetevents;
   INPUT_RECORD *inputrecords;
   HANDLE handle, *handles;
-  curl_socket_t *fdarr, *wsasocks;
+  curl_socket_t sock, *fdarr, *wsasocks;
   int error, fds;
   DWORD nfd = 0, wsa = 0;
   int ret = 0;
@@ -536,6 +536,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   for(idx = 0; idx < nfd; idx++) {
     fds = fdarr[idx];
     handle = handles[idx];
+    sock = (curl_socket_t)fds;
 
     /* check if the current internal handle was triggered */
     if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) >= idx &&
@@ -550,7 +551,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             if(!PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL))
               avail = 0;
             if(!avail)
-              FD_CLR(fds, readfds);
+              FD_CLR(sock, readfds);
           } /* check if there is no data from keyboard input */
           else if (!_kbhit()) {
             /* check if there are INPUT_RECORDs in the input buffer */
@@ -573,18 +574,18 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             }
 
             /* remove from descriptor set since there is no real data */
-            FD_CLR(fds, readfds);
+            FD_CLR(sock, readfds);
           }
         }
 
         /* stdin is never ready for write or exceptional */
-        FD_CLR(fds, writefds);
-        FD_CLR(fds, exceptfds);
+        FD_CLR(sock, writefds);
+        FD_CLR(sock, exceptfds);
       }
       else if(fds == fileno(stdout) || fds == fileno(stderr)) {
         /* stdout and stderr are never ready for read or exceptional */
-        FD_CLR(fds, readfds);
-        FD_CLR(fds, exceptfds);
+        FD_CLR(sock, readfds);
+        FD_CLR(sock, exceptfds);
       }
       else {
         /* try to handle the event with the WINSOCK2 functions */
@@ -592,29 +593,29 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         if(error != SOCKET_ERROR) {
           /* remove from descriptor set if not ready for read/accept/close */
           if(!(wsanetevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
-            FD_CLR(fds, readfds);
+            FD_CLR(sock, readfds);
 
           /* remove from descriptor set if not ready for write/connect */
           if(!(wsanetevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
-            FD_CLR(fds, writefds);
+            FD_CLR(sock, writefds);
 
           /* remove from descriptor set if not exceptional */
           if(!(wsanetevents.lNetworkEvents & FD_OOB))
-            FD_CLR(fds, exceptfds);
+            FD_CLR(sock, exceptfds);
         }
       }
 
       /* check if the event has not been filtered using specific tests */
-      if(FD_ISSET(fds, readfds) || FD_ISSET(fds, writefds) ||
-         FD_ISSET(fds, exceptfds)) {
+      if(FD_ISSET(sock, readfds) || FD_ISSET(sock, writefds) ||
+         FD_ISSET(sock, exceptfds)) {
         ret++;
       }
     }
     else {
       /* remove from all descriptor sets since this handle did not trigger */
-      FD_CLR(fds, readfds);
-      FD_CLR(fds, writefds);
-      FD_CLR(fds, exceptfds);
+      FD_CLR(sock, readfds);
+      FD_CLR(sock, writefds);
+      FD_CLR(sock, exceptfds);
     }
   }
 
