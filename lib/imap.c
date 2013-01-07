@@ -20,6 +20,7 @@
  *
  * RFC2195 CRAM-MD5 authentication
  * RFC2222 Simple Authentication and Security Layer (SASL)
+ * RFC2831 DIGEST-MD5 authentication
  * RFC3501 IMAPv4 protocol
  * RFC4616 PLAIN authentication
  * RFC5092 IMAP URL Scheme
@@ -437,6 +438,8 @@ static void state(struct connectdata *conn,
     "AUTHENTICATE_LOGIN",
     "AUTHENTICATE_LOGIN_PASSWD",
     "AUTHENTICATE_CRAMMD5",
+    "AUTHENTICATE_DIGESTMD5",
+    "AUTHENTICATE_DIGESTMD5_RESP",
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
     "AUTHENTICATE",
@@ -518,7 +521,12 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   /* Check supported authentication mechanisms by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
+  if(imapc->authmechs & SASL_MECH_DIGEST_MD5) {
+    mech = "DIGEST-MD5";
+    authstate = IMAP_AUTHENTICATE_DIGESTMD5;
+    imapc->authused = SASL_MECH_DIGEST_MD5;
+  }
+  else if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
     mech = "CRAM-MD5";
     authstate = IMAP_AUTHENTICATE_CRAMMD5;
     imapc->authused = SASL_MECH_CRAM_MD5;
@@ -833,6 +841,73 @@ static CURLcode imap_state_auth_cram_resp(struct connectdata *conn,
     }
 
     Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+
+/* For AUTHENTICATE DIGEST-MD5 challenge responses */
+static CURLcode imap_state_auth_digest_resp(struct connectdata *conn,
+                                            int imapcode,
+                                            imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *chlg64 = data->state.buffer;
+  size_t len = 0;
+  char *rplyb64 = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied: %d", imapcode);
+    return CURLE_LOGIN_DENIED;
+  }
+
+  /* Get the challenge */
+  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
+    ;
+
+  /* Create the response message */
+  result = Curl_sasl_create_digest_md5_message(data, chlg64, conn->user,
+                                               conn->passwd, "imap",
+                                               &rplyb64, &len);
+
+  /* Send the response */
+  if(!result) {
+    if(rplyb64) {
+      result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", rplyb64);
+
+      if(!result)
+        state(conn, IMAP_AUTHENTICATE_DIGESTMD5_RESP);
+    }
+
+    Curl_safefree(rplyb64);
+  }
+
+  return result;
+}
+
+/* For AUTHENTICATE DIGEST-MD5 challenge-response responses */
+static CURLcode imap_state_auth_digest_resp_resp(struct connectdata *conn,
+                                                 int imapcode,
+                                                 imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Authentication failed: %d", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Send an empty response */
+    result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+
+    if(!result)
+      state(conn, IMAP_AUTHENTICATE);
   }
 
   return result;
@@ -1160,6 +1235,14 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     case IMAP_AUTHENTICATE_CRAMMD5:
       result = imap_state_auth_cram_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_DIGESTMD5:
+      result = imap_state_auth_digest_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_DIGESTMD5_RESP:
+      result = imap_state_auth_digest_resp_resp(conn, imapcode, imapc->state);
       break;
 #endif
 
