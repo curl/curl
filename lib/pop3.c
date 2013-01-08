@@ -103,6 +103,7 @@ static int pop3_getsock(struct connectdata *conn,
                         int numsocks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
+static CURLcode pop3_state_upgrade_tls(struct connectdata *conn);
 
 /*
  * POP3 protocol handler.
@@ -227,7 +228,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
     return FALSE;
   }
 
-  /* Are we processing servergreet responses */
+  /* Are we processing servergreet responses? */
   if(pop3c->state == POP3_SERVERGREET) {
     /* Look for the APOP timestamp */
     if(len >= 3 && line[len - 3] == '>') {
@@ -345,6 +346,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "STOP",
     "SERVERGREET",
     "STARTTLS",
+    "UPGRADETLS",
     "CAPA",
     "AUTH_PLAIN",
     "AUTH_LOGIN",
@@ -568,12 +570,32 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = pop3_state_capa(conn);
   }
   else {
-    /* Curl_ssl_connect is BLOCKING */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(CURLE_OK == result) {
-      pop3_to_pop3s(conn);
-      result = pop3_state_capa(conn);
+    if(data->state.used_interface == Curl_if_multi) {
+      state(conn, POP3_UPGRADETLS);
+      result = pop3_state_upgrade_tls(conn);
     }
+    else {
+      result = Curl_ssl_connect(conn, FIRSTSOCKET);
+      if(CURLE_OK == result) {
+        pop3_to_pop3s(conn);
+        result = pop3_state_capa(conn);
+      }
+    }
+  }
+
+  return result;
+}
+
+static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
+{
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+
+  if(pop3c->ssldone) {
+    pop3_to_pop3s(conn);
+    result = pop3_state_capa(conn);
   }
 
   return result;
@@ -1113,6 +1135,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
   size_t nread = 0;
+
+  /* Busy upgrading the connection; right now all I/O is SSL/TLS, not POP3 */
+  if(pop3c->state == POP3_UPGRADETLS)
+    return pop3_state_upgrade_tls(conn);
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)

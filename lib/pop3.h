@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,8 @@ typedef enum {
   POP3_SERVERGREET,  /* waiting for the initial greeting immediately after
                         a connect */
   POP3_STARTTLS,
+  POP3_UPGRADETLS,   /* asynchronously upgrade the connection to SSL/TLS
+                       (multi mode only) */
   POP3_CAPA,
   POP3_AUTH_PLAIN,
   POP3_AUTH_LOGIN,
@@ -63,6 +65,8 @@ struct pop3_conn {
   unsigned int authused;  /* SASL auth mechanism used for the connection */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
   pop3state state;        /* Always use pop3.c:state() to change state! */
+  bool ssldone;           /* Is connect() over SSL done? Only relevant in
+                             multi mode */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;
