@@ -62,7 +62,7 @@ Portability
  these versions:
 
  GNU Libtool  1.4.2
- GNU Autoconf 2.59
+ GNU Autoconf 2.57
  GNU Automake 1.7 (we currently avoid 1.10 due to Solaris-related bugs)
  GNU M4       1.4
  perl         5.004
