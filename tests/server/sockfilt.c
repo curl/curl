@@ -92,10 +92,8 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-
-#ifdef WIN32
-#include <conio.h>
-#include <fcntl.h>
+#ifdef USE_WINSOCK
+#include <conio.h>  /* for _kbhit() used in select_ws() */
 #endif
 
 #define ENABLE_CURLX_PRINTF
@@ -406,13 +404,12 @@ static void lograw(unsigned char *buffer, ssize_t len)
     logmsg("'%s'", data);
 }
 
+#ifdef USE_WINSOCK
 /*
  * WinSock select() does not support standard file descriptors,
  * it can only check SOCKETs. The following function is an attempt
  * to re-create a select() function with support for other handle types.
- */
-#ifdef USE_WINSOCK
-/*
+ *
  * select() function with support for WINSOCK2 sockets and all
  * other handle types supported by WaitForMultipleObjectsEx().
  *
@@ -491,7 +488,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
     /* only wait for events for which we actually care */
     if(networkevents) {
-      fdarr[nfd] = (curl_socket_t)fds;
+      fdarr[nfd] = (curl_socket_t) LongToHandle(fds);
       if(fds == fileno(stdin)) {
         handles[nfd] = GetStdHandle(STD_INPUT_HANDLE);
       }
@@ -507,12 +504,12 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           error = WSAEventSelect(fds, wsaevent, networkevents);
           if(error != SOCKET_ERROR) {
             handles[nfd] = wsaevent;
-            wsasocks[wsa] = (curl_socket_t)fds;
+            wsasocks[wsa] = (curl_socket_t) LongToHandle(fds);
             wsaevents[wsa] = wsaevent;
             wsa++;
           }
           else {
-            handles[nfd] = (HANDLE)fds;
+            handles[nfd] = LongToHandle(fds);
             WSACloseEvent(wsaevent);
           }
         }
@@ -534,9 +531,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* loop over the internal handles returned in the descriptors */
   for(idx = 0; idx < nfd; idx++) {
-    fds = fdarr[idx];
     handle = handles[idx];
-    sock = (curl_socket_t)fds;
+    sock = fdarr[idx];
+    fds = HandleToLong(sock);
 
     /* check if the current internal handle was triggered */
     if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) >= idx &&
@@ -632,7 +629,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   return ret;
 }
 #define select(a,b,c,d,e) select_ws(a,b,c,d,e)
-#endif
+#endif  /* USE_WINSOCK */
 
 /*
   sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
@@ -859,21 +856,22 @@ static bool juggle(curl_socket_t *sockfdp,
 
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
 
+    curl_socket_t newfd = CURL_SOCKET_BAD; /* newly accepted socket */
+
     if(*mode == PASSIVE_LISTEN) {
       /* there's no stream set up yet, this is an indication that there's a
          client connecting. */
-      listenfd = sockfd;
-      sockfd = accept(listenfd, NULL, NULL);
-      if(CURL_SOCKET_BAD == sockfd) {
+      newfd = accept(sockfd, NULL, NULL);
+      if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               listenfd, error, strerror(error));
+               sockfd, error, strerror(error));
       }
       else {
         logmsg("====> Client connect");
         if(!write_stdout("CNCT\n", 5))
           return FALSE;
-        *sockfdp = sockfd; /* store the new socket */
+        *sockfdp = newfd; /* store the new socket */
         *mode = PASSIVE_CONNECT; /* we have connected */
       }
       return TRUE;
