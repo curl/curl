@@ -233,6 +233,10 @@ static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
 static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 #endif
 
+#if defined(SIGBREAK) && defined(WIN32)
+static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
+#endif
+
 /* var which if set indicates that the program should finish execution */
 
 SIG_ATOMIC_T got_exit_signal = 0;
@@ -288,6 +292,13 @@ static void install_signal_handlers(void)
   else
     siginterrupt(SIGTERM, 1);
 #endif
+#if defined(SIGBREAK) && defined(WIN32)
+  /* handle SIGBREAK signal with our exit_signal_handler */
+  if((old_sigbreak_handler = signal(SIGBREAK, exit_signal_handler)) == SIG_ERR)
+    logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
+  else
+    siginterrupt(SIGBREAK, 1);
+#endif
 }
 
 static void restore_signal_handlers(void)
@@ -311,6 +322,10 @@ static void restore_signal_handlers(void)
 #ifdef SIGTERM
   if(SIG_ERR != old_sigterm_handler)
     (void)signal(SIGTERM, old_sigterm_handler);
+#endif
+#if defined(SIGBREAK) && defined(WIN32)
+  if(SIG_ERR != old_sigbreak_handler)
+    (void)signal(SIGBREAK, old_sigbreak_handler);
 #endif
 }
 
