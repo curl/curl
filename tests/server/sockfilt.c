@@ -104,6 +104,7 @@
 #include "inet_pton.h"
 #include "util.h"
 #include "server_sockaddr.h"
+#include "warnless.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -488,7 +489,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
     /* only wait for events for which we actually care */
     if(networkevents) {
-      fdarr[nfd] = (curl_socket_t) LongToHandle(fds);
+      fdarr[nfd] = curlx_sitosk(fds);
       if(fds == fileno(stdin)) {
         handles[nfd] = GetStdHandle(STD_INPUT_HANDLE);
       }
@@ -504,12 +505,12 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           error = WSAEventSelect(fds, wsaevent, networkevents);
           if(error != SOCKET_ERROR) {
             handles[nfd] = wsaevent;
-            wsasocks[wsa] = (curl_socket_t) LongToHandle(fds);
+            wsasocks[wsa] = curlx_sitosk(fds);
             wsaevents[wsa] = wsaevent;
             wsa++;
           }
           else {
-            handles[nfd] = LongToHandle(fds);
+            handles[nfd] = (HANDLE) curlx_sitosk(fds);
             WSACloseEvent(wsaevent);
           }
         }
@@ -533,7 +534,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   for(idx = 0; idx < nfd; idx++) {
     handle = handles[idx];
     sock = fdarr[idx];
-    fds = HandleToLong(sock);
+    fds = curlx_sktosi(sock);
 
     /* check if the current internal handle was triggered */
     if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) >= idx &&

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -377,6 +377,28 @@ size_t curlx_sitouz(int sinum)
 #  pragma warning(pop)
 #endif
 }
+
+#ifdef USE_WINSOCK
+
+/*
+** curl_socket_t to signed int
+*/
+
+int curlx_sktosi(curl_socket_t s)
+{
+  return (int)((ssize_t) s);
+}
+
+/*
+** signed int to curl_socket_t
+*/
+
+curl_socket_t curlx_sitosk(int i)
+{
+  return (curl_socket_t)((ssize_t) i);
+}
+
+#endif /* USE_WINSOCK */
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
