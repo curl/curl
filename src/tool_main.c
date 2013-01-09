@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
 
   main_checkfds();
 
-#ifdef HAVE_SIGNAL
-  signal(SIGPIPE, SIG_IGN);
+#ifdef SIGPIPE
+  (void)signal(SIGPIPE, SIG_IGN);
 #endif
 
   res = operate(&config, argc, argv);
