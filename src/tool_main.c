@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
   main_checkfds();
 
-#ifdef SIGPIPE
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE)
   (void)signal(SIGPIPE, SIG_IGN);
 #endif
 
