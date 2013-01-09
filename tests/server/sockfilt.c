@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -109,6 +109,17 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
+#ifdef USE_WINSOCK
+#undef  EINTR
+#define EINTR    4 /* errno.h value */
+#undef  EAGAIN
+#define EAGAIN  11 /* errno.h value */
+#undef  ENOMEM
+#define ENOMEM  12 /* errno.h value */
+#undef  EINVAL
+#define EINVAL  22 /* errno.h value */
+#endif
+
 #define DEFAULT_PORT 8999
 
 #ifndef DEFAULT_LOGFILE
@@ -178,13 +189,13 @@ static volatile int exit_signal = 0;
 
 static RETSIGTYPE exit_signal_handler(int signum)
 {
-  int old_errno = ERRNO;
+  int old_errno = errno;
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
   }
   (void)signal(signum, exit_signal_handler);
-  SET_ERRNO(old_errno);
+  errno = old_errno;
 }
 
 static void install_signal_handlers(void)
@@ -192,29 +203,29 @@ static void install_signal_handlers(void)
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
   if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGHUP handler: %s", strerror(errno));
 #endif
 #ifdef SIGPIPE
   /* ignore SIGPIPE signal */
   if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGPIPE handler: %s", strerror(errno));
 #endif
 #ifdef SIGALRM
   /* ignore SIGALRM signal */
   if((old_sigalrm_handler = signal(SIGALRM, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGALRM handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGALRM handler: %s", strerror(errno));
 #endif
 #ifdef SIGINT
   /* handle SIGINT signal with our exit_signal_handler */
   if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGINT handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGINT handler: %s", strerror(errno));
   else
     siginterrupt(SIGINT, 1);
 #endif
 #ifdef SIGTERM
   /* handle SIGTERM signal with our exit_signal_handler */
   if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGTERM handler: %s", strerror(errno));
   else
     siginterrupt(SIGTERM, 1);
 #endif
@@ -266,7 +277,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
     }
 
     if(rc < 0) {
-      error = ERRNO;
+      error = errno;
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("unrecoverable read() failure: (%d) %s",
@@ -311,7 +322,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
     }
 
     if(wc < 0) {
-      error = ERRNO;
+      error = errno;
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("unrecoverable write() failure: (%d) %s",
@@ -435,7 +446,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* check if the input value is valid */
   if(nfds < 0) {
-    SET_SOCKERRNO(EINVAL);
+    errno = EINVAL;
     return -1;
   }
 
@@ -448,28 +459,28 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the original input handles */
   fdarr = malloc(nfds * sizeof(curl_socket_t));
   if(fdarr == NULL) {
-    SET_SOCKERRNO(ENOMEM);
+    errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal event handles */
   handles = malloc(nfds * sizeof(HANDLE));
   if(handles == NULL) {
-    SET_SOCKERRNO(ENOMEM);
+    errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal socket handles */
   wsasocks = malloc(nfds * sizeof(curl_socket_t));
   if(wsasocks == NULL) {
-    SET_SOCKERRNO(ENOMEM);
+    errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal WINSOCK2 events */
   wsaevents = malloc(nfds * sizeof(WSAEVENT));
   if(wsaevents == NULL) {
-    SET_SOCKERRNO(ENOMEM);
+    errno = ENOMEM;
     return -1;
   }
 
@@ -743,7 +754,7 @@ static bool juggle(curl_socket_t *sockfdp,
       return FALSE;
     }
 
-  } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
+  } while((rc == -1) && ((error = errno) == EINTR));
 
   if(rc < 0) {
     logmsg("select() failed with error: (%d) %s",
@@ -933,7 +944,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
-          error = SOCKERRNO;
+          error = errno;
           logmsg("wait_ms() failed with error: (%d) %s",
                  error, strerror(error));
           sclose(sock);

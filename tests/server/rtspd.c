@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,6 +53,13 @@
 
 /* include memdebug.h last */
 #include "memdebug.h"
+
+#ifdef USE_WINSOCK
+#undef  EINTR
+#define EINTR    4 /* errno.h value */
+#undef  ERANGE
+#define ERANGE  34 /* errno.h value */
+#endif
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
@@ -236,13 +243,13 @@ static volatile int exit_signal = 0;
 
 static RETSIGTYPE exit_signal_handler(int signum)
 {
-  int old_errno = ERRNO;
+  int old_errno = errno;
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
   }
   (void)signal(signum, exit_signal_handler);
-  SET_ERRNO(old_errno);
+  errno = old_errno;
 }
 
 static void install_signal_handlers(void)
@@ -250,29 +257,29 @@ static void install_signal_handlers(void)
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
   if((old_sighup_handler = signal(SIGHUP, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGHUP handler: %s", strerror(errno));
 #endif
 #ifdef SIGPIPE
   /* ignore SIGPIPE signal */
   if((old_sigpipe_handler = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGPIPE handler: %s", strerror(errno));
 #endif
 #ifdef SIGALRM
   /* ignore SIGALRM signal */
   if((old_sigalrm_handler = signal(SIGALRM, SIG_IGN)) == SIG_ERR)
-    logmsg("cannot install SIGALRM handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGALRM handler: %s", strerror(errno));
 #endif
 #ifdef SIGINT
   /* handle SIGINT signal with our exit_signal_handler */
   if((old_sigint_handler = signal(SIGINT, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGINT handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGINT handler: %s", strerror(errno));
   else
     siginterrupt(SIGINT, 1);
 #endif
 #ifdef SIGTERM
   /* handle SIGTERM signal with our exit_signal_handler */
   if((old_sigterm_handler = signal(SIGTERM, exit_signal_handler)) == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: %s", strerror(ERRNO));
+    logmsg("cannot install SIGTERM handler: %s", strerror(errno));
   else
     siginterrupt(SIGTERM, 1);
 #endif
@@ -395,7 +402,7 @@ static int ProcessRequest(struct httprequest *req)
 
       stream=fopen(filename, "rb");
       if(!stream) {
-        error = ERRNO;
+        error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", req->testno);
@@ -575,9 +582,9 @@ static int ProcessRequest(struct httprequest *req)
       while(*ptr && ISSPACE(*ptr))
         ptr++;
       endptr = ptr;
-      SET_ERRNO(0);
+      errno = 0;
       clen = strtoul(ptr, &endptr, 10);
-      if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == ERRNO)) {
+      if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == errno)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid Content-Length: (%s) in the request", ptr);
         req->open = FALSE; /* closes connection */
@@ -709,7 +716,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
-  } while ((dump == NULL) && ((error = ERRNO) == EINTR));
+  } while ((dump == NULL) && ((error = errno) == EINTR));
   if (dump == NULL) {
     logmsg("Error opening file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
@@ -725,7 +732,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
-  } while ((writeleft > 0) && ((error = ERRNO) == EINTR));
+  } while ((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to " REQUEST_DUMP, totalsize);
@@ -740,7 +747,7 @@ storerequest_cleanup:
 
   do {
     res = fclose(dump);
-  } while(res && ((error = ERRNO) == EINTR));
+  } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
@@ -954,7 +961,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     stream=fopen(filename, "rb");
     if(!stream) {
-      error = ERRNO;
+      error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
       logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
@@ -979,7 +986,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     /* re-open the same file again */
     stream=fopen(filename, "rb");
     if(!stream) {
-      error = ERRNO;
+      error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
       logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
@@ -1024,7 +1031,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   dump = fopen(RESPONSE_DUMP, "ab");
   if(!dump) {
-    error = ERRNO;
+    error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", RESPONSE_DUMP);
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
@@ -1082,7 +1089,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   do {
     res = fclose(dump);
-  } while(res && ((error = ERRNO) == EINTR));
+  } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
            RESPONSE_DUMP, error, strerror(error));
@@ -1128,7 +1135,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
               break;
             if(res) {
               /* should not happen */
-              error = SOCKERRNO;
+              error = errno;
               logmsg("wait_ms() failed with error: (%d) %s",
                      error, strerror(error));
               break;
