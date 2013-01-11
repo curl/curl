@@ -27,7 +27,7 @@ This release includes the following bugfixes:
  o HTTP: remove stray CRLF in chunk-encoded content-free request bodies
  o build: fix AIX compilation and usage of events/revents
  o VC Makefiles: add missing hostcheck
- o 
+ o nss: clear session cache if a client certificate from file is used
 
 This release includes the following known bugs:
 
