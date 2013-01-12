@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -207,12 +207,12 @@ static void destroy_async_data (struct Curl_async *async)
 }
 
 /*
- * Curl_resolver_fdset() is called when someone from the outside world (using
- * curl_multi_fdset()) wants to get our fd_set setup and we're talking with
- * ares. The caller must make sure that this function is only called when we
- * have a working ares channel.
+ * Curl_resolver_getsock() is called when someone from the outside world
+ * (using curl_multi_fdset()) wants to get our fd_set setup and we're talking
+ * with ares. The caller must make sure that this function is only called when
+ * we have a working ares channel.
  *
- * Returns: CURLE_OK always!
+ * Returns: sockets-in-use-bitmap
  */
 
 int Curl_resolver_getsock(struct connectdata *conn,
