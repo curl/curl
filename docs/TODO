@@ -69,55 +69,52 @@
  10. POP3
  10.1 auth= in URLs
  
- 11. IMAP
+ 11. LDAP
  11.1 SASL based authentication mechanisms
  
- 12. LDAP
- 12.1 SASL based authentication mechanisms
+ 12. Other protocols
+
+ 13. New protocols
+ 13.1 RSYNC
+
+ 14. SASL
+ 14.1 Other authentication mechanisms
  
- 13. Other protocols
+ 15. Client
+ 15.1 sync
+ 15.2 glob posts
+ 15.3 prevent file overwriting
+ 15.4 simultaneous parallel transfers
+ 15.5 provide formpost headers
+ 15.6 url-specific options
+ 15.7 warning when setting an option
+ 15.8 IPv6 addresses with globbing
 
- 14. New protocols
- 14.1 RSYNC
+ 16. Build
+ 16.1 roffit
 
- 15. SASL
- 15.1 Other authentication mechanisms
- 
- 16. Client
- 16.1 sync
- 16.2 glob posts
- 16.3 prevent file overwriting
- 16.4 simultaneous parallel transfers
- 16.5 provide formpost headers
- 16.6 url-specific options
- 16.7 warning when setting an option
- 16.8 IPv6 addresses with globbing
+ 17. Test suite
+ 17.1 SSL tunnel
+ 17.2 nicer lacking perl message
+ 17.3 more protocols supported
+ 17.4 more platforms supported
 
- 17. Build
- 17.1 roffit
+ 18. Next SONAME bump
+ 18.1 http-style HEAD output for ftp
+ 18.2 combine error codes
+ 18.3 extend CURLOPT_SOCKOPTFUNCTION prototype
 
- 18. Test suite
- 18.1 SSL tunnel
- 18.2 nicer lacking perl message
- 18.3 more protocols supported
- 18.4 more platforms supported
-
- 19. Next SONAME bump
- 19.1 http-style HEAD output for ftp
- 19.2 combine error codes
- 19.3 extend CURLOPT_SOCKOPTFUNCTION prototype
-
- 20. Next major release
- 20.1 cleanup return codes
- 20.2 remove obsolete defines
- 20.3 size_t
- 20.4 remove several functions
- 20.5 remove CURLOPT_FAILONERROR
- 20.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
- 20.7 remove progress meter from libcurl
- 20.8 remove 'curl_httppost' from public
- 20.9 have form functions use CURL handle argument
- 20.10 Add CURLOPT_MAIL_CLIENT option
+ 19. Next major release
+ 19.1 cleanup return codes
+ 19.2 remove obsolete defines
+ 19.3 size_t
+ 19.4 remove several functions
+ 19.5 remove CURLOPT_FAILONERROR
+ 19.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+ 19.7 remove progress meter from libcurl
+ 19.8 remove 'curl_httppost' from public
+ 19.9 have form functions use CURL handle argument
+ 19.10 Add CURLOPT_MAIL_CLIENT option
 
 ==============================================================================
 
@@ -402,17 +399,9 @@ to provide the data to send.
  Being able to specify the preferred authentication mechanism in the URL as
  per RFC2384.
 
-11. IMAP
+11. LDAP
 
 11.1 SASL based authentication mechanisms
-
- Curl currently sends usernames and passwords as clear text whilst SASL based
- authentication mechanisms can be more secure. As such, support should be
- added to support these authentication mechanisms.
-
-12. LDAP
-
-12.1 SASL based authentication mechansims
 
  Currently the LDAP module only supports ldap_simple_bind_s() in order to bind
  to an LDAP server. However, this function sends username and password details
@@ -420,24 +409,24 @@ to provide the data to send.
  be possible to use ldap_bind_s() instead specifing the security context
  information ourselves.
 
-13. Other protocols
+12. Other protocols
 
-14. New protocols
+13. New protocols
 
-14.1 RSYNC
+13.1 RSYNC
 
  There's no RFC for the protocol or an URI/URL format.  An implementation
  should most probably use an existing rsync library, such as librsync.
 
-15. SASL
+14. SASL
 
-15.1 Other authentication mechanisms
+14.1 Other authentication mechanisms
 
- Add support for gssapi to SMTP and POP3.
+ Add support for gssapi to SMTP, POP3 and IMAP.
 
-16. Client
+15. Client
 
-16.1 sync
+15.1 sync
 
  "curl --sync http://example.com/feed[1-100].rss" or
  "curl --sync http://example.net/{index,calendar,history}.html"
@@ -446,12 +435,12 @@ to provide the data to send.
  remote file is newer than the local file. A Last-Modified HTTP date header
  should also be used to set the mod date on the downloaded file.
 
-16.2 glob posts
+15.2 glob posts
 
  Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
  This is easily scripted though.
 
-16.3 prevent file overwriting
+15.3 prevent file overwriting
 
  Add an option that prevents cURL from overwriting existing local files. When
  used, and there already is an existing file with the target file name
@@ -459,14 +448,14 @@ to provide the data to send.
  existing). So that index.html becomes first index.html.1 and then
  index.html.2 etc.
 
-16.4 simultaneous parallel transfers
+15.4 simultaneous parallel transfers
 
  The client could be told to use maximum N simultaneous parallel transfers and
  then just make sure that happens. It should of course not make more than one
  connection to the same remote host. This would require the client to use the
  multi interface. http://curl.haxx.se/bug/feature.cgi?id=1558595
 
-16.5 provide formpost headers
+15.5 provide formpost headers
 
  Extending the capabilities of the multipart formposting. How about leaving
  the ';type=foo' syntax as it is and adding an extra tag (headers) which
@@ -480,7 +469,7 @@ to provide the data to send.
  which should overwrite the program reasonable defaults (plain/text,
  8bit...)
 
-16.6 url-specific options
+15.6 url-specific options
 
  Provide a way to make options bound to a specific URL among several on the
  command line. Possibly by letting ':' separate options between URLs,
@@ -494,57 +483,57 @@ to provide the data to send.
 
  The example would do a POST-GET-POST combination on a single command line.
 
-16.7 warning when setting an option
+15.7 warning when setting an option
 
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
   compiled into the library.
 
-16.8 IPv6 addresses with globbing
+15.8 IPv6 addresses with globbing
 
   Currently the command line client needs to get url globbing disabled (with
   -g) for it to support IPv6 numerical addresses. This is a rather silly flaw
   that should be corrected. It probably involves a smarter detection of the
   '[' and ']' letters.
 
-17. Build
+16. Build
 
-17.1 roffit
+16.1 roffit
 
  Consider extending 'roffit' to produce decent ASCII output, and use that
  instead of (g)nroff when building src/tool_hugehelp.c
 
-18. Test suite
+17. Test suite
 
-18.1 SSL tunnel
+17.1 SSL tunnel
 
  Make our own version of stunnel for simple port forwarding to enable HTTPS
  and FTP-SSL tests without the stunnel dependency, and it could allow us to
  provide test tools built with either OpenSSL or GnuTLS
 
-18.2 nicer lacking perl message
+17.2 nicer lacking perl message
 
  If perl wasn't found by the configure script, don't attempt to run the tests
  but explain something nice why it doesn't.
 
-18.3 more protocols supported
+17.3 more protocols supported
 
  Extend the test suite to include more protocols. The telnet could just do ftp
  or http operations (for which we have test servers).
 
-18.4 more platforms supported
+17.4 more platforms supported
 
  Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
  fork()s and it should become even more portable.
 
-19. Next SONAME bump
+18. Next SONAME bump
 
-19.1 http-style HEAD output for ftp
+18.1 http-style HEAD output for ftp
 
  #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
  from being output in NOBODY requests over ftp
 
-19.2 combine error codes
+18.2 combine error codes
 
  Combine some of the error codes to remove duplicates.  The original
  numbering should not be changed, and the old identifiers would be
@@ -569,29 +558,29 @@ to provide the data to send.
 
     CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
 
-19.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+18.3 extend CURLOPT_SOCKOPTFUNCTION prototype
 
  The current prototype only provides 'purpose' that tells what the
  connection/socket is for, but not any protocol or similar. It makes it hard
  for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
  similar.
 
-20. Next major release
+10. Next major release
 
-20.1 cleanup return codes
+19.1 cleanup return codes
 
  curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
  CURLMcode. These should be changed to be the same.
 
-20.2 remove obsolete defines
+19.2 remove obsolete defines
 
  remove obsolete defines from curl/curl.h
 
-20.3 size_t
+19.3 size_t
 
  make several functions use size_t instead of int in their APIs
 
-20.4 remove several functions
+19.4 remove several functions
 
  remove the following functions from the public API:
 
@@ -612,18 +601,18 @@ to provide the data to send.
 
  curl_multi_socket_all
 
-20.5 remove CURLOPT_FAILONERROR
+19.5 remove CURLOPT_FAILONERROR
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
 
-20.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+19.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
 
  Remove support for a global DNS cache. Anything global is silly, and we
  already offer the share interface for the same functionality but done
  "right".
 
-20.7 remove progress meter from libcurl
+19.7 remove progress meter from libcurl
 
  The internally provided progress meter output doesn't belong in the library.
  Basically no application wants it (apart from curl) but instead applications
@@ -633,7 +622,7 @@ to provide the data to send.
  variable types passed to it instead of doubles so that big files work
  correctly.
 
-20.8 remove 'curl_httppost' from public
+19.8 remove 'curl_httppost' from public
 
  curl_formadd() was made to fill in a public struct, but the fact that the
  struct is public is never really used by application for their own advantage
@@ -642,7 +631,7 @@ to provide the data to send.
  Changing them to return a private handle will benefit the implementation and
  allow us much greater freedoms while still maintining a solid API and ABI.
 
-20.9 have form functions use CURL handle argument
+19.9 have form functions use CURL handle argument
 
  curl_formadd() and curl_formget() both currently have no CURL handle
  argument, but both can use a callback that is set in the easy handle, and
@@ -650,7 +639,7 @@ to provide the data to send.
  curl_easy_perform() (or similar) called - which is hard to grasp and a design
  mistake.
 
-20.10 Add CURLOPT_MAIL_CLIENT option
+19.10 Add CURLOPT_MAIL_CLIENT option
 
  Rather than use the URL to specify the mail client string to present in the
  HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
