@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o build: fix AIX compilation and usage of events/revents
  o VC Makefiles: add missing hostcheck
  o nss: clear session cache if a client certificate from file is used
+ o nss: fix error messages for CURLE_SSL_{CACERT,CRL}_BADFILE
 
 This release includes the following known bugs:
 
