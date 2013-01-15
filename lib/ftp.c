@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1853,6 +1853,10 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
             ptr=NULL; /* set to NULL to signal error */
             break;
           }
+        }
+        if(num > 0xffff) {
+          failf(data, "Illegal port number in EPSV reply");
+          return CURLE_FTP_WEIRD_PASV_REPLY;
         }
         if(ptr) {
           newport = (unsigned short)(num & 0xffff);
