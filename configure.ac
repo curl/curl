@@ -3725,6 +3725,8 @@ AC_CONFIG_FILES([Makefile \
            lib/Makefile \
            lib/libcurl.vers \
            tests/Makefile \
+           tests/certs/Makefile \
+           tests/certs/scripts/Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \

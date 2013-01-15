@@ -19,6 +19,7 @@
 # KIND, either express or implied.
 #
 ###########################################################################
+AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = scripts
 
