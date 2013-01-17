@@ -40,7 +40,8 @@
  *
  * Reads a 'name=value' parameter and builds the appropriate linked list.
  *
- * Specify files to upload with 'name=@filename'. Supports specified
+ * Specify files to upload with 'name=@filename', or 'name=@"filename"'
+ * in case the filename contain ',' or ';'. Supports specified
  * given Content-Type of the files. Such as ';type=<content-type>'.
  *
  * If literal_value is set, any initial '@' or '<' in the value string
@@ -50,6 +51,10 @@
  * multiple files by writing it like:
  *
  * 'name=@filename,filename2,filename3'
+ * 
+ * or use double-quotes quote the filename:
+ *
+ * 'name=@"filename","filename2","filename3"'
  *
  * If you want content-types specified for each too, write them like:
  *
@@ -64,7 +69,11 @@
  * To upload a file, but to fake the file name that will be included in the
  * formpost, do like this:
  *
- * 'name=@filename;filename=/dev/null'
+ * 'name=@filename;filename=/dev/null' or quote the faked filename like:
+ * 'name=@filename;filename="play, play, and play.txt"'
+ *
+ * If filename/path contains ',' or ';', it must be quoted by double-quotes, 
+ * else curl will fail to figure out the correct filename.
  *
  * This function uses curl_formadd to fulfill it's job. Is heavily based on
  * the old curl_formparse code.
@@ -115,6 +124,27 @@ int formparse(struct Configurable *config,
         char *ptr;
         char *filename = NULL;
 
+        /* check whether the file part is quoted */
+        sep = NULL;
+        if ('"' == contp[0]) {
+          sep = strchr(contp+1, '"');
+        }
+        if (sep) {
+          contp += 1;
+          *sep = '\0'; /* terminate file name at the end quot */
+          ptr = sep+1; /* point to the text following the quot */
+
+          sep = strchr(ptr, ';');
+          sep2 = strchr(ptr, ',');
+
+          /* pick the closest */
+          if(sep2 && (sep2 < sep)) {
+            sep = sep2;
+
+            /* no type was specified! */
+          }
+        }
+        else {
         sep = strchr(contp, ';');
         sep2 = strchr(contp, ',');
 
@@ -123,6 +153,7 @@ int formparse(struct Configurable *config,
           sep = sep2;
 
           /* no type was specified! */
+        }
         }
 
         type = NULL;
@@ -182,6 +213,21 @@ int formparse(struct Configurable *config,
             }
             else if(checkprefix("filename=", ptr)) {
               filename = &ptr[9];
+              ptr = NULL;
+              if ('"' == filename[0]) {
+                ptr = strchr(filename+1, '"');
+              }
+              if (ptr) {
+                filename += 1;
+                *ptr = '\0'; /* zero terminate */
+                ptr++;
+                sep = strchr(ptr, ';');
+                if(!sep) {
+                  sep = strchr(ptr, ',');
+                }
+                ptr = sep ? (sep + 1) : NULL;
+              }
+              else {
               ptr = strchr(filename, ';');
               if(!ptr) {
                 ptr = strchr(filename, ',');
@@ -189,6 +235,7 @@ int formparse(struct Configurable *config,
               if(ptr) {
                 *ptr = '\0'; /* zero terminate */
                 ptr++;
+              }
               }
             }
             else
