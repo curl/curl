@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1147,14 +1147,14 @@ struct auth {
 };
 
 struct UrlState {
-  enum {
-    Curl_if_none,
-    Curl_if_easy,
-    Curl_if_multi
-  } used_interface;
 
   /* Points to the connection cache */
   struct conncache *conn_cache;
+
+  /* when curl_easy_perform() is called, the multi handle is "owned" by
+     the easy handle so curl_easy_cleanup() on such an easy handle will
+     also close the multi handle! */
+  bool multi_owned_by_easy;
 
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
@@ -1588,7 +1588,6 @@ struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_PRIVATE, /* points to our own */
     HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
@@ -1608,7 +1607,11 @@ struct Names {
 struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
-                                  struct to which this "belongs" */
+                                  struct to which this "belongs" when used by
+                                  the multi interface */
+  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
+                                    struct to which this "belongs" when used
+                                    by the easy interface */
   struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
                                       in multi controlling structure to assist
                                       in removal. */

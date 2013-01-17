@@ -43,4 +43,4 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h	\
   curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h	\
   curl_sasl.h curl_schannel.h curl_multibyte.h curl_darwinssl.h	\
-  hostcheck.h bundles.h conncache.h curl_setup_once.h
+  hostcheck.h bundles.h conncache.h curl_setup_once.h multihandle.h

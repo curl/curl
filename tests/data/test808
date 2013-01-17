@@ -10,7 +10,8 @@ LIST
 # Server-side
 <reply>
 <servercmd>
-REPLY LIST +OK 808 100
+# include the '.\r\n' 3-byte trailer to end the transfer poperly!
+REPLY LIST +OK 808 100\r\n.
 </servercmd>
 </reply>
 

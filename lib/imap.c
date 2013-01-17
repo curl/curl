@@ -633,19 +633,9 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       result = imap_state_capability(conn);
   }
   else {
-    if(data->state.used_interface == Curl_if_multi) {
-      state(conn, IMAP_UPGRADETLS);
-      result = imap_state_upgrade_tls(conn);
-    }
-    else {
-      result = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if(CURLE_OK == result) {
-        imap_to_imaps(conn);
-        result = imap_state_capability(conn);
-      }
-    }
+    state(conn, IMAP_UPGRADETLS);
+    return imap_state_upgrade_tls(conn);
   }
-
   return result;
 }
 
@@ -1358,7 +1348,6 @@ static CURLcode imap_connect(struct connectdata *conn,
 {
   CURLcode result;
   struct imap_conn *imapc = &conn->proto.imapc;
-  struct SessionHandle *data=conn->data;
   struct pingpong *pp = &imapc->pp;
 
   *done = FALSE; /* default to not done yet */
@@ -1379,17 +1368,7 @@ static CURLcode imap_connect(struct connectdata *conn,
   pp->endofresp = imap_endofresp;
   pp->conn = conn;
 
-  if((conn->handler->flags & PROTOPT_SSL) &&
-     data->state.used_interface != Curl_if_multi) {
-    /* IMAPS is simply imap with SSL for the control channel */
-    /* so perform the SSL initialization for this socket */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(result)
-      return result;
-  }
-
-  /* Initialise the response reader stuff */
-  Curl_pp_init(pp);
+  Curl_pp_init(pp); /* init generic pingpong data */
 
   /* Start off waiting for the server greeting response */
   state(conn, IMAP_SERVERGREET);
@@ -1397,13 +1376,7 @@ static CURLcode imap_connect(struct connectdata *conn,
   /* Start off with an id of '*' */
   imapc->idstr = "*";
 
-  if(data->state.used_interface == Curl_if_multi)
-    result = imap_multi_statemach(conn, done);
-  else {
-    result = imap_easy_statemach(conn);
-    if(!result)
-      *done = TRUE;
-  }
+  result = imap_multi_statemach(conn, done);
 
   return result;
 }
@@ -1473,13 +1446,9 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   if(result)
     return result;
 
-  /* Run the state-machine */
-  if(conn->data->state.used_interface == Curl_if_multi)
-    result = imap_multi_statemach(conn, dophase_done);
-  else {
-    result = imap_easy_statemach(conn);
-    *dophase_done = TRUE; /* with the easy interface we are done here */
-  }
+  /* run the state-machine */
+  result = imap_multi_statemach(conn, dophase_done);
+
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)

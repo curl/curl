@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,6 +74,8 @@
 #include "sslgen.h" /* for Curl_ssl_check_cxn() */
 #include "progress.h"
 #include "warnless.h"
+#include "conncache.h"
+#include "multihandle.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -980,8 +982,7 @@ singleipconnect(struct connectdata *conn,
 
   /* The 'WAITCONN_TIMEOUT == rc' comes from the waitconnect(), and not from
      connect(). We can be sure of this since connect() cannot return 1. */
-  if((WAITCONN_TIMEOUT == rc) &&
-     (data->state.used_interface == Curl_if_multi)) {
+  if(WAITCONN_TIMEOUT == rc) {
     /* Timeout when running the multi interface */
     *sockp = sockfd;
     return CURLE_OK;
@@ -1072,9 +1073,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
     /* start connecting to the IP curr_addr points to */
     res = singleipconnect(conn, curr_addr,
-                          /* don't hang when doing multi */
-                          (data->state.used_interface == Curl_if_multi)?0:
-                          conn->timeoutms_per_addr, &sockfd, connected);
+                          0, /* don't hang when doing multi */
+                          &sockfd, connected);
     if(res)
       return res;
 
@@ -1112,6 +1112,21 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   return CURLE_OK;
 }
 
+struct connfind {
+  struct connectdata *tofind;
+  bool found;
+};
+
+static int conn_is_conn(struct connectdata *conn, void *param)
+{
+  struct connfind *f = (struct connfind *)param;
+  if(conn == f->tofind) {
+    f->found = TRUE;
+    return 1;
+  }
+  return 0;
+}
+
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given SessionHandle.
@@ -1125,8 +1140,21 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  if(data->state.lastconnect) {
+  /* this only works for an easy handle that has been used for
+     curl_easy_perform()! */
+  if(data->state.lastconnect && data->multi_easy) {
     struct connectdata *c = data->state.lastconnect;
+    struct connfind find;
+    find.tofind = data->state.lastconnect;
+    find.found = FALSE;
+
+    Curl_conncache_foreach(data->multi_easy->conn_cache, &find, conn_is_conn);
+
+    if(!find.found) {
+      data->state.lastconnect = NULL;
+      return CURL_SOCKET_BAD;
+    }
+
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;

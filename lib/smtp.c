@@ -493,17 +493,8 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
       result = smtp_authenticate(conn);
   }
   else {
-    if(data->state.used_interface == Curl_if_multi) {
-      state(conn, SMTP_UPGRADETLS);
-      result = smtp_state_upgrade_tls(conn);
-    }
-    else {
-      result = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if(CURLE_OK == result) {
-        smtp_to_smtps(conn);
-        result = smtp_state_ehlo(conn);
-      }
-    }
+    state(conn, SMTP_UPGRADETLS);
+    return smtp_state_upgrade_tls(conn);
   }
 
   return result;
@@ -1300,7 +1291,6 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  struct SessionHandle *data = conn->data;
   struct pingpong *pp = &smtpc->pp;
   const char *path = conn->data->state.path;
   char localhost[HOSTNAME_MAX + 1];
@@ -1322,15 +1312,6 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   pp->statemach_act = smtp_statemach_act;
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
-
-  if((conn->handler->protocol & CURLPROTO_SMTPS) &&
-      data->state.used_interface != Curl_if_multi) {
-    /* SMTPS is simply smtp with SSL for the control channel */
-    /* so perform the SSL initialization for this socket */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(result)
-      return result;
-  }
 
   /* Initialise the response reader stuff */
   Curl_pp_init(pp);
@@ -1357,13 +1338,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   /* Start off waiting for the server greeting response */
   state(conn, SMTP_SERVERGREET);
 
-  if(data->state.used_interface == Curl_if_multi)
-    result = smtp_multi_statemach(conn, done);
-  else {
-    result = smtp_easy_statemach(conn);
-    if(!result)
-      *done = TRUE;
-  }
+  result = smtp_multi_statemach(conn, done);
 
   return result;
 }
@@ -1470,13 +1445,9 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   if(result)
     return result;
 
-  /* Run the state-machine */
-  if(conn->data->state.used_interface == Curl_if_multi)
-    result = smtp_multi_statemach(conn, dophase_done);
-  else {
-    result = smtp_easy_statemach(conn);
-    *dophase_done = TRUE; /* with the easy interface we are done here */
-  }
+  /* run the state-machine */
+  result = smtp_multi_statemach(conn, dophase_done);
+
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)

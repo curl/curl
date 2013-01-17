@@ -34,11 +34,13 @@ pop3://%HOSTIP:%POP3PORT/813 -u user:wrong
 <errorcode>
 67
 </errorcode>
+#
+# The multi interface considers a broken "DO" request as a prematurely broken
+# transfer and such a connection will not get a "QUIT"
 <protocol>
 CAPA
 USER user
 PASS wrong
-QUIT
 </protocol>
 </verify>
 </testcase>

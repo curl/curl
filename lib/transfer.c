@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2067,8 +2067,6 @@ static CURLcode Curl_do_perform(struct SessionHandle *data)
   struct connectdata *conn=NULL;
   char *newurl = NULL; /* possibly a new URL to follow to! */
   followtype follow = FOLLOW_NONE;
-
-  data->state.used_interface = Curl_if_easy;
 
   res = Curl_pretransfer(data);
   if(res)

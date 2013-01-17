@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2793,13 +2793,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 
   state(conn, SSH_INIT);
 
-  if(data->state.used_interface == Curl_if_multi)
-    result = ssh_multi_statemach(conn, done);
-  else {
-    result = ssh_easy_statemach(conn, TRUE);
-    if(!result)
-      *done = TRUE;
-  }
+  result = ssh_multi_statemach(conn, done);
 
   return result;
 }
@@ -2828,13 +2822,8 @@ CURLcode scp_perform(struct connectdata *conn,
   state(conn, SSH_SCP_TRANS_INIT);
 
   /* run the state-machine */
-  if(conn->data->state.used_interface == Curl_if_multi) {
-    result = ssh_multi_statemach(conn, dophase_done);
-  }
-  else {
-    result = ssh_easy_statemach(conn, FALSE);
-    *dophase_done = TRUE; /* with the easy interface we are done here */
-  }
+  result = ssh_multi_statemach(conn, dophase_done);
+
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {
@@ -3037,13 +3026,8 @@ CURLcode sftp_perform(struct connectdata *conn,
   state(conn, SSH_SFTP_QUOTE_INIT);
 
   /* run the state-machine */
-  if(conn->data->state.used_interface == Curl_if_multi) {
-    result = ssh_multi_statemach(conn, dophase_done);
-  }
-  else {
-    result = ssh_easy_statemach(conn, FALSE);
-    *dophase_done = TRUE; /* with the easy interface we are done here */
-  }
+  result = ssh_multi_statemach(conn, dophase_done);
+
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done) {

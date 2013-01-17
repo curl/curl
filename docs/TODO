@@ -21,8 +21,7 @@
 
  2. libcurl - multi interface
  2.1 More non-blocking
- 2.2 Remove easy interface internally
- 2.4 Fix HTTP Pipelining for PUT
+ 2.2 Fix HTTP Pipelining for PUT
 
  3. Documentation
  3.1  More and better
@@ -191,16 +190,7 @@
  - The "DONE" operation (post transfer protocol-specific actions) for the
    protocols SFTP, SMTP, FTP. Fixing Curl_done() for this is a worthy task.
 
-2.2 Remove easy interface internally
-
- Make curl_easy_perform() a wrapper-function that simply creates a multi
- handle, adds the easy handle to it, runs curl_multi_perform() until the
- transfer is done, then detach the easy handle, destroy the multi handle and
- return the easy handle's return code. This will thus make everything
- internally use and assume the multi interface. The select()-loop should use
- curl_multi_socket().
-
-2.4 Fix HTTP Pipelining for PUT
+2.2 Fix HTTP Pipelining for PUT
 
  HTTP Pipelining can be a way to greatly enhance performance for multiple
  serial requests and currently libcurl only supports that for HEAD and GET

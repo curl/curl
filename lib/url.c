@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,7 +131,6 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 /* Local static prototypes */
-static bool ConnectionKillOne(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
@@ -255,15 +254,6 @@ static const struct Curl_handler Curl_handler_dummy = {
   PROTOPT_NONE                          /* flags */
 };
 
-static void close_connections(struct SessionHandle *data)
-{
-  /* Loop through all open connections and kill them one by one */
-  bool killed;
-  do {
-    killed = ConnectionKillOne(data);
-  } while(killed);
-}
-
 void Curl_freeset(struct SessionHandle * data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
@@ -386,6 +376,11 @@ CURLcode Curl_close(struct SessionHandle *data)
        and detach this handle from there. */
     curl_multi_remove_handle(data->multi, data);
 
+  if(data->multi_easy)
+    /* when curl_easy_perform() is used, it creates its own multi handle to
+       use and this is the one */
+    curl_multi_cleanup(data->multi_easy);
+
   /* Destroy the timeout list that is held in the easy handle. It is
      /normally/ done by curl_multi_remove_handle() but this is "just in
      case" */
@@ -397,19 +392,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
                       field! */
-
-  if(data->state.conn_cache) {
-    if(data->state.conn_cache->type == CONNCACHE_PRIVATE) {
-      /* close all connections still alive that are in the private connection
-         cache, as we no longer have the pointer left to the shared one. */
-      close_connections(data);
-      Curl_conncache_destroy(data->state.conn_cache);
-      data->state.conn_cache = NULL;
-    }
-  }
-
-  if(data->dns.hostcachetype == HCACHE_PRIVATE)
-    Curl_hostcache_destroy(data);
 
   if(data->state.rangestringalloc)
     free(data->state.range);
@@ -2000,10 +1982,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->share->dirty++;
 
       if(data->share->hostcache) {
-        /* use shared host cache, first free the private one if any */
-        if(data->dns.hostcachetype == HCACHE_PRIVATE)
-          Curl_hostcache_destroy(data);
-
+        /* use shared host cache */
         data->dns.hostcache = data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
       }
@@ -2980,69 +2959,6 @@ ConnectionExists(struct SessionHandle *data,
   }
 
   return FALSE; /* no matching connecting exists */
-}
-
-/*
- * This function kills and removes an existing connection in the connection
- * cache. The connection that has been unused for the longest time.
- *
- * Returns FALSE if it can't find any unused connection to kill.
- */
-static bool
-ConnectionKillOne(struct SessionHandle *data)
-{
-  struct conncache *bc = data->state.conn_cache;
-  struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
-  struct curl_hash_element *he;
-  long highscore=-1;
-  long score;
-  struct timeval now;
-  struct connectdata *conn_candidate = NULL;
-  struct connectbundle *bundle;
-
-  now = Curl_tvnow();
-
-  Curl_hash_start_iterate(bc->hash, &iter);
-
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    struct connectdata *conn;
-
-    bundle = he->ptr;
-
-    curr = bundle->conn_list->head;
-    while(curr) {
-      conn = curr->ptr;
-
-      if(!conn->inuse) {
-        /* Set higher score for the age passed since the connection was used */
-        score = Curl_tvdiff(now, conn->now);
-
-        if(score > highscore) {
-          highscore = score;
-          conn_candidate = conn;
-        }
-      }
-      curr = curr->next;
-    }
-
-    he = Curl_hash_next_element(&iter);
-  }
-
-  if(conn_candidate) {
-    /* Set the connection's owner correctly */
-    conn_candidate->data = data;
-
-    bundle = conn_candidate->bundle;
-
-    /* the winner gets the honour of being disconnected */
-    (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
-
-    return TRUE;
-  }
-
-  return FALSE;
 }
 
 /* this connection can now be marked 'idle' */

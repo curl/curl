@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3084,6 +3084,7 @@ sub singletest {
             my $valgrindcmd = "$valgrind ";
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
             $valgrindcmd .= "--leak-check=yes ";
+            $valgrindcmd .= "--suppressions=valgrind.supp ";
             $valgrindcmd .= "--num-callers=16 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";

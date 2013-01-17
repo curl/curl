@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1519,16 +1519,6 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_SSLv2;
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
-
-#if 0
-  /*
-   * Not sure it's needed to tell SSL_connect() that socket is
-   * non-blocking. It doesn't seem to care, but just return with
-   * SSL_ERROR_WANT_x.
-   */
-  if(data->state.used_interface == Curl_if_multi)
-    SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
-#endif
 
   if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
     if(!cert_stuff(conn,

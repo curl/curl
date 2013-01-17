@@ -570,17 +570,8 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = pop3_state_capa(conn);
   }
   else {
-    if(data->state.used_interface == Curl_if_multi) {
-      state(conn, POP3_UPGRADETLS);
-      result = pop3_state_upgrade_tls(conn);
-    }
-    else {
-      result = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if(CURLE_OK == result) {
-        pop3_to_pop3s(conn);
-        result = pop3_state_capa(conn);
-      }
-    }
+    state(conn, POP3_UPGRADETLS);
+    result = pop3_state_upgrade_tls(conn);
   }
 
   return result;
@@ -1301,7 +1292,6 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  struct SessionHandle *data = conn->data;
   struct pingpong *pp = &pop3c->pp;
 
   *done = FALSE; /* default to not done yet */
@@ -1336,13 +1326,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   /* Start off waiting for the server greeting response */
   state(conn, POP3_SERVERGREET);
 
-  if(data->state.used_interface == Curl_if_multi)
-    result = pop3_multi_statemach(conn, done);
-  else {
-    result = pop3_easy_statemach(conn);
-    if(!result)
-      *done = TRUE;
-  }
+  result = pop3_multi_statemach(conn, done);
 
   return result;
 }
@@ -1418,12 +1402,8 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
     return result;
 
   /* Run the state-machine */
-  if(conn->data->state.used_interface == Curl_if_multi)
-    result = pop3_multi_statemach(conn, dophase_done);
-  else {
-    result = pop3_easy_statemach(conn);
-    *dophase_done = TRUE; /* with the easy interface we are done here */
-  }
+  result = pop3_multi_statemach(conn, dophase_done);
+
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)

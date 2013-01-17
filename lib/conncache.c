@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,7 @@ static void free_bundle_hash_entry(void *freethis)
   Curl_bundle_destroy(b);
 }
 
-struct conncache *Curl_conncache_init(conncachetype type)
+struct conncache *Curl_conncache_init(void)
 {
   struct conncache *connc;
 
@@ -62,9 +62,6 @@ struct conncache *Curl_conncache_init(conncachetype type)
     free(connc);
     return NULL;
   }
-
-  connc->type = type;
-  connc->num_connections = 0;
 
   return connc;
 }
