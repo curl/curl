@@ -10,7 +10,14 @@ Curl and libcurl 7.29.0
 This release includes the following changes:
 
  o test: offer "automake" output and check for perl better
- o 
+ o always-multi: always use non-blocking internals
+ o imap: Added support for sasl digest-md5 authentication
+ o imap: Added support for sasl cram-md5 authentication
+ o imap: Added support for sasl ntlm authentication
+ o imap: Added support for sasl login authentication
+ o imap: Added support for sasl plain text authentication
+ o mk-ca-bundle: add -f, support passing to stdout and more
+ o writeout: -w now supports remote_ip/port and local_ip/port
 
 This release includes the following bugfixes:
 
@@ -29,6 +36,14 @@ This release includes the following bugfixes:
  o VC Makefiles: add missing hostcheck
  o nss: clear session cache if a client certificate from file is used
  o nss: fix error messages for CURLE_SSL_{CACERT,CRL}_BADFILE
+ o fix HTTP CONNECT tunnel establishment upon delayed response
+ o --libcurl: fix for non-zero default options
+ o FTP: reject illegal port numbers in EPSV 229 responses
+ o build: use per-target '_CPPFLAGS' for those currently using default
+ o configure: fix automake 1.13 compatibility
+ o curl: ignore SIGPIPE
+ o pop3: Added support for non-blocking SSL upgrade
+ o pop3: Fixed default authentication detection
 
 This release includes the following known bugs:
 
@@ -39,7 +54,8 @@ advice from friends like these:
 
  Nick Zitzmann, Colin Watson, Fabian Keil, Kamil Dudka, Lijo Antony,
  Linus Nielsen Feltzing, Marc Hoersken, Nick Zitzmann, Stanislav Ivochkin,
- Steve Holme, Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea
+ Steve Holme, Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea,
+ Gisle Vanem, Yves Arrouye, Kai Engert, Lluís Batlle i Rossell
 
         Thanks! (and sorry if I forgot to mention someone)
 
