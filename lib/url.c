@@ -3237,7 +3237,6 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
                                bool *protocol_done)
 {
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data = conn->data;
 
   *protocol_done = FALSE;
 
@@ -3254,18 +3253,17 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
-  Curl_verboseconnect(conn);
-
   if(!conn->bits.protoconnstart) {
-
-    /* Set start time here for timeout purposes in the connect procedure, it
-       is later set again for the progress meter purpose */
-    conn->now = Curl_tvnow();
 
     result = Curl_proxy_connect(conn);
     if(result)
       return result;
+
+    if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
+       (conn->tunnel_state[FIRSTSOCKET] != TUNNEL_COMPLETE))
+      /* when using an HTTP tunnel proxy, await complete tunnel establishment
+         before proceeding further. Return CURLE_OK so we'll be called again */
+      return CURLE_OK;
 
     if(conn->handler->connect_it) {
       /* is there a protocol-specific connect() procedure? */
@@ -5072,6 +5070,10 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
 #ifdef CURL_DO_LINEEND_CONV
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
 #endif /* CURL_DO_LINEEND_CONV */
+
+  /* set start time here for timeout purposes in the connect procedure, it
+     is later set again for the progress meter purpose */
+  conn->now = Curl_tvnow();
 
   for(;;) {
     /* loop for CURL_SERVER_CLOSED_CONNECTION */
