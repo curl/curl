@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o curl: ignore SIGPIPE
  o pop3: Added support for non-blocking SSL upgrade
  o pop3: Fixed default authentication detection
+ o imap: Fixed usernames and passwords that contain escape characters
 
 This release includes the following known bugs:
 
