@@ -10,13 +10,13 @@ Curl and libcurl 7.29.0
 This release includes the following changes:
 
  o test: offer "automake" output and check for perl better
- o always-multi: always use non-blocking internals
+ o always-multi: always use non-blocking internals [1]
  o imap: Added support for sasl digest-md5 authentication
  o imap: Added support for sasl cram-md5 authentication
  o imap: Added support for sasl ntlm authentication
  o imap: Added support for sasl login authentication
  o imap: Added support for sasl plain text authentication
- o mk-ca-bundle: add -f, support passing to stdout and more
+ o mk-ca-bundle: add -f, support passing to stdout and more [5]
  o writeout: -w now supports remote_ip/port and local_ip/port
 
 This release includes the following bugfixes:
@@ -25,7 +25,7 @@ This release includes the following bugfixes:
  o darwinssl: Fixed inability to disable peer verification on Snow Leopard
    and Lion
  o curl_multi_remove_handle: fix memory leak triggered with CURLOPT_RESOLVE
- o SCP: relative path didn't work as documented
+ o SCP: relative path didn't work as documented [7]
  o setup_once.h: HP-UX <sys/socket.h> issue workaround
  o configure: fix cross pkg-config detection
  o runtests: Do not add undefined values to @INC
@@ -36,15 +36,16 @@ This release includes the following bugfixes:
  o VC Makefiles: add missing hostcheck
  o nss: clear session cache if a client certificate from file is used
  o nss: fix error messages for CURLE_SSL_{CACERT,CRL}_BADFILE
- o fix HTTP CONNECT tunnel establishment upon delayed response
+ o fix HTTP CONNECT tunnel establishment upon delayed response [2]
  o --libcurl: fix for non-zero default options
  o FTP: reject illegal port numbers in EPSV 229 responses
  o build: use per-target '_CPPFLAGS' for those currently using default
- o configure: fix automake 1.13 compatibility
- o curl: ignore SIGPIPE
+ o configure: fix automake 1.13 compatibility [6]
+ o curl: ignore SIGPIPE [4]
  o pop3: Added support for non-blocking SSL upgrade
  o pop3: Fixed default authentication detection
  o imap: Fixed usernames and passwords that contain escape characters
+ o packages/DOS/common.dj: remove COFF debug info generation [3]
 
 This release includes the following known bugs:
 
@@ -62,4 +63,10 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- 
+ [1] = http://daniel.haxx.se/blog/2013/01/17/internally-were-all-multi-now/
+ [2] = http://curl.haxx.se/mail/lib-2013-01/0191.html
+ [3] = http://curl.haxx.se/mail/lib-2013-01/0130.html
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1180
+ [5] = http://curl.haxx.se/mail/lib-2013-01/0045.html
+ [6] = http://curl.haxx.se/mail/lib-2012-12/0246.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1173
