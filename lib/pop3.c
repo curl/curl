@@ -1229,7 +1229,12 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result = Curl_pp_multi_statemach(&pop3c->pp);
+  CURLcode result;
+
+  if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone)
+    result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+  else
+    result = Curl_pp_multi_statemach(&pop3c->pp);
 
   *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
