@@ -3084,7 +3084,7 @@ sub singletest {
             my $valgrindcmd = "$valgrind ";
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
             $valgrindcmd .= "--leak-check=yes ";
-            $valgrindcmd .= "--suppressions=valgrind.supp ";
+            $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
             $valgrindcmd .= "--num-callers=16 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";
