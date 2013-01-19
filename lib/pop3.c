@@ -98,8 +98,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 static CURLcode pop3_connect(struct connectdata *conn, bool *done);
 static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
-static int pop3_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
@@ -593,8 +592,7 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 }
 
 /* For CAPA responses */
-static CURLcode pop3_state_capa_resp(struct connectdata *conn,
-                                     int pop3code,
+static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
@@ -956,8 +954,7 @@ static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
   return result;
 }
 
-static CURLcode pop3_state_apop_resp(struct connectdata *conn,
-                                     int pop3code,
+static CURLcode pop3_state_apop_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
@@ -977,8 +974,7 @@ static CURLcode pop3_state_apop_resp(struct connectdata *conn,
 }
 
 /* For USER responses */
-static CURLcode pop3_state_user_resp(struct connectdata *conn,
-                                     int pop3code,
+static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
@@ -1004,8 +1000,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn,
 }
 
 /* For PASS responses */
-static CURLcode pop3_state_pass_resp(struct connectdata *conn,
-                                     int pop3code,
+static CURLcode pop3_state_pass_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;

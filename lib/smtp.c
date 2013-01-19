@@ -94,8 +94,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 static CURLcode smtp_connect(struct connectdata *conn, bool *done);
 static CURLcode smtp_disconnect(struct connectdata *conn, bool dead);
 static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done);
-static int smtp_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
@@ -438,8 +437,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 }
 
 /* For the SMTP "protocol connect" and "doing" phases only */
-static int smtp_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks)
 {
   return Curl_pp_getsock(&conn->proto.smtpc.pp, socks, numsocks);
@@ -516,8 +514,7 @@ static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
 }
 
 /* For EHLO responses */
-static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -547,8 +544,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn,
 }
 
 /* For HELO responses */
-static CURLcode smtp_state_helo_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_helo_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -882,8 +878,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 #endif
 
 /* For the final responses to the AUTH sequence */
-static CURLcode smtp_state_auth_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_auth_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -997,8 +992,7 @@ static CURLcode smtp_rcpt_to(struct connectdata *conn)
 }
 
 /* For MAIL responses */
-static CURLcode smtp_state_mail_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -1022,8 +1016,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn,
 }
 
 /* For RCPT responses */
-static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -1061,8 +1054,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn,
 }
 
 /* For DATA response */
-static CURLcode smtp_state_data_resp(struct connectdata *conn,
-                                     int smtpcode,
+static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   struct SessionHandle *data = conn->data;

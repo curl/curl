@@ -93,8 +93,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 static CURLcode imap_connect(struct connectdata *conn, bool *done);
 static CURLcode imap_disconnect(struct connectdata *conn, bool dead);
 static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done);
-static int imap_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
@@ -124,7 +123,6 @@ const struct Curl_handler Curl_handler_imap = {
   PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD
   | PROTOPT_NOURLQUERY              /* flags */
 };
-
 
 #ifdef USE_SSL
 /*
@@ -177,7 +175,6 @@ static const struct Curl_handler Curl_handler_imap_proxy = {
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
-
 
 #ifdef USE_SSL
 /*
@@ -423,8 +420,7 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
 }
 
 /* This is the ONLY way to change IMAP state! */
-static void state(struct connectdata *conn,
-                  imapstate newstate)
+static void state(struct connectdata *conn, imapstate newstate)
 {
   struct imap_conn *imapc = &conn->proto.imapc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -570,8 +566,7 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */
-static int imap_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
+static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks)
 {
   return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
@@ -636,6 +631,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
     state(conn, IMAP_UPGRADETLS);
     return imap_state_upgrade_tls(conn);
   }
+
   return result;
 }
 
@@ -1090,8 +1086,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
 }
 
 /* For the (first line of) FETCH BODY[TEXT] response */
-static CURLcode imap_state_fetch_resp(struct connectdata *conn,
-                                      int imapcode,
+static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
                                       imapstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -1277,8 +1272,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 }
 
 /* Called repeatedly until done from multi.c */
-static CURLcode imap_multi_statemach(struct connectdata *conn,
-                                         bool *done)
+static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done)
 {
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
@@ -1343,8 +1337,7 @@ static CURLcode imap_init(struct connectdata *conn)
  * phase is done when this function returns, or FALSE is not. When called as
  * a part of the easy interface, it will always be TRUE.
  */
-static CURLcode imap_connect(struct connectdata *conn,
-                                 bool *done) /* see description above */
+static CURLcode imap_connect(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   struct imap_conn *imapc = &conn->proto.imapc;
