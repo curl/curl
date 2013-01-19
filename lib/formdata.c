@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -830,9 +830,10 @@ static CURLcode AddFormData(struct FormData **formp,
          file */
       if(!strequal("-", newform->line)) {
         struct_stat file;
-        if(!stat(newform->line, &file)) {
+        if(!stat(newform->line, &file) && S_ISREG(file.st_mode))
           *size += file.st_size;
-        }
+        else
+          return CURLE_BAD_FUNCTION_ARGUMENT;
       }
     }
   }
