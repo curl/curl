@@ -14,8 +14,6 @@ MANPAGE =	../docs/curl.1
 README	=	../docs/MANUAL
 MKHELP	=	../src/mkhelp.pl
 
-top_srcdir = ..
-
 include Makefile.inc
 
 OBJS = $(CURL_CFILES:.c=.o) $(CURLX_ONES:.c=.o)

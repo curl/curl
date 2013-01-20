@@ -5,7 +5,6 @@
 
 DEPEND_PREREQ = # tool_hugehelp.c
 
-top_srcdir = ..
 TOPDIR = ..
 
 include ../packages/DOS/common.dj

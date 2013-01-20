@@ -5,7 +5,7 @@ TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 
 # files used only in some libcurl test programs
-WARNLESS = $(top_srcdir)/lib/warnless.c $(top_srcdir)/lib/warnless.h
+WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 
 # these files are used in every single test program below
 SUPPORTFILES = first.c test.h
@@ -25,7 +25,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect \
   \
   lib1500 lib1501 lib1502 lib1503 lib1504 lib1505
 
-chkhostname_SOURCES = chkhostname.c $(top_srcdir)/lib/curl_gethostname.c
+chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
 chkhostname_DEPENDENCIES =
 chkhostname_CPPFLAGS = $(AM_CPPFLAGS)

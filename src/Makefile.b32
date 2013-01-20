@@ -77,10 +77,9 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 .path.obj = $(OBJDIR)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
-!undef top_srcdir
 !include Makefile.inc
 
-CSOURCES = $(CURL_CFILES) $(CURLX_ONES:/lib/=)
+CSOURCES = $(CURL_CFILES) $(CURLX_ONES:../lib/=)
 OBJECTS  = $(CSOURCES:.c=.obj)
 
 .c.obj:
