@@ -133,7 +133,8 @@ char *get_param_word(char **str, char **end_pos)
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes, 
- * else curl will fail to figure out the correct filename.
+ * else curl will fail to figure out the correct filename. if the filename
+ * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  * This function uses curl_formadd to fulfill it's job. Is heavily based on
  * the old curl_formparse code.
