@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 18
+# serial 19
 
 dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
@@ -145,7 +145,7 @@ dnl variable want_debug value as appropriate.
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])dnl
   AC_BEFORE([$0],[CURL_CHECK_OPTION_CURLDEBUG])dnl
-  AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
   AC_ARG_ENABLE(debug,
@@ -177,7 +177,7 @@ dnl shell variable want_optimize value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_OPTIMIZE], [
   AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
-  AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable compiler optimizer])
   OPT_COMPILER_OPTIMIZE="default"
   AC_ARG_ENABLE(optimize,
@@ -326,7 +326,7 @@ dnl shell variable want_warnings as appropriate.
 AC_DEFUN([CURL_CHECK_OPTION_WARNINGS], [
   AC_REQUIRE([CURL_CHECK_OPTION_DEBUG])dnl
   AC_BEFORE([$0],[CURL_CHECK_OPTION_WERROR])dnl
-  AC_BEFORE([$0],[CURL_CHECK_PROG_CC])dnl
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
   AC_MSG_CHECKING([whether to enable strict compiler warnings])
   OPT_COMPILER_WARNINGS="default"
   AC_ARG_ENABLE(warnings,
