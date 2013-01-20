@@ -954,6 +954,7 @@ static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
   return result;
 }
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 static CURLcode pop3_state_apop_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
@@ -972,6 +973,7 @@ static CURLcode pop3_state_apop_resp(struct connectdata *conn, int pop3code,
 
   return result;
 }
+#endif
 
 /* For USER responses */
 static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
@@ -1192,9 +1194,11 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
       break;
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
     case POP3_APOP:
       result = pop3_state_apop_resp(conn, pop3code, pop3c->state);
       break;
+#endif
 
     case POP3_USER:
       result = pop3_state_user_resp(conn, pop3code, pop3c->state);
