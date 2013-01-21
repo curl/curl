@@ -1025,6 +1025,47 @@ static char *strippath(const char *fullfile)
   return base; /* returns an allocated string or NULL ! */
 }
 
+static CURLcode formdata_add_filename(const struct curl_httppost *file,
+                                      struct FormData **form,
+                                      curl_off_t *size)
+{
+  CURLcode result = CURLE_OK;
+  char *filename = file->showfilename;
+  char *filebasename = NULL;
+  char *filename_escaped = NULL;
+
+  if(!filename) {
+    filebasename = strippath(file->contents);
+    if(!filebasename)
+      return CURLE_OUT_OF_MEMORY;
+    filename = filebasename;
+  }
+
+  if(strchr(filename, '\\') || strchr(filename, '"')) {
+    char *p0, *p1;
+
+    /* filename need be escaped */
+    filename_escaped = malloc(strlen(filename)*2+1);
+    if(!filename_escaped)
+      return CURLE_OUT_OF_MEMORY;
+    p0 = filename_escaped;
+    p1 = filename;
+    while(*p1) {
+      if(*p1 == '\\' || *p1 == '"')
+        *p0++ = '\\';
+      *p0++ = *p1++;
+    }
+    *p0 = '\0';
+    filename = filename_escaped;
+  }
+  result = AddFormDataf(form, size,
+                        "; filename=\"%s\"",
+                        filename);
+  Curl_safefree(filename_escaped);
+  Curl_safefree(filebasename);
+  return result;
+}
+
 /*
  * Curl_getformdata() converts a linked list of "meta data" into a complete
  * (possibly huge) multipart formdata. The input list is in 'post', while the
@@ -1139,22 +1180,13 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
 
       if(post->more) {
         /* if multiple-file */
-        char *filebasename = NULL;
-        if(!file->showfilename) {
-          filebasename = strippath(file->contents);
-          if(!filebasename) {
-            result = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-        }
-
         result = AddFormDataf(&form, &size,
                               "\r\n--%s\r\nContent-Disposition: "
-                              "attachment; filename=\"%s\"",
-                              fileboundary,
-                              (file->showfilename?file->showfilename:
-                               filebasename));
-        Curl_safefree(filebasename);
+                              "attachment",
+                              fileboundary);
+        if(result)
+          break;
+        result = formdata_add_filename(file, &form, &size);
         if(result)
           break;
       }
@@ -1164,14 +1196,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
            HTTPPOST_CALLBACK cases the ->showfilename struct member is always
            assigned at this point */
         if(post->showfilename || (post->flags & HTTPPOST_FILENAME)) {
-          char *filebasename=
-            (!post->showfilename)?strippath(post->contents):NULL;
-
-          result = AddFormDataf(&form, &size,
-                                "; filename=\"%s\"",
-                                (post->showfilename?post->showfilename:
-                                 filebasename));
-          Curl_safefree(filebasename);
+          result = formdata_add_filename(post, &form, &size);
         }
 
         if(result)

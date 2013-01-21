@@ -484,6 +484,17 @@ filename=, like this:
 
 \fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
 
+If filename/path contains ',' or ';', it must be quoted by double-quotes like:
+
+\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" url.com
+
+or
+
+\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' url.com
+
+Note that if a filename/path is quoted by double-quotes, any double-quote
+or backslash within the filename must be escaped by backslash.
+
 See further examples and details in the MANUAL.
 
 This option can be used multiple times.
