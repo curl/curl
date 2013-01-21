@@ -26,12 +26,12 @@ dnl -------------------------------------------------
 dnl Private macro.
 
 AC_DEFUN([_XC_PROG_CC_PREAMBLE], [
-  export CC
-  export CPP
-  export LIBS
-  export CFLAGS
-  export LDFLAGS
-  export CPPFLAGS
+dnl  export CC
+dnl  export CPP
+dnl  export LIBS
+dnl  export CFLAGS
+dnl  export LDFLAGS
+dnl  export CPPFLAGS
   xc_prog_cc_prev_IFS=$IFS
   xc_prog_cc_prev_LIBS=$LIBS
   xc_prog_cc_prev_CFLAGS=$CFLAGS
@@ -50,12 +50,12 @@ AC_DEFUN([_XC_PROG_CC_POSTLUDE], [
   CFLAGS=$xc_prog_cc_prev_CFLAGS
   LDFLAGS=$xc_prog_cc_prev_LDFLAGS
   CPPFLAGS=$xc_prog_cc_prev_CPPFLAGS
-  AC_SUBST([CC])dnl
-  AC_SUBST([CPP])dnl
-  AC_SUBST([LIBS])dnl
-  AC_SUBST([CFLAGS])dnl
-  AC_SUBST([LDFLAGS])dnl
-  AC_SUBST([CPPFLAGS])dnl
+dnl  AC_SUBST([CC])dnl
+dnl  AC_SUBST([CPP])dnl
+dnl  AC_SUBST([LIBS])dnl
+dnl  AC_SUBST([CFLAGS])dnl
+dnl  AC_SUBST([LDFLAGS])dnl
+dnl  AC_SUBST([CPPFLAGS])dnl
 ])
 
 
