@@ -52,6 +52,7 @@ FAQ
   3.19 How do I get HTTP from a host using a specific IP address?
   3.20 How to SFTP from my user's home directory?
   3.21 Protocol xxx not supported or disabled in libcurl
+  3.22 curl -X gives me HTTP problems
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -731,6 +732,33 @@ FAQ
   Note that this error will also occur if you pass a wrongly spelled protocol
   part as in "htpt://example.com" or as in the less evident case if you prefix
   the protocol part with a space as in " http://example.com/".
+
+  3.22 curl -X gives me HTTP problems
+
+  In normal circumstances, -X should hardly ever be used.
+
+  By default you use curl without explicitly saying which request method to
+  use when the URL identifies a HTTP transfer. If you just pass in a URL like
+  "curl http://example.com" it will use GET. If you use -d or -F curl will use
+  POST, -I will cause a HEAD and -T will make it a PUT.
+
+  If for whatever reason you're not happy with these default choices that curl
+  does for you, you can override those request methods by specifying -X
+  [WHATEVER]. This way you can for example send a DELETE by doing "curl -X
+  DELETE [URL]".
+
+  It is thus pointless to do "curl -XGET [URL]" as GET would be used
+  anyway. In the same vein it is pointless to do "curl -X POST -d data
+  [URL]"... But you can make a fun and somewhat rare request that sends a
+  request-body in a GET request with something like "curl -X GET -d data
+  [URL]"
+
+  Note that -X doesn't change curl's behavior. It only modifies the actual
+  string sent in the request.
+
+  Accordingly, by using -XPOST on a command line that for example would follow
+  a 303 redirect, you will effectively prevent curl from behaving
+  correctly. Be aware.
 
 
 4. Running Problems
