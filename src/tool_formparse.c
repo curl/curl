@@ -34,13 +34,74 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+
+/*
+ * helper function to get a word from form param
+ * after call get_parm_word, str either point to string end
+ * or point to any of end chars.
+ */
+char *get_param_word(char **str, char **end_pos)
+{         
+  char *ptr = *str;
+  char *word_begin = NULL;
+  char *ptr2;
+  char *escape = NULL;
+  const char *end_chars = ";,";
+  char tmp;
+        
+  /* the first non-space char is here */
+  word_begin = ptr;
+  if (*ptr == '"') {
+    ++ptr;
+    while (*ptr) {
+      if (*ptr == '\\') {
+        if (ptr[1] == '\\' || ptr[1] == '"') {
+          /* remember the first escape position */
+          if (!escape)
+            escape = ptr;
+          /* skip escape of back-slash or double-quote */
+          ptr += 2;
+          continue;
+        }
+      }
+      if (*ptr == '"') {
+        *end_pos = ptr;
+        if (escape) {
+          /* has escape, we restore the unescaped string here */
+          ptr = ptr2 = escape;
+          do {
+            if (*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"'))
+              ++ptr;
+            *ptr2++ = *ptr++;
+          }
+          while (ptr < *end_pos); 
+          *end_pos = ptr2;
+        }
+        while (*ptr && NULL==strchr(end_chars, *ptr))
+          ++ptr;
+        *str = ptr;
+        return word_begin+1;
+      }
+      ++ptr;
+    }
+    /* end quote is missing, treat it as non-quoted. */
+    ptr = word_begin;
+  }
+
+  while (*ptr && NULL==strchr(end_chars, *ptr))
+    ++ptr;
+  *str = *end_pos = ptr;
+  return word_begin;
+}
+
 /***************************************************************************
  *
  * formparse()
  *
  * Reads a 'name=value' parameter and builds the appropriate linked list.
  *
- * Specify files to upload with 'name=@filename'. Supports specified
+ * Specify files to upload with 'name=@filename', or 'name=@"filename"'
+ * in case the filename contain ',' or ';'. Supports specified
  * given Content-Type of the files. Such as ';type=<content-type>'.
  *
  * If literal_value is set, any initial '@' or '<' in the value string
@@ -50,6 +111,10 @@
  * multiple files by writing it like:
  *
  * 'name=@filename,filename2,filename3'
+ * 
+ * or use double-quotes quote the filename:
+ *
+ * 'name=@"filename","filename2","filename3"'
  *
  * If you want content-types specified for each too, write them like:
  *
@@ -64,7 +129,12 @@
  * To upload a file, but to fake the file name that will be included in the
  * formpost, do like this:
  *
- * 'name=@filename;filename=/dev/null'
+ * 'name=@filename;filename=/dev/null' or quote the faked filename like:
+ * 'name=@filename;filename="play, play, and play.txt"'
+ *
+ * If filename/path contains ',' or ';', it must be quoted by double-quotes, 
+ * else curl will fail to figure out the correct filename. if the filename
+ * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  * This function uses curl_formadd to fulfill it's job. Is heavily based on
  * the old curl_formparse code.
@@ -86,7 +156,6 @@ int formparse(struct Configurable *config,
   char *contp;
   const char *type = NULL;
   char *sep;
-  char *sep2;
 
   if((1 == sscanf(input, "%255[^=]=", name)) &&
      ((contp = strchr(input, '=')) != NULL)) {
@@ -107,110 +176,95 @@ int formparse(struct Configurable *config,
       struct multi_files *multi_start = NULL;
       struct multi_files *multi_current = NULL;
 
-      contp++;
+      char *ptr = contp;
+      char *end = ptr + strlen(ptr);
 
       do {
         /* since this was a file, it may have a content-type specifier
            at the end too, or a filename. Or both. */
-        char *ptr;
         char *filename = NULL;
-
-        sep = strchr(contp, ';');
-        sep2 = strchr(contp, ',');
-
-        /* pick the closest */
-        if(sep2 && (sep2 < sep)) {
-          sep = sep2;
-
-          /* no type was specified! */
-        }
+        char *word_end;
 
         type = NULL;
 
-        if(sep) {
-          bool semicolon = (';' == *sep) ? TRUE : FALSE;
+        ++ptr;
+        contp = get_param_word(&ptr, &word_end);
+        bool semicolon = (';' == *ptr) ? TRUE : FALSE;
+        *word_end = '\0'; /* terminate the contp */
+        /* have other content, continue parse */
+        while (semicolon) {
+          /* have type or filename field */
+          ++ptr;
+          while (*ptr && (ISSPACE(*ptr)))
+            ++ptr;
 
-          *sep = '\0'; /* terminate file name at separator */
+          if(checkprefix("type=", ptr)) {
+            /* set type pointer */
+            type = &ptr[5];
 
-          ptr = sep+1; /* point to the text following the separator */
-
-          while(semicolon && ptr && (','!= *ptr)) {
-
-            /* pass all white spaces */
-            while(ISSPACE(*ptr))
-              ptr++;
-
-            if(checkprefix("type=", ptr)) {
-              /* set type pointer */
-              type = &ptr[5];
-
-              /* verify that this is a fine type specifier */
-              if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
-                             type_major, type_minor)) {
-                warnf(config, "Illegally formatted content-type field!\n");
-                Curl_safefree(contents);
-                FreeMultiInfo(&multi_start, &multi_current);
-                return 2; /* illegal content-type syntax! */
-              }
-
-              /* now point beyond the content-type specifier */
-              sep = (char *)type + strlen(type_major)+strlen(type_minor)+1;
-
-              /* there's a semicolon following - we check if it is a filename
-                 specified and if not we simply assume that it is text that
-                 the user wants included in the type and include that too up
-                 to the next zero or semicolon. */
-              if(*sep==';') {
-                if(!checkprefix(";filename=", sep)) {
-                  sep2 = strchr(sep+1, ';');
-                  if(sep2)
-                    sep = sep2;
-                  else
-                    sep = sep + strlen(sep); /* point to end of string */
-                }
-              }
-              else
-                semicolon = FALSE;
-
-              if(*sep) {
-                *sep = '\0'; /* zero terminate type string */
-
-                ptr = sep+1;
-              }
-              else
-                ptr = NULL; /* end */
+            /* verify that this is a fine type specifier */
+            if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
+                           type_major, type_minor)) {
+              warnf(config, "Illegally formatted content-type field!\n");
+              Curl_safefree(contents);
+              FreeMultiInfo(&multi_start, &multi_current);
+              return 2; /* illegal content-type syntax! */
             }
-            else if(checkprefix("filename=", ptr)) {
-              filename = &ptr[9];
-              ptr = strchr(filename, ';');
-              if(!ptr) {
-                ptr = strchr(filename, ',');
-              }
-              if(ptr) {
-                *ptr = '\0'; /* zero terminate */
-                ptr++;
+
+            /* now point beyond the content-type specifier */
+            sep = (char *)type + strlen(type_major)+strlen(type_minor)+1;
+
+            /* there's a semicolon following - we check if it is a filename
+               specified and if not we simply assume that it is text that
+               the user wants included in the type and include that too up
+               to the next sep. */
+            ptr = sep;
+            if(*sep==';') {
+              if(!checkprefix(";filename=", sep)) {
+                char *content = NULL;
+                ptr = sep + 1;
+                content = get_param_word(&ptr, &sep);
+                semicolon = (';' == *ptr) ? TRUE : FALSE;
               }
             }
             else
-              /* confusion, bail out of loop */
-              break;
-          }
+              semicolon = FALSE;
 
-          sep = ptr;
+            if(*sep)
+              *sep = '\0'; /* zero terminate type string */
+          }
+          else if(checkprefix("filename=", ptr)) {
+            ptr += 9;
+            filename = get_param_word(&ptr, &word_end);
+            semicolon = (';' == *ptr) ? TRUE : FALSE;
+            *word_end = '\0';
+          }
+          else {
+            /* unknown prefix, skip to next block */
+            char *unknown = NULL;
+            unknown = get_param_word(&ptr, &word_end);
+            semicolon = (';' == *ptr) ? TRUE : FALSE;
+            if (*unknown) {
+              *word_end = '\0';
+              warnf(config, "skip unknown form field: %s\n", unknown);
+            }
+          }
         }
+        /* now ptr point to comma or string end */
+
 
         /* if type == NULL curl_formadd takes care of the problem */
 
-        if(!AddMultiFiles(contp, type, filename, &multi_start,
+        if(*contp && !AddMultiFiles(contp, type, filename, &multi_start,
                           &multi_current)) {
           warnf(config, "Error building form post!\n");
           Curl_safefree(contents);
           FreeMultiInfo(&multi_start, &multi_current);
           return 3;
         }
-        contp = sep; /* move the contents pointer to after the separator */
 
-      } while(sep && *sep); /* loop if there's another file name */
+        /* *ptr could be '\0', so we just check with the string end */
+      } while(ptr < end); /* loop if there's another file name */
 
       /* now we add the multiple files section */
       if(multi_start) {
