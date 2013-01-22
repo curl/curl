@@ -19,8 +19,8 @@
  * KIND, either express or implied.
  *
  * RFC2195 CRAM-MD5 authentication
- * RFC2222 Simple Authentication and Security Layer (SASL)
  * RFC2831 DIGEST-MD5 authentication
+ * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
