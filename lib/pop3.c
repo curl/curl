@@ -21,11 +21,11 @@
  * RFC1734 POP3 Authentication
  * RFC1939 POP3 protocol
  * RFC2195 CRAM-MD5 authentication
- * RFC2222 Simple Authentication and Security Layer (SASL)
  * RFC2384 POP URL Scheme
  * RFC2449 POP3 Extension Mechanism
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  * RFC2831 DIGEST-MD5 authentication
+ * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
