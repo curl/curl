@@ -241,6 +241,16 @@ AC_SUBST([PATH_SEPARATOR])dnl
 ])
 
 
+dnl _XC_CONFIGURE_PREAMBLE_SUCCESS_MSG
+dnl -------------------------------------------------
+dnl Private macro.
+
+AC_DEFUN([_XC_CONFIGURE_PREAMBLE_SUCCESS_MSG],
+[dnl
+echo "checking whether some basic commands and utilities are available... yes"
+])
+
+
 dnl _XC_CONFIGURE_PREAMBLE
 dnl -------------------------------------------------
 dnl Private macro.
@@ -254,7 +264,7 @@ AC_REQUIRE([_XC_CHECK_COMMAND_EXPR])dnl
 AC_REQUIRE([_XC_CHECK_UTILITY_SED])dnl
 AC_REQUIRE([_XC_CHECK_UTILITY_GREP])dnl
 AC_REQUIRE([_XC_CHECK_PATH_SEPARATOR])dnl
-echo "checking whether some basic commands and utilities are available... yes"
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_SUCCESS_MSG])dnl
 ])
 
 
