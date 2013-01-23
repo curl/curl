@@ -629,7 +629,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
   }
   else {
     state(conn, IMAP_UPGRADETLS);
-    return imap_state_upgrade_tls(conn);
+    result = imap_state_upgrade_tls(conn);
   }
 
   return result;
@@ -1628,8 +1628,6 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
       return CURLE_OK;
 
     result = imap_dophase_done(conn, connected);
-    if(result)
-      return result;
   }
 
   return result;

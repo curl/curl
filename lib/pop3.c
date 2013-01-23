@@ -1608,8 +1608,6 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
       return CURLE_OK;
 
     result = pop3_dophase_done(conn, connected);
-    if(result)
-      return result;
   }
 
   return result;

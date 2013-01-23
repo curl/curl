@@ -492,7 +492,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   }
   else {
     state(conn, SMTP_UPGRADETLS);
-    return smtp_state_upgrade_tls(conn);
+    result = smtp_state_upgrade_tls(conn);
   }
 
   return result;
@@ -1599,8 +1599,6 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
       return CURLE_OK;
 
     result = smtp_dophase_done(conn, connected);
-    if(result)
-      return result;
   }
 
   return result;
