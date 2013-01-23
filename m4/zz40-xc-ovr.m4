@@ -40,6 +40,19 @@ AC_DEFUN([_XC_CONFIGURE_PREAMBLE_COMMENT],
 ])
 
 
+dnl _XC_CONFIGURE_PREAMBLE_INIT
+dnl -------------------------------------------------
+dnl Private macro.
+
+AC_DEFUN([_XC_CONFIGURE_PREAMBLE_INIT],
+[dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_COMMENT])dnl
+xc_msg_warn='configure: WARNING:'
+xc_msg_abrt='Can not continue.'
+xc_msg_err='configure: error:'
+])
+
+
 dnl _XC_CHECK_COMMAND_TEST
 dnl -------------------------------------------------
 dnl Private macro.
@@ -48,6 +61,7 @@ dnl Check that 'test' command is available, else abort.
 
 AC_DEFUN([_XC_CHECK_COMMAND_TEST],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
 # Require that 'test' command is available.
 #
@@ -59,7 +73,7 @@ case "x$xc_tst_str" in
     :
     ;;
   *)
-    echo "configure: error: 'test' command not found. Can not continue."
+    echo "$xc_msg_err 'test' command not found. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -74,6 +88,7 @@ dnl Check that PATH is set, otherwise abort.
 
 AC_DEFUN([_XC_CHECK_PATH],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
 #
 # Require that PATH variable is set.
@@ -86,7 +101,7 @@ case "x$xc_tst_str" in
     :
     ;;
   *)
-    echo "configure: error: PATH variable not set. Can not continue."
+    echo "$xc_msg_err PATH variable not set. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -101,6 +116,7 @@ dnl Check that 'expr' command is available, else abort.
 
 AC_DEFUN([_XC_CHECK_COMMAND_EXPR],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
 # Require that 'expr' command is available.
 #
@@ -112,7 +128,7 @@ case "x$xc_tst_str" in
     :
     ;;
   *)
-    echo "configure: error: 'expr' command not found. Can not continue."
+    echo "$xc_msg_err 'expr' command not found. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -130,6 +146,7 @@ dnl 'sed' this early please, that should be done later.
 
 AC_DEFUN([_XC_CHECK_UTILITY_SED],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
 # Require that 'sed' utility is found within PATH.
 #
@@ -141,7 +158,7 @@ case "x$xc_tst_str" in
     :
     ;;
   *)
-    echo "configure: error: 'sed' utility not in PATH. Can not continue."
+    echo "$xc_msg_err 'sed' utility not in PATH. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -159,6 +176,7 @@ dnl 'grep' this early please, that should be done later.
 
 AC_DEFUN([_XC_CHECK_UTILITY_GREP],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
 # Require that 'grep' utility is found within PATH.
 #
@@ -170,7 +188,7 @@ case "x$xc_tst_str" in
     :
     ;;
   *)
-    echo "configure: error: 'grep' utility not in PATH. Can not continue."
+    echo "$xc_msg_err 'grep' utility not in PATH. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -190,6 +208,7 @@ dnl auto-detected one.
 
 AC_DEFUN([_XC_CHECK_PATH_SEPARATOR],
 [dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
 AC_REQUIRE([_XC_CHECK_PATH])dnl
 AC_REQUIRE([_XC_CHECK_COMMAND_EXPR])dnl
@@ -220,7 +239,7 @@ if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   # chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
     # Stop dead until user provides PATH_SEPARATOR definition.
-    echo "configure: error: PATH_SEPARATOR variable not set. Can not continue."
+    echo "$xc_msg_err PATH_SEPARATOR variable not set. $xc_msg_abrt" >&2
     exit 1
   fi
 else
@@ -234,7 +253,7 @@ else
     # Simply use the auto-detected one when not already set.
     PATH_SEPARATOR="$xc_tst_auto_separator"
   elif "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
-    echo "configure: warning: PATH_SEPARATOR does not match auto-detected one."
+    echo "$xc_msg_warn PATH_SEPARATOR does not match auto-detected one." >&2
   fi
 fi
 AC_SUBST([PATH_SEPARATOR])dnl
@@ -258,6 +277,7 @@ dnl Private macro.
 AC_DEFUN([_XC_CONFIGURE_PREAMBLE],
 [dnl
 AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_COMMENT])dnl
+AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
 AC_REQUIRE([_XC_CHECK_PATH])dnl
 AC_REQUIRE([_XC_CHECK_COMMAND_EXPR])dnl
