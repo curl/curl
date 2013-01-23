@@ -38,7 +38,9 @@ dnl this macro is used in configure.ac, with autoconf
 dnl 2.57 or older.
 
 m4_ifdef([AC_CONFIG_MACRO_DIR],
-  [m4_undefine([AC_CONFIG_MACRO_DIR])])
+[dnl
+m4_undefine([AC_CONFIG_MACRO_DIR])dnl
+])
 m4_define([AC_CONFIG_MACRO_DIR],[])
 
 
@@ -50,6 +52,13 @@ dnl used for same configure script, overriding those
 dnl provided elsewhere.
 
 AC_DEFUN([XC_OVR_ZZ60],
-  [AC_BEFORE([$0],[AC_PROG_LIBTOOL])
-   AC_BEFORE([$0],[AM_INIT_AUTOMAKE])])
+[dnl
+AC_BEFORE([$0],[LT_INIT])dnl
+AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
+AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
+AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
+dnl
+AC_BEFORE([$0],[AC_CONFIG_MACRO_DIR])dnl
+AC_BEFORE([$0],[AC_CONFIG_MACRO_DIRS])dnl
+])
 
