@@ -490,10 +490,8 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
     else
       result = smtp_authenticate(conn);
   }
-  else {
-    state(conn, SMTP_UPGRADETLS);
+  else
     result = smtp_state_upgrade_tls(conn);
-  }
 
   return result;
 }
@@ -505,9 +503,14 @@ static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
 
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
 
-  if(smtpc->ssldone) {
-    smtp_to_smtps(conn);
-    result = smtp_state_ehlo(conn);
+  if(!result) {
+    if(smtpc->state != SMTP_UPGRADETLS)
+      state(conn, SMTP_UPGRADETLS);
+
+    if(smtpc->ssldone) {
+      smtp_to_smtps(conn);
+      result = smtp_state_ehlo(conn);
+    }
   }
 
   return result;
