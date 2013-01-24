@@ -627,10 +627,8 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
     else
       result = imap_state_capability(conn);
   }
-  else {
-    state(conn, IMAP_UPGRADETLS);
+  else
     result = imap_state_upgrade_tls(conn);
-  }
 
   return result;
 }
@@ -642,9 +640,14 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
 
-  if(imapc->ssldone) {
-    imap_to_imaps(conn);
-    result = imap_state_capability(conn);
+  if(!result) {
+    if(imapc->state != IMAP_UPGRADETLS)
+      state(conn, IMAP_UPGRADETLS);
+
+    if(imapc->ssldone) {
+      imap_to_imaps(conn);
+      result = imap_state_capability(conn);
+    }
   }
 
   return result;
