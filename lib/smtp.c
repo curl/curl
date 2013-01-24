@@ -18,13 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * RFC2821 SMTP protocol
- * RFC3207 SMTP over TLS
- * RFC4954 SMTP Authentication
+ * RFC1870 SMTP Service Extension for Message Size
  * RFC2195 CRAM-MD5 authentication
  * RFC2831 DIGEST-MD5 authentication
+ * RFC3207 SMTP over TLS
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC4954 SMTP Authentication
+ * RFC5321 SMTP protocol
  *
  ***************************************************************************/
 
