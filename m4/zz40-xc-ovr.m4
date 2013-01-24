@@ -60,7 +60,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO],
 
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
     ;;
@@ -88,7 +88,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
 
 xc_tst_str='unknown'
 (`test -n "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
     ;;
@@ -115,7 +115,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
 
 xc_tst_str='unknown'
 (`test -n "$PATH" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
     ;;
@@ -142,7 +142,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
 
 xc_tst_str='unknown'
 xc_tst_str=(`expr "$xc_tst_str" : '.*' 2>/dev/null`)
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   x7)
     :
     ;;
@@ -174,7 +174,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
 xc_tst_str='unknown'
 xc_tst_str=(`echo "$xc_tst_str" 2>/dev/null \
   | sed -e 's:unknown:success:' 2>/dev/null`)
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
     ;;
@@ -206,7 +206,7 @@ AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" 2>/dev/null \
   | grep 'unknown' >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in
+case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
     ;;
