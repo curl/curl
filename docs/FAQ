@@ -424,9 +424,10 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  GnuTLS, yassl, NSS, PolarSSL, axTLS, Darwinssl, schannel (native Windows) or
-  qssl. They all have their pros and cons, and we try to maintain a comparison
-  of them here: http://curl.haxx.se/docs/ssl-compared.html
+  GnuTLS, yassl, NSS, PolarSSL, axTLS, Secure Transport (native iOS/OS X),
+  schannel (native Windows) or qssl (native IBM i). They all have their pros
+  and cons, and we try to maintain a comparison of them here:
+  http://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -912,8 +913,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, NSS or Microsoft Windows libraries at
-  build-time to provide this functionality.
+  NTLM support requires OpenSSL, GnuTLS, NSS, Secure Transport, or Microsoft
+  Windows libraries at build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
