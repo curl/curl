@@ -568,10 +568,8 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
     else
       result = pop3_state_capa(conn);
   }
-  else {
-    state(conn, POP3_UPGRADETLS);
+  else
     result = pop3_state_upgrade_tls(conn);
-  }
 
   return result;
 }
@@ -583,9 +581,14 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
 
-  if(pop3c->ssldone) {
-    pop3_to_pop3s(conn);
-    result = pop3_state_capa(conn);
+  if(!result) {
+    if(pop3c->state != POP3_UPGRADETLS)
+      state(conn, POP3_UPGRADETLS);
+
+    if(pop3c->ssldone) {
+      pop3_to_pop3s(conn);
+      result = pop3_state_capa(conn);
+    }
   }
 
   return result;
