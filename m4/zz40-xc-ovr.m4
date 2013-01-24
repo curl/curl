@@ -28,46 +28,66 @@ dnl subdirectory. This allows that macro (re)definitions from this
 dnl file may override those provided in other files.
 
 
-dnl _XC_CONFIGURE_PREAMBLE_COMMENT
+dnl _XC_CFG_PRE_PREAMBLE
 dnl -------------------------------------------------
 dnl Private macro.
 
-AC_DEFUN([_XC_CONFIGURE_PREAMBLE_COMMENT],
+AC_DEFUN([_XC_CFG_PRE_PREAMBLE],
 [
 ## ---------------------------- ##
 ## XC_CONFIGURE_PREAMBLE rev: 1 ##
 ## ---------------------------- ##
-])
 
+xc_configure_preamble_prev_IFS=$IFS
 
-dnl _XC_CONFIGURE_PREAMBLE_INIT
-dnl -------------------------------------------------
-dnl Private macro.
-
-AC_DEFUN([_XC_CONFIGURE_PREAMBLE_INIT],
-[dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_COMMENT])dnl
 xc_msg_warn='configure: WARNING:'
 xc_msg_abrt='Can not continue.'
 xc_msg_err='configure: error:'
 ])
 
-
-dnl _XC_CHECK_COMMAND_TEST
+dnl _XC_CFG_PRE_BASIC_CHK_CMD_ECHO
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check that 'test' command is available, else abort.
+dnl Emits shell code that verifies that 'echo' command
+dnl is available, otherwise aborts execution.
 
-AC_DEFUN([_XC_CHECK_COMMAND_TEST],
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
-# Require that 'test' command is available.
+# Verify that 'echo' command is available, otherwise abort.
 #
 
 xc_tst_str='unknown'
-test -n "$xc_tst_str" && xc_tst_str='success'
+(`echo "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
+case "x$xc_tst_str" in
+  xsuccess)
+    :
+    ;;
+  *)
+    # Try built-in echo, and fail.
+    echo "$xc_msg_err 'echo' command not found. $xc_msg_abrt" >&2
+    exit 1
+    ;;
+esac
+])
+
+
+dnl _XC_CFG_PRE_BASIC_CHK_CMD_TEST
+dnl -------------------------------------------------
+dnl Private macro.
+dnl
+dnl Emits shell code that verifies that 'test' command
+dnl is available, otherwise aborts execution.
+
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
+[dnl
+#
+# Verify that 'test' command is available, otherwise abort.
+#
+
+xc_tst_str='unknown'
+(`test -n "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
 case "x$xc_tst_str" in
   xsuccess)
     :
@@ -80,49 +100,48 @@ esac
 ])
 
 
-dnl _XC_CHECK_PATH
+dnl _XC_CFG_PRE_BASIC_CHK_VAR_PATH
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check that PATH is set, otherwise abort.
+dnl Emits shell code that verifies that 'PATH' variable
+dnl is set, otherwise aborts execution.
 
-AC_DEFUN([_XC_CHECK_PATH],
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
-AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
 #
-# Require that PATH variable is set.
+# Verify that 'PATH' variable is set, otherwise abort.
 #
 
 xc_tst_str='unknown'
-test -n "$PATH" && xc_tst_str='success'
+(`test -n "$PATH" >/dev/null 2>&1`) && xc_tst_str='success'
 case "x$xc_tst_str" in
   xsuccess)
     :
     ;;
   *)
-    echo "$xc_msg_err PATH variable not set. $xc_msg_abrt" >&2
+    echo "$xc_msg_err 'PATH' variable not set. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
 ])
 
 
-dnl _XC_CHECK_COMMAND_EXPR
+dnl _XC_CFG_PRE_BASIC_CHK_CMD_EXPR
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check that 'expr' command is available, else abort.
+dnl Emits shell code that verifies that 'expr' command
+dnl is available, otherwise aborts execution.
 
-AC_DEFUN([_XC_CHECK_COMMAND_EXPR],
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
-# Require that 'expr' command is available.
+# Verify that 'expr' command is available, otherwise abort.
 #
 
 xc_tst_str='unknown'
-xc_tst_str=`expr "$xc_tst_str" : '.*'`
+xc_tst_str=(`expr "$xc_tst_str" : '.*' 2>/dev/null`)
 case "x$xc_tst_str" in
   x7)
     :
@@ -135,111 +154,117 @@ esac
 ])
 
 
-dnl _XC_CHECK_UTILITY_SED
+dnl _XC_CFG_PRE_BASIC_CHK_UTIL_SED
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check that 'sed' utility is found within PATH. This
-dnl 'sed' is required in order to allow configure script
-dnl bootstrapping itself. No fancy testing for a proper
-dnl 'sed' this early please, that should be done later.
+dnl Emits shell code that verifies that 'sed' utility
+dnl is found within 'PATH', otherwise aborts execution.
+dnl
+dnl This 'sed' is required in order to allow configure
+dnl script bootstrapping itself. No fancy testing for a
+dnl proper 'sed' this early, that should be done later.
 
-AC_DEFUN([_XC_CHECK_UTILITY_SED],
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
-# Require that 'sed' utility is found within PATH.
+# Verify that 'sed' utility is found within 'PATH', otherwise abort.
 #
 
 xc_tst_str='unknown'
-xc_tst_str=`echo "$xc_tst_str" | sed -e 's:unknown:success:'`
+xc_tst_str=(`echo "$xc_tst_str" 2>/dev/null \
+  | sed -e 's:unknown:success:' 2>/dev/null`)
 case "x$xc_tst_str" in
   xsuccess)
     :
     ;;
   *)
-    echo "$xc_msg_err 'sed' utility not in PATH. $xc_msg_abrt" >&2
+    echo "$xc_msg_err 'sed' utility not found in 'PATH'. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
 ])
 
 
-dnl _XC_CHECK_UTILITY_GREP
+dnl _XC_CFG_PRE_BASIC_CHK_UTIL_GREP
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check that 'grep' utility is found within PATH. This
-dnl 'grep' is required in order to allow configure script
-dnl bootstrapping itself. No fancy testing for a proper
-dnl 'grep' this early please, that should be done later.
+dnl Emits shell code that verifies that 'grep' utility
+dnl is found within 'PATH', otherwise aborts execution.
+dnl
+dnl This 'grep' is required in order to allow configure
+dnl script bootstrapping itself. No fancy testing for a
+dnl proper 'grep' this early, that should be done later.
 
-AC_DEFUN([_XC_CHECK_UTILITY_GREP],
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
 #
-# Require that 'grep' utility is found within PATH.
+# Verify that 'grep' utility is found within 'PATH', otherwise abort.
 #
 
 xc_tst_str='unknown'
-echo "$xc_tst_str" | grep 'unknown' >/dev/null 2>&1 && xc_tst_str='success'
+(`echo "$xc_tst_str" 2>/dev/null \
+  | grep 'unknown' >/dev/null 2>&1`) && xc_tst_str='success'
 case "x$xc_tst_str" in
   xsuccess)
     :
     ;;
   *)
-    echo "$xc_msg_err 'grep' utility not in PATH. $xc_msg_abrt" >&2
+    echo "$xc_msg_err 'grep' utility not found in 'PATH'. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
 ])
 
 
-dnl _XC_CHECK_PATH_SEPARATOR
+dnl _XC_CFG_PRE_CHECK_PATH_SEPARATOR
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Check and compute the path separator for us. This
-dnl path separator is the symbol used to diferentiate
-dnl or separate paths inside the PATH environment var.
+dnl Emits shell code that computes the path separator
+dnl and stores the result in 'PATH_SEPARATOR', unless
+dnl the user has already set it with a non-empty value.
 dnl
-dnl User provided PATH_SEPARATOR always overrides the
-dnl auto-detected one.
+dnl This path separator is the symbol used to separate
+dnl or diferentiate paths inside the 'PATH' environment
+dnl environment variable.
+dnl
+dnl Non-empty user provided 'PATH_SEPARATOR' always
+dnl overrides the auto-detected one.
 
-AC_DEFUN([_XC_CHECK_PATH_SEPARATOR],
+AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
-AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
-AC_REQUIRE([_XC_CHECK_PATH])dnl
-AC_REQUIRE([_XC_CHECK_COMMAND_EXPR])dnl
 #
-# Auto-detect and set PATH_SEPARATOR, unless it is already set.
+# Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
 #
 
-# Directory count in PATH when using a colon separator.
-xc_tst_dirs_col=0
+# Directory count in 'PATH' when using a colon separator.
+xc_tst_dirs_col=''
 xc_tst_prev_IFS=$IFS; IFS=':'
 for xc_tst_dir in $PATH; do
   IFS=$xc_tst_prev_IFS
-  test -d "$xc_tst_dir" && xc_tst_dirs_col=`expr $xc_tst_dirs_col + 1`
+  xc_tst_dirs_col="x$xc_tst_dirs_col"
 done
 IFS=$xc_tst_prev_IFS
+xc_tst_dirs_col=(`expr "$xc_tst_dirs_col" : '.*'`)
 
-# Directory count in PATH when using a semicolon separator.
-xc_tst_dirs_sem=0
+# Directory count in 'PATH' when using a semicolon separator.
+xc_tst_dirs_sem=''
 xc_tst_prev_IFS=$IFS; IFS=';'
 for xc_tst_dir in $PATH; do
   IFS=$xc_tst_prev_IFS
-  test -d "$xc_tst_dir" && xc_tst_dirs_sem=`expr $xc_tst_dirs_sem + 1`
+  xc_tst_dirs_sem="x$xc_tst_dirs_sem"
 done
 IFS=$xc_tst_prev_IFS
+xc_tst_dirs_sem=(`expr "$xc_tst_dirs_sem" : '.*'`)
 
 if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   # When both counting methods give the same result we do not want to
   # chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
-    # Stop dead until user provides PATH_SEPARATOR definition.
-    echo "$xc_msg_err PATH_SEPARATOR variable not set. $xc_msg_abrt" >&2
+    # Stop dead until user provides 'PATH_SEPARATOR' definition.
+    echo "$xc_msg_err 'PATH_SEPARATOR' variable not set. $xc_msg_abrt" >&2
     exit 1
   fi
 else
@@ -252,21 +277,23 @@ else
   if test -z "$PATH_SEPARATOR"; then
     # Simply use the auto-detected one when not already set.
     PATH_SEPARATOR="$xc_tst_auto_separator"
-  elif "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
-    echo "$xc_msg_warn PATH_SEPARATOR does not match auto-detected one." >&2
+  elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
+    echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
   fi
 fi
 AC_SUBST([PATH_SEPARATOR])dnl
 ])
 
 
-dnl _XC_CONFIGURE_PREAMBLE_SUCCESS_MSG
+dnl _XC_CFG_PRE_POSTLUDE
 dnl -------------------------------------------------
 dnl Private macro.
 
-AC_DEFUN([_XC_CONFIGURE_PREAMBLE_SUCCESS_MSG],
+AC_DEFUN([_XC_CFG_PRE_POSTLUDE],
 [dnl
 echo "checking whether some basic commands and utilities are available... yes"
+
+IFS=$xc_configure_preamble_prev_IFS
 ])
 
 
@@ -276,15 +303,15 @@ dnl Private macro.
 
 AC_DEFUN([_XC_CONFIGURE_PREAMBLE],
 [dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_COMMENT])dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_INIT])dnl
-AC_REQUIRE([_XC_CHECK_COMMAND_TEST])dnl
-AC_REQUIRE([_XC_CHECK_PATH])dnl
-AC_REQUIRE([_XC_CHECK_COMMAND_EXPR])dnl
-AC_REQUIRE([_XC_CHECK_UTILITY_SED])dnl
-AC_REQUIRE([_XC_CHECK_UTILITY_GREP])dnl
-AC_REQUIRE([_XC_CHECK_PATH_SEPARATOR])dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE_SUCCESS_MSG])dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
+AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])dnl
 ])
 
 
@@ -298,7 +325,7 @@ dnl of some commands and utilities needed to allow
 dnl configure script bootstrapping itself when using
 dnl these to figure out other settings. Also performs
 dnl PATH_SEPARATOR auto-detection and sets its value
-dnl unless it is already set.
+dnl unless it is already set with a non-empty value.
 dnl
 dnl These basic checks are intended to be placed and
 dnl executed as early as possible in the resulting
@@ -307,7 +334,7 @@ dnl shell code.
 dnl
 dnl Although this is a public macro it should not be
 dnl used directly from configure.ac given that in this
-dnl way its expansion is not placed early enough in
+dnl way its expansion may not be placed early enough in
 dnl generated configure script, it simply makes little
 dnl sense to perform these basic checks once the script
 dnl is into more serious business.
@@ -320,12 +347,15 @@ AC_DEFUN([XC_CONFIGURE_PREAMBLE],
 [dnl
 AC_PREREQ([2.50])dnl
 AC_BEFORE([$0],[_XC_CONFIGURE_PREAMBLE])dnl
-AC_BEFORE([$0],[_XC_CHECK_COMMAND_TEST])dnl
-AC_BEFORE([$0],[_XC_CHECK_PATH])dnl
-AC_BEFORE([$0],[_XC_CHECK_COMMAND_EXPR])dnl
-AC_BEFORE([$0],[_XC_CHECK_UTILITY_SED])dnl
-AC_BEFORE([$0],[_XC_CHECK_UTILITY_GREP])dnl
-AC_BEFORE([$0],[_XC_CHECK_PATH_SEPARATOR])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_PREAMBLE])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_POSTLUDE])dnl
 AC_REQUIRE([_XC_CONFIGURE_PREAMBLE])dnl
 m4_define([$0],[])dnl
 ])
