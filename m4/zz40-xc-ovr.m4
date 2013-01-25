@@ -240,7 +240,7 @@ AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
 #
 
 # Directory count in 'PATH' when using a colon separator.
-xc_tst_dirs_col=''
+xc_tst_dirs_col='x'
 xc_tst_prev_IFS=$IFS; IFS=':'
 for xc_tst_dir in $PATH; do
   IFS=$xc_tst_prev_IFS
@@ -250,7 +250,7 @@ IFS=$xc_tst_prev_IFS
 xc_tst_dirs_col=(`expr "$xc_tst_dirs_col" : '.*'`)
 
 # Directory count in 'PATH' when using a semicolon separator.
-xc_tst_dirs_sem=''
+xc_tst_dirs_sem='x'
 xc_tst_prev_IFS=$IFS; IFS=';'
 for xc_tst_dir in $PATH; do
   IFS=$xc_tst_prev_IFS
@@ -276,7 +276,7 @@ else
   fi
   if test -z "$PATH_SEPARATOR"; then
     # Simply use the auto-detected one when not already set.
-    PATH_SEPARATOR="$xc_tst_auto_separator"
+    PATH_SEPARATOR=$xc_tst_auto_separator
   elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
   fi
@@ -361,7 +361,7 @@ m4_define([$0],[])dnl
 ])
 
 
-dnl Override autoconf's PATH_SEPARATOR check
+dnl Override autoconf PATH_SEPARATOR check
 dnl -------------------------------------------------
 dnl This is done to ensure that the same check is
 dnl used across different autoconf versions and to
