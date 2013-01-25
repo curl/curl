@@ -54,6 +54,7 @@ dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
 #
 # Verify that 'echo' command is available, otherwise abort.
 #
@@ -82,6 +83,8 @@ dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
 #
 # Verify that 'test' command is available, otherwise abort.
 #
@@ -109,6 +112,9 @@ dnl is set, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 #
 # Verify that 'PATH' variable is set, otherwise abort.
 #
@@ -136,6 +142,10 @@ dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 #
 # Verify that 'expr' command is available, otherwise abort.
 #
@@ -167,6 +177,11 @@ dnl proper 'sed' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 #
 # Verify that 'sed' utility is found within 'PATH', otherwise abort.
 #
@@ -199,6 +214,12 @@ dnl proper 'grep' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 #
 # Verify that 'grep' utility is found within 'PATH', otherwise abort.
 #
@@ -235,6 +256,13 @@ dnl overrides the auto-detected one.
 
 AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
 #
 # Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
 #
@@ -291,6 +319,14 @@ dnl Private macro.
 
 AC_DEFUN([_XC_CFG_PRE_POSTLUDE],
 [dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
 echo "checking whether some basic commands and utilities are available... yes"
 
 IFS=$xc_configure_preamble_prev_IFS
