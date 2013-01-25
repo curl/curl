@@ -249,7 +249,7 @@ dnl the user has already set it with a non-empty value.
 dnl
 dnl This path separator is the symbol used to separate
 dnl or diferentiate paths inside the 'PATH' environment
-dnl environment variable.
+dnl variable.
 dnl
 dnl Non-empty user provided 'PATH_SEPARATOR' always
 dnl overrides the auto-detected one.
@@ -355,7 +355,7 @@ dnl XC_CONFIGURE_PREAMBLE
 dnl -------------------------------------------------
 dnl Public macro.
 dnl
-dnl This macro macro emits shell code which does some
+dnl This macro emits shell code which does some
 dnl very basic checks related with the availability
 dnl of some commands and utilities needed to allow
 dnl configure script bootstrapping itself when using
@@ -408,32 +408,44 @@ dnl
 dnl Override when using autoconf 2.53 and newer.
 dnl
 
+m4_ifdef([_AS_PATH_SEPARATOR_PREPARE],
+[dnl
+m4_undefine([_AS_PATH_SEPARATOR_PREPARE])dnl
 m4_defun([_AS_PATH_SEPARATOR_PREPARE],
 [dnl
 AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 m4_define([$0],[])dnl
+])dnl
 ])
 
 dnl
 dnl Override when using autoconf 2.50 to 2.52
 dnl
 
+m4_ifdef([_AC_INIT_PREPARE_FS_SEPARATORS],
+[dnl
+m4_undefine([_AC_INIT_PREPARE_FS_SEPARATORS])dnl
 m4_defun([_AC_INIT_PREPARE_FS_SEPARATORS],
 [dnl
 AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 ac_path_separator=$PATH_SEPARATOR
 m4_define([$0],[])dnl
+])dnl
 ])
 
 dnl
 dnl Override when using libtool 1.4.2
 dnl
 
+m4_ifdef([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
+[dnl
+m4_undefine([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR])dnl
 m4_defun([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR],
 [dnl
 AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 lt_cv_sys_path_separator=$PATH_SEPARATOR
 m4_define([$0],[])dnl
+])dnl
 ])
 
 
@@ -475,6 +487,7 @@ AC_BEFORE([$0],[AC_CONFIG_HEADERS])dnl
 AC_BEFORE([$0],[AC_CONFIG_MACRO_DIR])dnl
 AC_BEFORE([$0],[AC_CONFIG_MACRO_DIRS])dnl
 dnl
+m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
 ])
 
