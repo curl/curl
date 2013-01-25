@@ -226,11 +226,13 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   line += 4;
   len -= 4;
 
+  /* Do we have a SIZE capability? */
   if(smtpc->state == SMTP_EHLO && len >= 4 && !memcmp(line, "SIZE", 4)) {
     DEBUGF(infof(conn->data, "Server supports SIZE extension.\n"));
     smtpc->size_supported = true;
   }
 
+  /* Do we have an AUTH capability? */
   if(smtpc->state == SMTP_EHLO && len >= 5 && !memcmp(line, "AUTH ", 5)) {
     line += 5;
     len -= 5;
@@ -246,11 +248,13 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
       if(!len)
         break;
 
+      /* Extract the word */
       for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
             line[wordlen] != '\t' && line[wordlen] != '\r' &&
             line[wordlen] != '\n';)
         wordlen++;
 
+      /* Test the word for a matching authentication mechanism */
       if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
         smtpc->authmechs |= SASL_MECH_LOGIN;
       else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
