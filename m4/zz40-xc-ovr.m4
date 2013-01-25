@@ -151,7 +151,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 #
 
 xc_tst_str='unknown'
-xc_tst_str=(`expr "$xc_tst_str" : '.*' 2>/dev/null`)
+xc_tst_str=`expr "$xc_tst_str" : '.*' 2>/dev/null`
 case "x$xc_tst_str" in @%:@((
   x7)
     :
@@ -187,8 +187,8 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 #
 
 xc_tst_str='unknown'
-xc_tst_str=(`echo "$xc_tst_str" 2>/dev/null \
-  | sed -e 's:unknown:success:' 2>/dev/null`)
+xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
+  | sed -e 's:unknown:success:' 2>/dev/null`
 case "x$xc_tst_str" in @%:@((
   xsuccess)
     :
@@ -275,7 +275,7 @@ for xc_tst_dir in $PATH; do
   xc_tst_dirs_col="x$xc_tst_dirs_col"
 done
 IFS=$xc_tst_prev_IFS
-xc_tst_dirs_col=(`expr "$xc_tst_dirs_col" : '.*'`)
+xc_tst_dirs_col=`expr "$xc_tst_dirs_col" : '.*'`
 
 # Directory count in 'PATH' when using a semicolon separator.
 xc_tst_dirs_sem='x'
@@ -285,7 +285,7 @@ for xc_tst_dir in $PATH; do
   xc_tst_dirs_sem="x$xc_tst_dirs_sem"
 done
 IFS=$xc_tst_prev_IFS
-xc_tst_dirs_sem=(`expr "$xc_tst_dirs_sem" : '.*'`)
+xc_tst_dirs_sem=`expr "$xc_tst_dirs_sem" : '.*'`
 
 if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   # When both counting methods give the same result we do not want to
