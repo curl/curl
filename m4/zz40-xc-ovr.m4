@@ -327,9 +327,9 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
 AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
-echo "checking whether some basic commands and utilities are available... yes"
-
 IFS=$xc_configure_preamble_prev_IFS
+
+xc_configure_preamble_result='yes'
 ])
 
 
@@ -449,6 +449,36 @@ m4_define([$0],[])dnl
 ])
 
 
+dnl _XC_OVR_ZZ40_WITNESS
+dnl -------------------------------------------------
+dnl Private macro.
+dnl
+dnl Emits shell code that allows knowing wether macro
+dnl XC_CONFIGURE_PREAMBLE has expanded before configure
+dnl body begins, and if it has suceeded when configure
+dnl finally runs. Results are recorded in config.log
+
+AC_DEFUN([_XC_OVR_ZZ40_WITNESS],
+[dnl
+m4_divert_text([BODY],
+[dnl
+#
+# Witness that XC_CONFIGURE_PREAMBLE has been used.
+#
+
+if test -z "$xc_configure_preamble_result"; then
+  AC_MSG_WARN([a macro expansion problem has been detected])
+  if test -z "$PATH_SEPARATOR"; then
+    AC_MSG_ERROR([variable 'PATH_SEPARATOR' not set (internal problem)])
+  fi
+else
+  AC_MSG_CHECKING([whether some basic commands and utilities are available])
+  AC_MSG_RESULT([$xc_configure_preamble_result])
+fi
+])dnl
+])
+
+
 dnl XC_OVR_ZZ40
 dnl -------------------------------------------------
 dnl Placing a call to this macro in configure.ac will
@@ -458,7 +488,8 @@ dnl provided elsewhere.
 dnl
 dnl This is the proper and intended way in which macro
 dnl XC_CONFIGURE_PREAMBLE will expand early enough in
-dnl generated configure script.
+dnl generated configure script, as well as witness of
+dnl its usage into configure body.
 
 AC_DEFUN([XC_OVR_ZZ40],
 [dnl
@@ -486,6 +517,8 @@ AC_BEFORE([$0],[AC_CONFIG_SRCDIR])dnl
 AC_BEFORE([$0],[AC_CONFIG_HEADERS])dnl
 AC_BEFORE([$0],[AC_CONFIG_MACRO_DIR])dnl
 AC_BEFORE([$0],[AC_CONFIG_MACRO_DIRS])dnl
+dnl
+AC_REQUIRE([_XC_OVR_ZZ40_WITNESS])dnl
 dnl
 m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
