@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,8 +64,7 @@ struct smtp_conn {
   unsigned int authused;   /* Auth mechanism used for the connection */
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   struct curl_slist *rcpt; /* Recipient list */
-  bool ssldone;            /* Is connect() over SSL done? Only relevant in
-                              multi mode */
+  bool ssldone;            /* Is connect() over SSL done? */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
 };
@@ -85,4 +84,3 @@ extern const struct Curl_handler Curl_handler_smtps;
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread);
 
 #endif /* HEADER_CURL_SMTP_H */
-

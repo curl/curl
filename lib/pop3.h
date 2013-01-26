@@ -65,8 +65,7 @@ struct pop3_conn {
   unsigned int authused;  /* SASL auth mechanism used for the connection */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
   pop3state state;        /* Always use pop3.c:state() to change state! */
-  bool ssldone;           /* Is connect() over SSL done? Only relevant in
-                             multi mode */
+  bool ssldone;           /* Is connect() over SSL done? */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

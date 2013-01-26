@@ -61,8 +61,7 @@ struct imap_conn {
   imapstate state;        /* Always use imap.c:state() to change state! */
   int cmdid;              /* Next command ID */
   const char *idstr;      /* String based response ID to wait for */
-  bool ssldone;           /* Is connect() over SSL done? Only relevant in
-                             multi mode */
+  bool ssldone;           /* Is connect() over SSL done? */
 };
 
 extern const struct Curl_handler Curl_handler_imap;
