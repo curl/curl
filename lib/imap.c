@@ -601,7 +601,8 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
        to TLS connection now */
     const char *str = getcmdid(conn);
     result = imap_sendf(conn, str, "%s STARTTLS", str);
-    state(conn, IMAP_STARTTLS);
+    if(!result)
+      state(conn, IMAP_STARTTLS);
   }
   else
     result = imap_state_capability(conn);
