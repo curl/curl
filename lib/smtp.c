@@ -543,7 +543,8 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");
-    state(conn, SMTP_STARTTLS);
+    if(!result)
+      state(conn, SMTP_STARTTLS);
   }
   else
     result = smtp_authenticate(conn);
