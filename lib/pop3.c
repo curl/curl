@@ -542,7 +542,8 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
     result = Curl_pp_sendf(&pop3c->pp, "STLS");
-    state(conn, POP3_STARTTLS);
+    if(!result)
+      state(conn, POP3_STARTTLS);
   }
   else
     result = pop3_state_capa(conn);
