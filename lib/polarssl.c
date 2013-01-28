@@ -38,6 +38,10 @@
 #include <polarssl/x509.h>
 #include <polarssl/version.h>
 
+#if POLARSSL_VERSION_NUMBER >= 0x01000000
+#include <polarssl/error.h>
+#endif /* POLARSSL_VERSION_NUMBER >= 0x01000000 */
+
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
 
@@ -113,6 +117,10 @@ polarssl_connect_step1(struct connectdata *conn,
   void *old_session = NULL;
   size_t old_session_size = 0;
 
+  char errorbuf[128];
+  memset(errorbuf, 0, sizeof(errorbuf));
+
+
   /* PolarSSL only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "PolarSSL does not support SSLv2");
@@ -131,8 +139,11 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_SSL_CAFILE]);
 
     if(ret<0) {
-      failf(data, "Error reading ca cert file %s: -0x%04X",
-            data->set.str[STRING_SSL_CAFILE], ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading ca cert file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_SSL_CAFILE], -ret, errorbuf);
 
       if(data->set.ssl.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
@@ -147,8 +158,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_CERT]);
 
     if(ret) {
-      failf(data, "Error reading client cert file %s: -0x%04X",
-            data->set.str[STRING_CERT], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading client cert file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_CERT], -ret, errorbuf);
+
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -160,8 +175,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_KEY_PASSWD]);
 
     if(ret) {
-      failf(data, "Error reading private key %s: -0x%04X",
-            data->set.str[STRING_KEY], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading private key %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_KEY], -ret, errorbuf);
+
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -174,8 +193,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_SSL_CRLFILE]);
 
     if(ret) {
-      failf(data, "Error reading CRL file %s: -0x%04X",
-            data->set.str[STRING_SSL_CRLFILE], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading CRL file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_SSL_CRLFILE], -ret, errorbuf);
+
       return CURLE_SSL_CRL_BADFILE;
     }
   }
@@ -253,6 +276,9 @@ polarssl_connect_step2(struct connectdata *conn,
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
 
+  char errorbuf[128];
+  memset(errorbuf, 0, sizeof(errorbuf));
+
   conn->recv[sockindex] = polarssl_recv;
   conn->send[sockindex] = polarssl_send;
 
@@ -261,7 +287,11 @@ polarssl_connect_step2(struct connectdata *conn,
       break;
     else if(ret != POLARSSL_ERR_NET_WANT_READ &&
             ret != POLARSSL_ERR_NET_WANT_WRITE) {
-      failf(data, "ssl_handshake returned -0x%04X", -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+	  failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s", -ret, errorbuf);
+
       return CURLE_SSL_CONNECT_ERROR;
     }
     else {
