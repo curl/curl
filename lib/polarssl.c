@@ -67,12 +67,51 @@
 #include "select.h"
 #include "rawstr.h"
 
+/* apply threading? */
+#if defined(USE_THREADS_POSIX)
+#define THREADING_SUPPORT
+#include "polarsslthreadlock.h"
+#endif /* USE_THREADS_POSIX */
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#if defined(THREADING_SUPPORT) && POLARSSL_VERSION_NUMBER>0x01010000
+static entropy_context entropy;
+
+static int  entropy_init_initialized  = 0;
+
+/* start of entropy_init_mutex() */
+static void entropy_init_mutex(entropy_context *ctx)
+{
+    /* lock 0 = entropy_init_mutex() */
+    polarsslthreadlock_lock_function(0);
+    if(entropy_init_initialized == 0)
+    {
+        entropy_init(ctx);
+        entropy_init_initialized = 1;
+    }
+    polarsslthreadlock_unlock_function(0);
+}
+/* end of entropy_init_mutex() */
+
+/* start of entropy_func_mutex() */
+static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
+{
+    int ret;
+	/* lock 1 = entropy_func_mutex() */
+    polarsslthreadlock_lock_function(1);
+    ret = entropy_func(data, output, len);
+    polarsslthreadlock_unlock_function(1);
+	
+	return ret;
+}
+/* end of entropy_func_mutex() */
+
+#endif /* THREADING_SUPPORT && POLARSSL_VERSION_NUMBER>0x01010000 */
 
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
@@ -128,6 +167,18 @@ polarssl_connect_step1(struct connectdata *conn,
 #if POLARSSL_VERSION_NUMBER<0x01010000
   havege_init(&connssl->hs);
 #else
+#ifdef THREADING_SUPPORT
+  entropy_init_mutex(&entropy);
+
+  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
+                           connssl->ssn.id, connssl->ssn.length)) != 0)
+  {
+#ifdef POLARSSL_ERROR_C
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+	 failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n", -ret, errorbuf);
+  }
+#else
   entropy_init(&connssl->entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
@@ -138,6 +189,7 @@ polarssl_connect_step1(struct connectdata *conn,
 #endif /* POLARSSL_ERROR_C */
 	 failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n", -ret, errorbuf);
   }
+#endif /* THREADING_SUPPORT */
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
   /* Load the trusted CA */
@@ -637,4 +689,24 @@ Curl_polarssl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif
+/*
+ * return 0 error initializing SSL
+ * return 1 SSL initialized successfully
+ */
+int polarssl_init(void)
+{
+#ifdef THREADING_SUPPORT
+  return polarsslthreadlock_thread_setup();
+#else /* THREADING_SUPPORT */
+  return 1;
+#endif /* THREADING_SUPPORT */   
+}
+
+void polarssl_cleanup(void)
+{
+#ifdef THREADING_SUPPORT
+  polarsslthreadlock_thread_cleanup();
+#endif /* THREADING_SUPPORT */
+}
+
+#endif /* USE_POLARSSL */

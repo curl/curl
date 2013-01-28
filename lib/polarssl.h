@@ -25,6 +25,11 @@
 
 #ifdef USE_POLARSSL
 
+/* Called on first use PolarSSL, setup threading if supported */
+int  polarssl_init(void);
+void polarssl_cleanup(void);
+
+
 CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex);
 
 CURLcode Curl_polarssl_connect_nonblocking(struct connectdata *conn,
@@ -43,8 +48,8 @@ size_t Curl_polarssl_version(char *buffer, size_t size);
 int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 
 /* API setup for PolarSSL */
-#define curlssl_init() (1)
-#define curlssl_cleanup() Curl_nop_stmt
+#define curlssl_init() polarssl_init()
+#define curlssl_cleanup() polarssl_cleanup()
 #define curlssl_connect Curl_polarssl_connect
 #define curlssl_connect_nonblocking Curl_polarssl_connect_nonblocking
 #define curlssl_session_free(x)  Curl_polarssl_session_free(x)
