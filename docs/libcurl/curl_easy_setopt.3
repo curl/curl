@@ -2260,8 +2260,8 @@ even indicate an accessible file.
 This option is by default set to the system path where libcurl's cacert bundle
 is assumed to be stored, as established at build time.
 
-When built against NSS, this is the directory that the NSS certificate
-database resides in.
+If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
+(libnsspem.so) needs to be available for this option to work properly.
 .IP CURLOPT_ISSUERCERT
 Pass a char * to a zero terminated string naming a file holding a CA
 certificate in PEM format. If the option is set, an additional check against
