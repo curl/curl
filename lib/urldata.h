@@ -107,9 +107,15 @@
 #endif
 
 #ifdef USE_POLARSSL
-#include <polarssl/havege.h>
 #include <polarssl/ssl.h>
-#endif
+#include <polarssl/version.h>
+#if POLARSSL_VERSION_NUMBER<0x01010000
+#include <polarssl/havege.h>
+#else
+#include <polarssl/entropy.h>
+#include <polarssl/ctr_drbg.h>
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+#endif /* USE_POLARSSL */
 
 #ifdef USE_CYASSL
 #undef OCSP_REQUEST  /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
@@ -282,7 +288,13 @@ struct ssl_connect_data {
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_POLARSSL
+#if POLARSSL_VERSION_NUMBER<0x01010000
   havege_state hs;
+#else
+  /* from v1.1.0, use ctr_drbg and entropy */
+  ctr_drbg_context ctr_drbg;
+  entropy_context entropy;
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_context ssl;
   ssl_session ssn;
   int server_fd;

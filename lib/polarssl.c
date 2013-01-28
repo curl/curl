@@ -33,7 +33,6 @@
 
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
-#include <polarssl/havege.h>
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
 #include <polarssl/version.h>
@@ -42,8 +41,13 @@
 #include <polarssl/error.h>
 #endif /* POLARSSL_VERSION_NUMBER >= 0x01000000 */
 
+#if POLARSSL_VERSION_NUMBER>0x01010000
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
+#else
+#include <polarssl/havege.h>
+#endif /* POLARSSL_VERSION_NUMBER>0x01010000 */
+
 
 #if POLARSSL_VERSION_NUMBER<0x01000000
 /*
@@ -69,14 +73,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* version dependent differences */
-#if POLARSSL_VERSION_NUMBER < 0x01010000
-/* the old way */
-#define HAVEGE_RANDOM havege_rand
-#else
-/* from 1.1.0 */
-#define HAVEGE_RANDOM havege_random
-#endif
 
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
@@ -129,7 +125,20 @@ polarssl_connect_step1(struct connectdata *conn,
   else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
+#if POLARSSL_VERSION_NUMBER<0x01010000
   havege_init(&connssl->hs);
+#else
+  entropy_init(&connssl->entropy);
+
+  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
+                           connssl->ssn.id, connssl->ssn.length)) != 0)
+  {
+#ifdef POLARSSL_ERROR_C
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+	 failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n", -ret, errorbuf);
+  }
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
   /* Load the trusted CA */
   memset(&connssl->cacert, 0, sizeof(x509_cert));
@@ -214,8 +223,13 @@ polarssl_connect_step1(struct connectdata *conn,
   ssl_set_endpoint(&connssl->ssl, SSL_IS_CLIENT);
   ssl_set_authmode(&connssl->ssl, SSL_VERIFY_OPTIONAL);
 
-  ssl_set_rng(&connssl->ssl, HAVEGE_RANDOM,
+#if POLARSSL_VERSION_NUMBER<0x01010000
+  ssl_set_rng(&connssl->ssl, havege_rand,
               &connssl->hs);
+#else
+  ssl_set_rng(&connssl->ssl, ctr_drbg_random,
+              &connssl->ctr_drbg);
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_set_bio(&connssl->ssl,
               net_recv, &conn->sock[sockindex],
               net_send, &conn->sock[sockindex]);
