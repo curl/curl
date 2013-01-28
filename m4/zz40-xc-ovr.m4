@@ -28,15 +28,28 @@ dnl subdirectory. This allows that macro (re)definitions from this
 dnl file may override those provided in other files.
 
 
+dnl Version macros
+dnl -------------------------------------------------
+dnl Public macros.
+
+m4_define([XC_CONFIGURE_PREAMBLE_VER_MAJOR],[1])dnl
+m4_define([XC_CONFIGURE_PREAMBLE_VER_MINOR],[0])dnl
+
+
 dnl _XC_CFG_PRE_PREAMBLE
 dnl -------------------------------------------------
 dnl Private macro.
 
 AC_DEFUN([_XC_CFG_PRE_PREAMBLE],
 [
-## ---------------------------- ##
-## XC_CONFIGURE_PREAMBLE rev: 1 ##
-## ---------------------------- ##
+## -------------------------------- ##
+@%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []dnl
+XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]dnl
+XC_CONFIGURE_PREAMBLE_VER_MINOR  ##
+## -------------------------------- ##
+
+xc_configure_preamble_ver_major='XC_CONFIGURE_PREAMBLE_VER_MAJOR'
+xc_configure_preamble_ver_minor='XC_CONFIGURE_PREAMBLE_VER_MINOR'
 
 xc_configure_preamble_prev_IFS=$IFS
 
@@ -44,6 +57,7 @@ xc_msg_warn='configure: WARNING:'
 xc_msg_abrt='Can not continue.'
 xc_msg_err='configure: error:'
 ])
+
 
 dnl _XC_CFG_PRE_BASIC_CHK_CMD_ECHO
 dnl -------------------------------------------------
@@ -61,7 +75,7 @@ AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
 
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   xsuccess)
     :
     ;;
@@ -91,7 +105,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
 
 xc_tst_str='unknown'
 (`test -n "$xc_tst_str" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   xsuccess)
     :
     ;;
@@ -121,7 +135,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 
 xc_tst_str='unknown'
 (`test -n "$PATH" >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   xsuccess)
     :
     ;;
@@ -152,7 +166,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 
 xc_tst_str='unknown'
 xc_tst_str=`expr "$xc_tst_str" : '.*' 2>/dev/null`
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   x7)
     :
     ;;
@@ -189,7 +203,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 xc_tst_str='unknown'
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
   | sed -e 's:unknown:success:' 2>/dev/null`
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   xsuccess)
     :
     ;;
@@ -227,7 +241,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 xc_tst_str='unknown'
 (`echo "$xc_tst_str" 2>/dev/null \
   | grep 'unknown' >/dev/null 2>&1`) && xc_tst_str='success'
-case "x$xc_tst_str" in @%:@((
+case "x$xc_tst_str" in @%:@ ((
   xsuccess)
     :
     ;;
@@ -333,24 +347,6 @@ xc_configure_preamble_result='yes'
 ])
 
 
-dnl _XC_CONFIGURE_PREAMBLE
-dnl -------------------------------------------------
-dnl Private macro.
-
-AC_DEFUN([_XC_CONFIGURE_PREAMBLE],
-[dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
-AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
-AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])dnl
-])
-
-
 dnl XC_CONFIGURE_PREAMBLE
 dnl -------------------------------------------------
 dnl Public macro.
@@ -359,30 +355,29 @@ dnl This macro emits shell code which does some
 dnl very basic checks related with the availability
 dnl of some commands and utilities needed to allow
 dnl configure script bootstrapping itself when using
-dnl these to figure out other settings. Also performs
-dnl PATH_SEPARATOR auto-detection and sets its value
-dnl unless it is already set with a non-empty value.
+dnl these to figure out other settings. Also emits
+dnl code that performs PATH_SEPARATOR auto-detection
+dnl and sets its value unless it is already set with
+dnl a non-empty value.
 dnl
 dnl These basic checks are intended to be placed and
 dnl executed as early as possible in the resulting
 dnl configure script, and as such these must be pure
-dnl shell code.
+dnl and portable shell code.
 dnl
-dnl Although this is a public macro it should not be
-dnl used directly from configure.ac given that in this
-dnl way its expansion may not be placed early enough in
-dnl generated configure script, it simply makes little
-dnl sense to perform these basic checks once the script
-dnl is into more serious business.
+dnl This macro may be used directly, or indirectly
+dnl when using other macros that AC_REQUIRE it such
+dnl as XC_CHECK_PATH_SEPARATOR.
 dnl
-dnl The proper way of making this macro expand early
-dnl enough in configure script is using XC_OVR_ZZ40
-dnl in configure.ac which takes care of everything.
+dnl Currently the mechanism used to ensure that this
+dnl macro expands early enough in generated configure
+dnl script is making it override autoconf and libtool
+dnl PATH_SEPARATOR check.
 
 AC_DEFUN([XC_CONFIGURE_PREAMBLE],
 [dnl
 AC_PREREQ([2.50])dnl
-AC_BEFORE([$0],[_XC_CONFIGURE_PREAMBLE])dnl
+dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_PREAMBLE])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
@@ -392,16 +387,50 @@ AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_POSTLUDE])dnl
-AC_REQUIRE([_XC_CONFIGURE_PREAMBLE])dnl
+dnl
+AC_BEFORE([$0],[AC_CHECK_TOOL])dnl
+AC_BEFORE([$0],[AC_CHECK_PROG])dnl
+AC_BEFORE([$0],[AC_CHECK_TOOLS])dnl
+AC_BEFORE([$0],[AC_CHECK_PROGS])dnl
+dnl
+AC_BEFORE([$0],[AC_PATH_TOOL])dnl
+AC_BEFORE([$0],[AC_PATH_PROG])dnl
+AC_BEFORE([$0],[AC_PATH_PROGS])dnl
+dnl
+AC_BEFORE([$0],[AC_PROG_SED])dnl
+AC_BEFORE([$0],[AC_PROG_GREP])dnl
+AC_BEFORE([$0],[AC_PROG_LN_S])dnl
+AC_BEFORE([$0],[AC_PROG_MKDIR_P])dnl
+AC_BEFORE([$0],[AC_PROG_INSTALL])dnl
+AC_BEFORE([$0],[AC_PROG_MAKE_SET])dnl
+AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
+dnl
+AC_BEFORE([$0],[LT_INIT])dnl
+AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
+AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
+dnl
+AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
+AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])dnl
+dnl
+m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
 ])
 
 
-dnl Override autoconf PATH_SEPARATOR check
+dnl Override autoconf and libtool PATH_SEPARATOR check
 dnl -------------------------------------------------
+dnl Macros overriding.
+dnl
 dnl This is done to ensure that the same check is
 dnl used across different autoconf versions and to
-dnl allow us to expand XC_CONFIGURE_PREAMBLE macro
+dnl allow expansion of XC_CONFIGURE_PREAMBLE macro
 dnl early enough in the generated configure script.
 
 dnl
@@ -449,50 +478,39 @@ m4_define([$0],[])dnl
 ])
 
 
-dnl _XC_OVR_ZZ40_WITNESS
+dnl XC_CHECK_PATH_SEPARATOR
 dnl -------------------------------------------------
-dnl Private macro.
+dnl Public macro.
 dnl
-dnl Emits shell code that allows knowing wether macro
-dnl XC_CONFIGURE_PREAMBLE has expanded before configure
-dnl body begins, and if it has suceeded when configure
-dnl finally runs. Results are recorded in config.log
-
-AC_DEFUN([_XC_OVR_ZZ40_WITNESS],
-[dnl
-m4_divert_text([BODY],
-[dnl
-#
-# Witness that XC_CONFIGURE_PREAMBLE has been used.
-#
-
-if test -z "$xc_configure_preamble_result"; then
-  AC_MSG_WARN([a macro expansion problem has been detected])
-  if test -z "$PATH_SEPARATOR"; then
-    AC_MSG_ERROR([variable 'PATH_SEPARATOR' not set (internal problem)])
-  fi
-else
-  AC_MSG_CHECKING([whether some basic commands and utilities are available])
-  AC_MSG_RESULT([$xc_configure_preamble_result])
-fi
-])dnl
-])
-
-
-dnl XC_OVR_ZZ40
-dnl -------------------------------------------------
-dnl Placing a call to this macro in configure.ac will
-dnl make macros in this file visible to other macros
-dnl used for same configure script, overriding those
-dnl provided elsewhere.
+dnl Usage of this macro ensures that generated configure
+dnl script uses the same PATH_SEPARATOR check irrespective
+dnl of autoconf or libtool version being used to generate
+dnl configure script.
 dnl
-dnl This is the proper and intended way in which macro
-dnl XC_CONFIGURE_PREAMBLE will expand early enough in
-dnl generated configure script, as well as witness of
-dnl its usage into configure body.
+dnl Emits shell code that computes the path separator
+dnl and stores the result in 'PATH_SEPARATOR', unless
+dnl the user has already set it with a non-empty value.
+dnl
+dnl This path separator is the symbol used to separate
+dnl or diferentiate paths inside the 'PATH' environment
+dnl variable.
+dnl
+dnl Non-empty user provided 'PATH_SEPARATOR' always
+dnl overrides the auto-detected one.
+dnl
+dnl Strictly speaking the check is done in two steps. The
+dnl first, which does the actual check, takes place in
+dnl XC_CONFIGURE_PREAMBLE macro and happens very early in
+dnl generated configure script. The second one shows and
+dnl logs the result of the check into config.log at a later
+dnl configure stage. Placement of this second stage in
+dnl generated configure script will be done where first
+dnl direct or indirect usage of this macro happens.
 
-AC_DEFUN([XC_OVR_ZZ40],
+AC_DEFUN([XC_CHECK_PATH_SEPARATOR],
 [dnl
+AC_PREREQ([2.50])dnl
+dnl
 AC_BEFORE([$0],[AC_CHECK_TOOL])dnl
 AC_BEFORE([$0],[AC_CHECK_PROG])dnl
 AC_BEFORE([$0],[AC_CHECK_TOOLS])dnl
@@ -505,6 +523,7 @@ dnl
 AC_BEFORE([$0],[AC_PROG_SED])dnl
 AC_BEFORE([$0],[AC_PROG_GREP])dnl
 AC_BEFORE([$0],[AC_PROG_LN_S])dnl
+AC_BEFORE([$0],[AC_PROG_MKDIR_P])dnl
 AC_BEFORE([$0],[AC_PROG_INSTALL])dnl
 AC_BEFORE([$0],[AC_PROG_MAKE_SET])dnl
 AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
@@ -513,12 +532,20 @@ AC_BEFORE([$0],[LT_INIT])dnl
 AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
 AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
 dnl
-AC_BEFORE([$0],[AC_CONFIG_SRCDIR])dnl
-AC_BEFORE([$0],[AC_CONFIG_HEADERS])dnl
-AC_BEFORE([$0],[AC_CONFIG_MACRO_DIR])dnl
-AC_BEFORE([$0],[AC_CONFIG_MACRO_DIRS])dnl
+AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 dnl
-AC_REQUIRE([_XC_OVR_ZZ40_WITNESS])dnl
+#
+# Check that 'PATH_SEPARATOR' has already been set.
+#
+
+if test -z "$xc_configure_preamble_result"; then
+  AC_MSG_WARN([a macro expansion problem has been detected])
+fi
+if test -z "$PATH_SEPARATOR"; then
+  AC_MSG_ERROR([variable 'PATH_SEPARATOR' not set (internal problem)])
+fi
+AC_MSG_CHECKING([for path separator])
+AC_MSG_RESULT([$PATH_SEPARATOR])
 dnl
 m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
