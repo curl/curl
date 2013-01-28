@@ -68,10 +68,10 @@
 #include "rawstr.h"
 
 /* apply threading? */
-#if defined(USE_THREADS_POSIX)
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 #define THREADING_SUPPORT
 #include "polarsslthreadlock.h"
-#endif /* USE_THREADS_POSIX */
+#endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
