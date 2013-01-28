@@ -24,7 +24,7 @@ endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.2
+LIBSSH2_PATH = ../../libssh2-1.4.3
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -49,7 +49,7 @@ endif
 
 # Edit the path below to point to the base of your libmetalink package.
 ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.1.0
+LIBMETALINK_PATH = ../../libmetalink-0.1.2
 endif
 
 # Edit the path below to point to the base of your libexpat package.
