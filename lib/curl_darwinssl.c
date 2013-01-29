@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012-2013, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012-2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1383,12 +1383,14 @@ static ssize_t darwinssl_send(struct connectdata *conn,
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  size_t processed;
+  size_t processed = 0UL;
   OSStatus err = SSLWrite(connssl->ssl_ctx, mem, len, &processed);
 
   if(err != noErr) {
     switch (err) {
-      case errSSLWouldBlock:  /* we're not done yet; keep sending */
+      case errSSLWouldBlock:  /* return how much we sent (if anything) */
+        if(processed)
+          return (ssize_t)processed;
         *curlcode = CURLE_AGAIN;
         return -1;
         break;
@@ -1411,12 +1413,14 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];
-  size_t processed;
+  size_t processed = 0UL;
   OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
     switch (err) {
-      case errSSLWouldBlock:  /* we're not done yet; keep reading */
+      case errSSLWouldBlock:  /* return how much we read (if anything) */
+        if(processed)
+          return (ssize_t)processed;
         *curlcode = CURLE_AGAIN;
         return -1;
         break;
