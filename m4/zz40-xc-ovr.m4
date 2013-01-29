@@ -97,7 +97,6 @@ dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_TEST],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
 #
 # Verify that 'test' command is available, otherwise abort.
@@ -126,8 +125,6 @@ dnl is set, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_VAR_PATH],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 #
 # Verify that 'PATH' variable is set, otherwise abort.
@@ -156,9 +153,6 @@ dnl is available, otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 #
 # Verify that 'expr' command is available, otherwise abort.
@@ -191,11 +185,7 @@ dnl proper 'sed' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_SED],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 #
 # Verify that 'sed' utility is found within 'PATH', otherwise abort.
 #
@@ -228,12 +218,7 @@ dnl proper 'grep' this early, that should be done later.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 #
 # Verify that 'grep' utility is found within 'PATH', otherwise abort.
 #
@@ -247,6 +232,96 @@ case "x$xc_tst_str" in @%:@ ((
     ;;
   *)
     echo "$xc_msg_err 'grep' utility not found in 'PATH'. $xc_msg_abrt" >&2
+    exit 1
+    ;;
+esac
+])
+
+
+dnl _XC_CFG_PRE_BASIC_CHK_UTIL_TR
+dnl -------------------------------------------------
+dnl Private macro.
+dnl
+dnl Emits shell code that verifies that 'tr' utility
+dnl is found within 'PATH', otherwise aborts execution.
+
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_TR],
+[dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+#
+# Verify that 'tr' utility is found within 'PATH', otherwise abort.
+#
+
+xc_tst_str='98s7u6c5c4e3s2s10'
+xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
+  | tr -d '0123456789' 2>/dev/null`
+case "x$xc_tst_str" in @%:@ ((
+  xsuccess)
+    :
+    ;;
+  *)
+    echo "$xc_msg_err 'tr' utility not found in 'PATH'. $xc_msg_abrt" >&2
+    exit 1
+    ;;
+esac
+])
+
+
+dnl _XC_CFG_PRE_BASIC_CHK_UTIL_WC
+dnl -------------------------------------------------
+dnl Private macro.
+dnl
+dnl Emits shell code that verifies that 'wc' utility
+dnl is found within 'PATH', otherwise aborts execution.
+
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_WC],
+[dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+#
+# Verify that 'wc' utility is found within 'PATH', otherwise abort.
+#
+
+xc_tst_str='unknown unknown unknown unknown'
+xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
+  | wc -w 2>/dev/null`
+case "x$xc_tst_str" in @%:@ ((
+  x4)
+    :
+    ;;
+  *)
+    echo "$xc_msg_err 'wc' utility not found in 'PATH'. $xc_msg_abrt" >&2
+    exit 1
+    ;;
+esac
+])
+
+
+dnl _XC_CFG_PRE_BASIC_CHK_UTIL_CAT
+dnl -------------------------------------------------
+dnl Private macro.
+dnl
+dnl Emits shell code that verifies that 'cat' utility
+dnl is found within 'PATH', otherwise aborts execution.
+
+AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT],
+[dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
+#
+# Verify that 'cat' utility is found within 'PATH', otherwise abort.
+#
+
+xc_tst_str='unknown'
+xc_tst_str=`cat <<_EOT 2>/dev/null | wc -l 2>/dev/null
+unknown
+unknown
+unknown
+_EOT`
+case "x$xc_tst_str" in @%:@ ((
+  x3)
+    :
+    ;;
+  *)
+    echo "$xc_msg_err 'cat' utility not found in 'PATH'. $xc_msg_abrt" >&2
     exit 1
     ;;
 esac
@@ -270,13 +345,7 @@ dnl overrides the auto-detected one.
 
 AC_DEFUN([_XC_CFG_PRE_CHECK_PATH_SEPARATOR],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_PREAMBLE])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_ECHO])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_TEST])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
 #
 # Auto-detect and set 'PATH_SEPARATOR', unless it is already non-empty set.
 #
@@ -323,6 +392,7 @@ else
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
   fi
 fi
+xc_PATH_SEPARATOR=$PATH_SEPARATOR
 AC_SUBST([PATH_SEPARATOR])dnl
 ])
 
@@ -340,6 +410,9 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
 AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
 IFS=$xc_configure_preamble_prev_IFS
 
@@ -385,6 +458,9 @@ AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
+AC_BEFORE([$0],[_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
 AC_BEFORE([$0],[_XC_CFG_PRE_POSTLUDE])dnl
 dnl
@@ -416,6 +492,9 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_CMD_EXPR])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_SED])dnl
 AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_GREP])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_CAT])dnl
 AC_REQUIRE([_XC_CFG_PRE_CHECK_PATH_SEPARATOR])dnl
 AC_REQUIRE([_XC_CFG_PRE_POSTLUDE])dnl
 dnl
@@ -535,17 +614,30 @@ dnl
 AC_REQUIRE([XC_CONFIGURE_PREAMBLE])dnl
 dnl
 #
-# Check that 'PATH_SEPARATOR' has already been set.
+# Check that 'XC_CONFIGURE_PREAMBLE' has already run.
 #
 
 if test -z "$xc_configure_preamble_result"; then
-  AC_MSG_WARN([a macro expansion problem has been detected])
+  AC_MSG_ERROR([xc_configure_preamble_result not set (internal problem)])
+fi
+
+#
+# Check that 'PATH_SEPARATOR' has already been set.
+#
+
+if test -z "$xc_PATH_SEPARATOR"; then
+  AC_MSG_ERROR([xc_PATH_SEPARATOR not set (internal problem)])
 fi
 if test -z "$PATH_SEPARATOR"; then
-  AC_MSG_ERROR([variable 'PATH_SEPARATOR' not set (internal problem)])
+  AC_MSG_ERROR([PATH_SEPARATOR not set (internal or config.site problem)])
 fi
 AC_MSG_CHECKING([for path separator])
 AC_MSG_RESULT([$PATH_SEPARATOR])
+if test "x$PATH_SEPARATOR" != "x$xc_PATH_SEPARATOR"; then
+  AC_MSG_CHECKING([for initial path separator])
+  AC_MSG_RESULT([$xc_PATH_SEPARATOR])
+  AC_MSG_ERROR([path separator mismatch (internal or config.site problem)])
+fi
 dnl
 m4_pattern_forbid([^_*XC])dnl
 m4_define([$0],[])dnl
