@@ -130,6 +130,9 @@ int main(void)
     /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
     curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
     res = curl_easy_perform(curl);
     /* Check for errors */
