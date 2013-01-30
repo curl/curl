@@ -346,9 +346,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Prepare the URL string */
-  strcpy(uri, service);
-  strcat(uri, "/");
-  strcat(uri, realm);
+  snprintf(uri, sizeof(uri), "%s/%s", service, realm);
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -392,20 +390,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
-  strcpy(response, "username=\"");
-  strcat(response, userp);
-  strcat(response, "\",realm=\"");
-  strcat(response, realm);
-  strcat(response, "\",nonce=\"");
-  strcat(response, nonce);
-  strcat(response, "\",cnonce=\"");
-  strcat(response, cnonce);
-  strcat(response, "\",nc=");
-  strcat(response, nonceCount);
-  strcat(response, ",digest-uri=\"");
-  strcat(response, uri);
-  strcat(response, "\",response=");
-  strcat(response, resp_hash_hex);
+  snprintf(response, sizeof(response),
+           "username=\"%s\",realm=\"%s\",nonce=\"%s\","
+           "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s",
+           userp, realm, nonce,
+           cnonce, nonceCount, uri, resp_hash_hex);
 
   /* Base64 encode the reply */
   return Curl_base64_encode(data, response, 0, outptr, outlen);
