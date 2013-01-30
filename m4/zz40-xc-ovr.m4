@@ -275,7 +275,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
 # Verify that 'tr' utility is found within 'PATH', otherwise abort.
 #
 
-xc_tst_str='${xc_tab}98s7u6c5c4e3s2s10'
+xc_tst_str="${xc_tab}98s7u6c5c4e3s2s10"
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
   | tr -d "0123456789$xc_tab" 2>/dev/null`
 case "x$xc_tst_str" in @%:@ ((
