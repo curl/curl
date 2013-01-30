@@ -53,6 +53,17 @@ xc_configure_preamble_ver_minor='XC_CONFIGURE_PREAMBLE_VER_MINOR'
 
 xc_configure_preamble_prev_IFS=$IFS
 
+#
+# Set internationalization behavior variables
+#
+
+LANG='C'
+LC_ALL='C'
+LANGUAGE='C'
+export LANG
+export LC_ALL
+export LANGUAGE
+
 xc_msg_warn='configure: WARNING:'
 xc_msg_abrt='Can not continue.'
 xc_msg_err='configure: error:'
@@ -276,14 +287,14 @@ dnl is found within 'PATH', otherwise aborts execution.
 
 AC_DEFUN([_XC_CFG_PRE_BASIC_CHK_UTIL_WC],
 [dnl
-AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_VAR_PATH])dnl
+AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_TR])dnl
 #
 # Verify that 'wc' utility is found within 'PATH', otherwise abort.
 #
 
 xc_tst_str='unknown unknown unknown unknown'
 xc_tst_str=`echo "$xc_tst_str" 2>/dev/null \
-  | wc -w 2>/dev/null`
+  | wc -w 2>/dev/null | tr -d ' ' 2>/dev/null`
 case "x$xc_tst_str" in @%:@ ((
   x4)
     :
@@ -311,7 +322,7 @@ AC_REQUIRE([_XC_CFG_PRE_BASIC_CHK_UTIL_WC])dnl
 #
 
 xc_tst_str='unknown'
-xc_tst_str=`cat <<_EOT 2>/dev/null | wc -l 2>/dev/null
+xc_tst_str=`cat <<_EOT 2>/dev/null | wc -l 2>/dev/null | tr -d ' ' 2>/dev/null
 unknown
 unknown
 unknown
