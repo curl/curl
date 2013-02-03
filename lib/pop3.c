@@ -460,47 +460,55 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
 
   /* Check supported authentication mechanisms by decreasing order of
      security */
+  if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL) {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(pop3c->authmechs & SASL_MECH_DIGEST_MD5) {
-    mech = "DIGEST-MD5";
-    authstate = POP3_AUTH_DIGESTMD5;
-    pop3c->authused = SASL_MECH_DIGEST_MD5;
-  }
-  else if(pop3c->authmechs & SASL_MECH_CRAM_MD5) {
-    mech = "CRAM-MD5";
-    authstate = POP3_AUTH_CRAMMD5;
-    pop3c->authused = SASL_MECH_CRAM_MD5;
-  }
-  else
+    if(pop3c->authmechs & SASL_MECH_DIGEST_MD5) {
+      mech = "DIGEST-MD5";
+      authstate = POP3_AUTH_DIGESTMD5;
+      pop3c->authused = SASL_MECH_DIGEST_MD5;
+    }
+    else if(pop3c->authmechs & SASL_MECH_CRAM_MD5) {
+      mech = "CRAM-MD5";
+      authstate = POP3_AUTH_CRAMMD5;
+      pop3c->authused = SASL_MECH_CRAM_MD5;
+    }
+    else
 #endif
 #ifdef USE_NTLM
-  if(pop3c->authmechs & SASL_MECH_NTLM) {
-    mech = "NTLM";
-    authstate = POP3_AUTH_NTLM;
-    pop3c->authused = SASL_MECH_NTLM;
-  }
-  else
+    if(pop3c->authmechs & SASL_MECH_NTLM) {
+      mech = "NTLM";
+      authstate = POP3_AUTH_NTLM;
+      pop3c->authused = SASL_MECH_NTLM;
+    }
+    else
 #endif
-  if(pop3c->authmechs & SASL_MECH_LOGIN) {
-    mech = "LOGIN";
-    authstate = POP3_AUTH_LOGIN;
-    pop3c->authused = SASL_MECH_LOGIN;
-  }
-  else if(pop3c->authmechs & SASL_MECH_PLAIN) {
-    mech = "PLAIN";
-    authstate = POP3_AUTH_PLAIN;
-    pop3c->authused = SASL_MECH_PLAIN;
-  }
-  else {
-    infof(conn->data, "No known SASL authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
+    if(pop3c->authmechs & SASL_MECH_LOGIN) {
+      mech = "LOGIN";
+      authstate = POP3_AUTH_LOGIN;
+      pop3c->authused = SASL_MECH_LOGIN;
+    }
+    else if(pop3c->authmechs & SASL_MECH_PLAIN) {
+      mech = "PLAIN";
+      authstate = POP3_AUTH_PLAIN;
+      pop3c->authused = SASL_MECH_PLAIN;
+    }
   }
 
-  if(!result) {
+  if(mech) {
     result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
 
     if(!result)
       state(conn, authstate);
+  }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  else if(conn->proto.pop3c.authtypes & POP3_TYPE_APOP)
+    result = pop3_state_apop(conn);
+#endif
+  else if(conn->proto.pop3c.authtypes & POP3_TYPE_CLEARTEXT)
+    result = pop3_state_user(conn);
+  else {
+    infof(conn->data, "No known authentication mechanisms supported!\n");
+    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
   }
 
   return result;
@@ -603,21 +611,8 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code == '+' && conn->proto.pop3c.authtypes) {
-    /* Check supported authentication types by decreasing order of security */
-    if(conn->proto.pop3c.authtypes & POP3_TYPE_SASL)
-      result = pop3_authenticate(conn);
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-    else if(conn->proto.pop3c.authtypes & POP3_TYPE_APOP)
-      result = pop3_state_apop(conn);
-#endif
-    else if(conn->proto.pop3c.authtypes & POP3_TYPE_CLEARTEXT)
-      result = pop3_state_user(conn);
-    else {
-      infof(conn->data, "No known authentication types supported!\n");
-      result = CURLE_LOGIN_DENIED; /* Other types not supported */
-    }
-  }
+  if(pop3code == '+')
+    result = pop3_authenticate(conn);
   else
     result = pop3_state_user(conn);
 
