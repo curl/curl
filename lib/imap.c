@@ -378,8 +378,12 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
               line[wordlen] != '\n';)
           wordlen++;
 
+        /* Has the server explicitly disabled the LOGIN command? */
+        if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
+          imapc->login_disabled = TRUE;
+
         /* Do we have an AUTH capability? */
-        if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
+        else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
           line += 5;
           len -= 5;
           wordlen -= 5;
@@ -548,18 +552,20 @@ static CURLcode imap_authenticate(struct connectdata *conn)
     authstate = IMAP_AUTHENTICATE_PLAIN;
     imapc->authused = SASL_MECH_PLAIN;
   }
-  else {
-    infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
-  }
 
-  if(!result) {
+  if(mech) {
     const char *str = getcmdid(conn);
 
     result = imap_sendf(conn, str, "%s AUTHENTICATE %s", str, mech);
 
     if(!result)
       state(conn, authstate);
+  }
+  else if(!imapc->login_disabled)
+    result = imap_state_login(conn);
+  else {
+    infof(conn->data, "No known authentication mechanisms supported!\n");
+    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
   }
 
   return result;
@@ -660,11 +666,10 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
 
   (void)instate; /* no use for this yet */
 
-  if(imapcode == 'O' && imapc->authmechs)
+  if(imapcode == 'O')
     result = imap_authenticate(conn);
   else
     result = imap_state_login(conn);

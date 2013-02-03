@@ -62,6 +62,7 @@ struct imap_conn {
   int cmdid;              /* Next command ID */
   const char *idstr;      /* String based response ID to wait for */
   bool ssldone;           /* Is connect() over SSL done? */
+  bool login_disabled;    /* LOGIN command explicitly disabled by server */
 };
 
 extern const struct Curl_handler Curl_handler_imap;
