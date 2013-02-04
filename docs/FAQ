@@ -1287,7 +1287,7 @@ FAQ
 
   If you're using the multi interface, you can also stop a transfer by
   removing the particular easy handle from the multi stack at any moment you
-  think the transfer is done.
+  think the transfer is done or when you wish to abort the transfer.
 
   5.14 Using C++ non-static functions for callbacks?
 
