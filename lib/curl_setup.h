@@ -40,6 +40,11 @@
 
 #include "curl_config.h"
 
+/* VMS needs some helper routines/definitions */
+#ifdef __VMS
+#  include "post-config-vms.h"
+#endif
+
 #else /* HAVE_CONFIG_H */
 
 #ifdef _WIN32_WCE
@@ -645,7 +650,9 @@ int netware_init(void);
  * Include macros and defines that should only be processed once.
  */
 
+#ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
+#endif
 
 /*
  * Definition of our NOP statement Object-like macro

@@ -27,6 +27,10 @@
 #include <signal.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
@@ -44,10 +48,6 @@
  * anyway for convenience.
  */
 #include "memdebug.h" /* keep this as LAST include */
-
-#ifdef __VMS
-static int vms_show = 0;
-#endif
 
 /*
  * Ensure that file descriptors 0, 1 and 2 (stdin, stdout, stderr) are

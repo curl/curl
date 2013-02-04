@@ -25,6 +25,8 @@
 
 #ifdef __VMS
 
+int vms_show;  /* If VMS error code has been written */
+
 int is_vms_shell(void);
 void vms_special_exit(int code, int vms_show);
 

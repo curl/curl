@@ -526,17 +526,6 @@ typedef int sig_atomic_t;
 #define EREMOTE          WSAEREMOTE
 #endif
 
-
-/*
- *  Actually use __32_getpwuid() on 64-bit VMS builds for getpwuid()
- */
-
-#if defined(__VMS) && \
-    defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
-#define getpwuid __32_getpwuid
-#endif
-
-
 /*
  * Macro argv_item_t hides platform details to code using it.
  */
