@@ -519,7 +519,7 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   const char *mech = NULL;
   imapstate authstate = IMAP_STOP;
 
-  /* Check supported authentication mechanisms by decreasing order of
+  /* Calculate the supported authentication mechanism by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(imapc->authmechs & SASL_MECH_DIGEST_MD5) {
@@ -554,6 +554,7 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   }
 
   if(mech) {
+    /* Perform SASL based authentication */
     const char *str = getcmdid(conn);
 
     result = imap_sendf(conn, str, "%s AUTHENTICATE %s", str, mech);
@@ -562,10 +563,12 @@ static CURLcode imap_authenticate(struct connectdata *conn)
       state(conn, authstate);
   }
   else if(!imapc->login_disabled)
+    /* Perform clear text authentication */
     result = imap_state_login(conn);
   else {
+    /* Other mechanisms not supported */
     infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
+    result = CURLE_LOGIN_DENIED;
   }
 
   return result;

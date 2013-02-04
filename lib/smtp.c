@@ -373,8 +373,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     return result;
   }
 
-  /* Check supported authentication mechanisms by decreasing order of
-     security */
+  /* Calculate the supported authentication mechanism, by decreasing order of
+     security, as well as the initial response where appropriate */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(smtpc->authmechs & SASL_MECH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
@@ -417,11 +417,13 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
                                             conn->passwd, &initresp, &len);
   }
   else {
+    /* Other mechanisms not supported */
     infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
+    result = CURLE_LOGIN_DENIED;
   }
 
   if(!result) {
+    /* Perform SASL based authentication */
     if(initresp &&
        strlen(mech) + len <= 512 - 8) { /* AUTH <mech> ...<crlf> */
        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
@@ -435,6 +437,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
       if(!result)
         state(conn, state1);
     }
+
     Curl_safefree(initresp);
   }
 

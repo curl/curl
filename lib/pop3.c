@@ -458,7 +458,7 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   const char *mech = NULL;
   pop3state authstate = POP3_STOP;
 
-  /* Check supported authentication mechanisms by decreasing order of
+  /* Calculate the supported authentication mechanism by decreasing order of
      security */
   if(pop3c->authtypes & POP3_TYPE_SASL) {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
@@ -495,6 +495,7 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   }
 
   if(mech) {
+    /* Perform SASL based authentication */
     result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
 
     if(!result)
@@ -502,13 +503,16 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   else if(pop3c->authtypes & POP3_TYPE_APOP)
+    /* Perform APOP authentication */
     result = pop3_state_apop(conn);
 #endif
   else if(pop3c->authtypes & POP3_TYPE_CLEARTEXT)
+    /* Perform clear text authentication */
     result = pop3_state_user(conn);
   else {
+    /* Other mechanisms not supported */
     infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED; /* Other mechanisms not supported */
+    result = CURLE_LOGIN_DENIED;
   }
 
   return result;
