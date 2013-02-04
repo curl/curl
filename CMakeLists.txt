@@ -132,22 +132,6 @@ mark_as_advanced(DISABLED_THREADSAFE)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
 mark_as_advanced(ENABLE_IPV6)
 
-if(WIN32)
-  # Windows standard libraries are located in C:/Program Files/Microsoft SDKs/[...]
-  # They are already included in the default MSVC LIBPATH => no find_library is needed!
-  list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES wsock32.lib ws2_32.lib)  # bufferoverflowu.lib
-  if(CURL_DISABLE_LDAP)
-    # Remove wldap32.lib from space-separated list
-    string(REPLACE " " ";" _LIST ${CMAKE_C_STANDARD_LIBRARIES})
-    list(REMOVE_ITEM _LIST "wldap32.lib")
-    to_list_spaces(_LIST CMAKE_C_STANDARD_LIBRARIES)
-  else()
-    # Append wldap32.lib
-    list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES wldap32.lib)
-  endif()
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES}"   CACHE STRING "" FORCE)
-endif()
-
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -249,6 +233,7 @@ if(CURL_ZLIB)  # AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE
     set(HAVE_ZLIB_H ON)
     set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
+    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
   endif()
 endif()
 
@@ -816,9 +801,6 @@ endif(MSVC)
 function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
   if(CURL_ZLIB AND ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIR})
-  endif()
-  if(CURL_ZLIB AND ZLIB_FOUND)
-    target_link_libraries(${TARGET_NAME} ${ZLIB_LIBRARIES})
     #ADD_DEFINITIONS( -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ )
   endif()
 
@@ -826,9 +808,10 @@ function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
     include_directories(${OPENSSL_INCLUDE_DIR})
   endif()
   if(CMAKE_USE_OPENSSL AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-    target_link_libraries(${TARGET_NAME} ${OPENSSL_LIBRARIES})
     #ADD_DEFINITIONS( -DUSE_SSLEAY )
   endif()
+
+  target_link_libraries(${TARGET_NAME} ${CURL_LIBS})
 endfunction()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
@@ -869,3 +852,13 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION include
     FILES_MATCHING PATTERN "*.h"
     PATTERN "curlbuild.h" EXCLUDE)
+
+
+# Workaround for MSVS10 to avoid the Dialog Hell
+# FIXME: This could be removed with future version of CMake.
+if(MSVC_VERSION EQUAL 1600)
+  set(CURL_SLN_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
+  if(EXISTS "${CURL_SLN_FILENAME}")
+    file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
+  endif()
+endif()

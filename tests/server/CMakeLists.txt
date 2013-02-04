@@ -14,7 +14,6 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   endif()
   # resolve test needs this
   setup_curl_dependencies(${TEST_NAME})
-  #TARGET_LINK_LIBRARIES( ${TEST_NAME} libcurl )
 
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convinience and to ease portability of these servers,
