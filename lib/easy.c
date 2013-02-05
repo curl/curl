@@ -457,7 +457,9 @@ CURLcode curl_easy_perform(CURL *easy)
     }
   }
 
-  mcode = curl_multi_remove_handle(multi, easy);
+  /* ignoring the return code isn't nice, but atm we can't really handle
+     a failure here, room for future improvement! */
+  (void)curl_multi_remove_handle(multi, easy);
 
   /* The multi handle is kept alive, owned by the easy handle */
   return code;
