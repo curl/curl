@@ -122,6 +122,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "http_proxy.h"
 #include "bundles.h"
 #include "conncache.h"
+#include "multihandle.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -131,6 +132,8 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 /* Local static prototypes */
+static struct connectdata *
+find_oldest_idle_connection(struct SessionHandle *data);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
@@ -2710,6 +2713,57 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
   }
 }
 
+/*
+ * This function kills and removes an existing connection in the connection
+ * cache. The connection that has been unused for the longest time.
+ *
+ * Returns the pointer to the oldest idle connection, or NULL if none was
+ * found.
+ */
+static struct connectdata *
+find_oldest_idle_connection(struct SessionHandle *data)
+{
+  struct conncache *bc = data->state.conn_cache;
+  struct curl_hash_iterator iter;
+  struct curl_llist_element *curr;
+  struct curl_hash_element *he;
+  long highscore=-1;
+  long score;
+  struct timeval now;
+  struct connectdata *conn_candidate = NULL;
+  struct connectbundle *bundle;
+
+  now = Curl_tvnow();
+
+  Curl_hash_start_iterate(bc->hash, &iter);
+
+  he = Curl_hash_next_element(&iter);
+  while(he) {
+    struct connectdata *conn;
+
+    bundle = he->ptr;
+
+    curr = bundle->conn_list->head;
+    while(curr) {
+      conn = curr->ptr;
+
+      if(!conn->inuse) {
+        /* Set higher score for the age passed since the connection was used */
+        score = Curl_tvdiff(now, conn->now);
+
+        if(score > highscore) {
+          highscore = score;
+          conn_candidate = conn;
+        }
+      }
+      curr = curr->next;
+    }
+
+    he = Curl_hash_next_element(&iter);
+  }
+
+  return conn_candidate;
+}
 
 /*
  * Given one filled in connection struct (named needle), this function should
@@ -2961,11 +3015,35 @@ ConnectionExists(struct SessionHandle *data,
   return FALSE; /* no matching connecting exists */
 }
 
-/* this connection can now be marked 'idle' */
-static void
-ConnectionDone(struct connectdata *conn)
+/* Mark the connection as 'idle', or close it if the cache is full.
+   Returns TRUE if the connection is kept, or FALSE if it was closed. */
+static bool
+ConnectionDone(struct SessionHandle *data, struct connectdata *conn)
 {
+  /* data->multi->maxconnects can be negative, deal with it. */
+  size_t maxconnects =
+    (data->multi->maxconnects < 0) ? 0 : data->multi->maxconnects;
+  struct connectdata *conn_candidate = NULL;
+
+  /* Mark the current connection as 'unused' */
   conn->inuse = FALSE;
+
+  if(maxconnects > 0 &&
+     data->state.conn_cache->num_connections > maxconnects) {
+    infof(data, "Connection cache is full, closing the oldest one.\n");
+
+    conn_candidate = find_oldest_idle_connection(data);
+
+    if(conn_candidate) {
+      /* Set the connection's owner correctly */
+      conn_candidate->data = data;
+
+      /* the winner gets the honour of being disconnected */
+      (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
+    }
+  }
+
+  return (conn_candidate == conn) ? FALSE : TRUE;
 }
 
 /*
@@ -4907,6 +4985,7 @@ static CURLcode create_conn(struct SessionHandle *data,
      * This is a brand new connection, so let's store it in the connection
      * cache of ours!
      */
+    conn->inuse = TRUE;
     ConnectionStore(data, conn);
   }
 
@@ -5182,14 +5261,17 @@ CURLcode Curl_done(struct connectdata **connp,
       result = res2;
   }
   else {
-    ConnectionDone(conn); /* the connection is no longer in use */
+    /* the connection is no longer in use */
+    if(ConnectionDone(data, conn)) {
+      /* remember the most recently used connection */
+      data->state.lastconnect = conn;
 
-    /* remember the most recently used connection */
-    data->state.lastconnect = conn;
-
-    infof(data, "Connection #%ld to host %s left intact\n",
-          conn->connection_id,
-          conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+      infof(data, "Connection #%ld to host %s left intact\n",
+            conn->connection_id,
+            conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+    }
+    else
+      data->state.lastconnect = NULL;
   }
 
   *connp = NULL; /* to make the caller of this function better detect that
