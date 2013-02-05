@@ -323,8 +323,8 @@ static char* imap_atom(const char* str)
 }
 
 /* Function that checks for an ending imap status code at the start of the
-   given string but also detects the supported mechanisms from the CAPABILITY
-   response. */
+   given string but also detects the supported authentication mechanisms from
+   the CAPABILITY response. */
 static int imap_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -378,11 +378,11 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
               line[wordlen] != '\n';)
           wordlen++;
 
-        /* Has the server explicitly disabled the LOGIN command? */
+        /* Has the server explicitly disabled clear text authentication? */
         if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
           imapc->login_disabled = TRUE;
 
-        /* Do we have an AUTH capability? */
+        /* Do we have a SASL based authentication mechanism? */
         else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
           line += 5;
           len -= 5;

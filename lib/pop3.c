@@ -260,19 +260,19 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
       return TRUE;
     }
 
-    /* Does the server support clear text? */
+    /* Does the server support clear text authentication? */
     if(len >= 4 && !memcmp(line, "USER", 4)) {
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
       return FALSE;
     }
 
-    /* Does the server support APOP? */
+    /* Does the server support APOP authentication? */
     if(len >= 4 && !memcmp(line, "APOP", 4)) {
       pop3c->authtypes |= POP3_TYPE_APOP;
       return FALSE;
     }
 
-    /* Does the server support SASL? */
+    /* Does the server support SASL based authentication? */
     if(len < 4 || memcmp(line, "SASL", 4))
       return FALSE;
 

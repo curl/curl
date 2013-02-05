@@ -226,13 +226,13 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   line += 4;
   len -= 4;
 
-  /* Do we have a SIZE capability? */
+  /* Does the server support the SIZE capability? */
   if(smtpc->state == SMTP_EHLO && len >= 4 && !memcmp(line, "SIZE", 4)) {
     DEBUGF(infof(conn->data, "Server supports SIZE extension.\n"));
     smtpc->size_supported = true;
   }
 
-  /* Do we have an AUTH capability? */
+  /* Do we have the authentication mechanism list? */
   if(smtpc->state == SMTP_EHLO && len >= 5 && !memcmp(line, "AUTH ", 5)) {
     line += 5;
     len -= 5;
