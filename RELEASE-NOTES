@@ -16,6 +16,7 @@ This release includes the following changes:
  o imap: Added support for sasl ntlm authentication
  o imap: Added support for sasl login authentication
  o imap: Added support for sasl plain text authentication
+ o imap: Added support for login disabled server capability
  o mk-ca-bundle: add -f, support passing to stdout and more [5]
  o writeout: -w now supports remote_ip/port and local_ip/port
 
@@ -46,6 +47,8 @@ This release includes the following bugfixes:
  o pop3: Fixed default authentication detection
  o imap: Fixed usernames and passwords that contain escape characters
  o packages/DOS/common.dj: remove COFF debug info generation [3]
+ o imap/pop3/smtp: Fixed failure detection during TLS upgrade [8]
+ o pop3: Fixed no known authentication mechanism when fallback is required [9]
 
 This release includes the following known bugs:
 
@@ -57,7 +60,7 @@ advice from friends like these:
  Nick Zitzmann, Colin Watson, Fabian Keil, Kamil Dudka, Lijo Antony,
  Linus Nielsen Feltzing, Marc Hoersken, Stanislav Ivochkin, Steve Holme,
  Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea, Gisle Vanem,
- Yves Arrouye, Kai Engert, LluÃ­s Batlle i Rossell
+ Yves Arrouye, Kai Engert, Lluís Batlle i Rossell, Jirí Hruška
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -70,3 +73,5 @@ References to bug reports and discussions on issues:
  [5] = http://curl.haxx.se/mail/lib-2013-01/0045.html
  [6] = http://curl.haxx.se/mail/lib-2012-12/0246.html
  [7] = http://curl.haxx.se/bug/view.cgi?id=1173
+ [8] = http://curl.haxx.se/mail/lib-2013-01/0250.html
+ [9] = http://curl.haxx.se/mail/lib-2013-02/0004.html
