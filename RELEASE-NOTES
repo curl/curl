@@ -49,6 +49,14 @@ This release includes the following bugfixes:
  o packages/DOS/common.dj: remove COFF debug info generation [3]
  o imap/pop3/smtp: Fixed failure detection during TLS upgrade [8]
  o pop3: Fixed no known authentication mechanism when fallback is required [9]
+ o formadd: reject trying to read a directory where a file is expected [10]
+ o formpost: support quotes, commas and semicolon in file names [11]
+ o docs: update the comments about loading CA certs with NSS [12]
+ o docs: fix typos in man pages [13]
+ o darwinssl: Fix bug where packets were sometimes transmitted twice [14]
+ o winbuild: include version info for .dll .exe [15]
+ o schannel: Removed extended error connection setup flag [16]
+ o VMS: fix and generate the VMS build config
 
 This release includes the following known bugs:
 
@@ -60,7 +68,9 @@ advice from friends like these:
  Nick Zitzmann, Colin Watson, Fabian Keil, Kamil Dudka, Lijo Antony,
  Linus Nielsen Feltzing, Marc Hoersken, Stanislav Ivochkin, Steve Holme,
  Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea, Gisle Vanem,
- Yves Arrouye, Kai Engert, Lluís Batlle i Rossell, Jirí Hruška
+ Yves Arrouye, Kai Engert, LluÃ­s Batlle i Rossell, JirÃ­ Hruka,
+ John E. Malmberg, Tor Arntsen, Matt Arsenault, Sergei Nikulov,
+ Guenter Knauf, Craig Davison, Ulrich Doehner, Jiri Jaburek, Bruno de Carvalho
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -75,3 +85,10 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/bug/view.cgi?id=1173
  [8] = http://curl.haxx.se/mail/lib-2013-01/0250.html
  [9] = http://curl.haxx.se/mail/lib-2013-02/0004.html
+ [10] = http://curl.haxx.se/mail/archive-2013-01/0017.html
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1171
+ [12] = https://bugzilla.redhat.com/696783
+ [13] = https://bugzilla.redhat.com/896544
+ [14] = http://curl.haxx.se/mail/lib-2013-01/0295.html
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1186
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1187
