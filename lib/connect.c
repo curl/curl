@@ -970,6 +970,8 @@ singleipconnect(struct connectdata *conn,
       break;
     }
   }
+  else
+    *sockp = sockfd;
 
   return CURLE_OK;
 }
