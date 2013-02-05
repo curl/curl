@@ -223,35 +223,12 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         return result;
 
       conn->tunnel_state[sockindex] = TUNNEL_CONNECT;
-    } /* END CONNECT PHASE */
 
-    /* now we've issued the CONNECT and we're waiting to hear back -
-       we try not to block here in multi-mode because that might be a LONG
-       wait if the proxy cannot connect-through to the remote host. */
-
-    /* if timeout is requested, find out how much remaining time we have */
-    check = timeout - /* timeout time */
-      Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
-    if(check <= 0) {
-      failf(data, "Proxy CONNECT aborted due to timeout");
-      return CURLE_RECV_ERROR;
-    }
-
-    if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
-      /* return so we'll be called again polling-style */
+      /* now we've issued the CONNECT and we're waiting to hear back, return
+         and get called again polling-style */
       return CURLE_OK;
-    else {
-      DEBUGF(infof(data,
-                   "Multi mode finished polling for response from "
-                   "proxy CONNECT\n"));
-    }
 
-    /* at this point, either:
-       1) we're in easy-mode and so it's okay to block waiting for a CONNECT
-       response
-       2) we're in multi-mode and we didn't block - it's either an error or we
-       now have some data waiting.
-       In any case, the tunnel_connecting phase is over. */
+    } /* END CONNECT PHASE */
 
     { /* BEGIN NEGOTIATION PHASE */
       size_t nread;   /* total size read */
