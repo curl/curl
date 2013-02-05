@@ -5,9 +5,9 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
+ * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -219,8 +219,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
   /* setup request flags */
   connssl->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-                       ISC_REQ_CONFIDENTIALITY | ISC_REQ_EXTENDED_ERROR |
-                       ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
+                       ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
+                       ISC_REQ_STREAM;
 
   /* allocate memory for the security context handle */
   connssl->ctxt = malloc(sizeof(struct curl_schannel_ctxt));
@@ -503,8 +503,6 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       failf(data, "schannel: failed to setup replay detection");
     if(!(connssl->ret_flags & ISC_RET_CONFIDENTIALITY))
       failf(data, "schannel: failed to setup confidentiality");
-    if(!(connssl->ret_flags & ISC_RET_EXTENDED_ERROR))
-      failf(data, "schannel: failed to setup extended errors");
     if(!(connssl->ret_flags & ISC_RET_ALLOCATED_MEMORY))
       failf(data, "schannel: failed to setup memory allocation");
     if(!(connssl->ret_flags & ISC_RET_STREAM))
