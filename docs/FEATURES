@@ -122,6 +122,47 @@ FILE
  - "uploads"
  - resume
 
+SMTP
+ - authentication: Plain, Login, CRAM-MD5, Digest-MD5 and NTLM (*9)
+ - send mail
+ - mail from support
+ - mail size support
+ - mail auth support for trusted server-to-server relaying
+ - multiple recipients
+ - via http-proxy
+
+SMTPS (*1)
+ - implicit smtps:// support
+ - explicit "STARTTLS" usage to "upgrade" plain smtp:// connections to use SSL
+ - via http-proxy
+ 
+POP3
+ - authentication: Clear Text, APOP and SASL
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
+   NTLM (*9)
+ - list e-mails
+ - retrieve e-mails
+ - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP
+ - via http-proxy
+
+POP3S (*1)
+ - implicit pop3s:// support
+ - explicit "STLS" usage to "upgrade" plain pop3:// connections to use SSL
+ - via http-proxy
+ 
+IMAP
+ - authentication: Clear Text and SASL
+ - select mailbox
+ - basic fetch e-mail support
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
+   NTLM (*9)
+ - via http-proxy
+
+IMAPS (*1)
+ - implicit imaps:// support
+ - explicit "STARTTLS" usage to "upgrade" plain imap:// connections to use SSL
+ - via http-proxy
+
 FOOTNOTES
 =========
 
