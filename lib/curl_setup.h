@@ -40,11 +40,6 @@
 
 #include "curl_config.h"
 
-/* VMS needs some helper routines/definitions */
-#ifdef __VMS
-#  include "post-config-vms.h"
-#endif
-
 #else /* HAVE_CONFIG_H */
 
 #ifdef _WIN32_WCE
@@ -232,6 +227,14 @@
 
 #ifdef __OS400__
 #  include "setup-os400.h"
+#endif
+
+/*
+ * VMS setup file includes some system headers.
+ */
+
+#ifdef __VMS
+#  include "setup-vms.h"
 #endif
 
 /*

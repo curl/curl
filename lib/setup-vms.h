@@ -1,5 +1,5 @@
-#ifndef HEADER_CONFIG_VMS_H
-#define HEADER_CONFIG_VMS_H
+#ifndef HEADER_CURL_SETUP_VMS_H
+#define HEADER_CURL_SETUP_VMS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -395,4 +395,4 @@ char * unix_path;
 #endif
 #endif
 
-#endif /* HEADER_CONFIG_VMS_H */
+#endif /* HEADER_CURL_SETUP_VMS_H */
