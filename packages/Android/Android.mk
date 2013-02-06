@@ -49,7 +49,7 @@
 # Dan Fandrich
 # November 2011
 
-LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH:= $(call my-dir)/../..
 
 common_CFLAGS := -Wpointer-arith -Wwrite-strings -Wunused -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wno-system-headers -DHAVE_CONFIG_H
 
