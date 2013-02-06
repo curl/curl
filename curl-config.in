@@ -71,62 +71,62 @@ while test $# -gt 0; do
         ;;
 
     --ca)
-	echo "@CURL_CA_BUNDLE@"
-	;;
+        echo "@CURL_CA_BUNDLE@"
+        ;;
 
     --cc)
-	echo "@CC@"
-	;;
+        echo "@CC@"
+        ;;
 
     --prefix)
-	echo "$prefix"
-	;;
+        echo "$prefix"
+        ;;
 
     --feature|--features)
         for feature in @SUPPORT_FEATURES@ ""; do
             test -n "$feature" && echo "$feature"
         done
-	;;
+        ;;
 
     --protocols)
         for protocol in @SUPPORT_PROTOCOLS@; do
             echo "$protocol"
         done
-	;;
+        ;;
 
     --version)
-	echo libcurl @CURLVERSION@
-	exit 0
-	;;
+        echo libcurl @CURLVERSION@
+        exit 0
+        ;;
 
     --checkfor)
         checkfor=$2
         cmajor=`echo $checkfor | cut -d. -f1`
         cminor=`echo $checkfor | cut -d. -f2`
         # when extracting the patch part we strip off everything after a
-	# dash as that's used for things like version 1.2.3-CVS
-	cpatch=`echo $checkfor | cut -d. -f3 | cut -d- -f1`
+        # dash as that's used for things like version 1.2.3-CVS
+        cpatch=`echo $checkfor | cut -d. -f3 | cut -d- -f1`
         checknum=`echo "$cmajor*256*256 + $cminor*256 + ${cpatch:-0}" | bc`
         numuppercase=`echo @VERSIONNUM@ | tr 'a-f' 'A-F'`
         nownum=`echo "obase=10; ibase=16; $numuppercase" | bc`
 
-	if test "$nownum" -ge "$checknum"; then
-	  # silent success
-	  exit 0
-	else
-	  echo "requested version $checkfor is newer than existing @CURLVERSION@"
-	  exit 1
-	fi
-	;;
+        if test "$nownum" -ge "$checknum"; then
+          # silent success
+          exit 0
+        else
+          echo "requested version $checkfor is newer than existing @CURLVERSION@"
+          exit 1
+        fi
+        ;;
 
     --vernum)
-	echo @VERSIONNUM@
-	exit 0
-	;;
+        echo @VERSIONNUM@
+        exit 0
+        ;;
 
     --help)
-	usage 0
-	;;
+        usage 0
+        ;;
 
     --cflags)
         if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
@@ -134,38 +134,38 @@ while test $# -gt 0; do
         else
           CPPFLAG_CURL_STATICLIB=""
         fi
-       	if test "X@includedir@" = "X/usr/include"; then
+        if test "X@includedir@" = "X/usr/include"; then
           echo "$CPPFLAG_CURL_STATICLIB"
         else
           echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
         fi
-       	;;
+        ;;
 
     --libs)
-	if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
-	   CURLLIBDIR="-L@libdir@ "
-	else
-	   CURLLIBDIR=""
-	fi
-	if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
-	  echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
-	else
-	  echo ${CURLLIBDIR}-lcurl
-	fi
-	;;
+        if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
+           CURLLIBDIR="-L@libdir@ "
+        else
+           CURLLIBDIR=""
+        fi
+        if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
+          echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
+        else
+          echo ${CURLLIBDIR}-lcurl
+        fi
+        ;;
 
     --static-libs)
-	echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
-	;;
+        echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
+        ;;
 
     --configure)
-      echo @CONFIGURE_OPTIONS@
-    ;;
+        echo @CONFIGURE_OPTIONS@
+        ;;
 
     *)
         echo "unknown option: $1"
-	usage 1
-	;;
+        usage 1
+        ;;
     esac
     shift
 done
