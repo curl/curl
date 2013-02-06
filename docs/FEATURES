@@ -135,7 +135,7 @@ SMTPS (*1)
  - implicit smtps:// support
  - explicit "STARTTLS" usage to "upgrade" plain smtp:// connections to use SSL
  - via http-proxy
- 
+
 POP3
  - authentication: Clear Text, APOP and SASL
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
@@ -149,7 +149,7 @@ POP3S (*1)
  - implicit pop3s:// support
  - explicit "STLS" usage to "upgrade" plain pop3:// connections to use SSL
  - via http-proxy
- 
+
 IMAP
  - authentication: Clear Text and SASL
  - select mailbox
