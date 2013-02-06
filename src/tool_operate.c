@@ -73,6 +73,7 @@
 #include "tool_writeenv.h"
 #include "tool_writeout.h"
 #include "tool_xattr.h"
+#include "tool_vms.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -1537,7 +1538,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         show_error:
 
 #ifdef __VMS
-        vms_show = 0;
         if(is_vms_shell()) {
           /* VMS DCL shell behavior */
           if(!config->showerror)

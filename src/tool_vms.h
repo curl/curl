@@ -25,7 +25,12 @@
 
 #ifdef __VMS
 
-int vms_show;  /* If VMS error code has been written */
+/*
+ * Forward-declaration of global variable vms_show defined
+ * in tool_main.c, used in main() as parameter for function
+ * vms_special_exit() to allow proper curl tool exiting.
+ */
+extern int vms_show;
 
 int is_vms_shell(void);
 void vms_special_exit(int code, int vms_show);

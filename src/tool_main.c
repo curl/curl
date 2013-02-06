@@ -45,6 +45,16 @@
  */
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifdef __VMS
+/*
+ * vms_show is a global variable, used in main() as parameter for
+ * function vms_special_exit() to allow proper curl tool exiting.
+ * Its value may be set in other tool_*.c source files thanks to
+ * forward declaration present in tool_vms.h
+ */
+static int vms_show = 0;
+#endif
+
 /*
  * Ensure that file descriptors 0, 1 and 2 (stdin, stdout, stderr) are
  * open before starting to run.  Otherwise, the first three network

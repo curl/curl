@@ -49,10 +49,6 @@
 #  define main(x,y) curl_main(x,y)
 #endif
 
-#ifdef __VMS
-#   include "tool_vms.h"
-#endif
-
 #ifdef TPF
 #  undef select
    /* change which select is used for the curl command line tool */
