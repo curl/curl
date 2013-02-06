@@ -29,5 +29,5 @@ EXTRA_DIST = README 			\
 	Symbian/readme.txt 		\
 	TPF/curl.mak 			\
 	TPF/maketpf.env_curl 		\
-	TPF/maketpf.env_curllib
-
+	TPF/maketpf.env_curllib         \
+	Android/Android.mk

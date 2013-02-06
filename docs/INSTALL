@@ -876,7 +876,7 @@ VxWorks
 Android
 =======
    Method using the static makefile:
-      - see the build notes in the Android.mk file.
+      - see the build notes in the packages/Android/Android.mk file.
 
    Method using a configure cross-compile (tested with Android NDK r7c, r8):
       - prepare the toolchain of the Android NDK for standalone use; this can
