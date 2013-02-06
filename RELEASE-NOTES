@@ -7,6 +7,10 @@ Curl and libcurl 7.29.0
  Known libcurl bindings:       39
  Contributors:                 993
 
+This release includes the following securify fix:
+
+ o POP3/IMAP/SMTP SASL buffer overflow vulnerability [17]
+
 This release includes the following changes:
 
  o test: offer "automake" output and check for perl better
@@ -70,7 +74,8 @@ advice from friends like these:
  Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea, Gisle Vanem,
  Yves Arrouye, Kai Engert, Lluís Batlle i Rossell, Jirí Hruka,
  John E. Malmberg, Tor Arntsen, Matt Arsenault, Sergei Nikulov,
- Guenter Knauf, Craig Davison, Ulrich Doehner, Jiri Jaburek, Bruno de Carvalho
+ Guenter Knauf, Craig Davison, Ulrich Doehner, Jiri Jaburek, Bruno de Carvalho,
+ Eldar Zaitov
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -92,3 +97,4 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/mail/lib-2013-01/0295.html
  [15] = http://curl.haxx.se/bug/view.cgi?id=1186
  [16] = http://curl.haxx.se/bug/view.cgi?id=1187
+ [17] = http://curl.haxx.se/docs/adv_20130206.html
