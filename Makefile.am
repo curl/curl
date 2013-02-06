@@ -31,11 +31,12 @@ CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
-winbuild/MakefileBuild.vc winbuild/Makefile.vc
+ winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
+ winbuild/Makefile.msvc.names
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  RELEASE-NOTES buildconf libcurl.pc.in vc6curl.dsw MacOSX-Framework	\
- $(CMAKE_DIST) Makefile.msvc.names $(WINBUILD_DIST) lib/libcurl.vers.in
+ $(CMAKE_DIST) $(WINBUILD_DIST) lib/libcurl.vers.in
 
 bin_SCRIPTS = curl-config
 
