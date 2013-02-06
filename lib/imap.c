@@ -215,18 +215,18 @@ static CURLcode imap_sendf(struct connectdata *conn,
                            const char *idstr, /* command id to wait for */
                            const char *fmt, ...)
 {
-  CURLcode res;
+  CURLcode result;
   struct imap_conn *imapc = &conn->proto.imapc;
   va_list ap;
   va_start(ap, fmt);
 
-  imapc->idstr = idstr;
+  imapc->resptag = idstr;
 
-  res = Curl_pp_vsendf(&imapc->pp, fmt, ap);
+  result = Curl_pp_vsendf(&imapc->pp, fmt, ap);
 
   va_end(ap);
 
-  return res;
+  return result;
 }
 
 static const char *getcmdid(struct connectdata *conn)
@@ -330,7 +330,7 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
   char *line = pp->linestart_resp;
   size_t len = pp->nread_resp;
   struct imap_conn *imapc = &pp->conn->proto.imapc;
-  const char *id = imapc->idstr;
+  const char *id = imapc->resptag;
   size_t id_len = strlen(id);
   size_t wordlen;
 
@@ -511,7 +511,7 @@ static CURLcode imap_state_login(struct connectdata *conn)
   char *user = imap_atom(imap->user);
   char *passwd = imap_atom(imap->passwd);
 
-  /* send USER and password */
+  /* Send USER and password */
   result = imap_sendf(conn, str, "%s LOGIN %s %s", str,
                       user ? user : "", passwd ? passwd : "");
 
@@ -1390,7 +1390,7 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   state(conn, IMAP_SERVERGREET);
 
   /* Start off with an id of '*' */
-  imapc->idstr = "*";
+  imapc->resptag = "*";
 
   result = imap_multi_statemach(conn, done);
 
