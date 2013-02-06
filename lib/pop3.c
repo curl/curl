@@ -372,6 +372,19 @@ static void state(struct connectdata *conn, pop3state newstate)
   pop3c->state = newstate;
 }
 
+static CURLcode pop3_state_starttls(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the STLS command */
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "STLS");
+
+  if(!result)
+    state(conn, POP3_STARTTLS);
+
+  return result;
+}
+
 static CURLcode pop3_state_capa(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -541,7 +554,6 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   (void)instate; /* no use for this yet */
 
@@ -553,9 +565,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
-    result = Curl_pp_sendf(&pop3c->pp, "STLS");
-    if(!result)
-      state(conn, POP3_STARTTLS);
+    result = pop3_state_starttls(conn);
   }
   else
     result = pop3_state_capa(conn);

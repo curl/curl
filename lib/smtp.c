@@ -355,6 +355,19 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return CURLE_OK;
 }
 
+static CURLcode smtp_state_starttls(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the STARTTLS command */
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");
+
+  if(!result)
+    state(conn, SMTP_STARTTLS);
+
+  return result;
+}
+
 static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -545,9 +558,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
   else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");
-    if(!result)
-      state(conn, SMTP_STARTTLS);
+    result = smtp_state_starttls(conn);
   }
   else
     result = smtp_authenticate(conn);

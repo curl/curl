@@ -459,6 +459,20 @@ static void state(struct connectdata *conn, imapstate newstate)
   imapc->state = newstate;
 }
 
+static CURLcode imap_state_starttls(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  const char *str = getcmdid(conn);
+
+  /* Send the STARTTLS command */
+  result = imap_sendf(conn, str, "%s STARTTLS", str);
+
+  if(!result)
+    state(conn, IMAP_STARTTLS);
+
+  return result;
+}
+
 static CURLcode imap_state_capability(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -608,10 +622,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
   if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
        to TLS connection now */
-    const char *str = getcmdid(conn);
-    result = imap_sendf(conn, str, "%s STARTTLS", str);
-    if(!result)
-      state(conn, IMAP_STARTTLS);
+    result = imap_state_starttls(conn);
   }
   else
     result = imap_state_capability(conn);
