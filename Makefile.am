@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -34,9 +34,9 @@ WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
 winbuild/MakefileBuild.vc winbuild/Makefile.vc
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
- curl-style.el sample.emacs RELEASE-NOTES buildconf 	\
- libcurl.pc.in vc6curl.dsw MacOSX-Framework Android.mk $(CMAKE_DIST)	\
- Makefile.msvc.names $(WINBUILD_DIST) lib/libcurl.vers.in
+ RELEASE-NOTES buildconf libcurl.pc.in vc6curl.dsw MacOSX-Framework	\
+ Android.mk $(CMAKE_DIST) Makefile.msvc.names $(WINBUILD_DIST)		\
+ lib/libcurl.vers.in
 
 bin_SCRIPTS = curl-config
 
