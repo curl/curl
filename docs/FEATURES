@@ -34,6 +34,7 @@ libcurl supports
  - replaceable memory functions (malloc, free, realloc, etc)
  - asynchronous name resolving (*6)
  - both a push and a pull style interface
+ - international domain names (*11)
 
 HTTP
  - HTTP/1.1 compliant (optionally uses 1.0)
@@ -61,6 +62,7 @@ HTTP
  - retrieve file modification date
  - Content-Encoding support for deflate and gzip
  - "Transfer-Encoding: chunked" support for "uploads"
+ - data compression (*12)
 
 HTTPS (*1)
  - (all the HTTP features)
@@ -68,7 +70,7 @@ HTTPS (*1)
  - verify server certificate
  - via http-proxy
  - select desired encryption
- - force usage of a specific SSL version (SSLv2(*7), SSLv3 or TLSv1)
+ - force usage of a specific SSL version (SSLv2 (*7), SSLv3 (*10) or TLSv1)
 
 FTP
  - download
@@ -93,7 +95,7 @@ FTP
 
 FTPS (*1)
  - implicit ftps:// support that use SSL on both connections
- - explicit "AUTH TSL" and "AUTH SSL" usage to "upgrade" plain ftp://
+ - explicit "AUTH TLS" and "AUTH SSL" usage to "upgrade" plain ftp://
    connection to use SSL for both or one of the connections
 
 SCP (*8)
@@ -173,6 +175,12 @@ FOOTNOTES
   *4 = requires FBopenssl
   *5 = requires a krb4 library, such as the MIT one or similar.
   *6 = requires c-ares
-  *7 = requires OpenSSL or NSS, as GnuTLS only supports SSLv3 and TLSv1
+  *7 = requires OpenSSL, NSS, qssl, schannel, or Secure Transport; GnuTLS, for
+       example, only supports SSLv3 and TLSv1
   *8 = requires libssh2
-  *9 = requires OpenSSL, GnuTLS, NSS, yassl or SSPI (native Windows)
+  *9 = requires OpenSSL, GnuTLS, NSS, yassl, Secure Transport, or SSPI (native
+       Windows)
+  *10 = requires any of the SSL libraries in (*1) above other than axTLS, which
+        does not support SSLv3
+  *11 = requires libidn or Windows
+  *12 = requires libz
