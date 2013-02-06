@@ -352,37 +352,6 @@ Win32
    at runtime.
    Run 'nmake vc-ssl-zlib' to build with both ssl and zlib support.
 
-   MSVC 6 IDE
-   ----------
-
-   A minimal VC++ 6.0 reference workspace (vc6curl.dsw) is available with the
-   source distribution archive to allow proper building of the two included
-   projects, the libcurl library and the curl tool.
-
-   1) Open the vc6curl.dsw workspace with MSVC6's IDE.
-   2) Select 'Build' from top menu.
-   3) Select 'Batch Build' from dropdown menu.
-   4) Make sure that the eight project configurations are 'checked'.
-   5) Click on the 'Build' button.
-   6) Once the eight project configurations are built you are done.
-
-   Dynamic and static libcurl libraries are built in debug and release flavours,
-   and can be located each one in its own subdirectory, DLL-Debug, DLL-Release,
-   LIB-Debug and LIB-Release, all of them below the 'lib' subdirectory.
-
-   In the same way four curl executables are created, each using its respective
-   library. The resulting curl executables are located in its own subdirectory,
-   DLL-Debug, DLL-Release, LIB-Debug and LIB-Release, below the 'src' subdir.
-
-   These reference VC++ 6.0 configurations are generated using the dynamic CRT.
-
-   Intentionally, these reference VC++ 6.0 projects and configurations don't use
-   third party libraries, such as OpenSSL or Zlib, to allow proper compilation
-   and configuration for all new users without further requirements.
-
-   If you need something more 'involved' you might adjust them for your own use,
-   or explore the world of makefiles described above 'MSVC from command line'.
-
    Borland C++ compiler
    ---------------------
 

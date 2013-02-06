@@ -35,8 +35,8 @@ WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/Makefile.msvc.names
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
- RELEASE-NOTES buildconf libcurl.pc.in vc6curl.dsw MacOSX-Framework	\
- $(CMAKE_DIST) $(WINBUILD_DIST) lib/libcurl.vers.in
+ RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework $(CMAKE_DIST)	\
+ $(WINBUILD_DIST) lib/libcurl.vers.in
 
 bin_SCRIPTS = curl-config
 
