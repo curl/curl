@@ -166,7 +166,8 @@ IMAPS (*1)
 FOOTNOTES
 =========
 
-  *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL or schannel
+  *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL, schannel (native
+       Windows), Secure Transport (native iOS/OS X)  or qssl (native IBM i)
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar.
   *4 = requires FBopenssl
