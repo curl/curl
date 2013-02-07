@@ -211,39 +211,31 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
  *
  * Designed to never block.
  */
-static CURLcode imap_sendf(struct connectdata *conn,
-                           const char *idstr, /* command id to wait for */
-                           const char *fmt, ...)
+static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
 {
   CURLcode result;
   struct imap_conn *imapc = &conn->proto.imapc;
+  char *taggedfmt;
   va_list ap;
   va_start(ap, fmt);
 
-  imapc->resptag = idstr;
+  /* Calculate the next command ID wrapping at 3 digits */
+  imapc->cmdid = (imapc->cmdid + 1) % 1000;
 
-  result = Curl_pp_vsendf(&imapc->pp, fmt, ap);
+  /* Calculate the tag based on the connection ID and command ID */
+  snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
+           'A' + (conn->connection_id % 26), imapc->cmdid);
 
+  taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
+  if(!taggedfmt)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
+
+  Curl_safefree(taggedfmt);
   va_end(ap);
 
   return result;
-}
-
-static const char *getcmdid(struct connectdata *conn)
-{
-  static const char * const ids[]= {
-    "A",
-    "B",
-    "C",
-    "D"
-  };
-
-  struct imap_conn *imapc = &conn->proto.imapc;
-
-  /* Get the next id, but wrap at end of table */
-  imapc->cmdid = (int)((imapc->cmdid + 1) % (sizeof(ids) / sizeof(ids[0])));
-
-  return ids[imapc->cmdid];
 }
 
 /***********************************************************************
@@ -462,10 +454,9 @@ static void state(struct connectdata *conn, imapstate newstate)
 static CURLcode imap_state_starttls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const char *str = getcmdid(conn);
 
   /* Send the STARTTLS command */
-  result = imap_sendf(conn, str, "%s STARTTLS", str);
+  result = imap_sendf(conn, "STARTTLS");
 
   if(!result)
     state(conn, IMAP_STARTTLS);
@@ -477,7 +468,6 @@ static CURLcode imap_state_capability(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  const char *str;
 
   imapc->authmechs = 0;         /* No known authentication mechanisms yet */
   imapc->authused = 0;          /* Clear the authentication mechanism used */
@@ -490,10 +480,8 @@ static CURLcode imap_state_capability(struct connectdata *conn)
     return result;
   }
 
-  str = getcmdid(conn);
-
   /* Send the CAPABILITY command */
-  result = imap_sendf(conn, str, "%s CAPABILITY", str);
+  result = imap_sendf(conn, "CAPABILITY");
 
   if(result)
     return result;
@@ -507,13 +495,12 @@ static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result;
   struct FTP *imap = conn->data->state.proto.imap;
-  const char *str = getcmdid(conn);
   char *user = imap_atom(imap->user);
   char *passwd = imap_atom(imap->passwd);
 
   /* Send USER and password */
-  result = imap_sendf(conn, str, "%s LOGIN %s %s", str,
-                      user ? user : "", passwd ? passwd : "");
+  result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
+                      passwd ? passwd : "");
 
   Curl_safefree(user);
   Curl_safefree(passwd);
@@ -569,9 +556,7 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 
   if(mech) {
     /* Perform SASL based authentication */
-    const char *str = getcmdid(conn);
-
-    result = imap_sendf(conn, str, "%s AUTHENTICATE %s", str, mech);
+    result = imap_sendf(conn, "AUTHENTICATE %s", mech);
 
     if(!result)
       state(conn, authstate);
@@ -1051,10 +1036,9 @@ static CURLcode imap_select(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  const char *str = getcmdid(conn);
 
-  result = imap_sendf(conn, str, "%s SELECT %s", str,
-                      imapc->mailbox?imapc->mailbox:"");
+  result = imap_sendf(conn, "SELECT %s",
+                      imapc->mailbox ? imapc->mailbox : "");
   if(result)
     return result;
 
@@ -1066,12 +1050,11 @@ static CURLcode imap_select(struct connectdata *conn)
 static CURLcode imap_fetch(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const char *str = getcmdid(conn);
 
   /* TODO: make this select the correct mail
    * Use "1 body[text]" to get the full mail body of mail 1
    */
-  result = imap_sendf(conn, str, "%s FETCH 1 BODY[TEXT]", str);
+  result = imap_sendf(conn, "FETCH 1 BODY[TEXT]");
   if(result)
     return result;
 
@@ -1389,8 +1372,8 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   /* Start off waiting for the server greeting response */
   state(conn, IMAP_SERVERGREET);
 
-  /* Start off with an id of '*' */
-  imapc->resptag = "*";
+  /* Start off with an response id of '*' */
+  strcpy(imapc->resptag, "*");
 
   result = imap_multi_statemach(conn, done);
 
@@ -1521,9 +1504,8 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
 static CURLcode imap_logout(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const char *str = getcmdid(conn);
 
-  result = imap_sendf(conn, str, "%s LOGOUT", str, NULL);
+  result = imap_sendf(conn, "LOGOUT", NULL);
   if(result)
     return result;
 

@@ -60,7 +60,7 @@ struct imap_conn {
   unsigned int authused;  /* Auth mechanism used for the connection */
   imapstate state;        /* Always use imap.c:state() to change state! */
   int cmdid;              /* Last used command ID */
-  const char *resptag;    /* Response tag to wait for */
+  char resptag[5];        /* Response tag to wait for */
   bool ssldone;           /* Is connect() over SSL done? */
   bool login_disabled;    /* LOGIN command explicitly disabled by server */
 };
