@@ -9,6 +9,8 @@ Curl and libcurl 7.29.1
 
 This release includes the following changes:
 
+ o imap: Changed response tag generation to be completely unique
+ o imap: Added support for SASL-IR extension
  o 
 
 This release includes the following bugfixes:
