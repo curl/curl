@@ -523,19 +523,22 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *mech = NULL;
-  imapstate authstate = IMAP_STOP;
+  char *initresp = NULL;
+  size_t len = 0;
+  imapstate authstate1 = IMAP_STOP;
+  imapstate authstate2 = IMAP_STOP;
 
   /* Calculate the supported authentication mechanism by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(imapc->authmechs & SASL_MECH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
-    authstate = IMAP_AUTHENTICATE_DIGESTMD5;
+    authstate1 = IMAP_AUTHENTICATE_DIGESTMD5;
     imapc->authused = SASL_MECH_DIGEST_MD5;
   }
   else if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
     mech = "CRAM-MD5";
-    authstate = IMAP_AUTHENTICATE_CRAMMD5;
+    authstate1 = IMAP_AUTHENTICATE_CRAMMD5;
     imapc->authused = SASL_MECH_CRAM_MD5;
   }
   else
@@ -543,28 +546,56 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
   if(imapc->authmechs & SASL_MECH_NTLM) {
     mech = "NTLM";
-    authstate = IMAP_AUTHENTICATE_NTLM;
+    authstate1 = IMAP_AUTHENTICATE_NTLM;
+    authstate2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
     imapc->authused = SASL_MECH_NTLM;
+
+    if(imapc->ir_supported)
+      result = Curl_sasl_create_login_message(conn->data, conn->user,
+                                              &initresp, &len);
   }
   else
 #endif
   if(imapc->authmechs & SASL_MECH_LOGIN) {
     mech = "LOGIN";
-    authstate = IMAP_AUTHENTICATE_LOGIN;
+    authstate1 = IMAP_AUTHENTICATE_LOGIN;
+    authstate2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
     imapc->authused = SASL_MECH_LOGIN;
+
+    if(imapc->ir_supported)
+      result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                              conn->passwd, &initresp, &len);
   }
   else if(imapc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
-    authstate = IMAP_AUTHENTICATE_PLAIN;
+    authstate1 = IMAP_AUTHENTICATE_PLAIN;
+    authstate2 = IMAP_AUTHENTICATE;
     imapc->authused = SASL_MECH_PLAIN;
+
+    if(imapc->ir_supported)
+      result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                              conn->passwd, &initresp, &len);
   }
 
-  if(mech) {
-    /* Perform SASL based authentication */
-    result = imap_sendf(conn, "AUTHENTICATE %s", mech);
+  if(result)
+    return result;
 
-    if(!result)
-      state(conn, authstate);
+  if(mech) {
+    if(initresp) {
+      /* Perform SASL based authentication */
+      result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
+
+      if(!result)
+        state(conn, authstate2);
+    }
+    else {
+      result = imap_sendf(conn, "AUTHENTICATE %s", mech);
+
+      if(!result)
+        state(conn, authstate1);
+    }
+
+    Curl_safefree(initresp);
   }
   else if(!imapc->login_disabled)
     /* Perform clear text authentication */
