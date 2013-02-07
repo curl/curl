@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+/*
+ * See comment in curl_memory.h for the explanation of this sanity check.
+ */
+
+#ifdef CURLX_NO_MEMORY_CALLBACKS
+#error "libcurl shall not ever be built with CURLX_NO_MEMORY_CALLBACKS defined"
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
