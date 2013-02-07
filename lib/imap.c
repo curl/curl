@@ -24,6 +24,7 @@
  * RFC3501 IMAPv4 protocol
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC4959 IMAP Extension for SASL Initial Client Response
  * RFC5092 IMAP URL Scheme
  *
  ***************************************************************************/
@@ -374,6 +375,10 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
         if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
           imapc->login_disabled = TRUE;
 
+        /* Does the server support the SASL-IR capability? */
+        else if(wordlen == 7 && !memcmp(line, "SASL-IR", 7))
+          imapc->ir_supported = TRUE;
+
         /* Do we have a SASL based authentication mechanism? */
         else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
           line += 5;
@@ -676,7 +681,7 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
   return result;
 }
 
-/* For AUTHENTICATE PLAIN responses */
+/* For AUTHENTICATE PLAIN (without initial response) responses */
 static CURLcode imap_state_auth_plain_resp(struct connectdata *conn,
                                            int imapcode,
                                            imapstate instate)
@@ -713,7 +718,7 @@ static CURLcode imap_state_auth_plain_resp(struct connectdata *conn,
   return result;
 }
 
-/* For AUTHENTICATE LOGIN responses */
+/* For AUTHENTICATE LOGIN (without initial response) responses */
 static CURLcode imap_state_auth_login_resp(struct connectdata *conn,
                                            int imapcode,
                                            imapstate instate)
@@ -910,7 +915,7 @@ static CURLcode imap_state_auth_digest_resp_resp(struct connectdata *conn,
 #endif
 
 #ifdef USE_NTLM
-/* For AUTHENTICATE NTLM responses */
+/* For AUTHENTICATE NTLM (without initial response) responses */
 static CURLcode imap_state_auth_ntlm_resp(struct connectdata *conn,
                                           int imapcode,
                                           imapstate instate)

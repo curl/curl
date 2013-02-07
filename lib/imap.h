@@ -63,6 +63,7 @@ struct imap_conn {
   char resptag[5];        /* Response tag to wait for */
   bool ssldone;           /* Is connect() over SSL done? */
   bool login_disabled;    /* LOGIN command explicitly disabled by server */
+  bool ir_supported;      /* Initial response supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_imap;
