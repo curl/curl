@@ -293,7 +293,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "UPGRADETLS",
     "AUTH_PLAIN",
     "AUTH_LOGIN",
-    "AUTH_PASSWD",
+    "AUTH_LOGIN_PASSWD",
     "AUTH_CRAMMD5",
     "AUTH_DIGESTMD5",
     "AUTH_DIGESTMD5_RESP",
@@ -416,7 +416,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   if(smtpc->authmechs & SASL_MECH_LOGIN) {
     mech = "LOGIN";
     state1 = SMTP_AUTH_LOGIN;
-    state2 = SMTP_AUTH_PASSWD;
+    state2 = SMTP_AUTH_LOGIN_PASSWD;
     smtpc->authused = SASL_MECH_LOGIN;
     result = Curl_sasl_create_login_message(conn->data, conn->user,
                                             &initresp, &len);
@@ -650,7 +650,7 @@ static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
 
         if(!result)
-          state(conn, SMTP_AUTH_PASSWD);
+          state(conn, SMTP_AUTH_LOGIN_PASSWD);
       }
 
       Curl_safefree(authuser);
@@ -660,7 +660,7 @@ static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
   return result;
 }
 
-/* For responses to user entry of AUTH LOGIN */
+/* For AUTH LOGIN user entry responses */
 static CURLcode smtp_state_auth_passwd_resp(struct connectdata *conn,
                                             int smtpcode,
                                             smtpstate instate)
@@ -1173,7 +1173,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       result = smtp_state_auth_login_resp(conn, smtpcode, smtpc->state);
       break;
 
-    case SMTP_AUTH_PASSWD:
+    case SMTP_AUTH_LOGIN_PASSWD:
       result = smtp_state_auth_passwd_resp(conn, smtpcode, smtpc->state);
       break;
 

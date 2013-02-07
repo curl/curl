@@ -38,7 +38,7 @@ typedef enum {
                        (multi mode only) */
   SMTP_AUTH_PLAIN,
   SMTP_AUTH_LOGIN,
-  SMTP_AUTH_PASSWD,
+  SMTP_AUTH_LOGIN_PASSWD,
   SMTP_AUTH_CRAMMD5,
   SMTP_AUTH_DIGESTMD5,
   SMTP_AUTH_DIGESTMD5_RESP,
