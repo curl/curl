@@ -204,9 +204,9 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
 #endif
 #endif
 
-/* Function that checks for an ending smtp status code at the start of the
-   given string, but also detects the supported authentication mechanisms
-   from  the EHLO AUTH response. */
+/* Function that checks for an ending SMTP status code at the start of the
+   given string, but also detects various capabilities from the EHLO response
+   including the supported authentication mechanisms. */
 static int smtp_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -223,55 +223,56 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
   if((result = (line[3] == ' ')) != 0)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
-  line += 4;
-  len -= 4;
+  /* Are we processing EHLO command responses? */
+  if(smtpc->state == SMTP_EHLO) {
+    line += 4;
+    len -= 4;
 
-  /* Does the server support the SIZE capability? */
-  if(smtpc->state == SMTP_EHLO && len >= 4 && !memcmp(line, "SIZE", 4)) {
-    DEBUGF(infof(conn->data, "Server supports SIZE extension.\n"));
-    smtpc->size_supported = true;
-  }
+    /* Does the server support the SIZE capability? */
+    if(len >= 4 && !memcmp(line, "SIZE", 4))
+      smtpc->size_supported = TRUE;
 
-  /* Do we have the authentication mechanism list? */
-  if(smtpc->state == SMTP_EHLO && len >= 5 && !memcmp(line, "AUTH ", 5)) {
-    line += 5;
-    len -= 5;
+    /* Do we have the authentication mechanism list? */
+    else if(len >= 5 && !memcmp(line, "AUTH ", 5)) {
+      line += 5;
+      len -= 5;
 
-    for(;;) {
-      while(len &&
-            (*line == ' ' || *line == '\t' ||
-             *line == '\r' || *line == '\n')) {
-        line++;
-        len--;
+      for(;;) {
+        while(len &&
+              (*line == ' ' || *line == '\t' ||
+               *line == '\r' || *line == '\n')) {
+          line++;
+          len--;
+        }
+
+        if(!len)
+          break;
+
+        /* Extract the word */
+        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
+              line[wordlen] != '\t' && line[wordlen] != '\r' &&
+              line[wordlen] != '\n';)
+          wordlen++;
+
+        /* Test the word for a matching authentication mechanism */
+        if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+          smtpc->authmechs |= SASL_MECH_LOGIN;
+        else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+          smtpc->authmechs |= SASL_MECH_PLAIN;
+        else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+          smtpc->authmechs |= SASL_MECH_CRAM_MD5;
+        else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+          smtpc->authmechs |= SASL_MECH_DIGEST_MD5;
+        else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+          smtpc->authmechs |= SASL_MECH_GSSAPI;
+        else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+          smtpc->authmechs |= SASL_MECH_EXTERNAL;
+        else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+          smtpc->authmechs |= SASL_MECH_NTLM;
+
+        line += wordlen;
+        len -= wordlen;
       }
-
-      if(!len)
-        break;
-
-      /* Extract the word */
-      for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-            line[wordlen] != '\t' && line[wordlen] != '\r' &&
-            line[wordlen] != '\n';)
-        wordlen++;
-
-      /* Test the word for a matching authentication mechanism */
-      if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
-        smtpc->authmechs |= SASL_MECH_LOGIN;
-      else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
-        smtpc->authmechs |= SASL_MECH_PLAIN;
-      else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
-        smtpc->authmechs |= SASL_MECH_CRAM_MD5;
-      else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
-        smtpc->authmechs |= SASL_MECH_DIGEST_MD5;
-      else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
-        smtpc->authmechs |= SASL_MECH_GSSAPI;
-      else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
-        smtpc->authmechs |= SASL_MECH_EXTERNAL;
-      else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
-        smtpc->authmechs |= SASL_MECH_NTLM;
-
-      line += wordlen;
-      len -= wordlen;
     }
   }
 
