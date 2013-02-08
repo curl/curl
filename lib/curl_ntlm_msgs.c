@@ -405,6 +405,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     *(dup_domain.tchar_ptr + domlen) = TEXT('\0');
     ntlm->identity.Domain = dup_domain.tbyte_ptr;
     ntlm->identity.DomainLength = curlx_uztoul(domlen);
+    free(dup_domain.tchar_ptr);
     dup_domain.tchar_ptr = NULL;
 
     Curl_unicodefree(useranddomain.tchar_ptr);
