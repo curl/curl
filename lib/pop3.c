@@ -253,7 +253,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
   /* Are we processing CAPA command responses? */
   else if(pop3c->state == POP3_CAPA) {
 
-    /* Do we have the terminating character? */
+    /* Do we have the terminating line? */
     if(len >= 1 && !memcmp(line, ".", 1)) {
       *resp = '+';
 
@@ -261,68 +261,65 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
     }
 
     /* Does the server support clear text authentication? */
-    if(len >= 4 && !memcmp(line, "USER", 4)) {
+    if(len >= 4 && !memcmp(line, "USER", 4))
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
-      return FALSE;
-    }
 
     /* Does the server support APOP authentication? */
-    if(len >= 4 && !memcmp(line, "APOP", 4)) {
+    else if(len >= 4 && !memcmp(line, "APOP", 4))
       pop3c->authtypes |= POP3_TYPE_APOP;
-      return FALSE;
-    }
 
     /* Does the server support SASL based authentication? */
-    if(len < 4 || memcmp(line, "SASL", 4))
-      return FALSE;
+    else if(len >= 4 && !memcmp(line, "SASL", 4)) {
+      pop3c->authtypes |= POP3_TYPE_SASL;
 
-    pop3c->authtypes |= POP3_TYPE_SASL;
+      /* Advance past the SASL keyword */
+      line += 4;
+      len -= 4;
 
-    /* Advance past the SASL keyword */
-    line += 4;
-    len -= 4;
+      /* Loop through the data line */
+      for(;;) {
+        while(len &&
+              (*line == ' ' || *line == '\t' ||
+               *line == '\r' || *line == '\n')) {
 
-    /* Loop through the data line */
-    for(;;) {
-      while(len &&
-            (*line == ' ' || *line == '\t' ||
-             *line == '\r' || *line == '\n')) {
+          if(*line == '\n')
+            return FALSE;
 
-        if(*line == '\n')
-          return FALSE;
+          line++;
+          len--;
+        }
 
-        line++;
-        len--;
+        if(!len)
+          break;
+
+        /* Extract the word */
+        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
+              line[wordlen] != '\t' && line[wordlen] != '\r' &&
+              line[wordlen] != '\n';)
+          wordlen++;
+
+        /* Test the word for a matching authentication mechanism */
+        if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+          pop3c->authmechs |= SASL_MECH_LOGIN;
+        else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+          pop3c->authmechs |= SASL_MECH_PLAIN;
+        else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+          pop3c->authmechs |= SASL_MECH_CRAM_MD5;
+        else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+          pop3c->authmechs |= SASL_MECH_DIGEST_MD5;
+        else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+          pop3c->authmechs |= SASL_MECH_GSSAPI;
+        else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+          pop3c->authmechs |= SASL_MECH_EXTERNAL;
+        else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+          pop3c->authmechs |= SASL_MECH_NTLM;
+
+        line += wordlen;
+        len -= wordlen;
       }
-
-      if(!len)
-        break;
-
-      /* Extract the word */
-      for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-            line[wordlen] != '\t' && line[wordlen] != '\r' &&
-            line[wordlen] != '\n';)
-        wordlen++;
-
-      /* Test the word for a matching authentication mechanism */
-      if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
-        pop3c->authmechs |= SASL_MECH_LOGIN;
-      else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
-        pop3c->authmechs |= SASL_MECH_PLAIN;
-      else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
-        pop3c->authmechs |= SASL_MECH_CRAM_MD5;
-      else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
-        pop3c->authmechs |= SASL_MECH_DIGEST_MD5;
-      else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
-        pop3c->authmechs |= SASL_MECH_GSSAPI;
-      else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
-        pop3c->authmechs |= SASL_MECH_EXTERNAL;
-      else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
-        pop3c->authmechs |= SASL_MECH_NTLM;
-
-      line += wordlen;
-      len -= wordlen;
     }
+
+    return FALSE;
   }
 
   if((len < 1 || memcmp("+", line, 1)) &&
