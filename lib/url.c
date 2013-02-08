@@ -5219,6 +5219,13 @@ CURLcode Curl_done(struct connectdata **connp,
     conn->dns_entry = NULL;
   }
 
+  if(status == CURLE_ABORTED_BY_CALLBACK)
+    /* When we're aborted due to a callback return code it basically have to
+       be counted as premature as there is trouble ahead if we don't. We have
+       many callbacks and protocols work differently, we could potentially do
+       this more fine-grained in the future. */
+    premature = TRUE;
+
   /* this calls the protocol-specific function pointer previously set */
   if(conn->handler->done)
     result = conn->handler->done(conn, status, premature);
