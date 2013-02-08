@@ -525,20 +525,20 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   const char *mech = NULL;
   char *initresp = NULL;
   size_t len = 0;
-  imapstate authstate1 = IMAP_STOP;
-  imapstate authstate2 = IMAP_STOP;
+  imapstate state1 = IMAP_STOP;
+  imapstate state2 = IMAP_STOP;
 
   /* Calculate the supported authentication mechanism by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if(imapc->authmechs & SASL_MECH_DIGEST_MD5) {
     mech = "DIGEST-MD5";
-    authstate1 = IMAP_AUTHENTICATE_DIGESTMD5;
+    state1 = IMAP_AUTHENTICATE_DIGESTMD5;
     imapc->authused = SASL_MECH_DIGEST_MD5;
   }
   else if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
     mech = "CRAM-MD5";
-    authstate1 = IMAP_AUTHENTICATE_CRAMMD5;
+    state1 = IMAP_AUTHENTICATE_CRAMMD5;
     imapc->authused = SASL_MECH_CRAM_MD5;
   }
   else
@@ -546,8 +546,8 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
   if(imapc->authmechs & SASL_MECH_NTLM) {
     mech = "NTLM";
-    authstate1 = IMAP_AUTHENTICATE_NTLM;
-    authstate2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
+    state1 = IMAP_AUTHENTICATE_NTLM;
+    state2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
     imapc->authused = SASL_MECH_NTLM;
 
     if(imapc->ir_supported)
@@ -558,8 +558,8 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 #endif
   if(imapc->authmechs & SASL_MECH_LOGIN) {
     mech = "LOGIN";
-    authstate1 = IMAP_AUTHENTICATE_LOGIN;
-    authstate2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
+    state1 = IMAP_AUTHENTICATE_LOGIN;
+    state2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
     imapc->authused = SASL_MECH_LOGIN;
 
     if(imapc->ir_supported)
@@ -568,8 +568,8 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   }
   else if(imapc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
-    authstate1 = IMAP_AUTHENTICATE_PLAIN;
-    authstate2 = IMAP_AUTHENTICATE;
+    state1 = IMAP_AUTHENTICATE_PLAIN;
+    state2 = IMAP_AUTHENTICATE;
     imapc->authused = SASL_MECH_PLAIN;
 
     if(imapc->ir_supported)
@@ -586,13 +586,13 @@ static CURLcode imap_authenticate(struct connectdata *conn)
       result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
 
       if(!result)
-        state(conn, authstate2);
+        state(conn, state2);
     }
     else {
       result = imap_sendf(conn, "AUTHENTICATE %s", mech);
 
       if(!result)
-        state(conn, authstate1);
+        state(conn, state1);
     }
 
     Curl_safefree(initresp);
