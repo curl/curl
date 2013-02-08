@@ -661,9 +661,9 @@ static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
 }
 
 /* For AUTH LOGIN user entry responses */
-static CURLcode smtp_state_auth_passwd_resp(struct connectdata *conn,
-                                            int smtpcode,
-                                            smtpstate instate)
+static CURLcode smtp_state_auth_login_password_resp(struct connectdata *conn,
+                                                    int smtpcode,
+                                                    smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1174,7 +1174,8 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 
     case SMTP_AUTH_LOGIN_PASSWD:
-      result = smtp_state_auth_passwd_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_login_password_resp(conn, smtpcode,
+                                                   smtpc->state);
       break;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
