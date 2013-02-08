@@ -360,6 +360,7 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case TLS_DH_anon_WITH_AES_256_CBC_SHA:
       return "TLS_DH_anon_WITH_AES_256_CBC_SHA";
       break;
+#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
     /* TLS 1.0 with ECDSA (RFC 4492) */
     case TLS_ECDH_ECDSA_WITH_NULL_SHA:
       return "TLS_ECDH_ECDSA_WITH_NULL_SHA";
@@ -436,6 +437,7 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
       return "TLS_ECDH_anon_WITH_AES_256_CBC_SHA";
       break;
+#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 #if defined(__MAC_10_8) || defined(__IPHONE_5_0)
     /* TLS 1.2 (RFC 5246) */
     case TLS_RSA_WITH_NULL_MD5:
@@ -659,6 +661,37 @@ CF_INLINE bool IsRunningMountainLionOrLater(void)
 #else
   return true;  /* iOS users: this doesn't concern you */
 #endif
+}
+
+/* Apple provides a myriad of ways of getting information about a certificate
+   into a string. Some aren't available under iOS or newer cats. So here's
+   a unified function for getting a string describing the certificate that
+   ought to work in all cats starting with Leopard. */
+CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
+{
+  CFStringRef server_cert_summary = CFSTR("(null)");
+
+#if (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)
+  /* iOS: There's only one way to do this. */
+  server_cert_summary = SecCertificateCopySubjectSummary(cert);
+#else
+#if defined(__MAC_10_7)
+  /* Lion & later: Get the long description if we can. */
+  if(SecCertificateCopyLongDescription != NULL)
+    server_cert_summary =
+      SecCertificateCopyLongDescription(NULL, cert, NULL);
+  else
+#endif /* defined(__MAC_10_7) */
+#if defined(__MAC_10_6)
+  /* Snow Leopard: Get the certificate summary. */
+  if(SecCertificateCopySubjectSummary != NULL)
+    server_cert_summary = SecCertificateCopySubjectSummary(cert);
+  else
+#endif /* defined(__MAC_10_6) */
+  /* Leopard is as far back as we go... */
+  (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
+#endif /* (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE) */
+  return server_cert_summary;
 }
 
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
@@ -907,9 +940,11 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
             ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
 
+#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
       case errSSLServerAuthCompleted:
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
+#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
       case errSSLXCertChainInvalid:
       case errSSLUnknownRootCert:
@@ -993,7 +1028,7 @@ darwinssl_connect_step3(struct connectdata *conn,
     count = SecTrustGetCertificateCount(trust);
     for(i = 0L ; i < count ; i++) {
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+      server_cert_summary = CopyCertSubject(server_cert);
       memset(server_cert_summary_c, 0, 128);
       if(CFStringGetCString(server_cert_summary,
                             server_cert_summary_c,
@@ -1019,8 +1054,7 @@ darwinssl_connect_step3(struct connectdata *conn,
       count = SecTrustGetCertificateCount(trust);
       for(i = 0L ; i < count ; i++) {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        server_cert_summary =
-          SecCertificateCopyLongDescription(NULL, server_cert, NULL);
+        server_cert_summary = CopyCertSubject(server_cert);
         memset(server_cert_summary_c, 0, 128);
         if(CFStringGetCString(server_cert_summary,
                               server_cert_summary_c,
@@ -1041,7 +1075,7 @@ darwinssl_connect_step3(struct connectdata *conn,
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
 
-        server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+        server_cert_summary = CopyCertSubject(server_cert);
         memset(server_cert_summary_c, 0, 128);
         if(CFStringGetCString(server_cert_summary,
                               server_cert_summary_c,
@@ -1062,8 +1096,7 @@ darwinssl_connect_step3(struct connectdata *conn,
     count = CFArrayGetCount(server_certs);
     for(i = 0L ; i < count ; i++) {
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-
-      server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+      server_cert_summary = CopyCertSubject(server_cert);
       memset(server_cert_summary_c, 0, 128);
       if(CFStringGetCString(server_cert_summary,
                             server_cert_summary_c,
