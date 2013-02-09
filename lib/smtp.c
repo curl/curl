@@ -210,7 +210,7 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
 static int smtp_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
-  size_t len = pp->nread_resp;
+  size_t len = strlen(pp->linestart_resp);
   struct connectdata *conn = pp->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   size_t wordlen;
@@ -242,6 +242,10 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
         while(len &&
               (*line == ' ' || *line == '\t' ||
                *line == '\r' || *line == '\n')) {
+
+          if(*line == '\n')
+            return FALSE;
+
           line++;
           len--;
         }
