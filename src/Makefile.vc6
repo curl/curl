@@ -56,7 +56,7 @@ PROGRAM_NAME = curl.exe
 
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8x
+OPENSSL_PATH = ../../openssl-0.9.8y
 !ENDIF
 
 !IFNDEF ZLIB_PATH

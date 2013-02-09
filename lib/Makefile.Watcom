@@ -101,7 +101,7 @@ LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8x
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8y
 !endif
 
 !ifdef %ares_root
