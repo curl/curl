@@ -940,17 +940,24 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
             ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
 
-#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
-      case errSSLServerAuthCompleted:
+      /* The below is errSSLServerAuthCompleted; it's not defined in
+        Leopard's headers */
+      case -9841:
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
-#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
       case errSSLXCertChainInvalid:
+        failf(data, "SSL certificate problem: Invalid certificate chain");
+        return CURLE_SSL_CACERT;
       case errSSLUnknownRootCert:
+        failf(data, "SSL certificate problem: Untrusted root certificate");
+        return CURLE_SSL_CACERT;
       case errSSLNoRootCert:
+        failf(data, "SSL certificate problem: No root certificate");
+        return CURLE_SSL_CACERT;
       case errSSLCertExpired:
-        failf(data, "SSL certificate problem: OSStatus %d", err);
+        failf(data, "SSL certificate problem: Certificate chain had an "
+              "expired certificate");
         return CURLE_SSL_CACERT;
 
       case errSSLHostNameMismatch:
