@@ -57,6 +57,11 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->proxyuserpwd);
   Curl_safefree(config->proxy);
 
+  Curl_safefree(config->dns_ipv6_addr);
+  Curl_safefree(config->dns_ipv4_addr);
+  Curl_safefree(config->dns_interface);
+  Curl_safefree(config->dns_servers);
+
   Curl_safefree(config->noproxy);
 
   Curl_safefree(config->mail_from);
@@ -127,4 +132,3 @@ void free_config_fields(struct Configurable *config)
 
   Curl_safefree(config->libcurl);
 }
-

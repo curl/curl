@@ -66,6 +66,10 @@ struct Configurable {
   char *range;
   long low_speed_limit;
   long low_speed_time;
+  char* dns_servers;   /* dot notation: 1.1.1.1;2.2.2.2 */
+  char* dns_interface; /* interface name */
+  char* dns_ipv4_addr; /* dot notation */
+  char* dns_ipv6_addr; /* dot notation */
   int showerror; /* -1 == unset, default => show errors
                     0 => -s is used to NOT show errors
                     1 => -S has been used to show errors */
@@ -214,4 +218,3 @@ struct Configurable {
 void free_config_fields(struct Configurable *config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
-
