@@ -224,7 +224,7 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
   if(len >= 4 && !memcmp("-ERR", line, 4)) {
     *resp = '-';
 
-    return FALSE;
+    return TRUE;
   }
 
   /* Are we processing servergreet responses? */
