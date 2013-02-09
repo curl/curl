@@ -315,9 +315,9 @@ static char* imap_atom(const char* str)
   return newstr;
 }
 
-/* Function that checks for an ending imap status code at the start of the
-   given string but also detects the supported authentication mechanisms from
-   the CAPABILITY response. */
+/* Function that checks for an ending IMAP status code at the start of the
+   given string but also detects various capabilities from the CAPABILITY
+   response including the supported authentication mechanisms. */
 static int imap_endofresp(struct pingpong *pp, int *resp)
 {
   char *line = pp->linestart_resp;
@@ -327,7 +327,7 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
   size_t id_len = strlen(id);
   size_t wordlen;
 
-  /* Do we have a generic command response? */
+  /* Do we have a command response? */
   if(len >= id_len + 3) {
     if(!memcmp(id, line, id_len) && line[id_len] == ' ') {
       *resp = line[id_len + 1]; /* O, N or B */
@@ -335,14 +335,14 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
     }
   }
 
-  /* Do we have a generic continuation response? */
+  /* Do we have a continuation response? */
   if((len == 3 && !memcmp("+", line, 1)) ||
      (len >= 2 && !memcmp("+ ", line, 2))) {
     *resp = '+';
     return TRUE;
   }
 
-  /* Are we processing CAPABILITY command responses? */
+  /* Are we processing CAPABILITY command data? */
   if(imapc->state == IMAP_CAPABILITY) {
     /* Do we have a valid response? */
     if(len >= 2 && !memcmp("* ", line, 2)) {
