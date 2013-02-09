@@ -224,7 +224,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
   /* Are we processing EHLO command data? */
-  if(smtpc->state == SMTP_EHLO && (!result || (result && *resp == 250))) {
+  if(smtpc->state == SMTP_EHLO && (!result || (result && *resp/100 == 2))) {
     line += 4;
     len -= 4;
 
