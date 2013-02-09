@@ -269,12 +269,12 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
       pop3c->authtypes |= POP3_TYPE_APOP;
 
     /* Does the server support SASL based authentication? */
-    else if(len >= 4 && !memcmp(line, "SASL", 4)) {
+    else if(len >= 5 && !memcmp(line, "SASL ", 5)) {
       pop3c->authtypes |= POP3_TYPE_SASL;
 
       /* Advance past the SASL keyword */
-      line += 4;
-      len -= 4;
+      line += 5;
+      len -= 5;
 
       /* Loop through the data line */
       for(;;) {
