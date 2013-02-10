@@ -636,15 +636,24 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+')
     result = pop3_state_user(conn);
   else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-       to TLS connection now */
-    result = pop3_state_starttls(conn);
+    /* We don't have a SSL/TLS connection yet, but SSL is requested */
+    if(pop3c->tls_supported)
+      /* Switch to TLS connection now */
+      result = pop3_state_starttls(conn);
+    else if(data->set.use_ssl == CURLUSESSL_TRY)
+      /* Fallback and carry on with authentication */
+      result = pop3_authenticate(conn);
+    else {
+      failf(data, "STLS not supported.");
+      result = CURLE_USE_SSL_FAILED;
+    }
   }
   else
     result = pop3_authenticate(conn);
