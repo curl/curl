@@ -371,8 +371,12 @@ static int imap_endofresp(struct pingpong *pp, int *resp)
               line[wordlen] != '\n';)
           wordlen++;
 
+        /* Does the server support the STARTTLS capability? */
+        if(len >= 8 && !memcmp(line, "STARTTLS", 8))
+          imapc->tls_supported = TRUE;
+
         /* Has the server explicitly disabled clear text authentication? */
-        if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
+        else if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
           imapc->login_disabled = TRUE;
 
         /* Does the server support the SASL-IR capability? */

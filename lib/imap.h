@@ -62,6 +62,7 @@ struct imap_conn {
   int cmdid;              /* Last used command ID */
   char resptag[5];        /* Response tag to wait for */
   bool ssldone;           /* Is connect() over SSL done? */
+  bool tls_supported;     /* StartTLS capability supported by server */
   bool login_disabled;    /* LOGIN command explicitly disabled by server */
   bool ir_supported;      /* Initial response supported by server */
 };
