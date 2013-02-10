@@ -65,6 +65,7 @@ struct smtp_conn {
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   struct curl_slist *rcpt; /* Recipient list */
   bool ssldone;            /* Is connect() over SSL done? */
+  bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
 };

@@ -228,8 +228,12 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
     line += 4;
     len -= 4;
 
+    /* Does the server support the STARTTLS capability? */
+    if(len >= 8 && !memcmp(line, "STARTTLS", 8))
+      smtpc->tls_supported = TRUE;
+
     /* Does the server support the SIZE capability? */
-    if(len >= 4 && !memcmp(line, "SIZE", 4))
+    else if(len >= 4 && !memcmp(line, "SIZE", 4))
       smtpc->size_supported = TRUE;
 
     /* Do we have the authentication mechanism list? */
@@ -237,6 +241,7 @@ static int smtp_endofresp(struct pingpong *pp, int *resp)
       line += 5;
       len -= 5;
 
+      /* Loop through the data line */
       for(;;) {
         while(len &&
               (*line == ' ' || *line == '\t' ||
