@@ -480,14 +480,7 @@ static CURLcode imap_state_capability(struct connectdata *conn)
 
   imapc->authmechs = 0;         /* No known authentication mechanisms yet */
   imapc->authused = 0;          /* Clear the authentication mechanism used */
-
-  /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
-  if(!conn->bits.user_passwd) {
-    state(conn, IMAP_STOP);
-
-    return result;
-  }
+  imapc->tls_supported = FALSE; /* Clear the TLS capability */
 
   /* Send the CAPABILITY command */
   result = imap_sendf(conn, "CAPABILITY");
@@ -502,10 +495,18 @@ static CURLcode imap_state_capability(struct connectdata *conn)
 
 static CURLcode imap_state_login(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct FTP *imap = conn->data->state.proto.imap;
   char *user = imap_atom(imap->user);
   char *passwd = imap_atom(imap->passwd);
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, IMAP_STOP);
+
+    return result;
+  }
 
   /* Send USER and password */
   result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
@@ -531,6 +532,14 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   size_t len = 0;
   imapstate state1 = IMAP_STOP;
   imapstate state2 = IMAP_STOP;
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, IMAP_STOP);
+
+    return result;
+  }
 
   /* Calculate the supported authentication mechanism by decreasing order of
      security */
@@ -644,13 +653,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
-  if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-       to TLS connection now */
-    result = imap_state_starttls(conn);
-  }
-  else
-    result = imap_state_capability(conn);
+  result = imap_state_capability(conn);
 
   return result;
 }
@@ -671,7 +674,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = imap_state_capability(conn);
+      result = imap_authenticate(conn);
   }
   else
     result = imap_state_upgrade_tls(conn);
@@ -705,13 +708,19 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
-  if(imapcode == 'O')
-    result = imap_authenticate(conn);
-  else
+  if(imapcode != 'O')
     result = imap_state_login(conn);
+  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
+       to TLS connection now */
+    result = imap_state_starttls(conn);
+  }
+  else
+    result = imap_authenticate(conn);
 
   return result;
 }
