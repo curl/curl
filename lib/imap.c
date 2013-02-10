@@ -497,8 +497,8 @@ static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *imap = conn->data->state.proto.imap;
-  char *user = imap_atom(imap->user);
-  char *passwd = imap_atom(imap->passwd);
+  char *user;
+  char *passwd;
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
@@ -507,6 +507,10 @@ static CURLcode imap_state_login(struct connectdata *conn)
 
     return result;
   }
+
+  /* Make sure the username and password are in the correct atom format */
+  user = imap_atom(imap->user);
+  passwd = imap_atom(imap->passwd);
 
   /* Send USER and password */
   result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
