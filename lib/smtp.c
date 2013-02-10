@@ -334,6 +334,7 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   smtpc->authmechs = 0;         /* No known authentication mechanisms yet */
   smtpc->authused = 0;          /* Clear the authentication mechanism used
                                    for esmtp connections */
+  smtpc->tls_supported = FALSE; /* Clear the TLS capability */
 
   /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
@@ -553,6 +554,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   (void)instate; /* no use for this yet */
 
@@ -566,9 +568,17 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
     }
   }
   else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-       to TLS connection now */
-    result = smtp_state_starttls(conn);
+    /* We don't have a SSL/TLS connection yet, but SSL is requested */
+    if(smtpc->tls_supported)
+      /* Switch to TLS connection now */
+      result = smtp_state_starttls(conn);
+    else if(data->set.use_ssl == CURLUSESSL_TRY)
+      /* Fallback and carry on with authentication */
+      result = smtp_authenticate(conn);
+    else {
+      failf(data, "STARTTLS not supported.");
+      result = CURLE_USE_SSL_FAILED;
+    }
   }
   else
     result = smtp_authenticate(conn);
