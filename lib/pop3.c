@@ -393,14 +393,7 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
 
   pop3c->authmechs = 0;         /* No known authentication mechanisms yet */
   pop3c->authused = 0;          /* Clear the authentication mechanism used */
-
-  /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
-  if(!conn->bits.user_passwd) {
-    state(conn, POP3_STOP);
-
-    return result;
-  }
+  pop3c->tls_supported = FALSE; /* Clear the TLS capability */
 
   /* Send the CAPA command */
   result = Curl_pp_sendf(&pop3c->pp, "CAPA");
@@ -415,8 +408,16 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
 
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct FTP *pop3 = conn->data->state.proto.pop3;
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, POP3_STOP);
+
+    return result;
+  }
 
   /* Send the USER command */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
@@ -439,6 +440,15 @@ static CURLcode pop3_state_apop(struct connectdata *conn)
   unsigned char digest[MD5_DIGEST_LEN];
   char secret[2 * MD5_DIGEST_LEN + 1];
 
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, POP3_STOP);
+
+    return result;
+  }
+
+  /* Create the digest */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
@@ -471,6 +481,14 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *mech = NULL;
   pop3state authstate = POP3_STOP;
+
+  /* Check we have a username and password to authenticate with and end the
+     connect phase if we don't */
+  if(!conn->bits.user_passwd) {
+    state(conn, POP3_STOP);
+
+    return result;
+  }
 
   /* Calculate the supported authentication mechanism by decreasing order of
      security */
@@ -563,13 +581,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
-  if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
-       to TLS connection now */
-    result = pop3_state_starttls(conn);
-  }
-  else
-    result = pop3_state_capa(conn);
+  result = pop3_state_capa(conn);
 
   return result;
 }
@@ -590,7 +602,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = pop3_state_capa(conn);
+      result = pop3_authenticate(conn);
   }
   else
     result = pop3_state_upgrade_tls(conn);
@@ -623,13 +635,19 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
-  if(pop3code == '+')
-    result = pop3_authenticate(conn);
-  else
+  if(pop3code != '+')
     result = pop3_state_user(conn);
+  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
+       to TLS connection now */
+    result = pop3_state_starttls(conn);
+  }
+  else
+    result = pop3_authenticate(conn);
 
   return result;
 }
