@@ -25,7 +25,7 @@
 //
 // GNU C++ compile command line suggestion (edit paths accordingly):
 //
-// g++ -Wall -I/opt/curl/include -I/opt/libxml/include/libxml2 htmltitle.cc \
+// g++ -Wall -I/opt/curl/include -I/opt/libxml/include/libxml2 htmltitle.cpp \
 // -o htmltitle -L/opt/curl/lib -L/opt/libxml/lib -lcurl -lxml2
 
 #include <stdio.h>
