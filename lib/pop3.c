@@ -345,9 +345,9 @@ static void state(struct connectdata *conn, pop3state newstate)
   static const char * const names[] = {
     "STOP",
     "SERVERGREET",
+    "CAPA",
     "STARTTLS",
     "UPGRADETLS",
-    "CAPA",
     "AUTH_PLAIN",
     "AUTH_LOGIN",
     "AUTH_LOGIN_PASSWD",
@@ -1185,12 +1185,12 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       result = pop3_state_servergreet_resp(conn, pop3code, pop3c->state);
       break;
 
-    case POP3_STARTTLS:
-      result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
-      break;
-
     case POP3_CAPA:
       result = pop3_state_capa_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_STARTTLS:
+      result = pop3_state_starttls_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH_PLAIN:

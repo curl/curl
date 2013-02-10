@@ -433,9 +433,9 @@ static void state(struct connectdata *conn, imapstate newstate)
   static const char * const names[]={
     "STOP",
     "SERVERGREET",
+    "CAPABILITY",
     "STARTTLS",
     "UPGRADETLS",
-    "CAPABILITY",
     "AUTHENTICATE_PLAIN",
     "AUTHENTICATE_LOGIN",
     "AUTHENTICATE_LOGIN_PASSWD",
@@ -1265,12 +1265,12 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       result = imap_state_servergreet_resp(conn, imapcode, imapc->state);
       break;
 
-    case IMAP_STARTTLS:
-      result = imap_state_starttls_resp(conn, imapcode, imapc->state);
-      break;
-
     case IMAP_CAPABILITY:
       result = imap_state_capability_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_STARTTLS:
+      result = imap_state_starttls_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_AUTHENTICATE_PLAIN:
