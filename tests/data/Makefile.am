@@ -94,6 +94,7 @@ test1387 test1388 test1389 test1390 test1391 test1392 test1393 \
 test1400 test1401 test1402 test1403 test1404 test1405 test1406 test1407 \
 test1408 test1409 test1410 test1411 test1412 test1413 \
 test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
+test1508 \
 test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007 \
 test2008 test2009 test2010 test2011 test2012 test2013 test2014 test2015 \
 test2016 test2017 test2018 test2019 test2020 test2021 test2022 \

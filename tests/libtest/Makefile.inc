@@ -23,7 +23,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect \
                 lib582 lib583        lib585 lib586 lib587               \
   lib590 lib591                                    lib597 lib598 lib599 \
   \
-  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507
+  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508
 
 chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
@@ -316,3 +316,7 @@ lib1506_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1506
 lib1507_SOURCES = lib1507.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1507_LDADD = $(TESTUTIL_LIBS)
 lib1507_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1507
+
+lib1508_SOURCES = lib1508.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1508_LDADD = $(TESTUTIL_LIBS)
+lib1508_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1508

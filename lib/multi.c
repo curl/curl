@@ -1773,10 +1773,12 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     /* Close all the connections in the connection cache */
     close_all_connections(multi);
 
-    multi->closure_handle->dns.hostcache = multi->hostcache;
-    Curl_hostcache_clean(multi->closure_handle);
+    if(multi->closure_handle) {
+      multi->closure_handle->dns.hostcache = multi->hostcache;
+      Curl_hostcache_clean(multi->closure_handle);
 
-    Curl_close(multi->closure_handle);
+      Curl_close(multi->closure_handle);
+    }
     multi->closure_handle = NULL;
 
     Curl_hash_destroy(multi->sockhash);
