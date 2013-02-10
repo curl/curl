@@ -12,7 +12,7 @@ This release includes the following changes:
  o imap: Changed response tag generation to be completely unique
  o imap: Added support for SASL-IR extension
  o darwinssl: Make certificate errors less techy
- o 
+ o imap/pop3/smtp: Added support for the STARTTLS capability
 
 This release includes the following bugfixes:
 
