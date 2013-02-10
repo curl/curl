@@ -3080,6 +3080,9 @@ static CURLcode ConnectionStore(struct SessionHandle *data,
 */
 CURLcode Curl_connected_proxy(struct connectdata *conn)
 {
+  if(!conn->bits.proxy)
+    return CURLE_OK;
+
   switch(conn->proxytype) {
 #ifndef CURL_DISABLE_PROXY
   case CURLPROXY_SOCKS5:
