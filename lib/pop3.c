@@ -260,8 +260,12 @@ static int pop3_endofresp(struct pingpong *pp, int *resp)
       return TRUE;
     }
 
+    /* Does the server support the STLS capability? */
+    if(len >= 4 && !memcmp(line, "STLS", 4))
+      pop3c->tls_supported = TRUE;
+
     /* Does the server support clear text authentication? */
-    if(len >= 4 && !memcmp(line, "USER", 4))
+    else if(len >= 4 && !memcmp(line, "USER", 4))
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
     /* Does the server support APOP authentication? */
