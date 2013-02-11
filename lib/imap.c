@@ -204,6 +204,15 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
 #endif
 #endif
 
+#ifdef USE_SSL
+static void imap_to_imaps(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_imaps;
+}
+#else
+#define imap_to_imaps(x) Curl_nop_stmt
+#endif
+
 /***********************************************************************
  *
  * imap_sendf()
@@ -493,6 +502,25 @@ static CURLcode imap_state_starttls(struct connectdata *conn)
   return result;
 }
 
+static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
+{
+  struct imap_conn *imapc = &conn->proto.imapc;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
+
+  if(!result) {
+    if(imapc->state != IMAP_UPGRADETLS)
+      state(conn, IMAP_UPGRADETLS);
+
+    if(imapc->ssldone) {
+      imap_to_imaps(conn);
+      result = imap_state_capability(conn);
+    }
+  }
+
+  return result;
+}
 
 static CURLcode imap_state_login(struct connectdata *conn)
 {
@@ -627,22 +655,6 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* For the IMAP "protocol connect" and "doing" phases only */
-static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
-{
-  return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
-}
-
-#ifdef USE_SSL
-static void imap_to_imaps(struct connectdata *conn)
-{
-  conn->handler = &Curl_handler_imaps;
-}
-#else
-#define imap_to_imaps(x) Curl_nop_stmt
-#endif
-
 /* For the initial server greeting */
 static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             int imapcode,
@@ -715,26 +727,6 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
   }
   else
     result = imap_state_upgrade_tls(conn);
-
-  return result;
-}
-
-static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
-{
-  struct imap_conn *imapc = &conn->proto.imapc;
-  CURLcode result;
-
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
-
-  if(!result) {
-    if(imapc->state != IMAP_UPGRADETLS)
-      state(conn, IMAP_UPGRADETLS);
-
-    if(imapc->ssldone) {
-      imap_to_imaps(conn);
-      result = imap_state_capability(conn);
-    }
-  }
 
   return result;
 }
@@ -1395,6 +1387,13 @@ static CURLcode imap_init(struct connectdata *conn)
   imap->passwd = conn->passwd;
 
   return CURLE_OK;
+}
+
+/* For the IMAP "protocol connect" and "doing" phases only */
+static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
+                        int numsocks)
+{
+  return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
 }
 
 /***********************************************************************

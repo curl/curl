@@ -207,6 +207,15 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
 #endif
 #endif
 
+#ifdef USE_SSL
+static void pop3_to_pop3s(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_pop3s;
+}
+#else
+#define pop3_to_pop3s(x) Curl_nop_stmt
+#endif
+
 /* Function that checks for an ending pop3 status code at the start of the
    given string, but also detects the APOP timestamp from the server greeting
    as well as the supported authentication types and allowed SASL mechanisms
@@ -406,6 +415,25 @@ static CURLcode pop3_state_starttls(struct connectdata *conn)
   return result;
 }
 
+static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
+{
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+
+  if(!result) {
+    if(pop3c->state != POP3_UPGRADETLS)
+      state(conn, POP3_UPGRADETLS);
+
+    if(pop3c->ssldone) {
+      pop3_to_pop3s(conn);
+      result = pop3_state_capa(conn);
+    }
+  }
+
+  return result;
+}
 
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
@@ -551,22 +579,6 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* For the POP3 "protocol connect" and "doing" phases only */
-static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
-{
-  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
-}
-
-#ifdef USE_SSL
-static void pop3_to_pop3s(struct connectdata *conn)
-{
-  conn->handler = &Curl_handler_pop3s;
-}
-#else
-#define pop3_to_pop3s(x) Curl_nop_stmt
-#endif
-
 /* For the initial server greeting */
 static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
                                             int pop3code,
@@ -638,26 +650,6 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   }
   else
     result = pop3_state_upgrade_tls(conn);
-
-  return result;
-}
-
-static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
-{
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result;
-
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
-
-  if(!result) {
-    if(pop3c->state != POP3_UPGRADETLS)
-      state(conn, POP3_UPGRADETLS);
-
-    if(pop3c->ssldone) {
-      pop3_to_pop3s(conn);
-      result = pop3_state_capa(conn);
-    }
-  }
 
   return result;
 }
@@ -1321,6 +1313,13 @@ static CURLcode pop3_init(struct connectdata *conn)
   pop3->passwd = conn->passwd;
 
   return CURLE_OK;
+}
+
+/* For the POP3 "protocol connect" and "doing" phases only */
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
+                        int numsocks)
+{
+  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
 }
 
 /***********************************************************************

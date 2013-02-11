@@ -204,6 +204,15 @@ static const struct Curl_handler Curl_handler_smtps_proxy = {
 #endif
 #endif
 
+#ifdef USE_SSL
+static void smtp_to_smtps(struct connectdata *conn)
+{
+  conn->handler = &Curl_handler_smtps;
+}
+#else
+#define smtp_to_smtps(x) Curl_nop_stmt
+#endif
+
 /* Function that checks for an ending SMTP status code at the start of the
    given string, but also detects various capabilities from the EHLO response
    including the supported authentication mechanisms. */
@@ -379,6 +388,26 @@ static CURLcode smtp_state_starttls(struct connectdata *conn)
   return result;
 }
 
+static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
+{
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  CURLcode result;
+
+  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
+
+  if(!result) {
+    if(smtpc->state != SMTP_UPGRADETLS)
+      state(conn, SMTP_UPGRADETLS);
+
+    if(smtpc->ssldone) {
+      smtp_to_smtps(conn);
+      result = smtp_state_ehlo(conn);
+    }
+  }
+
+  return result;
+}
+
 static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -468,22 +497,6 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* For the SMTP "protocol connect" and "doing" phases only */
-static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
-{
-  return Curl_pp_getsock(&conn->proto.smtpc.pp, socks, numsocks);
-}
-
-#ifdef USE_SSL
-static void smtp_to_smtps(struct connectdata *conn)
-{
-  conn->handler = &Curl_handler_smtps;
-}
-#else
-#define smtp_to_smtps(x) Curl_nop_stmt
-#endif
-
 /* For the initial server greeting */
 static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
                                             int smtpcode,
@@ -524,26 +537,6 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   }
   else
     result = smtp_state_upgrade_tls(conn);
-
-  return result;
-}
-
-static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
-{
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-  CURLcode result;
-
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
-
-  if(!result) {
-    if(smtpc->state != SMTP_UPGRADETLS)
-      state(conn, SMTP_UPGRADETLS);
-
-    if(smtpc->ssldone) {
-      smtp_to_smtps(conn);
-      result = smtp_state_ehlo(conn);
-    }
-  }
 
   return result;
 }
@@ -1310,6 +1303,13 @@ static CURLcode smtp_init(struct connectdata *conn)
   smtp->passwd = conn->passwd;
 
   return CURLE_OK;
+}
+
+/* For the SMTP "protocol connect" and "doing" phases only */
+static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
+                        int numsocks)
+{
+  return Curl_pp_getsock(&conn->proto.smtpc.pp, socks, numsocks);
 }
 
 /***********************************************************************
