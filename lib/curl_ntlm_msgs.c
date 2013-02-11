@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -179,10 +179,11 @@ static unsigned int readint_le(unsigned char *buf)
 /*
  * Curl_ntlm_decode_type2_message()
  *
- * This is used to decode a ntlm type-2 message received from a: HTTP, SMTP
- * or POP3 server. The message is first decoded from a base64 string into a
- * raw ntlm message and checked for validity before the appropriate data for
- * creating a type-3 message is written to the given ntlm data structure.
+ * This is used to decode a ntlm type-2 message received from a HTTP or SASL
+ * based (such as SMTP, POP3 or IMAP) server. The message is first decoded
+ * from a base64 string into a raw ntlm message and checked for validity
+ * before the appropriate data for creating a type-3 message is written to
+ * the given ntlm data structure.
  *
  * Parameters:
  *
@@ -305,9 +306,9 @@ static void unicodecpy(unsigned char *dest,
 /*
  * Curl_ntlm_create_type1_message()
  *
- * This is used to generate an already encoded NTLM type-1 message ready
- * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
- * using the appropriate compile time crypo API.
+ * This is used to generate an already encoded NTLM type-1 message ready for
+ * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
+ * or IMAP) server, using the appropriate compile time crypo API.
  *
  * Parameters:
  *
@@ -553,9 +554,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 /*
  * Curl_ntlm_create_type3_message()
  *
- * This is used to generate an already encoded NTLM type-3 message ready
- * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
- * using the appropriate compile time crypo API.
+ * This is used to generate an already encoded NTLM type-3 message ready for
+ * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
+ * or IMAP) server, using the appropriate compile time crypo API.
  *
  * Parameters:
  *
