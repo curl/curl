@@ -373,19 +373,6 @@ static void state(struct connectdata *conn, pop3state newstate)
   pop3c->state = newstate;
 }
 
-static CURLcode pop3_state_starttls(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-
-  /* Send the STLS command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "STLS");
-
-  if(!result)
-    state(conn, POP3_STARTTLS);
-
-  return result;
-}
-
 static CURLcode pop3_state_capa(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -405,6 +392,20 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+static CURLcode pop3_state_starttls(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the STLS command */
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "STLS");
+
+  if(!result)
+    state(conn, POP3_STARTTLS);
+
+  return result;
+}
+
 
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
@@ -586,6 +587,37 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   return result;
 }
 
+/* For CAPA responses */
+static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
+                                     pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+')
+    result = pop3_state_user(conn);
+  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* We don't have a SSL/TLS connection yet, but SSL is requested */
+    if(pop3c->tls_supported)
+      /* Switch to TLS connection now */
+      result = pop3_state_starttls(conn);
+    else if(data->set.use_ssl == CURLUSESSL_TRY)
+      /* Fallback and carry on with authentication */
+      result = pop3_authenticate(conn);
+    else {
+      failf(data, "STLS not supported.");
+      result = CURLE_USE_SSL_FAILED;
+    }
+  }
+  else
+    result = pop3_authenticate(conn);
+
+  return result;
+}
+
 /* For STARTTLS responses */
 static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
                                          int pop3code,
@@ -626,37 +658,6 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
       result = pop3_state_capa(conn);
     }
   }
-
-  return result;
-}
-
-/* For CAPA responses */
-static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
-                                     pop3state instate)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-
-  (void)instate; /* no use for this yet */
-
-  if(pop3code != '+')
-    result = pop3_state_user(conn);
-  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested */
-    if(pop3c->tls_supported)
-      /* Switch to TLS connection now */
-      result = pop3_state_starttls(conn);
-    else if(data->set.use_ssl == CURLUSESSL_TRY)
-      /* Fallback and carry on with authentication */
-      result = pop3_authenticate(conn);
-    else {
-      failf(data, "STLS not supported.");
-      result = CURLE_USE_SSL_FAILED;
-    }
-  }
-  else
-    result = pop3_authenticate(conn);
 
   return result;
 }
