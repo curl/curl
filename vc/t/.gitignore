@@ -1,0 +1,7 @@
+*
+!.gitattributes
+!.gitignore
+!README
+!lib
+!src
+!tests

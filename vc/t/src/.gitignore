@@ -1,0 +1,5 @@
+*
+!.gitattributes
+!.gitignore
+!*.foot
+!*.head
