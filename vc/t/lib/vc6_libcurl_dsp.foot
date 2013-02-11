@@ -1,10 +1,9 @@
-
 # Begin Group "Resource Files"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\libcurl.rc
+SOURCE=..\..\..\lib\libcurl.rc
 # End Source File
 # End Group
 # End Target

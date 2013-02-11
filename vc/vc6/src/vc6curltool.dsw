@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "curlsrc"=".\vc6curlsrc.dsp" - Package Owner=<4>
+Project: "curltool"=".\vc6curltool.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
