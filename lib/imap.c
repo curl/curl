@@ -1089,9 +1089,15 @@ static CURLcode imap_select(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct IMAP *imap = data->state.proto.imap;
+  char *mailbox;
 
-  result = imap_sendf(conn, "SELECT %s",
-                      imap->mailbox ? imap->mailbox : "");
+  mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+  if(!mailbox)
+    result = CURLE_OUT_OF_MEMORY;
+  else
+    result = imap_sendf(conn, "SELECT %s", mailbox);
+
+  Curl_safefree(mailbox);
   if(result)
     return result;
 
