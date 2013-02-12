@@ -326,6 +326,7 @@ struct ssl_connect_data {
   curl_socket_t ssl_sockfd;
   ssl_connect_state connecting_state;
   bool ssl_direction; /* true if writing, false if reading */
+  size_t ssl_write_buffered_length;
 #endif /* USE_DARWINSSL */
 };
 
