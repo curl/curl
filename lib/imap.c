@@ -327,11 +327,10 @@ static char* imap_atom(const char* str)
 /* Function that checks for an ending IMAP status code at the start of the
    given string but also detects various capabilities from the CAPABILITY
    response including the supported authentication mechanisms. */
-static int imap_endofresp(struct pingpong *pp, int *resp)
+static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
+                           int *resp)
 {
-  char *line = pp->linestart_resp;
-  size_t len = pp->nread_resp;
-  struct imap_conn *imapc = &pp->conn->proto.imapc;
+  struct imap_conn *imapc = &conn->proto.imapc;
   const char *id = imapc->resptag;
   size_t id_len = strlen(id);
   size_t wordlen;

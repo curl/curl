@@ -220,11 +220,9 @@ static void pop3_to_pop3s(struct connectdata *conn)
    given string, but also detects the APOP timestamp from the server greeting
    as well as the supported authentication types and allowed SASL mechanisms
    from the CAPA response. */
-static int pop3_endofresp(struct pingpong *pp, int *resp)
+static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
+                           int *resp)
 {
-  char *line = pp->linestart_resp;
-  size_t len = strlen(pp->linestart_resp);
-  struct connectdata *conn = pp->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t wordlen;
   size_t i;

@@ -216,11 +216,9 @@ static void smtp_to_smtps(struct connectdata *conn)
 /* Function that checks for an ending SMTP status code at the start of the
    given string, but also detects various capabilities from the EHLO response
    including the supported authentication mechanisms. */
-static int smtp_endofresp(struct pingpong *pp, int *resp)
+static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
+                           int *resp)
 {
-  char *line = pp->linestart_resp;
-  size_t len = strlen(pp->linestart_resp);
-  struct connectdata *conn = pp->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   int result = FALSE;
   size_t wordlen;

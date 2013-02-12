@@ -395,7 +395,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           if(result)
             return result;
 
-          if(pp->endofresp(pp, code)) {
+          if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
             /* This is the end of the last line, copy the last line to the
                start of the buffer and zero terminate, for old times sake (and
                krb4)! */

@@ -598,17 +598,17 @@ static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
 /* macro to check for the last line in an FTP server response */
 #define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
-static int ftp_endofresp(struct pingpong *pp,
-                         int *code)
+static bool ftp_endofresp(struct connectdata *conn, char *line, size_t len,
+                          int *code)
 {
-  char *line = pp->linestart_resp;
-  size_t len = pp->nread_resp;
+  (void)conn;
 
   if((len > 3) && LASTLINE(line)) {
     *code = curlx_sltosi(strtol(line, NULL, 10));
-    return 1;
+    return TRUE;
   }
-  return 0;
+
+  return FALSE;
 }
 
 static CURLcode ftp_readresp(curl_socket_t sockfd,

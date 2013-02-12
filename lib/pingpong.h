@@ -64,7 +64,7 @@ struct pingpong {
 
   CURLcode (*statemach_act)(struct connectdata *conn);
 
-  int (*endofresp)(struct pingpong *pp, int *code);
+  bool (*endofresp)(struct connectdata *conn, char *ptr, size_t len, int *code);
 };
 
 /*
