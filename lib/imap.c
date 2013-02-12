@@ -423,7 +423,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     /* Do we have a valid response? */
     if(len >= 2 && !memcmp("* ", line, 2)) {
       *resp = '*';
- 
+
       return TRUE;
     }
   }
