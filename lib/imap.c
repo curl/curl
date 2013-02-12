@@ -363,9 +363,6 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
               (*line == ' ' || *line == '\t' ||
                *line == '\r' || *line == '\n')) {
 
-          if(*line == '\n')
-            return FALSE;
-
           line++;
           len--;
         }
