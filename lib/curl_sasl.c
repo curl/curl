@@ -283,6 +283,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(result)
     return result;
 
+  if(!chlg)
+    return CURLE_LOGIN_DENIED;
+
   /* Retrieve nonce string from the challenge */
   if(!sasl_digest_get_key_value(chlg, "nonce=\"", nonce,
                                 sizeof(nonce), '\"')) {
