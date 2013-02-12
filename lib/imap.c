@@ -339,6 +339,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
   if(len >= id_len + 3) {
     if(!memcmp(id, line, id_len) && line[id_len] == ' ') {
       *resp = line[id_len + 1]; /* O, N or B */
+
       return TRUE;
     }
   }
@@ -347,6 +348,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
   if((len == 3 && !memcmp("+", line, 1)) ||
      (len >= 2 && !memcmp("+ ", line, 2))) {
     *resp = '+';
+
     return TRUE;
   }
 
@@ -416,12 +418,12 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       }
     }
   }
-
   /* Are we processing FETCH command responses? */
-  if(imapc->state == IMAP_FETCH) {
+  else if(imapc->state == IMAP_FETCH) {
     /* Do we have a valid response? */
     if(len >= 2 && !memcmp("* ", line, 2)) {
       *resp = '*';
+ 
       return TRUE;
     }
   }

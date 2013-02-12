@@ -216,10 +216,10 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
-/* Function that checks for an ending pop3 status code at the start of the
+/* Function that checks for an ending POP3 status code at the start of the
    given string, but also detects the APOP timestamp from the server greeting
-   as well as the supported authentication types and allowed SASL mechanisms
-   from the CAPA response. */
+   and various capabilities from the CAPA response including the supported
+   authentication types and allowed SASL mechanisms. */
 static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
@@ -259,7 +259,6 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   }
   /* Are we processing CAPA command responses? */
   else if(pop3c->state == POP3_CAPA) {
-
     /* Do we have the terminating line? */
     if(len >= 1 && !memcmp(line, ".", 1)) {
       *resp = '+';
@@ -330,14 +329,15 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
     return FALSE;
   }
 
-  if((len < 1 || memcmp("+", line, 1)) &&
-     (len < 3 || memcmp("+OK", line, 3)))
+  /* Do we have a command or continuation response? */
+  if((len >= 3 && !memcmp("+OK", line, 3)) ||
+     (len >= 1 && !memcmp("+", line, 1))) {
+    *resp = '+';
+
+    return TRUE;
+  }
+
   return FALSE; /* Nothing for us */
-
-  /* Otherwise it's a positive response */
-  *resp = '+';
-
-  return TRUE;
 }
 
 /* This is the ONLY way to change POP3 state! */
