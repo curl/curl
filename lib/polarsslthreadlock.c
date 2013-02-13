@@ -24,7 +24,8 @@
 #include <stdio.h>
 #include "curl_setup.h"
 
-#if defined(USE_POLARSSL) && (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
+#if defined(USE_POLARSSL) && \
+    (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
 
 #if defined(USE_THREADS_POSIX)
 #ifdef HAVE_PTHREAD_H
@@ -52,23 +53,21 @@ int polarsslthreadlock_thread_setup(void)
   int ret;
 
   mutex_buf = malloc(NUMT * sizeof(MUTEX_TYPE));
-  if (!mutex_buf)
+  if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 
 #ifdef HAVE_PTHREAD_H
-  for (i = 0;  i < NUMT;  i++)
-  {
+  for(i = 0;  i < NUMT;  i++) {
     ret = pthread_mutex_init(&mutex_buf[i], NULL);
-	if(ret)
-	   return 0; /* pthread_mutex_init failed */
+    if(ret)
+      return 0; /* pthread_mutex_init failed */
   }
 #elif defined(HAVE_PROCESS_H)
-  for (i = 0;  i < NUMT;  i++)
-  {
+  for(i = 0;  i < NUMT;  i++) {
     mutex_buf[i] = CreateMutex(0, FALSE, 0);
-	if(mutex_buf[i] == 0)
-	  return 0;  /* CreateMutex failed */
-  }	
+    if(mutex_buf[i] == 0)
+      return 0;  /* CreateMutex failed */
+  }
 #endif /* HAVE_PTHREAD_H */
 
   return 1; /* OK */
@@ -78,22 +77,22 @@ int polarsslthreadlock_thread_cleanup(void)
 {
   int i;
   int ret;
-  
-  if (!mutex_buf)
+
+  if(!mutex_buf)
     return 0; /* error, no threads locks defined */
 
 #ifdef HAVE_PTHREAD_H
-  for (i = 0; i < NUMT; i++)
-  {
+  for(i = 0; i < NUMT; i++) {
     ret = pthread_mutex_destroy(&mutex_buf[i]);
-	if(ret)
-	  return 0; /* pthread_mutex_destroy failed */
+    if(ret)
+      return 0; /* pthread_mutex_destroy failed */
   }
 #elif defined(HAVE_PROCESS_H)
-  for (i = 0; i < NUMT; i++)
+  for(i = 0; i < NUMT; i++) {
     ret = CloseHandle(mutex_buf[i]);
     if(!ret)
-	  return 0; /* CloseHandle failed */	
+      return 0; /* CloseHandle failed */
+  }
 #endif /* HAVE_PTHREAD_H */
   free(mutex_buf);
   mutex_buf = NULL;
@@ -105,25 +104,23 @@ int polarsslthreadlock_lock_function(int n)
 {
   int ret;
 #ifdef HAVE_PTHREAD_H
-  if(n < NUMT)
-  {
+  if(n < NUMT) {
     ret = pthread_mutex_lock(&mutex_buf[n]);
-	if(ret)
-	{
-	  DEBUGF(fprintf(stderr, "Error: polarsslthreadlock_lock_function failed\n"));
-	  return 0; /* pthread_mutex_lock failed */
-	}
+    if(ret) {
+      DEBUGF(fprintf(stderr,
+                     "Error: polarsslthreadlock_lock_function failed\n"));
+      return 0; /* pthread_mutex_lock failed */
+    }
   }
 #elif defined(HAVE_PROCESS_H)
-  if(n < NUMT)
-  {
+  if(n < NUMT) {
     ret = (WaitForSingleObject(mutex_buf[n], INFINITE)==WAIT_FAILED?1:0);
-	if(ret)
-	{
-	  DEBUGF(fprintf(stderr, "Error: polarsslthreadlock_lock_function failed\n"));
-	  return 0; /* pthread_mutex_lock failed */
-	}
-  }	
+    if(ret) {
+      DEBUGF(fprintf(stderr,
+                     "Error: polarsslthreadlock_lock_function failed\n"));
+      return 0; /* pthread_mutex_lock failed */
+    }
+  }
 #endif /* HAVE_PTHREAD_H */
   return 1; /* OK */
 }
@@ -132,24 +129,22 @@ int polarsslthreadlock_unlock_function(int n)
 {
   int ret;
 #ifdef HAVE_PTHREAD_H
-  if(n < NUMT)
-  {
+  if(n < NUMT) {
     ret = pthread_mutex_unlock(&mutex_buf[n]);
-	if(ret)
-	{
-	  DEBUGF(fprintf(stderr, "Error: polarsslthreadlock_unlock_function failed\n"));
-	  return 0; /* pthread_mutex_unlock failed */
-	}
+    if(ret) {
+      DEBUGF(fprintf(stderr,
+                     "Error: polarsslthreadlock_unlock_function failed\n"));
+      return 0; /* pthread_mutex_unlock failed */
+    }
   }
 #elif defined(HAVE_PROCESS_H)
-  if(n < NUMT)
-  {
+  if(n < NUMT) {
     ret = ReleaseMutex(mutex_buf[n]);
-	if(!ret)
-	{
-	  DEBUGF(fprintf(stderr, "Error: polarsslthreadlock_unlock_function failed\n"));
-	  return 0; /* pthread_mutex_lock failed */
-	}
+    if(!ret) {
+      DEBUGF(fprintf(stderr,
+                     "Error: polarsslthreadlock_unlock_function failed\n"));
+      return 0; /* pthread_mutex_lock failed */
+    }
   }
 #endif /* HAVE_PTHREAD_H */
   return 1; /* OK */

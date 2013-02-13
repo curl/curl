@@ -87,14 +87,13 @@ static int  entropy_init_initialized  = 0;
 /* start of entropy_init_mutex() */
 static void entropy_init_mutex(entropy_context *ctx)
 {
-    /* lock 0 = entropy_init_mutex() */
-    polarsslthreadlock_lock_function(0);
-    if(entropy_init_initialized == 0)
-    {
-        entropy_init(ctx);
-        entropy_init_initialized = 1;
-    }
-    polarsslthreadlock_unlock_function(0);
+  /* lock 0 = entropy_init_mutex() */
+  polarsslthreadlock_lock_function(0);
+  if(entropy_init_initialized == 0) {
+    entropy_init(ctx);
+    entropy_init_initialized = 1;
+  }
+  polarsslthreadlock_unlock_function(0);
 }
 /* end of entropy_init_mutex() */
 
@@ -102,12 +101,12 @@ static void entropy_init_mutex(entropy_context *ctx)
 static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
     int ret;
-	/* lock 1 = entropy_func_mutex() */
+    /* lock 1 = entropy_func_mutex() */
     polarsslthreadlock_lock_function(1);
     ret = entropy_func(data, output, len);
     polarsslthreadlock_unlock_function(1);
-	
-	return ret;
+
+    return ret;
 }
 /* end of entropy_func_mutex() */
 
@@ -171,23 +170,23 @@ polarssl_connect_step1(struct connectdata *conn,
   entropy_init_mutex(&entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
-                           connssl->ssn.id, connssl->ssn.length)) != 0)
-  {
+                               connssl->ssn.id, connssl->ssn.length)) != 0) {
 #ifdef POLARSSL_ERROR_C
      error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-	 failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n", -ret, errorbuf);
+     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
   }
 #else
   entropy_init(&connssl->entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
-                           connssl->ssn.id, connssl->ssn.length)) != 0)
-  {
+                                connssl->ssn.id, connssl->ssn.length)) != 0) {
 #ifdef POLARSSL_ERROR_C
      error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-	 failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n", -ret, errorbuf);
+     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
   }
 #endif /* THREADING_SUPPORT */
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
@@ -354,11 +353,12 @@ polarssl_connect_step2(struct connectdata *conn,
     else if(ret != POLARSSL_ERR_NET_WANT_READ &&
             ret != POLARSSL_ERR_NET_WANT_WRITE) {
 #ifdef POLARSSL_ERROR_C
-      error_strerror(ret, errorbuf, sizeof(errorbuf));
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-	  failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s", -ret, errorbuf);
+     failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s",
+                                                    -ret, errorbuf);
 
-      return CURLE_SSL_CONNECT_ERROR;
+     return CURLE_SSL_CONNECT_ERROR;
     }
     else {
       if(ret == POLARSSL_ERR_NET_WANT_READ) {
@@ -699,7 +699,7 @@ int polarssl_init(void)
   return polarsslthreadlock_thread_setup();
 #else /* THREADING_SUPPORT */
   return 1;
-#endif /* THREADING_SUPPORT */   
+#endif /* THREADING_SUPPORT */
 }
 
 void polarssl_cleanup(void)
