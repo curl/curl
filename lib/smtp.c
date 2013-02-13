@@ -1347,12 +1347,6 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   /* Initialise the response reader stuff */
   Curl_pp_init(pp);
 
-  /* Set the default response time-out */
-  pp->response_time = RESP_TIMEOUT;
-  pp->statemach_act = smtp_statemach_act;
-  pp->endofresp = smtp_endofresp;
-  pp->conn = conn;
-
   /* Calculate the path if necessary */
   if(!*path) {
     if(!Curl_gethostname(localhost, sizeof(localhost)))
