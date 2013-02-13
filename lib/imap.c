@@ -505,6 +505,7 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
 
+  /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
 
   if(!result) {
@@ -1415,19 +1416,22 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
+  /* Initialise the IMAP layer */
   result = imap_init(conn);
-  if(CURLE_OK != result)
+  if(result)
     return result;
 
-  /* We always support persistent connections on imap */
+  /* We always support persistent connections in IMAP */
   conn->bits.close = FALSE;
 
-  pp->response_time = RESP_TIMEOUT; /* set default response time-out */
+  /* Set the default response time-out */
+  pp->response_time = RESP_TIMEOUT;
   pp->statemach_act = imap_statemach_act;
   pp->endofresp = imap_endofresp;
   pp->conn = conn;
 
-  Curl_pp_init(pp); /* init generic pingpong data */
+  /* Initialise the pingpong layer */
+  Curl_pp_init(pp);
 
   /* Start off waiting for the server greeting response */
   state(conn, IMAP_SERVERGREET);
@@ -1460,9 +1464,9 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 
   if(!imap)
     /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the imap struct is not
+     * trying to resolve the host name, it seems that the IMAP struct is not
      * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no imap pointer is set.
+     * this function. So we simply return success if no IMAP pointer is set.
      */
     return CURLE_OK;
 
@@ -1687,7 +1691,7 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
 
   result = imap_perform(conn, &connected, dophase_done);
 
-  if(CURLE_OK == result) {
+  if(!result) {
     if(!*dophase_done)
       /* The DO phase has not completed yet */
       return CURLE_OK;
@@ -1703,7 +1707,7 @@ static CURLcode imap_setup_connection(struct connectdata * conn)
   struct SessionHandle *data = conn->data;
 
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel imap operations through the proxy, we
+    /* Unless we have asked to tunnel IMAP operations through the proxy, we
        switch and use HTTP operations only */
 #ifndef CURL_DISABLE_HTTP
     if(conn->handler == &Curl_handler_imap)

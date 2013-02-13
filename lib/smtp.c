@@ -388,6 +388,7 @@ static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
 
+  /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
 
   if(!result) {
@@ -1332,19 +1333,21 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
+  /* Initialise the SMTP layer */
   result = smtp_init(conn);
-  if(CURLE_OK != result)
+  if(result)
     return result;
 
-  /* We always support persistent connections on smtp */
+  /* We always support persistent connections in SMTP */
   conn->bits.close = FALSE;
 
-  pp->response_time = RESP_TIMEOUT; /* set default response time-out */
+  /* Set the default response time-out */
+  pp->response_time = RESP_TIMEOUT;
   pp->statemach_act = smtp_statemach_act;
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
-  /* Initialise the response reader stuff */
+  /* Initialise the pingpong layer */
   Curl_pp_init(pp);
 
   /* Calculate the path if necessary */
@@ -1389,9 +1392,9 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
   if(!smtp)
     /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the smtp struct is not
+     * trying to resolve the host name, it seems that the SMTP struct is not
      * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no smtp pointer is set.
+     * this function. So we simply return success if no SMTP pointer is set.
      */
     return CURLE_OK;
 
@@ -1626,7 +1629,7 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
 
   result = smtp_perform(conn, &connected, dophase_done);
 
-  if(CURLE_OK == result) {
+  if(!result) {
     if(!*dophase_done)
       /* The DO phase has not completed yet */
       return CURLE_OK;
@@ -1642,7 +1645,7 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
 
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel smtp operations through the proxy, we
+    /* Unless we have asked to tunnel SMTP operations through the proxy, we
        switch and use HTTP operations only */
 #ifndef CURL_DISABLE_HTTP
     if(conn->handler == &Curl_handler_smtp)

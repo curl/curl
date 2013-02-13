@@ -415,6 +415,7 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
 
+  /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
 
   if(!result) {
@@ -1340,27 +1341,29 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
      sessionhandle, deal with it */
   Curl_reset_reqproto(conn);
 
+  /* Initialise the POP3 layer */
   result = pop3_init(conn);
-  if(CURLE_OK != result)
+  if(result)
     return result;
 
-  /* We always support persistent connections on pop3 */
+  /* We always support persistent connections in POP3 */
   conn->bits.close = FALSE;
 
-  pp->response_time = RESP_TIMEOUT; /* set default response time-out */
+  /* Set the default response time-out */
+  pp->response_time = RESP_TIMEOUT;
   pp->statemach_act = pop3_statemach_act;
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
   if(conn->handler->flags & PROTOPT_SSL) {
-    /* POP3S is simply pop3 with SSL for the control channel */
+    /* POP3S is simply POP3 with SSL for the control channel */
     /* so perform the SSL initialization for this socket */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
   }
 
-  /* Initialise the response reader stuff */
+  /* Initialise the pingpong layer */
   Curl_pp_init(pp);
 
   /* Start off waiting for the server greeting response */
@@ -1392,9 +1395,9 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 
   if(!pop3)
     /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the pop3 struct is not
+     * trying to resolve the host name, it seems that the POP3 struct is not
      * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no pop3 pointer is set.
+     * this function. So we simply return success if no POP3 pointer is set.
      */
     return CURLE_OK;
 
@@ -1638,7 +1641,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
 
   result = pop3_perform(conn, &connected, dophase_done);
 
-  if(CURLE_OK == result) {
+  if(!result) {
     if(!*dophase_done)
       /* The DO phase has not completed yet */
       return CURLE_OK;
@@ -1654,7 +1657,7 @@ static CURLcode pop3_setup_connection(struct connectdata * conn)
   struct SessionHandle *data = conn->data;
 
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel pop3 operations through the proxy, we
+    /* Unless we have asked to tunnel POP3 operations through the proxy, we
        switch and use HTTP operations only */
 #ifndef CURL_DISABLE_HTTP
     if(conn->handler == &Curl_handler_pop3)
