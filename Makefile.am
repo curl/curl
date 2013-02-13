@@ -30,22 +30,22 @@ CMake/CurlTests.c CMake/FindOpenSSL.cmake CMake/FindZLIB.cmake		\
 CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
-VC6LIBDSP = vc/vc6/lib/vc6libcurl.dsp
-VC6LIBDSPHEAD = vc/t/lib/vc6_libcurl_dsp.head
-VC6LIBDSPFOOT = vc/t/lib/vc6_libcurl_dsp.foot
+VC6LIBDSP = vs/vc6/lib/vc6libcurl.dsp
+VC6LIBDSPHEAD = vs/t/lib/vc6_libcurl_dsp.head
+VC6LIBDSPFOOT = vs/t/lib/vc6_libcurl_dsp.foot
 
-VC8LIBPRJ = vc/vc8/lib/vc8libcurl.vcproj
-VC8LIBPRJHEAD = vc/t/lib/vc8_libcurl_prj.head
-VC8LIBPRJFOOT = vc/t/lib/vc8_libcurl_prj.foot
+VC8LIBPRJ = vs/vc8/lib/vc8libcurl.vcproj
+VC8LIBPRJHEAD = vs/t/lib/vc8_libcurl_prj.head
+VC8LIBPRJFOOT = vs/t/lib/vc8_libcurl_prj.foot
 
 VC_DIST = \
- vc/t/README \
+ vs/t/README \
  $(VC6LIBDSP) $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
  $(VC8LIBPRJ) $(VC8LIBPRJHEAD) $(VC8LIBPRJFOOT) \
- vc/vc6/vc6curl.dsw \
- vc/vc6/lib/vc6libcurl.dsw \
- vc/vc6/src/vc6curltool.dsw \
- vc/vc6/src/vc6curltool.dsp
+ vs/vc6/vc6curl.dsw \
+ vs/vc6/lib/vc6libcurl.dsw \
+ vs/vc6/src/vc6curltool.dsw \
+ vs/vc6/src/vc6curltool.dsp
 
 VC6LIBDSP_DEPS = $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
  Makefile.am lib/Makefile.inc
@@ -206,7 +206,7 @@ vc6-ide:
 $(VC6LIBDSP): $(VC6LIBDSP_DEPS)
 	@(echo "generating '$(VC6LIBDSP)'"; \
 	\
-	for dir in 'vc' 'vc/vc6' 'vc/vc6/lib'; do \
+	for dir in 'vs' 'vs/vc6' 'vs/vc6/lib'; do \
 	  test -d "$$dir" || mkdir "$$dir" || exit 1; \
 	done; \
 	\
@@ -252,7 +252,7 @@ vc8-ide:
 $(VC8LIBPRJ): $(VC8LIBPRJ_DEPS)
 	@(echo "generating '$(VC8LIBPRJ)'"; \
 	\
-	for dir in 'vc' 'vc/vc8' 'vc/vc8/lib'; do \
+	for dir in 'vs' 'vs/vc8' 'vs/vc8/lib'; do \
 	  test -d "$$dir" || mkdir "$$dir" || exit 1; \
 	done; \
 	\

@@ -359,7 +359,7 @@ Win32
    source distribution archive to allow proper building of the two included
    projects, the libcurl library and the curl tool.
 
-   1) Open the vc6curl.dsw workspace with MSVC6's IDE.
+   1) Open the vs/vc6/vc6curl.dsw workspace with MSVC6's IDE.
    2) Select 'Build' from top menu.
    3) Select 'Batch Build' from dropdown menu.
    4) Make sure that the eight project configurations are 'checked'.
@@ -367,12 +367,12 @@ Win32
    6) Once the eight project configurations are built you are done.
 
    Dynamic and static libcurl libraries are built in debug and release flavours,
-   and can be located each one in its own subdirectory, DLL-Debug, DLL-Release,
-   LIB-Debug and LIB-Release, all of them below the 'lib' subdirectory.
+   and can be located each one in its own subdirectory, dll-debug, dll-release,
+   lib-debug and lib-release, all of them below the 'vs/vc6/lib' subdirectory.
 
    In the same way four curl executables are created, each using its respective
    library. The resulting curl executables are located in its own subdirectory,
-   DLL-Debug, DLL-Release, LIB-Debug and LIB-Release, below the 'src' subdir.
+   dll-debug, dll-release, lib-debug and lib-release, below 'vs/vc6/src' subdir.
 
    These reference VC++ 6.0 configurations are generated using the dynamic CRT.
 
