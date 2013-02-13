@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -163,10 +163,6 @@
   #define HAVE_SIGSETJMP  1
   #define HAVE_SYS_TIME_H 1
   #define HAVE_VARIADIC_MACROS_GCC 1
-
-  #if (DJGPP_MINOR >= 4)
-    #define HAVE_STRLCAT  1
-  #endif
 
   /* Because djgpp <= 2.03 doesn't have snprintf() etc. */
   #if (DJGPP_MINOR < 4)
