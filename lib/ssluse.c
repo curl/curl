@@ -236,27 +236,14 @@ static int ossl_seed(struct SessionHandle *data)
 
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
-  {
+  do {
     int len;
-    char *area;
+    unsigned char randb[64];
+    Curl_ossl_random(data, randb, sizeof(randb));
 
-    /* Changed call to RAND_seed to use the underlying RAND_add implementation
-     * directly.  Do this in a loop, with the amount of additional entropy
-     * being dependent upon the algorithm used by Curl_FormBoundary(): N bytes
-     * of a 7-bit ascii set. -- Richard Gorton, March 11 2003.
-     */
-
-    do {
-      area = Curl_FormBoundary();
-      if(!area)
-        return 3; /* out of memory */
-
-      len = curlx_uztosi(strlen(area));
-      RAND_add(area, len, (len >> 1));
-
-      free(area); /* now remove the random junk */
-    } while(!RAND_status());
-  }
+    len = sizeof(randb);
+    RAND_add(randb, len, (len >> 1));
+  } while(!RAND_status());
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
