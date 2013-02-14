@@ -56,6 +56,7 @@ static char *Curl_basename(char *path);
 #endif
 
 static size_t readfromfile(struct Form *form, char *buffer, size_t size);
+static char *formboundary(void);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -1100,7 +1101,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
   if(!post)
     return result; /* no input => no output! */
 
-  boundary = Curl_FormBoundary();
+  boundary = formboundary();
   if(!boundary)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1156,7 +1157,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
          the magic to include several files with the same field name */
 
       Curl_safefree(fileboundary);
-      fileboundary = Curl_FormBoundary();
+      fileboundary = formboundary();
       if(!fileboundary) {
         result = CURLE_OUT_OF_MEMORY;
         break;
@@ -1459,6 +1460,34 @@ char *Curl_formpostheader(void *formp, size_t *len)
   return header;
 }
 
+/*
+ * formboundary() creates a suitable boundary string and returns an allocated
+ * one.
+ */
+static char *formboundary(void)
+{
+  char *retstring;
+  size_t i;
+
+  static const char table16[]="0123456789abcdef";
+
+  retstring = malloc(BOUNDARY_LENGTH+1);
+
+  if(!retstring)
+    return NULL; /* failed */
+
+  strcpy(retstring, "----------------------------");
+
+  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
+    retstring[i] = table16[Curl_rand()%16];
+
+  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
+     combinations */
+  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
+
+  return retstring;
+}
+
 #else  /* CURL_DISABLE_HTTP */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                           struct curl_httppost **last_post,
@@ -1484,37 +1513,5 @@ void curl_formfree(struct curl_httppost *form)
   /* does nothing HTTP is disabled */
 }
 
-#endif  /* CURL_DISABLE_HTTP */
 
-#if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
-
-/*
- * Curl_FormBoundary() creates a suitable boundary string and returns an
- * allocated one. This is also used by SSL-code so it must be present even
- * if HTTP is disabled!
- */
-char *Curl_FormBoundary(void)
-{
-  char *retstring;
-  size_t i;
-
-  static const char table16[]="0123456789abcdef";
-
-  retstring = malloc(BOUNDARY_LENGTH+1);
-
-  if(!retstring)
-    return NULL; /* failed */
-
-  strcpy(retstring, "----------------------------");
-
-  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
-    retstring[i] = table16[Curl_rand()%16];
-
-  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
-     combinations */
-  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
-
-  return retstring;
-}
-
-#endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
+#endif  /* !defined(CURL_DISABLE_HTTP) */
