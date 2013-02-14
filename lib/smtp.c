@@ -910,8 +910,9 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 #endif
 
 /* For the final responses to the AUTH sequence */
-static CURLcode smtp_state_auth_resp(struct connectdata *conn, int smtpcode,
-                                     smtpstate instate)
+static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
+                                           int smtpcode, 
+                                           smtpstate instate)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1213,7 +1214,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 #endif
 
     case SMTP_AUTH:
-      result = smtp_state_auth_resp(conn, smtpcode, smtpc->state);
+      result = smtp_state_auth_final_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_MAIL:
