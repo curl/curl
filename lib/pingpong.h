@@ -130,4 +130,14 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp);
 int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks,
                     int numsocks);
 
+
+/***********************************************************************
+ *
+ * Curl_pp_moredata()
+ *
+ * Returns whether there are still more data in the cache and so a call
+ * to Curl_pp_readresp() will not block.
+ */
+bool Curl_pp_moredata(struct pingpong *pp);
+
 #endif /* HEADER_CURL_PINGPONG_H */

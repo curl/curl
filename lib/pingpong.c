@@ -503,6 +503,10 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp)
   return CURLE_OK;
 }
 
+bool Curl_pp_moredata(struct pingpong *pp)
+{
+  return (!pp->sendleft && pp->cache && pp->nread_resp < pp->cache_size);
+}
 
 
 #endif
