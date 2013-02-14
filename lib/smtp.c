@@ -911,7 +911,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 
 /* For the final responses to the AUTH sequence */
 static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
-                                           int smtpcode, 
+                                           int smtpcode,
                                            smtpstate instate)
 {
   CURLcode result = CURLE_OK;
