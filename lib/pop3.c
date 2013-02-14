@@ -1355,14 +1355,6 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
-  if(conn->handler->flags & PROTOPT_SSL) {
-    /* POP3S is simply POP3 with SSL for the control channel */
-    /* so perform the SSL initialization for this socket */
-    result = Curl_ssl_connect(conn, FIRSTSOCKET);
-    if(result)
-      return result;
-  }
-
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
 
