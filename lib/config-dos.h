@@ -178,8 +178,7 @@
 #endif
 
 #ifdef MSDOS  /* Watt-32 */
-  #define HAVE_CLOSESOCKET_CAMEL  1
-  #define CloseSocket(s)          close_s((s))
+  #define HAVE_CLOSE_S    1
 #endif
 
 #undef word
