@@ -102,9 +102,13 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   else
     interval_ms = 0; /* immediate */
 
-  rc = Curl_socket_ready(pp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
-                         pp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
-                         interval_ms);
+  if(Curl_pp_moredata(pp))
+    /* We are receiving and there is data in the cache so just read it */
+    rc = 1;
+  else
+    rc = Curl_socket_ready(pp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+                           pp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
+                           interval_ms);
 
   if(block) {
     /* if we didn't wait, we don't have to spend time on this now */
