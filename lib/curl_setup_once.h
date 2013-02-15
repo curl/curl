@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -257,6 +257,8 @@ struct timeval {
 #  define sclose(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose(x)  CloseSocket((x))
+#elif defined(HAVE_CLOSE_S)
+#  define sclose(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
 #  define sclose(x)  lwip_close((x))
 #else
