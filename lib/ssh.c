@@ -2635,7 +2635,7 @@ static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode ssh_easy_statemach(struct connectdata *conn,
+static CURLcode ssh_block_statemach(struct connectdata *conn,
                                    bool duringconnect)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -2902,7 +2902,7 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
 
     state(conn, SSH_SESSION_DISCONNECT);
 
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
 
   return result;
@@ -2923,7 +2923,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
   else
     result = status;
@@ -3065,7 +3065,7 @@ static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection)
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */
     state(conn, SSH_SFTP_SHUTDOWN);
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT is done\n"));

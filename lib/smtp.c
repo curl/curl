@@ -1254,21 +1254,21 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
   else
-    result = Curl_pp_multi_statemach(&smtpc->pp);
+    result = Curl_pp_statemach(&smtpc->pp, FALSE);
 
   *done = (smtpc->state == SMTP_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode smtp_easy_statemach(struct connectdata *conn)
+static CURLcode smtp_block_statemach(struct connectdata *conn)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
   CURLcode result = CURLE_OK;
 
   while(smtpc->state != SMTP_STOP) {
-    result = Curl_pp_easy_statemach(pp);
+    result = Curl_pp_statemach(pp, TRUE);
     if(result)
       break;
   }
@@ -1437,7 +1437,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
-    result = smtp_easy_statemach(conn);
+    result = smtp_block_statemach(conn);
   }
 
   /* Clear the transfer mode for the next connection */
@@ -1534,7 +1534,7 @@ static CURLcode smtp_quit(struct connectdata *conn)
 
   state(conn, SMTP_QUIT);
 
-  result = smtp_easy_statemach(conn);
+  result = smtp_block_statemach(conn);
 
   return result;
 }

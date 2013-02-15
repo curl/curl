@@ -3124,7 +3124,7 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
                                     bool *done)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  CURLcode result = Curl_pp_multi_statemach(&ftpc->pp);
+  CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE);
 
   /* Check for the state outside of the Curl_socket_ready() return code checks
      since at times we are in fact already in this state when this function
@@ -3134,14 +3134,14 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
   return result;
 }
 
-static CURLcode ftp_easy_statemach(struct connectdata *conn)
+static CURLcode ftp_block_statemach(struct connectdata *conn)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
-    result = Curl_pp_easy_statemach(pp);
+    result = Curl_pp_statemach(pp, TRUE);
     if(result)
       break;
   }
@@ -4193,7 +4193,7 @@ static CURLcode ftp_quit(struct connectdata *conn)
 
     state(conn, FTP_QUIT);
 
-    result = ftp_easy_statemach(conn);
+    result = ftp_block_statemach(conn);
   }
 
   return result;

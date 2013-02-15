@@ -1340,21 +1340,21 @@ static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done)
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
   else
-    result = Curl_pp_multi_statemach(&imapc->pp);
+    result = Curl_pp_statemach(&imapc->pp, FALSE);
 
   *done = (imapc->state == IMAP_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode imap_easy_statemach(struct connectdata *conn)
+static CURLcode imap_block_statemach(struct connectdata *conn)
 {
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
   CURLcode result = CURLE_OK;
 
   while(imapc->state != IMAP_STOP) {
-    result = Curl_pp_easy_statemach(pp);
+    result = Curl_pp_statemach(pp, TRUE);
     if(result)
       break;
   }
@@ -1575,7 +1575,7 @@ static CURLcode imap_logout(struct connectdata *conn)
 
   state(conn, IMAP_LOGOUT);
 
-  result = imap_easy_statemach(conn);
+  result = imap_block_statemach(conn);
 
   return result;
 }

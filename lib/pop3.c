@@ -1263,21 +1263,21 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
   else
-    result = Curl_pp_multi_statemach(&pop3c->pp);
+    result = Curl_pp_statemach(&pop3c->pp, FALSE);
 
   *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode pop3_easy_statemach(struct connectdata *conn)
+static CURLcode pop3_block_statemach(struct connectdata *conn)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
   CURLcode result = CURLE_OK;
 
   while(pop3c->state != POP3_STOP) {
-    result = Curl_pp_easy_statemach(pp);
+    result = Curl_pp_statemach(pp, TRUE);
     if(result)
       break;
   }
@@ -1506,7 +1506,7 @@ static CURLcode pop3_quit(struct connectdata *conn)
 
   state(conn, POP3_QUIT);
 
-  result = pop3_easy_statemach(conn);
+  result = pop3_block_statemach(conn);
 
   return result;
 }
