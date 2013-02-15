@@ -25,7 +25,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c	\
   curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c		\
   curl_sasl.c curl_schannel.c curl_multibyte.c curl_darwinssl.c		\
-  hostcheck.c bundles.c conncache.c
+  hostcheck.c bundles.c conncache.c pipeline.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -44,4 +44,4 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   asyn.h curl_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h	\
   curl_ntlm_msgs.h curl_sasl.h curl_schannel.h curl_multibyte.h		\
   curl_darwinssl.h hostcheck.h bundles.h conncache.h curl_setup_once.h	\
-  multihandle.h setup-vms.h
+  multihandle.h setup-vms.h pipeline.h

@@ -292,6 +292,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_CHUNK_FAILED:
     return "Chunk callback failed";
 
+  case CURLE_NO_CONNECTION_AVAILABLE:
+    return "The max connection limit is reached";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE16:
   case CURLE_OBSOLETE20:

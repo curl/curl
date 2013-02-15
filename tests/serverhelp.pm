@@ -79,7 +79,7 @@ sub serverfactors {
     my $idnum;
 
     if($server =~
-        /^((ftp|http|imap|pop3|smtp)s?)(\d*)(-ipv6|)$/) {
+        /^((ftp|http|imap|pop3|smtp|http-pipe)s?)(\d*)(-ipv6|)$/) {
         $proto  = $1;
         $idnum  = ($3 && ($3 > 1)) ? $3 : 1;
         $ipvnum = ($4 && ($4 =~ /6$/)) ? 6 : 4;
@@ -105,7 +105,7 @@ sub servername_str {
 
     $proto = uc($proto) if($proto);
     die "unsupported protocol: '$proto'" unless($proto &&
-        ($proto =~ /^(((FTP|HTTP|IMAP|POP3|SMTP)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTPTLS))$/));
+        ($proto =~ /^(((FTP|HTTP|IMAP|POP3|SMTP|HTTP-PIPE)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTPTLS))$/));
 
     $ipver = (not $ipver) ? 'ipv4' : lc($ipver);
     die "unsupported IP version: '$ipver'" unless($ipver &&

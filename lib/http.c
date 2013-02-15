@@ -73,6 +73,8 @@
 #include "http_proxy.h"
 #include "warnless.h"
 #include "non-ascii.h"
+#include "bundles.h"
+#include "pipeline.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -3148,13 +3150,19 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
+          struct connectbundle *cb_ptr;
 
           /* If HTTP version is >= 1.1 and connection is persistent
              server supports pipelining. */
           DEBUGF(infof(data,
                        "HTTP 1.1 or later with persistent connection, "
                        "pipelining supported\n"));
-          conn->server_supports_pipelining = TRUE;
+          /* Activate pipelining if needed */
+          cb_ptr = conn->bundle;
+          if(cb_ptr) {
+            if(!Curl_pipeline_site_blacklisted(data, conn))
+              cb_ptr->server_supports_pipelining = TRUE;
+          }
         }
 
         switch(k->httpcode) {
@@ -3230,6 +3238,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         Curl_safefree(data->info.contenttype);
         data->info.contenttype = contenttype;
       }
+    }
+    else if(checkprefix("Server:", k->p)) {
+      char *server_name = copy_header_value(k->p);
+
+      /* Turn off pipelining if the server version is blacklisted */
+      if(conn->bundle && conn->bundle->server_supports_pipelining) {
+        if(Curl_pipeline_server_blacklisted(data, server_name))
+          conn->bundle->server_supports_pipelining = FALSE;
+      }
+      Curl_safefree(server_name);
     }
     else if((conn->httpversion == 10) &&
             conn->bits.httpproxy &&

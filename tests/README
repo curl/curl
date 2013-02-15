@@ -39,6 +39,7 @@ The cURL Test Suite
  1.1 Requires to run
 
   perl (and a unix-style shell)
+  python (and a unix-style shell)
   diff (when a test fails, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)

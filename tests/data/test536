@@ -1,4 +1,12 @@
 <testcase>
+<info>
+<keywords>
+HTTP
+pipelining
+multi
+</keywords>
+</info>
+
 <reply>
 <data mode="text">
 HTTP/1.1 404 Badness

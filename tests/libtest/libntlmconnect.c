@@ -125,6 +125,12 @@ int test(char *url)
 
   multi_init(multi);
 
+#ifdef USE_PIPELINING
+  multi_setopt(multi, CURLMOPT_PIPELINING, 1);
+  multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS, 5);
+  multi_setopt(multi, CURLMOPT_MAX_TOTAL_CONNECTIONS, 10);
+#endif
+
   for(;;) {
     struct timeval interval;
     fd_set fdread;
