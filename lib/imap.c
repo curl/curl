@@ -1057,9 +1057,9 @@ static CURLcode imap_state_auth_final_resp(struct connectdata *conn,
     failf(data, "Authentication failed: %d", imapcode);
     result = CURLE_LOGIN_DENIED;
   }
-
-  /* End of connect phase */
-  state(conn, IMAP_STOP);
+  else
+    /* End of connect phase */
+    state(conn, IMAP_STOP);
 
   return result;
 }
