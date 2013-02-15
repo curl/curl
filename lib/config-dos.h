@@ -79,7 +79,6 @@
 #define HAVE_SYS_SOCKET_H      1
 #define HAVE_SYS_STAT_H        1
 #define HAVE_SYS_TYPES_H       1
-#define HAVE_TERMIOS_H         1
 #define HAVE_TIME_H            1
 #define HAVE_UNISTD_H          1
 
@@ -162,6 +161,7 @@
   #define HAVE_SIGACTION  1
   #define HAVE_SIGSETJMP  1
   #define HAVE_SYS_TIME_H 1
+  #define HAVE_TERMIOS_H  1
   #define HAVE_VARIADIC_MACROS_GCC 1
 
   /* Because djgpp <= 2.03 doesn't have snprintf() etc. */
