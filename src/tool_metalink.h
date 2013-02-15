@@ -157,7 +157,7 @@ void metalink_cleanup(void);
 #define clean_metalink(x)  Curl_nop_stmt
 
 /* metalink_cleanup() takes no arguments */
-#define metalink_cleanup Curl_nop_stmt
+#define metalink_cleanup() Curl_nop_stmt
 
 #endif /* USE_METALINK */
 
