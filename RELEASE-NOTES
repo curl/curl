@@ -4,7 +4,7 @@ Curl and libcurl 7.29.1
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
- Known libcurl bindings:       39
+ Known libcurl bindings:       42
  Contributors:                 1005
 
 This release includes the following changes:
