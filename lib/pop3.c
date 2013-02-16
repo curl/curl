@@ -27,6 +27,7 @@
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC5034 POP3 SASL Authentication Mechanism
  *
  ***************************************************************************/
 
