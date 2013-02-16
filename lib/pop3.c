@@ -412,8 +412,8 @@ static CURLcode pop3_state_starttls(struct connectdata *conn)
 
 static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result;
 
   /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
@@ -1147,7 +1147,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 
 static CURLcode pop3_statemach_act(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int pop3code;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -1257,8 +1257,8 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 /* Called repeatedly until done from multi.c */
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
 {
+  CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
@@ -1272,12 +1272,11 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
 
 static CURLcode pop3_block_statemach(struct connectdata *conn)
 {
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-  struct pingpong *pp = &pop3c->pp;
   CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   while(pop3c->state != POP3_STOP) {
-    result = Curl_pp_statemach(pp, TRUE);
+    result = Curl_pp_statemach(&pop3c->pp, TRUE);
     if(result)
       break;
   }
@@ -1331,7 +1330,7 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
  */
 static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1378,10 +1377,10 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result = CURLE_OK;
 
   (void)premature;
 
@@ -1458,7 +1457,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
  */
 static CURLcode pop3_do(struct connectdata *conn, bool *done)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *done = FALSE; /* default to false */
 
@@ -1469,23 +1468,23 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
     the struct POP3 is allocated and setup in the pop3_connect() function.
   */
   Curl_reset_reqproto(conn);
-  retcode = pop3_init(conn);
-  if(retcode)
-    return retcode;
+  result = pop3_init(conn);
+  if(result)
+    return result;
 
   /* Parse the URL path */
-  retcode = pop3_parse_url_path(conn);
-  if(retcode)
-    return retcode;
+  result = pop3_parse_url_path(conn);
+  if(result)
+    return result;
 
   /* Parse the custom request */
-  retcode = pop3_parse_custom_request(conn);
-  if(retcode)
-    return retcode;
+  result = pop3_parse_custom_request(conn);
+  if(result)
+    return result;
 
-  retcode = pop3_regular_transfer(conn, done);
+  result = pop3_regular_transfer(conn, done);
 
-  return retcode;
+  return result;
 }
 
 /***********************************************************************

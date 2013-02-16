@@ -222,7 +222,7 @@ static void imap_to_imaps(struct connectdata *conn)
  */
 static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
   char *taggedfmt;
   va_list ap;
@@ -501,8 +501,8 @@ static CURLcode imap_state_starttls(struct connectdata *conn)
 
 static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  CURLcode result;
 
   /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
@@ -1229,7 +1229,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int imapcode;
   struct imap_conn *imapc = &conn->proto.imapc;
@@ -1333,8 +1333,8 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 /* Called repeatedly until done from multi.c */
 static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done)
 {
+  CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  CURLcode result;
 
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
@@ -1348,12 +1348,11 @@ static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done)
 
 static CURLcode imap_block_statemach(struct connectdata *conn)
 {
-  struct imap_conn *imapc = &conn->proto.imapc;
-  struct pingpong *pp = &imapc->pp;
   CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
 
   while(imapc->state != IMAP_STOP) {
-    result = Curl_pp_statemach(pp, TRUE);
+    result = Curl_pp_statemach(&imapc->pp, TRUE);
     if(result)
       break;
   }
@@ -1405,7 +1404,7 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
  */
 static CURLcode imap_connect(struct connectdata *conn, bool *done)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
 
@@ -1455,9 +1454,9 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
 static CURLcode imap_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *imap = data->state.proto.imap;
-  CURLcode result=CURLE_OK;
 
   (void)premature;
 
@@ -1530,7 +1529,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
  */
 static CURLcode imap_do(struct connectdata *conn, bool *done)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *done = FALSE; /* default to false */
 
@@ -1541,18 +1540,18 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
     the struct IMAP is allocated and setup in the imap_connect() function.
   */
   Curl_reset_reqproto(conn);
-  retcode = imap_init(conn);
-  if(retcode)
-    return retcode;
+  result = imap_init(conn);
+  if(result)
+    return result;
 
   /* Parse the URL path */
-  retcode = imap_parse_url_path(conn);
-  if(retcode)
-    return retcode;
+  result = imap_parse_url_path(conn);
+  if(result)
+    return result;
 
-  retcode = imap_regular_transfer(conn, done);
+  result = imap_regular_transfer(conn, done);
 
-  return retcode;
+  return result;
 }
 
 /***********************************************************************

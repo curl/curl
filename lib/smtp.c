@@ -331,7 +331,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
 
 static CURLcode smtp_state_ehlo(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   smtpc->authmechs = 0;         /* No known authentication mechanisms yet */
@@ -352,7 +352,7 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
 
 static CURLcode smtp_state_helo(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   smtpc->authused = 0;          /* No authentication mechanism used in smtp
@@ -384,8 +384,8 @@ static CURLcode smtp_state_starttls(struct connectdata *conn)
 
 static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  CURLcode result;
 
   /* Start the SSL connection */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
@@ -407,8 +407,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  char *initresp = NULL;
   const char *mech = NULL;
+  char *initresp = NULL;
   size_t len = 0;
   smtpstate state1 = SMTP_STOP;
   smtpstate state2 = SMTP_STOP;
@@ -1130,7 +1130,7 @@ static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
 
 static CURLcode smtp_statemach_act(struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct SessionHandle *data = conn->data;
   int smtpcode;
@@ -1247,8 +1247,8 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 /* Called repeatedly until done from multi.c */
 static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
 {
+  CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  CURLcode result;
 
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone)
     result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
@@ -1262,12 +1262,11 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
 
 static CURLcode smtp_block_statemach(struct connectdata *conn)
 {
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-  struct pingpong *pp = &smtpc->pp;
   CURLcode result = CURLE_OK;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   while(smtpc->state != SMTP_STOP) {
-    result = Curl_pp_statemach(pp, TRUE);
+    result = Curl_pp_statemach(&smtpc->pp, TRUE);
     if(result)
       break;
   }
@@ -1321,7 +1320,7 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
  */
 static CURLcode smtp_connect(struct connectdata *conn, bool *done)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
   const char *path = conn->data->state.path;
@@ -1383,9 +1382,9 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
 static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *smtp = data->state.proto.smtp;
-  CURLcode result = CURLE_OK;
   ssize_t bytes_written;
 
   (void)premature;
@@ -1495,7 +1494,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
  */
 static CURLcode smtp_do(struct connectdata *conn, bool *done)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *done = FALSE; /* default to false */
 
@@ -1506,13 +1505,13 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
     the struct SMTP is allocated and setup in the smtp_connect() function.
   */
   Curl_reset_reqproto(conn);
-  retcode = smtp_init(conn);
-  if(retcode)
-    return retcode;
+  result = smtp_init(conn);
+  if(result)
+    return result;
 
-  retcode = smtp_regular_transfer(conn, done);
+  result = smtp_regular_transfer(conn, done);
 
-  return retcode;
+  return result;
 }
 
 /***********************************************************************
