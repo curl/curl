@@ -421,7 +421,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
 #elif defined(USE_NSS)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_DARWINSSL)
-    (void)CC_MD4(pw, 2 * len, ntbuffer);
+    (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
