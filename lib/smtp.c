@@ -99,7 +99,6 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
-static CURLcode smtp_state_upgrade_tls(struct connectdata *conn);
 
 /*
  * SMTP protocol handler.

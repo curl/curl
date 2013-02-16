@@ -103,7 +103,6 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
-static CURLcode pop3_state_upgrade_tls(struct connectdata *conn);
 
 /*
  * POP3 protocol handler.

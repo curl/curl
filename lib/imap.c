@@ -98,7 +98,6 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
-static CURLcode imap_state_upgrade_tls(struct connectdata *conn);
 
 /*
  * IMAP protocol handler.
