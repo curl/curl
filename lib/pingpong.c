@@ -79,7 +79,7 @@ long Curl_pp_state_timeout(struct pingpong *pp)
 /*
  * Curl_pp_statemach()
  */
-CURLcode Curl_pp_statemach(struct pingpong *pp, bool wait)
+CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
 {
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
@@ -94,7 +94,7 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool wait)
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
-  if(wait) {
+  if(block) {
     interval_ms = 1000;  /* use 1 second timeout intervals */
     if(timeout_ms < interval_ms)
       interval_ms = timeout_ms;
@@ -106,7 +106,7 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool wait)
                          pp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
                          interval_ms);
 
-  if(wait) {
+  if(block) {
     /* if we didn't wait, we don't have to spend time on this now */
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
