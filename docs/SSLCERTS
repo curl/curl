@@ -1,6 +1,12 @@
                       Peer SSL Certificate Verification
                       =================================
 
+(NOTE: If libcurl was built with Schannel or Secure Transport support, then
+this does not apply to you. Scroll down for details on how the OS-native
+engines handle SSL certificates. If you're not sure, then run "curl -V" and
+read the results. If the version string says "WinSSL" in it, then it was built
+with Schannel support.)
+
 libcurl performs peer SSL certificate verification by default.  This is done
 by using CA cert bundle that the SSL library can use to make sure the peer's
 server certificate is valid.
@@ -93,24 +99,40 @@ server.
                       Peer SSL Certificate Verification with NSS
                       ==========================================
 
-If libcurl is build with NSS support then depending on the OS distribution it
-is probably required to take some additional steps to use the system-wide CA
-cert db. RedHat ships with an additional module libnsspem.so which enables NSS
-to read the OpenSSL PEM CA bundle. With OpenSuSE this lib is missing, and NSS
-can only work with its own internal formats. Also NSS got a new database
-format:
-https://wiki.mozilla.org/NSS_Shared_DB
-Starting with version 7.19.7 libcurl will check for the NSS version it runs,
-and add automatically the 'sql:' prefix to the certdb directory (either the
+If libcurl was built with NSS support, then depending on the OS distribution,
+it is probably required to take some additional steps to use the system-wide CA
+cert db. RedHat ships with an additional module, libnsspem.so, which enables
+NSS to read the OpenSSL PEM CA bundle. This library is missing in OpenSuSE, and
+without it, NSS can only work with its own internal formats. NSS also has a new
+database format: https://wiki.mozilla.org/NSS_Shared_DB
+
+Starting with version 7.19.7, libcurl will check for the NSS version it runs,
+and automatically add the 'sql:' prefix to the certdb directory (either the
 hardcoded default /etc/pki/nssdb or the directory configured with SSL_DIR
-environment variable) if a version 3.12.0 or later is detected.
-To check which certdb format your distribution provides examine the default
-certdb location /etc/pki/nssdb; the new certdb format can be identified by
+environment variable) if version 3.12.0 or later is detected. To check which
+ertdb format your distribution provides, examine the default
+certdb location: /etc/pki/nssdb; the new certdb format can be identified by
 the filenames cert9.db, key4.db, pkcs11.txt; filenames of older versions are
 cert8.db, key3.db, modsec.db.
-Usually these cert databases are empty; but NSS also has built-in CAs which are
-provided through a shared library libnssckbi.so; if you want to use these
-built-in CAs then create a symlink to libnssckbi.so in /etc/pki/nssdb:
+
+Usually these cert databases are empty, but NSS also has built-in CAs which are
+provided through a shared library, libnssckbi.so; if you want to use these
+built-in CAs, then create a symlink to libnssckbi.so in /etc/pki/nssdb:
 ln -s /usr/lib[64]/libnssckbi.so /etc/pki/nssdb/libnssckbi.so
 
+     Peer SSL Certificate Verification with Schannel and Secure Transport
+     ====================================================================
 
+If libcurl was built with Schannel (Microsoft's TLS/SSL engine) or Secure
+Transport (Apple's TLS/SSL engine) support, then libcurl will still perform
+peer certificate verification, but instead of using a CA cert bundle, it will
+use the certificates that are built into the OS. These are the same
+certificates that appear in the Internet Options control panel (under Windows)
+or Keychain Access application (under OS X). Any custom security rules for
+certificates will be honored.
+
+Schannel will run CRL checks on certificates unless peer verification is
+disabled. Secure Transport on iOS will run OCSP checks on certificates unless
+peer verification is disabled. Secure Transport on OS X will run either OCSP
+or CRL checks on certificates if those features are enabled, and this behavior
+can be adjusted in the preferences of Keychain Access.
