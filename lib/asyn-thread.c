@@ -387,44 +387,6 @@ static bool init_resolve_thread (struct connectdata *conn,
   return FALSE;
 }
 
-#if defined(HAVE_GETADDRINFO) && !defined(HAVE_GAI_STRERROR) && !defined(WIN32)
-/* NetWare has getaddrinfo but lacks gai_strerror.
-   Windows has a gai_strerror but it is bad (not thread-safe) and the generic
-   socket error string function can be used for this pupose. */
-static const char *gai_strerror(int ecode)
-{
-  switch (ecode) {
-  case EAI_AGAIN:
-    return "The name could not be resolved at this time";
-  case EAI_BADFLAGS:
-    return "The flags parameter had an invalid value";
-  case EAI_FAIL:
-    return "A non-recoverable error occurred when attempting to "
-      "resolve the name";
-  case EAI_FAMILY:
-    return "The address family was not recognized";
-  case EAI_MEMORY:
-    return "Out of memory";
-  case EAI_NONAME:
-    return "The name does not resolve for the supplied parameters";
-  case EAI_SERVICE:
-    return "The service passed was not recognized for the "
-      "specified socket type"
-  case EAI_SOCKTYPE:
-    return "The intended socket type was not recognized"
-  case EAI_SYSTEM:
-    return "A system error occurred";
-  case EAI_OVERFLOW:
-    return "An argument buffer overflowed";
-  default:
-    return "Unknown error";
-
-/* define this now as this is a private implementation of said function */
-#define HAVE_GAI_STRERROR
-}
-#endif
-
-
 /*
  * resolver_error() calls failf() with the appropriate message after a resolve
  * error
@@ -443,16 +405,8 @@ static CURLcode resolver_error(struct connectdata *conn)
     rc = CURLE_COULDNT_RESOLVE_HOST;
   }
 
-  failf(conn->data, "Could not resolve %s: %s; %s", host_or_proxy,
-        conn->async.hostname,
-#ifdef HAVE_GAI_STRERROR
-        /* NetWare doesn't have gai_strerror and on Windows it isn't deemed
-           thread-safe */
-        gai_strerror(conn->async.status)
-#else
-        Curl_strerror(conn, conn->async.status)
-#endif
-    );
+  failf(conn->data, "Could not resolve %s: %s", host_or_proxy,
+        conn->async.hostname);
   return rc;
 }
 
