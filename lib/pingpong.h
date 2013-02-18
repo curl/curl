@@ -74,7 +74,7 @@ struct pingpong {
  * called repeatedly until done. Set 'wait' to make it wait a while on the
  * socket if there's no traffic.
  */
-CURLcode Curl_pp_statemach(struct pingpong *pp, bool wait);
+CURLcode Curl_pp_statemach(struct pingpong *pp, bool block);
 
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp);
