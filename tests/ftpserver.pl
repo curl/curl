@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -124,7 +124,6 @@ my $sockfilt_timeout = 5;  # default timeout for sockfilter eXsysreads
 #
 my %commandfunc;  # protocol command specific function callbacks
 my %displaytext;  # text returned to client before callback runs
-my @welcome;      # text returned to client upon connection
 
 #**********************************************************************
 # global vars customized for each test from the server commands file
@@ -547,13 +546,12 @@ sub protocolsetup {
             'NOOP' => '200 Yes, I\'m very good at doing nothing.',
             'PBSZ' => '500 PBSZ not implemented',
             'PROT' => '500 PROT not implemented',
-        );
-        @welcome = (
+            'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
             '220-   / __| | | | |_) | |    '."\r\n",
             '220-  | (__| |_| |  _ <| |___ '."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n"
+            '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
     elsif($proto eq 'pop3') {
@@ -567,14 +565,13 @@ sub protocolsetup {
             'USER' => '+OK We are happy you popped in!',
             'PASS' => '+OK Access granted',
             'QUIT' => '+OK byebye',
-        );
-        @welcome = (
+            'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve'."\r\n"
+            '+OK cURL POP3 server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -590,14 +587,13 @@ sub protocolsetup {
         %displaytext = (
             'LOGIN'  => ' OK We are happy you popped in!',
             'LOGOUT' => ' OK thanks for the fish',
-        );
-        @welcome = (
+            'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK cURL IMAP server ready to serve'."\r\n"
+            '* OK cURL IMAP server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -610,13 +606,12 @@ sub protocolsetup {
             'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
             'QUIT' => '200 byebye',
-        );
-        @welcome = (
+            'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
             '220-   / __| | | | |_) | |    '."\r\n",
             '220-  | (__| |_| |  _ <| |___ '."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n"
+            '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
 }
@@ -2157,7 +2152,18 @@ while(1) {
 
     &customize(); # read test control instructions
 
-    sendcontrol @welcome;
+    my $welcome = $customreply{"welcome"};
+    if(!$welcome) {
+        $welcome = $displaytext{"welcome"};
+    }
+    else {
+        # clear it after use
+        $customreply{"welcome"}="";
+        if($welcome !~ /\r\n\z/) {
+            $welcome .= "\r\n";
+        }
+    }
+    sendcontrol $welcome;
 
     #remove global variables from last connection
     if($ftplistparserstate) {
@@ -2168,9 +2174,7 @@ while(1) {
     }
 
     if($verbose) {
-        for(@welcome) {
-            print STDERR "OUT: $_";
-        }
+        print STDERR "OUT: $welcome";
     }
 
     my $full = "";

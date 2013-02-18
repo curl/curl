@@ -2711,7 +2711,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     /* we have now received a full FTP server response */
     switch(ftpc->state) {
     case FTP_WAIT220:
-      if(ftpcode != 220) {
+      if(ftpcode == 230)
+        /* 230 User logged in - already! */
+        return ftp_state_user_resp(conn, ftpcode, ftpc->state);
+      else if(ftpcode != 220) {
         failf(data, "Got a %03d ftp-server response when 220 was expected",
               ftpcode);
         return CURLE_FTP_WEIRD_SERVER_REPLY;
