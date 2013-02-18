@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -170,7 +170,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  int interval_end;
+  long interval_end;
   struct thread_sync_data tsd;
 };
 
@@ -528,7 +528,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    int elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    long elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
