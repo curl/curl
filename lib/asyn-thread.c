@@ -430,8 +430,19 @@ static const char *gai_strerror(int ecode)
  * error
  */
 
-static void resolver_error(struct connectdata *conn, const char *host_or_proxy)
+static CURLcode resolver_error(struct connectdata *conn)
 {
+  const char *host_or_proxy;
+  CURLcode rc;
+  if(conn->bits.httpproxy) {
+    host_or_proxy = "proxy";
+    rc = CURLE_COULDNT_RESOLVE_PROXY;
+  }
+  else {
+    host_or_proxy = "host";
+    rc = CURLE_COULDNT_RESOLVE_HOST;
+  }
+
   failf(conn->data, "Could not resolve %s: %s; %s", host_or_proxy,
         conn->async.hostname,
 #ifdef HAVE_GAI_STRERROR
@@ -442,6 +453,7 @@ static void resolver_error(struct connectdata *conn, const char *host_or_proxy)
         Curl_strerror(conn, conn->async.status)
 #endif
     );
+  return rc;
 }
 
 /*
@@ -473,17 +485,9 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(entry)
     *entry = conn->async.dns;
 
-  if(!conn->async.dns) {
-    /* a name was not resolved */
-    if(conn->bits.httpproxy) {
-      resolver_error(conn, "proxy");
-      rc = CURLE_COULDNT_RESOLVE_PROXY;
-    }
-    else {
-      resolver_error(conn, "host");
-      rc = CURLE_COULDNT_RESOLVE_HOST;
-    }
-  }
+  if(!conn->async.dns)
+    /* a name was not resolved, report error */
+    rc = resolver_error(conn);
 
   destroy_async_data(&conn->async);
 
@@ -518,12 +522,13 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
   if(done) {
     getaddrinfo_complete(conn);
-    destroy_async_data(&conn->async);
 
     if(!conn->async.dns) {
-      resolver_error(conn, "host");
-      return CURLE_COULDNT_RESOLVE_HOST;
+      CURLcode rc = resolver_error(conn);
+      destroy_async_data(&conn->async);
+      return rc;
     }
+    destroy_async_data(&conn->async);
     *entry = conn->async.dns;
   }
   else {
