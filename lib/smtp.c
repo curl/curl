@@ -219,14 +219,15 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  int result = FALSE;
+  bool result = FALSE;
   size_t wordlen;
 
   if(len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
     return FALSE;       /* Nothing for us */
 
   /* Do we have a command response? */
-  if((result = (line[3] == ' ')) != 0)
+  result = (line[3] == ' ') ? TRUE : FALSE;
+  if(result)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
   /* Are we processing EHLO command data? */
