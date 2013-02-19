@@ -20,7 +20,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   qssl.c rawstr.c curl_addrinfo.c socks_gssapi.c socks_sspi.c		\
   curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c	\
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c polarssl.c		\
-  polarsslthreadlock.c curl_rtmp.c openldap.c curl_gethostname.c	\
+  polarssl_threadlock.c curl_rtmp.c openldap.c curl_gethostname.c	\
   gopher.c axtls.c idn_win32.c http_negotiate_sspi.c cyassl.c		\
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c	\
   curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c		\
@@ -39,7 +39,7 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   tftp.h sockaddr.h splay.h strdup.h socks.h ssh.h nssg.h curl_base64.h	\
   rawstr.h curl_addrinfo.h curl_sspi.h slist.h nonblock.h		\
   curl_memrchr.h imap.h pop3.h smtp.h pingpong.h rtsp.h curl_threads.h	\
-  warnless.h curl_hmac.h polarssl.h polarsslthreadlock.h curl_rtmp.h	\
+  warnless.h curl_hmac.h polarssl.h polarssl_threadlock.h curl_rtmp.h	\
   curl_gethostname.h gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h	\
   asyn.h curl_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h	\
   curl_ntlm_msgs.h curl_sasl.h curl_schannel.h curl_multibyte.h		\

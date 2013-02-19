@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,26 +20,25 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-#include <stdio.h>
 #include "curl_setup.h"
 
 #if defined(USE_POLARSSL) && \
     (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
 
 #if defined(USE_THREADS_POSIX)
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#define MUTEX_TYPE       pthread_mutex_t
-#endif /* HAVE_PTHREAD_H */
+#  ifdef HAVE_PTHREAD_H
+#    include <pthread.h>
+#  endif
 #elif defined(USE_THREADS_WIN32)
-#ifdef HAVE_PROCESS_H
-#include <process.h>
-#define MUTEX_TYPE       HANDLE
-#endif /* HAVE_PROCESS_H */
-#endif /* USE_THREADS_POSIX */
+#  ifdef HAVE_PROCESS_H
+#    include <process.h>
+#  endif
+#endif
 
-#include "polarsslthreadlock.h"
+#include "polarssl_threadlock.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -49,14 +48,14 @@
 #define NUMT                    2
 
 /* This array will store all of the mutexes available to PolarSSL. */
-static MUTEX_TYPE *mutex_buf = NULL;
+static POLARSSL_MUTEX_T *mutex_buf = NULL;
 
 int polarsslthreadlock_thread_setup(void)
 {
   int i;
   int ret;
 
-  mutex_buf = malloc(NUMT * sizeof(MUTEX_TYPE));
+  mutex_buf = malloc(NUMT * sizeof(POLARSSL_MUTEX_T));
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 

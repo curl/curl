@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,18 +66,18 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
-
-/* apply threading? */
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#define THREADING_SUPPORT
 #include "polarsslthreadlock.h"
-#endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+/* apply threading? */
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#define THREADING_SUPPORT
+#endif
 
 #if defined(THREADING_SUPPORT) && POLARSSL_VERSION_NUMBER>0x01010000
 static entropy_context entropy;
@@ -695,18 +695,12 @@ Curl_polarssl_connect(struct connectdata *conn,
  */
 int polarssl_init(void)
 {
-#ifdef THREADING_SUPPORT
   return polarsslthreadlock_thread_setup();
-#else /* THREADING_SUPPORT */
-  return 1;
-#endif /* THREADING_SUPPORT */
 }
 
 void polarssl_cleanup(void)
 {
-#ifdef THREADING_SUPPORT
-  polarsslthreadlock_thread_cleanup();
-#endif /* THREADING_SUPPORT */
+  (void)polarsslthreadlock_thread_cleanup();
 }
 
 #endif /* USE_POLARSSL */
