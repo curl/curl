@@ -535,7 +535,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         long retry_numretries;
         long retry_sleep_default;
         long retry_sleep;
-        char *this_url;
+        char *this_url = NULL;
         int metalink_next_res = 0;
 
         outfile = NULL;
