@@ -13,6 +13,7 @@ curl tool
  - multiple file upload on a single command line
  - custom maximum transfer rate
  - redirectable stderr
+ - metalink support (*13)
 
 libcurl supports
  - full URL syntax with no length limit
@@ -184,3 +185,5 @@ FOOTNOTES
         does not support SSLv3
   *11 = requires libidn or Windows
   *12 = requires libz
+  *13 = requires libmetalink, and either an Apple or Microsoft operating
+        system, or OpenSSL, or GnuTLS, or NSS
