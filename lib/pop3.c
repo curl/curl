@@ -1397,7 +1397,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
 
-  /* Cleanup our do based variables */
+  /* Cleanup our per-request based variables */
   Curl_safefree(pop3c->mailbox);
   Curl_safefree(pop3c->custom);
 
