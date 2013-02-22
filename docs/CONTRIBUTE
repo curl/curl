@@ -212,7 +212,7 @@
  commit.
 
  Now send those patches off to the curl-library list. You can of course opt to
- do that with the 'get send-email' command.
+ do that with the 'git send-email' command.
 
 3.3 How To Make a Patch without git
 
