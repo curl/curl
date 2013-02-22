@@ -45,3 +45,4 @@ CHANGES.dist
 .project
 .cproject
 .settings
+/[0-9]*.patch
