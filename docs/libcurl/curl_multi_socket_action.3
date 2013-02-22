@@ -38,7 +38,9 @@ can be passed as an events bitmask \fBev_bitmask\fP by first setting
 \fBev_bitmask\fP to 0, and then adding using bitwise OR (|) any combination of
 events to be chosen from CURL_CSELECT_IN, CURL_CSELECT_OUT or
 CURL_CSELECT_ERR. When the events on a socket are unknown, pass 0 instead, and
-libcurl will test the descriptor internally.
+libcurl will test the descriptor internally. It is also permissible to pass
+CURL_SOCKET_TIMEOUT to the \fBsockfd\fP parameter in order to initiate the
+whole process or when a timeout occurs.
 
 At return, the integer \fBrunning_handles\fP points to will contain the number
 of running easy handles within the multi handle. When this number reaches
@@ -71,7 +73,10 @@ The socket \fBcallback\fP function uses a prototype like this
                            curl_socket_t s, /* socket */
                            int action,      /* see values below */
                            void *userp,    /* private callback pointer */
-                           void *socketp); /* private socket pointer */
+                           void *socketp); /* private socket pointer,
+                                              \fBNULL\fI if not
+                                              previously assigned with
+                                              \fIcurl_multi_assign(3)\fP */
 
 .fi
 The callback MUST return 0.
@@ -132,15 +137,15 @@ timeout value to use when waiting for socket activities.
 them for activity. This can be done through your application code, or by way
 of an external library such as libevent or glib.
 
-6. Call curl_multi_socket_action(...CURL_SOCKET_TIMEOUT...) to kickstart
-everything. To get one or more callbacks called.
+6. Call curl_multi_socket_action(..., CURL_SOCKET_TIMEOUT, 0, ...)
+to kickstart everything. To get one or more callbacks called.
 
 7. Wait for activity on any of libcurl's sockets, use the timeout value your
-callback has been told
+callback has been told.
 
 8, When activity is detected, call curl_multi_socket_action() for the
 socket(s) that got action. If no activity is detected and the timeout expires,
-call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP
+call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, and is deemed stable since 7.16.0.
 .SH "SEE ALSO"

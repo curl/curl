@@ -31,6 +31,7 @@ curl_version - returns the libcurl version string
 Returns a human readable string with the version number of libcurl and some of
 its important components (like OpenSSL version).
 .SH RETURN VALUE
-A pointer to a zero terminated string.
+A pointer to a zero terminated string. The string resides in a statically
+allocated buffer and must not be freed by the caller.
 .SH "SEE ALSO"
 .BR curl_version_info "(3)"

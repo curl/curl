@@ -58,7 +58,8 @@ The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 Set the parameter to 1 to get the library to display a lot of verbose
 information about its operations. Very useful for libcurl and/or protocol
 debugging and understanding. The verbose information will be sent to stderr,
-or the stream set with \fICURLOPT_STDERR\fP.
+or the stream set with \fICURLOPT_STDERR\fP. The default value for this
+parameter is 0.
 
 You hardly ever want this set in production use, you will almost always want
 this when you debug/report problems. Another neat option for debugging is the
@@ -66,11 +67,11 @@ this when you debug/report problems. Another neat option for debugging is the
 .IP CURLOPT_HEADER
 A parameter set to 1 tells the library to include the header in the body
 output. This is only relevant for protocols that actually have headers
-preceding the data (like HTTP).
+preceding the data (like HTTP). The default value for this parameter is 0.
 .IP CURLOPT_NOPROGRESS
 Pass a long. If set to 1, it tells the library to shut off the progress meter
 completely. It will also prevent the \fICURLOPT_PROGRESSFUNCTION\fP from
-getting called.
+getting called. The default value for this parameter is 1.
 
 Future versions of libcurl are likely to not have any built-in progress meter
 at all.
@@ -79,6 +80,7 @@ Pass a long. If it is 1, libcurl will not use any functions that
 install signal handlers or any functions that cause signals to be sent to the
 process. This option is mainly here to allow multi-threaded unix applications
 to still set/use all timeout options etc, without risking getting signals.
+The default value for this parameter is 0.
 (Added in 7.10)
 
 If this option is set and libcurl has been built with the standard name
@@ -180,8 +182,9 @@ means 100K.
 .IP CURLOPT_WRITEDATA
 Data pointer to pass to the file write function. If you use the
 \fICURLOPT_WRITEFUNCTION\fP option, this is the pointer you'll get as
-input. If you don't use a callback, you must pass a 'FILE *' as libcurl will
-pass this to fwrite() when writing data.
+input. If you don't use a callback, you must pass a 'FILE *' (cast
+to 'void *') as libcurl will pass this to fwrite() when writing data.
+By default, the value of this parameter is unspecified.
 
 The internal \fICURLOPT_WRITEFUNCTION\fP will write the data to the FILE *
 given with this option, or to stdout if this option hasn't been set.
@@ -226,7 +229,7 @@ userdata set with \fICURLOPT_READDATA\fP.
 Data pointer to pass to the file read function. If you use the
 \fICURLOPT_READFUNCTION\fP option, this is the pointer you'll get as input. If
 you don't specify a read callback but instead rely on the default internal
-read function, this data must be a valid readable FILE *.
+read function, this data must be a valid readable FILE * (cast to 'void *').
 
 If you're using libcurl as a win32 DLL, you MUST use a
 \fICURLOPT_READFUNCTION\fP if you set this option.
@@ -240,13 +243,15 @@ gets called by libcurl when something special I/O-related needs to be done
 that the library can't do by itself. For now, rewinding the read data stream
 is the only action it can request. The rewinding of the read data stream may
 be necessary when doing a HTTP PUT or POST with a multi-pass authentication
-method.  (Option added in 7.12.3).
+method. By default, this parameter is set to NULL.  (Option added in 7.12.3).
 
-Use \fICURLOPT_SEEKFUNCTION\fP instead to provide seeking!
+Use \fICURLOPT_SEEKFUNCTION\fP instead to provide seeking! If
+\fICURLOPT_SEEKFUNCTION\fP is set, this parameter will be ignored when seeking.
 .IP CURLOPT_IOCTLDATA
 Pass a pointer that will be untouched by libcurl and passed as the 3rd
-argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.  (Option
-added in 7.12.3)
+argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.
+By default, the value of this parameter is unspecified.  (Option added in
+7.12.3)
 .IP CURLOPT_SEEKFUNCTION
 Pass a pointer to a function that matches the following prototype: \fBint
 function(void *instream, curl_off_t offset, int origin);\fP This function gets
@@ -262,6 +267,8 @@ success, 1 (CURL_SEEKFUNC_FAIL) to cause the upload operation to fail or 2
 free to work around the problem if possible. The latter can sometimes be done
 by instead reading from the input or similar.
 
+By default, this parameter is unset.
+
 If you forward the input arguments directly to "fseek" or "lseek", note that
 the data type for \fIoffset\fP is not the same as defined for curl_off_t on
 many systems! (Option added in 7.18.0)
@@ -271,7 +278,8 @@ Data pointer to pass to the file seek function. If you use the
 you don't specify a seek callback, NULL is passed. (Option added in 7.18.0)
 .IP CURLOPT_SOCKOPTFUNCTION
 Pass a pointer to a function that matches the following prototype: \fBint
-function(void *clientp, curl_socket_t curlfd, curlsocktype purpose);\fP. This
+function(void *clientp, curl_socket_t curlfd, curlsocktype purpose);\fP. By
+default, this parameter is unset. If set, this
 function gets called by libcurl after the socket() call but before the
 connect() call. The callback's \fIpurpose\fP argument identifies the exact
 purpose for this particular socket:
@@ -293,6 +301,7 @@ in fact already connected and then libcurl will not attempt to connect it.
 .IP CURLOPT_SOCKOPTDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
+The default value of this parameter is unspecified.
 (Option added in 7.16.0)
 .IP CURLOPT_OPENSOCKETFUNCTION
 Pass a pointer to a function that matches the following prototype:
@@ -317,6 +326,7 @@ blacklisting.  The default behavior is:
 .IP CURLOPT_OPENSOCKETDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
+The default value of this parameter is unspecified.
 (Option added in 7.17.1.)
 .IP CURLOPT_CLOSESOCKETFUNCTION
 Pass a pointer to a function that matches the following prototype: \fBint
@@ -328,7 +338,9 @@ success and 1 if there was an error.  (Option added in 7.21.7)
 .IP CURLOPT_CLOSESOCKETDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the closesocket callback set with
-\fICURLOPT_CLOSESOCKETFUNCTION\fP.  (Option added in 7.21.7)
+\fICURLOPT_CLOSESOCKETFUNCTION\fP.
+The default value of this parameter is unspecified.
+(Option added in 7.21.7)
 .IP CURLOPT_PROGRESSFUNCTION
 Pass a pointer to a function that matches the following prototype: \fBint
 function(void *clientp, double dltotal, double dlnow, double ultotal, double
@@ -349,6 +361,7 @@ get called.
 .IP CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
+The default value of this parameter is unspecified.
 .IP CURLOPT_HEADERFUNCTION
 Pass a pointer to a function that matches the following prototype:
 \fBsize_t function( void *ptr, size_t size, size_t nmemb, void

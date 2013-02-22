@@ -41,6 +41,7 @@ handle is no longer connected to the multi handle
 3 - \fIcurl_multi_cleanup(3)\fP should be called when all easy handles are
 removed
 .SH RETURN VALUE
-CURLMcode type, general libcurl multi interface error code.
+CURLMcode type, general libcurl multi interface error code. On success,
+CURLM_OK is returned.
 .SH "SEE ALSO"
 .BR curl_multi_init "(3)," curl_easy_cleanup "(3)," curl_easy_init "(3)"

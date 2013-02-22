@@ -42,7 +42,7 @@ of milliseconds at this very moment. If 0, it means you should proceed
 immediately without waiting for anything. If it returns -1, there's no timeout
 at all set.
 
-An application that uses the multi_socket API SHOULD not use this function, but
+An application that uses the multi_socket API SHOULD NOT use this function, but
 SHOULD instead use \fIcurl_multi_setopt(3)\fP and its
 \fPCURLMOPT_TIMERFUNCTION\fP option for proper and desired behavior.
 
