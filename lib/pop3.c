@@ -434,7 +434,6 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct POP3 *pop3 = conn->data->state.proto.pop3;
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
@@ -446,7 +445,7 @@ static CURLcode pop3_state_user(struct connectdata *conn)
 
   /* Send the USER command */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
-                         pop3->user ? pop3->user : "");
+                         conn->user ? conn->user : "");
   if(result)
     return result;
 
@@ -1011,7 +1010,6 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
 
   (void)instate; /* no use for this yet */
 
@@ -1022,7 +1020,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
   else
     /* Send the PASS command */
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
-                           pop3->passwd ? pop3->passwd : "");
+                           conn->passwd ? conn->passwd : "");
   if(result)
     return result;
 
@@ -1301,13 +1299,6 @@ static CURLcode pop3_init(struct connectdata *conn)
   /* Get some initial data into the pop3 struct */
   pop3->bytecountp = &data->req.bytecount;
 
-  /* No need to duplicate user+password, the connectdata struct won't change
-     during a session, but we re-init them here since on subsequent inits
-     since the conn struct may have changed or been replaced.
-  */
-  pop3->user = conn->user;
-  pop3->passwd = conn->passwd;
-
   return CURLE_OK;
 }
 
@@ -1411,7 +1402,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
  *
  * pop3_perform()
  *
- * This is the actual DO function for POP3. Get a file/directory according to
+ * This is the actual DO function for POP3. Get a message/listing according to
  * the options previously setup.
  */
 static CURLcode pop3_perform(struct connectdata *conn, bool *connected,

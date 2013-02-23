@@ -58,8 +58,6 @@ typedef enum {
    used. */
 struct POP3 {
   curl_off_t *bytecountp;
-  char *user;             /* User name string */
-  char *passwd;           /* Password string */
   curl_ftptransfer transfer;
   char *mailbox;          /* Message ID */
   char *custom;           /* Custom Request */
