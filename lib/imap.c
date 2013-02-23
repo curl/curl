@@ -1716,9 +1716,9 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
     DEBUGF(infof(conn->data, "IMAP URL parameter '%s' = '%s'\n", name, value));
 
-    /* Process known parameters (UIDVALIDITY, UID and SECTION) and create
-       a virtual URL level as they should be followed by a slash, which needs
-       to be stripped. Note: Unknown parameters trigger URL_MALFORMAT error */
+    /* Process known parameters (UIDVALIDITY, UID and SECTION) and create a
+       virtual URL level, as they should be followed by a slash, which needs
+       to be stripped off. Unknown parameters trigger a URL_MALFORMAT error */
     if(Curl_raw_equal(name, "UIDVALIDITY") && !imap->uidvalidity) {
       if(valuelen > 0 && value[valuelen - 1] == '/')
         value[valuelen - 1] = '\0';
