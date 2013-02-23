@@ -32,6 +32,13 @@
 /* forward-declaration, this is defined in urldata.h */
 struct connectdata;
 
+typedef enum {
+  FTPTRANSFER_BODY, /* yes do transfer a body */
+  FTPTRANSFER_INFO, /* do still go through to get info/headers */
+  FTPTRANSFER_NONE, /* don't get anything and don't get info */
+  FTPTRANSFER_LAST  /* end of list marker, never used */
+} curl_ftptransfer;
+
 /*
  * 'pingpong' is the generic struct used for protocols doing server<->client
  * conversations in a back-and-forth style such as FTP, IMAP, POP3, SMTP etc.

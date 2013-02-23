@@ -97,13 +97,6 @@ typedef enum {
                             file */
 } curl_ftpfile;
 
-typedef enum {
-  FTPTRANSFER_BODY, /* yes do transfer a body */
-  FTPTRANSFER_INFO, /* do still go through to get info/headers */
-  FTPTRANSFER_NONE, /* don't get anything and don't get info */
-  FTPTRANSFER_LAST  /* end of list marker, never used */
-} curl_ftptransfer;
-
 /* This FTP struct is used in the SessionHandle. All FTP data that is
    connection-oriented must be in FTP_conn to properly deal with the fact that
    perhaps the SessionHandle is changed between the times the connection is
