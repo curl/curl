@@ -1007,16 +1007,17 @@ static CURLcode smtp_mail(struct connectdata *conn)
 static CURLcode smtp_rcpt_to(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   /* Send the RCPT TO command */
-  if(smtpc->rcpt) {
-    if(smtpc->rcpt->data[0] == '<')
+  if(smtp->rcpt) {
+    if(smtp->rcpt->data[0] == '<')
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtpc->rcpt->data);
+                             smtp->rcpt->data);
     else
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                             smtpc->rcpt->data);
+                             smtp->rcpt->data);
     if(!result)
       state(conn, SMTP_RCPT);
   }
@@ -1030,6 +1031,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1039,8 +1041,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
     state(conn, SMTP_STOP);
   }
   else {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-    smtpc->rcpt = data->set.mail_rcpt;
+    smtp->rcpt = data->set.mail_rcpt;
 
     result = smtp_rcpt_to(conn);
   }
@@ -1054,6 +1055,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1063,14 +1065,12 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     state(conn, SMTP_STOP);
   }
   else {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-    if(smtpc->rcpt) {
-      smtpc->rcpt = smtpc->rcpt->next;
+    if(smtp->rcpt) {
+      smtp->rcpt = smtp->rcpt->next;
       result = smtp_rcpt_to(conn);
 
       /* If we failed or still are sending RCPT data then return */
-      if(result || smtpc->rcpt)
+      if(result || smtp->rcpt)
         return result;
     }
 

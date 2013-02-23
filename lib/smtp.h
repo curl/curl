@@ -62,6 +62,7 @@ struct SMTP {
   char *user;             /* User name string */
   char *passwd;           /* Password string */
   curl_pp_transfer transfer;
+  struct curl_slist *rcpt; /* Recipient list */
 };
 
 /* smtp_conn is used for struct connection-oriented data in the connectdata
@@ -74,7 +75,6 @@ struct smtp_conn {
   unsigned int authmechs;  /* Accepted authentication mechanisms */
   unsigned int authused;   /* Auth mechanism used for the connection */
   smtpstate state;         /* Always use smtp.c:state() to change state! */
-  struct curl_slist *rcpt; /* Recipient list */
   bool ssldone;            /* Is connect() over SSL done? */
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
