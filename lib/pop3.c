@@ -1061,11 +1061,9 @@ static CURLcode pop3_command(struct connectdata *conn)
   if(pop3->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
     command = "LIST";
 
-    if(pop3->mailbox[0] != '\0') {
+    if(pop3->mailbox[0] != '\0')
       /* Message specific LIST so skip the BODY transfer */
-      struct POP3 *pop3 = conn->data->state.proto.pop3;
       pop3->transfer = FTPTRANSFER_INFO;
-    }
   }
   else
     command = "RETR";
