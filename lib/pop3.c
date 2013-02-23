@@ -434,7 +434,7 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *pop3 = conn->data->state.proto.pop3;
+  struct POP3 *pop3 = conn->data->state.proto.pop3;
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
@@ -1011,7 +1011,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->state.proto.pop3;
 
   (void)instate; /* no use for this yet */
 
@@ -1064,7 +1064,7 @@ static CURLcode pop3_command(struct connectdata *conn)
 
     if(pop3c->mailbox[0] != '\0') {
       /* Message specific LIST so skip the BODY transfer */
-      struct FTP *pop3 = conn->data->state.proto.pop3;
+      struct POP3 *pop3 = conn->data->state.proto.pop3;
       pop3->transfer = FTPTRANSFER_INFO;
     }
   }
@@ -1096,7 +1096,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1289,10 +1289,10 @@ static CURLcode pop3_block_statemach(struct connectdata *conn)
 static CURLcode pop3_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->state.proto.pop3;
 
   if(!pop3) {
-    pop3 = data->state.proto.pop3 = calloc(sizeof(struct FTP), 1);
+    pop3 = data->state.proto.pop3 = calloc(sizeof(struct POP3), 1);
     if(!pop3)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1379,7 +1379,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   (void)premature;
@@ -1424,7 +1424,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct FTP *pop3 = conn->data->state.proto.pop3;
+    struct POP3 *pop3 = conn->data->state.proto.pop3;
     pop3->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1577,7 +1577,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 /* Call this when the DO phase has completed */
 static CURLcode pop3_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct FTP *pop3 = conn->data->state.proto.pop3;
+  struct POP3 *pop3 = conn->data->state.proto.pop3;
 
   (void)connected;
 

@@ -1293,7 +1293,7 @@ struct UrlState {
     void *generic;
     struct SSHPROTO *ssh;
     struct IMAP *imap;
-    struct FTP *pop3;
+    struct POP3 *pop3;
     struct FTP *smtp;
   } proto;
   /* current user of this SessionHandle instance, or NULL */
