@@ -1439,7 +1439,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = smtp_block_statemach(conn);
   }
 
-  /* Clear the transfer mode for the next connection */
+  /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -1557,7 +1557,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && smtpc->pp.conn)
-    (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
+    (void)smtp_quit(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);

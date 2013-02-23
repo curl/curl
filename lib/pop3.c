@@ -1401,7 +1401,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(pop3c->mailbox);
   Curl_safefree(pop3c->custom);
 
-  /* Clear the transfer mode for the next connection */
+  /* Clear the transfer mode for the next request */
   pop3->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -1529,7 +1529,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && pop3c->pp.conn)
-    (void)pop3_quit(conn); /* ignore errors on the LOGOUT */
+    (void)pop3_quit(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);

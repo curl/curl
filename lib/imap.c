@@ -1469,7 +1469,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   /* Cleanup our per-request based variables */
   Curl_safefree(imap->mailbox);
 
-  /* Clear the transfer mode for the next connection */
+  /* Clear the transfer mode for the next request */
   imap->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -1592,7 +1592,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
   /* The IMAP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && imapc->pp.conn)
-    (void)imap_logout(conn); /* ignore errors on the LOGOUT */
+    (void)imap_logout(conn); /* ignore errors on LOGOUT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);
