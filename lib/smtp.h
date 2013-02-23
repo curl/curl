@@ -59,8 +59,6 @@ typedef enum {
    used. */
 struct SMTP {
   curl_off_t *bytecountp;
-  char *user;             /* User name string */
-  char *passwd;           /* Password string */
   curl_pp_transfer transfer;
   struct curl_slist *rcpt; /* Recipient list */
 };

@@ -1291,13 +1291,6 @@ static CURLcode smtp_init(struct connectdata *conn)
   /* Get some initial data into the smtp struct */
   smtp->bytecountp = &data->req.bytecount;
 
-  /* No need to duplicate user+password, the connectdata struct won't change
-     during a session, but we re-init them here since on subsequent inits
-     since the conn struct may have changed or been replaced.
-  */
-  smtp->user = conn->user;
-  smtp->passwd = conn->passwd;
-
   return CURLE_OK;
 }
 
@@ -1449,8 +1442,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  *
  * smtp_perform()
  *
- * This is the actual DO function for SMTP. Get a file/directory according to
- * the options previously setup.
+ * This is the actual DO function for SMTP. Send a mail according to the
+ * options previously setup.
  */
 static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
