@@ -59,7 +59,7 @@ typedef enum {
 struct POP3 {
   curl_off_t *bytecountp;
   curl_pp_transfer transfer;
-  char *mailbox;          /* Message ID */
+  char *id;               /* Message ID */
   char *custom;           /* Custom Request */
 };
 

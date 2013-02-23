@@ -1058,10 +1058,10 @@ static CURLcode pop3_command(struct connectdata *conn)
   const char *command = NULL;
 
   /* Calculate the default command */
-  if(pop3->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
+  if(pop3->id[0] == '\0' || conn->data->set.ftp_list_only) {
     command = "LIST";
 
-    if(pop3->mailbox[0] != '\0')
+    if(pop3->id[0] != '\0')
       /* Message specific LIST so skip the BODY transfer */
       pop3->transfer = FTPTRANSFER_INFO;
   }
@@ -1069,10 +1069,10 @@ static CURLcode pop3_command(struct connectdata *conn)
     command = "RETR";
 
   /* Send the command */
-  if(pop3->mailbox[0] != '\0')
+  if(pop3->id[0] != '\0')
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
                            (pop3->custom && pop3->custom[0] != '\0' ?
-                            pop3->custom : command), pop3->mailbox);
+                            pop3->custom : command), pop3->id);
   else
     result = Curl_pp_sendf(&conn->proto.pop3c.pp,
                            (pop3->custom && pop3->custom[0] != '\0' ?
@@ -1386,7 +1386,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   }
 
   /* Cleanup our per-request based variables */
-  Curl_safefree(pop3->mailbox);
+  Curl_safefree(pop3->id);
   Curl_safefree(pop3->custom);
 
   /* Clear the transfer mode for the next request */
@@ -1543,8 +1543,8 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   struct POP3 *pop3 = data->state.proto.pop3;
   const char *path = data->state.path;
 
-  /* URL decode the path and use this mailbox */
-  return Curl_urldecode(data, path, 0, &pop3->mailbox, NULL, TRUE);
+  /* URL decode the path for the message ID */
+  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
 }
 
 static CURLcode pop3_parse_custom_request(struct connectdata *conn)
