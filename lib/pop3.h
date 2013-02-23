@@ -61,14 +61,14 @@ struct POP3 {
   char *user;             /* User name string */
   char *passwd;           /* Password string */
   curl_ftptransfer transfer;
+  char *mailbox;          /* Message ID */
+  char *custom;           /* Custom Request */
 };
 
 /* pop3_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct pop3_conn {
   struct pingpong pp;
-  char *mailbox;          /* Message ID */
-  char *custom;           /* Custom Request */
   size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as

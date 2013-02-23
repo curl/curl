@@ -1055,14 +1055,15 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn, int pop3code,
 static CURLcode pop3_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
   const char *command = NULL;
 
   /* Calculate the default command */
-  if(pop3c->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
+  if(pop3->mailbox[0] == '\0' || conn->data->set.ftp_list_only) {
     command = "LIST";
 
-    if(pop3c->mailbox[0] != '\0') {
+    if(pop3->mailbox[0] != '\0') {
       /* Message specific LIST so skip the BODY transfer */
       struct POP3 *pop3 = conn->data->state.proto.pop3;
       pop3->transfer = FTPTRANSFER_INFO;
@@ -1072,14 +1073,14 @@ static CURLcode pop3_command(struct connectdata *conn)
     command = "RETR";
 
   /* Send the command */
-  if(pop3c->mailbox[0] != '\0')
+  if(pop3->mailbox[0] != '\0')
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s %s",
-                           (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : command), pop3c->mailbox);
+                           (pop3->custom && pop3->custom[0] != '\0' ?
+                            pop3->custom : command), pop3->mailbox);
   else
     result = Curl_pp_sendf(&conn->proto.pop3c.pp,
-                           (pop3c->custom && pop3c->custom[0] != '\0' ?
-                            pop3c->custom : command));
+                           (pop3->custom && pop3->custom[0] != '\0' ?
+                            pop3->custom : command));
 
   if(result)
     return result;
@@ -1380,7 +1381,6 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct POP3 *pop3 = data->state.proto.pop3;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   (void)premature;
 
@@ -1398,8 +1398,8 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   }
 
   /* Cleanup our per-request based variables */
-  Curl_safefree(pop3c->mailbox);
-  Curl_safefree(pop3c->custom);
+  Curl_safefree(pop3->mailbox);
+  Curl_safefree(pop3->custom);
 
   /* Clear the transfer mode for the next request */
   pop3->transfer = FTPTRANSFER_BODY;
@@ -1552,24 +1552,24 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
 static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
   /* The POP3 struct is already initialised in pop3_connect() */
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
   const char *path = data->state.path;
 
   /* URL decode the path and use this mailbox */
-  return Curl_urldecode(data, path, 0, &pop3c->mailbox, NULL, TRUE);
+  return Curl_urldecode(data, path, 0, &pop3->mailbox, NULL, TRUE);
 }
 
 static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
   const char *custom = conn->data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3c->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
 
   return result;
 }
