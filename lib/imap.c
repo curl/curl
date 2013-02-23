@@ -523,7 +523,6 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct IMAP *imap = conn->data->state.proto.imap;
   char *user;
   char *passwd;
 
@@ -536,8 +535,8 @@ static CURLcode imap_state_login(struct connectdata *conn)
   }
 
   /* Make sure the username and password are in the correct atom format */
-  user = imap_atom(imap->user);
-  passwd = imap_atom(imap->passwd);
+  user = imap_atom(conn->user);
+  passwd = imap_atom(conn->passwd);
 
   /* Send USER and password */
   result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
@@ -1376,13 +1375,6 @@ static CURLcode imap_init(struct connectdata *conn)
 
   /* Get some initial data into the imap struct */
   imap->bytecountp = &data->req.bytecount;
-
-  /* No need to duplicate user+password, the connectdata struct won't change
-     during a session, but we re-init them here since on subsequent inits
-     since the conn struct may have changed or been replaced.
-  */
-  imap->user = conn->user;
-  imap->passwd = conn->passwd;
 
   return CURLE_OK;
 }

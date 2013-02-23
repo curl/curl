@@ -58,8 +58,6 @@ typedef enum {
    used. */
 struct IMAP {
   curl_off_t *bytecountp;
-  char *user;             /* User name string */
-  char *passwd;           /* Password string */
   curl_ftptransfer transfer;
   char *mailbox;          /* Mailbox to select */
 };
