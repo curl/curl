@@ -1474,6 +1474,9 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 
   /* Cleanup our per-request based variables */
   Curl_safefree(imap->mailbox);
+  Curl_safefree(imap->uidvalidity);
+  Curl_safefree(imap->uid);
+  Curl_safefree(imap->section);
 
   /* Clear the transfer mode for the next request */
   imap->transfer = FTPTRANSFER_BODY;

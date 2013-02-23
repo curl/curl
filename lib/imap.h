@@ -59,6 +59,9 @@ struct IMAP {
   curl_off_t *bytecountp;
   curl_pp_transfer transfer;
   char *mailbox;          /* Mailbox to select */
+  char *uidvalidity;      /* UIDVALIDITY to check in select */
+  char *uid;              /* Message UID to fetch */
+  char *section;          /* Message SECTION to fetch */
 };
 
 /* imap_conn is used for struct connection-oriented data in the connectdata
