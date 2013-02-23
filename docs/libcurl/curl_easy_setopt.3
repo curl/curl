@@ -727,12 +727,31 @@ the HELO / EHLO command to the mail server at example.com.
 
 .B POP3
 
-The path part of a POP3 request specifies the mailbox (message) to retrieve.
-If the mailbox is not specified then a list of waiting messages is returned
-instead.
+The path part of a POP3 request specifies the message ID to retrieve. If the
+ID is not specified then a list of waiting messages is returned instead.
 
-pop3://user:password@mail.example.com - This lists the available messages
-pop3://user:password@mail.example.com/1 - This retrieves the first message
+pop3://user:password@mail.example.com - This lists the available messages for
+the user
+pop3://user:password@mail.example.com/1 - This retrieves the first message for
+the user
+
+.B IMAP
+
+The path part of an IMAP request not only specifies the mailbox, but can also
+be used to specify the UID and SECTION of the message to fetch (Added in
+7.30.0).
+
+imap://user:password@mail.example.com - Selects the user's INBOX and fetches
+message 1
+imap://user:password@mail.example.com/OUTBOX - Selects the user's OUTBOX and
+fetches message 1.
+imap://user:password@mail.example.com/OUTBOX;UID=2 - Selects the user's OUTBOX
+mailbox and fetches message 2
+imap://user:password@mail.example.com/OUTBOX;UID=3/;SECTION=TEXT - Selects the
+SENT mailbox and fetches message 3 with only the text portion of the message
+
+For more information about the individual components of an IMAP URL please
+see RFC5092.
 
 .B SCP
 
