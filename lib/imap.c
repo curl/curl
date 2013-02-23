@@ -1109,11 +1109,12 @@ static CURLcode imap_select(struct connectdata *conn)
 static CURLcode imap_fetch(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct IMAP *imap = conn->data->state.proto.imap;
 
-  /* TODO: make this select the correct mail
-   * Use "1 body[text]" to get the full mail body of mail 1
-   */
-  result = imap_sendf(conn, "FETCH 1 BODY[TEXT]");
+  /* Send the FETCH command */
+  result = imap_sendf(conn, "FETCH %s BODY[%s]",
+                      imap->uid ? imap->uid : "1",
+                      imap->section ? imap->section : "");
   if(result)
     return result;
 
