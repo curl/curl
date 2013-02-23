@@ -1374,11 +1374,10 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   (void)premature;
 
   if(!pop3)
-    /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the POP3 struct is not
-     * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no POP3 pointer is set.
-     */
+    /* When the easy handle is removed from the multi interface while libcurl
+       is still trying to resolve the host name, the POP3 struct is not yet
+       initialized. However, the removal action calls Curl_done() which in
+       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
@@ -1450,12 +1449,10 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct POP3' to play with. For new connections,
-    the struct POP3 is allocated and setup in the pop3_connect() function.
-  */
+  /* Since connections can be re-used between SessionHandles, there might be a
+     connection already existing but on a fresh SessionHandle struct. As such
+     we make sure we have a good POP3 struct to play with. For new connections
+     the POP3 struct is allocated and setup in the pop3_connect() function. */
   Curl_reset_reqproto(conn);
   result = pop3_init(conn);
   if(result)
@@ -1488,6 +1485,7 @@ static CURLcode pop3_quit(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
+  /* Send the QUIT command */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT", NULL);
   if(result)
     return result;
@@ -1513,7 +1511,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to */
+     disconnect wait in vain and cause more problems than we need to. */
 
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
@@ -1684,7 +1682,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread)
      5 bytes (0d 0a 2e 0d 0a). Note that a line starting with a dot matches
      the eob so the server will have prefixed it with an extra dot which we
      need to strip out. Additionally the marker could of course be spread out
-     over 5 different data chunks */
+     over 5 different data chunks. */
   for(i = 0; i < nread; i++) {
     size_t prev = pop3c->eob;
 

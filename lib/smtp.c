@@ -1384,11 +1384,10 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   (void)premature;
 
   if(!smtp)
-    /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the SMTP struct is not
-     * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no SMTP pointer is set.
-     */
+    /* When the easy handle is removed from the multi interface while libcurl
+       is still trying to resolve the host name, the SMTP struct is not yet
+       initialized. However, the removal action calls Curl_done() which in
+       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
@@ -1492,12 +1491,10 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct SMTP' to play with. For new connections,
-    the struct SMTP is allocated and setup in the smtp_connect() function.
-  */
+  /* Since connections can be re-used between SessionHandles, there might be a
+     connection already existing but on a fresh SessionHandle struct. As such
+     we make sure we have a good SMTP struct to play with. For new connections
+     the SMTP struct is allocated and setup in the smtp_connect() function. */
   Curl_reset_reqproto(conn);
   result = smtp_init(conn);
   if(result)
@@ -1520,6 +1517,7 @@ static CURLcode smtp_quit(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
+  /* Send the QUIT command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
   if(result)
     return result;
@@ -1545,7 +1543,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to */
+     disconnect wait in vain and cause more problems than we need to. */
 
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
