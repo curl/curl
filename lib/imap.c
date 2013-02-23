@@ -523,7 +523,7 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct FTP *imap = conn->data->state.proto.imap;
+  struct IMAP *imap = conn->data->state.proto.imap;
   char *user;
   char *passwd;
 
@@ -1088,10 +1088,11 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
 static CURLcode imap_select(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
 
   result = imap_sendf(conn, "SELECT %s",
-                      imapc->mailbox ? imapc->mailbox : "");
+                      imap->mailbox ? imap->mailbox : "");
   if(result)
     return result;
 
@@ -1151,7 +1152,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
-  struct FTP *imap = data->state.proto.imap;
+  struct IMAP *imap = data->state.proto.imap;
   struct pingpong *pp = &imapc->pp;
   const char *ptr = data->state.buffer;
 
@@ -1365,10 +1366,10 @@ static CURLcode imap_block_statemach(struct connectdata *conn)
 static CURLcode imap_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct FTP *imap = data->state.proto.imap;
+  struct IMAP *imap = data->state.proto.imap;
 
   if(!imap) {
-    imap = data->state.proto.imap = calloc(sizeof(struct FTP), 1);
+    imap = data->state.proto.imap = calloc(sizeof(struct IMAP), 1);
     if(!imap)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1456,8 +1457,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *imap = data->state.proto.imap;
-  struct imap_conn *imapc= &conn->proto.imapc;
+  struct IMAP *imap = data->state.proto.imap;
 
   (void)premature;
 
@@ -1475,7 +1475,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   }
 
   /* Cleanup our per-request based variables */
-  Curl_safefree(imapc->mailbox);
+  Curl_safefree(imap->mailbox);
 
   /* Clear the transfer mode for the next connection */
   imap->transfer = FTPTRANSFER_BODY;
@@ -1500,7 +1500,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct FTP *imap = conn->data->state.proto.imap;
+    struct IMAP *imap = conn->data->state.proto.imap;
     imap->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1621,21 +1621,21 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 static CURLcode imap_parse_url_path(struct connectdata *conn)
 {
   /* The imap struct is already inited in imap_connect() */
-  struct imap_conn *imapc = &conn->proto.imapc;
   struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
   const char *path = data->state.path;
 
   if(!*path)
     path = "INBOX";
 
   /* URL decode the path and use this mailbox */
-  return Curl_urldecode(data, path, 0, &imapc->mailbox, NULL, TRUE);
+  return Curl_urldecode(data, path, 0, &imap->mailbox, NULL, TRUE);
 }
 
 /* Call this when the DO phase has completed */
 static CURLcode imap_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct FTP *imap = conn->data->state.proto.imap;
+  struct IMAP *imap = conn->data->state.proto.imap;
 
   (void)connected;
 

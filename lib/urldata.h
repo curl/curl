@@ -1292,7 +1292,7 @@ struct UrlState {
     void *telnet;        /* private for telnet.c-eyes only */
     void *generic;
     struct SSHPROTO *ssh;
-    struct FTP *imap;
+    struct IMAP *imap;
     struct FTP *pop3;
     struct FTP *smtp;
   } proto;
