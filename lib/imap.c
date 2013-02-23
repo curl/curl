@@ -664,7 +664,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    return CURLE_FTP_WEIRD_SERVER_REPLY;
+    return CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
   }
 
   result = imap_state_capability(conn);
@@ -1168,11 +1168,11 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     ptr++;
 
   if(*ptr == '{') {
-    curl_off_t filesize = curlx_strtoofft(ptr + 1, NULL, 10);
-    if(filesize)
-      Curl_pgrsSetDownloadSize(data, filesize);
+    curl_off_t size = curlx_strtoofft(ptr + 1, NULL, 10);
+    if(size)
+      Curl_pgrsSetDownloadSize(data, size);
 
-    infof(data, "Found %" FORMAT_OFF_TU " bytes to download\n", filesize);
+    infof(data, "Found %" FORMAT_OFF_TU " bytes to download\n", size);
 
     if(pp->cache) {
       /* At this point there is a bunch of data in the header "cache" that is
@@ -1180,20 +1180,20 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
          that there may even be additional "headers" after the body. */
       size_t chunk = pp->cache_size;
 
-      if(chunk > (size_t)filesize)
+      if(chunk > (size_t)size)
         /* the conversion from curl_off_t to size_t is always fine here */
-        chunk = (size_t)filesize;
+        chunk = (size_t)size;
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, pp->cache, chunk);
       if(result)
         return result;
 
-      filesize -= chunk;
+      size -= chunk;
 
       /* we've now used parts of or the entire cache */
       if(pp->cache_size > chunk) {
         /* part of, move the trailing data to the start and reduce the size */
-        memmove(pp->cache, pp->cache+chunk,
+        memmove(pp->cache, pp->cache + chunk,
                 pp->cache_size - chunk);
         pp->cache_size -= chunk;
       }
@@ -1205,17 +1205,17 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       }
     }
 
-    infof(data, "Filesize left: %" FORMAT_OFF_T "\n", filesize);
+    infof(data, "Size left: %" FORMAT_OFF_T "\n", size);
 
-    if(!filesize)
+    if(!size)
       /* the entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
-      Curl_setup_transfer(conn, FIRSTSOCKET, filesize, FALSE,
-                          imap->bytecountp, -1, NULL); /* no upload here */
+      Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, imap->bytecountp,
+                          -1, NULL); /* no upload here */
 
-    data->req.maxdownload = filesize;
+    data->req.maxdownload = size;
   }
   else
     /* We don't know how to parse this line */
@@ -1479,8 +1479,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
  *
  * imap_perform()
  *
- * This is the actual DO function for IMAP. Get a file/directory according to
- * the options previously setup.
+ * This is the actual DO function for IMAP. Fetch a message according to the
+ * options previously setup.
  */
 static CURLcode imap_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
