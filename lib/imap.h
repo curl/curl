@@ -57,7 +57,7 @@ typedef enum {
    used. */
 struct IMAP {
   curl_off_t *bytecountp;
-  curl_ftptransfer transfer;
+  curl_pp_transfer transfer;
   char *mailbox;          /* Mailbox to select */
 };
 

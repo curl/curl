@@ -37,7 +37,7 @@ typedef enum {
   FTPTRANSFER_INFO, /* do still go through to get info/headers */
   FTPTRANSFER_NONE, /* don't get anything and don't get info */
   FTPTRANSFER_LAST  /* end of list marker, never used */
-} curl_ftptransfer;
+} curl_pp_transfer;
 
 /*
  * 'pingpong' is the generic struct used for protocols doing server<->client
