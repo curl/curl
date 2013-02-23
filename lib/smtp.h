@@ -53,6 +53,17 @@ typedef enum {
   SMTP_LAST         /* never used */
 } smtpstate;
 
+/* This SMTP struct is used in the SessionHandle. All SMTP data that is
+   connection-oriented must be in smtp_conn to properly deal with the fact that
+   perhaps the SessionHandle is changed between the times the connection is
+   used. */
+struct SMTP {
+  curl_off_t *bytecountp;
+  char *user;             /* User name string */
+  char *passwd;           /* Password string */
+  curl_pp_transfer transfer;
+};
+
 /* smtp_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct smtp_conn {

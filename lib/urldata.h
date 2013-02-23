@@ -1294,7 +1294,7 @@ struct UrlState {
     struct SSHPROTO *ssh;
     struct IMAP *imap;
     struct POP3 *pop3;
-    struct FTP *smtp;
+    struct SMTP *smtp;
   } proto;
   /* current user of this SessionHandle instance, or NULL */
   struct connectdata *current_conn;

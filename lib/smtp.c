@@ -1091,7 +1091,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1280,10 +1280,10 @@ static CURLcode smtp_block_statemach(struct connectdata *conn)
 static CURLcode smtp_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   if(!smtp) {
-    smtp = data->state.proto.smtp = calloc(sizeof(struct FTP), 1);
+    smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
     if(!smtp)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1385,7 +1385,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->state.proto.smtp;
   ssize_t bytes_written;
 
   (void)premature;
@@ -1462,7 +1462,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct FTP *smtp = conn->data->state.proto.smtp;
+    struct SMTP *smtp = conn->data->state.proto.smtp;
     smtp->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1574,7 +1574,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 /* Call this when the DO phase has completed */
 static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct FTP *smtp = conn->data->state.proto.smtp;
+  struct SMTP *smtp = conn->data->state.proto.smtp;
 
   (void)connected;
 
