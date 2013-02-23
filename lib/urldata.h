@@ -1532,7 +1532,7 @@ struct UserDefined {
   bool include_header;   /* include received protocol headers in data output */
   bool http_set_referer; /* is a custom referer used */
   bool http_auto_referer; /* set "correct" referer when following location: */
-  bool opt_no_body;      /* as set with CURLOPT_NO_BODY */
+  bool opt_no_body;      /* as set with CURLOPT_NOBODY */
   bool set_port;         /* custom port number used */
   bool upload;           /* upload request */
   enum CURL_NETRC_OPTION
