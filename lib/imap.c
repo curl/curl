@@ -1283,6 +1283,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
   if(result)
     return result;
 
+  /* Was there an error parsing the response line? */
+  if(imapcode == -1)
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
+
   if(imapcode) {
     /* We have now received a full IMAP server response */
     switch(imapc->state) {
