@@ -334,7 +334,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
   size_t id_len = strlen(id);
   size_t wordlen;
 
-  /* Do we have a command response? */
+  /* Do we have a tagged command response? */
   if(len >= id_len + 3) {
     if(!memcmp(id, line, id_len) && line[id_len] == ' ') {
       *resp = line[id_len + 1]; /* O, N or B */
