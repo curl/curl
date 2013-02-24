@@ -347,7 +347,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     else {
       failf(conn->data, "Bad tagged response");
       *resp = -1;
-     }
+    }
 
     return TRUE;
   }
