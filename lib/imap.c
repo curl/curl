@@ -353,32 +353,6 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     return TRUE;
   }
 
-  /* Do we have a continuation response? */
-  if((len == 3 && !memcmp("+", line, 1)) ||
-     (len >= 2 && !memcmp("+ ", line, 2))) {
-    switch(imapc->state) {
-      /* States which are interested in continuation responses */
-      case IMAP_AUTHENTICATE_PLAIN:
-      case IMAP_AUTHENTICATE_LOGIN:
-      case IMAP_AUTHENTICATE_LOGIN_PASSWD:
-      case IMAP_AUTHENTICATE_CRAMMD5:
-      case IMAP_AUTHENTICATE_DIGESTMD5:
-      case IMAP_AUTHENTICATE_DIGESTMD5_RESP:
-      case IMAP_AUTHENTICATE_NTLM:
-      case IMAP_AUTHENTICATE_NTLM_TYPE2MSG:
-      case IMAP_AUTHENTICATE:
-        *resp = '+';
-        break;
-
-      default:
-        failf(conn->data, "Unexpected continuation response");
-        *resp = -1;
-        break;
-    }
-
-    return TRUE;
-  }
-
   /* Do we have an untagged command response */
   if(len >= 2 && !memcmp("* ", line, 2)) {
     /* Are we processing CAPABILITY command data? */
@@ -443,6 +417,8 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         line += wordlen;
         len -= wordlen;
       }
+
+      return FALSE;
     }
     /* Are we processing FETCH command responses? */
     else if(imapc->state == IMAP_FETCH) {
@@ -450,6 +426,32 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
 
       return TRUE;
     }
+  }
+
+  /* Do we have a continuation response? */
+  if((len == 3 && !memcmp("+", line, 1)) ||
+     (len >= 2 && !memcmp("+ ", line, 2))) {
+    switch(imapc->state) {
+      /* States which are interested in continuation responses */
+      case IMAP_AUTHENTICATE_PLAIN:
+      case IMAP_AUTHENTICATE_LOGIN:
+      case IMAP_AUTHENTICATE_LOGIN_PASSWD:
+      case IMAP_AUTHENTICATE_CRAMMD5:
+      case IMAP_AUTHENTICATE_DIGESTMD5:
+      case IMAP_AUTHENTICATE_DIGESTMD5_RESP:
+      case IMAP_AUTHENTICATE_NTLM:
+      case IMAP_AUTHENTICATE_NTLM_TYPE2MSG:
+      case IMAP_AUTHENTICATE:
+        *resp = '+';
+        break;
+
+      default:
+        failf(conn->data, "Unexpected continuation response");
+        *resp = -1;
+        break;
+    }
+
+    return TRUE;
   }
 
   return FALSE; /* Nothing for us */
