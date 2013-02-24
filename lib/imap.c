@@ -360,10 +360,10 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     return TRUE;
   }
 
-  /* Are we processing CAPABILITY command data? */
-  if(imapc->state == IMAP_CAPABILITY) {
-    /* Do we have a valid response? */
-    if(len >= 2 && !memcmp("* ", line, 2)) {
+  /* Do we have an untagged command response */
+  if(len >= 2 && !memcmp("* ", line, 2)) {
+    /* Are we processing CAPABILITY command data? */
+    if(imapc->state == IMAP_CAPABILITY) {
       line += 2;
       len -= 2;
 
@@ -425,11 +425,8 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         len -= wordlen;
       }
     }
-  }
-  /* Are we processing FETCH command responses? */
-  else if(imapc->state == IMAP_FETCH) {
-    /* Do we have a valid response? */
-    if(len >= 2 && !memcmp("* ", line, 2)) {
+    /* Are we processing FETCH command responses? */
+    else if(imapc->state == IMAP_FETCH) {
       *resp = '*';
 
       return TRUE;
