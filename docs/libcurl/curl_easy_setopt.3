@@ -732,6 +732,7 @@ ID is not specified then a list of waiting messages is returned instead.
 
 pop3://user:password@mail.example.com - This lists the available messages for
 the user
+
 pop3://user:password@mail.example.com/1 - This retrieves the first message for
 the user
 
@@ -743,10 +744,13 @@ be used to specify the UID and SECTION of the message to fetch (Added in
 
 imap://user:password@mail.example.com - Selects the user's INBOX and fetches
 message 1
+
 imap://user:password@mail.example.com/OUTBOX - Selects the user's OUTBOX and
 fetches message 1.
+
 imap://user:password@mail.example.com/OUTBOX;UID=2 - Selects the user's OUTBOX
 mailbox and fetches message 2
+
 imap://user:password@mail.example.com/OUTBOX;UID=3/;SECTION=TEXT - Selects the
 SENT mailbox and fetches message 3 with only the text portion of the message
 
