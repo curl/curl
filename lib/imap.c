@@ -336,13 +336,14 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
 
   /* Do we have a tagged command response? */
   if(len >= id_len + 1 && !memcmp(id, line, id_len) && line[id_len] == ' ') {
-    len = len - id_len - 1;
+    line += id_len + 1;
+    len -= id_len + 1;
 
-    if(len >= 2 && !memcmp(line + id_len + 1, "OK", 2))
+    if(len >= 2 && !memcmp(line, "OK", 2))
       *resp = 'O';
-    else if(len >= 2 && !memcmp(line + id_len + 1, "NO", 2))
+    else if(len >= 2 && !memcmp(line, "NO", 2))
       *resp = 'N';
-    else if(len >= 3 && !memcmp(line + id_len + 1, "BAD", 3))
+    else if(len >= 3 && !memcmp(line, "BAD", 3))
       *resp = 'B';
     else {
       failf(conn->data, "Bad tagged response");
