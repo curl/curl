@@ -1720,7 +1720,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
     char *value;
     size_t valuelen;
 
-    /* Decode the parameter name */
+    /* Find the length of the name parameter */
     begin = ++ptr;
     while(*ptr && *ptr != '=')
       ptr++;
@@ -1728,16 +1728,17 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
     if(!*ptr)
       return CURLE_URL_MALFORMAT;
 
-    /* Decode the parameter name */
+    /* Decode the name parameter */
     result = Curl_urldecode(data, begin, ptr - begin, &name, NULL, TRUE);
     if(result)
       return result;
 
+    /* Find the length of the value parameter */
     begin = ++ptr;
     while(imap_is_bchar(*ptr))
       ptr++;
 
-    /* Decode the parameter value */
+    /* Decode the value parameter */
     result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen, TRUE);
     if(result) {
       Curl_safefree(name);
@@ -1746,9 +1747,10 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
     DEBUGF(infof(conn->data, "IMAP URL parameter '%s' = '%s'\n", name, value));
 
-    /* Process known parameters (UIDVALIDITY, UID and SECTION) and create a
-       virtual URL level, as they should be followed by a slash, which needs
-       to be stripped off. Unknown parameters trigger a URL_MALFORMAT error */
+    /* Process the known hierarchical parameters (UIDVALIDITY, UID and SECTION)
+       stripping of the trailing slash character if it is present.
+
+       Note: Unknown parameters trigger a URL_MALFORMAT error. */
     if(Curl_raw_equal(name, "UIDVALIDITY") && !imap->uidvalidity) {
       if(valuelen > 0 && value[valuelen - 1] == '/')
         value[valuelen - 1] = '\0';
