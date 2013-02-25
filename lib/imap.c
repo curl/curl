@@ -679,6 +679,54 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   return result;
 }
 
+/* Start the DO phase */
+static CURLcode imap_select(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
+  char *mailbox;
+
+  mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+  if(!mailbox)
+    result = CURLE_OUT_OF_MEMORY;
+  else
+    result = imap_sendf(conn, "SELECT %s", mailbox);
+
+  Curl_safefree(mailbox);
+  if(result)
+    return result;
+
+  state(conn, IMAP_SELECT);
+
+  return result;
+}
+
+static CURLcode imap_fetch(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct IMAP *imap = conn->data->state.proto.imap;
+
+  /* Send the FETCH command */
+  result = imap_sendf(conn, "FETCH %s BODY[%s]",
+                      imap->uid ? imap->uid : "1",
+                      imap->section ? imap->section : "");
+  if(result)
+    return result;
+
+  /*
+   * When issued, the server will respond with a single line similar to
+   * '* 1 FETCH (BODY[TEXT] {2021}'
+   *
+   * Identifying the fetch and how many bytes of contents we can expect. We
+   * must extract that number before continuing to "download as usual".
+   */
+
+  state(conn, IMAP_FETCH);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             int imapcode,
@@ -1106,54 +1154,6 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
   else
     /* End of connect phase */
     state(conn, IMAP_STOP);
-
-  return result;
-}
-
-/* Start the DO phase */
-static CURLcode imap_select(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct IMAP *imap = data->state.proto.imap;
-  char *mailbox;
-
-  mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
-  if(!mailbox)
-    result = CURLE_OUT_OF_MEMORY;
-  else
-    result = imap_sendf(conn, "SELECT %s", mailbox);
-
-  Curl_safefree(mailbox);
-  if(result)
-    return result;
-
-  state(conn, IMAP_SELECT);
-
-  return result;
-}
-
-static CURLcode imap_fetch(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct IMAP *imap = conn->data->state.proto.imap;
-
-  /* Send the FETCH command */
-  result = imap_sendf(conn, "FETCH %s BODY[%s]",
-                      imap->uid ? imap->uid : "1",
-                      imap->section ? imap->section : "");
-  if(result)
-    return result;
-
-  /*
-   * When issued, the server will respond with a single line similar to
-   * '* 1 FETCH (BODY[TEXT] {2021}'
-   *
-   * Identifying the fetch and how many bytes of contents we can expect. We
-   * must extract that number before continuing to "download as usual".
-   */
-
-  state(conn, IMAP_FETCH);
 
   return result;
 }
