@@ -1100,8 +1100,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
   }
 
   /* SMTP upload */
-  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      FIRSTSOCKET, NULL);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
 
   /* End of do phase */
   state(conn, SMTP_STOP);

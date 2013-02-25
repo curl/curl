@@ -1245,8 +1245,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
-      Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, NULL,
-                          -1, NULL); /* no upload here */
+      Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, NULL, -1, NULL);
 
     data->req.maxdownload = size;
   }
