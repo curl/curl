@@ -380,7 +380,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
           wordlen++;
 
         /* Does the server support the STARTTLS capability? */
-        if(wordlen >= 8 && !memcmp(line, "STARTTLS", 8))
+        if(wordlen == 8 && !memcmp(line, "STARTTLS", 8))
           imapc->tls_supported = TRUE;
 
         /* Has the server explicitly disabled clear text authentication? */
