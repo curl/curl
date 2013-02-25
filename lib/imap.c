@@ -1348,12 +1348,12 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       result = imap_state_login_resp(conn, imapcode, imapc->state);
       break;
 
-    case IMAP_FETCH:
-      result = imap_state_fetch_resp(conn, imapcode, imapc->state);
-      break;
-
     case IMAP_SELECT:
       result = imap_state_select_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_FETCH:
+      result = imap_state_fetch_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
