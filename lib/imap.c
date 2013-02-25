@@ -1185,7 +1185,6 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
-  struct IMAP *imap = data->state.proto.imap;
   struct pingpong *pp = &imapc->pp;
   const char *ptr = data->state.buffer;
 
@@ -1246,7 +1245,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
-      Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, imap->bytecountp,
+      Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, NULL,
                           -1, NULL); /* no upload here */
 
     data->req.maxdownload = size;
@@ -1410,9 +1409,6 @@ static CURLcode imap_init(struct connectdata *conn)
     if(!imap)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Get some initial data into the imap struct */
-  imap->bytecountp = &data->req.bytecount;
 
   return CURLE_OK;
 }
