@@ -1091,7 +1091,6 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1102,7 +1101,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
 
   /* SMTP upload */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      FIRSTSOCKET, smtp->bytecountp);
+                      FIRSTSOCKET, NULL);
 
   /* End of do phase */
   state(conn, SMTP_STOP);
@@ -1287,9 +1286,6 @@ static CURLcode smtp_init(struct connectdata *conn)
     if(!smtp)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Get some initial data into the smtp struct */
-  smtp->bytecountp = &data->req.bytecount;
 
   return CURLE_OK;
 }

@@ -58,7 +58,6 @@ typedef enum {
    perhaps the SessionHandle is changed between the times the connection is
    used. */
 struct SMTP {
-  curl_off_t *bytecountp;
   curl_pp_transfer transfer;
   struct curl_slist *rcpt; /* Recipient list */
 };
