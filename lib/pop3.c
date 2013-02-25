@@ -1115,7 +1115,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
   pop3c->strip = 2;
 
   /* POP3 download */
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
+  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL,
                       -1, NULL); /* no upload here */
 
   if(pp->cache) {
@@ -1293,9 +1293,6 @@ static CURLcode pop3_init(struct connectdata *conn)
     if(!pop3)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Get some initial data into the pop3 struct */
-  pop3->bytecountp = &data->req.bytecount;
 
   return CURLE_OK;
 }

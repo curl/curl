@@ -57,7 +57,6 @@ typedef enum {
    perhaps the SessionHandle is changed between the times the connection is
    used. */
 struct POP3 {
-  curl_off_t *bytecountp;
   curl_pp_transfer transfer;
   char *id;               /* Message ID */
   char *custom;           /* Custom Request */
