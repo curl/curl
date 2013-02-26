@@ -391,8 +391,13 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     switch(imapc->state) {
       /* States which are interested in untagged responses */
       case IMAP_CAPABILITY:
+        if(!imap_matchresp(line, len, "CAPABILITY"))
+          return FALSE;
+        break;
+
       case IMAP_FETCH:
-        *resp = '*';
+        if(!imap_matchresp(line, len, "FETCH"))
+          return FALSE;
         break;
  
       /* Ignore other untagged responses */
@@ -400,6 +405,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         return FALSE;
     }
 
+    *resp = '*';
     return TRUE;
   }
 
