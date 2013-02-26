@@ -738,15 +738,19 @@ the user
 
 .B IMAP
 
-The path part of an IMAP request not only specifies the mailbox, but can also
-be used to specify the UID and SECTION of the message to fetch (Added in
-7.30.0).
+The path part of an IMAP request not only specifies the mailbox to select, but
+can also be used to check the UIDVALIDITY of the mailbox and to specify the
+UID and SECTION of the message to fetch (Added in 7.30.0).
 
 imap://user:password@mail.example.com - Selects the user's INBOX and fetches
 message 1
 
+imap://user:password@mail.example.com/INBOX/;UIDVALIDITY=50 - Selects the
+user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches message
+1 if it is
+
 imap://user:password@mail.example.com/OUTBOX - Selects the user's OUTBOX and
-fetches message 1.
+fetches message 1
 
 imap://user:password@mail.example.com/OUTBOX/;UID=2 - Selects the user's OUTBOX
 mailbox and fetches message 2
