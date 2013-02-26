@@ -386,7 +386,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     return TRUE;
   }
 
-  /* Do we have an untagged command response */
+  /* Do we have an untagged command response? */
   if(len >= 2 && !memcmp("* ", line, 2)) {
     switch(imapc->state) {
       /* States which are interested in untagged responses */
