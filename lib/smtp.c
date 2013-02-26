@@ -1090,8 +1090,6 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
-  struct SessionHandle *data = conn->data;
-
   (void)instate; /* no use for this yet */
 
   if(smtpcode != 354) {
