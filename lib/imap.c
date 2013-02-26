@@ -323,6 +323,41 @@ static char* imap_atom(const char* str)
   return newstr;
 }
 
+/* Determines whether the untagged response is related to a specified
+   command by checking if it is in format "* <command-name> ..." or
+   "* <number> <command-name> ...". The "* " marker is assumed to have
+   already been checked by the caller. */
+static bool imap_matchresp(const char *line, size_t len, const char *cmd)
+{
+  const char *end = line + len;
+  size_t cmd_len = strlen(cmd);
+
+  /* Skip the untagged response marker */
+  line += 2;
+
+  /* Do we have a number after the marker? */
+  if(line < end && ISDIGIT(*line)) {
+    /* Skip the number */
+    do
+      line++;
+    while(line < end && ISDIGIT(*line));
+
+    /* Do we have the space character? */
+    if(line == end || *line != ' ')
+      return FALSE;
+
+    line++;
+  }
+
+  /* Does the command name match and is it followed by a space character or at
+     the end of line? */
+  if(line + cmd_len <= end && Curl_raw_nequal(line, cmd, cmd_len) &&
+     (line[cmd_len] == ' ' || line + cmd_len == end))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Function that checks whether the given string is a valid tagged, untagged
    or continuation response which can be processed by the response handler. */
 static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
