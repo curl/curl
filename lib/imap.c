@@ -1216,6 +1216,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct IMAP *imap = conn->data->state.proto.imap;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *line = data->state.buffer;
   char tmp[20];
@@ -1233,8 +1234,16 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
     failf(data, "Select failed");
     result = CURLE_LOGIN_DENIED;
   }
-  else
-    result = imap_fetch(conn);
+  else {
+    /* Check if the UIDVALIDITY has been specified and matches */
+    if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
+       strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
+      failf(conn->data, "Mailbox UIDVALIDITY has changed");
+      result = CURLE_REMOTE_FILE_NOT_FOUND;
+    }
+    else
+      result = imap_fetch(conn);
+  }
 
   return result;
 }
