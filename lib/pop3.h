@@ -66,6 +66,8 @@ struct POP3 {
    struct */
 struct pop3_conn {
   struct pingpong pp;
+  pop3state state;        /* Always use pop3.c:state() to change state! */
+  bool ssldone;           /* Is connect() over SSL done? */
   size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
@@ -74,8 +76,6 @@ struct pop3_conn {
   unsigned int authmechs; /* Accepted SASL authentication mechanisms */
   unsigned int authused;  /* SASL auth mechanism used for the connection */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
-  pop3state state;        /* Always use pop3.c:state() to change state! */
-  bool ssldone;           /* Is connect() over SSL done? */
   bool tls_supported;     /* StartTLS capability supported by server */
 };
 

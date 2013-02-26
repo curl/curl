@@ -67,12 +67,12 @@ struct IMAP {
    struct */
 struct imap_conn {
   struct pingpong pp;
+  imapstate state;            /* Always use imap.c:state() to change state! */
+  bool ssldone;               /* Is connect() over SSL done? */
   unsigned int authmechs;     /* Accepted authentication mechanisms */
   unsigned int authused;      /* Auth mechanism used for the connection */
-  imapstate state;            /* Always use imap.c:state() to change state! */
   int cmdid;                  /* Last used command ID */
   char resptag[5];            /* Response tag to wait for */
-  bool ssldone;               /* Is connect() over SSL done? */
   bool tls_supported;         /* StartTLS capability supported by server */
   bool login_disabled;        /* LOGIN command disabled by server */
   bool ir_supported;          /* Initial response supported by server */
