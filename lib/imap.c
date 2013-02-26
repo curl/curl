@@ -395,6 +395,11 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
           return FALSE;
         break;
 
+      case IMAP_SELECT:
+        /* SELECT is special in that its untagged responses does not have a
+           common prefix so accept anything! */
+        break;
+
       case IMAP_FETCH:
         if(!imap_matchresp(line, len, "FETCH"))
           return FALSE;
@@ -666,7 +671,11 @@ static CURLcode imap_select(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct IMAP *imap = data->state.proto.imap;
+  struct imap_conn *imapc = &conn->proto.imapc;
   char *mailbox;
+
+  /* Invalidate old information in case we are switching mailboxes */
+  Curl_safefree(imapc->mailbox_uidvalidity);
 
   mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
   if(!mailbox)
@@ -1207,10 +1216,20 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *line = data->state.buffer;
+  char tmp[20];
 
   (void)instate; /* no use for this yet */
 
-  if(imapcode != 'O') {
+  if(imapcode == '*') {
+    /* See if this is an UIDVALIDITY response */
+    if(sscanf(line + 2, "OK [UIDVALIDITY %19[0123456789]]", tmp) == 1) {
+      Curl_safefree(imapc->mailbox_uidvalidity);
+      imapc->mailbox_uidvalidity = strdup(tmp);
+    }
+  }
+  else if(imapcode != 'O') {
     failf(data, "Select failed");
     result = CURLE_LOGIN_DENIED;
   }
