@@ -76,6 +76,7 @@ struct imap_conn {
   bool tls_supported;     /* StartTLS capability supported by server */
   bool login_disabled;    /* LOGIN command explicitly disabled by server */
   bool ir_supported;      /* Initial response supported by server */
+  char *mailbox_uidvalidity;  /* UIDVALIDITY parsed from SELECT response */
 };
 
 extern const struct Curl_handler Curl_handler_imap;

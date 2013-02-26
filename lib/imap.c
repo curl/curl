@@ -1676,6 +1676,9 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, imapc->authused);
 
+  /* Cleanup our connection based variables */
+  Curl_safefree(imapc->mailbox_uidvalidity);
+
   return CURLE_OK;
 }
 
