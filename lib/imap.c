@@ -399,7 +399,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         if(!imap_matchresp(line, len, "FETCH"))
           return FALSE;
         break;
- 
+
       /* Ignore other untagged responses */
       default:
         return FALSE;
