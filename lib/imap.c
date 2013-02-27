@@ -810,23 +810,25 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
       line += wordlen;
     }
   }
-  else if(imapcode != 'O')
-    result = imap_state_login(conn);
-  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* We don't have a SSL/TLS connection yet, but SSL is requested */
-    if(imapc->tls_supported)
-      /* Switch to TLS connection now */
-      result = imap_state_starttls(conn);
-    else if(data->set.use_ssl == CURLUSESSL_TRY)
-      /* Fallback and carry on with authentication */
-      result = imap_authenticate(conn);
-    else {
-      failf(data, "STARTTLS not supported.");
-      result = CURLE_USE_SSL_FAILED;
+  else if(imapcode == 'O') {
+    if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      /* We don't have a SSL/TLS connection yet, but SSL is requested */
+      if(imapc->tls_supported)
+        /* Switch to TLS connection now */
+        result = imap_state_starttls(conn);
+      else if(data->set.use_ssl == CURLUSESSL_TRY)
+        /* Fallback and carry on with authentication */
+        result = imap_authenticate(conn);
+      else {
+        failf(data, "STARTTLS not supported.");
+        result = CURLE_USE_SSL_FAILED;
+      }
     }
+    else
+      result = imap_authenticate(conn);
   }
   else
-    result = imap_authenticate(conn);
+    result = imap_state_login(conn);
 
   return result;
 }
