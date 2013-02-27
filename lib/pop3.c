@@ -676,7 +676,7 @@ static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", plainauth);
 
         if(!result)
-          state(conn, POP3_AUTH);
+          state(conn, POP3_AUTH_FINAL);
       }
 
       Curl_safefree(plainauth);
@@ -750,7 +750,7 @@ static CURLcode pop3_state_auth_login_password_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", authpasswd);
 
         if(!result)
-          state(conn, POP3_AUTH);
+          state(conn, POP3_AUTH_FINAL);
       }
 
       Curl_safefree(authpasswd);
@@ -805,7 +805,7 @@ static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
       result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", rplyb64);
 
       if(!result)
-        state(conn, POP3_AUTH);
+        state(conn, POP3_AUTH_FINAL);
     }
 
     Curl_safefree(rplyb64);
@@ -875,7 +875,7 @@ static CURLcode pop3_state_auth_digest_resp_resp(struct connectdata *conn,
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "");
 
     if(!result)
-      state(conn, POP3_AUTH);
+      state(conn, POP3_AUTH_FINAL);
   }
 
   return result;
@@ -951,7 +951,7 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", type3msg);
 
         if(!result)
-          state(conn, POP3_AUTH);
+          state(conn, POP3_AUTH_FINAL);
       }
 
       Curl_safefree(type3msg);
@@ -1215,7 +1215,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-    case POP3_AUTH:
+    case POP3_AUTH_FINAL:
       result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
       break;
 
