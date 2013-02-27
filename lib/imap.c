@@ -730,10 +730,10 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    return CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
   }
-
-  result = imap_state_capability(conn);
+  else
+    result = imap_state_capability(conn);
 
   return result;
 }
