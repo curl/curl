@@ -674,7 +674,8 @@ static CURLcode imap_select(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
   char *mailbox;
 
-  /* Invalidate old information in case we are switching mailboxes */
+  /* Invalidate old information as we are switching mailboxes */
+  Curl_safefree(imapc->mailbox);
   Curl_safefree(imapc->mailbox_uidvalidity);
 
   mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
@@ -1241,8 +1242,12 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
       failf(conn->data, "Mailbox UIDVALIDITY has changed");
       result = CURLE_REMOTE_FILE_NOT_FOUND;
     }
-    else
+    else {
+      /* Note the currently opened mailbox on this connection */
+      imapc->mailbox = strdup(imap->mailbox);
+
       result = imap_fetch(conn);
+    }
   }
 
   return result;
@@ -1592,6 +1597,9 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 {
   /* This is IMAP and no proxy */
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
+  struct imap_conn *imapc = &conn->proto.imapc;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -1604,7 +1612,17 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   *dophase_done = FALSE; /* not done yet */
 
   /* Start the first command in the DO phase */
-  result = imap_select(conn);
+  if(imap->mailbox && imapc->mailbox &&
+     !strcmp(imap->mailbox, imapc->mailbox) &&
+     (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
+      !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity))) {
+    /* This mailbox (with the same UIDVALIDITY if set) is already selected on
+       this connection so go straight to the next fetch operation */
+    result = imap_fetch(conn);
+  }
+  else
+    result = imap_select(conn);
+  
   if(result)
     return result;
 
