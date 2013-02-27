@@ -427,7 +427,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_AUTHENTICATE_DIGESTMD5_RESP:
       case IMAP_AUTHENTICATE_NTLM:
       case IMAP_AUTHENTICATE_NTLM_TYPE2MSG:
-      case IMAP_AUTHENTICATE:
+      case IMAP_AUTHENTICATE_FINAL:
         *resp = '+';
         break;
 
@@ -625,7 +625,7 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   else if(imapc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     state1 = IMAP_AUTHENTICATE_PLAIN;
-    state2 = IMAP_AUTHENTICATE;
+    state2 = IMAP_AUTHENTICATE_FINAL;
     imapc->authused = SASL_MECH_PLAIN;
 
     if(imapc->ir_supported)
@@ -884,7 +884,7 @@ static CURLcode imap_state_auth_plain_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", plainauth);
 
         if(!result)
-          state(conn, IMAP_AUTHENTICATE);
+          state(conn, IMAP_AUTHENTICATE_FINAL);
       }
 
       Curl_safefree(plainauth);
@@ -958,7 +958,7 @@ static CURLcode imap_state_auth_login_password_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", authpasswd);
 
         if(!result)
-          state(conn, IMAP_AUTHENTICATE);
+          state(conn, IMAP_AUTHENTICATE_FINAL);
       }
 
       Curl_safefree(authpasswd);
@@ -1013,7 +1013,7 @@ static CURLcode imap_state_auth_cram_resp(struct connectdata *conn,
       result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", rplyb64);
 
       if(!result)
-        state(conn, IMAP_AUTHENTICATE);
+        state(conn, IMAP_AUTHENTICATE_FINAL);
     }
 
     Curl_safefree(rplyb64);
@@ -1083,7 +1083,7 @@ static CURLcode imap_state_auth_digest_resp_resp(struct connectdata *conn,
     result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
 
     if(!result)
-      state(conn, IMAP_AUTHENTICATE);
+      state(conn, IMAP_AUTHENTICATE_FINAL);
   }
 
   return result;
@@ -1159,7 +1159,7 @@ static CURLcode imap_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", type3msg);
 
         if(!result)
-          state(conn, IMAP_AUTHENTICATE);
+          state(conn, IMAP_AUTHENTICATE_FINAL);
       }
 
       Curl_safefree(type3msg);
@@ -1418,7 +1418,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-    case IMAP_AUTHENTICATE:
+    case IMAP_AUTHENTICATE_FINAL:
       result = imap_state_auth_final_resp(conn, imapcode, imapc->state);
       break;
 
