@@ -460,7 +460,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   else if(smtpc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     state1 = SMTP_AUTH_PLAIN;
-    state2 = SMTP_AUTH;
+    state2 = SMTP_AUTH_FINAL;
     smtpc->authused = SASL_MECH_PLAIN;
     result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                             conn->passwd, &initresp, &len);
@@ -622,7 +622,7 @@ static CURLcode smtp_state_auth_plain_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(plainauth);
@@ -696,7 +696,7 @@ static CURLcode smtp_state_auth_login_password_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(authpasswd);
@@ -751,7 +751,7 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", rplyb64);
 
       if(!result)
-        state(conn, SMTP_AUTH);
+        state(conn, SMTP_AUTH_FINAL);
     }
 
     Curl_safefree(rplyb64);
@@ -821,7 +821,7 @@ static CURLcode smtp_state_auth_digest_resp_resp(struct connectdata *conn,
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "");
 
     if(!result)
-      state(conn, SMTP_AUTH);
+      state(conn, SMTP_AUTH_FINAL);
   }
 
   return result;
@@ -898,7 +898,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(type3msg);
@@ -1209,7 +1209,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-    case SMTP_AUTH:
+    case SMTP_AUTH_FINAL:
       result = smtp_state_auth_final_resp(conn, smtpcode, smtpc->state);
       break;
 
