@@ -1233,11 +1233,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
       imapc->mailbox_uidvalidity = strdup(tmp);
     }
   }
-  else if(imapcode != 'O') {
-    failf(data, "Select failed");
-    result = CURLE_LOGIN_DENIED;
-  }
-  else {
+  else if(imapcode == 'O') {
     /* Check if the UIDVALIDITY has been specified and matches */
     if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
        strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
@@ -1250,6 +1246,10 @@ static CURLcode imap_state_select_resp(struct connectdata *conn,
 
       result = imap_fetch(conn);
     }
+  }
+  else {
+    failf(data, "Select failed");
+    result = CURLE_LOGIN_DENIED;
   }
 
   return result;
