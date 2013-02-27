@@ -257,7 +257,7 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
  * The returned string needs to be freed.
  *
  */
-static char* imap_atom(const char* str)
+static char *imap_atom(const char *str)
 {
   const char *p1;
   char *p2;
