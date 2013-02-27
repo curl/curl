@@ -1351,16 +1351,19 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
 
-  /* Read the response from the server */
-  result = Curl_pp_readresp(sock, pp, &imapcode, &nread);
-  if(result)
-    return result;
+  do {
+    /* Read the response from the server */
+    result = Curl_pp_readresp(sock, pp, &imapcode, &nread);
+    if(result)
+      return result;
 
-  /* Was there an error parsing the response line? */
-  if(imapcode == -1)
-    return CURLE_FTP_WEIRD_SERVER_REPLY;
+    /* Was there an error parsing the response line? */
+    if(imapcode == -1)
+      return CURLE_FTP_WEIRD_SERVER_REPLY;
 
-  if(imapcode) {
+    if(!imapcode)
+      break;
+
     /* We have now received a full IMAP server response */
     switch(imapc->state) {
     case IMAP_SERVERGREET:
@@ -1436,7 +1439,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       state(conn, IMAP_STOP);
       break;
     }
-  }
+  } while(!result && imapc->state != IMAP_STOP && Curl_pp_moredata(pp));
 
   return result;
 }
