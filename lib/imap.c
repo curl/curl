@@ -675,13 +675,16 @@ static CURLcode imap_select(struct connectdata *conn)
   Curl_safefree(imapc->mailbox);
   Curl_safefree(imapc->mailbox_uidvalidity);
 
+  /* Make sure the mailbox is in the correct atom format */
   mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
   if(!mailbox)
     result = CURLE_OUT_OF_MEMORY;
   else
+    /* Send the SELECT command */
     result = imap_sendf(conn, "SELECT %s", mailbox);
 
   Curl_safefree(mailbox);
+
   if(!result)
     state(conn, IMAP_SELECT);
 
@@ -697,6 +700,7 @@ static CURLcode imap_fetch(struct connectdata *conn)
   result = imap_sendf(conn, "FETCH %s BODY[%s]",
                       imap->uid ? imap->uid : "1",
                       imap->section ? imap->section : "");
+
   if(!result)
     state(conn, IMAP_FETCH);
 
