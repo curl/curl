@@ -495,7 +495,7 @@ static CURLcode imap_state_capability(struct connectdata *conn)
   if(!result)
     state(conn, IMAP_CAPABILITY);
 
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode imap_state_starttls(struct connectdata *conn)
@@ -560,7 +560,7 @@ static CURLcode imap_state_login(struct connectdata *conn)
   if(!result)
     state(conn, IMAP_LOGIN);
 
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode imap_authenticate(struct connectdata *conn)
