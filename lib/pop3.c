@@ -360,7 +360,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
-    "AUTH",
+    "AUTH_FINAL",
     "APOP",
     "USER",
     "PASS",
