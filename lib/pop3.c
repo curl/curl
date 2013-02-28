@@ -1625,7 +1625,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   return result;
 }
 
-static CURLcode pop3_setup_connection(struct connectdata * conn)
+static CURLcode pop3_setup_connection(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
