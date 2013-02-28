@@ -1271,7 +1271,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   if('*' != imapcode) {
     Curl_pgrsSetDownloadSize(data, 0);
     state(conn, IMAP_STOP);
-    return CURLE_OK;
+    return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
   }
 
   /* Something like this comes "* 1 FETCH (BODY[TEXT] {2021}\r" */
