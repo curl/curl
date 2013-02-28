@@ -492,10 +492,8 @@ static CURLcode imap_state_capability(struct connectdata *conn)
   /* Send the CAPABILITY command */
   result = imap_sendf(conn, "CAPABILITY");
 
-  if(result)
-    return result;
-
-  state(conn, IMAP_CAPABILITY);
+  if(!result)
+    state(conn, IMAP_CAPABILITY);
 
   return CURLE_OK;
 }
@@ -559,10 +557,8 @@ static CURLcode imap_state_login(struct connectdata *conn)
   Curl_safefree(user);
   Curl_safefree(passwd);
 
-  if(result)
-    return result;
-
-  state(conn, IMAP_LOGIN);
+  if(!result)
+    state(conn, IMAP_LOGIN);
 
   return CURLE_OK;
 }
@@ -686,10 +682,8 @@ static CURLcode imap_select(struct connectdata *conn)
     result = imap_sendf(conn, "SELECT %s", mailbox);
 
   Curl_safefree(mailbox);
-  if(result)
-    return result;
-
-  state(conn, IMAP_SELECT);
+  if(!result)
+    state(conn, IMAP_SELECT);
 
   return result;
 }
@@ -703,10 +697,8 @@ static CURLcode imap_fetch(struct connectdata *conn)
   result = imap_sendf(conn, "FETCH %s BODY[%s]",
                       imap->uid ? imap->uid : "1",
                       imap->section ? imap->section : "");
-  if(result)
-    return result;
-
-  state(conn, IMAP_FETCH);
+  if(!result)
+    state(conn, IMAP_FETCH);
 
   return result;
 }
