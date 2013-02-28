@@ -1610,7 +1610,6 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct IMAP *imap = conn->data->state.proto.imap;
     imap->transfer = FTPTRANSFER_INFO;
   }
 
