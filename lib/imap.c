@@ -1626,7 +1626,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   }
   else
     result = imap_select(conn);
-  
+
   if(result)
     return result;
 
