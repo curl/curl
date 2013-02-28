@@ -1337,6 +1337,26 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   return result;
 }
 
+/* For the final response to the FETCH command */
+static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
+                                            int imapcode,
+                                            imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+
+  (void)instate; /* No use for this yet */
+
+  if('O' != imapcode)
+    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
+  else
+    result = CURLE_OK;
+
+  /* End of do phase */
+  state(conn, IMAP_STOP);
+
+  return result;
+}
+
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1433,6 +1453,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_FETCH:
       result = imap_state_fetch_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_FETCH_FINAL:
+      result = imap_state_fetch_final_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
@@ -1577,6 +1601,18 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   if(status) {
     conn->bits.close = TRUE; /* marked for closure */
     result = status;         /* use the already set error code */
+  }
+  else if(!data->set.connect_only) {
+    state(conn, IMAP_FETCH_FINAL);
+
+    /* Run the state-machine
+
+       TODO: when the multi interface is used, this _really_ should be using
+       the imap_multi_statemach function but we have no general support for
+       non-blocking DONE operations, not in the multi state machine and with
+       Curl_done() invokes on several places in the code!
+    */
+    result = imap_block_statemach(conn);
   }
 
   /* Cleanup our per-request based variables */
