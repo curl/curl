@@ -313,7 +313,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
-    "AUTH",
+    "AUTH_FINAL",
     "MAIL",
     "RCPT",
     "DATA",
