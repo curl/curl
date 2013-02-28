@@ -467,6 +467,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "LOGIN",
     "SELECT",
     "FETCH",
+    "FETCH_FINAL",
     "LOGOUT",
     /* LAST */
   };
