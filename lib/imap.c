@@ -1214,8 +1214,7 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
 }
 
 /* For SELECT responses */
-static CURLcode imap_state_select_resp(struct connectdata *conn,
-                                       int imapcode,
+static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -1987,7 +1986,7 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
   return result;
 }
 
-static CURLcode imap_setup_connection(struct connectdata * conn)
+static CURLcode imap_setup_connection(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
