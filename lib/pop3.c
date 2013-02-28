@@ -1134,7 +1134,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
     pp->cache_size = 0;
   }
 
-  /* End of do phase */
+  /* End of DO phase */
   state(conn, POP3_STOP);
 
   return result;
