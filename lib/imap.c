@@ -706,14 +706,6 @@ static CURLcode imap_fetch(struct connectdata *conn)
   if(result)
     return result;
 
-  /*
-   * When issued, the server will respond with a single line similar to
-   * '* 1 FETCH (BODY[TEXT] {2021}'
-   *
-   * Identifying the fetch and how many bytes of contents we can expect. We
-   * must extract that number before continuing to "download as usual".
-   */
-
   state(conn, IMAP_FETCH);
 
   return result;
@@ -1255,7 +1247,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
   return result;
 }
 
-/* For the (first line of) FETCH BODY[TEXT] response */
+/* For the (first line of the) FETCH response */
 static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
                                       imapstate instate)
 {
@@ -1273,7 +1265,8 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
   }
 
-  /* Something like this comes "* 1 FETCH (BODY[TEXT] {2021}\r" */
+  /* Something like this is received "* 1 FETCH (BODY[TEXT] {2021}\r" so parse
+     the continuation data contained within the curly brackets */
   while(*ptr && (*ptr != '{'))
     ptr++;
 
@@ -1291,7 +1284,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       size_t chunk = pp->cache_size;
 
       if(chunk > (size_t)size)
-        /* the conversion from curl_off_t to size_t is always fine here */
+        /* The conversion from curl_off_t to size_t is always fine here */
         chunk = (size_t)size;
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, pp->cache, chunk);
@@ -1300,25 +1293,26 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
       size -= chunk;
 
-      /* we've now used parts of or the entire cache */
+      infof(data, "Written %" FORMAT_OFF_TU " bytes, %" FORMAT_OFF_TU
+            " bytes are left for transfer\n", (curl_off_t)chunk, size);
+
+      /* Have we used the entire cache or just part of it?*/
       if(pp->cache_size > chunk) {
-        /* part of, move the trailing data to the start and reduce the size */
-        memmove(pp->cache, pp->cache + chunk,
-                pp->cache_size - chunk);
+        /* Only part of it so shrink the cache to fit the trailing data */
+        memmove(pp->cache, pp->cache + chunk, pp->cache_size - chunk);
         pp->cache_size -= chunk;
       }
       else {
-        /* cache is drained */
+        /* Free the cache */
         Curl_safefree(pp->cache);
-        pp->cache = NULL;
+
+        /* Reset the cache size */
         pp->cache_size = 0;
       }
     }
 
-    infof(data, "Size left: %" FORMAT_OFF_T "\n", size);
-
     if(!size)
-      /* the entire data is already transferred! */
+      /* The entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else
       /* IMAP download */
@@ -1330,7 +1324,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     /* We don't know how to parse this line */
     result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
 
-  /* End of do phase */
+  /* End of DO phase */
   state(conn, IMAP_STOP);
 
   return result;
@@ -1350,7 +1344,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   else
     result = CURLE_OK;
 
-  /* End of do phase */
+  /* End of DONE phase */
   state(conn, IMAP_STOP);
 
   return result;
