@@ -463,7 +463,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "AUTHENTICATE_DIGESTMD5_RESP",
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
-    "AUTHENTICATE",
+    "AUTHENTICATE_FINAL",
     "LOGIN",
     "SELECT",
     "FETCH",
