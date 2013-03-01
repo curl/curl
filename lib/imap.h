@@ -48,6 +48,8 @@ typedef enum {
   IMAP_SELECT,
   IMAP_FETCH,
   IMAP_FETCH_FINAL,
+  IMAP_APPEND,
+  IMAP_APPEND_FINAL,
   IMAP_LOGOUT,
   IMAP_LAST          /* never used */
 } imapstate;
