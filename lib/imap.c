@@ -1410,6 +1410,26 @@ static CURLcode imap_state_append_resp(struct connectdata *conn,
   }
 }
 
+/* For final APPEND responses performed after the upload */
+static CURLcode imap_state_append_final_resp(struct connectdata *conn,
+                                             int imapcode,
+                                             imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+
+  (void)instate; /* No use for this yet */
+
+  /* Final response, stop and return the final status */
+  if(imapcode == 'O')
+    result = CURLE_OK;
+  else
+    result = CURLE_UPLOAD_FAILED;
+
+  state(conn, IMAP_STOP);
+
+  return result;
+}
+
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1514,6 +1534,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND:
       result = imap_state_append_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_APPEND_FINAL:
+      result = imap_state_append_final_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
@@ -1660,7 +1684,15 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only) {
-    state(conn, IMAP_FETCH_FINAL);
+    /* Handle responses after FETCH or APPEND transfer has finished */
+    if(!data->set.upload)
+      state(conn, IMAP_FETCH_FINAL);
+    else {
+      /* End the APPEND command first by sending an empty line */
+      result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+      if(!result)
+        state(conn, IMAP_APPEND_FINAL);
+    }
 
     /* Run the state-machine
 
@@ -1669,7 +1701,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
-    result = imap_block_statemach(conn);
+    if(!result)
+      result = imap_block_statemach(conn);
   }
 
   /* Cleanup our per-request based variables */
