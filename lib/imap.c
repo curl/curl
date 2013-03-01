@@ -428,6 +428,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_AUTHENTICATE_NTLM:
       case IMAP_AUTHENTICATE_NTLM_TYPE2MSG:
       case IMAP_AUTHENTICATE_FINAL:
+      case IMAP_APPEND:
         *resp = '+';
         break;
 
@@ -1358,6 +1359,57 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   return result;
 }
 
+static CURLcode imap_append(struct connectdata *conn)
+{
+  CURLcode result;
+  struct IMAP *imap = conn->data->state.proto.imap;
+  char *mailbox;
+
+  if(conn->data->set.infilesize < 0) {
+    failf(conn->data, "Cannot APPEND with unknown input file size\n");
+    return CURLE_UPLOAD_FAILED;
+  }
+
+  mailbox = imap_atom(imap->mailbox);
+
+  if(!mailbox)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = imap_sendf(conn, "APPEND %s (\\Seen) {%" FORMAT_OFF_T "}",
+                      mailbox, conn->data->set.infilesize);
+
+  Curl_safefree(mailbox);
+
+  if(!result)
+    state(conn, IMAP_APPEND);
+
+  return result;
+}
+
+/* For APPEND responses */
+static CURLcode imap_state_append_resp(struct connectdata *conn,
+                                       int imapcode,
+                                       imapstate instate)
+{
+  struct SessionHandle *data = conn->data;
+
+  (void)instate; /* No use for this yet */
+
+  if(imapcode == '+') {
+    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* No download */
+                        FIRSTSOCKET, NULL);
+
+    /* Stop now and let the core go from DO to PERFORM phase */
+    state(conn, IMAP_STOP);
+    return CURLE_OK;
+  }
+  else {
+    state(conn, IMAP_STOP);
+    return CURLE_UPLOAD_FAILED;
+  }
+}
+
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1458,6 +1510,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_FETCH_FINAL:
       result = imap_state_fetch_final_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_APPEND:
+      result = imap_state_append_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
