@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_FTP) || \
   !defined(CURL_DISABLE_POP3) || !defined(CURL_DISABLE_SMTP)
@@ -64,23 +64,17 @@ struct pingpong {
 
   CURLcode (*statemach_act)(struct connectdata *conn);
 
-  int (*endofresp)(struct pingpong *pp, int *code);
+  bool (*endofresp)(struct connectdata *conn, char *ptr, size_t len,
+                    int *code);
 };
 
 /*
- * Curl_pp_multi_statemach()
+ * Curl_pp_statemach()
  *
- * called repeatedly until done when the multi interface is used.
+ * called repeatedly until done. Set 'wait' to make it wait a while on the
+ * socket if there's no traffic.
  */
-CURLcode Curl_pp_multi_statemach(struct pingpong *pp);
-
-/*
- * Curl_pp_easy_statemach()
- *
- * called repeatedly until done when the easy interface is used.
- */
-CURLcode Curl_pp_easy_statemach(struct pingpong *pp);
-
+CURLcode Curl_pp_statemach(struct pingpong *pp, bool block);
 
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp);

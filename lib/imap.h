@@ -1,5 +1,5 @@
-#ifndef __IMAP_H
-#define __IMAP_H
+#ifndef HEADER_CURL_IMAP_H
+#define HEADER_CURL_IMAP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,31 +28,46 @@
  * IMAP unique setup
  ***************************************************************************/
 typedef enum {
-  IMAP_STOP,    /* do nothing state, stops the state machine */
-  IMAP_SERVERGREET, /* waiting for the initial greeting immediately after
-                       a connect */
-  IMAP_LOGIN,
+  IMAP_STOP,         /* do nothing state, stops the state machine */
+  IMAP_SERVERGREET,  /* waiting for the initial greeting immediately after
+                        a connect */
+  IMAP_CAPABILITY,
   IMAP_STARTTLS,
-  IMAP_UPGRADETLS, /* asynchronously upgrade the connection to SSL/TLS
-                      (multi mode only) */
+  IMAP_UPGRADETLS,   /* asynchronously upgrade the connection to SSL/TLS
+                       (multi mode only) */
+  IMAP_AUTHENTICATE_PLAIN,
+  IMAP_AUTHENTICATE_LOGIN,
+  IMAP_AUTHENTICATE_LOGIN_PASSWD,
+  IMAP_AUTHENTICATE_CRAMMD5,
+  IMAP_AUTHENTICATE_DIGESTMD5,
+  IMAP_AUTHENTICATE_DIGESTMD5_RESP,
+  IMAP_AUTHENTICATE_NTLM,
+  IMAP_AUTHENTICATE_NTLM_TYPE2MSG,
+  IMAP_AUTHENTICATE,
+  IMAP_LOGIN,
   IMAP_SELECT,
   IMAP_FETCH,
   IMAP_LOGOUT,
-  IMAP_LAST  /* never used */
+  IMAP_LAST          /* never used */
 } imapstate;
 
 /* imap_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct imap_conn {
   struct pingpong pp;
-  char *mailbox;     /* what to FETCH */
-  imapstate state; /* always use imap.c:state() to change state! */
-  int cmdid;       /* id number/index */
-  const char *idstr; /* pointer to a string for which to wait for as id */
-  bool ssldone;      /* connect() over SSL? only relevant in multi mode */
+  char *mailbox;          /* Mailbox to select */
+  unsigned int authmechs; /* Accepted authentication mechanisms */
+  unsigned int authused;  /* Auth mechanism used for the connection */
+  imapstate state;        /* Always use imap.c:state() to change state! */
+  int cmdid;              /* Last used command ID */
+  char resptag[5];        /* Response tag to wait for */
+  bool ssldone;           /* Is connect() over SSL done? */
+  bool tls_supported;     /* StartTLS capability supported by server */
+  bool login_disabled;    /* LOGIN command explicitly disabled by server */
+  bool ir_supported;      /* Initial response supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_imap;
 extern const struct Curl_handler Curl_handler_imaps;
 
-#endif /* __IMAP_H */
+#endif /* HEADER_CURL_IMAP_H */

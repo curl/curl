@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012-2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,11 +20,12 @@
  *
  * RFC2195 CRAM-MD5 authentication
  * RFC2831 DIGEST-MD5 authentication
+ * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -282,6 +283,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(result)
     return result;
 
+  if(!chlg)
+    return CURLE_LOGIN_DENIED;
+
   /* Retrieve nonce string from the challenge */
   if(!sasl_digest_get_key_value(chlg, "nonce=\"", nonce,
                                 sizeof(nonce), '\"')) {
@@ -345,9 +349,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Prepare the URL string */
-  strcpy(uri, service);
-  strcat(uri, "/");
-  strcat(uri, realm);
+  snprintf(uri, sizeof(uri), "%s/%s", service, realm);
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -391,20 +393,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
-  strcpy(response, "username=\"");
-  strcat(response, userp);
-  strcat(response, "\",realm=\"");
-  strcat(response, realm);
-  strcat(response, "\",nonce=\"");
-  strcat(response, nonce);
-  strcat(response, "\",cnonce=\"");
-  strcat(response, cnonce);
-  strcat(response, "\",nc=");
-  strcat(response, nonceCount);
-  strcat(response, ",digest-uri=\"");
-  strcat(response, uri);
-  strcat(response, "\",response=");
-  strcat(response, resp_hash_hex);
+  snprintf(response, sizeof(response),
+           "username=\"%s\",realm=\"%s\",nonce=\"%s\","
+           "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s",
+           userp, realm, nonce,
+           cnonce, nonceCount, uri, resp_hash_hex);
 
   /* Base64 encode the reply */
   return Curl_base64_encode(data, response, 0, outptr, outlen);

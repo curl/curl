@@ -1,5 +1,5 @@
-#ifndef __SMTP_H
-#define __SMTP_H
+#ifndef HEADER_CURL_SMTP_H
+#define HEADER_CURL_SMTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ typedef enum {
                        (multi mode only) */
   SMTP_AUTH_PLAIN,
   SMTP_AUTH_LOGIN,
-  SMTP_AUTH_PASSWD,
+  SMTP_AUTH_LOGIN_PASSWD,
   SMTP_AUTH_CRAMMD5,
   SMTP_AUTH_DIGESTMD5,
   SMTP_AUTH_DIGESTMD5_RESP,
@@ -64,8 +64,8 @@ struct smtp_conn {
   unsigned int authused;   /* Auth mechanism used for the connection */
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   struct curl_slist *rcpt; /* Recipient list */
-  bool ssldone;            /* Is connect() over SSL done? only relevant in
-                              multi mode */
+  bool ssldone;            /* Is connect() over SSL done? */
+  bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
 };
@@ -84,4 +84,4 @@ extern const struct Curl_handler Curl_handler_smtps;
 
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread);
 
-#endif /* __SMTP_H */
+#endif /* HEADER_CURL_SMTP_H */

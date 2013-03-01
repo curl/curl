@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,6 +47,13 @@
 #include "getpart.h"
 #include "util.h"
 #include "timeval.h"
+
+#ifdef USE_WINSOCK
+#undef  EINTR
+#define EINTR    4 /* errno.h value */
+#undef  EINVAL
+#define EINVAL  22 /* errno.h value */
+#endif
 
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
@@ -118,7 +125,7 @@ void logmsg(const char *msg, ...)
     fclose(logfp);
   }
   else {
-    error = ERRNO;
+    error = errno;
     fprintf(stderr, "fopen() failed with error: %d %s\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", serverlogfile);
@@ -208,7 +215,7 @@ int wait_ms(int timeout_ms)
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    SET_SOCKERRNO(EINVAL);
+    errno = EINVAL;
     return -1;
   }
 #if defined(MSDOS)
@@ -228,7 +235,7 @@ int wait_ms(int timeout_ms)
 #endif /* HAVE_POLL_FINE */
     if(r != -1)
       break;
-    error = SOCKERRNO;
+    error = errno;
     if(error && (error != EINTR))
       break;
     pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv);
@@ -249,7 +256,7 @@ int write_pidfile(const char *filename)
   pid = (long)getpid();
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
-    logmsg("Couldn't write pid file: %s %s", filename, strerror(ERRNO));
+    logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
   fprintf(pidfile, "%ld\n", pid);
@@ -266,7 +273,7 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     lockfile = fopen(filename, "wb");
-  } while((lockfile == NULL) && ((error = ERRNO) == EINTR));
+  } while((lockfile == NULL) && ((error = errno) == EINTR));
   if(lockfile == NULL) {
     logmsg("Error creating lock file %s error: %d %s",
            filename, error, strerror(error));
@@ -275,7 +282,7 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     res = fclose(lockfile);
-  } while(res && ((error = ERRNO) == EINTR));
+  } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error closing lock file %s error: %d %s",
            filename, error, strerror(error));
@@ -294,7 +301,7 @@ void clear_advisor_read_lock(const char *filename)
 
   do {
     res = unlink(filename);
-  } while(res && ((error = ERRNO) == EINTR));
+  } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error removing lock file %s error: %d %s",
            filename, error, strerror(error));

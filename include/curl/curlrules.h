@@ -190,7 +190,7 @@ typedef char
  * CURL_ISOCPP and CURL_OFF_T_C definitions are done here in order to allow
  * these to be visible and exported by the external libcurl interface API,
  * while also making them visible to the library internals, simply including
- * setup.h, without actually needing to include curl.h internally.
+ * curl_setup.h, without actually needing to include curl.h internally.
  * If some day this section would grow big enough, all this should be moved
  * to its own header file.
  */

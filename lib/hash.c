@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include "hash.h"
 #include "llist.h"
@@ -208,12 +208,15 @@ Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
 {
   struct curl_llist_element *le;
   struct curl_hash_element  *he;
-  struct curl_llist *l = FETCH_LIST(h, key, key_len);
+  struct curl_llist *l;
 
-  for(le = l->head; le; le = le->next) {
-    he = le->ptr;
-    if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      return he->ptr;
+  if(h) {
+    l = FETCH_LIST(h, key, key_len);
+    for(le = l->head; le; le = le->next) {
+      he = le->ptr;
+      if(h->comp_func(he->key, he->key_len, key, key_len)) {
+        return he->ptr;
+      }
     }
   }
 
@@ -249,8 +252,7 @@ Curl_hash_clean(struct curl_hash *h)
     h->table[i] = NULL;
   }
 
-  free(h->table);
-  h->table = NULL;
+  Curl_safefree(h->table);
   h->size = 0;
   h->slots = 0;
 }

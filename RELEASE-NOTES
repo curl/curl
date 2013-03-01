@@ -1,19 +1,28 @@
-Curl and libcurl 7.28.2
+Curl and libcurl 7.29.1
 
- Public curl releases:         131
+ Public curl releases:         132
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
- Known libcurl bindings:       39
- Contributors:                 993
+ Known libcurl bindings:       42
+ Contributors:                 1005
 
 This release includes the following changes:
 
- o 
+ o imap: Changed response tag generation to be completely unique
+ o imap: Added support for SASL-IR extension
+ o darwinssl: Make certificate errors less techy
+ o imap/pop3/smtp: Added support for the STARTTLS capability
 
 This release includes the following bugfixes:
 
- o nss: prevent NSS from crashing on client auth hook failure
+ o darwinssl: Fix build under Leopard
+ o DONE: consider callback-aborted transfers premature [1]
+ o ntlm: fix memory leak
+ o smtp: Fixed an issue when processing EHLO failure responses
+ o pop3: Fixed incorrect return value from pop3_endofresp()
+ o pop3: Fixed SASL authentication capability detection
+ o 
 
 This release includes the following known bugs:
 
@@ -22,10 +31,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Kamil Dudka, Steve Holme, Nick Zitzmann, Patricia Muscalu, Dan Fandrich,
+ Gisle Vanem, Guenter Knauf
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- 
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1184
+ [2] = 

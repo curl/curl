@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 
 /* This file is for lib internal stuff */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #define PORT_FTP 21
 #define PORT_FTPS 990
@@ -107,9 +107,15 @@
 #endif
 
 #ifdef USE_POLARSSL
-#include <polarssl/havege.h>
 #include <polarssl/ssl.h>
-#endif
+#include <polarssl/version.h>
+#if POLARSSL_VERSION_NUMBER<0x01010000
+#include <polarssl/havege.h>
+#else
+#include <polarssl/entropy.h>
+#include <polarssl/ctr_drbg.h>
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+#endif /* USE_POLARSSL */
 
 #ifdef USE_CYASSL
 #undef OCSP_REQUEST  /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
@@ -282,7 +288,13 @@ struct ssl_connect_data {
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_POLARSSL
+#if POLARSSL_VERSION_NUMBER<0x01010000
   havege_state hs;
+#else
+  /* from v1.1.0, use ctr_drbg and entropy */
+  ctr_drbg_context ctr_drbg;
+  entropy_context entropy;
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_context ssl;
   ssl_session ssn;
   int server_fd;
@@ -326,6 +338,7 @@ struct ssl_connect_data {
   curl_socket_t ssl_sockfd;
   ssl_connect_state connecting_state;
   bool ssl_direction; /* true if writing, false if reading */
+  size_t ssl_write_buffered_length;
 #endif /* USE_DARWINSSL */
 };
 
@@ -1147,14 +1160,14 @@ struct auth {
 };
 
 struct UrlState {
-  enum {
-    Curl_if_none,
-    Curl_if_easy,
-    Curl_if_multi
-  } used_interface;
 
   /* Points to the connection cache */
   struct conncache *conn_cache;
+
+  /* when curl_easy_perform() is called, the multi handle is "owned" by
+     the easy handle so curl_easy_cleanup() on such an easy handle will
+     also close the multi handle! */
+  bool multi_owned_by_easy;
 
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
@@ -1588,7 +1601,6 @@ struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_PRIVATE, /* points to our own */
     HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
@@ -1608,7 +1620,11 @@ struct Names {
 struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
-                                  struct to which this "belongs" */
+                                  struct to which this "belongs" when used by
+                                  the multi interface */
+  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
+                                    struct to which this "belongs" when used
+                                    by the easy interface */
   struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
                                       in multi controlling structure to assist
                                       in removal. */

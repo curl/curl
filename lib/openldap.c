@@ -6,7 +6,7 @@
  *                 \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
 
@@ -192,6 +192,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   struct SessionHandle *data=conn->data;
   int rc, proto = LDAP_VERSION3;
   char hosturl[1024], *ptr;
+  (void)done;
 
   strcpy(hosturl, "ldap");
   ptr = hosturl+4;
@@ -212,22 +213,11 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode res;
-    if(data->state.used_interface == Curl_if_easy) {
-      res = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if(res)
-        return res;
-      li->ssldone = TRUE;
-    }
-    else {
-      res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
-      if(res)
-        return res;
-    }
+    res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
+    if(res)
+      return res;
   }
 #endif
-
-  if(data->state.used_interface == Curl_if_easy)
-    return ldap_connecting(conn, done);
 
   return CURLE_OK;
 }
@@ -262,10 +252,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   }
 #endif
 
-  if(data->state.used_interface == Curl_if_easy)
-    tvp = NULL;    /* let ldap_result block indefinitely */
-  else
-    tvp = &tv;
+  tvp = &tv;
 
 retry:
   if(!li->didbind) {

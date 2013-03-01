@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,8 +33,8 @@ typedef enum {
   CURLWC_CLEAN, /* deallocate resources and reset settings */
   CURLWC_SKIP,  /* skip over concrete file */
   CURLWC_ERROR, /* error cases */
-  CURLWC_DONE   /* if is wildcard->state == CURLWC_DONE wildcard loop in
-                   Curl_perform() will end */
+  CURLWC_DONE   /* if is wildcard->state == CURLWC_DONE wildcard loop
+                   will end */
 } curl_wildcard_states;
 
 typedef void (*curl_wildcard_tmp_dtor)(void *ptr);

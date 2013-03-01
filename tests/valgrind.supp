@@ -1,0 +1,16 @@
+{
+   libidn-idna_to_ascii-error
+   Memcheck:Addr4
+   fun:idna_to_ascii_4z
+   fun:idna_to_ascii_8z
+   fun:idna_to_ascii_lz
+   fun:fix_hostname
+   fun:resolve_server
+   fun:create_conn
+   fun:Curl_connect
+   fun:multi_runsingle
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:operate
+   fun:main
+}

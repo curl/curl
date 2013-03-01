@@ -1,5 +1,5 @@
-#ifndef __HTTP_CHUNKS_H
-#define __HTTP_CHUNKS_H
+#ifndef HEADER_CURL_HTTP_CHUNKS_H
+#define HEADER_CURL_HTTP_CHUNKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -104,4 +104,5 @@ struct Curl_chunker {
   size_t dataleft; /* untouched data amount at the end of the last buffer */
 };
 
-#endif
+#endif /* HEADER_CURL_HTTP_CHUNKS_H */
+

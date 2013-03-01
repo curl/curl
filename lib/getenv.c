@@ -20,11 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
-
-#ifdef __VMS
-#include <unixlib.h>
-#endif
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 #include "curl_memory.h"
@@ -46,10 +42,6 @@ char *GetEnv(const char *variable)
   return (env[0] != '\0')?strdup(env):NULL;
 #else
   char *env = getenv(variable);
-#ifdef __VMS
-  if(env && strcmp("HOME",variable) == 0)
-    env = decc_translate_vms(env);
-#endif
   return (env && env[0])?strdup(env):NULL;
 #endif
 #endif

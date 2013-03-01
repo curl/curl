@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -385,40 +385,46 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   return ret;
 }
 
-#ifdef CURL_MULTIEASY
-/***************************************************************************
- * This function is still only for testing purposes. It makes a great way
- * to run the full test suite on the multi interface instead of the easy one.
- ***************************************************************************
+/*
+ * curl_easy_perform() is the external interface that performs a blocking
+ * transfer as previously setup.
  *
- * The *new* curl_easy_perform() is the external interface that performs a
- * transfer previously setup.
- *
- * Wrapper-function that: creates a multi handle, adds the easy handle to it,
+ * CONCEPT: This function creates a multi handle, adds the easy handle to it,
  * runs curl_multi_perform() until the transfer is done, then detaches the
  * easy handle, destroys the multi handle and returns the easy handle's return
- * code. This will make everything internally use and assume multi interface.
+ * code.
+ *
+ * REALITY: it can't just create and destroy the multi handle that easily. It
+ * needs to keep it around since if this easy handle is used again by this
+ * function, the same multi handle must be re-used so that the same pools and
+ * caches can be used.
  */
 CURLcode curl_easy_perform(CURL *easy)
 {
   CURLM *multi;
   CURLMcode mcode;
   CURLcode code = CURLE_OK;
-  int still_running;
-  struct timeval timeout;
-  int rc;
   CURLMsg *msg;
-  fd_set fdread;
-  fd_set fdwrite;
-  fd_set fdexcep;
-  int maxfd;
+  bool done = FALSE;
+  int rc;
+  struct SessionHandle *data = easy;
 
   if(!easy)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  multi = curl_multi_init();
-  if(!multi)
-    return CURLE_OUT_OF_MEMORY;
+  if(data->multi) {
+    failf(data, "easy handled already used in multi handle");
+    return CURLE_FAILED_INIT;
+  }
+
+  if(data->multi_easy)
+    multi = data->multi_easy;
+  else {
+    multi = curl_multi_init();
+    if(!multi)
+      return CURLE_OUT_OF_MEMORY;
+    data->multi_easy = multi;
+  }
 
   mcode = curl_multi_add_handle(multi, easy);
   if(mcode) {
@@ -429,108 +435,35 @@ CURLcode curl_easy_perform(CURL *easy)
       return CURLE_FAILED_INIT;
   }
 
-  /* we start some action by calling perform right away */
+  /* assign this after curl_multi_add_handle() since that function checks for
+     it and rejects this handle otherwise */
+  data->multi = multi;
 
-  do {
-    while(CURLM_CALL_MULTI_PERFORM ==
-          curl_multi_perform(multi, &still_running));
+  while(!done && !mcode) {
+    int still_running;
 
-    if(!still_running)
-      break;
+    mcode = curl_multi_wait(multi, NULL, 0, 1000, NULL);
 
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
+    if(mcode == CURLM_OK)
+      mcode = curl_multi_perform(multi, &still_running);
 
-    /* timeout once per second */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    /* only read 'still_running' if curl_multi_perform() return OK */
+    if((mcode == CURLM_OK) && !still_running) {
+      msg = curl_multi_info_read(multi, &rc);
+      if(msg) {
+        code = msg->data.result;
+        done = TRUE;
+      }
+    }
+  }
 
-    /* Old deprecated style: get file descriptors from the transfers */
-    curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
-    rc = Curl_select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+  /* ignoring the return code isn't nice, but atm we can't really handle
+     a failure here, room for future improvement! */
+  (void)curl_multi_remove_handle(multi, easy);
 
-    /* The way is to extract the sockets and wait for them without using
-       select. This whole alternative version should probably rather use the
-       curl_multi_socket() approach. */
-
-    if(rc == -1)
-      /* select error */
-      break;
-
-    /* timeout or data to send/receive => loop! */
-  } while(still_running);
-
-  msg = curl_multi_info_read(multi, &rc);
-  if(msg)
-    code = msg->data.result;
-
-  mcode = curl_multi_remove_handle(multi, easy);
-  /* what to do if it fails? */
-
-  mcode = curl_multi_cleanup(multi);
-  /* what to do if it fails? */
-
+  /* The multi handle is kept alive, owned by the easy handle */
   return code;
 }
-#else
-/*
- * curl_easy_perform() is the external interface that performs a transfer
- * previously setup.
- */
-CURLcode curl_easy_perform(CURL *curl)
-{
-  struct SessionHandle *data = (struct SessionHandle *)curl;
-
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(! (data->share && data->share->hostcache)) {
-    /* this handle is not using a shared dns cache */
-
-    if(data->set.global_dns_cache &&
-       (data->dns.hostcachetype != HCACHE_GLOBAL)) {
-      /* global dns cache was requested but still isn't */
-      struct curl_hash *ptr;
-
-      if(data->dns.hostcachetype == HCACHE_PRIVATE) {
-        /* if the current cache is private, kill it first */
-        Curl_hash_destroy(data->dns.hostcache);
-        data->dns.hostcachetype = HCACHE_NONE;
-        data->dns.hostcache = NULL;
-      }
-
-      ptr = Curl_global_host_cache_init();
-      if(ptr) {
-        /* only do this if the global cache init works */
-        data->dns.hostcache = ptr;
-        data->dns.hostcachetype = HCACHE_GLOBAL;
-      }
-    }
-
-    if(!data->dns.hostcache) {
-      data->dns.hostcachetype = HCACHE_PRIVATE;
-      data->dns.hostcache = Curl_mk_dnscache();
-
-      if(!data->dns.hostcache)
-        /* While we possibly could survive and do good without a host cache,
-           the fact that creating it failed indicates that things are truly
-           screwed up and we should bail out! */
-        return CURLE_OUT_OF_MEMORY;
-    }
-
-  }
-
-  if(!data->state.conn_cache) {
-    /* Oops, no connection cache, create one */
-    data->state.conn_cache = Curl_conncache_init(CONNCACHE_PRIVATE);
-    if(!data->state.conn_cache)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  return Curl_perform(data);
-}
-#endif
 
 /*
  * curl_easy_cleanup() is the external interface to cleaning/freeing the given
@@ -553,10 +486,6 @@ void Curl_easy_addmulti(struct SessionHandle *data,
                         void *multi)
 {
   data->multi = multi;
-  if(multi == NULL)
-    /* the association is cleared, mark the easy handle as not used by an
-       interface */
-    data->state.used_interface = Curl_if_none;
 }
 
 void Curl_easy_initHandleData(struct SessionHandle *data)

@@ -22,7 +22,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 

@@ -1,5 +1,5 @@
-#ifndef __INET_NTOP_H
-#define __INET_NTOP_H
+#ifndef HEADER_CURL_INET_NTOP_H
+#define HEADER_CURL_INET_NTOP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 
@@ -34,4 +34,5 @@ char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
         inet_ntop(af,addr,buf,(curl_socklen_t)size)
 #endif
 
-#endif /* __INET_NTOP_H */
+#endif /* HEADER_CURL_INET_NTOP_H */
+

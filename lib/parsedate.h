@@ -1,5 +1,5 @@
-#ifndef __CURL_PARSEDATE_H
-#define __CURL_PARSEDATE_H
+#ifndef HEADER_CURL_PARSEDATE_H
+#define HEADER_CURL_PARSEDATE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -27,4 +27,5 @@ extern const char * const Curl_month[12];
 
 CURLcode Curl_gmtime(time_t intime, struct tm *store);
 
-#endif
+#endif /* HEADER_CURL_PARSEDATE_H */
+

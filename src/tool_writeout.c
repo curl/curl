@@ -54,6 +54,10 @@ typedef enum {
   VAR_REDIRECT_URL,
   VAR_SSL_VERIFY_RESULT,
   VAR_EFFECTIVE_FILENAME,
+  VAR_PRIMARY_IP,
+  VAR_PRIMARY_PORT,
+  VAR_LOCAL_IP,
+  VAR_LOCAL_PORT,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -88,6 +92,10 @@ static const struct variable replacements[]={
   {"redirect_url", VAR_REDIRECT_URL},
   {"ssl_verify_result", VAR_SSL_VERIFY_RESULT},
   {"filename_effective", VAR_EFFECTIVE_FILENAME},
+  {"remote_ip", VAR_PRIMARY_IP},
+  {"remote_port", VAR_PRIMARY_PORT},
+  {"local_ip", VAR_LOCAL_IP},
+  {"local_port", VAR_LOCAL_PORT},
   {NULL, VAR_NONE}
 };
 
@@ -246,6 +254,30 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_EFFECTIVE_FILENAME:
                 if(outs->filename)
                   fprintf(stream, "%s", outs->filename);
+                break;
+              case VAR_PRIMARY_IP:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP,
+                                     &stringp))
+                  fprintf(stream, "%s", stringp);
+                break;
+              case VAR_PRIMARY_PORT:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT,
+                                     &longinfo))
+                  fprintf(stream, "%ld", longinfo);
+                break;
+              case VAR_LOCAL_IP:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_LOCAL_IP,
+                                     &stringp))
+                  fprintf(stream, "%s", stringp);
+                break;
+              case VAR_LOCAL_PORT:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT,
+                                     &longinfo))
+                  fprintf(stream, "%ld", longinfo);
                 break;
               default:
                 break;

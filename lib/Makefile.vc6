@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -62,14 +62,14 @@
 # Makefile.msvc.names provides libcurl file names
 # ------------------------------------------------
 
-!INCLUDE ..\Makefile.msvc.names
+!INCLUDE ..\winbuild\Makefile.msvc.names
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8x
+OPENSSL_PATH   = ../../openssl-0.9.8y
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
-LIBSSH2_PATH   = ../../libssh2-1.4.2
+LIBSSH2_PATH   = ../../libssh2-1.4.3
 !ENDIF
 
 !IFNDEF ZLIB_PATH

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -374,8 +374,13 @@ clean:
 !include CURL_OBJS.inc
 !include LIBCURL_OBJS.inc
 
+!IF "$(AS_DLL)" == "true"
+LIB_OBJS = $(LIBCURL_OBJS) $(RESOURCE)
+!ELSE
 LIB_OBJS = $(LIBCURL_OBJS)
-EXE_OBJS = $(CURL_OBJS)
+!ENDIF
+
+EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
 
 all : $(TARGET) $(PROGRAM_NAME)
 
@@ -454,7 +459,7 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 !ENDIF
 !ENDIF
 
-CURL_FROM_LIBCURL=$(CURL_DIROBJ)\hugehelp.obj \
+CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\rawstr.obj \
  $(CURL_DIROBJ)\strtoofft.obj
@@ -466,8 +471,8 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 {$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
 	$(CC) $(CURL_CFLAGS) /Fo"$@"  $<
 
-$(CURL_DIROBJ)\hugehelp.obj: $(CURL_SRC_DIR)\hugehelp.c
-	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\hugehelp.c
+$(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
+	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
 $(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
 $(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c

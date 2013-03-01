@@ -1,0 +1,8 @@
+Note:
+
+Files located in subdirectory 'vs/t' and below are 'templates' used for
+the generation of msvc IDE workspace and project files, distributed in
+subdirectories 'vs/vc6' and 'vs/vc8'.
+
+All these template files use UNIX line endings intentionally, in order
+to allow proper file generation. Don't convert these to crlf line-ends.

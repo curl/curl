@@ -78,7 +78,7 @@ ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.7
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.4.2
+LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.4.3
 !endif
 
 !ifdef %librtmp_root
@@ -90,7 +90,7 @@ LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8x
+OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8y
 !endif
 
 !ifdef %ares_root
@@ -132,7 +132,7 @@ OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
 
 RESOURCE = $(OBJ_DIR)$(DS)curl.res
 
-all: hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
+all: tool_hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
 	@echo Welcome to cURL
 
 clean: .SYMBOLIC
@@ -141,13 +141,13 @@ clean: .SYMBOLIC
 
 vclean distclean: clean .SYMBOLIC
 	-$(RD) $(OBJ_DIR)
-	-$(RM) curl.exe curl.map curl.sym hugehelp.c
+	-$(RM) curl.exe curl.map curl.sym tool_hugehelp.c
 
-hugehelp.c: hugehelp.c.cvs
+tool_hugehelp.c: tool_hugehelp.c.cvs
 	$(CP) $[@ $^@
 
-hugehelp.c.cvs: .EXISTSONLY
-	$(CP) hugehelp.c $^@
+tool_hugehelp.c.cvs: .EXISTSONLY
+	$(CP) tool_hugehelp.c $^@
 
 $(OBJ_DIR):
 	-$(MD) $^@

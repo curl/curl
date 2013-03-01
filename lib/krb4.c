@@ -39,7 +39,7 @@
  *
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_KRB4

@@ -1,5 +1,5 @@
-#ifndef __KRB4_H
-#define __KRB4_H
+#ifndef HEADER_CURL_KRB4_H
+#define HEADER_CURL_KRB4_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -53,4 +53,5 @@ void Curl_sec_end (struct connectdata *);
 CURLcode Curl_sec_login (struct connectdata *);
 int Curl_sec_request_prot (struct connectdata *conn, const char *level);
 
-#endif
+#endif /* HEADER_CURL_KRB4_H */
+

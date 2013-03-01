@@ -134,7 +134,7 @@ print <<HEAD
  * Generation time: $now
  */
 #ifdef USE_MANUAL
-#include "hugehelp.h"
+#include "tool_hugehelp.h"
 HEAD
     ;
 if($c) {

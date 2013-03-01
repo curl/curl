@@ -423,11 +423,8 @@ The windows version of curl will automatically look for a CA certs file named
 \'curl-ca-bundle.crt\', either in the same directory as curl.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
-If curl is built against the NSS SSL library then this option tells
-curl the nickname of the CA certificate to use within the NSS database
-defined by the environment variable SSL_DIR (or by default /etc/pki/nssdb).
-If the NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files
-may be loaded.
+If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
+(libnsspem.so) needs to be available for this option to work properly.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
@@ -483,6 +480,17 @@ You can also explicitly change the name field of a file upload part by setting
 filename=, like this:
 
 \fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
+
+If filename/path contains ',' or ';', it must be quoted by double-quotes like:
+
+\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" url.com
+
+or
+
+\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' url.com
+
+Note that if a filename/path is quoted by double-quotes, any double-quote
+or backslash within the filename must be escaped by backslash.
 
 See further examples and details in the MANUAL.
 
@@ -1524,6 +1532,13 @@ same info.
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
 .TP
+.B local_ip
+The IP address of the local end of the most recently done connection - can be
+either IPv4 or IPv6 (Added in 7.29.0)
+.TP
+.B local_port
+The local port number of the most recently done connection (Added in 7.29.0)
+.TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
@@ -1533,6 +1548,13 @@ Number of redirects that were followed in the request. (Added in 7.12.3)
 .B redirect_url
 When an HTTP request was made without -L to follow redirects, this variable
 will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
+.TP
+.B remote_ip
+The remote IP address of the most recently done connection - can be either
+IPv4 or IPv6 (Added in 7.29.0)
+.TP
+.B remote_port
+The remote port number of the most recently done connection (Added in 7.29.0)
 .TP
 .B size_download
 The total amount of bytes that were downloaded.
@@ -1630,6 +1652,14 @@ otherwise used (which defaults to GET). Read the HTTP 1.1 specification for
 details and explanations. Common additional HTTP requests include PUT and
 DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and
 more.
+
+Normally you don't need this option. All sorts of GET, HEAD, POST and PUT
+requests are rather invoked by using dedicated command line options.
+
+This option only changes the actual word used in the HTTP request, it does not
+alter the way curl behaves. So for example if you want to make a proper HEAD
+request, using -X HEAD will not suffice. You need to use the \fI-I, --head\fP
+option.
 
 (FTP)
 Specifies a custom FTP command to use instead of LIST when doing file lists

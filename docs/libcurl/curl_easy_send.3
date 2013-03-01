@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -57,6 +57,9 @@ sent into \fB*n\fP. Note that this may very well be less than the amount you
 wanted to send.
 
 On failure, returns the appropriate error code.
+
+If there's no socket available to use from the previous transfer, this function
+returns CURLE_UNSUPPORTED_PROTOCOL.
 .SH EXAMPLE
 See \fBsendrecv.c\fP in \fBdocs/examples\fP directory for usage example.
 .SH "SEE ALSO"

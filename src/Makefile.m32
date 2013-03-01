@@ -18,11 +18,11 @@ ZLIB_PATH = ../../zlib-1.2.7
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8x
+OPENSSL_PATH = ../../openssl-0.9.8y
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.2
+LIBSSH2_PATH = ../../libssh2-1.4.3
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
@@ -296,11 +296,11 @@ curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_OBJECTS) $(curl_LDADD)
 
 # We don't have nroff normally under win32
-# hugehelp.c: $(PROOT)/docs/MANUAL $(PROOT)/docs/curl.1 mkhelp.pl
-#	@$(call DEL, hugehelp.c)
-# 	$(NROFF) -man $(PROOT)/docs/curl.1 | $(PERL) mkhelp.pl $(PROOT)/docs/MANUAL > hugehelp.c
+# tool_hugehelp.c: $(PROOT)/docs/MANUAL $(PROOT)/docs/curl.1 mkhelp.pl
+#	@$(call DEL, tool_hugehelp.c)
+# 	$(NROFF) -man $(PROOT)/docs/curl.1 | $(PERL) mkhelp.pl $(PROOT)/docs/MANUAL > tool_hugehelp.c
 
-hugehelp.c:
+tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
 
@@ -311,8 +311,8 @@ hugehelp.c:
 	$(RC) $(RCFLAGS) $< -o $@
 
 clean:
-ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
-	@$(call DEL, hugehelp.c)
+ifeq "$(wildcard tool_hugehelp.c.cvs)" "tool_hugehelp.c.cvs"
+	@$(call DEL, tool_hugehelp.c)
 endif
 	@$(call DEL, $(curl_OBJECTS) $(curlx_OBJECTS) $(RESOURCE))
 

@@ -28,7 +28,7 @@
  * as well as the library. Do not mix with library internals!
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 

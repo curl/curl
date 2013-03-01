@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #if defined(USE_SSLEAY) || defined(USE_AXTLS)
 /* these two backends use functions from this file */

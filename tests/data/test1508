@@ -1,0 +1,31 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+multi
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<tool>
+lib1508
+</tool>
+ <name>
+Close a multi handle without using it
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/path/1508
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/stdout1508" mode="text">
+We are done
+</file>
+</verify>
+</testcase>

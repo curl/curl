@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Mandy Wu, <mandy.wu@intel.com>
- * Copyright (C) 2011 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
   filename = test2file(testnum);
   stream=fopen(filename, "rb");
   if(!stream) {
-    error = ERRNO;
+    error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", filename);
     logmsg("Couldn't open test file %ld", testnum);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
   stream=fopen(filename, "rb");
   if(!stream) {
-    error = ERRNO;
+    error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", filename);
     logmsg("Couldn't open test file %ld", testnum);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     if(strcmp(buf, type1_input) == 0) {
       stream=fopen(filename, "rb");
       if(!stream) {
-        error = ERRNO;
+        error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", testnum);
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
     else if(strncmp(buf, type3_input, strlen(type3_input)) == 0) {
       stream=fopen(filename, "rb");
       if(!stream) {
-        error = ERRNO;
+        error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", testnum);

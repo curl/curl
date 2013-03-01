@@ -1,5 +1,5 @@
-#ifndef __MULTIIF_H
-#define __MULTIIF_H
+#ifndef HEADER_CURL_MULTIIF_H
+#define HEADER_CURL_MULTIIF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -50,4 +50,5 @@ void Curl_multi_handlePipeBreak(struct SessionHandle *data);
 void Curl_multi_dump(const struct Curl_multi *multi_handle);
 #endif
 
-#endif /* __MULTIIF_H */
+#endif /* HEADER_CURL_MULTIIF_H */
+

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -77,48 +77,3 @@ int curl_strnequal(const char *first, const char *second, size_t max)
   return toupper(*first) == toupper(*second);
 #endif
 }
-
-#ifndef HAVE_STRLCAT
-/*
- * The strlcat() function appends the NUL-terminated string src to the end
- * of dst. It will append at most size - strlen(dst) - 1 bytes, NUL-termi-
- * nating the result.
- *
- * The strlcpy() and strlcat() functions return the total length of the
- * string they tried to create.  For strlcpy() that means the length of src.
- * For strlcat() that means the initial length of dst plus the length of
- * src. While this may seem somewhat confusing it was done to make trunca-
- * tion detection simple.
- *
- *
- */
-size_t Curl_strlcat(char *dst, const char *src, size_t siz)
-{
-  char *d = dst;
-  const char *s = src;
-  size_t n = siz;
-  union {
-    ssize_t sig;
-     size_t uns;
-  } dlen;
-
-  /* Find the end of dst and adjust bytes left but don't go past end */
-  while(n-- != 0 && *d != '\0')
-    d++;
-  dlen.sig = d - dst;
-  n = siz - dlen.uns;
-
-  if(n == 0)
-    return(dlen.uns + strlen(s));
-  while(*s != '\0') {
-    if(n != 1) {
-      *d++ = *s;
-      n--;
-    }
-    s++;
-  }
-  *d = '\0';
-
-  return(dlen.uns + (s - src));     /* count does not include NUL */
-}
-#endif

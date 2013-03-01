@@ -579,6 +579,7 @@ sub protocolsetup {
     }
     elsif($proto eq 'imap') {
         %commandfunc = (
+            'CAPABILITY' => \&CAPABILITY_imap,
             'FETCH'  => \&FETCH_imap,
             'SELECT' => \&SELECT_imap,
         );
@@ -759,6 +760,27 @@ my $cmdid;
 # what was picked by SELECT
 my $selected;
 
+sub CAPABILITY_imap {
+    my ($testno) = @_;
+    my $data;
+
+    if(!$support_capa) {
+        sendcontrol "$cmdid BAD Command\r\n";
+    }
+    else {
+        $data = "* CAPABILITY IMAP4";
+        if($support_auth) {
+            $data .= " AUTH=UNKNOWN";
+        }
+        $data .= " pingpong test server\r\n";
+
+        sendcontrol $data;
+        sendcontrol "$cmdid OK CAPABILITY completed\r\n";
+    }
+
+    return 0;
+}
+
 sub SELECT_imap {
     my ($testno) = @_;
     my @data;
@@ -770,7 +792,6 @@ sub SELECT_imap {
 
     return 0;
 }
-
 
 sub FETCH_imap {
      my ($testno) = @_;

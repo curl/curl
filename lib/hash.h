@@ -1,5 +1,5 @@
-#ifndef __HASH_H
-#define __HASH_H
+#ifndef HEADER_CURL_HASH_H
+#define HEADER_CURL_HASH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <stddef.h>
 
@@ -103,4 +103,5 @@ void Curl_hash_print(struct curl_hash *h,
                      void (*func)(void *));
 
 
-#endif
+#endif /* HEADER_CURL_HASH_H */
+

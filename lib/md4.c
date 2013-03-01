@@ -20,7 +20,7 @@
    documentation and/or software.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 /* NSS crypto library does not provide the MD4 hash algorithm, so that we have
  * a local implementation of it */

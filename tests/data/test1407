@@ -12,7 +12,7 @@ LIST
 # Server-side
 <reply>
 <servercmd>
-REPLY LIST +OK 1407 100
+REPLY LIST +OK 1407 100\r\n.
 </servercmd>
 </reply>
 

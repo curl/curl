@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
@@ -56,6 +56,7 @@ static char *Curl_basename(char *path);
 #endif
 
 static size_t readfromfile(struct Form *form, char *buffer, size_t size);
+static char *formboundary(void);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -830,9 +831,10 @@ static CURLcode AddFormData(struct FormData **formp,
          file */
       if(!strequal("-", newform->line)) {
         struct_stat file;
-        if(!stat(newform->line, &file)) {
+        if(!stat(newform->line, &file) && S_ISREG(file.st_mode))
           *size += file.st_size;
-        }
+        else
+          return CURLE_BAD_FUNCTION_ARGUMENT;
       }
     }
   }
@@ -1024,6 +1026,47 @@ static char *strippath(const char *fullfile)
   return base; /* returns an allocated string or NULL ! */
 }
 
+static CURLcode formdata_add_filename(const struct curl_httppost *file,
+                                      struct FormData **form,
+                                      curl_off_t *size)
+{
+  CURLcode result = CURLE_OK;
+  char *filename = file->showfilename;
+  char *filebasename = NULL;
+  char *filename_escaped = NULL;
+
+  if(!filename) {
+    filebasename = strippath(file->contents);
+    if(!filebasename)
+      return CURLE_OUT_OF_MEMORY;
+    filename = filebasename;
+  }
+
+  if(strchr(filename, '\\') || strchr(filename, '"')) {
+    char *p0, *p1;
+
+    /* filename need be escaped */
+    filename_escaped = malloc(strlen(filename)*2+1);
+    if(!filename_escaped)
+      return CURLE_OUT_OF_MEMORY;
+    p0 = filename_escaped;
+    p1 = filename;
+    while(*p1) {
+      if(*p1 == '\\' || *p1 == '"')
+        *p0++ = '\\';
+      *p0++ = *p1++;
+    }
+    *p0 = '\0';
+    filename = filename_escaped;
+  }
+  result = AddFormDataf(form, size,
+                        "; filename=\"%s\"",
+                        filename);
+  Curl_safefree(filename_escaped);
+  Curl_safefree(filebasename);
+  return result;
+}
+
 /*
  * Curl_getformdata() converts a linked list of "meta data" into a complete
  * (possibly huge) multipart formdata. The input list is in 'post', while the
@@ -1058,7 +1101,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
   if(!post)
     return result; /* no input => no output! */
 
-  boundary = Curl_FormBoundary();
+  boundary = formboundary();
   if(!boundary)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1114,7 +1157,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
          the magic to include several files with the same field name */
 
       Curl_safefree(fileboundary);
-      fileboundary = Curl_FormBoundary();
+      fileboundary = formboundary();
       if(!fileboundary) {
         result = CURLE_OUT_OF_MEMORY;
         break;
@@ -1138,22 +1181,13 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
 
       if(post->more) {
         /* if multiple-file */
-        char *filebasename = NULL;
-        if(!file->showfilename) {
-          filebasename = strippath(file->contents);
-          if(!filebasename) {
-            result = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-        }
-
         result = AddFormDataf(&form, &size,
                               "\r\n--%s\r\nContent-Disposition: "
-                              "attachment; filename=\"%s\"",
-                              fileboundary,
-                              (file->showfilename?file->showfilename:
-                               filebasename));
-        Curl_safefree(filebasename);
+                              "attachment",
+                              fileboundary);
+        if(result)
+          break;
+        result = formdata_add_filename(file, &form, &size);
         if(result)
           break;
       }
@@ -1163,14 +1197,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
            HTTPPOST_CALLBACK cases the ->showfilename struct member is always
            assigned at this point */
         if(post->showfilename || (post->flags & HTTPPOST_FILENAME)) {
-          char *filebasename=
-            (!post->showfilename)?strippath(post->contents):NULL;
-
-          result = AddFormDataf(&form, &size,
-                                "; filename=\"%s\"",
-                                (post->showfilename?post->showfilename:
-                                 filebasename));
-          Curl_safefree(filebasename);
+          result = formdata_add_filename(post, &form, &size);
         }
 
         if(result)
@@ -1433,6 +1460,34 @@ char *Curl_formpostheader(void *formp, size_t *len)
   return header;
 }
 
+/*
+ * formboundary() creates a suitable boundary string and returns an allocated
+ * one.
+ */
+static char *formboundary(void)
+{
+  char *retstring;
+  size_t i;
+
+  static const char table16[]="0123456789abcdef";
+
+  retstring = malloc(BOUNDARY_LENGTH+1);
+
+  if(!retstring)
+    return NULL; /* failed */
+
+  strcpy(retstring, "----------------------------");
+
+  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
+    retstring[i] = table16[Curl_rand()%16];
+
+  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
+     combinations */
+  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
+
+  return retstring;
+}
+
 #else  /* CURL_DISABLE_HTTP */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                           struct curl_httppost **last_post,
@@ -1458,37 +1513,5 @@ void curl_formfree(struct curl_httppost *form)
   /* does nothing HTTP is disabled */
 }
 
-#endif  /* CURL_DISABLE_HTTP */
 
-#if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
-
-/*
- * Curl_FormBoundary() creates a suitable boundary string and returns an
- * allocated one. This is also used by SSL-code so it must be present even
- * if HTTP is disabled!
- */
-char *Curl_FormBoundary(void)
-{
-  char *retstring;
-  size_t i;
-
-  static const char table16[]="0123456789abcdef";
-
-  retstring = malloc(BOUNDARY_LENGTH+1);
-
-  if(!retstring)
-    return NULL; /* failed */
-
-  strcpy(retstring, "----------------------------");
-
-  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
-    retstring[i] = table16[Curl_rand()%16];
-
-  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
-     combinations */
-  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
-
-  return retstring;
-}
-
-#endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
+#endif  /* !defined(CURL_DISABLE_HTTP) */

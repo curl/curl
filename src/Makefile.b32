@@ -27,7 +27,7 @@ ZLIB_PATH = ..\..\zlib-1.2.7
 
 # Edit the path below to point to the base of your OpenSSL package.
 !ifndef OPENSSL_PATH
-OPENSSL_PATH = ..\..\openssl-0.9.8x
+OPENSSL_PATH = ..\..\openssl-0.9.8y
 !endif
 
 # Set program's name
@@ -77,16 +77,15 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 .path.obj = $(OBJDIR)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
-!undef top_srcdir
 !include Makefile.inc
 
-CSOURCES = $(CURL_CFILES) $(CURLX_ONES:/lib/=)
+CSOURCES = $(CURL_CFILES) $(CURLX_ONES:../lib/=)
 OBJECTS  = $(CSOURCES:.c=.obj)
 
 .c.obj:
 	$(CC_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$@ $<
 
-all:	$(OBJDIR) hugehelp $(PROGNAME)
+all:	$(OBJDIR) tool_hugehelp $(PROGNAME)
 
 clean:
 	cd $(OBJDIR)
@@ -101,13 +100,13 @@ $(OBJDIR):
 	@-$(MKDIR) $(OBJDIR)
 
 !ifdef WITH_ZLIB
-hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
-        groff -Tascii -man -P -c ../docs/curl.1 > hugehelp.tmp
-        perl -w mkhelp.pl -c ../docs/MANUAL < hugehelp.tmp > hugehelp.c
-	@-$(RM) hugehelp.tmp
+tool_hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
+        groff -Tascii -man -P -c ../docs/curl.1 > tool_hugehelp.tmp
+        perl -w mkhelp.pl -c ../docs/MANUAL < tool_hugehelp.tmp > tool_hugehelp.c
+	@-$(RM) tool_hugehelp.tmp
 !else
-hugehelp:
-	$(COPY) hugehelp.c.cvs hugehelp.c
+tool_hugehelp:
+	$(COPY) tool_hugehelp.c.cvs tool_hugehelp.c
 !endif
 
 $(PROGNAME): $(OBJECTS) $(LIBCURL_LIB) $(LINKLIB)

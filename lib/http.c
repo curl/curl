@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -1295,22 +1295,16 @@ Curl_compareheader(const char *headerline, /* line to check */
  */
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 {
-  struct SessionHandle *data;
   CURLcode result;
-
-  data=conn->data;
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
 
-  if(data->state.used_interface == Curl_if_multi) {
-    /* when the multi interface is used, the CONNECT procedure might not have
-       been completed */
-    result = Curl_proxy_connect(conn);
-    if(result)
-      return result;
-  }
+  /* the CONNECT procedure might not have been completed */
+  result = Curl_proxy_connect(conn);
+  if(result)
+    return result;
 
   if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
     /* nothing else to do except wait right now - we're not done here. */
@@ -1318,22 +1312,12 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 
   if(conn->given->flags & PROTOPT_SSL) {
     /* perform SSL initialization */
-    if(data->state.used_interface == Curl_if_multi) {
-      result = https_connecting(conn, done);
-      if(result)
-        return result;
-    }
-    else {
-      /* BLOCKING */
-      result = Curl_ssl_connect(conn, FIRSTSOCKET);
-      if(result)
-        return result;
-      *done = TRUE;
-    }
+    result = https_connecting(conn, done);
+    if(result)
+      return result;
   }
-  else {
+  else
     *done = TRUE;
-  }
 
   return CURLE_OK;
 }

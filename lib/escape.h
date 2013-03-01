@@ -1,6 +1,5 @@
 #ifndef HEADER_CURL_ESCAPE_H
 #define HEADER_CURL_ESCAPE_H
-
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -30,4 +29,5 @@ CURLcode Curl_urldecode(struct SessionHandle *data,
                         char **ostring, size_t *olen,
                         bool reject_crlf);
 
-#endif
+#endif /* HEADER_CURL_ESCAPE_H */
+

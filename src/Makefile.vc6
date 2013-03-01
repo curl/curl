@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -52,12 +52,11 @@ PROGRAM_NAME = curl.exe
 # Makefile.msvc.names provides libcurl file names
 # ------------------------------------------------
 
-!INCLUDE ..\Makefile.msvc.names
-
+!INCLUDE ..\winbuild\Makefile.msvc.names
 
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8x
+OPENSSL_PATH = ../../openssl-0.9.8y
 !ENDIF
 
 !IFNDEF ZLIB_PATH
@@ -134,7 +133,6 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 !ENDIF
 
 RELEASE_OBJS= \
-	hugehelpr.obj \
 	nonblockr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
@@ -157,6 +155,7 @@ RELEASE_OBJS= \
 	tool_helpr.obj \
 	tool_helpersr.obj \
 	tool_homedirr.obj \
+	tool_hugehelpr.obj \
 	tool_libinfor.obj \
 	tool_mainr.obj \
 	tool_metalinkr.obj \
@@ -178,7 +177,6 @@ RELEASE_OBJS= \
 	curlr.res
 
 DEBUG_OBJS= \
-	hugehelpd.obj \
 	nonblockd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
@@ -201,6 +199,7 @@ DEBUG_OBJS= \
 	tool_helpd.obj \
 	tool_helpersd.obj \
 	tool_homedird.obj \
+	tool_hugehelpd.obj \
 	tool_libinfod.obj \
 	tool_maind.obj \
 	tool_metalinkd.obj \
@@ -341,8 +340,6 @@ debug: $(DEBUG_OBJS)
         $(MANIFESTTOOL)
 
 ## Release
-hugehelpr.obj: hugehelp.c
-	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 nonblockr.obj: ../lib/nonblock.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrr.obj: ../lib/rawstr.c
@@ -387,6 +384,8 @@ tool_helpersr.obj: tool_helpers.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_helpers.c
 tool_homedirr.obj: tool_homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_homedir.c
+tool_hugehelpr.obj: tool_hugehelp.c
+	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" tool_hugehelp.c
 tool_libinfor.obj: tool_libinfo.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_mainr.obj: tool_main.c
@@ -427,8 +426,6 @@ curlr.res : curl.rc
 	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
 ## Debug
-hugehelpd.obj: hugehelp.c
-	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 nonblockd.obj: ../lib/nonblock.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
 rawstrd.obj: ../lib/rawstr.c
@@ -473,6 +470,8 @@ tool_helpersd.obj: tool_helpers.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_helpers.c
 tool_homedird.obj: tool_homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_homedir.c
+tool_hugehelpd.obj: tool_hugehelp.c
+	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" tool_hugehelp.c
 tool_libinfod.obj: tool_libinfo.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
 tool_maind.obj: tool_main.c

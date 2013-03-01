@@ -132,22 +132,6 @@ mark_as_advanced(DISABLED_THREADSAFE)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
 mark_as_advanced(ENABLE_IPV6)
 
-if(WIN32)
-  # Windows standard libraries are located in C:/Program Files/Microsoft SDKs/[...]
-  # They are already included in the default MSVC LIBPATH => no find_library is needed!
-  list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES wsock32.lib ws2_32.lib)  # bufferoverflowu.lib
-  if(CURL_DISABLE_LDAP)
-    # Remove wldap32.lib from space-separated list
-    string(REPLACE " " ";" _LIST ${CMAKE_C_STANDARD_LIBRARIES})
-    list(REMOVE_ITEM _LIST "wldap32.lib")
-    to_list_spaces(_LIST CMAKE_C_STANDARD_LIBRARIES)
-  else()
-    # Append wldap32.lib
-    list_spaces_append_once(CMAKE_C_STANDARD_LIBRARIES wldap32.lib)
-  endif()
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES}"   CACHE STRING "" FORCE)
-endif()
-
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -249,26 +233,28 @@ if(CURL_ZLIB)  # AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE
     set(HAVE_ZLIB_H ON)
     set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
+    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
   endif()
 endif()
 
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
 mark_as_advanced(CMAKE_USE_OPENSSL)
 if(CMAKE_USE_OPENSSL)
-  if(WIN32)
-    find_package(OpenSSL)
-    if(OPENSSL_FOUND)
-      set(USE_SSLEAY TRUE)
-      set(USE_OPENSSL TRUE)
-      list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} )
-    else()
-      set(CMAKE_USE_OPENSSL FALSE)
-      message(STATUS "OpenSSL NOT Found, disabling CMAKE_USE_OPENSSL")
-    endif()
-  else(WIN32)
-    check_library_exists_concat("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
-    check_library_exists_concat("ssl"    SSL_connect  HAVE_LIBSSL)
-  endif(WIN32)
+
+  set(USE_SSLEAY OFF)
+  set(USE_OPENSSL OFF)
+  set(HAVE_LIBCRYPTO OFF)
+  set(HAVE_LIBSSL OFF)
+
+  find_package(OpenSSL)
+  if(OPENSSL_FOUND)
+    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+    set(USE_SSLEAY ON)
+    set(USE_OPENSSL ON)
+    set(HAVE_LIBCRYPTO ON)
+    set(HAVE_LIBSSL ON)
+  endif(OPENSSL_FOUND)
 endif(CMAKE_USE_OPENSSL)
 
 # If we have features.h, then do the _BSD_SOURCE magic
@@ -334,14 +320,17 @@ check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
-check_include_file_concat("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
-check_include_file_concat("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
-check_include_file_concat("openssl/err.h"    HAVE_OPENSSL_ERR_H)
-check_include_file_concat("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
-check_include_file_concat("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
-check_include_file_concat("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
-check_include_file_concat("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
-check_include_file_concat("openssl/x509.h"   HAVE_OPENSSL_X509_H)
+if(CMAKE_USE_OPENSSL AND OPENSSL_FOUND)
+  check_include_file_concat("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
+  check_include_file_concat("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
+  check_include_file_concat("openssl/err.h"    HAVE_OPENSSL_ERR_H)
+  check_include_file_concat("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
+  check_include_file_concat("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
+  check_include_file_concat("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
+  check_include_file_concat("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
+  check_include_file_concat("openssl/x509.h"   HAVE_OPENSSL_X509_H)
+  check_include_file_concat("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+endif(CMAKE_USE_OPENSSL AND OPENSSL_FOUND)
 check_include_file_concat("pem.h"            HAVE_PEM_H)
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
@@ -376,10 +365,6 @@ check_include_file_concat("stdint.h"        HAVE_STDINT_H)
 check_include_file_concat("sockio.h"        HAVE_SOCKIO_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 check_include_file_concat("idna.h"          HAVE_IDNA_H)
-
-if(CMAKE_USE_OPENSSL)
-  check_include_file_concat("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
-endif(CMAKE_USE_OPENSSL)
 
 if(NOT HAVE_LDAP_H)
   message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
@@ -816,9 +801,6 @@ endif(MSVC)
 function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
   if(CURL_ZLIB AND ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIR})
-  endif()
-  if(CURL_ZLIB AND ZLIB_FOUND)
-    target_link_libraries(${TARGET_NAME} ${ZLIB_LIBRARIES})
     #ADD_DEFINITIONS( -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ )
   endif()
 
@@ -826,9 +808,10 @@ function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
     include_directories(${OPENSSL_INCLUDE_DIR})
   endif()
   if(CMAKE_USE_OPENSSL AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-    target_link_libraries(${TARGET_NAME} ${OPENSSL_LIBRARIES})
     #ADD_DEFINITIONS( -DUSE_SSLEAY )
   endif()
+
+  target_link_libraries(${TARGET_NAME} ${CURL_LIBS})
 endfunction()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
@@ -869,3 +852,13 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION include
     FILES_MATCHING PATTERN "*.h"
     PATTERN "curlbuild.h" EXCLUDE)
+
+
+# Workaround for MSVS10 to avoid the Dialog Hell
+# FIXME: This could be removed with future version of CMake.
+if(MSVC_VERSION EQUAL 1600)
+  set(CURL_SLN_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
+  if(EXISTS "${CURL_SLN_FILENAME}")
+    file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
+  endif()
+endif()

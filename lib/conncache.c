@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #include <curl/curl.h>
 
@@ -47,7 +47,7 @@ static void free_bundle_hash_entry(void *freethis)
   Curl_bundle_destroy(b);
 }
 
-struct conncache *Curl_conncache_init(conncachetype type)
+struct conncache *Curl_conncache_init(void)
 {
   struct conncache *connc;
 
@@ -62,9 +62,6 @@ struct conncache *Curl_conncache_init(conncachetype type)
     free(connc);
     return NULL;
   }
-
-  connc->type = type;
-  connc->num_connections = 0;
 
   return connc;
 }
@@ -180,10 +177,13 @@ void Curl_conncache_remove_conn(struct conncache *connc,
 
 /* This function iterates the entire connection cache and calls the
    function func() with the connection pointer as the first argument
-   and the supplied 'param' argument as the other */
+   and the supplied 'param' argument as the other,
+
+   Return 0 from func() to continue the loop, return 1 to abort it.
+ */
 void Curl_conncache_foreach(struct conncache *connc,
                             void *param,
-                            void (*func)(void *conn, void *param))
+                            int (*func)(struct connectdata *conn, void *param))
 {
   struct curl_hash_iterator iter;
   struct curl_llist_element *curr;
@@ -208,7 +208,8 @@ void Curl_conncache_foreach(struct conncache *connc,
       conn = curr->ptr;
       curr = curr->next;
 
-      func(conn, param);
+      if(1 == func(conn, param))
+        return;
     }
 
     he = Curl_hash_next_element(&iter);

@@ -289,6 +289,10 @@ axTLS
 
  Required actions unknown.
 
+Secure Transport
+
+ The engine is fully thread-safe, and no additional steps are required.
+
 When using multiple threads you should set the CURLOPT_NOSIGNAL option to 1
 for all handles. Everything will or might work fine except that timeouts are
 not honored during the DNS lookup - which you can work around by building

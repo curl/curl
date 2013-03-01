@@ -1,5 +1,5 @@
-#ifndef __HOSTCHECK_H
-#define __HOSTCHECK_H
+#ifndef HEADER_CURL_HOSTCHECK_H
+#define HEADER_CURL_HOSTCHECK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -28,4 +28,5 @@
 #define CURL_HOST_MATCH   1
 int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 
-#endif
+#endif /* HEADER_CURL_HOSTCHECK_H */
+

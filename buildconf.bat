@@ -12,9 +12,9 @@ ECHO ERROR: This file shall only be used with a curl git tree checkout.
 goto end_all
 :start_doing
 
-REM create hugehelp.c
-if not exist src\hugehelp.c.cvs goto end_hugehelp_c
-copy /Y src\hugehelp.c.cvs src\hugehelp.c
+REM create tool_hugehelp.c
+if not exist src\tool_hugehelp.c.cvs goto end_hugehelp_c
+copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c
 :end_hugehelp_c
 
 REM create Makefile

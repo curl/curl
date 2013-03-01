@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
@@ -74,6 +74,8 @@
 #include "sslgen.h" /* for Curl_ssl_check_cxn() */
 #include "progress.h"
 #include "warnless.h"
+#include "conncache.h"
+#include "multihandle.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -126,7 +128,6 @@ tcpkeepalive(struct SessionHandle *data,
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai, /* start connecting to this */
-                long timeout_ms,
                 curl_socket_t *sock,
                 bool *connected);
 
@@ -197,20 +198,19 @@ long Curl_timeleft(struct SessionHandle *data,
 }
 
 /*
- * waitconnect() waits for a TCP connect on the given socket for the specified
- * number if milliseconds. It returns:
+ * checkconnect() checks for a TCP connect on the given socket.
+ * It returns:
  */
 
-#define WAITCONN_CONNECTED     0
-#define WAITCONN_SELECT_ERROR -1
-#define WAITCONN_TIMEOUT       1
-#define WAITCONN_FDSET_ERROR   2
-#define WAITCONN_ABORTED       3
+enum chkconn_t {
+  CHKCONN_SELECT_ERROR = -1,
+  CHKCONN_CONNECTED    = 0,
+  CHKCONN_IDLE         = 1,
+  CHKCONN_FDSET_ERROR  = 2
+};
 
-static
-int waitconnect(struct connectdata *conn,
-                curl_socket_t sockfd, /* socket */
-                long timeout_msec)
+static enum chkconn_t
+checkconnect(curl_socket_t sockfd)
 {
   int rc;
 #ifdef mpeix
@@ -220,34 +220,20 @@ int waitconnect(struct connectdata *conn,
   (void)verifyconnect(sockfd, NULL);
 #endif
 
-  for(;;) {
+  rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, 0);
 
-    /* now select() until we get connect or timeout */
-    rc = Curl_socket_ready(CURL_SOCKET_BAD, sockfd, timeout_msec>1000?
-                           1000:timeout_msec);
-    if(Curl_pgrsUpdate(conn))
-      return WAITCONN_ABORTED;
+  if(-1 == rc)
+    /* error, no connect here, try next */
+    return CHKCONN_SELECT_ERROR;
 
-    if(-1 == rc)
-      /* error, no connect here, try next */
-      return WAITCONN_SELECT_ERROR;
+  else if(rc & CURL_CSELECT_ERR)
+    /* error condition caught */
+    return CHKCONN_FDSET_ERROR;
 
-    else if(0 == rc) {
-      /* timeout */
-      timeout_msec -= 1000;
-      if(timeout_msec <= 0)
-        return WAITCONN_TIMEOUT;
+  else if(rc)
+    return CHKCONN_CONNECTED;
 
-      continue;
-    }
-
-    if(rc & CURL_CSELECT_ERR)
-      /* error condition caught */
-      return WAITCONN_FDSET_ERROR;
-
-    break;
-  }
-  return WAITCONN_CONNECTED;
+  return CHKCONN_IDLE;
 }
 
 static CURLcode bindlocal(struct connectdata *conn,
@@ -546,7 +532,7 @@ static CURLcode trynextip(struct connectdata *conn,
   ai = conn->ip_addr->ai_next;
 
   while(ai) {
-    CURLcode res = singleipconnect(conn, ai, 0L, &sockfd, connected);
+    CURLcode res = singleipconnect(conn, ai, &sockfd, connected);
     if(res)
       return res;
     if(sockfd != CURL_SOCKET_BAD) {
@@ -674,21 +660,20 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 }
 
 /*
- * Curl_is_connected() is used from the multi interface to check if the
- * firstsocket has connected.
+ * Curl_is_connected() checks if the socket has connected.
  */
 
 CURLcode Curl_is_connected(struct connectdata *conn,
                            int sockindex,
                            bool *connected)
 {
-  int rc;
   struct SessionHandle *data = conn->data;
   CURLcode code = CURLE_OK;
   curl_socket_t sockfd = conn->sock[sockindex];
   long allow = DEFAULT_CONNECT_TIMEOUT;
   int error = 0;
   struct timeval now;
+  enum chkconn_t chk;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
@@ -711,9 +696,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  /* check for connect without timeout as we want to return immediately */
-  rc = waitconnect(conn, sockfd, 0);
-  if(WAITCONN_TIMEOUT == rc) {
+  /* check socket for connect */
+  chk = checkconnect(sockfd);
+  if(CHKCONN_IDLE == chk) {
     if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
       infof(data, "After %ldms connect time, move on!\n",
             conn->timeoutms_per_addr);
@@ -724,7 +709,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return code;
   }
 
-  if(WAITCONN_CONNECTED == rc) {
+  if(CHKCONN_CONNECTED == chk) {
     if(verifyconnect(sockfd, &error)) {
       /* we are connected with TCP, awesome! */
 
@@ -734,6 +719,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         return code;
 
       conn->bits.tcpconnect[sockindex] = TRUE;
+
       *connected = TRUE;
       if(sockindex == FIRSTSOCKET)
         Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
@@ -746,7 +732,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
   else {
     /* nope, not connected  */
-    if(WAITCONN_FDSET_ERROR == rc) {
+    if(CHKCONN_FDSET_ERROR == chk) {
       (void)verifyconnect(sockfd, &error);
       infof(data, "%s\n",Curl_strerror(conn, error));
     }
@@ -862,12 +848,11 @@ void Curl_sndbufset(curl_socket_t sockfd)
  * CURL_SOCKET_BAD. Other errors will however return proper errors.
  *
  * singleipconnect() connects to the given IP only, and it may return without
- * having connected if used from the multi interface.
+ * having connected.
  */
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai,
-                long timeout_ms,
                 curl_socket_t *sockp,
                 bool *connected)
 {
@@ -938,17 +923,24 @@ singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   curlx_nonblock(sockfd, TRUE);
 
+  conn->connecttime = Curl_tvnow();
+  if(conn->num_addr > 1)
+    Curl_expire(data, conn->timeoutms_per_addr);
+
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
     if(-1 == rc)
       error = SOCKERRNO;
-    conn->connecttime = Curl_tvnow();
-    if(conn->num_addr > 1)
-      Curl_expire(data, conn->timeoutms_per_addr);
   }
-  else
-    rc = 0;
+  else {
+    *sockp = sockfd;
+    return CURLE_OK;
+  }
+
+#ifdef ENABLE_IPV6
+  conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
+#endif
 
   if(-1 == rc) {
     switch (error) {
@@ -963,54 +955,23 @@ singleipconnect(struct connectdata *conn,
     case EAGAIN:
 #endif
 #endif
-      rc = waitconnect(conn, sockfd, timeout_ms);
-      if(WAITCONN_ABORTED == rc) {
-        Curl_closesocket(conn, sockfd);
-        return CURLE_ABORTED_BY_CALLBACK;
-      }
-      break;
+      *sockp = sockfd;
+      return CURLE_OK;
+
     default:
       /* unknown error, fallthrough and try another address! */
       failf(data, "Failed to connect to %s: %s",
             conn->ip_addr_str, Curl_strerror(conn,error));
       data->state.os_errno = error;
+
+      /* connect failed */
+      Curl_closesocket(conn, sockfd);
+
       break;
     }
   }
-
-  /* The 'WAITCONN_TIMEOUT == rc' comes from the waitconnect(), and not from
-     connect(). We can be sure of this since connect() cannot return 1. */
-  if((WAITCONN_TIMEOUT == rc) &&
-     (data->state.used_interface == Curl_if_multi)) {
-    /* Timeout when running the multi interface */
+  else
     *sockp = sockfd;
-    return CURLE_OK;
-  }
-
-  if(!isconnected)
-    isconnected = verifyconnect(sockfd, &error);
-
-  if(!rc && isconnected) {
-    /* we are connected, awesome! */
-    *connected = TRUE; /* this is a true connect */
-    infof(data, "connected\n");
-#ifdef ENABLE_IPV6
-    conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
-#endif
-
-    Curl_updateconninfo(conn, sockfd);
-    *sockp = sockfd;
-    return CURLE_OK;
-  }
-  else if(WAITCONN_TIMEOUT == rc)
-    infof(data, "Timeout\n");
-  else {
-    data->state.os_errno = error;
-    infof(data, "%s\n", Curl_strerror(conn, error));
-  }
-
-  /* connect failed or timed out */
-  Curl_closesocket(conn, sockfd);
 
   return CURLE_OK;
 }
@@ -1072,9 +1033,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
     /* start connecting to the IP curr_addr points to */
     res = singleipconnect(conn, curr_addr,
-                          /* don't hang when doing multi */
-                          (data->state.used_interface == Curl_if_multi)?0:
-                          conn->timeoutms_per_addr, &sockfd, connected);
+                          &sockfd, connected);
     if(res)
       return res;
 
@@ -1112,6 +1071,21 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   return CURLE_OK;
 }
 
+struct connfind {
+  struct connectdata *tofind;
+  bool found;
+};
+
+static int conn_is_conn(struct connectdata *conn, void *param)
+{
+  struct connfind *f = (struct connfind *)param;
+  if(conn == f->tofind) {
+    f->found = TRUE;
+    return 1;
+  }
+  return 0;
+}
+
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given SessionHandle.
@@ -1125,8 +1099,21 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  if(data->state.lastconnect) {
+  /* this only works for an easy handle that has been used for
+     curl_easy_perform()! */
+  if(data->state.lastconnect && data->multi_easy) {
     struct connectdata *c = data->state.lastconnect;
+    struct connfind find;
+    find.tofind = data->state.lastconnect;
+    find.found = FALSE;
+
+    Curl_conncache_foreach(data->multi_easy->conn_cache, &find, conn_is_conn);
+
+    if(!find.found) {
+      data->state.lastconnect = NULL;
+      return CURL_SOCKET_BAD;
+    }
+
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;

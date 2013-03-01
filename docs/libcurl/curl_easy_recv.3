@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -59,8 +59,13 @@ On success, returns \fBCURLE_OK\fP, stores the received data into
 
 On failure, returns the appropriate error code.
 
-If there is no data to read, the function returns \fBCURLE_AGAIN\fP. Use
-your operating system facilities to wait until the data is ready, and retry.
+If there is no data to read, the function returns \fBCURLE_AGAIN\fP. Use your
+operating system facilities to wait until the data is ready, and retry.
+
+Reading exactly 0 bytes would indicate a closed connection.
+
+If there's no socket available to use from the previous transfer, this function
+returns CURLE_UNSUPPORTED_PROTOCOL.
 .SH EXAMPLE
 See \fBsendrecv.c\fP in \fBdocs/examples\fP directory for usage example.
 .SH "SEE ALSO"

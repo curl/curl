@@ -1,5 +1,5 @@
-#ifndef __INET_PTON_H
-#define __INET_PTON_H
+#ifndef HEADER_CURL_INET_PTON_H
+#define HEADER_CURL_INET_PTON_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 int Curl_inet_pton(int, const char *, void *);
 
@@ -33,4 +33,5 @@ int Curl_inet_pton(int, const char *, void *);
 #define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
 #endif
 
-#endif /* __INET_PTON_H */
+#endif /* HEADER_CURL_INET_PTON_H */
+

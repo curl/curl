@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 bool Curl_if_is_interface_name(const char *interf);
 char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size);

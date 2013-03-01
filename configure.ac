@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -27,15 +27,16 @@ dnl We don't know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: http://curl.haxx.se/mail/])
 
 XC_OVR_ZZ50
+XC_OVR_ZZ60
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2012 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2013 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
-AM_CONFIG_HEADER(lib/curl_config.h include/curl/curlbuild.h)
+AC_CONFIG_HEADERS(lib/curl_config.h include/curl/curlbuild.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 
@@ -47,7 +48,7 @@ CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 
-CURL_CHECK_PATH_SEPARATOR_REQUIRED
+XC_CHECK_PATH_SEPARATOR
 
 #
 # save the configure arguments
@@ -124,6 +125,7 @@ fi
 
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
+XC_CHECK_PROG_CC
 AM_INIT_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
@@ -145,7 +147,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -168,119 +170,6 @@ curl_verbose_msg="enabled (--disable-verbose)"
     init_ssl_msg=${curl_ssl_msg}
 
 dnl
-dnl LIBS should only specify libraries
-dnl
-tst_bad_spec="no"
-for word1 in $LIBS; do
-  case "$word1" in
-    -l* | --library=*)
-      :
-      ;;
-    *)
-      tst_bad_spec="yes"
-      ;;
-  esac
-done
-if test "$tst_bad_spec" = "yes"; then
-  AC_MSG_WARN([invalid LIBS: $LIBS])
-  AC_MSG_ERROR([LIBS may only be used to specify libraries (-lname).])
-fi
-
-dnl
-dnl LDFLAGS should only specify linker flags
-dnl
-tst_bad_msg=""
-tst_bad_spec="no"
-for word1 in $LDFLAGS; do
-  case "$word1" in
-    -D*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
-      ;;
-    -U*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
-      ;;
-    -I*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not include directories. Use CPPFLAGS for these."
-      ;;
-    -l* | --library=*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not libraries. Use LIBS for these."
-      ;;
-  esac
-done
-if test "$tst_bad_spec" = "yes"; then
-  AC_MSG_WARN([invalid LDFLAGS: $LDFLAGS])
-  AC_MSG_ERROR([LDFLAGS may only be used to specify linker flags, $tst_bad_msg])
-fi
-
-dnl
-dnl CPPFLAGS should only specify C preprocessor flags
-dnl
-tst_bad_msg=""
-tst_bad_spec="no"
-for word1 in $CPPFLAGS; do
-  case "$word1" in
-    -rpath*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
-      ;;
-    -L* | --library-path=*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not library directories. Use LDFLAGS for these."
-      ;;
-    -l* | --library=*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not libraries. Use LIBS for these."
-      ;;
-  esac
-done
-if test "$tst_bad_spec" = "yes"; then
-  AC_MSG_WARN([invalid CPPFLAGS: $CPPFLAGS])
-  AC_MSG_ERROR([CPPFLAGS may only be used to specify C preprocessor flags, $tst_bad_msg])
-fi
-
-dnl
-dnl CFLAGS should only specify C compiler flags
-dnl
-tst_bad_msg=""
-tst_bad_spec="no"
-for word1 in $CFLAGS; do
-  case "$word1" in
-    -D*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not macro definitions. Use CPPFLAGS for these."
-      ;;
-    -U*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not macro suppressions. Use CPPFLAGS for these."
-      ;;
-    -I*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not include directories. Use CPPFLAGS for these."
-      ;;
-    -rpath*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not library runtime directories. Use LDFLAGS for these."
-      ;;
-    -L* | --library-path=*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not library directories. Use LDFLAGS for these."
-      ;;
-    -l* | --library=*)
-      tst_bad_spec="yes"
-      tst_bad_msg="not libraries. Use LIBS for these."
-      ;;
-  esac
-done
-if test "$tst_bad_spec" = "yes"; then
-  AC_MSG_WARN([invalid CFLAGS: $CFLAGS])
-  AC_MSG_ERROR([CFLAGS may only be used to specify C compiler flags, $tst_bad_msg])
-fi
-
-dnl
 dnl Save some initial values the user might have provided
 dnl
 INITIAL_LDFLAGS=$LDFLAGS
@@ -295,7 +184,6 @@ dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 dnl Checks for programs.
-CURL_CHECK_PROG_CC
 
 dnl Our curl_off_t internal and external configure settings
 CURL_CONFIGURE_CURL_OFF_T
@@ -3156,7 +3044,6 @@ CURL_CHECK_FUNC_STRCMPI
 CURL_CHECK_FUNC_STRDUP
 CURL_CHECK_FUNC_STRERROR_R
 CURL_CHECK_FUNC_STRICMP
-CURL_CHECK_FUNC_STRLCAT
 CURL_CHECK_FUNC_STRNCASECMP
 CURL_CHECK_FUNC_STRNCMPI
 CURL_CHECK_FUNC_STRNICMP
@@ -3614,100 +3501,7 @@ squeeze CURL_NETWORK_AND_TIME_LIBS
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
 
-dnl
-dnl Some sanity checks for LIBS, LDFLAGS, CPPFLAGS and CFLAGS values that
-dnl configure is going to feed into makefiles generated by automake. Due
-dnl to automake placement and usage of these variables we have to follow
-dnl its rules or we may get funny results later on at make-time.
-dnl
-
-dnl
-dnl LIBS should only specify libraries
-dnl
-AC_MSG_NOTICE([using LIBS: $LIBS])
-tst_bad_spec="no"
-for word1 in $LIBS; do
-  case "$word1" in
-    -l* | --library=*)
-      :
-      ;;
-    *)
-      tst_bad_spec="yes"
-      ;;
-  esac
-done
-if test "$tst_bad_spec" = "yes"; then
-  AC_MSG_WARN([oops, LIBS should only specify libraries.])
-fi
-
-dnl
-dnl LDFLAGS should only specify linker flags
-dnl
-AC_MSG_NOTICE([using LDFLAGS: $LDFLAGS])
-tst_bad_msg="oops, LDFLAGS should only specify linker flags, not"
-for word1 in $LDFLAGS; do
-  case "$word1" in
-    -D*)
-      AC_MSG_WARN([$tst_bad_msg macro definitions. Use CPPFLAGS for: $word1])
-      ;;
-    -U*)
-      AC_MSG_WARN([$tst_bad_msg macro suppressions. Use CPPFLAGS for: $word1])
-      ;;
-    -I*)
-      AC_MSG_WARN([$tst_bad_msg include directories. Use CPPFLAGS for: $word1])
-      ;;
-    -l* | --library=*)
-      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
-      ;;
-  esac
-done
-
-dnl
-dnl CPPFLAGS should only specify C preprocessor flags
-dnl
-AC_MSG_NOTICE([using CPPFLAGS: $CPPFLAGS])
-tst_bad_msg="oops, CPPFLAGS should only specify C preprocessor flags, not"
-for word1 in $CPPFLAGS; do
-  case "$word1" in
-    -rpath*)
-      AC_MSG_WARN([$tst_bad_msg library runtime directories. Use LDFLAGS for: $word1])
-      ;;
-    -L* | --library-path=*)
-      AC_MSG_WARN([$tst_bad_msg library directories. Use LDFLAGS for: $word1])
-      ;;
-    -l* | --library=*)
-      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
-      ;;
-  esac
-done
-
-dnl
-dnl CFLAGS should only specify C compiler flags
-dnl
-AC_MSG_NOTICE([using CFLAGS: $CFLAGS])
-tst_bad_msg="oops, CFLAGS should only specify C compiler flags, not"
-for word1 in $CFLAGS; do
-  case "$word1" in
-    -D*)
-      AC_MSG_WARN([$tst_bad_msg macro definitions. Use CPPFLAGS for: $word1])
-      ;;
-    -U*)
-      AC_MSG_WARN([$tst_bad_msg macro suppressions. Use CPPFLAGS for: $word1])
-      ;;
-    -I*)
-      AC_MSG_WARN([$tst_bad_msg include directories. Use CPPFLAGS for: $word1])
-      ;;
-    -rpath*)
-      AC_MSG_WARN([$tst_bad_msg library runtime directories. Use LDFLAGS for: $word1])
-      ;;
-    -L* | --library-path=*)
-      AC_MSG_WARN([$tst_bad_msg library directories. Use LDFLAGS for: $word1])
-      ;;
-    -l* | --library=*)
-      AC_MSG_WARN([$tst_bad_msg libraries. Use LIBS for: $word1])
-      ;;
-  esac
-done
+XC_CHECK_BUILD_FLAGS
 
 if test "x$want_curldebug_assumed" = "xyes" &&
   test "x$want_curldebug" = "xyes" && test "x$USE_ARES" = "x1"; then
@@ -3724,6 +3518,8 @@ AC_CONFIG_FILES([Makefile \
            lib/Makefile \
            lib/libcurl.vers \
            tests/Makefile \
+           tests/certs/Makefile \
+           tests/certs/scripts/Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \

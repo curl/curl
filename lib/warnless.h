@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+#ifdef USE_WINSOCK
+#include <curl/curl.h> /* for curl_socket_t */
+#endif
 
 unsigned short curlx_ultous(unsigned long ulnum);
 
@@ -47,6 +51,14 @@ size_t curlx_sotouz(curl_off_t sonum);
 int curlx_sztosi(ssize_t sznum);
 
 size_t curlx_sitouz(int sinum);
+
+#ifdef USE_WINSOCK
+
+int curlx_sktosi(curl_socket_t s);
+
+curl_socket_t curlx_sitosk(int i);
+
+#endif /* USE_WINSOCK */
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 

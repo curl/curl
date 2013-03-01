@@ -1,5 +1,5 @@
-#ifndef __LLIST_H
-#define __LLIST_H
+#ifndef HEADER_CURL_LLIST_H
+#define HEADER_CURL_LLIST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 #include <stddef.h>
 
 typedef void (*curl_llist_dtor)(void *, void *);
@@ -53,4 +53,5 @@ void Curl_llist_destroy(struct curl_llist *, void *);
 int Curl_llist_move(struct curl_llist *, struct curl_llist_element *,
                     struct curl_llist *, struct curl_llist_element *);
 
-#endif
+#endif /* HEADER_CURL_LLIST_H */
+

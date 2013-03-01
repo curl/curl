@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 struct Curl_tree {
   struct Curl_tree *smaller; /* smaller node */

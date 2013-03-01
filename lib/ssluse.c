@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@
  * Sampo Kellomaki 1998.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -236,27 +236,14 @@ static int ossl_seed(struct SessionHandle *data)
 
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
-  {
+  do {
     int len;
-    char *area;
+    unsigned char randb[64];
+    Curl_ossl_random(data, randb, sizeof(randb));
 
-    /* Changed call to RAND_seed to use the underlying RAND_add implementation
-     * directly.  Do this in a loop, with the amount of additional entropy
-     * being dependent upon the algorithm used by Curl_FormBoundary(): N bytes
-     * of a 7-bit ascii set. -- Richard Gorton, March 11 2003.
-     */
-
-    do {
-      area = Curl_FormBoundary();
-      if(!area)
-        return 3; /* out of memory */
-
-      len = curlx_uztosi(strlen(area));
-      RAND_add(area, len, (len >> 1));
-
-      free(area); /* now remove the random junk */
-    } while(!RAND_status());
-  }
+    len = sizeof(randb);
+    RAND_add(randb, len, (len >> 1));
+  } while(!RAND_status());
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
@@ -1519,16 +1506,6 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_SSLv2;
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
-
-#if 0
-  /*
-   * Not sure it's needed to tell SSL_connect() that socket is
-   * non-blocking. It doesn't seem to care, but just return with
-   * SSL_ERROR_WANT_x.
-   */
-  if(data->state.used_interface == Curl_if_multi)
-    SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
-#endif
 
   if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
     if(!cert_stuff(conn,

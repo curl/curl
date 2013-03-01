@@ -24,9 +24,6 @@
 #ifdef HAVE_PWD_H
 #  include <pwd.h>
 #endif
-#ifdef __VMS
-#  include <unixlib.h>
-#endif
 
 #include "tool_homedir.h"
 
@@ -56,15 +53,8 @@ static char *GetEnv(const char *variable, char do_expand)
   }
 #else
   (void)do_expand;
-#ifdef __VMS
-  env = getenv(variable);
-  if(env && strcmp("HOME",variable) == 0) {
-    env = decc_translate_vms(env);
-  }
-#else
   /* no length control */
   env = getenv(variable);
-#endif
 #endif
   return (env && env[0]) ? strdup(env) : NULL;
 }
@@ -87,11 +77,7 @@ char *homedir(void)
    struct passwd *pw = getpwuid(geteuid());
 
    if(pw) {
-#ifdef __VMS
-     home = decc_translate_vms(pw->pw_dir);
-#else
      home = pw->pw_dir;
-#endif
      if(home && home[0])
        home = strdup(home);
      else

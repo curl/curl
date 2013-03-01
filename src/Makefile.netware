@@ -19,12 +19,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8x
+OPENSSL_PATH = ../../openssl-0.9.8y
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.2
+LIBSSH2_PATH = ../../libssh2-1.4.3
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -49,7 +49,7 @@ endif
 
 # Edit the path below to point to the base of your libmetalink package.
 ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.1.0
+LIBMETALINK_PATH = ../../libmetalink-0.1.2
 endif
 
 # Edit the path below to point to the base of your libexpat package.
@@ -379,8 +379,8 @@ install: $(INSTDIR) all
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 
 clean:
-ifeq "$(wildcard hugehelp.c.cvs)" "hugehelp.c.cvs"
-	-$(RM) hugehelp.c
+ifeq "$(wildcard tool_hugehelp.c.cvs)" "tool_hugehelp.c.cvs"
+	-$(RM) tool_hugehelp.c
 endif
 	-$(RM) -r $(OBJDIR)
 
@@ -488,9 +488,9 @@ endif
 	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
 endif
 
-hugehelp.c:
+tool_hugehelp.c:
 	@echo Creating $@
-	@$(CP) hugehelp.c.cvs $@
+	@$(CP) tool_hugehelp.c.cvs $@
 
 $(LIBCARES_PATH)/libcares.$(LIBEXT):
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.netware lib

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -170,7 +170,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  int interval_end;
+  long interval_end;
   struct thread_sync_data tsd;
 };
 
@@ -387,61 +387,27 @@ static bool init_resolve_thread (struct connectdata *conn,
   return FALSE;
 }
 
-#if defined(HAVE_GETADDRINFO) && !defined(HAVE_GAI_STRERROR) && !defined(WIN32)
-/* NetWare has getaddrinfo but lacks gai_strerror.
-   Windows has a gai_strerror but it is bad (not thread-safe) and the generic
-   socket error string function can be used for this pupose. */
-static const char *gai_strerror(int ecode)
-{
-  switch (ecode) {
-  case EAI_AGAIN:
-    return "The name could not be resolved at this time";
-  case EAI_BADFLAGS:
-    return "The flags parameter had an invalid value";
-  case EAI_FAIL:
-    return "A non-recoverable error occurred when attempting to "
-      "resolve the name";
-  case EAI_FAMILY:
-    return "The address family was not recognized";
-  case EAI_MEMORY:
-    return "Out of memory";
-  case EAI_NONAME:
-    return "The name does not resolve for the supplied parameters";
-  case EAI_SERVICE:
-    return "The service passed was not recognized for the "
-      "specified socket type"
-  case EAI_SOCKTYPE:
-    return "The intended socket type was not recognized"
-  case EAI_SYSTEM:
-    return "A system error occurred";
-  case EAI_OVERFLOW:
-    return "An argument buffer overflowed";
-  default:
-    return "Unknown error";
-
-/* define this now as this is a private implementation of said function */
-#define HAVE_GAI_STRERROR
-}
-#endif
-
-
 /*
  * resolver_error() calls failf() with the appropriate message after a resolve
  * error
  */
 
-static void resolver_error(struct connectdata *conn, const char *host_or_proxy)
+static CURLcode resolver_error(struct connectdata *conn)
 {
-  failf(conn->data, "Could not resolve %s: %s; %s", host_or_proxy,
-        conn->async.hostname,
-#ifdef HAVE_GAI_STRERROR
-        /* NetWare doesn't have gai_strerror and on Windows it isn't deemed
-           thread-safe */
-        gai_strerror(conn->async.status)
-#else
-        Curl_strerror(conn, conn->async.status)
-#endif
-    );
+  const char *host_or_proxy;
+  CURLcode rc;
+  if(conn->bits.httpproxy) {
+    host_or_proxy = "proxy";
+    rc = CURLE_COULDNT_RESOLVE_PROXY;
+  }
+  else {
+    host_or_proxy = "host";
+    rc = CURLE_COULDNT_RESOLVE_HOST;
+  }
+
+  failf(conn->data, "Could not resolve %s: %s", host_or_proxy,
+        conn->async.hostname);
+  return rc;
 }
 
 /*
@@ -473,17 +439,9 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(entry)
     *entry = conn->async.dns;
 
-  if(!conn->async.dns) {
-    /* a name was not resolved */
-    if(conn->bits.httpproxy) {
-      resolver_error(conn, "proxy");
-      rc = CURLE_COULDNT_RESOLVE_PROXY;
-    }
-    else {
-      resolver_error(conn, "host");
-      rc = CURLE_COULDNT_RESOLVE_HOST;
-    }
-  }
+  if(!conn->async.dns)
+    /* a name was not resolved, report error */
+    rc = resolver_error(conn);
 
   destroy_async_data(&conn->async);
 
@@ -518,17 +476,18 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
   if(done) {
     getaddrinfo_complete(conn);
-    destroy_async_data(&conn->async);
 
     if(!conn->async.dns) {
-      resolver_error(conn, "host");
-      return CURLE_COULDNT_RESOLVE_HOST;
+      CURLcode rc = resolver_error(conn);
+      destroy_async_data(&conn->async);
+      return rc;
     }
+    destroy_async_data(&conn->async);
     *entry = conn->async.dns;
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    int elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    long elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 

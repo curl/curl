@@ -52,6 +52,7 @@ FAQ
   3.19 How do I get HTTP from a host using a specific IP address?
   3.20 How to SFTP from my user's home directory?
   3.21 Protocol xxx not supported or disabled in libcurl
+  3.22 curl -X gives me HTTP problems
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -97,6 +98,7 @@ FAQ
   5.14 Using C++ non-static functions for callbacks?
   5.15 How do I get an FTP directory listing?
   5.16 I want a different time-out!
+  5.17 Can I write a server with libcurl?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -243,10 +245,10 @@ FAQ
   supervised in any way by the project.
 
   We still get help from companies. Haxx provides web site, bandwidth, mailing
-  lists etc and sourceforge.net hosts project services we take advantage from,
-  like the bug tracker. Also again, some companies have sponsored certain
-  parts of the development in the past and I hope some will continue to do so
-  in the future.
+  lists etc, sourceforge.net hosts project services we take advantage from,
+  like the bug tracker and github hosts the primary git repository. Also
+  again, some companies have sponsored certain parts of the development in the
+  past and I hope some will continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us coding, documenting, testing etc.
@@ -307,17 +309,16 @@ FAQ
   never use it.
 
   In May 2012 Daniel did a counting game and came up with a number that may
-  be completely wrong or somewhat accurate. 300 million!
+  be completely wrong or somewhat accurate. Over 500 million!
 
   See http://daniel.haxx.se/blog/2012/05/16/300m-users/
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca-bundle.crt file that used to be bundled with curl was very outdated
-  (it being last modified year 2000 should tell) and must be replaced with a
-  much more modern and up-to-date version by anyone who wants to verify peers
-  anyway. It is no longer provided, the last curl release that shipped it was
-  curl 7.18.0.
+  The ca cert bundle that used to shipped with curl was very outdated and must
+  be replaced with an up-to-date version by anyone who wants to verify
+  peers. It is no longer provided by curl. The last curl release ever that
+  shipped a ca cert bundle was curl 7.18.0.
 
   In the cURL project we've decided not to attempt to keep this file updated
   (or even present anymore) since deciding what to add to a ca cert bundle is
@@ -417,19 +418,24 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS, PolarSSL, axTLS or
-  qssl, although there should not be many problems using a different
-  library. If anyone does "port" curl to use a different SSL library, we are
-  of course very interested in getting the patch!
+  Curl has been written to use a generic SSL function layer internally, and
+  that SSL functionality can then be provided by one out of many different SSL
+  backends.
+
+  curl can be built to use one of the following SSL alternatives: OpenSSL,
+  GnuTLS, yassl, NSS, PolarSSL, axTLS, Secure Transport (native iOS/OS X),
+  schannel (native Windows) or qssl (native IBM i). They all have their pros
+  and cons, and we try to maintain a comparison of them here:
+  http://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
   That is an OpenSSL binary built for Windows.
 
-  Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
-  on a windows machine to do https://. Check out the curl web site to find
-  accurate and up-to-date pointers to recent OpenSSL DLLs and other binary
-  packages.
+  Curl can be built with OpenSSL to do the SSL stuff. The LIBEAY32.DLL is then
+  what curl needs on a windows machine to do https:// etc. Check out the curl
+  web site to find accurate and up-to-date pointers to recent OpenSSL DLLs and
+  other binary packages.
 
   2.4 Does curl support SOCKS (RFC 1928) ?
 
@@ -465,9 +471,9 @@ FAQ
   3.3 Why doesn't my posting using -F work?
 
   You can't simply use -F or -d at your choice. The web server that will
-  receive your post assumes one of the formats. If the form you're trying to
-  "fake" sets the type to 'multipart/form-data', then and only then you must
-  use the -F type. In all the most common cases, you should use -d which then
+  receive your post expects one of the formats. If the form you're trying to
+  submit uses the type 'multipart/form-data', then and only then you must use
+  the -F type. In all the most common cases, you should use -d which then
   causes a posting with the type 'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
@@ -495,9 +501,9 @@ FAQ
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
 
   To curl, all contents are alike. It doesn't matter how the page was
-  generated. It may be ASP, PHP, Perl, shell-script, SSI or plain
-  HTML-files. There's no difference to curl and it doesn't even know what kind
-  of language that generated the page.
+  generated. It may be ASP, PHP, Perl, shell-script, SSI or plain HTML
+  files. There's no difference to curl and it doesn't even know what kind of
+  language that generated the page.
 
   See also item 3.14 regarding javascript.
 
@@ -731,6 +737,33 @@ FAQ
   part as in "htpt://example.com" or as in the less evident case if you prefix
   the protocol part with a space as in " http://example.com/".
 
+  3.22 curl -X gives me HTTP problems
+
+  In normal circumstances, -X should hardly ever be used.
+
+  By default you use curl without explicitly saying which request method to
+  use when the URL identifies a HTTP transfer. If you just pass in a URL like
+  "curl http://example.com" it will use GET. If you use -d or -F curl will use
+  POST, -I will cause a HEAD and -T will make it a PUT.
+
+  If for whatever reason you're not happy with these default choices that curl
+  does for you, you can override those request methods by specifying -X
+  [WHATEVER]. This way you can for example send a DELETE by doing "curl -X
+  DELETE [URL]".
+
+  It is thus pointless to do "curl -XGET [URL]" as GET would be used
+  anyway. In the same vein it is pointless to do "curl -X POST -d data
+  [URL]"... But you can make a fun and somewhat rare request that sends a
+  request-body in a GET request with something like "curl -X GET -d data
+  [URL]"
+
+  Note that -X doesn't change curl's behavior. It only modifies the actual
+  string sent in the request.
+
+  Accordingly, by using -XPOST on a command line that for example would follow
+  a 303 redirect, you will effectively prevent curl from behaving
+  correctly. Be aware.
+
 
 4. Running Problems
 
@@ -879,8 +912,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, NSS or Microsoft Windows libraries at
-  build-time to provide this functionality.
+  NTLM support requires OpenSSL, GnuTLS, NSS, Secure Transport, or Microsoft
+  Windows libraries at build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
@@ -1253,7 +1286,7 @@ FAQ
 
   If you're using the multi interface, you can also stop a transfer by
   removing the particular easy handle from the multi stack at any moment you
-  think the transfer is done.
+  think the transfer is done or when you wish to abort the transfer.
 
   5.14 Using C++ non-static functions for callbacks?
 
@@ -1310,6 +1343,15 @@ FAQ
   CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
   use that to figure out exactly when the right condition is met when the
   transfer should get stopped.
+
+  5.17 Can I write a server with libcurl?
+
+  No. libcurl offers no functions or building blocks to build any kind of
+  internet protocol server. libcurl is only a client-side library. For server
+  libraries, you need to continue your search elsewhere but there exist many
+  good open source ones out there for most protocols you could possibly want a
+  server for. And there are really good stand-alone ones that have been tested
+  and proven for many years. There's no need for you to reinvent them!
 
 
 6. License Issues

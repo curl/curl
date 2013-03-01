@@ -39,6 +39,7 @@
 /* and finally any "NONE" value. */
 
 #define NV(e) {#e, e}
+#define NV1(e, v) {#e, (v)}
 #define NVEND {NULL, 0}         /* sentinel to mark end of list */
 
 const NameValue setopt_nv_CURLPROXY[] = {
@@ -120,6 +121,13 @@ const NameValue setopt_nv_CURLPROTO[] = {
   NV(CURLPROTO_TELNET),
   NV(CURLPROTO_TFTP),
   NVEND,
+};
+
+/* These options have non-zero default values. */
+static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
+  NV1(CURLOPT_SSL_VERIFYPEER, 1),
+  NV1(CURLOPT_SSL_VERIFYHOST, 1),
+  NVEND
 };
 
 /* Format and add code; jump to nomem on malloc error */
@@ -453,10 +461,19 @@ CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
   if(tag < CURLOPTTYPE_OBJECTPOINT) {
     /* Value is expected to be a long */
     long lval = va_arg(arg, long);
+    long defval = 0L;
+    const NameValue *nv = NULL;
+    for(nv=setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+      if(!strcmp(name, nv->name)) {
+        defval = nv->value;
+        break; /* found it */
+      }
+    }
+
     snprintf(buf, sizeof(buf), "%ldL", lval);
     value = buf;
     ret = curl_easy_setopt(curl, tag, lval);
-    if(!lval)
+    if(lval == defval)
       skip = TRUE;
   }
   else if(tag < CURLOPTTYPE_OFF_T) {

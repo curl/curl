@@ -1,5 +1,5 @@
-#ifndef __CURLX_H
-#define __CURLX_H
+#ifndef HEADER_CURL_CURLX_H
+#define HEADER_CURL_CURLX_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -115,4 +115,5 @@
 # define vaprintf curlx_mvaprintf
 #endif /* ENABLE_CURLX_PRINTF */
 
-#endif /* __CURLX_H */
+#endif /* HEADER_CURL_CURLX_H */
+

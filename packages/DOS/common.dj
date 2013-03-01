@@ -92,7 +92,7 @@ ARES_ROOT    = $(TOPDIR)/ares
 CC   = gcc
 YACC = bison -y
 
-CFLAGS = -g -gcoff -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
+CFLAGS = -g -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
          -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)

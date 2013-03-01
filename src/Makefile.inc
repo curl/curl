@@ -9,12 +9,13 @@
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
-CURLX_ONES = $(top_srcdir)/lib/strtoofft.c \
-	$(top_srcdir)/lib/strdup.c \
-	$(top_srcdir)/lib/rawstr.c \
-	$(top_srcdir)/lib/nonblock.c
+CURLX_ONES = \
+	../lib/strtoofft.c \
+	../lib/strdup.c \
+	../lib/rawstr.c \
+	../lib/nonblock.c
 
-CURL_CFILES = hugehelp.c \
+CURL_CFILES = \
 	tool_binmode.c \
 	tool_bname.c \
 	tool_cb_dbg.c \
@@ -34,6 +35,7 @@ CURL_CFILES = hugehelp.c \
 	tool_help.c \
 	tool_helpers.c \
 	tool_homedir.c \
+	tool_hugehelp.c \
 	tool_libinfo.c \
 	tool_main.c \
 	tool_metalink.c \
@@ -53,7 +55,7 @@ CURL_CFILES = hugehelp.c \
 	tool_writeout.c \
 	tool_xattr.c
 
-CURL_HFILES = hugehelp.h \
+CURL_HFILES = \
 	tool_binmode.h \
 	tool_bname.h \
 	tool_cb_dbg.h \
@@ -73,6 +75,7 @@ CURL_HFILES = hugehelp.h \
 	tool_help.h \
 	tool_helpers.h \
 	tool_homedir.h \
+	tool_hugehelp.h \
 	tool_libinfo.h \
 	tool_main.h \
 	tool_metalink.h \

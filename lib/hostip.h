@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 #include "hash.h"
 #include "curl_addrinfo.h"
 #include "asyn.h"

@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,19 +27,27 @@
  *
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_POLARSSL
 
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
-#include <polarssl/havege.h>
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
 #include <polarssl/version.h>
 
+#if POLARSSL_VERSION_NUMBER >= 0x01000000
+#include <polarssl/error.h>
+#endif /* POLARSSL_VERSION_NUMBER >= 0x01000000 */
+
+#if POLARSSL_VERSION_NUMBER>0x01010000
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
+#else
+#include <polarssl/havege.h>
+#endif /* POLARSSL_VERSION_NUMBER>0x01010000 */
+
 
 #if POLARSSL_VERSION_NUMBER<0x01000000
 /*
@@ -58,6 +66,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
+#include "polarsslthreadlock.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -65,14 +74,43 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* version dependent differences */
-#if POLARSSL_VERSION_NUMBER < 0x01010000
-/* the old way */
-#define HAVEGE_RANDOM havege_rand
-#else
-/* from 1.1.0 */
-#define HAVEGE_RANDOM havege_random
+/* apply threading? */
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#define THREADING_SUPPORT
 #endif
+
+#if defined(THREADING_SUPPORT) && POLARSSL_VERSION_NUMBER>0x01010000
+static entropy_context entropy;
+
+static int  entropy_init_initialized  = 0;
+
+/* start of entropy_init_mutex() */
+static void entropy_init_mutex(entropy_context *ctx)
+{
+  /* lock 0 = entropy_init_mutex() */
+  polarsslthreadlock_lock_function(0);
+  if(entropy_init_initialized == 0) {
+    entropy_init(ctx);
+    entropy_init_initialized = 1;
+  }
+  polarsslthreadlock_unlock_function(0);
+}
+/* end of entropy_init_mutex() */
+
+/* start of entropy_func_mutex() */
+static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
+{
+    int ret;
+    /* lock 1 = entropy_func_mutex() */
+    polarsslthreadlock_lock_function(1);
+    ret = entropy_func(data, output, len);
+    polarsslthreadlock_unlock_function(1);
+
+    return ret;
+}
+/* end of entropy_func_mutex() */
+
+#endif /* THREADING_SUPPORT && POLARSSL_VERSION_NUMBER>0x01010000 */
 
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
@@ -113,6 +151,10 @@ polarssl_connect_step1(struct connectdata *conn,
   void *old_session = NULL;
   size_t old_session_size = 0;
 
+  char errorbuf[128];
+  memset(errorbuf, 0, sizeof(errorbuf));
+
+
   /* PolarSSL only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "PolarSSL does not support SSLv2");
@@ -121,7 +163,33 @@ polarssl_connect_step1(struct connectdata *conn,
   else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
+#if POLARSSL_VERSION_NUMBER<0x01010000
   havege_init(&connssl->hs);
+#else
+#ifdef THREADING_SUPPORT
+  entropy_init_mutex(&entropy);
+
+  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
+                               connssl->ssn.id, connssl->ssn.length)) != 0) {
+#ifdef POLARSSL_ERROR_C
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
+  }
+#else
+  entropy_init(&connssl->entropy);
+
+  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
+                                connssl->ssn.id, connssl->ssn.length)) != 0) {
+#ifdef POLARSSL_ERROR_C
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
+  }
+#endif /* THREADING_SUPPORT */
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
   /* Load the trusted CA */
   memset(&connssl->cacert, 0, sizeof(x509_cert));
@@ -131,8 +199,11 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_SSL_CAFILE]);
 
     if(ret<0) {
-      failf(data, "Error reading ca cert file %s: -0x%04X",
-            data->set.str[STRING_SSL_CAFILE], ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading ca cert file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_SSL_CAFILE], -ret, errorbuf);
 
       if(data->set.ssl.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
@@ -147,8 +218,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_CERT]);
 
     if(ret) {
-      failf(data, "Error reading client cert file %s: -0x%04X",
-            data->set.str[STRING_CERT], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading client cert file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_CERT], -ret, errorbuf);
+
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -160,8 +235,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_KEY_PASSWD]);
 
     if(ret) {
-      failf(data, "Error reading private key %s: -0x%04X",
-            data->set.str[STRING_KEY], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading private key %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_KEY], -ret, errorbuf);
+
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -174,8 +253,12 @@ polarssl_connect_step1(struct connectdata *conn,
                             data->set.str[STRING_SSL_CRLFILE]);
 
     if(ret) {
-      failf(data, "Error reading CRL file %s: -0x%04X",
-            data->set.str[STRING_SSL_CRLFILE], -ret);
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading CRL file %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_SSL_CRLFILE], -ret, errorbuf);
+
       return CURLE_SSL_CRL_BADFILE;
     }
   }
@@ -191,8 +274,13 @@ polarssl_connect_step1(struct connectdata *conn,
   ssl_set_endpoint(&connssl->ssl, SSL_IS_CLIENT);
   ssl_set_authmode(&connssl->ssl, SSL_VERIFY_OPTIONAL);
 
-  ssl_set_rng(&connssl->ssl, HAVEGE_RANDOM,
+#if POLARSSL_VERSION_NUMBER<0x01010000
+  ssl_set_rng(&connssl->ssl, havege_rand,
               &connssl->hs);
+#else
+  ssl_set_rng(&connssl->ssl, ctr_drbg_random,
+              &connssl->ctr_drbg);
+#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_set_bio(&connssl->ssl,
               net_recv, &conn->sock[sockindex],
               net_send, &conn->sock[sockindex]);
@@ -253,6 +341,9 @@ polarssl_connect_step2(struct connectdata *conn,
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
 
+  char errorbuf[128];
+  memset(errorbuf, 0, sizeof(errorbuf));
+
   conn->recv[sockindex] = polarssl_recv;
   conn->send[sockindex] = polarssl_send;
 
@@ -261,8 +352,13 @@ polarssl_connect_step2(struct connectdata *conn,
       break;
     else if(ret != POLARSSL_ERR_NET_WANT_READ &&
             ret != POLARSSL_ERR_NET_WANT_WRITE) {
-      failf(data, "ssl_handshake returned -0x%04X", -ret);
-      return CURLE_SSL_CONNECT_ERROR;
+#ifdef POLARSSL_ERROR_C
+     error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+     failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s",
+                                                    -ret, errorbuf);
+
+     return CURLE_SSL_CONNECT_ERROR;
     }
     else {
       if(ret == POLARSSL_ERR_NET_WANT_READ) {
@@ -593,4 +689,18 @@ Curl_polarssl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif
+/*
+ * return 0 error initializing SSL
+ * return 1 SSL initialized successfully
+ */
+int polarssl_init(void)
+{
+  return polarsslthreadlock_thread_setup();
+}
+
+void polarssl_cleanup(void)
+{
+  (void)polarsslthreadlock_thread_cleanup();
+}
+
+#endif /* USE_POLARSSL */

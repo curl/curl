@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifndef HAVE_STRDUP
 extern char *curlx_strdup(const char *str);

@@ -1,6 +1,5 @@
-#ifndef __HTTP_H
-#define __HTTP_H
-
+#ifndef HEADER_CURL_HTTP_H
+#define HEADER_CURL_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -168,4 +167,5 @@ Curl_http_output_auth(struct connectdata *conn,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
 
-#endif
+#endif /* HEADER_CURL_HTTP_H */
+
