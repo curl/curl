@@ -1294,6 +1294,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       if(result)
         return result;
 
+      data->req.bytecount += chunk;
       size -= chunk;
 
       infof(data, "Written %" FORMAT_OFF_TU " bytes, %" FORMAT_OFF_TU
@@ -1317,11 +1318,11 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     if(!size)
       /* The entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-    else
+    else {
       /* IMAP download */
+      data->req.maxdownload = size;
       Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, NULL, -1, NULL);
-
-    data->req.maxdownload = size;
+    }
   }
   else {
     /* We don't know how to parse this line */
