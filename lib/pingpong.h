@@ -32,6 +32,13 @@
 /* forward-declaration, this is defined in urldata.h */
 struct connectdata;
 
+typedef enum {
+  FTPTRANSFER_BODY, /* yes do transfer a body */
+  FTPTRANSFER_INFO, /* do still go through to get info/headers */
+  FTPTRANSFER_NONE, /* don't get anything and don't get info */
+  FTPTRANSFER_LAST  /* end of list marker, never used */
+} curl_pp_transfer;
+
 /*
  * 'pingpong' is the generic struct used for protocols doing server<->client
  * conversations in a back-and-forth style such as FTP, IMAP, POP3, SMTP etc.
@@ -129,5 +136,15 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp);
 
 int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks,
                     int numsocks);
+
+
+/***********************************************************************
+ *
+ * Curl_pp_moredata()
+ *
+ * Returns whether there are still more data in the cache and so a call
+ * to Curl_pp_readresp() will not block.
+ */
+bool Curl_pp_moredata(struct pingpong *pp);
 
 #endif /* HEADER_CURL_PINGPONG_H */

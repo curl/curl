@@ -1394,9 +1394,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_FILE:
     /*
-     * FILE pointer to write to or include in the data write callback
+     * FILE pointer to write to. Or possibly
+     * used as argument to the write callback.
      */
-    data->set.out = va_arg(param, FILE *);
+    data->set.out = va_arg(param, void *);
     break;
   case CURLOPT_FTPPORT:
     /*
@@ -1437,7 +1438,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * FILE pointer to read the file to be uploaded from. Or possibly
      * used as argument to the read callback.
      */
-    data->set.in = va_arg(param, FILE *);
+    data->set.in = va_arg(param, void *);
     break;
   case CURLOPT_INFILESIZE:
     /*

@@ -213,13 +213,14 @@ my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 my $has_metalink;# set if curl is built with Metalink support
 
-my $has_openssl; # built with a lib using an OpenSSL-like API
-my $has_gnutls;  # built with GnuTLS
-my $has_nss;     # built with NSS
-my $has_yassl;   # built with yassl
-my $has_polarssl;# built with polarssl
-my $has_axtls;   # built with axTLS
-my $has_winssl;  # built with WinSSL (Schannel/SSPI)
+my $has_openssl;  # built with a lib using an OpenSSL-like API
+my $has_gnutls;   # built with GnuTLS
+my $has_nss;      # built with NSS
+my $has_yassl;    # built with yassl
+my $has_polarssl; # built with polarssl
+my $has_axtls;    # built with axTLS
+my $has_winssl;   # built with WinSSL (Schannel/SSPI)
+my $has_darwinssl;# build with DarwinSSL (Secure Transport)
 
 my $has_shared = "unknown";  # built shared
 
@@ -2258,6 +2259,10 @@ sub checksystem {
                $has_axtls=1;
                $ssllib="axTLS";
            }
+           elsif ($libcurl =~ /securetransport/i) {
+               $has_darwinssl=1;
+               $ssllib="DarwinSSL";
+           }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2679,6 +2684,11 @@ sub singletest {
         }
         elsif($f eq "WinSSL") {
             if($has_winssl) {
+                next;
+            }
+        }
+        elsif($f eq "DarwinSSL") {
+            if($has_darwinssl) {
                 next;
             }
         }

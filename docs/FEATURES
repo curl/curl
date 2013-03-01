@@ -156,7 +156,7 @@ POP3S (*1)
 IMAP
  - authentication: Clear Text and SASL
  - select mailbox
- - basic fetch e-mail support
+ - fetch e-mails with support for specifing the UID and SECTION
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
    NTLM (*9)
  - via http-proxy

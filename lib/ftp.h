@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,13 +97,6 @@ typedef enum {
                             file */
 } curl_ftpfile;
 
-typedef enum {
-  FTPTRANSFER_BODY, /* yes do transfer a body */
-  FTPTRANSFER_INFO, /* do still go through to get info/headers */
-  FTPTRANSFER_NONE, /* don't get anything and don't get info */
-  FTPTRANSFER_LAST  /* end of list marker, never used */
-} curl_ftptransfer;
-
 /* This FTP struct is used in the SessionHandle. All FTP data that is
    connection-oriented must be in FTP_conn to properly deal with the fact that
    perhaps the SessionHandle is changed between the times the connection is
@@ -115,7 +108,7 @@ struct FTP {
 
   /* transfer a file/body or not, done as a typedefed enum just to make
      debuggers display the full symbol and not just the numerical value */
-  curl_ftptransfer transfer;
+  curl_pp_transfer transfer;
   curl_off_t downloadsize;
 };
 

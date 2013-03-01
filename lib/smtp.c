@@ -313,7 +313,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
-    "AUTH",
+    "AUTH_FINAL",
     "MAIL",
     "RCPT",
     "DATA",
@@ -460,7 +460,7 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   else if(smtpc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
     state1 = SMTP_AUTH_PLAIN;
-    state2 = SMTP_AUTH;
+    state2 = SMTP_AUTH_FINAL;
     smtpc->authused = SASL_MECH_PLAIN;
     result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                             conn->passwd, &initresp, &len);
@@ -622,7 +622,7 @@ static CURLcode smtp_state_auth_plain_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(plainauth);
@@ -696,7 +696,7 @@ static CURLcode smtp_state_auth_login_password_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(authpasswd);
@@ -751,7 +751,7 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", rplyb64);
 
       if(!result)
-        state(conn, SMTP_AUTH);
+        state(conn, SMTP_AUTH_FINAL);
     }
 
     Curl_safefree(rplyb64);
@@ -821,7 +821,7 @@ static CURLcode smtp_state_auth_digest_resp_resp(struct connectdata *conn,
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "");
 
     if(!result)
-      state(conn, SMTP_AUTH);
+      state(conn, SMTP_AUTH_FINAL);
   }
 
   return result;
@@ -898,7 +898,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type3msg);
 
         if(!result)
-          state(conn, SMTP_AUTH);
+          state(conn, SMTP_AUTH_FINAL);
       }
 
       Curl_safefree(type3msg);
@@ -1007,16 +1007,17 @@ static CURLcode smtp_mail(struct connectdata *conn)
 static CURLcode smtp_rcpt_to(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   /* Send the RCPT TO command */
-  if(smtpc->rcpt) {
-    if(smtpc->rcpt->data[0] == '<')
+  if(smtp->rcpt) {
+    if(smtp->rcpt->data[0] == '<')
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtpc->rcpt->data);
+                             smtp->rcpt->data);
     else
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                             smtpc->rcpt->data);
+                             smtp->rcpt->data);
     if(!result)
       state(conn, SMTP_RCPT);
   }
@@ -1030,6 +1031,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1039,8 +1041,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
     state(conn, SMTP_STOP);
   }
   else {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-    smtpc->rcpt = data->set.mail_rcpt;
+    smtp->rcpt = data->set.mail_rcpt;
 
     result = smtp_rcpt_to(conn);
   }
@@ -1054,6 +1055,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   (void)instate; /* no use for this yet */
 
@@ -1063,14 +1065,12 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     state(conn, SMTP_STOP);
   }
   else {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-    if(smtpc->rcpt) {
-      smtpc->rcpt = smtpc->rcpt->next;
+    if(smtp->rcpt) {
+      smtp->rcpt = smtp->rcpt->next;
       result = smtp_rcpt_to(conn);
 
       /* If we failed or still are sending RCPT data then return */
-      if(result || smtpc->rcpt)
+      if(result || smtp->rcpt)
         return result;
     }
 
@@ -1090,9 +1090,6 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
-  struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
-
   (void)instate; /* no use for this yet */
 
   if(smtpcode != 354) {
@@ -1101,10 +1098,9 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
   }
 
   /* SMTP upload */
-  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      FIRSTSOCKET, smtp->bytecountp);
+  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
 
-  /* End of do phase */
+  /* End of DO phase */
   state(conn, SMTP_STOP);
 
   return CURLE_OK;
@@ -1123,7 +1119,7 @@ static CURLcode smtp_state_postdata_resp(struct connectdata *conn,
   if(smtpcode != 250)
     result = CURLE_RECV_ERROR;
 
-  /* End of done phase */
+  /* End of DONE phase */
   state(conn, SMTP_STOP);
 
   return result;
@@ -1213,7 +1209,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-    case SMTP_AUTH:
+    case SMTP_AUTH_FINAL:
       result = smtp_state_auth_final_resp(conn, smtpcode, smtpc->state);
       break;
 
@@ -1280,23 +1276,13 @@ static CURLcode smtp_block_statemach(struct connectdata *conn)
 static CURLcode smtp_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   if(!smtp) {
-    smtp = data->state.proto.smtp = calloc(sizeof(struct FTP), 1);
+    smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
     if(!smtp)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Get some initial data into the smtp struct */
-  smtp->bytecountp = &data->req.bytecount;
-
-  /* No need to duplicate user+password, the connectdata struct won't change
-     during a session, but we re-init them here since on subsequent inits
-     since the conn struct may have changed or been replaced.
-  */
-  smtp->user = conn->user;
-  smtp->passwd = conn->passwd;
 
   return CURLE_OK;
 }
@@ -1385,17 +1371,16 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct FTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->state.proto.smtp;
   ssize_t bytes_written;
 
   (void)premature;
 
   if(!smtp)
-    /* When the easy handle is removed from the multi while libcurl is still
-     * trying to resolve the host name, it seems that the SMTP struct is not
-     * yet initialized, but the removal action calls Curl_done() which calls
-     * this function. So we simply return success if no SMTP pointer is set.
-     */
+    /* When the easy handle is removed from the multi interface while libcurl
+       is still trying to resolve the host name, the SMTP struct is not yet
+       initialized. However, the removal action calls Curl_done() which in
+       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
@@ -1439,7 +1424,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = smtp_block_statemach(conn);
   }
 
-  /* Clear the transfer mode for the next connection */
+  /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -1449,8 +1434,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  *
  * smtp_perform()
  *
- * This is the actual DO function for SMTP. Get a file/directory according to
- * the options previously setup.
+ * This is the actual DO function for SMTP. Send a mail according to the
+ * options previously setup.
  */
 static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
@@ -1462,7 +1447,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct FTP *smtp = conn->data->state.proto.smtp;
+    struct SMTP *smtp = conn->data->state.proto.smtp;
     smtp->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1499,12 +1484,10 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct SMTP' to play with. For new connections,
-    the struct SMTP is allocated and setup in the smtp_connect() function.
-  */
+  /* Since connections can be re-used between SessionHandles, there might be a
+     connection already existing but on a fresh SessionHandle struct. As such
+     we make sure we have a good SMTP struct to play with. For new connections
+     the SMTP struct is allocated and setup in the smtp_connect() function. */
   Curl_reset_reqproto(conn);
   result = smtp_init(conn);
   if(result)
@@ -1527,6 +1510,7 @@ static CURLcode smtp_quit(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
+  /* Send the QUIT command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
   if(result)
     return result;
@@ -1552,12 +1536,12 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to */
+     disconnect wait in vain and cause more problems than we need to. */
 
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && smtpc->pp.conn)
-    (void)smtp_quit(conn); /* ignore errors on the LOGOUT */
+    (void)smtp_quit(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
@@ -1574,7 +1558,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 /* Call this when the DO phase has completed */
 static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct FTP *smtp = conn->data->state.proto.smtp;
+  struct SMTP *smtp = conn->data->state.proto.smtp;
 
   (void)connected;
 

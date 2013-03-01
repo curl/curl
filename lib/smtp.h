@@ -44,7 +44,7 @@ typedef enum {
   SMTP_AUTH_DIGESTMD5_RESP,
   SMTP_AUTH_NTLM,
   SMTP_AUTH_NTLM_TYPE2MSG,
-  SMTP_AUTH,
+  SMTP_AUTH_FINAL,
   SMTP_MAIL,        /* MAIL FROM */
   SMTP_RCPT,        /* RCPT TO */
   SMTP_DATA,
@@ -53,18 +53,26 @@ typedef enum {
   SMTP_LAST         /* never used */
 } smtpstate;
 
+/* This SMTP struct is used in the SessionHandle. All SMTP data that is
+   connection-oriented must be in smtp_conn to properly deal with the fact that
+   perhaps the SessionHandle is changed between the times the connection is
+   used. */
+struct SMTP {
+  curl_pp_transfer transfer;
+  struct curl_slist *rcpt; /* Recipient list */
+};
+
 /* smtp_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct smtp_conn {
   struct pingpong pp;
+  smtpstate state;         /* Always use smtp.c:state() to change state! */
+  bool ssldone;            /* Is connect() over SSL done? */
   char *domain;            /* Client address/name to send in the EHLO */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
   unsigned int authmechs;  /* Accepted authentication mechanisms */
   unsigned int authused;   /* Auth mechanism used for the connection */
-  smtpstate state;         /* Always use smtp.c:state() to change state! */
-  struct curl_slist *rcpt; /* Recipient list */
-  bool ssldone;            /* Is connect() over SSL done? */
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */

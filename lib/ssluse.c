@@ -237,11 +237,9 @@ static int ossl_seed(struct SessionHandle *data)
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
   do {
-    int len;
     unsigned char randb[64];
-    Curl_ossl_random(data, randb, sizeof(randb));
-
-    len = sizeof(randb);
+    int len = sizeof(randb);
+    RAND_bytes(randb, len);
     RAND_add(randb, len, (len >> 1));
   } while(!RAND_status());
 

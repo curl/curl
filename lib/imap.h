@@ -43,28 +43,42 @@ typedef enum {
   IMAP_AUTHENTICATE_DIGESTMD5_RESP,
   IMAP_AUTHENTICATE_NTLM,
   IMAP_AUTHENTICATE_NTLM_TYPE2MSG,
-  IMAP_AUTHENTICATE,
+  IMAP_AUTHENTICATE_FINAL,
   IMAP_LOGIN,
   IMAP_SELECT,
   IMAP_FETCH,
+  IMAP_FETCH_FINAL,
   IMAP_LOGOUT,
   IMAP_LAST          /* never used */
 } imapstate;
+
+/* This IMAP struct is used in the SessionHandle. All IMAP data that is
+   connection-oriented must be in imap_conn to properly deal with the fact that
+   perhaps the SessionHandle is changed between the times the connection is
+   used. */
+struct IMAP {
+  curl_pp_transfer transfer;
+  char *mailbox;          /* Mailbox to select */
+  char *uidvalidity;      /* UIDVALIDITY to check in select */
+  char *uid;              /* Message UID to fetch */
+  char *section;          /* Message SECTION to fetch */
+};
 
 /* imap_conn is used for struct connection-oriented data in the connectdata
    struct */
 struct imap_conn {
   struct pingpong pp;
-  char *mailbox;          /* Mailbox to select */
-  unsigned int authmechs; /* Accepted authentication mechanisms */
-  unsigned int authused;  /* Auth mechanism used for the connection */
-  imapstate state;        /* Always use imap.c:state() to change state! */
-  int cmdid;              /* Last used command ID */
-  char resptag[5];        /* Response tag to wait for */
-  bool ssldone;           /* Is connect() over SSL done? */
-  bool tls_supported;     /* StartTLS capability supported by server */
-  bool login_disabled;    /* LOGIN command explicitly disabled by server */
-  bool ir_supported;      /* Initial response supported by server */
+  imapstate state;            /* Always use imap.c:state() to change state! */
+  bool ssldone;               /* Is connect() over SSL done? */
+  unsigned int authmechs;     /* Accepted authentication mechanisms */
+  unsigned int authused;      /* Auth mechanism used for the connection */
+  int cmdid;                  /* Last used command ID */
+  char resptag[5];            /* Response tag to wait for */
+  bool tls_supported;         /* StartTLS capability supported by server */
+  bool login_disabled;        /* LOGIN command disabled by server */
+  bool ir_supported;          /* Initial response supported by server */
+  char *mailbox;              /* The last selected mailbox */
+  char *mailbox_uidvalidity;  /* UIDVALIDITY parsed from select response */
 };
 
 extern const struct Curl_handler Curl_handler_imap;

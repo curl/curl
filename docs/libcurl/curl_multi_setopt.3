@@ -49,7 +49,7 @@ argument with \fICURLMOPT_SOCKETDATA\fP.  See \fIcurl_multi_socket(3)\fP for
 more callback details.
 .IP CURLMOPT_SOCKETDATA
 Pass a pointer to whatever you want passed to the \fBcurl_socket_callback\fP's
-forth argument, the userp pointer. This is not used by libcurl but only
+fourth argument, the userp pointer. This is not used by libcurl but only
 passed-thru as-is. Set the callback pointer with
 \fICURLMOPT_SOCKETFUNCTION\fP.
 .IP CURLMOPT_PIPELINING
@@ -61,14 +61,17 @@ on the same connection rather than being executed in parallel. (Added in
 7.16.0)
 .IP CURLMOPT_TIMERFUNCTION
 Pass a pointer to a function matching the \fBcurl_multi_timer_callback\fP
-prototype.  This function will then be called when the timeout value
+prototype: int curl_multi_timer_callback(CURLM *multi /* multi handle */,
+long timeout_ms /* timeout in milliseconds */, void *userp /* TIMERDATA */).
+This function will then be called when the timeout value
 changes. The timeout value is at what latest time the application should call
 one of the \&"performing" functions of the multi interface
 (\fIcurl_multi_socket_action(3)\fP and \fIcurl_multi_perform(3)\fP) - to allow
 libcurl to keep timeouts and retries etc to work. A timeout value of -1 means
 that there is no timeout at all, and 0 means that the timeout is already
 reached. Libcurl attempts to limit calling this only when the fixed future
-timeout time actually changes. See also \fICURLMOPT_TIMERDATA\fP. This
+timeout time actually changes. See also \fICURLMOPT_TIMERDATA\fP. The callback
+should return 0 on success, and -1 on error. This
 callback can be used instead of, or in addition to,
 \fIcurl_multi_timeout(3)\fP. (Added in 7.16.0)
 .IP CURLMOPT_TIMERDATA
