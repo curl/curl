@@ -1721,8 +1721,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
  *
  * imap_perform()
  *
- * This is the actual DO function for IMAP. Fetch a message according to the
- * options previously setup.
+ * This is the actual DO function for IMAP. Fetch or append a message
+ * according to the options previously setup.
  */
 static CURLcode imap_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
@@ -1743,10 +1743,14 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   *dophase_done = FALSE; /* not done yet */
 
   /* Start the first command in the DO phase */
-  if(imap->mailbox && imapc->mailbox &&
-     !strcmp(imap->mailbox, imapc->mailbox) &&
-     (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
-      !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity))) {
+  if(conn->data->set.upload)
+    /* APPEND can be executed directly */
+    result = imap_append(conn);
+    /* FETCH needs a selected mailbox */
+  else if(imap->mailbox && imapc->mailbox &&
+          !strcmp(imap->mailbox, imapc->mailbox) &&
+          (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
+           !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity))) {
     /* This mailbox (with the same UIDVALIDITY if set) is already selected on
        this connection so go straight to the next fetch operation */
     result = imap_fetch(conn);
