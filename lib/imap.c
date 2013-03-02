@@ -1287,7 +1287,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
   (void)instate; /* no use for this yet */
 
-  if('*' != imapcode) {
+  if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, 0);
     state(conn, IMAP_STOP);
     return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
@@ -1375,7 +1375,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
 
   (void)instate; /* No use for this yet */
 
-  if('O' != imapcode)
+  if(imapcode != 'O')
     result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
   else
     result = CURLE_OK;
