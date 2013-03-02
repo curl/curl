@@ -1395,7 +1395,11 @@ static CURLcode imap_state_append_resp(struct connectdata *conn,
 
   (void)instate; /* No use for this yet */
 
-  if(imapcode == '+') {
+  if(imapcode != '+') {
+    state(conn, IMAP_STOP);
+    return CURLE_UPLOAD_FAILED;
+  }
+  else {
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* No download */
                         FIRSTSOCKET, NULL);
@@ -1403,10 +1407,6 @@ static CURLcode imap_state_append_resp(struct connectdata *conn,
     /* Stop now and let the core go from DO to PERFORM phase */
     state(conn, IMAP_STOP);
     return CURLE_OK;
-  }
-  else {
-    state(conn, IMAP_STOP);
-    return CURLE_UPLOAD_FAILED;
   }
 }
 
