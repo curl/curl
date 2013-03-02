@@ -1273,7 +1273,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
   return result;
 }
 
-/* For the (first line of the) FETCH response */
+/* For the (first line of the) FETCH responses */
 static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
                                       imapstate instate)
 {
@@ -1366,7 +1366,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   return result;
 }
 
-/* For the final response to the FETCH command */
+/* For final FETCH responses performed after the download */
 static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
                                             int imapcode,
                                             imapstate instate)
@@ -1387,8 +1387,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
 }
 
 /* For APPEND responses */
-static CURLcode imap_state_append_resp(struct connectdata *conn,
-                                       int imapcode,
+static CURLcode imap_state_append_resp(struct connectdata *conn, int imapcode,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
@@ -1401,10 +1400,12 @@ static CURLcode imap_state_append_resp(struct connectdata *conn,
   }
   else {
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* No download */
-                        FIRSTSOCKET, NULL);
+
+    /* IMAP upload */
+    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
   }
 
+  /* End of DO phase */
   state(conn, IMAP_STOP);
 
   return result;
@@ -1425,6 +1426,7 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
   else
     result = CURLE_UPLOAD_FAILED;
 
+  /* End of DONE phase */
   state(conn, IMAP_STOP);
 
   return result;
