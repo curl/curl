@@ -1252,6 +1252,8 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
   const char *ptr = data->state.buffer;
+  bool parsed = FALSE;
+  curl_off_t size;
 
   (void)instate; /* no use for this yet */
 
@@ -1267,11 +1269,16 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     ptr++;
 
   if(*ptr == '{') {
-    curl_off_t size = curlx_strtoofft(ptr + 1, NULL, 10);
-    if(size)
-      Curl_pgrsSetDownloadSize(data, size);
+    char *endptr;
+    size = curlx_strtoofft(ptr + 1, &endptr, 10);
+    if(endptr - ptr > 1 && endptr[0] == '}' &&
+       endptr[1] == '\r' && endptr[2] == '\0')
+      parsed = TRUE;
+  }
 
+  if(parsed) {
     infof(data, "Found %" FORMAT_OFF_TU " bytes to download\n", size);
+    Curl_pgrsSetDownloadSize(data, size);
 
     if(pp->cache) {
       /* At this point there is a bunch of data in the header "cache" that is
@@ -1287,6 +1294,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       if(result)
         return result;
 
+      data->req.bytecount += chunk;
       size -= chunk;
 
       infof(data, "Written %" FORMAT_OFF_TU " bytes, %" FORMAT_OFF_TU
@@ -1310,15 +1318,17 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
     if(!size)
       /* The entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-    else
+    else {
       /* IMAP download */
+      data->req.maxdownload = size;
       Curl_setup_transfer(conn, FIRSTSOCKET, size, FALSE, NULL, -1, NULL);
-
-    data->req.maxdownload = size;
+    }
   }
-  else
+  else {
     /* We don't know how to parse this line */
+    failf(pp->conn->data, "Failed to parse FETCH response.");
     result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+  }
 
   /* End of DO phase */
   state(conn, IMAP_STOP);
