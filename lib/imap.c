@@ -710,6 +710,33 @@ static CURLcode imap_fetch(struct connectdata *conn)
   return result;
 }
 
+static CURLcode imap_append(struct connectdata *conn)
+{
+  CURLcode result;
+  struct IMAP *imap = conn->data->state.proto.imap;
+  char *mailbox;
+
+  if(conn->data->set.infilesize < 0) {
+    failf(conn->data, "Cannot APPEND with unknown input file size\n");
+    return CURLE_UPLOAD_FAILED;
+  }
+
+  mailbox = imap_atom(imap->mailbox);
+
+  if(!mailbox)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = imap_sendf(conn, "APPEND %s (\\Seen) {%" FORMAT_OFF_T "}",
+                      mailbox, conn->data->set.infilesize);
+
+  Curl_safefree(mailbox);
+
+  if(!result)
+    state(conn, IMAP_APPEND);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             int imapcode,
@@ -1355,33 +1382,6 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
 
   /* End of DONE phase */
   state(conn, IMAP_STOP);
-
-  return result;
-}
-
-static CURLcode imap_append(struct connectdata *conn)
-{
-  CURLcode result;
-  struct IMAP *imap = conn->data->state.proto.imap;
-  char *mailbox;
-
-  if(conn->data->set.infilesize < 0) {
-    failf(conn->data, "Cannot APPEND with unknown input file size\n");
-    return CURLE_UPLOAD_FAILED;
-  }
-
-  mailbox = imap_atom(imap->mailbox);
-
-  if(!mailbox)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = imap_sendf(conn, "APPEND %s (\\Seen) {%" FORMAT_OFF_T "}",
-                      mailbox, conn->data->set.infilesize);
-
-  Curl_safefree(mailbox);
-
-  if(!result)
-    state(conn, IMAP_APPEND);
 
   return result;
 }
