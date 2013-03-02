@@ -1391,23 +1391,23 @@ static CURLcode imap_state_append_resp(struct connectdata *conn,
                                        int imapcode,
                                        imapstate instate)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
 
   (void)instate; /* No use for this yet */
 
   if(imapcode != '+') {
-    state(conn, IMAP_STOP);
-    return CURLE_UPLOAD_FAILED;
+    result = CURLE_UPLOAD_FAILED;
   }
   else {
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* No download */
                         FIRSTSOCKET, NULL);
-
-    /* Stop now and let the core go from DO to PERFORM phase */
-    state(conn, IMAP_STOP);
-    return CURLE_OK;
   }
+
+  state(conn, IMAP_STOP);
+
+  return result;
 }
 
 /* For final APPEND responses performed after the upload */
