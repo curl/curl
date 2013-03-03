@@ -1713,6 +1713,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(imap->uidvalidity);
   Curl_safefree(imap->uid);
   Curl_safefree(imap->section);
+  Curl_safefree(imap->custom);
+  Curl_safefree(imap->custom_params);
 
   /* Clear the transfer mode for the next request */
   imap->transfer = FTPTRANSFER_BODY;

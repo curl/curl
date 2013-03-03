@@ -65,6 +65,8 @@ struct IMAP {
   char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
   char *section;          /* Message SECTION to fetch */
+  char *custom;           /* Custom request */
+  char *custom_params;    /* Parameters for the custom request */
 };
 
 /* imap_conn is used for struct connection-oriented data in the connectdata
