@@ -730,16 +730,18 @@ static CURLcode imap_append(struct connectdata *conn)
   struct IMAP *imap = conn->data->state.proto.imap;
   char *mailbox;
 
+  /* Check we know the size of the upload */
   if(conn->data->set.infilesize < 0) {
     failf(conn->data, "Cannot APPEND with unknown input file size\n");
     return CURLE_UPLOAD_FAILED;
   }
 
+  /* Make sure the mailbox is in the correct atom format */
   mailbox = imap_atom(imap->mailbox);
-
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
+  /* Send the APPEND command */
   result = imap_sendf(conn, "APPEND %s (\\Seen) {%" FORMAT_OFF_T "}",
                       mailbox, conn->data->set.infilesize);
 
