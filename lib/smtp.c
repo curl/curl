@@ -343,12 +343,10 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, SMTP_EHLO);
 
-  state(conn, SMTP_EHLO);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode smtp_state_helo(struct connectdata *conn)
@@ -362,12 +360,10 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   /* Send the HELO command */
   result = Curl_pp_sendf(&smtpc->pp, "HELO %s", smtpc->domain);
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, SMTP_HELO);
 
-  state(conn, SMTP_HELO);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode smtp_state_starttls(struct connectdata *conn)
@@ -996,10 +992,8 @@ static CURLcode smtp_mail(struct connectdata *conn)
   Curl_safefree(auth);
   Curl_safefree(size);
 
-  if(result)
-    return result;
-
-  state(conn, SMTP_MAIL);
+  if(!result)
+    state(conn, SMTP_MAIL);
 
   return result;
 }
@@ -1077,10 +1071,8 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     /* Send the DATA command */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA");
 
-    if(result)
-      return result;
-
-    state(conn, SMTP_DATA);
+    if(!result)
+      state(conn, SMTP_DATA);
   }
 
   return result;
