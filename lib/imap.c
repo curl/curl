@@ -87,6 +87,7 @@
 
 /* Local API functions */
 static CURLcode imap_parse_url_path(struct connectdata *conn);
+static CURLcode imap_parse_custom_request(struct connectdata *conn);
 static CURLcode imap_regular_transfer(struct connectdata *conn, bool *done);
 static CURLcode imap_do(struct connectdata *conn, bool *done);
 static CURLcode imap_done(struct connectdata *conn, CURLcode status,
@@ -1806,6 +1807,11 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
+  /* Parse the custom request */
+  result = imap_parse_custom_request(conn);
+  if(result)
+    return result;
+
   result = imap_regular_transfer(conn, done);
 
   return result;
@@ -2015,6 +2021,37 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
     return CURLE_URL_MALFORMAT;
 
   return CURLE_OK;
+}
+
+static CURLcode imap_parse_custom_request(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+
+  if(custom) {
+    /* URL decode the custom request */
+    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, TRUE);
+
+    /* Extract the parameters if specified */
+    if(!result) {
+      const char *params = imap->custom;
+
+      while(*params && *params != ' ')
+        params++;
+
+      if(*params) {
+        imap->custom_params = strdup(params);
+        imap->custom[params - imap->custom] = '\0';
+
+        if(!imap->custom_params)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+    }
+  }
+
+  return result;
 }
 
 /* Call this when the DO phase has completed */
