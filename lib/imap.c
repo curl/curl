@@ -1794,8 +1794,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
  *
  * imap_perform()
  *
- * This is the actual DO function for IMAP. Fetch or append a message
- * according to the options previously setup.
+ * This is the actual DO function for IMAP. Fetch or append a message, or do
+ * other things according to the options previously setup.
  */
 static CURLcode imap_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
@@ -1805,6 +1805,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   struct SessionHandle *data = conn->data;
   struct IMAP *imap = data->state.proto.imap;
   struct imap_conn *imapc = &conn->proto.imapc;
+  bool selected = FALSE;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -1815,20 +1816,26 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 
   *dophase_done = FALSE; /* not done yet */
 
+  /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
+     has already been selected on this connection */
+  if(imap->mailbox && imapc->mailbox &&
+     !strcmp(imap->mailbox, imapc->mailbox) &&
+     (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
+      !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)))
+    selected = TRUE;
+
   /* Start the first command in the DO phase */
   if(conn->data->set.upload)
     /* APPEND can be executed directly */
     result = imap_append(conn);
-    /* FETCH needs a selected mailbox */
-  else if(imap->mailbox && imapc->mailbox &&
-          !strcmp(imap->mailbox, imapc->mailbox) &&
-          (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
-           !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity))) {
-    /* This mailbox (with the same UIDVALIDITY if set) is already selected on
-       this connection so go straight to the next fetch operation */
+  else if(imap->custom && (selected || !imap->mailbox))
+    /* Custom command using the same mailbox or no mailbox */
+    result = imap_custom(conn);
+  else if(!imap->custom && selected)
+    /* FETCH from the same mailbox */
     result = imap_fetch(conn);
-  }
   else
+    /* SELECT the mailbox */
     result = imap_select(conn);
 
   if(result)
