@@ -389,12 +389,10 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
   /* Send the CAPA command */
   result = Curl_pp_sendf(&pop3c->pp, "CAPA");
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, POP3_CAPA);
 
-  state(conn, POP3_CAPA);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode pop3_state_starttls(struct connectdata *conn)
@@ -446,12 +444,10 @@ static CURLcode pop3_state_user(struct connectdata *conn)
   /* Send the USER command */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
                          conn->user ? conn->user : "");
-  if(result)
-    return result;
+  if(!result)
+    state(conn, POP3_USER);
 
-  state(conn, POP3_USER);
-
-  return CURLE_OK;
+  return result;
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
@@ -1021,10 +1017,8 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
     /* Send the PASS command */
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
                            conn->passwd ? conn->passwd : "");
-  if(result)
-    return result;
-
-  state(conn, POP3_PASS);
+  if(!result)
+    state(conn, POP3_PASS);
 
   return result;
 }
@@ -1078,10 +1072,8 @@ static CURLcode pop3_command(struct connectdata *conn)
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command));
 
-  if(result)
-    return result;
-
-  state(conn, POP3_COMMAND);
+  if(!result)
+    state(conn, POP3_COMMAND);
 
   return result;
 }
