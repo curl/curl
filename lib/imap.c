@@ -364,6 +364,7 @@ static bool imap_matchresp(const char *line, size_t len, const char *cmd)
 static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
+  struct IMAP *imap = conn->data->state.proto.imap;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *id = imapc->resptag;
   size_t id_len = strlen(id);
@@ -403,6 +404,17 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
 
       case IMAP_FETCH:
         if(!imap_matchresp(line, len, "FETCH"))
+          return FALSE;
+        break;
+
+      case IMAP_CUSTOM:
+        /* When dealing with a custom command, we are interested in all
+           intermediate responses which match the parameter name. The
+           exceptions are SELECT and EXAMINE commands, for which no
+           filtering is (or can be easily) done. */
+        if(!imap_matchresp(line, len, imap->custom) &&
+           strcmp(imap->custom, "SELECT") &&
+           strcmp(imap->custom, "EXAMINE"))
           return FALSE;
         break;
 
@@ -735,6 +747,24 @@ static CURLcode imap_append(struct connectdata *conn)
 
   if(!result)
     state(conn, IMAP_APPEND);
+
+  return result;
+}
+
+static CURLcode imap_custom(struct connectdata *conn)
+{
+  struct IMAP *imap = conn->data->state.proto.imap;
+
+  /* Send the custom request */
+  CURLcode result = imap_sendf(conn, "%s%s", imap->custom,
+                               imap->custom_params ? imap->custom_params : "");
+
+  if(!result) {
+    /* We don't know how much data will be received */
+    Curl_pgrsSetDownloadSize(conn->data, -1);
+
+    state(conn, IMAP_CUSTOM);
+  }
 
   return result;
 }
@@ -1434,6 +1464,39 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
   return result;
 }
 
+/* For custom request responses */
+static CURLcode imap_state_custom_resp(struct connectdata *conn,
+                                       int imapcode,
+                                       imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  char *line = conn->data->state.buffer;
+  size_t len = strlen(line);
+
+  (void)instate; /* No use for this yet */
+
+  if(imapcode == '*') {
+    /* The client which asked for this custom command should know best
+       how to cope with the result, just send it as body.
+       Add back the LF character temporarily while saving. */
+    line[len] = '\n';
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
+    line[len] = '\0';
+  }
+  else {
+    /* Final response. Stop and return the final status. */
+    if(imapcode != 'O')
+      result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    else
+      result = CURLE_OK;
+
+    /* End of DO phase */
+    state(conn, IMAP_STOP);
+  }
+
+  return result;
+}
+
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1542,6 +1605,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND_FINAL:
       result = imap_state_append_final_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_CUSTOM:
+      result = imap_state_custom_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
