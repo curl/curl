@@ -1757,7 +1757,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
     conn->bits.close = TRUE; /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only) {
+  else if(!data->set.connect_only && !imap->custom) {
     /* Handle responses after FETCH or APPEND transfer has finished */
     if(!data->set.upload)
       state(conn, IMAP_FETCH_FINAL);
