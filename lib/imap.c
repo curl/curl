@@ -1294,7 +1294,10 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
       /* Note the currently opened mailbox on this connection */
       imapc->mailbox = strdup(imap->mailbox);
 
-      result = imap_fetch(conn);
+      if(imap->custom)
+        result = imap_custom(conn);
+      else
+        result = imap_fetch(conn);
     }
   }
   else {
