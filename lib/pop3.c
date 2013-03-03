@@ -1547,7 +1547,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct POP3 *pop3 = data->state.proto.pop3;
-  const char *custom = conn->data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */
   if(custom)
