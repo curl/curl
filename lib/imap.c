@@ -1928,7 +1928,7 @@ static CURLcode imap_logout(struct connectdata *conn)
  */
 static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 {
-  struct imap_conn *imapc= &conn->proto.imapc;
+  struct imap_conn *imapc = &conn->proto.imapc;
 
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
