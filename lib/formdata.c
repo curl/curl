@@ -831,7 +831,7 @@ static CURLcode AddFormData(struct FormData **formp,
          file */
       if(!strequal("-", newform->line)) {
         struct_stat file;
-        if(!stat(newform->line, &file) && S_ISREG(file.st_mode))
+        if(!stat(newform->line, &file) && !S_ISDIR(file.st_mode))
           *size += file.st_size;
         else
           return CURLE_BAD_FUNCTION_ARGUMENT;
