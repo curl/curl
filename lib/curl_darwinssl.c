@@ -97,8 +97,8 @@ static OSStatus SocketRead(SSLConnectionRef connection,
     if(rrtn <= 0) {
       /* this is guesswork... */
       theErr = errno;
-      if((rrtn == 0) && (theErr == 0)) {
-        /* try fix for iSync */
+      if(rrtn == 0) { /* EOF = server hung up */
+        /* the framework will turn this into errSSLClosedNoNotify */
         rtn = errSSLClosedGraceful;
       }
       else /* do the switch */
@@ -966,6 +966,9 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               "certificate did not match \"%s\"\n", conn->host.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
 
+      case errSSLConnectionRefused:
+        failf(data, "Server dropped the connection during the SSL handshake");
+        return CURLE_SSL_CONNECT_ERROR;
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
               conn->host.name, err);
@@ -1502,7 +1505,12 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
         return -1L;
         break;
 
-      case errSSLClosedGraceful: /* they're done; fail gracefully */
+      /* errSSLClosedGraceful - server gracefully shut down the SSL session
+         errSSLClosedNoNotify - server hung up on us instead of sending a
+           closure alert notice, read() is returning 0
+         Either way, inform the caller that the server disconnected. */
+      case errSSLClosedGraceful:
+      case errSSLClosedNoNotify:
         *curlcode = CURLE_OK;
         return -1L;
         break;
