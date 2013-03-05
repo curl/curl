@@ -479,6 +479,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "AUTHENTICATE_NTLM_TYPE2MSG",
     "AUTHENTICATE_FINAL",
     "LOGIN",
+    "LIST",
     "SELECT",
     "FETCH",
     "FETCH_FINAL",
