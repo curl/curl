@@ -692,6 +692,12 @@ static CURLcode imap_select(struct connectdata *conn)
   Curl_safefree(imapc->mailbox);
   Curl_safefree(imapc->mailbox_uidvalidity);
 
+  /* Check we have a mailbox */
+  if(!imap->mailbox) {
+    failf(conn->data, "Cannot SELECT without a mailbox.");
+    return CURLE_URL_MALFORMAT;
+  }
+
   /* Make sure the mailbox is in the correct atom format */
   mailbox = imap_atom(imap->mailbox);
   if(!mailbox)
@@ -729,6 +735,12 @@ static CURLcode imap_append(struct connectdata *conn)
   CURLcode result;
   struct IMAP *imap = conn->data->state.proto.imap;
   char *mailbox;
+
+  /* Check we have a mailbox */
+  if(!imap->mailbox) {
+    failf(conn->data, "Cannot APPEND without a mailbox.");
+    return CURLE_URL_MALFORMAT;
+  }
 
   /* Check we know the size of the upload */
   if(conn->data->set.infilesize < 0) {
@@ -1869,7 +1881,6 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 static CURLcode imap_do(struct connectdata *conn, bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct IMAP *imap;
 
   *done = FALSE; /* default to false */
 
@@ -1882,8 +1893,6 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  imap = conn->data->state.proto.imap;
-
   /* Parse the URL path */
   result = imap_parse_url_path(conn);
   if(result)
@@ -1893,12 +1902,6 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
   result = imap_parse_custom_request(conn);
   if(result)
     return result;
-
-  /* Check we have a mailbox for FETCH and APPEND commands */
-  if(!imap->custom && !imap->mailbox) {
-    failf(conn->data, "FETCH and APPEND require a mailbox.");
-    return CURLE_URL_MALFORMAT;
-  }
 
   result = imap_regular_transfer(conn, done);
 
