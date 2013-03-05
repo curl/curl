@@ -397,6 +397,11 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
           return FALSE;
         break;
 
+      case IMAP_LIST:
+        if(!imap_matchresp(line, len, "LIST"))
+          return FALSE;
+        break;
+
       case IMAP_SELECT:
         /* SELECT is special in that its untagged responses does not have a
            common prefix so accept anything! */
@@ -681,6 +686,30 @@ static CURLcode imap_authenticate(struct connectdata *conn)
 }
 
 /* Start the DO phase */
+static CURLcode imap_list(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = data->state.proto.imap;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  char *mailbox;
+
+  /* Make sure the mailbox is in the correct atom format */
+  mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+  if(!mailbox)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Send the LIST command */
+  result = imap_sendf(conn, "LIST \"%s\" *", mailbox);
+
+  Curl_safefree(mailbox);
+
+  if(!result)
+    state(conn, IMAP_LIST);
+
+  return result;
+}
+
 static CURLcode imap_select(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1278,6 +1307,38 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
   return result;
 }
 
+/* For LIST responses */
+static CURLcode imap_state_list_resp(struct connectdata *conn, int imapcode,
+                                     imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  char *line = conn->data->state.buffer;
+  size_t len = strlen(line);
+
+  (void)instate; /* No use for this yet */
+
+  if(imapcode == '*') {
+    /* The client which asked for this custom command should know best
+       how to cope with the result, just send it as body.
+       Add back the LF character temporarily while saving. */
+    line[len] = '\n';
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
+    line[len] = '\0';
+  }
+  else {
+    /* Final response. Stop and return the final status. */
+    if(imapcode != 'O')
+      result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    else
+      result = CURLE_OK;
+
+    /* End of DO phase */
+    state(conn, IMAP_STOP);
+  }
+
+  return result;
+}
+
 /* For SELECT responses */
 static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
                                        imapstate instate)
@@ -1603,6 +1664,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_LOGIN:
       result = imap_state_login_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_LIST:
+      result = imap_state_list_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_SELECT:
