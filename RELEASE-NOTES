@@ -22,7 +22,7 @@ This release includes the following bugfixes:
  o smtp: Fixed an issue when processing EHLO failure responses
  o pop3: Fixed incorrect return value from pop3_endofresp()
  o pop3: Fixed SASL authentication capability detection
- o 
+ o nss: fix misplaced code enabling non-blocking socket mode
 
 This release includes the following known bugs:
 

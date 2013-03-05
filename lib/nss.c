@@ -1237,12 +1237,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
   model = SSL_ImportFD(NULL, model);
 
-  /* make the socket nonblocking */
-  sock_opt.option = PR_SockOpt_Nonblocking;
-  sock_opt.value.non_blocking = PR_TRUE;
-  if(PR_SetSocketOption(model, &sock_opt) != PR_SUCCESS)
-    goto error;
-
   if(SSL_OptionSet(model, SSL_SECURITY, PR_TRUE) != SECSuccess)
     goto error;
   if(SSL_OptionSet(model, SSL_HANDSHAKE_AS_SERVER, PR_FALSE) != SECSuccess)
@@ -1414,6 +1408,12 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       curlerr = CURLE_SSL_CACERT;
     goto error;
   }
+
+  /* switch the SSL socket into non-blocking mode */
+  sock_opt.option = PR_SockOpt_Nonblocking;
+  sock_opt.value.non_blocking = PR_TRUE;
+  if(PR_SetSocketOption(connssl->handle, &sock_opt) != PR_SUCCESS)
+    goto error;
 
   connssl->state = ssl_connection_complete;
   conn->recv[sockindex] = nss_recv;
