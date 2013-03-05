@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -692,6 +692,11 @@ int netware_init(void);
 /* Define S_ISREG if not defined by system headers, f.e. MSVC */
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+
+/* Define S_ISDIR if not defined by system headers, f.e. MSVC */
+#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
+#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
