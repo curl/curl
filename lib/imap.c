@@ -701,10 +701,10 @@ static CURLcode imap_select(struct connectdata *conn)
   /* Make sure the mailbox is in the correct atom format */
   mailbox = imap_atom(imap->mailbox);
   if(!mailbox)
-    result = CURLE_OUT_OF_MEMORY;
-  else
-    /* Send the SELECT command */
-    result = imap_sendf(conn, "SELECT %s", mailbox);
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Send the SELECT command */
+  result = imap_sendf(conn, "SELECT %s", mailbox);
 
   Curl_safefree(mailbox);
 
