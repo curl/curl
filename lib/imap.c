@@ -1837,7 +1837,8 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
     conn->bits.close = TRUE; /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only && !imap->custom) {
+  else if(!data->set.connect_only && !imap->custom &&
+          (imap->uid || data->set.upload)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
     if(!data->set.upload)
       state(conn, IMAP_FETCH_FINAL);
@@ -1914,12 +1915,15 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   else if(imap->custom && (selected || !imap->mailbox))
     /* Custom command using the same mailbox or no mailbox */
     result = imap_custom(conn);
-  else if(!imap->custom && selected)
+  else if(!imap->custom && selected && imap->uid)
     /* FETCH from the same mailbox */
     result = imap_fetch(conn);
-  else
+  else if(imap->uid)
     /* SELECT the mailbox */
     result = imap_select(conn);
+  else
+    /* LIST */
+    result = imap_list(conn);
 
   if(result)
     return result;
