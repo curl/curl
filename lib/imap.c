@@ -1506,14 +1506,15 @@ static CURLcode imap_state_append_resp(struct connectdata *conn, int imapcode,
     result = CURLE_UPLOAD_FAILED;
   }
   else {
+    /* Set the progress upload size */
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
     /* IMAP upload */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
-  }
 
-  /* End of DO phase */
-  state(conn, IMAP_STOP);
+    /* End of DO phase */
+    state(conn, IMAP_STOP);
+  }
 
   return result;
 }
@@ -1527,14 +1528,11 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
 
   (void)instate; /* No use for this yet */
 
-  /* Final response, stop and return the final status */
-  if(imapcode == 'O')
-    result = CURLE_OK;
-  else
+  if(imapcode != 'O')
     result = CURLE_UPLOAD_FAILED;
-
-  /* End of DONE phase */
-  state(conn, IMAP_STOP);
+  else
+    /* End of DONE phase */
+    state(conn, IMAP_STOP);
 
   return result;
 }
