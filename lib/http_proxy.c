@@ -356,6 +356,10 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
                   result = Curl_client_write(conn, writetype, line_start,
                                              perline);
+
+                  data->info.header_size += (long)perline;
+                  data->req.headerbytecount += (long)perline;
+
                   if(result)
                     return result;
 
