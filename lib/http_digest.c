@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -287,6 +287,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   struct timeval now;
 
   char **allocuserpwd;
+  size_t userlen;
   const char *userp;
   const char *passwdp;
   struct auth *authp;
@@ -533,10 +534,11 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   }
 
   /* append CRLF + zero (3 bytes) to the userpwd header */
-  tmp = realloc(*allocuserpwd, strlen(*allocuserpwd) + 3);
+  userlen = strlen(*allocuserpwd);
+  tmp = realloc(*allocuserpwd, userlen + 3);
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
-  strcat(tmp, "\r\n");
+  strcpy(&tmp[userlen], "\r\n"); /* append the data */
   *allocuserpwd = tmp;
 
   return CURLE_OK;

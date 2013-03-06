@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -275,32 +275,33 @@ static char *my_get_line(FILE *fp)
 {
   char buf[4096];
   char *nl = NULL;
-  char *retval = NULL;
+  char *line = NULL;
 
   do {
     if(NULL == fgets(buf, sizeof(buf), fp))
       break;
-    if(!retval) {
-      retval = strdup(buf);
-      if(!retval)
+    if(!line) {
+      line = strdup(buf);
+      if(!line)
         return NULL;
     }
     else {
       char *ptr;
-      ptr = realloc(retval, strlen(retval) + strlen(buf) + 1);
+      size_t linelen = strlen(line);
+      ptr = realloc(line, linelen + strlen(buf) + 1);
       if(!ptr) {
-        Curl_safefree(retval);
+        Curl_safefree(line);
         return NULL;
       }
-      retval = ptr;
-      strcat(retval, buf);
+      line = ptr;
+      strcpy(&line[linelen], buf);
     }
-    nl = strchr(retval, '\n');
+    nl = strchr(line, '\n');
   } while(!nl);
 
   if(nl)
     *nl = '\0';
 
-  return retval;
+  return line;
 }
 

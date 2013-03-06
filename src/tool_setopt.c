@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -199,7 +199,7 @@ static char *c_escape(const char *str)
       e += 2;
     }
     else if(! isprint(c)) {
-      sprintf(e, "\\%03o", c);
+      snprintf(e, 4, "\\%03o", c);
       e += 4;
     }
     else
@@ -270,7 +270,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct Configurable *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        sprintf(preamble, "%*s", strlen(preamble), "");
+        snprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -313,7 +313,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct Configurable *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        sprintf(preamble, "%*s", strlen(preamble), "");
+        snprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
       }
     }
     /* If any bits have no definition, output an explicit value.
