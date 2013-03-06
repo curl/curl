@@ -1487,10 +1487,8 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   if(imapcode != 'O')
     result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
   else
-    result = CURLE_OK;
-
-  /* End of DONE phase */
-  state(conn, IMAP_STOP);
+    /* End of DONE phase */
+    state(conn, IMAP_STOP);
 
   return result;
 }
