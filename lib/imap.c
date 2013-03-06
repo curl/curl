@@ -1548,39 +1548,6 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
   return result;
 }
 
-/* For custom request responses */
-static CURLcode imap_state_custom_resp(struct connectdata *conn,
-                                       int imapcode,
-                                       imapstate instate)
-{
-  CURLcode result = CURLE_OK;
-  char *line = conn->data->state.buffer;
-  size_t len = strlen(line);
-
-  (void)instate; /* No use for this yet */
-
-  if(imapcode == '*') {
-    /* The client which asked for this custom command should know best
-       how to cope with the result, just send it as body.
-       Add back the LF character temporarily while saving. */
-    line[len] = '\n';
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
-    line[len] = '\0';
-  }
-  else {
-    /* Final response. Stop and return the final status. */
-    if(imapcode != 'O')
-      result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
-    else
-      result = CURLE_OK;
-
-    /* End of DO phase */
-    state(conn, IMAP_STOP);
-  }
-
-  return result;
-}
-
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1672,6 +1639,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       break;
 
     case IMAP_LIST:
+    case IMAP_CUSTOM:
       result = imap_state_list_resp(conn, imapcode, imapc->state);
       break;
 
@@ -1693,10 +1661,6 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND_FINAL:
       result = imap_state_append_final_resp(conn, imapcode, imapc->state);
-      break;
-
-    case IMAP_CUSTOM:
-      result = imap_state_custom_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
