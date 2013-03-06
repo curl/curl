@@ -940,20 +940,32 @@ sub STORE_imap {
 sub LIST_imap {
     my ($args) = @_;
     my ($reference, $mailbox) = split(/ /, $args, 2);
+    my @data;
 
     logmsg "LIST_imap got $args\n";
 
-    my $testno = $reference;
-    $testno =~ s/^([^0-9]*)//;
-    my $testpart = "";
-    if ($testno > 10000) {
-        $testpart = $testno % 10000;
-        $testno = int($testno / 10000);
+    if ($reference eq '"verifiedserver"') {
+         # this is the secret command that verifies that this actually is
+         # the curl test server
+         @data = ("* LIST () \"/\" \"WE ROOLZ: $$\"\r\n");
+         if($verbose) {
+             print STDERR "FTPD: We returned proof we are the test server\n";
+         }
+         logmsg "return proof we are we\n";
     }
+    else {
+        my $testno = $reference;
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
     
-    loadtest("$srcdir/data/test$testno");
+        loadtest("$srcdir/data/test$testno");
 
-    my @data = getpart("reply", "data$testpart");
+        @data = getpart("reply", "data$testpart");
+    }
 
     for my $d (@data) {
         sendcontrol $d;
