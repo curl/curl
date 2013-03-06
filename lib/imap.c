@@ -748,9 +748,15 @@ static CURLcode imap_fetch(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct IMAP *imap = conn->data->state.proto.imap;
 
+  /* Check we have a UID */
+  if(!imap->uid) {
+    failf(conn->data, "Cannot FETCH without a UID.");
+    return CURLE_URL_MALFORMAT;
+  }
+
   /* Send the FETCH command */
   result = imap_sendf(conn, "FETCH %s BODY[%s]",
-                      imap->uid ? imap->uid : "1",
+                      imap->uid,
                       imap->section ? imap->section : "");
 
   if(!result)
