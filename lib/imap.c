@@ -691,7 +691,6 @@ static CURLcode imap_list(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct IMAP *imap = data->state.proto.imap;
-  struct imap_conn *imapc = &conn->proto.imapc;
   char *mailbox;
 
   /* Make sure the mailbox is in the correct atom format */
