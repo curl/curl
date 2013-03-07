@@ -1873,7 +1873,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   else if(!imap->custom && selected && imap->uid)
     /* FETCH from the same mailbox */
     result = imap_fetch(conn);
-  else if(imap->uid)
+  else if(imap->mailbox && !selected && (imap->custom || imap->uid))
     /* SELECT the mailbox */
     result = imap_select(conn);
   else
