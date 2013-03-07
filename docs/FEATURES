@@ -127,7 +127,7 @@ FILE
 
 SMTP
  - authentication: Plain, Login, CRAM-MD5, Digest-MD5 and NTLM (*9)
- - send mail
+ - send e-mails
  - mail from support
  - mail size support
  - mail auth support for trusted server-to-server relaying
@@ -145,7 +145,8 @@ POP3
    NTLM (*9)
  - list e-mails
  - retrieve e-mails
- - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP
+ - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP via
+   custom requests
  - via http-proxy
 
 POP3S (*1)
@@ -155,10 +156,13 @@ POP3S (*1)
 
 IMAP
  - authentication: Clear Text and SASL
- - select mailbox
- - fetch e-mails with support for specifing the UID and SECTION
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
    NTLM (*9)
+ - list the content of a mailbox
+ - select mailbox with support for verifing the UIDVALIDITY
+ - fetch e-mails with support for specifing the UID and SECTION
+ - upload e-mails via the append command
+ - enhanced command support for: EXAMINE and STORE via custom requests
  - via http-proxy
 
 IMAPS (*1)
