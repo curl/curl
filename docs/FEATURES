@@ -158,8 +158,8 @@ IMAP
  - authentication: Clear Text and SASL
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
    NTLM (*9)
- - list the content of a mailbox
- - select mailbox with support for verifing the UIDVALIDITY
+ - list the folders of a mailbox
+ - select a mailbox with support for verifing the UIDVALIDITY
  - fetch e-mails with support for specifing the UID and SECTION
  - upload e-mails via the append command
  - enhanced command support for: EXAMINE and STORE via custom requests
