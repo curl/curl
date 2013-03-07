@@ -11,6 +11,9 @@ This release includes the following changes:
 
  o imap: Changed response tag generation to be completely unique
  o imap: Added support for SASL-IR extension
+ o imap: Added support for list command
+ o imap: Added custom request parsing
+ o imap: Added support for parsing the UIDVALIDITY property
  o darwinssl: Make certificate errors less techy
  o imap/pop3/smtp: Added support for the STARTTLS capability
 
@@ -22,7 +25,17 @@ This release includes the following bugfixes:
  o smtp: Fixed an issue when processing EHLO failure responses
  o pop3: Fixed incorrect return value from pop3_endofresp()
  o pop3: Fixed SASL authentication capability detection
+ o pop3: Fixed blocking SSL connect when connecting via POP3S
  o nss: fix misplaced code enabling non-blocking socket mode
+ o AddFormData: prevent only directories from being posted [2]
+ o darwinssl: fix infinite loop if server disconnected abruptly [3]
+ o metalink: fix improbable crash parsing metalink filename
+ o show proper host name on failed resolve
+ o MacOSX-Framework: Make script work in Xcode 4.0 and later
+ o strlcat: remove function [4]
+ o darwinssl: Fix send glitchiness with data > 32 or so KB [5]
+ o polarssl: better 1.1.x and 1.2.x support
+ o various documentation improvements
 
 This release includes the following known bugs:
 
@@ -32,11 +45,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Kamil Dudka, Steve Holme, Nick Zitzmann, Patricia Muscalu, Dan Fandrich,
- Gisle Vanem, Guenter Knauf
+ Gisle Vanem, Guenter Knauf, Yang Tse, Oliver Gondža, Aki Koskinen,
+ Alexander Klauer, Kim Vandry, Willem Sparreboom, Jeremy Huddleston,
+ Bruno de Carvalho
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/bug/view.cgi?id=1184
- [2] = 
+ [2] = http://curl.haxx.se/mail/archive-2013-02/0040.html
+ [3] = http://curl.haxx.se/mail/lib-2013-03/0014.html
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1192
+ [5] = http://curl.haxx.se/mail/lib-2013-02/0145.html
