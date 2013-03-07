@@ -11,9 +11,11 @@ This release includes the following changes:
 
  o imap: Changed response tag generation to be completely unique
  o imap: Added support for SASL-IR extension
- o imap: Added support for list command
+ o imap: Added support for the list command
+ o imap: Added support for the append command
  o imap: Added custom request parsing
- o imap: Added support for parsing the UIDVALIDITY property
+ o imap: Added support to the fetch command for UID and SECTION properties
+ o imap: Added parsing and verification of the UIDVALIDITY mailbox attribute
  o darwinssl: Make certificate errors less techy
  o imap/pop3/smtp: Added support for the STARTTLS capability
 
@@ -26,6 +28,7 @@ This release includes the following bugfixes:
  o pop3: Fixed incorrect return value from pop3_endofresp()
  o pop3: Fixed SASL authentication capability detection
  o pop3: Fixed blocking SSL connect when connecting via POP3S
+ o imap: Fixed memory leak when performing multiple selects 
  o nss: fix misplaced code enabling non-blocking socket mode
  o AddFormData: prevent only directories from being posted [2]
  o darwinssl: fix infinite loop if server disconnected abruptly [3]
