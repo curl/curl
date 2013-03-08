@@ -415,9 +415,12 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_CUSTOM:
         /* When dealing with a custom command, we are interested in all
            intermediate responses which match the parameter name. The
-           exceptions are SELECT and EXAMINE commands, for which no
-           filtering is (or can be easily) done. */
+           exceptions are STORE, which returns untagged responses as FETCH,
+           and SELECT and EXAMINE commands, for which no filtering is (or can
+           be easily) done. */
         if(!imap_matchresp(line, len, imap->custom) &&
+           (strcmp(imap->custom, "STORE") ||
+            !imap_matchresp(line, len, "FETCH")) &&
            strcmp(imap->custom, "SELECT") &&
            strcmp(imap->custom, "EXAMINE"))
           return FALSE;
