@@ -73,6 +73,9 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl \
               -I$(top_srcdir)/lib
 endif
 
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
+
 # Mostly for Windows build targets, when building libcurl library
 if USE_CPPFLAG_BUILDING_LIBCURL
 AM_CPPFLAGS += -DBUILDING_LIBCURL
@@ -111,25 +114,25 @@ endif
 #
 # For the full guide on libcurl ABI rules, see docs/libcurl/ABI
 
-if NO_UNDEFINED
-# The -no-undefined flag is crucial to build fine on some platforms
-UNDEF = -no-undefined
+libcurl_la_LDFLAGS_EXTRA =
+
+if CURL_LT_SHLIB_USE_VERSION_INFO
+libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
 endif
 
-if MIMPURE
-# This is for gcc on Solaris (8+ ?) to avoid "relocations remain against
-# allocatable but non-writable sections" problems.
-MIMPURE = -mimpure-text
+if CURL_LT_SHLIB_USE_NO_UNDEFINED
+libcurl_la_LDFLAGS_EXTRA += -no-undefined
 endif
 
-if VERSIONED_SYMBOLS
-VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
+if CURL_LT_SHLIB_USE_MIMPURE_TEXT
+libcurl_la_LDFLAGS_EXTRA += -mimpure-text
 endif
 
-# Prevent LIBS from being used for all link targets
-LIBS = $(BLANK_AT_MAKETIME)
+if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
+libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+endif
 
-libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
+libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(LIBCURL_LIBS)
 
 if DOING_CURL_SYMBOL_HIDING
 libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS

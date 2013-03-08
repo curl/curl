@@ -198,48 +198,19 @@ CURL_CONFIGURE_REENTRANT
 dnl check for how to do large files
 AC_SYS_LARGEFILE
 
-dnl support building of Windows DLLs
-AC_LIBTOOL_WIN32_DLL
+XC_LIBTOOL
 
-dnl force libtool to build static libraries with PIC on AMD64-Linux & FreeBSD
-AC_MSG_CHECKING([if arch-OS host is AMD64-Linux/FreeBSD (to build static libraries with PIC)])
-case $host in
-  x86_64*linux*|amd64*freebsd*|ia64*freebsd*)
-    AC_MSG_RESULT([yes])
-    with_pic=yes
-    ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
-esac
+#
+# Automake conditionals based on libtool related checks
+#
 
-AC_MSG_CHECKING([if compiler is icc (to build with PIC)])
-case $CC in
-  icc | */icc)
-    AC_MSG_RESULT([yes])
-    with_pic=yes
-    ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
-esac
+AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSION_INFO],
+  [test "x$xc_lt_shlib_use_version_info" = 'xyes'])
+AM_CONDITIONAL([CURL_LT_SHLIB_USE_NO_UNDEFINED],
+  [test "x$xc_lt_shlib_use_no_undefined" = 'xyes'])
+AM_CONDITIONAL([CURL_LT_SHLIB_USE_MIMPURE_TEXT],
+  [test "x$xc_lt_shlib_use_mimpure_text" = 'xyes'])
 
-dnl libtool setup
-AC_PROG_LIBTOOL
-
-AC_MSG_CHECKING([if we need -mimpure-text])
-mimpure=no
-case $host in
-  *-*-solaris2*)
-    if test "$GCC" = "yes"; then
-      mimpure="yes"
-    fi
-    ;;
-  *)
-    ;;
-esac
-AC_MSG_RESULT($mimpure)
-AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
 use_cppflag_building_libcurl="no"
@@ -310,9 +281,6 @@ CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
 CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
 CURL_CHECK_COMPILER_SYMBOL_HIDING
-
-CURL_CHECK_NO_UNDEFINED
-AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
 
 CURL_CHECK_CURLDEBUG
 AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
@@ -2613,8 +2581,10 @@ AC_MSG_RESULT(no)
 ]
 )
 
-AC_SUBST(VERSIONED_FLAVOUR, ["$versioned_symbols_flavour"])
-AM_CONDITIONAL(VERSIONED_SYMBOLS, test "x$versioned_symbols" = "xyes")
+AC_SUBST([CURL_LT_SHLIB_VERSIONED_FLAVOUR],
+  ["$versioned_symbols_flavour"])
+AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
+  [test "x$versioned_symbols" = 'xyes'])
 
 dnl -------------------------------------------------
 dnl check winidn option before other IDN libraries

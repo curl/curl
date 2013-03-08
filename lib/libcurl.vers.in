@@ -6,7 +6,7 @@ HIDDEN
     _save*;
 };
 
-CURL_@VERSIONED_FLAVOUR@4
+CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@4
 {
   global: curl_*;
   local: *;
