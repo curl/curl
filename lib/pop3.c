@@ -1594,20 +1594,18 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   /* Make sure size is unknown at this point */
   data->req.size = -1;
 
+  /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
+  /* Carry out the perform */
   result = pop3_perform(conn, &connected, dophase_done);
 
-  if(!result) {
-    if(!*dophase_done)
-      /* The DO phase has not completed yet */
-      return CURLE_OK;
-
+  /* Perform post DO phase operations if necessary */
+  if(!result && *dophase_done)
     result = pop3_dophase_done(conn, connected);
-  }
 
   return result;
 }
