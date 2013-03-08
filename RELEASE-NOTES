@@ -7,6 +7,11 @@ Curl and libcurl 7.30.0
  Known libcurl bindings:       42
  Contributors:                 1005
 
+***
+  krb4 support is up for removal. If you care about it at all, speak up
+  on the curl-library list asap!
+***
+
 This release includes the following changes:
 
  o imap: Changed response tag generation to be completely unique
