@@ -496,6 +496,13 @@ static void state(struct connectdata *conn, imapstate newstate)
   imapc->state = newstate;
 }
 
+/***********************************************************************
+ *
+ * imap_state_capability()
+ *
+ * Sends the CAPABILITY command in order to obtain a list of server side
+ * supported capabilities.
+ */
 static CURLcode imap_state_capability(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -514,6 +521,12 @@ static CURLcode imap_state_capability(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_state_starttls()
+ *
+ * Sends the STARTTLS command to start the upgrade to TLS.
+ */
 static CURLcode imap_state_starttls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -527,6 +540,12 @@ static CURLcode imap_state_starttls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_state_upgrade_tls()
+ *
+ * Performs the upgrade to TLS.
+ */
 static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -548,6 +567,12 @@ static CURLcode imap_state_upgrade_tls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_state_login()
+ *
+ * Sends a clear text LOGIN command to authenticate with.
+ */
 static CURLcode imap_state_login(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -579,6 +604,16 @@ static CURLcode imap_state_login(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_authenticate()
+ *
+ * Sends an AUTHENTICATE command allowing the client to login with the
+ * appropriate SASL authentication mechanism.
+ *
+ * Additionally, the function will perform fallback to the LOGIN command
+ * should a common mechanism not be available between the client and server.
+ */
 static CURLcode imap_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -678,7 +713,12 @@ static CURLcode imap_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* Start the DO phase */
+/***********************************************************************
+ *
+ * imap_list()
+ *
+ * Sends a LIST command or an alternative custom request.
+ */
 static CURLcode imap_list(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -708,6 +748,12 @@ static CURLcode imap_list(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_select()
+ *
+ * Sends a SELECT command to ask the server to change the selected mailbox.
+ */
 static CURLcode imap_select(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -742,6 +788,12 @@ static CURLcode imap_select(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_fetch()
+ *
+ * Sends a FETCH command to initiate the download of a message.
+ */
 static CURLcode imap_fetch(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -764,6 +816,12 @@ static CURLcode imap_fetch(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_append()
+ *
+ * Sends an APPEND command to initiate the upload of a message.
+ */
 static CURLcode imap_append(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
