@@ -114,6 +114,8 @@ endif
 #
 # For the full guide on libcurl ABI rules, see docs/libcurl/ABI
 
+AM_LDFLAGS =
+
 libcurl_la_LDFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_VERSION_INFO
