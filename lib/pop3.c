@@ -1470,13 +1470,10 @@ static CURLcode pop3_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT", NULL);
-  if(result)
-    return result;
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT");
 
-  state(conn, POP3_QUIT);
-
-  result = pop3_block_statemach(conn);
+  if(!result)
+    state(conn, POP3_QUIT);
 
   return result;
 }
@@ -1500,7 +1497,8 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && pop3c->pp.conn)
-    (void)pop3_quit(conn); /* ignore errors on QUIT */
+    if(!pop3_quit(conn))
+      (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);

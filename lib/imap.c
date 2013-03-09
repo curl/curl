@@ -1950,13 +1950,10 @@ static CURLcode imap_logout(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the LOGOUT command */
-  result = imap_sendf(conn, "LOGOUT", NULL);
-  if(result)
-    return result;
+  result = imap_sendf(conn, "LOGOUT");
 
-  state(conn, IMAP_LOGOUT);
-
-  result = imap_block_statemach(conn);
+  if(!result)
+    state(conn, IMAP_LOGOUT);
 
   return result;
 }
@@ -1979,7 +1976,8 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
   /* The IMAP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && imapc->pp.conn)
-    (void)imap_logout(conn); /* ignore errors on LOGOUT */
+    if(!imap_logout(conn))
+      (void)imap_block_statemach(conn); /* ignore errors on LOGOUT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);

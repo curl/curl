@@ -1501,12 +1501,9 @@ static CURLcode smtp_quit(struct connectdata *conn)
 
   /* Send the QUIT command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
-  if(result)
-    return result;
 
-  state(conn, SMTP_QUIT);
-
-  result = smtp_block_statemach(conn);
+  if(!result)
+    state(conn, SMTP_QUIT);
 
   return result;
 }
@@ -1530,7 +1527,8 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && smtpc->pp.conn)
-    (void)smtp_quit(conn); /* ignore errors on QUIT */
+    if(!smtp_quit(conn))
+      (void)smtp_block_statemach(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
