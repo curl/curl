@@ -1202,8 +1202,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* Perform the protocol's DO action */
-        easy->result = Curl_do(&easy->easy_conn,
-                               &dophase_done);
+        easy->result = Curl_do(&easy->easy_conn, &dophase_done);
+
+        /* When Curl_do() returns failure, easy->easy_conn might be NULL! */
 
         if(CURLE_OK == easy->result) {
           if(!dophase_done) {
@@ -1292,7 +1293,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         else {
           /* failure detected */
           Curl_posttransfer(data);
-          Curl_done(&easy->easy_conn, easy->result, FALSE);
+          if(easy->easy_conn)
+            Curl_done(&easy->easy_conn, easy->result, FALSE);
           disconnect_conn = TRUE;
         }
       }
