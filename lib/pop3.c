@@ -1461,9 +1461,7 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
  *
  * pop3_quit()
  *
- * This should be called before calling sclose().  We should then wait for the
- * response from the server before returning. The calling code should then try
- * to close the connection.
+ * Performs the quit action prior to sclose() be called.
  */
 static CURLcode pop3_quit(struct connectdata *conn)
 {

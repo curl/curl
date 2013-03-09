@@ -1940,10 +1940,7 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
  *
  * imap_logout()
  *
- * This should be called before calling sclose().  We should then wait for the
- * response from the server before returning. The calling code should then try
- * to close the connection.
- *
+ * Performs the logout action prior to sclose() being called.
  */
 static CURLcode imap_logout(struct connectdata *conn)
 {

@@ -1491,9 +1491,7 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
  *
  * smtp_quit()
  *
- * This should be called before calling sclose().  We should then wait for the
- * response from the server before returning. The calling code should then try
- * to close the connection.
+ * Performs the quit action prior to sclose() being called.
  */
 static CURLcode smtp_quit(struct connectdata *conn)
 {
