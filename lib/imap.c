@@ -821,6 +821,25 @@ static CURLcode imap_custom(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * imap_logout()
+ *
+ * Performs the logout action prior to sclose() being called.
+ */
+static CURLcode imap_logout(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the LOGOUT command */
+  result = imap_sendf(conn, "LOGOUT");
+
+  if(!result)
+    state(conn, IMAP_LOGOUT);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             int imapcode,
@@ -1932,25 +1951,6 @@ static CURLcode imap_do(struct connectdata *conn, bool *done)
     return result;
 
   result = imap_regular_transfer(conn, done);
-
-  return result;
-}
-
-/***********************************************************************
- *
- * imap_logout()
- *
- * Performs the logout action prior to sclose() being called.
- */
-static CURLcode imap_logout(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-
-  /* Send the LOGOUT command */
-  result = imap_sendf(conn, "LOGOUT");
-
-  if(!result)
-    state(conn, IMAP_LOGOUT);
 
   return result;
 }
