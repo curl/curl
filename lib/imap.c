@@ -1752,16 +1752,17 @@ static CURLcode imap_block_statemach(struct connectdata *conn)
    required */
 static CURLcode imap_init(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct IMAP *imap = data->state.proto.imap;
 
   if(!imap) {
     imap = data->state.proto.imap = calloc(sizeof(struct IMAP), 1);
     if(!imap)
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */

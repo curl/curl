@@ -1272,16 +1272,17 @@ static CURLcode pop3_block_statemach(struct connectdata *conn)
    required */
 static CURLcode pop3_init(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct POP3 *pop3 = data->state.proto.pop3;
 
   if(!pop3) {
     pop3 = data->state.proto.pop3 = calloc(sizeof(struct POP3), 1);
     if(!pop3)
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
