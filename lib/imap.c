@@ -403,7 +403,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         break;
 
       case IMAP_SELECT:
-        /* SELECT is special in that its untagged responses does not have a
+        /* SELECT is special in that its untagged responses do not have a
            common prefix so accept anything! */
         break;
 
