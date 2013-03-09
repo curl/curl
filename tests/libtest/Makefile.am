@@ -88,6 +88,8 @@ else
 noinst_LTLIBRARIES =
 endif
 
+AM_LDFLAGS =
+
 libhostname_la_LDFLAGS_EXTRA = -module -avoid-version -rpath /nowhere
 
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
