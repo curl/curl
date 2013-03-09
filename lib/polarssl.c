@@ -66,7 +66,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
-#include "polarsslthreadlock.h"
+#include "polarssl_threadlock.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

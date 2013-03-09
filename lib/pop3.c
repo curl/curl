@@ -389,12 +389,10 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
   /* Send the CAPA command */
   result = Curl_pp_sendf(&pop3c->pp, "CAPA");
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, POP3_CAPA);
 
-  state(conn, POP3_CAPA);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode pop3_state_starttls(struct connectdata *conn)
@@ -446,12 +444,10 @@ static CURLcode pop3_state_user(struct connectdata *conn)
   /* Send the USER command */
   result = Curl_pp_sendf(&conn->proto.pop3c.pp, "USER %s",
                          conn->user ? conn->user : "");
-  if(result)
-    return result;
+  if(!result)
+    state(conn, POP3_USER);
 
-  state(conn, POP3_USER);
-
-  return CURLE_OK;
+  return result;
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
@@ -1021,10 +1017,8 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
     /* Send the PASS command */
     result = Curl_pp_sendf(&conn->proto.pop3c.pp, "PASS %s",
                            conn->passwd ? conn->passwd : "");
-  if(result)
-    return result;
-
-  state(conn, POP3_PASS);
+  if(!result)
+    state(conn, POP3_PASS);
 
   return result;
 }
@@ -1078,10 +1072,8 @@ static CURLcode pop3_command(struct connectdata *conn)
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command));
 
-  if(result)
-    return result;
-
-  state(conn, POP3_COMMAND);
+  if(!result)
+    state(conn, POP3_COMMAND);
 
   return result;
 }
@@ -1270,11 +1262,8 @@ static CURLcode pop3_block_statemach(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  while(pop3c->state != POP3_STOP) {
+  while(pop3c->state != POP3_STOP && !result)
     result = Curl_pp_statemach(&pop3c->pp, TRUE);
-    if(result)
-      break;
-  }
 
   return result;
 }
@@ -1472,22 +1461,17 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
  *
  * pop3_quit()
  *
- * This should be called before calling sclose().  We should then wait for the
- * response from the server before returning. The calling code should then try
- * to close the connection.
+ * Performs the quit action prior to sclose() be called.
  */
 static CURLcode pop3_quit(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT", NULL);
-  if(result)
-    return result;
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT");
 
-  state(conn, POP3_QUIT);
-
-  result = pop3_block_statemach(conn);
+  if(!result)
+    state(conn, POP3_QUIT);
 
   return result;
 }
@@ -1511,7 +1495,8 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && pop3c->pp.conn)
-    (void)pop3_quit(conn); /* ignore errors on QUIT */
+    if(!pop3_quit(conn))
+      (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
@@ -1547,7 +1532,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct POP3 *pop3 = data->state.proto.pop3;
-  const char *custom = conn->data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */
   if(custom)
@@ -1577,12 +1562,10 @@ static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done)
 
   if(result)
     DEBUGF(infof(conn->data, "DO phase failed\n"));
-  else {
-    if(*dophase_done) {
-      result = pop3_dophase_done(conn, FALSE /* not connected */);
+  else if(*dophase_done) {
+    result = pop3_dophase_done(conn, FALSE /* not connected */);
 
-      DEBUGF(infof(conn->data, "DO phase is complete\n"));
-    }
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
   }
 
   return result;
@@ -1607,20 +1590,18 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   /* Make sure size is unknown at this point */
   data->req.size = -1;
 
+  /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
+  /* Carry out the perform */
   result = pop3_perform(conn, &connected, dophase_done);
 
-  if(!result) {
-    if(!*dophase_done)
-      /* The DO phase has not completed yet */
-      return CURLE_OK;
-
+  /* Perform post DO phase operations if necessary */
+  if(!result && *dophase_done)
     result = pop3_dophase_done(conn, connected);
-  }
 
   return result;
 }

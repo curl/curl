@@ -30,7 +30,7 @@ imap
 IMAP FETCH
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/801 -u user:secret
+'imap://%HOSTIP:%IMAPPORT/801/;UID=1' -u user:secret
 </command>
 </client>
 

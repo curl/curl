@@ -45,9 +45,12 @@ typedef enum {
   IMAP_AUTHENTICATE_NTLM_TYPE2MSG,
   IMAP_AUTHENTICATE_FINAL,
   IMAP_LOGIN,
+  IMAP_LIST,
   IMAP_SELECT,
   IMAP_FETCH,
   IMAP_FETCH_FINAL,
+  IMAP_APPEND,
+  IMAP_APPEND_FINAL,
   IMAP_LOGOUT,
   IMAP_LAST          /* never used */
 } imapstate;
@@ -62,6 +65,8 @@ struct IMAP {
   char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
   char *section;          /* Message SECTION to fetch */
+  char *custom;           /* Custom request */
+  char *custom_params;    /* Parameters for the custom request */
 };
 
 /* imap_conn is used for struct connection-oriented data in the connectdata

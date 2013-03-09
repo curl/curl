@@ -805,18 +805,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           /*
            * Then append ? followed by the get fields to the url.
            */
-          urlbuffer = malloc(strlen(this_url) + strlen(httpgetfields) + 3);
-          if(!urlbuffer) {
-            res = CURLE_OUT_OF_MEMORY;
-            goto show_error;
-          }
           if(pc)
-            sprintf(urlbuffer, "%s%c%s", this_url, sep, httpgetfields);
+            urlbuffer = aprintf("%s%c%s", this_url, sep, httpgetfields);
           else
             /* Append  / before the ? to create a well-formed url
                if the url contains a hostname only
             */
-            sprintf(urlbuffer, "%s/?%s", this_url, httpgetfields);
+            urlbuffer = aprintf("%s/?%s", this_url, httpgetfields);
+
+          if(!urlbuffer) {
+            res = CURLE_OUT_OF_MEMORY;
+            goto show_error;
+          }
 
           Curl_safefree(this_url); /* free previous URL */
           this_url = urlbuffer; /* use our new URL instead! */

@@ -343,12 +343,10 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, SMTP_EHLO);
 
-  state(conn, SMTP_EHLO);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode smtp_state_helo(struct connectdata *conn)
@@ -362,12 +360,10 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   /* Send the HELO command */
   result = Curl_pp_sendf(&smtpc->pp, "HELO %s", smtpc->domain);
 
-  if(result)
-    return result;
+  if(!result)
+    state(conn, SMTP_HELO);
 
-  state(conn, SMTP_HELO);
-
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode smtp_state_starttls(struct connectdata *conn)
@@ -996,10 +992,8 @@ static CURLcode smtp_mail(struct connectdata *conn)
   Curl_safefree(auth);
   Curl_safefree(size);
 
-  if(result)
-    return result;
-
-  state(conn, SMTP_MAIL);
+  if(!result)
+    state(conn, SMTP_MAIL);
 
   return result;
 }
@@ -1077,10 +1071,8 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     /* Send the DATA command */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA");
 
-    if(result)
-      return result;
-
-    state(conn, SMTP_DATA);
+    if(!result)
+      state(conn, SMTP_DATA);
   }
 
   return result;
@@ -1262,11 +1254,8 @@ static CURLcode smtp_block_statemach(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  while(smtpc->state != SMTP_STOP) {
+  while(smtpc->state != SMTP_STOP && !result)
     result = Curl_pp_statemach(&smtpc->pp, TRUE);
-    if(result)
-      break;
-  }
 
   return result;
 }
@@ -1502,9 +1491,7 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
  *
  * smtp_quit()
  *
- * This should be called before calling sclose().  We should then wait for the
- * response from the server before returning. The calling code should then try
- * to close the connection.
+ * Performs the quit action prior to sclose() being called.
  */
 static CURLcode smtp_quit(struct connectdata *conn)
 {
@@ -1512,12 +1499,9 @@ static CURLcode smtp_quit(struct connectdata *conn)
 
   /* Send the QUIT command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
-  if(result)
-    return result;
 
-  state(conn, SMTP_QUIT);
-
-  result = smtp_block_statemach(conn);
+  if(!result)
+    state(conn, SMTP_QUIT);
 
   return result;
 }
@@ -1541,7 +1525,8 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && smtpc->pp.conn)
-    (void)smtp_quit(conn); /* ignore errors on QUIT */
+    if(!smtp_quit(conn))
+      (void)smtp_block_statemach(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
@@ -1576,12 +1561,10 @@ static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done)
 
   if(result)
     DEBUGF(infof(conn->data, "DO phase failed\n"));
-  else {
-    if(*dophase_done) {
-      result = smtp_dophase_done(conn, FALSE /* not connected */);
+  else if(*dophase_done) {
+    result = smtp_dophase_done(conn, FALSE /* not connected */);
 
-      DEBUGF(infof(conn->data, "DO phase is complete\n"));
-    }
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
   }
 
   return result;
@@ -1606,20 +1589,18 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
   /* Make sure size is unknown at this point */
   data->req.size = -1;
 
+  /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
+  /* Carry out the perform */
   result = smtp_perform(conn, &connected, dophase_done);
 
-  if(!result) {
-    if(!*dophase_done)
-      /* The DO phase has not completed yet */
-      return CURLE_OK;
-
+  /* Perform post DO phase operations if necessary */
+  if(!result && *dophase_done)
     result = smtp_dophase_done(conn, connected);
-  }
 
   return result;
 }

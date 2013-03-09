@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 65
+# serial 66
 
 
 dnl CURL_CHECK_COMPILER
@@ -1195,6 +1195,7 @@ dnl library or as a shared one on those systems on which
 dnl shared libraries support undefined symbols.
 
 AC_DEFUN([CURL_CHECK_CURLDEBUG], [
+  AC_REQUIRE([XC_LIBTOOL])dnl
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
   supports_curldebug="unknown"
   if test "$want_curldebug" = "yes"; then
@@ -1210,7 +1211,7 @@ AC_DEFUN([CURL_CHECK_CURLDEBUG], [
     fi
     if test "$supports_curldebug" != "no"; then
       if test "$enable_shared" = "yes" &&
-        test "$need_no_undefined" = "yes"; then
+        test "x$xc_lt_shlib_use_no_undefined" = 'xyes'; then
         supports_curldebug="no"
         AC_MSG_WARN([shared library does not support undefined symbols.])
       fi
@@ -1237,31 +1238,6 @@ AC_DEFUN([CURL_CHECK_CURLDEBUG], [
   fi
 ])
 
-
-dnl CURL_CHECK_NO_UNDEFINED
-dnl -------------------------------------------------
-dnl Checks if the -no-undefined flag must be used when
-dnl building shared libraries. This is required on all
-dnl systems on which shared libraries should not have
-dnl references to undefined symbols. This check should
-dnl not be done before AC-PROG-LIBTOOL.
-
-AC_DEFUN([CURL_CHECK_NO_UNDEFINED], [
-  AC_BEFORE([$0],[CURL_CHECK_CURLDEBUG])dnl
-  AC_MSG_CHECKING([if shared libraries need -no-undefined])
-  need_no_undefined="no"
-  case $host in
-    *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-cegcc* | *-*-aix*)
-      need_no_undefined="yes"
-      ;;
-  esac
-  if test "x$allow_undefined" = "xno"; then
-    need_no_undefined="yes"
-  elif test "x$allow_undefined_flag" = "xunsupported"; then
-    need_no_undefined="yes"
-  fi
-  AC_MSG_RESULT($need_no_undefined)
-])
 
 
 dnl CURL_CHECK_COMPILER_HALT_ON_ERROR

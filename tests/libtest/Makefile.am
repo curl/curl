@@ -88,16 +88,18 @@ else
 noinst_LTLIBRARIES =
 endif
 
-if NO_UNDEFINED
-# The -no-undefined flag is crucial to build fine on some platforms
-UNDEF = -no-undefined
+libhostname_la_LDFLAGS_EXTRA = -module -avoid-version -rpath /nowhere
+
+if CURL_LT_SHLIB_USE_NO_UNDEFINED
+libhostname_la_LDFLAGS_EXTRA += -no-undefined
 endif
+
+libhostname_la_LDFLAGS = $(AM_LDFLAGS) $(libhostname_la_LDFLAGS_EXTRA)
 
 libhostname_la_SOURCES = sethostname.c sethostname.h
 
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
-libhostname_la_LDFLAGS = -module -avoid-version $(UNDEF) -rpath /nowhere
 
 if DOING_CURL_SYMBOL_HIDING
 libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS

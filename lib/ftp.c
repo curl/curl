@@ -3978,16 +3978,11 @@ static CURLcode wc_statemach(struct connectdata *conn)
     /* filelist has at least one file, lets get first one */
     struct ftp_conn *ftpc = &conn->proto.ftpc;
     struct curl_fileinfo *finfo = wildcard->filelist->head->ptr;
-    char *tmp_path = malloc(strlen(conn->data->state.path) +
-                      strlen(finfo->filename) + 1);
-    if(!tmp_path) {
-      return CURLE_OUT_OF_MEMORY;
-    }
 
-    tmp_path[0] = 0;
-    /* make full path to matched file */
-    strcat(tmp_path, wildcard->path);
-    strcat(tmp_path, finfo->filename);
+    char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
+    if(!tmp_path)
+      return CURLE_OUT_OF_MEMORY;
+
     /* switch default "state.pathbuffer" and tmp_path, good to see
        ftp_parse_url_path function to understand this trick */
     Curl_safefree(conn->data->state.pathbuffer);
@@ -4124,13 +4119,13 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(s, SBUF_SIZE-3, fmt, ap);
+  write_len = vsnprintf(s, SBUF_SIZE-3, fmt, ap);
   va_end(ap);
 
-  strcat(s, "\r\n"); /* append a trailing CRLF */
+  strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
+  write_len +=2;
 
   bytes_written=0;
-  write_len = strlen(s);
 
   res = Curl_convert_to_network(conn->data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */

@@ -45,7 +45,7 @@ http-proxy
 IMAP FETCH tunneled through HTTP proxy
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/1321 -u user:secret -p -x %HOSTIP:%PROXYPORT
+'imap://%HOSTIP:%IMAPPORT/1321/;UID=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 

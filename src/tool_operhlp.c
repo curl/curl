@@ -123,21 +123,19 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
     /* URL encode the file name */
     encfile = curl_easy_escape(curl, filep, 0 /* use strlen */);
     if(encfile) {
-      char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
-      if(!urlbuffer) {
-        curl_free(encfile);
-        Curl_safefree(url);
-        return NULL;
-      }
+      char *urlbuffer;
       if(ptr)
         /* there is a trailing slash on the URL */
-        sprintf(urlbuffer, "%s%s", url, encfile);
+        urlbuffer = aprintf("%s%s", url, encfile);
       else
         /* there is no trailing slash on the URL */
-        sprintf(urlbuffer, "%s/%s", url, encfile);
+        urlbuffer = aprintf("%s/%s", url, encfile);
 
       curl_free(encfile);
       Curl_safefree(url);
+
+      if(!urlbuffer)
+        return NULL;
 
       url = urlbuffer; /* use our new URL instead! */
     }
