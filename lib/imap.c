@@ -398,7 +398,12 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
         break;
 
       case IMAP_LIST:
-        if(!imap_matchresp(line, len, "LIST"))
+        if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
+          (imap->custom && !imap_matchresp(line, len, imap->custom) &&
+           (strcmp(imap->custom, "STORE") ||
+            !imap_matchresp(line, len, "FETCH")) &&
+           strcmp(imap->custom, "SELECT") &&
+           strcmp(imap->custom, "EXAMINE")))
           return FALSE;
         break;
 
@@ -409,20 +414,6 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
 
       case IMAP_FETCH:
         if(!imap_matchresp(line, len, "FETCH"))
-          return FALSE;
-        break;
-
-      case IMAP_CUSTOM:
-        /* When dealing with a custom command, we are interested in all
-           intermediate responses which match the parameter name. The
-           exceptions are STORE, which returns untagged responses as FETCH,
-           and SELECT and EXAMINE commands, for which no filtering is (or can
-           be easily) done. */
-        if(!imap_matchresp(line, len, imap->custom) &&
-           (strcmp(imap->custom, "STORE") ||
-            !imap_matchresp(line, len, "FETCH")) &&
-           strcmp(imap->custom, "SELECT") &&
-           strcmp(imap->custom, "EXAMINE"))
           return FALSE;
         break;
 
@@ -493,7 +484,6 @@ static void state(struct connectdata *conn, imapstate newstate)
     "FETCH_FINAL",
     "APPEND",
     "APPEND_FINAL",
-    "CUSTOM",
     "LOGOUT",
     /* LAST */
   };
@@ -696,15 +686,21 @@ static CURLcode imap_list(struct connectdata *conn)
   struct IMAP *imap = data->state.proto.imap;
   char *mailbox;
 
-  /* Make sure the mailbox is in the correct atom format */
-  mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
-  if(!mailbox)
-    return CURLE_OUT_OF_MEMORY;
+  if(imap->custom)
+    /* Send the custom request */
+    result = imap_sendf(conn, "%s%s", imap->custom,
+                        imap->custom_params ? imap->custom_params : "");
+  else {
+    /* Make sure the mailbox is in the correct atom format */
+    mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+    if(!mailbox)
+      return CURLE_OUT_OF_MEMORY;
 
-  /* Send the LIST command */
-  result = imap_sendf(conn, "LIST \"%s\" *", mailbox);
+    /* Send the LIST command */
+    result = imap_sendf(conn, "LIST \"%s\" *", mailbox);
 
-  Curl_safefree(mailbox);
+    Curl_safefree(mailbox);
+  }
 
   if(!result)
     state(conn, IMAP_LIST);
@@ -799,24 +795,6 @@ static CURLcode imap_append(struct connectdata *conn)
 
   if(!result)
     state(conn, IMAP_APPEND);
-
-  return result;
-}
-
-static CURLcode imap_custom(struct connectdata *conn)
-{
-  struct IMAP *imap = conn->data->state.proto.imap;
-
-  /* Send the custom request */
-  CURLcode result = imap_sendf(conn, "%s%s", imap->custom,
-                               imap->custom_params ? imap->custom_params : "");
-
-  if(!result) {
-    /* We don't know how much data will be received */
-    Curl_pgrsSetDownloadSize(conn->data, -1);
-
-    state(conn, IMAP_CUSTOM);
-  }
 
   return result;
 }
@@ -1391,7 +1369,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
       imapc->mailbox = strdup(imap->mailbox);
 
       if(imap->custom)
-        result = imap_custom(conn);
+        result = imap_list(conn);
       else
         result = imap_fetch(conn);
     }
@@ -1650,7 +1628,6 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       break;
 
     case IMAP_LIST:
-    case IMAP_CUSTOM:
       result = imap_state_list_resp(conn, imapcode, imapc->state);
       break;
 
@@ -1891,7 +1868,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
     result = imap_append(conn);
   else if(imap->custom && (selected || !imap->mailbox))
     /* Custom command using the same mailbox or no mailbox */
-    result = imap_custom(conn);
+    result = imap_list(conn);
   else if(!imap->custom && selected && imap->uid)
     /* FETCH from the same mailbox */
     result = imap_fetch(conn);
