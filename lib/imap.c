@@ -236,10 +236,12 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
   snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
            'A' + (conn->connection_id % 26), imapc->cmdid);
 
+  /* Prefix the format with the tag */
   taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
   if(!taggedfmt)
     return CURLE_OUT_OF_MEMORY;
 
+  /* Send the data with the tag */
   result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
 
   Curl_safefree(taggedfmt);
