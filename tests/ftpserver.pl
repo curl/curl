@@ -804,54 +804,54 @@ sub SELECT_imap {
 }
 
 sub FETCH_imap {
-     my ($args) = @_;
-     my ($uid, $how) = split(/ /, $args, 2);
-     my @data;
-     my $size;
+    my ($args) = @_;
+    my ($uid, $how) = split(/ /, $args, 2);
+    my @data;
+    my $size;
 
-     logmsg "FETCH_imap got $args\n";
+    logmsg "FETCH_imap got $args\n";
 
-     if($selected =~ /^verifiedserver$/) {
-         # this is the secret command that verifies that this actually is
-         # the curl test server
-         my $response = "WE ROOLZ: $$\r\n";
-         if($verbose) {
-             print STDERR "FTPD: We returned proof we are the test server\n";
-         }
-         $data[0] = $response;
-         logmsg "return proof we are we\n";
-     }
-     else {
-         logmsg "retrieve a mail\n";
+    if($selected =~ /^verifiedserver$/) {
+        # this is the secret command that verifies that this actually is
+        # the curl test server
+        my $response = "WE ROOLZ: $$\r\n";
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
+        }
+        $data[0] = $response;
+        logmsg "return proof we are we\n";
+    }
+    else {
+        logmsg "retrieve a mail\n";
 
-         my $testno = $selected;
-         $testno =~ s/^([^0-9]*)//;
-         my $testpart = "";
-         if ($testno > 10000) {
-             $testpart = $testno % 10000;
-             $testno = int($testno / 10000);
-         }
+        my $testno = $selected;
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
 
-         # send mail content
-         loadtest("$srcdir/data/test$testno");
+        # send mail content
+        loadtest("$srcdir/data/test$testno");
 
-         @data = getpart("reply", "data$testpart");
-     }
+        @data = getpart("reply", "data$testpart");
+    }
 
-     for (@data) {
-         $size += length($_);
-     }
+    for (@data) {
+        $size += length($_);
+    }
 
-     sendcontrol "* $uid FETCH ($how {$size}\r\n";
+    sendcontrol "* $uid FETCH ($how {$size}\r\n";
 
-     for my $d (@data) {
-         sendcontrol $d;
-     }
+    for my $d (@data) {
+        sendcontrol $d;
+    }
 
-     sendcontrol ")\r\n";
-     sendcontrol "$cmdid OK FETCH completed\r\n";
+    sendcontrol ")\r\n";
+    sendcontrol "$cmdid OK FETCH completed\r\n";
 
-     return 0;
+    return 0;
 }
 
 sub APPEND_imap {
@@ -889,18 +889,18 @@ sub APPEND_imap {
             my $datasize = ($left > $chunksize) ? $chunksize : $left;
 
             if($datasize > 0) {
-              logmsg "> Appending $datasize bytes to file\n";
-              print FILE substr($line, 0, $datasize) if(!$nosave);
-              $line = substr($line, $datasize);
+                logmsg "> Appending $datasize bytes to file\n";
+                print FILE substr($line, 0, $datasize) if(!$nosave);
+                $line = substr($line, $datasize);
 
-              $received += $datasize;
-              if($received == $size) {
-                logmsg "Received all data, waiting for final CRLF.\n";
-              }
+                $received += $datasize;
+                if($received == $size) {
+                    logmsg "Received all data, waiting for final CRLF.\n";
+                }
             }
 
             if($received == $size && $line eq "\r\n") {
-              last;
+                last;
             }
         }
         elsif($line eq "DISC\n") {
