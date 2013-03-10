@@ -47,15 +47,15 @@ test542 test543 test544 test545 test546 test547 test548 test549 test550	\
 test551 test552 test553 test554 test555 test556 test557 test560 test561	\
 test562 test563 test564 test565 test566 test567 test568 test569 test570	\
 test571 test572 test573 test574 test575 test576 test578 test579 test580	\
-test581 test582 test583 test584 test585 test586 test587 test588 test590 \
-test591 test592 test593 test594 test595 test596 test597 test598 test599 \
+test581 test582 test583 test584 test585 test586 test587 test588 test590	\
+test591 test592 test593 test594 test595 test596 test597 test598 test599	\
 test600 test601 test602 test603 test604	\
 test605 test606 test607 test608 test609 test610 test611 test612 test613	\
 test614 test615 test616 test617 test618 test619 test620 test621 test622	\
 test623 test624 test625 test626 test627 test628 test629 test630 test631	\
-test632 test633 test634 test635 test636 test637 test638 test639 \
-test700 test701 test702	test703 test704 test705 test706 test707 test708 \
-test709 test710 \
+test632 test633 test634 test635 test636 test637 test638 test639	\
+test700 test701 test702	test703 test704 test705 test706 test707 test708	\
+test709 test710	\
 test800	\
 test850 test851 test852 test853 test854 test855 test856 test857	\
 test900	test901 test902 test903 test904 test905	test906	\
@@ -75,32 +75,32 @@ test1094 test1095 test1096 test1097 test1098 test1099 test1100 test1101	\
 test1102 test1103 test1104 test1105 test1106 test1107 test1108 test1109	\
 test1110 test1111 test1112 test1113 test1114 test1115 test1116 test1117	\
 test1118 test1119 test1120 test1121 test1122 test1123 test1124 test1125	\
-test1126 test1127 test1128 test1129 test1130 test1131 test1132 test1133 \
-test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
-test1208 test1209 test1210 test1211 test1212 \
-test1220 test1221 test1222 test1223 \
+test1126 test1127 test1128 test1129 test1130 test1131 test1132 test1133	\
+test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207	\
+test1208 test1209 test1210 test1211 test1212	\
+test1220 test1221 test1222 test1223	\
 test1300 test1301 test1302 test1303 test1304 test1305	\
-test1306 test1307 test1308 test1309 test1310 test1311 test1312 test1313 \
-test1314 test1315 test1316 test1317 test1318 test1319 test1320 test1321 \
-test1322 test1323 test1324 test1325 test1326 test1327 test1328 test1329 \
-test1331 test1332 test1333 test1334 test1335 test1336 test1337 test1338 \
-test1339 test1340 test1341 test1342 test1343 test1344 test1345 test1346 \
-test1347 test1348 test1349 test1350 test1351 test1352 test1353 test1354 \
-test1355 test1356 test1357 test1358 test1359 test1360 test1361 test1362 \
-test1363 test1364 test1365 test1366 test1367 test1368 test1369 test1370 \
-test1371 test1372 test1373 test1374 test1375 test1376 test1377 test1378 \
-test1379 test1380 test1381 test1382 test1383 test1384 test1385 test1386 \
-test1387 test1388 test1389 test1390 test1391 test1392 test1393 \
-test1400 test1401 test1402 test1403 test1404 test1405 test1406 test1407 \
-test1408 test1409 test1410 test1411 test1412 test1413 \
-test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
-test1508 \
-test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007 \
-test2008 test2009 test2010 test2011 test2012 test2013 test2014 test2015 \
-test2016 test2017 test2018 test2019 test2020 test2021 test2022 \
-test2023 test2024 test2025 \
-test2026 test2027 test2028 \
-test2029 test2030 test2031 \
+test1306 test1307 test1308 test1309 test1310 test1311 test1312 test1313	\
+test1314 test1315 test1316 test1317 test1318 test1319 test1320 test1321	\
+test1322 test1323 test1324 test1325 test1326 test1327 test1328 test1329	\
+test1331 test1332 test1333 test1334 test1335 test1336 test1337 test1338	\
+test1339 test1340 test1341 test1342 test1343 test1344 test1345 test1346	\
+test1347 test1348 test1349 test1350 test1351 test1352 test1353 test1354	\
+test1355 test1356 test1357 test1358 test1359 test1360 test1361 test1362	\
+test1363 test1364 test1365 test1366 test1367 test1368 test1369 test1370	\
+test1371 test1372 test1373 test1374 test1375 test1376 test1377 test1378	\
+test1379 test1380 test1381 test1382 test1383 test1384 test1385 test1386	\
+test1387 test1388 test1389 test1390 test1391 test1392 test1393	\
+test1400 test1401 test1402 test1403 test1404 test1405 test1406 test1407	\
+test1408 test1409 test1410 test1411 test1412 test1413	\
+test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507	\
+test1508	\
+test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007	\
+test2008 test2009 test2010 test2011 test2012 test2013 test2014 test2015	\
+test2016 test2017 test2018 test2019 test2020 test2021 test2022	\
+test2023 test2024 test2025	\
+test2026 test2027 test2028	\
+test2029 test2030 test2031	\
 test2032
 
 EXTRA_DIST = $(TESTCASES) DISABLED
