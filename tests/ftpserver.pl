@@ -762,6 +762,14 @@ my $cmdid;
 # what was picked by SELECT
 my $selected;
 
+# Any IMAP parameter can come in escaped and in double quotes.
+# This function is dumb (so far) and just removes the quotes if present.
+sub fix_imap_params {
+    foreach (@_) {
+        $_ = $1 if /^"(.*)"$/;
+    }
+}
+
 sub CAPABILITY_imap {
     my ($testno) = @_;
     my $data;
@@ -785,6 +793,7 @@ sub CAPABILITY_imap {
 
 sub SELECT_imap {
     my ($testno) = @_;
+    fix_imap_params($testno);
 
     logmsg "SELECT_imap got test $testno\n";
 
@@ -808,10 +817,11 @@ sub FETCH_imap {
     my ($uid, $how) = split(/ /, $args, 2);
     my @data;
     my $size;
+    fix_imap_params($uid, $how);
 
     logmsg "FETCH_imap got $args\n";
 
-    if($selected =~ /^verifiedserver$/) {
+    if($selected eq "verifiedserver") {
         # this is the secret command that verifies that this actually is
         # the curl test server
         my $response = "WE ROOLZ: $$\r\n";
@@ -861,6 +871,7 @@ sub APPEND_imap {
 
     $args =~ /^([^ ]+) [^{]*\{(\d+)\}$/;
     my ($folder, $size) = ($1, $2);
+    fix_imap_params($folder);
 
     sendcontrol "+ Ready for literal data\r\n";
 
@@ -928,6 +939,7 @@ sub APPEND_imap {
 sub STORE_imap {
     my ($args) = @_;
     my ($uid, $what) = split(/ /, $args, 2);
+    fix_imap_params($uid);
 
     logmsg "STORE_imap got $args\n";
 
@@ -941,10 +953,11 @@ sub LIST_imap {
     my ($args) = @_;
     my ($reference, $mailbox) = split(/ /, $args, 2);
     my @data;
+    fix_imap_params($reference, $mailbox);
 
     logmsg "LIST_imap got $args\n";
 
-    if ($reference eq '"verifiedserver"') {
+    if ($reference eq "verifiedserver") {
          # this is the secret command that verifies that this actually is
          # the curl test server
          @data = ("* LIST () \"/\" \"WE ROOLZ: $$\"\r\n");
