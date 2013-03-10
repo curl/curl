@@ -30,7 +30,7 @@ SMTP login authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 806@foo --mail-from 806@from -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@foo --mail-from 904@from -u test:1234 -T -
 </command>
 </client>
 
@@ -41,8 +41,8 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 806@foo --mail-from 806@from -u test:1
 EHLO user
 AUTH LOGIN dGVzdA==
 MTIzNA==
-MAIL FROM:<806@from>
-RCPT TO:<806@foo>
+MAIL FROM:<904@from>
+RCPT TO:<904@foo>
 DATA
 QUIT
 </protocol>

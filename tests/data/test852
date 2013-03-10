@@ -25,7 +25,7 @@ pop3
 POP3 LIST invalid message
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
+pop3://%HOSTIP:%POP3PORT/852 -l -u user:secret
 </command>
 </client>
 
@@ -39,7 +39,7 @@ pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
 CAPA
 USER user
 PASS secret
-LIST 809
+LIST 852
 QUIT
 </protocol>
 </verify>
