@@ -29,7 +29,7 @@ This release includes the following changes:
    new multi interface connection handling.
  o Added CURLMOPT_MAX_PIPELINE_LENGTH, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE,
    CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLMOPT_PIPELINING_SITE_BL and
-   CURLMOPT_PIPELINING_SERVER_BL for new pipelning control
+   CURLMOPT_PIPELINING_SERVER_BL for new pipelning control [15]
 
 This release includes the following bugfixes:
 
@@ -65,7 +65,7 @@ This release includes the following bugfixes:
  o build: fixes for VMS
  o CONNECT: clear 'rewindaftersend' on success [12]
  o HTTP proxy: insert slash in URL if missing [13]
- o hiperfifo: updated to use current libevent API,
+ o hiperfifo: updated to use current libevent API [14]
  o getinmemory.c: abort the transfer nicely if not enough memory
 
 This release includes the following known bugs:
@@ -100,3 +100,6 @@ References to bug reports and discussions on issues:
  [11] = http://curl.haxx.se/bug/view.cgi?id=1204
  [12] = https://groups.google.com/d/msg/msysgit/B31LNftR4BI/KhRTz0iuGmUJ
  [13] = http://curl.haxx.se/bug/view.cgi?id=1206
+ [14] = http://curl.haxx.se/bug/view.cgi?id=1199
+ [15] = http://daniel.haxx.se/blog/2013/03/26/better-pipelining-in-libcurl-7-30-0/
+ 
