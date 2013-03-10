@@ -54,11 +54,11 @@ test605 test606 test607 test608 test609 test610 test611 test612 test613	\
 test614 test615 test616 test617 test618 test619 test620 test621 test622	\
 test623 test624 test625 test626 test627 test628 test629 test630 test631	\
 test632 test633 test634 test635 test636 test637 test638 test639	\
-test700 test701 test702	test703 test704 test705 test706 test707 test708	\
+test700 test701 test702 test703 test704 test705 test706 test707 test708	\
 test709 test710	\
 test800 test801 test802 test803 test804 test805 test806 test807	\
 test850 test851 test852 test853 test854 test855 test856 test857	\
-test900	test901 test902 test903 test904 test905	test906	\
+test900 test901 test902 test903 test904 test905	test906	\
 test1000 test1001 test1002 test1003 test1004 test1005	\
 test1006 test1007 test1008 test1009 test1010 test1011 test1012 test1013	\
 test1014 test1015 test1016 test1017 test1018 test1019 test1020 test1021	\
