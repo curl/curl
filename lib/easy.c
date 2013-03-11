@@ -262,6 +262,8 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
+  Curl_ack_eintr = flags & CURL_GLOBAL_ACK_EINTR;
+
   init_flags  = flags;
 
   /* Preset pseudo-random number sequence. */

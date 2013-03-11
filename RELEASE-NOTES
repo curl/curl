@@ -24,6 +24,7 @@ This release includes the following changes:
  o darwinssl: Make certificate errors less techy
  o imap/pop3/smtp: Added support for the STARTTLS capability
  o checksrc: ban use of sprintf, vsprintf, strcat, strncat and gets
+ o curl_global_init() now accepts the CURL_GLOBAL_ACK_EINTR flag [10]
 
 This release includes the following bugfixes:
 
@@ -81,3 +82,4 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/bug/view.cgi?id=1190
  [8] = http://curl.haxx.se/bug/view.cgi?id=1193
  [9] = http://curl.haxx.se/bug/view.cgi?id=1194
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1168

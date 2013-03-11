@@ -70,6 +70,10 @@ Initialise nothing extra. This sets no bit.
 .B CURL_GLOBAL_DEFAULT
 A sensible default. It will init both SSL and Win32. Right now, this equals
 the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
+.TP
+.B CURL_GLOBAL_ACK_EINTR
+When this flag is set, curl will acknowledge EINTR condition when connecting
+or when waiting for data.  Otherwise, curl waits until full timeout elapses.
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.

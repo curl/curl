@@ -50,11 +50,8 @@
 
 #define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
 
-#ifdef CURL_ACKNOWLEDGE_EINTR
-#define error_not_EINTR (1)
-#else
-#define error_not_EINTR (error != EINTR)
-#endif
+int Curl_ack_eintr = 0;
+#define error_not_EINTR (Curl_ack_eintr || error != EINTR)
 
 /*
  * Internal function used for waiting a specific amount of ms
@@ -67,10 +64,6 @@
  * Timeout resolution, accuracy, as well as maximum supported
  * value is system dependent, neither factor is a citical issue
  * for the intended use of this function in the library.
- * On non-DOS and non-Winsock platforms, when compiled with
- * CURL_ACKNOWLEDGE_EINTR defined, EINTR condition is honored
- * and function might exit early without awaiting full timeout,
- * otherwise EINTR will be ignored and full timeout will elapse.
  *
  * Return values:
  *   -1 = system call error, invalid timeout value, or interrupted
@@ -133,9 +126,6 @@ int Curl_wait_ms(int timeout_ms)
  * A negative timeout value makes this function wait indefinitely,
  * unles no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
- * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
- * is honored and function might exit early without awaiting timeout,
- * otherwise EINTR will be ignored.
  *
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
@@ -351,9 +341,6 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
  * A negative timeout value makes this function wait indefinitely,
  * unles no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
- * When compiled with CURL_ACKNOWLEDGE_EINTR defined, EINTR condition
- * is honored and function might exit early without awaiting timeout,
- * otherwise EINTR will be ignored.
  *
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
