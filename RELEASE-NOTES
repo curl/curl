@@ -53,6 +53,7 @@ This release includes the following bugfixes:
  o docs: updates HTML index and general improvements
  o curlbuild.h.dist: enhance non-configure GCC ABI detection logic
  o sasl: Fixed null pointer reference when decoding empty digest challenge [8]
+ o easy: do not ignore poll() failures other than EINTR
 
 This release includes the following known bugs:
 
