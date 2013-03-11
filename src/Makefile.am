@@ -44,7 +44,6 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl \
 
 bin_PROGRAMS = curl
 
-# Mostly for Windows build targets, when using static libcurl
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif

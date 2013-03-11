@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -93,29 +93,21 @@ extern "C" {
 typedef void CURL;
 
 /*
- * Decorate exportable functions for Win32 and Symbian OS DLL linking.
- * This avoids using a .def file for building libcurl.dll.
+ * libcurl external API function linkage decorations.
  */
-#if (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)) && \
-     !defined(CURL_STATICLIB)
-#if defined(BUILDING_LIBCURL)
-#define CURL_EXTERN  __declspec(dllexport)
-#else
-#define CURL_EXTERN  __declspec(dllimport)
-#endif
-#else
 
-#ifdef CURL_HIDDEN_SYMBOLS
-/*
- * This definition is used to make external definitions visible in the
- * shared library when symbols are hidden by default.  It makes no
- * difference when compiling applications whether this is set or not,
- * only when compiling the library.
- */
-#define CURL_EXTERN CURL_EXTERN_SYMBOL
+#ifdef CURL_STATICLIB
+#  define CURL_EXTERN
+#elif defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)
+#  if defined(BUILDING_LIBCURL)
+#    define CURL_EXTERN  __declspec(dllexport)
+#  else
+#    define CURL_EXTERN  __declspec(dllimport)
+#  endif
+#elif defined(BUILDING_LIBCURL) && defined(CURL_HIDDEN_SYMBOLS)
+#  define CURL_EXTERN CURL_EXTERN_SYMBOL
 #else
-#define CURL_EXTERN
-#endif
+#  define CURL_EXTERN
 #endif
 
 #ifndef curl_socket_typedef

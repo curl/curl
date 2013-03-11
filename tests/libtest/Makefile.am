@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -70,11 +70,6 @@ endif
 LDADD = $(SUPPORTFILES_LIBS)
 DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
-# Mostly for Windows build targets, when using static libcurl
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
-
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
@@ -88,25 +83,35 @@ else
 noinst_LTLIBRARIES =
 endif
 
-AM_LDFLAGS =
+if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
+endif
 
+AM_LDFLAGS =
+AM_CFLAGS =
+
+libhostname_la_CPPFLAGS_EXTRA =
 libhostname_la_LDFLAGS_EXTRA = -module -avoid-version -rpath /nowhere
+libhostname_la_CFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libhostname_la_LDFLAGS_EXTRA += -no-undefined
 endif
 
+if CURL_LT_SHLIB_USE_MIMPURE_TEXT
+libhostname_la_LDFLAGS_EXTRA += -mimpure-text
+endif
+
+if DOING_CURL_SYMBOL_HIDING
+libhostname_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
+libhostname_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
+endif
+
+libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) $(libhostname_la_CPPFLAGS_EXTRA)
 libhostname_la_LDFLAGS = $(AM_LDFLAGS) $(libhostname_la_LDFLAGS_EXTRA)
+libhostname_la_CFLAGS = $(AM_CFLAGS) $(libhostname_la_CFLAGS_EXTRA)
 
 libhostname_la_SOURCES = sethostname.c sethostname.h
 
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
-
-if DOING_CURL_SYMBOL_HIDING
-libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-libhostname_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
-else
-libhostname_la_CPPFLAGS = $(AM_CPPFLAGS)
-libhostname_la_CFLAGS = $(AM_CFLAGS)
-endif
