@@ -1085,6 +1085,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1105,25 +1106,27 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
      the strip counter here so that these bytes won't be delivered. */
   pop3c->strip = 2;
 
-  /* POP3 download */
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
+  if(pop3->transfer == FTPTRANSFER_BODY) {
+    /* POP3 download */
+    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
 
-  if(pp->cache) {
-    /* The header "cache" contains a bunch of data that is actually body
-       content so send it as such. Note that there may even be additional
-       "headers" after the body */
+    if(pp->cache) {
+      /* The header "cache" contains a bunch of data that is actually body
+         content so send it as such. Note that there may even be additional
+         "headers" after the body */
 
-    if(!data->set.opt_no_body) {
-      result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
-      if(result)
-        return result;
+      if(!data->set.opt_no_body) {
+        result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
+        if(result)
+          return result;
+      }
+
+      /* Free the cache */
+      Curl_safefree(pp->cache);
+
+      /* Reset the cache size */
+      pp->cache_size = 0;
     }
-
-    /* Free the cache */
-    Curl_safefree(pp->cache);
-
-    /* Reset the cache size */
-    pp->cache_size = 0;
   }
 
   /* End of DO phase */
