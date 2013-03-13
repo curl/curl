@@ -1548,13 +1548,8 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 /* Call this when the DO phase has completed */
 static CURLcode pop3_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct POP3 *pop3 = conn->data->state.proto.pop3;
-
+  (void)conn;
   (void)connected;
-
-  if(pop3->transfer != FTPTRANSFER_BODY)
-    /* no data to transfer */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 
   return CURLE_OK;
 }
