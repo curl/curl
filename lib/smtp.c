@@ -1264,16 +1264,17 @@ static CURLcode smtp_block_statemach(struct connectdata *conn)
    required */
 static CURLcode smtp_init(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->state.proto.smtp;
 
   if(!smtp) {
     smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
     if(!smtp)
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 /* For the SMTP "protocol connect" and "doing" phases only */

@@ -23,6 +23,8 @@ This release includes the following changes:
  o imap: Added parsing and verification of the UIDVALIDITY mailbox attribute
  o darwinssl: Make certificate errors less techy
  o imap/pop3/smtp: Added support for the STARTTLS capability
+ o checksrc: ban use of sprintf, vsprintf, strcat, strncat and gets
+ o curl_global_init() now accepts the CURL_GLOBAL_ACK_EINTR flag [10]
 
 This release includes the following bugfixes:
 
@@ -44,6 +46,15 @@ This release includes the following bugfixes:
  o darwinssl: Fix send glitchiness with data > 32 or so KB [5]
  o polarssl: better 1.1.x and 1.2.x support
  o various documentation improvements
+ o multi: NULL pointer reference when closing an unused multi handle [9]
+ o SOCKS: fix socks proxy when noproxy matched [7]
+ o install-sh: updated to support multiple source files as arguments [6]
+ o PolarSSL: added human readable error strings
+ o resolver_error: remove wrong error message output
+ o docs: updates HTML index and general improvements
+ o curlbuild.h.dist: enhance non-configure GCC ABI detection logic
+ o sasl: Fixed null pointer reference when decoding empty digest challenge [8]
+ o easy: do not ignore poll() failures other than EINTR
 
 This release includes the following known bugs:
 
@@ -55,7 +66,8 @@ advice from friends like these:
  Kamil Dudka, Steve Holme, Nick Zitzmann, Patricia Muscalu, Dan Fandrich,
  Gisle Vanem, Guenter Knauf, Yang Tse, Oliver Gondža, Aki Koskinen,
  Alexander Klauer, Kim Vandry, Willem Sparreboom, Jeremy Huddleston,
- Bruno de Carvalho
+ Bruno de Carvalho, Rainer Jung, Jeremy Huddleston, Kim Vandry, Jiri Hruska,
+ Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -66,3 +78,8 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/mail/lib-2013-03/0014.html
  [4] = http://curl.haxx.se/bug/view.cgi?id=1192
  [5] = http://curl.haxx.se/mail/lib-2013-02/0145.html
+ [6] = http://curl.haxx.se/bug/view.cgi?id=1195
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1190
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1193
+ [9] = http://curl.haxx.se/bug/view.cgi?id=1194
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1168

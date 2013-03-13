@@ -42,7 +42,7 @@ Portability
  cyassl       2.0.0
  openldap     2.0
  MIT krb5 lib 1.2.4
- qsossl       V5R2M0
+ qsossl       V5R3M0
  NSS          3.12.x
  axTLS        1.2.7
  Heimdal      ?
@@ -52,7 +52,7 @@ Portability
  curl running fine on:
 
  Windows      98
- AS/400       V5R2M0
+ AS/400       V5R3M0
  Symbian      9.1
  Windows CE   ?
  TPF          ?

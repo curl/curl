@@ -1,36 +1,32 @@
 <testcase>
 <info>
 <keywords>
-SMTP
-SMTP AUTH LOGIN
-RFC4954
+IMAP
+LIST
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<servercmd>
-REPLY EHLO 250 AUTH LOGIN
-REPLY AUTH 334 UGFzc3dvcmQ6
-REPLY MTIzNA== 235 Authenticated
-</servercmd>
+<data>
+* LIST () "/" /806/blurdybloop
+* LIST (\Noselect) "/" /806/foo
+* LIST () "/" /806/foo/bar
+</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-smtp
+imap
 </server>
  <name>
-SMTP login authentication
+IMAP LIST
  </name>
-<stdin>
-mail body
-</stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 806@foo --mail-from 806@from -u test:1234 -T -
+-u user:secret 'imap://%HOSTIP:%IMAPPORT/806/'
 </command>
 </client>
 
@@ -38,18 +34,10 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 806@foo --mail-from 806@from -u test:1
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
-AUTH LOGIN dGVzdA==
-MTIzNA==
-MAIL FROM:<806@from>
-RCPT TO:<806@foo>
-DATA
-QUIT
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 LIST "806" *
+A004 LOGOUT
 </protocol>
-<upload>
-mail body
-
-.
-</upload>
 </verify>
 </testcase>

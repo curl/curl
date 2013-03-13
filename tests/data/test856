@@ -2,7 +2,6 @@
 <info>
 <keywords>
 POP3
-RETR
 FAILURE
 </keywords>
 </info>
@@ -11,7 +10,7 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
-REPLY RETR -ERR no such message
+REPLY PASS -ERR invalid login
 </servercmd>
 </reply>
 
@@ -22,10 +21,10 @@ REPLY RETR -ERR no such message
 pop3
 </server>
  <name>
-POP3 RETR invalid message
+POP3 invalid login
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/812 -u user:secret
+pop3://%HOSTIP:%POP3PORT/856 -u user:wrong
 </command>
 </client>
 
@@ -33,14 +32,15 @@ pop3://%HOSTIP:%POP3PORT/812 -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-56
+67
 </errorcode>
+#
+# The multi interface considers a broken "DO" request as a prematurely broken
+# transfer and such a connection will not get a "QUIT"
 <protocol>
 CAPA
 USER user
-PASS secret
-RETR 812
-QUIT
+PASS wrong
 </protocol>
 </verify>
 </testcase>

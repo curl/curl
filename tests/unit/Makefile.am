@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -59,12 +59,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/lib/libcurlu.la @LDFLAGS@ @LIBCURL_LIBS@
 DEPENDENCIES = $(top_builddir)/lib/libcurlu.la
-AM_CPPFLAGS += -DUNITTESTS
-
-# Mostly for Windows build targets, when using static libcurl
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
+AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
 # Makefile.inc provides neat definitions
 include Makefile.inc

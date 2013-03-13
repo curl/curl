@@ -1,38 +1,33 @@
 <testcase>
 <info>
 <keywords>
-SMTP
-SMTP HELO
-RFC821
+IMAP
+SELECT
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<servercmd>
-REPLY EHLO 500 Command unrecognized
-REPLY HELO 250 Already old but still servicing...
-</servercmd>
+<data>
+body
+
+--
+  yours sincerely
+</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-smtp
+imap
 </server>
  <name>
-RFC821-only SMTP server (EHLO not supported)
+IMAP doesn't perform SELECT if re-using the same mailbox
  </name>
-<stdin>
-From: different
-To: another
-
-body
-</stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 804@foo --mail-from 804@from -T -
+-u user:secret 'imap://%HOSTIP:%IMAPPORT/804/;UID=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/804/;UID=456/;SECTION=2.3'
 </command>
 </client>
 
@@ -40,20 +35,12 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 804@foo --mail-from 804@from -T -
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
-HELO user
-MAIL FROM:<804@from>
-RCPT TO:<804@foo>
-DATA
-QUIT
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT 804
+A004 FETCH 123 BODY[1]
+A005 FETCH 456 BODY[2.3]
+A006 LOGOUT
 </protocol>
-<upload>
-From: different
-To: another
-
-body
-
-.
-</upload>
 </verify>
 </testcase>

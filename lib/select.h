@@ -81,6 +81,12 @@ int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
 
+/* On non-DOS and non-Winsock platforms, when Curl_ack_eintr is set,
+ * EINTR condition is honored and function might exit early without
+ * awaiting full timeout.  Otherwise EINTR will be ignored and full
+ * timeout will elapse. */
+extern int Curl_ack_eintr;
+
 int Curl_wait_ms(int timeout_ms);
 
 #ifdef TPF

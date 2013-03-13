@@ -10,9 +10,6 @@ FETCH
 # Server-side
 <reply>
 <data>
-From: me@somewhere
-To: fake@nowhere
-
 body
 
 --
@@ -27,10 +24,10 @@ body
 imap
 </server>
  <name>
-IMAP FETCH
+IMAP FETCH by UID and SECTION
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/801/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/801/;UID=123/;SECTION=1' -u user:secret
 </command>
 </client>
 
@@ -41,7 +38,7 @@ IMAP FETCH
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT 801
-A004 FETCH 1 BODY[]
+A004 FETCH 123 BODY[1]
 A005 LOGOUT
 </protocol>
 </verify>

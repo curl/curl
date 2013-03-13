@@ -802,7 +802,8 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
   int bitmap;
   unsigned int i;
-  unsigned int nfds = extra_nfds;
+  unsigned int nfds = 0;
+  unsigned int curlfds;
   struct pollfd *ufds = NULL;
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -832,6 +833,9 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     easy = easy->next; /* check next handle */
   }
 
+  curlfds = nfds; /* number of internal file descriptors */
+  nfds += extra_nfds; /* add the externally provided ones */
+
   if(nfds) {
     ufds = malloc(nfds * sizeof(struct pollfd));
     if(!ufds)
@@ -839,32 +843,37 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   }
   nfds = 0;
 
-  /* Add the curl handles to our pollfds first */
-  easy=multi->easy.next;
-  while(easy != &multi->easy) {
-    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+  /* only do the second loop if we found descriptors in the first stage run
+     above */
 
-    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
-      curl_socket_t s = CURL_SOCKET_BAD;
+  if(curlfds) {
+    /* Add the curl handles to our pollfds first */
+    easy=multi->easy.next;
+    while(easy != &multi->easy) {
+      bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
 
-      if(bitmap & GETSOCK_READSOCK(i)) {
-        ufds[nfds].fd = sockbunch[i];
-        ufds[nfds].events = POLLIN;
-        ++nfds;
-        s = sockbunch[i];
+      for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+        curl_socket_t s = CURL_SOCKET_BAD;
+
+        if(bitmap & GETSOCK_READSOCK(i)) {
+          ufds[nfds].fd = sockbunch[i];
+          ufds[nfds].events = POLLIN;
+          ++nfds;
+          s = sockbunch[i];
+        }
+        if(bitmap & GETSOCK_WRITESOCK(i)) {
+          ufds[nfds].fd = sockbunch[i];
+          ufds[nfds].events = POLLOUT;
+          ++nfds;
+          s = sockbunch[i];
+        }
+        if(s == CURL_SOCKET_BAD) {
+          break;
+        }
       }
-      if(bitmap & GETSOCK_WRITESOCK(i)) {
-        ufds[nfds].fd = sockbunch[i];
-        ufds[nfds].events = POLLOUT;
-        ++nfds;
-        s = sockbunch[i];
-      }
-      if(s == CURL_SOCKET_BAD) {
-        break;
-      }
+
+      easy = easy->next; /* check next handle */
     }
-
-    easy = easy->next; /* check next handle */
   }
 
   /* Add external file descriptions from poll-like struct curl_waitfd */
@@ -1202,8 +1211,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* Perform the protocol's DO action */
-        easy->result = Curl_do(&easy->easy_conn,
-                               &dophase_done);
+        easy->result = Curl_do(&easy->easy_conn, &dophase_done);
+
+        /* When Curl_do() returns failure, easy->easy_conn might be NULL! */
 
         if(CURLE_OK == easy->result) {
           if(!dophase_done) {
@@ -1292,7 +1302,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         else {
           /* failure detected */
           Curl_posttransfer(data);
-          Curl_done(&easy->easy_conn, easy->result, FALSE);
+          if(easy->easy_conn)
+            Curl_done(&easy->easy_conn, easy->result, FALSE);
           disconnect_conn = TRUE;
         }
       }

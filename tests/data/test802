@@ -1,32 +1,34 @@
 <testcase>
 <info>
 <keywords>
-SMTP
+IMAP
+SELECT
+UIDVALIDITY
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
+<data>
+body
+
+--
+  yours sincerely
+</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-smtp
+imap
 </server>
  <name>
-SMTP
+IMAP SELECT UIDVALIDITY Success
  </name>
-<stdin>
-From: different
-To: another
-
-body
-</stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 802@foo --mail-rcpt 802@foobar.example --mail-from 802@from -T -
+'imap://%HOSTIP:%IMAPPORT/802;UIDVALIDITY=3857529045/;UID=123/;SECTION=TEXT' -u user:secret
 </command>
 </client>
 
@@ -34,20 +36,11 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 802@foo --mail-rcpt 802@foobar.example
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
-MAIL FROM:<802@from>
-RCPT TO:<802@foo>
-RCPT TO:<802@foobar.example>
-DATA
-QUIT
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT 802
+A004 FETCH 123 BODY[TEXT]
+A005 LOGOUT
 </protocol>
-<upload>
-From: different
-To: another
-
-body
-
-.
-</upload>
 </verify>
 </testcase>

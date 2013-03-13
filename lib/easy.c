@@ -262,6 +262,8 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
+  Curl_ack_eintr = flags & CURL_GLOBAL_ACK_EINTR;
+
   init_flags  = flags;
 
   /* Preset pseudo-random number sequence. */
@@ -441,11 +443,19 @@ CURLcode curl_easy_perform(CURL *easy)
 
   while(!done && !mcode) {
     int still_running;
+    int ret;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, NULL);
+    mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
 
-    if(mcode == CURLM_OK)
+    if(mcode == CURLM_OK) {
+      if(ret == -1) {
+        /* poll() failed not on EINTR, indicate a network problem */
+        code = CURLE_RECV_ERROR;
+        break;
+      }
+
       mcode = curl_multi_perform(multi, &still_running);
+    }
 
     /* only read 'still_running' if curl_multi_perform() return OK */
     if((mcode == CURLM_OK) && !still_running) {

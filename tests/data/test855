@@ -2,7 +2,7 @@
 <info>
 <keywords>
 POP3
-LIST
+RETR
 FAILURE
 </keywords>
 </info>
@@ -11,7 +11,7 @@ FAILURE
 # Server-side
 <reply>
 <servercmd>
-REPLY LIST -ERR no such message
+REPLY RETR -ERR no such message
 </servercmd>
 </reply>
 
@@ -22,10 +22,10 @@ REPLY LIST -ERR no such message
 pop3
 </server>
  <name>
-POP3 LIST invalid message
+POP3 RETR invalid message
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
+pop3://%HOSTIP:%POP3PORT/855 -u user:secret
 </command>
 </client>
 
@@ -39,7 +39,7 @@ pop3://%HOSTIP:%POP3PORT/809 -l -u user:secret
 CAPA
 USER user
 PASS secret
-LIST 809
+RETR 855
 QUIT
 </protocol>
 </verify>

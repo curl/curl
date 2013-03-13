@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with CRLF-dot-CRLF in data
+ </name>
+<stdin>
+From: different
+To: another
+
+
+.
+.
+
+.
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 901@foo --mail-from '<901@from>' -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO user
+MAIL FROM:<901@from>
+RCPT TO:<901@foo>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+
+..
+..
+
+..
+
+body
+
+.
+</upload>
+</verify>
+</testcase>

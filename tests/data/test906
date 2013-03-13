@@ -1,36 +1,32 @@
 <testcase>
 <info>
 <keywords>
-IMAP
-FETCH
+SMTP
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data>
-From: me@somewhere
-To: fake@nowhere
-
-body
-
---
-  yours sincerely
-</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-imap
+smtp
 </server>
  <name>
-IMAP FETCH
+SMTP without --mail-from
  </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
  <command>
-'imap://%HOSTIP:%IMAPPORT/800/;UID=1' -u user:secret
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@foo -T -
 </command>
 </client>
 
@@ -38,11 +34,19 @@ IMAP FETCH
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-A001 CAPABILITY
-A002 LOGIN user secret
-A003 SELECT 800
-A004 FETCH 1 BODY[]
-A005 LOGOUT
+EHLO user
+MAIL FROM:<>
+RCPT TO:<906@foo>
+DATA
+QUIT
 </protocol>
+<upload>
+From: different
+To: another
+
+body
+
+.
+</upload>
 </verify>
 </testcase>

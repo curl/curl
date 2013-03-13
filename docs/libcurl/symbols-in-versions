@@ -614,6 +614,7 @@ CURL_GLOBAL_DEFAULT             7.8
 CURL_GLOBAL_NOTHING             7.8
 CURL_GLOBAL_SSL                 7.8
 CURL_GLOBAL_WIN32               7.8.1
+CURL_GLOBAL_ACK_EINTR           7.30.0
 CURL_HTTP_VERSION_1_0           7.9.1
 CURL_HTTP_VERSION_1_1           7.9.1
 CURL_HTTP_VERSION_NONE          7.9.1

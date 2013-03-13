@@ -37,12 +37,15 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  objnames-test08.sh objnames-test10.sh objnames.inc
 
 lib_LTLIBRARIES = libcurl.la
-LIBCURL_LIBS = @LIBCURL_LIBS@
+
+if BUILD_UNITTESTS
+noinst_LTLIBRARIES = libcurlu.la
+else
+noinst_LTLIBRARIES =
+endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
-
-CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -76,16 +79,6 @@ endif
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-# Mostly for Windows build targets, when building libcurl library
-if USE_CPPFLAG_BUILDING_LIBCURL
-AM_CPPFLAGS += -DBUILDING_LIBCURL
-endif
-
-# Mostly for Windows build targets, when building static libcurl
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
-
 if SONAME_BUMP
 #
 # Bumping of SONAME conditionally may seem like a weird thing to do, and yeah
@@ -114,9 +107,13 @@ endif
 #
 # For the full guide on libcurl ABI rules, see docs/libcurl/ABI
 
+AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
+AM_CFLAGS =
 
+libcurl_la_CPPFLAGS_EXTRA =
 libcurl_la_LDFLAGS_EXTRA =
+libcurl_la_CFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_VERSION_INFO
 libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
@@ -134,25 +131,21 @@ if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 endif
 
-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(LIBCURL_LIBS)
+if USE_CPPFLAG_CURL_STATICLIB
+libcurl_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
+endif
 
 if DOING_CURL_SYMBOL_HIDING
-libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
-else
-libcurl_la_CPPFLAGS = $(AM_CPPFLAGS)
-libcurl_la_CFLAGS = $(AM_CFLAGS)
+libcurl_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
+libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
 endif
 
-# unit testing static library built only along with unit tests
-if BUILD_UNITTESTS
-noinst_LTLIBRARIES = libcurlu.la
-else
-noinst_LTLIBRARIES =
-endif
+libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
+libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(LIBCURL_LIBS)
+libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
 
-libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
-libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
+libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
+libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
 libcurlu_la_CFLAGS = $(AM_CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines

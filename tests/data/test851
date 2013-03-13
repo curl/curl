@@ -11,7 +11,7 @@ LIST
 <reply>
 <servercmd>
 # include the '.\r\n' 3-byte trailer to end the transfer poperly!
-REPLY LIST +OK 808 100\r\n.
+REPLY LIST +OK 851 100\r\n.
 </servercmd>
 </reply>
 
@@ -25,7 +25,7 @@ pop3
 POP3 LIST one message
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/808 -l -u user:secret
+pop3://%HOSTIP:%POP3PORT/851 -l -u user:secret
 </command>
 </client>
 
@@ -36,7 +36,7 @@ pop3://%HOSTIP:%POP3PORT/808 -l -u user:secret
 CAPA
 USER user
 PASS secret
-LIST 808
+LIST 851
 QUIT
 </protocol>
 </verify>

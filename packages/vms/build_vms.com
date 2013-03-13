@@ -123,6 +123,11 @@ $!		     LARGEFILE default to on where available
 $!		     IEEE float default to on where available.
 $!		     Generate the curl_config.h file from system inspection.
 $!		     Linker finds ldap with out option file.
+$! 13-Mar-2013, Tom Grace
+$!                   Added missing slash in cc_full_list.
+$!                   Removed unwanted extra quotes inside symbol tool_main
+$!                   for non-VAX architectures that triggered link failure.
+$!                   Replaced curl_sys_inc with sys_inc.
 $!
 $!===========================================================================
 $!
@@ -226,7 +231,7 @@ $ nokerberos = 0
 $ cc_names = "/names=(shortened, as_is)/repository='exedir'
 $ cc_defs = "HAVE_CONFIG_H=1"
 $ cc_list = "/list='objdir'/show=(expan, includ)/machine
-$ cc_full_list = "list='objdir'/show=(all, nomessages)/machine
+$ cc_full_list = "/list='objdir'/show=(all, nomessages)/machine
 $ link_qual = ""
 $ if arch_name .eqs. "VAX"
 $ then
@@ -669,7 +674,7 @@ $   sys_inc = sys_inc + ",''curl_sys_krbinc'"
 $ endif
 $ if curl_sys_zlibinc .nes. ""
 $ then
-$   curl_sys_inc = sys_inc + ",''curl_sys_zlibinc'"
+$   sys_inc = sys_inc + ",''curl_sys_zlibinc'"
 $ endif
 $ call build "[--.lib]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
@@ -728,7 +733,7 @@ $ link_dsf2 = ""
 $ tool_main = "tool_main"
 $ if arch_name .nes. "VAX"
 $ then
-$   tool_main = """tool_main"""
+$   tool_main = "tool_main"
 $   link_dsf1 = "/dsf=" + exedir + "CURL.DSF"
 $   link_dsf2 = "/dsf=" + exedir + "CURL_DEBUG.DSF"
 $ endif
@@ -838,7 +843,7 @@ $    then
 $       'vo_c' "CC (opts) ", file
 $	define/user curl 'curl_logical'
 $	if curl_sys_krbinc .nes. "" then define/user gssapi 'curl_sys_krbinc'
-$	define/user decc$system_include 'curl_sys_inc'
+$	define/user decc$system_include 'sys_inc'
 $       CC 'cc_defs' -
          'cc_qual1' -
          'cc_qual2' -

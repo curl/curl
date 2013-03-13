@@ -1,9 +1,8 @@
 <testcase>
 <info>
 <keywords>
-IMAP
-SELECT
-UIDVALIDITY
+POP3
+LIST
 FAILURE
 </keywords>
 </info>
@@ -11,34 +10,37 @@ FAILURE
 #
 # Server-side
 <reply>
+<servercmd>
+REPLY LIST -ERR no such message
+</servercmd>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-imap
+pop3
 </server>
  <name>
-IMAP SELECT UIDVALIDITY Failure
+POP3 LIST invalid message
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/803;UIDVALIDITY=12345/;UID=123' -u user:secret
+pop3://%HOSTIP:%POP3PORT/852 -l -u user:secret
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_REMOTE_FILE_NOT_FOUND - UIDVALIDITY mismatch
 <errorcode>
-78
+56
 </errorcode>
 <protocol>
-A001 CAPABILITY
-A002 LOGIN user secret
-A003 SELECT 803
-A004 LOGOUT
+CAPA
+USER user
+PASS secret
+LIST 852
+QUIT
 </protocol>
 </verify>
 </testcase>

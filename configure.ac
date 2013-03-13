@@ -211,32 +211,37 @@ AM_CONDITIONAL([CURL_LT_SHLIB_USE_NO_UNDEFINED],
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_MIMPURE_TEXT],
   [test "x$xc_lt_shlib_use_mimpure_text" = 'xyes'])
 
+#
+# Due to libtool and automake machinery limitations of not allowing
+# specifying separate CPPFLAGS or CFLAGS when compiling objects for
+# inclusion of these in shared or static libraries, we are forced to
+# build using separate configure runs for shared and static libraries
+# on systems where different CPPFLAGS or CFLAGS are mandatory in order
+# to compile objects for each kind of library. Notice that relying on
+# the '-DPIC' CFLAG that libtool provides is not valid given that the
+# user might for example choose to build static libraries with PIC.
+#
 
-AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
-use_cppflag_building_libcurl="no"
-use_cppflag_curl_staticlib="no"
-CPPFLAG_CURL_STATICLIB=""
-case $host in
-  *-*-mingw*)
-    AC_MSG_RESULT(yes)
-    use_cppflag_building_libcurl="yes"
-    AC_MSG_CHECKING([if we need CURL_STATICLIB])
-    if test "X$enable_shared" = "Xno"
-    then
-      AC_MSG_RESULT(yes)
-      use_cppflag_curl_staticlib="yes"
-      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB"
-    else
-      AC_MSG_RESULT(no)
-    fi
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-esac
-AM_CONDITIONAL(USE_CPPFLAG_BUILDING_LIBCURL, test x$use_cppflag_building_libcurl = xyes)
-AM_CONDITIONAL(USE_CPPFLAG_CURL_STATICLIB, test x$use_cppflag_curl_staticlib = xyes)
-AC_SUBST(CPPFLAG_CURL_STATICLIB)
+#
+# Make our Makefile.am files use the staticlib CPPFLAG only when strictly
+# targeting a static library and not building its shared counterpart.
+#
+
+AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
+  [test "x$xc_lt_build_static_only" = 'xyes'])
+
+#
+# Make staticlib CPPFLAG variable and its definition visible in output
+# files unconditionally, providing an empty definition unless strictly
+# targeting a static library and not building its shared counterpart.
+#
+
+CPPFLAG_CURL_STATICLIB=
+if test "x$xc_lt_build_static_only" = 'xyes'; then
+  CPPFLAG_CURL_STATICLIB='-DCURL_STATICLIB'
+fi
+AC_SUBST([CPPFLAG_CURL_STATICLIB])
+
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
@@ -247,10 +252,6 @@ else
 fi
 AC_SUBST(REQUIRE_LIB_DEPS)
 AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$REQUIRE_LIB_DEPS = xyes)
-
-dnl The install stuff has already been taken care of by the automake stuff
-dnl AC_PROG_INSTALL
-AC_PROG_MAKE_SET
 
 dnl check if there's a way to force code inline
 AC_C_INLINE
