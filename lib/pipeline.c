@@ -92,41 +92,6 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
   return FALSE;
 }
 
-/* Find the best connection in a bundle to use for the next request */
-struct connectdata *
-Curl_bundle_find_best(struct SessionHandle *data,
-                      struct connectbundle *cb_ptr)
-{
-  struct curl_llist_element *curr;
-  struct connectdata *conn;
-  struct connectdata *best_conn = NULL;
-  size_t pipe_len;
-  size_t best_pipe_len = 99;
-
-  (void)data;
-
-  curr = cb_ptr->conn_list->head;
-  while(curr) {
-    conn = curr->ptr;
-    pipe_len = conn->send_pipe->size + conn->recv_pipe->size;
-
-    if(!Curl_pipeline_penalized(conn->data, conn) &&
-       pipe_len < best_pipe_len) {
-      best_conn = conn;
-      best_pipe_len = pipe_len;
-    }
-    curr = curr->next;
-  }
-
-  /* If we haven't found a connection, i.e all pipelines are penalized
-     or full, just pick one. The request will then be queued in
-     Curl_add_handle_to_pipeline(). */
-  if(!best_conn) {
-    best_conn = cb_ptr->conn_list->head->ptr;
-  }
-  return best_conn;
-}
-
 CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
                                      struct connectdata *conn)
 {

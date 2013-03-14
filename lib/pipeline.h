@@ -22,10 +22,6 @@
  *
  ***************************************************************************/
 
-struct connectdata *
-Curl_bundle_find_best(struct SessionHandle *data,
-                      struct connectbundle *cb_ptr);
-
 CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
                                      struct connectdata *conn);
 void Curl_move_handle_from_send_to_recv_pipe(struct SessionHandle *handle,
