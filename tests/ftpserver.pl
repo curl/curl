@@ -581,6 +581,7 @@ sub protocolsetup {
         %commandfunc = (
             'APPEND' => \&APPEND_imap,
             'CAPABILITY' => \&CAPABILITY_imap,
+            'EXAMINE' => \&EXAMINE_imap,
             'FETCH'  => \&FETCH_imap,
             'LIST'   => \&LIST_imap,
             'SELECT' => \&SELECT_imap,
@@ -985,6 +986,25 @@ sub LIST_imap {
     }
 
     sendcontrol "$cmdid OK LIST Completed\r\n";
+
+    return 0;
+}
+
+sub EXAMINE_imap {
+    my ($testno) = @_;
+    fix_imap_params($testno);
+
+    logmsg "EXAMINE_imap got test $testno\n";
+
+    # Example from RFC 3501, 6.3.2. EXAMINE Command
+    sendcontrol "* 17 EXISTS\r\n";
+    sendcontrol "* 2 RECENT\r\n";
+    sendcontrol "* OK [UNSEEN 8] Message 8 is first unseen\r\n";
+    sendcontrol "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n";
+    sendcontrol "* OK [UIDNEXT 4392] Predicted next UID\r\n";
+    sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
+    sendcontrol "* OK [PERMANENTFLAGS ()] No permanent flags permitted\r\n";
+    sendcontrol "$cmdid OK [READ-ONLY] EXAMINE completed\r\n";
 
     return 0;
 }
