@@ -67,6 +67,7 @@
  
  10. POP3
  10.1 auth= in URLs
+ 10.2 Initial response
  
  11. LDAP
  11.1 SASL based authentication mechanisms
@@ -388,6 +389,11 @@ to provide the data to send.
 
  Being able to specify the preferred authentication mechanism in the URL as
  per RFC2384.
+
+10.2 Inital response
+
+ Add the ability for the user to specify whether the initial response is
+ included in the AUTH command as per RFC5034.
 
 11. LDAP
 
