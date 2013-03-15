@@ -191,6 +191,7 @@ unittest
 debug
 TLS-SRP
 Metalink
+TrackMemory
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -250,7 +251,7 @@ If a CONNECT is used to the server (to emulate HTTPS etc over proxy), the port
 number given in the CONNECT request will be used to identify which test that
 is being run, if the proxy host name is said to start with 'test'.
 
-If there's no non-zero test number found in the above to places, the HTTP test
+If there's no non-zero test number found in the above two places, the HTTP test
 server will use the number following the last dot in the given url so that
 "foo.bar.123" gets treated as test case 123.
 

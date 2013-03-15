@@ -176,8 +176,8 @@ my $TESTCASES="all";
 my $perl="perl -I$srcdir";
 my $server_response_maxtime=13;
 
-my $debug_build=0; # curl built with --enable-debug
-my $curl_debug=0;  # curl built with --enable-curldebug (memory tracking)
+my $debug_build=0;          # built debug enabled (--enable-debug)
+my $has_memory_tracking=0;  # built with memory tracking (--enable-curldebug)
 my $libtool;
 
 # name of the file that the memory debugging creates:
@@ -2368,8 +2368,8 @@ sub checksystem {
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
             if($feat =~ /TrackMemory/i) {
-                # curl was built with --enable-curldebug (memory tracking)
-                $curl_debug = 1;
+                # built with memory tracking support (--enable-curldebug)
+                $has_memory_tracking = 1;
             }
             if($feat =~ /debug/i) {
                 # curl was built with --enable-debug
@@ -2487,8 +2487,9 @@ sub checksystem {
         }
     }
 
-    if(!$curl_debug && $torture) {
-        die "can't run torture tests since curl was not built with curldebug";
+    if(!$has_memory_tracking && $torture) {
+        die "can't run torture tests since curl was built without ".
+            "TrackMemory feature (--enable-curldebug)";
     }
 
     $has_shared = `sh $CURLCONFIG --built-shared`;
@@ -2511,7 +2512,7 @@ sub checksystem {
     logmsg sprintf("* Server SSL:   %8s", $stunnel?"ON ":"OFF");
     logmsg sprintf("  libcurl SSL:  %s\n", $ssl_version?"ON ":"OFF");
     logmsg sprintf("* debug build:  %8s", $debug_build?"ON ":"OFF");
-    logmsg sprintf("  track memory: %s\n", $curl_debug?"ON ":"OFF");
+    logmsg sprintf("  track memory: %s\n", $has_memory_tracking?"ON ":"OFF");
     logmsg sprintf("* valgrind:     %8s", $valgrind?"ON ":"OFF");
     logmsg sprintf("  HTTP IPv6     %s\n", $http_ipv6?"ON ":"OFF");
     logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
@@ -2790,6 +2791,11 @@ sub singletest {
                 next;
             }
         }
+        elsif($f eq "TrackMemory") {
+            if($has_memory_tracking) {
+                next;
+            }
+        }
         elsif($f eq "large_file") {
             if($large_file) {
                 next;
@@ -3064,7 +3070,7 @@ sub singletest {
         # there was no command given, use something silly
         $cmd="-";
     }
-    if($curl_debug) {
+    if($has_memory_tracking) {
         unlink($memdump);
     }
 
@@ -3659,9 +3665,9 @@ sub singletest {
         return 1;
     }
 
-    if($curl_debug) {
+    if($has_memory_tracking) {
         if(! -f $memdump) {
-            logmsg "\n** ALERT! memory debugging with no output file?\n"
+            logmsg "\n** ALERT! memory tracking with no output file?\n"
                 if(!$cmdtype eq "perl");
         }
         else {

@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+TrackMemory
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+TrackMemory
+</features>
+# tool is what to use instead of 'curl'
+<tool>
+lib558
+</tool>
+
+<name>
+libtest memory tracking operational
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/memdump" mode="text">
+MEM ../../../tests/libtest/lib558.c: malloc()
+MEM ../../../tests/libtest/lib558.c: free()
+MEM ../../lib/escape.c: malloc()
+MEM ../../lib/escape.c: realloc()
+MEM ../../lib/escape.c: realloc()
+MEM ../../lib/escape.c: free()
+</file>
+<stripfile>
+s/ =.*//
+s/\(.*\)/()/
+s/:\d+/:/
+</stripfile>
+</verify>
+
+</testcase>

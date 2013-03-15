@@ -6,7 +6,7 @@ UNITFILES = curlcheck.h \
 
 # These are all unit test programs
 UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307 \
- unit1308 unit1309
+ unit1308 unit1309 unit1330
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1300_CPPFLAGS = $(AM_CPPFLAGS)
@@ -34,4 +34,7 @@ unit1308_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1309_SOURCES = unit1309.c $(UNITFILES)
 unit1309_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1330_SOURCES = unit1330.c $(UNITFILES)
+unit1330_CPPFLAGS = $(AM_CPPFLAGS)
 

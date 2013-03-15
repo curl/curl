@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+TrackMemory
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+TrackMemory
+</features>
+
+<name>
+curl memory tracking operational
+</name>
+<command>
+--version
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/memdump" mode="text">
+MEM ../../src/tool_paramhlp.c
+MEM ../../src/tool_cfgable.c
+</file>
+<stripfile>
+$_ = '' if (($_ !~ /tool_paramhlp/) && ($_ !~ /tool_cfgable/))
+s/:\d+.*//
+</stripfile>
+</verify>
+
+</testcase>
