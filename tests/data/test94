@@ -11,14 +11,14 @@ FAILURE
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<connect nocheck="yes">
 HTTP/1.1 407 Needs proxy authentication
 Server: test-server/fake swsclose yesyes
 Proxy-Authenticate: Basic "oh please"
 Connection: close
 
 bing
-</data>
+</connect>
 </reply>
 
 #

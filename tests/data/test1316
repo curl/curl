@@ -12,12 +12,21 @@ HTTP proxy
 #
 # Server-side
 <reply>
+
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+Magic: sure you can FTP me
+
+</connect>
+
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
+Magic: sure you can FTP me
 
 HTTP/1.1 200 Mighty fine indeed
+Magic: sure you can FTP me
 
 total 20
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 .
@@ -36,6 +45,11 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 #
 # Client-side
 <client>
+
+# please send the real CONNECT connect off to the FTP server's port
+<connectport>
+%FTPPORT
+</connectport>
 <server>
 ftp
 http-proxy
@@ -44,7 +58,7 @@ http-proxy
 FTP LIST tunneled through HTTP proxy
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
+ftp://ftp.1316:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 

@@ -15,7 +15,7 @@ HTTP proxy Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data>
+<connect>
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Transfer-Encoding: chunked
@@ -825,7 +825,7 @@ end of 1 KB aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 0
 
-</data>
+</connect>
 
 # this is returned when we get a GET!
 <data2>
@@ -840,12 +840,12 @@ daniel
 </data2>
 
 # then this is returned when we get proxy-auth
-<data1000>
+<connect1000>
 HTTP/1.1 200 OK swsbounce
 Server: no
 
 Nice proxy auth sir!
-</data1000>
+</connect1000>
 
 <datacheck>
 HTTP/1.1 407 Authorization Required to proxy me my dear
@@ -879,7 +879,7 @@ crypto
 HTTP proxy CONNECT auth Digest, large headers and chunked data
  </name>
  <command>
-http://test.remote.haxx.se:1061/path/10610002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+http://test.remote.haxx.se.1061:%HTTPPORT/path/10610002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
 </client>
 
@@ -889,17 +889,17 @@ http://test.remote.haxx.se:1061/path/10610002 --proxy http://%HOSTIP:%HTTPPORT -
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.haxx.se:1061 HTTP/1.1
-Host: test.remote.haxx.se:1061
+CONNECT test.remote.haxx.se.1061:%HTTPPORT HTTP/1.1
+Host: test.remote.haxx.se.1061:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.haxx.se:1061 HTTP/1.1
-Host: test.remote.haxx.se:1061
-Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se:1061", response="8e96acf6a6214012183879e28e73b2d3"
+CONNECT test.remote.haxx.se.1061:%HTTPPORT HTTP/1.1
+Host: test.remote.haxx.se.1061:%HTTPPORT
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se.1061:%HTTPPORT", response="4e23449fa93224834299e7282a70472c"
 Proxy-Connection: Keep-Alive
 
 GET /path/10610002 HTTP/1.1
-Host: test.remote.haxx.se:1061
+Host: test.remote.haxx.se.1061:%HTTPPORT
 Accept: */*
 
 </protocol>

@@ -21,6 +21,10 @@ Content-Length: 9
 
 contents
 </data>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+
+</connect>
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
 
@@ -46,7 +50,7 @@ http-proxy
 HTTP over proxytunnel using POST
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
+http://test.95:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
 </command>
 </client>
 
@@ -57,16 +61,16 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datat
 ^User-Agent:.*
 </strip>
 <proxy>
-CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
+CONNECT test.95:%HTTPPORT HTTP/1.1
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
+Host: test.95:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol nonewline="yes">
 POST /we/want/that/page/95 HTTP/1.1
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
+Host: test.95:%HTTPPORT
 Accept: */*
 Content-Length: 27
 Content-Type: application/x-www-form-urlencoded

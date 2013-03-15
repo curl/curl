@@ -12,6 +12,11 @@ HTTP proxy
 #
 # Server-side
 <reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+imap: sure hit me
+
+</connect>
 <data>
 From: me@somewhere
 To: fake@nowhere
@@ -23,6 +28,7 @@ body
 </data>
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
+imap: sure hit me
 
 From: me@somewhere
 To: fake@nowhere
@@ -45,7 +51,7 @@ http-proxy
 IMAP FETCH tunneled through HTTP proxy
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/1321/;UID=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
+'imap://imap.1321:%IMAPPORT/1321/;UID=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
@@ -63,8 +69,8 @@ A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
 <proxy>
-CONNECT %HOSTIP:%IMAPPORT HTTP/1.1
-Host: %HOSTIP:%IMAPPORT
+CONNECT imap.1321:%IMAPPORT HTTP/1.1
+Host: imap.1321:%IMAPPORT
 User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
 Proxy-Connection: Keep-Alive
 

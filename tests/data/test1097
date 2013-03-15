@@ -18,13 +18,15 @@ Content-Length: 27
 
 This is all fine and dandy
 </data>
-<data1001>
+
+<connect1001>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 Content-Length: 27
 
 This is all fine and dandy
-</data1001>
+</connect1001>
+
 <datacheck>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
@@ -50,7 +52,7 @@ NTLM
 HTTP POST using CONNECT with --proxy-ntlm but no auth is required
  </name>
  <command>
-http://test.a.galaxy.far.far.away:1097/1097 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -d "dummy=value" -p
+http://test.a.galaxy.far.far.away.1097:%HTTPPORT/1097 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -d "dummy=value" -p
 </command>
 </client>
 
@@ -60,15 +62,15 @@ http://test.a.galaxy.far.far.away:1097/1097 --proxy http://%HOSTIP:%HTTPPORT --p
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.a.galaxy.far.far.away:1097 HTTP/1.1
-Host: test.a.galaxy.far.far.away:1097
+CONNECT test.a.galaxy.far.far.away.1097:%HTTPPORT HTTP/1.1
+Host: test.a.galaxy.far.far.away.1097:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.19.5-CVS (i686-pc-linux-gnu) libcurl/7.19.5-CVS OpenSSL/0.9.8g zlib/1.2.3.3 c-ares/1.6.1-CVS libidn/1.12 libssh2/1.0.1_CVS
 Proxy-Connection: Keep-Alive
 
 POST /1097 HTTP/1.1
 User-Agent: curl/7.19.5-CVS (i686-pc-linux-gnu) libcurl/7.19.5-CVS OpenSSL/0.9.8g zlib/1.2.3.3 c-ares/1.6.1-CVS libidn/1.12 libssh2/1.0.1_CVS
-Host: test.a.galaxy.far.far.away:1097
+Host: test.a.galaxy.far.far.away.1097:%HTTPPORT
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded

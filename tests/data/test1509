@@ -5,9 +5,7 @@ HTTP
 HTTP GET
 HTTP CONNECT
 HTTP proxy
-HTTP proxy Basic auth
 proxytunnel
-multi
 </keywords>
 </info>
 
@@ -18,8 +16,10 @@ connection-monitor
 </servercmd>
 <connect>
 HTTP/1.1 200 Mighty fine indeed
+Server: the beast that eats naughty clients
 
 </connect>
+
 <data>
 HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -30,6 +30,7 @@ ETag: "21025-dc7-39462498"
 </data>
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
+Server: the beast that eats naughty clients
 
 HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -37,6 +38,8 @@ Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 
+header length is ........: 239
+header length should be..: 239
 </datacheck>
 </reply>
 
@@ -48,16 +51,16 @@ http-proxy
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib503
+lib1509
 </tool>
 
  <name>
 simple multi http:// through proxytunnel with authentication info
  </name>
  <command>
-http://machine.503:%HTTPPORT/503 %HOSTIP:%PROXYPORT
+http://the.old.moo.1509:%HTTPPORT/1509 %HOSTIP:%PROXYPORT
 </command>
-<file name="log/test503.txt">
+<file name="log/test1509.txt">
 foo
    bar
 bar
@@ -69,16 +72,14 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT machine.503:%HTTPPORT HTTP/1.1
-Host: machine.503:%HTTPPORT
-Proxy-Authorization: Basic dGVzdDppbmc=
+CONNECT the.old.moo.1509:%HTTPPORT HTTP/1.1
+Host: the.old.moo.1509:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
-GET /503 HTTP/1.1
-Authorization: Basic dGVzdDppbmc=
-Host: machine.503:%HTTPPORT
+GET /1509 HTTP/1.1
+Host: the.old.moo.1509:%HTTPPORT
 Accept: */*
 
 [DISCONNECT]

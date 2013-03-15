@@ -14,6 +14,12 @@ proxytunnel
 #
 # Server-side
 <reply>
+<connect>
+HTTP/1.1 200 OK
+Connected-fine: sure
+
+</connect>
+
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -24,7 +30,8 @@ Content-Length: 9
 contents
 </data>
 <datacheck>
-HTTP/1.1 200 Mighty fine indeed
+HTTP/1.1 200 OK
+Connected-fine: sure
 
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -47,7 +54,7 @@ http-proxy
 HTTP CONNECT with proxytunnel getting two URLs from the same host
  </name>
  <command>
-http://remotesite.com:%HTTPPORT/we/want/that/page/275 -p -x %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com:%HTTPPORT/we/want/that/page/275
+http://remotesite.com.275:%HTTPPORT/we/want/that/page/275 -p -x %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com.275:%HTTPPORT/we/want/that/page/275
 </command>
 </client>
 
@@ -58,8 +65,8 @@ http://remotesite.com:%HTTPPORT/we/want/that/page/275 -p -x %HOSTIP:%PROXYPORT -
 ^User-Agent:.*
 </strip>
 <proxy>
-CONNECT remotesite.com:%HTTPPORT HTTP/1.1
-Host: remotesite.com:%HTTPPORT
+CONNECT remotesite.com.275:%HTTPPORT HTTP/1.1
+Host: remotesite.com.275:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Proxy-Connection: Keep-Alive
@@ -68,12 +75,12 @@ Proxy-Connection: Keep-Alive
 <protocol>
 GET /we/want/that/page/275 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
-Host: remotesite.com:%HTTPPORT
+Host: remotesite.com.275:%HTTPPORT
 Accept: */*
 
 GET /we/want/that/page/275 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
-Host: remotesite.com:%HTTPPORT
+Host: remotesite.com.275:%HTTPPORT
 Accept: */*
 
 </protocol>

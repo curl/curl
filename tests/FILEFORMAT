@@ -75,6 +75,11 @@ to complete a transfer. The response to each request is found in its own data
 section.  Validating the entire negotiation sequence can be done by
 specifying a datacheck section.
 </dataNUM>
+<connect>
+The connect section is used instead of the 'data' for all CONNECT
+requests. The remainder of the rules for the data section then apply but with
+a connect prefix.
+</connect>
 <datacheck [nonewline="yes"]>
 if the data is sent but this is what should be checked afterwards. If
 'nonewline' is set, we will cut off the trailing newline of this given data
@@ -247,13 +252,10 @@ that is returned. The last slash in the URL must be followed by a number. That
 number (N) will be used by the test-server to load test case N and return the
 data that is defined within the <reply><data></data></reply> section.
 
-If a CONNECT is used to the server (to emulate HTTPS etc over proxy), the port
-number given in the CONNECT request will be used to identify which test that
-is being run, if the proxy host name is said to start with 'test'.
-
-If there's no non-zero test number found in the above two places, the HTTP test
-server will use the number following the last dot in the given url so that
-"foo.bar.123" gets treated as test case 123.
+If there's no test number found above, the HTTP test server will use the
+number following the last dot in the given hostname (made so that a CONNECT
+can still pass on test number) so that "foo.bar.123" gets treated as test case
+123.
 
 Set type="perl" to write the test case as a perl script. It implies that
 there's no memory debugging and valgrind gets shut off for this test.

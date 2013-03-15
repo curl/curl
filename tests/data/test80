@@ -24,6 +24,10 @@ Content-Length: 9
 
 contents
 </data>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+
+</connect>
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
 
@@ -49,7 +53,7 @@ http-proxy
 HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
+http://test.80:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
 </command>
 </client>
 
@@ -60,8 +64,8 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT -
 ^User-Agent:.*
 </strip>
 <proxy>
-CONNECT %HOSTIP:%HTTPPORT HTTP/1.0
-Host: %HOSTIP:%HTTPPORT
+CONNECT test.80:%HTTPPORT HTTP/1.0
+Host: test.80:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Proxy-Connection: Keep-Alive
@@ -71,7 +75,7 @@ Proxy-Connection: Keep-Alive
 GET /we/want/that/page/80 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
+Host: test.80:%HTTPPORT
 Accept: */*
 
 </protocol>

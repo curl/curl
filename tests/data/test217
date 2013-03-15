@@ -15,11 +15,11 @@ followlocation
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data nocheck="yes">
+<connect nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.
-</data>
+</connect>
 
 </reply>
 
@@ -32,7 +32,7 @@ http
 HTTP proxy CONNECT to proxy returning 405
  </name>
  <command>
-http://test.remote.example.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w "%{http_code} %{http_connect}\n"
+http://test.remote.example.com.217:%HTTPPORT/path/2170002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w "%{http_code} %{http_connect}\n"
 </command>
 </client>
 
@@ -42,8 +42,8 @@ http://test.remote.example.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.example.com:217 HTTP/1.1
-Host: test.remote.example.com:217
+CONNECT test.remote.example.com.217:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.217:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
 </protocol>
