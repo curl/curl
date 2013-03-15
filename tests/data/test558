@@ -35,17 +35,18 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump" mode="text">
-MEM ../../../tests/libtest/lib558.c: malloc()
-MEM ../../../tests/libtest/lib558.c: free()
-MEM ../../lib/escape.c: malloc()
-MEM ../../lib/escape.c: realloc()
-MEM ../../lib/escape.c: realloc()
-MEM ../../lib/escape.c: free()
+MEM lib558.c: malloc()
+MEM lib558.c: free()
+MEM escape.c: malloc()
+MEM escape.c: realloc()
+MEM escape.c: realloc()
+MEM escape.c: free()
 </file>
 <stripfile>
 s/ =.*//
 s/\(.*\)/()/
 s/:\d+/:/
+s:^(MEM )(.*/)(.*):$1$3:
 </stripfile>
 </verify>
 

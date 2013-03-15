@@ -31,12 +31,13 @@ curl memory tracking operational
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump" mode="text">
-MEM ../../src/tool_paramhlp.c
-MEM ../../src/tool_cfgable.c
+MEM tool_paramhlp.c
+MEM tool_cfgable.c
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /tool_paramhlp/) && ($_ !~ /tool_cfgable/))
 s/:\d+.*//
+s:^(MEM )(.*/)(.*):$1$3:
 </stripfile>
 </verify>
 

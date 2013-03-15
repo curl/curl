@@ -37,13 +37,14 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump" mode="text">
-MEM ../../../tests/unit/unit1330.c: malloc()
-MEM ../../../tests/unit/unit1330.c: free()
+MEM unit1330.c: malloc()
+MEM unit1330.c: free()
 </file>
 <stripfile>
 s/ =.*//
 s/\(.*\)/()/
 s/:\d+/:/
+s:^(MEM )(.*/)(.*):$1$3:
 </stripfile>
 </verify>
 
