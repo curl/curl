@@ -16,7 +16,7 @@ CUSTOMREQUEST
 * OK [UNSEEN 8] Message 8 is first unseen
 * OK [UIDVALIDITY 3857529045] UIDs valid
 * OK [UIDNEXT 4392] Predicted next UID
-* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)
+* FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
 * OK [PERMANENTFLAGS ()] No permanent flags permitted
 </data>
 </reply>
