@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 22
+
+the content goes here
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with proxy and host-only URL
+ </name>
+# the thing here is that this sloppy form is accepted and we convert it
+# for normal server use, and we need to make sure it gets converted to
+# RFC style even for proxies
+ <command>
+-x %HOSTIP:%HTTPPORT we.want.that.site.com.1213
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET HTTP://we.want.that.site.com.1213/ HTTP/1.1
+Host: we.want.that.site.com.1213
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

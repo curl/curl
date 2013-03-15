@@ -3663,6 +3663,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char protobuf[16];
   const char *protop;
   CURLcode result;
+  bool fix_slash = FALSE;
 
   *prot_missing = FALSE;
 
@@ -3809,12 +3810,14 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     memcpy(path+1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
+    fix_slash = TRUE;
 
     *query=0; /* now cut off the hostname at the ? */
   }
   else if(!path[0]) {
     /* if there's no path set, use a single slash */
     strcpy(path, "/");
+    fix_slash = TRUE;
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
@@ -3827,6 +3830,41 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        is bigger than the path. Use +1 to move the zero byte too. */
     memmove(&path[1], path, strlen(path)+1);
     path[0] = '/';
+    fix_slash = TRUE;
+  }
+
+
+  /*
+   * "fix_slash" means that the URL was malformatted so we need to generate an
+   * updated version with the new slash inserted at the right place!  We need
+   * the corrected URL when communicating over HTTP proxy and we don't know at
+   * this point if we're using a proxy or not.
+   */
+  if(fix_slash) {
+    char *reurl;
+
+    size_t plen = strlen(path); /* new path, should be 1 byte longer than
+                                   the original */
+    size_t urllen = strlen(data->change.url); /* original URL length */
+
+    reurl = malloc(urllen + 2); /* 2 for zerobyte + slash */
+    if(!reurl)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* copy the prefix */
+    memcpy(reurl, data->change.url, urllen - (plen-1));
+
+    /* append the trailing piece + zerobyte */
+    memcpy(&reurl[urllen - (plen-1)], path, plen + 1);
+
+    /* possible free the old one */
+    if(data->change.url_alloc) {
+      Curl_safefree(data->change.url);
+      data->change.url_alloc = FALSE;
+    }
+
+    data->change.url = reurl;
+    data->change.url_alloc = TRUE; /* free this later */
   }
 
   /*************************************************************

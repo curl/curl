@@ -507,15 +507,24 @@ static int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      sprintf(logbuf, "Requested test number %ld part %ld",
-              req->testno, req->partno);
-      logmsg("%s", logbuf);
+      if(req->testno) {
 
-      /* find and parse <servercmd> for this test */
-      parse_servercmd(req);
+        sprintf(logbuf, "Requested test number %ld part %ld",
+                req->testno, req->partno);
+        logmsg("%s", logbuf);
+
+        /* find and parse <servercmd> for this test */
+        parse_servercmd(req);
+      }
+      else
+        req->testno = DOCNUMBER_NOTHING;
 
     }
-    else {
+
+    if(req->testno == DOCNUMBER_NOTHING) {
+      /* didn't find any in the first scan, try alternative test case
+         number placements */
+
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
@@ -563,8 +572,39 @@ static int ProcessRequest(struct httprequest *req)
         parse_servercmd(req);
       }
       else {
-        logmsg("Did not find test number in PATH");
-        req->testno = DOCNUMBER_404;
+        /* there was no trailing slash and it wasn't CONNECT, then we get the
+           the number off the last dot instead, IE we consider the TLD to be
+           the test number. Test 123 can then be written as
+           "example.com.123". */
+
+        /* find the last dot */
+        ptr = strrchr(doc, '.');
+
+        /* get the number after it */
+        if(ptr) {
+          ptr++; /* skip the dot */
+
+          req->testno = strtol(ptr, &ptr, 10);
+
+          if(req->testno > 10000) {
+            req->partno = req->testno % 10000;
+            req->testno /= 10000;
+          }
+          else
+            req->partno = 0;
+
+          sprintf(logbuf, "Requested test number %ld part %ld (from host name)",
+                  req->testno, req->partno);
+          logmsg("%s", logbuf);
+
+        }
+
+        if(!req->testno) {
+          logmsg("Did not find test number in PATH");
+          req->testno = DOCNUMBER_404;
+        }
+        else
+          parse_servercmd(req);
       }
     }
   }
