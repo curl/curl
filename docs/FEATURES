@@ -162,7 +162,8 @@ IMAP
  - select a mailbox with support for verifing the UIDVALIDITY
  - fetch e-mails with support for specifing the UID and SECTION
  - upload e-mails via the append command
- - enhanced command support for: EXAMINE and STORE via custom requests
+ - enhanced command support for: EXAMINE, CREATE, DELETE, RENAME, STATUS,
+   STORE, COPY, and UID via custom requests
  - via http-proxy
 
 IMAPS (*1)
