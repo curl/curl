@@ -390,7 +390,7 @@ to provide the data to send.
  Being able to specify the preferred authentication mechanism in the URL as
  per RFC2384.
 
-10.2 Inital response
+10.2 Initial response
 
  Add the ability for the user to specify whether the initial response is
  included in the AUTH command as per RFC5034.
