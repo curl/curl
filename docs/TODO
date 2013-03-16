@@ -71,11 +71,13 @@
  10.2 Initial response
  10.3 Graceful base64 decoding failure
  
- 11. LDAP
- 11.1 SASL based authentication mechanisms
+ 11. IMAP
+ 10.1 auth= in URLs
+ 10.2 Graceful base64 decoding failure
  
- 12. Other protocols
-
+ 12. LDAP
+ 12.1 SASL based authentication mechanisms
+ 
  13. New protocols
  13.1 RSYNC
 
@@ -411,17 +413,29 @@ to provide the data to send.
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC5034.
 
-11. LDAP
+11. IMAP
 
-11.1 SASL based authentication mechanisms
+11.1 auth= in URLs
+
+ Being able to specify the preferred authentication mechanism in the URL as
+ per RFC5092.
+
+11.2 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC3501.
+
+12. LDAP
+
+12.1 SASL based authentication mechanisms
 
  Currently the LDAP module only supports ldap_simple_bind_s() in order to bind
  to an LDAP server. However, this function sends username and password details
  using the simple authentication mechanism (as clear text). However, it should
  be possible to use ldap_bind_s() instead specifing the security context
  information ourselves.
-
-12. Other protocols
 
 13. New protocols
 
