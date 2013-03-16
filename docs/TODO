@@ -64,10 +64,12 @@
  9.1 Specify the preferred authentication mechanism
  9.2 Initial response
  9.3 Pipelining
+ 9.4 Graceful base64 decoding failure
  
  10. POP3
  10.1 auth= in URLs
  10.2 Initial response
+ 10.3 Graceful base64 decoding failure
  
  11. LDAP
  11.1 SASL based authentication mechanisms
@@ -383,6 +385,13 @@ to provide the data to send.
 
  Add support for pipelining emails.
 
+9.4 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC4954.
+
 10. POP3
 
 10.1 auth= in URLs
@@ -394,6 +403,13 @@ to provide the data to send.
 
  Add the ability for the user to specify whether the initial response is
  included in the AUTH command as per RFC5034.
+
+10.3 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC5034.
 
 11. LDAP
 
