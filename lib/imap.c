@@ -673,8 +673,9 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     imapc->authused = SASL_MECH_NTLM;
 
     if(imapc->ir_supported)
-      result = Curl_sasl_create_login_message(conn->data, conn->user,
-                                              &initresp, &len);
+      result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                   &conn->ntlm,
+                                                   &initresp, &len);
   }
   else
 #endif
@@ -685,8 +686,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     imapc->authused = SASL_MECH_LOGIN;
 
     if(imapc->ir_supported)
-      result = Curl_sasl_create_plain_message(conn->data, conn->user,
-                                              conn->passwd, &initresp, &len);
+      result = Curl_sasl_create_login_message(conn->data, conn->user,
+                                              &initresp, &len);
   }
   else if(imapc->authmechs & SASL_MECH_PLAIN) {
     mech = "PLAIN";
@@ -703,8 +704,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     return result;
 
   if(mech) {
+    /* Perform SASL based authentication */
     if(initresp) {
-      /* Perform SASL based authentication */
       result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
 
       if(!result)
