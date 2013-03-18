@@ -560,6 +560,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
   infof (data, "Proxy replied OK to CONNECT request\n");
   data->req.ignorebody = FALSE; /* put it (back) to non-ignore state */
+  conn->bits.rewindaftersend = FALSE; /* make sure this isn't set for the
+                                         document request  */
   return CURLE_OK;
 }
 #endif /* CURL_DISABLE_PROXY */
