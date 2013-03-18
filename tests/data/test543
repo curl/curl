@@ -28,7 +28,7 @@ curl_easy_escape
 # There's no MTDM in the protocol here since this code doesn't ask for the
 # time/date of the file
 <verify>
-<stdout>
+<stdout mode="text">
 %9C%26K%3DI%04%A1%01%E0%D8%7C%20%B7%EFS%29%FA%1DW%E1
 </stdout>
 </verify>

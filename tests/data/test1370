@@ -52,11 +52,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1370">
+<file1 name="log/outfile1370" mode="text">
 12345
 </file1>
 
-<file2 name="log/heads1370">
+<file2 name="log/heads1370" mode="text">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -67,7 +67,7 @@ Content-Disposition: filename=name1370; charset=funny; option=strange
 
 </file2>
 
-<file3 name="log/stdout1370">
+<file3 name="log/stdout1370" mode="text">
 </file3>
 
 </verify>

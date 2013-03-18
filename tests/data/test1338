@@ -56,11 +56,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/1338">
+<file1 name="log/1338" mode="text">
 12345
 </file1>
 
-<file2 name="log/heads1338">
+<file2 name="log/heads1338" mode="text">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -70,7 +70,7 @@ Content-Type: text/html
 
 </file2>
 
-<file3 name="log/stdout1338">
+<file3 name="log/stdout1338" mode="text">
 </file3>
 
 </verify>
