@@ -45,41 +45,41 @@
  6.3 feature negotiation debug data
  6.4 send data in chunks
 
- 7. SSL
- 7.1 Disable specific versions
- 7.2 Provide mutex locking API
- 7.3 Evaluate SSL patches
- 7.4 Cache OpenSSL contexts
- 7.5 Export session ids
- 7.6 Provide callback for cert verification
- 7.7 Support other SSL libraries
- 7.9 improve configure --with-ssl
- 7.10 Support DANE
+ 7. SMTP
+ 7.1 Specify the preferred authentication mechanism
+ 7.2 Initial response
+ 7.3 Pipelining
+ 7.4 Graceful base64 decoding failure
+ 
+ 8. POP3
+ 8.1 auth= in URLs
+ 8.2 Initial response
+ 8.3 Graceful base64 decoding failure
+ 
+ 9. IMAP
+ 9.1 auth= in URLs
+ 9.2 Graceful base64 decoding failure
+ 
+ 10. LDAP
+ 10.1 SASL based authentication mechanisms
+ 
+ 11. New protocols
+ 11.1 RSYNC
 
- 8. GnuTLS
- 8.1 SSL engine stuff
- 8.3 check connection
+ 12. SSL
+ 12.1 Disable specific versions
+ 12.2 Provide mutex locking API
+ 12.3 Evaluate SSL patches
+ 12.4 Cache OpenSSL contexts
+ 12.5 Export session ids
+ 12.6 Provide callback for cert verification
+ 12.7 Support other SSL libraries
+ 12.8 improve configure --with-ssl
+ 12.9 Support DANE
 
- 9. SMTP
- 9.1 Specify the preferred authentication mechanism
- 9.2 Initial response
- 9.3 Pipelining
- 9.4 Graceful base64 decoding failure
- 
- 10. POP3
- 10.1 auth= in URLs
- 10.2 Initial response
- 10.3 Graceful base64 decoding failure
- 
- 11. IMAP
- 11.1 auth= in URLs
- 11.2 Graceful base64 decoding failure
- 
- 12. LDAP
- 12.1 SASL based authentication mechanisms
- 
- 13. New protocols
- 13.1 RSYNC
+ 13. GnuTLS
+ 13.1 SSL engine stuff
+ 13.2 check connection
 
  14. SASL
  14.1 Other authentication mechanisms
@@ -178,7 +178,6 @@
 
     http://tools.ietf.org/html/rfc6555
 
-
 2. libcurl - multi interface
 
 2.1 More non-blocking
@@ -270,7 +269,6 @@
  headers use a default value so only headers that need to be moved have to be
  specified.
 
-
 6. TELNET
 
 6.1 ditch stdin
@@ -295,25 +293,103 @@ to provide the data to send.
   use, but inefficient for any other.  Sent data should be sent in larger
   chunks.
 
-7. SSL
+7. SMTP
 
-7.1 Disable specific versions
+7.1 Specify the preferred authentication mechanism
+
+ Add the ability to specify the preferred authentication mechanism or a list
+ of mechanisms that should be used. Not only that, but the order that is
+ returned by the server during the EHLO response should be honored by curl.
+
+7.2 Initial response
+
+ Add the ability for the user to specify whether the initial response is
+ included in the AUTH command. Some email servers, such as Microsoft
+ Exchange, can work with either whilst others need to have the initial
+ response sent separately:
+
+ http://curl.haxx.se/mail/lib-2012-03/0114.html
+
+7.3 Pipelining
+
+ Add support for pipelining emails.
+
+7.4 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC4954.
+
+8. POP3
+
+8.1 auth= in URLs
+
+ Being able to specify the preferred authentication mechanism in the URL as
+ per RFC2384.
+
+8.2 Initial response
+
+ Add the ability for the user to specify whether the initial response is
+ included in the AUTH command as per RFC5034.
+
+8.3 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC5034.
+
+9. IMAP
+
+9.1 auth= in URLs
+
+ Being able to specify the preferred authentication mechanism in the URL as
+ per RFC5092.
+
+9.2 Graceful base64 decoding failure
+
+ Rather than shutting down the session and returning an error when the
+ decoding of a base64 encoded authentication response fails, we should
+ gracefully shutdown the authentication process by sending a * response to the
+ server as per RFC3501.
+
+10. LDAP
+
+10.1 SASL based authentication mechanisms
+
+ Currently the LDAP module only supports ldap_simple_bind_s() in order to bind
+ to an LDAP server. However, this function sends username and password details
+ using the simple authentication mechanism (as clear text). However, it should
+ be possible to use ldap_bind_s() instead specifing the security context
+ information ourselves.
+
+11. New protocols
+
+11.1 RSYNC
+
+ There's no RFC for the protocol or an URI/URL format.  An implementation
+ should most probably use an existing rsync library, such as librsync.
+
+12. SSL
+
+12.1 Disable specific versions
 
  Provide an option that allows for disabling specific SSL versions, such as
  SSLv2 http://curl.haxx.se/bug/feature.cgi?id=1767276
 
-7.2 Provide mutex locking API
+12.2 Provide mutex locking API
 
  Provide a libcurl API for setting mutex callbacks in the underlying SSL
  library, so that the same application code can use mutex-locking
  independently of OpenSSL or GnutTLS being used.
 
-7.3 Evaluate SSL patches
+12.3 Evaluate SSL patches
 
  Evaluate/apply Gertjan van Wingerde's SSL patches:
  http://curl.haxx.se/mail/lib-2004-03/0087.html
 
-7.4 Cache OpenSSL contexts
+12.4 Cache OpenSSL contexts
 
  "Look at SSL cafile - quick traces look to me like these are done on every
  request as well, when they should only be necessary once per ssl context (or
@@ -323,7 +399,7 @@ to provide the data to send.
  style connections are re-used. It will make us use slightly more memory but
  it will libcurl do less creations and deletions of SSL contexts.
 
-7.5 Export session ids
+12.5 Export session ids
 
  Add an interface to libcurl that enables "session IDs" to get
  exported/imported. Cris Bailiff said: "OpenSSL has functions which can
@@ -331,122 +407,44 @@ to provide the data to send.
  the state from such a buffer at a later date - this is used by mod_ssl for
  apache to implement and SSL session ID cache".
 
-7.6 Provide callback for cert verification
+12.6 Provide callback for cert verification
 
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
 
-7.7 Support other SSL libraries
+12.7 Support other SSL libraries
 
  Make curl's SSL layer capable of using other free SSL libraries.  Such as
  MatrixSSL (http://www.matrixssl.org/).
 
-7.9 improve configure --with-ssl
+12.8 improve configure --with-ssl
 
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
  then NSS...
 
-7.10 Support DANE
+12.9 Support DANE
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
  http://www.rfc-editor.org/rfc/rfc6698.txt
 
-8. GnuTLS
+13. GnuTLS
 
-8.1 SSL engine stuff
+13.1 SSL engine stuff
 
  Is this even possible?
 
-8.3 check connection
+13.2 check connection
 
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
-
-9. SMTP
-
-9.1 Specify the preferred authentication mechanism
-
- Add the ability to specify the preferred authentication mechanism or a list
- of mechanisms that should be used. Not only that, but the order that is
- returned by the server during the EHLO response should be honored by curl.
-
-9.2 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command. Some email servers, such as Microsoft
- Exchange, can work with either whilst others need to have the initial
- response sent separately:
-
- http://curl.haxx.se/mail/lib-2012-03/0114.html
-
-9.3 Pipelining
-
- Add support for pipelining emails.
-
-9.4 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC4954.
-
-10. POP3
-
-10.1 auth= in URLs
-
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC2384.
-
-10.2 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command as per RFC5034.
-
-10.3 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC5034.
-
-11. IMAP
-
-11.1 auth= in URLs
-
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC5092.
-
-11.2 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC3501.
-
-12. LDAP
-
-12.1 SASL based authentication mechanisms
-
- Currently the LDAP module only supports ldap_simple_bind_s() in order to bind
- to an LDAP server. However, this function sends username and password details
- using the simple authentication mechanism (as clear text). However, it should
- be possible to use ldap_bind_s() instead specifing the security context
- information ourselves.
-
-13. New protocols
-
-13.1 RSYNC
-
- There's no RFC for the protocol or an URI/URL format.  An implementation
- should most probably use an existing rsync library, such as librsync.
 
 14. SASL
 
 14.1 Other authentication mechanisms
 
- Add support for gssapi to SMTP, POP3 and IMAP.
+ Add support for GSSAPI to SMTP, POP3 and IMAP.
 
 15. Client
 
