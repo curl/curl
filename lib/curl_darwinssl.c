@@ -59,6 +59,7 @@
 
 /* From MacTypes.h (which we can't include because it isn't present in iOS: */
 #define ioErr -36
+#define paramErr -50
 
 /* In Mountain Lion and iOS 5, Apple made some changes to the API. They
    added TLS 1.1 and 1.2 support, and deprecated and replaced some
@@ -628,40 +629,36 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
   return "TLS_NULL_WITH_NULL_NULL";
 }
 
-CF_INLINE bool IsRunningMountainLionOrLater(void)
-{
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
+{
   int mib[2];
   char *os_version;
   size_t os_version_len;
-  char *os_version_major/*, *os_version_minor, *os_version_point*/;
-  int os_version_major_int;
+  char *os_version_major, *os_version_minor/*, *os_version_point*/;
 
   /* Get the Darwin kernel version from the kernel using sysctl(): */
   mib[0] = CTL_KERN;
   mib[1] = KERN_OSRELEASE;
   if(sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
-    return false;
+    return;
   os_version = malloc(os_version_len*sizeof(char));
   if(!os_version)
-    return false;
+    return;
   if(sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1) {
     free(os_version);
-    return false;
+    return;
   }
 
-  /* Parse the version. If it's version 12.0.0 or later, then this user is
-     using Mountain Lion. */
+  /* Parse the version: */
   os_version_major = strtok(os_version, ".");
-  /*os_version_minor = strtok(NULL, ".");
-  os_version_point = strtok(NULL, ".");*/
-  os_version_major_int = atoi(os_version_major);
+  os_version_minor = strtok(NULL, ".");
+  /*os_version_point = strtok(NULL, ".");*/
+  *major = atoi(os_version_major);
+  *minor = atoi(os_version_minor);
   free(os_version);
-  return os_version_major_int >= 12;
-#else
-  return true;  /* iOS users: this doesn't concern you */
-#endif
 }
+#endif
 
 /* Apple provides a myriad of ways of getting information about a certificate
    into a string. Some aren't available under iOS or newer cats. So here's
@@ -707,6 +704,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif
   /*SSLConnectionRef ssl_connection;*/
   OSStatus err = noErr;
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  size_t all_ciphers_count = 0UL, allowed_ciphers_count = 0UL, i;
+  SSLCipherSuite *all_ciphers = NULL, *allowed_ciphers = NULL;
+  int darwinver_maj = 0, darwinver_min = 0;
+
+  GetDarwinVersionNumber(&darwinver_maj, &darwinver_min);
+#endif
 
 #if defined(__MAC_10_8) || defined(__IPHONE_5_0)
   if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
@@ -851,7 +855,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      to disable certificate validation if the user turned that off.
      (SecureTransport will always validate the certificate chain by
      default.) */
-  if(SSLSetSessionOption != NULL && IsRunningMountainLionOrLater()) {
+  /* (Note: Darwin 12.x.x is Mountain Lion.) */
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  if(SSLSetSessionOption != NULL && darwinver_maj >= 12) {
+#else
+  if(SSLSetSessionOption != NULL) {
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               data->set.ssl.verifypeer?false:true);
@@ -894,6 +903,31 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
             err);
     }
   }
+
+  /* There's a known bug in early versions of Mountain Lion where ST's ECC
+     ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
+     Work around the problem here by disabling those ciphers if we are running
+     in an affected version of OS X. */
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  if(darwinver_maj == 12 && darwinver_min <= 3) {
+    (void)SSLGetNumberSupportedCiphers(connssl->ssl_ctx, &all_ciphers_count);
+    all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+    allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+    if(all_ciphers && allowed_ciphers &&
+       SSLGetSupportedCiphers(connssl->ssl_ctx, all_ciphers,
+         &all_ciphers_count) == noErr) {
+      for(i = 0UL ; i < all_ciphers_count ; i++) {
+        if(all_ciphers[i] < 0xC001 || all_ciphers[i] > 0xC032) {
+          allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
+        }
+      }
+      (void)SSLSetEnabledCiphers(connssl->ssl_ctx, allowed_ciphers,
+                                 allowed_ciphers_count);
+    }
+    Curl_safefree(all_ciphers);
+    Curl_safefree(allowed_ciphers);
+  }
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
 
   err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
   if(err != noErr) {
@@ -947,6 +981,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
 
+      /* These are all certificate problems with the server: */
       case errSSLXCertChainInvalid:
         failf(data, "SSL certificate problem: Invalid certificate chain");
         return CURLE_SSL_CACERT;
@@ -961,13 +996,23 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               "expired certificate");
         return CURLE_SSL_CACERT;
 
+      /* This error is raised if the server's cert didn't match the server's
+         host name: */
       case errSSLHostNameMismatch:
         failf(data, "SSL certificate peer verification failed, the "
               "certificate did not match \"%s\"\n", conn->host.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
 
+      /* Generic handshake errors: */
       case errSSLConnectionRefused:
         failf(data, "Server dropped the connection during the SSL handshake");
+        return CURLE_SSL_CONNECT_ERROR;
+      case errSSLClosedAbort:
+        failf(data, "Server aborted the SSL handshake");
+        return CURLE_SSL_CONNECT_ERROR;
+      case paramErr: /* if you're getting this, it could be a cipher problem */
+        failf(data, "Internal SSL engine error encountered during the "
+              "SSL handshake");
         return CURLE_SSL_CONNECT_ERROR;
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
