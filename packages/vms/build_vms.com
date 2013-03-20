@@ -128,6 +128,11 @@ $!                   Added missing slash in cc_full_list.
 $!                   Removed unwanted extra quotes inside symbol tool_main
 $!                   for non-VAX architectures that triggered link failure.
 $!                   Replaced curl_sys_inc with sys_inc.
+$! 19-Mar-2013, John Malmberg
+$!                   symbol tool_main needs to be quoted when parse style is
+$!                   set to exended in versions of VMS greater than 7.3-1.
+$!                   Remove curlbuild.h generation as it should be pre-built
+$!                   in the curl release or daily tarball.
 $!
 $!===========================================================================
 $!
@@ -198,6 +203,7 @@ $!
 $! Define the architecture-specific product file destination directory
 $! name(s).
 $!
+$ parse_style = "TRADITIONAL"
 $ if (f$getsyi("HW_MODEL") .lt. 1024)
 $ then
 $    arch_name = "VAX"
@@ -205,6 +211,31 @@ $ else
 $    arch_name = ""
 $    arch_name = arch_name + f$edit(f$getsyi("ARCH_NAME"), "UPCASE")
 $    if (arch_name .eqs. "") then arch_name = "UNK"
+$!
+$!   Extended parsing option starts with VMS 7.3-1.
+$!   There is no 7.4, so that simplifies the parse a bit.
+$!
+$    node_swvers = f$getsyi("node_swvers")
+$    version_patch = f$extract(1, f$length(node_swvers), node_swvers)
+$    maj_ver = f$element(0, ".", version_patch)
+$    min_ver_patch = f$element(1, ".", version_patch)
+$    min_ver = f$element(0, "-", min_ver_patch)
+$    patch = f$element(1, "-", min_ver_patch)
+$    if patch .eqs. "-" then patch = ""
+$    parse_x = 0
+$    if maj_ver .ges. "8"
+$    then
+$       parse_x = 1
+$    else
+$       if maj_ver .eqs. "7" .and. min_ver .ges. "3" .and. patch .nes. ""
+$       then
+$          parse_x = 1
+$       endif
+$    endif
+$    if parse_x
+$    then
+$       parse_style = f$getjpi("", "parse_style_perm")
+$    endif
 $ endif
 $!
 $ exedir = proc_dev_dir - delim + ".''arch_name'" + delim
@@ -274,8 +305,6 @@ $   prods = proc_dev_dir + arch_name + ".DIR;1"
 $   if (f$search(prods) .nes. "") then set prot=o:rwed 'prods'
 $   if (f$search(prods) .nes. "") then delete /log 'prods'
 $   file = "[]config_vms.h"
-$   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[.include.curl]curlbuild.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
@@ -654,15 +683,6 @@ $!   set nover
 $endif
 $!
 $!
-$write sys$output "Creating the new curlbuild.h"
-$new_conf = f$search("[.include.curl]curlbuild.h")
-$if new_conf .eqs. ""
-$then
-$!   set ver
-$   @'proc_dev_dir'build_curlbuild_h.com
-$!   set nover
-$endif
-$!
 $!
 $ on control_y then goto Common_Exit
 $!
@@ -727,13 +747,17 @@ $!
 $! If we are not on VAX, then we want the debug symbol table in
 $! a separate file.
 $! VAX needs the tool_main unquoted in uppercase,
-$! Alpha and IA64 need tool_main quoted in exact case.
+$! Alpha and IA64 need tool_main quoted in exact case when parse style is
+$! extended.
 $ link_dsf1 = ""
 $ link_dsf2 = ""
 $ tool_main = "tool_main"
 $ if arch_name .nes. "VAX"
 $ then
-$   tool_main = "tool_main"
+$   if parse_style .eqs. "EXTENDED"
+$   then
+$      tool_main = """tool_main"""
+$   endif
 $   link_dsf1 = "/dsf=" + exedir + "CURL.DSF"
 $   link_dsf2 = "/dsf=" + exedir + "CURL_DEBUG.DSF"
 $ endif

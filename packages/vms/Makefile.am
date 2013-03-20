@@ -1,5 +1,4 @@
 EXTRA_DIST = \
- build_curlbuild_h.com \
  build_vms.com \
  config_h.com \
  curlmsg.h \
