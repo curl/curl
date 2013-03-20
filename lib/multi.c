@@ -1017,7 +1017,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* There was no connection available. We will go to the pending
            state and wait for an available connection. */
         multistate(easy, CURLM_STATE_CONNECT_PEND);
-        easy->result = CURLM_OK;
+        easy->result = CURLE_OK;
         break;
       }
 
