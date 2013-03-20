@@ -57,7 +57,7 @@ write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 int parse_url_file(const char *filename)
 {
   FILE *f;
-  int time;
+  int filetime;
   char buf[200];
 
   num_handles = 0;
@@ -69,8 +69,8 @@ int parse_url_file(const char *filename)
     return 0;
 
   while(!feof(f)) {
-    if(fscanf(f, "%d %s\n", &time, buf)) {
-      urltime[num_handles] = time;
+    if(fscanf(f, "%d %s\n", &filetime, buf)) {
+      urltime[num_handles] = filetime;
       urlstring[num_handles] = strdup(buf);
       num_handles++;
       continue;
