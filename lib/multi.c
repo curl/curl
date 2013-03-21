@@ -636,7 +636,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
 bool Curl_multi_pipeline_enabled(const struct Curl_multi* multi)
 {
-  return multi && multi->pipelining_enabled;
+  return (multi && multi->pipelining_enabled) ? TRUE : FALSE;
 }
 
 void Curl_multi_handlePipeBreak(struct SessionHandle *data)
