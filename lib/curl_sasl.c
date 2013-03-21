@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012-2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -90,8 +90,8 @@ static bool sasl_digest_get_key_value(const unsigned char *chlg,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
-                                        const char* userp,
-                                        const char* passwdp,
+                                        const char *userp,
+                                        const char *passwdp,
                                         char **outptr, size_t *outlen)
 {
   char plainauth[2 * MAX_CURL_USER_LENGTH + MAX_CURL_PASSWORD_LENGTH];
@@ -138,7 +138,7 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
-                                        const char* valuep, char **outptr,
+                                        const char *valuep, char **outptr,
                                         size_t *outlen)
 {
   size_t vlen = strlen(valuep);
@@ -179,9 +179,9 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char* chlg64,
-                                           const char* userp,
-                                           const char* passwdp,
+                                           const char *chlg64,
+                                           const char *userp,
+                                           const char *passwdp,
                                            char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
@@ -250,10 +250,10 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char* chlg64,
-                                             const char* userp,
-                                             const char* passwdp,
-                                             const char* service,
+                                             const char *chlg64,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             const char *service,
                                              char **outptr, size_t *outlen)
 {
   static const char table16[] = "0123456789abcdef";

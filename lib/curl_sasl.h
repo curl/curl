@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,30 +35,30 @@
 
 /* This is used to generate a base64 encoded PLAIN authentication message */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
-                                        const char* userp,
-                                        const char* passwdp,
+                                        const char *userp,
+                                        const char *passwdp,
                                         char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded LOGIN authentication message
    containing either the user name or password details */
 CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
-                                        const char* valuep, char **outptr,
+                                        const char *valuep, char **outptr,
                                         size_t *outlen);
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 /* This is used to generate a base64 encoded CRAM-MD5 response message */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char* chlg64,
-                                           const char* user,
-                                           const char* passwdp,
+                                           const char *chlg64,
+                                           const char *user,
+                                           const char *passwdp,
                                            char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char* chlg64,
-                                             const char* user,
-                                             const char* passwdp,
-                                             const char* service,
+                                             const char *chlg64,
+                                             const char *user,
+                                             const char *passwdp,
+                                             const char *service,
                                              char **outptr, size_t *outlen);
 #endif
 
