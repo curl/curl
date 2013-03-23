@@ -25,6 +25,11 @@ This release includes the following changes:
  o imap/pop3/smtp: Added support for the STARTTLS capability
  o checksrc: ban use of sprintf, vsprintf, strcat, strncat and gets
  o curl_global_init() now accepts the CURL_GLOBAL_ACK_EINTR flag [10]
+ o Added CURLMOPT_MAX_HOST_CONNECTIONS, CURLMOPT_MAX_TOTAL_CONNECTIONS for
+   new multi interface connection handling.
+ o Added CURLMOPT_MAX_PIPELINE_LENGTH, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE,
+   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLMOPT_PIPELINING_SITE_BL and
+   CURLMOPT_PIPELINING_SERVER_BL for new pipelning control
 
 This release includes the following bugfixes:
 
@@ -56,6 +61,12 @@ This release includes the following bugfixes:
  o sasl: Fixed null pointer reference when decoding empty digest challenge [8]
  o easy: do not ignore poll() failures other than EINTR
  o darwinssl: disable ECC ciphers under Mountain Lion by default
+ o CONNECT: count received headers [11]
+ o build: fixes for VMS
+ o CONNECT: clear 'rewindaftersend' on success [12]
+ o HTTP proxy: insert slash in URL if missing [13]
+ o hiperfifo: updated to use current libevent API,
+ o getinmemory.c: abort the transfer nicely if not enough memory
 
 This release includes the following known bugs:
 
@@ -68,7 +79,9 @@ advice from friends like these:
  Gisle Vanem, Guenter Knauf, Yang Tse, Oliver Gondža, Aki Koskinen,
  Alexander Klauer, Kim Vandry, Willem Sparreboom, Jeremy Huddleston,
  Bruno de Carvalho, Rainer Jung, Jeremy Huddleston, Kim Vandry, Jiri Hruska,
- Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing
+ Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing,
+ Martin Jansen, John E. Malmberg, Tom Grace, Patrick Monnerat,
+ Zdenek Pavlas, Myk Taylor, Cédric Deltheil
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -84,3 +97,6 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/bug/view.cgi?id=1193
  [9] = http://curl.haxx.se/bug/view.cgi?id=1194
  [10] = http://curl.haxx.se/bug/view.cgi?id=1168
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1204
+ [12] = https://groups.google.com/d/msg/msysgit/B31LNftR4BI/KhRTz0iuGmUJ
+ [13] = http://curl.haxx.se/bug/view.cgi?id=1206
