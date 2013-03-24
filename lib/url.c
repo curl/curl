@@ -2523,12 +2523,12 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
         data->state.authproxy.want;
     }
 
-    if(has_host_ntlm || has_proxy_ntlm) {
+    if(has_host_ntlm || has_proxy_ntlm)
       data->state.authproblem = FALSE;
-
-      Curl_http_ntlm_cleanup(conn);
-    }
   }
+
+  /* Cleanup NTLM connection-related data */
+  Curl_http_ntlm_cleanup(conn);
 
   /* Cleanup possible redirect junk */
   if(data->req.newurl) {

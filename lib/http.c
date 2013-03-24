@@ -1739,8 +1739,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     conn->bits.authneg = FALSE;
 
   Curl_safefree(conn->allocptr.ref);
-  if(data->change.referer && !Curl_checkheaders(data, "Referer:"))
+  if(data->change.referer && !Curl_checkheaders(data, "Referer:")) {
     conn->allocptr.ref = aprintf("Referer: %s\r\n", data->change.referer);
+    if(!conn->allocptr.ref)
+      return CURLE_OUT_OF_MEMORY;
+  }
   else
     conn->allocptr.ref = NULL;
 
