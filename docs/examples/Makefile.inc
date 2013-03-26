@@ -12,4 +12,5 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
 COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	   \
   ftpuploadresume.c ghiper.c hiperfifo.c htmltidy.c multithread.c	   \
   opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
-  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp
+  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
+  multi-uv.c
