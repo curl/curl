@@ -61,6 +61,7 @@ multi-debugcallback.c - a multi-interface app using the debug callback
 multi-double.c - a multi-interface app doing two simultaneous transfers
 multi-post.c   - a multi-interface app doing a multipart formpost
 multi-single.c - a multi-interface app getting a single file
+multi-uv.c     - a multi-interface app using libuv
 multithread.c  - an example using multi-treading transferring multiple files
 opensslthreadlock.c - show how to do locking when using OpenSSL multi-threaded
 persistant.c   - request two URLs with a persistent connection
