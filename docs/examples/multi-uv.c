@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-/* Example application code using the multi socket interface to download 
+/* Example application code using the multi socket interface to download
    multiple files at once, but instead of using curl_multi_perform and
    curl_multi_wait, which uses select(), we use libuv.
    It supports epoll, kqueue, etc. on unixes and fast IO completion ports on
@@ -48,11 +48,12 @@ typedef struct curl_context_s {
   curl_socket_t sockfd;
 } curl_context_t;
 
-curl_context_t* create_curl_context(curl_socket_t sockfd) {
+curl_context_t* create_curl_context(curl_socket_t sockfd)
+{
   int r;
-  curl_context_t* context;
+  curl_context_t *context;
 
-  context = (curl_context_t*) malloc(sizeof *context);
+  context = (curl_context_t *) malloc(sizeof *context);
 
   context->sockfd = sockfd;
 
@@ -62,20 +63,25 @@ curl_context_t* create_curl_context(curl_socket_t sockfd) {
   return context;
 }
 
-void curl_close_cb(uv_handle_t* handle) {
+void curl_close_cb(uv_handle_t *handle)
+{
   curl_context_t* context = (curl_context_t*) handle->data;
   free(context);
 }
 
-void destroy_curl_context(curl_context_t* context) {
+void destroy_curl_context(curl_context_t *context)
+{
   uv_close((uv_handle_t*) &context->poll_handle, curl_close_cb);
 }
 
 
-void add_download(const char *url, int num) {
+void add_download(const char *url, int num)
+{
   char filename[50];
-  sprintf(filename, "%d.download", num);
   FILE *file;
+  CURL *handle;
+
+  sprintf(filename, "%d.download", num);
 
   file = fopen(filename, "w");
   if (file == NULL) {
@@ -83,34 +89,39 @@ void add_download(const char *url, int num) {
     return;
   }
 
-  CURL *handle = curl_easy_init();
+  handle = curl_easy_init();
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
   curl_easy_setopt(handle, CURLOPT_URL, url);
   curl_multi_add_handle(curl_handle, handle);
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
-void curl_perform(uv_poll_t *req, int status, int events) {
-  uv_timer_stop(&timeout);
+void curl_perform(uv_poll_t *req, int status, int events)
+{
   int running_handles;
   int flags = 0;
-  if (events & UV_READABLE) flags |= CURL_CSELECT_IN;
-  if (events & UV_WRITABLE) flags |= CURL_CSELECT_OUT;
-
   curl_context_t *context;
+  char *done_url;
+  CURLMsg *message;
+  int pending;
+
+  uv_timer_stop(&timeout);
+
+  if (events & UV_READABLE)
+    flags |= CURL_CSELECT_IN;
+  if (events & UV_WRITABLE)
+    flags |= CURL_CSELECT_OUT;
 
   context = (curl_context_t*)req;
 
-  curl_multi_socket_action(curl_handle, context->sockfd, flags, &running_handles);
+  curl_multi_socket_action(curl_handle, context->sockfd, flags,
+                           &running_handles);
 
-  char *done_url;
-
-  CURLMsg *message;
-  int pending;
   while ((message = curl_multi_info_read(curl_handle, &pending))) {
     switch (message->msg) {
     case CURLMSG_DONE:
-      curl_easy_getinfo(message->easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
+      curl_easy_getinfo(message->easy_handle, CURLINFO_EFFECTIVE_URL,
+                        &done_url);
       printf("%s DONE\n", done_url);
 
       curl_multi_remove_handle(curl_handle, message->easy_handle);
@@ -124,18 +135,24 @@ void curl_perform(uv_poll_t *req, int status, int events) {
   }
 }
 
-void on_timeout(uv_timer_t *req, int status) {
+void on_timeout(uv_timer_t *req, int status)
+{
   int running_handles;
-  curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0, &running_handles);
+  curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
+                           &running_handles);
 }
 
-void start_timeout(CURLM *multi, long timeout_ms, void *userp) {
+void start_timeout(CURLM *multi, long timeout_ms, void *userp)
+{
   if (timeout_ms <= 0)
-    timeout_ms = 1; /* 0 means directly call socket_action, but we'll do it in a bit */
+    timeout_ms = 1; /* 0 means directly call socket_action, but we'll do it in
+                       a bit */
   uv_timer_start(&timeout, on_timeout, timeout_ms, 0);
 }
 
-int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, void *socketp) {
+int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
+                  void *socketp)
+{
   curl_context_t *curl_context;
   if (action == CURL_POLL_IN || action == CURL_POLL_OUT) {
     if (socketp) {
@@ -157,7 +174,7 @@ int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, void *so
   case CURL_POLL_REMOVE:
     if (socketp) {
       uv_poll_stop(&((curl_context_t*)socketp)->poll_handle);
-      destroy_curl_context((curl_context_t*) socketp);                
+      destroy_curl_context((curl_context_t*) socketp);
       curl_multi_assign(curl_handle, s, NULL);
     }
     break;
@@ -168,7 +185,8 @@ int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp, void *so
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   loop = uv_default_loop();
 
   if (argc <= 1)
