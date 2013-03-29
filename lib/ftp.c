@@ -162,8 +162,6 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
                                  bool connected);
 
 /* easy-to-use macro: */
-#define FTPSENDF(x,y,z)    if((result = Curl_ftpsendf(x,y,z)) != CURLE_OK) \
-                              return result
 #define PPSENDF(x,y,z)  if((result = Curl_pp_sendf(x,y,z)) != CURLE_OK) \
                               return result
 
@@ -3523,7 +3521,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
         acceptfail = TRUE;
       }
 
-      FTPSENDF(conn, "%s", cmd);
+      PPSENDF(&conn->proto.ftpc.pp, "%s", cmd);
 
       pp->response = Curl_tvnow(); /* timeout relative now */
 
