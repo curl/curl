@@ -41,7 +41,10 @@ Ch
 
 Cocoa
 
-  Written by Dan Wood
+  BBHTTP: written by Bruno de Carvalho
+  https://github.com/brunodecarvalho/BBHTTP
+
+  curlhandle: Written by Dan Wood
   http://curlhandle.sourceforge.net/
 
 D
@@ -55,6 +58,7 @@ Dylan
   http://dylanlibs.sourceforge.net/
 
 Eiffel
+
   Written by Eiffel Software
   http://curl.haxx.se/libcurl/eiffel/
 
@@ -95,6 +99,11 @@ Java
 
   Maintained by [blank]
   http://curl.haxx.se/libcurl/java/
+
+Julia
+
+  Written by Paul Howe
+  https://github.com/forio/Curl.jl
 
 Lisp
 
