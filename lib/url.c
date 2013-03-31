@@ -2974,6 +2974,18 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
+      if((needle->handler->protocol & CURLPROTO_FTP) ||
+         ((needle->handler->protocol & CURLPROTO_HTTP) && wantNTLM)) {
+         /* This is FTP or HTTP+NTLM, verify that we're using the same name
+            and password as well */
+         if(!strequal(needle->user, check->user) ||
+            !strequal(needle->passwd, check->passwd)) {
+            /* one of them was different */
+            continue;
+         }
+         credentialsMatch = TRUE;
+      }
+
       if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
          (needle->bits.httpproxy && check->bits.httpproxy &&
           needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
@@ -3006,17 +3018,6 @@ ConnectionExists(struct SessionHandle *data,
                            check->connection_id));
               continue;
             }
-          }
-          if((needle->handler->protocol & CURLPROTO_FTP) ||
-             ((needle->handler->protocol & CURLPROTO_HTTP) && wantNTLM)) {
-            /* This is FTP or HTTP+NTLM, verify that we're using the same name
-               and password as well */
-            if(!strequal(needle->user, check->user) ||
-               !strequal(needle->passwd, check->passwd)) {
-              /* one of them was different */
-              continue;
-            }
-            credentialsMatch = TRUE;
           }
           match = TRUE;
         }
