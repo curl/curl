@@ -67,6 +67,10 @@ This release includes the following bugfixes:
  o HTTP proxy: insert slash in URL if missing [13]
  o hiperfifo: updated to use current libevent API [14]
  o getinmemory.c: abort the transfer nicely if not enough memory
+ o improved win32 memorytracking and fixed NTLM memory leaks
+ o corrected proxy header response headers count [16]
+ o FTP quote operations on re-used connection [17]
+ o tcpkeepalive on win32 [18]
 
 This release includes the following known bugs:
 
@@ -81,7 +85,8 @@ advice from friends like these:
  Bruno de Carvalho, Rainer Jung, Jeremy Huddleston, Kim Vandry, Jiri Hruska,
  Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing,
  Martin Jansen, John E. Malmberg, Tom Grace, Patrick Monnerat,
- Zdenek Pavlas, Myk Taylor, Cédric Deltheil
+ Zdenek Pavlas, Myk Taylor, Cédric Deltheil, Robert Wruck, Sam Deane,
+ Clemens Gruber
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -102,4 +107,6 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/bug/view.cgi?id=1206
  [14] = http://curl.haxx.se/bug/view.cgi?id=1199
  [15] = http://daniel.haxx.se/blog/2013/03/26/better-pipelining-in-libcurl-7-30-0/
- 
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1204
+ [17] = http://curl.haxx.se/mail/lib-2013-03/0319.html
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1209
