@@ -87,11 +87,21 @@
 
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
-#ifdef __DragonFly__
-/* DragonFlyBSD uses millisecond as KEEPIDLE and KEEPINTVL units */
+#if defined(__DragonFly__) || defined(HAVE_WINSOCK_H)
+/* DragonFlyBSD and Windows use millisecond units */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
 #define KEEPALIVE_FACTOR(x)
+#endif
+
+#if defined(HAVE_WINSOCK_H) && !defined(SIO_KEEPALIVE_VALS)
+#define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
+
+struct tcp_keepalive {
+  u_long onoff;
+  u_long keepalivetime;
+  u_long keepaliveinterval;
+};
 #endif
 
 static void
@@ -106,6 +116,22 @@ tcpkeepalive(struct SessionHandle *data,
     infof(data, "Failed to set SO_KEEPALIVE on fd %d\n", sockfd);
   }
   else {
+#if defined(SIO_KEEPALIVE_VALS)
+    struct tcp_keepalive vals;
+    DWORD dummy;
+    vals.onoff = 1;
+    optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
+    vals.keepalivetime = optval;
+    optval = curlx_sltosi(data->set.tcp_keepintvl);
+    KEEPALIVE_FACTOR(optval);
+    vals.keepaliveinterval = optval;
+    if (WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
+                 NULL, 0, &dummy, NULL, NULL) != 0) {
+      infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd %d: %d\n",
+            (int)sockfd, WSAGetLastError());
+    }
+#else
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
@@ -121,6 +147,7 @@ tcpkeepalive(struct SessionHandle *data,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);
     }
+#endif
 #endif
   }
 }
