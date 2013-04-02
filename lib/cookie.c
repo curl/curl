@@ -689,9 +689,9 @@ Curl_cookie_add(struct SessionHandle *data,
       lastc->next = co;
     else
       c->cookies = co;
+    c->numcookies++; /* one more cookie in the jar */
   }
 
-  c->numcookies++; /* one more cookie in the jar */
   return co;
 }
 
