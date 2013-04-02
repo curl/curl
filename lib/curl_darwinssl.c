@@ -995,6 +995,10 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         failf(data, "SSL certificate problem: Certificate chain had an "
               "expired certificate");
         return CURLE_SSL_CACERT;
+      case errSSLBadCert:
+        failf(data, "SSL certificate problem: Couldn't understand the server "
+              "certificate format");
+        return CURLE_SSL_CONNECT_ERROR;
 
       /* This error is raised if the server's cert didn't match the server's
          host name: */
@@ -1010,9 +1014,17 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLClosedAbort:
         failf(data, "Server aborted the SSL handshake");
         return CURLE_SSL_CONNECT_ERROR;
-      case paramErr: /* if you're getting this, it could be a cipher problem */
+      case errSSLNegotiation:
+        failf(data, "Could not negotiate an SSL cipher suite with the server");
+        return CURLE_SSL_CONNECT_ERROR;
+      /* Sometimes paramErr happens with buggy ciphers: */
+      case paramErr: case errSSLInternal:
         failf(data, "Internal SSL engine error encountered during the "
               "SSL handshake");
+        return CURLE_SSL_CONNECT_ERROR;
+      case errSSLFatalAlert:
+        failf(data, "Fatal SSL engine error encountered during the SSL "
+              "handshake");
         return CURLE_SSL_CONNECT_ERROR;
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
