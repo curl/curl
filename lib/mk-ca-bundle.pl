@@ -76,7 +76,7 @@ sub HELP_MESSAGE() {
 }
 
 sub VERSION_MESSAGE() {
-  print "${0} version ${version} running on Perl ${]} on ${^O}\n";
+  print "${0} version ${version} running Perl ${]} on ${^O}\n";
 }
 
 HELP_MESSAGE() if ($opt_h);
