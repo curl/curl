@@ -1485,7 +1485,7 @@ to GET. Usable if a POST, HEAD, PUT, or a custom request has been used
 previously using the same curl handle.
 
 When setting \fICURLOPT_HTTPGET\fP to 1, it will automatically set
-\fICURLOPT_NOBODY\fP to 0 (since 7.14.1).
+\fICURLOPT_NOBODY\fP to 0 and \fICURLOPT_UPLOAD\fP to 0.
 .IP CURLOPT_HTTP_VERSION
 Pass a long, set to one of the values described below. They force libcurl to
 use the specific HTTP versions. This is not sensible to do unless you have a
