@@ -44,6 +44,7 @@ my $version = '1.18';
 
 $opt_w = 76; # default base64 encoded lines length
 
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
 getopts('bfhilnqtuvw:');
 
 if ($opt_i) {
@@ -59,7 +60,7 @@ if ($opt_i) {
 }
 
 $0 =~ s@.*(/|\\)@@;
-if ($opt_h) {
+sub HELP_MESSAGE() {
   print "Usage:\t${0} [-b] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [-w<l>] [<outputfile>]\n";
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
   print "\t-f\tforce rebuild even if certdata.txt is current\n";
@@ -73,6 +74,12 @@ if ($opt_h) {
   print "\t-w <l>\twrap base64 output lines after <l> chars (default: ${opt_w})\n";
   exit;
 }
+
+sub VERSION_MESSAGE() {
+  print "${0} version ${version} running on Perl ${]} on ${^O}\n";
+}
+
+HELP_MESSAGE() if ($opt_h);
 
 my $crt = $ARGV[0] || 'ca-bundle.crt';
 (my $txt = $url) =~ s@(.*/|\?.*)@@g;
