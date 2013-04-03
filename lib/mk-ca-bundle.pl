@@ -34,15 +34,17 @@ use Getopt::Std;
 use MIME::Base64;
 use LWP::UserAgent;
 use strict;
-use vars qw($opt_b $opt_f $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v);
+use vars qw($opt_b $opt_f $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v $opt_w);
 
 my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.17';
+my $version = '1.18';
 
-getopts('bfhilnqtuv');
+$opt_w = 76; # default base64 encoded lines length
+
+getopts('bfhilnqtuvw:');
 
 if ($opt_i) {
   print ("=" x 78 . "\n");
@@ -58,7 +60,7 @@ if ($opt_i) {
 
 $0 =~ s@.*(/|\\)@@;
 if ($opt_h) {
-  printf("Usage:\t%s [-b] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [<outputfile>]\n", $0);
+  print "Usage:\t${0} [-b] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [-w<l>] [<outputfile>]\n";
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
   print "\t-f\tforce rebuild even if certdata.txt is current\n";
   print "\t-i\tprint version info about used modules\n";
@@ -68,6 +70,7 @@ if ($opt_h) {
   print "\t-t\tinclude plain text listing of certificates\n";
   print "\t-u\tunlink (remove) certdata.txt after processing\n";
   print "\t-v\tbe verbose and print out processed CAs\n";
+  print "\t-w <l>\twrap base64 output lines after <l> chars (default: ${opt_w})\n";
   exit;
 }
 
@@ -182,8 +185,10 @@ while (<TXT>) {
     if ($untrusted) {
       $skipnum ++;
     } else {
+      my $encoded = MIME::Base64::encode_base64($data, '');
+      $encoded =~ s/(.{1,${opt_w}})/$1\n/g;
       my $pem = "-----BEGIN CERTIFICATE-----\n"
-              . MIME::Base64::encode($data)
+              . $encoded
               . "-----END CERTIFICATE-----\n";
       print CRT "\n$caname\n";
       print CRT ("=" x length($caname) . "\n");
