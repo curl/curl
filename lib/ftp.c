@@ -1066,12 +1066,17 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
     if(*addr != '\0') {
       /* attempt to get the address of the given interface name */
-      if(!Curl_if2ip(conn->ip_addr->ai_family, addr,
-                     hbuf, sizeof(hbuf)))
-        /* not an interface, use the given string as host name instead */
-        host = addr;
-      else
-        host = hbuf; /* use the hbuf for host name */
+      switch(Curl_if2ip(conn->ip_addr->ai_family, conn->scope, addr,
+                     hbuf, sizeof(hbuf))) {
+        case IF2IP_NOT_FOUND:
+          /* not an interface, use the given string as host name instead */
+          host = addr;
+          break;
+        case IF2IP_AF_NOT_SUPPORTED:
+          return CURLE_FTP_PORT_FAILED;
+        case IF2IP_FOUND:
+          host = hbuf; /* use the hbuf for host name */
+      }
     }
     else
       /* there was only a port(-range) given, default the host */

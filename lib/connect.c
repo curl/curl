@@ -310,41 +310,54 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
 
     /* interface */
-    if(!is_host && (is_interface || Curl_if_is_interface_name(dev))) {
-      if(Curl_if2ip(af, dev, myhost, sizeof(myhost)) == NULL)
-        return CURLE_INTERFACE_FAILED;
-
-      /*
-       * We now have the numerical IP address in the 'myhost' buffer
-       */
-      infof(data, "Local Interface %s is ip %s using address family %i\n",
-            dev, myhost, af);
-      done = 1;
+    if(!is_host) {
+      switch(Curl_if2ip(af, conn->scope, dev, myhost, sizeof(myhost))) {
+        case IF2IP_NOT_FOUND:
+          if(is_interface) {
+            /* Do not fall back to treating it as a host name */
+            failf(data, "Couldn't bind to interface '%s'", dev);
+            return CURLE_INTERFACE_FAILED;
+          }
+          break;
+        case IF2IP_AF_NOT_SUPPORTED:
+          /* Signal the caller to try another address family if available */
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        case IF2IP_FOUND:
+          is_interface = TRUE;
+          /*
+           * We now have the numerical IP address in the 'myhost' buffer
+           */
+          infof(data, "Local Interface %s is ip %s using address family %i\n",
+                dev, myhost, af);
+          done = 1;
 
 #ifdef SO_BINDTODEVICE
-      /* I am not sure any other OSs than Linux that provide this feature, and
-       * at the least I cannot test. --Ben
-       *
-       * This feature allows one to tightly bind the local socket to a
-       * particular interface.  This will force even requests to other local
-       * interfaces to go out the external interface.
-       *
-       *
-       * Only bind to the interface when specified as interface, not just as a
-       * hostname or ip address.
-       */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                    dev, (curl_socklen_t)strlen(dev)+1) != 0) {
-        error = SOCKERRNO;
-        infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
-              " will do regular bind\n",
-              dev, error, Curl_strerror(conn, error));
-        /* This is typically "errno 1, error: Operation not permitted" if
-           you're not running as root or another suitable privileged user */
-      }
+          /* I am not sure any other OSs than Linux that provide this feature,
+           * and at the least I cannot test. --Ben
+           *
+           * This feature allows one to tightly bind the local socket to a
+           * particular interface.  This will force even requests to other
+           * local interfaces to go out the external interface.
+           *
+           *
+           * Only bind to the interface when specified as interface, not just
+           * as a hostname or ip address.
+           */
+          if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                        dev, (curl_socklen_t)strlen(dev)+1) != 0) {
+            error = SOCKERRNO;
+            infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
+                  " will do regular bind\n",
+                  dev, error, Curl_strerror(conn, error));
+            /* This is typically "errno 1, error: Operation not permitted" if
+               you're not running as root or another suitable privileged
+               user */
+          }
 #endif
+          break;
+      }
     }
-    else {
+    if(!is_interface) {
       /*
        * This was not an interface, resolve the name as a host name
        * or IP number
@@ -388,11 +401,26 @@ static CURLcode bindlocal(struct connectdata *conn,
     if(done > 0) {
 #ifdef ENABLE_IPV6
       /* ipv6 address */
-      if((af == AF_INET6) &&
-         (Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0)) {
-        si6->sin6_family = AF_INET6;
-        si6->sin6_port = htons(port);
-        sizeof_sa = sizeof(struct sockaddr_in6);
+      if(af == AF_INET6) {
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
+        char *scope_ptr = strchr(myhost, '%');
+
+        if(scope_ptr) *(scope_ptr++) = 0;
+#endif
+        if(Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0) {
+          si6->sin6_family = AF_INET6;
+          si6->sin6_port = htons(port);
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
+          if(scope_ptr) {
+            /* The "myhost" string either comes from Curl_if2ip or
+               from Curl_printable_address. The latter returns only
+               numeric scope IDs and the former returns none at all.
+               So the scope ID, if present, is known to be numeric */
+            si6->sin6_scope_id = atoi(scope_ptr);
+          }
+        }
+#endif
+          sizeof_sa = sizeof(struct sockaddr_in6);
       }
       else
 #endif
@@ -966,6 +994,11 @@ singleipconnect(struct connectdata *conn,
   res = bindlocal(conn, sockfd, addr.family);
   if(res) {
     Curl_closesocket(conn, sockfd); /* close socket and bail out */
+    if(res == CURLE_UNSUPPORTED_PROTOCOL) {
+      /* The address family is not supported on this interface.
+         We can continue trying addresses */
+      return CURLE_OK;
+    }
     return res;
   }
 
