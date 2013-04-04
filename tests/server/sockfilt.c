@@ -270,6 +270,73 @@ static void restore_signal_handlers(void)
 #endif
 }
 
+#ifdef WIN32
+/*
+ * read-wrapper to support reading from stdin on Windows.
+ */
+static ssize_t read_wincon(int fd, void *buf, size_t count)
+{
+  HANDLE handle = NULL;
+  DWORD mode, rcount = 0;
+  BOOL success;
+
+  if(fd == fileno(stdin)) {
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+  }
+  else {
+    return read(fd, buf, count);
+  }
+
+  if(GetConsoleMode(handle, &mode)) {
+    success = ReadConsole(handle, buf, count, &rcount, NULL);
+  }
+  else {
+    success = ReadFile(handle, buf, count, &rcount, NULL);
+  }
+  if(success) {
+    return rcount;
+  }
+
+  errno = GetLastError();
+  return -1;
+}
+#define read(a,b,c) read_wincon(a,b,c)
+
+/*
+ * write-wrapper to support writing to stdout and stderr on Windows.
+ */
+static ssize_t write_wincon(int fd, const void *buf, size_t count)
+{
+  HANDLE handle = NULL;
+  DWORD mode, wcount = 0;
+  BOOL success;
+
+  if(fd == fileno(stdout)) {
+    handle = GetStdHandle(STD_OUTPUT_HANDLE);
+  }
+  else if(fd == fileno(stderr)) {
+    handle = GetStdHandle(STD_ERROR_HANDLE);
+  }
+  else {
+    return write(fd, buf, count);
+  }
+
+  if(GetConsoleMode(handle, &mode)) {
+    success = WriteConsole(handle, buf, count, &wcount, NULL);
+  }
+  else {
+    success = WriteFile(handle, buf, count, &wcount, NULL);
+  }
+  if(success) {
+    return wcount;
+  }
+
+  errno = GetLastError();
+  return -1;
+}
+#define write(a,b,c) write_wincon(a,b,c)
+#endif
+
 /*
  * fullread is a wrapper around the read() function. This will repeat the call
  * to read() until it actually has read the complete number of bytes indicated
@@ -451,7 +518,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
   long networkevents;
-  DWORD milliseconds, wait, idx, avail, events, inputs;
+  DWORD milliseconds, wait, idx, mode, avail, events, inputs;
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
   INPUT_RECORD *inputrecords;
@@ -572,7 +639,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         /* check if there is no data in the input buffer */
         if(!stdin->_cnt) {
           /* check if we are getting data from a PIPE */
-          if(!GetConsoleMode(handle, &avail)) {
+          if(!GetConsoleMode(handle, &mode)) {
             /* check if there is no data from PIPE input */
             if(!PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL))
               avail = 0;
