@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,7 +71,7 @@ static const char *const helptext[] = {
   "     --disable-epsv  Inhibit using EPSV (F)",
   " -D, --dump-header FILE  Write the headers to this file",
   "     --egd-file FILE  EGD socket path for random data (SSL)",
-  "     --engine ENGINGE  Crypto engine (SSL). \"--engine list\" for list",
+  "     --engine ENGINE  Crypto engine (SSL). \"--engine list\" for list",
 #ifdef USE_ENVIRONMENT
   "     --environment   Write results to environment variables (RISC OS)",
 #endif
