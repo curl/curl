@@ -276,7 +276,8 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
-  Curl_ack_eintr = flags & CURL_GLOBAL_ACK_EINTR;
+  if(flags & CURL_GLOBAL_ACK_EINTR)
+    Curl_ack_eintr = 1;
 
   init_flags  = flags;
 
