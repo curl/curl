@@ -333,13 +333,15 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
                              &encoded, &len);
   if(error) {
     gss_release_buffer(&discard_st, &neg_ctx->output_token);
-    neg_ctx->output_token = GSS_C_EMPTY_BUFFER;
+    neg_ctx->output_token.value = NULL;
+    neg_ctx->output_token.length = 0;
     return error;
   }
 
   if(!encoded || !len) {
     gss_release_buffer(&discard_st, &neg_ctx->output_token);
-    neg_ctx->output_token = GSS_C_EMPTY_BUFFER;
+    neg_ctx->output_token.value = NULL;
+    neg_ctx->output_token.length = 0;
     return CURLE_REMOTE_ACCESS_DENIED;
   }
 
