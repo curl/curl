@@ -44,6 +44,7 @@ my $version = '1.18';
 
 $opt_w = 76; # default base64 encoded lines length
 
+$0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
 getopts('bfhilnqtuvw:');
 
@@ -59,7 +60,6 @@ if ($opt_i) {
   print ("=" x 78 . "\n");
 }
 
-$0 =~ s@.*(/|\\)@@;
 sub HELP_MESSAGE() {
   print "Usage:\t${0} [-b] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [-w<l>] [<outputfile>]\n";
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
