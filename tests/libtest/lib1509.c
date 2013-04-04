@@ -25,8 +25,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define VERBOSE 0
-
 size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream);
 size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream);
 
@@ -34,12 +32,14 @@ long realHeaderSize = 0;
 
 int test(char *URL)
 {
-  CURL *curl;
   long headerSize;
-  CURLcode res=CURLE_OK;
+  CURLcode code;
+  CURL *curl = NULL;
+  int res = 0;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
+  global_init(CURL_GLOBAL_ALL);
+
+  easy_init(curl);
 
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
 
@@ -50,19 +50,34 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  res = curl_easy_perform(curl);
 
-  curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
+  code = curl_easy_perform(curl);
+  if(CURLE_OK != code) {
+    fprintf(stderr, "%s:%d curl_easy_perform() failed, "
+            "with code %d (%s)\n",
+            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
+  code = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
+  if(CURLE_OK != code) {
+    fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
+            "with code %d (%s)\n",
+            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
   printf("header length is ........: %lu\n", headerSize);
   printf("header length should be..: %lu\n", realHeaderSize);
 
 test_cleanup:
 
-  /* undocumented cleanup sequence - type UA */
-
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+
+  return res;
 }
 
 size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream)
