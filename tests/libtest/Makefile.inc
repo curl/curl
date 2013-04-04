@@ -21,7 +21,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
  lib583 lib585 lib586 lib587        lib590 lib591 lib597 lib598 lib599   \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
- lib1509 \
+ lib1509 lib1510 \
  lib1900 \
  lib2033
 
@@ -330,6 +330,10 @@ lib1508_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1508
 lib1509_SOURCES = lib1509.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1509_LDADD = $(TESTUTIL_LIBS)
 lib1509_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1509
+
+lib1510_SOURCES = lib1510.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1510_LDADD = $(TESTUTIL_LIBS)
+lib1510_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1510
 
 lib1900_SOURCES = lib1900.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1900_CPPFLAGS = $(AM_CPPFLAGS)

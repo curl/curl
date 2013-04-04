@@ -442,6 +442,9 @@ CURLcode curl_easy_perform(CURL *easy)
     data->multi_easy = multi;
   }
 
+  /* Copy the MAXCONNECTS option to the multi handle */
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
+
   mcode = curl_multi_add_handle(multi, easy);
   if(mcode) {
     curl_multi_cleanup(multi);
