@@ -632,7 +632,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     fds = curlx_sktosi(sock);
 
     /* check if the current internal handle was triggered */
-    if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) >= idx &&
+    if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) <= idx &&
        WaitForSingleObjectEx(handle, 0, FALSE) == WAIT_OBJECT_0) {
       /* try to handle the event with STD* handle functions */
       if(fds == fileno(stdin)) {
@@ -682,7 +682,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       }
       else {
         /* try to handle the event with the WINSOCK2 functions */
-        error = WSAEnumNetworkEvents(fds, NULL, &wsanetevents);
+        error = WSAEnumNetworkEvents(fds, handle, &wsanetevents);
         if(error != SOCKET_ERROR) {
           /* remove from descriptor set if not ready for read/accept/close */
           if(!(wsanetevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
