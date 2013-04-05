@@ -71,6 +71,9 @@ This release includes the following bugfixes:
  o corrected proxy header response headers count [16]
  o FTP quote operations on re-used connection [17]
  o tcpkeepalive on win32 [18]
+ o easy: acknowledge the CURLOPT_MAXCONNECTS option properly [19]
+ o easy interface: restore default MAXCONNECTS to 5
+ o win32: don't set SO_SNDBUF for windows vista or later versions [20]
 
 This release includes the following known bugs:
 
@@ -86,7 +89,8 @@ advice from friends like these:
  Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing,
  Martin Jansen, John E. Malmberg, Tom Grace, Patrick Monnerat,
  Zdenek Pavlas, Myk Taylor, Cédric Deltheil, Robert Wruck, Sam Deane,
- Clemens Gruber
+ Clemens Gruber, Marc Hoersken, Tomas Mlcoch, Fredrik Thulin, Steven Gu,
+ Andrew Kurushin, Christian Hägele
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -110,3 +114,5 @@ References to bug reports and discussions on issues:
  [16] = http://curl.haxx.se/bug/view.cgi?id=1204
  [17] = http://curl.haxx.se/mail/lib-2013-03/0319.html
  [18] = http://curl.haxx.se/bug/view.cgi?id=1209
+ [19] = http://curl.haxx.se/bug/view.cgi?id=1212
+ [20] = http://curl.haxx.se/bug/view.cgi?id=1188
