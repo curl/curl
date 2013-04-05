@@ -286,32 +286,33 @@ static const struct feat feats[] = {
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP}
 };
 
-/* https://sourceforge.net/p/curl/bugs/1196/ */
+/* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
+ * We allow ':' and '\' to be escaped by '\' so that we can use certificate
+ * nicknames containing ':'.  See <https://sourceforge.net/p/curl/bugs/1196/>
+ * for details. */
 static void parse_cert_parameter(const char *cert_parameter,
                                  char **certname,
                                  char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
-  size_t parsed_chars = 0;
   size_t span;
   const char *param_place = NULL;
   char *certname_place = NULL;
+  *passphrase = NULL;
+
   /* most trivial assumption: cert_parameter is empty */
   if(param_length == 0) {
     *certname = NULL;
-    *passphrase = NULL;
     return;
   }
   /* next less trivial: cert_parameter contains no colon nor backslash; this
    * means no passphrase was given and no characters escaped */
   if(!strpbrk(cert_parameter, ":\\")) {
     *certname = strdup(cert_parameter);
-    *passphrase = NULL;
     return;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
   *certname = (char *) malloc(param_length + 1);
-  *passphrase = NULL;
   param_place = cert_parameter;
   certname_place = *certname;
   param_place = cert_parameter;
@@ -374,7 +375,6 @@ static void parse_cert_parameter(const char *cert_parameter,
         *passphrase = strdup(param_place);
       }
       return;
-      break;
     }
   }
 }
