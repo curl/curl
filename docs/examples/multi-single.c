@@ -41,6 +41,8 @@ int main(void)
 
   int still_running; /* keep number of running handles */
 
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
@@ -108,9 +110,13 @@ int main(void)
     }
   } while(still_running);
 
-  curl_multi_cleanup(multi_handle);
+  curl_multi_remove_handle(multi_handle, http_handle);
 
   curl_easy_cleanup(http_handle);
+
+  curl_multi_cleanup(multi_handle);
+
+  curl_global_cleanup();
 
   return 0;
 }
