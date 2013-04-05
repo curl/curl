@@ -878,14 +878,16 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
      remote site, or we could wait for that site to connect to us. Or just
      handle ordinary commands.
 
-     When waiting for a connect, we will be in FTP_STOP state and then we wait
-     for the secondary socket to become writeable. If we're in another state,
-     we're still handling commands on the control (primary) connection.
+     When waiting for a connect, we can be in FTP_STOP state (or we're in
+     FTP_STOR when we do an upload) and then we wait for the secondary socket
+     to become writeable. . If we're in another state, we're still handling
+     commands on the control (primary) connection.
 
   */
 
   switch(ftpc->state) {
   case FTP_STOP:
+  case FTP_STOR:
     break;
   default:
     return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
