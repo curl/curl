@@ -21,6 +21,7 @@ This release includes the following changes:
  o usercertinmem.c: add example showing user cert in memory
  o url: Added smtp and pop3 hostnames to the protocol detection list
  o imap/pop3/smtp: Added support for enabling the SASL initial response [8]
+ o curl -E: allow to use ':' in certificate nicknames [10]
  o 
 
 This release includes the following bugfixes:
@@ -67,4 +68,4 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/bug/view.cgi?id=1218
  [8] = http://curl.haxx.se/mail/lib-2012-03/0114.html
  [9] = http://curl.haxx.se/mail/lib-2013-05/0000.html
- [10]
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1196
