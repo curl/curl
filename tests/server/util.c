@@ -55,7 +55,7 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
-#if __MINGW32__
+#ifdef __MINGW32__
 #include <TlHelp32.h>
 #endif
 
