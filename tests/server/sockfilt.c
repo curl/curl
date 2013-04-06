@@ -643,8 +643,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             /* check if there is no data from PIPE input */
             if(!PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL))
               avail = 0;
-            if(!avail)
+            if(!avail) {
               FD_CLR(sock, readfds);
+              /* reduce CPU load */
+              Sleep(10);
+            }
           } /* check if there is no data from keyboard input */
           else if (!_kbhit()) {
             /* check if there are INPUT_RECORDs in the input buffer */
