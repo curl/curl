@@ -1063,6 +1063,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct curl_schannel_cred *cached_cred = NULL;
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         conn->host.name, conn->remote_port);
@@ -1126,6 +1127,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
     /* free SSPI Schannel API security context handle */
     if(connssl->ctxt) {
+      infof(data, "schannel: clear security context handle\n");
       s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
       Curl_safefree(connssl->ctxt);
     }
@@ -1135,6 +1137,18 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       connssl->cred->refcount--;
       infof(data, "schannel: decremented credential handle refcount = %d\n",
             connssl->cred->refcount);
+    }
+
+    /* if the handle refcount is zero, check if we have not cached it */
+    if(connssl->cred && connssl->cred->refcount == 0) {
+      /* if the handle was not cached, it is stale to be freed */
+      if(!Curl_ssl_getsessionid(conn, (void**)&cached_cred, NULL)) {
+        if(connssl->cred != cached_cred) {
+          infof(data, "schannel: clear credential handle\n");
+          s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
+          Curl_safefree(connssl->cred);
+        }
+      }
     }
   }
 
