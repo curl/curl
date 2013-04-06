@@ -111,6 +111,17 @@ sub killpid {
         if($tmp =~ /^(\d+)$/) {
             my $pid = $1;
             if($pid > 0) {
+                if($^O eq "msys") {
+                    my $filter = "-fi \"PID eq $pid\"";
+                    my $result = `tasklist $filter 2>nul`;
+                    if(index($result, "$pid") != -1) {
+                        print("RUN: Process with pid $pid requested to quit\n")
+                            if($verbose);
+                        system("taskkill $filter >nul 2>&1");
+                        push @signalled, $pid;
+                        next; # it is a Windows PID
+                    }
+                }
                 if(kill(0, $pid)) {
                     print("RUN: Process with pid $pid signalled to die\n")
                         if($verbose);
@@ -134,6 +145,13 @@ sub killpid {
         while($twentieths--) {
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
                 my $pid = $signalled[$i];
+                if($^O eq "msys") {
+                    my $filter = "-fi \"PID eq $pid\"";
+                    my $result = `tasklist $filter 2>nul`;
+                    if(index($result, "$pid") != -1) {
+                        next; # the Windows PID still exists
+                    }
+                }
                 if(!kill(0, $pid)) {
                     print("RUN: Process with pid $pid gracefully died\n")
                         if($verbose);
@@ -155,6 +173,15 @@ sub killpid {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
                     if($verbose);
                 kill("KILL", $pid);
+                if($^O eq "msys") {
+                    my $filter = "-fi \"PID eq $pid\"";
+                    my $result = `tasklist $filter 2>nul`;
+                    if(index($result, "$pid") != -1) {
+                        print("RUN: Process with pid $pid forced to quit\n")
+                            if($verbose);
+                        system("taskkill -f $filter >nul 2>&1");
+                    }
+                }
                 # if possible reap its dead children
                 waitpid($pid, &WNOHANG);
                 push @reapchild, $pid;
