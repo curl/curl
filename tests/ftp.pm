@@ -63,6 +63,14 @@ sub processexists {
     my $pid = pidfromfile($pidfile);
 
     if($pid > 0) {
+        # verify if currently existing Windows process
+        if($^O eq "msys") {
+            my $filter = "-fi \"PID eq $pid\"";
+            my $result = `tasklist $filter 2>nul`;
+            if(index($result, "$pid") != -1) {
+                return $pid;
+            }
+        }
         # verify if currently alive
         if(kill(0, $pid)) {
             return $pid;
@@ -222,6 +230,13 @@ sub killsockfilters {
             printf("* kill pid for %s-%s => %d\n", $server,
                 ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
             kill("KILL", $pid);
+            if($^O eq "msys") {
+                my $filter = "-fi \"PID eq $pid\"";
+                my $result = `tasklist $filter 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -f $filter >nul 2>&1");
+                }
+            }
             waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
@@ -236,6 +251,13 @@ sub killsockfilters {
             printf("* kill pid for %s-data => %d\n", $server,
                 $pid) if($verbose);
             kill("KILL", $pid);
+            if($^O eq "msys") {
+                my $filter = "-fi \"PID eq $pid\"";
+                my $result = `tasklist $filter 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -f $filter >nul 2>&1");
+                }
+            }
             waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
