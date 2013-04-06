@@ -213,10 +213,9 @@ sub compareparts {
  # we cannot compare arrays index per index since with the base64 chunks,
  # they may not be "evenly" distributed
 
- if($^O eq "MSWin32" || $^O eq "msys") {
-     $first =~ s/\r\n/\n/g;
-     $second =~ s/\r\n/\n/g;
- }
+ # NOTE: this no longer strips off carriage returns from the arrays. Is that
+ # really necessary? It ruins the testing of newlines. I believe it was once
+ # added to enable tests on win32.
 
  if($first ne $second) {
      return 1;
