@@ -875,7 +875,7 @@ int main(int argc, char **argv)
         result = 2;
         break;
       }
-      if (connect(peer, &from.sa, sizeof(from.sa6)) < 0) {
+      if(connect(peer, &from.sa, sizeof(from.sa6)) < 0) {
         logmsg("connect: fail");
         result = 1;
         break;
@@ -964,6 +964,9 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   char *filename, *mode = NULL;
   int error;
   FILE *server;
+#ifdef USE_WINSOCK
+  DWORD recvtimeout, recvtimeoutbak;
+#endif
 
   /* Open request dump file. */
   server = fopen(REQUEST_DUMP, "ab");
@@ -1018,10 +1021,26 @@ again:
     nak(ecode);
     return 1;
   }
+
+#ifdef USE_WINSOCK
+  recvtimeout = sizeof(recvtimeoutbak);
+  getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (char*)&recvtimeoutbak, (int*)&recvtimeout);
+  recvtimeout = TIMEOUT*1000;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char*)&recvtimeout, sizeof(recvtimeout));
+#endif
+
   if (tp->th_opcode == opcode_WRQ)
     recvtftp(test, pf);
   else
     sendtftp(test, pf);
+
+#ifdef USE_WINSOCK
+  recvtimeout = recvtimeoutbak;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char*)&recvtimeout, sizeof(recvtimeout));
+#endif
 
   return 0;
 }
@@ -1196,9 +1215,6 @@ static void sendtftp(struct testcase *test, struct formats *pf)
  */
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
-#ifdef USE_WINSOCK
-  DWORD recvtimeout, recvtimeoutbak;
-#endif
   ssize_t n, size;
   recvblock = 0;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
@@ -1268,20 +1284,7 @@ send_ack:
   alarm(rexmtval);
 #endif
   /* normally times out and quits */
-#ifdef USE_WINSOCK
-  recvtimeout = sizeof(recvtimeoutbak);
-  getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (char*)&recvtimeoutbak, (int*)&recvtimeout);
-  recvtimeout = 10;
-  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char*)&recvtimeout, sizeof(recvtimeout));
-#endif
   n = sread(peer, &buf.storage[0], sizeof(buf.storage));
-#ifdef USE_WINSOCK
-  recvtimeout = recvtimeoutbak;
-  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
-             (const char*)&recvtimeout, sizeof(recvtimeout));
-#endif
 #ifdef HAVE_ALARM
   alarm(0);
 #endif
