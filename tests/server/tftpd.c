@@ -1196,6 +1196,9 @@ static void sendtftp(struct testcase *test, struct formats *pf)
  */
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
+#if USE_WINSOCK
+  DWORD recvtimeout;
+#endif
   ssize_t n, size;
   recvblock = 0;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
@@ -1265,7 +1268,17 @@ send_ack:
   alarm(rexmtval);
 #endif
   /* normally times out and quits */
+#ifdef USE_WINSOCK
+  recvtimeout = 10;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char*)&recvtimeout, sizeof(recvtimeout));
+#endif
   n = sread(peer, &buf.storage[0], sizeof(buf.storage));
+#ifdef USE_WINSOCK
+  recvtimeout = 0;
+  setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (const char*)&recvtimeout, sizeof(recvtimeout));
+#endif
 #ifdef HAVE_ALARM
   alarm(0);
 #endif
