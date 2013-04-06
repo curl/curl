@@ -1173,6 +1173,7 @@ sub runhttpserver {
     my $logfile;
     my $flags = "";
     my $exe = "$perl $srcdir/httpserver.pl";
+    my $verbose_flag = "--verbose ";
 
     if($alt eq "ipv6") {
         # if IPv6, use a different setup
@@ -1186,7 +1187,8 @@ sub runhttpserver {
     elsif($alt eq "pipe") {
         # basically the same, but another ID
         $idnum = 3;
-	$exe = "python $srcdir/http_pipe.py";
+        $exe = "python $srcdir/http_pipe.py";
+        $verbose_flag .= "1 ";
     }
 
     $server = servername_id($proto, $ipvnum, $idnum);
@@ -1210,7 +1212,7 @@ sub runhttpserver {
 
     $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
-    $flags .= "--verbose " if($debugprotocol);
+    $flags .= $verbose_flag if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
@@ -1285,7 +1287,7 @@ sub runhttp_pipeserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    $flags .= "--verbose " if($debugprotocol);
+    $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--port $port --srcdir \"$srcdir\"";
