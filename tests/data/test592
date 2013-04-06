@@ -62,10 +62,11 @@ EPRT |1|
 PORT
 TYPE I
 STOR 592
+QUIT
 </protocol>
-# 28 == CURLE_OPERATION_TIMEDOUT
+# CURLE_FTP_ACCEPT_FAILED = 10
 <errorcode>
-28
+10
 </errorcode>
 <upload>
 </upload>

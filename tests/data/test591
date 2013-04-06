@@ -63,9 +63,9 @@ TYPE I
 STOR 591
 QUIT
 </protocol>
-# CURLE_UPLOAD_FAILED = 25
+# CURLE_FTP_ACCEPT_FAILED = 10
 <errorcode>
-25
+10
 </errorcode>
 <upload>
 </upload>
