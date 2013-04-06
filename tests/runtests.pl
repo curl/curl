@@ -427,7 +427,7 @@ sub startnew {
         if(-f $pidfile && -s $pidfile && open(PID, "<$pidfile")) {
             $pid2 = 0 + <PID>;
             close(PID);
-            if(($pid2 > 0) && kill(0, $pid2)) {
+            if(($pid2 > 0) && pidexists($pid2)) {
                 # if $pid2 is valid, then make sure this pid is alive, as
                 # otherwise it is just likely to be the _previous_ pidfile or
                 # similar!
@@ -928,7 +928,7 @@ sub verifyssh {
     if($pid > 0) {
         # if we have a pid it is actually our ssh server,
         # since runsshserver() unlinks previous pidfile
-        if(!kill(0, $pid)) {
+        if(!pidexists($pid)) {
             logmsg "RUN: SSH server has died after starting up\n";
             checkdied($pid);
             unlink($pidfile);
@@ -1041,7 +1041,7 @@ sub verifyhttptls {
         if($pid > 0) {
             # if we have a pid it is actually our httptls server,
             # since runhttptlsserver() unlinks previous pidfile
-            if(!kill(0, $pid)) {
+            if(!pidexists($pid)) {
                 logmsg "RUN: $server server has died after starting up\n";
                 checkdied($pid);
                 unlink($pidfile);
@@ -1077,7 +1077,7 @@ sub verifysocks {
     if($pid > 0) {
         # if we have a pid it is actually our socks server,
         # since runsocksserver() unlinks previous pidfile
-        if(!kill(0, $pid)) {
+        if(!pidexists($pid)) {
             logmsg "RUN: SOCKS server has died after starting up\n";
             checkdied($pid);
             unlink($pidfile);
@@ -1218,7 +1218,7 @@ sub runhttpserver {
     my $cmd = "$exe $flags";
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($httppid <= 0 || !kill(0, $httppid)) {
+    if($httppid <= 0 || !pidexists($httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1293,7 +1293,7 @@ sub runhttp_pipeserver {
     my $cmd = "$srcdir/http_pipe.py $flags";
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($httppid <= 0 || !kill(0, $httppid)) {
+    if($httppid <= 0 || !pidexists($httppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1374,7 +1374,7 @@ sub runhttpsserver {
     my $cmd = "$perl $srcdir/secureserver.pl $flags";
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($httpspid <= 0 || !kill(0, $httpspid)) {
+    if($httpspid <= 0 || !pidexists($httpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1454,7 +1454,7 @@ sub runhttptlsserver {
     my $cmd = "$httptlssrv $flags > $logfile 2>&1";
     my ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1); # fake pidfile
 
-    if($httptlspid <= 0 || !kill(0, $httptlspid)) {
+    if($httptlspid <= 0 || !pidexists($httptlspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1549,7 +1549,7 @@ sub runpingpongserver {
     my $cmd = "$perl $srcdir/ftpserver.pl $flags";
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($ftppid <= 0 || !kill(0, $ftppid)) {
+    if($ftppid <= 0 || !pidexists($ftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1631,7 +1631,7 @@ sub runftpsserver {
     my $cmd = "$perl $srcdir/secureserver.pl $flags";
     my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($ftpspid <= 0 || !kill(0, $ftpspid)) {
+    if($ftpspid <= 0 || !pidexists($ftpspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1713,7 +1713,7 @@ sub runtftpserver {
     my $cmd = "$perl $srcdir/tftpserver.pl $flags";
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($tftppid <= 0 || !kill(0, $tftppid)) {
+    if($tftppid <= 0 || !pidexists($tftppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1794,7 +1794,7 @@ sub runrtspserver {
     my $cmd = "$perl $srcdir/rtspserver.pl $flags";
     my ($rtsppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($rtsppid <= 0 || !kill(0, $rtsppid)) {
+    if($rtsppid <= 0 || !pidexists($rtsppid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -1876,7 +1876,7 @@ sub runsshserver {
     # passed to startnew, when this happens startnew completes without being
     # able to read the pidfile and consequently returns a zero pid2 above.
 
-    if($sshpid <= 0 || !kill(0, $sshpid)) {
+    if($sshpid <= 0 || !pidexists($sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
@@ -2033,7 +2033,7 @@ sub runsocksserver {
     my $cmd="$ssh -N -F $sshconfig $ip > $sshlog 2>&1";
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1); # fake pidfile
 
-    if($sshpid <= 0 || !kill(0, $sshpid)) {
+    if($sshpid <= 0 || !pidexists($sshpid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         display_sshlog();
