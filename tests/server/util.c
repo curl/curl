@@ -55,10 +55,6 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
-#ifdef __MINGW32__
-#include <TlHelp32.h>
-#endif
-
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
@@ -251,58 +247,6 @@ int wait_ms(int timeout_ms)
     r = -1;
   return r;
 }
-
-#ifdef __MINGW32__
-/* WORKAROUND
- *
- * These functions make it possible to get the Msys PID instead of the
- * Windows PID assigned to the current process. This is done by walking up
- * to the Msys sh.exe process that launched the actual Windows processes.
- *
- * Usually an Msys process would result in the following process tree:
- *   sh.exe           <-- waiting Windows process, but visible Msys process
- *     \
- *     <proc>.exe     <-- waiting Windows process, but not visible to Msys
- *       \
- *       <proc>.exe   <-- running Windows process, but not visible to Msys
- *
- * Attention: This may not be true for all Msys processes.
- */
-static pid_t getpid_msys(void)
-{
-  PROCESSENTRY32 entry;
-  HANDLE snapshot;
-  DWORD pid;
-  BOOL walk;
-
-  pid = (DWORD)getpid();
-
-  entry.dwSize = sizeof(PROCESSENTRY32);
-  snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
-
-  if(snapshot != INVALID_HANDLE_VALUE) {
-    walk = TRUE;
-    do {
-      if(Process32First(snapshot, &entry)) {
-        do {
-          if(pid == entry.th32ProcessID) {
-            if(!strcmp(entry.szExeFile, "sh.exe")) {
-              walk = FALSE;
-              break;
-            }
-            pid = entry.th32ParentProcessID;
-            break;
-          }
-        } while (Process32Next(snapshot, &entry));
-      }
-    } while(walk);
-    CloseHandle(snapshot);
-  }
-
-  return (pid_t)pid;
-}
-#define getpid() getpid_msys()
-#endif
 
 int write_pidfile(const char *filename)
 {
