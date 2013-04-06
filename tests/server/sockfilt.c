@@ -580,7 +580,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       networkevents |= FD_WRITE|FD_CONNECT;
 
     if(FD_ISSET(fds, exceptfds))
-      networkevents |= FD_OOB;
+      networkevents |= FD_OOB|FD_CLOSE;
 
     /* only wait for events for which we actually care */
     if(networkevents) {
@@ -695,8 +695,17 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           if(!(wsanetevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
             FD_CLR(sock, writefds);
 
+          /* HACK:
+           * use exceptfds together with readfds to signal
+           * that the connection was closed by the client.
+           *
+           * Reason: FD_CLOSE is only signaled once, sometimes
+           * at the same time as FD_READ with data being available.
+           * This means that recv/sread is not reliable to detect
+           * that the connection is closed.
+           */
           /* remove from descriptor set if not exceptional */
-          if(!(wsanetevents.lNetworkEvents & FD_OOB))
+          if(!(wsanetevents.lNetworkEvents & (FD_OOB|FD_CLOSE)))
             FD_CLR(sock, exceptfds);
         }
       }
@@ -802,6 +811,9 @@ static bool juggle(curl_socket_t *sockfdp,
     else {
       /* there's always a socket to wait for */
       FD_SET(sockfd, &fds_read);
+#ifdef USE_WINSOCK
+      FD_SET(sockfd, &fds_err);
+#endif
       maxfd = (int)sockfd;
     }
     break;
@@ -812,6 +824,9 @@ static bool juggle(curl_socket_t *sockfdp,
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
     if(CURL_SOCKET_BAD != sockfd) {
       FD_SET(sockfd, &fds_read);
+#ifdef USE_WINSOCK
+      FD_SET(sockfd, &fds_err);
+#endif
       maxfd = (int)sockfd;
     }
     else {
@@ -979,7 +994,22 @@ static bool juggle(curl_socket_t *sockfdp,
     /* read from socket, pass on data to stdout */
     nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
-    if(nread_socket <= 0) {
+    if(nread_socket > 0) {
+      snprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
+      if(!write_stdout(data, 10))
+        return FALSE;
+      if(!write_stdout(buffer, nread_socket))
+        return FALSE;
+
+      logmsg("< %zd bytes data, client => server", nread_socket);
+      lograw(buffer, nread_socket);
+    }
+
+    if(nread_socket <= 0
+#ifdef USE_WINSOCK
+       || FD_ISSET(sockfd, &fds_err)
+#endif
+       ) {
       logmsg("====> Client disconnect");
       if(!write_stdout("DISC\n", 5))
         return FALSE;
@@ -991,15 +1021,6 @@ static bool juggle(curl_socket_t *sockfdp,
         *mode = ACTIVE_DISCONNECT;
       return TRUE;
     }
-
-    snprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
-    if(!write_stdout(data, 10))
-      return FALSE;
-    if(!write_stdout(buffer, nread_socket))
-      return FALSE;
-
-    logmsg("< %zd bytes data, client => server", nread_socket);
-    lograw(buffer, nread_socket);
   }
 
   return TRUE;
