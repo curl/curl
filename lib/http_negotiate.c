@@ -212,7 +212,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                  spnegoTokenLength,
                                  NULL,
                                  NULL,
-                                 &mechToken.value,
+                                 (unsigned char**)&mechToken.value,
                                  &mechToken.length,
                                  NULL,
                                  NULL)) {
@@ -304,7 +304,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     if(!makeSpnegoInitialToken(object,
                                responseToken,
                                responseTokenLength,
-                               &spnegoToken.value,
+                               (unsigned char**)&spnegoToken.value,
                                &spnegoToken.length)) {
       Curl_safefree(responseToken);
       ASN1_OBJECT_free(object);
