@@ -112,6 +112,8 @@ sub pidkill {
             my $result = `tasklist -fi \"$filter\" 2>nul`;
             if(index($result, "$pid") != -1) {
                 system("taskkill -f -fi \"$filter\" >nul 2>&1");
+                # Windows XP Home compatibility
+                system("tskill $pid >nul 2>&1");
             }
         }
     }
