@@ -257,14 +257,14 @@ int wait_ms(int timeout_ms)
  *
  * These functions make it possible to get the Msys PID instead of the
  * Windows PID assigned to the current process. This is done by walking up
- * to the Msys sh.exe process that launched the shadow Windows processes.
+ * to the Msys sh.exe process that launched the actual Windows processes.
  *
- * Usually an Msys process would result in following process tree:
- *   sh.exe           <-- waiting Windows process, but running Msys process
+ * Usually an Msys process would result in the following process tree:
+ *   sh.exe           <-- waiting Windows process, but visible Msys process
  *     \
- *     <proc>.exe     <-- waiting Windows process
+ *     <proc>.exe     <-- waiting Windows process, but not visible to Msys
  *       \
- *       <proc>.exe   <-- running Windows process
+ *       <proc>.exe   <-- running Windows process, but not visible to Msys
  *
  * Attention: This may not be true for all Msys processes.
  */
@@ -282,7 +282,7 @@ static pid_t getpid_msys(void)
 
   if(snapshot != INVALID_HANDLE_VALUE) {
     walk = TRUE;
-    while(walk) {
+    do {
       if(Process32First(snapshot, &entry)) {
         do {
           if(pid == entry.th32ProcessID) {
@@ -295,7 +295,7 @@ static pid_t getpid_msys(void)
           }
         } while (Process32Next(snapshot, &entry));
       }
-    }
+    } while(walk);
     CloseHandle(snapshot);
   }
 
