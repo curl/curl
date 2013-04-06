@@ -1196,8 +1196,8 @@ static void sendtftp(struct testcase *test, struct formats *pf)
  */
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
-#if USE_WINSOCK
-  DWORD recvtimeout;
+#ifdef USE_WINSOCK
+  DWORD recvtimeout, recvtimeoutbak;
 #endif
   ssize_t n, size;
   recvblock = 0;
@@ -1269,13 +1269,16 @@ send_ack:
 #endif
   /* normally times out and quits */
 #ifdef USE_WINSOCK
+  recvtimeout = sizeof(recvtimeoutbak);
+  getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
+             (char*)&recvtimeoutbak, (int*)&recvtimeout);
   recvtimeout = 10;
   setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
              (const char*)&recvtimeout, sizeof(recvtimeout));
 #endif
   n = sread(peer, &buf.storage[0], sizeof(buf.storage));
 #ifdef USE_WINSOCK
-  recvtimeout = 0;
+  recvtimeout = recvtimeoutbak;
   setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
              (const char*)&recvtimeout, sizeof(recvtimeout));
 #endif
