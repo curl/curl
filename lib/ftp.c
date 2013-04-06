@@ -3374,7 +3374,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 #endif
 
   if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
-    if(!result && ftpc->dont_check && data->req.maxdownload > 0)
+    if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
       result = Curl_pp_sendf(pp, "ABOR");
       if(result) {
@@ -3383,6 +3383,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
         ftpc->ctl_valid = FALSE; /* mark control connection as bad */
         conn->bits.close = TRUE; /* mark for connection closure */
       }
+    }
 
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* The secondary socket is using SSL so we must close down that part
