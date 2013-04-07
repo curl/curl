@@ -89,6 +89,10 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
 
+#ifndef ENABLE_IPV6
+  (void) remote_scope;
+#endif
+
   if(getifaddrs(&head) >= 0) {
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
       if(iface->ifa_addr != NULL) {
