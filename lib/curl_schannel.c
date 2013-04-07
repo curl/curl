@@ -1132,17 +1132,21 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       Curl_safefree(connssl->ctxt);
     }
 
-    /* decrement the reference counter of the credential/session handle */
-    if(connssl->cred && connssl->cred->refcount > 0) {
-      connssl->cred->refcount--;
-      infof(data, "schannel: decremented credential handle refcount = %d\n",
-            connssl->cred->refcount);
-    }
+    /* free SSPI Schannel API credential handle */
+    if(connssl->cred) {
+      /* decrement the reference counter of the credential/session handle */
+      if(connssl->cred->refcount > 0) {
+        connssl->cred->refcount--;
+        infof(data, "schannel: decremented credential handle refcount = %d\n",
+              connssl->cred->refcount);
+      }
 
-    /* if the handle refcount is zero, check if we have not cached it */
-    if(connssl->cred && connssl->cred->refcount == 0) {
-      /* if the handle was not cached, it is stale to be freed */
-      if(!Curl_ssl_getsessionid(conn, (void**)&cached_cred, NULL)) {
+      /* if the handle refcount is zero, check if we have not cached it */
+      if(connssl->cred->refcount == 0) {
+        if(Curl_ssl_getsessionid(conn, (void**)&cached_cred, NULL)) {
+          cached_cred = NULL;
+        }
+        /* if the handle was not cached, it is stale to be freed */
         if(connssl->cred != cached_cred) {
           infof(data, "schannel: clear credential handle\n");
           s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
