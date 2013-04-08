@@ -26,7 +26,7 @@ This release includes the following changes:
  o checksrc: ban use of sprintf, vsprintf, strcat, strncat and gets
  o curl_global_init() now accepts the CURL_GLOBAL_ACK_EINTR flag [10]
  o Added CURLMOPT_MAX_HOST_CONNECTIONS, CURLMOPT_MAX_TOTAL_CONNECTIONS for
-   new multi interface connection handling.
+   new multi interface connection handling
  o Added CURLMOPT_MAX_PIPELINE_LENGTH, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE,
    CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLMOPT_PIPELINING_SITE_BL and
    CURLMOPT_PIPELINING_SERVER_BL for new pipelining control [15]
