@@ -702,11 +702,10 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
-  /*SSLConnectionRef ssl_connection;*/
-  OSStatus err = noErr;
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
   size_t all_ciphers_count = 0UL, allowed_ciphers_count = 0UL, i;
   SSLCipherSuite *all_ciphers = NULL, *allowed_ciphers = NULL;
+  OSStatus err = noErr;
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
   int darwinver_maj = 0, darwinver_min = 0;
 
   GetDarwinVersionNumber(&darwinver_maj, &darwinver_min);
@@ -904,30 +903,92 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
 
-  /* There's a known bug in early versions of Mountain Lion where ST's ECC
-     ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
-     Work around the problem here by disabling those ciphers if we are running
-     in an affected version of OS X. */
+  /* Disable cipher suites that ST supports but are not safe. These ciphers
+     are unlikely to be used in any case since ST gives other ciphers a much
+     higher priority, but it's probably better that we not connect at all than
+     to give the user a false sense of security if the server only supports
+     insecure ciphers. (Note: We don't care about SSLv2-only ciphers.) */
+  (void)SSLGetNumberSupportedCiphers(connssl->ssl_ctx, &all_ciphers_count);
+  all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+  allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+  if(all_ciphers && allowed_ciphers &&
+     SSLGetSupportedCiphers(connssl->ssl_ctx, all_ciphers,
+       &all_ciphers_count) == noErr) {
+    for(i = 0UL ; i < all_ciphers_count ; i++) {
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
-  if(darwinver_maj == 12 && darwinver_min <= 3) {
-    (void)SSLGetNumberSupportedCiphers(connssl->ssl_ctx, &all_ciphers_count);
-    all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
-    allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
-    if(all_ciphers && allowed_ciphers &&
-       SSLGetSupportedCiphers(connssl->ssl_ctx, all_ciphers,
-         &all_ciphers_count) == noErr) {
-      for(i = 0UL ; i < all_ciphers_count ; i++) {
-        if(all_ciphers[i] < 0xC001 || all_ciphers[i] > 0xC032) {
-          allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
-        }
+     /* There's a known bug in early versions of Mountain Lion where ST's ECC
+        ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
+        Work around the problem here by disabling those ciphers if we are
+        running in an affected version of OS X. */
+      if(darwinver_maj == 12 && darwinver_min <= 3 &&
+         all_ciphers[i] >= 0xC001 && all_ciphers[i] <= 0xC032) {
+           continue;
       }
-      (void)SSLSetEnabledCiphers(connssl->ssl_ctx, allowed_ciphers,
-                                 allowed_ciphers_count);
+#endif
+      switch(all_ciphers[i]) {
+        /* Disable NULL ciphersuites: */
+        case SSL_NULL_WITH_NULL_NULL:
+        case SSL_RSA_WITH_NULL_MD5:
+        case SSL_RSA_WITH_NULL_SHA:
+        case SSL_FORTEZZA_DMS_WITH_NULL_SHA:
+        case 0xC001: /* TLS_ECDH_ECDSA_WITH_NULL_SHA */
+        case 0xC006: /* TLS_ECDHE_ECDSA_WITH_NULL_SHA */
+        case 0xC00B: /* TLS_ECDH_RSA_WITH_NULL_SHA */
+        case 0xC010: /* TLS_ECDHE_RSA_WITH_NULL_SHA */
+        /* Disable anonymous ciphersuites: */
+        case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5:
+        case SSL_DH_anon_WITH_RC4_128_MD5:
+        case SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_DH_anon_WITH_DES_CBC_SHA:
+        case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
+        case TLS_DH_anon_WITH_AES_128_CBC_SHA:
+        case TLS_DH_anon_WITH_AES_256_CBC_SHA:
+        case 0xC015: /* TLS_ECDH_anon_WITH_NULL_SHA */
+        case 0xC016: /* TLS_ECDH_anon_WITH_RC4_128_SHA */
+        case 0xC017: /* TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA */
+        case 0xC018: /* TLS_ECDH_anon_WITH_AES_128_CBC_SHA */
+        case 0xC019: /* TLS_ECDH_anon_WITH_AES_256_CBC_SHA */
+        case 0x006C: /* TLS_DH_anon_WITH_AES_128_CBC_SHA256 */
+        case 0x006D: /* TLS_DH_anon_WITH_AES_256_CBC_SHA256 */
+        case 0x00A6: /* TLS_DH_anon_WITH_AES_128_GCM_SHA256 */
+        case 0x00A7: /* TLS_DH_anon_WITH_AES_256_GCM_SHA384 */
+        /* Disable weak key ciphersuites: */
+        case SSL_RSA_EXPORT_WITH_RC4_40_MD5:
+        case SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5:
+        case SSL_RSA_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA:
+        case SSL_RSA_WITH_DES_CBC_SHA:
+        case SSL_DH_DSS_WITH_DES_CBC_SHA:
+        case SSL_DH_RSA_WITH_DES_CBC_SHA:
+        case SSL_DHE_DSS_WITH_DES_CBC_SHA:
+        case SSL_DHE_RSA_WITH_DES_CBC_SHA:
+        /* Disable IDEA: */
+        case SSL_RSA_WITH_IDEA_CBC_SHA:
+        case SSL_RSA_WITH_IDEA_CBC_MD5:
+          break;
+        default: /* enable everything else */
+          allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
+          break;
+      }
     }
+    err = SSLSetEnabledCiphers(connssl->ssl_ctx, allowed_ciphers,
+                               allowed_ciphers_count);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+  else {
     Curl_safefree(all_ciphers);
     Curl_safefree(allowed_ciphers);
+    failf(data, "SSL: Failed to allocate memory for allowed ciphers");
+    return CURLE_OUT_OF_MEMORY;
   }
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+  Curl_safefree(all_ciphers);
+  Curl_safefree(allowed_ciphers);
 
   err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
   if(err != noErr) {
@@ -940,8 +1001,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * SSLSetConnection() will not copy that address. I've found that
    * conn->sock[sockindex] may change on its own. */
   connssl->ssl_sockfd = sockfd;
-  /*ssl_connection = &(connssl->ssl_sockfd);
-  err = SSLSetConnection(connssl->ssl_ctx, ssl_connection);*/
   err = SSLSetConnection(connssl->ssl_ctx, connssl);
   if(err != noErr) {
     failf(data, "SSL: SSLSetConnection() failed: %d", err);

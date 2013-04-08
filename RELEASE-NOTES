@@ -78,6 +78,7 @@ This release includes the following bugfixes:
  o winssl: Fixed memory leak if connection was not successful
  o FTP: wait on both connections during active STOR state [21]
  o connect: treat a failed local bind of an interface as a non-fatal error [22]
+ o darwinssl: disable insecure ciphers by default
 
 This release includes the following known bugs:
 
