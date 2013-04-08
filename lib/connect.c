@@ -148,6 +148,15 @@ tcpkeepalive(struct SessionHandle *data,
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);
     }
 #endif
+#ifdef TCP_KEEPALIVE
+    /* Mac OS X style */
+    optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
+          (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPALIVE on fd %d\n", sockfd);
+    }
+#endif
 #endif
   }
 }
