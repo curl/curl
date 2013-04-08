@@ -35,7 +35,7 @@ This release includes the following bugfixes:
 
  o darwinssl: Fix build under Leopard
  o DONE: consider callback-aborted transfers premature [1]
- o ntlm: fix memory leak
+ o ntlm: Fixed memory leaks
  o smtp: Fixed an issue when processing EHLO failure responses
  o pop3: Fixed incorrect return value from pop3_endofresp()
  o pop3: Fixed SASL authentication capability detection
@@ -67,7 +67,7 @@ This release includes the following bugfixes:
  o HTTP proxy: insert slash in URL if missing [13]
  o hiperfifo: updated to use current libevent API [14]
  o getinmemory.c: abort the transfer nicely if not enough memory
- o improved win32 memorytracking and fixed NTLM memory leaks
+ o improved win32 memorytracking
  o corrected proxy header response headers count [16]
  o FTP quote operations on re-used connection [17]
  o tcpkeepalive on win32 [18]
