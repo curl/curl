@@ -71,6 +71,7 @@ This release includes the following bugfixes:
  o corrected proxy header response headers count [16]
  o FTP quote operations on re-used connection [17]
  o tcpkeepalive on win32 [18]
+ o tcpkeepalive on Mac OS X [23]
  o easy: acknowledge the CURLOPT_MAXCONNECTS option properly [19]
  o easy interface: restore default MAXCONNECTS to 5
  o win32: don't set SO_SNDBUF for windows vista or later versions [20]
@@ -123,3 +124,4 @@ References to bug reports and discussions on issues:
  [20] = http://curl.haxx.se/bug/view.cgi?id=1188
  [21] = http://curl.haxx.se/bug/view.cgi?id=1183
  [22] = http://curl.haxx.se/bug/view.cgi?id=1189
+ [23] = http://curl.haxx.se/bug/view.cgi?id=1214
