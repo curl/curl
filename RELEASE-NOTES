@@ -74,6 +74,10 @@ This release includes the following bugfixes:
  o easy: acknowledge the CURLOPT_MAXCONNECTS option properly [19]
  o easy interface: restore default MAXCONNECTS to 5
  o win32: don't set SO_SNDBUF for windows vista or later versions [20]
+ o HTTP: made cookie sort function more deterministic
+ o winssl: Fixed memory leak if connection was not successful
+ o FTP: wait on both connections during active STOR state [21]
+ o connect: treat a failed local bind of an interface as a non-fatal error [22]
 
 This release includes the following known bugs:
 
@@ -90,7 +94,7 @@ advice from friends like these:
  Martin Jansen, John E. Malmberg, Tom Grace, Patrick Monnerat,
  Zdenek Pavlas, Myk Taylor, Cédric Deltheil, Robert Wruck, Sam Deane,
  Clemens Gruber, Marc Hoersken, Tomas Mlcoch, Fredrik Thulin, Steven Gu,
- Andrew Kurushin, Christian Hägele
+ Andrew Kurushin, Christian Hägele, Daniel Theron
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -116,3 +120,5 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/view.cgi?id=1209
  [19] = http://curl.haxx.se/bug/view.cgi?id=1212
  [20] = http://curl.haxx.se/bug/view.cgi?id=1188
+ [21] = http://curl.haxx.se/bug/view.cgi?id=1183
+ [22] = http://curl.haxx.se/bug/view.cgi?id=1189
