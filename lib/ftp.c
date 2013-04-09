@@ -2871,13 +2871,19 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           return CURLE_OUT_OF_MEMORY;
 
         /* Reply format is like
-           257<space>"<directory-name>"<space><commentary> and the RFC959
-           says
+           257<space>[rubbish]"<directory-name>"<space><commentary> and the
+           RFC959 says
 
            The directory name can contain any character; embedded
            double-quotes should be escaped by double-quotes (the
            "quote-doubling" convention).
         */
+
+        /* scan for the first double-quote for non-standard responses */
+        while(ptr < &data->state.buffer[sizeof(data->state.buffer)]
+              && *ptr != '\n' && *ptr != '\0' && *ptr != '"')
+          ptr++;
+
         if('\"' == *ptr) {
           /* it started good */
           ptr++;
