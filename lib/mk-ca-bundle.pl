@@ -124,7 +124,7 @@ print CRT <<EOT;
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
 ## file (certdata.txt).  This file can be found in the mozilla source tree:
-## $url
+## ${url}
 ##
 ## It contains the certificates in ${format}PEM format and therefore
 ## can be directly used with curl / libcurl / php_curl, or with
@@ -201,11 +201,18 @@ while (<TXT>) {
       print CRT ("=" x length($caname) . "\n");
       if (!$opt_t) {
         print CRT $pem;
-      }
-      if ($opt_t) {
-        my $openssl_output = `echo '$pem' | $openssl x509 -md5 -fingerprint -text -inform PEM` or
-          die "Couldn't run openssl : $?\n";
-        print CRT $openssl_output;
+      } else {
+        my $pipe = "|$openssl x509 -md5 -fingerprint -text -inform PEM";
+        if (!$stdout) {
+          $pipe .= " >> $crt.~";
+          close(CRT) or die "Couldn't close $crt.~: $!";
+        }
+        open(TMP, $pipe) or die "Couldn't open openssl pipe: $!";
+        print TMP $pem;
+        close(TMP) or die "Couldn't close openssl pipe: $!";
+        if (!$stdout) {
+          open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
+        }
       }
       print STDERR "Parsing: $caname\n" if ($opt_v);
       $certnum ++;
