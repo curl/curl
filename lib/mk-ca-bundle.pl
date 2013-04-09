@@ -203,9 +203,9 @@ while (<TXT>) {
         print CRT $pem;
       }
       if ($opt_t) {
-        open(TMP, "|$openssl x509 -md5 -fingerprint -text -inform PEM >> $crt") or die "Couldn't open openssl pipe: $!\n";
-        print TMP $pem;
-        close(TMP) or die "Couldn't close openssl pipe: $!\n";
+        my $openssl_output = `echo '$pem' | $openssl x509 -md5 -fingerprint -text -inform PEM` or
+          die "Couldn't run openssl : $?\n";
+        print CRT $openssl_output;
       }
       print STDERR "Parsing: $caname\n" if ($opt_v);
       $certnum ++;
