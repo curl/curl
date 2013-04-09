@@ -612,7 +612,11 @@
 /* #define USE_ARES 1 */
 
 /* Define to enable threaded asynchronous DNS lookups. */
-#define USE_THREADS_WIN32 1
+#if !defined(USE_ARES) && !defined(USE_THREADS_WIN32)
+#  define USE_THREADS_WIN32 1
+#elif defined(USE_THREADS_WIN32) && USE_THREADS_WIN32 == 0
+#  undef USE_THREADS_WIN32
+#endif
 
 #if defined(USE_ARES) && defined(USE_THREADS_WIN32)
 #  error "Only one DNS lookup specialty may be defined at most"
