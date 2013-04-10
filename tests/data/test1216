@@ -37,6 +37,7 @@ http://example.fake/c/1216 http://bexample.fake/c/1216 -b log/injar1216 -x %HOST
 example.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
 example.fake	FALSE	/b	FALSE	0		moo1	indeed
 example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
+example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
 </file>
 </client>
 
@@ -50,7 +51,7 @@ GET http://example.fake/c/1216 HTTP/1.1
 Host: example.fake
 Accept: */*
 Proxy-Connection: Keep-Alive
-Cookie: moo2=indeed
+Cookie: moo2=indeed; moo3=indeed
 
 GET http://bexample.fake/c/1216 HTTP/1.1
 Host: bexample.fake
