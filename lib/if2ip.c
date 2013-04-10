@@ -162,6 +162,8 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
   curl_socket_t dummy;
   size_t len;
 
+  (void)remote_scope;
+
   if(!interf || (af != AF_INET))
     return IF2IP_NOT_FOUND;
 
