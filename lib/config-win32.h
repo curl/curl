@@ -611,11 +611,10 @@
 /* Define to enable c-ares asynchronous DNS lookups. */
 /* #define USE_ARES 1 */
 
-/* Define to enable threaded asynchronous DNS lookups. */
-#if !defined(USE_ARES) && !defined(USE_THREADS_WIN32)
+/* Default define to enable threaded asynchronous DNS lookups. */
+#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
+    !defined(USE_THREADS_WIN32)
 #  define USE_THREADS_WIN32 1
-#elif defined(USE_THREADS_WIN32) && USE_THREADS_WIN32 == 0
-#  undef USE_THREADS_WIN32
 #endif
 
 #if defined(USE_ARES) && defined(USE_THREADS_WIN32)
