@@ -56,6 +56,8 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
+include_directories(${CMAKE_REQUIRED_INCLUDES})
+link_directories(${CMAKE_LIBRARY_PATH})
 
 if(WIN32)
   set(NATIVE_WINDOWS ON)
