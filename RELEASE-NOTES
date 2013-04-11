@@ -33,6 +33,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o SECURITY ADVISORY: cookie tailmatching to avoid cross-domain leakage [25]
  o darwinssl: Fix build under Leopard
  o DONE: consider callback-aborted transfers premature [1]
  o ntlm: Fixed memory leaks
@@ -80,6 +81,8 @@ This release includes the following bugfixes:
  o FTP: wait on both connections during active STOR state [21]
  o connect: treat a failed local bind of an interface as a non-fatal error [22]
  o darwinssl: disable insecure ciphers by default
+ o FTP: handle "rubbish" in front of directory name in 257 responses [24]
+ o mk-ca-bundle: Fixed lost OpenSSL output with "-t"
 
 This release includes the following known bugs:
 
@@ -96,7 +99,8 @@ advice from friends like these:
  Martin Jansen, John E. Malmberg, Tom Grace, Patrick Monnerat,
  Zdenek Pavlas, Myk Taylor, Cédric Deltheil, Robert Wruck, Sam Deane,
  Clemens Gruber, Marc Hoersken, Tomas Mlcoch, Fredrik Thulin, Steven Gu,
- Andrew Kurushin, Christian Hägele, Daniel Theron
+ Andrew Kurushin, Christian Hägele, Daniel Theron, Bill Middlecamp,
+ Richard Michael, Yamada Yasuharu
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -125,3 +129,5 @@ References to bug reports and discussions on issues:
  [21] = http://curl.haxx.se/bug/view.cgi?id=1183
  [22] = http://curl.haxx.se/bug/view.cgi?id=1189
  [23] = http://curl.haxx.se/bug/view.cgi?id=1214
+ [24] = http://curl.haxx.se/mail/lib-2013-04/0113.html
+ [25] = http://curl.haxx.se/docs/adv_20130412.html
