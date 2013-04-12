@@ -1625,6 +1625,12 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
 }
 
+/***********************************************************************
+ *
+ * pop3_parse_custom_request()
+ *
+ * Parse the custom request.
+ */
 static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
