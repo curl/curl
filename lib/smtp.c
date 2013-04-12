@@ -99,6 +99,7 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
+static CURLcode smtp_parse_url_path(struct connectdata *conn);
 
 /*
  * SMTP protocol handler.
@@ -1300,8 +1301,6 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct pingpong *pp = &smtpc->pp;
-  const char *path = conn->data->state.path;
-  char localhost[HOSTNAME_MAX + 1];
 
   *done = FALSE; /* default to not done yet */
 
@@ -1326,16 +1325,8 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
 
-  /* Calculate the path if necessary */
-  if(!*path) {
-    if(!Curl_gethostname(localhost, sizeof(localhost)))
-      path = localhost;
-    else
-      path = "localhost";
-  }
-
-  /* URL decode the path and use it as the domain in our EHLO */
-  result = Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
+  /* Parse the URL path */
+  result = smtp_parse_url_path(conn);
   if(result)
     return result;
 
@@ -1638,6 +1629,33 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * smtp_parse_url_path()
+ *
+ * Parse the URL path into separate path components.
+ */
+static CURLcode smtp_parse_url_path(struct connectdata *conn)
+{
+  /* The SMTP struct is already initialised in smtp_connect() */
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  const char *path = data->state.path;
+  char localhost[HOSTNAME_MAX + 1];
+
+  /* Calculate the path if necessary */
+  if(!*path) {
+    if(!Curl_gethostname(localhost, sizeof(localhost)))
+      path = localhost;
+    else
+      path = "localhost";
+  }
+
+  /* URL decode the path and use it as the domain in our EHLO */
+  return Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
 }
 
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
