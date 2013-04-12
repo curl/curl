@@ -90,8 +90,6 @@
 #include "memdebug.h"
 
 /* Local API functions */
-static CURLcode pop3_parse_url_path(struct connectdata *conn);
-static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 static CURLcode pop3_regular_transfer(struct connectdata *conn, bool *done);
 static CURLcode pop3_do(struct connectdata *conn, bool *done);
 static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
@@ -103,6 +101,8 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
+static CURLcode pop3_parse_url_path(struct connectdata *conn);
+static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 
 /*
  * POP3 protocol handler.
@@ -1514,37 +1514,6 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/***********************************************************************
- *
- * pop3_parse_url_path()
- *
- * Parse the URL path into separate path components.
- */
-static CURLcode pop3_parse_url_path(struct connectdata *conn)
-{
-  /* The POP3 struct is already initialised in pop3_connect() */
-  struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
-  const char *path = data->state.path;
-
-  /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
-}
-
-static CURLcode pop3_parse_custom_request(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
-
-  /* URL decode the custom request */
-  if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
-
-  return result;
-}
-
 /* Call this when the DO phase has completed */
 static CURLcode pop3_dophase_done(struct connectdata *conn, bool connected)
 {
@@ -1637,6 +1606,37 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * pop3_parse_url_path()
+ *
+ * Parse the URL path into separate path components.
+ */
+static CURLcode pop3_parse_url_path(struct connectdata *conn)
+{
+  /* The POP3 struct is already initialised in pop3_connect() */
+  struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
+  const char *path = data->state.path;
+
+  /* URL decode the path for the message ID */
+  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
+}
+
+static CURLcode pop3_parse_custom_request(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct POP3 *pop3 = data->state.proto.pop3;
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+
+  /* URL decode the custom request */
+  if(custom)
+    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
+
+  return result;
 }
 
 /* This function scans the body after the end-of-body and writes everything
