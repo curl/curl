@@ -704,6 +704,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif
   size_t all_ciphers_count = 0UL, allowed_ciphers_count = 0UL, i;
   SSLCipherSuite *all_ciphers = NULL, *allowed_ciphers = NULL;
+  char *ssl_sessionid;
+  size_t ssl_sessionid_len;
   OSStatus err = noErr;
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
   int darwinver_maj = 0, darwinver_min = 0;
@@ -989,6 +991,38 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
   Curl_safefree(all_ciphers);
   Curl_safefree(allowed_ciphers);
+
+  /* Check if there's a cached ID we can/should use here! */
+  if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
+    &ssl_sessionid_len)) {
+    /* we got a session id, use it! */
+    err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    /* Informational message */
+    infof(data, "SSL re-using session ID\n");
+  }
+  /* If there isn't one, then let's make one up! This has to be done prior
+     to starting the handshake. */
+  else {
+    CURLcode retcode;
+
+    ssl_sessionid = malloc(256*sizeof(char));
+    ssl_sessionid_len = snprintf(ssl_sessionid, 256, "curl:%s:%hu",
+      conn->host.name, conn->remote_port);
+    err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    retcode = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len);
+    if(retcode!= CURLE_OK) {
+      failf(data, "failed to store ssl session");
+      return retcode;
+    }
+  }
 
   err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
   if(err != noErr) {
@@ -1460,6 +1494,17 @@ int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
   }
 
   return rc;
+}
+
+void Curl_darwinssl_session_free(void *ptr)
+{
+  /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
+     cached session ID inside the Security framework. There is a private
+     function that does this, but I don't want to have to explain to you why I
+     got your application rejected from the App Store due to the use of a
+     private API, so the best we can do is free up our own char array that we
+     created way back in darwinssl_connect_step1... */
+  Curl_safefree(ptr);
 }
 
 size_t Curl_darwinssl_version(char *buffer, size_t size)
