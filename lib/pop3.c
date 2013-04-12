@@ -1645,8 +1645,13 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
   return result;
 }
 
-/* This function scans the body after the end-of-body and writes everything
-   until the end is found */
+/***********************************************************************
+ *
+ * Curl_pop3_write()
+ *
+ * This function scans the body after the end-of-body and writes everything
+ * until the end is found.
+ */
 CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread)
 {
   /* This code could be made into a special function in the handler struct */
