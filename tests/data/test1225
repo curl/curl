@@ -2,10 +2,8 @@
 <info>
 <keywords>
 FTP
-EPSV
-TYPE A
+PASV
 RETR
-type=
 </keywords>
 </info>
 # Server-side
@@ -26,11 +24,12 @@ works
 ftp
 </server>
  <name>
-FTP GET with type=A style ASCII URL using %20 codes
+FTP fetch two files using absolute paths
  </name>
  <command>
-"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces//and%20things2/106;type=A"
+ftp://%HOSTIP:%FTPPORT//foo/1225 ftp://%HOSTIP:%FTPPORT//foo/bar/1225
 </command>
+
 </client>
 
 # Verify data after the test has been "shot"
@@ -40,12 +39,18 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD /
-CWD path with  spaces
-CWD and things2
+CWD foo
 EPSV
-TYPE A
-SIZE 106
-RETR 106
+TYPE I
+SIZE 1225
+RETR 1225
+CWD /
+CWD /
+CWD foo
+CWD bar
+EPSV
+SIZE 1225
+RETR 1225
 QUIT
 </protocol>
 </verify>
