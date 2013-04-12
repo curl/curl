@@ -99,6 +99,8 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
+static char *imap_atom(const char *str);
+static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...);
 
 /*
  * IMAP protocol handler.
@@ -212,119 +214,6 @@ static void imap_to_imaps(struct connectdata *conn)
 #else
 #define imap_to_imaps(x) Curl_nop_stmt
 #endif
-
-/***********************************************************************
- *
- * imap_sendf()
- *
- * Sends the formated string as an IMAP command to the server.
- *
- * Designed to never block.
- */
-static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
-{
-  CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
-  char *taggedfmt;
-  va_list ap;
-  va_start(ap, fmt);
-
-  /* Calculate the next command ID wrapping at 3 digits */
-  imapc->cmdid = (imapc->cmdid + 1) % 1000;
-
-  /* Calculate the tag based on the connection ID and command ID */
-  snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-           'A' + (conn->connection_id % 26), imapc->cmdid);
-
-  /* Prefix the format with the tag */
-  taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
-  if(!taggedfmt)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Send the data with the tag */
-  result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
-
-  Curl_safefree(taggedfmt);
-  va_end(ap);
-
-  return result;
-}
-
-/***********************************************************************
- *
- * imap_atom()
- *
- * Checks the input string for characters that need escaping and returns an
- * atom ready for sending to the server.
- *
- * The returned string needs to be freed.
- *
- */
-static char *imap_atom(const char *str)
-{
-  const char *p1;
-  char *p2;
-  size_t backsp_count = 0;
-  size_t quote_count = 0;
-  bool space_exists = FALSE;
-  size_t newlen = 0;
-  char *newstr = NULL;
-
-  if(!str)
-    return NULL;
-
-  /* Count any unescapped characters */
-  p1 = str;
-  while(*p1) {
-    if(*p1 == '\\')
-      backsp_count++;
-    else if(*p1 == '"')
-      quote_count++;
-    else if(*p1 == ' ')
-      space_exists = TRUE;
-
-    p1++;
-  }
-
-  /* Does the input contain any unescapped characters? */
-  if(!backsp_count && !quote_count && !space_exists)
-    return strdup(str);
-
-  /* Calculate the new string length */
-  newlen = strlen(str) + backsp_count + quote_count + (space_exists ? 2 : 0);
-
-  /* Allocate the new string */
-  newstr = (char *) malloc((newlen + 1) * sizeof(char));
-  if(!newstr)
-    return NULL;
-
-  /* Surround the string in quotes if necessary */
-  p2 = newstr;
-  if(space_exists) {
-    newstr[0] = '"';
-    newstr[newlen - 1] = '"';
-    p2++;
-  }
-
-  /* Copy the string, escaping backslash and quote characters along the way */
-  p1 = str;
-  while(*p1) {
-    if(*p1 == '\\' || *p1 == '"') {
-      *p2 = '\\';
-      p2++;
-    }
-
-   *p2 = *p1;
-
-    p1++;
-    p2++;
-  }
-
-  /* Terminate the string */
-  newstr[newlen] = '\0';
-
-  return newstr;
-}
 
 /***********************************************************************
  *
@@ -2322,6 +2211,119 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * imap_sendf()
+ *
+ * Sends the formated string as an IMAP command to the server.
+ *
+ * Designed to never block.
+ */
+static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  char *taggedfmt;
+  va_list ap;
+  va_start(ap, fmt);
+
+  /* Calculate the next command ID wrapping at 3 digits */
+  imapc->cmdid = (imapc->cmdid + 1) % 1000;
+
+  /* Calculate the tag based on the connection ID and command ID */
+  snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
+           'A' + (conn->connection_id % 26), imapc->cmdid);
+
+  /* Prefix the format with the tag */
+  taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
+  if(!taggedfmt)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Send the data with the tag */
+  result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
+
+  Curl_safefree(taggedfmt);
+  va_end(ap);
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * imap_atom()
+ *
+ * Checks the input string for characters that need escaping and returns an
+ * atom ready for sending to the server.
+ *
+ * The returned string needs to be freed.
+ *
+ */
+static char *imap_atom(const char *str)
+{
+  const char *p1;
+  char *p2;
+  size_t backsp_count = 0;
+  size_t quote_count = 0;
+  bool space_exists = FALSE;
+  size_t newlen = 0;
+  char *newstr = NULL;
+
+  if(!str)
+    return NULL;
+
+  /* Count any unescapped characters */
+  p1 = str;
+  while(*p1) {
+    if(*p1 == '\\')
+      backsp_count++;
+    else if(*p1 == '"')
+      quote_count++;
+    else if(*p1 == ' ')
+      space_exists = TRUE;
+
+    p1++;
+  }
+
+  /* Does the input contain any unescapped characters? */
+  if(!backsp_count && !quote_count && !space_exists)
+    return strdup(str);
+
+  /* Calculate the new string length */
+  newlen = strlen(str) + backsp_count + quote_count + (space_exists ? 2 : 0);
+
+  /* Allocate the new string */
+  newstr = (char *) malloc((newlen + 1) * sizeof(char));
+  if(!newstr)
+    return NULL;
+
+  /* Surround the string in quotes if necessary */
+  p2 = newstr;
+  if(space_exists) {
+    newstr[0] = '"';
+    newstr[newlen - 1] = '"';
+    p2++;
+  }
+
+  /* Copy the string, escaping backslash and quote characters along the way */
+  p1 = str;
+  while(*p1) {
+    if(*p1 == '\\' || *p1 == '"') {
+      *p2 = '\\';
+      p2++;
+    }
+
+   *p2 = *p1;
+
+    p1++;
+    p2++;
+  }
+
+  /* Terminate the string */
+  newstr[newlen] = '\0';
+
+  return newstr;
 }
 
 #endif /* CURL_DISABLE_IMAP */
