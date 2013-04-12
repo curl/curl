@@ -1641,7 +1641,6 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
 {
   /* The SMTP struct is already initialised in smtp_connect() */
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *path = data->state.path;
   char localhost[HOSTNAME_MAX + 1];
