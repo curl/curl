@@ -2295,6 +2295,12 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/***********************************************************************
+ *
+ * imap_parse_custom_request()
+ *
+ * Parse the custom request.
+ */
 static CURLcode imap_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
