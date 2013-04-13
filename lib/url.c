@@ -2452,6 +2452,7 @@ static void conn_free(struct connectdata *conn)
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
+  Curl_safefree(conn->options);
   Curl_safefree(conn->proxyuser);
   Curl_safefree(conn->proxypasswd);
   Curl_safefree(conn->allocptr.proxyuserpwd);
@@ -4342,24 +4343,27 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
                                    struct connectdata *conn,
                                    char *user, char *passwd)
 {
+  char options[MAX_CURL_OPTIONS_LENGTH];
+
   /* At this point, we're hoping all the other special cases have
    * been taken care of, so conn->host.name is at most
-   *    [user[:password]]@]hostname
+   *    [user[:password][;options]]@]hostname
    *
    * We need somewhere to put the embedded details, so do that first.
    */
 
-  char *ptr=strchr(conn->host.name, '@');
+  char *ptr = strchr(conn->host.name, '@');
   char *userpass = conn->host.name;
 
-  user[0] =0;   /* to make everything well-defined */
-  passwd[0]=0;
+  user[0] = 0;   /* to make everything well-defined */
+  passwd[0] = 0;
+  options[0] = 0;
 
   /* We will now try to extract the
-   * possible user+password pair in a string like:
+   * possible login information in a string like:
    * ftp://user:password@ftp.my.site:8021/README */
   if(ptr != NULL) {
-    /* there's a user+password given here, to the left of the @ */
+    /* There's login information to the left of the @ */
 
     conn->host.name = ++ptr;
 
@@ -4369,26 +4373,46 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
      * set user/passwd, but doing that first adds more cases here :-(
      */
 
-    conn->bits.userpwd_in_url = TRUE;
     if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
-      /* We could use the one in the URL */
-
-      conn->bits.user_passwd = TRUE; /* enable user+password */
-
+      /* We could use the information in the URL so extract it */
       if(*userpass != ':') {
-        /* the name is given, get user+password */
-        sscanf(userpass, "%" MAX_CURL_USER_LENGTH_TXT "[^:@]:"
-               "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-               user, passwd);
+        if(*userpass != ';') {
+          /* The user is given so extract the user, password and options */
+          int result = sscanf(userpass,
+                              "%" MAX_CURL_USER_LENGTH_TXT "[^:;@]:"
+                              "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^;@];"
+                              "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
+                              user, passwd, options);
+
+          /* The extract failed so extract the user and options instead */
+          if(result == 1)
+            sscanf(userpass, "%" MAX_CURL_USER_LENGTH_TXT "[^:;@];"
+                             "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
+                              user, options);
+        }
+        else {
+          /* No name or password are given so extract the options only */
+        sscanf(userpass, ";%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]", options);
+        }
       }
       else
-        /* no name given, get the password only */
-        sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]", passwd);
+        /* No name is given so extract the password and options */
+        sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^;@];"
+               "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
+               passwd, options);
 
       if(user[0]) {
-        char *newname=curl_easy_unescape(data, user, 0, NULL);
+        char *newname;
+
+        /* We have a user in the URL */
+        conn->bits.userpwd_in_url = TRUE;
+        conn->bits.user_passwd = TRUE; /* enable user+password */
+
+        /* Decode the user */
+        newname = curl_easy_unescape(data, user, 0, NULL);
         if(!newname)
           return CURLE_OUT_OF_MEMORY;
+
         if(strlen(newname) < MAX_CURL_USER_LENGTH)
           strcpy(user, newname);
 
@@ -4396,18 +4420,33 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
            the unconverted name, it'll be wrong but what the heck */
         free(newname);
       }
+
       if(passwd[0]) {
-        /* we have a password found in the URL, decode it! */
-        char *newpasswd=curl_easy_unescape(data, passwd, 0, NULL);
+        /* We have a password in the URL so decode it */
+        char *newpasswd = curl_easy_unescape(data, passwd, 0, NULL);
         if(!newpasswd)
           return CURLE_OUT_OF_MEMORY;
+
         if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
           strcpy(passwd, newpasswd);
 
         free(newpasswd);
       }
+
+      if(options[0]) {
+        /* We have an options list in the URL so decode it */
+        char *newoptions = curl_easy_unescape(data, options, 0, NULL);
+        if(!newoptions)
+          return CURLE_OUT_OF_MEMORY;
+
+        if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
+          conn->options = newoptions;
+        else
+          free(newoptions);
+      }
     }
   }
+
   return CURLE_OK;
 }
 
