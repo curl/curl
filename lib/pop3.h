@@ -72,7 +72,7 @@ struct pop3_conn {
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
                              non-body */
-  unsigned int authtypes; /* Supported authentication types */
+  unsigned int authtypes; /* Accepted authentication types */
   unsigned int authmechs; /* Accepted SASL authentication mechanisms */
   unsigned int preftype;  /* Preferred authentication type */
   unsigned int prefmech;  /* Preferred SASL authentication mechanism */
