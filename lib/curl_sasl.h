@@ -33,6 +33,10 @@
 #define SASL_MECH_EXTERNAL      0x0020
 #define SASL_MECH_NTLM          0x0040
 
+/* Authentication mechanism values */
+#define SASL_AUTH_NONE          0
+#define SASL_AUTH_ANY           ~0
+
 /* This is used to generate a base64 encoded PLAIN authentication message */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
                                         const char *userp,
