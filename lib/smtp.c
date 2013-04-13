@@ -26,6 +26,7 @@
  * RFC4616 PLAIN authentication
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
+ * Draft   SMTP URL Interface
  *
  ***************************************************************************/
 
@@ -99,6 +100,7 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
+static CURLcode smtp_parse_url_options(struct connectdata *conn);
 static CURLcode smtp_parse_url_path(struct connectdata *conn);
 
 /*
@@ -422,12 +424,14 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(smtpc->authmechs & SASL_MECH_DIGEST_MD5) {
+  if((smtpc->authmechs & SASL_MECH_DIGEST_MD5) &&
+     (smtpc->prefmech & SASL_MECH_DIGEST_MD5)) {
     mech = "DIGEST-MD5";
     state1 = SMTP_AUTH_DIGESTMD5;
     smtpc->authused = SASL_MECH_DIGEST_MD5;
   }
-  else if(smtpc->authmechs & SASL_MECH_CRAM_MD5) {
+  else if((smtpc->authmechs & SASL_MECH_CRAM_MD5) &&
+          (smtpc->prefmech & SASL_MECH_CRAM_MD5)) {
     mech = "CRAM-MD5";
     state1 = SMTP_AUTH_CRAMMD5;
     smtpc->authused = SASL_MECH_CRAM_MD5;
@@ -435,7 +439,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   else
 #endif
 #ifdef USE_NTLM
-  if(smtpc->authmechs & SASL_MECH_NTLM) {
+  if((smtpc->authmechs & SASL_MECH_NTLM) &&
+     (smtpc->prefmech & SASL_MECH_NTLM)) {
     mech = "NTLM";
     state1 = SMTP_AUTH_NTLM;
     state2 = SMTP_AUTH_NTLM_TYPE2MSG;
@@ -446,7 +451,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   }
   else
 #endif
-  if(smtpc->authmechs & SASL_MECH_LOGIN) {
+  if((smtpc->authmechs & SASL_MECH_LOGIN) &&
+     (smtpc->prefmech & SASL_MECH_LOGIN)) {
     mech = "LOGIN";
     state1 = SMTP_AUTH_LOGIN;
     state2 = SMTP_AUTH_LOGIN_PASSWD;
@@ -454,7 +460,8 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
     result = Curl_sasl_create_login_message(conn->data, conn->user,
                                             &initresp, &len);
   }
-  else if(smtpc->authmechs & SASL_MECH_PLAIN) {
+  else if((smtpc->authmechs & SASL_MECH_PLAIN) &&
+          (smtpc->prefmech & SASL_MECH_PLAIN)) {
     mech = "PLAIN";
     state1 = SMTP_AUTH_PLAIN;
     state2 = SMTP_AUTH_FINAL;
@@ -1322,8 +1329,16 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
+  /* Set the default preferred authentication mechanism */
+  smtpc->prefmech = SASL_AUTH_ANY;
+
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
+
+  /* Parse the URL options */
+  result = smtp_parse_url_options(conn);
+  if(result)
+    return result;
 
   /* Parse the URL path */
   result = smtp_parse_url_path(conn);
@@ -1629,6 +1644,52 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * smtp_parse_url_options()
+ *
+ * Parse the URL login options.
+ */
+static CURLcode smtp_parse_url_options(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  const char *options = conn->options;
+  const char *ptr = options;
+
+  if(options) {
+    const char *key = ptr;
+
+    while(*ptr && *ptr != '=')
+        ptr++;
+
+    if(strnequal(key, "AUTH", 4)) {
+      const char *value = ptr + 1;
+
+      if(strequal(value, "*"))
+        smtpc->prefmech = SASL_AUTH_ANY;
+      else if(strequal(value, "LOGIN"))
+        smtpc->prefmech = SASL_MECH_LOGIN;
+      else if(strequal(value, "PLAIN"))
+        smtpc->prefmech = SASL_MECH_PLAIN;
+      else if(strequal(value, "CRAM-MD5"))
+        smtpc->prefmech = SASL_MECH_CRAM_MD5;
+      else if(strequal(value, "DIGEST-MD5"))
+        smtpc->prefmech = SASL_MECH_DIGEST_MD5;
+      else if(strequal(value, "GSSAPI"))
+        smtpc->prefmech = SASL_MECH_GSSAPI;
+      else if(strequal(value, "NTLM"))
+        smtpc->prefmech = SASL_MECH_NTLM;
+      else
+        smtpc->prefmech = SASL_AUTH_NONE;
+    }
+    else
+      result = CURLE_URL_MALFORMAT;
+  }
+
+  return result;
 }
 
 /***********************************************************************

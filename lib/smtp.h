@@ -72,6 +72,7 @@ struct smtp_conn {
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
   unsigned int authmechs;  /* Accepted authentication mechanisms */
+  unsigned int prefmech;   /* Preferred authentication mechanism */
   unsigned int authused;   /* Auth mechanism used for the connection */
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
