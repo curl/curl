@@ -15,7 +15,7 @@ Curl and libcurl 7.30.1
 This release includes the following changes:
 
  o darwinssl: add TLS session resumption
- o imap / pop3 / smtp: Added support for ;auth=<mech> in the URL
+ o imap/pop3/smtp: Added support for ;auth=<mech> in the URL
  o 
 
 This release includes the following bugfixes:
