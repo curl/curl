@@ -14,10 +14,15 @@ Curl and libcurl 7.30.1
 
 This release includes the following changes:
 
+ o darwinssl: add TLS session resumption
+ o imap / pop3 / smtp: Added support for ;auth=<mech> in the URL
  o 
 
 This release includes the following bugfixes:
 
+ o FTP: access files in root dir correctly [1]
+ o configure: try pthread_create without -lpthread [2]
+ o FTP: handle a 230 welcome response [3]
  o 
 
 This release includes the following known bugs:
@@ -27,9 +32,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
+ Anders Havn
+
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/mail/lib-2013-04/0142.html
+ [2] = http://curl.haxx.se/bug/view.cgi?id=1216
+ [3] = http://curl.haxx.se/mail/lib-2013-02/0102.html
+ [4] = 
