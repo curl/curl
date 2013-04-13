@@ -99,6 +99,7 @@ static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
 static char *imap_atom(const char *str);
 static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...);
+static CURLcode imap_parse_url_options(struct connectdata *conn);
 static CURLcode imap_parse_url_path(struct connectdata *conn);
 static CURLcode imap_parse_custom_request(struct connectdata *conn);
 
@@ -542,12 +543,14 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   /* Calculate the supported authentication mechanism by decreasing order of
      security */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if(imapc->authmechs & SASL_MECH_DIGEST_MD5) {
+  if((imapc->authmechs & SASL_MECH_DIGEST_MD5) &&
+     (imapc->prefmech & SASL_MECH_DIGEST_MD5)) {
     mech = "DIGEST-MD5";
     state1 = IMAP_AUTHENTICATE_DIGESTMD5;
     imapc->authused = SASL_MECH_DIGEST_MD5;
   }
-  else if(imapc->authmechs & SASL_MECH_CRAM_MD5) {
+  else if((imapc->authmechs & SASL_MECH_CRAM_MD5) &&
+          (imapc->prefmech & SASL_MECH_CRAM_MD5)) {
     mech = "CRAM-MD5";
     state1 = IMAP_AUTHENTICATE_CRAMMD5;
     imapc->authused = SASL_MECH_CRAM_MD5;
@@ -555,7 +558,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   else
 #endif
 #ifdef USE_NTLM
-  if(imapc->authmechs & SASL_MECH_NTLM) {
+    if((imapc->authmechs & SASL_MECH_NTLM) &&
+       (imapc->prefmech & SASL_MECH_NTLM)) {
     mech = "NTLM";
     state1 = IMAP_AUTHENTICATE_NTLM;
     state2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
@@ -568,7 +572,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
   else
 #endif
-  if(imapc->authmechs & SASL_MECH_LOGIN) {
+  if((imapc->authmechs & SASL_MECH_LOGIN) &&
+     (imapc->prefmech & SASL_MECH_LOGIN)) {
     mech = "LOGIN";
     state1 = IMAP_AUTHENTICATE_LOGIN;
     state2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
@@ -578,7 +583,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
       result = Curl_sasl_create_login_message(conn->data, conn->user,
                                               &initresp, &len);
   }
-  else if(imapc->authmechs & SASL_MECH_PLAIN) {
+  else if((imapc->authmechs & SASL_MECH_PLAIN) &&
+          (imapc->prefmech & SASL_MECH_PLAIN)) {
     mech = "PLAIN";
     state1 = IMAP_AUTHENTICATE_PLAIN;
     state2 = IMAP_AUTHENTICATE_FINAL;
@@ -1717,8 +1723,16 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   pp->endofresp = imap_endofresp;
   pp->conn = conn;
 
+  /* Set the default preferred authentication mechanism */
+  imapc->prefmech = SASL_AUTH_ANY;
+
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
+
+  /* Parse the URL options */
+  result = imap_parse_url_options(conn);
+  if(result)
+    return result;
 
   /* Start off waiting for the server greeting response */
   state(conn, IMAP_SERVERGREET);
@@ -2183,6 +2197,52 @@ static bool imap_is_bchar(char ch)
     default:
       return false;
   }
+}
+
+/***********************************************************************
+ *
+ * imap_parse_url_options()
+ *
+ * Parse the URL login options.
+ */
+static CURLcode imap_parse_url_options(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *options = conn->options;
+  const char *ptr = options;
+
+  if(options) {
+    const char *key = ptr;
+
+    while(*ptr && *ptr != '=')
+        ptr++;
+
+    if(strnequal(key, "AUTH", 4)) {
+      const char *value = ptr + 1;
+
+      if(strequal(value, "*"))
+        imapc->prefmech = SASL_AUTH_ANY;
+      else if(strequal(value, "LOGIN"))
+        imapc->prefmech = SASL_MECH_LOGIN;
+      else if(strequal(value, "PLAIN"))
+        imapc->prefmech = SASL_MECH_PLAIN;
+      else if(strequal(value, "CRAM-MD5"))
+        imapc->prefmech = SASL_MECH_CRAM_MD5;
+      else if(strequal(value, "DIGEST-MD5"))
+        imapc->prefmech = SASL_MECH_DIGEST_MD5;
+      else if(strequal(value, "GSSAPI"))
+        imapc->prefmech = SASL_MECH_GSSAPI;
+      else if(strequal(value, "NTLM"))
+        imapc->prefmech = SASL_MECH_NTLM;
+      else
+        imapc->prefmech = SASL_AUTH_NONE;
+    }
+    else
+      result = CURLE_URL_MALFORMAT;
+  }
+
+  return result;
 }
 
 /***********************************************************************
