@@ -85,9 +85,9 @@ extern const struct Curl_handler Curl_handler_pop3;
 extern const struct Curl_handler Curl_handler_pop3s;
 
 /* Authentication type flags */
-#define POP3_TYPE_CLEARTEXT 0x0001
-#define POP3_TYPE_APOP      0x0002
-#define POP3_TYPE_SASL      0x0004
+#define POP3_TYPE_CLEARTEXT (1 << 0)
+#define POP3_TYPE_APOP      (1 << 1)
+#define POP3_TYPE_SASL      (1 << 2)
 
 /* Authentication type values */
 #define POP3_TYPE_NONE      0
