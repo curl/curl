@@ -25,13 +25,13 @@
 #include "pingpong.h"
 
 /* Authentication mechanism flags */
-#define SASL_MECH_LOGIN         0x0001
-#define SASL_MECH_PLAIN         0x0002
-#define SASL_MECH_CRAM_MD5      0x0004
-#define SASL_MECH_DIGEST_MD5    0x0008
-#define SASL_MECH_GSSAPI        0x0010
-#define SASL_MECH_EXTERNAL      0x0020
-#define SASL_MECH_NTLM          0x0040
+#define SASL_MECH_LOGIN         (1 << 0)
+#define SASL_MECH_PLAIN         (1 << 1)
+#define SASL_MECH_CRAM_MD5      (1 << 2)
+#define SASL_MECH_DIGEST_MD5    (1 << 3)
+#define SASL_MECH_GSSAPI        (1 << 4)
+#define SASL_MECH_EXTERNAL      (1 << 5)
+#define SASL_MECH_NTLM          (1 << 6)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
