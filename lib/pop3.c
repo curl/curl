@@ -101,6 +101,7 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
+static CURLcode pop3_parse_url_options(struct connectdata *conn);
 static CURLcode pop3_parse_url_path(struct connectdata *conn);
 static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 
@@ -514,12 +515,14 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
      security */
   if(pop3c->authtypes & POP3_TYPE_SASL) {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    if(pop3c->authmechs & SASL_MECH_DIGEST_MD5) {
+    if((pop3c->authmechs & SASL_MECH_DIGEST_MD5) &&
+       (pop3c->prefmech & SASL_MECH_DIGEST_MD5)) {
       mech = "DIGEST-MD5";
       authstate = POP3_AUTH_DIGESTMD5;
       pop3c->authused = SASL_MECH_DIGEST_MD5;
     }
-    else if(pop3c->authmechs & SASL_MECH_CRAM_MD5) {
+    else if((pop3c->authmechs & SASL_MECH_CRAM_MD5) &&
+            (pop3c->prefmech & SASL_MECH_CRAM_MD5)) {
       mech = "CRAM-MD5";
       authstate = POP3_AUTH_CRAMMD5;
       pop3c->authused = SASL_MECH_CRAM_MD5;
@@ -527,26 +530,29 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
     else
 #endif
 #ifdef USE_NTLM
-    if(pop3c->authmechs & SASL_MECH_NTLM) {
+    if((pop3c->authmechs & SASL_MECH_NTLM) &&
+       (pop3c->prefmech & SASL_MECH_NTLM)) {
       mech = "NTLM";
       authstate = POP3_AUTH_NTLM;
       pop3c->authused = SASL_MECH_NTLM;
     }
     else
 #endif
-    if(pop3c->authmechs & SASL_MECH_LOGIN) {
+    if((pop3c->authmechs & SASL_MECH_LOGIN) &&
+       (pop3c->prefmech & SASL_MECH_LOGIN)) {
       mech = "LOGIN";
       authstate = POP3_AUTH_LOGIN;
       pop3c->authused = SASL_MECH_LOGIN;
     }
-    else if(pop3c->authmechs & SASL_MECH_PLAIN) {
+    else if((pop3c->authmechs & SASL_MECH_PLAIN) &&
+            (pop3c->prefmech & SASL_MECH_PLAIN)) {
       mech = "PLAIN";
       authstate = POP3_AUTH_PLAIN;
       pop3c->authused = SASL_MECH_PLAIN;
     }
   }
 
-  if(mech) {
+  if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
     /* Perform SASL based authentication */
     result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
 
@@ -554,11 +560,13 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
       state(conn, authstate);
   }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  else if(pop3c->authtypes & POP3_TYPE_APOP)
+  else if((pop3c->authtypes & POP3_TYPE_APOP) &&
+          (pop3c->preftype & POP3_TYPE_APOP))
     /* Perform APOP authentication */
     result = pop3_state_apop(conn);
 #endif
-  else if(pop3c->authtypes & POP3_TYPE_CLEARTEXT)
+  else if((pop3c->authtypes & POP3_TYPE_CLEARTEXT) &&
+          (pop3c->preftype & POP3_TYPE_CLEARTEXT))
     /* Perform clear text authentication */
     result = pop3_state_user(conn);
   else {
@@ -1332,8 +1340,17 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
+  /* Set the default preferred authentication type and mechanism */
+  pop3c->preftype = POP3_TYPE_ANY;
+  pop3c->prefmech = SASL_AUTH_ANY;
+
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
+
+  /* Parse the URL options */
+  result = pop3_parse_url_options(conn);
+  if(result)
+    return result;
 
   /* Start off waiting for the server greeting response */
   state(conn, POP3_SERVERGREET);
@@ -1606,6 +1623,72 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * pop3_parse_url_options()
+ *
+ * Parse the URL login options.
+ */
+static CURLcode pop3_parse_url_options(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  const char *options = conn->options;
+  const char *ptr = options;
+
+  if(options) {
+    const char *key = ptr;
+
+    while(*ptr && *ptr != '=')
+        ptr++;
+
+    if(strnequal(key, "AUTH", 4)) {
+      const char *value = ptr + 1;
+
+      if(strequal(value, "*")) {
+        pop3c->preftype = POP3_TYPE_ANY;
+        pop3c->prefmech = SASL_AUTH_ANY;
+      }
+      else if(strequal(value, "+APOP")) {
+        pop3c->preftype = POP3_TYPE_APOP;
+        pop3c->prefmech = SASL_AUTH_NONE;
+      }
+      else if(strequal(value, "LOGIN")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_LOGIN;
+      }
+      else if(strequal(value, "PLAIN")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_PLAIN;
+      }
+      else if(strequal(value, "CRAM-MD5")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_CRAM_MD5;
+      }
+      else if(strequal(value, "DIGEST-MD5")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_DIGEST_MD5;
+      }
+      else if(strequal(value, "GSSAPI")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_GSSAPI;
+      }
+      else if(strequal(value, "NTLM")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_NTLM;
+      }
+      else {
+        pop3c->preftype = POP3_TYPE_NONE;
+        pop3c->prefmech = SASL_AUTH_NONE;
+      }
+    }
+    else
+      result = CURLE_URL_MALFORMAT;
+  }
+
+  return result;
 }
 
 /***********************************************************************
