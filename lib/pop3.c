@@ -390,12 +390,12 @@ static void state(struct connectdata *conn, pop3state newstate)
 
 /***********************************************************************
  *
- * pop3_state_capa()
+ * pop3_perform_capa()
  *
  * Sends the CAPA command in order to obtain a list of server side supported
  * capabilities.
  */
-static CURLcode pop3_state_capa(struct connectdata *conn)
+static CURLcode pop3_perform_capa(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -415,11 +415,11 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_state_starttls()
+ * pop3_perform_starttls()
  *
  * Sends the STLS command to start the upgrade to TLS.
  */
-static CURLcode pop3_state_starttls(struct connectdata *conn)
+static CURLcode pop3_perform_starttls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -434,11 +434,11 @@ static CURLcode pop3_state_starttls(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_state_upgrade_tls()
+ * pop3_perform_upgrade_tls()
  *
  * Performs the upgrade to TLS.
  */
-static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
+static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -452,7 +452,7 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 
     if(pop3c->ssldone) {
       pop3_to_pop3s(conn);
-      result = pop3_state_capa(conn);
+      result = pop3_perform_capa(conn);
     }
   }
 
@@ -461,11 +461,11 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_state_user()
+ * pop3_perform_user()
  *
  * Sends a clear text USER command to authenticate with.
  */
-static CURLcode pop3_state_user(struct connectdata *conn)
+static CURLcode pop3_perform_user(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -489,11 +489,11 @@ static CURLcode pop3_state_user(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 /***********************************************************************
  *
- * pop3_state_apop()
+ * pop3_perform_apop()
  *
  * Sends an APOP command to authenticate with.
  */
-static CURLcode pop3_state_apop(struct connectdata *conn)
+static CURLcode pop3_perform_apop(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -539,7 +539,7 @@ static CURLcode pop3_state_apop(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_authenticate()
+ * pop3_perform_authenticate()
  *
  * Sends an AUTH command allowing the client to login with the appropriate
  * SASL authentication mechanism.
@@ -547,7 +547,7 @@ static CURLcode pop3_state_apop(struct connectdata *conn)
  * Additionally, the function will perform fallback to APOP and USER commands
  * should a common mechanism not be available between the client and server.
  */
-static CURLcode pop3_authenticate(struct connectdata *conn)
+static CURLcode pop3_perform_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -614,12 +614,12 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   else if((pop3c->authtypes & POP3_TYPE_APOP) &&
           (pop3c->preftype & POP3_TYPE_APOP))
     /* Perform APOP authentication */
-    result = pop3_state_apop(conn);
+    result = pop3_perform_apop(conn);
 #endif
   else if((pop3c->authtypes & POP3_TYPE_CLEARTEXT) &&
           (pop3c->preftype & POP3_TYPE_CLEARTEXT))
     /* Perform clear text authentication */
-    result = pop3_state_user(conn);
+    result = pop3_perform_user(conn);
   else {
     /* Other mechanisms not supported */
     infof(conn->data, "No known authentication mechanisms supported!\n");
@@ -631,11 +631,11 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_command()
+ * pop3_perform_command()
  *
  * Sends a POP3 based command.
  */
-static CURLcode pop3_command(struct connectdata *conn)
+static CURLcode pop3_perform_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -671,11 +671,11 @@ static CURLcode pop3_command(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_quit()
+ * pop3_perform_quit()
  *
  * Performs the quit action prior to sclose() be called.
  */
-static CURLcode pop3_quit(struct connectdata *conn)
+static CURLcode pop3_perform_quit(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -703,7 +703,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
-  result = pop3_state_capa(conn);
+  result = pop3_perform_capa(conn);
 
   return result;
 }
@@ -719,22 +719,22 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+')
-    result = pop3_state_user(conn);
+    result = pop3_perform_user(conn);
   else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* We don't have a SSL/TLS connection yet, but SSL is requested */
     if(pop3c->tls_supported)
       /* Switch to TLS connection now */
-      result = pop3_state_starttls(conn);
+      result = pop3_perform_starttls(conn);
     else if(data->set.use_ssl == CURLUSESSL_TRY)
       /* Fallback and carry on with authentication */
-      result = pop3_authenticate(conn);
+      result = pop3_perform_authenticate(conn);
     else {
       failf(data, "STLS not supported.");
       result = CURLE_USE_SSL_FAILED;
     }
   }
   else
-    result = pop3_authenticate(conn);
+    result = pop3_perform_authenticate(conn);
 
   return result;
 }
@@ -755,10 +755,10 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = pop3_authenticate(conn);
+      result = pop3_perform_authenticate(conn);
   }
   else
-    result = pop3_state_upgrade_tls(conn);
+    result = pop3_perform_upgrade_tls(conn);
 
   return result;
 }
@@ -1229,7 +1229,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not POP3 */
   if(pop3c->state == POP3_UPGRADETLS)
-    return pop3_state_upgrade_tls(conn);
+    return pop3_perform_upgrade_tls(conn);
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -1499,7 +1499,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
   *dophase_done = FALSE; /* not done yet */
 
   /* Start the first command in the DO phase */
-  result = pop3_command(conn);
+  result = pop3_perform_command(conn);
   if(result)
     return result;
 
@@ -1572,7 +1572,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
   if(!dead_connection && pop3c->pp.conn)
-    if(!pop3_quit(conn))
+    if(!pop3_perform_quit(conn))
       (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
