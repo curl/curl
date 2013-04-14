@@ -217,10 +217,15 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
-/* Function that checks for an ending POP3 status code at the start of the
-   given string, but also detects the APOP timestamp from the server greeting
-   and various capabilities from the CAPA response including the supported
-   authentication types and allowed SASL mechanisms. */
+/***********************************************************************
+ *
+ * pop3_endofresp()
+ *
+ * Checks for an ending POP3 status code at the start of the given string, but
+ * also detects the APOP timestamp from the server greeting and various
+ * capabilities from the CAPA response including the supported authentication
+ * types and allowed SASL mechanisms.
+ */
 static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
@@ -341,7 +346,12 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   return FALSE; /* Nothing for us */
 }
 
-/* This is the ONLY way to change POP3 state! */
+/***********************************************************************
+ *
+ * state()
+ *
+ * This is the ONLY way to change POP3 state!
+ */
 static void state(struct connectdata *conn, pop3state newstate)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
@@ -378,6 +388,13 @@ static void state(struct connectdata *conn, pop3state newstate)
   pop3c->state = newstate;
 }
 
+/***********************************************************************
+ *
+ * pop3_state_capa()
+ *
+ * Sends the CAPA command in order to obtain a list of server side supported
+ * capabilities.
+ */
 static CURLcode pop3_state_capa(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -396,6 +413,12 @@ static CURLcode pop3_state_capa(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * pop3_state_starttls()
+ *
+ * Sends the STLS command to start the upgrade to TLS.
+ */
 static CURLcode pop3_state_starttls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -409,6 +432,12 @@ static CURLcode pop3_state_starttls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * pop3_state_upgrade_tls()
+ *
+ * Performs the upgrade to TLS.
+ */
 static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -430,6 +459,12 @@ static CURLcode pop3_state_upgrade_tls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * pop3_state_user()
+ *
+ * Sends a clear text USER command to authenticate with.
+ */
 static CURLcode pop3_state_user(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -452,6 +487,12 @@ static CURLcode pop3_state_user(struct connectdata *conn)
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+/***********************************************************************
+ *
+ * pop3_state_apop()
+ *
+ * Sends an APOP command to authenticate with.
+ */
 static CURLcode pop3_state_apop(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -496,6 +537,16 @@ static CURLcode pop3_state_apop(struct connectdata *conn)
 }
 #endif
 
+/***********************************************************************
+ *
+ * pop3_authenticate()
+ *
+ * Sends an AUTH command allowing the client to login with the appropriate
+ * SASL authentication mechanism.
+ *
+ * Additionally, the function will perform fallback to APOP and USER commands
+ * should a common mechanism not be available between the client and server.
+ */
 static CURLcode pop3_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -578,7 +629,12 @@ static CURLcode pop3_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* Start the DO phase for the command */
+/***********************************************************************
+ *
+ * pop3_command()
+ *
+ * Sends a POP3 based command.
+ */
 static CURLcode pop3_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
