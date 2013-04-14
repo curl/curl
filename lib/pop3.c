@@ -613,6 +613,25 @@ static CURLcode pop3_command(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * pop3_quit()
+ *
+ * Performs the quit action prior to sclose() be called.
+ */
+static CURLcode pop3_quit(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the QUIT command */
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT");
+
+  if(!result)
+    state(conn, POP3_QUIT);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
                                             int pop3code,
@@ -1474,25 +1493,6 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
     return result;
 
   result = pop3_regular_transfer(conn, done);
-
-  return result;
-}
-
-/***********************************************************************
- *
- * pop3_quit()
- *
- * Performs the quit action prior to sclose() be called.
- */
-static CURLcode pop3_quit(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-
-  /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT");
-
-  if(!result)
-    state(conn, POP3_QUIT);
 
   return result;
 }
