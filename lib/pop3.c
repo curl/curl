@@ -700,10 +700,10 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 
   if(pop3code != '+') {
     failf(data, "Got unexpected pop3-server response");
-    return CURLE_FTP_WEIRD_SERVER_REPLY;
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
-
-  result = pop3_perform_capa(conn);
+  else
+    result = pop3_perform_capa(conn);
 
   return result;
 }
