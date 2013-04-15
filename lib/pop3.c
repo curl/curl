@@ -1098,6 +1098,7 @@ static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+/* For APOP responses */
 static CURLcode pop3_state_apop_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
