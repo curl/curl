@@ -569,6 +569,27 @@ static CURLcode smtp_mail(struct connectdata *conn)
   return result;
 }
 
+static CURLcode smtp_rcpt_to(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
+
+  /* Send the RCPT TO command */
+  if(smtp->rcpt) {
+    if(smtp->rcpt->data[0] == '<')
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
+                             smtp->rcpt->data);
+    else
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
+                             smtp->rcpt->data);
+    if(!result)
+      state(conn, SMTP_RCPT);
+  }
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
                                             int smtpcode,
@@ -1002,27 +1023,6 @@ static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
   else
     /* End of connect phase */
     state(conn, SMTP_STOP);
-
-  return result;
-}
-
-static CURLcode smtp_rcpt_to(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
-
-  /* Send the RCPT TO command */
-  if(smtp->rcpt) {
-    if(smtp->rcpt->data[0] == '<')
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtp->rcpt->data);
-    else
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                             smtp->rcpt->data);
-    if(!result)
-      state(conn, SMTP_RCPT);
-  }
 
   return result;
 }
