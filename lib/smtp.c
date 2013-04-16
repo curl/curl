@@ -590,6 +590,25 @@ static CURLcode smtp_rcpt_to(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_quit()
+ *
+ * Performs the quit action prior to sclose() being called.
+ */
+static CURLcode smtp_quit(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Send the QUIT command */
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
+
+  if(!result)
+    state(conn, SMTP_QUIT);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
                                             int smtpcode,
@@ -1490,25 +1509,6 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
     return result;
 
   result = smtp_regular_transfer(conn, done);
-
-  return result;
-}
-
-/***********************************************************************
- *
- * smtp_quit()
- *
- * Performs the quit action prior to sclose() being called.
- */
-static CURLcode smtp_quit(struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-
-  /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
-
-  if(!result)
-    state(conn, SMTP_QUIT);
 
   return result;
 }
