@@ -497,6 +497,78 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   return result;
 }
 
+/* Start the DO phase */
+static CURLcode smtp_mail(struct connectdata *conn)
+{
+  char *from = NULL;
+  char *auth = NULL;
+  char *size = NULL;
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  /* Calculate the FROM parameter */
+  if(!data->set.str[STRING_MAIL_FROM])
+    /* Null reverse-path, RFC-2821, sect. 3.7 */
+    from = strdup("<>");
+  else if(data->set.str[STRING_MAIL_FROM][0] == '<')
+    from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
+  else
+    from = aprintf("<%s>", data->set.str[STRING_MAIL_FROM]);
+
+  if(!from)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Calculate the optional AUTH parameter */
+  if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.authused) {
+    if(data->set.str[STRING_MAIL_AUTH][0] != '\0')
+      auth = aprintf("%s", data->set.str[STRING_MAIL_AUTH]);
+    else
+      /* Empty AUTH, RFC-2554, sect. 5 */
+      auth = strdup("<>");
+
+    if(!auth) {
+      Curl_safefree(from);
+
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+
+  /* calculate the optional SIZE parameter */
+  if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
+    size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
+
+    if(!size) {
+      Curl_safefree(from);
+      Curl_safefree(auth);
+
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+
+  /* Send the MAIL command */
+  if(!auth && !size)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
+                           "MAIL FROM:%s", from);
+  else if(auth && !size)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
+                           "MAIL FROM:%s AUTH=%s", from, auth);
+  else if(auth && size)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
+                           "MAIL FROM:%s AUTH=%s SIZE=%s", from, auth, size);
+  else
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
+                           "MAIL FROM:%s SIZE=%s", from, size);
+
+  Curl_safefree(from);
+  Curl_safefree(auth);
+  Curl_safefree(size);
+
+  if(!result)
+    state(conn, SMTP_MAIL);
+
+  return result;
+}
+
 /* For the initial server greeting */
 static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
                                             int smtpcode,
@@ -930,78 +1002,6 @@ static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
   else
     /* End of connect phase */
     state(conn, SMTP_STOP);
-
-  return result;
-}
-
-/* Start the DO phase */
-static CURLcode smtp_mail(struct connectdata *conn)
-{
-  char *from = NULL;
-  char *auth = NULL;
-  char *size = NULL;
-  CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
-
-  /* Calculate the FROM parameter */
-  if(!data->set.str[STRING_MAIL_FROM])
-    /* Null reverse-path, RFC-2821, sect. 3.7 */
-    from = strdup("<>");
-  else if(data->set.str[STRING_MAIL_FROM][0] == '<')
-    from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
-  else
-    from = aprintf("<%s>", data->set.str[STRING_MAIL_FROM]);
-
-  if(!from)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Calculate the optional AUTH parameter */
-  if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] != '\0')
-      auth = aprintf("%s", data->set.str[STRING_MAIL_AUTH]);
-    else
-      /* Empty AUTH, RFC-2554, sect. 5 */
-      auth = strdup("<>");
-
-    if(!auth) {
-      Curl_safefree(from);
-
-      return CURLE_OUT_OF_MEMORY;
-    }
-  }
-
-  /* calculate the optional SIZE parameter */
-  if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
-    size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
-
-    if(!size) {
-      Curl_safefree(from);
-      Curl_safefree(auth);
-
-      return CURLE_OUT_OF_MEMORY;
-    }
-  }
-
-  /* Send the MAIL command */
-  if(!auth && !size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s", from);
-  else if(auth && !size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s AUTH=%s", from, auth);
-  else if(auth && size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s AUTH=%s SIZE=%s", from, auth, size);
-  else
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s SIZE=%s", from, size);
-
-  Curl_safefree(from);
-  Curl_safefree(auth);
-  Curl_safefree(size);
-
-  if(!result)
-    state(conn, SMTP_MAIL);
 
   return result;
 }
