@@ -3350,6 +3350,11 @@ dnl yes or no
 ENABLE_SHARED="$enable_shared"
 AC_SUBST(ENABLE_SHARED)
 
+dnl to let curl-config output the static libraries correctly
+ENABLE_STATIC="$enable_static"
+AC_SUBST(ENABLE_STATIC)
+
+
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
 dnl since it is more cross-compile friendly than curl-config
