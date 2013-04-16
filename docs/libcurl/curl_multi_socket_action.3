@@ -74,9 +74,9 @@ The socket \fBcallback\fP function uses a prototype like this
                            int action,      /* see values below */
                            void *userp,    /* private callback pointer */
                            void *socketp); /* private socket pointer,
-                                              \fBNULL\fI if not
+                                              \fBNULL\fP if not
                                               previously assigned with
-                                              \fIcurl_multi_assign(3)\fP */
+                                              \fBcurl_multi_assign(3)\fP */
 
 .fi
 The callback MUST return 0.
