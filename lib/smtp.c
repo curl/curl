@@ -215,9 +215,14 @@ static void smtp_to_smtps(struct connectdata *conn)
 #define smtp_to_smtps(x) Curl_nop_stmt
 #endif
 
-/* Function that checks for an ending SMTP status code at the start of the
-   given string, but also detects various capabilities from the EHLO response
-   including the supported authentication mechanisms. */
+/***********************************************************************
+ *
+ * pop3_endofresp()
+ *
+ * Checks for an ending SMTP status code at the start of the given string, but
+ * also detects various capabilities from the EHLO response including the
+ * supported authentication mechanisms.
+ */
 static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
@@ -295,7 +300,12 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
   return result;
 }
 
-/* This is the ONLY way to change SMTP state! */
+/***********************************************************************
+ *
+ * state()
+ *
+ * This is the ONLY way to change SMTP state!
+ */
 static void state(struct connectdata *conn, smtpstate newstate)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
@@ -333,6 +343,13 @@ static void state(struct connectdata *conn, smtpstate newstate)
   smtpc->state = newstate;
 }
 
+/***********************************************************************
+ *
+ * smtp_state_ehlo()
+ *
+ * Sends the EHLO command to not only initialise communication with the ESMTP
+ * server but to also obtain a list of server side supported capabilities.
+ */
 static CURLcode smtp_state_ehlo(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -352,6 +369,12 @@ static CURLcode smtp_state_ehlo(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_state_helo()
+ *
+ * Sends the HELO command to initialise communication with the SMTP server.
+ */
 static CURLcode smtp_state_helo(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -369,6 +392,12 @@ static CURLcode smtp_state_helo(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_state_starttls()
+ *
+ * Sends the STLS command to start the upgrade to TLS.
+ */
 static CURLcode smtp_state_starttls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -382,6 +411,12 @@ static CURLcode smtp_state_starttls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_state_upgrade_tls()
+ *
+ * Performs the upgrade to TLS.
+ */
 static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -403,6 +438,13 @@ static CURLcode smtp_state_upgrade_tls(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_authenticate()
+ *
+ * Sends an AUTH command allowing the client to login with the appropriate
+ * SASL authentication mechanism.
+ */
 static CURLcode smtp_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -497,7 +539,12 @@ static CURLcode smtp_authenticate(struct connectdata *conn)
   return result;
 }
 
-/* Start the DO phase */
+/***********************************************************************
+ *
+ * smtp_mail()
+ *
+ * Sends an MAIL command to initiate the upload of a message.
+ */
 static CURLcode smtp_mail(struct connectdata *conn)
 {
   char *from = NULL;
@@ -569,6 +616,13 @@ static CURLcode smtp_mail(struct connectdata *conn)
   return result;
 }
 
+/***********************************************************************
+ *
+ * smtp_rcpt_to()
+ *
+ * Sends a RCPT TO command for a given recipient as part of the message upload
+ * process.
+ */
 static CURLcode smtp_rcpt_to(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
