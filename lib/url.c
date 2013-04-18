@@ -141,9 +141,9 @@ find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
-static CURLcode parse_url_userpass(struct SessionHandle *data,
-                                   struct connectdata *conn,
-                                   char *user, char *passwd, char *options);
+static CURLcode parse_url_login(struct SessionHandle *data,
+                                struct connectdata *conn,
+                                char *user, char *passwd, char *options);
 /*
  * Protocol table.
  */
@@ -3865,11 +3865,11 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     data->change.url_alloc = TRUE; /* free this later */
   }
 
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd, options);
+  /*
+   * Parse the login details from the URL and strip them out of
+   * the host name
+   */
+  result = parse_url_login(data, conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 
@@ -4327,7 +4327,8 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
 
 /*
  *
- * Parse a user name and password in the URL and strip it out of the host name
+ * Parse the login details (user name, password and options) from the URL and
+ * strip them out of the host name
  *
  * Inputs: data->set.use_netrc (CURLOPT_NETRC)
  *         conn->host.name
@@ -4335,12 +4336,13 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  * Outputs: (almost :- all currently undefined)
  *          conn->bits.user_passwd  - non-zero if non-default passwords exist
  *          user                    - non-zero length if defined
- *          passwd                  -   ditto
+ *          passwd                  - non-zero length if defined
+ *          options                 - non-zero length if defined
  *          conn->host.name         - remove user name and password
  */
-static CURLcode parse_url_userpass(struct SessionHandle *data,
-                                   struct connectdata *conn,
-                                   char *user, char *passwd, char *options)
+static CURLcode parse_url_login(struct SessionHandle *data,
+                                struct connectdata *conn,
+                                char *user, char *passwd, char *options)
 {
   /* At this point, we're hoping all the other special cases have
    * been taken care of, so conn->host.name is at most
@@ -4606,20 +4608,23 @@ static void override_userpass(struct SessionHandle *data,
 /*
  * Set password so it's available in the connection.
  */
-static CURLcode set_userpass(struct connectdata *conn,
-                             const char *user, const char *passwd,
-                             const char *options)
+static CURLcode set_login(struct connectdata *conn,
+                          const char *user, const char *passwd,
+                          const char *options)
 {
   CURLcode result = CURLE_OK;
 
   /* If our protocol needs a password and we have none, use the defaults */
   if((conn->handler->flags & PROTOPT_NEEDSPWD) && !conn->bits.user_passwd) {
-
+    /* Store the default user */
     conn->user = strdup(CURL_DEFAULT_USER);
+
+    /* Store the default password */
     if(conn->user)
       conn->passwd = strdup(CURL_DEFAULT_PASSWORD);
     else
       conn->passwd = NULL;
+
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
   else {
@@ -5084,7 +5089,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * for use
    *************************************************************/
   override_userpass(data, conn, user, passwd);
-  result = set_userpass(conn, user, passwd, options);
+  result = set_login(conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 
