@@ -4490,8 +4490,8 @@ static CURLcode parse_login_details(const char *login, const size_t len,
 
   /* Calculate the portion lengths */
   ulen = (psep ?
-          (osep && psep > osep ? osep - login : psep - login) :
-          (osep ? osep - login : len));
+          (size_t)(osep && psep > osep ? osep - login : psep - login) :
+          (osep ? (size_t)(osep - login) : len));
   plen = (psep ?
           (osep && osep > psep ? osep - psep : login + len - psep) - 1 : 0);
   olen = (osep ?
