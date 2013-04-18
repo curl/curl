@@ -2619,8 +2619,10 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     fi
     capath="$want_capath"
     ca="no"
-  else
-    dnl neither of --with-ca-* given
+  elif test "x$cross_compiling" != "xyes"; then
+    dnl NOT cross-compiling and...
+    dnl neither of the --with-ca-* options are provided
+
     dnl first try autodetecting a CA bundle , then a CA path
     dnl both autodetections can be skipped by --without-ca-*
     ca="no"
@@ -2656,9 +2658,10 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
         fi
       done
     fi
+  else
+    dnl no option given and cross-compiling
+    AC_MSG_WARN([skipped the ca-cert path detection when cross-compiling])
   fi
-
-
 
   if test "x$ca" != "xno"; then
     CURL_CA_BUNDLE='"'$ca'"'
