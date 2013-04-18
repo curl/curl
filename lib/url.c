@@ -143,7 +143,7 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
 static CURLcode parse_url_userpass(struct SessionHandle *data,
                                    struct connectdata *conn,
-                                   char *user, char *passwd);
+                                   char *user, char *passwd, char *options);
 /*
  * Protocol table.
  */
@@ -3651,8 +3651,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
 static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                     struct connectdata *conn,
                                     bool *prot_missing,
-                                    char *user,
-                                    char *passwd)
+                                    char *user, char *passwd, char *options)
 {
   char *at;
   char *fragment;
@@ -3870,7 +3869,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
    * Parse a user name and password in the URL and strip it out
    * of the host name
    *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
+  result = parse_url_userpass(data, conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 
@@ -4341,10 +4340,8 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  */
 static CURLcode parse_url_userpass(struct SessionHandle *data,
                                    struct connectdata *conn,
-                                   char *user, char *passwd)
+                                   char *user, char *passwd, char *options)
 {
-  char options[MAX_CURL_OPTIONS_LENGTH];
-
   /* At this point, we're hoping all the other special cases have
    * been taken care of, so conn->host.name is at most
    *    [user[:password][;options]]@]hostname
@@ -4440,9 +4437,9 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
           return CURLE_OUT_OF_MEMORY;
 
         if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
-          conn->options = newoptions;
-        else
-          free(newoptions);
+          strcpy(options, newoptions);
+
+        free(newoptions);
       }
     }
   }
@@ -4610,11 +4607,13 @@ static void override_userpass(struct SessionHandle *data,
  * Set password so it's available in the connection.
  */
 static CURLcode set_userpass(struct connectdata *conn,
-                             const char *user, const char *passwd)
+                             const char *user, const char *passwd,
+                             const char *options)
 {
+  CURLcode result = CURLE_OK;
+
   /* If our protocol needs a password and we have none, use the defaults */
-  if((conn->handler->flags & PROTOPT_NEEDSPWD) &&
-     !conn->bits.user_passwd) {
+  if((conn->handler->flags & PROTOPT_NEEDSPWD) && !conn->bits.user_passwd) {
 
     conn->user = strdup(CURL_DEFAULT_USER);
     if(conn->user)
@@ -4624,17 +4623,28 @@ static CURLcode set_userpass(struct connectdata *conn,
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
   else {
-    /* store user + password, zero-length if not set */
+    /* Store the user, zero-length if not set */
     conn->user = strdup(user);
+
+    /* Store the password (only if user is present), zero-length if not set */
     if(conn->user)
       conn->passwd = strdup(passwd);
     else
       conn->passwd = NULL;
   }
-  if(!conn->user || !conn->passwd)
-    return CURLE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  if(!conn->user || !conn->passwd)
+    result = CURLE_OUT_OF_MEMORY;
+
+  /* Store the options, null if not set */
+  if(!result && options[0]) {
+    conn->options = strdup(options);
+
+    if(!conn->options)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  return result;
 }
 
 /*************************************************************
@@ -4800,12 +4810,13 @@ static CURLcode create_conn(struct SessionHandle *data,
                             struct connectdata **in_connect,
                             bool *async)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct connectdata *conn;
   struct connectdata *conn_temp = NULL;
   size_t urllen;
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
+  char options[MAX_CURL_OPTIONS_LENGTH];
   bool reuse;
   char *proxy = NULL;
   bool prot_missing = FALSE;
@@ -4874,7 +4885,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd);
+  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd,
+                               options);
   if(result != CURLE_OK)
     return result;
 
@@ -5072,7 +5084,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    * for use
    *************************************************************/
   override_userpass(data, conn, user, passwd);
-  result = set_userpass(conn, user, passwd);
+  result = set_userpass(conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 
