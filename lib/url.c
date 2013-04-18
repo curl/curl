@@ -4468,7 +4468,8 @@ static CURLcode parse_url_login(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 static CURLcode parse_login_details(const char *login, const size_t len,
-                                    char **userp, char **passwdp, char **optionsp)
+                                    char **userp, char **passwdp,
+                                    char **optionsp)
 {
   CURLcode result = CURLE_OK;
   char *utemp = NULL;
