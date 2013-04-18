@@ -4470,7 +4470,7 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **userp, char **passwdp, char **optionsp)
 {
-  int result = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char *utemp = NULL;
   char *ptemp = NULL;
   char *otemp = NULL;
