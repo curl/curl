@@ -5,7 +5,8 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   persistant post-callback postit2 sepheaders simple simplepost simplessl  \
   sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard \
   smtp-multi simplesmtp smtp-tls rtsp externalsocket resolve \
-  progressfunc pop3s pop3slist imap url2file sftpget ftpsget
+  progressfunc pop3s pop3slist imap url2file sftpget ftpsget \
+  usercertinmem
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
