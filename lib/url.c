@@ -144,6 +144,9 @@ static CURLcode do_init(struct connectdata *conn);
 static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
                                 char *user, char *passwd, char *options);
+static CURLcode parse_login_details(const char *login, const size_t len,
+                                    char **userptr, char **passwdptr,
+                                    char **optionsptr);
 /*
  * Protocol table.
  */
@@ -4326,6 +4329,7 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
 #endif /* CURL_DISABLE_PROXY */
 
 /*
+ * parse_url_login()
  *
  * Parse the login details (user name, password and options) from the URL and
  * strip them out of the host name
@@ -4344,6 +4348,11 @@ static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
                                 char *user, char *passwd, char *options)
 {
+  CURLcode result = CURLE_OK;
+  char *userp = NULL;
+  char *passwdp = NULL;
+  char *optionsp = NULL;
+
   /* At this point, we're hoping all the other special cases have
    * been taken care of, so conn->host.name is at most
    *    [user[:password][;options]]@]hostname
@@ -4352,7 +4361,7 @@ static CURLcode parse_url_login(struct SessionHandle *data,
    */
 
   char *ptr = strchr(conn->host.name, '@');
-  char *userpass = conn->host.name;
+  char *login = conn->host.name;
 
   user[0] = 0;   /* to make everything well-defined */
   passwd[0] = 0;
@@ -4361,7 +4370,7 @@ static CURLcode parse_url_login(struct SessionHandle *data,
   /* We will now try to extract the
    * possible login information in a string like:
    * ftp://user:password@ftp.my.site:8021/README */
-  if(ptr != NULL) {
+  if(ptr) {
     /* There's login information to the left of the @ */
 
     conn->host.name = ++ptr;
@@ -4373,80 +4382,169 @@ static CURLcode parse_url_login(struct SessionHandle *data,
      */
 
     if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
-      /* We could use the information in the URL so extract it */
-      if(*userpass != ':') {
-        if(*userpass != ';') {
-          /* The user is given so extract the user, password and options */
-          int result = sscanf(userpass,
-                              "%" MAX_CURL_USER_LENGTH_TXT "[^:;@]:"
-                              "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^;@];"
-                              "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
-                              user, passwd, options);
+      /* We could use the login information in the URL so extract it */
+      result = parse_login_details(login, ptr - login - 1,
+                                   &userp, &passwdp, &optionsp);
+      if(!result) {
+        if(userp) {
+          char *newname;
 
-          /* The extract failed so extract the user and options instead */
-          if(result == 1)
-            sscanf(userpass, "%" MAX_CURL_USER_LENGTH_TXT "[^:;@];"
-                             "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
-                              user, options);
+          /* We have a user in the URL */
+          conn->bits.userpwd_in_url = TRUE;
+          conn->bits.user_passwd = TRUE; /* enable user+password */
+
+          /* Decode the user */
+          newname = curl_easy_unescape(data, userp, 0, NULL);
+          if(!newname)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newname) < MAX_CURL_USER_LENGTH)
+            strcpy(user, newname);
+
+          free(newname);
         }
-        else {
-          /* No name or password are given so extract the options only */
-        sscanf(userpass, ";%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]", options);
+
+        if(passwdp) {
+          /* We have a password in the URL so decode it */
+          char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
+          if(!newpasswd)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
+            strcpy(passwd, newpasswd);
+
+          free(newpasswd);
+        }
+
+        if(optionsp) {
+          /* We have an options list in the URL so decode it */
+          char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
+          if(!newoptions)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
+            strcpy(options, newoptions);
+
+          free(newoptions);
         }
       }
-      else
-        /* No name is given so extract the password and options */
-        sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^;@];"
-               "%" MAX_CURL_OPTIONS_LENGTH_TXT "[^@]",
-               passwd, options);
 
-      if(user[0]) {
-        char *newname;
-
-        /* We have a user in the URL */
-        conn->bits.userpwd_in_url = TRUE;
-        conn->bits.user_passwd = TRUE; /* enable user+password */
-
-        /* Decode the user */
-        newname = curl_easy_unescape(data, user, 0, NULL);
-        if(!newname)
-          return CURLE_OUT_OF_MEMORY;
-
-        if(strlen(newname) < MAX_CURL_USER_LENGTH)
-          strcpy(user, newname);
-
-        /* if the new name is longer than accepted, then just use
-           the unconverted name, it'll be wrong but what the heck */
-        free(newname);
-      }
-
-      if(passwd[0]) {
-        /* We have a password in the URL so decode it */
-        char *newpasswd = curl_easy_unescape(data, passwd, 0, NULL);
-        if(!newpasswd)
-          return CURLE_OUT_OF_MEMORY;
-
-        if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
-          strcpy(passwd, newpasswd);
-
-        free(newpasswd);
-      }
-
-      if(options[0]) {
-        /* We have an options list in the URL so decode it */
-        char *newoptions = curl_easy_unescape(data, options, 0, NULL);
-        if(!newoptions)
-          return CURLE_OUT_OF_MEMORY;
-
-        if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
-          strcpy(options, newoptions);
-
-        free(newoptions);
-      }
+      Curl_safefree(userp);
+      Curl_safefree(passwdp);
+      Curl_safefree(optionsp);
     }
   }
 
-  return CURLE_OK;
+  return result;
+}
+
+/*
+ * parse_login_details()
+ *
+ * This is used to parse a login string for user name, password and options in
+ * the following formats:
+ *
+ *   user
+ *   user:password
+ *   user:password;options
+ *   user;options
+ *   user;options:password
+ *   :password
+ *   :password;options
+ *   ;options
+ *   ;options:password
+ *
+ * Parameters:
+ *
+ * login    [in]     - The login string.
+ * len      [in]     - The length of the login string.
+ * userp    [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the user will be stored upon completion.
+ * passdwp  [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the password will be stored upon completion.
+ * optionsp [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the options will be stored upon completion.
+ *
+ * Returns CURLE_OK on success.
+ */
+static CURLcode parse_login_details(const char *login, const size_t len,
+                                    char **userp, char **passwdp, char **optionsp)
+{
+  int result = CURLE_OK;
+  char *utemp = NULL;
+  char *ptemp = NULL;
+  char *otemp = NULL;
+  const char *psep = NULL;
+  const char *osep = NULL;
+  size_t ulen;
+  size_t plen;
+  size_t olen;
+
+  /* Attempt to find the password separator */
+  if(passwdp)
+    psep = strchr(login, ':');
+
+  /* Attempt to find the options separator */
+  if(optionsp)
+    osep = strchr(login, ';');
+
+  /* Calculate the portion lengths */
+  ulen = (psep ?
+          (osep && psep > osep ? osep - login : psep - login) :
+          (osep ? osep - login : len));
+  plen = (psep ?
+          (osep && osep > psep ? osep - psep : login + len - psep) - 1 : 0);
+  olen = (osep ?
+          (psep && psep > osep ? psep - osep : login + len - osep) - 1 : 0);
+
+  /* Allocate the user portion temporary buffer */
+  if(userp && ulen) {
+    utemp = malloc(ulen + 1);
+    if(!utemp)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Allocate the password portion temporary buffer */
+  if(!result && passwdp && plen) {
+    ptemp = malloc(plen + 1);
+    if(!ptemp)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Allocate the options  portion temporary buffer */
+  if(!result && optionsp && olen) {
+    otemp = malloc(olen + 1);
+    if(!otemp)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  if(!result) {
+    /* Copy the user portion if necessary */
+    if(utemp) {
+      memcpy(utemp, login, ulen);
+      utemp[ulen] = '\0';
+      Curl_safefree(*userp);
+      *userp = utemp;
+    }
+
+    /* Copy the password portion if necessary */
+    if(ptemp) {
+      memcpy(ptemp, psep + 1, plen);
+      ptemp[plen] = '\0';
+      Curl_safefree(*passwdp);
+      *passwdp = ptemp;
+    }
+
+    /* Copy the password portion if necessary */
+    if(otemp) {
+      memcpy(otemp, osep + 1, olen);
+      otemp[olen] = '\0';
+      Curl_safefree(*optionsp);
+      *optionsp = otemp;
+    }
+  }
+
+  return result;
 }
 
 /*************************************************************
