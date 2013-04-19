@@ -4482,12 +4482,22 @@ static CURLcode parse_login_details(const char *login, const size_t len,
   size_t olen;
 
   /* Attempt to find the password separator */
-  if(passwdp)
+  if(passwdp) {
     psep = strchr(login, ':');
 
+    /* Within the constraint of the login string */
+    if(psep >= login + len)
+      psep = NULL;
+  }
+
   /* Attempt to find the options separator */
-  if(optionsp)
+  if(optionsp) {
     osep = strchr(login, ';');
+
+    /* Within the constraint of the login string */
+    if(osep >= login + len)
+      osep = NULL;
+  }
 
   /* Calculate the portion lengths */
   ulen = (psep ?
