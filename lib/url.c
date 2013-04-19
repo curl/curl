@@ -4494,9 +4494,11 @@ static CURLcode parse_login_details(const char *login, const size_t len,
           (size_t)(osep && psep > osep ? osep - login : psep - login) :
           (osep ? (size_t)(osep - login) : len));
   plen = (psep ?
-          (osep && osep > psep ? osep - psep : login + len - psep) - 1 : 0);
+          (osep && osep > psep ? (size_t)(osep - psep) :
+                                 (size_t)(login + len - psep)) - 1 : 0);
   olen = (osep ?
-          (psep && psep > osep ? psep - osep : login + len - osep) - 1 : 0);
+          (psep && psep > osep ? (size_t)(psep - osep) :
+                                 (size_t)(login + len - osep)) - 1 : 0);
 
   /* Allocate the user portion temporary buffer */
   if(userp && ulen) {
