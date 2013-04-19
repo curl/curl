@@ -4536,7 +4536,7 @@ static CURLcode parse_login_details(const char *login, const size_t len,
       *passwdp = ptemp;
     }
 
-    /* Copy the password portion if necessary */
+    /* Copy the options portion if necessary */
     if(otemp) {
       memcpy(otemp, osep + 1, olen);
       otemp[olen] = '\0';
