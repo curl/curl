@@ -4690,20 +4690,26 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
 }
 
 /*
- * Override a user name and password from the URL with that in the
- * CURLOPT_USERPWD option or a .netrc file, if applicable.
+ * Override the login details from the URL with that in the CURLOPT_USERPWD
+ * option or a .netrc file, if applicable.
  */
-static void override_userpass(struct SessionHandle *data,
-                              struct connectdata *conn,
-                              char *user, char *passwd)
+static void override_login(struct SessionHandle *data,
+                           struct connectdata *conn,
+                           char *user, char *passwd, char *options)
 {
-  if(data->set.str[STRING_USERNAME] != NULL) {
+  if(data->set.str[STRING_USERNAME]) {
     strncpy(user, data->set.str[STRING_USERNAME], MAX_CURL_USER_LENGTH);
-    user[MAX_CURL_USER_LENGTH-1] = '\0';   /*To be on safe side*/
+    user[MAX_CURL_USER_LENGTH - 1] = '\0';   /* To be on safe side */
   }
-  if(data->set.str[STRING_PASSWORD] != NULL) {
+
+  if(data->set.str[STRING_PASSWORD]) {
     strncpy(passwd, data->set.str[STRING_PASSWORD], MAX_CURL_PASSWORD_LENGTH);
-    passwd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
+    passwd[MAX_CURL_PASSWORD_LENGTH - 1] = '\0'; /* To be on safe side */
+  }
+
+  if(data->set.str[STRING_OPTIONS]) {
+    strncpy(options, data->set.str[STRING_OPTIONS], MAX_CURL_OPTIONS_LENGTH);
+    options[MAX_CURL_OPTIONS_LENGTH - 1] = '\0'; /* To be on safe side */
   }
 
   conn->bits.netrc = FALSE;
@@ -5205,11 +5211,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
-  /*************************************************************
-   * Check for an overridden user name and password, then set it
-   * for use
-   *************************************************************/
-  override_userpass(data, conn, user, passwd);
+  /* Check for overridden login details and set them accordingly */
+  override_login(data, conn, user, passwd, options);
   result = set_login(conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
