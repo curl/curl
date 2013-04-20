@@ -332,19 +332,22 @@ static CURLcode setstropt_userpwd(char *option, char **user_storage,
                                (options_storage ? &optionsp : NULL));
   if(!result) {
     /* store username part of option */
-    if(user_storage)
+    if(user_storage) {
       Curl_safefree(*user_storage);
       *user_storage = userp;
+    }
 
     /* store password part of option */
-    if(pwd_storage)
+    if(pwd_storage) {
       Curl_safefree(*pwd_storage);
       *pwd_storage = passwdp;
+    }
 
     /* store options part of option */
-    if(options_storage)
+    if(options_storage) {
       Curl_safefree(*options_storage);
       *options_storage = optionsp;
+    }
   }
 
   return result;
