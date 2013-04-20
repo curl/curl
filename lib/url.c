@@ -305,31 +305,15 @@ static CURLcode setstropt_userpwd(char *option, char **user_storage,
   char *passwdp = NULL;
   char *optionsp = NULL;
 
-  if(!option) {
-    /* we treat a NULL passed in as a hint to clear existing info */
-    if(user_storage) {
-      Curl_safefree(*user_storage);
-      *user_storage = (char *) NULL;
-    }
-
-    if(pwd_storage) {
-      Curl_safefree(*pwd_storage);
-      *pwd_storage = (char *) NULL;
-    }
-
-    if(options_storage) {
-      Curl_safefree(*options_storage);
-      *options_storage = (char *) NULL;
-    }
-
-    return CURLE_OK;
+  /* Parse the login details if specified. It not then we treat NULL as a hint
+     to clear the existing data */
+  if(option) {
+    result = parse_login_details(option, strlen(option),
+                                 (user_storage ? &userp : NULL),
+                                 (pwd_storage ? &passwdp : NULL),
+                                 (options_storage ? &optionsp : NULL));
   }
 
-  /* Parse the login details */
-  result = parse_login_details(option, strlen(option),
-                               (user_storage ? &userp : NULL),
-                               (pwd_storage ? &passwdp : NULL),
-                               (options_storage ? &optionsp : NULL));
   if(!result) {
     /* store username part of option */
     if(user_storage) {
