@@ -298,43 +298,52 @@ static CURLcode setstropt(char **charp, char * s)
 }
 
 static CURLcode setstropt_userpwd(char *option, char **user_storage,
-                                  char **pwd_storage)
+                                  char **pwd_storage, char **options_storage)
 {
-  char* separator;
   CURLcode result = CURLE_OK;
+  char *userp = NULL;
+  char *passwdp = NULL;
+  char *optionsp = NULL;
 
   if(!option) {
     /* we treat a NULL passed in as a hint to clear existing info */
-    Curl_safefree(*user_storage);
-    *user_storage = (char *) NULL;
-    Curl_safefree(*pwd_storage);
-    *pwd_storage = (char *) NULL;
+    if(user_storage) {
+      Curl_safefree(*user_storage);
+      *user_storage = (char *) NULL;
+    }
+
+    if(pwd_storage) {
+      Curl_safefree(*pwd_storage);
+      *pwd_storage = (char *) NULL;
+    }
+
+    if(options_storage) {
+      Curl_safefree(*options_storage);
+      *options_storage = (char *) NULL;
+    }
+
     return CURLE_OK;
   }
 
-  separator = strchr(option, ':');
-  if(separator != NULL) {
-
+  /* Parse the login details */
+  result = parse_login_details(option, strlen(option),
+                               (user_storage ? &userp : NULL),
+                               (pwd_storage ? &passwdp : NULL),
+                               (options_storage ? &optionsp : NULL));
+  if(!result) {
     /* store username part of option */
-    char * p;
-    size_t username_len = (size_t)(separator-option);
-    p = malloc(username_len+1);
-    if(!p)
-      result = CURLE_OUT_OF_MEMORY;
-    else {
-      memcpy(p, option, username_len);
-      p[username_len] = '\0';
-      Curl_safefree(*user_storage);
-      *user_storage = p;
-    }
+    if(user_storage)
+      setstropt(user_storage, userp);
 
     /* store password part of option */
-    if(result == CURLE_OK)
-      result = setstropt(pwd_storage, separator+1);
+    if(pwd_storage)
+      setstropt(pwd_storage, passwdp);
+
+    /* store options part of option */
+    if(options_storage)
+      setstropt(options_storage, optionsp);
   }
-  else {
-    result = setstropt(user_storage, option);
-  }
+
   return result;
 }
 
@@ -1537,11 +1546,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_USERPWD:
     /*
-     * user:password to use in the operation
+     * user:password;options to use in the operation
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_USERNAME],
-                               &data->set.str[STRING_PASSWORD]);
+                               &data->set.str[STRING_PASSWORD],
+                               &data->set.str[STRING_OPTIONS]);
     break;
   case CURLOPT_USERNAME:
     /*
@@ -1614,7 +1624,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD]);
+                               &data->set.str[STRING_PROXYPASSWORD], NULL);
     break;
   case CURLOPT_PROXYUSERNAME:
     /*
