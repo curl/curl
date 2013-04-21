@@ -264,7 +264,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   PROTOPT_NONE                          /* flags */
 };
 
-void Curl_freeset(struct SessionHandle * data)
+void Curl_freeset(struct SessionHandle *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
@@ -278,7 +278,7 @@ void Curl_freeset(struct SessionHandle * data)
   data->change.referer = NULL;
 }
 
-static CURLcode setstropt(char **charp, char * s)
+static CURLcode setstropt(char **charp, char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
@@ -301,43 +301,43 @@ static CURLcode setstropt_userpwd(char *option, char **user_storage,
                                   char **pwd_storage, char **options_storage)
 {
   CURLcode result = CURLE_OK;
-  char *userp = NULL;
-  char *passwdp = NULL;
-  char *optionsp = NULL;
+  char *user = NULL;
+  char *passwd = NULL;
+  char *options = NULL;
 
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
   if(option) {
     result = parse_login_details(option, strlen(option),
-                                 (user_storage ? &userp : NULL),
-                                 (pwd_storage ? &passwdp : NULL),
-                                 (options_storage ? &optionsp : NULL));
+                                 (user_storage ? &user : NULL),
+                                 (pwd_storage ? &passwd : NULL),
+                                 (options_storage ? &options : NULL));
   }
 
   if(!result) {
-    /* store username part of option */
+    /* Store the username part of option if required */
     if(user_storage) {
       Curl_safefree(*user_storage);
-      *user_storage = userp;
+      *user_storage = user;
     }
 
-    /* store password part of option */
+    /* Store the password part of option if required */
     if(pwd_storage) {
       Curl_safefree(*pwd_storage);
-      *pwd_storage = passwdp;
+      *pwd_storage = passwd;
     }
 
-    /* store options part of option */
+    /* Store the options part of option if required */
     if(options_storage) {
       Curl_safefree(*options_storage);
-      *options_storage = optionsp;
+      *options_storage = options;
     }
   }
 
   return result;
 }
 
-CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
+CURLcode Curl_dupset(struct SessionHandle *dst, struct SessionHandle *src)
 {
   CURLcode r = CURLE_OK;
   enum dupstring i;
@@ -4472,9 +4472,9 @@ static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **optionsp)
 {
   CURLcode result = CURLE_OK;
-  char *utemp = NULL;
-  char *ptemp = NULL;
-  char *otemp = NULL;
+  char *ubuf = NULL;
+  char *pbuf = NULL;
+  char *obuf = NULL;
   const char *psep = NULL;
   const char *osep = NULL;
   size_t ulen;
@@ -4510,50 +4510,50 @@ static CURLcode parse_login_details(const char *login, const size_t len,
           (psep && psep > osep ? (size_t)(psep - osep) :
                                  (size_t)(login + len - osep)) - 1 : 0);
 
-  /* Allocate the user portion temporary buffer */
+  /* Allocate the user portion buffer */
   if(userp && ulen) {
-    utemp = malloc(ulen + 1);
-    if(!utemp)
+    ubuf = malloc(ulen + 1);
+    if(!ubuf)
       result = CURLE_OUT_OF_MEMORY;
   }
 
-  /* Allocate the password portion temporary buffer */
+  /* Allocate the password portion buffer */
   if(!result && passwdp && plen) {
-    ptemp = malloc(plen + 1);
-    if(!ptemp)
+    pbuf = malloc(plen + 1);
+    if(!pbuf)
       result = CURLE_OUT_OF_MEMORY;
   }
 
-  /* Allocate the options  portion temporary buffer */
+  /* Allocate the options portion buffer */
   if(!result && optionsp && olen) {
-    otemp = malloc(olen + 1);
-    if(!otemp)
+    obuf = malloc(olen + 1);
+    if(!obuf)
       result = CURLE_OUT_OF_MEMORY;
   }
 
   if(!result) {
-    /* Copy the user portion if necessary */
-    if(utemp) {
-      memcpy(utemp, login, ulen);
-      utemp[ulen] = '\0';
+    /* Store the user portion if necessary */
+    if(ubuf) {
+      memcpy(ubuf, login, ulen);
+      ubuf[ulen] = '\0';
       Curl_safefree(*userp);
-      *userp = utemp;
+      *userp = ubuf;
     }
 
-    /* Copy the password portion if necessary */
-    if(ptemp) {
-      memcpy(ptemp, psep + 1, plen);
-      ptemp[plen] = '\0';
+    /* Store the password portion if necessary */
+    if(pbuf) {
+      memcpy(pbuf, psep + 1, plen);
+      pbuf[plen] = '\0';
       Curl_safefree(*passwdp);
-      *passwdp = ptemp;
+      *passwdp = pbuf;
     }
 
-    /* Copy the options portion if necessary */
-    if(otemp) {
-      memcpy(otemp, osep + 1, olen);
-      otemp[olen] = '\0';
+    /* Store the options portion if necessary */
+    if(obuf) {
+      memcpy(obuf, osep + 1, olen);
+      obuf[olen] = '\0';
       Curl_safefree(*optionsp);
-      *optionsp = otemp;
+      *optionsp = obuf;
     }
   }
 
