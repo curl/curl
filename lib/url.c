@@ -297,8 +297,8 @@ static CURLcode setstropt(char **charp, char *s)
   return CURLE_OK;
 }
 
-static CURLcode setstropt_userpwd(char *option, char **user_storage,
-                                  char **pwd_storage, char **options_storage)
+static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
+                                  char **optionsp)
 {
   CURLcode result = CURLE_OK;
   char *user = NULL;
@@ -309,28 +309,28 @@ static CURLcode setstropt_userpwd(char *option, char **user_storage,
      to clear the existing data */
   if(option) {
     result = parse_login_details(option, strlen(option),
-                                 (user_storage ? &user : NULL),
-                                 (pwd_storage ? &passwd : NULL),
-                                 (options_storage ? &options : NULL));
+                                 (userp ? &user : NULL),
+                                 (passwdp ? &passwd : NULL),
+                                 (optionsp ? &options : NULL));
   }
 
   if(!result) {
     /* Store the username part of option if required */
-    if(user_storage) {
-      Curl_safefree(*user_storage);
-      *user_storage = user;
+    if(userp) {
+      Curl_safefree(*userp);
+      *userp = user;
     }
 
     /* Store the password part of option if required */
-    if(pwd_storage) {
-      Curl_safefree(*pwd_storage);
-      *pwd_storage = passwd;
+    if(passwdp) {
+      Curl_safefree(*passwdp);
+      *passwdp = passwd;
     }
 
     /* Store the options part of option if required */
-    if(options_storage) {
-      Curl_safefree(*options_storage);
-      *options_storage = options;
+    if(optionsp) {
+      Curl_safefree(*optionsp);
+      *optionsp = options;
     }
   }
 
