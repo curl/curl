@@ -4208,7 +4208,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
          username or password with reserved characters like ':' in
          them. */
       Curl_safefree(conn->proxyuser);
-      if(proxyuser)
+      if(proxyuser && strlen(proxyuser) < MAX_CURL_USER_LENGTH)
         conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
       else
         conn->proxyuser = strdup("");
@@ -4217,7 +4217,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
         res = CURLE_OUT_OF_MEMORY;
       else {
         Curl_safefree(conn->proxypasswd);
-        if(proxypasswd)
+        if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
           conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
         else
           conn->proxypasswd = strdup("");
