@@ -640,17 +640,23 @@ http://192.168.0.1/
 
 http://[2001:1890:1112:1::20]/
 
-It is also possible to specify the user name and password as part of the
-host, for some protocols, when connecting to servers that require
-authentication.
-
-For example the following types of authentication support this:
+It is also possible to specify the user name, password and any supported login
+options as part of the host, for the following protocols, when connecting to
+servers that require authentication:
 
 http://user:password@www.example.com
 
 ftp://user:password@ftp.example.com
 
-pop3://user:password@mail.example.com
+imap://user:password;options@mail.example.com
+
+pop3://user:password;options@mail.example.com
+
+smtp://user:password;options@mail.example.com
+
+At present only IMAP, POP3 and SMTP support login options as part of the host.
+For more information about the login options in URL syntax please see RFC2384
+and RFC5092 (Added in 7.30.1).
 
 The port is optional and when not specified libcurl will use the default port
 based on the determined or specified protocol: 80 for HTTP, 21 for FTP and 25
