@@ -620,12 +620,20 @@ scheme://host:port/path
 
 For a greater explanation of the format please see RFC3986.
 
-If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
-etc), libcurl will attempt to resolve which protocol to use based on the
-given host mame. If the protocol is not supported, libcurl will return
-(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP
-or \fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed
-information on which protocols are supported.
+If the given URL lacks the scheme (such as "http://" or "ftp://" etc) then
+libcurl will attempt to resolve the protocol based on the given host name,
+which may be one of the following:
+
+HTTP, FTP, DICT, LDAP, IMAP, POP3 or SMTP
+
+(POP3 and SMTP added in 7.30.1)
+
+Should the protocol, either that specified by the scheme or deduced by libcurl
+from the host name, not be supported by libcurl then
+(\fICURLE_UNSUPPORTED_PROTOCOL\fP) will be returned from either the
+\fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP functions when you
+call them. Use \fIcurl_version_info(3)\fP for detailed information of which
+protocols are supported by the build of libcurl you are using.
 
 The host part of the URL contains the address of the server that you want to
 connect to. This can be the fully qualified domain name of the server, the
