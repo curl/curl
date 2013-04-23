@@ -7,19 +7,19 @@
                           How cURL Became Like This
 
 
-In the second half of 1997, Daniel Stenberg came up with the idea to make
+Towards the end of 1996, Daniel Stenberg came up with the idea to make
 currency-exchange calculations available to Internet Relay Chat (IRC)
 users. All the necessary data are published on the Web; he just needed to
 automate their retrieval.
 
 Daniel simply adopted an existing command-line open-source tool, httpget, that
-Brazilian Rafael Sagula had written. After a few minor adjustments, it did
-just what he needed.
+Brazilian Rafael Sagula had written and recently release version 0.1 of. After
+a few minor adjustments, it did just what he needed. HttpGet 1.0 was relased
+on April 8th 1997 with brand new HTTP proxy support.
 
-Soon, he found currencies on a GOPHER site, so support for that had to go in,
-and not before long FTP download support was added as well. The name of the
-project was changed to urlget to better fit what it actually did now, since
-the http-only days were already passed.
+We soon found and fixed support for getting currencies over GOPHER.  Once FTP
+download support was added, the name of the project was changed and urlget 2.0
+was released in August 1997. The http-only days were already passed.
 
 The project slowly grew bigger. When upload capabilities were added and the
 name once again was misleading, a second name change was made and on March 20,
