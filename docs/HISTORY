@@ -14,7 +14,7 @@ automate their retrieval.
 
 Daniel simply adopted an existing command-line open-source tool, httpget, that
 Brazilian Rafael Sagula had written and recently release version 0.1 of. After
-a few minor adjustments, it did just what he needed. HttpGet 1.0 was relased
+a few minor adjustments, it did just what he needed. HttpGet 1.0 was released
 on April 8th 1997 with brand new HTTP proxy support.
 
 We soon found and fixed support for getting currencies over GOPHER.  Once FTP
