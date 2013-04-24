@@ -16,8 +16,9 @@ This release includes the following changes:
 
  o darwinssl: add TLS session resumption
  o imap/pop3/smtp: Added support for ;auth=<mech> in the URL
- o imap/pop3/smtp: Added support for ;auth=<mech> in CURLOPT_USERPWD
+ o imap/pop3/smtp: Added support for ;auth=<mech> to CURLOPT_USERPWD
  o usercertinmem.c: add example showing user cert in memory
+ o url: Added smtp and pop3 hostnames to the protocol detection list
  o 
 
 This release includes the following bugfixes:
@@ -28,6 +29,7 @@ This release includes the following bugfixes:
  o curl-config: don't output static libs when they are disabled
  o CURL_CHECK_CA_BUNDLE: don't check for paths when cross-compiling [4]
  o Various documentation updates
+ o getinfo.c: reset timecond when clearing session-info variables [5]
  o 
 
 This release includes the following known bugs:
@@ -39,7 +41,8 @@ advice from friends like these:
 
  David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
  Anders Havn, Dan Fandrich, Paul Howarth, Dave Reisner, Wouter Van Rooy,
- Linus Nielsen Feltzing, Ishan SinghLevett
+ Linus Nielsen Feltzing, Ishan SinghLevett, Alessandro Ghedini,
+ Ludovico Cavedon
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -49,4 +52,5 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/bug/view.cgi?id=1216
  [3] = http://curl.haxx.se/mail/lib-2013-02/0102.html
  [4] = http://curl.haxx.se/mail/lib-2013-04/0294.html
- [5] = 
+ [5] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=705783
+ [6] = 
