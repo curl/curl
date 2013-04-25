@@ -494,7 +494,9 @@ sub checktestcmd {
 #
 sub runclient {
     my ($cmd)=@_;
-    return system($cmd);
+    my $ret = system($cmd);
+    print "CMD ($ret): $cmd\n" if($verbose);
+    return $ret;
 
 # This is one way to test curl on a remote machine
 #    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
