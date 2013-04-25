@@ -353,7 +353,7 @@ to provide the data to send.
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC3501.
 
-8.2 Enhanced capability support
+9.2 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPABILITY command.
