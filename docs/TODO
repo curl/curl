@@ -49,13 +49,17 @@
  7.1 Initial response
  7.2 Pipelining
  7.3 Graceful base64 decoding failure
+ 7.4 Enhanced capability support
  
  8. POP3
  8.1 Initial response
- 8.2 Graceful base64 decoding failure
+ 8.2 Pipelining
+ 8.3 Graceful base64 decoding failure
+ 8.4 Enhanced capability support
  
  9. IMAP
  9.1 Graceful base64 decoding failure
+ 9.2 Enhanced capability support
  
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -312,6 +316,11 @@ to provide the data to send.
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC4954.
 
+7.4 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the EHLO command.
+
 8. POP3
 
 8.1 Initial response
@@ -319,12 +328,21 @@ to provide the data to send.
  Add the ability for the user to specify whether the initial response is
  included in the AUTH command as per RFC5034.
 
-8.2 Graceful base64 decoding failure
+8.2 Pipelining
+
+ Add support for pipelining commands.
+
+8.3 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC5034.
+ 
+8.4 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the CAPA command.
 
 9. IMAP
 
@@ -334,6 +352,11 @@ to provide the data to send.
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC3501.
+
+8.2 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the CAPABILITY command.
 
 10. LDAP
 
