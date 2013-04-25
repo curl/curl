@@ -46,19 +46,16 @@
  6.4 send data in chunks
 
  7. SMTP
- 7.1 Specify the preferred authentication mechanism
- 7.2 Initial response
- 7.3 Pipelining
- 7.4 Graceful base64 decoding failure
+ 7.1 Initial response
+ 7.2 Pipelining
+ 7.3 Graceful base64 decoding failure
  
  8. POP3
- 8.1 auth= in URLs
- 8.2 Initial response
- 8.3 Graceful base64 decoding failure
+ 8.1 Initial response
+ 8.2 Graceful base64 decoding failure
  
  9. IMAP
- 9.1 auth= in URLs
- 9.2 Graceful base64 decoding failure
+ 9.1 Graceful base64 decoding failure
  
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -295,13 +292,7 @@ to provide the data to send.
 
 7. SMTP
 
-7.1 Specify the preferred authentication mechanism
-
- Add the ability to specify the preferred authentication mechanism or a list
- of mechanisms that should be used. Not only that, but the order that is
- returned by the server during the EHLO response should be honored by curl.
-
-7.2 Initial response
+7.1 Initial response
 
  Add the ability for the user to specify whether the initial response is
  included in the AUTH command. Some email servers, such as Microsoft
@@ -310,11 +301,11 @@ to provide the data to send.
 
  http://curl.haxx.se/mail/lib-2012-03/0114.html
 
-7.3 Pipelining
+7.2 Pipelining
 
  Add support for pipelining emails.
 
-7.4 Graceful base64 decoding failure
+7.3 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
@@ -323,17 +314,12 @@ to provide the data to send.
 
 8. POP3
 
-8.1 auth= in URLs
-
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC2384.
-
-8.2 Initial response
+8.1 Initial response
 
  Add the ability for the user to specify whether the initial response is
  included in the AUTH command as per RFC5034.
 
-8.3 Graceful base64 decoding failure
+8.2 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
@@ -342,12 +328,7 @@ to provide the data to send.
 
 9. IMAP
 
-9.1 auth= in URLs
-
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC5092.
-
-9.2 Graceful base64 decoding failure
+9.1 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
