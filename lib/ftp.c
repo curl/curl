@@ -1951,13 +1951,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
-  if(data->set.str[STRING_PROXY] && *data->set.str[STRING_PROXY]) {
+  if(conn->bits.proxy) {
     /*
-     * This is a tunnel through a http proxy and we need to connect to the
-     * proxy again here.
-     *
-     * We don't want to rely on a former host lookup that might've expired
-     * now, instead we remake the lookup here and now!
+     * This connection uses a proxy and we need to connect to the proxy again
+     * here. We don't want to rely on a former host lookup that might've
+     * expired now, instead we remake the lookup here and now!
      */
     rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
