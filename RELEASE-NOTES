@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o CURL_CHECK_CA_BUNDLE: don't check for paths when cross-compiling [4]
  o Various documentation updates
  o getinfo.c: reset timecond when clearing session-info variables [5]
+ o FILE: prevent an artificial timeout event due to stale speed-check data [6]
  o 
 
 This release includes the following known bugs:
@@ -53,4 +54,4 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/mail/lib-2013-02/0102.html
  [4] = http://curl.haxx.se/mail/lib-2013-04/0294.html
  [5] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=705783
- [6] = 
+ [6] = https://bugzilla.redhat.com/906031

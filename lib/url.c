@@ -5193,6 +5193,9 @@ static CURLcode create_conn(struct SessionHandle *data,
                           -1, NULL); /* no upload */
     }
 
+    /* since we skip do_init() */
+    Curl_speedinit(data);
+
     return result;
   }
 #endif
