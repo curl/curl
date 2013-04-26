@@ -58,6 +58,7 @@
 #define CURL_SOCKET_HASH_TABLE_SIZE 911
 #endif
 
+#define CURL_CONNECTION_HASH_SIZE 97
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
@@ -246,9 +247,9 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static struct curl_hash *sh_init(void)
+static struct curl_hash *sh_init(int hashsize)
 {
-  return Curl_hash_alloc(CURL_SOCKET_HASH_TABLE_SIZE, hash_fd, fd_key_compare,
+  return Curl_hash_alloc(hashsize, hash_fd, fd_key_compare,
                          sh_freeentry);
 }
 
@@ -278,7 +279,8 @@ static void multi_freeamsg(void *a, void *b)
   (void)b;
 }
 
-CURLM *curl_multi_init(void)
+struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
+                                     int chashsize) /* connection hash */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
@@ -291,11 +293,11 @@ CURLM *curl_multi_init(void)
   if(!multi->hostcache)
     goto error;
 
-  multi->sockhash = sh_init();
+  multi->sockhash = sh_init(hashsize);
   if(!multi->sockhash)
     goto error;
 
-  multi->conn_cache = Curl_conncache_init();
+  multi->conn_cache = Curl_conncache_init(chashsize);
   if(!multi->conn_cache)
     goto error;
 
@@ -324,6 +326,13 @@ CURLM *curl_multi_init(void)
   free(multi);
   return NULL;
 }
+
+CURLM *curl_multi_init(void)
+{
+  return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
+                           CURL_CONNECTION_HASH_SIZE);
+}
+
 
 CURLMcode curl_multi_add_handle(CURLM *multi_handle,
                                 CURL *easy_handle)

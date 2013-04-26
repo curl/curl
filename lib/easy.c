@@ -73,6 +73,7 @@
 #include "non-ascii.h"
 #include "warnless.h"
 #include "conncache.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -437,7 +438,9 @@ CURLcode curl_easy_perform(CURL *easy)
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-    multi = curl_multi_init();
+    /* this multi handle will only ever have a single easy handled attached
+       to it, so make it use minimal hashes */
+    multi = Curl_multi_handle(1, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
     data->multi_easy = multi;
