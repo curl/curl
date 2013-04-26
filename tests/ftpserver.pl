@@ -581,12 +581,12 @@ sub protocolsetup {
             'EXAMINE' => \&EXAMINE_imap,
             'FETCH'  => \&FETCH_imap,
             'LIST'   => \&LIST_imap,
+            'LOGOUT'   => \&LOGOUT_imap,
             'SELECT' => \&SELECT_imap,
             'STORE'  => \&STORE_imap
         );
         %displaytext = (
             'LOGIN'  => ' OK We are happy you popped in!',
-            'LOGOUT' => ' OK thanks for the fish',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
@@ -1000,6 +1000,13 @@ sub EXAMINE_imap {
     sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
     sendcontrol "* OK [PERMANENTFLAGS ()] No permanent flags permitted\r\n";
     sendcontrol "$cmdid OK [READ-ONLY] EXAMINE completed\r\n";
+
+    return 0;
+}
+
+sub LOGOUT_imap {
+    sendcontrol "* BYE cURL IMAP server signing off\r\n";
+    sendcontrol "$cmdid OK LOGOUT completed\r\n";
 
     return 0;
 }
