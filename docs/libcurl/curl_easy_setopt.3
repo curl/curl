@@ -1217,6 +1217,15 @@ actual name and password with the \fICURLOPT_PROXYUSERPWD\fP option. The
 bitmask can be constructed by or'ing together the bits listed above for the
 \fICURLOPT_HTTPAUTH\fP option. As of this writing, only Basic, Digest and NTLM
 work. (Added in 7.10.7)
+.IP CURLOPT_SASL_IR
+Pass a long. If the value is 1, curl will send the initial response to the
+server in the first authentication packet in order to reduce the number of
+ping pong requests. Only applicable to supporting SASL authentication
+mechanisms and to the IMAP, POP3 and SMTP protocols. (Added in 7.30.1)
+
+Note: Whilst IMAP supports this option there is no need to explicitly set it,
+as libcurl can determine the feature itself when the server supports the
+SASL-IR CAPABILITY.
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Pass a parameter set to 1 to enable this. When enabled, libcurl will
