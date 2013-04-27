@@ -2246,18 +2246,25 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_MAIL_FROM:
+    /* Set the SMTP mail originator */
     result = setstropt(&data->set.str[STRING_MAIL_FROM],
                        va_arg(param, char *));
     break;
 
   case CURLOPT_MAIL_AUTH:
+    /* Set the SMTP auth originator */
     result = setstropt(&data->set.str[STRING_MAIL_AUTH],
                        va_arg(param, char *));
     break;
 
   case CURLOPT_MAIL_RCPT:
-    /* get a list of mail recipients */
+    /* Set the list of mail recipients */
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
+    break;
+
+  case CURLOPT_SASL_IR:
+    /* Enable/disable SASL initial response */
+    data->set.sasl_ir = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
   case CURLOPT_RTSP_REQUEST:
