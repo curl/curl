@@ -67,7 +67,7 @@ test800 test801 test802 test803 test804 test805 test806 test807 test808 \
 \
 test850 test851 test852 test853 test854 test855 test856 test857 \
 \
-test900 test901 test902 test903 test904 test905 test906 \
+test900 test901 test902 test903 test904 test905 test906 test907 test908 \
 \
 test1000 test1001 test1002 test1003 test1004 test1005 test1006 test1007 \
 test1008 test1009 test1010 test1011 test1012 test1013 test1014 test1015 \
