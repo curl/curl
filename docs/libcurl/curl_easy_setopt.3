@@ -626,7 +626,7 @@ given host names:
 
 HTTP, FTP, DICT, LDAP, IMAP, POP3 or SMTP
 
-(POP3 and SMTP added in 7.30.1)
+(POP3 and SMTP added in 7.31.0)
 
 Should the protocol, either that specified by the scheme or deduced by libcurl
 from the host name, not be supported by libcurl then
@@ -664,7 +664,7 @@ smtp://user:password;options@mail.example.com
 
 At present only IMAP, POP3 and SMTP support login options as part of the host.
 For more information about the login options in URL syntax please see RFC2384,
-RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.30.1).
+RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.31.0).
 
 The port is optional and when not specified libcurl will use the default port
 based on the determined or specified protocol: 80 for HTTP, 21 for FTP and 25
@@ -1071,7 +1071,7 @@ to prevent accidental information leakage.
 
 At present only IMAP, POP3 and SMTP support login options as part of the
 details string. For more information about the login options please see
-RFC2384, RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.30.1).
+RFC2384, RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.31.0).
 
 Use \fICURLOPT_HTTPAUTH\fP to specify the authentication method for HTTP based
 connections.
@@ -1221,7 +1221,7 @@ work. (Added in 7.10.7)
 Pass a long. If the value is 1, curl will send the initial response to the
 server in the first authentication packet in order to reduce the number of
 ping pong requests. Only applicable to supporting SASL authentication
-mechanisms and to the IMAP, POP3 and SMTP protocols. (Added in 7.30.1)
+mechanisms and to the IMAP, POP3 and SMTP protocols. (Added in 7.31.0)
 
 Note: Whilst IMAP supports this option there is no need to explicitly set it,
 as libcurl can determine the feature itself when the server supports the
