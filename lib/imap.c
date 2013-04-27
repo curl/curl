@@ -525,6 +525,7 @@ static CURLcode imap_perform_login(struct connectdata *conn)
 static CURLcode imap_perform_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *mech = NULL;
   char *initresp = NULL;
@@ -565,7 +566,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     state2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
     imapc->authused = SASL_MECH_NTLM;
 
-    if(imapc->ir_supported)
+    if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
                                                    &conn->ntlm,
                                                    &initresp, &len);
@@ -579,7 +580,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     state2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
     imapc->authused = SASL_MECH_LOGIN;
 
-    if(imapc->ir_supported)
+    if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_login_message(conn->data, conn->user,
                                               &initresp, &len);
   }
@@ -590,7 +591,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     state2 = IMAP_AUTHENTICATE_FINAL;
     imapc->authused = SASL_MECH_PLAIN;
 
-    if(imapc->ir_supported)
+    if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                               conn->passwd, &initresp, &len);
   }
