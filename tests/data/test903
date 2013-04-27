@@ -13,7 +13,8 @@ RFC4954
 <reply>
 <servercmd>
 REPLY EHLO 250 AUTH PLAIN
-REPLY AUTH 235 Authenticated
+REPLY AUTH 334 PLAIN supported
+REPLY dGVzdAB0ZXN0ADEyMzQ= 235 Authenticated
 </servercmd>
 </reply>
 
@@ -39,7 +40,8 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 903@foo --mail-from 903@from -u test:1
 <verify>
 <protocol>
 EHLO user
-AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ=
+AUTH PLAIN
+dGVzdAB0ZXN0ADEyMzQ=
 MAIL FROM:<903@from>
 RCPT TO:<903@foo>
 DATA

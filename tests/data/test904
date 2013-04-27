@@ -12,7 +12,8 @@ RFC4954
 <reply>
 <servercmd>
 REPLY EHLO 250 AUTH LOGIN
-REPLY AUTH 334 UGFzc3dvcmQ6
+REPLY AUTH 334 LOGIN supported
+REPLY dGVzdA== 334 UGFzc3dvcmQ6
 REPLY MTIzNA== 235 Authenticated
 </servercmd>
 </reply>
@@ -39,7 +40,8 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@foo --mail-from 904@from -u test:1
 <verify>
 <protocol>
 EHLO user
-AUTH LOGIN dGVzdA==
+AUTH LOGIN
+dGVzdA==
 MTIzNA==
 MAIL FROM:<904@from>
 RCPT TO:<904@foo>
