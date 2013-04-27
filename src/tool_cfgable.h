@@ -80,6 +80,7 @@ struct Configurable {
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
+  bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
   bool mute;                /* don't show messages, --silent given */

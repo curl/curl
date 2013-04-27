@@ -173,6 +173,7 @@ static const char *const helptext[] = {
   "     --retry-delay SECONDS "
   "When retrying, wait this many seconds between each",
   "     --retry-max-time SECONDS  Retry only within this period",
+  "     --sasl-ir       Enable initial response in SASL authentication"
   " -S, --show-error    "
   "Show error. With -s, make curl show errors when they occur",
   " -s, --silent        Silent mode. Don't output anything",
