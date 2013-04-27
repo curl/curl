@@ -550,9 +550,13 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
 static CURLcode pop3_perform_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *mech = NULL;
-  pop3state authstate = POP3_STOP;
+  char *initresp = NULL;
+  size_t len = 0;
+  pop3state state1 = POP3_STOP;
+  pop3state state2 = POP3_STOP;
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
@@ -569,13 +573,13 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     if((pop3c->authmechs & SASL_MECH_DIGEST_MD5) &&
        (pop3c->prefmech & SASL_MECH_DIGEST_MD5)) {
       mech = "DIGEST-MD5";
-      authstate = POP3_AUTH_DIGESTMD5;
+      state1 = POP3_AUTH_DIGESTMD5;
       pop3c->authused = SASL_MECH_DIGEST_MD5;
     }
     else if((pop3c->authmechs & SASL_MECH_CRAM_MD5) &&
             (pop3c->prefmech & SASL_MECH_CRAM_MD5)) {
       mech = "CRAM-MD5";
-      authstate = POP3_AUTH_CRAMMD5;
+      state1 = POP3_AUTH_CRAMMD5;
       pop3c->authused = SASL_MECH_CRAM_MD5;
     }
     else
@@ -584,31 +588,62 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     if((pop3c->authmechs & SASL_MECH_NTLM) &&
        (pop3c->prefmech & SASL_MECH_NTLM)) {
       mech = "NTLM";
-      authstate = POP3_AUTH_NTLM;
+      state1 = POP3_AUTH_NTLM;
+      state2 = POP3_AUTH_NTLM_TYPE2MSG;
       pop3c->authused = SASL_MECH_NTLM;
+
+      if(data->set.sasl_ir)
+        result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                     &conn->ntlm,
+                                                     &initresp, &len);
     }
     else
 #endif
     if((pop3c->authmechs & SASL_MECH_LOGIN) &&
        (pop3c->prefmech & SASL_MECH_LOGIN)) {
       mech = "LOGIN";
-      authstate = POP3_AUTH_LOGIN;
+      state1 = POP3_AUTH_LOGIN;
+      state2 = POP3_AUTH_LOGIN_PASSWD;
       pop3c->authused = SASL_MECH_LOGIN;
+
+      if(data->set.sasl_ir)
+        result = Curl_sasl_create_login_message(conn->data, conn->user,
+                                                &initresp, &len);
     }
     else if((pop3c->authmechs & SASL_MECH_PLAIN) &&
             (pop3c->prefmech & SASL_MECH_PLAIN)) {
       mech = "PLAIN";
-      authstate = POP3_AUTH_PLAIN;
+      state1 = POP3_AUTH_PLAIN;
+      state2 = POP3_AUTH_FINAL;
       pop3c->authused = SASL_MECH_PLAIN;
+
+      if(data->set.sasl_ir)
+        result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                                conn->passwd, &initresp,
+                                                &len);
     }
   }
 
+  if(result)
+    return result;
+
   if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
     /* Perform SASL based authentication */
-    result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+    if(initresp) {
+      result = Curl_pp_sendf(&pop3c->pp, "AUTH %s %s", mech, initresp);
 
-    if(!result)
-      state(conn, authstate);
+      if(!result)
+        state(conn, state2);
+    }
+    else {
+      /* Perform SASL based authentication */
+      result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+
+      if(!result)
+        state(conn, state1);
+    }
+
+    Curl_safefree(initresp);
   }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   else if((pop3c->authtypes & POP3_TYPE_APOP) &&
@@ -763,7 +798,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   return result;
 }
 
-/* For AUTH PLAIN responses */
+/* For AUTH PLAIN (without initial response) responses */
 static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
                                            int pop3code,
                                            pop3state instate)
@@ -800,7 +835,7 @@ static CURLcode pop3_state_auth_plain_resp(struct connectdata *conn,
   return result;
 }
 
-/* For AUTH LOGIN responses */
+/* For AUTH LOGIN (without initial response) responses */
 static CURLcode pop3_state_auth_login_resp(struct connectdata *conn,
                                            int pop3code,
                                            pop3state instate)
@@ -997,7 +1032,7 @@ static CURLcode pop3_state_auth_digest_resp_resp(struct connectdata *conn,
 #endif
 
 #ifdef USE_NTLM
-/* For AUTH NTLM responses */
+/* For AUTH NTLM (without initial response) responses */
 static CURLcode pop3_state_auth_ntlm_resp(struct connectdata *conn,
                                           int pop3code,
                                           pop3state instate)
