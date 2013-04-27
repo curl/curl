@@ -30,7 +30,7 @@ SMTP login authentication with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 908@foo --mail-from 908@from -u test:1234 -T --sasl-ir -
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 908@foo --mail-from 908@from -u test:1234 --sasl-ir -T -
 </command>
 </client>
 
