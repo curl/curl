@@ -448,6 +448,7 @@ static CURLcode smtp_perform_upgrade_tls(struct connectdata *conn)
 static CURLcode smtp_perform_authenticate(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *mech = NULL;
   char *initresp = NULL;
@@ -487,10 +488,12 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTH_NTLM;
     state2 = SMTP_AUTH_NTLM_TYPE2MSG;
     smtpc->authused = SASL_MECH_NTLM;
-    result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
-                                                 &conn->ntlm,
-                                                 &initresp, &len);
-  }
+
+    if(data->set.sasl_ir)
+      result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
+                                                   &conn->ntlm,
+                                                   &initresp, &len);
+    }
   else
 #endif
   if((smtpc->authmechs & SASL_MECH_LOGIN) &&
@@ -499,8 +502,10 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTH_LOGIN;
     state2 = SMTP_AUTH_LOGIN_PASSWD;
     smtpc->authused = SASL_MECH_LOGIN;
-    result = Curl_sasl_create_login_message(conn->data, conn->user,
-                                            &initresp, &len);
+
+    if(data->set.sasl_ir)
+      result = Curl_sasl_create_login_message(conn->data, conn->user,
+                                              &initresp, &len);
   }
   else if((smtpc->authmechs & SASL_MECH_PLAIN) &&
           (smtpc->prefmech & SASL_MECH_PLAIN)) {
@@ -508,8 +513,10 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
     state1 = SMTP_AUTH_PLAIN;
     state2 = SMTP_AUTH_FINAL;
     smtpc->authused = SASL_MECH_PLAIN;
-    result = Curl_sasl_create_plain_message(conn->data, conn->user,
-                                            conn->passwd, &initresp, &len);
+
+    if(data->set.sasl_ir)
+      result = Curl_sasl_create_plain_message(conn->data, conn->user,
+                                              conn->passwd, &initresp, &len);
   }
   else {
     /* Other mechanisms not supported */
