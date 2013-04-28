@@ -527,7 +527,7 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
   if(!result) {
     /* Perform SASL based authentication */
     if(initresp &&
-       strlen(mech) + len <= 512 - 8) { /* AUTH <mech> ...<crlf> */
+       8 + strlen(mech) + len <= 512) { /* AUTH <mech> ...<crlf> */
        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
 
       if(!result)
