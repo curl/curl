@@ -2240,7 +2240,11 @@ With NSS this can also be the nickname of the certificate you wish to
 authenticate with. If you want to use a file from the current directory, please
 precede it with "./" prefix, in order to avoid confusion with a nickname.
 
-(iOS and Mac OS X only) With Secure Transport, this string must match the name of a certificate that's in the system or user keychain. You should encode this string in UTF-8 format in case it contains non-ASCII characters. The private key corresponding to the certificate, and certificate chain (if any),  must also be present in the keychain.
+(iOS and Mac OS X only) With Secure Transport, this string must match the name
+of a certificate that's in the system or user keychain. You should encode this
+string in UTF-8 format in case it contains non-ASCII characters. The private
+key corresponding to the certificate, and certificate chain (if any),  must
+also be present in the keychain. (Added in 7.31.0)
 .IP CURLOPT_SSLCERTTYPE
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your certificate. Supported formats are "PEM" and "DER".  (Added
@@ -2250,7 +2254,9 @@ Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be
 changed with \fICURLOPT_SSLKEYTYPE\fP.
 
-(iOS and Mac OS X only) This option is ignored if curl was built against Secure Transport. Secure Transport expects the private key to be already present in the keychain containing the certificate.
+(iOS and Mac OS X only) This option is ignored if curl was built against Secure
+Transport. Secure Transport expects the private key to be already present in
+the keychain containing the certificate.
 .IP CURLOPT_SSLKEYTYPE
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
