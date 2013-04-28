@@ -596,33 +596,32 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
                                               conn->passwd, &initresp, &len);
   }
 
-  if(result)
-    return result;
+  if(!result) {
+    if(mech) {
+      /* Perform SASL based authentication */
+      if(initresp) {
+        result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
 
-  if(mech) {
-    /* Perform SASL based authentication */
-    if(initresp) {
-      result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
+        if(!result)
+          state(conn, state2);
+      }
+      else {
+        result = imap_sendf(conn, "AUTHENTICATE %s", mech);
 
-      if(!result)
-        state(conn, state2);
+        if(!result)
+          state(conn, state1);
+      }
+
+      Curl_safefree(initresp);
     }
+    else if(!imapc->login_disabled)
+      /* Perform clear text authentication */
+      result = imap_perform_login(conn);
     else {
-      result = imap_sendf(conn, "AUTHENTICATE %s", mech);
-
-      if(!result)
-        state(conn, state1);
+      /* Other mechanisms not supported */
+      infof(conn->data, "No known authentication mechanisms supported!\n");
+      result = CURLE_LOGIN_DENIED;
     }
-
-    Curl_safefree(initresp);
-  }
-  else if(!imapc->login_disabled)
-    /* Perform clear text authentication */
-    result = imap_perform_login(conn);
-  else {
-    /* Other mechanisms not supported */
-    infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED;
   }
 
   return result;

@@ -624,42 +624,40 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     }
   }
 
-  if(result)
-    return result;
-
-  if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
-    /* Perform SASL based authentication */
-    if(initresp &&
-       8 + strlen(mech) + len <= 255) { /* AUTH <mech> ...<crlf> */
-      result = Curl_pp_sendf(&pop3c->pp, "AUTH %s %s", mech, initresp);
-
-      if(!result)
-        state(conn, state2);
-    }
-    else {
+  if(!result) {
+    if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
       /* Perform SASL based authentication */
-      result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+      if(initresp &&
+         8 + strlen(mech) + len <= 255) { /* AUTH <mech> ...<crlf> */
+        result = Curl_pp_sendf(&pop3c->pp, "AUTH %s %s", mech, initresp);
 
-      if(!result)
-        state(conn, state1);
+        if(!result)
+          state(conn, state2);
+      }
+      else {
+        result = Curl_pp_sendf(&pop3c->pp, "AUTH %s", mech);
+
+        if(!result)
+          state(conn, state1);
+      }
+
+      Curl_safefree(initresp);
     }
-
-    Curl_safefree(initresp);
-  }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  else if((pop3c->authtypes & POP3_TYPE_APOP) &&
-          (pop3c->preftype & POP3_TYPE_APOP))
-    /* Perform APOP authentication */
-    result = pop3_perform_apop(conn);
+    else if((pop3c->authtypes & POP3_TYPE_APOP) &&
+            (pop3c->preftype & POP3_TYPE_APOP))
+      /* Perform APOP authentication */
+      result = pop3_perform_apop(conn);
 #endif
-  else if((pop3c->authtypes & POP3_TYPE_CLEARTEXT) &&
-          (pop3c->preftype & POP3_TYPE_CLEARTEXT))
-    /* Perform clear text authentication */
-    result = pop3_perform_user(conn);
-  else {
-    /* Other mechanisms not supported */
-    infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED;
+    else if((pop3c->authtypes & POP3_TYPE_CLEARTEXT) &&
+            (pop3c->preftype & POP3_TYPE_CLEARTEXT))
+      /* Perform clear text authentication */
+      result = pop3_perform_user(conn);
+    else {
+      /* Other mechanisms not supported */
+      infof(conn->data, "No known authentication mechanisms supported!\n");
+      result = CURLE_LOGIN_DENIED;
+    }
   }
 
   return result;

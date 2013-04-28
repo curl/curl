@@ -518,29 +518,31 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
       result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                               conn->passwd, &initresp, &len);
   }
-  else {
-    /* Other mechanisms not supported */
-    infof(conn->data, "No known authentication mechanisms supported!\n");
-    result = CURLE_LOGIN_DENIED;
-  }
 
   if(!result) {
-    /* Perform SASL based authentication */
-    if(initresp &&
-       8 + strlen(mech) + len <= 512) { /* AUTH <mech> ...<crlf> */
-       result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
+    if(mech) {
+      /* Perform SASL based authentication */
+      if(initresp &&
+         8 + strlen(mech) + len <= 512) { /* AUTH <mech> ...<crlf> */
+        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s %s", mech, initresp);
 
-      if(!result)
-        state(conn, state2);
+        if(!result)
+          state(conn, state2);
+      }
+      else {
+        result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
+
+        if(!result)
+          state(conn, state1);
+      }
+
+      Curl_safefree(initresp);
     }
     else {
-      result = Curl_pp_sendf(&smtpc->pp, "AUTH %s", mech);
-
-      if(!result)
-        state(conn, state1);
+      /* Other mechanisms not supported */
+      infof(conn->data, "No known authentication mechanisms supported!\n");
+      result = CURLE_LOGIN_DENIED;
     }
-
-    Curl_safefree(initresp);
   }
 
   return result;
