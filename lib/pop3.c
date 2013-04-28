@@ -629,7 +629,8 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
 
   if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
     /* Perform SASL based authentication */
-    if(initresp) {
+    if(initresp &&
+       8 + strlen(mech) + len <= 255) { /* AUTH <mech> ...<crlf> */
       result = Curl_pp_sendf(&pop3c->pp, "AUTH %s %s", mech, initresp);
 
       if(!result)
