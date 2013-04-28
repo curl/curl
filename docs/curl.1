@@ -390,6 +390,8 @@ NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
 loaded. If you want to use a file from the current directory, please precede
 it with "./" prefix, in order to avoid confusion with a nickname.
 
+(iOS and Mac OS X only) If curl is built against Secure Transport, then the certificate string must match the name of a certificate that's in the system or user keychain. The private key corresponding to the certificate, and certificate chain (if any),  must also be present in the keychain.
+
 If this option is used several times, the last one will be used.
 .IP "--engine <name>"
 Select the OpenSSL crypto engine to use for cipher

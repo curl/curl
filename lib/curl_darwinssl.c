@@ -691,6 +691,101 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
   return server_cert_summary;
 }
 
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+static OSStatus CopyIdentityWithLabelOldSchool(char *label,
+                                               SecIdentityRef *out_c_a_k)
+{
+  OSStatus status = errSecItemNotFound;
+/* The SecKeychainSearch API was deprecated in Lion, and using it will raise
+   deprecation warnings, so let's not compile this unless it's necessary: */
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
+  SecKeychainAttributeList attr_list;
+  SecKeychainAttribute attr;
+  SecKeychainSearchRef search = NULL;
+  SecCertificateRef cert = NULL;
+
+  /* Set up the attribute list: */
+  attr_list.count = 1L;
+  attr_list.attr = &attr;
+
+  /* Set up our lone search criterion: */
+  attr.tag = kSecLabelItemAttr;
+  attr.data = label;
+  attr.length = (UInt32)strlen(label);
+
+  /* Start searching: */
+  status = SecKeychainSearchCreateFromAttributes(NULL,
+                                                 kSecCertificateItemClass,
+                                                 &attr_list,
+                                                 &search);
+  if(status == noErr) {
+    status = SecKeychainSearchCopyNext(search,
+                                       (SecKeychainItemRef *)&cert);
+    if(status == noErr && cert) {
+      /* If we found a certificate, does it have a private key? */
+      status = SecIdentityCreateWithCertificate(NULL, cert, out_c_a_k);
+      CFRelease(cert);
+    }
+  }
+
+  if(search)
+    CFRelease(search);
+#else
+#pragma unused(label, out_c_a_k)
+#endif /* MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7 */
+  return status;
+}
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+
+static OSStatus CopyIdentityWithLabel(char *label,
+                                      SecIdentityRef *out_cert_and_key)
+{
+  OSStatus status = errSecItemNotFound;
+
+#if defined(__MAC_10_6) || defined(__IPHONE_2_0)
+  /* SecItemCopyMatching() was introduced in iOS and Snow Leopard. If it
+     exists, let's use that to find the certificate. */
+  if(SecItemCopyMatching != NULL) {
+    CFTypeRef keys[4];
+    CFTypeRef values[4];
+    CFDictionaryRef query_dict;
+    CFStringRef label_cf = CFStringCreateWithCString(NULL, label,
+      kCFStringEncodingUTF8);
+
+    /* Set up our search criteria and expected results: */
+    values[0] = kSecClassIdentity; /* we want a certificate and a key */
+    keys[0] = kSecClass;
+    values[1] = kCFBooleanTrue;    /* we want a reference */
+    keys[1] = kSecReturnRef;
+    values[2] = kSecMatchLimitOne; /* one is enough, thanks */
+    keys[2] = kSecMatchLimit;
+    /* identity searches need a SecPolicyRef in order to work */
+    values[3] = SecPolicyCreateSSL(false, label_cf);
+    keys[3] = kSecMatchPolicy;
+    query_dict = CFDictionaryCreate(NULL, (const void **)keys,
+                                   (const void **)values, 4L,
+                                   &kCFCopyStringDictionaryKeyCallBacks,
+                                   &kCFTypeDictionaryValueCallBacks);
+    CFRelease(values[3]);
+    CFRelease(label_cf);
+
+    /* Do we have a match? */
+    status = SecItemCopyMatching(query_dict, (CFTypeRef *)out_cert_and_key);
+    CFRelease(query_dict);
+  }
+  else {
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+    /* On Leopard, fall back to SecKeychainSearch. */
+    status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+  }
+#elif (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  /* For developers building on Leopard, we have no choice but to fall back. */
+  status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
+#endif /* defined(__MAC_10_6) || defined(__IPHONE_2_0) */
+  return status;
+}
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -841,8 +936,57 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
 
-  /* No need to load certificates here. SecureTransport uses the Keychain
-   * (which is also part of the Security framework) to evaluate trust. */
+  if(data->set.str[STRING_KEY]) {
+    infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
+                "Transport. The private key must be in the Keychain.");
+  }
+
+  if(data->set.str[STRING_CERT]) {
+    SecIdentityRef cert_and_key = NULL;
+
+    /* User wants to authenticate with a client cert. Look for it: */
+    err = CopyIdentityWithLabel(data->set.str[STRING_CERT], &cert_and_key);
+    if(err == noErr) {
+      SecCertificateRef cert = NULL;
+      CFTypeRef certs_c[1];
+      CFArrayRef certs;
+
+      /* If we found one, print it out: */
+      err = SecIdentityCopyCertificate(cert_and_key, &cert);
+      if(err == noErr) {
+        CFStringRef cert_summary = CopyCertSubject(cert);
+        char cert_summary_c[128];
+
+        if(cert_summary) {
+          memset(cert_summary_c, 0, 128);
+          if(CFStringGetCString(cert_summary,
+                                cert_summary_c,
+                                128,
+                                kCFStringEncodingUTF8)) {
+            infof(data, "Client certificate: %s\n", cert_summary_c);
+          }
+          CFRelease(cert_summary);
+          CFRelease(cert);
+        }
+      }
+      certs_c[0] = cert_and_key;
+      certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
+                            &kCFTypeArrayCallBacks);
+      err = SSLSetCertificate(connssl->ssl_ctx, certs);
+      if(certs)
+        CFRelease(certs);
+      if(err != noErr) {
+        failf(data, "SSL: SSLSetCertificate() failed: OSStatus %d", err);
+        return CURLE_SSL_CERTPROBLEM;
+      }
+      CFRelease(cert_and_key);
+    }
+    else {
+      failf(data, "SSL: Can't find the certificate \"%s\" and its private key "
+                  "in the Keychain.", data->set.str[STRING_CERT]);
+      return CURLE_SSL_CERTPROBLEM;
+    }
+  }
 
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
@@ -1091,6 +1235,20 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLBadCert:
         failf(data, "SSL certificate problem: Couldn't understand the server "
               "certificate format");
+        return CURLE_SSL_CONNECT_ERROR;
+
+      /* These are all certificate problems with the client: */
+      case errSecAuthFailed:
+        failf(data, "SSL authentication failed");
+        return CURLE_SSL_CONNECT_ERROR;
+      case errSSLPeerHandshakeFail:
+        failf(data, "SSL peer handshake failed, the server most likely "
+              "requires a client certificate to connect");
+        return CURLE_SSL_CONNECT_ERROR;
+      case errSSLPeerUnknownCA:
+        failf(data, "SSL server rejected the client certificate due to "
+              "the certificate being signed by an unknown certificate "
+              "authority");
         return CURLE_SSL_CONNECT_ERROR;
 
       /* This error is raised if the server's cert didn't match the server's
