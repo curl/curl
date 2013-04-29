@@ -1011,7 +1011,7 @@ sub STATUS_imap {
 
     logmsg "STATUS_imap got test $testno\n";
 
-    $testno =~ s/^([^0-9]*)//;
+    $testno =~ s/[^0-9]//g;
     my $testpart = "";
     if ($testno > 10000) {
         $testpart = $testno % 10000;
@@ -1020,7 +1020,7 @@ sub STATUS_imap {
 
     loadtest("$srcdir/data/test$testno");
 
-    @data = getpart("reply", "data$testpart");
+    my @data = getpart("reply", "data$testpart");
 
     for my $d (@data) {
         sendcontrol $d;
