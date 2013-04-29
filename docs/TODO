@@ -46,16 +46,14 @@
  6.4 send data in chunks
 
  7. SMTP
- 7.1 Initial response
- 7.2 Pipelining
- 7.3 Graceful base64 decoding failure
- 7.4 Enhanced capability support
+ 7.1 Pipelining
+ 7.2 Graceful base64 decoding failure
+ 7.3 Enhanced capability support
  
  8. POP3
- 8.1 Initial response
- 8.2 Pipelining
- 8.3 Graceful base64 decoding failure
- 8.4 Enhanced capability support
+ 8.1 Pipelining
+ 8.2 Graceful base64 decoding failure
+ 8.3 Enhanced capability support
  
  9. IMAP
  9.1 Graceful base64 decoding failure
@@ -296,50 +294,36 @@ to provide the data to send.
 
 7. SMTP
 
-7.1 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command. Some email servers, such as Microsoft
- Exchange, can work with either whilst others need to have the initial
- response sent separately:
-
- http://curl.haxx.se/mail/lib-2012-03/0114.html
-
-7.2 Pipelining
+7.1 Pipelining
 
  Add support for pipelining emails.
 
-7.3 Graceful base64 decoding failure
+7.2 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC4954.
 
-7.4 Enhanced capability support
+7.3 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the EHLO command.
 
 8. POP3
 
-8.1 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command as per RFC5034.
-
-8.2 Pipelining
+8.1 Pipelining
 
  Add support for pipelining commands.
 
-8.3 Graceful base64 decoding failure
+8.2 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC5034.
  
-8.4 Enhanced capability support
+8.3 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPA command.
