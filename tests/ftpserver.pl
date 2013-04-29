@@ -587,7 +587,7 @@ sub protocolsetup {
             'STORE'  => \&STORE_imap
         );
         %displaytext = (
-            'LOGIN'  => ' OK We are happy you popped in!',
+            'LOGIN'  => ' OK LOGIN completed',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
