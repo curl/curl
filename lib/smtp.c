@@ -589,7 +589,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     }
   }
 
-  /* calculate the optional SIZE parameter */
+  /* Calculate the optional SIZE parameter */
   if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
     size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
 
@@ -1172,12 +1172,17 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
 {
+  struct SessionHandle *data = conn->data;
+
   (void)instate; /* no use for this yet */
 
   if(smtpcode != 354) {
     state(conn, SMTP_STOP);
     return CURLE_SEND_ERROR;
   }
+
+  /* Set the progress upload size */
+  Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
   /* SMTP upload */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);

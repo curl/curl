@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o sshserver: disable StrictHostKeyChecking
  o ftpserver: Fixed imap logout confirmation data
  o curl_easy_init: use less mallocs
+ o smtp: Fixed unknown percentage complete in progress bar
  o 
 
 This release includes the following known bugs:
