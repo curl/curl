@@ -498,7 +498,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->egd_file, nextarg);
         break;
       case 'c': /* connect-timeout */
-        err = str2unum(&config->connecttimeout, nextarg);
+        err = str2udouble(&config->connecttimeout, nextarg);
         if(err)
           return err;
         break;
@@ -1404,7 +1404,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'm':
       /* specified max time */
-      err = str2unum(&config->timeout, nextarg);
+      err = str2udouble(&config->timeout, nextarg);
       if(err)
         return err;
       break;

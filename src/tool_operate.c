@@ -946,7 +946,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt_str(curl, CURLOPT_RANGE, config->range);
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
-        my_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
+        my_setopt(curl, CURLOPT_TIMEOUT_MS, (long)(config->timeout * 1000));
 
         if(built_in_protos & CURLPROTO_HTTP) {
 
@@ -1134,7 +1134,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* new in libcurl 7.7: */
         my_setopt_str(curl, CURLOPT_RANDOM_FILE, config->random_file);
         my_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
-        my_setopt(curl, CURLOPT_CONNECTTIMEOUT, config->connecttimeout);
+        my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
+                  (long)(config->connecttimeout * 1000));
 
         if(config->cipher_list)
           my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);

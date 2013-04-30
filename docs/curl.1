@@ -230,7 +230,9 @@ server sends an unsupported encoding, curl will report an error.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
-of no more use. See also the \fI-m, --max-time\fP option.
+of no more use.  Since 7.32.0, this option accepts decimal values, but the
+actual timeout will decrease in accuracy as the specified timeout increases in
+decimal precision. See also the \fI-m, --max-time\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "--create-dirs"
@@ -813,7 +815,10 @@ Basic authentication).
 .IP "-m, --max-time <seconds>"
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow
-networks or links going down.  See also the \fI--connect-timeout\fP option.
+networks or links going down.  Since 7.32.0, this option accepts decimal
+values, but the actual timeout will decrease in accuracy as the specified
+timeout increases in decimal precision.  See also the \fI--connect-timeout\fP
+option.
 
 If this option is used several times, the last one will be used.
 .IP "--mail-auth <address>"

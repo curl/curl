@@ -53,8 +53,8 @@ struct Configurable {
   char *postfields;
   curl_off_t postfieldsize;
   char *referer;
-  long timeout;
-  long connecttimeout;
+  double timeout;
+  double connecttimeout;
   long maxredirs;
   curl_off_t max_filesize;
   char *headerfile;
