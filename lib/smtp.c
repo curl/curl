@@ -1796,8 +1796,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   */
   ssize_t i;
   ssize_t si;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->state.proto.smtp;
 
   /* Do we need to allocate the scatch buffer? */
   if(!data->state.scratch) {
@@ -1812,36 +1812,36 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
   for(i = 0, si = 0; i < nread; i++) {
-    if(SMTP_EOB[smtpc->eob] == data->req.upload_fromhere[i])
-      smtpc->eob++;
-    else if(smtpc->eob) {
+    if(SMTP_EOB[smtp->eob] == data->req.upload_fromhere[i])
+      smtp->eob++;
+    else if(smtp->eob) {
       /* A previous substring matched so output that first */
-      memcpy(&data->state.scratch[si], SMTP_EOB, smtpc->eob);
-      si += smtpc->eob;
+      memcpy(&data->state.scratch[si], SMTP_EOB, smtp->eob);
+      si += smtp->eob;
 
       /* Then compare the first byte */
       if(SMTP_EOB[0] == data->req.upload_fromhere[i])
-        smtpc->eob = 1;
+        smtp->eob = 1;
       else
-        smtpc->eob = 0;
+        smtp->eob = 0;
     }
 
     /* Do we have a match for CRLF. as per RFC-2821, sect. 4.5.2 */
-    if(SMTP_EOB_FIND_LEN == smtpc->eob) {
+    if(SMTP_EOB_FIND_LEN == smtp->eob) {
       /* Copy the replacement data to the target buffer */
       memcpy(&data->state.scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
       si += SMTP_EOB_REPL_LEN;
-      smtpc->eob = 0;
+      smtp->eob = 0;
     }
-    else if(!smtpc->eob)
+    else if(!smtp->eob)
       data->state.scratch[si++] = data->req.upload_fromhere[i];
   }
 
-  if(smtpc->eob) {
+  if(smtp->eob) {
     /* A substring matched before processing ended so output that now */
-    memcpy(&data->state.scratch[si], SMTP_EOB, smtpc->eob);
-    si += smtpc->eob;
-    smtpc->eob = 0;
+    memcpy(&data->state.scratch[si], SMTP_EOB, smtp->eob);
+    si += smtp->eob;
+    smtp->eob = 0;
   }
 
   if(si != nread) {
