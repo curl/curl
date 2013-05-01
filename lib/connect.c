@@ -413,23 +413,22 @@ static CURLcode bindlocal(struct connectdata *conn,
       if(af == AF_INET6) {
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
         char *scope_ptr = strchr(myhost, '%');
-
-        if(scope_ptr) *(scope_ptr++) = 0;
+        if(scope_ptr)
+          *(scope_ptr++) = 0;
 #endif
         if(Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0) {
           si6->sin6_family = AF_INET6;
           si6->sin6_port = htons(port);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-          if(scope_ptr) {
-            /* The "myhost" string either comes from Curl_if2ip or
-               from Curl_printable_address. The latter returns only
-               numeric scope IDs and the former returns none at all.
-               So the scope ID, if present, is known to be numeric */
+          if(scope_ptr)
+            /* The "myhost" string either comes from Curl_if2ip or from
+               Curl_printable_address. The latter returns only numeric scope
+               IDs and the former returns none at all.  So the scope ID, if
+               present, is known to be numeric */
             si6->sin6_scope_id = atoi(scope_ptr);
-          }
-        }
 #endif
-          sizeof_sa = sizeof(struct sockaddr_in6);
+        }
+        sizeof_sa = sizeof(struct sockaddr_in6);
       }
       else
 #endif
