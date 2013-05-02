@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+unittest
+TrackMemory
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+TrackMemory
+</features>
+# tool is what to use instead of 'curl'
+<tool>
+unit1330
+</tool>
+
+<name>
+unit tests memory tracking operational
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/memdump" mode="text">
+MEM unit1330.c: malloc()
+MEM unit1330.c: free()
+</file>
+<stripfile>
+s/ =.*//
+s/\(.*\)/()/
+s/:\d+/:/
+s:^(MEM )(.*/)(.*):$1$3:
+</stripfile>
+</verify>
+
+</testcase>

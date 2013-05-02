@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -135,7 +135,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   struct SessionHandle *data = conn->data;
   struct negotiatedata *neg_ctx = proxy?&data->state.proxyneg:
     &data->state.negotiate;
-  OM_uint32 major_status, minor_status, minor_status2;
+  OM_uint32 major_status, minor_status, discard_st;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   int ret;
@@ -192,46 +192,50 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
     input_token.length = rawlen;
 
+    DEBUGASSERT(input_token.value != NULL);
+
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
     if(checkprefix("Negotiate", header)) {
-      ASN1_OBJECT *   object            = NULL;
-      unsigned char * spnegoToken       = NULL;
+      unsigned char  *spnegoToken       = NULL;
       size_t          spnegoTokenLength = 0;
-      unsigned char * mechToken         = NULL;
-      size_t          mechTokenLength   = 0;
-
-      if(input_token.value == NULL)
-        return CURLE_OUT_OF_MEMORY;
+      gss_buffer_desc mechToken         = GSS_C_EMPTY_BUFFER;
 
       spnegoToken = malloc(input_token.length);
-      if(spnegoToken == NULL)
+      if(spnegoToken == NULL) {
+        Curl_safefree(input_token.value);
         return CURLE_OUT_OF_MEMORY;
-
+      }
+      memcpy(spnegoToken, input_token.value, input_token.length);
       spnegoTokenLength = input_token.length;
 
-      object = OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
       if(!parseSpnegoTargetToken(spnegoToken,
                                  spnegoTokenLength,
                                  NULL,
                                  NULL,
-                                 &mechToken,
-                                 &mechTokenLength,
+                                 (unsigned char**)&mechToken.value,
+                                 &mechToken.length,
                                  NULL,
                                  NULL)) {
-        free(spnegoToken);
-        spnegoToken = NULL;
+        Curl_safefree(spnegoToken);
         infof(data, "Parse SPNEGO Target Token failed\n");
       }
+      else if(!mechToken.value || !mechToken.length) {
+        Curl_safefree(spnegoToken);
+        if(mechToken.value)
+          gss_release_buffer(&discard_st, &mechToken);
+        infof(data, "Parse SPNEGO Target Token succeeded (NULL token)\n");
+      }
       else {
-        free(input_token.value);
-        input_token.value = malloc(mechTokenLength);
-        if(input_token.value == NULL)
+        Curl_safefree(spnegoToken);
+        Curl_safefree(input_token.value);
+        input_token.value = malloc(mechToken.length);
+        if(input_token.value == NULL) {
+          gss_release_buffer(&discard_st, &mechToken);
           return CURLE_OUT_OF_MEMORY;
-
-        memcpy(input_token.value, mechToken,mechTokenLength);
-        input_token.length = mechTokenLength;
-        free(mechToken);
-        mechToken = NULL;
+        }
+        memcpy(input_token.value, mechToken.value, mechToken.length);
+        input_token.length = mechToken.length;
+        gss_release_buffer(&discard_st, &mechToken);
         infof(data, "Parse SPNEGO Target Token succeeded\n");
       }
     }
@@ -246,23 +250,23 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                            &input_token,
                                            &output_token,
                                            NULL);
-  if(input_token.length > 0)
-    gss_release_buffer(&minor_status2, &input_token);
+  Curl_safefree(input_token.value);
+
   neg_ctx->status = major_status;
   if(GSS_ERROR(major_status)) {
-    /* Curl_cleanup_negotiate(data) ??? */
-    log_gss_error(conn, minor_status,
-                  "gss_init_sec_context() failed: ");
+    if(output_token.value)
+      gss_release_buffer(&discard_st, &output_token);
+    log_gss_error(conn, minor_status, "gss_init_sec_context() failed: ");
     return -1;
   }
 
-  if(output_token.length == 0) {
+  if(!output_token.value || !output_token.length) {
+    if(output_token.value)
+      gss_release_buffer(&discard_st, &output_token);
     return -1;
   }
 
   neg_ctx->output_token = output_token;
-  /* conn->bits.close = FALSE; */
-
   return 0;
 }
 
@@ -275,14 +279,14 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   size_t len = 0;
   char *userp;
   CURLcode error;
+  OM_uint32 discard_st;
 
 #ifdef HAVE_SPNEGO /* Handle SPNEGO */
   if(checkprefix("Negotiate", neg_ctx->protocol)) {
-    ASN1_OBJECT *   object            = NULL;
-    unsigned char * spnegoToken       = NULL;
-    size_t          spnegoTokenLength = 0;
-    unsigned char * responseToken       = NULL;
+    ASN1_OBJECT    *object              = NULL;
+    unsigned char  *responseToken       = NULL;
     size_t          responseTokenLength = 0;
+    gss_buffer_desc spnegoToken         = GSS_C_EMPTY_BUFFER;
 
     responseToken = malloc(neg_ctx->output_token.length);
     if(responseToken == NULL)
@@ -291,30 +295,34 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
            neg_ctx->output_token.length);
     responseTokenLength = neg_ctx->output_token.length;
 
-    object=OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
-    if(!makeSpnegoInitialToken (object,
-                                 responseToken,
-                                 responseTokenLength,
-                                 &spnegoToken,
-                                 &spnegoTokenLength)) {
-      free(responseToken);
-      responseToken = NULL;
+    object = OBJ_txt2obj("1.2.840.113554.1.2.2", 1);
+    if(!object) {
+      Curl_safefree(responseToken);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(!makeSpnegoInitialToken(object,
+                               responseToken,
+                               responseTokenLength,
+                               (unsigned char**)&spnegoToken.value,
+                               &spnegoToken.length)) {
+      Curl_safefree(responseToken);
+      ASN1_OBJECT_free(object);
       infof(conn->data, "Make SPNEGO Initial Token failed\n");
     }
+    else if(!spnegoToken.value || !spnegoToken.length) {
+      Curl_safefree(responseToken);
+      ASN1_OBJECT_free(object);
+      if(spnegoToken.value)
+        gss_release_buffer(&discard_st, &spnegoToken);
+      infof(conn->data, "Make SPNEGO Initial Token succeeded (NULL token)\n");
+    }
     else {
-      free(responseToken);
-      responseToken = NULL;
-      free(neg_ctx->output_token.value);
-      neg_ctx->output_token.value = malloc(spnegoTokenLength);
-      if(neg_ctx->output_token.value == NULL) {
-        free(spnegoToken);
-        spnegoToken = NULL;
-        return CURLE_OUT_OF_MEMORY;
-      }
-      memcpy(neg_ctx->output_token.value, spnegoToken,spnegoTokenLength);
-      neg_ctx->output_token.length = spnegoTokenLength;
-      free(spnegoToken);
-      spnegoToken = NULL;
+      Curl_safefree(responseToken);
+      ASN1_OBJECT_free(object);
+      gss_release_buffer(&discard_st, &neg_ctx->output_token);
+      neg_ctx->output_token.value = spnegoToken.value;
+      neg_ctx->output_token.length = spnegoToken.length;
       infof(conn->data, "Make SPNEGO Initial Token succeeded\n");
     }
   }
@@ -324,26 +332,33 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
                              neg_ctx->output_token.length,
                              &encoded, &len);
   if(error) {
-    Curl_safefree(neg_ctx->output_token.value);
+    gss_release_buffer(&discard_st, &neg_ctx->output_token);
     neg_ctx->output_token.value = NULL;
+    neg_ctx->output_token.length = 0;
     return error;
   }
 
-  if(len == 0) {
-    Curl_safefree(neg_ctx->output_token.value);
+  if(!encoded || !len) {
+    gss_release_buffer(&discard_st, &neg_ctx->output_token);
     neg_ctx->output_token.value = NULL;
+    neg_ctx->output_token.length = 0;
     return CURLE_REMOTE_ACCESS_DENIED;
   }
 
   userp = aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
                   neg_ctx->protocol, encoded);
-
-  if(proxy)
+  if(proxy) {
+    Curl_safefree(conn->allocptr.proxyuserpwd);
     conn->allocptr.proxyuserpwd = userp;
-  else
+  }
+  else {
+    Curl_safefree(conn->allocptr.userpwd);
     conn->allocptr.userpwd = userp;
-  free(encoded);
-  Curl_cleanup_negotiate (conn->data);
+  }
+
+  Curl_safefree(encoded);
+  Curl_cleanup_negotiate(conn->data);
+
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
@@ -353,7 +368,7 @@ static void cleanup(struct negotiatedata *neg_ctx)
   if(neg_ctx->context != GSS_C_NO_CONTEXT)
     gss_delete_sec_context(&minor_status, &neg_ctx->context, GSS_C_NO_BUFFER);
 
-  if(neg_ctx->output_token.length != 0)
+  if(neg_ctx->output_token.value)
     gss_release_buffer(&minor_status, &neg_ctx->output_token);
 
   if(neg_ctx->server_name != GSS_C_NO_NAME)

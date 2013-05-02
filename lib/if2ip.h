@@ -24,7 +24,15 @@
 #include "curl_setup.h"
 
 bool Curl_if_is_interface_name(const char *interf);
-char *Curl_if2ip(int af, const char *interf, char *buf, int buf_size);
+
+typedef enum {
+  IF2IP_NOT_FOUND = 0, /* Interface not found */
+  IF2IP_AF_NOT_SUPPORTED = 1, /* Int. exists but has no address for this af */
+  IF2IP_FOUND = 2 /* The address has been stored in "buf" */
+} if2ip_result_t;
+
+if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
+                          const char *interf, char *buf, int buf_size);
 
 #ifdef __INTERIX
 

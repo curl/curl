@@ -37,6 +37,7 @@ int test(char *URL)
   CURLM *m = NULL;
   int i;
   char target_url[256];
+  int handles_added = 0;
 
   for(i=0; i < NUM_HANDLES; i++)
     curl[i] = NULL;
@@ -59,9 +60,12 @@ int test(char *URL)
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
     /* include headers */
     easy_setopt(curl[i], CURLOPT_HEADER, 1L);
-    /* add handle to multi */
-    multi_add_handle(m, curl[i]);
   }
+
+  /* Add the first handle to multi. We do this to let libcurl detect
+     that the server can do pipelining. The rest of the handles will be
+     added later. */
+  multi_add_handle(m, curl[handles_added++]);
 
   multi_setopt(m, CURLMOPT_PIPELINING, 1L);
 
@@ -79,8 +83,13 @@ int test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if(!running && handles_added >= NUM_HANDLES)
       break; /* done */
+
+    /* Add the rest of the handles now that the first handle has sent the
+       request. */
+    while(handles_added < NUM_HANDLES)
+      multi_add_handle(m, curl[handles_added++]);
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);

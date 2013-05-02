@@ -173,6 +173,7 @@ static const struct LongShort aliases[]= {
   {"$H", "mail-auth",                TRUE},
   {"$I", "post303",                  FALSE},
   {"$J", "metalink",                 FALSE},
+  {"$K", "sasl-ir",                  FALSE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -858,6 +859,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 #endif
           break;
         }
+      case 'K': /* --sasl-ir */
+        config->sasl_ir = TRUE;
+        break;
       }
       break;
     case '#': /* --progress-bar */

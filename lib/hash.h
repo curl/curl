@@ -104,4 +104,3 @@ void Curl_hash_print(struct curl_hash *h,
 
 
 #endif /* HEADER_CURL_HASH_H */
-

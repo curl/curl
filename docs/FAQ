@@ -728,7 +728,7 @@ FAQ
   When passing on a URL to curl to use, it may respond that the particular
   protocol is not supported or disabled. The particular way this error message
   is phrased is because curl doesn't make a distinction internally of whether
-  a particular protocol is not supported (ie never got any code added that
+  a particular protocol is not supported (i.e. never got any code added that
   knows how to speak that protocol) or if it was explicitly disabled. curl can
   be built to only support a given set of protocols, and the rest would then
   be disabled or not supported.
@@ -1055,11 +1055,11 @@ FAQ
 
   4.19 Why doesn't cURL return an error when the network cable is unplugged?
 
-  Unplugging the cable is not an error situation. The TCP/IP protocol stack
+  Unplugging a cable is not an error situation. The TCP/IP protocol stack
   was designed to be fault tolerant, so even though there may be a physical
   break somewhere the connection shouldn't be affected, just possibly
   delayed.  Eventually, the physical break will be fixed or the data will be
-  re-routed around the physical problem.
+  re-routed around the physical problem through another path.
 
   In such cases, the TCP/IP stack is responsible for detecting when the
   network connection is irrevocably lost. Since with some protocols it is
@@ -1077,6 +1077,12 @@ FAQ
   falls too low, and --connect-timeout and --max-time can be used to put an
   overall timeout on the connection phase or the entire transfer.
 
+  A libcurl-using application running in a known physical environment (e.g.
+  an embedded device with only a single network connection) may want to act
+  immediately if its lone network connection goes down.  That can be achieved
+  by having the application monitor the network connection on its own using an
+  OS-specific mechanism, then signalling libcurl to abort (see also item 5.13).
+  
 
 5. libcurl Issues
 
@@ -1086,7 +1092,9 @@ FAQ
 
   We have written the libcurl code specifically adjusted for multi-threaded
   programs. libcurl will use thread-safe functions instead of non-safe ones if
-  your system has such.
+  your system has such.  Note that you must never share the same handle in
+  multiple threads.
+
 
   If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
   need to provide one or two locking functions:

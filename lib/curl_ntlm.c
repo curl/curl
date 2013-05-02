@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -181,7 +181,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     /* Create a type-1 message */
     error = Curl_ntlm_create_type1_message(userp, passwdp, ntlm, &base64,
                                            &len);
-
     if(error)
       return error;
 
@@ -190,8 +189,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy ? "Proxy-" : "",
                               base64);
-      DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
       free(base64);
+      if(!*allocuserpwd)
+        return CURLE_OUT_OF_MEMORY;
+      DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
     }
     break;
 
@@ -207,8 +208,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy ? "Proxy-" : "",
                               base64);
-      DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
       free(base64);
+      if(!*allocuserpwd)
+        return CURLE_OUT_OF_MEMORY;
+      DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
 
       ntlm->state = NTLMSTATE_TYPE3; /* we send a type-3 */
       authp->done = TRUE;
@@ -218,10 +221,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    if(*allocuserpwd) {
-      free(*allocuserpwd);
-      *allocuserpwd = NULL;
-    }
+    Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;
   }

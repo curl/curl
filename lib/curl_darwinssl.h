@@ -37,6 +37,7 @@ void Curl_darwinssl_close_all(struct SessionHandle *data);
 /* close a SSL connection */
 void Curl_darwinssl_close(struct connectdata *conn, int sockindex);
 
+void Curl_darwinssl_session_free(void *ptr);
 size_t Curl_darwinssl_version(char *buffer, size_t size);
 int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex);
 int Curl_darwinssl_check_cxn(struct connectdata *conn);
@@ -56,7 +57,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_cleanup() Curl_nop_stmt
 #define curlssl_connect Curl_darwinssl_connect
 #define curlssl_connect_nonblocking Curl_darwinssl_connect_nonblocking
-#define curlssl_session_free(x) Curl_nop_stmt
+#define curlssl_session_free(x) Curl_darwinssl_session_free(x)
 #define curlssl_close_all Curl_darwinssl_close_all
 #define curlssl_close Curl_darwinssl_close
 #define curlssl_shutdown(x,y) 0

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,17 +22,86 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h> /* for the typedefs */
+/*
+ * Nasty internal details ahead...
+ *
+ * File curl_memory.h must be included by _all_ *.c source files
+ * that use memory related functions strdup, malloc, calloc, realloc
+ * or free, and given source file is used to build libcurl library.
+ *
+ * There is nearly no exception to above rule. All libcurl source
+ * files in 'lib' subdirectory as well as those living deep inside
+ * 'packages' subdirectories and linked together in order to build
+ * libcurl library shall follow it.
+ *
+ * File lib/strdup.c is an exception, given that it provides a strdup
+ * clone implementation while using malloc. Extra care needed inside
+ * this one. TODO: revisit this paragraph and related code.
+ *
+ * The need for curl_memory.h inclusion is due to libcurl's feature
+ * of allowing library user to provide memory replacement functions,
+ * memory callbacks, at runtime with curl_global_init_mem()
+ *
+ * Any *.c source file used to build libcurl library that does not
+ * include curl_memory.h and uses any memory function of the five
+ * mentioned above will compile without any indication, but it will
+ * trigger weird memory related issues at runtime.
+ *
+ * OTOH some source files from 'lib' subdirectory may additionally be
+ * used directly as source code when using some curlx_ functions by
+ * third party programs that don't even use libcurl at all. When using
+ * these source files in this way it is necessary these are compiled
+ * with CURLX_NO_MEMORY_CALLBACKS defined, in order to ensure that no
+ * attempt of calling libcurl's memory callbacks is done from code
+ * which can not use this machinery.
+ *
+ * Notice that libcurl's 'memory tracking' system works chaining into
+ * the memory callback machinery. This implies that when compiling
+ * 'lib' source files with CURLX_NO_MEMORY_CALLBACKS defined this file
+ * disengages usage of libcurl's 'memory tracking' system, defining
+ * MEMDEBUG_NODEFINES and overriding CURLDEBUG purpose.
+ *
+ * CURLX_NO_MEMORY_CALLBACKS takes precedence over CURLDEBUG. This is
+ * done in order to allow building a 'memory tracking' enabled libcurl
+ * and at the same time allow building programs which do not use it.
+ *
+ * Programs and libraries in 'tests' subdirectories have specific
+ * purposes and needs, and as such each one will use whatever fits
+ * best, depending additionally wether it links with libcurl or not.
+ *
+ * Caveat emptor. Proper curlx_* separation is a work in progress
+ * the same as CURLX_NO_MEMORY_CALLBACKS usage, some adjustments may
+ * still be required. IOW don't use them yet, there are sharp edges.
+ */
+
+#ifdef HEADER_CURL_MEMDEBUG_H
+#error "Header memdebug.h shall not be included before curl_memory.h"
+#endif
+
+#ifndef CURLX_NO_MEMORY_CALLBACKS
+
+#include <curl/curl.h> /* for the callback typedefs */
 
 extern curl_malloc_callback Curl_cmalloc;
 extern curl_free_callback Curl_cfree;
 extern curl_realloc_callback Curl_crealloc;
 extern curl_strdup_callback Curl_cstrdup;
 extern curl_calloc_callback Curl_ccalloc;
+#ifdef WIN32
+extern curl_wcsdup_callback Curl_cwcsdup;
+#endif
 
 #ifndef CURLDEBUG
-/* Only do this define-mania if we're not using the memdebug system, as that
-   has preference on this magic. */
+
+/*
+ * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
+ * realloc and free, along with others, in memdebug.h in a different
+ * way although still using memory callbacks forward declared above.
+ * When using the 'memory tracking' system (CURLDEBUG defined) we do
+ * not define here the five memory functions given that definitions
+ * from memdebug.h are the ones that shall be used.
+ */
+
 #undef strdup
 #define strdup(ptr) Curl_cstrdup(ptr)
 #undef malloc
@@ -44,6 +113,27 @@ extern curl_calloc_callback Curl_ccalloc;
 #undef free
 #define free(ptr) Curl_cfree(ptr)
 
+#ifdef WIN32
+#  undef wcsdup
+#  define wcsdup(ptr) Curl_cwcsdup(ptr)
+#  undef _wcsdup
+#  define _wcsdup(ptr) Curl_cwcsdup(ptr)
+#  undef _tcsdup
+#  ifdef UNICODE
+#    define _tcsdup(ptr) Curl_cwcsdup(ptr)
+#  else
+#    define _tcsdup(ptr) Curl_cstrdup(ptr)
+#  endif
 #endif
+
+#endif /* CURLDEBUG */
+
+#else /* CURLX_NO_MEMORY_CALLBACKS */
+
+#ifndef MEMDEBUG_NODEFINES
+#define MEMDEBUG_NODEFINES
+#endif
+
+#endif /* CURLX_NO_MEMORY_CALLBACKS */
 
 #endif /* HEADER_CURL_MEMORY_H */

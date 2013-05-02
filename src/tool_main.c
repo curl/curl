@@ -52,7 +52,7 @@
  * Its value may be set in other tool_*.c source files thanks to
  * forward declaration present in tool_vms.h
  */
-extern int vms_show = 0;
+int vms_show = 0;
 #endif
 
 /*

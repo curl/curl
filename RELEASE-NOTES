@@ -1,6 +1,6 @@
-Curl and libcurl 7.30.0
+Curl and libcurl 7.31.0
 
- Public curl releases:         132
+ Public curl releases:         133
  Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
@@ -14,47 +14,31 @@ Curl and libcurl 7.30.0
 
 This release includes the following changes:
 
- o imap: Changed response tag generation to be completely unique
- o imap: Added support for SASL-IR extension
- o imap: Added support for the list command
- o imap: Added support for the append command
- o imap: Added custom request parsing
- o imap: Added support to the fetch command for UID and SECTION properties
- o imap: Added parsing and verification of the UIDVALIDITY mailbox attribute
- o darwinssl: Make certificate errors less techy
- o imap/pop3/smtp: Added support for the STARTTLS capability
- o checksrc: ban use of sprintf, vsprintf, strcat, strncat and gets
- o curl_global_init() now accepts the CURL_GLOBAL_ACK_EINTR flag [10]
+ o darwinssl: add TLS session resumption
+ o darwinssl: add TLS crypto authentication
+ o imap/pop3/smtp: Added support for ;auth=<mech> in the URL
+ o imap/pop3/smtp: Added support for ;auth=<mech> to CURLOPT_USERPWD
+ o usercertinmem.c: add example showing user cert in memory
+ o url: Added smtp and pop3 hostnames to the protocol detection list
+ o imap/pop3/smtp: Added support for enabling the SASL initial response [8]
+ o 
 
 This release includes the following bugfixes:
 
- o darwinssl: Fix build under Leopard
- o DONE: consider callback-aborted transfers premature [1]
- o ntlm: fix memory leak
- o smtp: Fixed an issue when processing EHLO failure responses
- o pop3: Fixed incorrect return value from pop3_endofresp()
- o pop3: Fixed SASL authentication capability detection
- o pop3: Fixed blocking SSL connect when connecting via POP3S
- o imap: Fixed memory leak when performing multiple selects 
- o nss: fix misplaced code enabling non-blocking socket mode
- o AddFormData: prevent only directories from being posted [2]
- o darwinssl: fix infinite loop if server disconnected abruptly [3]
- o metalink: fix improbable crash parsing metalink filename
- o show proper host name on failed resolve
- o MacOSX-Framework: Make script work in Xcode 4.0 and later
- o strlcat: remove function [4]
- o darwinssl: Fix send glitchiness with data > 32 or so KB [5]
- o polarssl: better 1.1.x and 1.2.x support
- o various documentation improvements
- o multi: NULL pointer reference when closing an unused multi handle [9]
- o SOCKS: fix socks proxy when noproxy matched [7]
- o install-sh: updated to support multiple source files as arguments [6]
- o PolarSSL: added human readable error strings
- o resolver_error: remove wrong error message output
- o docs: updates HTML index and general improvements
- o curlbuild.h.dist: enhance non-configure GCC ABI detection logic
- o sasl: Fixed null pointer reference when decoding empty digest challenge [8]
- o easy: do not ignore poll() failures other than EINTR
+ o FTP: access files in root dir correctly [1]
+ o configure: try pthread_create without -lpthread [2]
+ o FTP: handle a 230 welcome response [3]
+ o curl-config: don't output static libs when they are disabled
+ o CURL_CHECK_CA_BUNDLE: don't check for paths when cross-compiling [4]
+ o Various documentation updates
+ o getinfo.c: reset timecond when clearing session-info variables [5]
+ o FILE: prevent an artificial timeout event due to stale speed-check data [6]
+ o ftp_state_pasv_resp: connect through proxy also when set by env [7]
+ o sshserver: disable StrictHostKeyChecking
+ o ftpserver: Fixed imap logout confirmation data
+ o curl_easy_init: use less mallocs
+ o smtp: Fixed unknown percentage complete in progress bar
+ o 
 
 This release includes the following known bugs:
 
@@ -63,23 +47,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Kamil Dudka, Steve Holme, Nick Zitzmann, Patricia Muscalu, Dan Fandrich,
- Gisle Vanem, Guenter Knauf, Yang Tse, Oliver Gondža, Aki Koskinen,
- Alexander Klauer, Kim Vandry, Willem Sparreboom, Jeremy Huddleston,
- Bruno de Carvalho, Rainer Jung, Jeremy Huddleston, Kim Vandry, Jiri Hruska,
- Alexander Klauer, Saran Neti, Alessandro Ghedini, Linus Nielsen Feltzing
+ David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
+ Anders Havn, Dan Fandrich, Paul Howarth, Dave Reisner, Wouter Van Rooy,
+ Linus Nielsen Feltzing, Ishan SinghLevett, Alessandro Ghedini,
+ Ludovico Cavedon, Zdenek Pavlas, Zekun Ni
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1184
- [2] = http://curl.haxx.se/mail/archive-2013-02/0040.html
- [3] = http://curl.haxx.se/mail/lib-2013-03/0014.html
- [4] = http://curl.haxx.se/bug/view.cgi?id=1192
- [5] = http://curl.haxx.se/mail/lib-2013-02/0145.html
- [6] = http://curl.haxx.se/bug/view.cgi?id=1195
- [7] = http://curl.haxx.se/bug/view.cgi?id=1190
- [8] = http://curl.haxx.se/bug/view.cgi?id=1193
- [9] = http://curl.haxx.se/bug/view.cgi?id=1194
- [10] = http://curl.haxx.se/bug/view.cgi?id=1168
+ [1] = http://curl.haxx.se/mail/lib-2013-04/0142.html
+ [2] = http://curl.haxx.se/bug/view.cgi?id=1216
+ [3] = http://curl.haxx.se/mail/lib-2013-02/0102.html
+ [4] = http://curl.haxx.se/mail/lib-2013-04/0294.html
+ [5] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=705783
+ [6] = https://bugzilla.redhat.com/906031
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1218
+ [8] = http://curl.haxx.se/mail/lib-2012-03/0114.html
+ [9]

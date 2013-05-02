@@ -1,14 +1,4 @@
-To be addressed in 7.29
+To be addressed in ...
 =======================
-
-310 - a new authentication callback
-
-312 - custom Content-Length appears in CONNECT, solve it by offering a
-      separate option to provide headers for the CONNECT request:
-      http://curl.haxx.se/mail/lib-2012-09/0059.html
-
-317 - CURLINFO_SSL_TRUST to return SSL-specific data for a darwinssl build
-
-322 - pipelining improvements
 
 327 - 

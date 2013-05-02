@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -124,7 +124,6 @@ my $sockfilt_timeout = 5;  # default timeout for sockfilter eXsysreads
 #
 my %commandfunc;  # protocol command specific function callbacks
 my %displaytext;  # text returned to client before callback runs
-my @welcome;      # text returned to client upon connection
 
 #**********************************************************************
 # global vars customized for each test from the server commands file
@@ -547,13 +546,12 @@ sub protocolsetup {
             'NOOP' => '200 Yes, I\'m very good at doing nothing.',
             'PBSZ' => '500 PBSZ not implemented',
             'PROT' => '500 PROT not implemented',
-        );
-        @welcome = (
+            'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
             '220-   / __| | | | |_) | |    '."\r\n",
             '220-  | (__| |_| |  _ <| |___ '."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n"
+            '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
     elsif($proto eq 'pop3') {
@@ -567,36 +565,36 @@ sub protocolsetup {
             'USER' => '+OK We are happy you popped in!',
             'PASS' => '+OK Access granted',
             'QUIT' => '+OK byebye',
-        );
-        @welcome = (
+            'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve'."\r\n"
+            '+OK cURL POP3 server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'imap') {
         %commandfunc = (
             'APPEND' => \&APPEND_imap,
             'CAPABILITY' => \&CAPABILITY_imap,
+            'EXAMINE' => \&EXAMINE_imap,
             'FETCH'  => \&FETCH_imap,
             'LIST'   => \&LIST_imap,
+            'LOGOUT'   => \&LOGOUT_imap,
             'SELECT' => \&SELECT_imap,
+            'STATUS'  => \&STATUS_imap,
             'STORE'  => \&STORE_imap
         );
         %displaytext = (
-            'LOGIN'  => ' OK We are happy you popped in!',
-            'LOGOUT' => ' OK thanks for the fish',
-        );
-        @welcome = (
+            'LOGIN'  => ' OK LOGIN completed',
+            'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK cURL IMAP server ready to serve'."\r\n"
+            '* OK cURL IMAP server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -609,13 +607,12 @@ sub protocolsetup {
             'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
             'QUIT' => '200 byebye',
-        );
-        @welcome = (
+            'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
             '220-   / __| | | | |_) | |    '."\r\n",
             '220-  | (__| |_| |  _ <| |___ '."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n"
+            '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
 }
@@ -985,6 +982,58 @@ sub LIST_imap {
     }
 
     sendcontrol "$cmdid OK LIST Completed\r\n";
+
+    return 0;
+}
+
+sub EXAMINE_imap {
+    my ($testno) = @_;
+    fix_imap_params($testno);
+
+    logmsg "EXAMINE_imap got test $testno\n";
+
+    # Example from RFC 3501, 6.3.2. EXAMINE Command
+    sendcontrol "* 17 EXISTS\r\n";
+    sendcontrol "* 2 RECENT\r\n";
+    sendcontrol "* OK [UNSEEN 8] Message 8 is first unseen\r\n";
+    sendcontrol "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n";
+    sendcontrol "* OK [UIDNEXT 4392] Predicted next UID\r\n";
+    sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
+    sendcontrol "* OK [PERMANENTFLAGS ()] No permanent flags permitted\r\n";
+    sendcontrol "$cmdid OK [READ-ONLY] EXAMINE completed\r\n";
+
+    return 0;
+}
+
+sub STATUS_imap {
+    my ($testno) = @_;
+    fix_imap_params($testno);
+
+    logmsg "STATUS_imap got test $testno\n";
+
+    $testno =~ s/[^0-9]//g;
+    my $testpart = "";
+    if ($testno > 10000) {
+        $testpart = $testno % 10000;
+        $testno = int($testno / 10000);
+    }
+
+    loadtest("$srcdir/data/test$testno");
+
+    my @data = getpart("reply", "data$testpart");
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
+    sendcontrol "$cmdid OK STATUS completed\r\n";
+
+    return 0;
+}
+
+sub LOGOUT_imap {
+    sendcontrol "* BYE cURL IMAP server signing off\r\n";
+    sendcontrol "$cmdid OK LOGOUT completed\r\n";
 
     return 0;
 }
@@ -2137,7 +2186,18 @@ while(1) {
 
     &customize(); # read test control instructions
 
-    sendcontrol @welcome;
+    my $welcome = $customreply{"welcome"};
+    if(!$welcome) {
+        $welcome = $displaytext{"welcome"};
+    }
+    else {
+        # clear it after use
+        $customreply{"welcome"}="";
+        if($welcome !~ /\r\n\z/) {
+            $welcome .= "\r\n";
+        }
+    }
+    sendcontrol $welcome;
 
     #remove global variables from last connection
     if($ftplistparserstate) {
@@ -2148,9 +2208,7 @@ while(1) {
     }
 
     if($verbose) {
-        for(@welcome) {
-            print STDERR "OUT: $_";
-        }
+        print STDERR "OUT: $welcome";
     }
 
     my $full = "";

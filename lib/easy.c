@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+/*
+ * See comment in curl_memory.h for the explanation of this sanity check.
+ */
+
+#ifdef CURLX_NO_MEMORY_CALLBACKS
+#error "libcurl shall not ever be built with CURLX_NO_MEMORY_CALLBACKS defined"
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -65,6 +73,7 @@
 #include "non-ascii.h"
 #include "warnless.h"
 #include "conncache.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -189,6 +198,9 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+#ifdef WIN32
+curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
+#endif
 #else
 /*
  * Symbian OS doesn't support initialization to code in writeable static data.
@@ -220,6 +232,9 @@ CURLcode curl_global_init(long flags)
   Curl_crealloc = (curl_realloc_callback)realloc;
   Curl_cstrdup = (curl_strdup_callback)system_strdup;
   Curl_ccalloc = (curl_calloc_callback)calloc;
+#ifdef WIN32
+  Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
+#endif
 
   if(flags & CURL_GLOBAL_SSL)
     if(!Curl_ssl_init()) {
@@ -262,7 +277,8 @@ CURLcode curl_global_init(long flags)
   }
 #endif
 
-  Curl_ack_eintr = flags & CURL_GLOBAL_ACK_EINTR;
+  if(flags & CURL_GLOBAL_ACK_EINTR)
+    Curl_ack_eintr = 1;
 
   init_flags  = flags;
 
@@ -422,11 +438,16 @@ CURLcode curl_easy_perform(CURL *easy)
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-    multi = curl_multi_init();
+    /* this multi handle will only ever have a single easy handled attached
+       to it, so make it use minimal hashes */
+    multi = Curl_multi_handle(1, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
     data->multi_easy = multi;
   }
+
+  /* Copy the MAXCONNECTS option to the multi handle */
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
 
   mcode = curl_multi_add_handle(multi, easy);
   if(mcode) {

@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+pipelining
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+Adding handle 0
+Handle 0 Completed with status 0
+Adding handle 1
+Adding handle 2
+Adding handle 3
+Adding handle 4
+Adding handle 5
+Adding handle 6
+Handle 2 Completed with status 0
+Handle 3 Completed with status 0
+Handle 4 Completed with status 0
+Handle 1 Completed with status 0
+Handle 5 Completed with status 0
+Handle 6 Completed with status 0
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http-pipe
+</server>
+<tool>
+lib1900
+</tool>
+ <name>
+HTTP GET using pipelining, blacklisted site
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPIPEPORT/
+</command>
+<file name="log/urls.txt">
+blacklist_site 127.0.0.1:%HTTPPIPEPORT
+0 1k.txt
+1000 100k.txt
+0 1k.txt
+0 1k.txt
+0 1k.txt
+0 1k.txt
+0 1k.txt
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

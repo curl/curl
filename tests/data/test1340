@@ -57,11 +57,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/name1340">
+<file1 name="log/name1340" mode="text">
 12345
 </file1>
 
-<file2 name="log/heads1340">
+<file2 name="log/heads1340" mode="text">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -72,7 +72,7 @@ Content-Disposition: filename=name1340; charset=funny; option=strange
 
 </file2>
 
-<file3 name="log/stdout1340">
+<file3 name="log/stdout1340" mode="text">
 curl: Saved to filename '%PWD/log/name1340'
 </file3>
 

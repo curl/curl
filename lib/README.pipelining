@@ -42,10 +42,3 @@ Details
   still resolve the second one properly to make sure that they actually _can_
   be considered for pipelining. Also, asking for explicit pipelining on handle
   X may be tricky when handle X get a closed connection.
-
-- We need options to control max pipeline length, and probably how to behave
-  if we reach that limit. As was discussed on the list, it can probably be
-  made very complicated, so perhaps we can think of a way to pass all
-  variables involved to a callback and let the application decide how to act
-  in specific situations. Either way, these fancy options are only interesting
-  to work on when everything is working and we have working apps to test with.

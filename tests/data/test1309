@@ -24,7 +24,7 @@ unit1309
 </client>
 
 <verify>
-<stdout>
+<stdout mode="text">
 Result:
       0.1013[3]
     0.1003[2]

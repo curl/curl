@@ -494,8 +494,10 @@ clean:
 # A config was provided, so the library can be built.
 #
 X_OBJS= \
+	$(DIROBJ)\amigaos.obj \
 	$(DIROBJ)\asyn-ares.obj \
 	$(DIROBJ)\asyn-thread.obj \
+	$(DIROBJ)\axtls.obj \
 	$(DIROBJ)\base64.obj \
 	$(DIROBJ)\bundles.obj \
 	$(DIROBJ)\conncache.obj \
@@ -506,6 +508,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_darwinssl.obj \
 	$(DIROBJ)\curl_fnmatch.obj \
 	$(DIROBJ)\curl_gethostname.obj \
+	$(DIROBJ)\curl_gssapi.obj \
 	$(DIROBJ)\curl_memrchr.obj \
 	$(DIROBJ)\curl_multibyte.obj \
 	$(DIROBJ)\curl_ntlm.obj \
@@ -518,6 +521,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_schannel.obj \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
+	$(DIROBJ)\cyassl.obj \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
@@ -544,10 +548,13 @@ X_OBJS= \
 	$(DIROBJ)\http_negotiate.obj \
 	$(DIROBJ)\http_negotiate_sspi.obj \
 	$(DIROBJ)\http_proxy.obj \
+	$(DIROBJ)\idn_win32.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\imap.obj \
 	$(DIROBJ)\inet_ntop.obj \
 	$(DIROBJ)\inet_pton.obj \
+	$(DIROBJ)\krb4.obj \
+	$(DIROBJ)\krb5.obj \
 	$(DIROBJ)\ldap.obj \
 	$(DIROBJ)\llist.obj \
 	$(DIROBJ)\md4.obj \
@@ -556,15 +563,21 @@ X_OBJS= \
 	$(DIROBJ)\mprintf.obj \
 	$(DIROBJ)\multi.obj \
 	$(DIROBJ)\netrc.obj \
+	$(DIROBJ)\non-ascii.obj \
 	$(DIROBJ)\nonblock.obj \
+	$(DIROBJ)\nss.obj \
 	$(DIROBJ)\openldap.obj \
 	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\pingpong.obj \
+	$(DIROBJ)\pipeline.obj \
 	$(DIROBJ)\polarssl.obj \
+	$(DIROBJ)\polarssl_threadlock.obj \
 	$(DIROBJ)\pop3.obj \
 	$(DIROBJ)\progress.obj \
+	$(DIROBJ)\qssl.obj \
 	$(DIROBJ)\rawstr.obj \
 	$(DIROBJ)\rtsp.obj \
+	$(DIROBJ)\security.obj \
 	$(DIROBJ)\select.obj \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\share.obj \
@@ -578,6 +591,7 @@ X_OBJS= \
 	$(DIROBJ)\ssh.obj \
 	$(DIROBJ)\sslgen.obj \
 	$(DIROBJ)\ssluse.obj \
+	$(DIROBJ)\strdup.obj \
 	$(DIROBJ)\strequal.obj \
 	$(DIROBJ)\strerror.obj \
 	$(DIROBJ)\strtok.obj \

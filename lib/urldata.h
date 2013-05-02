@@ -58,6 +58,8 @@
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
+#define DEFAULT_CONNCACHE_SIZE 5
+
 /* length of longest IPv6 address string including the trailing null */
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
@@ -857,6 +859,7 @@ struct connectdata {
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
+  char *options; /* options string, allocated */
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
@@ -935,17 +938,10 @@ struct connectdata {
                               handle */
   bool writechannel_inuse; /* whether the write channel is in use by an easy
                               handle */
-  bool server_supports_pipelining; /* TRUE if server supports pipelining,
-                                      set after first response */
   struct curl_llist *send_pipe; /* List of handles waiting to
                                    send on this pipeline */
   struct curl_llist *recv_pipe; /* List of handles waiting to read
                                    their responses on this pipeline */
-  struct curl_llist *pend_pipe; /* List of pending handles on
-                                   this pipeline */
-  struct curl_llist *done_pipe; /* Handles that are finished, but
-                                   still reference this connectdata */
-#define MAX_PIPELINE_LENGTH 5
   char* master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
@@ -1022,8 +1018,7 @@ struct connectdata {
     TUNNEL_CONNECT, /* CONNECT has been sent off */
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state[2]; /* two separate ones to allow FTP */
-
-   struct connectbundle *bundle; /* The bundle we are member of */
+  struct connectbundle *bundle; /* The bundle we are member of */
 };
 
 /* The end of connectdata. */
@@ -1142,8 +1137,7 @@ typedef enum {
  * Session-data MUST be put in the connectdata struct and here.  */
 #define MAX_CURL_USER_LENGTH 256
 #define MAX_CURL_PASSWORD_LENGTH 256
-#define MAX_CURL_USER_LENGTH_TXT "255"
-#define MAX_CURL_PASSWORD_LENGTH_TXT "255"
+#define MAX_CURL_OPTIONS_LENGTH 256
 
 struct auth {
   unsigned long want;  /* Bitmask set to the authentication methods wanted by
@@ -1171,13 +1165,6 @@ struct UrlState {
 
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
-
-  struct connectdata *pending_conn; /* This points to the connection we want
-                                       to open when we are waiting in the
-                                       CONNECT_PEND state in the multi
-                                       interface. This to avoid recreating it
-                                       when we enter the CONNECT state again.
-                                    */
 
   struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
@@ -1365,6 +1352,7 @@ enum dupstring {
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
+  STRING_OPTIONS,         /* <options>, if used */
   STRING_PROXYUSERNAME,   /* Proxy <username>, if used */
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
   STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
@@ -1575,6 +1563,7 @@ struct UserDefined {
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+  bool sasl_ir;         /* Enable/disable SASL initial response */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */

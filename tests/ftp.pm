@@ -48,6 +48,78 @@ sub pidfromfile {
 }
 
 #######################################################################
+# pidexists checks if a process with a given pid exists and is alive.
+# This will return the positive pid if the process exists and is alive.
+# This will return the negative pid if the process exists differently.
+# This will return 0 if the process could not be found.
+#
+sub pidexists {
+    my $pid = $_[0];
+
+    if($pid > 0) {
+        # verify if currently existing and alive
+        if(kill(0, $pid)) {
+            return $pid;
+        }
+
+        # verify if currently existing Windows process
+        if($^O eq "msys") {
+            my $filter = "PID eq $pid";
+            my $result = `tasklist -fi \"$filter\" 2>nul`;
+            if(index($result, "$pid") != -1) {
+                return -$pid;
+            }
+        }
+    }
+
+    return 0;
+}
+
+#######################################################################
+# pidterm asks the process with a given pid to terminate gracefully.
+#
+sub pidterm {
+    my $pid = $_[0];
+
+    if($pid > 0) {
+        # signal the process to terminate
+        kill("TERM", $pid);
+
+        # request the process to quit
+        if($^O eq "msys") {
+            my $filter = "PID eq $pid";
+            my $result = `tasklist -fi \"$filter\" 2>nul`;
+            if(index($result, "$pid") != -1) {
+                system("taskkill -fi \"$filter\" >nul 2>&1");
+            }
+        }
+    }
+}
+
+#######################################################################
+# pidkill kills the process with a given pid mercilessly andforcefully.
+#
+sub pidkill {
+    my $pid = $_[0];
+
+    if($pid > 0) {
+        # signal the process to terminate
+        kill("KILL", $pid);
+
+        # request the process to quit
+        if($^O eq "msys") {
+            my $filter = "PID eq $pid";
+            my $result = `tasklist -fi \"$filter\" 2>nul`;
+            if(index($result, "$pid") != -1) {
+                system("taskkill -f -fi \"$filter\" >nul 2>&1");
+                # Windows XP Home compatibility
+                system("tskill $pid >nul 2>&1");
+            }
+        }
+    }
+}
+
+#######################################################################
 # processexists checks if a process with the pid stored in the given
 # pidfile exists and is alive. This will return 0 on any file related
 # error or if a pid can not be extracted from the given file. When a
@@ -64,7 +136,7 @@ sub processexists {
 
     if($pid > 0) {
         # verify if currently alive
-        if(kill(0, $pid)) {
+        if(pidexists($pid)) {
             return $pid;
         }
         else {
@@ -111,10 +183,10 @@ sub killpid {
         if($tmp =~ /^(\d+)$/) {
             my $pid = $1;
             if($pid > 0) {
-                if(kill(0, $pid)) {
+                if(pidexists($pid)) {
                     print("RUN: Process with pid $pid signalled to die\n")
                         if($verbose);
-                    kill("TERM", $pid);
+                    pidterm($pid);
                     push @signalled, $pid;
                 }
                 else {
@@ -134,7 +206,7 @@ sub killpid {
         while($twentieths--) {
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
                 my $pid = $signalled[$i];
-                if(!kill(0, $pid)) {
+                if(!pidexists($pid)) {
                     print("RUN: Process with pid $pid gracefully died\n")
                         if($verbose);
                     splice @signalled, $i, 1;
@@ -154,7 +226,7 @@ sub killpid {
             if($pid > 0) {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
                     if($verbose);
-                kill("KILL", $pid);
+                pidkill($pid);
                 # if possible reap its dead children
                 waitpid($pid, &WNOHANG);
                 push @reapchild, $pid;
@@ -194,7 +266,7 @@ sub killsockfilters {
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
                 ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
-            kill("KILL", $pid);
+            pidkill($pid);
             waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
@@ -208,7 +280,7 @@ sub killsockfilters {
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
                 $pid) if($verbose);
-            kill("KILL", $pid);
+            pidkill($pid);
             waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);

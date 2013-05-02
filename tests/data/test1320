@@ -11,6 +11,11 @@ HTTP proxy
 #
 # Server-side
 <reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+smtp: sure hit me
+
+</connect>
 </reply>
 
 #
@@ -30,7 +35,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1320@foo --mail-rcpt 1320@foobar.example --mail-from 1320@from -T - -p -x %HOSTIP:%PROXYPORT
+smtp://smtp.1320:%SMTPPORT/user --mail-rcpt 1320@foo --mail-rcpt 1320@foobar.example --mail-from 1320@from -T - -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
@@ -57,8 +62,8 @@ body
 .
 </upload>
 <proxy>
-CONNECT %HOSTIP:%SMTPPORT HTTP/1.1
-Host: %HOSTIP:%SMTPPORT
+CONNECT smtp.1320:%SMTPPORT HTTP/1.1
+Host: smtp.1320:%SMTPPORT
 User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
 Proxy-Connection: Keep-Alive
 

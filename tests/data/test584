@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-Pipelining
+pipelining
 multi
 </keywords>
 </info>
@@ -76,7 +76,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout mode="text">
 HTTP/1.1 200 OK
 Server: test-server/fake
 Content-Length: 4

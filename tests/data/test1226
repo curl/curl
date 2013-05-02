@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP fetch a file from the root directory with singlecwd
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT//1226 --ftp-method singlecwd
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD /
+EPSV
+TYPE I
+SIZE 1226
+RETR 1226
+QUIT
+</protocol>
+</verify>
+</testcase>

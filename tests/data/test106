@@ -39,7 +39,8 @@ FTP GET with type=A style ASCII URL using %20 codes
 USER anonymous
 PASS ftp@example.com
 PWD
-CWD /path with  spaces
+CWD /
+CWD path with  spaces
 CWD and things2
 EPSV
 TYPE A

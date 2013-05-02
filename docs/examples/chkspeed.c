@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 {
   CURL *curl_handle;
   CURLcode res;
-  int prtsep = 0, prttime = 0;
+  int prtall = 0, prtsep = 0, prttime = 0;
   const char *url = URL_1M;
   char *appname = argv[0];
 
@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
           fprintf(stderr, "\r%s %s - %s\n",
                   appname, CHKSPEED_VERSION, curl_version());
           exit(1);
+        } else if (strncasecmp(*argv, "-A", 2) == 0) {
+          prtall = 1;
         } else if (strncasecmp(*argv, "-X", 2) == 0) {
           prtsep = 1;
         } else if (strncasecmp(*argv, "-T", 2) == 0) {
@@ -160,6 +162,18 @@ int main(int argc, char *argv[])
     res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD, &val);
     if((CURLE_OK == res) && (val>0))
       printf("Average download speed: %0.3f kbyte/sec.\n", val / 1024);
+
+    if (prtall) {
+      /* check for name resolution time */
+      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME, &val);
+      if((CURLE_OK == res) && (val>0))
+        printf("Name lookup time: %0.3f sec.\n", val);
+
+      /* check for connect time */
+      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME, &val);
+      if((CURLE_OK == res) && (val>0))
+        printf("Connect time: %0.3f sec.\n", val);
+    }
 
   } else {
     fprintf(stderr, "Error while fetching '%s' : %s\n",

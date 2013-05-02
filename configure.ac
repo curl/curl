@@ -2968,7 +2968,6 @@ AC_TYPE_SIGNAL
 CURL_CHECK_FUNC_SELECT
 
 CURL_CHECK_FUNC_RECV
-CURL_CHECK_FUNC_RECVFROM
 CURL_CHECK_FUNC_SEND
 CURL_CHECK_MSG_NOSIGNAL
 
@@ -3159,14 +3158,26 @@ if test "$want_thres" = "yes"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS -pthread"
-      AC_CHECK_LIB(pthread, pthread_create,
-        [ AC_MSG_NOTICE([using POSIX threaded DNS lookup])
-          AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
-          USE_THREADS_POSIX=1
-          curl_res_msg="threaded"
-        ],
-        [ CFLAGS="$save_CFLAGS"])
+
+      dnl first check for function without lib
+      AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
+
+      dnl if it wasn't found without lib, search for it in pthread lib
+      if test "$USE_THREADS_POSIX" != "1"
+      then
+        CFLAGS="$CFLAGS -pthread"
+        AC_CHECK_LIB(pthread, pthread_create,
+                     [USE_THREADS_POSIX=1],
+                     [ CFLAGS="$save_CFLAGS"])
+      fi
+
+      if test "x$USE_THREADS_POSIX" = "x1"
+      then
+        AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
+        curl_res_msg="POSIX threaded"
+      fi
+
+
   ])
 fi
 
@@ -3338,6 +3349,11 @@ AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 dnl yes or no
 ENABLE_SHARED="$enable_shared"
 AC_SUBST(ENABLE_SHARED)
+
+dnl to let curl-config output the static libraries correctly
+ENABLE_STATIC="$enable_static"
+AC_SUBST(ENABLE_STATIC)
+
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file

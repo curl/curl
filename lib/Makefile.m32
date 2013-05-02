@@ -106,6 +106,9 @@ endif
 ifeq ($(findstring -ares,$(CFG)),-ares)
 ARES = 1
 endif
+ifeq ($(findstring -sync,$(CFG)),-sync)
+SYNC = 1
+endif
 ifeq ($(findstring -rtmp,$(CFG)),-rtmp)
 RTMP = 1
 SSL = 1
@@ -151,11 +154,15 @@ endif
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
 
-ifdef ARES
-  INCLUDES += -I"$(LIBCARES_PATH)"
-  CFLAGS += -DUSE_ARES
-  DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
-  libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
+ifdef SYNC
+  CFLAGS += -DUSE_SYNC_DNS
+else
+  ifdef ARES
+    INCLUDES += -I"$(LIBCARES_PATH)"
+    CFLAGS += -DUSE_ARES -DCARES_STATICLIB
+    DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
+    libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
+  endif
 endif
 ifdef RTMP
   INCLUDES += -I"$(LIBRTMP_PATH)"

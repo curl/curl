@@ -5,7 +5,7 @@
 '*                            | (__| |_| |  _ <| |___
 '*                             \___|\___/|_| \_\_____|
 '*
-'* Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+'* Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 '*
 '* This software is licensed as described in the file COPYING, which
 '* you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 '* Hacked by Guenter Knauf
 '***************************************************************************
 Option Explicit
-Const myVersion = "0.3.6"
+Const myVersion = "0.3.7"
 
 Const myUrl = "http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
 
@@ -36,6 +36,7 @@ Const myCdSavF = FALSE       ' Flag: save downloaded data to file certdata.txt
 Const myCaBakF = TRUE        ' Flag: backup existing ca-bundle certificate
 Const myAskLiF = TRUE        ' Flag: display certdata.txt license agreement
 Const myAskTiF = TRUE        ' Flag: ask to include certificate text info
+Const myWrapLe = 76          ' Default length of base64 output lines
 
 '******************* Nothing to configure below! *******************
 Dim objShell, objNetwork, objFSO, objHttp
@@ -239,7 +240,8 @@ End Function
 
 Function Base64Encode(inData)
   Const Base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-  Dim cOut, sOut, I
+  Dim cOut, sOut, lWrap, I
+  lWrap = Int(myWrapLe * 3 / 4)
 
   'For each group of 3 bytes
   For I = 1 To Len(inData) Step 3
@@ -265,9 +267,9 @@ Function Base64Encode(inData)
     'Add the part To OutPut string
     sOut = sOut + pOut
 
-    'Add a new line For Each 76 chars In dest (76*3/4 = 57)
+    'Add a new line For Each myWrapLe chars In dest
     If (I < Len(inData) - 2) Then
-      If (I + 2) Mod 57 = 0 Then sOut = sOut & vbLf
+      If (I + 2) Mod lWrap = 0 Then sOut = sOut & vbLf
     End If
   Next
   Select Case Len(inData) Mod 3

@@ -56,7 +56,8 @@ details of how to use this function.
 .SH FLAGS
 .TP 5
 .B CURL_GLOBAL_ALL
-Initialize everything possible. This sets all known bits.
+Initialize everything possible. This sets all known bits except
+\fBCURL_GLOBAL_ACK_EINTR\fP.
 .TP
 .B CURL_GLOBAL_SSL
 Initialize SSL

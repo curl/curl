@@ -611,8 +611,11 @@
 /* Define to enable c-ares asynchronous DNS lookups. */
 /* #define USE_ARES 1 */
 
-/* Define to enable threaded asynchronous DNS lookups. */
-#define USE_THREADS_WIN32 1
+/* Default define to enable threaded asynchronous DNS lookups. */
+#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
+    !defined(USE_THREADS_WIN32)
+#  define USE_THREADS_WIN32 1
+#endif
 
 #if defined(USE_ARES) && defined(USE_THREADS_WIN32)
 #  error "Only one DNS lookup specialty may be defined at most"

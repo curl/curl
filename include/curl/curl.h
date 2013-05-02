@@ -507,6 +507,8 @@ typedef enum {
   CURLE_RTSP_SESSION_ERROR,      /* 86 - mismatch of RTSP Session Ids */
   CURLE_FTP_BAD_FILE_LIST,       /* 87 - unable to parse FTP file list */
   CURLE_CHUNK_FAILED,            /* 88 - chunk callback reported error */
+  CURLE_NO_CONNECTION_AVAILABLE, /* 89 - No connection available, the
+                                    session will be queued */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -1525,8 +1527,11 @@ typedef enum {
   /* Enable/disable specific SSL features with a bitmask, see CURLSSLOPT_* */
   CINIT(SSL_OPTIONS, LONG, 216),
 
-  /* set the SMTP auth originator */
+  /* Set the SMTP auth originator */
   CINIT(MAIL_AUTH, OBJECTPOINT, 217),
+
+  /* Enable/disable SASL initial response */
+  CINIT(SASL_IR, LONG, 218),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

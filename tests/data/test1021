@@ -12,32 +12,32 @@ HTTP proxy NTLM auth
 # Server-side
 <reply>
 
-<data>
+<connect>
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: NTLM
 Content-Length: 21
 Connection: close
 
 data to discard
-</data>
+</connect>
 
 # this is returned first since we get no proxy-auth
-<data1001>
+<connect1001>
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 28
 
 And you should ignore this data.
-</data1001>
+</connect1001>
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<connect1002>
 HTTP/1.1 200 Things are fine in proxy land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 
-</data1002>
+</connect1002>
 
 # this is returned when we get a GET!
 <data2>
@@ -102,7 +102,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com:1021/path/10210002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-anyauth --proxytunnel
+http://test.remote.example.com.1021:%HTTPPORT/path/10210002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-anyauth --proxytunnel
 </command>
 <precheck>
 chkhostname curlhost
@@ -115,23 +115,23 @@ chkhostname curlhost
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-CONNECT test.remote.example.com:1021 HTTP/1.1
-Host: test.remote.example.com:1021
+CONNECT test.remote.example.com.1021:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.1021:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.example.com:1021 HTTP/1.1
-Host: test.remote.example.com:1021
+CONNECT test.remote.example.com.1021:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.1021:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Proxy-Connection: Keep-Alive
 
-CONNECT test.remote.example.com:1021 HTTP/1.1
-Host: test.remote.example.com:1021
+CONNECT test.remote.example.com.1021:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.1021:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAKAeQjzKtCQ7ubW8S6MN7B59436GAxPu0CVROwwNBsgxML49gcbAXLT/bU+H5wrS9XNpbGx5Y3VybGhvc3Q=
 Proxy-Connection: Keep-Alive
 
 GET /path/10210002 HTTP/1.1
 User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
-Host: test.remote.example.com:1021
+Host: test.remote.example.com.1021:%HTTPPORT
 Accept: */*
 
 </protocol>

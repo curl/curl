@@ -240,6 +240,9 @@ Mismatch of RTSP Session Identifiers.
 Unable to parse FTP file list (during FTP wildcard downloading).
 .IP "CURLE_CHUNK_FAILED (88)"
 Chunk callback reported error.
+.IP "CURLE_NO_CONNECTION_AVAILABLE (89)"
+(For internal use only, will never be returned by libcurl) No connection
+available, the session will be queued. (added in 7.30.0)
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.

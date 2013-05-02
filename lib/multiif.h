@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,13 +22,19 @@
  *
  ***************************************************************************/
 
+
+
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
 void Curl_expire(struct SessionHandle *data, long milli);
 
-bool Curl_multi_canPipeline(const struct Curl_multi* multi);
+bool Curl_multi_pipeline_enabled(const struct Curl_multi* multi);
 void Curl_multi_handlePipeBreak(struct SessionHandle *data);
+
+/* Internal version of curl_multi_init() accepts size parameters for the
+   socket and connection hashes */
+struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16
@@ -50,5 +56,31 @@ void Curl_multi_handlePipeBreak(struct SessionHandle *data);
 void Curl_multi_dump(const struct Curl_multi *multi_handle);
 #endif
 
-#endif /* HEADER_CURL_MULTIIF_H */
+/* Update the current connection of a One_Easy handle */
+void Curl_multi_set_easy_connection(struct SessionHandle *handle,
+                                    struct connectdata *conn);
 
+void Curl_multi_process_pending_handles(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
+size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_MAX_PIPELINE_LENGTH option */
+size_t Curl_multi_max_pipeline_length(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE option */
+curl_off_t Curl_multi_content_length_penalty_size(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE option */
+curl_off_t Curl_multi_chunk_length_penalty_size(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_PIPELINING_SITE_BL option */
+struct curl_llist *Curl_multi_pipelining_site_bl(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_PIPELINING_SERVER_BL option */
+struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi);
+
+/* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
+size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
+
+#endif /* HEADER_CURL_MULTIIF_H */

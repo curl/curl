@@ -473,7 +473,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         /* We've stopped dealing with input, get out of the do-while loop */
 
         if(nread > 0) {
-          if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+          if(Curl_multi_pipeline_enabled(conn->data->multi)) {
             infof(data,
                   "Rewinding stream by : %zd"
                   " bytes on url %s (zero-length body)\n",
@@ -602,8 +602,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           if(dataleft != 0) {
             infof(conn->data, "Leftovers after chunking: %zu bytes\n",
                   dataleft);
-            if(conn->data->multi &&
-               Curl_multi_canPipeline(conn->data->multi)) {
+            if(Curl_multi_pipeline_enabled(conn->data->multi)) {
               /* only attempt the rewind if we truly are pipelining */
               infof(conn->data, "Rewinding %zu bytes\n",dataleft);
               read_rewind(conn, dataleft);
@@ -626,7 +625,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
         excess = (size_t)(k->bytecount + nread - k->maxdownload);
         if(excess > 0 && !k->ignorebody) {
-          if(conn->data->multi && Curl_multi_canPipeline(conn->data->multi)) {
+          if(Curl_multi_pipeline_enabled(conn->data->multi)) {
             /* The 'excess' amount below can't be more than BUFSIZE which
                always will fit in a size_t */
             infof(data,

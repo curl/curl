@@ -338,6 +338,31 @@ typedef enum {
   /* maximum number of entries in the connection cache */
   CINIT(MAXCONNECTS, LONG, 6),
 
+  /* maximum number of (pipelining) connections to one host */
+  CINIT(MAX_HOST_CONNECTIONS, LONG, 7),
+
+  /* maximum number of requests in a pipeline */
+  CINIT(MAX_PIPELINE_LENGTH, LONG, 8),
+
+  /* a connection with a content-length longer than this
+     will not be considered for pipelining */
+  CINIT(CONTENT_LENGTH_PENALTY_SIZE, OFF_T, 9),
+
+  /* a connection with a chunk length longer than this
+     will not be considered for pipelining */
+  CINIT(CHUNK_LENGTH_PENALTY_SIZE, OFF_T, 10),
+
+  /* a list of site names(+port) that are blacklisted from
+     pipelining */
+  CINIT(PIPELINING_SITE_BL, OBJECTPOINT, 11),
+
+  /* a list of server types that are blacklisted from
+     pipelining */
+  CINIT(PIPELINING_SERVER_BL, OBJECTPOINT, 12),
+
+  /* maximum number of open connections in total */
+  CINIT(MAX_TOTAL_CONNECTIONS, LONG, 13),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,15 +118,29 @@ static void freecookie(struct Cookie *co)
   free(co);
 }
 
-static bool tailmatch(const char *little, const char *bigone)
+static bool tailmatch(const char *cooke_domain, const char *hostname)
 {
-  size_t littlelen = strlen(little);
-  size_t biglen = strlen(bigone);
+  size_t cookie_domain_len = strlen(cooke_domain);
+  size_t hostname_len = strlen(hostname);
 
-  if(littlelen > biglen)
+  if(hostname_len < cookie_domain_len)
     return FALSE;
 
-  return Curl_raw_equal(little, bigone+biglen-littlelen) ? TRUE : FALSE;
+  if(!Curl_raw_equal(cooke_domain, hostname+hostname_len-cookie_domain_len))
+    return FALSE;
+
+  /* A lead char of cookie_domain is not '.'.
+     RFC6265 4.1.2.3. The Domain Attribute says:
+       For example, if the value of the Domain attribute is
+       "example.com", the user agent will include the cookie in the Cookie
+       header when making HTTP requests to example.com, www.example.com, and
+       www.corp.example.com.
+   */
+  if(hostname_len == cookie_domain_len)
+    return TRUE;
+  if('.' == *(hostname + hostname_len - cookie_domain_len - 1))
+    return TRUE;
+  return FALSE;
 }
 
 /*
@@ -689,9 +703,9 @@ Curl_cookie_add(struct SessionHandle *data,
       lastc->next = co;
     else
       c->cookies = co;
+    c->numcookies++; /* one more cookie in the jar */
   }
 
-  c->numcookies++; /* one more cookie in the jar */
   return co;
 }
 
@@ -777,11 +791,28 @@ static int cookie_sort(const void *p1, const void *p2)
 {
   struct Cookie *c1 = *(struct Cookie **)p1;
   struct Cookie *c2 = *(struct Cookie **)p2;
+  size_t l1, l2;
 
-  size_t l1 = c1->path?strlen(c1->path):0;
-  size_t l2 = c2->path?strlen(c2->path):0;
+  /* 1 - compare cookie path lengths */
+  l1 = c1->path ? strlen(c1->path) : 0;
+  l2 = c2->path ? strlen(c2->path) : 0;
 
-  return (l2 > l1) ? 1 : (l2 < l1) ? -1 : 0 ;
+  if(l1 != l2)
+    return (l2 > l1) ? 1 : -1 ; /* avoid size_t <=> int conversions */
+
+  /* 2 - compare cookie domain lengths */
+  l1 = c1->domain ? strlen(c1->domain) : 0;
+  l2 = c2->domain ? strlen(c2->domain) : 0;
+
+  if(l1 != l2)
+    return (l2 > l1) ? 1 : -1 ;  /* avoid size_t <=> int conversions */
+
+  /* 3 - compare cookie names */
+  if(c1->name && c2->name)
+    return strcmp(c1->name, c2->name);
+
+  /* sorry, can't be more deterministic */
+  return 0;
 }
 
 /*****************************************************************************

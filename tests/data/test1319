@@ -11,6 +11,13 @@ HTTP proxy
 #
 # Server-side
 <reply>
+
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+pop3: sure hit me
+
+</connect>
+
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
 <data>
@@ -25,6 +32,7 @@ body
 
 <datacheck>
 HTTP/1.1 200 Mighty fine indeed
+pop3: sure hit me
 
 From: me@somewhere
 To: fake@nowhere
@@ -47,7 +55,7 @@ http-proxy
 POP3 fetch tunneled through HTTP proxy
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
+pop3://pop.1319:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
 </command>
 </client>
 
@@ -65,8 +73,8 @@ RETR 1319
 QUIT
 </protocol>
 <proxy>
-CONNECT %HOSTIP:%POP3PORT HTTP/1.1
-Host: %HOSTIP:%POP3PORT
+CONNECT pop.1319:%POP3PORT HTTP/1.1
+Host: pop.1319:%POP3PORT
 User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
 Proxy-Connection: Keep-Alive
 

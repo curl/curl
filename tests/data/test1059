@@ -12,13 +12,13 @@ FAILURE
 #
 # Server-side
 <reply>
-<data>
+<connect>
 HTTP/1.1 501 Method not implemented swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 0
 
-</data>
+</connect>
 </reply>
 
 #

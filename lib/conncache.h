@@ -27,7 +27,7 @@ struct conncache {
   size_t num_connections;
 };
 
-struct conncache *Curl_conncache_init(void);
+struct conncache *Curl_conncache_init(int size);
 
 void Curl_conncache_destroy(struct conncache *connc);
 
