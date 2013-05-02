@@ -30,7 +30,7 @@ To: another
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 9091@foo --mail-rcpt 909@foobar.example --mail-from 909@from -T log/test909.eml
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 909@foo --mail-rcpt 909@foobar.example --mail-from 909@from -T log/test909.eml
 </command>
 </client>
 
