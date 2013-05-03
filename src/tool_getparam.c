@@ -1302,11 +1302,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       {
         char *certname, *passphrase;
         parse_cert_parameter(nextarg, &certname, &passphrase);
-        if(certname) {
-          GetStr(&config->cert, certname);
-        }
+        Curl_safefree(config->cert);
+        config->cert = certname;
         if(passphrase) {
-          GetStr(&config->key_passwd, passphrase);
+          Curl_safefree(config->key_passwd);
+          config->key_passwd = passphrase;
         }
         cleanarg(nextarg);
       }
