@@ -55,6 +55,9 @@
 int vms_show = 0;
 #endif
 
+/* if we build a static library for unit tests, there is no main() function */
+#ifndef UNITTESTS
+
 /*
  * Ensure that file descriptors 0, 1 and 2 (stdin, stdout, stderr) are
  * open before starting to run.  Otherwise, the first three network
@@ -118,3 +121,4 @@ int main(int argc, char *argv[])
 #endif
 }
 
+#endif /* ndef UNITTESTS */
