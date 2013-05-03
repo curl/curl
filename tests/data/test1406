@@ -38,7 +38,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@foo --mail-rcpt 1406@foobar.examp
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:<1406@from> SIZE=34
+MAIL FROM:<1406@from> SIZE=38
 RCPT TO:<1406@foo>
 RCPT TO:<1406@foobar.example>
 DATA
