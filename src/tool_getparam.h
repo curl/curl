@@ -45,5 +45,11 @@ ParameterError getparameter(char *flag,
                             bool *usedarg,
                             struct Configurable *config);
 
+#ifdef UNITTESTS
+void parse_cert_parameter(const char *cert_parameter,
+                          char **certname,
+                          char **passphrase);
+#endif
+
 #endif /* HEADER_CURL_TOOL_GETPARAM_H */
 

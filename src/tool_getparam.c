@@ -290,9 +290,12 @@ static const struct feat feats[] = {
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
  * nicknames containing ':'.  See <https://sourceforge.net/p/curl/bugs/1196/>
  * for details. */
-static void parse_cert_parameter(const char *cert_parameter,
-                                 char **certname,
-                                 char **passphrase)
+#ifndef UNITTESTS
+static
+#endif
+void parse_cert_parameter(const char *cert_parameter,
+                          char **certname,
+                          char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;
