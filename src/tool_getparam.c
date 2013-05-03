@@ -298,13 +298,13 @@ static void parse_cert_parameter(const char *cert_parameter,
   size_t span;
   const char *param_place = NULL;
   char *certname_place = NULL;
+  *certname = NULL;
   *passphrase = NULL;
 
   /* most trivial assumption: cert_parameter is empty */
-  if(param_length == 0) {
-    *certname = NULL;
+  if(param_length == 0)
     return;
-  }
+
   /* next less trivial: cert_parameter contains no colon nor backslash; this
    * means no passphrase was given and no characters escaped */
   if(!strpbrk(cert_parameter, ":\\")) {
@@ -312,16 +312,17 @@ static void parse_cert_parameter(const char *cert_parameter,
     return;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
-  *certname = (char *) malloc(param_length + 1);
-  param_place = cert_parameter;
-  certname_place = *certname;
+  certname_place = malloc(param_length + 1);
+  if(!certname_place)
+    return;
+
+  *certname = certname_place;
   param_place = cert_parameter;
   while(*param_place) {
     span = strcspn(param_place, ":\\");
     strncpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
-    *certname_place = '\0';
     /* we just ate all the non-special chars. now we're on either a special
      * char or the end of the string. */
     switch(*param_place) {
@@ -374,9 +375,11 @@ static void parse_cert_parameter(const char *cert_parameter,
       if(strlen(param_place) > 0) {
         *passphrase = strdup(param_place);
       }
-      return;
+      goto done;
     }
   }
+done:
+  *certname_place = '\0';
 }
 
 ParameterError getparameter(char *flag,    /* f or -long-flag */
