@@ -38,6 +38,8 @@ This release includes the following bugfixes:
  o ftpserver: Fixed imap logout confirmation data
  o curl_easy_init: use less mallocs
  o smtp: Fixed unknown percentage complete in progress bar
+ o smtp: Fixed sending of double CRLF caused by first in EOB
+ o bindlocal: move brace out of #ifdef [9]
  o 
 
 This release includes the following known bugs:
@@ -50,7 +52,7 @@ advice from friends like these:
  David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
  Anders Havn, Dan Fandrich, Paul Howarth, Dave Reisner, Wouter Van Rooy,
  Linus Nielsen Feltzing, Ishan SinghLevett, Alessandro Ghedini,
- Ludovico Cavedon, Zdenek Pavlas, Zekun Ni
+ Ludovico Cavedon, Zdenek Pavlas, Zekun Ni,  Lars Johannesen
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -64,4 +66,5 @@ References to bug reports and discussions on issues:
  [6] = https://bugzilla.redhat.com/906031
  [7] = http://curl.haxx.se/bug/view.cgi?id=1218
  [8] = http://curl.haxx.se/mail/lib-2012-03/0114.html
- [9]
+ [9] = http://curl.haxx.se/mail/lib-2013-05/0000.html
+ [10]
