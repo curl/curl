@@ -1474,7 +1474,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only) {
-    /* Calculate the EOB taking into account any terminating CRLF from the 
+    /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4. */
     eob = SMTP_EOB;
