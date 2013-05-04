@@ -1457,7 +1457,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   struct SMTP *smtp = data->state.proto.smtp;
   struct pingpong *pp = &conn->proto.smtpc.pp;
   const char *eob;
-  size_t len;
+  ssize_t len;
   ssize_t bytes_written;
 
   (void)premature;
