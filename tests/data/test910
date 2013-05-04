@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP without terminating CRLF
+ </name>
+<stdin nonewline="yes">
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 910@foo --mail-rcpt 910@foobar.example --mail-from 910@from -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO user
+MAIL FROM:<910@from>
+RCPT TO:<910@foo>
+RCPT TO:<910@foobar.example>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>
