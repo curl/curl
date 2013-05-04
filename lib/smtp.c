@@ -564,7 +564,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
   /* Calculate the FROM parameter */
   if(!data->set.str[STRING_MAIL_FROM])
-    /* Null reverse-path, RFC-2821, sect. 3.7 */
+    /* Null reverse-path, RFC-5321, sect. 3.6.3 */
     from = strdup("<>");
   else if(data->set.str[STRING_MAIL_FROM][0] == '<')
     from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
@@ -1797,7 +1797,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
      they are sent as CRLF.. instead, as a . on the beginning of a line will
      be deleted by the server when not part of an EOB terminator and a
      genuine CRLF.CRLF which isn't escaped will wrongly be detected as end of
-     data by the server.
+     data by the server
   */
   ssize_t i;
   ssize_t si;
@@ -1841,7 +1841,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
       smtp->trailing_crlf = FALSE;
     }
 
-    /* Do we have a match for CRLF. as per RFC-2821, sect. 4.5.2 */
+    /* Do we have a match for CRLF. as per RFC-5321, sect. 4.5.2 */
     if(SMTP_EOB_FIND_LEN == smtp->eob) {
       /* Copy the replacement data to the target buffer */
       memcpy(&data->state.scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
