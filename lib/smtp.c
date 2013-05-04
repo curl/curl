@@ -1455,6 +1455,9 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->state.proto.smtp;
+  struct pingpong *pp = &conn->proto.smtpc.pp;
+  const char *eob;
+  size_t len;
   ssize_t bytes_written;
 
   (void)premature;
@@ -1471,25 +1474,27 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only) {
-    struct smtp_conn *smtpc = &conn->proto.smtpc;
-    struct pingpong *pp = &smtpc->pp;
+    /* Calculate the EOB taking into account any terminating CRLF from the 
+       previous line of the email or the CRLF of the DATA command when there
+       is "no mail data". RFC-5321, sect. 4.1.1.4. */
+    eob = SMTP_EOB;
+    len = SMTP_EOB_LEN;
+    if(smtp->trailing_crlf || !conn->data->set.infilesize) {
+      eob += 2;
+      len -= 2;
+    }
 
     /* Send the end of block data */
-    result = Curl_write(conn,
-                        conn->writesockfd,  /* socket to send to */
-                        SMTP_EOB,           /* buffer pointer */
-                        SMTP_EOB_LEN,       /* buffer size */
-                        &bytes_written);    /* actually sent away */
-
+    result = Curl_write(conn, conn->writesockfd, eob, len, &bytes_written);
     if(result)
       return result;
 
-    if(bytes_written != SMTP_EOB_LEN) {
+    if(bytes_written != len) {
       /* The whole chunk was not sent so keep it around and adjust the
          pingpong structure accordingly */
-      pp->sendthis = strdup(SMTP_EOB);
-      pp->sendsize = SMTP_EOB_LEN;
-      pp->sendleft = SMTP_EOB_LEN - bytes_written;
+      pp->sendthis = strdup(eob);
+      pp->sendsize = len;
+      pp->sendleft = len - bytes_written;
     }
     else
       /* Successfully sent so adjust the response timeout relative to now */
@@ -1812,8 +1817,15 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
   for(i = 0, si = 0; i < nread; i++) {
-    if(SMTP_EOB[smtp->eob] == data->req.upload_fromhere[i])
+    if(SMTP_EOB[smtp->eob] == data->req.upload_fromhere[i]) {
       smtp->eob++;
+
+      /* Is the EOB potentially the terminating CRLF? */
+      if(2 == smtp->eob || SMTP_EOB_LEN == smtp->eob)
+        smtp->trailing_crlf = TRUE;
+      else
+        smtp->trailing_crlf = FALSE;
+    }
     else if(smtp->eob) {
       /* A previous substring matched so output that first */
       memcpy(&data->state.scratch[si], SMTP_EOB, smtp->eob);
@@ -1824,6 +1836,9 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
         smtp->eob = 1;
       else
         smtp->eob = 0;
+
+      /* Reset the trailing CRLF flag as there was more data */
+      smtp->trailing_crlf = FALSE;
     }
 
     /* Do we have a match for CRLF. as per RFC-2821, sect. 4.5.2 */

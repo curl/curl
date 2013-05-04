@@ -49,7 +49,6 @@ From: different
 To: another
 
 body
-
 .
 </upload>
 <file name="log/test1406.c" mode="text">
