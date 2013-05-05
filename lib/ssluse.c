@@ -2205,14 +2205,7 @@ static CURLcode servercert(struct connectdata *conn,
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
                          buffer, BUFSIZE);
-  if(rc) {
-    if(strict)
-      failf(data, "SSL: couldn't get X509-subject!");
-    X509_free(connssl->server_cert);
-    connssl->server_cert = NULL;
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  infof(data, "\t subject: %s\n", buffer);
+  infof(data, "\t subject: %s\n", rc?"[NONE]":buffer);
 
   certdate = X509_get_notBefore(connssl->server_cert);
   asn1_output(certdate, buffer, BUFSIZE);
