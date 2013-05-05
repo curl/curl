@@ -534,6 +534,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       return retcode;
     }
     else {
+      connssl->cred->cached = TRUE;
       infof(data, "schannel: stored credential handle in session cache\n");
     }
   }
@@ -1141,17 +1142,11 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
               connssl->cred->refcount);
       }
 
-      /* if the handle refcount is zero, check if we have not cached it */
-      if(connssl->cred->refcount == 0) {
-        if(Curl_ssl_getsessionid(conn, (void**)&cached_cred, NULL)) {
-          cached_cred = NULL;
-        }
-        /* if the handle was not cached, it is stale to be freed */
-        if(connssl->cred != cached_cred) {
-          infof(data, "schannel: clear credential handle\n");
-          s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
-          Curl_safefree(connssl->cred);
-        }
+      /* if the handle was not cached and the refcount is zero */
+      if(!connssl->cred->cached && connssl->cred->refcount == 0) {
+        infof(data, "schannel: clear credential handle\n");
+        s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
+        Curl_safefree(connssl->cred);
       }
     }
   }
@@ -1177,7 +1172,7 @@ void Curl_schannel_session_free(void *ptr)
 {
   struct curl_schannel_cred *cred = ptr;
 
-  if(cred && cred->refcount == 0) {
+  if(cred && cred->cached && cred->refcount == 0) {
     s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
     Curl_safefree(cred);
   }
