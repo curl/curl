@@ -316,8 +316,11 @@ Variables are substituted on the contents of the file as in the <command>
 section.
 </file>
 
-<stdin>
+<stdin [nonewline="yes"]>
 Pass this given data on stdin to the tool.
+
+If 'nonewline' is set, we will cut off the trailing newline of this given data
+before comparing with the one actually received by the client
 </stdin>
 
 </client>
