@@ -1482,10 +1482,8 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
                         size_t len,                /* amount to write */
                         CURLcode *curlcode)
 {
-  int rc;
-
-  rc = PR_Send(conn->ssl[sockindex].handle, mem, (int)len, 0, -1);
-
+  ssize_t rc = PR_Send(conn->ssl[sockindex].handle, mem, (int)len, 0,
+                       PR_INTERVAL_NO_WAIT);
   if(rc < 0) {
     PRInt32 err = PR_GetError();
     if(err == PR_WOULD_BLOCK_ERROR)
@@ -1513,9 +1511,8 @@ static ssize_t nss_recv(struct connectdata * conn, /* connection data */
                         size_t buffersize,         /* max amount to read */
                         CURLcode *curlcode)
 {
-  ssize_t nread;
-
-  nread = PR_Recv(conn->ssl[num].handle, buf, (int)buffersize, 0, -1);
+  ssize_t nread = PR_Recv(conn->ssl[num].handle, buf, (int)buffersize, 0,
+                          PR_INTERVAL_NO_WAIT);
   if(nread < 0) {
     /* failed SSL read */
     PRInt32 err = PR_GetError();
