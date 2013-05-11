@@ -72,7 +72,7 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.7
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.8
 !endif
 
 !ifdef %libssh2_root

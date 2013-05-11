@@ -73,7 +73,7 @@ LIBSSH2_PATH   = ../../libssh2-1.4.3
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.2.7
+ZLIB_PATH  = ../../zlib-1.2.8
 !ENDIF
 
 !IFNDEF MACHINE

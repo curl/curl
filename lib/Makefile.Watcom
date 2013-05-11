@@ -83,7 +83,7 @@ CFLAGS += -dWANT_IDN_PROTOTYPES
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.7
+ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.8
 !endif
 
 !ifdef %libssh2_root

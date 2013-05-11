@@ -27,14 +27,14 @@
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
-## set ZLIB_PATH=c:/zlib-1.2.7
+## set ZLIB_PATH=c:/zlib-1.2.8
 ## set ZLIB=1
 #
 ###########################################################################
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../../zlib-1.2.7
+ZLIB_PATH = ../../../zlib-1.2.8
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
