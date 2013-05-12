@@ -41,7 +41,10 @@ This release includes the following bugfixes:
  o smtp: Fixed unknown percentage complete in progress bar
  o smtp: Fixed sending of double CRLF caused by first in EOB
  o bindlocal: move brace out of #ifdef [9]
- o 
+ o winssl: Fixed invalid memory access during SSL shutdown [11]
+ o OS X framework: fix invalid symbolic link
+ o OpenSSL: allow empty server certificate subject [12]
+ o
 
 This release includes the following known bugs:
 
@@ -53,7 +56,8 @@ advice from friends like these:
  David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
  Anders Havn, Dan Fandrich, Paul Howarth, Dave Reisner, Wouter Van Rooy,
  Linus Nielsen Feltzing, Ishan SinghLevett, Alessandro Ghedini,
- Ludovico Cavedon, Zdenek Pavlas, Zekun Ni,  Lars Johannesen
+ Ludovico Cavedon, Zdenek Pavlas, Zekun Ni, Lars Johannesen, Marc Hoersken,
+ Renaud Guillard, John Gardiner Myers, Jared Jennings
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -69,3 +73,5 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2012-03/0114.html
  [9] = http://curl.haxx.se/mail/lib-2013-05/0000.html
  [10] = http://curl.haxx.se/bug/view.cgi?id=1196
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1219
+ [12] = http://curl.haxx.se/bug/view.cgi?id=1220
