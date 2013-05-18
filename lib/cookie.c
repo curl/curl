@@ -143,6 +143,34 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
   return FALSE;
 }
 
+static bool pathmatch(const char* cookie_path, const char* url_path)
+{
+  size_t cookie_path_len = strlen(cookie_path);
+  size_t url_path_len = strlen(url_path);
+
+  if(url_path_len < cookie_path_len)
+    return FALSE;
+
+  /* not using checkprefix() because matching should be case-sensitive */
+  if(strncmp(cookie_path, url_path, cookie_path_len))
+    return FALSE;
+
+  /* it is true if cookie_path and url_path are the same */
+  if(cookie_path_len == url_path_len)
+    return TRUE;
+
+  /* here, cookie_path_len < url_path_len */
+
+  /* it is false if cookie path is /example and url path is /examples */
+  if(cookie_path[cookie_path_len - 1] != '/') {
+    if(url_path[cookie_path_len] != '/') {
+      return FALSE;
+    }
+  }
+  /* matching! */
+  return TRUE;
+}
+
 /*
  * Load cookies from all given cookie files (CURLOPT_COOKIEFILE).
  */
@@ -858,10 +886,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
         /* now check the left part of the path with the cookies path
            requirement */
-        if(!co->path ||
-           /* not using checkprefix() because matching should be
-              case-sensitive */
-           !strncmp(co->path, path, strlen(co->path)) ) {
+        if(!co->path || pathmatch(co->path, path) ) {
 
           /* and now, we know this is a match and we should create an
              entry for the return-linked-list */

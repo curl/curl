@@ -59,7 +59,7 @@ perl -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs endi
 GET /we/want/8 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: cookie=perhaps; cookie=yes; partmatch=present; foobar=name; blexp=yesyes
+Cookie: cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes
 
 </protocol>
 </verify>
