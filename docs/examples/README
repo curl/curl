@@ -78,4 +78,5 @@ simplepost.c   - HTTP POST
 simplessl.c    - HTTPS example with certificates many options set
 synctime.c     - Sync local time by extracting date from remote HTTP servers
 url2file.c     - download a document and store it in a file
+xmlstream.c    - Stream-parse a document using the streaming Expat parser
 10-at-a-time.c - Download many files simultaneously, 10 at a time.
