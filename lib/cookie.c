@@ -212,6 +212,9 @@ static void strstore(char **str, const char *newstr)
  *
  * Add a single cookie line to the cookie keeping object.
  *
+ * Be aware that sometimes we get an IP-only host name, and that might also be
+ * a numerical IPv6 address.
+ *
  ***************************************************************************/
 
 struct Cookie *
@@ -318,70 +321,32 @@ Curl_cookie_add(struct SessionHandle *data,
           }
         }
         else if(Curl_raw_equal("domain", name)) {
-          /* note that this name may or may not have a preceding dot, but
-             we don't care about that, we treat the names the same anyway */
-
-          const char *domptr=whatptr;
-          const char *nextptr;
-          int dotcount=1;
-
-          /* Count the dots, we need to make sure that there are enough
-             of them. */
+          /* Now, we make sure that our host is within the given domain,
+             or the given domain is not valid and thus cannot be set. */
 
           if('.' == whatptr[0])
-            /* don't count the initial dot, assume it */
-            domptr++;
+            whatptr++; /* ignore preceding dot */
 
-          do {
-            nextptr = strchr(domptr, '.');
-            if(nextptr) {
-              if(domptr != nextptr)
-                dotcount++;
-              domptr = nextptr+1;
+          if(!domain || tailmatch(whatptr, domain)) {
+            const char *tailptr=whatptr;
+            if(tailptr[0] == '.')
+              tailptr++;
+            strstore(&co->domain, tailptr); /* don't prefix w/dots
+                                               internally */
+            if(!co->domain) {
+              badcookie = TRUE;
+              break;
             }
-          } while(nextptr);
-
-          /* The original Netscape cookie spec defined that this domain name
-             MUST have three dots (or two if one of the seven holy TLDs),
-             but it seems that these kinds of cookies are in use "out there"
-             so we cannot be that strict. I've therefore lowered the check
-             to not allow less than two dots. */
-
-          if(dotcount < 2) {
-            /* Received and skipped a cookie with a domain using too few
-               dots. */
-            badcookie=TRUE; /* mark this as a bad cookie */
-            infof(data, "skipped cookie with illegal dotcount domain: %s\n",
-                  whatptr);
+            co->tailmatch=TRUE; /* we always do that if the domain name was
+                                   given */
           }
           else {
-            /* Now, we make sure that our host is within the given domain,
-               or the given domain is not valid and thus cannot be set. */
-
-            if('.' == whatptr[0])
-              whatptr++; /* ignore preceding dot */
-
-            if(!domain || tailmatch(whatptr, domain)) {
-              const char *tailptr=whatptr;
-              if(tailptr[0] == '.')
-                tailptr++;
-              strstore(&co->domain, tailptr); /* don't prefix w/dots
-                                                 internally */
-              if(!co->domain) {
-                badcookie = TRUE;
-                break;
-              }
-              co->tailmatch=TRUE; /* we always do that if the domain name was
-                                     given */
-            }
-            else {
-              /* we did not get a tailmatch and then the attempted set domain
-                 is not a domain to which the current host belongs. Mark as
-                 bad. */
-              badcookie=TRUE;
-              infof(data, "skipped cookie with bad tailmatch domain: %s\n",
-                    whatptr);
-            }
+            /* we did not get a tailmatch and then the attempted set domain
+               is not a domain to which the current host belongs. Mark as
+               bad. */
+            badcookie=TRUE;
+            infof(data, "skipped cookie with bad tailmatch domain: %s\n",
+                  whatptr);
           }
         }
         else if(Curl_raw_equal("version", name)) {
@@ -539,12 +504,6 @@ Curl_cookie_add(struct SessionHandle *data,
       *ptr=0; /* clear it */
 
     firstptr=strtok_r(lineptr, "\t", &tok_buf); /* tokenize it on the TAB */
-
-    /* Here's a quick check to eliminate normal HTTP-headers from this */
-    if(!firstptr || strchr(firstptr, ':')) {
-      free(co);
-      return NULL;
-    }
 
     /* Now loop through the fields and init the struct we already have
        allocated */
