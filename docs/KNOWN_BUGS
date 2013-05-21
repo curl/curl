@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+81. When using -J (with -O), automaticly resumed downloading together with "-C
+  -" fails. Without -J the same command line works! This happens because the
+  resume logic is worked out before the target file name (and thus its
+  pre-transfer size) has been figured out!
+  http://curl.haxx.se/bug/view.cgi?id=1169
+
 80. Curl doesn't recognize certificates in DER format in keychain, but it
   works with PEM.
   http://curl.haxx.se/bug/view.cgi?id=3439999
