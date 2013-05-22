@@ -2546,7 +2546,7 @@ static ssize_t ossl_send(struct connectdata *conn,
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   rc = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
-  if(rc < 0) {
+  if(rc <= 0) {
     err = SSL_get_error(conn->ssl[sockindex].handle, rc);
 
     switch(err) {
