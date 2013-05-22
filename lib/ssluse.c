@@ -2595,7 +2595,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, buffsize);
-  if(nread < 0) {
+  if(nread <= 0) {
     /* failed SSL_read */
     int err = SSL_get_error(conn->ssl[num].handle, (int)nread);
 
