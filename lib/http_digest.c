@@ -267,6 +267,38 @@ static void md5_to_ascii(unsigned char *source, /* 16 bytes */
     snprintf((char *)&dest[i*2], 3, "%02x", source[i]);
 }
 
+/* Perform quoted-string escaping as described in RFC2616 and its errata */
+static char *string_quoted(const char *source)
+{
+  char *dest, *d;
+  const char *s = source;
+  size_t n = 1; /* null terminator */
+
+  /* Calculate size needed */
+  while(*s) {
+    ++n;
+    if(*s == '"' || *s == '\\') {
+      ++n;
+    }
+    ++s;
+  }
+
+  dest = (char *)malloc(n);
+  if(dest) {
+    s = source;
+    d = dest;
+    while(*s) {
+      if(*s == '"' || *s == '\\') {
+        *d++ = '\\';
+      }
+      *d++ = *s++;
+    }
+    *d = 0;
+  }
+
+  return dest;
+}
+
 CURLcode Curl_output_digest(struct connectdata *conn,
                             bool proxy,
                             const unsigned char *request,
@@ -289,6 +321,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   char **allocuserpwd;
   size_t userlen;
   const char *userp;
+  char *userp_quoted;
   const char *passwdp;
   struct auth *authp;
 
@@ -468,7 +501,18 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
     Authorization: Digest username="testuser", realm="testrealm", \
     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
+
+    Digest parameters are all quoted strings.  Username which is provided by
+    the user will need double quotes and backslashes within it escaped.  For
+    the other fields, this shouldn't be an issue.  realm, nonce, and opaque
+    are copied as is from the server, escapes and all.  cnonce is generated
+    with web-safe characters.  uri is already percent encoded.  nc is 8 hex
+    characters.  algorithm and qop with standard values only contain web-safe
+    chracters.
   */
+  userp_quoted = string_quoted(userp);
+  if(!*userp_quoted)
+    return CURLE_OUT_OF_MEMORY;
 
   if(d->qop) {
     *allocuserpwd =
@@ -482,7 +526,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "qop=%s, "
                "response=\"%s\"",
                proxy?"Proxy-":"",
-               userp,
+               userp_quoted,
                d->realm,
                d->nonce,
                uripath, /* this is the PATH part of the URL */
@@ -505,12 +549,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "uri=\"%s\", "
                "response=\"%s\"",
                proxy?"Proxy-":"",
-               userp,
+               userp_quoted,
                d->realm,
                d->nonce,
                uripath, /* this is the PATH part of the URL */
                request_digest);
   }
+  free(userp_quoted);
   if(!*allocuserpwd)
     return CURLE_OUT_OF_MEMORY;
 
