@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -1277,8 +1277,9 @@ Set this option to zero to not timeout retries. (Added in 7.12.3)
 
 If this option is used several times, the last one will be used.
 .IP "-s, --silent"
-Silent or quiet mode. Don't show progress meter or error messages.  Makes
-Curl mute.
+Silent or quiet mode. Don't show progress meter or error messages.  Makes Curl
+mute. It will still output the data you ask for, potentially even to the
+terminal/stdout unless you redirect it.
 .IP "-S, --show-error"
 When used with \fI-s\fP it makes curl show an error message if it fails.
 .IP "--ssl"
