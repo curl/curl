@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -1250,7 +1250,7 @@ using the Content-disposition: header to generate a file name.  An application
 could also use CURLINFO_EFFECTIVE_URL to generate a file name from a
 server-supplied redirect URL. Special care must be taken to sanitize such
 names to avoid the possibility of a malicious server supplying one like
-"/etc/passwd", "\autoexec.bat" or even ".bashrc".
+"/etc/passwd", "autoexec.bat" or even ".bashrc".
 
 .IP "Server Certificates"
 A secure application should never use the CURLOPT_SSL_VERIFYPEER option to
