@@ -1202,8 +1202,24 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               || ssl_connect_2_reading == connssl->connecting_state
               || ssl_connect_2_writing == connssl->connecting_state);
 
+  SSLContextRef ssl_ctx = connssl->ssl_ctx;
+  
   /* Here goes nothing: */
-  err = SSLHandshake(connssl->ssl_ctx);
+  err = SSLHandshake(ssl_ctx);
+  
+  if(err != errSSLWouldBlock) {
+    SecTrustRef newTrust;
+    OSStatus copy_trust_err = SSLCopyPeerTrust(ssl_ctx, &newTrust);
+    if(copy_trust_err == noErr) {
+      SecTrustRef *sessionTrust = &data->info.ssl_trust;
+      if(*sessionTrust != NULL) {
+        data->info.free_ssl_trust(*sessionTrust);
+      }
+      
+      *sessionTrust = newTrust;
+      data->info.free_ssl_trust = (void (*)(void *))CFRelease;
+    }
+  }
 
   if(err != noErr) {
     switch (err) {

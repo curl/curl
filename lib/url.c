@@ -437,6 +437,11 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
+  
+  if(data->info.ssl_trust != NULL) {
+    data->info.free_ssl_trust(data->info.ssl_trust);
+  }
+  data->info.ssl_trust = NULL;
 
   /* this destroys the channel and we cannot use it anymore after this */
   Curl_resolver_cleanup(data->state.resolver);

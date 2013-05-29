@@ -1062,6 +1062,9 @@ struct PureInfo {
   struct curl_certinfo certs; /* info about the certs, only populated in
                                  OpenSSL builds. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+
+  void *ssl_trust;
+  void (*free_ssl_trust)(void *);
 };
 
 
