@@ -1603,21 +1603,33 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
       }
 
-      if(data->set.ftp_append)
+      int open_type;
+      
+      int path_len = curlx_uztoui(strlen(sftp_scp->path));
+      if(memcmp(sftp_scp->path + path_len - 1, "/", 1) == 0) {
+        open_type = LIBSSH2_SFTP_OPENDIR;
+        
+        flags = 0;
+      }
+      else {
+        open_type = LIBSSH2_SFTP_OPENFILE;
+        
+        if(data->set.ftp_append)
         /* Try to open for append, but create if nonexisting */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
-      else if(data->state.resume_from > 0)
+          flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
+        else if(data->state.resume_from > 0)
         /* If we have restart position then open for append */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
-      else
+          flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
+        else
         /* Clear file before writing (normal behaviour) */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC;
-
+          flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC;
+      }
+      
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sftp_scp->path,
-                             curlx_uztoui(strlen(sftp_scp->path)),
+                             path_len,
                              flags, data->set.new_file_perms,
-                             LIBSSH2_SFTP_OPENFILE);
+                             open_type);
 
       if(!sshc->sftp_handle) {
         rc = libssh2_session_last_errno(sshc->ssh_session);
