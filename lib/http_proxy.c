@@ -139,7 +139,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       if(!req_buffer)
         return CURLE_OUT_OF_MEMORY;
 
-      host_port = aprintf("%s:%hu", hostname, remote_port);
+      host_port = aprintf("%s%s%s:%hu",
+        conn->bits.ipv6_ip ? "[" : "",
+        hostname,
+        conn->bits.ipv6_ip ? "]" : "",
+        remote_port);
       if(!host_port) {
         free(req_buffer);
         return CURLE_OUT_OF_MEMORY;
