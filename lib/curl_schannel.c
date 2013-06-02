@@ -1064,7 +1064,6 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct curl_schannel_cred *cached_cred = NULL;
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         conn->host.name, conn->remote_port);
