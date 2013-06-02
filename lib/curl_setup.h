@@ -368,7 +368,9 @@
 #  include <sys/stat.h>
 #  undef  lseek
 #  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
+#  undef  fstat
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
+#  undef  stat
 #  define stat(fname,stp)            _stati64(fname, stp)
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
