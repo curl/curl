@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -36,6 +36,9 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 This function polls on all file descriptors used by the curl easy handles
 contained in the given multi handle set.  It will block until activity is
 detected on at least one of the handles or \fItimeout_ms\fP has passed.
+Alternatively, if the multi handle has a pending internal timeout that has a
+shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
+instead to make sure timeout accuracy is reasonably kept.
 
 The calling application may pass additional curl_waitfd structures which are
 similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.

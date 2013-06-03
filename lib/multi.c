@@ -76,6 +76,8 @@ static bool isHandleAtHead(struct SessionHandle *handle,
 static CURLMcode add_next_timeout(struct timeval now,
                                   struct Curl_multi *multi,
                                   struct SessionHandle *d);
+static CURLMcode multi_timeout(struct Curl_multi *multi,
+                               long *timeout_ms);
 
 #ifdef DEBUGBUILD
 static const char * const statename[]={
@@ -810,9 +812,16 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   unsigned int nfds = 0;
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
+  long timeout_internal;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
+
+  /* If the internally desired timeout is actually shorter than requested from
+     the outside, then use the shorter time! */
+  (void)multi_timeout(multi, &timeout_internal);
+  if(timeout_internal < (long)timeout_ms)
+    timeout_ms = (int)timeout_internal;
 
   /* Count up how many fds we have from the multi handle */
   easy=multi->easy.next;
