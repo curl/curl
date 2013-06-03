@@ -1529,7 +1529,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
             follow = FOLLOW_RETRY;
           easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
-          if(easy->result == CURLE_OK) {
+          if(CURLE_OK == easy->result) {
             easy->result = Curl_follow(data, newurl, follow);
             if(CURLE_OK == easy->result) {
               multistate(easy, CURLM_STATE_CONNECT);
