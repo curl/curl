@@ -66,7 +66,7 @@ endif
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
-test: perhcheck all
+test: perlcheck all
 	$(TEST)
 
 quiet-test: perlcheck all
