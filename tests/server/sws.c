@@ -518,6 +518,7 @@ static int ProcessRequest(struct httprequest *req)
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
+        unsigned long part=0;
 
         sprintf(logbuf, "Received a CONNECT %s HTTP/%d.%d request",
                 doc, prot_major, prot_minor);
@@ -530,14 +531,24 @@ static int ProcessRequest(struct httprequest *req)
 
         if(doc[0] == '[') {
           char *p = &doc[1];
-          while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.')))
-            p++;
+          /* scan through the hexgroups and store the value of the last group
+             in the 'part' variable and use as test case number!! */
+          while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
+            char *endp;
+            part = strtoul(p, &endp, 16);
+            if(ISXDIGIT(*p))
+              p = endp;
+            else
+              p++;
+          }
           if(*p != ']')
             logmsg("Invalid CONNECT IPv6 address format");
           else if (*(p+1) != ':')
             logmsg("Invalid CONNECT IPv6 port format");
           else
             portp = p+1;
+
+          req->testno = part;
         }
         else
           portp = strchr(doc, ':');
@@ -548,7 +559,10 @@ static int ProcessRequest(struct httprequest *req)
             logmsg("Invalid CONNECT port received");
           else
             req->connect_port = curlx_ultous(ulnum);
+
         }
+        logmsg("Port number: %d, test case number: %ld",
+               req->connect_port, req->testno);
       }
     }
 
