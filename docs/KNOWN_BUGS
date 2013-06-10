@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+82. When building with the Windows Borland compiler, it fails because the
+  "tlib" tool doesn't support hyphens (minus signs) in file names and we have
+  such in the build.
+  http://curl.haxx.se/bug/view.cgi?id=1222
+
 81. When using -J (with -O), automaticly resumed downloading together with "-C
   -" fails. Without -J the same command line works! This happens because the
   resume logic is worked out before the target file name (and thus its
