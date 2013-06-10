@@ -2106,6 +2106,11 @@ static CURLMcode add_next_timeout(struct timeval now,
   return CURLM_OK;
 }
 
+#ifdef WIN32
+#define TIMEOUT_INACCURACY 40000
+#else
+#define TIMEOUT_INACCURACY 3000
+#endif
 
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
@@ -2195,8 +2200,25 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
   }
 
-  now.tv_usec += 40000; /* compensate for bad precision timers that might've
-                           triggered too early */
+  /* Compensate for bad precision timers that might've triggered too early.
+
+     This precaution was added in commit 2c72732ebf3da5e as a result of bad
+     resolution in the windows function use(d).
+
+     The problematic case here is when using the multi_socket API and libcurl
+     has told the application about a timeout, and that timeout is what fires
+     off a bit early. As we don't have any IDs associated with the timeout we
+     can't tell which timeout that fired off but we only have the times to use
+     to check what to do. If it fires off too early, we don't run the correct
+     actions and we don't tell the application again about the same timeout as
+     was already first in the queue...
+
+     Originally we made the timeouts run 40 milliseconds early on all systems,
+     but now we have an #ifdef setup to provide a decent precaution inaccuracy
+     margin.
+  */
+
+  now.tv_usec += TIMEOUT_INACCURACY;
   if(now.tv_usec >= 1000000) {
     now.tv_sec++;
     now.tv_usec -= 1000000;
