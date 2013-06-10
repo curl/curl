@@ -458,16 +458,20 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   else
     md5this = (unsigned char *)aprintf("%s:%s", request, uripath);
 
+  if(d->qop && Curl_raw_equal(d->qop, "auth-int")) {
+    /* We don't support auth-int for PUT or POST at the moment.
+       TODO: replace md5 of empty string with entity-body for PUT/POST */
+    unsigned char *md5this2 = (unsigned char *)
+      aprintf("%s:%s", md5this, "d41d8cd98f00b204e9800998ecf8427e");
+    free(md5this);
+    md5this = md5this2;
+  }
+
   if(!md5this) {
     free(ha1);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(d->qop && Curl_raw_equal(d->qop, "auth-int")) {
-    /* We don't support auth-int at the moment. I can't see a easy way to get
-       entity-body here */
-    /* TODO: Append H(entity-body)*/
-  }
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
