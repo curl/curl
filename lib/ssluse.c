@@ -464,11 +464,22 @@ int cert_stuff(struct connectdata *conn,
       /* Set Certificate Verification chain */
       if(ca && sk_X509_num(ca)) {
         for(i = 0; i < sk_X509_num(ca); i++) {
-          if(!SSL_CTX_add_extra_chain_cert(ctx, sk_X509_value(ca, i))) {
+          /*
+           * Note that sk_X509_pop() is used below to make sure the cert is
+           * removed from the stack properly before getting passed to
+           * SSL_CTX_add_extra_chain_cert(). Previously we used
+           * sk_X509_value() instead, but then we'd clean it in the subsequent
+           * sk_X509_pop_free() call.
+           */
+          X509 *x = sk_X509_pop(ca);
+          if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
             failf(data, "cannot add certificate to certificate chain");
             goto fail;
           }
-          if(!SSL_CTX_add_client_CA(ctx, sk_X509_value(ca, i))) {
+          /* SSL_CTX_add_client_CA() seems to work with either sk_* function,
+           * presumably because it duplicates what we pass to it.
+           */
+          if(!SSL_CTX_add_client_CA(ctx, x)) {
             failf(data, "cannot add certificate to client CA list");
             goto fail;
           }
