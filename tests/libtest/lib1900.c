@@ -168,7 +168,7 @@ int test(char *URL)
   multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_blacklist);
   multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_blacklist);
 
-  gettimeofday(&last_handle_add, NULL);
+  last_handle_add = tutil_tvnow();
 
   for(;;) {
     struct timeval interval;
@@ -182,7 +182,7 @@ int test(char *URL)
     interval.tv_usec = 0;
 
     if(handlenum < num_handles) {
-      gettimeofday(&now, NULL);
+      now = tutil_tvnow();
       msnow = now.tv_sec * 1000 + now.tv_usec / 1000;
       mslast = last_handle_add.tv_sec * 1000 + last_handle_add.tv_usec / 1000;
       if(msnow - mslast >= urltime[handlenum] && handlenum < num_handles) {
