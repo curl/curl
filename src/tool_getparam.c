@@ -286,6 +286,105 @@ static const struct feat feats[] = {
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP}
 };
 
+/* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
+ * We allow ':' and '\' to be escaped by '\' so that we can use certificate
+ * nicknames containing ':'.  See <https://sourceforge.net/p/curl/bugs/1196/>
+ * for details. */
+#ifndef UNITTESTS
+static
+#endif
+void parse_cert_parameter(const char *cert_parameter,
+                          char **certname,
+                          char **passphrase)
+{
+  size_t param_length = strlen(cert_parameter);
+  size_t span;
+  const char *param_place = NULL;
+  char *certname_place = NULL;
+  *certname = NULL;
+  *passphrase = NULL;
+
+  /* most trivial assumption: cert_parameter is empty */
+  if(param_length == 0)
+    return;
+
+  /* next less trivial: cert_parameter contains no colon nor backslash; this
+   * means no passphrase was given and no characters escaped */
+  if(!strpbrk(cert_parameter, ":\\")) {
+    *certname = strdup(cert_parameter);
+    return;
+  }
+  /* deal with escaped chars; find unescaped colon if it exists */
+  certname_place = malloc(param_length + 1);
+  if(!certname_place)
+    return;
+
+  *certname = certname_place;
+  param_place = cert_parameter;
+  while(*param_place) {
+    span = strcspn(param_place, ":\\");
+    strncpy(certname_place, param_place, span);
+    param_place += span;
+    certname_place += span;
+    /* we just ate all the non-special chars. now we're on either a special
+     * char or the end of the string. */
+    switch(*param_place) {
+    case '\0':
+      break;
+    case '\\':
+      param_place++;
+      switch(*param_place) {
+        case '\0':
+          *certname_place++ = '\\';
+          break;
+        case '\\':
+          *certname_place++ = '\\';
+          param_place++;
+          break;
+        case ':':
+          *certname_place++ = ':';
+          param_place++;
+          break;
+        default:
+          *certname_place++ = '\\';
+          *certname_place++ = *param_place;
+          param_place++;
+          break;
+      }
+      break;
+    case ':':
+      /* Since we live in a world of weirdness and confusion, the win32
+         dudes can use : when using drive letters and thus c:\file:password
+         needs to work. In order not to break compatibility, we still use : as
+         separator, but we try to detect when it is used for a file name! On
+         windows. */
+#ifdef WIN32
+      if(param_place &&
+          (param_place == &cert_parameter[1]) &&
+          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
+          (ISALPHA(cert_parameter[0])) ) {
+        /* colon in the second column, followed by a backslash, and the
+           first character is an alphabetic letter:
+
+           this is a drive letter colon */
+        *certname_place++ = ':';
+        param_place++;
+        break;
+      }
+#endif
+      /* escaped colons and Windows drive letter colons were handled
+       * above; if we're still here, this is a separating colon */
+      param_place++;
+      if(strlen(param_place) > 0) {
+        *passphrase = strdup(param_place);
+      }
+      goto done;
+    }
+  }
+done:
+  *certname_place = '\0';
+}
+
 ParameterError getparameter(char *flag,    /* f or -long-flag */
                             char *nextarg, /* NULL if unset */
                             bool *usedarg, /* set to TRUE if the arg
@@ -1207,30 +1306,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       default: /* certificate file */
       {
-        char *ptr = strchr(nextarg, ':');
-        /* Since we live in a world of weirdness and confusion, the win32
-           dudes can use : when using drive letters and thus
-           c:\file:password needs to work. In order not to break
-           compatibility, we still use : as separator, but we try to detect
-           when it is used for a file name! On windows. */
-#ifdef WIN32
-        if(ptr &&
-           (ptr == &nextarg[1]) &&
-           (nextarg[2] == '\\' || nextarg[2] == '/') &&
-           (ISALPHA(nextarg[0])) )
-          /* colon in the second column, followed by a backslash, and the
-             first character is an alphabetic letter:
-
-             this is a drive letter colon */
-          ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
-#endif
-        if(ptr) {
-          /* we have a password too */
-          *ptr = '\0';
-          ptr++;
-          GetStr(&config->key_passwd, ptr);
+        char *certname, *passphrase;
+        parse_cert_parameter(nextarg, &certname, &passphrase);
+        Curl_safefree(config->cert);
+        config->cert = certname;
+        if(passphrase) {
+          Curl_safefree(config->key_passwd);
+          config->key_passwd = passphrase;
         }
-        GetStr(&config->cert, nextarg);
         cleanarg(nextarg);
       }
       }

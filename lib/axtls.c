@@ -131,6 +131,16 @@ static CURLcode map_error_to_curl(int axtls_err)
 static Curl_recv axtls_recv;
 static Curl_send axtls_send;
 
+static void free_ssl_structs(SSL_CTX *ssl_ctx, SSL *ssl)
+{
+  if(ssl) {
+    ssl_free (ssl);
+  }
+  if(ssl_ctx) {
+    ssl_ctx_free(ssl_ctx);
+  }
+}
+
 /*
  * This function is called after the TCP connect has completed. Setup the TLS
  * layer and do all necessary magic.
@@ -142,7 +152,7 @@ Curl_axtls_connect(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   SSL_CTX *ssl_ctx;
-  SSL *ssl;
+  SSL *ssl = NULL;
   int cert_types[] = {SSL_OBJ_X509_CERT, SSL_OBJ_PKCS12, 0};
   int key_types[] = {SSL_OBJ_RSA_KEY, SSL_OBJ_PKCS8, SSL_OBJ_PKCS12, 0};
   int i, ssl_fcn_return;
@@ -192,6 +202,7 @@ Curl_axtls_connect(struct connectdata *conn,
             data->set.ssl.CAfile);
       if(data->set.ssl.verifypeer) {
         Curl_axtls_close(conn, sockindex);
+        free_ssl_structs(ssl_ctx, ssl);
         return CURLE_SSL_CACERT_BADFILE;
       }
     }
@@ -226,6 +237,7 @@ Curl_axtls_connect(struct connectdata *conn,
       failf(data, "%s is not x509 or pkcs12 format",
             data->set.str[STRING_CERT]);
       Curl_axtls_close(conn, sockindex);
+      free_ssl_structs(ssl_ctx, ssl);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -251,6 +263,7 @@ Curl_axtls_connect(struct connectdata *conn,
       failf(data, "Failure: %s is not a supported key file",
             data->set.str[STRING_KEY]);
       Curl_axtls_close(conn, sockindex);
+      free_ssl_structs(ssl_ctx, ssl);
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -275,6 +288,7 @@ Curl_axtls_connect(struct connectdata *conn,
   ssl_fcn_return = ssl_handshake_status(ssl);
   if(ssl_fcn_return != SSL_OK) {
     Curl_axtls_close(conn, sockindex);
+    free_ssl_structs(ssl_ctx, ssl);
     ssl_display_error(ssl_fcn_return); /* goes to stdout. */
     return map_error_to_curl(ssl_fcn_return);
   }
@@ -288,6 +302,7 @@ Curl_axtls_connect(struct connectdata *conn,
   if(data->set.ssl.verifypeer) {
     if(ssl_verify_cert(ssl) != SSL_OK) {
       Curl_axtls_close(conn, sockindex);
+      free_ssl_structs(ssl_ctx, ssl);
       failf(data, "server cert verify failed");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -326,26 +341,37 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* RFC2818 checks */
   if(found_subject_alt_names && !found_subject_alt_name_matching_conn) {
-    /* Break connection ! */
-    Curl_axtls_close(conn, sockindex);
-    failf(data, "\tsubjectAltName(s) do not match %s\n", conn->host.dispname);
-    return CURLE_PEER_FAILED_VERIFICATION;
+    if(data->set.ssl.verifyhost) {
+      /* Break connection ! */
+      Curl_axtls_close(conn, sockindex);
+      free_ssl_structs(ssl_ctx, ssl);
+      failf(data, "\tsubjectAltName(s) do not match %s\n",
+            conn->host.dispname);
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    else
+      infof(data, "\tsubjectAltName(s) do not match %s\n",
   }
   else if(found_subject_alt_names == 0) {
     /* Per RFC2818, when no Subject Alt Names were available, examine the peer
        CN as a legacy fallback */
     peer_CN = ssl_get_cert_dn(ssl, SSL_X509_CERT_COMMON_NAME);
     if(peer_CN == NULL) {
-      /* Similar behaviour to the OpenSSL interface */
-      Curl_axtls_close(conn, sockindex);
-      failf(data, "unable to obtain common name from peer certificate");
-      return CURLE_PEER_FAILED_VERIFICATION;
+      if(data->set.ssl.verifyhost) {
+        Curl_axtls_close(conn, sockindex);
+        free_ssl_structs(ssl_ctx, ssl);
+        failf(data, "unable to obtain common name from peer certificate");
+        return CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else
+        infof(data, "unable to obtain common name from peer certificate");
     }
     else {
       if(!Curl_cert_hostcheck((const char *)peer_CN, conn->host.name)) {
         if(data->set.ssl.verifyhost) {
           /* Break connection ! */
           Curl_axtls_close(conn, sockindex);
+          free_ssl_structs(ssl_ctx, ssl);
           failf(data, "\tcommon name \"%s\" does not match \"%s\"\n",
                 peer_CN, conn->host.dispname);
           return CURLE_PEER_FAILED_VERIFICATION;

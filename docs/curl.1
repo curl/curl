@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -388,7 +388,10 @@ curl the nickname of the certificate to use within the NSS database defined
 by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
 NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
 loaded. If you want to use a file from the current directory, please precede
-it with "./" prefix, in order to avoid confusion with a nickname.
+it with "./" prefix, in order to avoid confusion with a nickname.  If the
+nickname contains ":", it needs to be preceded by "\\" so that it is not
+recognized as password delimiter.  If the nickname contains "\\", it needs to
+be escaped as "\\\\" so that it is not recognized as an escape character.
 
 (iOS and Mac OS X only) If curl is built against Secure Transport, then the certificate string must match the name of a certificate that's in the system or user keychain. The private key corresponding to the certificate, and certificate chain (if any),  must also be present in the keychain.
 
@@ -1274,8 +1277,9 @@ Set this option to zero to not timeout retries. (Added in 7.12.3)
 
 If this option is used several times, the last one will be used.
 .IP "-s, --silent"
-Silent or quiet mode. Don't show progress meter or error messages.  Makes
-Curl mute.
+Silent or quiet mode. Don't show progress meter or error messages.  Makes Curl
+mute. It will still output the data you ask for, potentially even to the
+terminal/stdout unless you redirect it.
 .IP "-S, --show-error"
 When used with \fI-s\fP it makes curl show an error message if it fails.
 .IP "--ssl"

@@ -346,11 +346,24 @@ Pass a pointer to a function that matches the following prototype: \fBint
 function(void *clientp, double dltotal, double dlnow, double ultotal, double
 ulnow); \fP. This function gets called by libcurl instead of its internal
 equivalent with a frequent interval during operation (roughly once per second
-or sooner) no matter if data is being transferred or not.  Unknown/unused
-argument values passed to the callback will be set to zero (like if you only
-download data, the upload size will remain 0). Returning a non-zero value from
-this callback will cause libcurl to abort the transfer and return
-\fICURLE_ABORTED_BY_CALLBACK\fP.
+or sooner) no matter if data is being transferred or not.
+
+\fIclientp\fP is the pointer set with \fICURLOPT_PROGRESSDATA\fP, it is not
+actually used by libcurl but is only passed along from the application to the
+callback.
+
+The callback gets told how much data libcurl will transfer and has
+transferred, in number of bytes. \fIdltotal\fP is the total number of bytes
+libcurl expects to download in this transfer. \fIdlnow\fP is the number of
+bytes downloaded so far. \fIultotal\fP is the total number of bytes libcurl
+expects to upload in this transfer. \fIulnow\fP is the number of bytes
+uploaded so far.
+
+Unknown/unused argument values passed to the callback will be set to zero
+(like if you only download data, the upload size will remain 0).
+
+Returning a non-zero value from this callback will cause libcurl to abort the
+transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
 
 If you transfer data with the multi interface, this function will not be
 called during periods of idleness unless you call the appropriate libcurl
@@ -1423,10 +1436,12 @@ internally, your added one will be used instead. If you add a header with no
 content as in 'Accept:' (no data on the right side of the colon), the
 internally used header will get disabled. Thus, using this option you can add
 new headers, replace internal headers and remove internal headers. To add a
-header with no content, make the content be two quotes: \&"". The headers
-included in the linked list must not be CRLF-terminated, because curl adds
-CRLF after each header item. Failure to comply with this will result in
-strange bugs because the server will most likely ignore part of the headers
+header with no content (nothing to the right side of the colon), use the
+form 'MyHeader;' (note the ending semicolon).
+
+The headers included in the linked list must not be CRLF-terminated, because
+curl adds CRLF after each header item. Failure to comply with this will result
+in strange bugs because the server will most likely ignore part of the headers
 you specified.
 
 The first line in a request (containing the method, usually a GET or POST) is

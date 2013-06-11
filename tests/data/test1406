@@ -38,7 +38,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@foo --mail-rcpt 1406@foobar.examp
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:<1406@from> SIZE=34
+MAIL FROM:<1406@from> SIZE=38
 RCPT TO:<1406@foo>
 RCPT TO:<1406@foobar.example>
 DATA
@@ -49,7 +49,6 @@ From: different
 To: another
 
 body
-
 .
 </upload>
 <file name="log/test1406.c" mode="text">
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
   slist1 = curl_slist_append(slist1, "1406@foobar.example");
 
   hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)34);
+  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
   curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/user");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);

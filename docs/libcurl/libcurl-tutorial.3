@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -1157,13 +1157,13 @@ and install a CURLOPT_OPENSOCKETFUNCTION callback function in which addresses
 are sanitized before use.
 
 .IP "Private Resources"
-A user who can control the DNS server of a domain being passed in within
-a URL can change the address of the host to a local, private address
-which the libcurl application will then use. e.g. The innocuous URL
-http://fuzzybunnies.example.com/ could actually resolve to the IP address
-of a server behind a firewall, such as 127.0.0.1 or 10.1.2.3
-Apps can mitigate against this by setting a CURLOPT_OPENSOCKETFUNCTION
-and checking the address before a connection.
+A user who can control the DNS server of a domain being passed in within a URL
+can change the address of the host to a local, private address which a
+server-side libcurl-using application could then use. e.g. the innocuous URL
+http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
+server behind a firewall, such as 127.0.0.1 or 10.1.2.3.  Apps can mitigate
+against this by setting a CURLOPT_OPENSOCKETFUNCTION and checking the address
+before a connection.
 
 All the malicious scenarios regarding redirected URLs apply just as well
 to non-redirected URLs, if the user is allowed to specify an arbitrary URL
@@ -1177,6 +1177,19 @@ A malicious FTP server could in response to the PASV command return an
 IP address and port number for a server local to the app running libcurl
 but behind a firewall.  Apps can mitigate against this by using the
 CURLOPT_FTP_SKIP_PASV_IP option or CURLOPT_FTPPORT.
+
+.IP "IPv6 Addresses"
+libcurl will normally handle IPv6 addresses transparently and just as easily
+as IPv4 addresses. That means that a sanitizing function that filters out
+addressses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
+::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
+would all bypass a naive filter and could allow access to undesired local
+resources.  IPv6 also has special address blocks like link-local and site-local
+that generally shouldn't be accessed by a server-side libcurl-using
+application.  A poorly-configured firewall installed in a data center,
+organization or server may also be configured to limit IPv4 connections but
+leave IPv6 connections wide open.  In some cases, the CURL_IPRESOLVE_V4 option
+can be used to limit resolved addresses to IPv4 only and bypass these issues.
 
 .IP Uploads
 When uploading, a redirect can cause a local (or remote) file to be
@@ -1250,7 +1263,7 @@ using the Content-disposition: header to generate a file name.  An application
 could also use CURLINFO_EFFECTIVE_URL to generate a file name from a
 server-supplied redirect URL. Special care must be taken to sanitize such
 names to avoid the possibility of a malicious server supplying one like
-"/etc/passwd", "\autoexec.bat" or even ".bashrc".
+"/etc/passwd", "\\autoexec.bat", "prn:" or even ".bashrc".
 
 .IP "Server Certificates"
 A secure application should never use the CURLOPT_SSL_VERIFYPEER option to
@@ -1263,9 +1276,14 @@ validated certificates is potentially as insecure as a plain HTTP connection.
 On a related issue, be aware that even in situations like when you have
 problems with libcurl and ask someone for help, everything you reveal in order
 to get best possible help might also impose certain security related
-risks. Host names, user names, paths, operating system specifics, etc (not to
+risks. Host names, user names, paths, operating system specifics, etc. (not to
 mention passwords of course) may in fact be used by intruders to gain
 additional information of a potential target.
+
+Be sure to limit access to application logs if they could hold private or
+security-related data.  Besides the obvious candidates like user names and
+passwords, things like URLs, cookies or even file names could also hold
+sensitive data.
 
 To avoid this problem, you must of course use your common sense. Often, you
 can just edit out the sensitive data or just search/replace your true
@@ -1347,10 +1365,10 @@ automatically share a lot of the data that otherwise would be kept on a
 per-easy handle basis when the easy interface is used.
 
 The DNS cache is shared between handles within a multi handle, making
-subsequent name resolvings faster and the connection pool that is kept to
-better allow persistent connections and connection re-use is shared. If you're
-using the easy interface, you can still share these between specific easy
-handles by using the share interface, see \fIlibcurl-share(3)\fP.
+subsequent name resolving faster, and the connection pool that is kept to
+better allow persistent connections and connection re-use is also shared. If
+you're using the easy interface, you can still share these between specific
+easy handles by using the share interface, see \fIlibcurl-share(3)\fP.
 
 Some things are never shared automatically, not within multi handles, like for
 example cookies so the only way to share that is with the share interface.

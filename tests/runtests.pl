@@ -3175,6 +3175,13 @@ sub singletest {
 
     if(@stdintest) {
         my $stdinfile="$LOGDIR/stdin-for-$testnum";
+
+        my %hash = getpartattr("client", "stdin");
+        if($hash{'nonewline'}) {
+            # cut off the final newline from the final line of the stdin data
+            chomp($stdintest[$#stdintest]);
+        }
+
         writearray($stdinfile, \@stdintest);
 
         $cmdargs .= " <$stdinfile";

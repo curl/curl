@@ -21,6 +21,7 @@ This release includes the following changes:
  o usercertinmem.c: add example showing user cert in memory
  o url: Added smtp and pop3 hostnames to the protocol detection list
  o imap/pop3/smtp: Added support for enabling the SASL initial response [8]
+ o curl -E: allow to use ':' in certificate nicknames [10]
  o 
 
 This release includes the following bugfixes:
@@ -38,7 +39,22 @@ This release includes the following bugfixes:
  o ftpserver: Fixed imap logout confirmation data
  o curl_easy_init: use less mallocs
  o smtp: Fixed unknown percentage complete in progress bar
- o 
+ o smtp: Fixed sending of double CRLF caused by first in EOB
+ o bindlocal: move brace out of #ifdef [9]
+ o winssl: Fixed invalid memory access during SSL shutdown [11]
+ o OS X framework: fix invalid symbolic link
+ o OpenSSL: allow empty server certificate subject [12]
+ o axtls: prevent memleaks on SSL handshake failures
+ o cookies: only consider full path matches
+ o Revert win32 MemoryTracking: wcsdup() _wcsdup() and _tcsdup() [13]
+ o Curl_cookie_add: handle IPv6 hosts [14]
+ o ossl_send: SSL_write() returning 0 is an error too
+ o ossl_recv: SSL_read() returning 0 is an error too
+ o Digest auth: escape user names with \ or " in them [15]
+ o curl_formadd.3: fixed wrong "end-marker" syntax [16]
+ o libcurl-tutorial.3: fix incorrect backslash [17]
+ o curl_multi_wait: reduce timeout if the multi handle wants to [18]
+ o tests/Makefile: typo in the perlcheck target [19]
 
 This release includes the following known bugs:
 
@@ -50,7 +66,10 @@ advice from friends like these:
  David Strauss, Kamil Dudka, Steve Holme, Nick Zitzmann, Sam Deane, Duncan,
  Anders Havn, Dan Fandrich, Paul Howarth, Dave Reisner, Wouter Van Rooy,
  Linus Nielsen Feltzing, Ishan SinghLevett, Alessandro Ghedini,
- Ludovico Cavedon, Zdenek Pavlas, Zekun Ni
+ Ludovico Cavedon, Zdenek Pavlas, Zekun Ni, Lars Johannesen, Marc Hoersken,
+ Renaud Guillard, John Gardiner Myers, Jared Jennings, Eric Hu,
+ Yamada Yasuharu, Stefan Neis, Mike Giancola, Eric S. Raymond, Andrii Moiseiev,
+ Christian Weisgerber
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -64,4 +83,14 @@ References to bug reports and discussions on issues:
  [6] = https://bugzilla.redhat.com/906031
  [7] = http://curl.haxx.se/bug/view.cgi?id=1218
  [8] = http://curl.haxx.se/mail/lib-2012-03/0114.html
- [9]
+ [9] = http://curl.haxx.se/mail/lib-2013-05/0000.html
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1196
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1219
+ [12] = http://curl.haxx.se/bug/view.cgi?id=1220
+ [13] = http://curl.haxx.se/mail/lib-2013-05/0070.html
+ [14] = http://curl.haxx.se/bug/view.cgi?id=1221
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1230
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1233
+ [17] = http://curl.haxx.se/bug/view.cgi?id=1234
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1224
+ [19] = http://curl.haxx.se/bug/view.cgi?id=1239

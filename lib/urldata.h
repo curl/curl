@@ -243,6 +243,7 @@ struct curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   int refcount;
+  bool cached;
 };
 
 struct curl_schannel_ctxt {

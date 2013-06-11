@@ -35,8 +35,8 @@ USER_CFLAGS:=
 # directories where to seek for includes and libraries
 OPENSSL_INC := D:/libraries/openssl/openssl-0.9.8y-vxWorks6.3/include
 OPENSSL_LIB := D:/libraries/openssl/openssl-0.9.8y-vxWorks6.3
-ZLIB_INC    := D:/libraries/zlib/zlib-1.2.7-VxWorks6.3/zlib-1.2.7
-ZLIB_LIB    := D:/libraries/zlib/zlib-1.2.7-VxWorks6.3/binaries/vxworks_3.1_gnu/Debug/lib
+ZLIB_INC    := D:/libraries/zlib/zlib-1.2.8-VxWorks6.3/zlib-1.2.8
+ZLIB_LIB    := D:/libraries/zlib/zlib-1.2.8-VxWorks6.3/binaries/vxworks_3.1_gnu/Debug/lib
 ARES_INC    :=
 ARES_LIB    :=
 

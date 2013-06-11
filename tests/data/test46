@@ -52,8 +52,8 @@ TZ=GMT
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 %HOSTIP	FALSE	/	FALSE	1439150993	mooo	indeed
-#HttpOnly_%HOSTIP	FALSE	/w	FALSE	1439150993	mooo2	indeed2
-%HOSTIP	FALSE	/wa	FALSE	0	empty	
+#HttpOnly_%HOSTIP	FALSE	/want	FALSE	1439150993	mooo2	indeed2
+%HOSTIP	FALSE	/want	FALSE	0	empty	
 </file>
 </client>
 
@@ -77,8 +77,8 @@ Cookie: empty=; mooo2=indeed2; mooo=indeed
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 %HOSTIP	FALSE	/	FALSE	1439150993	mooo	indeed
-#HttpOnly_%HOSTIP	FALSE	/w	FALSE	1439150993	mooo2	indeed2
-%HOSTIP	FALSE	/wa	FALSE	0	empty	
+#HttpOnly_%HOSTIP	FALSE	/want	FALSE	1439150993	mooo2	indeed2
+%HOSTIP	FALSE	/want	FALSE	0	empty	
 %HOSTIP	FALSE	/	FALSE	2054030187	ckyPersistent	permanent
 %HOSTIP	FALSE	/	FALSE	0	ckySession	temporary
 %HOSTIP	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE

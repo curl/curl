@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ After the \fIlastitem\fP pointer follow the real arguments.
 The pointers \fIfirstitem\fP and \fIlastitem\fP should both be pointing to
 NULL in the first call to this function. All list-data will be allocated by
 the function itself. You must call \fIcurl_formfree(3)\fP on the
-\fIfirstitem\P after the form post has been done to free the resources.
+\fIfirstitem\fP after the form post has been done to free the resources.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.

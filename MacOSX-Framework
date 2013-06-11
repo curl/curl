@@ -103,7 +103,7 @@ if test ! -z $SDK32; then
   ln -fs ${FRAMEWORK_VERSION}/Resources Resources
   ln -fs ${FRAMEWORK_VERSION}/Headers Headers
   cd Versions
-  ln -fs ${FRAMEWORK_VERSION} Current
+  ln -fs $(basename "${FRAMEWORK_VERSION}") Current
 
   echo Testing for SDK64
   if test -d $SDK64_DIR; then

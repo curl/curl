@@ -62,6 +62,7 @@ struct SMTP {
   struct curl_slist *rcpt; /* Recipient list */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
+  bool trailing_crlf;      /* Specifies if the tailing CRLF is present */
 };
 
 /* smtp_conn is used for struct connection-oriented data in the connectdata

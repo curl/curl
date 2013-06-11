@@ -43,3 +43,5 @@ simplessl
 smtp-multi
 smtp-tls
 url2file
+usercertinmem
+xmlstream

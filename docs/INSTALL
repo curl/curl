@@ -220,7 +220,7 @@ Win32
    adjust as necessary. It is also possible to override these paths with
    environment variables, for example:
 
-     set ZLIB_PATH=c:\zlib-1.2.7
+     set ZLIB_PATH=c:\zlib-1.2.8
      set OPENSSL_PATH=c:\openssl-0.9.8y
      set LIBSSH2_PATH=c:\libssh2-1.4.3
 
@@ -323,7 +323,7 @@ Win32
    documentation on how to compile zlib. Define the ZLIB_PATH environment
    variable to the location of zlib.h and zlib.lib, for example:
 
-     set ZLIB_PATH=c:\zlib-1.2.7
+     set ZLIB_PATH=c:\zlib-1.2.8
 
    Then run 'nmake vc-zlib' in curl's root directory.
 

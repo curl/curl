@@ -435,7 +435,7 @@ int cert_stuff(struct connectdata *conn,
       PKCS12_PBE_add();
 
       if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
-                        &ca)) {
+                       &ca)) {
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
               ERR_error_string(ERR_get_error(), NULL) );
@@ -447,54 +447,53 @@ int cert_stuff(struct connectdata *conn,
 
       if(SSL_CTX_use_certificate(ctx, x509) != 1) {
         failf(data, SSL_CLIENT_CERT_ERR);
-        EVP_PKEY_free(pri);
-        X509_free(x509);
-        sk_X509_pop_free(ca, X509_free);
-        return 0;
+        goto fail;
       }
 
       if(SSL_CTX_use_PrivateKey(ctx, pri) != 1) {
         failf(data, "unable to use private key from PKCS12 file '%s'",
               cert_file);
-        EVP_PKEY_free(pri);
-        X509_free(x509);
-        sk_X509_pop_free(ca, X509_free);
-        return 0;
+        goto fail;
       }
 
       if(!SSL_CTX_check_private_key (ctx)) {
         failf(data, "private key from PKCS12 file '%s' "
               "does not match certificate in same file", cert_file);
-        EVP_PKEY_free(pri);
-        X509_free(x509);
-        sk_X509_pop_free(ca, X509_free);
-        return 0;
+        goto fail;
       }
       /* Set Certificate Verification chain */
       if(ca && sk_X509_num(ca)) {
         for(i = 0; i < sk_X509_num(ca); i++) {
-          if(!SSL_CTX_add_extra_chain_cert(ctx,sk_X509_value(ca, i))) {
+          /*
+           * Note that sk_X509_pop() is used below to make sure the cert is
+           * removed from the stack properly before getting passed to
+           * SSL_CTX_add_extra_chain_cert(). Previously we used
+           * sk_X509_value() instead, but then we'd clean it in the subsequent
+           * sk_X509_pop_free() call.
+           */
+          X509 *x = sk_X509_pop(ca);
+          if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
             failf(data, "cannot add certificate to certificate chain");
-            EVP_PKEY_free(pri);
-            X509_free(x509);
-            sk_X509_pop_free(ca, X509_free);
-            return 0;
+            goto fail;
           }
-          if(!SSL_CTX_add_client_CA(ctx, sk_X509_value(ca, i))) {
+          /* SSL_CTX_add_client_CA() seems to work with either sk_* function,
+           * presumably because it duplicates what we pass to it.
+           */
+          if(!SSL_CTX_add_client_CA(ctx, x)) {
             failf(data, "cannot add certificate to client CA list");
-            EVP_PKEY_free(pri);
-            X509_free(x509);
-            sk_X509_pop_free(ca, X509_free);
-            return 0;
+            goto fail;
           }
         }
       }
 
+      cert_done = 1;
+  fail:
       EVP_PKEY_free(pri);
       X509_free(x509);
       sk_X509_pop_free(ca, X509_free);
-      cert_done = 1;
-      break;
+
+      if(!cert_done)
+        return 0; /* failure! */
 #else
       failf(data, "file type P12 for certificate not supported");
       return 0;
@@ -2205,14 +2204,7 @@ static CURLcode servercert(struct connectdata *conn,
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
                          buffer, BUFSIZE);
-  if(rc) {
-    if(strict)
-      failf(data, "SSL: couldn't get X509-subject!");
-    X509_free(connssl->server_cert);
-    connssl->server_cert = NULL;
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  infof(data, "\t subject: %s\n", buffer);
+  infof(data, "\t subject: %s\n", rc?"[NONE]":buffer);
 
   certdate = X509_get_notBefore(connssl->server_cert);
   asn1_output(certdate, buffer, BUFSIZE);
@@ -2553,7 +2545,7 @@ static ssize_t ossl_send(struct connectdata *conn,
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   rc = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
-  if(rc < 0) {
+  if(rc <= 0) {
     err = SSL_get_error(conn->ssl[sockindex].handle, rc);
 
     switch(err) {
@@ -2602,7 +2594,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, buffsize);
-  if(nread < 0) {
+  if(nread <= 0) {
     /* failed SSL_read */
     int err = SSL_get_error(conn->ssl[num].handle, (int)nread);
 

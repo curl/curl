@@ -17,16 +17,15 @@ SMTP
 smtp
 </server>
  <name>
-SMTP without --mail-from
+SMTP with no mail data
  </name>
-<stdin>
-From: different
-To: another
 
-body
+<stdin nonewline="yes">
+
 </stdin>
+
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@foo -T -
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 911@foo --mail-rcpt 911@foobar.example --mail-from 911@from -T -
 </command>
 </client>
 
@@ -35,16 +34,14 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@foo -T -
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:<>
-RCPT TO:<906@foo>
+MAIL FROM:<911@from>
+RCPT TO:<911@foo>
+RCPT TO:<911@foobar.example>
 DATA
 QUIT
 </protocol>
 <upload>
-From: different
-To: another
 
-body
 .
 </upload>
 </verify>
