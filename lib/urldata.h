@@ -325,6 +325,7 @@ struct ssl_connect_data {
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
+  ssl_connect_state connecting_state;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
   struct curl_schannel_cred *cred;

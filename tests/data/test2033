@@ -89,6 +89,9 @@ Finally, this is the real page!
 
 # Client-side
 <client>
+<features>
+NTLM
+</features>
 <server>
 http
 </server>
