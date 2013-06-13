@@ -420,6 +420,9 @@ CURLcode curl_easy_perform(CURL *easy)
   bool done = FALSE;
   int rc;
   struct SessionHandle *data = easy;
+  int without_fds = 0;  /* count number of consecutive returns from
+                           curl_multi_wait() without any filedescriptors */
+  struct timeval before;
 
   if(!easy)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -460,6 +463,7 @@ CURLcode curl_easy_perform(CURL *easy)
     int still_running;
     int ret;
 
+    before = curlx_tvnow();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
 
     if(mcode == CURLM_OK) {
@@ -468,6 +472,27 @@ CURLcode curl_easy_perform(CURL *easy)
         code = CURLE_RECV_ERROR;
         break;
       }
+      else if(ret == 0) {
+        struct timeval after = curlx_tvnow();
+        /* If it returns without any filedescriptor instantly, we need to
+           avoid busy-looping during periods where it has nothing particular
+           to wait for */
+        if(curlx_tvdiff(after, before) <= 10) {
+          without_fds++;
+          if(without_fds > 2) {
+            int sleep_ms = without_fds * 50;
+            if(sleep_ms > 1000)
+              sleep_ms = 1000;
+            Curl_wait_ms(sleep_ms);
+          }
+        }
+        else
+          /* it wasn't "instant", restart counter */
+          without_fds = 0;
+      }
+      else
+        /* got file descriptor, restart counter */
+        without_fds = 0;
 
       mcode = curl_multi_perform(multi, &still_running);
     }
