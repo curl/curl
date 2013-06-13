@@ -55,6 +55,13 @@ This release includes the following bugfixes:
  o libcurl-tutorial.3: fix incorrect backslash [17]
  o curl_multi_wait: reduce timeout if the multi handle wants to [18]
  o tests/Makefile: typo in the perlcheck target [19]
+ o axtls: honor disabled VERIFYHOST
+ o OpenSSL: avoid double free in the PKCS12 certificate code [20]
+ o multi_socket: reduce timeout inaccuracy margin [21]
+ o digest: support auth-int for empty entity body [22]
+ o axtls: now done non-blocking
+ o lib1900: use tutil_tvnow instead of gettimeofday
+ o curl_easy_perform: avoid busy-looping [23]
 
 This release includes the following known bugs:
 
@@ -69,7 +76,8 @@ advice from friends like these:
  Ludovico Cavedon, Zdenek Pavlas, Zekun Ni, Lars Johannesen, Marc Hoersken,
  Renaud Guillard, John Gardiner Myers, Jared Jennings, Eric Hu,
  Yamada Yasuharu, Stefan Neis, Mike Giancola, Eric S. Raymond, Andrii Moiseiev,
- Christian Weisgerber
+ Christian Weisgerber, Peter Gal, Aleksey Tulinov, Hang Su, Sergei Nikulov,
+ Miguel Angel
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -94,3 +102,7 @@ References to bug reports and discussions on issues:
  [17] = http://curl.haxx.se/bug/view.cgi?id=1234
  [18] = http://curl.haxx.se/bug/view.cgi?id=1224
  [19] = http://curl.haxx.se/bug/view.cgi?id=1239
+ [20] = http://curl.haxx.se/bug/view.cgi?id=1236
+ [21] = http://curl.haxx.se/bug/view.cgi?id=1228
+ [22] = http://curl.haxx.se/bug/view.cgi?id=1235
+ [23] = http://curl.haxx.se/bug/view.cgi?id=1238
