@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -357,12 +357,21 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   } /* Calculations end */
 
   if(!(data->progress.flags & PGRS_HIDE)) {
-
     /* progress meter has not been shut off */
 
-    if(data->set.fprogress) {
-      /* There's a callback set, so we call that instead of writing
-         anything ourselves. This really is the way to go. */
+    if(data->set.fxferinfo) {
+      /* There's a callback set, call that */
+      result= data->set.fxferinfo(data->set.progress_client,
+                                  data->progress.size_dl,
+                                  data->progress.downloaded,
+                                  data->progress.size_ul,
+                                  data->progress.uploaded);
+      if(result)
+        failf(data, "Callback aborted");
+      return result;
+    }
+    else if(data->set.fprogress) {
+      /* The older deprecated callback is set, call that */
       result= data->set.fprogress(data->set.progress_client,
                                   (double)data->progress.size_dl,
                                   (double)data->progress.downloaded,

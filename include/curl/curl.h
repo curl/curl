@@ -156,11 +156,21 @@ struct curl_httppost {
                                        HTTPPOST_CALLBACK posts */
 };
 
+/* This is the CURLOPT_PROGRESSFUNCTION callback proto. It is now considered
+   deprecated but was the only choice up until 7.31.0 */
 typedef int (*curl_progress_callback)(void *clientp,
                                       double dltotal,
                                       double dlnow,
                                       double ultotal,
                                       double ulnow);
+
+/* This is the CURLOPT_XFERINFOFUNCTION callback proto. It was introduced in
+   7.32.0, it avoids floating point and provides more detailed information. */
+typedef int (*curl_xferinfo_callback)(void *clientp,
+                                      curl_off_t dltotal,
+                                      curl_off_t dlnow,
+                                      curl_off_t ultotal,
+                                      curl_off_t ulnow);
 
 #ifndef CURL_MAX_WRITE_SIZE
   /* Tests have proven that 20K is a very bad buffer size for uploads on
@@ -968,13 +978,16 @@ typedef enum {
 
   /* 55 = OBSOLETE */
 
-  /* Function that will be called instead of the internal progress display
+  /* DEPRECATED
+   * Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
    * prototype defines. */
   CINIT(PROGRESSFUNCTION, FUNCTIONPOINT, 56),
 
-  /* Data passed to the progress callback */
+  /* Data passed to the CURLOPT_PROGRESSFUNCTION and CURLOPT_XFERINFOFUNCTION
+     callbacks */
   CINIT(PROGRESSDATA, OBJECTPOINT, 57),
+#define CURLOPT_XFERINFODATA CURLOPT_PROGRESSDATA
 
   /* We want the referrer field set automatically when following locations */
   CINIT(AUTOREFERER, LONG, 58),
@@ -1532,6 +1545,11 @@ typedef enum {
 
   /* Enable/disable SASL initial response */
   CINIT(SASL_IR, LONG, 218),
+
+  /* Function that will be called instead of the internal progress display
+   * function. This function should be defined as the curl_xferinfo_callback
+   * prototype defines. (Deprecates CURLOPT_PROGRESSFUNCTION) */
+  CINIT(XFERINFOFUNCTION, FUNCTIONPOINT, 219),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -377,10 +377,54 @@ function that performs transfers.
 
 \fICURLOPT_NOPROGRESS\fP must be set to 0 to make this function actually
 get called.
+.IP CURLOPT_XFERINFOFUNCTION
+Pass a pointer to a function that matches the following prototype:
+
+.nf
+\fBint function(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
+                curl_off_t ultotal, curl_off_t ulnow);\fP
+.fi
+
+This function gets called by libcurl instead of its internal equivalent with a
+frequent interval. While data is being transferred it will be called very
+frequently, and during slow periods like when nothing is being transferred it
+can slow down to about one call per second.
+
+\fIclientp\fP is the pointer set with \fICURLOPT_XFERINFODATA\fP, it is only
+passed along from the application to the callback.
+
+The callback gets told how much data libcurl will transfer and has
+transferred, in number of bytes. \fIdltotal\fP is the total number of bytes
+libcurl expects to download in this transfer. \fIdlnow\fP is the number of
+bytes downloaded so far. \fIultotal\fP is the total number of bytes libcurl
+expects to upload in this transfer. \fIulnow\fP is the number of bytes
+uploaded so far.
+
+Unknown/unused argument values passed to the callback will be set to zero
+(like if you only download data, the upload size will remain 0). Many times
+the callback will be called one or more times first, before it knows the data
+sizes so a program must be made to handle that.
+
+Returning a non-zero value from this callback will cause libcurl to abort the
+transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
+
+If you transfer data with the multi interface, this function will not be
+called during periods of idleness unless you call the appropriate libcurl
+function that performs transfers.
+
+\fICURLOPT_NOPROGRESS\fP must be set to 0 to make this function actually
+get called.
+
+(Added in 7.32.0)
 .IP CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 The default value of this parameter is unspecified.
+.IP CURLOPT_XFERINFODATA
+Pass a pointer that will be untouched by libcurl and passed as the first
+argument in the progress callback set with \fICURLOPT_XFERINFOFUNCTION\fP.
+The default value of this parameter is unspecified. This option is an alias
+for CURLOPT_PROGRESSDATA. (Added in 7.32.0)
 .IP CURLOPT_HEADERFUNCTION
 Pass a pointer to a function that matches the following prototype:
 \fBsize_t function( void *ptr, size_t size, size_t nmemb, void

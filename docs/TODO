@@ -16,9 +16,8 @@
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
- 1.6 progress callback without doubles
- 1.7 Happy Eyeball dual stack connect
- 1,8 Modified buffer size approach
+ 1.6 Happy Eyeball dual stack connect
+ 1.7 Modified buffer size approach
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -158,16 +157,7 @@
  we need libssh2 to properly tell us when we pass in a too small buffer and
  its current API (as of libssh2 1.2.7) doesn't.
 
-1.6 progress callback without doubles
-
- The progress callback was introduced way back in the days and the choice to
- use doubles in the arguments was possibly good at the time. Today the doubles
- only confuse users and make the amounts less precise. We should introduce
- another progress callback option that take precedence over the old one and
- have both co-exist for a forseeable time until we can remove the double-using
- one.
-
-1.7 Happy Eyeball dual stack connect
+1.6 Happy Eyeball dual stack connect
 
  In order to make alternative technologies not suffer when transitioning, like
  when introducing IPv6 as an alternative to IPv4 and there are more than one
@@ -179,7 +169,7 @@
 
     http://tools.ietf.org/html/rfc6555
 
-1.8 Modified buffer size approach
+1.7 Modified buffer size approach
 
  Current libcurl allocates a fixed 16K size buffer for download and an
  additional 16K for upload. They are always unconditionally part of the easy
