@@ -57,6 +57,7 @@
 #include "tool_doswin.h"
 #include "tool_easysrc.h"
 #include "tool_getparam.h"
+#include "tool_help.h"
 #include "tool_helpers.h"
 #include "tool_homedir.h"
 #include "tool_libinfo.h"
@@ -211,8 +212,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     parseconfig(NULL, config); /* ignore possible failure */
   }
 
-  if((argc < 2)  && !config->url_list) {
-    helpf(config->errors, NULL);
+  if((argc < 2) && !config->url_list) {
+    FILE *err = config->errors;
+    tool_help_short(err);
+    helpf(err, NULL);
     res = CURLE_FAILED_INIT;
     goto quit_curl;
   }
