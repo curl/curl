@@ -38,6 +38,7 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
+ 5.4 HTTP2/SPDY
 
  6. TELNET
  6.1 ditch stdin
@@ -267,6 +268,25 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
+
+5.4 HTTP2/SPDY
+
+ The first drafts for HTTP2 have been published
+ (http://tools.ietf.org/html/draft-ietf-httpbis-http2-03) and is so far based
+ on SPDY (http://www.chromium.org/spdy) designs and experiences. Chances are
+ it will end up in that style. Chrome and Firefox already support SPDY and
+ lots of web services do.
+
+ It would make sense to implement SPDY support now and later transition into
+ or add HTTP2 support as well.
+
+ We should base or HTTP2/SPDY work on a 3rd party library for the protocol
+ fiddling. The Spindy library (http://spindly.haxx.se/) was an attempt to make
+ such a library with an API suitable for use by libcurl but that effort has
+ more or less stalled.  spdylay (https://github.com/tatsuhiro-t/spdylay) may
+ be a better option, either used directly or wrapped with a more spindly-like
+ API.
+
 
 6. TELNET
 
