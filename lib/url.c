@@ -1137,41 +1137,44 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(argptr == NULL)
       break;
 
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+
     if(Curl_raw_equal(argptr, "ALL")) {
       /* clear all cookies */
       Curl_cookie_clearall(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "SESS")) {
       /* clear session cookies */
       Curl_cookie_clearsess(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "FLUSH")) {
       /* flush cookies to file */
       Curl_flush_cookies(data, 0);
-      break;
     }
+    else {
+      if(!data->cookies)
+        /* if cookie engine was not running, activate it */
+        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
 
-    if(!data->cookies)
-      /* if cookie engine was not running, activate it */
-      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      argptr = strdup(argptr);
+      if(!argptr) {
+        result = CURLE_OUT_OF_MEMORY;
+      }
+      else {
 
-    argptr = strdup(argptr);
-    if(!argptr) {
-      result = CURLE_OUT_OF_MEMORY;
-      break;
+        if(checkprefix("Set-Cookie:", argptr))
+          /* HTTP Header format line */
+          Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
+
+        else
+          /* Netscape format line */
+          Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
+
+        free(argptr);
+      }
     }
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 
-    if(checkprefix("Set-Cookie:", argptr))
-      /* HTTP Header format line */
-      Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
-
-    else
-      /* Netscape format line */
-      Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
-
-    free(argptr);
     break;
 #endif /* CURL_DISABLE_COOKIES */
 
