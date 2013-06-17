@@ -202,6 +202,32 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
+  /* initial cookie manipulation */
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_share_cleanup(share);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+  printf( "CURLOPT_SHARE\n" );
+  test_setopt( curl, CURLOPT_SHARE,      share );
+  printf( "CURLOPT_COOKIELIST injected_and_clobbered\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST,
+               "Set-Cookie: injected_and_clobbered=yes; "
+               "domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030" );
+  printf( "CURLOPT_COOKIELIST ALL\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "ALL" );
+  printf( "CURLOPT_COOKIELIST session\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "Set-Cookie: session=elephants" );
+  printf( "CURLOPT_COOKIELIST injected\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST,
+               "Set-Cookie: injected=yes; domain=host.foo.com; "
+               "expires=Sat Feb 2 11:56:27 GMT 2030" );
+  printf( "CURLOPT_COOKIELIST SESS\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "SESS" );
+  printf( "CLEANUP\n" );
+  curl_easy_cleanup( curl );
+
 
   res = 0;
 
@@ -238,6 +264,8 @@ int test(char *URL)
   test_setopt( curl, CURLOPT_SHARE,      share );
   printf( "CURLOPT_COOKIEJAR\n" );
   test_setopt( curl, CURLOPT_COOKIEJAR,  JAR );
+  printf( "CURLOPT_COOKIELIST FLUSH\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "FLUSH" );
 
   printf( "PERFORM\n" );
   curl_easy_perform( curl );
