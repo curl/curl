@@ -437,6 +437,12 @@ to provide the data to send.
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
  http://www.rfc-editor.org/rfc/rfc6698.txt
 
+ An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
+ (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
+ approach. See Daniel's comments:
+ http://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
+ correct library to base this development on.
+
 13. GnuTLS
 
 13.1 SSL engine stuff
