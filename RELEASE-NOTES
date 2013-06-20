@@ -62,6 +62,7 @@ This release includes the following bugfixes:
  o axtls: now done non-blocking
  o lib1900: use tutil_tvnow instead of gettimeofday
  o curl_easy_perform: avoid busy-looping [23]
+ o CURLOPT_COOKIELIST: take cookie share lock [24]
 
 This release includes the following known bugs:
 
@@ -77,7 +78,7 @@ advice from friends like these:
  Renaud Guillard, John Gardiner Myers, Jared Jennings, Eric Hu,
  Yamada Yasuharu, Stefan Neis, Mike Giancola, Eric S. Raymond, Andrii Moiseiev,
  Christian Weisgerber, Peter Gal, Aleksey Tulinov, Hang Su, Sergei Nikulov,
- Miguel Angel
+ Miguel Angel, Nach M. S., Benjamin Gilbert
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -106,3 +107,4 @@ References to bug reports and discussions on issues:
  [21] = http://curl.haxx.se/bug/view.cgi?id=1228
  [22] = http://curl.haxx.se/bug/view.cgi?id=1235
  [23] = http://curl.haxx.se/bug/view.cgi?id=1238
+ [24] = http://curl.haxx.se/bug/view.cgi?id=1215
