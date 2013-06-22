@@ -22,9 +22,11 @@ This release includes the following changes:
  o url: Added smtp and pop3 hostnames to the protocol detection list
  o imap/pop3/smtp: Added support for enabling the SASL initial response [8]
  o curl -E: allow to use ':' in certificate nicknames [10]
- o 
 
 This release includes the following bugfixes:
+
+ o SECURITY VULNERABILITY: curl_easy_unescape() may parse data beyond the end
+   of the input buffer [26]
 
  o FTP: access files in root dir correctly [1]
  o configure: try pthread_create without -lpthread [2]
@@ -63,6 +65,7 @@ This release includes the following bugfixes:
  o lib1900: use tutil_tvnow instead of gettimeofday
  o curl_easy_perform: avoid busy-looping [23]
  o CURLOPT_COOKIELIST: take cookie share lock [24]
+ o multi_socket: react on socket close immediately [25]
 
 This release includes the following known bugs:
 
@@ -78,7 +81,8 @@ advice from friends like these:
  Renaud Guillard, John Gardiner Myers, Jared Jennings, Eric Hu,
  Yamada Yasuharu, Stefan Neis, Mike Giancola, Eric S. Raymond, Andrii Moiseiev,
  Christian Weisgerber, Peter Gal, Aleksey Tulinov, Hang Su, Sergei Nikulov,
- Miguel Angel, Nach M. S., Benjamin Gilbert
+ Miguel Angel, Nach M. S., Benjamin Gilbert, Erik Johansson, Timo Sirainen,
+ Guenter Knauf
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -108,3 +112,5 @@ References to bug reports and discussions on issues:
  [22] = http://curl.haxx.se/bug/view.cgi?id=1235
  [23] = http://curl.haxx.se/bug/view.cgi?id=1238
  [24] = http://curl.haxx.se/bug/view.cgi?id=1215
+ [25] = http://curl.haxx.se/bug/view.cgi?id=1248
+ [26] = http://curl.haxx.se/docs/adv_20130622.html
