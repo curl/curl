@@ -71,7 +71,7 @@ Host: [1234:1234:1234::4ce]:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
 GET /wanted/page/1230 HTTP/1.1
-Host: [1234:1234:1234::4ce]:8990
+Host: [1234:1234:1234::4ce]:%HTTPPORT
 Accept: */*
 
 </protocol>
