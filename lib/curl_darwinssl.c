@@ -38,9 +38,56 @@
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
+
+/* The Security framework has changed greatly between iOS and different OS X
+   versions, and we will try to support as many of them as we can (back to
+   Leopard and iOS 5) by using macros and weak-linking.
+
+   IMPORTANT: If TLS 1.1 and 1.2 support are important for you on OS X, then
+   you must build this project against the 10.8 SDK or later. */
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
+#error "The darwinssl back-end requires Leopard or later."
+#endif /* MAC_OS_X_VERSION_MAX_ALLOWED < 1050 */
+
+#define CURL_BUILD_IOS 0
+#define CURL_BUILD_MAC 1
+/* This is the maximum API level we are allowed to use when building: */
+#define CURL_BUILD_MAC_10_5 MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+#define CURL_BUILD_MAC_10_6 MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+#define CURL_BUILD_MAC_10_7 MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+#define CURL_BUILD_MAC_10_8 MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
+/* These macros mean "the following code is present to allow runtime backward
+   compatibility with at least this cat or earlier":
+   (You set this at build-time by setting the MACOSX_DEPLOYMENT_TARGET
+   environmental variable.) */
+#define CURL_SUPPORT_MAC_10_5 MAC_OS_X_VERSION_MIN_REQUIRED <= 1050
+#define CURL_SUPPORT_MAC_10_6 MAC_OS_X_VERSION_MIN_REQUIRED <= 1060
+#define CURL_SUPPORT_MAC_10_7 MAC_OS_X_VERSION_MIN_REQUIRED <= 1070
+#define CURL_SUPPORT_MAC_10_8 MAC_OS_X_VERSION_MIN_REQUIRED <= 1080
+
+#elif TARGET_OS_EMBEDDED || TARGET_OS_IPHONE
+#define CURL_BUILD_IOS 1
+#define CURL_BUILD_MAC 0
+#define CURL_BUILD_MAC_10_5 0
+#define CURL_BUILD_MAC_10_6 0
+#define CURL_BUILD_MAC_10_7 0
+#define CURL_BUILD_MAC_10_8 0
+#define CURL_BUILD_MAC_10_9 0
+#define CURL_SUPPORT_MAC_10_5 0
+#define CURL_SUPPORT_MAC_10_6 0
+#define CURL_SUPPORT_MAC_10_7 0
+#define CURL_SUPPORT_MAC_10_8 0
+#define CURL_SUPPORT_MAC_10_9 0
+
+#else
+#error "The darwinssl back-end requires iOS or OS X."
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+
+#if CURL_BUILD_MAC
 #include <sys/sysctl.h>
-#endif
+#endif /* CURL_BUILD_MAC */
 
 #include "urldata.h"
 #include "sendf.h"
@@ -60,16 +107,6 @@
 /* From MacTypes.h (which we can't include because it isn't present in iOS: */
 #define ioErr -36
 #define paramErr -50
-
-/* In Mountain Lion and iOS 5, Apple made some changes to the API. They
-   added TLS 1.1 and 1.2 support, and deprecated and replaced some
-   functions. You need to build against the Mountain Lion or iOS 5 SDK
-   or later to get TLS 1.1 or 1.2 support working in cURL. We'll weak-link
-   to the newer functions and use them if present in the user's OS.
-
-   Builders: If you want TLS 1.1 and 1.2 but still want to retain support
-   for older cats, don't forget to set the MACOSX_DEPLOYMENT_TARGET
-   environmental variable prior to building cURL. */
 
 /* The following two functions were ripped from Apple sample code,
  * with some modifications: */
@@ -361,7 +398,7 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case TLS_DH_anon_WITH_AES_256_CBC_SHA:
       return "TLS_DH_anon_WITH_AES_256_CBC_SHA";
       break;
-#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
     /* TLS 1.0 with ECDSA (RFC 4492) */
     case TLS_ECDH_ECDSA_WITH_NULL_SHA:
       return "TLS_ECDH_ECDSA_WITH_NULL_SHA";
@@ -438,8 +475,8 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case TLS_ECDH_anon_WITH_AES_256_CBC_SHA:
       return "TLS_ECDH_anon_WITH_AES_256_CBC_SHA";
       break;
-#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
+#endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
     /* TLS 1.2 (RFC 5246) */
     case TLS_RSA_WITH_NULL_MD5:
       return "TLS_RSA_WITH_NULL_MD5";
@@ -624,12 +661,12 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
     case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
       return "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA";
       break;
-#endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
   }
   return "TLS_NULL_WITH_NULL_NULL";
 }
 
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_BUILD_MAC
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
 {
   int mib[2];
@@ -658,7 +695,7 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   *minor = atoi(os_version_minor);
   free(os_version);
 }
-#endif
+#endif /* CURL_BUILD_MAC */
 
 /* Apple provides a myriad of ways of getting information about a certificate
    into a string. Some aren't available under iOS or newer cats. So here's
@@ -668,37 +705,36 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
 {
   CFStringRef server_cert_summary = CFSTR("(null)");
 
-#if (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)
+#if CURL_BUILD_IOS
   /* iOS: There's only one way to do this. */
   server_cert_summary = SecCertificateCopySubjectSummary(cert);
 #else
-#if defined(__MAC_10_7)
+#if CURL_BUILD_MAC_10_7
   /* Lion & later: Get the long description if we can. */
   if(SecCertificateCopyLongDescription != NULL)
     server_cert_summary =
       SecCertificateCopyLongDescription(NULL, cert, NULL);
   else
-#endif /* defined(__MAC_10_7) */
-#if defined(__MAC_10_6)
+#endif /* CURL_BUILD_MAC_10_7 */
+#if CURL_BUILD_MAC_10_6
   /* Snow Leopard: Get the certificate summary. */
   if(SecCertificateCopySubjectSummary != NULL)
     server_cert_summary = SecCertificateCopySubjectSummary(cert);
   else
-#endif /* defined(__MAC_10_6) */
+#endif /* CURL_BUILD_MAC_10_6 */
   /* Leopard is as far back as we go... */
   (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
-#endif /* (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE) */
+#endif /* CURL_BUILD_IOS */
   return server_cert_summary;
 }
 
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_6
+/* The SecKeychainSearch API was deprecated in Lion, and using it will raise
+   deprecation warnings, so let's not compile this unless it's necessary: */
 static OSStatus CopyIdentityWithLabelOldSchool(char *label,
                                                SecIdentityRef *out_c_a_k)
 {
   OSStatus status = errSecItemNotFound;
-/* The SecKeychainSearch API was deprecated in Lion, and using it will raise
-   deprecation warnings, so let's not compile this unless it's necessary: */
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
   SecKeychainAttributeList attr_list;
   SecKeychainAttribute attr;
   SecKeychainSearchRef search = NULL;
@@ -730,19 +766,16 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
 
   if(search)
     CFRelease(search);
-#else
-#pragma unused(label, out_c_a_k)
-#endif /* MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7 */
   return status;
 }
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif /* CURL_SUPPORT_MAC_10_6 */
 
 static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
 
-#if defined(__MAC_10_6) || defined(__IPHONE_2_0)
+#if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard. If it
      exists, let's use that to find the certificate. */
   if(SecItemCopyMatching != NULL) {
@@ -774,15 +807,15 @@ static OSStatus CopyIdentityWithLabel(char *label,
     CFRelease(query_dict);
   }
   else {
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_6
     /* On Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif /* CURL_SUPPORT_MAC_10_6 */
   }
-#elif (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#elif CURL_SUPPORT_MAC_10_6
   /* For developers building on Leopard, we have no choice but to fall back. */
   status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* defined(__MAC_10_6) || defined(__IPHONE_2_0) */
+#endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
   return status;
 }
 
@@ -796,19 +829,19 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   struct in6_addr addr;
 #else
   struct in_addr addr;
-#endif
+#endif /* ENABLE_IPV6 */
   size_t all_ciphers_count = 0UL, allowed_ciphers_count = 0UL, i;
   SSLCipherSuite *all_ciphers = NULL, *allowed_ciphers = NULL;
   char *ssl_sessionid;
   size_t ssl_sessionid_len;
   OSStatus err = noErr;
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_BUILD_MAC
   int darwinver_maj = 0, darwinver_min = 0;
 
   GetDarwinVersionNumber(&darwinver_maj, &darwinver_min);
-#endif
+#endif /* CURL_BUILD_MAC */
 
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
     if(connssl->ssl_ctx)
       CFRelease(connssl->ssl_ctx);
@@ -820,7 +853,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
   else {
   /* The old ST API does not exist under iOS, so don't compile it: */
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_8
     if(connssl->ssl_ctx)
       (void)SSLDisposeContext(connssl->ssl_ctx);
     err = SSLNewContext(false, &(connssl->ssl_ctx));
@@ -828,7 +861,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       failf(data, "SSL: couldn't create a context: OSStatus %d", err);
       return CURLE_OUT_OF_MEMORY;
     }
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
   if(connssl->ssl_ctx)
@@ -838,11 +871,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     failf(data, "SSL: couldn't create a context: OSStatus %d", err);
     return CURLE_OUT_OF_MEMORY;
   }
-#endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
   connssl->ssl_write_buffered_length = 0UL; /* reset buffered write length */
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(data->set.ssl.version) {
       case CURL_SSLVERSION_DEFAULT: default:
@@ -863,7 +896,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_8
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
@@ -904,7 +937,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
     }
-#endif  /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif  /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
@@ -934,7 +967,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                          true);
       break;
   }
-#endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
   if(data->set.str[STRING_KEY]) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
@@ -992,7 +1025,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
-#if defined(__MAC_10_6) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
   /* Snow Leopard introduced the SSLSetSessionOption() function, but due to
      a library bug with the way the kSSLSessionOptionBreakOnServerAuth flag
      works, it doesn't work as expected under Snow Leopard or Lion.
@@ -1001,11 +1034,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      (SecureTransport will always validate the certificate chain by
      default.) */
   /* (Note: Darwin 12.x.x is Mountain Lion.) */
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_BUILD_MAC
   if(SSLSetSessionOption != NULL && darwinver_maj >= 12) {
 #else
   if(SSLSetSessionOption != NULL) {
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif /* CURL_BUILD_MAC */
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               data->set.ssl.verifypeer?false:true);
@@ -1015,14 +1048,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_8
     err = SSLSetEnableCertVerify(connssl->ssl_ctx,
                                  data->set.ssl.verifypeer?true:false);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
     }
-#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
   err = SSLSetEnableCertVerify(connssl->ssl_ctx,
@@ -1031,7 +1064,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;
   }
-#endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
   /* If this is a domain name and not an IP address, then configure SNI.
    * Also: the verifyhost setting influences SNI usage */
@@ -1061,7 +1094,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      SSLGetSupportedCiphers(connssl->ssl_ctx, all_ciphers,
        &all_ciphers_count) == noErr) {
     for(i = 0UL ; i < all_ciphers_count ; i++) {
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_BUILD_MAC
      /* There's a known bug in early versions of Mountain Lion where ST's ECC
         ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
         Work around the problem here by disabling those ciphers if we are
@@ -1070,7 +1103,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
          all_ciphers[i] >= 0xC001 && all_ciphers[i] <= 0xC032) {
            continue;
       }
-#endif
+#endif /* CURL_BUILD_MAC */
       switch(all_ciphers[i]) {
         /* Disable NULL ciphersuites: */
         case SSL_NULL_WITH_NULL_NULL:
@@ -1303,7 +1336,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         infof(data, "TLS 1.0 connection using %s\n",
               TLSCipherNameForNumber(cipher));
         break;
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
       case kTLSProtocol11:
         infof(data, "TLS 1.1 connection using %s\n",
               TLSCipherNameForNumber(cipher));
@@ -1339,8 +1372,8 @@ darwinssl_connect_step3(struct connectdata *conn,
   /* There is no step 3!
    * Well, okay, if verbose mode is on, let's print the details of the
    * server certificates. */
-#if defined(__MAC_10_7) || defined(__IPHONE_5_0)
-#if (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)
+#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
+#if CURL_BUILD_IOS
 #pragma unused(server_certs)
   err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
   if(err == noErr) {
@@ -1387,6 +1420,7 @@ darwinssl_connect_step3(struct connectdata *conn,
     }
   }
   else {
+#if CURL_SUPPORT_MAC_10_8
     err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
     if(err == noErr) {
       count = CFArrayGetCount(server_certs);
@@ -1406,8 +1440,9 @@ darwinssl_connect_step3(struct connectdata *conn,
       }
       CFRelease(server_certs);
     }
+#endif /* CURL_SUPPORT_MAC_10_8 */
   }
-#endif /* (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE) */
+#endif /* CURL_BUILD_IOS */
 #else
 #pragma unused(trust)
   err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
@@ -1427,7 +1462,7 @@ darwinssl_connect_step3(struct connectdata *conn,
     }
     CFRelease(server_certs);
   }
-#endif /* defined(__MAC_10_7) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
@@ -1579,16 +1614,16 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 
   if(connssl->ssl_ctx) {
     (void)SSLClose(connssl->ssl_ctx);
-#if defined(__MAC_10_8) || defined(__IPHONE_5_0)
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
     if(SSLCreateContext != NULL)
       CFRelease(connssl->ssl_ctx);
-#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#if CURL_SUPPORT_MAC_10_8
     else
       (void)SSLDisposeContext(connssl->ssl_ctx);
-#endif  /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
+#endif  /* CURL_SUPPORT_MAC_10_8 */
 #else
     (void)SSLDisposeContext(connssl->ssl_ctx);
-#endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
+#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
     connssl->ssl_ctx = NULL;
   }
   connssl->ssl_sockfd = 0;
