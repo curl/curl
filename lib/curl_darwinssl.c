@@ -1363,11 +1363,11 @@ darwinssl_connect_step3(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CFStringRef server_cert_summary;
   char server_cert_summary_c[128];
-  CFArrayRef server_certs;
+  CFArrayRef server_certs = NULL;
   SecCertificateRef server_cert;
   OSStatus err;
   CFIndex i, count;
-  SecTrustRef trust;
+  SecTrustRef trust = NULL;
 
   /* There is no step 3!
    * Well, okay, if verbose mode is on, let's print the details of the
@@ -1376,7 +1376,9 @@ darwinssl_connect_step3(struct connectdata *conn,
 #if CURL_BUILD_IOS
 #pragma unused(server_certs)
   err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
-  if(err == noErr) {
+  /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
+     a null trust, so be on guard for that: */
+  if(err == noErr && trust) {
     count = SecTrustGetCertificateCount(trust);
     for(i = 0L ; i < count ; i++) {
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
@@ -1402,7 +1404,9 @@ darwinssl_connect_step3(struct connectdata *conn,
   if(SecTrustEvaluateAsync != NULL) {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
-    if(err == noErr) {
+    /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
+       a null trust, so be on guard for that: */
+    if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
       for(i = 0L ; i < count ; i++) {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
@@ -1422,7 +1426,8 @@ darwinssl_connect_step3(struct connectdata *conn,
   else {
 #if CURL_SUPPORT_MAC_10_8
     err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
-    if(err == noErr) {
+    /* Just in case SSLCopyPeerCertificates() returns null too... */
+    if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
       for(i = 0L ; i < count ; i++) {
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
