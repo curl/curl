@@ -87,7 +87,12 @@
 #include "memdebug.h"
 
 #ifdef SIGPIPE_IGNORE
-#define SIGPIPE_VARIABLE(x) struct sigaction x
+struct sigpipe_ignore {
+  struct sigaction pipe;
+  bool no_signal;
+};
+
+#define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
 
 /*
  * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
@@ -95,13 +100,16 @@
  * return from libcurl again.
  */
 static void sigpipe_ignore(struct SessionHandle *data,
-                           struct sigaction *pipe)
+                           struct sigpipe_ignore *ig)
 {
+  /* get a local copy of no_signal because the SessionHandle might not be
+     around when we restore */
+  ig->no_signal = data->set.no_signal;
   if(!data->set.no_signal) {
     struct sigaction action;
     /* first, extract the existing situation */
-    sigaction(SIGPIPE, NULL, pipe);
-    action = *pipe;
+    sigaction(SIGPIPE, NULL, &ig->pipe);
+    action = ig->pipe;
     /* ignore this signal */
     action.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &action, NULL);
@@ -113,19 +121,17 @@ static void sigpipe_ignore(struct SessionHandle *data,
  * and SIGPIPE handling. It MUST only be called after a corresponding
  * sigpipe_ignore() was used.
  */
-static void sigpipe_restore(struct SessionHandle *data,
-                            struct sigaction *pipe)
+static void sigpipe_restore(struct sigpipe_ignore *ig)
 {
-  if(!data->set.no_signal) {
+  if(!ig->no_signal)
     /* restore the outside state */
-    sigaction(SIGPIPE, pipe, NULL);
-  }
+    sigaction(SIGPIPE, &ig->pipe, NULL);
 }
 
 #else
 /* for systems without sigaction */
 #define sigpipe_ignore(x,y)
-#define sigpipe_restore(x,y)
+#define sigpipe_restore(x)
 #define SIGPIPE_VARIABLE(x)
 #endif
 
@@ -562,7 +568,7 @@ CURLcode curl_easy_perform(CURL *easy)
      a failure here, room for future improvement! */
   (void)curl_multi_remove_handle(multi, easy);
 
-  sigpipe_restore(data, &pipe);
+  sigpipe_restore(&pipe);
 
   /* The multi handle is kept alive, owned by the easy handle */
   return code;
@@ -582,7 +588,7 @@ void curl_easy_cleanup(CURL *curl)
 
   sigpipe_ignore(data, &pipe);
   Curl_close(data);
-  sigpipe_restore(data, &pipe);
+  sigpipe_restore(&pipe);
 }
 
 /*
