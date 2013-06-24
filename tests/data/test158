@@ -33,7 +33,7 @@ http://%HOSTIP:%HTTPPORT/158 -F name=daniel
 <strip>
 ^User-Agent:.*
 ^Content-Type: multipart/form-data.*
-^---------------------------.*
+^-----------------------.*
 </strip>
 <protocol>
 POST /158 HTTP/1.1

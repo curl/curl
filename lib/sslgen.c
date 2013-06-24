@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,6 +45,16 @@
 
 #include "curl_setup.h"
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 #include "urldata.h"
 #define SSLGEN_C
 #include "sslgen.h" /* generic SSL protos etc */
@@ -63,6 +73,7 @@
 #include "curl_memory.h"
 #include "progress.h"
 #include "share.h"
+#include "timeval.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -157,6 +168,63 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->random_file);
+}
+
+
+/*
+ * Curl_rand() returns a random unsigned integer, 32bit.
+ *
+ * This non-SSL function is put here only because this file is the only one
+ * with knowledge of what the underlying SSL libraries provide in terms of
+ * randomizers.
+ *
+ * NOTE: 'data' may be passed in as NULL when coming from external API without
+ * easy handle!
+ *
+ */
+
+unsigned int Curl_rand(struct SessionHandle *data)
+{
+  unsigned int r;
+  static unsigned int randseed;
+  static bool seeded;
+
+#ifdef have_curlssl_random
+  if(!data) {
+#endif
+
+    if(!seeded) {
+
+#ifdef RANDOM_FILE
+      /* if there's a random file to read a seed from, use it */
+      int fd = open(RANDOM_FILE, O_RDONLY);
+      seeded = TRUE;
+      if(fd > -1) {
+        /* read random data into the randseed variable */
+        read(fd, &randseed, sizeof(randseed));
+        close(fd);
+      }
+      else
+#endif /* RANDOM_FILE */
+      {
+        struct timeval now = curlx_tvnow();
+        randseed += (unsigned int) now.tv_usec + (unsigned int)now.tv_sec;
+        Curl_rand(data);
+        Curl_rand(data);
+        Curl_rand(data);
+      }
+    }
+    /* Return an unsigned 32-bit pseudo-random number. */
+    r = randseed = randseed * 1103515245 + 12345;
+    return (r << 16) | ((r >> 16) & 0xFFFF);
+
+#ifdef have_curlssl_random
+  }
+  else {
+    Curl_ssl_random(data, (unsigned char *)&r, sizeof(r));
+    return r;
+  }
+#endif
 }
 
 #ifdef USE_SSL
@@ -518,17 +586,18 @@ void Curl_ssl_free_certinfo(struct SessionHandle *data)
   }
 }
 
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_NSS) || \
-    defined(USE_DARWINSSL)
-/* these functions are only used by some SSL backends */
+/* these functions are only provided by some SSL backends */
 
+#ifdef have_curlssl_random
 void Curl_ssl_random(struct SessionHandle *data,
                      unsigned char *entropy,
                      size_t length)
 {
   curlssl_random(data, entropy, length);
 }
+#endif
 
+#ifdef have_curlssl_md5sum
 void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
@@ -536,6 +605,6 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 {
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
 }
-#endif /* USE_SSLEAY || USE_GNUTLS || USE_NSS || USE_DARWINSSL */
+#endif
 
 #endif /* USE_SSL */

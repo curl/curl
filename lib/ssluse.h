@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,6 +72,10 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *md5sum /* output */,
                       size_t unused);
+
+/* this backend provides these functions: */
+#define have_curlssl_random 1
+#define have_curlssl_md5sum 1
 
 /* API setup for OpenSSL */
 #define curlssl_init Curl_ossl_init

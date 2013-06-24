@@ -24,9 +24,6 @@
 
 #include <curl/curl.h>
 
-/* Length of the random boundary string. */
-#define BOUNDARY_LENGTH 40
-
 #if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
@@ -35,7 +32,7 @@
 
 #include "urldata.h" /* for struct SessionHandle */
 #include "formdata.h"
-#include "curl_rand.h"
+#include "sslgen.h"
 #include "strequal.h"
 #include "curl_memory.h"
 #include "sendf.h"
@@ -56,7 +53,7 @@ static char *Curl_basename(char *path);
 #endif
 
 static size_t readfromfile(struct Form *form, char *buffer, size_t size);
-static char *formboundary(void);
+static char *formboundary(struct SessionHandle *data);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -1101,7 +1098,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
   if(!post)
     return result; /* no input => no output! */
 
-  boundary = formboundary();
+  boundary = formboundary(data);
   if(!boundary)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1157,7 +1154,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
          the magic to include several files with the same field name */
 
       Curl_safefree(fileboundary);
-      fileboundary = formboundary();
+      fileboundary = formboundary(data);
       if(!fileboundary) {
         result = CURLE_OUT_OF_MEMORY;
         break;
@@ -1464,28 +1461,12 @@ char *Curl_formpostheader(void *formp, size_t *len)
  * formboundary() creates a suitable boundary string and returns an allocated
  * one.
  */
-static char *formboundary(void)
+static char *formboundary(struct SessionHandle *data)
 {
-  char *retstring;
-  size_t i;
-
-  static const char table16[]="0123456789abcdef";
-
-  retstring = malloc(BOUNDARY_LENGTH+1);
-
-  if(!retstring)
-    return NULL; /* failed */
-
-  strcpy(retstring, "----------------------------");
-
-  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
-    retstring[i] = table16[Curl_rand()%16];
-
-  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
+  /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
      combinations */
-  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
-
-  return retstring;
+  return aprintf("------------------------%08x%08x",
+                 Curl_rand(data), Curl_rand(data));
 }
 
 #else  /* CURL_DISABLE_HTTP */

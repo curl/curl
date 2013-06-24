@@ -74,7 +74,6 @@
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "amigaos.h"
-#include "curl_rand.h"
 #include "non-ascii.h"
 #include "warnless.h"
 #include "conncache.h"
@@ -329,10 +328,6 @@ CURLcode curl_global_init(long flags)
     Curl_ack_eintr = 1;
 
   init_flags  = flags;
-
-  /* Preset pseudo-random number sequence. */
-
-  Curl_srand();
 
   return CURLE_OK;
 }
