@@ -33,6 +33,7 @@
 #include "strtok.h"
 #include "url.h" /* for Curl_safefree() */
 #include "curl_memory.h"
+#include "sslgen.h" /* for Curl_rand() */
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 #include "warnless.h"
 
@@ -316,8 +317,6 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   char *cnonce = NULL;
   size_t cnonce_sz = 0;
   char *tmp = NULL;
-  struct timeval now;
-
   char **allocuserpwd;
   size_t userlen;
   const char *userp;
@@ -376,10 +375,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     d->nc = 1;
 
   if(!d->cnonce) {
-    /* Generate a cnonce */
-    now = Curl_tvnow();
-    snprintf(cnoncebuf, sizeof(cnoncebuf), "%32ld",
-             (long)now.tv_sec + now.tv_usec);
+    snprintf(cnoncebuf, sizeof(cnoncebuf), "%08x%08x",
+             Curl_rand(data), Curl_rand(data));
 
     rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                             &cnonce, &cnonce_sz);
