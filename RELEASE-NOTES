@@ -18,7 +18,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o dotdot: introducing dot file path cleanup [1]
+ o docs: fix typo in curl_easy_getinfo manpage
+ o test1230: avoid using hard-wired port number
+ o test1396: invoke the correct test tool
+ o SIGPIPE: ignored while inside the library [2]
+ o darwinssl: fix crash that started happening in Lion
+ o OpenSSL: check for read errors, don't assume [3]
+ o c-ares: improve error message on failed resolve [4]
+ o printf: make sure %x are treated unsigned
+ o formpost: better random boundaries [5]
 
 This release includes the following known bugs:
 
@@ -27,10 +36,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Alex Vinnik, Alessandro Ghedini, Nick Zitzmann, Kamil Dudka,
+ Lluís Batlle i Rossell, Nach M. S., Kim Vandry
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1200
+ [2] = http://curl.haxx.se/bug/view.cgi?id=1180
+ [3] = http://curl.haxx.se/bug/view.cgi?id=1249
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1191
+ [5] = http://curl.haxx.se/bug/view.cgi?id=1251
