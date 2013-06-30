@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o c-ares: improve error message on failed resolve [4]
  o printf: make sure %x are treated unsigned
  o formpost: better random boundaries [5]
+ o url: restore the functionality of 'curl -u :' [6]
 
 This release includes the following known bugs:
 
@@ -48,3 +49,4 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/bug/view.cgi?id=1249
  [4] = http://curl.haxx.se/bug/view.cgi?id=1191
  [5] = http://curl.haxx.se/bug/view.cgi?id=1251
+ [6] = http://curl.haxx.se/mail/archive-2013-06/0052.html

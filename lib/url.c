@@ -318,6 +318,13 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
   if(!result) {
     /* Store the username part of option if required */
     if(userp) {
+      if(!user && option && option[0] == ':') {
+        /* Allocate an empty string instead of returning NULL as user name */
+        user = strdup("");
+        if(!user)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+
       Curl_safefree(*userp);
       *userp = user;
     }
