@@ -149,11 +149,11 @@ int test(char *URL)
 {
   int res;
   CURLSHcode scode = CURLSHE_OK;
-  char *url;
+  char *url = NULL;
   struct Tdata tdata;
   CURL *curl;
   CURLSH *share;
-  struct curl_slist *headers;
+  struct curl_slist *headers = NULL;
   int i;
   struct userdata user;
 
@@ -286,9 +286,12 @@ test_cleanup:
   /* clean up last handle */
   printf( "CLEANUP\n" );
   curl_easy_cleanup( curl );
-  curl_slist_free_all( headers );
 
-  curl_free(url);
+  if ( headers )
+    curl_slist_free_all( headers );
+
+  if ( url )
+    curl_free(url);
 
   /* free share */
   printf( "SHARE_CLEANUP\n" );
