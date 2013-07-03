@@ -891,7 +891,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol3);
         break;
       case CURL_SSLVERSION_SSLv2:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol2);
+        err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol2);
+        if(err != noErr) {
+          failf(data, "Your version of the OS does not support SSLv2");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol2);
     }
   }
@@ -932,9 +936,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
       case CURL_SSLVERSION_SSLv2:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+        err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kSSLProtocol2,
                                            true);
+        if(err != noErr) {
+          failf(data, "Your version of the OS does not support SSLv2");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
         break;
     }
 #endif  /* CURL_SUPPORT_MAC_10_8 */
@@ -957,9 +965,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                          true);
       break;
     case CURL_SSLVERSION_SSLv2:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                          kSSLProtocol2,
                                          true);
+      if(err != noErr) {
+        failf(data, "Your version of the OS does not support SSLv2");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
       break;
     case CURL_SSLVERSION_SSLv3:
       (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
