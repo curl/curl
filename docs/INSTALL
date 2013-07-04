@@ -1045,7 +1045,7 @@ PORTS
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
         - AVR32 Linux
-        - ARM Android 1.5, 2.1
+        - ARM Android 1.5, 2.1, 2.3, 3.2, 4.x
         - ARM INTEGRITY
         - ARM iOS
         - Cell Linux
@@ -1116,6 +1116,7 @@ GNU GSS      http://www.gnu.org/software/gss/
 GnuTLS       http://www.gnu.org/software/gnutls/
 Heimdal      http://www.pdc.kth.se/heimdal/
 libidn       http://www.gnu.org/software/libidn/
+libmetalink  https://launchpad.net/libmetalink/
 libssh2      http://www.libssh2.org/
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
 NSS          http://www.mozilla.org/projects/security/pki/nss/
