@@ -515,7 +515,6 @@ X_OBJS= \
 	$(DIROBJ)\curl_ntlm_core.obj \
 	$(DIROBJ)\curl_ntlm_msgs.obj \
 	$(DIROBJ)\curl_ntlm_wb.obj \
-	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
 	$(DIROBJ)\curl_sasl.obj \
 	$(DIROBJ)\curl_schannel.obj \
@@ -523,6 +522,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\cyassl.obj \
 	$(DIROBJ)\dict.obj \
+	$(DIROBJ)\dotdot.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
 	$(DIROBJ)\file.obj \
