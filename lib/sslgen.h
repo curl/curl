@@ -33,6 +33,8 @@ bool Curl_clone_ssl_config(struct ssl_config_data* source,
                            struct ssl_config_data* dest);
 void Curl_free_ssl_config(struct ssl_config_data* sslc);
 
+unsigned int Curl_rand(struct SessionHandle *);
+
 #ifdef USE_SSL
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
@@ -82,6 +84,13 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t md5len);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
+
+#ifdef have_curlssl_random
+#define HAVE_CURL_SSL_RANDOM
+#endif
+#ifdef have_curlssl_md5sum
+#define HAVE_CURL_SSL_MD5SUM
+#endif
 
 #else
 /* When SSL support is not present, just define away these function calls */

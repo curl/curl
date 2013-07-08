@@ -32,7 +32,7 @@
 
 #include "curl_base64.h"
 #include "curl_md5.h"
-#include "curl_rand.h"
+#include "sslgen.h"
 #include "curl_hmac.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
@@ -314,7 +314,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Generate 64 bits of random data */
   for(i = 0; i < 8; i++)
-    cnonce[i] = table16[Curl_rand()%16];
+    cnonce[i] = table16[Curl_rand(data)%16];
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);

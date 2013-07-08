@@ -18,6 +18,7 @@
  1.5 get rid of PATH_MAX
  1.6 progress callback without doubles
  1.7 Happy Eyeball dual stack connect
+ 1,8 Modified buffer size approach
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -38,6 +39,7 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
+ 5.4 HTTP2/SPDY
 
  6. TELNET
  6.1 ditch stdin
@@ -177,6 +179,28 @@
 
     http://tools.ietf.org/html/rfc6555
 
+1.8 Modified buffer size approach
+
+ Current libcurl allocates a fixed 16K size buffer for download and an
+ additional 16K for upload. They are always unconditionally part of the easy
+ handle. If CRLF translations are requested, an additional 32K "scratch
+ buffer" is allocated. A total of 64K transfer buffers in the worst case.
+
+ First, while the handles are not actually in use these buffers could be freed
+ so that lingering handles just kept in queues or whatever waste less memory.
+
+ Secondly, SFTP is a protocol that needs to handle many ~30K blocks at once
+ since each need to be individually acked and therefore libssh2 must be
+ allowed to send (or receive) many separate ones in parallel to achieve high
+ transfer speeds. A current libcurl build with a 16K buffer makes that
+ impossible, but one with a 512K buffer will reach MUCH faster transfers. But
+ allocating 512K unconditionally for all buffers just in case they would like
+ to do fast SFTP transfers at some point is not a good solution either.
+
+ Dynamically allocate buffer size depending on protocol in use in combination
+ with freeing it after each individual transfer? Other suggestions?
+
+
 2. libcurl - multi interface
 
 2.1 More non-blocking
@@ -267,6 +291,25 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
+
+5.4 HTTP2/SPDY
+
+ The first drafts for HTTP2 have been published
+ (http://tools.ietf.org/html/draft-ietf-httpbis-http2-03) and is so far based
+ on SPDY (http://www.chromium.org/spdy) designs and experiences. Chances are
+ it will end up in that style. Chrome and Firefox already support SPDY and
+ lots of web services do.
+
+ It would make sense to implement SPDY support now and later transition into
+ or add HTTP2 support as well.
+
+ We should base or HTTP2/SPDY work on a 3rd party library for the protocol
+ fiddling. The Spindy library (http://spindly.haxx.se/) was an attempt to make
+ such a library with an API suitable for use by libcurl but that effort has
+ more or less stalled.  spdylay (https://github.com/tatsuhiro-t/spdylay) may
+ be a better option, either used directly or wrapped with a more spindly-like
+ API.
+
 
 6. TELNET
 
@@ -416,6 +459,12 @@ to provide the data to send.
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
  http://www.rfc-editor.org/rfc/rfc6698.txt
+
+ An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
+ (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
+ approach. See Daniel's comments:
+ http://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
+ correct library to base this development on.
 
 13. GnuTLS
 

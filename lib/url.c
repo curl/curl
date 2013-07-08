@@ -124,6 +124,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "conncache.h"
 #include "multihandle.h"
 #include "pipeline.h"
+#include "dotdot.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -317,6 +318,13 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
   if(!result) {
     /* Store the username part of option if required */
     if(userp) {
+      if(!user && option && option[0] == ':') {
+        /* Allocate an empty string instead of returning NULL as user name */
+        user = strdup("");
+        if(!user)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+
       Curl_safefree(*userp);
       *userp = user;
     }
@@ -1137,41 +1145,44 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(argptr == NULL)
       break;
 
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+
     if(Curl_raw_equal(argptr, "ALL")) {
       /* clear all cookies */
       Curl_cookie_clearall(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "SESS")) {
       /* clear session cookies */
       Curl_cookie_clearsess(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "FLUSH")) {
       /* flush cookies to file */
       Curl_flush_cookies(data, 0);
-      break;
     }
+    else {
+      if(!data->cookies)
+        /* if cookie engine was not running, activate it */
+        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
 
-    if(!data->cookies)
-      /* if cookie engine was not running, activate it */
-      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      argptr = strdup(argptr);
+      if(!argptr) {
+        result = CURLE_OUT_OF_MEMORY;
+      }
+      else {
 
-    argptr = strdup(argptr);
-    if(!argptr) {
-      result = CURLE_OUT_OF_MEMORY;
-      break;
+        if(checkprefix("Set-Cookie:", argptr))
+          /* HTTP Header format line */
+          Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
+
+        else
+          /* Netscape format line */
+          Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
+
+        free(argptr);
+      }
     }
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 
-    if(checkprefix("Set-Cookie:", argptr))
-      /* HTTP Header format line */
-      Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
-
-    else
-      /* Netscape format line */
-      Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
-
-    free(argptr);
     break;
 #endif /* CURL_DISABLE_COOKIES */
 
@@ -3671,7 +3682,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char protobuf[16];
   const char *protop;
   CURLcode result;
-  bool fix_slash = FALSE;
+  bool rebuild_url = FALSE;
 
   *prot_missing = FALSE;
 
@@ -3822,14 +3833,14 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     memcpy(path+1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
 
     *query=0; /* now cut off the hostname at the ? */
   }
   else if(!path[0]) {
     /* if there's no path set, use a single slash */
     strcpy(path, "/");
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
@@ -3842,17 +3853,30 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        is bigger than the path. Use +1 to move the zero byte too. */
     memmove(&path[1], path, strlen(path)+1);
     path[0] = '/';
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
+  }
+  else {
+    /* sanitise paths and remove ../ and ./ sequences according to RFC3986 */
+    char *newp = Curl_dedotdotify(path);
+
+    if(strcmp(newp, path)) {
+      rebuild_url = TRUE;
+      free(data->state.pathbuffer);
+      data->state.pathbuffer = newp;
+      data->state.path = newp;
+      path = newp;
+    }
+    else
+      free(newp);
   }
 
-
   /*
-   * "fix_slash" means that the URL was malformatted so we need to generate an
-   * updated version with the new slash inserted at the right place!  We need
-   * the corrected URL when communicating over HTTP proxy and we don't know at
-   * this point if we're using a proxy or not.
+   * "rebuild_url" means that one or more URL components have been modified so
+   * we need to generate an updated full version.  We need the corrected URL
+   * when communicating over HTTP proxy and we don't know at this point if
+   * we're using a proxy or not.
    */
-  if(fix_slash) {
+  if(rebuild_url) {
     char *reurl;
 
     size_t plen = strlen(path); /* new path, should be 1 byte longer than
@@ -3874,6 +3898,8 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       Curl_safefree(data->change.url);
       data->change.url_alloc = FALSE;
     }
+
+    infof(data, "Rebuilt URL to: %s\n", reurl);
 
     data->change.url = reurl;
     data->change.url_alloc = TRUE; /* free this later */

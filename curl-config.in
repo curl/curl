@@ -155,12 +155,12 @@ while test $# -gt 0; do
         ;;
 
     --static-libs)
-	if test "X@ENABLE_STATIC@" != "Xno" ; then
-		echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
-	else
-		echo "curl was built with static libraries disabled" >&2
-		exit 1
-	fi
+        if test "X@ENABLE_STATIC@" != "Xno" ; then
+          echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
+        else
+          echo "curl was built with static libraries disabled" >&2
+          exit 1
+        fi
         ;;
 
     --configure)

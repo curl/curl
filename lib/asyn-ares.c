@@ -315,6 +315,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ResolverResults *res = (struct ResolverResults *)
     conn->async.os_specific;
+  CURLcode rc = CURLE_OK;
 
   *dns = NULL;
 
@@ -325,19 +326,19 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     /* temp_ai ownership is moved to the connection, so we need not free-up
        them */
     res->temp_ai = NULL;
-    destroy_async_data(&conn->async);
     if(!conn->async.dns) {
-      failf(data, "Could not resolve %s: %s (%s)",
-            conn->bits.proxy?"proxy":"host",
-            conn->host.dispname,
-            ares_strerror(conn->async.status));
-      return conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
+      failf(data, "Could not resolve: %s (%s)",
+            conn->async.hostname, ares_strerror(conn->async.status));
+      rc = conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
         CURLE_COULDNT_RESOLVE_HOST;
     }
-    *dns = conn->async.dns;
+    else
+      *dns = conn->async.dns;
+
+    destroy_async_data(&conn->async);
   }
 
-  return CURLE_OK;
+  return rc;
 }
 
 /*
@@ -415,37 +416,12 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(entry)
     *entry = conn->async.dns;
 
-  if(!conn->async.dns) {
-    /* a name was not resolved */
-    if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      if(conn->bits.proxy) {
-        failf(data, "Resolving proxy timed out: %s", conn->proxy.dispname);
-        rc = CURLE_COULDNT_RESOLVE_PROXY;
-      }
-      else {
-        failf(data, "Resolving host timed out: %s", conn->host.dispname);
-        rc = CURLE_COULDNT_RESOLVE_HOST;
-      }
-    }
-    else if(conn->async.done) {
-      if(conn->bits.proxy) {
-        failf(data, "Could not resolve proxy: %s (%s)", conn->proxy.dispname,
-              ares_strerror(conn->async.status));
-        rc = CURLE_COULDNT_RESOLVE_PROXY;
-      }
-      else {
-        failf(data, "Could not resolve host: %s (%s)", conn->host.dispname,
-              ares_strerror(conn->async.status));
-        rc = CURLE_COULDNT_RESOLVE_HOST;
-      }
-    }
-    else
-      rc = CURLE_OPERATION_TIMEDOUT;
-
+  if(rc)
     /* close the connection, since we can't return failure here without
-       cleaning up this connection properly */
+       cleaning up this connection properly.
+       TODO: remove this action from here, it is not a name resolver decision.
+    */
     conn->bits.close = TRUE;
-  }
 
   return rc;
 }

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012 - 2013, Nick Zitzmann, <nickzman@gmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,10 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t tmplen,
                            unsigned char *md5sum, /* output */
                            size_t md5len);
+
+/* this backend provides these functions: */
+#define have_curlssl_random 1
+#define have_curlssl_md5sum 1
 
 /* API setup for SecureTransport */
 #define curlssl_init() (1)

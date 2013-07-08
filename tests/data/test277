@@ -37,8 +37,8 @@ http://%HOSTIP:%HTTPPORT/want/277 -F name=daniel -H "Content-Type: text/info"
 ^User-Agent:.*
 </strip>
 <strippart>
-s/^------------------------------[a-z0-9]*/------------------------------/
-s/boundary=----------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[a-z0-9]*/--------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=------------------------/
 </strippart>
 <protocol>
 POST /want/277 HTTP/1.1
@@ -47,13 +47,13 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 145
 Expect: 100-continue
-Content-Type: text/info; boundary=----------------------------
+Content-Type: text/info; boundary=------------------------
 
-------------------------------
+--------------------------
 Content-Disposition: form-data; name="name"
 
 daniel
---------------------------------
+----------------------------
 </protocol>
 </verify>
 </testcase>

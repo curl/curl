@@ -83,4 +83,16 @@ struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi);
 /* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
 
+/*
+ * Curl_multi_closed()
+ *
+ * Used by the connect code to tell the multi_socket code that one of the
+ * sockets we were using have just been closed.  This function will then
+ * remove it from the sockethash for this handle to make the multi_socket API
+ * behave properly, especially for the case when libcurl will create another
+ * socket again and it gets the same file descriptor number.
+ */
+
+void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
+
 #endif /* HEADER_CURL_MULTIIF_H */

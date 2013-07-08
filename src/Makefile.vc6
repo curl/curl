@@ -100,6 +100,9 @@ SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib
 
+WINSSL_CFLAGS  = /DUSE_SCHANNEL
+#WINSSL_LIBS    = gdi32.lib user32.lib
+
 # Runtime library configuration
 RTLIB   = /MD
 RTLIBD  = /MDd
@@ -273,6 +276,16 @@ CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_LIBS)
 LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with winssl and zlib
+
+!IF "$(CFG)" == "release-winssl-zlib"
+CFLAGS         = $(CFLAGS) $(WINSSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(WINSSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(WINSSL_LIBS) $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(WINSSL_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 #################################################

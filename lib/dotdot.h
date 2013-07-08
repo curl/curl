@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_RAND_H
-#define HEADER_CURL_RAND_H
+#ifndef HEADER_CURL_DOTDOT_H
+#define HEADER_CURL_DOTDOT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,9 +21,5 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-void Curl_srand(void);
-
-unsigned int Curl_rand(void);
-
-#endif /* HEADER_CURL_RAND_H */
+char *Curl_dedotdotify(char *input);
+#endif

@@ -148,11 +148,23 @@ vc-ssl-zlib: $(VC)
 	cd ..\src
 	nmake /f Makefile.$(VC) cfg=release-ssl-zlib
 
+vc-winssl-zlib: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-winssl-zlib
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-winssl-zlib
+
 vc-x64-ssl-zlib: $(VC)
 	cd lib
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-zlib
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-zlib
+
+vc-x64-winssl-zlib: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib
 
 vc-ssl-dll: $(VC)
 	cd lib

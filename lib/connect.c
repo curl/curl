@@ -1239,7 +1239,7 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
  * 'conn' can be NULL, beware!
  */
 int Curl_closesocket(struct connectdata *conn,
-                     curl_socket_t sock)
+                      curl_socket_t sock)
 {
   if(conn && conn->fclosesocket) {
     if((sock == conn->sock[SECONDARYSOCKET]) &&
@@ -1251,7 +1251,13 @@ int Curl_closesocket(struct connectdata *conn,
     else
       return conn->fclosesocket(conn->closesocket_client, sock);
   }
-  return sclose(sock);
+  sclose(sock);
+
+  if(conn)
+    /* tell the multi-socket code about this */
+    Curl_multi_closed(conn, sock);
+
+  return 0;
 }
 
 /*

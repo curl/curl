@@ -2052,6 +2052,39 @@ static void singlesocket(struct Curl_multi *multi,
 }
 
 /*
+ * Curl_multi_closed()
+ *
+ * Used by the connect code to tell the multi_socket code that one of the
+ * sockets we were using have just been closed.  This function will then
+ * remove it from the sockethash for this handle to make the multi_socket API
+ * behave properly, especially for the case when libcurl will create another
+ * socket again and it gets the same file descriptor number.
+ */
+
+void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
+{
+  struct Curl_multi *multi = conn->data->multi;
+  if(multi) {
+    /* this is set if this connection is part of a handle that is added to
+       a multi handle, and only then this is necessary */
+    struct Curl_sh_entry *entry =
+      Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+
+    if(entry) {
+      if(multi->socket_cb)
+        multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
+                         multi->socket_userp,
+                         entry->socketp);
+
+      /* now remove it from the socket hash */
+      sh_delentry(multi->sockhash, s);
+    }
+  }
+}
+
+
+
+/*
  * add_next_timeout()
  *
  * Each SessionHandle has a list of timeouts. The add_next_timeout() is called

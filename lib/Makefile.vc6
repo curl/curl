@@ -103,23 +103,24 @@ WINDOWS_SDK_PATH = "$(PROGRAMFILES)\Microsoft SDK"
 #############################################################
 ## Nothing more to do below this line!
 
-CCNODBG    = cl.exe /O2 /DNDEBUG
-CCDEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGSSSL  = /DUSE_SSLEAY /DUSE_OPENSSL /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGSSSH2 = /DUSE_LIBSSH2 /DCURL_DISABLE_LDAP /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /I "$(LIBSSH2_PATH)/include"
-CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
-CFLAGSLIB  = /DCURL_STATICLIB
-LNKDLL     = link.exe /DLL
-LNKLIB     = link.exe /lib
-LFLAGS     = /nologo /machine:$(MACHINE)
-SSLLIBS    = libeay32.lib ssleay32.lib
-ZLIBLIBSDLL= zdll.lib
-ZLIBLIBS   = zlib.lib
-WINLIBS    = ws2_32.lib wldap32.lib advapi32.lib
-CFLAGS     = $(CFLAGS)
+CCNODBG      = cl.exe /O2 /DNDEBUG
+CCDEBUG      = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CFLAGSSSL    = /DUSE_SSLEAY /DUSE_OPENSSL /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+CFLAGSWINSSL = /DUSE_SCHANNEL
+CFLAGSSSH2   = /DUSE_LIBSSH2 /DCURL_DISABLE_LDAP /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /I "$(LIBSSH2_PATH)/include"
+CFLAGSZLIB   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
+CFLAGS       = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
+CFLAGSLIB    = /DCURL_STATICLIB
+LNKDLL       = link.exe /DLL
+LNKLIB       = link.exe /lib
+LFLAGS       = /nologo /machine:$(MACHINE)
+SSLLIBS      = libeay32.lib ssleay32.lib
+ZLIBLIBSDLL  = zdll.lib
+ZLIBLIBS     = zlib.lib
+WINLIBS      = ws2_32.lib wldap32.lib advapi32.lib
+CFLAGS       = $(CFLAGS)
 
-CFGSET     = FALSE
+CFGSET       = FALSE
 
 !IFDEF WINDOWS_SSPI
 CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
@@ -186,6 +187,18 @@ LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32"
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGSSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
+# release-winssl-zlib
+
+!IF "$(CFG)" == "release-winssl-zlib"
+TARGET   = $(LIBCURL_STA_LIB_REL)
+DIROBJ   = $(CFG)
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSWINSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
 
@@ -515,7 +528,6 @@ X_OBJS= \
 	$(DIROBJ)\curl_ntlm_core.obj \
 	$(DIROBJ)\curl_ntlm_msgs.obj \
 	$(DIROBJ)\curl_ntlm_wb.obj \
-	$(DIROBJ)\curl_rand.obj \
 	$(DIROBJ)\curl_rtmp.obj \
 	$(DIROBJ)\curl_sasl.obj \
 	$(DIROBJ)\curl_schannel.obj \
@@ -523,6 +535,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\cyassl.obj \
 	$(DIROBJ)\dict.obj \
+	$(DIROBJ)\dotdot.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\escape.obj \
 	$(DIROBJ)\file.obj \

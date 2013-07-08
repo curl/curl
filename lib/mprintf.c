@@ -380,11 +380,11 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         break;
       case 'x':
         vto[i].type = FORMAT_INT;
-        flags |= FLAGS_HEX;
+        flags |= FLAGS_HEX|FLAGS_UNSIGNED;
         break;
       case 'X':
         vto[i].type = FORMAT_INT;
-        flags |= FLAGS_HEX|FLAGS_UPPER;
+        flags |= FLAGS_HEX|FLAGS_UPPER|FLAGS_UNSIGNED;
         break;
       case 'c':
         vto[i].type = FORMAT_INT;
@@ -633,21 +633,21 @@ static int dprintf_formatf(
             OUTCHAR(' ');
         break;
       }
-      if(p->flags & FLAGS_UNSIGNED) {
-        /* Decimal unsigned integer.  */
-        base = 10;
-        goto unsigned_number;
-      }
       if(p->flags & FLAGS_OCTAL) {
         /* Octal unsigned integer.  */
         base = 8;
         goto unsigned_number;
       }
-      if(p->flags & FLAGS_HEX) {
+      else if(p->flags & FLAGS_HEX) {
         /* Hexadecimal unsigned integer.  */
 
         digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
         base = 16;
+        goto unsigned_number;
+      }
+      else if(p->flags & FLAGS_UNSIGNED) {
+        /* Decimal unsigned integer.  */
+        base = 10;
         goto unsigned_number;
       }
 
