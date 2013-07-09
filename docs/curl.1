@@ -1413,6 +1413,9 @@ default 512 bytes will be used.
 If this option is used several times, the last one will be used.
 
 (Added in 7.20.0)
+.IP " -z, --time-cond TIME"
+Transfer based on a time condition.  TIME may to be preceded by -, +, or =.
+See the corresponding sections 14.24, 14.28, and 14.29 of RFC 2068.
 .IP "--tlsauthtype <authtype>"
 Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
