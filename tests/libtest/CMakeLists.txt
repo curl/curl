@@ -25,14 +25,6 @@ function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
   set_target_properties(${TEST_NAME}
     PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 
-  if(MSVC)
-    if(NOT BUILD_RELEASE_DEBUG_DIRS)
-      # Ugly workaround to remove the "/debug" or "/release" in each output
-      set_target_properties(${TEST_NAME} PROPERTIES PREFIX "../")
-      set_target_properties(${TEST_NAME} PROPERTIES IMPORT_PREFIX "../")
-    endif()
-  endif()
-
 endfunction()
 
 
