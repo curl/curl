@@ -1423,9 +1423,6 @@ default 512 bytes will be used.
 If this option is used several times, the last one will be used.
 
 (Added in 7.20.0)
-.IP " -z, --time-cond TIME"
-Transfer based on a time condition.  TIME may to be preceded by -, +, or =.
-See the corresponding sections 14.24, 14.28, and 14.29 of RFC 2068.
 .IP "--tlsauthtype <authtype>"
 Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
@@ -1708,7 +1705,7 @@ speed-time seconds it gets aborted. speed-time is set with \fI-y\fP and is 30
 if not set.
 
 If this option is used several times, the last one will be used.
-.IP "-z/--time-cond <date expression>|<file>"
+.IP "-z, --time-cond <date expression>|<file>"
 (HTTP/FTP) Request a file that has been modified later than the given time and
 date, or one that has been modified before that time. The <date expression>
 can be all sorts of date strings or if it doesn't match any internal ones, it
