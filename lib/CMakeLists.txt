@@ -94,6 +94,10 @@ add_library(
   ${HHEADERS} ${CSOURCES}
   )
 
+if(MSVC AND CURL_STATICLIB)
+  set_target_properties(${LIB_NAME} PROPERTIES STATIC_LIBRARY_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
+endif()
+
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
 if(WIN32)
@@ -107,14 +111,6 @@ setup_curl_dependencies(${LIB_NAME})
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
-
-if(MSVC)
-  if(NOT BUILD_RELEASE_DEBUG_DIRS)
-    # Ugly workaround to remove the "/debug" or "/release" in each output
-    set_target_properties(${LIB_NAME} PROPERTIES PREFIX "../")
-    set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "../")
-  endif()
-endif()
 
 if(WIN32)
   if(NOT CURL_STATICLIB)

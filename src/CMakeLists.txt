@@ -46,13 +46,6 @@ target_link_libraries( ${EXE_NAME} libcurl )
 set_target_properties(${EXE_NAME} PROPERTIES
   DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 
-if(MSVC)
-  if(NOT BUILD_RELEASE_DEBUG_DIRS)
-    # Ugly workaround to remove the "/debug" or "/release" in each output
-    set_target_properties(${EXE_NAME} PROPERTIES PREFIX "../")
-  endif()
-endif()
-
 #INCLUDE(ModuleInstall OPTIONAL)
 
 install(TARGETS ${EXE_NAME} DESTINATION bin)
