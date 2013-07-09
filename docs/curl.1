@@ -1043,6 +1043,13 @@ ubiquitous in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.19.1)
+.IP "--post303"
+(HTTP) Tells curl to respect RFC 2616/10.3.2 and not convert POST requests
+into GET requests when following a 303 redirection. The non-RFC behaviour is
+ubiquitous in web browsers, so curl does the conversion by default to maintain
+consistency. However, a server may require a POST to remain a POST after such
+a redirection. This option is meaningful only when using \fI-L, --location\fP
+(Added in 7.26.0)
 .IP "--proto <protocols>"
 Tells curl to use the listed protocols for its initial retrieval. Protocols
 are evaluated left to right, are comma separated, and are each a protocol
