@@ -1043,6 +1043,13 @@ ubiquitous in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.19.1)
+.IP "--post303"
+(HTTP) Tells curl to respect RFC 2616/10.3.2 and not convert POST requests
+into GET requests when following a 303 redirection. The non-RFC behaviour is
+ubiquitous in web browsers, so curl does the conversion by default to maintain
+consistency. However, a server may require a POST to remain a POST after such
+a redirection. This option is meaningful only when using \fI-L, --location\fP
+(Added in 7.26.0)
 .IP "--proto <protocols>"
 Tells curl to use the listed protocols for its initial retrieval. Protocols
 are evaluated left to right, are comma separated, and are each a protocol
@@ -1280,6 +1287,9 @@ If this option is used several times, the last one will be used.
 Silent or quiet mode. Don't show progress meter or error messages.  Makes Curl
 mute. It will still output the data you ask for, potentially even to the
 terminal/stdout unless you redirect it.
+.IP "--sasl-ir"
+Enable initial response in SASL authentication.
+(Added in 7.31.0)
 .IP "-S, --show-error"
 When used with \fI-s\fP it makes curl show an error message if it fails.
 .IP "--ssl"
@@ -1695,7 +1705,7 @@ speed-time seconds it gets aborted. speed-time is set with \fI-y\fP and is 30
 if not set.
 
 If this option is used several times, the last one will be used.
-.IP "-z/--time-cond <date expression>|<file>"
+.IP "-z, --time-cond <date expression>|<file>"
 (HTTP/FTP) Request a file that has been modified later than the given time and
 date, or one that has been modified before that time. The <date expression>
 can be all sorts of date strings or if it doesn't match any internal ones, it
