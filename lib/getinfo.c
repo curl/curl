@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,9 +53,9 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   pro->t_redirect = 0;
 
   info->httpcode = 0;
-  info->httpversion=0;
-  info->filetime=-1; /* -1 is an illegal time and thus means unknown */
-  info->timecond=0;
+  info->httpversion = 0;
+  info->filetime = -1; /* -1 is an illegal time and thus means unknown */
+  info->timecond = FALSE;
 
   if(info->contenttype)
     free(info->contenttype);
@@ -186,7 +186,7 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
     break;
   case CURLINFO_CONDITION_UNMET:
     /* return if the condition prevented the document to get transferred */
-    *param_longp = data->info.timecond;
+    *param_longp = data->info.timecond ? 1L : 0L;
     break;
   case CURLINFO_RTSP_CLIENT_CSEQ:
     *param_longp = data->state.rtsp_next_client_CSeq;
