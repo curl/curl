@@ -53,7 +53,7 @@ char *Curl_dedotdotify(char *input)
   char *clone;
   size_t clen = inlen; /* the length of the cloned input */
   char *out = malloc(inlen+1);
-  char *outp;
+  char *outptr;
   char *orgclone;
   char *queryp;
   if(!out)
@@ -66,7 +66,7 @@ char *Curl_dedotdotify(char *input)
     return NULL;
   }
   orgclone = clone;
-  outp = out;
+  outptr = out;
 
   /*
    * To handle query-parts properly, we must find it and remove it during the
@@ -113,24 +113,24 @@ char *Curl_dedotdotify(char *input)
       clone+=3;
       clen-=3;
       /* remove the last segment from the output buffer */
-      while(outp > out) {
-        outp--;
-        if(*outp == '/')
+      while(outptr > out) {
+        outptr--;
+        if(*outptr == '/')
           break;
       }
-      *outp = 0; /* zero-terminate where it stops */
+      *outptr = 0; /* zero-terminate where it stops */
     }
     else if(!strcmp("/..", clone)) {
       clone[2]='/';
       clone+=2;
       clen-=2;
       /* remove the last segment from the output buffer */
-      while(outp > out) {
-        outp--;
-        if(*outp == '/')
+      while(outptr > out) {
+        outptr--;
+        if(*outptr == '/')
           break;
       }
-      *outp = 0; /* zero-terminate where it stops */
+      *outptr = 0; /* zero-terminate where it stops */
     }
 
     /*  D.  if the input buffer consists only of "." or "..", then remove
@@ -147,10 +147,10 @@ char *Curl_dedotdotify(char *input)
           character or the end of the input buffer. */
 
       do {
-        *outp++ = *clone++;
+        *outptr++ = *clone++;
         clen--;
       } while(*clone && (*clone != '/'));
-      *outp=0;
+      *outptr = 0;
     }
 
   } while(*clone);
@@ -162,7 +162,7 @@ char *Curl_dedotdotify(char *input)
        from the correct index. */
     size_t oindex = queryp - orgclone;
     qlen = strlen(&input[oindex]);
-    memcpy(outp, &input[oindex], qlen+1); /* include the ending zero byte */
+    memcpy(outptr, &input[oindex], qlen+1); /* include the ending zero byte */
   }
 
   free(orgclone);
