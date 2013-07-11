@@ -59,4 +59,12 @@ HTTP GET time conditions in repeated requests
 http://%HOSTIP:%HTTPPORT/1511
 </command>
 </client>
+
+# Verify data after the test has been "shot"
+# TEST_ERR_SUCCESS is errorcode 120
+<verify>
+<errorcode>
+120
+</errorcode>
+</verify>
 </testcase>
