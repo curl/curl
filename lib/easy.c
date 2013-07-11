@@ -87,7 +87,7 @@
 
 #ifdef SIGPIPE_IGNORE
 struct sigpipe_ignore {
-  struct sigaction pipe;
+  struct sigaction old_pipe_act;
   bool no_signal;
 };
 
@@ -107,8 +107,9 @@ static void sigpipe_ignore(struct SessionHandle *data,
   if(!data->set.no_signal) {
     struct sigaction action;
     /* first, extract the existing situation */
-    sigaction(SIGPIPE, NULL, &ig->pipe);
-    action = ig->pipe;
+    memset(&ig->old_pipe_act, 0, sizeof(struct sigaction));
+    sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
+    action = ig->old_pipe_act;
     /* ignore this signal */
     action.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &action, NULL);
@@ -124,13 +125,13 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
 {
   if(!ig->no_signal)
     /* restore the outside state */
-    sigaction(SIGPIPE, &ig->pipe, NULL);
+    sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
 
 #else
 /* for systems without sigaction */
-#define sigpipe_ignore(x,y)
-#define sigpipe_restore(x)
+#define sigpipe_ignore(x,y) Curl_nop_stmt
+#define sigpipe_restore(x)  Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
 #endif
 
@@ -472,7 +473,7 @@ CURLcode curl_easy_perform(CURL *easy)
   int without_fds = 0;  /* count number of consecutive returns from
                            curl_multi_wait() without any filedescriptors */
   struct timeval before;
-  SIGPIPE_VARIABLE(pipe);
+  SIGPIPE_VARIABLE(pipe_st);
 
   if(!easy)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -505,7 +506,7 @@ CURLcode curl_easy_perform(CURL *easy)
       return CURLE_FAILED_INIT;
   }
 
-  sigpipe_ignore(data, &pipe);
+  sigpipe_ignore(data, &pipe_st);
 
   /* assign this after curl_multi_add_handle() since that function checks for
      it and rejects this handle otherwise */
@@ -563,7 +564,7 @@ CURLcode curl_easy_perform(CURL *easy)
      a failure here, room for future improvement! */
   (void)curl_multi_remove_handle(multi, easy);
 
-  sigpipe_restore(&pipe);
+  sigpipe_restore(&pipe_st);
 
   /* The multi handle is kept alive, owned by the easy handle */
   return code;
@@ -576,14 +577,14 @@ CURLcode curl_easy_perform(CURL *easy)
 void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
-  SIGPIPE_VARIABLE(pipe);
+  SIGPIPE_VARIABLE(pipe_st);
 
   if(!data)
     return;
 
-  sigpipe_ignore(data, &pipe);
+  sigpipe_ignore(data, &pipe_st);
   Curl_close(data);
-  sigpipe_restore(&pipe);
+  sigpipe_restore(&pipe_st);
 }
 
 /*
