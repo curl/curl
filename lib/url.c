@@ -4565,15 +4565,20 @@ static CURLcode parse_login_details(const char *login, const size_t len,
   /* Allocate the password portion buffer */
   if(!result && passwdp && plen) {
     pbuf = malloc(plen + 1);
-    if(!pbuf)
+    if(!pbuf) {
+      Curl_safefree(ubuf);
       result = CURLE_OUT_OF_MEMORY;
+    }
   }
 
   /* Allocate the options portion buffer */
   if(!result && optionsp && olen) {
     obuf = malloc(olen + 1);
-    if(!obuf)
+    if(!obuf) {
+      Curl_safefree(pbuf);
+      Curl_safefree(ubuf);
       result = CURLE_OUT_OF_MEMORY;
+    }
   }
 
   if(!result) {
