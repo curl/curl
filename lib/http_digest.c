@@ -25,13 +25,11 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
 #include "urldata.h"
-#include "sendf.h"
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "curl_md5.h"
 #include "http_digest.h"
 #include "strtok.h"
-#include "url.h" /* for Curl_safefree() */
 #include "curl_memory.h"
 #include "sslgen.h" /* for Curl_rand() */
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
@@ -284,7 +282,7 @@ static char *string_quoted(const char *source)
     ++s;
   }
 
-  dest = (char *)malloc(n);
+  dest = malloc(n);
   if(dest) {
     s = source;
     d = dest;
@@ -311,7 +309,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char md5buf[16]; /* 16 bytes/128 bits */
   unsigned char request_digest[33];
   unsigned char *md5this;
-  unsigned char *ha1;
+  unsigned char ha1[33];/* 32 digits and 1 zero byte */
   unsigned char ha2[33];/* 32 digits and 1 zero byte */
   char cnoncebuf[33];
   char *cnonce = NULL;
@@ -353,10 +351,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     authp = &data->state.authhost;
   }
 
-  if(*allocuserpwd) {
-    Curl_safefree(*allocuserpwd);
-    *allocuserpwd = NULL;
-  }
+  Curl_safefree(*allocuserpwd);
 
   /* not set means empty */
   if(!userp)
@@ -406,12 +401,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  free(md5this); /* free this again */
-
-  ha1 = malloc(33); /* 32 digits and 1 zero byte */
-  if(!ha1)
-    return CURLE_OUT_OF_MEMORY;
-
+  Curl_safefree(md5this);
   md5_to_ascii(md5buf, ha1);
 
   if(d->algo == CURLDIGESTALGO_MD5SESS) {
@@ -421,7 +411,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
     CURL_OUTPUT_DIGEST_CONV(data, tmp); /* convert on non-ASCII machines */
     Curl_md5it(md5buf, (unsigned char *)tmp);
-    free(tmp); /* free this again */
+    Curl_safefree(tmp);
     md5_to_ascii(md5buf, ha1);
   }
 
@@ -463,18 +453,16 @@ CURLcode Curl_output_digest(struct connectdata *conn,
        TODO: replace md5 of empty string with entity-body for PUT/POST */
     unsigned char *md5this2 = (unsigned char *)
       aprintf("%s:%s", md5this, "d41d8cd98f00b204e9800998ecf8427e");
-    free(md5this);
+    Curl_safefree(md5this);
     md5this = md5this2;
   }
 
-  if(!md5this) {
-    free(ha1);
+  if(!md5this)
     return CURLE_OUT_OF_MEMORY;
-  }
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  free(md5this); /* free this again */
+  Curl_safefree(md5this);
   md5_to_ascii(md5buf, ha2);
 
   if(d->qop) {
@@ -492,13 +480,12 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                                        d->nonce,
                                        ha2);
   }
-  free(ha1);
   if(!md5this)
     return CURLE_OUT_OF_MEMORY;
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  free(md5this); /* free this again */
+  Curl_safefree(md5this);
   md5_to_ascii(md5buf, request_digest);
 
   /* for test case 64 (snooped from a Mozilla 1.3a request)
@@ -515,7 +502,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     chracters.
   */
   userp_quoted = string_quoted(userp);
-  if(!*userp_quoted)
+  if(!userp_quoted)
     return CURLE_OUT_OF_MEMORY;
 
   if(d->qop) {
@@ -559,7 +546,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                uripath, /* this is the PATH part of the URL */
                request_digest);
   }
-  free(userp_quoted);
+  Curl_safefree(userp_quoted);
   if(!*allocuserpwd)
     return CURLE_OUT_OF_MEMORY;
 
@@ -595,29 +582,12 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
 static void digest_cleanup_one(struct digestdata *d)
 {
-  if(d->nonce)
-    free(d->nonce);
-  d->nonce = NULL;
-
-  if(d->cnonce)
-    free(d->cnonce);
-  d->cnonce = NULL;
-
-  if(d->realm)
-    free(d->realm);
-  d->realm = NULL;
-
-  if(d->opaque)
-    free(d->opaque);
-  d->opaque = NULL;
-
-  if(d->qop)
-    free(d->qop);
-  d->qop = NULL;
-
-  if(d->algorithm)
-    free(d->algorithm);
-  d->algorithm = NULL;
+  Curl_safefree(d->nonce);
+  Curl_safefree(d->cnonce);
+  Curl_safefree(d->realm);
+  Curl_safefree(d->opaque);
+  Curl_safefree(d->qop);
+  Curl_safefree(d->algorithm);
 
   d->nc = 0;
   d->algo = CURLDIGESTALGO_MD5; /* default algorithm */
