@@ -315,6 +315,7 @@ char * unix_path;
 #define d2i_PKCS12_fp D2I_PKCS12_FP
 #define i2t_ASN1_OBJECT I2T_ASN1_OBJECT
 #define sk_num SK_NUM
+#define sk_pop SK_POP
 #define sk_pop_free SK_POP_FREE
 #define sk_value SK_VALUE
 
