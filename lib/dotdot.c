@@ -38,7 +38,7 @@
  *
  * This function gets a zero-terminated path with dot and dotdot sequences
  * passed in and strips them off according to the rules in RFC 3986 section
- * 5.2.5.
+ * 5.2.4.
  *
  * The function handles a query part ('?' + stuff) appended but it expects
  * that fragments ('#' + stuff) have already been cut off.
