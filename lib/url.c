@@ -3899,15 +3899,20 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                    the original */
     size_t urllen = strlen(data->change.url); /* original URL length */
 
+    size_t prefixlen = strlen(conn->host.name);
+
+    if(!*prot_missing)
+      prefixlen += strlen(protop) + strlen("://");
+
     reurl = malloc(urllen + 2); /* 2 for zerobyte + slash */
     if(!reurl)
       return CURLE_OUT_OF_MEMORY;
 
     /* copy the prefix */
-    memcpy(reurl, data->change.url, urllen - (plen-1));
+    memcpy(reurl, data->change.url, prefixlen);
 
     /* append the trailing piece + zerobyte */
-    memcpy(&reurl[urllen - (plen-1)], path, plen + 1);
+    memcpy(&reurl[prefixlen], path, plen + 1);
 
     /* possible free the old one */
     if(data->change.url_alloc) {
