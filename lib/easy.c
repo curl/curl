@@ -539,9 +539,7 @@ CURLcode curl_easy_perform(CURL *easy)
         if(curlx_tvdiff(after, before) <= 10) {
           without_fds++;
           if(without_fds > 2) {
-            int sleep_ms = without_fds * 50;
-            if(sleep_ms > 1000)
-              sleep_ms = 1000;
+            int sleep_ms = without_fds < 10 ? (1 << (without_fds-1)): 1000;
             Curl_wait_ms(sleep_ms);
           }
         }
