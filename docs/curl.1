@@ -393,7 +393,10 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
-(iOS and Mac OS X only) If curl is built against Secure Transport, then the certificate string must match the name of a certificate that's in the system or user keychain. The private key corresponding to the certificate, and certificate chain (if any),  must also be present in the keychain.
+(iOS and Mac OS X only) If curl is built against Secure Transport, then the
+certificate string must match the name of a certificate that's in the system or
+user keychain. The private key corresponding to the certificate, and
+certificate chain (if any),  must also be present in the keychain.
 
 If this option is used several times, the last one will be used.
 .IP "--engine <name>"
