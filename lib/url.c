@@ -4440,8 +4440,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 
           /* Decode the user */
           newname = curl_easy_unescape(data, userp, 0, NULL);
-          if(!newname)
+          if(!newname) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newname) < MAX_CURL_USER_LENGTH)
             strcpy(user, newname);
@@ -4452,8 +4456,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
         if(passwdp) {
           /* We have a password in the URL so decode it */
           char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
-          if(!newpasswd)
+          if(!newpasswd) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
             strcpy(passwd, newpasswd);
@@ -4464,8 +4472,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
         if(optionsp) {
           /* We have an options list in the URL so decode it */
           char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
-          if(!newoptions)
+          if(!newoptions) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
             strcpy(options, newoptions);
