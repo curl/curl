@@ -89,6 +89,7 @@ Example set of cookies:
 #include "strequal.h"
 #include "strtok.h"
 #include "sendf.h"
+#include "slist.h"
 #include "curl_memory.h"
 #include "share.h"
 #include "strtoofft.h"
@@ -1232,9 +1233,9 @@ struct curl_slist *Curl_cookie_list(struct SessionHandle *data)
       curl_slist_free_all(list);
       return NULL;
     }
-    beg = curl_slist_append(list, line);
-    free(line);
+    beg = Curl_slist_append_nodup(list, line);
     if(!beg) {
+      free(line);
       curl_slist_free_all(list);
       return NULL;
     }

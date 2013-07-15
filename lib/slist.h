@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,13 @@
  * error (or if the input list was NULL).
  */
 struct curl_slist *Curl_slist_duplicate(struct curl_slist *inlist);
+
+/*
+ * Curl_slist_append_nodup() takes ownership of the given string and appends
+ * it to the list.
+ */
+struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
+                                           char *data);
 
 #endif /* HEADER_CURL_SLIST_H */
 
