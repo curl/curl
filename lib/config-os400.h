@@ -277,20 +277,26 @@
 /* Define if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H
 
+
+/* The following define is needed on OS400 to enable strcmpi(), stricmp() and
+   strdup(). */
+#define __cplusplus__strings__
+
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 
 /* Define if you have the `strcmpi' function. */
-#undef HAVE_STRCMPI
+#define HAVE_STRCMPI
+
+/* Define if you have the `stricmp' function. */
+#define HAVE_STRICMP
 
 /* Define if you have the `strdup' function. */
-#undef HAVE_STRDUP
+#define HAVE_STRDUP
+
 
 /* Define if you have the `strftime' function. */
 #define HAVE_STRFTIME
-
-/* Define if you have the `stricmp' function. */
-#undef HAVE_STRICMP
 
 /* Define if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H
