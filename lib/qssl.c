@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,6 +37,7 @@
 #include "sslgen.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
+#include "x509asn1.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -169,10 +170,7 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
   SSLHandle * h = connssl->handle;
   long timeout_ms;
 
-  h->exitPgm = NULL;
-
-  if(!data->set.ssl.verifyhost)
-    h->exitPgm = Curl_qsossl_trap_cert;
+  h->exitPgm = data->set.ssl.verifypeer? NULL: Curl_qsossl_trap_cert;
 
   /* figure out how long time we should wait at maximum */
   timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -208,6 +206,8 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
     break;
   }
 
+  h->peerCert = NULL;
+  h->peerCertLen = 0;
   rc = SSL_Handshake(h, SSL_HANDSHAKE_AS_CLIENT);
 
   switch (rc) {
@@ -238,6 +238,23 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+  /* Verify host. */
+  rc = Curl_verifyhost(conn, h->peerCert, h->peerCert + h->peerCertLen);
+  if(rc != CURLE_OK)
+    return rc;
+
+  /* Gather certificate info. */
+  if(data->set.ssl.certinfo) {
+    if(Curl_ssl_init_certinfo(data, 1))
+      return CURLE_OUT_OF_MEMORY;
+    if(h->peerCert) {
+      rc = Curl_extract_certinfo(conn, 0, h->peerCert,
+                                 h->peerCert + h->peerCertLen);
+      if(rc != CURLE_OK)
+        return rc;
+    }
+  }
+
   return CURLE_OK;
 }
 
@@ -257,19 +274,22 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
   if(rc == CURLE_OK) {
     rc = Curl_qsossl_create(conn, sockindex);
 
-    if(rc == CURLE_OK)
+    if(rc == CURLE_OK) {
       rc = Curl_qsossl_handshake(conn, sockindex);
-    else {
-      SSL_Destroy(connssl->handle);
-      connssl->handle = NULL;
-      connssl->use = FALSE;
-      connssl->state = ssl_connection_none;
+      if(rc != CURLE_OK)
+        SSL_Destroy(connssl->handle);
     }
   }
+
   if(rc == CURLE_OK) {
-    connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = qsossl_recv;
     conn->send[sockindex] = qsossl_send;
+    connssl->state = ssl_connection_complete;
+  }
+  else {
+    connssl->handle = NULL;
+    connssl->use = FALSE;
+    connssl->state = ssl_connection_none;
   }
 
   return rc;

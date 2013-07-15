@@ -22,8 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_SSLEAY) || defined(USE_AXTLS)
-/* these two backends use functions from this file */
+#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_QSOSSL)
+/* these backends use functions from this file */
 
 #include "hostcheck.h"
 #include "rawstr.h"
@@ -93,4 +93,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return 0;
 }
 
-#endif /* SSLEAY or AXTLS */
+#endif /* SSLEAY or AXTLS or QSOSSL */
