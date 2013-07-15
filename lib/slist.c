@@ -73,10 +73,10 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
   if(!list)
     return new_item;
 
-    last = slist_get_last(list);
-    last->next = new_item;
-    return list;
-  }
+  last = slist_get_last(list);
+  last->next = new_item;
+  return list;
+}
 
 /*
  * curl_slist_append() appends a string to the linked list. It always returns
