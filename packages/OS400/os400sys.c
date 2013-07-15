@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,11 @@
 
 #ifdef USE_QSOSSL
 #include <qsossl.h>
+#endif
+
+#ifdef USE_GSKIT
+#include <gskssl.h>
+#include <qsoasync.h>
 #endif
 
 #ifdef HAVE_GSSAPI
@@ -449,6 +454,412 @@ Curl_SSL_Strerror_a(int sslreturnvalue, SSLErrorMsg * serrmsgp)
 }
 
 #endif /* USE_QSOSSL */
+
+
+#ifdef USE_GSKIT
+
+/* ASCII wrappers for the GSKit procedures. */
+
+/*
+ * EBCDIC --> ASCII string mapping table.
+ * Some strings returned by GSKit are dynamically allocated and automatically
+ * released when closing the handle.
+ * To provide the same functionality, we use a "private" handle that
+ * holds the GSKit handle and a list of string mappings. This will allow
+ * avoid conversion of already converted strings and releasing them upon
+ * close time.
+ */
+
+struct gskstrlist {
+  struct gskstrlist * next;
+  const char * ebcdicstr;
+  const char * asciistr;
+};
+
+struct Curl_gsk_descriptor {
+  gsk_handle h;
+  struct gskstrlist * strlist;
+};
+
+
+int
+Curl_gsk_environment_open(gsk_handle * my_env_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+  gsk_handle h;
+  int rc;
+
+  if(!my_env_handle)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  if(!(p = (struct Curl_gsk_descriptor *) malloc(sizeof *p)))
+    return GSK_INSUFFICIENT_STORAGE;
+  p->strlist = (struct gskstrlist *) NULL;
+  if((rc = gsk_environment_open(&p->h)) != GSK_OK)
+    free(p);
+  else
+    *my_env_handle = (gsk_handle) p;
+  return rc;
+}
+
+
+int
+Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
+                         gsk_handle * my_session_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+  gsk_handle h;
+  int rc;
+
+  if(!my_env_handle)
+    return GSK_INVALID_HANDLE;
+  if(!my_session_handle)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  h = ((struct Curl_gsk_descriptor *) my_env_handle)->h;
+  if(!(p = (struct Curl_gsk_descriptor *) malloc(sizeof *p)))
+    return GSK_INSUFFICIENT_STORAGE;
+  p->strlist = (struct gskstrlist *) NULL;
+  if((rc = gsk_secure_soc_open(h, &p->h)) != GSK_OK)
+    free(p);
+  else
+    *my_session_handle = (gsk_handle) p;
+  return rc;
+}
+
+
+static void
+gsk_free_handle(struct Curl_gsk_descriptor * p)
+
+{
+  struct gskstrlist * q;
+
+  while ((q = p->strlist)) {
+    p->strlist = q;
+    free((void *) q->asciistr);
+    free(q);
+  }
+  free(p);
+}
+
+
+int
+Curl_gsk_environment_close(gsk_handle * my_env_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+  int rc;
+
+  if(!my_env_handle)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  if(!*my_env_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) *my_env_handle;
+  if ((rc = gsk_environment_close(&p->h)) == GSK_OK) {
+    gsk_free_handle(p);
+    *my_env_handle = (gsk_handle) NULL;
+  }
+  return rc;
+}
+
+
+int
+Curl_gsk_secure_soc_close(gsk_handle * my_session_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+  int rc;
+
+  if(!my_session_handle)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  if(!*my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) *my_session_handle;
+  if ((rc = gsk_secure_soc_close(&p->h)) == GSK_OK) {
+    gsk_free_handle(p);
+    *my_session_handle = (gsk_handle) NULL;
+  }
+  return rc;
+}
+
+
+int
+Curl_gsk_environment_init(gsk_handle my_env_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_env_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_env_handle;
+  return gsk_environment_init(p->h);
+}
+
+
+int
+Curl_gsk_secure_soc_init(gsk_handle my_session_handle)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_session_handle;
+  return gsk_secure_soc_init(p->h);
+}
+
+
+int
+Curl_gsk_attribute_set_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
+                                const char * buffer, int bufSize)
+
+{
+  struct Curl_gsk_descriptor * p;
+  char * ebcdicbuf;
+  int rc;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  if(!buffer)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  if(bufSize < 0)
+    return GSK_ATTRIBUTE_INVALID_LENGTH;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  if(!bufSize)
+    bufSize = strlen(buffer);
+  if (!(ebcdicbuf = malloc(bufSize + 1)))
+      return GSK_INSUFFICIENT_STORAGE;
+  QadrtConvertA2E(ebcdicbuf, buffer, bufSize, bufSize);
+  ebcdicbuf[bufSize] = '\0';
+  rc = gsk_attribute_set_buffer(p->h, bufID, ebcdicbuf, bufSize);
+  free(ebcdicbuf);
+  return rc;
+}
+
+
+int
+Curl_gsk_attribute_set_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
+                            GSK_ENUM_VALUE enumValue)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  return gsk_attribute_set_enum(p->h, enumID, enumValue);
+}
+
+
+int
+Curl_gsk_attribute_set_numeric_value(gsk_handle my_gsk_handle,
+                                     GSK_NUM_ID numID, int numValue)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  return gsk_attribute_set_numeric_value(p->h, numID, numValue);
+}
+
+
+int
+Curl_gsk_attribute_set_callback(gsk_handle my_gsk_handle,
+                                GSK_CALLBACK_ID callBackID,
+                                void * callBackAreaPtr)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  return gsk_attribute_set_callback(p->h, callBackID, callBackAreaPtr);
+}
+
+
+static int
+cachestring(struct Curl_gsk_descriptor * p,
+            const char * ebcdicbuf, int bufsize, const char * * buffer)
+
+{
+  int rc;
+  char * asciibuf;
+  struct gskstrlist * sp;
+
+  for (sp = p->strlist; sp; sp = sp->next)
+    if(sp->ebcdicstr == ebcdicbuf)
+      break;
+  if(!sp) {
+    if(!(sp = (struct gskstrlist *) malloc(sizeof *sp)))
+      return GSK_INSUFFICIENT_STORAGE;
+    if(!(asciibuf = malloc(bufsize + 1))) {
+      free(sp);
+      return GSK_INSUFFICIENT_STORAGE;
+    }
+    QadrtConvertE2A(asciibuf, ebcdicbuf, bufsize, bufsize);
+    asciibuf[bufsize] = '\0';
+    sp->ebcdicstr = ebcdicbuf;
+    sp->asciistr = asciibuf;
+    sp->next = p->strlist;
+    p->strlist = sp;
+  }
+  *buffer = sp->asciistr;
+  return GSK_OK;
+}
+
+
+int
+Curl_gsk_attribute_get_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
+                                const char * * buffer, int * bufSize)
+
+{
+  struct Curl_gsk_descriptor * p;
+  int rc;
+  const char * mybuf;
+  int mylen;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  if(!buffer || !bufSize)
+    return GSK_OS400_ERROR_INVALID_POINTER;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  if ((rc = gsk_attribute_get_buffer(p->h, bufID, &mybuf, &mylen)) != GSK_OK)
+    return rc;
+  if((rc = cachestring(p, mybuf, mylen, buffer)) == GSK_OK)
+    *bufSize = mylen;
+  return rc;
+}
+
+
+int
+Curl_gsk_attribute_get_enum(gsk_handle my_gsk_handle, GSK_ENUM_ID enumID,
+                            GSK_ENUM_VALUE * enumValue)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  return gsk_attribute_get_enum(p->h, enumID, enumValue);
+}
+
+
+int
+Curl_gsk_attribute_get_numeric_value(gsk_handle my_gsk_handle,
+                                     GSK_NUM_ID numID, int * numValue)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  return gsk_attribute_get_numeric_value(p->h, numID, numValue);
+}
+
+
+int
+Curl_gsk_attribute_get_cert_info(gsk_handle my_gsk_handle,
+                                 GSK_CERT_ID certID,
+                                 const gsk_cert_data_elem * * certDataElem,
+                                 int * certDataElementCount)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_gsk_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_gsk_handle;
+  /* No need to convert code: text results are already in ASCII. */
+  return gsk_attribute_get_cert_info(p->h, certID,
+                                     certDataElem, certDataElementCount);
+}
+
+
+int
+Curl_gsk_secure_soc_misc(gsk_handle my_session_handle, GSK_MISC_ID miscID)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_session_handle;
+  return gsk_secure_soc_misc(p->h, miscID);
+}
+
+
+int
+Curl_gsk_secure_soc_read(gsk_handle my_session_handle, char * readBuffer,
+                         int readBufSize, int * amtRead)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_session_handle;
+  return gsk_secure_soc_read(p->h, readBuffer, readBufSize, amtRead);
+}
+
+
+int
+Curl_gsk_secure_soc_write(gsk_handle my_session_handle, char * writeBuffer,
+                          int writeBufSize, int * amtWritten)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_session_handle;
+  return gsk_secure_soc_write(p->h, writeBuffer, writeBufSize, amtWritten);
+}
+
+
+const char *
+Curl_gsk_strerror_a(int gsk_return_value)
+
+{
+  int i;
+  const char * cp;
+  char * cp2;
+
+  cp = gsk_strerror(gsk_return_value);
+
+  if (!cp)
+    return cp;
+
+  i = strlen(cp);
+
+  if (!(cp2 = Curl_thread_buffer(LK_GSK_ERROR, MAX_CONV_EXPANSION * i + 1)))
+    return cp2;
+
+  i = QadrtConvertE2A(cp2, cp, MAX_CONV_EXPANSION * i, i);
+  cp2[i] = '\0';
+  return cp2;
+}
+
+int
+Curl_gsk_secure_soc_startInit(gsk_handle my_session_handle,
+                              int IOCompletionPort,
+                              Qso_OverlappedIO_t * communicationsArea)
+
+{
+  struct Curl_gsk_descriptor * p;
+
+  if(!my_session_handle)
+    return GSK_INVALID_HANDLE;
+  p = (struct Curl_gsk_descriptor *) my_session_handle;
+  return gsk_secure_soc_startInit(p->h, IOCompletionPort, communicationsArea);
+}
+
+#endif /* USE_GSKIT */
+
 
 
 #ifdef HAVE_GSSAPI

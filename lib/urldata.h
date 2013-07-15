@@ -134,6 +134,10 @@
 #include <qsossl.h>
 #endif
 
+#ifdef USE_GSKIT
+#include <gskssl.h>
+#endif
+
 #ifdef USE_AXTLS
 #include <axTLS/ssl.h>
 #undef malloc
@@ -322,6 +326,11 @@ struct ssl_connect_data {
 #ifdef USE_QSOSSL
   SSLHandle *handle;
 #endif /* USE_QSOSSL */
+#ifdef USE_GSKIT
+  gsk_handle handle;
+  int iocport;
+  ssl_connect_state connecting_state;
+#endif
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
   SSL*     ssl;

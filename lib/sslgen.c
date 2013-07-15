@@ -32,6 +32,7 @@
    Curl_gtls_ - prefix for GnuTLS ones
    Curl_nss_ - prefix for NSS ones
    Curl_qssl_ - prefix for QsoSSL ones
+   Curl_gskit_ - prefix for GSKit ones
    Curl_polarssl_ - prefix for PolarSSL ones
    Curl_cyassl_ - prefix for CyaSSL ones
    Curl_schannel_ - prefix for Schannel SSPI ones
@@ -63,6 +64,7 @@
 #include "gtls.h"   /* GnuTLS versions */
 #include "nssg.h"   /* NSS versions */
 #include "qssl.h"   /* QSOSSL versions */
+#include "gskit.h"  /* Global Secure ToolKit versions */
 #include "polarssl.h" /* PolarSSL versions */
 #include "axtls.h"  /* axTLS versions */
 #include "cyassl.h"  /* CyaSSL versions */

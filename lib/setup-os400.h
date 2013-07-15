@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,6 +38,8 @@ typedef unsigned long   u_int32_t;
 #include <sys/socket.h>
 #include <netdb.h>
 #include <qsossl.h>
+#include <gskssl.h>
+#include <qsoasync.h>
 #include <gssapi.h>
 
 extern int      Curl_getaddrinfo_a(const char * nodename, const char * servname,
@@ -66,6 +68,93 @@ extern int      Curl_SSL_Init_a(SSLInit * init);
 
 extern char *   Curl_SSL_Strerror_a(int sslreturnvalue, SSLErrorMsg * serrmsgp);
 #define SSL_Strerror            Curl_SSL_Strerror_a
+
+
+/* GSKit wrappers. */
+
+extern int      Curl_gsk_environment_open(gsk_handle * my_env_handle);
+#define gsk_environment_open    Curl_gsk_environment_open
+
+extern int      Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
+                                         gsk_handle * my_session_handle);
+#define gsk_secure_soc_open     Curl_gsk_secure_soc_open
+
+extern int      Curl_gsk_environment_close(gsk_handle * my_env_handle);
+#define gsk_environment_close   Curl_gsk_environment_close
+
+extern int      Curl_gsk_secure_soc_close(gsk_handle * my_session_handle);
+#define gsk_secure_soc_close    Curl_gsk_secure_soc_close
+
+extern int      Curl_gsk_environment_init(gsk_handle my_env_handle);
+#define gsk_environment_init    Curl_gsk_environment_init
+
+extern int      Curl_gsk_secure_soc_init(gsk_handle my_session_handle);
+#define gsk_secure_soc_init     Curl_gsk_secure_soc_init
+
+extern int      Curl_gsk_attribute_set_buffer_a(gsk_handle my_gsk_handle,
+                                                GSK_BUF_ID bufID,
+                                                const char * buffer,
+                                                int bufSize);
+#define gsk_attribute_set_buffer        Curl_gsk_attribute_set_buffer_a
+
+extern int      Curl_gsk_attribute_set_enum(gsk_handle my_gsk_handle,
+                                            GSK_ENUM_ID enumID,
+                                            GSK_ENUM_VALUE enumValue);
+#define gsk_attribute_set_enum  Curl_gsk_attribute_set_enum
+
+extern int      Curl_gsk_attribute_set_numeric_value(gsk_handle my_gsk_handle,
+                                                     GSK_NUM_ID numID,
+                                                     int numValue);
+#define gsk_attribute_set_numeric_value Curl_gsk_attribute_set_numeric_value
+
+extern int      Curl_gsk_attribute_set_callback(gsk_handle my_gsk_handle,
+                                                GSK_CALLBACK_ID callBackID,
+                                                void * callBackAreaPtr);
+#define gsk_attribute_set_callback      Curl_gsk_attribute_set_callback
+
+extern int      Curl_gsk_attribute_get_buffer_a(gsk_handle my_gsk_handle,
+                                                GSK_BUF_ID bufID,
+                                                const char * * buffer,
+                                                int * bufSize);
+#define gsk_attribute_get_buffer        Curl_gsk_attribute_get_buffer_a
+
+extern int      Curl_gsk_attribute_get_enum(gsk_handle my_gsk_handle,
+                                            GSK_ENUM_ID enumID,
+                                            GSK_ENUM_VALUE * enumValue);
+#define gsk_attribute_get_enum  Curl_gsk_attribute_get_enum
+
+extern int      Curl_gsk_attribute_get_numeric_value(gsk_handle my_gsk_handle,
+                                                     GSK_NUM_ID numID,
+                                                     int * numValue);
+#define gsk_attribute_get_numeric_value Curl_gsk_attribute_get_numeric_value
+
+extern int      Curl_gsk_attribute_get_cert_info(gsk_handle my_gsk_handle,
+                                 GSK_CERT_ID certID,
+                                 const gsk_cert_data_elem * * certDataElem,
+                                 int * certDataElementCount);
+#define gsk_attribute_get_cert_info     Curl_gsk_attribute_get_cert_info
+
+extern int      Curl_gsk_secure_soc_misc(gsk_handle my_session_handle,
+                                         GSK_MISC_ID miscID);
+#define gsk_secure_soc_misc     Curl_gsk_secure_soc_misc
+
+extern int      Curl_gsk_secure_soc_read(gsk_handle my_session_handle,
+                                         char * readBuffer,
+                                         int readBufSize, int * amtRead);
+#define gsk_secure_soc_read     Curl_gsk_secure_soc_read
+
+extern int      Curl_gsk_secure_soc_write(gsk_handle my_session_handle,
+                                          char * writeBuffer,
+                                          int writeBufSize, int * amtWritten);
+#define gsk_secure_soc_write    Curl_gsk_secure_soc_write
+
+extern const char *     Curl_gsk_strerror_a(int gsk_return_value);
+#define gsk_strerror    Curl_gsk_strerror_a
+
+extern int      Curl_gsk_secure_soc_startInit(gsk_handle my_session_handle,
+                                      int IOCompletionPort,
+                                      Qso_OverlappedIO_t * communicationsArea);
+#define gsk_secure_soc_startInit        Curl_gsk_secure_soc_startInit
 
 
 /* GSSAPI wrappers. */
@@ -106,6 +195,7 @@ extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
                                                gss_ctx_id_t * context_handle,
                                                gss_buffer_t output_token);
 #define gss_delete_sec_context  Curl_gss_delete_sec_context_a
+
 
 /* LDAP wrappers. */
 

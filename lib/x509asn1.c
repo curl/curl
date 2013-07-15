@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_QSOSSL)
+#if defined(USE_QSOSSL) || defined(USE_GSKIT)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -1148,4 +1148,4 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_QSOSSL */
+#endif /* USE_QSOSSL or USE_GSKIT */

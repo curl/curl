@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_QSOSSL)
+#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_QSOSSL) || \
+    defined(USE_GSKIT)
 /* these backends use functions from this file */
 
 #include "hostcheck.h"
@@ -93,4 +94,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return 0;
 }
 
-#endif /* SSLEAY or AXTLS or QSOSSL */
+#endif /* SSLEAY or AXTLS or QSOSSL or GSKIT */

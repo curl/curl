@@ -39,22 +39,24 @@ header files are thus altered during build process to use this pragma, in
 order to force libcurl enums of being type int (the pragma disposition in use
 before inclusion is restored before resuming the including unit compilation).
 
-  Three SSL implementations were present in libcurl. Nevertheless, none of them
-is available on OS/400. To support SSL on OS/400, a fourth implementation has
-been added (qssl.[ch]). There is no way to have different certificate stores
-for CAs and for personal/application certificates/key. More, the SSL context
-may be defined as an application identifier in the main certificate store,
-or as a keyring file. As a consequence, the meaning of some fields have been
-slightly altered:
-_ The "certificate identifier" is taken from CURLOPT_SSLCERT if defined, else
-from CURLOPT_CAINFO.
-_ The certificate identifier is then used as an application identifier in the
-main certificate store. If successful, this context is used.
-_ If the previous step failed, the certificate identifier is used as the file
-name of a keyring. CURLOPT_KEYPASSWD is used here as the keyring password.
-_ The default ca-bundle (CURLOPT_CAINFO) is set to the main certificate store's
-keyring file name: this allows to use the system global CAs by default. (In that
-case, the keyring password is safely recovered from the system... IBM dixit!)
+  Two SSL implementations are available to libcurl on OS/400: QsoSSL which is
+obsolescent, does not support asynchronous I/O and only allows a single SSL
+context within a job, and GSKit that does not suffer from these limitations
+and is able to provide some information about the server certificate.
+  Both implementations of SSL are working on "certificate stores" or keyrings,
+rather than individual certificate/key files. Certificate stores, as weel as
+"certificate labels" are managed by external IBM-defined applications.
+  There are two ways to specify an SSL context:
+- By an application identifier.
+- By a keyring file pathname and (optionally) certificate label.
+  To identify an SSL context by application identifier, use option
+SETOPT_SSLCERT to specify the application identifier.
+  To address an SSL context by keyring and certificate label, use CURLOPT_CAINFO
+to set-up the keyring pathname, CURLOPT_SSLCERT to define the certificate label
+(omitting it will cause the default certificate in keyring to be used) and
+CURLOPT_KEYPASSWD to give the keyring password. If SSL is used without
+defining any of these options, the default (i.e.: system) keyring is used for
+server certificate validation.
 
   Non-standard EBCDIC wrapper prototypes are defined in an additional header
 file: ccsidcurl.h. These should be self-explanatory to an OS/400-aware
@@ -154,6 +156,14 @@ use:
         CURLINFO_PRIMARY_IP
         CURLINFO_RTSP_SESSION_ID
         CURLINFO_LOCAL_IP
+  Likewise, the following options are followed by a struct curl_slist * * and a
+CCSID.
+        CURLINFO_SSL_ENGINES
+        CURLINFO_COOKIELIST
+Lists returned should be released with curl_slist_free_all() after use.
+  Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
+CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
+use.
   Other options are processed like in curl_easy_getinfo().
 
   Standard compilation environment does support neither autotools nor make;
@@ -200,6 +210,8 @@ _ As a prerequisite, QADRT development environment must be installed.
 _ Install the curl source directory in IFS.
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
+- If the SSL backend has to be changed, edit file lib/config-os400.h
+  accordingly.
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
   parameters, like debug info generation, optimisation level, listing option,

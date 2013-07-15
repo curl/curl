@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_QSOSSL)
+#if defined(USE_QSOSSL) || defined(USE_GSKIT)
 
 #include "urldata.h"
 
@@ -125,5 +125,5 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn, int certnum,
 CURLcode Curl_verifyhost(struct connectdata * conn,
                          const char * beg, const char * end);
 
-#endif /* USE_QSOSSL */
+#endif /* USE_QSOSSL or USE_GSKIT */
 #endif /* HEADER_CURL_X509ASN1_H */
