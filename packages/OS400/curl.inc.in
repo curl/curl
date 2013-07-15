@@ -2109,13 +2109,18 @@
      d  code                               value like(CURLMcode)
      d  ccsid                        10u 0 value
       *
+      * May be used for strings and structures.
      d curl_easy_getinfo_ccsid...
      d                 pr                  extproc('curl_easy_getinfo_ccsid')
      d                                     like(CURLcode)
      d  curl                           *   value                                CURL *
      d  info                               value like(CURLINFO)
-     d  stringarg                      *   options(*nopass)                     char *
+     d  ptrarg                         *   options(*nopass)                     char *
      d  ccsid                        10u 0 value options(*nopass)
+      *
+     d curl_certinfo_free_all...
+     d                 pr                  extproc('curl_certinfo_free_all')
+     d  info                           *   value
       *
      d curl_formadd_ccsid...
      d                 pr                  extproc('curl_formadd_ccsid')

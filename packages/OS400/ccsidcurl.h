@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,5 +60,6 @@ CURL_EXTERN int curl_formget_ccsid(struct curl_httppost * form, void * arg,
                                    curl_formget_callback append,
                                    unsigned int ccsid);
 CURL_EXTERN CURLcode curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...);
+CURL_EXTERN void curl_certinfo_free_all(struct curl_certinfo *info);
 
 #endif
