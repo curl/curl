@@ -209,9 +209,10 @@ unsigned int Curl_rand(struct SessionHandle *data)
       {
         struct timeval now = curlx_tvnow();
         randseed += (unsigned int) now.tv_usec + (unsigned int)now.tv_sec;
-        Curl_rand(data);
-        Curl_rand(data);
-        Curl_rand(data);
+        randseed = randseed * 1103515245 + 12345;
+        randseed = randseed * 1103515245 + 12345;
+        randseed = randseed * 1103515245 + 12345;
+        seeded = TRUE;
       }
     }
     /* Return an unsigned 32-bit pseudo-random number. */
