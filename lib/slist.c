@@ -90,7 +90,7 @@ struct curl_slist *curl_slist_append(struct curl_slist *list,
 {
   char *dupdata = strdup(data);
 
-  if(!data)
+  if(!dupdata)
     return NULL;
 
   list = Curl_slist_append_nodup(list, dupdata);
