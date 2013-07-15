@@ -31,6 +31,7 @@
    Curl_ossl_ - prefix for OpenSSL ones
    Curl_gtls_ - prefix for GnuTLS ones
    Curl_nss_ - prefix for NSS ones
+   Curl_qssl_ - prefix for QsoSSL ones
    Curl_polarssl_ - prefix for PolarSSL ones
    Curl_cyassl_ - prefix for CyaSSL ones
    Curl_schannel_ - prefix for Schannel SSPI ones
@@ -67,6 +68,7 @@
 #include "cyassl.h"  /* CyaSSL versions */
 #include "curl_schannel.h" /* Schannel SSPI version */
 #include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
+#include "slist.h"
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"
@@ -74,6 +76,10 @@
 #include "progress.h"
 #include "share.h"
 #include "timeval.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -583,6 +589,65 @@ void Curl_ssl_free_certinfo(struct SessionHandle *data)
     ci->certinfo = NULL;
     ci->num_of_certs = 0;
   }
+}
+
+int Curl_ssl_init_certinfo(struct SessionHandle * data,
+                           int num)
+{
+  struct curl_certinfo * ci = &data->info.certs;
+  struct curl_slist * * table;
+
+  /* Initialize the certificate information structures. Return 0 if OK, else 1.
+   */
+  Curl_ssl_free_certinfo(data);
+  ci->num_of_certs = num;
+  table = calloc((size_t) num, sizeof(struct curl_slist *));
+  if(!table)
+    return 1;
+
+  ci->certinfo = table;
+  return 0;
+}
+
+CURLcode Curl_ssl_push_certinfo_len(struct SessionHandle *data,
+                                    int certnum,
+                                    const char *label,
+                                    const char *value,
+                                    size_t valuelen)
+{
+  struct curl_certinfo * ci = &data->info.certs;
+  char * output;
+  struct curl_slist * nl;
+  CURLcode res = CURLE_OK;
+
+  /* Add an information record for a particular certificate. */
+  output = curl_maprintf("%s:%.*s", label, valuelen, value);
+  if(!output)
+    return CURLE_OUT_OF_MEMORY;
+
+  nl = Curl_slist_append_nodup(ci->certinfo[certnum], output);
+  if(!nl) {
+    free(output);
+    curl_slist_free_all(ci->certinfo[certnum]);
+    res = CURLE_OUT_OF_MEMORY;
+  }
+
+  ci->certinfo[certnum] = nl;
+  return res;
+}
+
+/*
+ * This is a convenience function for push_certinfo_len that takes a zero
+ * terminated value.
+ */
+CURLcode Curl_ssl_push_certinfo(struct SessionHandle *data,
+                                int certnum,
+                                const char *label,
+                                const char *value)
+{
+  size_t valuelen = strlen(value);
+
+  return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
 }
 
 /* these functions are only provided by some SSL backends */
