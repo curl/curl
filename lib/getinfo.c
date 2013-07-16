@@ -60,6 +60,10 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   if(info->contenttype)
     free(info->contenttype);
   info->contenttype = NULL;
+  
+  if(info->ssl_trust)
+    info->free_ssl_trust(info->ssl_trust);
+  info->ssl_trust = NULL;
 
   info->header_size = 0;
   info->request_size = 0;
@@ -284,6 +288,19 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
+static CURLcode getinfo_ptr(struct SessionHandle *data, CURLINFO info,
+                            void **ptrp)
+{
+  switch(info) {
+  case CURLINFO_SSL_TRUST:
+    *ptrp = data->info.ssl_trust;
+    break;
+  default:
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 {
   va_list arg;
@@ -291,6 +308,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   double *param_doublep=NULL;
   char **param_charp=NULL;
   struct curl_slist **param_slistp=NULL;
+  void **param_ptrp=NULL;
   int type;
   /* default return code is to error out! */
   CURLcode ret = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -322,6 +340,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     if(NULL != param_slistp)
       ret = getinfo_slist(data, info, param_slistp);
     break;
+  case CURLINFO_PTR:
+    param_ptrp = va_arg(arg, void **);
+    if(NULL != param_ptrp)
+      ret = getinfo_ptr(data, info, param_ptrp);
   default:
     break;
   }

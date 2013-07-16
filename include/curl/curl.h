@@ -1947,6 +1947,7 @@ struct curl_certinfo {
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
 #define CURLINFO_SLIST    0x400000
+#define CURLINFO_PTR      0x500000
 #define CURLINFO_MASK     0x0fffff
 #define CURLINFO_TYPEMASK 0xf00000
 
@@ -1995,8 +1996,9 @@ typedef enum {
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
   /* Fill in new entries below here! */
+  CURLINFO_SSL_TRUST        = CURLINFO_PTR    + 43,
 
-  CURLINFO_LASTONE          = 42
+  CURLINFO_LASTONE          = 43
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
