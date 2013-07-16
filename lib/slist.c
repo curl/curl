@@ -59,8 +59,7 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
   struct curl_slist     *last;
   struct curl_slist     *new_item;
 
-  if(!data)
-    return NULL;
+  DEBUGASSERT(data);
 
   new_item = malloc(sizeof(struct curl_slist));
   if(!new_item)
