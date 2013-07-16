@@ -60,11 +60,16 @@ unlink (remove) certdata.txt after processing
 be verbose and print out processed CAs
 .SH EXIT STATUS
 Returns 0 on success. Returns 1 if it fails to download data.
+.SH CERTDATA FORMAT
+The file format used by Mozilla for this trust information seems to be documented here:
+.nf
+http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
+.fi
 .SH SEE ALSO
 .BR curl (1)
 .SH HISTORY
 \fBmk-ca-bundle\fP is a command line tool that is shipped as part of every
 curl and libcurl release (see http://curl.haxx.se/). It was originally based
 on the parse-certs script written by Roland Krikava and was later much
-improved by Guenter Knauf.  This manual page was written by Jan Schaumann
-\&<jschauma@netmeister.org>.
+improved by Guenter Knauf.  This manual page was initially written by Jan
+Schaumann \&<jschauma@netmeister.org>.
