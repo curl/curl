@@ -24,6 +24,7 @@
 #include "tool_setup.h"
 
 void tool_help(void);
+void tool_help_short(FILE *);
 
 #endif /* HEADER_CURL_TOOL_HELP_H */
 

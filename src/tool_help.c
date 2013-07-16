@@ -41,8 +41,16 @@
  *  curl --help | cut -c5- | grep "^-" | sort
  */
 
+static const char usage[] = "Usage: curl [options...] <url>";
+
+static const char *const helptext_short[] = {
+  usage,
+  "  Transfers data at <url> to standard output.",
+  NULL
+};
+
 static const char *const helptext[] = {
-  "Usage: curl [options...] <url>",
+  usage,
   "Options: (H) means HTTP/HTTPS only, (F) means FTP only",
   "     --anyauth       Pick \"any\" authentication method (H)",
   " -a, --append        Append to target file when uploading (F/SFTP)",
@@ -244,3 +252,15 @@ void tool_help(void)
   }
 }
 
+/*
+ * Print usage summary (for argc<2) on fp.
+ */
+void tool_help_short(FILE *fp)
+{
+  const char *line;
+  int i;
+  for(i = 0; (line = helptext_short[i]) != NULL; i++) {
+    fputs(line, fp);
+    putc('\n', fp);
+  }
+}
