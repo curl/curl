@@ -29,6 +29,8 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
  CMakeLists.txt mem-include-scan.pl valgrind.supp http_pipe.py
 
+DISTCLEANFILES = configurehelp.pm
+
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
