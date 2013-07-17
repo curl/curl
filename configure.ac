@@ -3531,6 +3531,8 @@ AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
 
+XC_AMEND_DISTCLEAN([lib src tests/unit tests/server tests/libtest docs/examples])
+
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
   curl version:     ${CURLVERSION}
