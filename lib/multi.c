@@ -808,7 +808,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   struct Curl_one_easy *easy;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
   int bitmap;
-  unsigned int i;
+  unsigned int i, j;
   unsigned int nfds = 0;
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
@@ -909,6 +909,9 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     i = Curl_poll(ufds, nfds, timeout_ms);
   else
     i = 0;
+
+  for(j = nfds - extra_nfds; j < nfds; j++)
+    extra_fds[j].revents = ufds[j].revents;
 
   Curl_safefree(ufds);
   if(ret)
