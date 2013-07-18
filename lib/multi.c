@@ -808,7 +808,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   struct Curl_one_easy *easy;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
   int bitmap;
-  unsigned int i, j;
+  unsigned int i;
   unsigned int nfds = 0;
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
@@ -904,14 +904,32 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
     ++nfds;
   }
 
-  if(nfds)
+  if(nfds) {
     /* wait... */
     i = Curl_poll(ufds, nfds, timeout_ms);
+
+    if(i) {
+      unsigned int j;
+      /* copy revents results from the poll to the curl_multi_wait poll
+         struct, the bit values of the actual underlying poll() implementation
+         may not be the same as the ones in the public libcurl API! */
+      for(j = 0; j < extra_nfds; j++) {
+        unsigned short mask = 0;
+        unsigned r = ufds[curlfds + j].revents;
+
+        if(r & POLLIN)
+          mask |= CURL_WAIT_POLLIN;
+        if(r & POLLOUT)
+          mask |= CURL_WAIT_POLLOUT;
+        if(r & POLLPRI)
+          mask |= CURL_WAIT_POLLPRI;
+
+        extra_fds[j].revents = mask;
+      }
+    }
+  }
   else
     i = 0;
-
-  for(j = nfds - extra_nfds; j < nfds; j++)
-    extra_fds[j].revents = ufds[j].revents;
 
   Curl_safefree(ufds);
   if(ret)
