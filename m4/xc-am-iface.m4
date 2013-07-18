@@ -31,6 +31,10 @@ dnl newer is used at configure script generation time, this
 dnl results in 'subdir-objects' automake option being used.
 dnl When using automake versions older than 1.14 this option
 dnl is not used when generating configure script.
+dnl
+dnl Existence of automake _AM_PROG_CC_C_O m4 private macro
+dnl is used to differentiate automake version 1.14 from older
+dnl ones which lack this macro.
 
 m4_define([_XC_AUTOMAKE_BODY],
 [dnl
@@ -56,8 +60,13 @@ dnl -------------------------------------------------
 dnl Public macro.
 dnl
 dnl This macro embeds automake machinery into configure
-dnl script with initialization option 'subdir-objects'
-dnl when using automake version 1.14 or newer.
+dnl script regardless of automake version used in order
+dnl to generate configure script.
+dnl
+dnl When using automake version 1.14 or newer, automake
+dnl initialization option 'subdir-objects' is used to
+dnl generate the configure script, otherwise this option
+dnl is not used.
 
 AC_DEFUN([XC_AUTOMAKE],
 [dnl
@@ -82,6 +91,8 @@ dnl This macro performs shell code embedding into
 dnl configure script in order to modify distclean
 dnl and maintainer-clean targets of makefiles which
 dnl are located in given list of subdirs.
+dnl
+dnl See XC_AMEND_DISTCLEAN comments for details.
 
 m4_define([_XC_AMEND_DISTCLEAN_BODY],
 [dnl
@@ -124,7 +135,7 @@ xc_dep_subdirs=`echo "$xc_inc_lines" \
 echo "$xc_rm_depfiles" >$xc_p
 
 for xc_dep_dir in $xc_dep_subdirs; do
-  echo "${xc_tab}@xm_dep_cnt=\`ls $xc_dep_dir | wc -l 2>/dev/null\`; \\"             >>$xc_p
+  echo "${xc_tab}@xm_dep_cnt=\`ls $xc_dep_dir | wc -l 2>/dev/null\`; \\"            >>$xc_p
   echo "${xc_tab}if test \$\$xm_dep_cnt -eq 0 && test -d $xc_dep_dir; then \\"      >>$xc_p
   echo "${xc_tab}  rm -rf $xc_dep_dir; \\"                                          >>$xc_p
   echo "${xc_tab}fi"                                                                >>$xc_p
@@ -196,8 +207,9 @@ dnl Public macro.
 dnl
 dnl This macro embeds shell code into configure script
 dnl that amends, at configure runtime, the distclean
-dnl target of Makefiles located in all subdirs given in
-dnl the mandatory white-space separated list argument.
+dnl and maintainer-clean targets of Makefiles located
+dnl in all subdirs given in the mandatory white-space
+dnl separated list argument.
 dnl
 dnl Embedding only takes place when using automake 1.14
 dnl or newer, otherwise amending code is not included
@@ -207,7 +219,8 @@ dnl distclean and maintainer-clean targets are modified
 dnl to avoid unconditional removal of dependency subdirs
 dnl which triggers distclean and maintainer-clean errors
 dnl when using automake 'subdir-objects' option along
-dnl with per-target objects.
+dnl with per-target objects and source files existing in
+dnl multiple subdirs used for different build targets.
 dnl
 dnl New behavior first removes each dependency tracking
 dnl file independently, and only removes each dependency
