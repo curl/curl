@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,6 +46,11 @@ CURL_EXTERN void *curl_dorealloc(void *ptr, size_t size, int line,
                                  const char *source);
 CURL_EXTERN void curl_dofree(void *ptr, int line, const char *source);
 CURL_EXTERN char *curl_dostrdup(const char *str, int line, const char *source);
+#ifdef WIN32
+CURL_EXTERN wchar_t *curl_dowcsdup(const wchar_t *str, int line,
+                                   const char *source);
+#endif
+
 CURL_EXTERN void curl_memdebug(const char *logname);
 CURL_EXTERN void curl_memlimit(long limit);
 CURL_EXTERN void curl_memlog(const char *format, ...);
@@ -83,6 +88,19 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define calloc(nbelem,size) curl_docalloc(nbelem, size, __LINE__, __FILE__)
 #define realloc(ptr,size) curl_dorealloc(ptr, size, __LINE__, __FILE__)
 #define free(ptr) curl_dofree(ptr, __LINE__, __FILE__)
+
+#ifdef WIN32
+#  undef wcsdup
+#  define wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
+#  undef _wcsdup
+#  define _wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
+#  undef _tcsdup
+#  ifdef UNICODE
+#    define _tcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
+#  else
+#    define _tcsdup(ptr) curl_dostrdup(ptr, __LINE__, __FILE__)
+#  endif
+#endif
 
 #define socket(domain,type,protocol)\
  curl_socket(domain,type,protocol,__LINE__,__FILE__)

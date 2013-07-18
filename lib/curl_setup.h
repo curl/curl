@@ -270,6 +270,7 @@
 #    endif
 #  endif
 #  include <tchar.h>
+   typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
 #endif
 
 /*
