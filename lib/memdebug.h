@@ -46,7 +46,7 @@ CURL_EXTERN void *curl_dorealloc(void *ptr, size_t size, int line,
                                  const char *source);
 CURL_EXTERN void curl_dofree(void *ptr, int line, const char *source);
 CURL_EXTERN char *curl_dostrdup(const char *str, int line, const char *source);
-#ifdef WIN32
+#if defined(WIN32) && defined(UNICODE)
 CURL_EXTERN wchar_t *curl_dowcsdup(const wchar_t *str, int line,
                                    const char *source);
 #endif
@@ -90,14 +90,15 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define free(ptr) curl_dofree(ptr, __LINE__, __FILE__)
 
 #ifdef WIN32
-#  undef wcsdup
-#  define wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
-#  undef _wcsdup
-#  define _wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
-#  undef _tcsdup
 #  ifdef UNICODE
+#    undef wcsdup
+#    define wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
+#    undef _wcsdup
+#    define _wcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
+#    undef _tcsdup
 #    define _tcsdup(ptr) curl_dowcsdup(ptr, __LINE__, __FILE__)
 #  else
+#    undef _tcsdup
 #    define _tcsdup(ptr) curl_dostrdup(ptr, __LINE__, __FILE__)
 #  endif
 #endif

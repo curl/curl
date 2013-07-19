@@ -239,7 +239,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   return mem;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && defined(UNICODE)
 wchar_t *curl_dowcsdup(const wchar_t *str, int line, const char *source)
 {
   wchar_t *mem;
