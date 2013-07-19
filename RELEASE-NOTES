@@ -14,7 +14,11 @@ Curl and libcurl 7.32.0
 
 This release includes the following changes:
 
- o 
+ o curl: allow timeouts to accept decimal values
+ o OS400: add slist and certinfo EBCDIC support
+ o OS400: new SSL backend GSKit
+ o CURLOPT_XFERINFOFUNCTION: introducing a new progress callback
+ o
 
 This release includes the following bugfixes:
 
@@ -29,6 +33,20 @@ This release includes the following bugfixes:
  o printf: make sure %x are treated unsigned
  o formpost: better random boundaries [5]
  o url: restore the functionality of 'curl -u :' [6]
+ o curl.1: fix typo in --xattr description [7]
+ o digest: improve nonce generation
+ o configure: automake 1.14 compatibility tweak
+ o curl.1: document the --post303 option in the man page
+ o curl.1: document the --sasl-ir option in the man page
+ o setup-vms.h: sk_pop symbol tweak
+ o tool_paramhlp: try harder to catch negatives
+ o cmake: Fix for MSVC2010 project generation [8]
+ o asyn-ares: Don't blank ares servers if none configured
+ o curl_multi_wait: set revents for extra fds
+ o Reinstate "WIN32 MemoryTracking: track wcsdup() _wcsdup() and _tcsdup()
+ o ftp_do_more: consider DO_MORE complete when server connects back [9]
+ o curl_easy_perform: gradually increase the delay time [10]
+ o
 
 This release includes the following known bugs:
 
@@ -38,7 +56,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Alex Vinnik, Alessandro Ghedini, Nick Zitzmann, Kamil Dudka,
- Lluís Batlle i Rossell, Nach M. S., Kim Vandry
+ Lluís Batlle i Rossell, Nach M. S., Kim Vandry, Ben Greear, Dan Fandrich,
+ Dave Reisner, Evgeny Turnaev, Guenter Knauf, John E. Malmberg,
+ Marc Hoersken, Patrick Monnerat, Sergei Nikulov, Yang Tse, Andreas Malzahn,
+ Clemens Gruber, Jean-No�l Rouvignac, Markus Moeller
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -50,3 +71,7 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/bug/view.cgi?id=1191
  [5] = http://curl.haxx.se/bug/view.cgi?id=1251
  [6] = http://curl.haxx.se/mail/archive-2013-06/0052.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1252
+ [8] = http://curl.haxx.se/mail/lib-2013-07/0046.html
+ [9] = http://curl.haxx.se/mail/lib-2013-07/0115.html
+ [10] = http://curl.haxx.se/mail/lib-2013-07/0103.html
