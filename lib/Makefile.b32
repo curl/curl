@@ -52,7 +52,7 @@ LDFLAGS  = -q -lq -laa -tWD
 SRCDIR   = .
 OBJDIR   = .\BCC_objs
 INCDIRS  = -I.;..\include
-LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
+LINKLIB  = $(BCCDIR)\lib\cw32mt.lib $(BCCDIR)\lib\ws2_32.lib
 DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
 
 # By default SSPI support is enabled for BCC
@@ -88,8 +88,24 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 !include Makefile.inc
 
-OBJECTS = $(CSOURCES:.c=.obj)
-PREPROCESSED = $(CSOURCES:.c=.int)
+# Borland's command line librarian program TLIB version 4.5 is not capable
+# of building a library when any of its objects contains an hypen in its
+# name, due to a command line parsing bug. In order to workaround this, we
+# build source files with hyphens in their name as objects with underscores
+# using explicit compilation build rules instead of implicit ones.
+
+NOHYPHEN = $(CSOURCES:-=_)
+
+OBJECTS = $(NOHYPHEN:.c=.obj)
+PREPROCESSED = $(NOHYPHEN:.c=.int)
+
+# Borland's command line compiler (BCC32) version 5.5.1 integrated
+# preprocessor has a bug which results in silently generating wrong
+# definitions for libcurl macros such as CURL_OFF_T_C, on the other
+# hand Borland's command line preprocessor (CPP32) version 5.5.1 does
+# not have the bug and achieves proper results. In order to avoid the
+# silent bug we first preprocess source files and later compile the
+# preprocessed result.
 
 .c.obj:
 	@-$(RM) $(@R).int
@@ -97,6 +113,21 @@ PREPROCESSED = $(CSOURCES:.c=.int)
 	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
 
 all:	$(OBJDIR) $(LIBCURL_LIB) $(LIBCURL_DLL)
+
+asyn_ares.obj: asyn-ares.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+asyn_thread.obj: asyn-thread.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+non_ascii.obj: non-ascii.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
 
 clean:
 	cd $(OBJDIR)
@@ -122,7 +153,10 @@ $(LIBCURL_LIB): $(OBJECTS)
 $(LIBCURL_DLL) $(LIBCURL_IMPLIB): $(OBJECTS) $(LINKLIB)
 	@-$(RM) $(LIBCURL_DLL)
 	@-$(RM) $(LIBCURL_IMPLIB)
-	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) $**
+	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) @&&!
+$(**: = ^
+)
+!
 	$(IMPLIB) $(LIBCURL_IMPLIB) $(LIBCURL_DLL)
 
 

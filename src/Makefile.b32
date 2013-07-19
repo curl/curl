@@ -34,11 +34,12 @@ OPENSSL_PATH = ..\..\openssl-0.9.8y
 PROGNAME = curl.exe
 
 # Setup environment
+PP_CMD   = cpp32 -q -P-
 CC_CMD   = bcc32 -q -c
 LD       = bcc32
 RM       = del 2>NUL
 MKDIR    = md
-RMDIR    = rd /q 2>nul
+RMDIR    = rd /q 2>NUL
 COPY     = $(COMSPEC) /c copy /y
 
 CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -w-inl -w-pia -w-pin -Dinline=__inline
@@ -47,7 +48,7 @@ LDFLAGS  = -q -lq -lap
 SRCDIRS  = .;..\lib
 OBJDIR   = .\BCC_objs
 INCDIRS  = -I.;..\include;..\lib
-LINKLIB  = $(BCCDIR)\lib\cw32mt.lib
+LINKLIB  = $(BCCDIR)\lib\cw32mt.lib $(BCCDIR)\lib\ws2_32.lib
 DEFINES  = -DNDEBUG -DWIN32
 
 !ifdef DYNAMIC
@@ -75,21 +76,34 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 
 .path.c   = $(SRCDIRS)
 .path.obj = $(OBJDIR)
+.path.int = $(OBJDIR)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 !include Makefile.inc
 
 CSOURCES = $(CURL_CFILES) $(CURLX_ONES:../lib/=)
 OBJECTS  = $(CSOURCES:.c=.obj)
+PREPROCESSED = $(CSOURCES:.c=.int)
+
+# Borland's command line compiler (BCC32) version 5.5.1 integrated
+# preprocessor has a bug which results in silently generating wrong
+# definitions for libcurl macros such as CURL_OFF_T_C, on the other
+# hand Borland's command line preprocessor (CPP32) version 5.5.1 does
+# not have the bug and achieves proper results. In order to avoid the
+# silent bug we first preprocess source files and later compile the
+# preprocessed result.
 
 .c.obj:
-	$(CC_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$@ $<
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(<)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
 
 all:	$(OBJDIR) tool_hugehelp $(PROGNAME)
 
 clean:
 	cd $(OBJDIR)
 	@-$(RM) $(OBJECTS)
+	@-$(RM) $(PREPROCESSED)
 	cd ..
 	@-$(RMDIR) $(OBJDIR)
 	@-$(RM) $(PROGNAME)
@@ -106,12 +120,15 @@ tool_hugehelp: ..\docs\MANUAL ..\docs\curl.1 mkhelp.pl
 	@-$(RM) tool_hugehelp.tmp
 !else
 tool_hugehelp:
-	$(COPY) tool_hugehelp.c.cvs tool_hugehelp.c
+	if exist ..\GIT-INFO $(COPY) tool_hugehelp.c.cvs tool_hugehelp.c
 !endif
 
 $(PROGNAME): $(OBJECTS) $(LIBCURL_LIB) $(LINKLIB)
 	@-$(RM) $(PROGNAME)
-	$(LD) $(LDFLAGS) -e$@ $**
+	$(LD) $(LDFLAGS) -e$@ @&&!
+$(**: = ^
+)
+!
 
 
 # End of Makefile.b32
