@@ -3748,6 +3748,9 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
 
         if(result)
           return result;
+
+        *complete = TRUE; /* this state is now complete when the server has
+                             connected back to us */
       }
     }
     else if(data->set.upload) {
