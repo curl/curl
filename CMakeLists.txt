@@ -56,6 +56,8 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
+include_directories(${CMAKE_REQUIRED_INCLUDES})
+link_directories(${CMAKE_LIBRARY_PATH})
 
 option(BUILD_CURL_EXE "Set to ON to build cURL executable." ON)
 option(BUILD_CURL_TESTS "Set to ON to build cURL tests." ON)
