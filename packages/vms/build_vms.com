@@ -390,7 +390,6 @@ $! by default.
 $ if f$locate(",debug,", args_lower) .lt. args_lower_len
 $ then
 $   cc_debug = "/debug/nooptimize"
-$   goto arg_loop_end
 $ endif
 $!
 $! We normally want IEEE float if it is available.  Programs that are
@@ -400,7 +399,6 @@ $!
 $ if f$locate(",noieee,", args_lower) .lt. args_lower_len
 $ then
 $   cc_float = ""
-$   goto arg_loop_end
 $ endif
 $!
 $! Normally we want large file if it is available.
