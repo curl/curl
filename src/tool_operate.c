@@ -119,6 +119,64 @@ static int is_fatal_error(int code)
   return 0;
 }
 
+#ifdef __VMS
+#include <fabdef.h>
+/*
+ * get_vms_file_size does what it takes to get the real size of the file
+ *
+ * For fixed files, find out the size of the EOF block and adjust.
+ *
+ * For all others, have to read the entire file in, discarding the contents.
+ * Most posted text files will be small, and binary files like zlib archives
+ * and CD/DVD images should be either a STREAM_LF format or a fixed format.
+ *
+ */
+static curl_off_t vms_realfilesize(const char * name,
+                                   const struct_stat * stat_buf)
+{
+  char buffer[8192];
+  curl_off_t count;
+  int ret_stat;
+  FILE * file;
+
+  file = fopen(name, "r");
+  if(file == NULL) {
+    return 0;
+  }
+  count = 0;
+  ret_stat = 1;
+  while(ret_stat > 0) {
+    ret_stat = fread(buffer, 1, sizeof(buffer), file);
+    if(ret_stat != 0)
+      count += ret_stat;
+  }
+  fclose(file);
+
+  return count;
+}
+
+/*
+ *
+ *  VmsSpecialSize checks to see if the stat st_size can be trusted and
+ *  if not to call a routine to get the correct size.
+ *
+ */
+static curl_off_t VmsSpecialSize(const char * name,
+                                 const struct_stat * stat_buf)
+{
+  switch(stat_buf->st_fab_rfm) {
+  case FAB$C_VAR:
+  case FAB$C_VFC:
+    return vms_realfilesize(name, stat_buf);
+    break;
+  default:
+    return stat_buf->st_size;
+  }
+}
+
+#endif
+
+
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
@@ -664,7 +722,14 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           if(config->resume_from) {
             /* open file for output: */
+#ifndef __VMS
             FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
+#else
+            /* Force VMS output format into stream mode which
+               is needed for the stat() call above to always work */
+            FILE *file = fopen(outfile, config->resume_from?"ab":"wb",
+                               "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
+#endif
             if(!file) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
               res = CURLE_WRITE_ERROR;
@@ -707,8 +772,27 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
            * to be considered with one appended if implied CC
            */
 
+#ifndef __VMS
           infd = open(uploadfile, O_RDONLY | O_BINARY);
           if((infd == -1) || fstat(infd, &fileinfo)) {
+#else
+          /* Calculate the real upload site for VMS */
+          infd = -1;
+          if(stat(uploadfile, &fileinfo) == 0) {
+            fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
+            switch (fileinfo.st_fab_rfm) {
+            case FAB$C_VAR:
+            case FAB$C_VFC:
+            case FAB$C_STMCR:
+              infd = open(uploadfile, O_RDONLY | O_BINARY);
+              break;
+            default:
+              infd = open(uploadfile, O_RDONLY | O_BINARY,
+                          "rfm=stmlf", "ctx=stm");
+            }
+          }
+          if(infd == -1) {
+#endif
             helpf(config->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1) {
               close(infd);
