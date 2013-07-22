@@ -832,7 +832,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         if(config->tcp_nodelay)
-          my_setopt(curl, CURLOPT_TCP_NODELAY, 1);
+          my_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
@@ -868,22 +868,22 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->recvpersecond)
           /* tell libcurl to use a smaller sized buffer as it allows us to
              make better sleeps! 7.9.9 stuff! */
-          my_setopt(curl, CURLOPT_BUFFERSIZE, config->recvpersecond);
+          my_setopt(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
 
         /* size of uploaded file: */
         if(uploadfilesize != -1)
           my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt_str(curl, CURLOPT_URL, this_url);     /* what to fetch */
-        my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress);
+        my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress?1L:0L);
         if(config->no_body) {
-          my_setopt(curl, CURLOPT_NOBODY, 1);
-          my_setopt(curl, CURLOPT_HEADER, 1);
+          my_setopt(curl, CURLOPT_NOBODY, 1L);
+          my_setopt(curl, CURLOPT_HEADER, 1L);
         }
         /* If --metalink is used, we ignore --include (headers in
            output) option because mixing headers to the body will
            confuse XML parser and/or hash check will fail. */
         else if(!config->use_metalink)
-          my_setopt(curl, CURLOPT_HEADER, config->include_headers);
+          my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
 #if !defined(CURL_DISABLE_PROXY)
         {
@@ -893,44 +893,44 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
 
           /* new in libcurl 7.3 */
-          my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
+          my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel?1L:0L);
 
           /* new in libcurl 7.5 */
           if(config->proxy)
-            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->proxyver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, (long)config->proxyver);
 
           /* new in libcurl 7.10 */
           if(config->socksproxy) {
             my_setopt_str(curl, CURLOPT_PROXY, config->socksproxy);
-            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->socksver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, (long)config->socksver);
           }
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_ANY);
+                              (long)CURLAUTH_ANY);
           else if(config->proxynegotiate)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_GSSNEGOTIATE);
+                              (long)CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_NTLM);
+                              (long)CURLAUTH_NTLM);
           else if(config->proxydigest)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_DIGEST);
+                              (long)CURLAUTH_DIGEST);
           else if(config->proxybasic)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_BASIC);
+                              (long)CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
         }
 #endif
 
-        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror);
-        my_setopt(curl, CURLOPT_UPLOAD, uploadfile?TRUE:FALSE);
-        my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
-        my_setopt(curl, CURLOPT_APPEND, config->ftp_append);
+        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
+        my_setopt(curl, CURLOPT_UPLOAD, uploadfile?1L:0L);
+        my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly?1L:0L);
+        my_setopt(curl, CURLOPT_APPEND, config->ftp_append?1L:0L);
 
         if(config->netrc_opt)
           my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
@@ -942,7 +942,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         if(config->netrc_file)
           my_setopt(curl, CURLOPT_NETRC_FILE, config->netrc_file);
 
-        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
+        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii?1L:0L);
         my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt_str(curl, CURLOPT_RANGE, config->range);
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
@@ -953,9 +953,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           long postRedir = 0;
 
           my_setopt(curl, CURLOPT_FOLLOWLOCATION,
-                    config->followlocation);
+                    config->followlocation?1L:0L);
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
-                    config->unrestricted_auth);
+                    config->unrestricted_auth?1L:0L);
 
           switch(config->httpreq) {
           case HTTPREQ_SIMPLEPOST:
@@ -972,7 +972,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
 
           my_setopt_str(curl, CURLOPT_REFERER, config->referer);
-          my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer);
+          my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer?1L:0L);
           my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
           my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
@@ -985,7 +985,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long) config->authtype);
+            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2),
              303 was added in 7.26.0 */
@@ -1003,7 +1003,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.21.6 */
           if(config->tr_encoding)
-            my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1);
+            my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1L);
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
@@ -1015,12 +1015,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                   config->sendpersecond);
         my_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE,
                   config->recvpersecond);
-        my_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
-                  config->use_resume?config->resume_from:0);
 
-        my_setopt(curl, CURLOPT_SSLCERT, config->cert);
+        if(config->use_resume)
+          my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);
+        else
+          my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, CURL_OFF_T_C(0));
+
+        my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
         my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
-        my_setopt(curl, CURLOPT_SSLKEY, config->key);
+        my_setopt_str(curl, CURLOPT_SSLKEY, config->key);
         my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
 
@@ -1082,10 +1085,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->no_body || config->remote_time) {
           /* no body or use remote time */
-          my_setopt(curl, CURLOPT_FILETIME, TRUE);
+          my_setopt(curl, CURLOPT_FILETIME, 1L);
         }
 
-        my_setopt(curl, CURLOPT_CRLF, config->crlf);
+        my_setopt(curl, CURLOPT_CRLF, config->crlf?1L:0L);
         my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
         my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
         my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
@@ -1105,13 +1108,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             my_setopt_str(curl, CURLOPT_COOKIEJAR, config->cookiejar);
 
           /* new in libcurl 7.9.7 */
-          my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession);
+          my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession?1L:0L);
         }
 #endif
 
         my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
-        my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
-        my_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
+        my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
+        my_setopt(curl, CURLOPT_TIMEVALUE, (long)config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         my_setopt(curl, CURLOPT_STDERR, config->errors);
 
@@ -1133,7 +1136,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in libcurl 7.7: */
         my_setopt_str(curl, CURLOPT_RANDOM_FILE, config->random_file);
-        my_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
+        my_setopt_str(curl, CURLOPT_EGDSOCKET, config->egd_file);
         my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
                   (long)(config->connecttimeout * 1000));
 
@@ -1143,17 +1146,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* new in libcurl 7.9.2: */
         if(config->disable_epsv)
           /* disable it */
-          my_setopt(curl, CURLOPT_FTP_USE_EPSV, FALSE);
+          my_setopt(curl, CURLOPT_FTP_USE_EPSV, 0L);
 
         /* new in libcurl 7.10.5 */
         if(config->disable_eprt)
           /* disable it */
-          my_setopt(curl, CURLOPT_FTP_USE_EPRT, FALSE);
+          my_setopt(curl, CURLOPT_FTP_USE_EPRT, 0L);
 
         if(config->tracetype != TRACE_NONE) {
           my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
           my_setopt(curl, CURLOPT_DEBUGDATA, config);
-          my_setopt(curl, CURLOPT_VERBOSE, TRUE);
+          my_setopt(curl, CURLOPT_VERBOSE, 1L);
         }
 
         /* new in curl 7.9.3 */
@@ -1161,12 +1164,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           res = res_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
           if(res)
             goto show_error;
-          my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
+          my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
         }
 
         /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                  config->ftp_create_dirs);
+                  config->ftp_create_dirs?1L:0L);
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)
@@ -1194,7 +1197,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)
-          my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
+          my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC,
+                         (long)config->ftp_ssl_ccc_mode);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
         {
@@ -1214,19 +1218,19 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
-        my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
+        my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
         /* curl 7.14.2 */
-        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip);
+        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
 
         /* curl 7.15.1 */
-        my_setopt(curl, CURLOPT_FTP_FILEMETHOD, config->ftp_filemethod);
+        my_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long)config->ftp_filemethod);
 
         /* curl 7.15.2 */
         if(config->localport) {
-          my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
+          my_setopt(curl, CURLOPT_LOCALPORT, (long)config->localport);
           my_setopt_str(curl, CURLOPT_LOCALPORTRANGE,
-                        config->localportrange);
+                        (long)config->localportrange);
         }
 
         /* curl 7.15.5 */
@@ -1235,13 +1239,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.16.0 */
         if(config->disable_sessionid)
-          my_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE,
-                    !config->disable_sessionid);
+          /* disable it */
+          my_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
 
         /* curl 7.16.2 */
         if(config->raw) {
-          my_setopt(curl, CURLOPT_HTTP_CONTENT_DECODING, FALSE);
-          my_setopt(curl, CURLOPT_HTTP_TRANSFER_DECODING, FALSE);
+          my_setopt(curl, CURLOPT_HTTP_CONTENT_DECODING, 0L);
+          my_setopt(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0L);
         }
 
         /* curl 7.17.1 */
@@ -1271,7 +1275,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.20.x */
         if(config->ftp_pret)
-          my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
+          my_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
 
         if(config->proto_present)
           my_setopt_flags(curl, CURLOPT_PROTOCOLS, config->proto);
@@ -1323,7 +1327,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in 7.31.0 */
         if(config->sasl_ir)
-          my_setopt(curl, CURLOPT_SASL_IR, (long)TRUE);
+          my_setopt(curl, CURLOPT_SASL_IR, 1L);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
