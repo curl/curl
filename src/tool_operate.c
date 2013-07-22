@@ -1185,15 +1185,15 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.15.5 */
         if(config->ftp_ssl_reqd)
-          my_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+          my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
         /* new in curl 7.11.0 */
         else if(config->ftp_ssl)
-          my_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+          my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_TRY);
 
         /* new in curl 7.16.0 */
         else if(config->ftp_ssl_control)
-          my_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
+          my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_CONTROL);
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)

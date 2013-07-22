@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,7 @@ extern const NameValue setopt_nv_CURL_HTTP_VERSION[];
 extern const NameValue setopt_nv_CURL_SSLVERSION[];
 extern const NameValue setopt_nv_CURL_TIMECOND[];
 extern const NameValue setopt_nv_CURLFTPSSL_CCC[];
+extern const NameValue setopt_nv_CURLUSESSL[];
 extern const NameValue setopt_nv_CURLPROTO[];
 extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 
@@ -60,6 +61,7 @@ extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 #define setopt_nv_CURLOPT_SSLVERSION setopt_nv_CURL_SSLVERSION
 #define setopt_nv_CURLOPT_TIMECONDITION setopt_nv_CURL_TIMECOND
 #define setopt_nv_CURLOPT_FTP_SSL_CCC setopt_nv_CURLFTPSSL_CCC
+#define setopt_nv_CURLOPT_USE_SSL setopt_nv_CURLUSESSL
 #define setopt_nv_CURLOPT_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_PROXYTYPE setopt_nv_CURLPROXY
