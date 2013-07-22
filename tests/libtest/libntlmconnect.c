@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,9 +126,9 @@ int test(char *url)
   multi_init(multi);
 
 #ifdef USE_PIPELINING
-  multi_setopt(multi, CURLMOPT_PIPELINING, 1);
-  multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS, 5);
-  multi_setopt(multi, CURLMOPT_MAX_TOTAL_CONNECTIONS, 10);
+  multi_setopt(multi, CURLMOPT_PIPELINING, 1L);
+  multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS, 5L);
+  multi_setopt(multi, CURLMOPT_MAX_TOTAL_CONNECTIONS, 10L);
 #endif
 
   for(;;) {

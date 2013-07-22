@@ -63,7 +63,7 @@ int test(char *URL)
 
   easy_setopt(curl, CURLOPT_RESOLVE, slist);
 
-  easy_setopt(curl, CURLOPT_MAXCONNECTS, 3);
+  easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
   for(i=0; i < NUM_URLS; i++) {
