@@ -933,11 +933,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_APPEND, config->ftp_append?1L:0L);
 
         if(config->netrc_opt)
-          my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
+          my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_OPTIONAL);
         else if(config->netrc || config->netrc_file)
-          my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
+          my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_REQUIRED);
         else
-          my_setopt(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
+          my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_IGNORED);
 
         if(config->netrc_file)
           my_setopt(curl, CURLOPT_NETRC_FILE, config->netrc_file);

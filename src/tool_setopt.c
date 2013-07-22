@@ -104,6 +104,13 @@ const NameValue setopt_nv_CURLUSESSL[] = {
   NVEND,
 };
 
+const NameValue setopt_nv_CURL_NETRC[] = {
+  NV(CURL_NETRC_IGNORED),
+  NV(CURL_NETRC_OPTIONAL),
+  NV(CURL_NETRC_REQUIRED),
+  NVEND,
+};
+
 /* These mappings essentially triplicated - see
  * tool_libinfo.c and tool_paramhlp.c */
 const NameValue setopt_nv_CURLPROTO[] = {
