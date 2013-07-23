@@ -854,6 +854,13 @@ CURLcode curl_easy_pause(CURL *curl, int action)
     free(freewrite); /* this is unconditionally no longer used */
   }
 
+  /* if there's no error and we're not pausing both directions, we want
+     to have this handle checked soon */
+  if(!result &&
+     ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
+      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
+    Curl_expire(data, 1); /* get this handle going again */
+
   return result;
 }
 
