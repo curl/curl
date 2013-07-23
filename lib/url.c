@@ -2574,7 +2574,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     conn->handler->disconnect(conn, dead_connection);
 
     /* unlink ourselves! */
-  infof(data, "Closing connection %d\n", conn->connection_id);
+  infof(data, "Closing connection %ld\n", conn->connection_id);
   Curl_conncache_remove_conn(data->state.conn_cache, conn);
 
 #if defined(USE_LIBIDN)
@@ -2875,7 +2875,8 @@ ConnectionExists(struct SessionHandle *data,
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
-    infof(data, "Found bundle for host %s: %p\n", needle->host.name, bundle);
+    infof(data, "Found bundle for host %s: %p\n",
+          needle->host.name, (void *)bundle);
 
     /* We can't pipe if we don't know anything about the server */
     if(canPipeline && !bundle->server_supports_pipelining) {
@@ -2911,7 +2912,7 @@ ConnectionExists(struct SessionHandle *data,
 
         if(dead) {
           check->data = data;
-          infof(data, "Connection %d seems to be dead!\n",
+          infof(data, "Connection %ld seems to be dead!\n",
                 check->connection_id);
 
           /* disconnect resources */
@@ -5335,7 +5336,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(reuse && !force_reuse && IsPipeliningPossible(data, conn_temp)) {
     size_t pipelen = conn_temp->send_pipe->size + conn_temp->recv_pipe->size;
     if(pipelen > 0) {
-      infof(data, "Found connection %d, with requests in the pipe (%d)\n",
+      infof(data, "Found connection %ld, with requests in the pipe (%zd)\n",
             conn_temp->connection_id, pipelen);
 
       if(conn_temp->bundle->num_connections < max_host_connections &&

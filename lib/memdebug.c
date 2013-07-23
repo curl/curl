@@ -186,7 +186,9 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
 
   if(source)
     curl_memlog("MEM %s:%d malloc(%zd) = %p\n",
-                source, line, wantedsize, mem ? mem->mem : 0);
+                source, line, wantedsize,
+                mem ? (void *)mem->mem : (void *)0);
+
   return (mem ? mem->mem : NULL);
 }
 
@@ -212,7 +214,9 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
 
   if(source)
     curl_memlog("MEM %s:%d calloc(%zu,%zu) = %p\n",
-                source, line, wanted_elements, wanted_size, mem?mem->mem:0);
+                source, line, wanted_elements, wanted_size,
+                mem ? (void *)mem->mem : (void *)0);
+
   return (mem ? mem->mem : NULL);
 }
 
@@ -234,7 +238,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
 
   if(source)
     curl_memlog("MEM %s:%d strdup(%p) (%zu) = %p\n",
-                source, line, str, len, mem);
+                source, line, (void *)str, len, (void *)mem);
 
   return mem;
 }
@@ -259,7 +263,7 @@ wchar_t *curl_dowcsdup(const wchar_t *str, int line, const char *source)
 
   if(source)
     curl_memlog("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, str, bsiz, mem);
+                source, line, (void *)str, bsiz, (void *)mem);
 
   return mem;
 }
@@ -295,7 +299,8 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
   mem = (Curl_crealloc)(mem, size);
   if(source)
     curl_memlog("MEM %s:%d realloc(%p, %zu) = %p\n",
-                source, line, ptr, wantedsize, mem?mem->mem:NULL);
+                source, line, (void *)ptr, wantedsize,
+                mem ? (void *)mem->mem : (void *)0);
 
   if(mem) {
     mem->size = wantedsize;
@@ -330,7 +335,7 @@ void curl_dofree(void *ptr, int line, const char *source)
   (Curl_cfree)(mem);
 
   if(source)
-    curl_memlog("MEM %s:%d free(%p)\n", source, line, ptr);
+    curl_memlog("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 }
 
 curl_socket_t curl_socket(int domain, int type, int protocol,
@@ -343,8 +348,10 @@ curl_socket_t curl_socket(int domain, int type, int protocol,
                     "FD %s:%d socket() = %zd\n" ;
 
   curl_socket_t sockfd = socket(domain, type, protocol);
+
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_memlog(fmt, source, line, sockfd);
+
   return sockfd;
 }
 
@@ -360,8 +367,10 @@ int curl_socketpair(int domain, int type, int protocol,
                     "FD %s:%d socketpair() = %zd %zd\n" ;
 
   int res = socketpair(domain, type, protocol, socket_vector);
+
   if(source && (0 == res))
     curl_memlog(fmt, source, line, socket_vector[0], socket_vector[1]);
+
   return res;
 }
 #endif
@@ -377,9 +386,12 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
 
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
+
   curl_socket_t sockfd = accept(s, addr, addrlen);
+
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_memlog(fmt, source, line, sockfd);
+
   return sockfd;
 }
 
@@ -408,9 +420,11 @@ FILE *curl_fopen(const char *file, const char *mode,
                  int line, const char *source)
 {
   FILE *res=fopen(file, mode);
+
   if(source)
     curl_memlog("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
-                source, line, file, mode, res);
+                source, line, file, mode, (void *)res);
+
   return res;
 }
 
@@ -419,9 +433,11 @@ FILE *curl_fdopen(int filedes, const char *mode,
                   int line, const char *source)
 {
   FILE *res=fdopen(filedes, mode);
+
   if(source)
     curl_memlog("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
-                source, line, filedes, mode, res);
+                source, line, filedes, mode, (void *)res);
+
   return res;
 }
 #endif
@@ -433,9 +449,11 @@ int curl_fclose(FILE *file, int line, const char *source)
   assert(file != NULL);
 
   res=fclose(file);
+
   if(source)
     curl_memlog("FILE %s:%d fclose(%p)\n",
-                source, line, file);
+                source, line, (void *)file);
+
   return res;
 }
 

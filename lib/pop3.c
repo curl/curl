@@ -382,7 +382,7 @@ static void state(struct connectdata *conn, pop3state newstate)
 
   if(pop3c->state != newstate)
     infof(conn->data, "POP3 %p state change from %s to %s\n",
-          pop3c, names[pop3c->state], names[newstate]);
+          (void *)pop3c, names[pop3c->state], names[newstate]);
 #endif
 
   pop3c->state = newstate;

@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -498,7 +498,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     /* We have no mechanism with a NULL name but keep this check */
     DEBUGASSERT(mech_name != NULL);
     if(mech_name == NULL) {
-      infof(data, "Skipping mechanism with empty name (%p)\n", mech);
+      infof(data, "Skipping mechanism with empty name (%p)\n", (void *)mech);
       continue;
     }
     tmp_allocation = realloc(conn->app_data, (*mech)->size);

@@ -392,7 +392,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(sshc->state != nowstate) {
     infof(conn->data, "SFTP %p state change from %s to %s\n",
-          sshc, names[sshc->state], names[nowstate]);
+          (void *)sshc, names[sshc->state], names[nowstate]);
   }
 #endif
 

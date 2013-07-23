@@ -131,7 +131,7 @@ static void mstate(struct Curl_one_easy *easy, CURLMstate state
     infof(easy->easy_handle,
           "STATE: %s => %s handle %p; line %d (connection #%ld) \n",
           statename[oldstate], statename[easy->state],
-          (char *)easy, lineno, connection_id);
+          (void *)easy, lineno, connection_id);
   }
 #endif
   if(state == CURLM_STATE_COMPLETED)
@@ -966,7 +966,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        we're using gets cleaned up and we're left with nothing. */
     if(data->state.pipe_broke) {
       infof(data, "Pipe broke: handle 0x%p, url = %s\n",
-            easy, data->state.path);
+            (void *)easy, data->state.path);
 
       if(easy->state < CURLM_STATE_COMPLETED) {
         /* Head back to the CONNECT state */

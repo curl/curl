@@ -828,7 +828,7 @@ static void _state(struct connectdata *conn,
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(ftpc->state != newstate)
     infof(conn->data, "FTP %p (line %d) state change from %s to %s\n",
-          ftpc, lineno, names[ftpc->state], names[newstate]);
+          (void *)ftpc, lineno, names[ftpc->state], names[newstate]);
 #endif
   ftpc->state = newstate;
 }

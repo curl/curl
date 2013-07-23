@@ -77,6 +77,7 @@
 #include "url.h"
 #include "rawstr.h"
 #include "curl_sasl.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -398,7 +399,7 @@ static void state(struct connectdata *conn, imapstate newstate)
 
   if(imapc->state != newstate)
     infof(conn->data, "IMAP %p state change from %s to %s\n",
-          imapc, names[imapc->state], names[newstate]);
+          (void *)imapc, names[imapc->state], names[newstate]);
 #endif
 
   imapc->state = newstate;
@@ -2069,7 +2070,7 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
 
   /* Calculate the tag based on the connection ID and command ID */
   snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-           'A' + (conn->connection_id % 26), imapc->cmdid);
+           'A' + curlx_sltosi(conn->connection_id % 26), imapc->cmdid);
 
   /* Prefix the format with the tag */
   taggedfmt = aprintf("%s %s", imapc->resptag, fmt);

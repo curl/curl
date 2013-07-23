@@ -337,7 +337,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
 
   if(smtpc->state != newstate)
     infof(conn->data, "SMTP %p state change from %s to %s\n",
-          smtpc, names[smtpc->state], names[newstate]);
+          (void *)smtpc, names[smtpc->state], names[newstate]);
 #endif
 
   smtpc->state = newstate;
