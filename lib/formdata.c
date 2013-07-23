@@ -426,7 +426,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 
       /* Get contents from a given file name */
     case CURLFORM_FILECONTENT:
-      if(current_form->flags != 0)
+      if(current_form->flags & (HTTPPOST_PTRCONTENTS|HTTPPOST_READFILE))
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         const char *filename = array_state?
