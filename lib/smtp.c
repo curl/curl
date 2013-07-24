@@ -403,7 +403,7 @@ static CURLcode smtp_perform_starttls(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the STARTTLS command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
 
   if(!result)
     state(conn, SMTP_STARTTLS);
@@ -664,7 +664,7 @@ static CURLcode smtp_perform_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, SMTP_QUIT);
@@ -997,7 +997,7 @@ static CURLcode smtp_state_auth_digest_resp_resp(struct connectdata *conn,
   }
   else {
     /* Send an empty response */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "");
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "");
 
     if(!result)
       state(conn, SMTP_AUTH_FINAL);
@@ -1159,7 +1159,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     }
 
     /* Send the DATA command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA");
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
 
     if(!result)
       state(conn, SMTP_DATA);

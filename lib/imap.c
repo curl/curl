@@ -1153,7 +1153,7 @@ static CURLcode imap_state_auth_digest_resp_resp(struct connectdata *conn,
   }
   else {
     /* Send an empty response */
-    result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+    result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", "");
 
     if(!result)
       state(conn, IMAP_AUTHENTICATE_FINAL);
@@ -1782,7 +1782,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
       state(conn, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
-      result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+      result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", "");
       if(!result)
         state(conn, IMAP_APPEND_FINAL);
     }
