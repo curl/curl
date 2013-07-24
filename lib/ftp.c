@@ -851,7 +851,7 @@ static CURLcode ftp_state_pwd(struct connectdata *conn)
   CURLcode result;
 
   /* send PWD to discover our entry point */
-  PPSENDF(&conn->proto.ftpc.pp, "PWD", NULL);
+  PPSENDF(&conn->proto.ftpc.pp, "%s", "PWD");
   state(conn, FTP_PWD);
 
   return CURLE_OK;
@@ -1805,7 +1805,7 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
   conn->bits.ftp_use_epsv = FALSE;
   conn->data->state.errorbuf = FALSE; /* allow error message to get
                                          rewritten */
-  PPSENDF(&conn->proto.ftpc.pp, "PASV", NULL);
+  PPSENDF(&conn->proto.ftpc.pp, "%s", "PASV");
   conn->proto.ftpc.count1++;
   /* remain in the FTP_PASV state */
   return result;
@@ -1941,7 +1941,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     conn->bits.ftp_use_epsv = FALSE;
     infof(data, "disabling EPSV usage\n");
 
-    PPSENDF(&ftpc->pp, "PASV", NULL);
+    PPSENDF(&ftpc->pp, "%s", "PASV");
     ftpc->count1++;
     /* remain in the FTP_PASV state */
     return result;
@@ -2834,7 +2834,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(data->set.ftp_ccc) {
         /* CCC - Clear Command Channel
          */
-        PPSENDF(&ftpc->pp, "CCC", NULL);
+        PPSENDF(&ftpc->pp, "%s", "CCC");
         state(conn, FTP_CCC);
       }
       else {
@@ -2921,7 +2921,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
           if(!ftpc->server_os && dir[0] != '/') {
 
-            result = Curl_pp_sendf(&ftpc->pp, "SYST", NULL);
+            result = Curl_pp_sendf(&ftpc->pp, "%s", "SYST");
             if(result != CURLE_OK) {
               free(dir);
               return result;
@@ -2974,7 +2974,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
         if(strequal(os, "OS/400")) {
           /* Force OS400 name format 1. */
-          result = Curl_pp_sendf(&ftpc->pp, "SITE NAMEFMT 1", NULL);
+          result = Curl_pp_sendf(&ftpc->pp, "%s", "SITE NAMEFMT 1");
           if(result != CURLE_OK) {
             free(os);
             return result;
@@ -3383,7 +3383,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
-      result = Curl_pp_sendf(pp, "ABOR");
+      result = Curl_pp_sendf(pp, "%s", "ABOR");
       if(result) {
         failf(data, "Failure sending ABOR command: %s",
               curl_easy_strerror(result));
@@ -4192,7 +4192,7 @@ static CURLcode ftp_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   if(conn->proto.ftpc.ctl_valid) {
-    result = Curl_pp_sendf(&conn->proto.ftpc.pp, "QUIT", NULL);
+    result = Curl_pp_sendf(&conn->proto.ftpc.pp, "%s", "QUIT");
     if(result) {
       failf(conn->data, "Failure sending QUIT command: %s",
             curl_easy_strerror(result));
