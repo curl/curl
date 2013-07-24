@@ -2063,7 +2063,8 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
   struct imap_conn *imapc = &conn->proto.imapc;
   char *taggedfmt;
   va_list ap;
-  va_start(ap, fmt);
+
+  DEBUGASSERT(fmt);
 
   /* Calculate the next command ID wrapping at 3 digits */
   imapc->cmdid = (imapc->cmdid + 1) % 1000;
@@ -2078,10 +2079,11 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
     return CURLE_OUT_OF_MEMORY;
 
   /* Send the data with the tag */
+  va_start(ap, fmt);
   result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
+  va_end(ap);
 
   Curl_safefree(taggedfmt);
-  va_end(ap);
 
   return result;
 }
