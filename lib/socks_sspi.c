@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -260,8 +260,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
     /* ignore the first (VER) byte */
     if(socksreq[1] == 255) { /* status / message type */
-      failf(data, "User was rejected by the SOCKS5 server (%d %d).",
-            socksreq[0], socksreq[1]);
+      failf(data, "User was rejected by the SOCKS5 server (%u %u).",
+            (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
       Curl_safefree(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -269,8 +269,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
 
     if(socksreq[1] != 1) { /* status / messgae type */
-      failf(data, "Invalid SSPI authentication response type (%d %d).",
-            socksreq[0], socksreq[1]);
+      failf(data, "Invalid SSPI authentication response type (%u %u).",
+            (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
       Curl_safefree(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -494,15 +494,15 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   /* ignore the first (VER) byte */
   if(socksreq[1] == 255) { /* status / message type */
-    failf(data, "User was rejected by the SOCKS5 server (%d %d).",
-          socksreq[0], socksreq[1]);
+    failf(data, "User was rejected by the SOCKS5 server (%u %u).",
+          (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
     s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
 
   if(socksreq[1] != 2) { /* status / message type */
-    failf(data, "Invalid SSPI encryption response type (%d %d).",
-          socksreq[0], socksreq[1]);
+    failf(data, "Invalid SSPI encryption response type (%u %u).",
+          (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
     s_pSecFn->DeleteSecurityContext(&sspi_context);
     return CURLE_COULDNT_CONNECT;
   }
@@ -549,8 +549,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
 
     if(sspi_w_token[1].cbBuffer != 1) {
-      failf(data, "Invalid SSPI encryption response length (%d).",
-            sspi_w_token[1].cbBuffer);
+      failf(data, "Invalid SSPI encryption response length (%lu).",
+            (unsigned long)sspi_w_token[1].cbBuffer);
       s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
       s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -563,8 +563,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   }
   else {
     if(sspi_w_token[0].cbBuffer != 1) {
-      failf(data, "Invalid SSPI encryption response length (%d).",
-            sspi_w_token[0].cbBuffer);
+      failf(data, "Invalid SSPI encryption response length (%lu).",
+            (unsigned long)sspi_w_token[0].cbBuffer);
       s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;

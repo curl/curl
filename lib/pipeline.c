@@ -86,7 +86,7 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
       penalized = TRUE;
 
     infof(data, "Conn: %ld (%p) Receive pipe weight: (%" FORMAT_OFF_T
-          "/%zd), penalized: %s\n",
+          "/%zu), penalized: %s\n",
           conn->connection_id, (void *)conn, recv_size,
           conn->chunk.datasize, penalized?"TRUE":"FALSE");
     return penalized;
@@ -322,7 +322,7 @@ void print_pipeline(struct connectdata *conn)
     curr = cb_ptr->conn_list->head;
     while(curr) {
       conn = curr->ptr;
-      infof(data, "- Conn %ld (%p) send_pipe: %zd, recv_pipe: %zd\n",
+      infof(data, "- Conn %ld (%p) send_pipe: %zu, recv_pipe: %zu\n",
             conn->connection_id,
             (void *)conn,
             conn->send_pipe->size,

@@ -185,7 +185,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   }
 
   if(source)
-    curl_memlog("MEM %s:%d malloc(%zd) = %p\n",
+    curl_memlog("MEM %s:%d malloc(%zu) = %p\n",
                 source, line, wantedsize,
                 mem ? (void *)mem->mem : (void *)0);
 

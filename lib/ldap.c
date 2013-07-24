@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -260,7 +260,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     }
     server = ldapssl_init(conn->host.name, (int)conn->port, 1);
     if(server == NULL) {
-      failf(data, "LDAP local: Cannot connect to %s:%hu",
+      failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
       status = CURLE_COULDNT_CONNECT;
       goto quit;
@@ -301,7 +301,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     }
     server = ldap_init(conn->host.name, (int)conn->port);
     if(server == NULL) {
-      failf(data, "LDAP local: Cannot connect to %s:%hu",
+      failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
       status = CURLE_COULDNT_CONNECT;
       goto quit;
@@ -337,7 +337,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   else {
     server = ldap_init(conn->host.name, (int)conn->port);
     if(server == NULL) {
-      failf(data, "LDAP local: Cannot connect to %s:%hu",
+      failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
       status = CURLE_COULDNT_CONNECT;
       goto quit;

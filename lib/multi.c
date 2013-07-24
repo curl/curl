@@ -1231,12 +1231,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
 #ifdef DEBUGBUILD
-      infof(data, "WAITDO: Conn %ld send pipe %zu inuse %d athead %d\n",
+      infof(data, "WAITDO: Conn %ld send pipe %zu inuse %s athead %s\n",
             easy->easy_conn->connection_id,
             easy->easy_conn->send_pipe->size,
-            easy->easy_conn->writechannel_inuse?1:0,
+            easy->easy_conn->writechannel_inuse?"TRUE":"FALSE",
             isHandleAtHead(data,
-                           easy->easy_conn->send_pipe)?1:0);
+                           easy->easy_conn->send_pipe)?"TRUE":"FALSE");
 #endif
       if(!easy->easy_conn->writechannel_inuse &&
          isHandleAtHead(data,
@@ -1423,12 +1423,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 #ifdef DEBUGBUILD
       else {
-        infof(data, "WAITPERFORM: Conn %ld recv pipe %zu inuse %d athead %d\n",
+        infof(data, "WAITPERFORM: Conn %ld recv pipe %zu inuse %s athead %s\n",
               easy->easy_conn->connection_id,
               easy->easy_conn->recv_pipe->size,
-              easy->easy_conn->readchannel_inuse?1:0,
+              easy->easy_conn->readchannel_inuse?"TRUE":"FALSE",
               isHandleAtHead(data,
-                             easy->easy_conn->recv_pipe)?1:0);
+                             easy->easy_conn->recv_pipe)?"TRUE":"FALSE");
       }
 #endif
       break;

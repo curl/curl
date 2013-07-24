@@ -668,7 +668,7 @@ static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
   }
 
   if(rtp_dataleft != 0 && rtp[0] == '$') {
-    DEBUGF(infof(data, "RTP Rewinding %zu %s\n", rtp_dataleft,
+    DEBUGF(infof(data, "RTP Rewinding %zd %s\n", rtp_dataleft,
           *readmore ? "(READMORE)" : ""));
 
     /* Store the incomplete RTP packet for a "rewind" */
