@@ -774,6 +774,70 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return result;
 }
 
+#ifdef __VMS
+#include <fabdef.h>
+/*
+ * get_vms_file_size does what it takes to get the real size of the file
+ *
+ * For fixed files, find out the size of the EOF block and adjust.
+ *
+ * For all others, have to read the entire file in, discarding the contents.
+ * Most posted text files will be small, and binary files like zlib archives
+ * and CD/DVD images should be either a STREAM_LF format or a fixed format.
+ *
+ */
+curl_off_t VmsRealFileSize(const char * name,
+                           const struct_stat * stat_buf)
+{
+  char buffer[8192];
+  curl_off_t count;
+  int ret_stat;
+  FILE * file;
+
+  file = fopen(name, "r");
+  if(file == NULL)
+    return 0;
+
+  count = 0;
+  ret_stat = 1;
+  while(ret_stat > 0) {
+    ret_stat = fread(buffer, 1, sizeof(buffer), file);
+    if(ret_stat != 0)
+      count += ret_stat;
+  }
+  fclose(file);
+
+  return count;
+}
+
+/*
+ *
+ *  VmsSpecialSize checks to see if the stat st_size can be trusted and
+ *  if not to call a routine to get the correct size.
+ *
+ */
+static curl_off_t VmsSpecialSize(const char * name,
+                                 const struct_stat * stat_buf)
+{
+  switch(stat_buf->st_fab_rfm) {
+  case FAB$C_VAR:
+  case FAB$C_VFC:
+    return VmsRealFileSize(name, stat_buf);
+    break;
+  default:
+    return stat_buf->st_size;
+  }
+}
+
+#endif
+
+#ifndef __VMS
+#define filesize(name, stat_data) (stat_data.st_size)
+#else
+    /* Getting the expected file size needs help on VMS */
+#define filesize(name, stat_data) VmsSpecialSize(name, &stat_data)
+#endif
+
 /*
  * AddFormData() adds a chunk of data to the FormData linked list.
  *
@@ -829,7 +893,7 @@ static CURLcode AddFormData(struct FormData **formp,
       if(!strequal("-", newform->line)) {
         struct_stat file;
         if(!stat(newform->line, &file) && !S_ISDIR(file.st_mode))
-          *size += file.st_size;
+          *size += filesize(newform->line, file);
         else
           return CURLE_BAD_FUNCTION_ARGUMENT;
       }
@@ -1340,6 +1404,36 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata )
   return 0;
 }
 
+#ifndef __VMS
+# define fopen_read fopen
+#else
+  /*
+   * vmsfopenread
+   *
+   * For upload to work as expected on VMS, different optional
+   * parameters must be added to the fopen command based on
+   * record format of the file.
+   *
+   */
+# define fopen_read vmsfopenread
+static FILE * vmsfopenread(const char *file, const char *mode) {
+  struct_stat statbuf;
+  int result;
+
+  result = stat(file, &statbuf);
+
+  switch (statbuf.st_fab_rfm) {
+  case FAB$C_VAR:
+  case FAB$C_VFC:
+  case FAB$C_STMCR:
+    return fopen(file, "r");
+    break;
+  default:
+    return fopen(file, "r", "rfm=stmlf", "ctx=stm");
+  }
+}
+#endif
+
 /*
  * readfromfile()
  *
@@ -1362,7 +1456,7 @@ static size_t readfromfile(struct Form *form, char *buffer,
   else {
     if(!form->fp) {
       /* this file hasn't yet been opened */
-      form->fp = fopen(form->data->line, "rb"); /* b is for binary */
+      form->fp = fopen_read(form->data->line, "rb"); /* b is for binary */
       if(!form->fp)
         return (size_t)-1; /* failure */
     }
