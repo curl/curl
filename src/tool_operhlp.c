@@ -139,6 +139,8 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
 
       url = urlbuffer; /* use our new URL instead! */
     }
+    else
+      Curl_safefree(url);
   }
   return url;
 }
