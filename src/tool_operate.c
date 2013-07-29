@@ -176,8 +176,7 @@ static curl_off_t VmsSpecialSize(const char * name,
     return stat_buf->st_size;
   }
 }
-
-#endif
+#endif /* __VMS */
 
 
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
@@ -724,14 +723,14 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
 
           if(config->resume_from) {
-            /* open file for output: */
-#ifndef __VMS
-            FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
-#else
-            /* Force VMS output format into stream mode which
-               is needed for the stat() call above to always work */
+#ifdef __VMS
+            /* open file for output, forcing VMS output format into stream
+               mode which is needed for stat() call above to always work. */
             FILE *file = fopen(outfile, config->resume_from?"ab":"wb",
                                "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
+#else
+            /* open file for output: */
+            FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
 #endif
             if(!file) {
               helpf(config->errors, "Can't open '%s'!\n", outfile);
@@ -774,11 +773,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
            * header for VARIABLE header files only the bare record data needs
            * to be considered with one appended if implied CC
            */
-
-#ifndef __VMS
-          infd = open(uploadfile, O_RDONLY | O_BINARY);
-          if((infd == -1) || fstat(infd, &fileinfo)) {
-#else
+#ifdef __VMS
           /* Calculate the real upload site for VMS */
           infd = -1;
           if(stat(uploadfile, &fileinfo) == 0) {
@@ -794,8 +789,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                           "rfm=stmlf", "ctx=stm");
             }
           }
-          if(infd == -1) {
+          if(infd == -1)
+#else
+          infd = open(uploadfile, O_RDONLY | O_BINARY);
+          if((infd == -1) || fstat(infd, &fileinfo))
 #endif
+          {
             helpf(config->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1) {
               close(infd);
