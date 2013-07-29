@@ -46,7 +46,12 @@ This release includes the following bugfixes:
  o Reinstate "WIN32 MemoryTracking: track wcsdup() _wcsdup() and _tcsdup()
  o ftp_do_more: consider DO_MORE complete when server connects back [9]
  o curl_easy_perform: gradually increase the delay time [10]
- o
+ o curl: fix symbolic names for CURLUSESSL_* enum in --libcurl output
+ o curl: fix upload of a zip file in OpenVMS [11]
+ o build: fix linking on Solaris 10 [12]
+ o curl_formadd: CURLFORM_FILECONTENT wrongly rejected some option combos [13]
+ o curl_formadd: fix file upload on VMS [14]
+ o curl_easy_pause: on unpause, trigger mulit-socket handling [15]
 
 This release includes the following known bugs:
 
@@ -56,10 +61,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Alex Vinnik, Alessandro Ghedini, Nick Zitzmann, Kamil Dudka,
- LluÃ­s Batlle i Rossell, Nach M. S., Kim Vandry, Ben Greear, Dan Fandrich,
- Dave Reisner, Evgeny Turnaev, Guenter Knauf, John E. Malmberg,
- Marc Hoersken, Patrick Monnerat, Sergei Nikulov, Yang Tse, Andreas Malzahn,
- Clemens Gruber, Jean-Noël Rouvignac, Markus Moeller
+ Lluis Batlle i Rossell, Nach M. S., Kim Vandry, Ben Greear, Dan Fandrich,
+ Dave Reisner, Evgeny Turnaev, Guenter Knauf, John E. Malmberg, Marc Hoersken,
+ Patrick Monnerat, Sergei Nikulov, Yang Tse, Andreas Malzahn, Clemens Gruber,
+ Jean-Noel Rouvignac, Markus Moeller, Fabian Keil, Dagobert Michelsen,
+ Byrial Jensen, Justin Karneges
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -75,3 +81,8 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2013-07/0046.html
  [9] = http://curl.haxx.se/mail/lib-2013-07/0115.html
  [10] = http://curl.haxx.se/mail/lib-2013-07/0103.html
+ [11] = http://curl.haxx.se/bug/view.cgi?id=496
+ [12] = http://curl.haxx.se/bug/view.cgi?id=1217
+ [13] = http://curl.haxx.se/mail/lib-2013-07/0258.html
+ [14] = http://curl.haxx.se/bug/view.cgi?id=758
+ [15] = http://curl.haxx.se/mail/lib-2013-07/0239.html
