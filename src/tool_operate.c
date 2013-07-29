@@ -39,6 +39,10 @@
 #  include <netinet/tcp.h>
 #endif
 
+#ifdef __VMS
+#  include <fabdef.h>
+#endif
+
 #include "rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -120,7 +124,6 @@ static int is_fatal_error(int code)
 }
 
 #ifdef __VMS
-#include <fabdef.h>
 /*
  * get_vms_file_size does what it takes to get the real size of the file
  *
