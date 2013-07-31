@@ -13,8 +13,7 @@ CURLX_ONES = \
 	../lib/strtoofft.c \
 	../lib/strdup.c \
 	../lib/rawstr.c \
-	../lib/nonblock.c \
-	../lib/timeval.c
+	../lib/nonblock.c
 
 CURL_CFILES = \
 	tool_binmode.c \

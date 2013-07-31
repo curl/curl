@@ -27,6 +27,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
+#include "tool_util.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -49,12 +50,12 @@ int tool_progress_cb(void *clientp,
   double percent;
   int barwidth;
   int num;
-  struct timeval now = curlx_tvnow();
+  struct timeval now = tvnow();
   struct ProgressData *bar = (struct ProgressData *)clientp;
   curl_off_t total;
   curl_off_t point;
 
-  if(curlx_tvdiff(now, bar->prevtime) < 200) /* allow 5 Hz */
+  if(tvdiff(now, bar->prevtime) < 200L) /* allow 5 Hz */
     return 0;
 
   /* expected transfer size */
