@@ -49,12 +49,12 @@ int tool_progress_cb(void *clientp,
   double percent;
   int barwidth;
   int num;
-  time_t now = time(NULL);
+  struct timeval now = curlx_tvnow();
   struct ProgressData *bar = (struct ProgressData *)clientp;
   curl_off_t total;
   curl_off_t point;
 
-  if(bar->prevtime == now) /* wait with update */
+  if(curlx_tvdiff(now, bar->prevtime) < 200) /* allow 5 Hz */
     return 0;
 
   /* expected transfer size */
