@@ -74,12 +74,10 @@
 #define CURL_BUILD_MAC_10_6 0
 #define CURL_BUILD_MAC_10_7 0
 #define CURL_BUILD_MAC_10_8 0
-#define CURL_BUILD_MAC_10_9 0
 #define CURL_SUPPORT_MAC_10_5 0
 #define CURL_SUPPORT_MAC_10_6 0
 #define CURL_SUPPORT_MAC_10_7 0
 #define CURL_SUPPORT_MAC_10_8 0
-#define CURL_SUPPORT_MAC_10_9 0
 
 #else
 #error "The darwinssl back-end requires iOS or OS X."
@@ -728,7 +726,7 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
   return server_cert_summary;
 }
 
-#if CURL_SUPPORT_MAC_10_6
+#if CURL_SUPPORT_MAC_10_7
 /* The SecKeychainSearch API was deprecated in Lion, and using it will raise
    deprecation warnings, so let's not compile this unless it's necessary: */
 static OSStatus CopyIdentityWithLabelOldSchool(char *label,
@@ -768,17 +766,18 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
     CFRelease(search);
   return status;
 }
-#endif /* CURL_SUPPORT_MAC_10_6 */
+#endif /* CURL_SUPPORT_MAC_10_7 */
 
 static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
 
-#if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
-  /* SecItemCopyMatching() was introduced in iOS and Snow Leopard. If it
-     exists, let's use that to find the certificate. */
-  if(SecItemCopyMatching != NULL) {
+#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
+  /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
+     kSecClassIdentity was introduced in Lion. If both exist, let's use them
+     to find the certificate. */
+  if(SecItemCopyMatching != NULL && kSecClassIdentity != NULL) {
     CFTypeRef keys[4];
     CFTypeRef values[4];
     CFDictionaryRef query_dict;
@@ -807,15 +806,16 @@ static OSStatus CopyIdentityWithLabel(char *label,
     CFRelease(query_dict);
   }
   else {
-#if CURL_SUPPORT_MAC_10_6
-    /* On Leopard, fall back to SecKeychainSearch. */
+#if CURL_SUPPORT_MAC_10_7
+    /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_SUPPORT_MAC_10_6 */
+#endif /* CURL_SUPPORT_MAC_10_7 */
   }
-#elif CURL_SUPPORT_MAC_10_6
-  /* For developers building on Leopard, we have no choice but to fall back. */
+#elif CURL_SUPPORT_MAC_10_7
+  /* For developers building on older cats, we have no choice but to fall back
+     to SecKeychainSearch. */
   status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
+#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
   return status;
 }
 
