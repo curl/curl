@@ -983,7 +983,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
   if(data->set.str[STRING_KEY]) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
-                "Transport. The private key must be in the Keychain.");
+                "Transport. The private key must be in the Keychain.\n");
   }
 
   if(data->set.str[STRING_CERT]) {
@@ -1089,7 +1089,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
                                strlen(conn->host.name));
     if(err != noErr) {
-      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
+      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d\n",
             err);
     }
   }
