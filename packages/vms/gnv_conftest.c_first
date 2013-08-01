@@ -1,0 +1,61 @@
+/* File: GNV$CONFTEST.C_FIRST
+ *
+ * $Id$
+ *
+ * Copyright 2009, John Malmberg
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+ * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ */
+
+/* This is needed for Configure tests to get the correct exit status */
+void __posix_exit(int __status);
+#define exit(__p1) __posix_exit(__p1)
+
+/* Fake pass the test to find a standard ldap routine that we know is */
+/* present on VMS, but with the wrong case for the symbol */
+char ldap_url_parse(void) {return 0;}
+
+/* These are to pass the test that does not use headers */
+/* Because configure does an #undef which keeps us from using #define */
+/* char CRYPTO_add_lock(void) {return 0;} */
+char SSL_connnect(void) {return 0;}
+char ENGINE_init(void) {return 0;}
+char RAND_status(void) {return 0;}
+/* char RAND_screen(void) {return 0;} In headers, but not present */
+char RAND_egd(void) {return 0;}
+char CRYPTO_cleanup_all_ex_data(void) {return 0;}
+char SSL_get_shutdown(void) {return 0;}
+char ENGINE_load_builtin_engines (void) {return 0;}
+
+/* And these are to pass the test that uses headers. */
+/* Because the HP OpenSSL transfer vectors are currently in Upper case only */
+#pragma message disable macroredef
+#define CRYPTO_add_lock CRYPTO_ADD_LOCK
+#define SSL_connect SSL_CONNECT
+#define ENGINE_init ENGINE_INIT
+#define RAND_status RAND_STATUS
+/* #define RAND_screen RAND_SCREEN */
+#define RAND_egd RAND_EGD
+#define CRYPTO_cleanup_all_ex_data CRYPTO_CLEANUP_ALL_EX_DATA
+#define SSL_get_shutdown SSL_GET_SHUTDOWN
+#define ENGINE_load_builtin_engines ENGINE_LOAD_BUILTIN_ENGINES
+
+/* Can not use the #define macro to fix the case on CRYPTO_lock because */
+/* there is a macro CRYPTO_LOCK that is a number */
+
+/* After all the work to get configure to pass the CRYPTO_LOCK tests,
+ * it turns out that VMS does not have the CRYPTO_LOCK symbol in the
+ * transfer vector, even though it is in the header file.
+ */
+
