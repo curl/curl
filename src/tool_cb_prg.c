@@ -55,7 +55,8 @@ int tool_progress_cb(void *clientp,
   curl_off_t total;
   curl_off_t point;
 
-  if(tvdiff(now, bar->prevtime) < 200L) /* allow 5 Hz */
+  if(bar->calls && (tvdiff(now, bar->prevtime) < 200L))
+    /* after first call, limit progress-bar updating to 5 Hz */
     return 0;
 
   /* expected transfer size */
