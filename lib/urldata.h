@@ -188,6 +188,7 @@
 #include "http.h"
 #include "rtsp.h"
 #include "wildcard.h"
+#include "multihandle.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -1619,6 +1620,25 @@ struct Names {
  */
 
 struct SessionHandle {
+  /* first, two fields for the linked list of these */
+  struct Curl_one_easy *next;
+  struct Curl_one_easy *prev;
+
+  struct SessionHandle *easy_handle; /* the easy handle for this unit */
+  struct connectdata *easy_conn;     /* the "unit's" connection */
+
+  CURLMstate mstate;  /* the handle's state */
+  CURLcode result;   /* previous result */
+
+  struct Curl_message msg; /* A single posted message. */
+
+  /* Array with the plain socket numbers this handle takes care of, in no
+     particular order. Note that all sockets are added to the sockhash, where
+     the state etc are also kept. This array is mostly used to detect when a
+     socket is to be removed from the hash. See singlesocket(). */
+  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  int numsocks;
+
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" when used by
