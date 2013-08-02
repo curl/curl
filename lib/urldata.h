@@ -1624,7 +1624,6 @@ struct SessionHandle {
   struct Curl_one_easy *next;
   struct Curl_one_easy *prev;
 
-  struct SessionHandle *easy_handle; /* the easy handle for this unit */
   struct connectdata *easy_conn;     /* the "unit's" connection */
 
   CURLMstate mstate;  /* the handle's state */
