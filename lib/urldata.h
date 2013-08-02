@@ -1492,12 +1492,6 @@ struct UserDefined {
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
 
-  struct SessionHandle *one_easy; /* When adding an easy handle to a multi
-                                     handle, an internal 'Curl_one_easy'
-                                     struct is created and this is a pointer
-                                     to the particular struct associated with
-                                     this SessionHandle */
-
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
   long ipver; /* the CURL_IPRESOLVE_* defines in the public header file

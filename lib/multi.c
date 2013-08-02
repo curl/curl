@@ -444,9 +444,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* make the SessionHandle refer back to this multi handle */
   Curl_easy_addmulti(easy_handle, multi_handle);
 
-  /* make the SessionHandle struct refer back to this struct */
-  easy->set.one_easy = easy;
-
   /* Set the timeout for this handle to expire really soon so that it will
      be taken care of even when this handle is added in the midst of operation
      when only the curl_multi_socket() API is used. During that flow, only
@@ -617,8 +614,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     else
       multi->easylp = easy->prev; /* point to last node */
 
-    easy->set.one_easy = NULL; /* detached */
-
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
 
@@ -638,10 +633,7 @@ bool Curl_multi_pipeline_enabled(const struct Curl_multi *multi)
 
 void Curl_multi_handlePipeBreak(struct SessionHandle *data)
 {
-  struct SessionHandle *one_easy = data->set.one_easy;
-
-  if(one_easy)
-    one_easy->easy_conn = NULL;
+  data->easy_conn = NULL;
 }
 
 static int waitconnect_getsock(struct connectdata *conn,
@@ -2196,35 +2188,35 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       /* If the pipeline is enabled, take the handle which is in the head of
          the pipeline. If we should write into the socket, take the send_pipe
          head.  If we should read from the socket, take the recv_pipe head. */
-      if(data->set.one_easy->easy_conn) {
+      if(data->easy_conn) {
         if((ev_bitmask & CURL_POLL_OUT) &&
-           data->set.one_easy->easy_conn->send_pipe &&
-           data->set.one_easy->easy_conn->send_pipe->head)
-          data = data->set.one_easy->easy_conn->send_pipe->head->ptr;
+           data->easy_conn->send_pipe &&
+           data->easy_conn->send_pipe->head)
+          data = data->easy_conn->send_pipe->head->ptr;
         else if((ev_bitmask & CURL_POLL_IN) &&
-                data->set.one_easy->easy_conn->recv_pipe &&
-                data->set.one_easy->easy_conn->recv_pipe->head)
-          data = data->set.one_easy->easy_conn->recv_pipe->head->ptr;
+                data->easy_conn->recv_pipe &&
+                data->easy_conn->recv_pipe->head)
+          data = data->easy_conn->recv_pipe->head->ptr;
       }
 
-      if(data->set.one_easy->easy_conn &&
-         !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
+      if(data->easy_conn &&
+         !(data->easy_conn->handler->flags & PROTOPT_DIRLOCK))
         /* set socket event bitmask if they're not locked */
-        data->set.one_easy->easy_conn->cselect_bits = ev_bitmask;
+        data->easy_conn->cselect_bits = ev_bitmask;
 
       do
-        result = multi_runsingle(multi, now, data->set.one_easy);
+        result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
 
-      if(data->set.one_easy->easy_conn &&
-         !(data->set.one_easy->easy_conn->handler->flags & PROTOPT_DIRLOCK))
+      if(data->easy_conn &&
+         !(data->easy_conn->handler->flags & PROTOPT_DIRLOCK))
         /* clear the bitmask only if not locked */
-        data->set.one_easy->easy_conn->cselect_bits = 0;
+        data->easy_conn->cselect_bits = 0;
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since
            last */
-        singlesocket(multi, data->set.one_easy);
+        singlesocket(multi, data);
 
       /* Now we fall-through and do the timer-based stuff, since we don't want
          to force the user to have to deal with timeouts as long as at least
@@ -2268,13 +2260,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* the first loop lap 'data' can be NULL */
     if(data) {
       do
-        result = multi_runsingle(multi, now, data->set.one_easy);
+        result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since
            last */
-        singlesocket(multi, data->set.one_easy);
+        singlesocket(multi, data);
     }
 
     /* Check if there's one (more) expired timer to deal with! This function
@@ -2472,9 +2464,9 @@ static int update_timer(struct Curl_multi *multi)
 }
 
 void Curl_multi_set_easy_connection(struct SessionHandle *handle,
-                                              struct connectdata *conn)
+                                    struct connectdata *conn)
 {
-  handle->set.one_easy->easy_conn = conn;
+  handle->easy_conn = conn;
 }
 
 static bool isHandleAtHead(struct SessionHandle *handle,
