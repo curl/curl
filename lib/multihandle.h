@@ -59,8 +59,6 @@ typedef enum {
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
-#define Curl_one_easy SessionHandle
-
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
@@ -68,8 +66,8 @@ struct Curl_multi {
   long type;
 
   /* We have a doubly-linked circular list with easy handles */
-  struct Curl_one_easy *easyp;
-  struct Curl_one_easy *easylp; /* last node */
+  struct SessionHandle *easyp;
+  struct SessionHandle *easylp; /* last node */
 
   int num_easy; /* amount of entries in the linked list above. */
   int num_alive; /* amount of easy handles that are added but have not yet

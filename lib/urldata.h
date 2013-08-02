@@ -1329,7 +1329,7 @@ struct DynamicStatic {
  * the 'DynamicStatic' struct.
  * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
-struct Curl_one_easy; /* declared and used only in multi.c */
+
 struct Curl_multi;    /* declared and used only in multi.c */
 
 enum dupstring {
@@ -1492,7 +1492,7 @@ struct UserDefined {
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
 
-  struct Curl_one_easy *one_easy; /* When adding an easy handle to a multi
+  struct SessionHandle *one_easy; /* When adding an easy handle to a multi
                                      handle, an internal 'Curl_one_easy'
                                      struct is created and this is a pointer
                                      to the particular struct associated with
@@ -1621,8 +1621,8 @@ struct Names {
 
 struct SessionHandle {
   /* first, two fields for the linked list of these */
-  struct Curl_one_easy *next;
-  struct Curl_one_easy *prev;
+  struct SessionHandle *next;
+  struct SessionHandle *prev;
 
   struct connectdata *easy_conn;     /* the "unit's" connection */
 
