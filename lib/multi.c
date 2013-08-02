@@ -410,9 +410,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* set the easy handle */
   multistate(easy, CURLM_STATE_INIT);
 
-  /* set the back pointer to one_easy to assist in removal */
-  easy->multi_pos =  easy;
-
   /* for multi interface connections, we share DNS cache automatically if the
      easy handle's one is currently not set. */
   if(!easy->dns.hostcache ||
@@ -500,8 +497,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
                                    CURL *curl_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
-  struct Curl_one_easy *easy;
-  struct SessionHandle *data = curl_handle;
+  struct SessionHandle *easy = curl_handle;
+  struct SessionHandle *data = easy;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -510,9 +507,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   /* Verify that we got a somewhat good easy handle too */
   if(!GOOD_EASY_HANDLE(curl_handle))
     return CURLM_BAD_EASY_HANDLE;
-
-  /* pick-up from the 'curl_handle' the kept position in the list */
-  easy = data->multi_pos;
 
   if(easy) {
     bool premature = (easy->mstate < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
@@ -624,9 +618,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       multi->easylp = easy->prev; /* point to last node */
 
     easy->set.one_easy = NULL; /* detached */
-
-    /* Null the position in the controlling structure */
-    easy->multi_pos = NULL;
 
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
@@ -1924,7 +1915,6 @@ static void singlesocket(struct Curl_multi *multi,
   curl_socket_t s;
   int num;
   unsigned int curraction;
-  struct Curl_one_easy *easy_by_hash;
   bool remove_sock_from_hash;
 
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
@@ -2003,10 +1993,7 @@ static void singlesocket(struct Curl_multi *multi,
         /* check if the socket to be removed serves a connection which has
            other easy-s in a pipeline. In this case the socket should not be
            removed. */
-        struct connectdata *easy_conn;
-
-        easy_by_hash = entry->easy->multi_pos;
-        easy_conn = easy_by_hash->easy_conn;
+        struct connectdata *easy_conn = easy->easy_conn;
         if(easy_conn) {
           if(easy_conn->recv_pipe && easy_conn->recv_pipe->size > 1) {
             /* the handle should not be removed from the pipe yet */

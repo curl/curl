@@ -1645,9 +1645,6 @@ struct SessionHandle {
   struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used
                                     by the easy interface */
-  struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
-                                      in multi controlling structure to assist
-                                      in removal. */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
