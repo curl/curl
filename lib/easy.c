@@ -812,7 +812,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
     do {
       chunklen = (tempsize > CURL_MAX_WRITE_SIZE)?CURL_MAX_WRITE_SIZE:tempsize;
 
-      result = Curl_client_write(data->state.current_conn,
+      result = Curl_client_write(data->easy_conn,
                                  temptype, tempwrite, chunklen);
       if(result)
         /* failures abort the loop at once */

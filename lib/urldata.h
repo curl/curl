@@ -1295,8 +1295,6 @@ struct UrlState {
     struct POP3 *pop3;
     struct SMTP *smtp;
   } proto;
-  /* current user of this SessionHandle instance, or NULL */
-  struct connectdata *current_conn;
 
   /* if true, force SSL connection retry (workaround for certain servers) */
   bool ssl_connect_retry;

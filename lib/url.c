@@ -2605,7 +2605,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   }
 
   conn_free(conn);
-  data->state.current_conn = NULL;
+
   Curl_speedinit(data);
 
   return CURLE_OK;
@@ -5865,9 +5865,7 @@ CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
 void Curl_reset_reqproto(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  if(data->state.proto.generic && data->state.current_conn != conn) {
-    free(data->state.proto.generic);
-    data->state.proto.generic = NULL;
-  }
-  data->state.current_conn = conn;
+
+  Curl_safefree(data->state.proto.generic);
+  data->state.proto.generic = NULL;
 }
