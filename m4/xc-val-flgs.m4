@@ -39,7 +39,7 @@ AC_DEFUN([_XC_CHECK_VAR_LIBS], [
   done
   if test $xc_bad_var_libs = yes; then
     AC_MSG_NOTICE([using LIBS: $LIBS])
-    AC_MSG_NOTICE([LIBS error: LIBS may only be used to specify libraries (-lname).])
+    AC_MSG_NOTICE([LIBS note: LIBS should only be used to specify libraries (-lname).])
   fi
 ])
 
@@ -68,7 +68,7 @@ AC_DEFUN([_XC_CHECK_VAR_LDFLAGS], [
   done
   if test $xc_bad_var_ldflags = yes; then
     AC_MSG_NOTICE([using LDFLAGS: $LDFLAGS])
-    xc_bad_var_msg="LDFLAGS error: LDFLAGS may only be used to specify linker flags, not"
+    xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
       case "$xc_word" in
         -D*)
@@ -110,7 +110,7 @@ AC_DEFUN([_XC_CHECK_VAR_CPPFLAGS], [
   done
   if test $xc_bad_var_cppflags = yes; then
     AC_MSG_NOTICE([using CPPFLAGS: $CPPFLAGS])
-    xc_bad_var_msg="CPPFLAGS error: CPPFLAGS may only be used to specify C preprocessor flags, not"
+    xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
       case "$xc_word" in
         -rpath*)
@@ -158,7 +158,7 @@ AC_DEFUN([_XC_CHECK_VAR_CFLAGS], [
   done
   if test $xc_bad_var_cflags = yes; then
     AC_MSG_NOTICE([using CFLAGS: $CFLAGS])
-    xc_bad_var_msg="CFLAGS error: CFLAGS may only be used to specify C compiler flags, not"
+    xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
       case "$xc_word" in
         -D*)
