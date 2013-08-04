@@ -26,7 +26,7 @@
 '* Hacked by Guenter Knauf
 '***************************************************************************
 Option Explicit
-Const myVersion = "0.3.7"
+Const myVersion = "0.3.8"
 
 Const myUrl = "http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
 
@@ -131,7 +131,8 @@ For i = 0 To UBound(myLines)
       While (i < UBound(myLines)) And Not (myLines(i) = "#")
         i = i + 1
         If (InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_NOT_TRUSTED") Or _
-           InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_TRUST_UNKNOWN")) Then
+           InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_TRUST_UNKNOWN") Or _
+           InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_MUST_VERIFY_TRUST")) Then
           myUntrusted = TRUE
         End If
       Wend
