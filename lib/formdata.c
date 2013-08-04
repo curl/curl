@@ -168,8 +168,8 @@ static FormInfo * AddFormInfo(char *value,
  * Returns some valid contenttype for filename.
  *
  ***************************************************************************/
-static const char * ContentTypeForFilename (const char *filename,
-                                            const char *prevtype)
+static const char *ContentTypeForFilename(const char *filename,
+                                          const char *prevtype)
 {
   const char *contenttype = NULL;
   unsigned int i;
@@ -178,7 +178,7 @@ static const char * ContentTypeForFilename (const char *filename,
    * extensions and pick the first we match!
    */
   struct ContentType {
-    char extension[6];
+    const char *extension;
     const char *type;
   };
   static const struct ContentType ctts[]={
@@ -667,9 +667,11 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if(((form->flags & HTTPPOST_FILENAME) ||
             (form->flags & HTTPPOST_BUFFER)) &&
            !form->contenttype ) {
+          char *f = form->flags & HTTPPOST_BUFFER?
+            form->showfilename : form->value;
+
           /* our contenttype is missing */
-          form->contenttype
-            = strdup(ContentTypeForFilename(form->value, prevtype));
+          form->contenttype = strdup(ContentTypeForFilename(f, prevtype));
           if(!form->contenttype) {
             return_value = CURL_FORMADD_MEMORY;
             break;

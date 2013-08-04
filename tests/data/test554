@@ -45,7 +45,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 732
+Content-Length: 718
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------
 
@@ -69,7 +69,7 @@ Content-Disposition: form-data; name="submit"
 send
 ------------------------------
 Content-Disposition: form-data; name="somename"; filename="somefile.txt"
-Content-Type: application/octet-stream
+Content-Type: text/plain
 
 blah blah
 --------------------------------
