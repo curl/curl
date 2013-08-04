@@ -105,7 +105,7 @@ static int https_getsock(struct connectdata *conn,
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -129,7 +129,7 @@ const struct Curl_handler Curl_handler_http = {
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -148,6 +148,21 @@ const struct Curl_handler Curl_handler_https = {
 };
 #endif
 
+
+CURLcode Curl_http_setup_conn(struct connectdata *conn)
+{
+  /* allocate the HTTP-specific struct for the SessionHandle, only to survive
+     during this request */
+  struct HTTP *http;
+
+  DEBUGASSERT(conn->data->state.proto.http == NULL);
+
+  conn->data->state.proto.http = http = calloc(1, sizeof(struct HTTP));
+  if(!http)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+}
 
 /*
  * checkheaders() checks the linked list of custom HTTP headers for a
@@ -1442,6 +1457,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   if(!premature && /* this check is pointless when DONE is called before the
                       entire operation is complete */
      !conn->bits.retry &&
+     !data->set.connect_only &&
      ((http->readbytecount +
        data->req.headerbytecount -
        data->req.deductheadercount)) <= 0) {
@@ -1655,20 +1671,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
-  if(!data->state.proto.http) {
-    /* Only allocate this struct if we don't already have it! */
-
-    http = calloc(1, sizeof(struct HTTP));
-    if(!http)
-      return CURLE_OUT_OF_MEMORY;
-    data->state.proto.http = http;
-  }
-  else
-    http = data->state.proto.http;
+  http = data->state.proto.http;
 
   if(!data->state.this_is_a_follow) {
     /* this is not a followed location, get the original host name */

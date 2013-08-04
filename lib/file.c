@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -186,31 +186,16 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   char *actual_path;
 #endif
 
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
   real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
   if(!real_path)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!data->state.proto.file) {
-    file = calloc(1, sizeof(struct FILEPROTO));
-    if(!file) {
-      free(real_path);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    data->state.proto.file = file;
+  file = calloc(1, sizeof(struct FILEPROTO));
+  if(!file) {
+    free(real_path);
+    return CURLE_OUT_OF_MEMORY;
   }
-  else {
-    /* file is not a protocol that can deal with "persistancy" */
-    file = data->state.proto.file;
-    Curl_safefree(file->freepath);
-    file->path = NULL;
-    if(file->fd != -1)
-      close(file->fd);
-    file->fd = -1;
-  }
+  data->state.proto.file = file;
 
 #ifdef DOS_FILESYSTEM
   /* If the first character is a slash, and there's
@@ -450,7 +435,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     return file_upload(conn);
 
   /* get the fd from the connection phase */
-  fd = conn->data->state.proto.file->fd;
+  fd = data->state.proto.file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
   if(-1 != fstat(fd, &statbuf)) {

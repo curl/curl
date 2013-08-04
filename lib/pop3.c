@@ -163,7 +163,7 @@ const struct Curl_handler Curl_handler_pop3s = {
 
 static const struct Curl_handler Curl_handler_pop3_proxy = {
   "POP3",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -188,7 +188,7 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
 
 static const struct Curl_handler Curl_handler_pop3s_proxy = {
   "POP3S",                              /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -1395,13 +1395,11 @@ static CURLcode pop3_init(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3;
 
-  if(!pop3) {
-    pop3 = data->state.proto.pop3 = calloc(sizeof(struct POP3), 1);
-    if(!pop3)
-      result = CURLE_OUT_OF_MEMORY;
-  }
+  pop3 = data->state.proto.pop3 = calloc(sizeof(struct POP3), 1);
+  if(!pop3)
+    result = CURLE_OUT_OF_MEMORY;
 
   return result;
 }
@@ -1430,15 +1428,6 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   struct pingpong *pp = &pop3c->pp;
 
   *done = FALSE; /* default to not done yet */
-
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
-  /* Initialise the POP3 layer */
-  result = pop3_init(conn);
-  if(result)
-    return result;
 
   /* We always support persistent connections in POP3 */
   conn->bits.close = FALSE;
@@ -1563,15 +1552,6 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /* Since connections can be re-used between SessionHandles, there might be a
-     connection already existing but on a fresh SessionHandle struct. As such
-     we make sure we have a good POP3 struct to play with. For new connections
-     the POP3 struct is allocated and setup in the pop3_connect() function. */
-  Curl_reset_reqproto(conn);
-  result = pop3_init(conn);
-  if(result)
-    return result;
-
   /* Parse the URL path */
   result = pop3_parse_url_path(conn);
   if(result)
@@ -1685,6 +1665,11 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
+  /* Initialise the POP3 layer */
+  CURLcode result = pop3_init(conn);
+  if(result)
+    return result;
+
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
     /* Unless we have asked to tunnel POP3 operations through the proxy, we
        switch and use HTTP operations only */
@@ -1700,10 +1685,8 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
 #endif
     }
 
-    /* We explicitly mark this connection as persistent here as we're doing
-       POP3 over HTTP and thus we accidentally avoid setting this value
-       otherwise */
-    conn->bits.close = FALSE;
+    /* set it up as an HTTP connection instead */
+    return conn->handler->setup_connection(conn);
 #else
     failf(data, "POP3 over http proxy requires HTTP support built-in!");
     return CURLE_UNSUPPORTED_PROTOCOL;

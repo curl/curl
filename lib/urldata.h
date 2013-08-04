@@ -1277,9 +1277,10 @@ struct UrlState {
   /* Protocol specific data.
    *
    *************************************************************************
-   * Note that this data will be REMOVED after each request, so anything that
-   * should be kept/stored on a per-connection basis and thus live for the
-   * next request on the same connection MUST be put in the connectdata struct!
+   * Note that this data will be freed after each request is DONE, so anything
+   * that should be kept/stored on a per-connection basis and thus live for
+   * the next request on the same connection MUST be put in the connectdata
+   * struct!
    *************************************************************************/
   union {
     struct HTTP *http;

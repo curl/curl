@@ -602,9 +602,8 @@ void Curl_easy_addmulti(struct SessionHandle *data,
 
 void Curl_easy_initHandleData(struct SessionHandle *data)
 {
-    memset(&data->req, 0, sizeof(struct SingleRequest));
-
-    data->req.maxdownload = -1;
+  memset(&data->req, 0, sizeof(struct SingleRequest));
+  data->req.maxdownload = -1;
 }
 
 /*

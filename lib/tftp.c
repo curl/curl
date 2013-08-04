@@ -947,10 +947,6 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
   state = conn->proto.tftpc = calloc(1, sizeof(tftp_state_data_t));
   if(!state)
     return CURLE_OUT_OF_MEMORY;
@@ -1306,14 +1302,6 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   CURLcode              code;
 
   *done = FALSE;
-
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct TFTP' to play with. For new connections,
-    the struct TFTP is allocated and setup in the tftp_connect() function.
-  */
-  Curl_reset_reqproto(conn);
 
   if(!conn->proto.tftpc) {
     code = tftp_connect(conn, done);

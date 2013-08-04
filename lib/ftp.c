@@ -225,7 +225,7 @@ const struct Curl_handler Curl_handler_ftps = {
 
 static const struct Curl_handler Curl_handler_ftp_proxy = {
   "FTP",                                /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -251,7 +251,7 @@ static const struct Curl_handler Curl_handler_ftp_proxy = {
 
 static const struct Curl_handler Curl_handler_ftps_proxy = {
   "FTPS",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -3159,56 +3159,6 @@ static CURLcode ftp_block_statemach(struct connectdata *conn)
 }
 
 /*
- * Allocate and initialize the struct FTP for the current SessionHandle.  If
- * need be.
- */
-
-#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
-    defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
-  /* workaround icc 9.1 optimizer issue */
-#pragma optimize("", off)
-#endif
-
-static CURLcode ftp_init(struct connectdata *conn)
-{
-  struct FTP *ftp;
-
-  if(NULL == conn->data->state.proto.ftp) {
-    conn->data->state.proto.ftp = malloc(sizeof(struct FTP));
-    if(NULL == conn->data->state.proto.ftp)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  ftp = conn->data->state.proto.ftp;
-
-  /* get some initial data into the ftp struct */
-  ftp->bytecountp = &conn->data->req.bytecount;
-  ftp->transfer = FTPTRANSFER_BODY;
-  ftp->downloadsize = 0;
-
-  /* No need to duplicate user+password, the connectdata struct won't change
-     during a session, but we re-init them here since on subsequent inits
-     since the conn struct may have changed or been replaced.
-  */
-  ftp->user = conn->user;
-  ftp->passwd = conn->passwd;
-  if(isBadFtpString(ftp->user))
-    return CURLE_URL_MALFORMAT;
-  if(isBadFtpString(ftp->passwd))
-    return CURLE_URL_MALFORMAT;
-
-  conn->proto.ftpc.known_filesize = -1; /* unknown size for now */
-
-  return CURLE_OK;
-}
-
-#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
-    defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
-  /* workaround icc 9.1 optimizer issue */
-#pragma optimize("", on)
-#endif
-
-/*
  * ftp_connect() should do everything that is to be considered a part of
  * the connection phase.
  *
@@ -3224,14 +3174,6 @@ static CURLcode ftp_connect(struct connectdata *conn,
   struct pingpong *pp = &ftpc->pp;
 
   *done = FALSE; /* default to not done yet */
-
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
-  result = ftp_init(conn);
-  if(CURLE_OK != result)
-    return result;
 
   /* We always support persistent connections on ftp */
   conn->bits.close = FALSE;
@@ -4099,17 +4041,6 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct FTP' to play with. For new connections,
-    the struct FTP is allocated and setup in the ftp_connect() function.
-  */
-  Curl_reset_reqproto(conn);
-  retcode = ftp_init(conn);
-  if(retcode)
-    return retcode;
-
   if(conn->data->set.wildcardmatch) {
     retcode = wc_statemach(conn);
     if(conn->data->wildcard.state == CURLWC_SKIP ||
@@ -4572,11 +4503,12 @@ CURLcode ftp_regular_transfer(struct connectdata *conn,
   return result;
 }
 
-static CURLcode ftp_setup_connection(struct connectdata * conn)
+static CURLcode ftp_setup_connection(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  char * type;
+  char *type;
   char command;
+  struct FTP *ftp;
 
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
     /* Unless we have asked to tunnel ftp operations through the proxy, we
@@ -4592,17 +4524,17 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     }
-    /*
-     * We explicitly mark this connection as persistent here as we're doing
-     * FTP over HTTP and thus we accidentally avoid setting this value
-     * otherwise.
-     */
-    conn->bits.close = FALSE;
+    /* set it up as a HTTP connection instead */
+    return conn->handler->setup_connection(conn);
 #else
     failf(data, "FTP over http proxy requires HTTP support built-in!");
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
+
+  conn->data->state.proto.ftp =  ftp = malloc(sizeof(struct FTP));
+  if(NULL == ftp)
+    return CURLE_OUT_OF_MEMORY;
 
   data->state.path++;   /* don't include the initial slash */
   data->state.slash_removed = TRUE; /* we've skipped the slash */
@@ -4635,6 +4567,24 @@ static CURLcode ftp_setup_connection(struct connectdata * conn)
       break;
     }
   }
+
+  /* get some initial data into the ftp struct */
+  ftp->bytecountp = &conn->data->req.bytecount;
+  ftp->transfer = FTPTRANSFER_BODY;
+  ftp->downloadsize = 0;
+
+  /* No need to duplicate user+password, the connectdata struct won't change
+     during a session, but we re-init them here since on subsequent inits
+     since the conn struct may have changed or been replaced.
+  */
+  ftp->user = conn->user;
+  ftp->passwd = conn->passwd;
+  if(isBadFtpString(ftp->user))
+    return CURLE_URL_MALFORMAT;
+  if(isBadFtpString(ftp->passwd))
+    return CURLE_URL_MALFORMAT;
+
+  conn->proto.ftpc.known_filesize = -1; /* unknown size for now */
 
   return CURLE_OK;
 }

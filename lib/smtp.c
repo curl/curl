@@ -161,7 +161,7 @@ const struct Curl_handler Curl_handler_smtps = {
 
 static const struct Curl_handler Curl_handler_smtp_proxy = {
   "SMTP",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -186,7 +186,7 @@ static const struct Curl_handler Curl_handler_smtp_proxy = {
 
 static const struct Curl_handler Curl_handler_smtps_proxy = {
   "SMTPS",                              /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -1361,13 +1361,11 @@ static CURLcode smtp_init(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp;
 
-  if(!smtp) {
-    smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
-    if(!smtp)
-      result = CURLE_OUT_OF_MEMORY;
-  }
+  smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
+  if(!smtp)
+    result = CURLE_OUT_OF_MEMORY;
 
   return result;
 }
@@ -1396,15 +1394,6 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   struct pingpong *pp = &smtpc->pp;
 
   *done = FALSE; /* default to not done yet */
-
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
-  /* Initialise the SMTP layer */
-  result = smtp_init(conn);
-  if(result)
-    return result;
 
   /* We always support persistent connections in SMTP */
   conn->bits.close = FALSE;
@@ -1571,15 +1560,6 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
 
   *done = FALSE; /* default to false */
 
-  /* Since connections can be re-used between SessionHandles, there might be a
-     connection already existing but on a fresh SessionHandle struct. As such
-     we make sure we have a good SMTP struct to play with. For new connections
-     the SMTP struct is allocated and setup in the smtp_connect() function. */
-  Curl_reset_reqproto(conn);
-  result = smtp_init(conn);
-  if(result)
-    return result;
-
   result = smtp_regular_transfer(conn, done);
 
   return result;
@@ -1687,6 +1667,7 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
 static CURLcode smtp_setup_connection(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
+  CURLcode result;
 
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
     /* Unless we have asked to tunnel SMTP operations through the proxy, we
@@ -1702,16 +1683,19 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     }
+    /* set it up as a HTTP connection instead */
+    return conn->handler->setup_connection(conn);
 
-    /* We explicitly mark this connection as persistent here as we're doing
-       SMTP over HTTP and thus we accidentally avoid setting this value
-       otherwise */
-    conn->bits.close = FALSE;
 #else
     failf(data, "SMTP over http proxy requires HTTP support built-in!");
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
+
+  /* Initialise the SMTP layer */
+  result = smtp_init(conn);
+  if(result)
+    return result;
 
   data->state.path++;   /* don't include the initial slash */
 

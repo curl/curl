@@ -149,13 +149,15 @@ static int ssh_perform_getsock(const struct connectdata *conn,
                                                        number of sockets */
                                int numsocks);
 
+static CURLcode ssh_setup_connection(struct connectdata *conn);
+
 /*
  * SCP protocol handler.
  */
 
 const struct Curl_handler Curl_handler_scp = {
   "SCP",                                /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  ssh_setup_connection,                 /* setup_connection */
   ssh_do,                               /* do_it */
   scp_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -181,7 +183,7 @@ const struct Curl_handler Curl_handler_scp = {
 
 const struct Curl_handler Curl_handler_sftp = {
   "SFTP",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  ssh_setup_connection,                 /* setup_connection */
   ssh_do,                               /* do_it */
   sftp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -199,7 +201,6 @@ const struct Curl_handler Curl_handler_sftp = {
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION
   | PROTOPT_NOURLQUERY                  /* flags */
 };
-
 
 static void
 kbd_callback(const char *name, int name_len, const char *instruction,
@@ -2689,24 +2690,13 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
 /*
  * SSH setup and connection
  */
-static CURLcode ssh_init(struct connectdata *conn)
+static CURLcode ssh_setup_connection(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
   struct SSHPROTO *ssh;
-  struct ssh_conn *sshc = &conn->proto.sshc;
 
-  sshc->actualcode = CURLE_OK; /* reset error code */
-  sshc->secondCreateDirs =0;   /* reset the create dir attempt state
-                                  variable */
-
-  if(data->state.proto.ssh)
-    return CURLE_OK;
-
-  ssh = calloc(1, sizeof(struct SSHPROTO));
+  conn->data->state.proto.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
-
-  data->state.proto.ssh = ssh;
 
   return CURLE_OK;
 }
@@ -2730,14 +2720,6 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
-
-  /* If there already is a protocol-specific struct allocated for this
-     sessionhandle, deal with it */
-  Curl_reset_reqproto(conn);
-
-  result = ssh_init(conn);
-  if(result)
-    return result;
 
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
@@ -2856,22 +2838,15 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
   CURLcode res;
   bool connected = 0;
   struct SessionHandle *data = conn->data;
+  struct ssh_conn *sshc = &conn->proto.sshc;
 
   *done = FALSE; /* default to false */
 
-  /*
-    Since connections can be re-used between SessionHandles, this might be a
-    connection already existing but on a fresh SessionHandle struct so we must
-    make sure we have a good 'struct SSHPROTO' to play with. For new
-    connections, the struct SSHPROTO is allocated and setup in the
-    ssh_connect() function.
-  */
-  Curl_reset_reqproto(conn);
-  res = ssh_init(conn);
-  if(res)
-    return res;
-
   data->req.size = -1; /* make sure this is unknown at this point */
+
+  sshc->actualcode = CURLE_OK; /* reset error code */
+  sshc->secondCreateDirs =0;   /* reset the create dir attempt state
+                                  variable */
 
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);

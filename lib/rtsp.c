@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,6 +81,8 @@ static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
                                    ssize_t *nread,
                                    bool *readmore);
 
+static CURLcode rtsp_setup_connection(struct connectdata *conn);
+
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
@@ -104,7 +106,7 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len);
  */
 const struct Curl_handler Curl_handler_rtsp = {
   "RTSP",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  rtsp_setup_connection,                /* setup_connection */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -121,6 +123,19 @@ const struct Curl_handler Curl_handler_rtsp = {
   CURLPROTO_RTSP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
+
+
+static CURLcode rtsp_setup_connection(struct connectdata *conn)
+{
+  struct RTSP *rtsp;
+
+  conn->data->state.proto.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
+  if(!rtsp)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+}
+
 
 /*
  * The server may send us RTP data at any point, and RTSPREQ_RECEIVE does not
@@ -221,7 +236,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
-  struct RTSP *rtsp;
+  struct RTSP *rtsp = data->state.proto.rtsp;
   struct HTTP *http;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
@@ -238,20 +253,6 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   const char *p_uagent = NULL;
 
   *done = TRUE;
-
-  Curl_reset_reqproto(conn);
-
-  if(!data->state.proto.rtsp) {
-    /* Only allocate this struct if we don't already have it! */
-
-    rtsp = calloc(1, sizeof(struct RTSP));
-    if(!rtsp)
-      return CURLE_OUT_OF_MEMORY;
-    data->state.proto.rtsp = rtsp;
-  }
-  else {
-    rtsp = data->state.proto.rtsp;
-  }
 
   http = &(rtsp->http_wrapper);
   /* Assert that no one has changed the RTSP struct in an evil way */
