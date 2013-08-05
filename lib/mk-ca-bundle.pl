@@ -164,7 +164,7 @@ while (<TXT>) {
   if ($start_of_cert && /^CKA_LABEL UTF8 \"(.*)\"/) {
     $caname = $1;
   }
-  my $untrusted = 0;
+  my $untrusted = 1;
   if ($start_of_cert && /^CKA_VALUE MULTILINE_OCTAL/) {
     my $data;
     while (<TXT>) {
@@ -184,10 +184,8 @@ while (<TXT>) {
     # now scan the trust part for untrusted certs
     while (<TXT>) {
       last if (/^#/);
-      if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_NOT_TRUSTED$/
-          or /^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_TRUST_UNKNOWN$/
-          or /^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_MUST_VERIFY_TRUST/) {
-        $untrusted = 1;
+      if (/^CKA_TRUST_SERVER_AUTH\s+CK_TRUST\s+CKT_NSS_TRUSTED_DELEGATOR$/) {
+          $untrusted = 0;
       }
     }
     if ($untrusted) {

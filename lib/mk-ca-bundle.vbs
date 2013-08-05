@@ -130,10 +130,8 @@ For i = 0 To UBound(myLines)
       myInsideCert = FALSE
       While (i < UBound(myLines)) And Not (myLines(i) = "#")
         i = i + 1
-        If (InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_NOT_TRUSTED") Or _
-           InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_TRUST_UNKNOWN") Or _
-           InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_MUST_VERIFY_TRUST")) Then
-          myUntrusted = TRUE
+        If InstrRev(myLines(i), "CKA_TRUST_SERVER_AUTH CK_TRUST CKT_NSS_TRUSTED_DELEGATOR") Then
+          myUntrusted = FALSE
         End If
       Wend
       If (myUntrusted = TRUE) Then
@@ -183,7 +181,7 @@ For i = 0 To UBound(myLines)
   End If
   If InstrRev(myLines(i), "CKA_VALUE MULTILINE_OCTAL") Then
     myInsideCert = TRUE
-    myUntrusted = FALSE
+    myUntrusted = TRUE
     myData = ""
   End If
   If InstrRev(myLines(i), "***** BEGIN LICENSE BLOCK *****") Then
