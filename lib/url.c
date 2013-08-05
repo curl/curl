@@ -612,7 +612,6 @@ CURLcode Curl_open(struct SessionHandle **curl)
     res = CURLE_OUT_OF_MEMORY;
   }
   else {
-    Curl_easy_initHandleData(data);
     res = Curl_init_userdefined(&data->set);
 
     data->state.headersize=HEADERSIZE;
@@ -5790,9 +5789,6 @@ static CURLcode do_init(struct connectdata *conn)
        opt_no_body is set FALSE since then we'll behave wrong when getting
        HTTP. */
     data->set.httpreq = HTTPREQ_GET;
-
-  /* NB: the content encoding software depends on this initialization */
-  Curl_easy_initHandleData(data);
 
   k->start = Curl_tvnow(); /* start time */
   k->now = k->start;   /* current time is now */

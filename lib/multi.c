@@ -329,6 +329,14 @@ CURLM *curl_multi_init(void)
                            CURL_CONNECTION_HASH_SIZE);
 }
 
+/*
+ * Store a pointed to the multi handle within the easy handle's data struct.
+ */
+static void easy_addmulti(struct SessionHandle *data,
+                          void *multi)
+{
+  data->multi = multi;
+}
 
 CURLMcode curl_multi_add_handle(CURLM *multi_handle,
                                 CURL *easy_handle)
@@ -391,7 +399,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
      is associated now with the multi handle which lacked one. */
   if(new_closure) {
     multi->closure_handle = new_closure;
-    Curl_easy_addmulti(multi->closure_handle, multi_handle);
+    easy_addmulti(multi->closure_handle, multi_handle);
     multi->closure_handle->state.conn_cache = multi->conn_cache;
   }
 
@@ -449,7 +457,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   }
 
   /* make the SessionHandle refer back to this multi handle */
-  Curl_easy_addmulti(data, multi_handle);
+  easy_addmulti(easy_handle, multi_handle);
 
   /* Set the timeout for this handle to expire really soon so that it will
      be taken care of even when this handle is added in the midst of operation
@@ -590,8 +598,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
       easy->easy_conn = NULL;
     }
 
-    Curl_easy_addmulti(easy, NULL); /* clear the association
-                                                    to this multi handle */
+    easy_addmulti(easy, NULL); /* clear the association to this multi
+                                  handle */
 
     {
       /* make sure there's no pending message in the queue sent from this easy
@@ -1849,7 +1857,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       /* Clear the pointer to the connection cache */
       easy->state.conn_cache = NULL;
 
-      Curl_easy_addmulti(easy, NULL); /* clear the association */
+      easy_addmulti(easy, NULL); /* clear the association */
 
       easy = nexteasy;
     }
