@@ -136,7 +136,7 @@ static CURLcode ftp_done(struct connectdata *conn,
                          CURLcode, bool premature);
 static CURLcode ftp_connect(struct connectdata *conn, bool *done);
 static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection);
-static CURLcode ftp_do_more(struct connectdata *conn, bool *completed);
+static CURLcode ftp_do_more(struct connectdata *conn, int *completed);
 static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
 static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks);
@@ -1799,15 +1799,15 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
 static CURLcode ftp_epsv_disable(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  infof(conn->data, "got positive EPSV response, but can't connect. "
-        "Disabling EPSV\n");
+  infof(conn->data, "Failed EPSV attempt. Disabling EPSV\n");
   /* disable it for next transfer */
   conn->bits.ftp_use_epsv = FALSE;
   conn->data->state.errorbuf = FALSE; /* allow error message to get
                                          rewritten */
   PPSENDF(&conn->proto.ftpc.pp, "%s", "PASV");
   conn->proto.ftpc.count1++;
-  /* remain in the FTP_PASV state */
+  /* remain in/go to the FTP_PASV state */
+  state(conn, FTP_PASV);
   return result;
 }
 
@@ -1936,15 +1936,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   }
   else if(ftpc->count1 == 0) {
     /* EPSV failed, move on to PASV */
-
-    /* disable it for next transfer */
-    conn->bits.ftp_use_epsv = FALSE;
-    infof(data, "disabling EPSV usage\n");
-
-    PPSENDF(&ftpc->pp, "%s", "PASV");
-    ftpc->count1++;
-    /* remain in the FTP_PASV state */
-    return result;
+    return ftp_epsv_disable(conn);
   }
   else {
     failf(data, "Bad PASV/EPSV response: %03d", ftpcode);
@@ -2021,14 +2013,17 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   case CURLPROXY_SOCKS5_HOSTNAME:
     result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost, newport,
                          SECONDARYSOCKET, conn);
+    connected = TRUE;
     break;
   case CURLPROXY_SOCKS4:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
                          SECONDARYSOCKET, conn, FALSE);
+    connected = TRUE;
     break;
   case CURLPROXY_SOCKS4A:
     result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
                          SECONDARYSOCKET, conn, TRUE);
+    connected = TRUE;
     break;
   case CURLPROXY_HTTP:
   case CURLPROXY_HTTP_1_0:
@@ -2080,8 +2075,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     }
   }
 
-  conn->bits.tcpconnect[SECONDARYSOCKET] = TRUE;
-
+  conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
 
@@ -3677,19 +3671,22 @@ static CURLcode ftp_range(struct connectdata *conn)
  *
  * This function shall be called when the second FTP (data) connection is
  * connected.
+ *
+ * 'complete' can return 0 for incomplete, 1 for done and -1 for go back
+ * (which basically is only for when PASV is being sent to retry a failed
+ * EPSV).
  */
 
-static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
+static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
 {
   struct SessionHandle *data=conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
+  bool complete = FALSE;
 
   /* the ftp struct is inited in ftp_connect() */
   struct FTP *ftp = data->state.proto.ftp;
-
-  *complete = FALSE;
 
   /* if the second connection isn't done yet, wait for it */
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
@@ -3707,14 +3704,22 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
     if(connected) {
       DEBUGF(infof(data, "DO-MORE connected phase starts\n"));
     }
-    else
+    else {
+      if(result && (ftpc->count1 == 0)) {
+        *completep = -1; /* go back to DOING please */
+        /* this is a EPSV connect failing, try PASV instead */
+        return ftp_epsv_disable(conn);
+      }
       return result;
+    }
   }
 
   if(ftpc->state) {
     /* already in a state so skip the intial commands.
        They are only done to kickstart the do_more state */
-    result = ftp_multi_statemach(conn, complete);
+    result = ftp_multi_statemach(conn, &complete);
+
+    *completep = (int)complete;
 
     /* if we got an error or if we don't wait for a data connection return
        immediately */
@@ -3725,7 +3730,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
       /* if we reach the end of the FTP state machine here, *complete will be
          TRUE but so is ftpc->wait_data_conn, which says we need to wait for
          the data connection and therefore we're not actually complete */
-      *complete = FALSE;
+      *completep = 0;
   }
 
   if(ftp->transfer <= FTPTRANSFER_INFO) {
@@ -3749,8 +3754,8 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
         if(result)
           return result;
 
-        *complete = TRUE; /* this state is now complete when the server has
-                             connected back to us */
+        *completep = 1; /* this state is now complete when the server has
+                           connected back to us */
       }
     }
     else if(data->set.upload) {
@@ -3758,7 +3763,8 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
       if(result)
         return result;
 
-      result = ftp_multi_statemach(conn, complete);
+      result = ftp_multi_statemach(conn, &complete);
+      *completep = (int)complete;
     }
     else {
       /* download */
@@ -3786,7 +3792,8 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
           return result;
       }
 
-      result = ftp_multi_statemach(conn, complete);
+      result = ftp_multi_statemach(conn, &complete);
+      *completep = (int)complete;
     }
     return result;
   }
@@ -3798,7 +3805,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, bool *complete)
 
   if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
-    *complete = TRUE;
+    *completep = 1;
     DEBUGF(infof(data, "DO-MORE phase ends with %d\n", (int)result));
   }
 
@@ -3841,7 +3848,9 @@ CURLcode ftp_perform(struct connectdata *conn,
   /* run the state-machine */
   result = ftp_multi_statemach(conn, dophase_done);
 
-  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+  *connected = conn->bits.tcpconnect[SECONDARYSOCKET];
+
+  infof(conn->data, "ftp_perform ends with SECONDARY: %d\n", *connected);
 
   if(*dophase_done)
     DEBUGF(infof(conn->data, "DO phase is complete1\n"));
@@ -4469,7 +4478,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(connected) {
-    bool completed;
+    int completed;
     CURLcode result = ftp_do_more(conn, &completed);
 
     if(result) {

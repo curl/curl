@@ -929,6 +929,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   struct SingleRequest *k;
   struct SessionHandle *data;
   long timeout_ms;
+  int control;
 
   if(!GOOD_EASY_HANDLE(easy))
     return CURLM_BAD_EASY_HANDLE;
@@ -1359,13 +1360,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /*
        * When we are connected, DO MORE and then go DO_DONE
        */
-      easy->result = Curl_do_more(easy->easy_conn, &dophase_done);
+      easy->result = Curl_do_more(easy->easy_conn, &control);
 
       /* No need to remove this handle from the send pipeline here since that
          is done in Curl_done() */
       if(CURLE_OK == easy->result) {
-        if(dophase_done) {
-          multistate(easy, CURLM_STATE_DO_DONE);
+        if(control) {
+          /* if positive, advance to DO_DONE
+             if negative, go back to DOING */
+          multistate(easy, control==1?
+                     CURLM_STATE_DO_DONE:
+                     CURLM_STATE_DOING);
           result = CURLM_CALL_MULTI_PERFORM;
         }
         else

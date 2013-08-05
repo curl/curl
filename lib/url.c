@@ -5841,18 +5841,20 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
  *
  * TODO: A future libcurl should be able to work away this state.
  *
+ * 'complete' can return 0 for incomplete, 1 for done and -1 for go back to
+ * DOING state there's more work to do!
  */
 
-CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
+CURLcode Curl_do_more(struct connectdata *conn, int *complete)
 {
   CURLcode result=CURLE_OK;
 
-  *completed = FALSE;
+  *complete = 0;
 
   if(conn->handler->do_more)
-    result = conn->handler->do_more(conn, completed);
+    result = conn->handler->do_more(conn, complete);
 
-  if(!result && *completed)
+  if(!result && (*complete == 1))
     /* do_complete must be called after the protocol-specific DO function */
     do_complete(conn);
 
