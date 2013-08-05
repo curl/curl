@@ -153,12 +153,10 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the SessionHandle, only to survive
      during this request */
-  struct HTTP *http;
+  DEBUGASSERT(conn->data->req.protop == NULL);
 
-  DEBUGASSERT(conn->data->state.proto.http == NULL);
-
-  conn->data->state.proto.http = http = calloc(1, sizeof(struct HTTP));
-  if(!http)
+  conn->data->req.protop = calloc(1, sizeof(struct HTTP));
+  if(!conn->data->req.protop)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -345,7 +343,7 @@ static bool pickoneauth(struct auth *pick)
 static CURLcode http_perhapsrewind(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  struct HTTP *http = data->state.proto.http;
+  struct HTTP *http = data->req.protop;
   curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
 
@@ -963,7 +961,7 @@ static size_t readmoredata(char *buffer,
                            void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct HTTP *http = conn->data->state.proto.http;
+  struct HTTP *http = conn->data->req.protop;
   size_t fullsize = size * nitems;
 
   if(0 == http->postsize)
@@ -1034,7 +1032,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   CURLcode res;
   char *ptr;
   size_t size;
-  struct HTTP *http = conn->data->state.proto.http;
+  struct HTTP *http = conn->data->req.protop;
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
@@ -1417,7 +1415,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
-  struct HTTP *http =data->state.proto.http;
+  struct HTTP *http =data->req.protop;
 
   Curl_unencode_cleanup(conn);
 
@@ -1671,7 +1669,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  http = data->state.proto.http;
+  http = data->req.protop;
 
   if(!data->state.this_is_a_follow) {
     /* this is not a followed location, get the original host name */

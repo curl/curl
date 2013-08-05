@@ -148,7 +148,6 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **userptr, char **passwdptr,
                                     char **optionsptr);
-static void free_connection_internals(struct SessionHandle *data);
 /*
  * Protocol table.
  */
@@ -419,7 +418,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   data->state.path = NULL;
 
   /* freed here just in case DONE wasn't called */
-  free_connection_internals(data);
+  Curl_free_request_state(data);
 
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
@@ -4037,7 +4036,10 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
      without doing a DISCONNECT or DONE in between (since the connection is
      yet in place) and therefore this function needs to first make sure
      there's no lingering previous data allocated. */
-  free_connection_internals(conn->data);
+  Curl_free_request_state(conn->data);
+
+  memset(&conn->data->req, 0, sizeof(struct SingleRequest));
+  conn->data->req.maxdownload = -1;
 
   conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
 
@@ -4066,9 +4068,14 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static void free_connection_internals(struct SessionHandle *data)
+/*
+ * Curl_free_request_state() should free temp data that was allocated in the
+ * SessionHandle for this single request.
+ */
+
+void Curl_free_request_state(struct SessionHandle *data)
 {
-  Curl_safefree(data->state.proto.generic);
+  Curl_safefree(data->req.protop);
 }
 
 
@@ -5751,7 +5758,7 @@ CURLcode Curl_done(struct connectdata **connp,
                     this was either closed or handed over to the connection
                     cache here, and therefore cannot be used from this point on
                  */
-  free_connection_internals(data);
+  Curl_free_request_state(data);
 
   return result;
 }

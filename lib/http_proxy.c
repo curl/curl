@@ -66,13 +66,13 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
      * This function might be called several times in the multi interface case
      * if the proxy's CONNTECT response is not instant.
      */
-    prot_save = conn->data->state.proto.generic;
+    prot_save = conn->data->req.protop;
     memset(&http_proxy, 0, sizeof(http_proxy));
-    conn->data->state.proto.http = &http_proxy;
+    conn->data->req.protop = &http_proxy;
     conn->bits.close = FALSE;
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
                                conn->host.name, conn->remote_port);
-    conn->data->state.proto.generic = prot_save;
+    conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
 #else

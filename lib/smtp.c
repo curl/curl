@@ -636,7 +636,7 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->req.protop;
 
   /* Send the RCPT TO command */
   if(smtp->rcpt) {
@@ -1115,7 +1115,7 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->req.protop;
 
   (void)instate; /* no use for this yet */
 
@@ -1139,7 +1139,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->req.protop;
 
   (void)instate; /* no use for this yet */
 
@@ -1363,7 +1363,7 @@ static CURLcode smtp_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp;
 
-  smtp = data->state.proto.smtp = calloc(sizeof(struct SMTP), 1);
+  smtp = data->req.protop = calloc(sizeof(struct SMTP), 1);
   if(!smtp)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1442,7 +1442,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->req.protop;
   struct pingpong *pp = &conn->proto.smtpc.pp;
   const char *eob;
   ssize_t len;
@@ -1523,7 +1523,7 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct SMTP *smtp = conn->data->state.proto.smtp;
+    struct SMTP *smtp = conn->data->req.protop;
     smtp->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1602,7 +1602,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 /* Call this when the DO phase has completed */
 static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 {
-  struct SMTP *smtp = conn->data->state.proto.smtp;
+  struct SMTP *smtp = conn->data->req.protop;
 
   (void)connected;
 
@@ -1785,7 +1785,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   ssize_t i;
   ssize_t si;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->state.proto.smtp;
+  struct SMTP *smtp = data->req.protop;
 
   /* Do we need to allocate the scatch buffer? */
   if(!data->state.scratch) {

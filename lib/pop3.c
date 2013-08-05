@@ -673,7 +673,7 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->req.protop;
   const char *command = NULL;
 
   /* Calculate the default command */
@@ -1203,7 +1203,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->req.protop;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
 
@@ -1397,7 +1397,7 @@ static CURLcode pop3_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct POP3 *pop3;
 
-  pop3 = data->state.proto.pop3 = calloc(sizeof(struct POP3), 1);
+  pop3 = data->req.protop = calloc(sizeof(struct POP3), 1);
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1472,7 +1472,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->req.protop;
 
   (void)premature;
 
@@ -1515,7 +1515,7 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct POP3 *pop3 = conn->data->state.proto.pop3;
+    struct POP3 *pop3 = conn->data->req.protop;
     pop3->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1774,7 +1774,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
   /* The POP3 struct is already initialised in pop3_connect() */
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->req.protop;
   const char *path = data->state.path;
 
   /* URL decode the path for the message ID */
@@ -1791,7 +1791,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct POP3 *pop3 = data->state.proto.pop3;
+  struct POP3 *pop3 = data->req.protop;
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */

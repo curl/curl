@@ -688,7 +688,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SSHPROTO *sftp_scp = data->state.proto.ssh;
+  struct SSHPROTO *sftp_scp = data->req.protop;
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   char *new_readdir_line;
@@ -2694,7 +2694,7 @@ static CURLcode ssh_setup_connection(struct connectdata *conn)
 {
   struct SSHPROTO *ssh;
 
-  conn->data->state.proto.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
+  conn->data->req.protop = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2870,7 +2870,7 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
   struct ssh_conn *ssh = &conn->proto.sshc;
   (void) dead_connection;
 
-  Curl_safefree(conn->data->state.proto.ssh);
+  Curl_safefree(conn->data->req.protop);
 
   if(ssh->ssh_session) {
     /* only if there's a session still around to use! */
@@ -2888,7 +2888,7 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
 static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 {
   CURLcode result = CURLE_OK;
-  struct SSHPROTO *sftp_scp = conn->data->state.proto.ssh;
+  struct SSHPROTO *sftp_scp = conn->data->req.protop;
 
   if(status == CURLE_OK) {
     /* run the state-machine
@@ -3035,7 +3035,7 @@ static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection)
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
 
-  Curl_safefree(conn->data->state.proto.ssh);
+  Curl_safefree(conn->data->req.protop);
 
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */

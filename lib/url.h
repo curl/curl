@@ -45,6 +45,7 @@ CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done);
+void Curl_free_request_state(struct SessionHandle *data);
 
 int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,

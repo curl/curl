@@ -692,6 +692,9 @@ struct SingleRequest {
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
                          http.c for details. */
+
+  void *protop;       /* Allocated protocol-specific data. Each protocol
+                         handler makes sure this points to data it needs. */
 };
 
 /*
@@ -1273,29 +1276,6 @@ struct UrlState {
   long rtsp_next_client_CSeq; /* the session's next client CSeq */
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
-
-  /* Protocol specific data.
-   *
-   *************************************************************************
-   * Note that this data will be freed after each request is DONE, so anything
-   * that should be kept/stored on a per-connection basis and thus live for
-   * the next request on the same connection MUST be put in the connectdata
-   * struct!
-   *************************************************************************/
-  union {
-    struct HTTP *http;
-    struct HTTP *https;  /* alias, just for the sake of being more readable */
-    struct RTSP *rtsp;
-    struct FTP *ftp;
-    /* void *tftp;    not used */
-    struct FILEPROTO *file;
-    void *telnet;        /* private for telnet.c-eyes only */
-    void *generic;
-    struct SSHPROTO *ssh;
-    struct IMAP *imap;
-    struct POP3 *pop3;
-    struct SMTP *smtp;
-  } proto;
 
   /* if true, force SSL connection retry (workaround for certain servers) */
   bool ssl_connect_retry;

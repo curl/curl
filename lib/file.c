@@ -90,7 +90,7 @@ static CURLcode file_done(struct connectdata *conn,
 static CURLcode file_connect(struct connectdata *conn, bool *done);
 static CURLcode file_disconnect(struct connectdata *conn,
                                 bool dead_connection);
-
+static CURLcode file_setup_connection(struct connectdata *conn);
 
 /*
  * FILE scheme handler.
@@ -98,7 +98,7 @@ static CURLcode file_disconnect(struct connectdata *conn,
 
 const struct Curl_handler Curl_handler_file = {
   "FILE",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
+  file_setup_connection,                /* setup_connection */
   file_do,                              /* do_it */
   file_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -116,6 +116,16 @@ const struct Curl_handler Curl_handler_file = {
   PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
 };
 
+
+static CURLcode file_setup_connection(struct connectdata *conn)
+{
+  /* allocate the FILE specific struct */
+  conn->data->req.protop = calloc(1, sizeof(struct FILEPROTO));
+  if(!conn->data->req.protop)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+}
 
  /*
   Check if this is a range download, and if so, set the internal variables
@@ -179,7 +189,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data = conn->data;
   char *real_path;
-  struct FILEPROTO *file;
+  struct FILEPROTO *file = data->req.protop;
   int fd;
 #ifdef DOS_FILESYSTEM
   int i;
@@ -189,13 +199,6 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   real_path = curl_easy_unescape(data, data->state.path, 0, NULL);
   if(!real_path)
     return CURLE_OUT_OF_MEMORY;
-
-  file = calloc(1, sizeof(struct FILEPROTO));
-  if(!file) {
-    free(real_path);
-    return CURLE_OUT_OF_MEMORY;
-  }
-  data->state.proto.file = file;
 
 #ifdef DOS_FILESYSTEM
   /* If the first character is a slash, and there's
@@ -247,7 +250,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 static CURLcode file_done(struct connectdata *conn,
                                CURLcode status, bool premature)
 {
-  struct FILEPROTO *file = conn->data->state.proto.file;
+  struct FILEPROTO *file = conn->data->req.protop;
   (void)status; /* not used */
   (void)premature; /* not used */
 
@@ -265,7 +268,7 @@ static CURLcode file_done(struct connectdata *conn,
 static CURLcode file_disconnect(struct connectdata *conn,
                                 bool dead_connection)
 {
-  struct FILEPROTO *file = conn->data->state.proto.file;
+  struct FILEPROTO *file = conn->data->req.protop;
   (void)dead_connection; /* not used */
 
   if(file) {
@@ -287,7 +290,7 @@ static CURLcode file_disconnect(struct connectdata *conn,
 
 static CURLcode file_upload(struct connectdata *conn)
 {
-  struct FILEPROTO *file = conn->data->state.proto.file;
+  struct FILEPROTO *file = conn->data->req.protop;
   const char *dir = strchr(file->path, DIRSEP);
   int fd;
   int mode;
@@ -425,6 +428,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t bytecount = 0;
   int fd;
   struct timeval now = Curl_tvnow();
+  struct FILEPROTO *file;
 
   *done = TRUE; /* unconditionally */
 
@@ -434,8 +438,10 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   if(data->set.upload)
     return file_upload(conn);
 
+  file = conn->data->req.protop;
+
   /* get the fd from the connection phase */
-  fd = data->state.proto.file->fd;
+  fd = file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
   if(-1 != fstat(fd, &statbuf)) {
