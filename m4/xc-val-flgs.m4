@@ -209,7 +209,7 @@ AC_DEFUN([XC_CHECK_USER_FLAGS], [
      test $xc_bad_var_cflags = yes ||
      test $xc_bad_var_ldflags = yes ||
      test $xc_bad_var_cppflags = yes; then
-     AC_MSG_WARN([One or more of these variables may cause build problems!])
+     AC_MSG_ERROR([Can not continue. Fix errors mentioned immediately above this line.])
   fi
 ])
 
