@@ -79,9 +79,9 @@
 1.3 What To Read
 
  Source code, the man pages, the INTERNALS document, TODO, KNOWN_BUGS, the
- most recent CHANGES. Just lurking on the libcurl mailing list is gonna give
- you a lot of insights on what's going on right now. Asking there is a good
- idea too.
+ most recent CHANGES. Just lurking on the curl-library mailing list is gonna
+ give you a lot of insights on what's going on right now. Asking there is a
+ good idea too.
 
 2. cURL Coding Standards
 
@@ -98,12 +98,12 @@
 
 2.2 Indenting
 
- Please try using the same indenting levels and bracing method as all the
- other code already does. It makes the source code a lot easier to follow if
- all of it is written using the same style. We don't ask you to like it, we
- just ask you to follow the tradition! ;-) This mainly means: 2-level indents,
- using spaces only (no tabs) and having the opening brace ({) on the same line
- as the if() or while().
+ Use the same indenting levels and bracing method as all the other code
+ already does. It makes the source code easier to follow if all of it is
+ written using the same style. We don't ask you to like it, we just ask you to
+ follow the tradition! ;-) This mainly means: 2-level indents, using spaces
+ only (no tabs) and having the opening brace ({) on the same line as the if()
+ or while().
 
  Also note that we use if() and while() with no space before the parenthesis.
 
@@ -151,6 +151,9 @@
  description exactly what they correct so that all patches can be selectively
  applied by the maintainer or other interested parties.
 
+ Also, separate patches enable bisecting much better when we track problems in
+ the future.
+
 2.9 Patch Against Recent Sources
 
  Please try to get the latest available sources to make your patches
@@ -177,6 +180,10 @@
  in the test suite. Every feature that is added should get at least one valid
  test case that verifies that it works as documented. If every submitter also
  posts a few test cases, it won't end up as a heavy burden on a single person!
+
+ If you don't have test cases or perhaps you have done something that is very
+ hard to write tests for, do explain exactly how you have otherwise tested and
+ verified your changes.
 
 3. Pushing Out Your Changes
 
