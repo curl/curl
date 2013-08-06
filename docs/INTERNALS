@@ -111,6 +111,9 @@ Windows vs Unix
 Library
 =======
 
+ (See LIBCURL-STRUCTS for a separate document describing all major internal
+ structs and their purposes.)
+
  There are plenty of entry points to the library, namely each publicly defined
  function that libcurl offers to applications. All of those functions are
  rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
@@ -135,16 +138,18 @@ Library
  options is documented in the man page. This function mainly sets things in
  the 'SessionHandle' struct.
 
- curl_easy_perform() does a whole lot of things:
+ curl_easy_perform() is just a wrapper function that makes use of the multi
+ API.  It basically curl_multi_init(), curl_multi_add_handle(),
+ curl_multi_wait(), and curl_multi_perform() until the transfer is done and
+ then returns.
 
- It starts off in the lib/easy.c file by calling Curl_perform() and the main
- work then continues in lib/url.c. The flow continues with a call to
- Curl_connect() to connect to the remote site.
+ Some of the most important key functions in url.c are called from multi.c
+ when certain key steps are to be made in the transfer operation.
 
  o Curl_connect()
 
-   ... analyzes the URL, it separates the different components and connects to
-   the remote host. This may involve using a proxy and/or using SSL. The
+   Analyzes the URL, it separates the different components and connects to the
+   remote host. This may involve using a proxy and/or using SSL. The
    Curl_resolv() function in lib/hostip.c is used for looking up host names
    (it does then use the proper underlying method, which may vary between
    platforms and builds).
@@ -160,10 +165,7 @@ Library
  o Curl_do()
 
    Curl_do() makes sure the proper protocol-specific function is called. The
-   functions are named after the protocols they handle. Curl_ftp(),
-   Curl_http(), Curl_dict(), etc. They all reside in their respective files
-   (ftp.c, http.c and dict.c). HTTPS is handled by Curl_http() and FTPS by
-   Curl_ftp().
+   functions are named after the protocols they handle.
 
    The protocol-specific functions of course deal with protocol-specific
    negotiations and setup. They have access to the Curl_sendf() (from
@@ -182,10 +184,9 @@ Library
    be called with some basic info about the upcoming transfer: what socket(s)
    to read/write and the expected file transfer sizes (if known).
 
- o Transfer()
+ o Curl_readwrite()
 
-   Curl_perform() then calls Transfer() in lib/transfer.c that performs the
-   entire file transfer.
+   Called during the transfer of the actual protocol payload.
 
    During transfer, the progress functions in lib/progress.c are called at a
    frequent interval (or at the user's choice, a specified callback might get
@@ -207,33 +208,11 @@ Library
    used. This function is only used when we are certain that no more transfers
    is going to be made on the connection. It can be also closed by force, or
    it can be called to make sure that libcurl doesn't keep too many
-   connections alive at the same time (there's a default amount of 5 but that
-   can be changed with the CURLOPT_MAXCONNECTS option).
+   connections alive at the same time.
 
    This function cleans up all resources that are associated with a single
    connection.
 
- Curl_perform() is the function that does the main "connect - do - transfer -
- done" loop. It loops if there's a Location: to follow.
-
- When completed, the curl_easy_cleanup() should be called to free up used
- resources. It runs Curl_disconnect() on all open connections.
-
- A quick roundup on internal function sequences (many of these call
- protocol-specific function-pointers):
-
-  Curl_connect - connects to a remote site and does initial connect fluff
-   This also checks for an existing connection to the requested site and uses
-   that one if it is possible.
-
-   Curl_do - starts a transfer
-    Curl_handler::do_it() - transfers data
-   Curl_done - ends a transfer
-
-  Curl_disconnect - disconnects from a remote site. This is called when the
-   disconnect is really requested, which doesn't necessarily have to be
-   exactly after curl_done in case we want to keep the connection open for
-   a while.
 
  HTTP(S)
 
@@ -316,48 +295,38 @@ Persistent Connections
    hold connection-oriented data. It is meant to hold the root data as well as
    all the options etc that the library-user may choose.
  o The 'SessionHandle' struct holds the "connection cache" (an array of
-   pointers to 'connectdata' structs). There's one connectdata struct
-   allocated for each connection that libcurl knows about. Note that when you
-   use the multi interface, the multi handle will hold the connection cache
-   and not the particular easy handle. This of course to allow all easy handles
-   in a multi stack to be able to share and re-use connections.
+   pointers to 'connectdata' structs).
  o This enables the 'curl handle' to be reused on subsequent transfers.
- o When we are about to perform a transfer with curl_easy_perform(), we first
-   check for an already existing connection in the cache that we can use,
-   otherwise we create a new one and add to the cache. If the cache is full
-   already when we add a new connection, we close one of the present ones. We
-   select which one to close dependent on the close policy that may have been
-   previously set.
- o When the transfer operation is complete, we try to leave the connection
-   open. Particular options may tell us not to, and protocols may signal
-   closure on connections and then we don't keep it open of course.
+ o When libcurl is told to perform a transfer, it first checks for an already
+   existing connection in the cache that we can use. Otherwise it creates a
+   new one and adds that the cache. If the cache is full already when a new
+   conncetion is added added, it will first close the oldest unused one.
+ o When the transfer operation is complete, the connection is left
+   open. Particular options may tell libcurl not to, and protocols may signal
+   closure on connections and then they won't be kept open of course.
  o When curl_easy_cleanup() is called, we close all still opened connections,
    unless of course the multi interface "owns" the connections.
 
- You do realize that the curl handle must be re-used in order for the
- persistent connections to work.
+ The curl handle must be re-used in order for the persistent connections to
+ work.
 
 multi interface/non-blocking
 ============================
 
- We make an effort to provide a non-blocking interface to the library, the
- multi interface. To make that interface work as good as possible, no
- low-level functions within libcurl must be written to work in a blocking
- manner.
+ The multi interface is a non-blocking interface to the library. To make that
+ interface work as good as possible, no low-level functions within libcurl
+ must be written to work in a blocking manner. (There are still a few spots
+ violating this rule.)
 
  One of the primary reasons we introduced c-ares support was to allow the name
  resolve phase to be perfectly non-blocking as well.
 
- The ultimate goal is to provide the easy interface simply by wrapping the
- multi interface functions and thus treat everything internally as the multi
- interface is the single interface we have.
-
- The FTP and the SFTP/SCP protocols are thus perfect examples of how we adapt
- and adjust the code to allow non-blocking operations even on multi-stage
- protocols. They are built around state machines that return when they could
- block waiting for data.  The DICT, LDAP and TELNET protocols are crappy
- examples and they are subject for rewrite in the future to better fit the
- libcurl protocol family.
+ The FTP and the SFTP/SCP protocols are examples of how we adapt and adjust
+ the code to allow non-blocking operations even on multi-stage command-
+ response protocols. They are built around state machines that return when
+ they would otherwise block waiting for data.  The DICT, LDAP and TELNET
+ protocols are crappy examples and they are subject for rewrite in the future
+ to better fit the libcurl protocol family.
 
 SSL libraries
 =============
@@ -408,12 +377,12 @@ API/ABI
 Client
 ======
 
- main() resides in src/main.c together with most of the client code.
+ main() resides in src/tool_main.c.
 
  src/tool_hugehelp.c is automatically generated by the mkhelp.pl perl script
- to display the complete "manual" and the src/urlglob.c file holds the
- functions used for the URL-"globbing" support. Globbing in the sense that
- the {} and [] expansion stuff is there.
+ to display the complete "manual" and the src/tool_urlglob.c file holds the
+ functions used for the URL-"globbing" support. Globbing in the sense that the
+ {} and [] expansion stuff is there.
 
  The client mostly messes around to setup its 'config' struct properly, then
  it calls the curl_easy_*() functions of the library and when it gets back
@@ -425,8 +394,8 @@ Client
  curl_easy_getinfo() function to extract useful information from the curl
  session.
 
- Recent versions may loop and do all this several times if many URLs were
- specified on the command line or config file.
+ It may loop and do all this several times if many URLs were specified on the
+ command line or config file.
 
 Memory Debugging
 ================
