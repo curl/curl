@@ -43,7 +43,7 @@ $!    The copy directory is vms_root:[project_name]
 $!    The UPDATE parameter is ignored.
 $!
 $!    This setting is used to make sure that the working vms directory
-$!    and the CVS checkout directory have the same contents.
+$!    and the repository checkout directory have the same contents.
 $!
 $! If P1 is "SRCBCK" then this
 $!     The source directory tree is: src_root:[project_name]
@@ -55,7 +55,7 @@ $!
 $!   This is to make sure that the backup save set for the unmodified
 $!   source is up to date.
 $!
-$!   If your CVS checkout is not on an NFS mounted volume, you do not
+$!   If your repository checkout is not on an NFS mounted volume, you do not
 $!   need to use this option or have the logical name src_root1 defined.
 $!
 $! If P1 is "VMSBCK" then this changes the two directories:
@@ -195,8 +195,6 @@ $   ref_name = f$parse(ref_spec,,,"NAME")
 $   ref_type = f$parse(ref_spec,,,"TYPE")
 $!
 $!
-$   if f$locate(".CVS]", ref_dir) .lt. f$length(ref_dir) then goto loop
-$
 $   rel_path = ref_dir - "[" - ref_base_dir
 $!  rel_path_len = f$length(rel_path) - 1
 $!  delim = f$extract(rel_path_len, 1, rel_path)
@@ -336,12 +334,6 @@ $!
 $   wrk_skip = 0
 $   ref_utype = f$edit(ref_type,"UPCASE")
 $   ref_ufname = f$edit(ref_fname,"UPCASE")
-$   if ref_ufname .eqs. "CVS.DIR" then wrk_skip = 1
-$   if ref_fname .eqs. ".cvsignore" then wrk_skip = 1
-$   if ref_fname .eqs. "Entries." then wrk_skip = 1
-$   if ref_fname .eqs. "Repository." then wrk_skip = 1
-$   if ref_fname .eqs. "Root." then wrk_skip = 1
-$!
 $!
 $   if wrk_skip .eq. 0
 $   then

@@ -278,7 +278,8 @@ and before installing Curl.
     $PRODUCT EXTRACT FILE -
       /select=(ssl$libcrypto_shr32.exe,ssl$libssl_shr32.exe)-
       /source=device:[dir] -
-      /destination=device:[vms$common.gnv.lib]
+      /options=noconfirm -
+      /destination=device:[vms$common.gnv.lib] SSL
 
 The [vms$common.sys$startup}curl_startup.com procedure will then configure
 libcurl to use these shared images instead of the system ones.

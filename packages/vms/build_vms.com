@@ -340,18 +340,64 @@ $   file = "[]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[]config.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[]curl-config."
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[]libcurl.pc"
+$   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib.cxx_repository]cxx$demangler_db."
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.src.cxx_repository]cxx$demangler_db."
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl_crtl_init"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   file = "[...]gnv$curlmsg"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]curlmsg"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]report_openssl_version"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]hp_ssl_release_info.txt"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]gnv_libcurl_xfer.mar_exact"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]gnv_libcurl_xfer"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.opt") .nes. "" then delete/log 'file'.opt;*
+$   file = "[...]curl-*_original_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl-*_vms_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl-*.release_notes"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl*.pcsi$desc"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl*.pcsi$text"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$!
 $   if clean_all .eq. 0 then goto Common_Exit
 $ endif
 $!
 $!
 $ if clean_all .ne. 0
 $ then
+$   file = "[...]gnv$libcurl"
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
+$   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
+$   file = "[.src]curl"
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
+$   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
 $   prods = proc_dev_dir - delim + ".ALPHA" + delim + "*.*;*"
 $   if (f$search(prods) .nes. "") then delete /log 'prods'
 $   prods = proc_dev_dir + "ALPHA" + ".DIR;1"
@@ -367,6 +413,9 @@ $   if (f$search(prods) .nes. "") then delete /log 'prods'
 $   prods = proc_dev_dir + "VAX"+ ".DIR;1"
 $   if (f$search(prods) .nes. "") then set prot=o:rwed 'prods'
 $   if (f$search(prods) .nes. "") then delete /log 'prods'
+$   file = "[...]macro32_exactcase"
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   if f$search("''file'.jnl") .nes. "" then delete/log 'file'.jnl;*
 $   goto Common_Exit
 $ endif
 $!

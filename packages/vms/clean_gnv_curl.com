@@ -211,6 +211,15 @@ $!
 $ file = "lcl_root:[.packages.vms]macro32_exactcase.exe"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
+$ file = "lcl_root:[.packages.vms]report_openssl_version.exe"
+$ if f$search(file) .nes. "" then delete 'file';*
+$!
+$ file = "lcl_root:[.packages.vms]hp_ssl_release_info.txt"
+$ if f$search(file) .nes. "" then delete 'file';*
+$!
+$ file = "lcl_root:[.src]curl.exe"
+$ if f$search(file) .nes. "" then delete 'file';*
+$!
 $all_exit:
 $!
 $! Put the default back.

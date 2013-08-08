@@ -136,7 +136,7 @@ $! We encode the snapshot date into the version as an ECO since a daily
 $! can never have an ECO.
 $!
 $! version_type = 'V' for a production release, and 'D' for a build from a
-$! daiy CVS snapshot.
+$! daiy snapshot of the curl source.
 $ majorver = f$element(0, ".", raw_version)
 $ minorver = f$element(1, ".", raw_version)
 $ raw_update = f$element(2, ".", raw_version)

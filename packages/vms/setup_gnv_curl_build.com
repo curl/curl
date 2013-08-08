@@ -269,26 +269,14 @@ $ endif
 $!
 $!
 $!
-$! Need to build the GNV common init module.
+$! Need to build the common init module.
 $!-------------------------------------------
-$ if f$search("[vms_common]vms_crtl_init_unix.obj") .nes. ""
+$ init_obj = "[.packages.vms]curl_crtl_init.obj"
+$ if f$search(init_obj) .eqs. ""
 $ then
-$!   Common copy, which should be more up to date than the one in the kit.
-$!------------------------------------------------------------------------
-$    define/job gnv_vms_common [vms_common]
-$    write sys$output "Using common vms_crtl_init_unix.obj"
-$ else
-$!   For some reason the common files are missing so use the local copies
-$!------------------------------------------------------------------------
-$    define/job gnv_vms_common 'default_dir'
-$    init_obj = "gnv_vms_common:vms_crtl_init_unix.obj"
-$    if f$search(init_obj) .eqs. ""
-$    then
-$       cc'cflags' 'default_dir'vms_crtl_init.c-
-            /define=GNV_UNIX_TOOL=1/obj='init_obj'
-$       purge 'init_obj'
-$       rename 'init_obj' ;1
-$    endif
+$   cc'cflags' 'default_dir'curl_crtl_init.c/obj='init_obj'
+$   purge 'init_obj'
+$   rename 'init_obj' ;1
 $ endif
 $!
 $all_exit:

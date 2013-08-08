@@ -1,7 +1,5 @@
 From File: curl_gnv_build_steps.txt
 
-$Id$
-
  Copyright 2009, John Malmberg
 
  Permission to use, copy, modify, and/or distribute this software for any
@@ -23,7 +21,7 @@ Unix builds use.
 Building CURL on OpenVMS using GNV requires GNV V2.1-2 or the updated
 images that are available via anonymous FTP at encompasserve.org in the gnv
 directory.  It also requires the GNV Bash 4.2.45 kit as an update from the
-same location.
+same location or from the sourceforge.net GNV project.
 
 The HP C 7.x compiler was used for building the GNV version.
 
@@ -51,14 +49,15 @@ VMS_ROOT: is for the source files that are specific to OpenVMS.
 LCL_ROOT: is manually created to have the same base and sub-directories as
           SRC_ROOT: and VMS_ROOT:
 
-The logical name REF_ROOT: is defined to be a logical name that is a search
-list for VMS_ROOT:,SRC_ROOT:
+The logical name REF_ROOT: may be defined to be a search list for
+VMS_ROOT:,SRC_ROOT:
 
-The logical name PRJ_ROOT: is defined to be a logical name that is a search
-list for LCL_ROOT:,REF_ROOT:
+The logical name PRJ_ROOT: is defined to be a search list for
+LCL_ROOT:,VMS_ROOT:,SRC_ROOT:
 
 For the make install process to work, it must have write access to the
 directories referenced by the GNU: logical name.
+
 In future releases of GNV, and with GNV Bash 4.2.45 installed, this name
 should be GNV$GNU:
 
@@ -71,8 +70,14 @@ OLD_GNU: can be set up to reference the real GNV directory tree.
 Then a local copy of the GNU/GNV$GNU logical names can be set up as a search
 list such as NEW_GNU:,OLD_GNU:
 
-The directory NEW_GNU:[usr] should be created.  The make install phase will
+The directory NEW_GNU:[usr] should be created.  The make install phase should
 create all the other directories.
+
+The make install process may abort if curl is already because it can not
+uninstall the older version of curl because it does not have permission.
+
+The file stage_curl_install.com is used set up a new_gnu: directory tree
+for testing.  The PCSI kitting procedure uses these files as input.
 
 These files do not create the directories in the VMS_ROOT and LCL_ROOT
 directory trees.  You can create them with commands similar to:
@@ -131,13 +136,13 @@ This command procedure does the following:
 
   $ @gnv_link_curl.com
 
-  $ purge new_gnu:[*...]/log
+  $ @stage_curl_install.com
 
+  $ purge new_gnu:[*...]/log
 
 To clean up after a build to start over, the following commands are used:
 
    $ bash
-   bash$ export GNV_DISABLE_DCL_FALLBACK=1
    bash$ cd ../..
    bash$ make clean
    bash$ exit
@@ -161,6 +166,10 @@ files from new_gnu: to old_gnu: at your convenience.
 Building a PCSI kit for an archictecture takes the following steps after
 making sure that you have a working build environment.
 
+Note that it requires manually creating two logical names as described
+below.  It is intentional that they be manually set.  This is for
+branding the PCSI kit based on who is making the kit.
+
    1. Make sure that you have a staging directory that can be referenced
       by the path STAGE_ROOT:[KIT]
 
@@ -174,9 +183,9 @@ making sure that you have a working build environment.
    4. Define the logical name GNV_PCSI_PRODUCER_FULL_NAME to be your full
       name or full name of your company.
 
-   5. If you are producing an update kit, then define the logical name
-      GNV_PCSI_PATCHLEVEL to the letter E followed by a number.  Do not
-      use a patch level for kits built from the daily CVS snapshot.
+   5. If you are producing an update kit, then update the file
+      vms_eco_level.h by changing the value for the VMS_ECO_LEVEL macro.
+      This file is currently only used in building the PCSI kit.
 
    6. Edit the file PCSI_GNV_CURL_FILE_LIST.TXT if there are new files added
       to the kit.  These files should all be ODS-2 legal filenames and
@@ -196,15 +205,49 @@ making sure that you have a working build environment.
       step, the PCSI kit built by these steps does a rename to the correct
       case as a post install step.
 
-   7. Build the PCSI kit with @pcsi_product_gnv_curl.com
+   7. Edit the build_curl_pcsi_desc.com and build_curl_pcsi_text.com if you
+      have changed the version of ZLIB that curl is built against.
+
+   8. Prepare to backup the files for building the kit.
+
+      Note that if src_root: or vms_root: are NFS mounted disks, the
+      step of backing up the source files will probably hang or fail.
+
+      You need to copy the source files to VMS mounted disks and create
+      logical names SRC_ROOT1 and VMS_ROOT1 to work around this to to
+      reference local disks.  Make sure src_root1:[000000] and
+      vms_root1:[000000] exist and can be written to.
+
+      The command procedure compare_curl_source can be used to check
+      those directories and keep them up to date.
+
+         @compare_curl_source.com SRCBCK UPDATE
+
+         This compares the reference project source with the backup
+         staging directory for it and updates with any changes.
+
+         @compare_curl_source.com VMSBCK UPDATE
+
+         This compares the VMS specific source with the backup
+         staging directory for it and updates with any changes.
+
+         Leave off "UPDATE" to just check without doing any changes.
+
+      If you are not using NFS mounted disks and do not want to have a
+      separate directory for staging the sources for backup make sure
+      that src_root1: and vms_root1: do not exist.
+
+   9. Build the PCSI kit with @pcsi_product_gnv_curl.com
 
        The following message is normal:
           %PCSI-I-CANNOTVAL, cannot validate
-            EAGLE$DQA0:[stage_root.][kit]JEM-AXPVMS-CURL-D0719-6-1.PCSI;1
+            EAGLE$DQA0:[stage_root.][kit]VMSPORTS-AXPVMS-CURL-V0731-0-1.PCSI;1
           -PCSI-I-NOTSIGNED, product kit is not signed and therefore has
           no manifest file
 
-       This will result in both compressed and uncompressed kits for the target
-       platform.
+       This will result in an uncompressed kit for the target platform.
+       On Alpha and Integrity, the pcsi_product_gnv_curl.com can be used with
+       the "COMPRESSED" parameter to build both a compressed and uncompressed
+       kits.
 
 Good Luck.
