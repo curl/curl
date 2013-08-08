@@ -18,7 +18,7 @@ This release includes the following changes:
  o OS400: add slist and certinfo EBCDIC support
  o OS400: new SSL backend GSKit
  o CURLOPT_XFERINFOFUNCTION: introducing a new progress callback
- o
+ o LIBCURL-STRUCTS: new document
 
 This release includes the following bugfixes:
 
@@ -52,6 +52,18 @@ This release includes the following bugfixes:
  o curl_formadd: CURLFORM_FILECONTENT wrongly rejected some option combos [13]
  o curl_formadd: fix file upload on VMS [14]
  o curl_easy_pause: on unpause, trigger mulit-socket handling [15]
+ o md5 & metalink: use better build macros on Apple operating systems [16]
+ o darwinssl: fix build error in crypto authentication under Snow Leopard [16]
+ o curl: make --progress-bar update the line less frequently [17]
+ o configure: don't error out on variable confusions (CFLAGS, LDFLAGS etc)
+ o mk-ca-bundle: skip more untrusted certificates
+ o formadd: wrong pointer for file name when CURLFORM_BUFFERPTR used [18]
+ o FTP: when EPSV gets a 229 but fails to connect, retry with PASV
+ o mk-ca-bundle.1: don't install on make install [19]
+ o VMS: lots of updates and fixes of the build procedure
+ o global dns cache: didn't work (regression)
+ o global dns cache: fix memory leak
+ o 
 
 This release includes the following known bugs:
 
@@ -65,7 +77,8 @@ advice from friends like these:
  Dave Reisner, Evgeny Turnaev, Guenter Knauf, John E. Malmberg, Marc Hoersken,
  Patrick Monnerat, Sergei Nikulov, Yang Tse, Andreas Malzahn, Clemens Gruber,
  Jean-Noel Rouvignac, Markus Moeller, Fabian Keil, Dagobert Michelsen,
- Byrial Jensen, Justin Karneges
+ Byrial Jensen, Justin Karneges, Edward Rudd, Marc Doughty, Konstantin Isakov,
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +99,7 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/mail/lib-2013-07/0258.html
  [14] = http://curl.haxx.se/bug/view.cgi?id=758
  [15] = http://curl.haxx.se/mail/lib-2013-07/0239.html
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1255
+ [17] = http://curl.haxx.se/mail/archive-2013-07/0031.html
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1262
+ [19] = http://curl.haxx.se/mail/lib-2013-08/0057.html
