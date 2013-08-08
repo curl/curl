@@ -334,7 +334,6 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
                                 CURL *easy_handle)
 {
   struct curl_llist *timeoutlist;
-  struct SessionHandle *easy;
   struct Curl_multi *multi = (struct Curl_multi *)multi_handle;
   struct SessionHandle *data = (struct SessionHandle *)easy_handle;
   struct SessionHandle *new_closure = NULL;
@@ -348,8 +347,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!GOOD_EASY_HANDLE(easy_handle))
     return CURLM_BAD_EASY_HANDLE;
 
-  /* Prevent users from adding same easy handle more than
-     once and prevent adding to more than one multi stack */
+  /* Prevent users from adding same easy handle more than once and prevent
+     adding to more than one multi stack */
   if(data->multi)
     /* possibly we should create a new unique error code for this condition */
     return CURLM_BAD_EASY_HANDLE;
@@ -359,13 +358,11 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   if(!timeoutlist)
     return CURLM_OUT_OF_MEMORY;
 
-  easy = data;
-
   /* In case multi handle has no hostcache yet, allocate one */
   if(!multi->hostcache) {
     hostcache = Curl_mk_dnscache();
     if(!hostcache) {
-      free(easy);
+      free(data);
       Curl_llist_destroy(timeoutlist, NULL);
       return CURLM_OUT_OF_MEMORY;
     }
@@ -377,7 +374,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     new_closure = (struct SessionHandle *)curl_easy_init();
     if(!new_closure) {
       Curl_hash_destroy(hostcache);
-      free(easy);
+      free(data);
       Curl_llist_destroy(timeoutlist, NULL);
       return CURLM_OUT_OF_MEMORY;
     }
@@ -408,18 +405,28 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   timeoutlist = NULL;
 
   /* set the easy handle */
-  multistate(easy, CURLM_STATE_INIT);
+  multistate(data, CURLM_STATE_INIT);
 
+  if((data->set.global_dns_cache) &&
+     (data->dns.hostcachetype != HCACHE_GLOBAL)) {
+    /* global dns cache was requested but still isn't */
+    struct curl_hash *global = Curl_global_host_cache_init();
+    if(global) {
+      /* only do this if the global cache init works */
+      data->dns.hostcache = global;
+      data->dns.hostcachetype = HCACHE_GLOBAL;
+    }
+  }
   /* for multi interface connections, we share DNS cache automatically if the
      easy handle's one is currently not set. */
-  if(!easy->dns.hostcache ||
-     (easy->dns.hostcachetype == HCACHE_NONE)) {
-    easy->dns.hostcache = multi->hostcache;
-    easy->dns.hostcachetype = HCACHE_MULTI;
+  else if(!data->dns.hostcache ||
+     (data->dns.hostcachetype == HCACHE_NONE)) {
+    data->dns.hostcache = multi->hostcache;
+    data->dns.hostcachetype = HCACHE_MULTI;
   }
 
   /* Point to the multi's connection cache */
-  easy->state.conn_cache = multi->conn_cache;
+  data->state.conn_cache = multi->conn_cache;
 
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of SessionHandle structs to try and maintain a FIFO queue so
@@ -427,22 +434,22 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* We add this new entry last in the list. */
 
-  easy->next = NULL; /* end of the line */
+  data->next = NULL; /* end of the line */
   if(multi->easyp) {
     struct SessionHandle *last = multi->easylp;
-    last->next = easy;
-    easy->prev = last;
-    multi->easylp = easy; /* the new last node */
+    last->next = data;
+    data->prev = last;
+    multi->easylp = data; /* the new last node */
   }
   else {
     /* first node, make both prev and next be NULL! */
-    easy->next = NULL;
-    easy->prev = NULL;
-    multi->easylp = multi->easyp = easy; /* both first and last */
+    data->next = NULL;
+    data->prev = NULL;
+    multi->easylp = multi->easyp = data; /* both first and last */
   }
 
   /* make the SessionHandle refer back to this multi handle */
-  Curl_easy_addmulti(easy_handle, multi_handle);
+  Curl_easy_addmulti(data, multi_handle);
 
   /* Set the timeout for this handle to expire really soon so that it will
      be taken care of even when this handle is added in the midst of operation
@@ -450,7 +457,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
      sockets that time-out or have actions will be dealt with. Since this
      handle has no action yet, we make sure it times out to get things to
      happen. */
-  Curl_expire(easy, 1);
+  Curl_expire(data, 1);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -1811,7 +1818,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     if(multi->closure_handle) {
       multi->closure_handle->dns.hostcache = multi->hostcache;
-      Curl_hostcache_clean(multi->closure_handle);
+      Curl_hostcache_clean(multi->closure_handle,
+                           multi->closure_handle->dns.hostcache);
 
       Curl_close(multi->closure_handle);
       multi->closure_handle = NULL;
@@ -1833,7 +1841,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       nexteasy=easy->next;
       if(easy->dns.hostcachetype == HCACHE_MULTI) {
         /* clear out the usage of the shared DNS cache */
-        Curl_hostcache_clean(easy);
+        Curl_hostcache_clean(easy, easy->dns.hostcache);
         easy->dns.hostcache = NULL;
         easy->dns.hostcachetype = HCACHE_NONE;
       }
