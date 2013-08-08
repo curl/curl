@@ -123,8 +123,8 @@ static void ftp_pasv_verbose(struct connectdata *conn,
                              char *newhost, /* ascii version */
                              int port);
 #endif
-static CURLcode ftp_state_post_rest(struct connectdata *conn);
-static CURLcode ftp_state_post_cwd(struct connectdata *conn);
+static CURLcode ftp_state_prepare_transfer(struct connectdata *conn);
+static CURLcode ftp_state_mdtm(struct connectdata *conn);
 static CURLcode ftp_state_quote(struct connectdata *conn,
                                 bool init, ftpstate instate);
 static CURLcode ftp_nb_type(struct connectdata *conn,
@@ -151,8 +151,7 @@ static CURLcode wc_statemach(struct connectdata *conn);
 
 static void wc_data_dtor(void *ptr);
 
-static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
-                                         curl_off_t filesize);
+static CURLcode ftp_state_retr(struct connectdata *conn, curl_off_t filesize);
 
 static CURLcode ftp_readresp(curl_socket_t sockfd,
                              struct pingpong *pp,
@@ -915,7 +914,7 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
 
   if(ftpc->cwddone)
     /* already done and fine */
-    result = ftp_state_post_cwd(conn);
+    result = ftp_state_mdtm(conn);
   else {
     ftpc->count2 = 0; /* count2 counts failed CWDs */
 
@@ -943,7 +942,7 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
       }
       else {
         /* No CWD necessary */
-        result = ftp_state_post_cwd(conn);
+        result = ftp_state_mdtm(conn);
       }
     }
   }
@@ -1373,10 +1372,14 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
   return result;
 }
 
-/* REST is the last command in the chain of commands when a "head"-like
-   request is made. Thus, if an actual transfer is to be made this is where
-   we take off for real. */
-static CURLcode ftp_state_post_rest(struct connectdata *conn)
+/*
+ * ftp_state_prepare_transfer() starts PORT, PASV or PRET etc.
+ *
+ * REST is the last command in the chain of commands when a "head"-like
+ * request is made. Thus, if an actual transfer is to be made this is where we
+ * take off for real.
+ */
+static CURLcode ftp_state_prepare_transfer(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->state.proto.ftp;
@@ -1419,7 +1422,7 @@ static CURLcode ftp_state_post_rest(struct connectdata *conn)
   return result;
 }
 
-static CURLcode ftp_state_post_size(struct connectdata *conn)
+static CURLcode ftp_state_rest(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->state.proto.ftp;
@@ -1435,12 +1438,12 @@ static CURLcode ftp_state_post_size(struct connectdata *conn)
     state(conn, FTP_REST);
   }
   else
-    result = ftp_state_post_rest(conn);
+    result = ftp_state_prepare_transfer(conn);
 
   return result;
 }
 
-static CURLcode ftp_state_post_type(struct connectdata *conn)
+static CURLcode ftp_state_size(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->state.proto.ftp;
@@ -1455,12 +1458,12 @@ static CURLcode ftp_state_post_type(struct connectdata *conn)
     state(conn, FTP_SIZE);
   }
   else
-    result = ftp_state_post_size(conn);
+    result = ftp_state_rest(conn);
 
   return result;
 }
 
-static CURLcode ftp_state_post_listtype(struct connectdata *conn)
+static CURLcode ftp_state_list(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1529,7 +1532,7 @@ static CURLcode ftp_state_post_listtype(struct connectdata *conn)
   return result;
 }
 
-static CURLcode ftp_state_post_retrtype(struct connectdata *conn)
+static CURLcode ftp_state_retr_prequote(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -1540,7 +1543,7 @@ static CURLcode ftp_state_post_retrtype(struct connectdata *conn)
   return result;
 }
 
-static CURLcode ftp_state_post_stortype(struct connectdata *conn)
+static CURLcode ftp_state_stor_prequote(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
@@ -1551,7 +1554,7 @@ static CURLcode ftp_state_post_stortype(struct connectdata *conn)
   return result;
 }
 
-static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
+static CURLcode ftp_state_type(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->data->state.proto.ftp;
@@ -1577,14 +1580,14 @@ static CURLcode ftp_state_post_mdtm(struct connectdata *conn)
       return result;
   }
   else
-    result = ftp_state_post_type(conn);
+    result = ftp_state_size(conn);
 
   return result;
 }
 
 /* This is called after the CWD commands have been done in the beginning of
    the DO phase */
-static CURLcode ftp_state_post_cwd(struct connectdata *conn)
+static CURLcode ftp_state_mdtm(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1600,7 +1603,7 @@ static CURLcode ftp_state_post_cwd(struct connectdata *conn)
     state(conn, FTP_MDTM);
   }
   else
-    result = ftp_state_post_mdtm(conn);
+    result = ftp_state_type(conn);
 
   return result;
 }
@@ -1775,7 +1778,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       else {
         if(ftpc->known_filesize != -1) {
           Curl_pgrsSetDownloadSize(data, ftpc->known_filesize);
-          result = ftp_state_post_retr_size(conn, ftpc->known_filesize);
+          result = ftp_state_retr(conn, ftpc->known_filesize);
         }
         else {
           PPSENDF(&ftpc->pp, "SIZE %s", ftpc->file);
@@ -2215,7 +2218,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
   }
 
   if(!result)
-    result = ftp_state_post_mdtm(conn);
+    result = ftp_state_type(conn);
 
   return result;
 }
@@ -2239,18 +2242,18 @@ static CURLcode ftp_state_type_resp(struct connectdata *conn,
           ftpcode);
 
   if(instate == FTP_TYPE)
-    result = ftp_state_post_type(conn);
+    result = ftp_state_size(conn);
   else if(instate == FTP_LIST_TYPE)
-    result = ftp_state_post_listtype(conn);
+    result = ftp_state_list(conn);
   else if(instate == FTP_RETR_TYPE)
-    result = ftp_state_post_retrtype(conn);
+    result = ftp_state_retr_prequote(conn);
   else if(instate == FTP_STOR_TYPE)
-    result = ftp_state_post_stortype(conn);
+    result = ftp_state_stor_prequote(conn);
 
   return result;
 }
 
-static CURLcode ftp_state_post_retr_size(struct connectdata *conn,
+static CURLcode ftp_state_retr(struct connectdata *conn,
                                          curl_off_t filesize)
 {
   CURLcode result = CURLE_OK;
@@ -2355,11 +2358,11 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
     }
 #endif
     Curl_pgrsSetDownloadSize(data, filesize);
-    result = ftp_state_post_size(conn);
+    result = ftp_state_rest(conn);
   }
   else if(instate == FTP_RETR_SIZE) {
     Curl_pgrsSetDownloadSize(data, filesize);
-    result = ftp_state_post_retr_size(conn, filesize);
+    result = ftp_state_retr(conn, filesize);
   }
   else if(instate == FTP_STOR_SIZE) {
     data->state.resume_from = filesize;
@@ -2387,7 +2390,7 @@ static CURLcode ftp_state_rest_resp(struct connectdata *conn,
         return result;
     }
 #endif
-    result = ftp_state_post_rest(conn);
+    result = ftp_state_prepare_transfer(conn);
     break;
 
   case FTP_RETR_REST:
@@ -3046,7 +3049,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->count1 - 1]);
         }
         else {
-          result = ftp_state_post_cwd(conn);
+          result = ftp_state_mdtm(conn);
           if(result)
             return result;
         }
