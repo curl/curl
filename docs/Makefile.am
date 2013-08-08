@@ -22,7 +22,8 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-man_MANS = curl.1 curl-config.1 mk-ca-bundle.1
+man_MANS = curl.1 curl-config.1
+noinst_man_MANS = mk-ca-bundle.1
 GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
 PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
 
