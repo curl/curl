@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,9 +29,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle, CURL *easy_handle);
 .ad
 .SH DESCRIPTION
 Adds a standard easy handle to the multi stack. This function call will make
-this \fImulti_handle\fP control the specified \fIeasy_handle\fP.
-Furthermore, libcurl now initiates the connection associated with the
-specified \fIeasy_handle\fP.
+this \fImulti_handle\fP control the specified \fIeasy_handle\fP.  Furthermore,
+libcurl now initiates the connection associated with the specified
+\fIeasy_handle\fP.
 
 When an easy handle has been added to a multi stack, you can not and you must
 not use \fIcurl_easy_perform(3)\fP on that handle!
@@ -40,6 +40,11 @@ If the easy handle is not set to use a shared (CURLOPT_SHARE) or global DNS
 cache (CURLOPT_DNS_USE_GLOBAL_CACHE), it will be made to use the DNS cache
 that is shared between all easy handles within the multi handle when
 \fIcurl_multi_add_handle(3)\fP is called.
+
+If you have CURLMOPT_TIMERFUNCTION set in the multi handle (and you really
+should), that callback will be called from within this function to ask for an
+updated timer so that your main event loop will get the activity on this
+handle to get started.
 
 The easy handle will remain added until you remove it again with
 \fIcurl_multi_remove_handle(3)\fP. You should remove the easy handle from the
