@@ -1387,8 +1387,7 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
  * the connection phase.
  *
  * The variable pointed to by 'done' will be TRUE if the protocol-layer
- * connect phase is done when this function returns, or FALSE if not. When
- * called as a part of the easy interface, it will always be TRUE.
+ * connect phase is done when this function returns, or FALSE if not.
  */
 static CURLcode smtp_connect(struct connectdata *conn, bool *done)
 {

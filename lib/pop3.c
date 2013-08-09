@@ -1421,8 +1421,7 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
  * connection phase.
  *
  * The variable 'done' points to will be TRUE if the protocol-layer connect
- * phase is done when this function returns, or FALSE is not. When called as
- * a part of the easy interface, it will always be TRUE.
+ * phase is done when this function returns, or FALSE if not.
  */
 static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 {

@@ -2567,8 +2567,8 @@ void Curl_expire(struct SessionHandle *data, long milli)
   struct timeval *nowp = &data->state.expiretime;
   int rc;
 
-  /* this is only interesting for multi-interface using libcurl, and only
-     while there is still a multi interface struct remaining! */
+  /* this is only interesting while there is still an associated multi struct
+     remaining! */
   if(!multi)
     return;
 
