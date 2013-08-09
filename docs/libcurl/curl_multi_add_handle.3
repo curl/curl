@@ -42,9 +42,10 @@ that is shared between all easy handles within the multi handle when
 \fIcurl_multi_add_handle(3)\fP is called.
 
 If you have CURLMOPT_TIMERFUNCTION set in the multi handle (and you really
-should), that callback will be called from within this function to ask for an
-updated timer so that your main event loop will get the activity on this
-handle to get started.
+should if you're working event-based with \fIcurl_multi_socket_action(3)\fP
+and friends), that callback will be called from within this function to ask
+for an updated timer so that your main event loop will get the activity on
+this handle to get started.
 
 The easy handle will remain added until you remove it again with
 \fIcurl_multi_remove_handle(3)\fP. You should remove the easy handle from the
