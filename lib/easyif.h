@@ -25,6 +25,9 @@
 /*
  * Prototypes for library-wide functions provided by easy.c
  */
+#ifdef CURLDEBUG
+CURLcode curl_easy_perform_ev(CURL *easy);
+#endif
 
 #endif /* HEADER_CURL_EASYIF_H */
 

@@ -453,70 +453,275 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   return ret;
 }
 
-/*
- * curl_easy_perform() is the external interface that performs a blocking
- * transfer as previously setup.
+#ifdef CURLDEBUG
+
+struct monitor {
+  struct monitor *next; /* the next node in the list or NULL */
+  struct pollfd socket; /* socket info of what to monitor */
+};
+
+struct events {
+  long ms;              /* timeout, run the timeout function when reached */
+  bool msbump;          /* set TRUE when timeout is set by callback */
+  int num_sockets;      /* number of nodes in the monitor list */
+  struct monitor *list; /* list of sockets to monitor */
+  int running_handles;  /* store the returned number */
+};
+
+/* events_timer
  *
- * CONCEPT: This function creates a multi handle, adds the easy handle to it,
- * runs curl_multi_perform() until the transfer is done, then detaches the
- * easy handle, destroys the multi handle and returns the easy handle's return
- * code.
- *
- * REALITY: it can't just create and destroy the multi handle that easily. It
- * needs to keep it around since if this easy handle is used again by this
- * function, the same multi handle must be re-used so that the same pools and
- * caches can be used.
+ * Callback that gets called with a new value when the timeout should be
+ * updated.
  */
-CURLcode curl_easy_perform(CURL *easy)
+
+static int events_timer(CURLM *multi,    /* multi handle */
+                        long timeout_ms, /* see above */
+                        void *userp)    /* private callback pointer */
 {
-  CURLM *multi;
-  CURLMcode mcode;
-  CURLcode code = CURLE_OK;
-  CURLMsg *msg;
+  struct events *ev = userp;
+  (void)multi;
+  if(timeout_ms == -1)
+    /* timeout removed */
+    timeout_ms = 0;
+  else if(timeout_ms == 0)
+    /* timeout is already reached! */
+    timeout_ms = 1; /* trigger asap */
+
+  ev->ms = timeout_ms;
+  ev->msbump = TRUE;
+  /* fprintf(stderr, "%s: timeout %ld\n", __func__, timeout_ms); */
+  return 0;
+}
+
+
+/* poll2cselect
+ *
+ * convert from poll() bit definitions to libcurl's CURL_CSELECT_* ones
+ */
+static int poll2cselect(int pollmask)
+{
+  int omask=0;
+  if(pollmask & POLLIN)
+    omask |= CURL_CSELECT_IN;
+  if(pollmask & POLLOUT)
+    omask |= CURL_CSELECT_OUT;
+  if(pollmask & POLLERR)
+    omask |= CURL_CSELECT_ERR;
+  return omask;
+}
+
+
+/* socketcb2poll
+ *
+ * convert from libcurl' CURL_POLL_* bit definitions to poll()'s
+ */
+static short socketcb2poll(int pollmask)
+{
+  short omask=0;
+  if(pollmask & CURL_POLL_IN)
+    omask |= POLLIN;
+  if(pollmask & CURL_POLL_OUT)
+    omask |= POLLOUT;
+  return omask;
+}
+
+/* events_socket
+ *
+ * Callback that gets called with information about socket activity to
+ * monitor.
+ */
+static int events_socket(CURL *easy,      /* easy handle */
+                         curl_socket_t s, /* socket */
+                         int what,        /* see above */
+                         void *userp,     /* private callback
+                                             pointer */
+                         void *socketp)   /* private socket
+                                             pointer */
+{
+  struct events *ev = userp;
+  struct monitor *m;
+  struct monitor *prev=NULL;
+  (void)socketp;
+
+  m = ev->list;
+  while(m) {
+    if(m->socket.fd == s) {
+
+      if(what == CURL_POLL_REMOVE) {
+        struct monitor *nxt = m->next;
+        /* remove this node from the list of monitored sockets */
+        if(prev)
+          prev->next = nxt;
+        else
+          ev->list = nxt;
+        free(m);
+        m = nxt;
+        infof(easy, "socket cb: socket %d REMOVED\n", s);
+      }
+      else {
+        /* The socket 's' is already being monitored, update the activity
+           mask. Convert from libcurl bitmask to the poll one. */
+        m->socket.events = socketcb2poll(what);
+        infof(easy, "socket cb: socket %d UPDATED as %s%s\n", s,
+              what&CURL_POLL_IN?"IN":"",
+              what&CURL_POLL_OUT?"OUT":"");
+      }
+      break;
+    }
+    prev = m;
+    m = m->next; /* move to next node */
+  }
+  if(!m) {
+    if(what == CURL_POLL_REMOVE) {
+      /* this happens a bit too often, libcurl fix perhaps? */
+      /* fprintf(stderr,
+         "%s: socket %d asked to be REMOVED but not present!\n",
+                 __func__, s); */
+    }
+    else {
+      m = malloc(sizeof(struct monitor));
+      m->next = ev->list;
+      m->socket.fd = s;
+      m->socket.events = socketcb2poll(what);
+      m->socket.revents = 0;
+      ev->list = m;
+      infof(easy, "socket cb: socket %d ADDED as %s%s\n", s,
+            what&CURL_POLL_IN?"IN":"",
+            what&CURL_POLL_OUT?"OUT":"");
+    }
+  }
+
+  return 0;
+}
+
+
+/*
+ * events_setup()
+ *
+ * Do the multi handle setups that only event-based transfers need.
+ */
+static void events_setup(CURLM *multi, struct events *ev)
+{
+  /* timer callback */
+  curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, events_timer);
+  curl_multi_setopt(multi, CURLMOPT_TIMERDATA, ev);
+
+  /* socket callback */
+  curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, events_socket);
+  curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, ev);
+}
+
+
+/* wait_or_timeout()
+ *
+ * waits for activity on any of the given sockets, or the timeout to trigger.
+ */
+
+static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
+{
   bool done = FALSE;
-  int rc;
-  struct SessionHandle *data = easy;
+  CURLMcode mcode;
+  CURLcode rc = CURLE_OK;
+
+  while(!done) {
+    CURLMsg *msg;
+    struct monitor *m;
+    struct pollfd *f;
+    struct pollfd fds[4];
+    int numfds=0;
+    int pollrc;
+    int i;
+    struct timeval before;
+    struct timeval after;
+
+    /* populate the fds[] array */
+    for(m = ev->list, f=&fds[0]; m; m = m->next) {
+      f->fd = m->socket.fd;
+      f->events = m->socket.events;
+      f->revents = 0;
+      /* fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd); */
+      f++;
+      numfds++;
+    }
+
+    /* get the time stamp to use to figure out how long poll takes */
+    before = curlx_tvnow();
+
+    /* fprintf(stderr, "poll(), %d numfds\n", numfds); */
+
+    /* wait for activity or timeout */
+    pollrc = Curl_poll(fds, numfds, (int)ev->ms);
+
+    after = curlx_tvnow();
+
+    ev->msbump = FALSE; /* reset here */
+
+    if(0 == pollrc) {
+      /* timeout! */
+      ev->ms = 0;
+      /* fprintf(stderr, "call curl_multi_socket_action( TIMEOUT )\n"); */
+      mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
+                                       &ev->running_handles);
+    }
+    else if(pollrc > 0) {
+      /* loop over the monitored sockets to see which ones had activity */
+      for(i = 0; i< numfds; i++) {
+        if(fds[i].revents) {
+          /* socket activity, tell libcurl */
+          int act = poll2cselect(fds[i].revents); /* convert */
+          infof(multi->easyp, "call curl_multi_socket_action( socket %d )\n",
+                fds[i].fd);
+          mcode = curl_multi_socket_action(multi, fds[i].fd, act,
+                                           &ev->running_handles);
+        }
+      }
+
+      if(!ev->msbump)
+        /* If nothing updated the timeout, we decrease it by the spent time.
+         * If it was updated, it has the new timeout time stored already.
+         */
+        ev->ms += curlx_tvdiff(after, before);
+
+    }
+    if(mcode)
+      return CURLE_URL_MALFORMAT; /* TODO: return a proper error! */
+
+    /* we don't really care about the "msgs_in_queue" value returned in the
+       second argument */
+    msg = curl_multi_info_read(multi, &pollrc);
+    if(msg) {
+      rc = msg->data.result;
+      done = TRUE;
+    }
+  }
+
+  return rc;
+}
+
+
+/* easy_events()
+ *
+ * Runs a transfer in a blocking manner using the events-based API
+ */
+static CURLcode easy_events(CURLM *multi)
+{
+  struct events evs= {2, FALSE, 0, NULL, 0};
+
+  /* if running event-based, do some further multi inits */
+  events_setup(multi, &evs);
+
+  return wait_or_timeout(multi, &evs);
+}
+#endif
+
+static CURLcode easy_transfer(CURLM *multi)
+{
+  bool done = FALSE;
+  CURLMcode mcode = CURLM_OK;
+  CURLcode code;
+  struct timeval before;
   int without_fds = 0;  /* count number of consecutive returns from
                            curl_multi_wait() without any filedescriptors */
-  struct timeval before;
-  SIGPIPE_VARIABLE(pipe_st);
-
-  if(!easy)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(data->multi) {
-    failf(data, "easy handled already used in multi handle");
-    return CURLE_FAILED_INIT;
-  }
-
-  if(data->multi_easy)
-    multi = data->multi_easy;
-  else {
-    /* this multi handle will only ever have a single easy handled attached
-       to it, so make it use minimal hashes */
-    multi = Curl_multi_handle(1, 3);
-    if(!multi)
-      return CURLE_OUT_OF_MEMORY;
-    data->multi_easy = multi;
-  }
-
-  /* Copy the MAXCONNECTS option to the multi handle */
-  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
-
-  mcode = curl_multi_add_handle(multi, easy);
-  if(mcode) {
-    curl_multi_cleanup(multi);
-    if(mcode == CURLM_OUT_OF_MEMORY)
-      return CURLE_OUT_OF_MEMORY;
-    else
-      return CURLE_FAILED_INIT;
-  }
-
-  sigpipe_ignore(data, &pipe_st);
-
-  /* assign this after curl_multi_add_handle() since that function checks for
-     it and rejects this handle otherwise */
-  data->multi = multi;
 
   while(!done && !mcode) {
     int still_running;
@@ -556,13 +761,82 @@ CURLcode curl_easy_perform(CURL *easy)
 
     /* only read 'still_running' if curl_multi_perform() return OK */
     if((mcode == CURLM_OK) && !still_running) {
-      msg = curl_multi_info_read(multi, &rc);
+      int rc;
+      CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
         code = msg->data.result;
         done = TRUE;
       }
     }
   }
+  return code;
+}
+
+
+/*
+ * easy_perform() is the external interface that performs a blocking
+ * transfer as previously setup.
+ *
+ * CONCEPT: This function creates a multi handle, adds the easy handle to it,
+ * runs curl_multi_perform() until the transfer is done, then detaches the
+ * easy handle, destroys the multi handle and returns the easy handle's return
+ * code.
+ *
+ * REALITY: it can't just create and destroy the multi handle that easily. It
+ * needs to keep it around since if this easy handle is used again by this
+ * function, the same multi handle must be re-used so that the same pools and
+ * caches can be used.
+ *
+ * DEBUG: if 'events' is set TRUE, this function will use a replacement engine
+ * instead of curl_multi_perform() and use curl_multi_socket_action().
+ */
+static CURLcode easy_perform(CURL *easy, bool events)
+{
+  CURLM *multi;
+  CURLMcode mcode;
+  CURLcode code = CURLE_OK;
+  struct SessionHandle *data = easy;
+  SIGPIPE_VARIABLE(pipe_st);
+
+  if(!easy)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(data->multi) {
+    failf(data, "easy handled already used in multi handle");
+    return CURLE_FAILED_INIT;
+  }
+
+  if(data->multi_easy)
+    multi = data->multi_easy;
+  else {
+    /* this multi handle will only ever have a single easy handled attached
+       to it, so make it use minimal hashes */
+    multi = Curl_multi_handle(1, 3);
+    if(!multi)
+      return CURLE_OUT_OF_MEMORY;
+    data->multi_easy = multi;
+  }
+
+  /* Copy the MAXCONNECTS option to the multi handle */
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
+
+  mcode = curl_multi_add_handle(multi, easy);
+  if(mcode) {
+    curl_multi_cleanup(multi);
+    if(mcode == CURLM_OUT_OF_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+    else
+      return CURLE_FAILED_INIT;
+  }
+
+  sigpipe_ignore(data, &pipe_st);
+
+  /* assign this after curl_multi_add_handle() since that function checks for
+     it and rejects this handle otherwise */
+  data->multi = multi;
+
+  /* run the transfer */
+  code = events ? easy_events(multi) : easy_transfer(multi);
 
   /* ignoring the return code isn't nice, but atm we can't really handle
      a failure here, room for future improvement! */
@@ -573,6 +847,28 @@ CURLcode curl_easy_perform(CURL *easy)
   /* The multi handle is kept alive, owned by the easy handle */
   return code;
 }
+
+
+/*
+ * curl_easy_perform() is the external interface that performs a blocking
+ * transfer as previously setup.
+ */
+CURLcode curl_easy_perform(CURL *easy)
+{
+  return easy_perform(easy, FALSE);
+}
+
+#ifdef CURLDEBUG
+/*
+ * curl_easy_perform_ev() is the external interface that performs a blocking
+ * transfer using the event-based API internally.
+ */
+CURLcode curl_easy_perform_ev(CURL *easy)
+{
+  return easy_perform(easy, TRUE);
+}
+
+#endif
 
 /*
  * curl_easy_cleanup() is the external interface to cleaning/freeing the given

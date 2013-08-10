@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -205,6 +205,9 @@ struct Configurable {
   bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */
   metalinkfile *metalinkfile_last; /* point to the last/current node */
+#ifdef CURLDEBUG
+  bool test_event_based;
+#endif
 }; /* struct Configurable */
 
 void free_config_fields(struct Configurable *config);

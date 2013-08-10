@@ -81,6 +81,11 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifdef CURLDEBUG
+/* libcurl's debug builds provide an extra function */
+CURLcode curl_easy_perform_ev(CURL *easy);
+#endif
+
 #define CURLseparator  "--_curl_--"
 
 #ifndef O_BINARY
@@ -1450,6 +1455,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                     mlfile->filename, this_url);
 #endif /* USE_METALINK */
 
+#ifdef CURLDEBUG
+          if(config->test_event_based)
+            res = curl_easy_perform_ev(curl);
+          else
+#endif
           res = curl_easy_perform(curl);
 
           if(outs.is_cd_filename && outs.stream && !config->mute &&

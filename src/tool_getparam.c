@@ -174,6 +174,7 @@ static const struct LongShort aliases[]= {
   {"$I", "post303",                  FALSE},
   {"$J", "metalink",                 FALSE},
   {"$K", "sasl-ir",                  FALSE},
+  {"$L", "test-event",               FALSE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -960,6 +961,13 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
       case 'K': /* --sasl-ir */
         config->sasl_ir = toggle;
+        break;
+      case 'L': /* --test-event */
+#ifdef CURLDEBUG
+        config->test_event_based = toggle;
+#else
+        warnf(config, "--test-event is ignored unless a debug build!\n");
+#endif
         break;
       }
       break;
