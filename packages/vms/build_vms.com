@@ -375,13 +375,23 @@ $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
 $   if f$search("''file'.opt") .nes. "" then delete/log 'file'.opt;*
 $   file = "[...]curl-*_original_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl_d-*_original_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[...]curl-*_vms_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl_d-*_vms_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[...]curl-*.release_notes"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl_d-*.release_notes"
+$   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[...]*curl*.pcsi$desc"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl_d*.pcsi$desc"
+$   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[...]*curl*.pcsi$text"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl_d*.pcsi$text"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $!
 $   if clean_all .eq. 0 then goto Common_Exit

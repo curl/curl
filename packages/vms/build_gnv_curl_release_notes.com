@@ -70,6 +70,17 @@ $   write sys$output "Can not find VMS specific Curl readme file."
 $   goto all_exit
 $ endif
 $!
+$ curl_release_notes = f$search("sys$disk:[--]release-notes.")
+$ if curl_release_notes .eqs. ""
+$ then
+$   curl_release_notes = f$search("sys$disk:[--]$RELEASE-NOTES.")
+$ endif
+$ if curl_release_notes .eqs. ""
+$ then
+$    write sys$output "Can not find Curl release-notes file."
+$    goto all_exit
+$ endif
+$!
 $ if f$search("sys$disk:[]hp_ssl_release_info.txt") .eqs. ""
 $ then
 $   write sys$output "GNV_LINK_CURL.COM has not been run!"
@@ -77,6 +88,7 @@ $   goto all_exit
 $ endif
 $!
 $ type/noheader 'curl_readme', 'vms_readme', -
+                'curl_release_notes', -
                 sys$disk:[]curl_release_note_start.txt, -
                 sys$disk:[]hp_ssl_release_info.txt, -
                 'curl_copying', -
