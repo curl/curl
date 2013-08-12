@@ -1,11 +1,11 @@
-Curl and libcurl 7.32.0
+Curl and libcurl 7.32.1
 
- Public curl releases:         134
- Command line options:         152
- curl_easy_setopt() options:   199
+ Public curl releases:         135
+ Command line options:         153
+ curl_easy_setopt() options:   201
  Public functions in libcurl:  58
  Known libcurl bindings:       42
- Contributors:                 1049
+ Contributors:                 1057
 
 ***
   krb4 support is up for removal. If you care about it at all, speak up
