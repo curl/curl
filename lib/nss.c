@@ -1543,9 +1543,8 @@ size_t Curl_nss_version(char *buffer, size_t size)
 
 int Curl_nss_seed(struct SessionHandle *data)
 {
-  /* TODO: implement? */
-  (void) data;
-  return 0;
+  /* make sure that NSS is initialized */
+  return !!Curl_nss_force_init(data);
 }
 
 void Curl_nss_random(struct SessionHandle *data,
@@ -1553,7 +1552,11 @@ void Curl_nss_random(struct SessionHandle *data,
                      size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
-  PK11_GenerateRandom(entropy, curlx_uztosi(length));
+  if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length))) {
+    /* no way to signal a failure from here, we have to abort */
+    failf(data, "PK11_GenerateRandom() failed, calling abort()...");
+    abort();
+  }
 }
 
 void Curl_nss_md5sum(unsigned char *tmp, /* input */
