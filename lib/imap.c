@@ -307,7 +307,8 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
            (strcmp(imap->custom, "STORE") ||
             !imap_matchresp(line, len, "FETCH")) &&
            strcmp(imap->custom, "SELECT") &&
-           strcmp(imap->custom, "EXAMINE")))
+           strcmp(imap->custom, "EXAMINE") &&
+           strcmp(imap->custom, "SEARCH")))
           return FALSE;
         break;
 
