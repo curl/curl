@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -639,7 +639,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
 
       case 'r': /* --create-dirs */
-        config->create_dirs = TRUE;
+        config->create_dirs = toggle;
         break;
 
       case 's': /* --max-redirs */
@@ -661,7 +661,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'u': /* --crlf */
         /* LF -> CRLF conversion? */
-        config->crlf = TRUE;
+        config->crlf = toggle;
         break;
 
       case 'v': /* --stderr */
@@ -888,7 +888,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->socks5_gssapi_service, nextarg);
         break;
       case '7': /* --socks5-gssapi-nec*/
-        config->socks5_gssapi_nec = TRUE;
+        config->socks5_gssapi_nec = toggle;
         break;
 #endif
       case '8': /* --proxy1.0 */
@@ -959,7 +959,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           break;
         }
       case 'K': /* --sasl-ir */
-        config->sasl_ir = TRUE;
+        config->sasl_ir = toggle;
         break;
       }
       break;
