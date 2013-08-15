@@ -196,6 +196,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   bool stillflags;
   int res = 0;
   int i;
+  unsigned long li;
 
   bool orig_noprogress;
   bool orig_isatty;
@@ -465,10 +466,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   for(urlnode = config->url_list; urlnode; urlnode = urlnode->next) {
 
-    int up; /* upload file counter within a single upload glob */
+    unsigned long up; /* upload file counter within a single upload glob */
     char *infiles; /* might be a glob pattern */
     char *outfiles;
-    int infilenum;
+    unsigned long infilenum;
     URLGlob *inglob;
 
     int metalink = 0; /* nonzero for metalink download. */
@@ -533,7 +534,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       char *uploadfile; /* a single file, never a glob */
       int separator;
       URLGlob *urls;
-      int urlnum;
+      unsigned long urlnum;
 
       uploadfile = NULL;
       urls = NULL;
@@ -583,7 +584,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(i = 0 ; i < urlnum; i++) {
+      for(li = 0 ; li < urlnum; li++) {
 
         int infd;
         bool infdopen;
@@ -628,7 +629,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             if(res)
               goto show_error;
           }
-          else if(!i) {
+          else if(!li) {
             this_url = strdup(urlnode->url);
             if(!this_url) {
               res = CURLE_OUT_OF_MEMORY;
@@ -863,8 +864,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         if(urlnum > 1 && !(config->mute)) {
-          fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
-                  i+1, urlnum, this_url, outfile ? outfile : "<stdout>");
+          fprintf(config->errors, "\n[%lu/%lu]: %s --> %s\n",
+                  li+1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
             printf("%s%s\n", CURLseparator, this_url);
         }
