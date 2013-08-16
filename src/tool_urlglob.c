@@ -62,6 +62,19 @@ static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount)
   return GLOB_OK;
 }
 
+/* multiply
+ *
+ * Multiplies and checks for overflow.
+ */
+static int multiply(unsigned long *amount, long with)
+{
+  unsigned long sum = *amount * with;
+  if(sum/with != *amount)
+    return 1; /* didn't fit, bail out */
+  *amount = sum;
+  return 0;
+}
+
 static GlobCode glob_set(URLGlob *glob, char **patternp,
                          size_t pos, unsigned long *amount,
                          int globindex)
@@ -102,8 +115,11 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
                  "no string within braces at pos %zu\n", pos);
         return GLOB_ERROR;
       }
-      /* add 1 since it'll be incremented below */
-      (*amount) *= (pat->content.Set.size+1);
+      /* add 1 to size since it'll be incremented below */
+      if(multiply(amount, pat->content.Set.size+1)) {
+        strcpy(glob->errormsg, "range overflow!\n");
+        return GLOB_ERROR;
+      }
       /* fall-through */
     case ',':
 
@@ -224,8 +240,11 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c = min_c;
     pat->content.CharRange.max_c = max_c;
 
-    *amount *= (pat->content.CharRange.max_c -
-                pat->content.CharRange.min_c + 1);
+    if(multiply(amount, (pat->content.CharRange.max_c -
+                         pat->content.CharRange.min_c + 1))) {
+      strcpy(glob->errormsg, "range overflow!\n");
+      return GLOB_ERROR;
+    }
   }
   else if(ISDIGIT(*pattern)) {
     /* numeric range detected */
@@ -288,8 +307,11 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
     pat->content.NumRange.max_n = max_n;
     pat->content.NumRange.step = step_n;
 
-    *amount *= (pat->content.NumRange.max_n -
-                pat->content.NumRange.min_n + 1);
+    if(multiply(amount, (pat->content.NumRange.max_n -
+                         pat->content.NumRange.min_n + 1))) {
+      strcpy(glob->errormsg, "range overflow!\n");
+      return GLOB_ERROR;
+    }
   }
   else {
     snprintf(glob->errormsg, sizeof(glob->errormsg),
