@@ -4795,27 +4795,27 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
  */
 static void override_login(struct SessionHandle *data,
                            struct connectdata *conn,
-                           char *user, char *passwd, char *options)
+                           char **userp, char **passwdp, char **optionsp)
 {
   if(data->set.str[STRING_USERNAME]) {
-    strncpy(user, data->set.str[STRING_USERNAME], MAX_CURL_USER_LENGTH);
-    user[MAX_CURL_USER_LENGTH - 1] = '\0';   /* To be on safe side */
+    strncpy(*userp, data->set.str[STRING_USERNAME], MAX_CURL_USER_LENGTH);
+    (*userp)[MAX_CURL_USER_LENGTH - 1] = '\0';   /* To be on safe side */
   }
 
   if(data->set.str[STRING_PASSWORD]) {
-    strncpy(passwd, data->set.str[STRING_PASSWORD], MAX_CURL_PASSWORD_LENGTH);
-    passwd[MAX_CURL_PASSWORD_LENGTH - 1] = '\0'; /* To be on safe side */
+    strncpy(*passwdp, data->set.str[STRING_PASSWORD], MAX_CURL_PASSWORD_LENGTH);
+    (*passwdp)[MAX_CURL_PASSWORD_LENGTH - 1] = '\0'; /* To be on safe side */
   }
 
   if(data->set.str[STRING_OPTIONS]) {
-    strncpy(options, data->set.str[STRING_OPTIONS], MAX_CURL_OPTIONS_LENGTH);
-    options[MAX_CURL_OPTIONS_LENGTH - 1] = '\0'; /* To be on safe side */
+    strncpy(*optionsp, data->set.str[STRING_OPTIONS], MAX_CURL_OPTIONS_LENGTH);
+    (*optionsp)[MAX_CURL_OPTIONS_LENGTH - 1] = '\0'; /* To be on safe side */
   }
 
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc != CURL_NETRC_IGNORED) {
     if(Curl_parsenetrc(conn->host.name,
-                       user, passwd,
+                       userp, passwdp,
                        data->set.str[STRING_NETRC_FILE])) {
       infof(data, "Couldn't find host %s in the "
             DOT_CHAR "netrc file; using defaults\n",
@@ -5278,7 +5278,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   /* Check for overridden login details and set them accordingly so they
      they are known when protocol->setup_connection is called! */
-  override_login(data, conn, user, passwd, options);
+  override_login(data, conn, &user, &passwd, &options);
   result = set_login(conn, user, passwd, options);
   if(result != CURLE_OK)
     goto out;
