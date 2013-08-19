@@ -5063,8 +5063,10 @@ static CURLcode create_conn(struct SessionHandle *data,
    * Check input data
    *************************************************************/
 
-  if(!data->change.url)
-    return CURLE_URL_MALFORMAT;
+  if(!data->change.url) {
+    result = CURLE_URL_MALFORMAT;
+    goto out;
+  }
 
   /* First, split up the current URL in parts so that we can use the
      parts for checking against the already present connections. In order
@@ -5072,8 +5074,10 @@ static CURLcode create_conn(struct SessionHandle *data,
      connection data struct and fill in for comparison purposes. */
   conn = allocate_conn(data);
 
-  if(!conn)
-    return CURLE_OUT_OF_MEMORY;
+  if(!conn) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   /* We must set the return variable as soon as possible, so that our
      parent can cleanup any possible allocs we may have done before
@@ -5103,15 +5107,18 @@ static CURLcode create_conn(struct SessionHandle *data,
   data->state.path = NULL;
 
   data->state.pathbuffer = malloc(urllen+2);
-  if(NULL == data->state.pathbuffer)
-    return CURLE_OUT_OF_MEMORY; /* really bad error */
+  if(NULL == data->state.pathbuffer) {
+    result = CURLE_OUT_OF_MEMORY; /* really bad error */
+    goto out;
+  }
   data->state.path = data->state.pathbuffer;
 
   conn->host.rawalloc = malloc(urllen+2);
   if(NULL == conn->host.rawalloc) {
     Curl_safefree(data->state.pathbuffer);
     data->state.path = NULL;
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
   }
 
   conn->host.name = conn->host.rawalloc;
@@ -5120,7 +5127,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   result = parseurlandfillconn(data, conn, &prot_missing, user, passwd,
                                options);
   if(result != CURLE_OK)
-    return result;
+    goto out;
 
   /*************************************************************
    * No protocol part in URL was used, add it!
@@ -5134,8 +5141,8 @@ static CURLcode create_conn(struct SessionHandle *data,
     reurl = aprintf("%s://%s", conn->handler->scheme, data->change.url);
 
     if(!reurl) {
-      Curl_safefree(proxy);
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
 
     if(data->change.url_alloc) {
@@ -5172,7 +5179,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(conn->bits.proxy_user_passwd) {
     result = parse_proxy_auth(data, conn);
     if(result != CURLE_OK)
-      return result;
+      goto out;
   }
 
   /*************************************************************
@@ -5183,7 +5190,8 @@ static CURLcode create_conn(struct SessionHandle *data,
     /* if global proxy is set, this is it */
     if(NULL == proxy) {
       failf(data, "memory shortage");
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
@@ -5211,16 +5219,17 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(proxy) {
     result = parse_proxy(data, conn, proxy);
 
-    free(proxy); /* parse_proxy copies the proxy string */
+    Curl_safefree(proxy); /* parse_proxy copies the proxy string */
 
     if(result)
-      return result;
+      goto out;
 
     if((conn->proxytype == CURLPROXY_HTTP) ||
        (conn->proxytype == CURLPROXY_HTTP_1_0)) {
 #ifdef CURL_DISABLE_HTTP
       /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
-      return CURLE_UNSUPPORTED_PROTOCOL;
+      result = CURLE_UNSUPPORTED_PROTOCOL;
+      goto out;
 #else
       /* force this connection's protocol to become HTTP if not already
          compatible - if it isn't tunneling through */
@@ -5257,24 +5266,22 @@ static CURLcode create_conn(struct SessionHandle *data,
    *************************************************************/
   result = parse_remote_port(data, conn);
   if(result != CURLE_OK)
-    return result;
+    goto out;
 
   /* Check for overridden login details and set them accordingly so they
      they are known when protocol->setup_connection is called! */
   override_login(data, conn, user, passwd, options);
   result = set_login(conn, user, passwd, options);
   if(result != CURLE_OK)
-    return result;
+    goto out;
 
   /*************************************************************
    * Setup internals depending on protocol. Needs to be done after
    * we figured out what/if proxy to use.
    *************************************************************/
   result = setup_connection_internals(conn);
-  if(result != CURLE_OK) {
-    Curl_safefree(proxy);
-    return result;
-  }
+  if(result != CURLE_OK)
+    goto out;
 
   conn->recv[FIRSTSOCKET] = Curl_recv_plain;
   conn->send[FIRSTSOCKET] = Curl_send_plain;
@@ -5307,7 +5314,7 @@ static CURLcode create_conn(struct SessionHandle *data,
         DEBUGASSERT(conn->handler->done);
         /* we ignore the return code for the protocol-specific DONE */
         (void)conn->handler->done(conn, result, FALSE);
-        return result;
+        goto out;
       }
 
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
@@ -5317,7 +5324,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     /* since we skip do_init() */
     do_init(conn);
 
-    return result;
+    goto out;
   }
 #endif
 
@@ -5342,8 +5349,10 @@ static CURLcode create_conn(struct SessionHandle *data,
   data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD];
 #endif
 
-  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
-    return CURLE_OUT_OF_MEMORY;
+  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config)) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -5446,7 +5455,8 @@ static CURLcode create_conn(struct SessionHandle *data,
       conn_free(conn);
       *in_connect = NULL;
 
-      return CURLE_NO_CONNECTION_AVAILABLE;
+      result = CURLE_NO_CONNECTION_AVAILABLE;
+      goto out;
     }
     else {
       /*
@@ -5468,7 +5478,7 @@ static CURLcode create_conn(struct SessionHandle *data,
    */
   result = setup_range(data);
   if(result)
-    return result;
+    goto out;
 
   /* Continue connectdata initialization here. */
 
@@ -5486,6 +5496,9 @@ static CURLcode create_conn(struct SessionHandle *data,
    *************************************************************/
   result = resolve_server(data, conn, async);
 
+  out:
+
+  Curl_safefree(proxy);
   return result;
 }
 
