@@ -5046,9 +5046,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   struct connectdata *conn;
   struct connectdata *conn_temp = NULL;
   size_t urllen;
-  char user[MAX_CURL_USER_LENGTH];
-  char passwd[MAX_CURL_PASSWORD_LENGTH];
-  char options[MAX_CURL_OPTIONS_LENGTH];
+  char *user = NULL;
+  char *passwd = NULL;
+  char *options = NULL;
   bool reuse;
   char *proxy = NULL;
   bool prot_missing = FALSE;
@@ -5123,6 +5123,14 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
+
+  user = malloc(MAX_CURL_USER_LENGTH);
+  passwd = malloc(MAX_CURL_PASSWORD_LENGTH);
+  options = malloc(MAX_CURL_OPTIONS_LENGTH);
+  if(!user || !passwd || !options) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   result = parseurlandfillconn(data, conn, &prot_missing, user, passwd,
                                options);
@@ -5498,6 +5506,9 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   out:
 
+  Curl_safefree(options);
+  Curl_safefree(passwd);
+  Curl_safefree(user);
   Curl_safefree(proxy);
   return result;
 }
