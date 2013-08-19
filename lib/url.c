@@ -4460,85 +4460,82 @@ static CURLcode parse_url_login(struct SessionHandle *data,
   passwd[0] = 0;
   options[0] = 0;
 
+  if(!ptr)
+    goto out;
+
   /* We will now try to extract the
    * possible login information in a string like:
    * ftp://user:password@ftp.my.site:8021/README */
-  if(ptr) {
-    /* There's login information to the left of the @ */
+  conn->host.name = ++ptr;
 
-    conn->host.name = ++ptr;
+  /* So the hostname is sane.  Only bother interpreting the
+   * results if we could care.  It could still be wasted
+   * work because it might be overtaken by the programmatically
+   * set user/passwd, but doing that first adds more cases here :-(
+   */
 
-    /* So the hostname is sane.  Only bother interpreting the
-     * results if we could care.  It could still be wasted
-     * work because it might be overtaken by the programmatically
-     * set user/passwd, but doing that first adds more cases here :-(
-     */
+  if(data->set.use_netrc == CURL_NETRC_REQUIRED)
+    goto out;
 
-    if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
-      /* We could use the login information in the URL so extract it */
-      result = parse_login_details(login, ptr - login - 1,
-                                   &userp, &passwdp, &optionsp);
-      if(!result) {
-        if(userp) {
-          char *newname;
+  /* We could use the login information in the URL so extract it */
+  result = parse_login_details(login, ptr - login - 1,
+                               &userp, &passwdp, &optionsp);
+  if(result != CURLE_OK)
+    goto out;
 
-          /* We have a user in the URL */
-          conn->bits.userpwd_in_url = TRUE;
-          conn->bits.user_passwd = TRUE; /* enable user+password */
+  if(userp) {
+    char *newname;
 
-          /* Decode the user */
-          newname = curl_easy_unescape(data, userp, 0, NULL);
-          if(!newname) {
-            Curl_safefree(userp);
-            Curl_safefree(passwdp);
-            Curl_safefree(optionsp);
-            return CURLE_OUT_OF_MEMORY;
-          }
+    /* We have a user in the URL */
+    conn->bits.userpwd_in_url = TRUE;
+    conn->bits.user_passwd = TRUE; /* enable user+password */
 
-          if(strlen(newname) < MAX_CURL_USER_LENGTH)
-            strcpy(user, newname);
-
-          free(newname);
-        }
-
-        if(passwdp) {
-          /* We have a password in the URL so decode it */
-          char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
-          if(!newpasswd) {
-            Curl_safefree(userp);
-            Curl_safefree(passwdp);
-            Curl_safefree(optionsp);
-            return CURLE_OUT_OF_MEMORY;
-          }
-
-          if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
-            strcpy(passwd, newpasswd);
-
-          free(newpasswd);
-        }
-
-        if(optionsp) {
-          /* We have an options list in the URL so decode it */
-          char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
-          if(!newoptions) {
-            Curl_safefree(userp);
-            Curl_safefree(passwdp);
-            Curl_safefree(optionsp);
-            return CURLE_OUT_OF_MEMORY;
-          }
-
-          if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
-            strcpy(options, newoptions);
-
-          free(newoptions);
-        }
-      }
-
-      Curl_safefree(userp);
-      Curl_safefree(passwdp);
-      Curl_safefree(optionsp);
+    /* Decode the user */
+    newname = curl_easy_unescape(data, userp, 0, NULL);
+    if(!newname) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
+
+    if(strlen(newname) < MAX_CURL_USER_LENGTH)
+      strcpy(user, newname);
+
+    free(newname);
   }
+
+  if(passwdp) {
+    /* We have a password in the URL so decode it */
+    char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
+    if(!newpasswd) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
+      strcpy(passwd, newpasswd);
+
+    free(newpasswd);
+  }
+
+  if(optionsp) {
+    /* We have an options list in the URL so decode it */
+    char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
+    if(!newoptions) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
+      strcpy(options, newoptions);
+
+    free(newoptions);
+  }
+
+  out:
+
+  Curl_safefree(userp);
+  Curl_safefree(passwdp);
+  Curl_safefree(optionsp);
 
   return result;
 }
