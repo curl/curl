@@ -144,7 +144,8 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
 static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
-                                char *user, char *passwd, char *options);
+                                char **userptr, char **passwdptr,
+                                char **optionsptr);
 static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **userptr, char **passwdptr,
                                     char **optionsptr);
@@ -3687,7 +3688,8 @@ static CURLcode findprotocol(struct SessionHandle *data,
 static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                     struct connectdata *conn,
                                     bool *prot_missing,
-                                    char *user, char *passwd, char *options)
+                                    char **userp, char **passwdp,
+                                    char **optionsp)
 {
   char *at;
   char *fragment;
@@ -3931,7 +3933,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
    * Parse the login details from the URL and strip them out of
    * the host name
    */
-  result = parse_url_login(data, conn, user, passwd, options);
+  result = parse_url_login(data, conn, userp, passwdp, optionsp);
   if(result != CURLE_OK)
     return result;
 
@@ -4439,7 +4441,7 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  */
 static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
-                                char *user, char *passwd, char *options)
+                                char **user, char **passwd, char **options)
 {
   CURLcode result = CURLE_OK;
   char *userp = NULL;
@@ -4456,9 +4458,9 @@ static CURLcode parse_url_login(struct SessionHandle *data,
   char *ptr = strchr(conn->host.name, '@');
   char *login = conn->host.name;
 
-  user[0] = 0;   /* to make everything well-defined */
-  passwd[0] = 0;
-  options[0] = 0;
+  DEBUGASSERT(!**user);
+  DEBUGASSERT(!**passwd);
+  DEBUGASSERT(!**options);
 
   if(!ptr)
     goto out;
@@ -4497,10 +4499,8 @@ static CURLcode parse_url_login(struct SessionHandle *data,
       goto out;
     }
 
-    if(strlen(newname) < MAX_CURL_USER_LENGTH)
-      strcpy(user, newname);
-
-    free(newname);
+    free(*user);
+    *user = newname;
   }
 
   if(passwdp) {
@@ -4511,10 +4511,8 @@ static CURLcode parse_url_login(struct SessionHandle *data,
       goto out;
     }
 
-    if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
-      strcpy(passwd, newpasswd);
-
-    free(newpasswd);
+    free(*passwd);
+    *passwd = newpasswd;
   }
 
   if(optionsp) {
@@ -4525,11 +4523,10 @@ static CURLcode parse_url_login(struct SessionHandle *data,
       goto out;
     }
 
-    if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
-      strcpy(options, newoptions);
-
-    free(newoptions);
+    free(*options);
+    *options = newoptions;
   }
+
 
   out:
 
@@ -5128,16 +5125,16 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  user = malloc(MAX_CURL_USER_LENGTH);
-  passwd = malloc(MAX_CURL_PASSWORD_LENGTH);
-  options = malloc(MAX_CURL_OPTIONS_LENGTH);
+  user = strdup("");
+  passwd = strdup("");
+  options = strdup("");
   if(!user || !passwd || !options) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd,
-                               options);
+  result = parseurlandfillconn(data, conn, &prot_missing, &user, &passwd,
+                               &options);
   if(result != CURLE_OK)
     goto out;
 
