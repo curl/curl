@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -360,6 +360,9 @@ curl_multi_strerror(CURLMcode error)
 
   case CURLM_UNKNOWN_OPTION:
     return "Unknown option";
+
+  case CURLM_ADDED_ALREADY:
+    return "The easy handle is already added to a multi handle";
 
   case CURLM_LAST:
     break;

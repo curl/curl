@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -273,6 +273,9 @@ The passed-in socket is not a valid one that libcurl already knows about.
 .IP "CURLM_UNKNOWN_OPTION (6)"
 curl_multi_setopt() with unsupported option
 (Added in 7.15.4)
+.IP "CURLM_ADDED_ALREADY (7)"
+An easy handle already added to a multi handle was attempted to get added a
+second time. (Added in 7.32.1)
 .SH "CURLSHcode"
 The "share" interface will return a CURLSHcode to indicate when an error has
 occurred.  Also consider \fIcurl_share_strerror(3)\fP.

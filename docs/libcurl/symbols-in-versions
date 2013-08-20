@@ -283,6 +283,7 @@ CURLMOPT_TIMERDATA              7.16.0
 CURLMOPT_TIMERFUNCTION          7.16.0
 CURLMSG_DONE                    7.9.6
 CURLMSG_NONE                    7.9.6
+CURLM_ADDED_ALREADY             7.32.1
 CURLM_BAD_EASY_HANDLE           7.9.6
 CURLM_BAD_HANDLE                7.9.6
 CURLM_BAD_SOCKET                7.15.4

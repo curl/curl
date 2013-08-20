@@ -357,8 +357,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Prevent users from adding same easy handle more than once and prevent
      adding to more than one multi stack */
   if(data->multi)
-    /* possibly we should create a new unique error code for this condition */
-    return CURLM_BAD_EASY_HANDLE;
+    return CURLM_ADDED_ALREADY;
 
   /* Allocate and initialize timeout list for easy handle */
   timeoutlist = Curl_llist_alloc(multi_freetimeout);
