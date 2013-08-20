@@ -294,6 +294,49 @@ static int do_file_type(const char *type)
   return -1;
 }
 
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+/*
+ * Supply default password to the engine user interface conversation.
+ * The password is passed by OpenSSL engine from ENGINE_load_private_key()
+ * last argument to the ui and can be obtained by UI_get0_user_data(ui) here.
+ */
+static int ssl_ui_reader(UI *ui, UI_STRING *uis)
+{
+  const char *password;
+  switch(UI_get_string_type(uis)) {
+  case UIT_PROMPT:
+  case UIT_VERIFY:
+    password = (const char*)UI_get0_user_data(ui);
+    if(NULL != password &&
+       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+      UI_set_result(ui, uis, password);
+      return 1;
+    }
+  default:
+    break;
+  }
+  return (UI_method_get_reader(UI_OpenSSL()))(ui, uis);
+}
+
+/*
+ * Suppress interactive request for a default password if available.
+ */
+static int ssl_ui_writer(UI *ui, UI_STRING *uis)
+{
+  switch(UI_get_string_type(uis)) {
+  case UIT_PROMPT:
+  case UIT_VERIFY:
+    if(NULL != UI_get0_user_data(ui) &&
+       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+      return 1;
+    }
+  default:
+    break;
+  }
+  return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
+}
+#endif
+
 static
 int cert_stuff(struct connectdata *conn,
                SSL_CTX* ctx,
@@ -527,7 +570,16 @@ int cert_stuff(struct connectdata *conn,
         EVP_PKEY *priv_key = NULL;
         if(data->state.engine) {
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
-          UI_METHOD *ui_method = UI_OpenSSL();
+          UI_METHOD *ui_method =
+            UI_create_method((char *)"cURL user interface");
+          if(NULL == ui_method) {
+            failf(data, "unable do create OpenSSL user-interface method");
+            return 0;
+          }
+          UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+          UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+          UI_method_set_reader(ui_method, ssl_ui_reader);
+          UI_method_set_writer(ui_method, ssl_ui_writer);
 #endif
           /* the typecast below was added to please mingw32 */
           priv_key = (EVP_PKEY *)
@@ -536,6 +588,9 @@ int cert_stuff(struct connectdata *conn,
                                     ui_method,
 #endif
                                     data->set.str[STRING_KEY_PASSWD]);
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+          UI_destroy_method(ui_method);
+#endif
           if(!priv_key) {
             failf(data, "failed to load private key from crypto engine");
             return 0;
