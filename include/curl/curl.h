@@ -645,16 +645,18 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
+enum curl_khtype {
+  CURLKHTYPE_UNKNOWN,
+  CURLKHTYPE_RSA1,
+  CURLKHTYPE_RSA,
+  CURLKHTYPE_DSS
+};
+
 struct curl_khkey {
   const char *key; /* points to a zero-terminated string encoded with base64
                       if len is zero, otherwise to the "raw" data */
   size_t len;
-  enum type {
-    CURLKHTYPE_UNKNOWN,
-    CURLKHTYPE_RSA1,
-    CURLKHTYPE_RSA,
-    CURLKHTYPE_DSS
-  } keytype;
+  enum curl_khtype keytype;
 };
 
 /* this is the set of return values expected from the curl_sshkeycallback
