@@ -1556,20 +1556,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
     case CURLM_STATE_DONE:
+      /* this state is highly transient, so run another loop after this */
+      result = CURLM_CALL_MULTI_PERFORM;
 
       if(data->easy_conn) {
         /* Remove ourselves from the receive pipeline, if we are there. */
-        Curl_removeHandleFromPipeline(data,
-                                      data->easy_conn->recv_pipe);
+        Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
-
-        if(data->easy_conn->bits.stream_was_rewound) {
-          /* This request read past its response boundary so we quickly let
-             the other requests consume those bytes since there is no
-             guarantee that the socket will become active again */
-          result = CURLM_CALL_MULTI_PERFORM;
-        }
 
         /* post-transfer command */
         data->result = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
@@ -1587,7 +1581,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(data->wildcard.state != CURLWC_DONE) {
           /* if a wildcard is set and we are not ending -> lets start again
              with CURLM_STATE_INIT */
-          result = CURLM_CALL_MULTI_PERFORM;
           multistate(data, CURLM_STATE_INIT);
           break;
         }
@@ -1596,7 +1589,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* after we have DONE what we're supposed to do, go COMPLETED, and
          it doesn't matter what the Curl_done() returned! */
       multistate(data, CURLM_STATE_COMPLETED);
-
       break;
 
     case CURLM_STATE_COMPLETED:
