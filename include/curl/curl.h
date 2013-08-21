@@ -649,7 +649,7 @@ struct curl_khkey {
   const char *key; /* points to a zero-terminated string encoded with base64
                       if len is zero, otherwise to the "raw" data */
   size_t len;
-  enum type {
+  enum {
     CURLKHTYPE_UNKNOWN,
     CURLKHTYPE_RSA1,
     CURLKHTYPE_RSA,
