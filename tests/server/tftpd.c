@@ -200,14 +200,6 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static int timeout;
 static int maxtimeout = 5 * TIMEOUT;
 
-static unsigned short sendblock; /* block count used by sendtftp() */
-static struct tftphdr *sdp;      /* data buffer used by sendtftp() */
-static struct tftphdr *sap;      /* ack buffer  used by sendtftp() */
-
-static unsigned short recvblock; /* block count used by recvtftp() */
-static struct tftphdr *rdp;      /* data buffer used by recvtftp() */
-static struct tftphdr *rap;      /* ack buffer  used by recvtftp() */
-
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
@@ -1148,6 +1140,10 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 {
   int size;
   ssize_t n;
+  unsigned short sendblock; /* block count */
+  struct tftphdr *sdp;      /* data buffer */
+  struct tftphdr *sap;      /* ack buffer */
+
   sendblock = 1;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
@@ -1216,6 +1212,10 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
   ssize_t n, size;
+  unsigned short recvblock; /* block count */
+  struct tftphdr *rdp;      /* data buffer */
+  struct tftphdr *rap;      /* ack buffer */
+
   recvblock = 0;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
