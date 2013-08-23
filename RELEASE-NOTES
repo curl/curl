@@ -14,56 +14,24 @@ Curl and libcurl 7.32.1
 
 This release includes the following changes:
 
- o curl: allow timeouts to accept decimal values
- o OS400: add slist and certinfo EBCDIC support
- o OS400: new SSL backend GSKit
- o CURLOPT_XFERINFOFUNCTION: introducing a new progress callback
- o LIBCURL-STRUCTS: new document
+ o test code for testing the event based API [3]
+ o CURLM_ADDED_ALREADY: new error code
+ o test TFTP server: support "writedelay" within <servercmd>
 
 This release includes the following bugfixes:
 
- o dotdot: introducing dot file path cleanup [1]
- o docs: fix typo in curl_easy_getinfo manpage
- o test1230: avoid using hard-wired port number
- o test1396: invoke the correct test tool
- o SIGPIPE: ignored while inside the library [2]
- o darwinssl: fix crash that started happening in Lion
- o OpenSSL: check for read errors, don't assume [3]
- o c-ares: improve error message on failed resolve [4]
- o printf: make sure %x are treated unsigned
- o formpost: better random boundaries [5]
- o url: restore the functionality of 'curl -u :' [6]
- o curl.1: fix typo in --xattr description [7]
- o digest: improve nonce generation
- o configure: automake 1.14 compatibility tweak
- o curl.1: document the --post303 option in the man page
- o curl.1: document the --sasl-ir option in the man page
- o setup-vms.h: sk_pop symbol tweak
- o tool_paramhlp: try harder to catch negatives
- o cmake: Fix for MSVC2010 project generation [8]
- o asyn-ares: Don't blank ares servers if none configured
- o curl_multi_wait: set revents for extra fds
- o Reinstate "WIN32 MemoryTracking: track wcsdup() _wcsdup() and _tcsdup()
- o ftp_do_more: consider DO_MORE complete when server connects back [9]
- o curl_easy_perform: gradually increase the delay time [10]
- o curl: fix symbolic names for CURLUSESSL_* enum in --libcurl output
- o curl: fix upload of a zip file in OpenVMS [11]
- o build: fix linking on Solaris 10 [12]
- o curl_formadd: CURLFORM_FILECONTENT wrongly rejected some option combos [13]
- o curl_formadd: fix file upload on VMS [14]
- o curl_easy_pause: on unpause, trigger mulit-socket handling [15]
- o md5 & metalink: use better build macros on Apple operating systems [16]
- o darwinssl: fix build error in crypto authentication under Snow Leopard [16]
- o curl: make --progress-bar update the line less frequently [17]
- o configure: don't error out on variable confusions (CFLAGS, LDFLAGS etc)
- o mk-ca-bundle: skip more untrusted certificates
- o formadd: wrong pointer for file name when CURLFORM_BUFFERPTR used [18]
- o FTP: when EPSV gets a 229 but fails to connect, retry with PASV
- o mk-ca-bundle.1: don't install on make install [19]
- o VMS: lots of updates and fixes of the build procedure
- o global dns cache: didn't work (regression)
- o global dns cache: fix memory leak
- o 
+ o nss: make sure that NSS is initialized
+ o curl: make --no-[option] work properly for several options
+ o FTP: with socket_action send better socket updates in active mode [1]
+ o curl: fix the --sasl-ir in the --help output
+ o tests 2032, 2033: Don't hardcode port in expected output
+ o urlglob: better detect unclosed braces, empty lists and overflows [7]
+ o urlglob: error out on range overflow [8]
+ o imap: Fixed response check for SEARCH command
+ o handle arbitrary-length username and password [2]
+ o TFTP: make the CURLOPT_LOW_SPEED* options work [4]
+ o curl.h: name space pollution by "enum type" [5]
+ o multi: move on from STATE_DONE faster [6]
 
 This release includes the following known bugs:
 
@@ -72,34 +40,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Alex Vinnik, Alessandro Ghedini, Nick Zitzmann, Kamil Dudka,
- Lluis Batlle i Rossell, Nach M. S., Kim Vandry, Ben Greear, Dan Fandrich,
- Dave Reisner, Evgeny Turnaev, Guenter Knauf, John E. Malmberg, Marc Hoersken,
- Patrick Monnerat, Sergei Nikulov, Yang Tse, Andreas Malzahn, Clemens Gruber,
- Jean-Noel Rouvignac, Markus Moeller, Fabian Keil, Dagobert Michelsen,
- Byrial Jensen, Justin Karneges, Edward Rudd, Marc Doughty, Konstantin Isakov,
- 
+ Alex McLellan, Bill Doyle, Colby Ranger, Fabian Keil, Gisle Vanem,
+ John E. Malmberg, Jonathan Nieder, Kamil Dudka, Shawn Landden,
+ Tor Arntsen, Will Dietz, Yi Huang
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1200
- [2] = http://curl.haxx.se/bug/view.cgi?id=1180
- [3] = http://curl.haxx.se/bug/view.cgi?id=1249
- [4] = http://curl.haxx.se/bug/view.cgi?id=1191
- [5] = http://curl.haxx.se/bug/view.cgi?id=1251
- [6] = http://curl.haxx.se/mail/archive-2013-06/0052.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=1252
- [8] = http://curl.haxx.se/mail/lib-2013-07/0046.html
- [9] = http://curl.haxx.se/mail/lib-2013-07/0115.html
- [10] = http://curl.haxx.se/mail/lib-2013-07/0103.html
- [11] = http://curl.haxx.se/bug/view.cgi?id=496
- [12] = http://curl.haxx.se/bug/view.cgi?id=1217
- [13] = http://curl.haxx.se/mail/lib-2013-07/0258.html
- [14] = http://curl.haxx.se/bug/view.cgi?id=758
- [15] = http://curl.haxx.se/mail/lib-2013-07/0239.html
- [16] = http://curl.haxx.se/bug/view.cgi?id=1255
- [17] = http://curl.haxx.se/mail/archive-2013-07/0031.html
- [18] = http://curl.haxx.se/bug/view.cgi?id=1262
- [19] = http://curl.haxx.se/mail/lib-2013-08/0057.html
+ [1] = http://curl.haxx.se/mail/lib-2013-08/0043.html
+ [2] = http://bugs.debian.org/719856
+ [3] = http://daniel.haxx.se/blog/2013/08/20/testing-curl_multi_socket_action/
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1269
+ [5] = https://github.com/bagder/curl/pull/76
+ [6] = http://curl.haxx.se/mail/lib-2013-08/0211.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1264
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1267
