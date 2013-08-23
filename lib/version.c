@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -234,9 +234,6 @@ static curl_version_info_data version_info = {
   0 /* features is 0 by default */
 #ifdef ENABLE_IPV6
   | CURL_VERSION_IPV6
-#endif
-#ifdef HAVE_KRB4
-  | CURL_VERSION_KERBEROS4
 #endif
 #ifdef USE_SSL
   | CURL_VERSION_SSL

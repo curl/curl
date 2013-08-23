@@ -7,7 +7,7 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999, 2013 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
  * Copyright (C) 2001 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -44,7 +44,7 @@
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
 
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -57,7 +57,7 @@
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
-#include "krb4.h"
+#include "security.h"
 #include "ftp.h"
 #include "sendf.h"
 #include "rawstr.h"
@@ -110,11 +110,8 @@ static char level_to_char(int level) {
 }
 
 static const struct Curl_sec_client_mech * const mechs[] = {
-#if defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   &Curl_krb5_client_mech,
-#endif
-#if defined(HAVE_KRB4)
-  &Curl_krb4_client_mech,
 #endif
   NULL
 };
@@ -199,7 +196,7 @@ socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
 
 static CURLcode read_data(struct connectdata *conn,
                           curl_socket_t fd,
-                          struct krb4buffer *buf)
+                          struct krb5buffer *buf)
 {
   int len;
   void* tmp;
@@ -225,7 +222,7 @@ static CURLcode read_data(struct connectdata *conn,
 }
 
 static size_t
-buffer_read(struct krb4buffer *buf, void *data, size_t len)
+buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
   if(buf->size - buf->index < len)
     len = buf->size - buf->index;
@@ -599,6 +596,6 @@ Curl_sec_end(struct connectdata *conn)
   conn->mech = NULL;
 }
 
-#endif /* HAVE_KRB4 || HAVE_GSSAPI */
+#endif /* HAVE_GSSAPI */
 
 #endif /* CURL_DISABLE_FTP */

@@ -59,11 +59,7 @@
 #include "ftp.h"
 #include "fileinfo.h"
 #include "ftplistparser.h"
-
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-#include "krb4.h"
-#endif
-
+#include "security.h"
 #include "strtoofft.h"
 #include "strequal.h"
 #include "sslgen.h"
@@ -615,7 +611,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 {
   struct connectdata *conn = pp->conn;
   struct SessionHandle *data = conn->data;
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   char * const buf = data->state.buffer;
 #endif
   CURLcode result = CURLE_OK;
@@ -623,7 +619,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
   result = Curl_pp_readresp(sockfd, pp, &code, size);
 
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#if defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
@@ -2578,19 +2574,6 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
-#ifdef HAVE_KRB4
-  if(conn->data->set.krb) {
-    /* We may need to issue a KAUTH here to have access to the files
-     * do it if user supplied a password
-     */
-    if(conn->passwd && *conn->passwd) {
-      /* BLOCKING */
-      result = Curl_krb_kauth(conn);
-      if(result)
-        return result;
-    }
-  }
-#endif
   if(conn->ssl[FIRSTSOCKET].use) {
     /* PBSZ = PROTECTION BUFFER SIZE.
 
@@ -2720,7 +2703,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
 
       /* We have received a 220 response fine, now we proceed. */
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
       if(data->set.krb) {
         /* If not anonymous login, try a secure login. Note that this
            procedure is still BLOCKING. */
@@ -4076,7 +4059,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   size_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   enum protection_level data_sec = conn->data_prot;
 #endif
 
@@ -4096,12 +4079,12 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
     return(res);
 
   for(;;) {
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
     conn->data_prot = data_sec;
 #endif
@@ -4203,7 +4186,7 @@ static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection)
 
   Curl_pp_disconnect(pp);
 
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   Curl_sec_end(conn);
 #endif
 

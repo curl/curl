@@ -150,7 +150,6 @@ dnl initialize all the info variables
     curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
-   curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
@@ -1133,101 +1132,6 @@ no)
         AC_MSG_WARN([the previous check could not be made default was used])
         ;;
 esac
-
-dnl **********************************************************************
-dnl Check for the presence of Kerberos4 libraries and headers
-dnl **********************************************************************
-
-AC_ARG_WITH(krb4-includes,
-AC_HELP_STRING([--with-krb4-includes=DIR],
-               [Specify location of kerberos4 headers]),[
- CPPFLAGS="$CPPFLAGS -I$withval"
- KRB4INC="$withval"
- want_krb4=yes
- ])
-
-AC_ARG_WITH(krb4-libs,
-AC_HELP_STRING([--with-krb4-libs=DIR],[Specify location of kerberos4 libs]),[
- LDFLAGS="$LDFLAGS -L$withval"
- KRB4LIB="$withval"
- want_krb4=yes
- ])
-
-
-OPT_KRB4=off
-AC_ARG_WITH(krb4,dnl
-AC_HELP_STRING([--with-krb4=DIR],[where to look for Kerberos4]),[
-  OPT_KRB4="$withval"
-  if test X"$OPT_KRB4" != Xno; then
-    want_krb4="yes"
-    if test X"$OPT_KRB4" != Xyes; then
-      LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib$libsuff"
-      KRB4LIB="$OPT_KRB4/lib$libsuff"
-      CPPFLAGS="$CPPFLAGS -I$OPT_KRB4/include"
-      KRB4INC="$OPT_KRB4/include"
-    fi
-  fi
- ])
-
-AC_MSG_CHECKING([if Kerberos4 support is requested])
-
-if test "$want_krb4" = yes
-then
-  if test "$ipv6" = "yes"; then
-    echo krb4 is not compatible with IPv6
-    exit 1
-  fi
-  AC_MSG_RESULT(yes)
-
-  dnl Check for & handle argument to --with-krb4
-
-  AC_MSG_CHECKING(where to look for Kerberos4)
-  if test X"$OPT_KRB4" = Xyes
-  then
-    AC_MSG_RESULT([defaults])
-  else
-    AC_MSG_RESULT([libs in $KRB4LIB, headers in $KRB4INC])
-  fi
-
-  dnl Check for DES library
-  AC_CHECK_LIB(des, des_pcbc_encrypt,
-  [
-    AC_CHECK_HEADERS(des.h)
-
-    dnl resolv lib?
-    AC_CHECK_FUNC(res_search, , [AC_CHECK_LIB(resolv, res_search)])
-
-    dnl Check for the Kerberos4 library
-    AC_CHECK_LIB(krb, krb_net_read,
-    [
-      dnl Check for header files
-      AC_CHECK_HEADERS(krb.h)
-
-      dnl we found the required libraries, add to LIBS
-      LIBS="-lkrb -lcom_err -ldes $LIBS"
-
-      dnl Check for function krb_get_our_ip_for_realm
-      dnl this is needed for NAT networks
-      AC_CHECK_FUNCS(krb_get_our_ip_for_realm)
-
-      dnl add define KRB4
-      AC_DEFINE(HAVE_KRB4, 1,
-      [if you have the Kerberos4 libraries (including -ldes)])
-
-      dnl substitute it too!
-      KRB4_ENABLED=1
-      AC_SUBST(KRB4_ENABLED)
-
-      curl_krb4_msg="enabled"
-
-      dnl the krb4 stuff needs a strlcpy()
-      AC_CHECK_FUNCS(strlcpy)
-
-    ])
-  ])
-else
-  AC_MSG_RESULT(no)
-fi
 
 dnl **********************************************************************
 dnl Check for FBopenssl(SPNEGO) libraries
@@ -3365,9 +3269,6 @@ if test "x$USE_SSLEAY" = "x1"; then
 elif test -n "$SSL_ENABLED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
 fi
-if test "@KRB4_ENABLED@" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES KRB4"
-fi
 if test "x$IPV6_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
 fi
@@ -3542,7 +3443,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  krb4 support:     ${curl_krb4_msg}
   GSSAPI support:   ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}

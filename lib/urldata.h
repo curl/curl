@@ -222,9 +222,9 @@
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
 
 
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-/* Types needed for krb4/5-ftp connections */
-struct krb4buffer {
+#ifdef HAVE_GSSAPI
+/* Types needed for krb5-ftp connections */
+struct krb5buffer {
   void *data;
   size_t size;
   size_t index;
@@ -934,12 +934,12 @@ struct connectdata {
   } allocptr;
 
   int sec_complete; /* if kerberos is enabled for this connection */
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
   size_t buffer_size;
-  struct krb4buffer in_buffer;
+  struct krb5buffer in_buffer;
   void *app_data;
   const struct Curl_sec_client_mech *mech;
   struct sockaddr_in local_addr;

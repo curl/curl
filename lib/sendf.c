@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,14 +34,6 @@
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
-
-/* the krb4 functions only exists for FTP and if krb4 or gssapi is defined */
-#if !defined(CURL_DISABLE_FTP) && (defined(HAVE_KRB4) || defined(HAVE_GSSAPI))
-#include "krb4.h"
-#else
-#define Curl_sec_send(a,b,c,d) -1
-#define Curl_sec_read(a,b,c,d) -1
-#endif
 
 #include "curl_memory.h"
 #include "strerror.h"

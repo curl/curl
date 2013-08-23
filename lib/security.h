@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_KRB4_H
-#define HEADER_CURL_KRB4_H
+#ifndef HEADER_CURL_SECURITY_H
+#define HEADER_CURL_SECURITY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,24 +34,18 @@ struct Curl_sec_client_mech {
   int (*decode)(void *, void*, int, int, struct connectdata *);
 };
 
-
 #define AUTH_OK         0
 #define AUTH_CONTINUE   1
 #define AUTH_ERROR      2
 
-#ifdef HAVE_KRB4
-extern struct Curl_sec_client_mech Curl_krb4_client_mech;
-#endif
-#ifdef HAVE_GSSAPI
-extern struct Curl_sec_client_mech Curl_krb5_client_mech;
-#endif
-
-CURLcode Curl_krb_kauth(struct connectdata *conn);
 int Curl_sec_read_msg (struct connectdata *conn, char *,
                        enum protection_level);
 void Curl_sec_end (struct connectdata *);
 CURLcode Curl_sec_login (struct connectdata *);
 int Curl_sec_request_prot (struct connectdata *conn, const char *level);
 
-#endif /* HEADER_CURL_KRB4_H */
+#ifdef HAVE_GSSAPI
+extern struct Curl_sec_client_mech Curl_krb5_client_mech;
+#endif
 
+#endif /* HEADER_CURL_SECURITY_H */

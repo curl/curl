@@ -51,7 +51,7 @@
 #include "ftp.h"
 #include "curl_gssapi.h"
 #include "sendf.h"
-#include "krb4.h"
+#include "security.h"
 #include "curl_memory.h"
 #include "warnless.h"
 

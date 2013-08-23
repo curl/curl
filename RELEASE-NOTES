@@ -7,16 +7,12 @@ Curl and libcurl 7.32.1
  Known libcurl bindings:       42
  Contributors:                 1057
 
-***
-  krb4 support is up for removal. If you care about it at all, speak up
-  on the curl-library list asap!
-***
-
 This release includes the following changes:
 
  o test code for testing the event based API [3]
  o CURLM_ADDED_ALREADY: new error code
  o test TFTP server: support "writedelay" within <servercmd>
+ o krb4 support has been removed
 
 This release includes the following bugfixes:
 
