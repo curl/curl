@@ -202,27 +202,25 @@ FAQ
   better. We do however believe in a few rules when it comes to the future of
   curl:
 
-  * Curl -- the command line tool -- is to remain a non-graphical command line
-    tool. If you want GUIs or fancy scripting capabilities, you should look
-    for another tool that uses libcurl.
+  Curl -- the command line tool -- is to remain a non-graphical command line
+  tool. If you want GUIs or fancy scripting capabilities, you should look for
+  another tool that uses libcurl.
 
-  * We do not add things to curl that other small and available tools already
-    do very fine at the side. Curl's output is fine to pipe into another
-    program or redirect to another file for the next program to interpret.
+  We do not add things to curl that other small and available tools already do
+  very fine at the side. Curl's output is fine to pipe into another program or
+  redirect to another file for the next program to interpret.
 
-  * We focus on protocol related issues and improvements. If you wanna do more
-    magic with the supported protocols than curl currently does, chances are
-    big we will agree. If you wanna add more protocols, we may very well
-    agree.
+  We focus on protocol related issues and improvements. If you wanna do more
+  magic with the supported protocols than curl currently does, chances are big
+  we will agree. If you wanna add more protocols, we may very well agree.
 
-  * If you want someone else to make all the work while you wait for us to
-    implement it for you, that is not a very friendly attitude. We spend a
-    considerable time already on maintaining and developing curl. In order to
-    get more out of us, you should consider trading in some of your time and
-    efforts in return.
+  If you want someone else to make all the work while you wait for us to
+  implement it for you, that is not a very friendly attitude. We spend a
+  considerable time already on maintaining and developing curl. In order to
+  get more out of us, you should consider trading in some of your time and
+  efforts in return.
 
-  * If you write the code, chances are bigger that it will get into curl
-    faster.
+  If you write the code, chances are bigger that it will get into curl faster.
 
   1.5 Who makes curl?
 
@@ -263,7 +261,7 @@ FAQ
 
   Our project name curl has been in effective use since 1998. We were not the
   first computer related project to use the name "curl" and do not claim any
-  first-hand rights to the name.
+  rights to the name.
 
   We recognize that we will be living in parallel with curl.com and wish them
   every success.
@@ -620,15 +618,15 @@ FAQ
 
   Some workarounds usually suggested to overcome this Javascript dependency:
 
-  - Depending on the Javascript complexity, write up a script that
-    translates it to another language and execute that.
+  Depending on the Javascript complexity, write up a script that translates it
+  to another language and execute that.
 
-  - Read the Javascript code and rewrite the same logic in another language.
+  Read the Javascript code and rewrite the same logic in another language.
 
-  - Implement a Javascript interpreter, people have successfully used the
-    Mozilla Javascript engine in the past.
+  Implement a Javascript interpreter, people have successfully used the
+  Mozilla Javascript engine in the past.
 
-  - Ask your admins to stop this, for a static proxy setup or similar.
+  Ask your admins to stop this, for a static proxy setup or similar.
 
   3.15 Can I do recursive fetches with curl?
 
@@ -644,34 +642,38 @@ FAQ
   There are three different kinds of "certificates" to keep track of when we
   talk about using SSL-based protocols (HTTPS or FTPS) using curl or libcurl.
 
-  - Client certificate. The server you communicate may require that you can
-    provide this in order to prove that you actually are who you claim to be.
-    If the server doesn't require this, you don't need a client certificate.
+  CLIENT CERTIFICATE
 
-    A client certificate is always used together with a private key, and the
-    private key has a pass phrase that protects it.
+  The server you communicate may require that you can provide this in order to
+  prove that you actually are who you claim to be.  If the server doesn't
+  require this, you don't need a client certificate.
 
-  - Server certificate. The server you communicate with has a server
-    certificate. You can and should verify this certificate to make sure that
-    you are truly talking to the real server and not a server impersonating
-    it.
+  A client certificate is always used together with a private key, and the
+  private key has a pass phrase that protects it.
 
-  - Certificate Authority certificate ("CA cert"). You often have several CA
-    certs in a CA cert bundle that can be used to verify a server certificate
-    that was signed by one of the authorities in the bundle. curl does not
-    come with a CA cert bundle but most curl installs provide one. You can
-    also override the default.
+  SERVER CERTIFICATE
 
-    The server certificate verification process is made by using a Certificate
-    Authority certificate ("CA cert") that was used to sign the server
-    certificate. Server certificate verification is enabled by default in curl
-    and libcurl and is often the reason for problems as explained in FAQ entry
-    4.12 and the SSLCERTS document
-    (http://curl.haxx.se/docs/sslcerts.html). Server certificates that are
-    "self-signed" or otherwise signed by a CA that you do not have a CA cert
-    for, cannot be verified. If the verification during a connect fails, you
-    are refused access. You then need to explicitly disable the verification
-    to connect to the server.
+  The server you communicate with has a server certificate. You can and should
+  verify this certificate to make sure that you are truly talking to the real
+  server and not a server impersonating it.
+
+  CERTIFICATE AUTHORITY CERTIFICATE ("CA cert")
+
+  You often have several CA certs in a CA cert bundle that can be used to
+  verify a server certificate that was signed by one of the authorities in the
+  bundle. curl does not come with a CA cert bundle but most curl installs
+  provide one. You can also override the default.
+
+  The server certificate verification process is made by using a Certificate
+  Authority certificate ("CA cert") that was used to sign the server
+  certificate. Server certificate verification is enabled by default in curl
+  and libcurl and is often the reason for problems as explained in FAQ entry
+  4.12 and the SSLCERTS document
+  (http://curl.haxx.se/docs/sslcerts.html). Server certificates that are
+  "self-signed" or otherwise signed by a CA that you do not have a CA cert
+  for, cannot be verified. If the verification during a connect fails, you are
+  refused access. You then need to explicitly disable the verification to
+  connect to the server.
 
   3.17 How do I list the root dir of an FTP server?
 
@@ -794,12 +796,13 @@ FAQ
 
      curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
-  In Windows, the standard DOS shell treats the %-symbol specially and you
-  need to use TWO %-symbols for each single one you want to use in the URL.
+  In Windows, the standard DOS shell treats the percent sign specially and you
+  need to use TWO percent signs for each single one you want to use in the
+  URL.
 
-  Also note that if you want the literal %-symbol to be part of the data you
-  pass in a POST using -d/--data you must encode it as '%25' (which then also
-  needs the %-symbol doubled on Windows machines).
+  If you want a literal percent sign to be part of the data you pass in a POST
+  using -d/--data you must encode it as '%25' (which then also needs the
+  percent sign doubled on Windows machines).
 
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
 
@@ -968,13 +971,13 @@ FAQ
   4.14 Redirects work in browser but not with curl!
 
   curl supports HTTP redirects fine (see item 3.8). Browsers generally support
-  at least two other ways to perform directs that curl does not:
+  at least two other ways to perform redirects that curl does not:
 
-  - Meta tags. You can write a HTML tag that will cause the browser to
-    redirect to another given URL after a certain time.
+  Meta tags. You can write a HTML tag that will cause the browser to redirect
+  to another given URL after a certain time.
 
-  - Javascript. You can write a Javascript program embedded in a HTML page
-    that redirects the browser to another given URL.
+  Javascript. You can write a Javascript program embedded in a HTML page that
+  redirects the browser to another given URL.
 
   There is no way to make curl follow these redirects. You must either
   manually figure out what the page is set to do, or you write a script that
@@ -1270,17 +1273,18 @@ FAQ
 
   5.12 Can I make libcurl fake or hide my real IP address?
 
-  No. libcurl operates on a higher level than so. Besides, faking IP address
-  would imply sending IP packages with a made-up source address, and then you
-  normally get a problem with intercepting the packages sent back as they
-  would then not be routed to you!
+  No. libcurl operates on a higher level. Besides, faking IP address would
+  imply sending IP packet with a made-up source address, and then you normally
+  get a problem with receiving the packet sent back as they would then not be
+  routed to you!
 
   If you use a proxy to access remote sites, the sites will not see your local
   IP address but instead the address of the proxy.
 
   Also note that on many networks NATs or other IP-munging techniques are used
   that makes you see and use a different IP address locally than what the
-  remote server will see you coming from.
+  remote server will see you coming from. You may also consider using
+  http://www.torproject.org .
 
   5.13 How do I stop an ongoing transfer?
 
