@@ -1553,6 +1553,9 @@ typedef enum {
    * prototype defines. (Deprecates CURLOPT_PROGRESSFUNCTION) */
   CINIT(XFERINFOFUNCTION, FUNCTIONPOINT, 219),
 
+  /* The XOAUTH2 bearer token */
+  CINIT(XOAUTH2_BEARER, OBJECTPOINT, 220),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
