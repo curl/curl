@@ -712,6 +712,9 @@ static CURLcode easy_events(CURLM *multi)
 
   return wait_or_timeout(multi, &evs);
 }
+#else /* CURLDEBUG */
+/* when not built with debug, this function doesn't exist */
+#define easy_events(x) CURLE_NOT_BUILT_IN
 #endif
 
 static CURLcode easy_transfer(CURLM *multi)
