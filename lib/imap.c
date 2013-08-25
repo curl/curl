@@ -26,6 +26,7 @@
  * RFC4616 PLAIN authentication
  * RFC4959 IMAP Extension for SASL Initial Client Response
  * RFC5092 IMAP URL Scheme
+ * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
 
@@ -344,6 +345,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_AUTHENTICATE_DIGESTMD5_RESP:
       case IMAP_AUTHENTICATE_NTLM:
       case IMAP_AUTHENTICATE_NTLM_TYPE2MSG:
+      case IMAP_AUTHENTICATE_XOAUTH2:
       case IMAP_AUTHENTICATE_FINAL:
       case IMAP_APPEND:
         *resp = '+';
@@ -386,6 +388,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "AUTHENTICATE_DIGESTMD5_RESP",
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
+    "AUTHENTICATE_XOAUTH2",
     "AUTHENTICATE_FINAL",
     "LOGIN",
     "LIST",
@@ -575,7 +578,20 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
   else
 #endif
-  if((imapc->authmechs & SASL_MECH_LOGIN) &&
+
+  if((imapc->authmechs & SASL_MECH_XOAUTH2) &&
+     (imapc->prefmech & SASL_MECH_XOAUTH2)) {
+    mech = "XOAUTH2";
+    state1 = IMAP_AUTHENTICATE_XOAUTH2;
+    state2 = IMAP_AUTHENTICATE_FINAL;
+    imapc->authused = SASL_MECH_XOAUTH2;
+
+    if(imapc->ir_supported || data->set.sasl_ir)
+      result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                                conn->xoauth2_bearer,
+                                                &initresp, &len);
+  }
+  else if((imapc->authmechs & SASL_MECH_LOGIN) &&
      (imapc->prefmech & SASL_MECH_LOGIN)) {
     mech = "LOGIN";
     state1 = IMAP_AUTHENTICATE_LOGIN;
@@ -879,6 +895,8 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
           imapc->authmechs |= SASL_MECH_EXTERNAL;
         else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
           imapc->authmechs |= SASL_MECH_NTLM;
+        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+          imapc->authmechs |= SASL_MECH_XOAUTH2;
       }
 
       line += wordlen;
@@ -1244,6 +1262,44 @@ static CURLcode imap_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
+/* For AUTH XOAUTH2 (without initial response) responses */
+static CURLcode imap_state_auth_xoauth2_resp(struct connectdata *conn,
+                                             int imapcode,
+                                             imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *xoauth = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(imapcode != '+') {
+    failf(data, "Access denied: %d", imapcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the authorisation message */
+    result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                              conn->xoauth2_bearer,
+                                              &xoauth, &len);
+
+    /* Send the message */
+    if(!result) {
+      if(xoauth) {
+        result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", xoauth);
+
+        if(!result)
+          state(conn, IMAP_AUTHENTICATE_FINAL);
+      }
+
+      Curl_safefree(xoauth);
+    }
+  }
+
+  return result;
+}
+
 /* For final responses to the AUTHENTICATE sequence */
 static CURLcode imap_state_auth_final_resp(struct connectdata *conn,
                                            int imapcode,
@@ -1592,6 +1648,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
                                                   imapc->state);
       break;
 #endif
+
+    case IMAP_AUTHENTICATE_XOAUTH2:
+      result = imap_state_auth_xoauth2_resp(conn, imapcode, imapc->state);
+      break;
 
     case IMAP_AUTHENTICATE_FINAL:
       result = imap_state_auth_final_resp(conn, imapcode, imapc->state);
@@ -2221,6 +2281,8 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
         imapc->prefmech = SASL_MECH_GSSAPI;
       else if(strequal(value, "NTLM"))
         imapc->prefmech = SASL_MECH_NTLM;
+      else if(strequal(value, "XOAUTH2"))
+        imapc->prefmech = SASL_MECH_XOAUTH2;
       else
         imapc->prefmech = SASL_AUTH_NONE;
     }
