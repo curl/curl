@@ -24,18 +24,18 @@ may have been fixed since this was written!
 
 80. Curl doesn't recognize certificates in DER format in keychain, but it
   works with PEM.
-  http://curl.haxx.se/bug/view.cgi?id=3439999
+  http://curl.haxx.se/bug/view.cgi?id=1065
 
 79. SMTP. When sending data to multiple recipients, curl will abort and return
   failure if one of the recipients indicate failure (on the "RCPT TO"
   command). Ordinary mail programs would proceed and still send to the ones
   that can receive data. This is subject for change in the future.
-  http://curl.haxx.se/bug/view.cgi?id=3438362
+  http://curl.haxx.se/bug/view.cgi?id=1116
 
 78. curl and libcurl don't always signal the client properly when "sending"
   zero bytes files - it makes for example the command line client not creating
   any file at all. Like when using FTP.
-  http://curl.haxx.se/bug/view.cgi?id=3438362
+  http://curl.haxx.se/bug/view.cgi?id=1063
 
 77. CURLOPT_FORBID_REUSE on a handle prevents NTLM from working since it
   "abuses" the underlying connection re-use system and if connections are
@@ -50,7 +50,7 @@ may have been fixed since this was written!
   properly if built with UNICODE defined together with the schannel/winssl
   backend. The original problem was mentioned in:
   http://curl.haxx.se/mail/lib-2009-10/0024.html
-  http://curl.haxx.se/bug/view.cgi?id=2944325
+  http://curl.haxx.se/bug/view.cgi?id=896
 
   The schannel version verified to work as mentioned in
   http://curl.haxx.se/mail/lib-2012-07/0073.html
@@ -60,7 +60,7 @@ may have been fixed since this was written!
   acknowledge the connection timeout during that phase but only the "real"
   timeout - which may surprise users as it is probably considered to be the
   connect phase to most people. Brought up (and is being misunderstood) in:
-  http://curl.haxx.se/bug/view.cgi?id=2844077
+  http://curl.haxx.se/bug/view.cgi?id=856
 
 72. "Pausing pipeline problems."
   http://curl.haxx.se/mail/lib-2009-07/0214.html
@@ -78,7 +78,7 @@ may have been fixed since this was written!
   http://tools.ietf.org/html/draft-reschke-rfc2231-in-http-02
 
 66. When using telnet, the time limitation options don't work.
-  http://curl.haxx.se/bug/view.cgi?id=2818950
+  http://curl.haxx.se/bug/view.cgi?id=846
 
 65. When doing FTP over a socks proxy or CONNECT through HTTP proxy and the
   multi interface is used, libcurl will fail if the (passive) TCP connection
@@ -109,7 +109,7 @@ may have been fixed since this was written!
   and instead the connection is "cancelled" (the operation is considered done)
   prematurely. There is a half-baked (busy-looping) patch provided in the bug
   report but it cannot be accepted as-is. See
-  http://curl.haxx.se/bug/view.cgi?id=2006544
+  http://curl.haxx.se/bug/view.cgi?id=748
 
 55. libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
   library header files exporting symbols/macros that should be kept private
@@ -133,12 +133,12 @@ may have been fixed since this was written!
   protocol code. This should be very rare.
 
 43. There seems to be a problem when connecting to the Microsoft telnet server.
-  http://curl.haxx.se/bug/view.cgi?id=1720605
+  http://curl.haxx.se/bug/view.cgi?id=649
 
 41. When doing an operation over FTP that requires the ACCT command (but not
   when logging in), the operation will fail since libcurl doesn't detect this
   and thus fails to issue the correct command:
-  http://curl.haxx.se/bug/view.cgi?id=1693337
+  http://curl.haxx.se/bug/view.cgi?id=635
 
 39. Steffen Rumler's Race Condition in Curl_proxyCONNECT:
   http://curl.haxx.se/mail/lib-2007-01/0045.html
@@ -151,7 +151,7 @@ may have been fixed since this was written!
 
 34. The SOCKS4 connection codes don't properly acknowledge (connect) timeouts.
   Also see #12. According to bug #1556528, even the SOCKS5 connect code does
-  not do it right: http://curl.haxx.se/bug/view.cgi?id=1556528,
+  not do it right: http://curl.haxx.se/bug/view.cgi?id=604
 
 31. "curl-config --libs" will include details set in LDFLAGS when configure is
   run that might be needed only for building libcurl. Further, curl-config
@@ -166,13 +166,12 @@ may have been fixed since this was written!
   IDs in URLs to get around the problem of percent signs being
   special. According to the reporter, Firefox deals with the URL _with_ a
   percent letter (which seems like a blatant URL spec violation).
-  libcurl supports zone IDs where the percent sign is URL-escaped (i.e. %25).
-
-   See http://curl.haxx.se/bug/view.cgi?id=1371118
+  libcurl supports zone IDs where the percent sign is URL-escaped (i.e. %25):
+  http://curl.haxx.se/bug/view.cgi?id=555
 
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
   "system context" will make it use wrong(?) user name - at least when compared
-  to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=1281867
+  to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=535
 
 23. SOCKS-related problems:
   B) libcurl doesn't support FTPS over a SOCKS proxy.
@@ -218,7 +217,7 @@ may have been fixed since this was written!
 10. To get HTTP Negotiate authentication to work fine, you need to provide a
   (fake) user name (this concerns both curl and the lib) because the code
   wrongly only considers authentication if there's a user name provided.
-  http://curl.haxx.se/bug/view.cgi?id=1004841. How?
+  http://curl.haxx.se/bug/view.cgi?id=440 How?
   http://curl.haxx.se/mail/lib-2004-08/0182.html
 
 8. Doing resumed upload over HTTP does not work with '-C -', because curl
