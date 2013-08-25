@@ -325,6 +325,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
+  if(config->userpwd && !config->xoauth2_bearer) {
+    res = checkpasswd("host", &config->userpwd);
+    if(res)
+      goto quit_curl;
+  }
+
+  if(config->proxyuserpwd) {
+    res = checkpasswd("proxy", &config->proxyuserpwd);
+    if(res)
+      goto quit_curl;
+  }
+
   if((!config->url_list || !config->url_list->url) && !config->list_engines) {
     helpf(config->errors, "no URL specified!\n");
     res = CURLE_FAILED_INIT;

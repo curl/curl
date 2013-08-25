@@ -1633,22 +1633,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
     break;
     case 'u':
-      /* user:password  */
+      /* user:password;options  */
       GetStr(&config->userpwd, nextarg);
       cleanarg(nextarg);
-      if(!config->xoauth2_bearer) {
-        err = checkpasswd("host", &config->userpwd);
-        if(err)
-          return err;
-      }
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
       cleanarg(nextarg);
-      err = checkpasswd("proxy", &config->proxyuserpwd);
-      if(err)
-        return err;
       break;
     case 'v':
       if(toggle) {
