@@ -47,6 +47,7 @@ static const char *const helptext[] = {
   "     --anyauth       Pick \"any\" authentication method (H)",
   " -a, --append        Append to target file when uploading (F/SFTP)",
   "     --basic         Use HTTP Basic Authentication (H)",
+  "     --bearer BEARER XOAUTH2 Bearer Token (IMAP and SMTP)",
   "     --cacert FILE   CA certificate to verify peer against (SSL)",
   "     --capath DIR    CA directory to verify peer against (SSL)",
   " -E, --cert CERT[:PASSWD] Client certificate file and password (SSL)",
