@@ -208,6 +208,7 @@ struct Configurable {
 #ifdef CURLDEBUG
   bool test_event_based;
 #endif
+  char *xoauth2_bearer;     /* XOAUTH2 bearer token */
 }; /* struct Configurable */
 
 void free_config_fields(struct Configurable *config);

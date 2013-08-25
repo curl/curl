@@ -96,6 +96,8 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->krblevel);
   Curl_safefree(config->trace_dump);
 
+  Curl_safefree(config->xoauth2_bearer);
+
   config->trace_stream = NULL; /* closed elsewhere when appropriate */
 
   Curl_safefree(config->writeout);

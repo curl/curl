@@ -977,6 +977,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         else if(!config->use_metalink)
           my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
+        if(config->xoauth2_bearer)
+          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->xoauth2_bearer);
+
 #if !defined(CURL_DISABLE_PROXY)
         {
           /* TODO: Make this a run-time check instead of compile-time one. */
