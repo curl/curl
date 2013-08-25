@@ -26,6 +26,7 @@
  * RFC4616 PLAIN authentication
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
+ * RFC6749 OAuth 2.0 Authorization Framework
  * Draft   SMTP URL Interface
  *
  ***************************************************************************/
@@ -290,6 +291,8 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
           smtpc->authmechs |= SASL_MECH_EXTERNAL;
         else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
           smtpc->authmechs |= SASL_MECH_NTLM;
+        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+          smtpc->authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
         len -= wordlen;
@@ -326,6 +329,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
+    "AUTH_XOAUTH2",
     "AUTH_FINAL",
     "MAIL",
     "RCPT",
@@ -496,7 +500,20 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
     }
   else
 #endif
-  if((smtpc->authmechs & SASL_MECH_LOGIN) &&
+
+  if((smtpc->authmechs & SASL_MECH_XOAUTH2) &&
+     (smtpc->prefmech & SASL_MECH_XOAUTH2)) {
+    mech = "XOAUTH2";
+    state1 = SMTP_AUTH_XOAUTH2;
+    state2 = SMTP_AUTH_FINAL;
+    smtpc->authused = SASL_MECH_XOAUTH2;
+
+    if(data->set.sasl_ir)
+      result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                                conn->xoauth2_bearer,
+                                                &initresp, &len);
+  }
+  else if((smtpc->authmechs & SASL_MECH_LOGIN) &&
      (smtpc->prefmech & SASL_MECH_LOGIN)) {
     mech = "LOGIN";
     state1 = SMTP_AUTH_LOGIN;
@@ -1088,6 +1105,43 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
+/* For AUTH XOAUTH2 (without initial response) responses */
+static CURLcode smtp_state_auth_xoauth2_resp(struct connectdata *conn,
+                                             int smtpcode, smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *xoauth = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the authorisation message */
+    result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                              conn->xoauth2_bearer,
+                                              &xoauth, &len);
+
+    /* Send the message */
+    if(!result) {
+      if(xoauth) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", xoauth);
+
+        if(!result)
+          state(conn, SMTP_AUTH_FINAL);
+      }
+
+      Curl_safefree(xoauth);
+    }
+  }
+
+  return result;
+}
+
 /* For the final responses to the AUTH sequence */
 static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
                                            int smtpcode,
@@ -1295,6 +1349,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
                                                   smtpc->state);
       break;
 #endif
+
+    case SMTP_AUTH_XOAUTH2:
+      result = smtp_state_auth_xoauth2_resp(conn, smtpcode, smtpc->state);
+      break;
 
     case SMTP_AUTH_FINAL:
       result = smtp_state_auth_final_resp(conn, smtpcode, smtpc->state);
@@ -1738,6 +1796,8 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
         smtpc->prefmech = SASL_MECH_GSSAPI;
       else if(strequal(value, "NTLM"))
         smtpc->prefmech = SASL_MECH_NTLM;
+      else if(strequal(value, "XOAUTH2"))
+        smtpc->prefmech = SASL_MECH_XOAUTH2;
       else
         smtpc->prefmech = SASL_AUTH_NONE;
     }
