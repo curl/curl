@@ -22,6 +22,7 @@
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
 
@@ -476,6 +477,40 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   return result;
 }
 #endif /* USE_NTLM */
+
+/*
+ * Curl_sasl_create_xoauth2_message()
+ *
+ * This is used to generate an already encoded XOAUTH2 message ready
+ * for sending to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * user    [in]     - The user name.
+ * bearer  [in]     - The XOAUTH Bearer token.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
+                                          const char *user,
+                                          const char *bearer,
+                                          char **outptr, size_t *outlen)
+{
+  char *xoauth;
+
+  xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
+
+  if(!xoauth)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Base64 encode the reply */
+  return Curl_base64_encode(data, xoauth, strlen(xoauth), outptr,
+                            outlen);
+}
 
 /*
  * Curl_sasl_cleanup()

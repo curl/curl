@@ -32,6 +32,7 @@
 #define SASL_MECH_GSSAPI        (1 << 4)
 #define SASL_MECH_EXTERNAL      (1 << 5)
 #define SASL_MECH_NTLM          (1 << 6)
+#define SASL_MECH_XOAUTH2       (1 << 7)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
@@ -84,6 +85,13 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                              char **outptr, size_t *outlen);
 
 #endif /* USE_NTLM */
+
+/* This is used to generate a base64 encoded XOAUTH2 authentication message
+   containing the user name and bearer token */
+CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
+                                          const char *user,
+                                          const char *bearer,
+                                          char **outptr, size_t *outlen);
 
 /* This is used to cleanup any libraries or curl modules used by the sasl
    functions */
