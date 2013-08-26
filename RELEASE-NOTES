@@ -13,6 +13,7 @@ This release includes the following changes:
  o CURLM_ADDED_ALREADY: new error code
  o test TFTP server: support "writedelay" within <servercmd>
  o krb4 support has been removed
+ o imap and smtp: added basic SASL XOAUTH2 support [9]
 
 This release includes the following bugfixes:
 
@@ -38,7 +39,7 @@ advice from friends like these:
 
  Alex McLellan, Bill Doyle, Colby Ranger, Fabian Keil, Gisle Vanem,
  John E. Malmberg, Jonathan Nieder, Kamil Dudka, Shawn Landden,
- Tor Arntsen, Will Dietz, Yi Huang
+ Tor Arntsen, Will Dietz, Yi Huang, Kyle L. Huff, Steve Holme
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -52,3 +53,4 @@ References to bug reports and discussions on issues:
  [6] = http://curl.haxx.se/mail/lib-2013-08/0211.html
  [7] = http://curl.haxx.se/bug/view.cgi?id=1264
  [8] = http://curl.haxx.se/bug/view.cgi?id=1267
+ [9] = http://curl.haxx.se/mail/lib-2013-08/0234.html
