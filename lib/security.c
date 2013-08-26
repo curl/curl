@@ -57,7 +57,7 @@
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
-#include "security.h"
+#include "curl_sec.h"
 #include "ftp.h"
 #include "sendf.h"
 #include "rawstr.h"

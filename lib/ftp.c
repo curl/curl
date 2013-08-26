@@ -59,7 +59,7 @@
 #include "ftp.h"
 #include "fileinfo.h"
 #include "ftplistparser.h"
-#include "security.h"
+#include "curl_sec.h"
 #include "strtoofft.h"
 #include "strequal.h"
 #include "sslgen.h"
