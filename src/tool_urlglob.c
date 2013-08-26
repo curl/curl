@@ -249,8 +249,8 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
   else if(ISDIGIT(*pattern)) {
     /* numeric range detected */
     unsigned long min_n;
-    unsigned long max_n;
-    unsigned long step_n;
+    unsigned long max_n = 0;
+    unsigned long step_n = 0;
     char *endp;
 
     pat->type = UPTNumRange;
