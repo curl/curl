@@ -49,8 +49,8 @@ default, the test script stops as soon as an error is detected.
 .IP "-bN"
 Use N as the base TCP/UDP port number on which to start the test servers.
 .IP "-c <curl>"
-Provide a custom curl binary to run the tests with. Default is the curl
-executable in the build tree.
+Provide a path to a custom curl binary to run the tests with. Default is the
+curl executable in the build tree.
 .IP "-d"
 Enable protocol debug: have the servers display protocol output.
 .IP "-e"
@@ -92,6 +92,10 @@ through everyone, which is very handy when debugging and then often in
 combination with \fI-g\fP.
 .IP "-v"
 Enable verbose output. Speaks more than default.
+.IP "-vc <curl>"
+Provide a path to a custom curl binary to run when verifying that the servers
+running are indeed our test servers. Default is the curl executable in the
+build tree.
 .SH "RUNNING TESTS"
 Many tests have conditions that must be met before the test case can run
 fine. They could depend on built-in features in libcurl or features present in

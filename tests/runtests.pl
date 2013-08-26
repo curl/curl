@@ -4433,6 +4433,16 @@ while(@ARGV) {
         $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
+    elsif ($ARGV[0] eq "-vc") {
+        # use this path to a curl used to verify servers
+
+        # Particularly useful when you introduce a crashing bug somewhere in
+        # the development version as then it won't be able to run any tests
+        # since it can't verify the servers!
+
+        $VCURL=$ARGV[1];
+        shift @ARGV;
+    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
@@ -4538,6 +4548,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -am      automake style output PASS/FAIL: [number] [name]
   -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
   -v       verbose output
+  -vc path use this curl only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
   [keyword] like "IPv6" to select only tests containing the key word
