@@ -10,6 +10,8 @@
    fun:Curl_connect
    fun:multi_runsingle
    fun:curl_multi_perform
+   fun:easy_transfer
+   fun:easy_perform
    fun:curl_easy_perform
    fun:operate
    fun:main
