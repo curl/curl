@@ -2104,12 +2104,6 @@ static CURLMcode add_next_timeout(struct timeval now,
   return CURLM_OK;
 }
 
-#ifdef WIN32
-#define TIMEOUT_INACCURACY 40000
-#else
-#define TIMEOUT_INACCURACY 3000
-#endif
-
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
                               curl_socket_t s,
@@ -2215,7 +2209,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
      margin.
   */
 
-  now.tv_usec += TIMEOUT_INACCURACY;
+  now.tv_usec += MULTI_TIMEOUT_INACCURACY;
   if(now.tv_usec >= 1000000) {
     now.tv_sec++;
     now.tv_usec -= 1000000;

@@ -22,7 +22,13 @@
  *
  ***************************************************************************/
 
-
+/* See multi_socket() for the explanation of this constant. Counted in number
+   of microseconds. */
+#ifdef WIN32
+#define MULTI_TIMEOUT_INACCURACY 40000
+#else
+#define MULTI_TIMEOUT_INACCURACY 3000
+#endif
 
 /*
  * Prototypes for library-wide functions provided by multi.c

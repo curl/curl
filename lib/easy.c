@@ -489,7 +489,6 @@ static int events_timer(CURLM *multi,    /* multi handle */
 
   ev->ms = timeout_ms;
   ev->msbump = TRUE;
-  /* fprintf(stderr, "%s: timeout %ld\n", __func__, timeout_ms); */
   return 0;
 }
 
@@ -647,8 +646,6 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     /* get the time stamp to use to figure out how long poll takes */
     before = curlx_tvnow();
 
-    /* fprintf(stderr, "poll(), %d numfds\n", numfds); */
-
     /* wait for activity or timeout */
     pollrc = Curl_poll(fds, numfds, (int)ev->ms);
 
@@ -793,15 +790,14 @@ static CURLcode easy_transfer(CURLM *multi)
  * DEBUG: if 'events' is set TRUE, this function will use a replacement engine
  * instead of curl_multi_perform() and use curl_multi_socket_action().
  */
-static CURLcode easy_perform(CURL *easy, bool events)
+static CURLcode easy_perform(struct SessionHandle *data, bool events)
 {
   CURLM *multi;
   CURLMcode mcode;
   CURLcode code = CURLE_OK;
-  struct SessionHandle *data = easy;
   SIGPIPE_VARIABLE(pipe_st);
 
-  if(!easy)
+  if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(data->multi) {
@@ -823,7 +819,7 @@ static CURLcode easy_perform(CURL *easy, bool events)
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
 
-  mcode = curl_multi_add_handle(multi, easy);
+  mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
     curl_multi_cleanup(multi);
     if(mcode == CURLM_OUT_OF_MEMORY)
@@ -843,7 +839,7 @@ static CURLcode easy_perform(CURL *easy, bool events)
 
   /* ignoring the return code isn't nice, but atm we can't really handle
      a failure here, room for future improvement! */
-  (void)curl_multi_remove_handle(multi, easy);
+  (void)curl_multi_remove_handle(multi, data);
 
   sigpipe_restore(&pipe_st);
 

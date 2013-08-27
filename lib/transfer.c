@@ -1952,8 +1952,10 @@ Curl_setup_transfer(
         k->exp100 = EXP100_AWAITING_CONTINUE;
         k->start100 = Curl_tvnow();
 
-        /* set a timeout for the multi interface */
-        Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
+        /* Set a timeout for the multi interface. Add the inaccuracy margin so
+           that we don't fire slightly too early and get denied to run. */
+        Curl_expire(data, CURL_TIMEOUT_EXPECT_100 +
+                    MULTI_TIMEOUT_INACCURACY / 1000);
       }
       else {
         if(data->state.expect100header)
