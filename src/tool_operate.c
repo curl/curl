@@ -69,6 +69,7 @@
 #include "tool_msgs.h"
 #include "tool_operate.h"
 #include "tool_operhlp.h"
+#include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
 #include "tool_sleep.h"
