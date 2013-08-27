@@ -582,6 +582,7 @@ sub protocolsetup {
             'FETCH'  => \&FETCH_imap,
             'LIST'   => \&LIST_imap,
             'LOGOUT'   => \&LOGOUT_imap,
+            'SEARCH'  => \&SEARCH_imap,
             'SELECT' => \&SELECT_imap,
             'STATUS'  => \&STATUS_imap,
             'STORE'  => \&STORE_imap
@@ -1027,6 +1028,32 @@ sub STATUS_imap {
     }
 
     sendcontrol "$cmdid OK STATUS completed\r\n";
+
+    return 0;
+}
+
+sub SEARCH_imap {
+    my ($testno) = @_;
+    fix_imap_params($testno);
+
+    logmsg "SEARCH_imap got test $testno\n";
+
+    $testno =~ s/[^0-9]//g;
+    my $testpart = "";
+    if ($testno > 10000) {
+        $testpart = $testno % 10000;
+        $testno = int($testno / 10000);
+    }
+
+    loadtest("$srcdir/data/test$testno");
+
+    my @data = getpart("reply", "data$testpart");
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
+    sendcontrol "$cmdid OK SEARCH completed\r\n";
 
     return 0;
 }
