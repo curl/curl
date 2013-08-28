@@ -1033,12 +1033,13 @@ sub STATUS_imap {
 }
 
 sub SEARCH_imap {
-    my ($testno) = @_;
-    fix_imap_params($testno);
+    my ($what) = @_;
+    my $testno = $selected;
+    fix_imap_params($what);
 
     logmsg "SEARCH_imap got test $testno\n";
 
-    $testno =~ s/[^0-9]//g;
+    $testno =~ s/^([^0-9]*)//;
     my $testpart = "";
     if ($testno > 10000) {
         $testpart = $testno % 10000;
