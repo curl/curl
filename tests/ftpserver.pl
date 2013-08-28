@@ -1038,6 +1038,7 @@ sub SEARCH_imap {
 
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
     else {
         my $testno = $selected;
 
