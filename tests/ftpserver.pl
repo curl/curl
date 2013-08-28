@@ -1036,13 +1036,13 @@ sub SEARCH_imap {
     my ($what) = @_;
     fix_imap_params($what);
 
+    logmsg "SEARCH_imap got $what\n";
+
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
     else {
         my $testno = $selected;
-
-        logmsg "SEARCH_imap got test $testno\n";
 
         $testno =~ s/^([^0-9]*)//;
         my $testpart = "";
