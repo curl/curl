@@ -1034,27 +1034,32 @@ sub STATUS_imap {
 
 sub SEARCH_imap {
     my ($what) = @_;
-    my $testno = $selected;
     fix_imap_params($what);
 
-    logmsg "SEARCH_imap got test $testno\n";
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    else {
+        my $testno = $selected;
 
-    $testno =~ s/^([^0-9]*)//;
-    my $testpart = "";
-    if ($testno > 10000) {
-        $testpart = $testno % 10000;
-        $testno = int($testno / 10000);
+        logmsg "SEARCH_imap got test $testno\n";
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        sendcontrol "$cmdid OK SEARCH completed\r\n";
     }
-
-    loadtest("$srcdir/data/test$testno");
-
-    my @data = getpart("reply", "data$testpart");
-
-    for my $d (@data) {
-        sendcontrol $d;
-    }
-
-    sendcontrol "$cmdid OK SEARCH completed\r\n";
 
     return 0;
 }
