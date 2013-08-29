@@ -455,8 +455,8 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 
 #ifdef CURLDEBUG
 
-struct monitor {
-  struct monitor *next; /* the next node in the list or NULL */
+struct socketmonitor {
+  struct socketmonitor *next; /* the next node in the list or NULL */
   struct pollfd socket; /* socket info of what to monitor */
 };
 
@@ -464,7 +464,7 @@ struct events {
   long ms;              /* timeout, run the timeout function when reached */
   bool msbump;          /* set TRUE when timeout is set by callback */
   int num_sockets;      /* number of nodes in the monitor list */
-  struct monitor *list; /* list of sockets to monitor */
+  struct socketmonitor *list; /* list of sockets to monitor */
   int running_handles;  /* store the returned number */
 };
 
@@ -538,8 +538,8 @@ static int events_socket(CURL *easy,      /* easy handle */
                                              pointer */
 {
   struct events *ev = userp;
-  struct monitor *m;
-  struct monitor *prev=NULL;
+  struct socketmonitor *m;
+  struct socketmonitor *prev=NULL;
   (void)socketp;
 
   m = ev->list;
@@ -547,7 +547,7 @@ static int events_socket(CURL *easy,      /* easy handle */
     if(m->socket.fd == s) {
 
       if(what == CURL_POLL_REMOVE) {
-        struct monitor *nxt = m->next;
+        struct socketmonitor *nxt = m->next;
         /* remove this node from the list of monitored sockets */
         if(prev)
           prev->next = nxt;
@@ -578,7 +578,7 @@ static int events_socket(CURL *easy,      /* easy handle */
                  __func__, s); */
     }
     else {
-      m = malloc(sizeof(struct monitor));
+      m = malloc(sizeof(struct socketmonitor));
       m->next = ev->list;
       m->socket.fd = s;
       m->socket.events = socketcb2poll(what);
@@ -624,7 +624,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
   while(!done) {
     CURLMsg *msg;
-    struct monitor *m;
+    struct socketmonitor *m;
     struct pollfd *f;
     struct pollfd fds[4];
     int numfds=0;
