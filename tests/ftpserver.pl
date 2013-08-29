@@ -1001,14 +1001,21 @@ sub EXAMINE_imap {
 
     logmsg "EXAMINE_imap got test $testno\n";
 
-    # Example from RFC 3501, 6.3.2. EXAMINE Command
-    sendcontrol "* 17 EXISTS\r\n";
-    sendcontrol "* 2 RECENT\r\n";
-    sendcontrol "* OK [UNSEEN 8] Message 8 is first unseen\r\n";
-    sendcontrol "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n";
-    sendcontrol "* OK [UIDNEXT 4392] Predicted next UID\r\n";
-    sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
-    sendcontrol "* OK [PERMANENTFLAGS ()] No permanent flags permitted\r\n";
+    $testno =~ s/[^0-9]//g;
+    my $testpart = "";
+    if ($testno > 10000) {
+        $testpart = $testno % 10000;
+        $testno = int($testno / 10000);
+    }
+
+    loadtest("$srcdir/data/test$testno");
+
+    my @data = getpart("reply", "data$testpart");
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
     sendcontrol "$cmdid OK [READ-ONLY] EXAMINE completed\r\n";
 
     return 0;
