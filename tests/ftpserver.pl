@@ -829,6 +829,9 @@ sub FETCH_imap {
         $data[0] = $response;
         logmsg "return proof we are we\n";
     }
+    elsif ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
     else {
         logmsg "retrieve a mail\n";
 
@@ -941,8 +944,13 @@ sub STORE_imap {
 
     logmsg "STORE_imap got $args\n";
 
-    sendcontrol "* $uid FETCH (FLAGS (\\Seen \\Deleted))\r\n";
-    sendcontrol "$cmdid OK STORE completed\r\n";
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
+    else {
+        sendcontrol "* $uid FETCH (FLAGS (\\Seen \\Deleted))\r\n";
+        sendcontrol "$cmdid OK STORE completed\r\n";
+    }
 
     return 0;
 }
