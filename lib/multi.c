@@ -483,6 +483,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   if(!GOOD_EASY_HANDLE(curl_handle))
     return CURLM_BAD_EASY_HANDLE;
 
+  /* Prevent users from trying to remove same easy handle more than once */
+  if(!data->multi)
+    return CURLM_OK; /* it is already removed so let's say it is fine! */
+
   if(easy) {
     bool premature = (data->mstate < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
     bool easy_owns_conn = (data->easy_conn &&
