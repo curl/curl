@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +20,8 @@
  *
  ***************************************************************************/
 #include "curlcheck.h"
-
 #include "netrc.h"
+#include "memdebug.h" /* LAST include file */
 
 static char *login;
 static char *password;
@@ -143,6 +143,9 @@ UNITTEST_START
   fail_unless(strncmp(password, "none", 4) == 0,
               "password should be 'none'");
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
+
+  free(login);
+  free(password);
 
   /* TODO:
    * Test over the size limit password / login!
