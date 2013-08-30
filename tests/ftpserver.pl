@@ -1122,7 +1122,7 @@ sub RENAME_imap {
 
     logmsg "RENAME_imap got $args\n";
 
-    if (($from_mailbox eq "") || (to_mailbox eq "")) {
+    if (($from_mailbox eq "") || ($to_mailbox eq "")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
