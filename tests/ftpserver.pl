@@ -576,22 +576,22 @@ sub protocolsetup {
     }
     elsif($proto eq 'imap') {
         %commandfunc = (
-            'APPEND' => \&APPEND_imap,
+            'APPEND'     => \&APPEND_imap,
             'CAPABILITY' => \&CAPABILITY_imap,
-            'CREATE'  => \&CREATE_imap,
-            'DELETE'  => \&DELETE_imap,
-            'EXAMINE' => \&EXAMINE_imap,
-            'FETCH'  => \&FETCH_imap,
-            'LIST'   => \&LIST_imap,
-            'LOGOUT'   => \&LOGOUT_imap,
-            'RENAME'  => \&RENAME_imap,
-            'SEARCH'  => \&SEARCH_imap,
-            'SELECT' => \&SELECT_imap,
-            'STATUS'  => \&STATUS_imap,
-            'STORE'  => \&STORE_imap
+            'CREATE'     => \&CREATE_imap,
+            'DELETE'     => \&DELETE_imap,
+            'EXAMINE'    => \&EXAMINE_imap,
+            'FETCH'      => \&FETCH_imap,
+            'LIST'       => \&LIST_imap,
+            'LOGOUT'     => \&LOGOUT_imap,
+            'RENAME'     => \&RENAME_imap,
+            'SEARCH'     => \&SEARCH_imap,
+            'SELECT'     => \&SELECT_imap,
+            'STATUS'     => \&STATUS_imap,
+            'STORE'      => \&STORE_imap
         );
         %displaytext = (
-            'LOGIN'  => ' OK LOGIN completed',
+            'LOGIN'   => ' OK LOGIN completed',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
@@ -874,12 +874,12 @@ sub APPEND_imap {
     logmsg "APPEND_imap got $args\r\n";
 
     $args =~ /^([^ ]+) [^{]*\{(\d+)\}$/;
-    my ($folder, $size) = ($1, $2);
-    fix_imap_params($folder);
+    my ($mailbox, $size) = ($1, $2);
+    fix_imap_params($mailbox);
 
     sendcontrol "+ Ready for literal data\r\n";
 
-    my $testno = $folder;
+    my $testno = $mailbox;
     my $filename = "log/upload.$testno";
 
     logmsg "Store test number $testno in $filename\n";
@@ -977,13 +977,14 @@ sub LIST_imap {
     }
     else {
         my $testno = $reference;
+
         $testno =~ s/^([^0-9]*)//;
         my $testpart = "";
         if ($testno > 10000) {
             $testpart = $testno % 10000;
             $testno = int($testno / 10000);
         }
-    
+
         loadtest("$srcdir/data/test$testno");
 
         @data = getpart("reply", "data$testpart");
