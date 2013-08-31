@@ -1651,8 +1651,16 @@ to follow location: headers.
 
 If this option is used several times, the last one will be used.
 .IP "-x, --proxy <[protocol://][user:password@]proxyhost[:port]>"
-Use the specified HTTP proxy. If the port number is not specified, it is
-assumed at port 1080.
+Use the specified proxy.
+
+The proxy string can be specified with a protocol:// prefix to specify
+alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
+socks5h:// to request the specific SOCKS version to be used. No protocol
+specified, http:// and all others will be treated as HTTP proxies. (The
+protocol support was added in curl 7.21.7)
+
+If the port number is not specified in the proxy string, it is assumed to be
+1080.
 
 This option overrides existing environment variables that set the proxy to
 use. If there's an environment variable setting a proxy, you can set proxy to
@@ -1670,11 +1678,6 @@ or pass in a colon with %3a.
 The proxy host can be specified the exact same way as the proxy environment
 variables, including the protocol prefix (http://) and the embedded user +
 password.
-
-From 7.21.7, the proxy string may be specified with a protocol:// prefix to
-specify alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
-socks5h:// to request the specific SOCKS version to be used. No protocol
-specified, http:// and all others will be treated as HTTP proxies.
 
 If this option is used several times, the last one will be used.
 .IP "-X, --request <command>"
