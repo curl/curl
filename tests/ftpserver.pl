@@ -578,6 +578,7 @@ sub protocolsetup {
         %commandfunc = (
             'APPEND'     => \&APPEND_imap,
             'CAPABILITY' => \&CAPABILITY_imap,
+            'CHECK'      => \&CHECK_imap,
             'CREATE'     => \&CREATE_imap,
             'DELETE'     => \&DELETE_imap,
             'EXAMINE'    => \&EXAMINE_imap,
@@ -1157,6 +1158,17 @@ sub RENAME_imap {
     }
     else {
         sendcontrol "$cmdid OK RENAME completed\r\n";
+    }
+
+    return 0;
+}
+
+sub CHECK_imap {
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
+    else {
+        sendcontrol "$cmdid OK CHECK completed\r\n";
     }
 
     return 0;
