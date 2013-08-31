@@ -816,54 +816,57 @@ sub SELECT_imap {
 sub FETCH_imap {
     my ($args) = @_;
     my ($uid, $how) = split(/ /, $args, 2);
-    my @data;
-    my $size;
     fix_imap_params($uid, $how);
 
     logmsg "FETCH_imap got $args\n";
 
-    if($selected eq "verifiedserver") {
-        # this is the secret command that verifies that this actually is
-        # the curl test server
-        my $response = "WE ROOLZ: $$\r\n";
-        if($verbose) {
-            print STDERR "FTPD: We returned proof we are the test server\n";
-        }
-        $data[0] = $response;
-        logmsg "return proof we are we\n";
-    }
-    elsif ($selected eq "") {
+    if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
     else {
-        logmsg "retrieve a mail\n";
+        my @data;
+        my $size;
 
-        my $testno = $selected;
-        $testno =~ s/^([^0-9]*)//;
-        my $testpart = "";
-        if ($testno > 10000) {
-            $testpart = $testno % 10000;
-            $testno = int($testno / 10000);
+        if($selected eq "verifiedserver") {
+            # this is the secret command that verifies that this actually is
+            # the curl test server
+            my $response = "WE ROOLZ: $$\r\n";
+            if($verbose) {
+                print STDERR "FTPD: We returned proof we are the test server\n";
+            }
+            $data[0] = $response;
+            logmsg "return proof we are we\n";
+        }
+        else {
+            logmsg "retrieve a mail\n";
+
+            my $testno = $selected;
+            $testno =~ s/^([^0-9]*)//;
+            my $testpart = "";
+            if ($testno > 10000) {
+                $testpart = $testno % 10000;
+                $testno = int($testno / 10000);
+            }
+
+            # send mail content
+            loadtest("$srcdir/data/test$testno");
+
+            @data = getpart("reply", "data$testpart");
         }
 
-        # send mail content
-        loadtest("$srcdir/data/test$testno");
+        for (@data) {
+            $size += length($_);
+        }
 
-        @data = getpart("reply", "data$testpart");
+        sendcontrol "* $uid FETCH ($how {$size}\r\n";
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        sendcontrol ")\r\n";
+        sendcontrol "$cmdid OK FETCH completed\r\n";
     }
-
-    for (@data) {
-        $size += length($_);
-    }
-
-    sendcontrol "* $uid FETCH ($how {$size}\r\n";
-
-    for my $d (@data) {
-        sendcontrol $d;
-    }
-
-    sendcontrol ")\r\n";
-    sendcontrol "$cmdid OK FETCH completed\r\n";
 
     return 0;
 }
@@ -973,7 +976,10 @@ sub LIST_imap {
 
     logmsg "LIST_imap got $args\n";
 
-    if ($reference eq "verifiedserver") {
+    if ($reference eq "") {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    elsif ($reference eq "verifiedserver") {
         # this is the secret command that verifies that this actually is
         # the curl test server
         sendcontrol "* LIST () \"/\" \"WE ROOLZ: $$\"\r\n";
@@ -984,9 +990,6 @@ sub LIST_imap {
         }
 
         logmsg "return proof we are we\n";
-    }
-    elsif ($reference eq "") {
-        sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
         my $testno = $reference;
