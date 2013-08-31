@@ -967,13 +967,13 @@ sub LIST_imap {
     logmsg "LIST_imap got $args\n";
 
     if ($reference eq "verifiedserver") {
-         # this is the secret command that verifies that this actually is
-         # the curl test server
-         @data = ("* LIST () \"/\" \"WE ROOLZ: $$\"\r\n");
-         if($verbose) {
-             print STDERR "FTPD: We returned proof we are the test server\n";
-         }
-         logmsg "return proof we are we\n";
+        # this is the secret command that verifies that this actually is
+        # the curl test server
+        @data = ("* LIST () \"/\" \"WE ROOLZ: $$\"\r\n");
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
+        }
+        logmsg "return proof we are we\n";
     }
     else {
         my $testno = $reference;
