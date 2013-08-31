@@ -566,7 +566,6 @@ X_OBJS= \
 	$(DIROBJ)\imap.obj \
 	$(DIROBJ)\inet_ntop.obj \
 	$(DIROBJ)\inet_pton.obj \
-	$(DIROBJ)\krb4.obj \
 	$(DIROBJ)\krb5.obj \
 	$(DIROBJ)\ldap.obj \
 	$(DIROBJ)\llist.obj \
