@@ -24,7 +24,7 @@ This release includes the following bugfixes:
  o tests 2032, 2033: Don't hardcode port in expected output
  o urlglob: better detect unclosed braces, empty lists and overflows [7]
  o urlglob: error out on range overflow [8]
- o imap: Fixed response check for SEARCH command
+ o imap: Fixed response check for SEARCH and EXPUNGE commands [10]
  o handle arbitrary-length username and password [2]
  o TFTP: make the CURLOPT_LOW_SPEED* options work [4]
  o curl.h: name space pollution by "enum type" [5]
@@ -54,3 +54,4 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/bug/view.cgi?id=1264
  [8] = http://curl.haxx.se/bug/view.cgi?id=1267
  [9] = http://curl.haxx.se/mail/lib-2013-08/0234.html
+ [10] = http://curl.haxx.se/mail/lib-2013-08/0136.html
