@@ -34,7 +34,7 @@
 
 int test(char *URL)
 {
-  CURLcode res;
+  CURLcode res = 0;
   CURL *curl[NUM_HANDLES] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;
