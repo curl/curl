@@ -718,7 +718,7 @@ static CURLcode easy_transfer(CURLM *multi)
 {
   bool done = FALSE;
   CURLMcode mcode = CURLM_OK;
-  CURLcode code;
+  CURLcode code = CURLE_OK;
   struct timeval before;
   int without_fds = 0;  /* count number of consecutive returns from
                            curl_multi_wait() without any filedescriptors */
