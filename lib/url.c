@@ -4795,9 +4795,9 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
  * Override the login details from the URL with that in the CURLOPT_USERPWD
  * option or a .netrc file, if applicable.
  */
-static int override_login(struct SessionHandle *data,
-                          struct connectdata *conn,
-                          char **userp, char **passwdp, char **optionsp)
+static CURLcode override_login(struct SessionHandle *data,
+                               struct connectdata *conn,
+                               char **userp, char **passwdp, char **optionsp)
 {
   if(data->set.str[STRING_USERNAME]) {
     free(*userp);
@@ -4838,6 +4838,7 @@ static int override_login(struct SessionHandle *data,
       conn->bits.user_passwd = TRUE; /* enable user+password */
     }
   }
+
   return CURLE_OK;
 }
 
