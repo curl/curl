@@ -1608,6 +1608,7 @@ enum {
                              for us! */
   CURL_HTTP_VERSION_1_0,  /* please use HTTP 1.0 in the request */
   CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
+  CURL_HTTP_VERSION_2_0,  /* please use HTTP 2.0 in the request */
 
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };

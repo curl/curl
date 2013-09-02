@@ -1,0 +1,19 @@
+
+HTTP2 with libcurl
+
+ Spec: http://tools.ietf.org/html/draft-ietf-httpbis-http2-06
+
+ Over an http:// URL
+
+  If CURLOPT_HTTP_VERSION is set to CURL_HTTP_VERSION_2, libcurl will include
+  an upgrade header in the initial request to the host to allow upgrading to
+  http2. Possibly introduce an option that will cause libcurl to fail if not
+  possible to upgrade. Possibly introduce an option that makes libcurl use
+  http2 at once over http://
+
+ Over an https:// URL
+
+  If CURLOPT_HTTP_VERSION is set to CURL_HTTP_VERSION_2, libcurl will use ALPN
+  (or NPN) to negotiate which protocol to continue with. Possibly introduce an
+  option that will cause libcurl to fail if not possible to use http2.
+
