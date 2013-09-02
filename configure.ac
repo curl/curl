@@ -2713,6 +2713,92 @@ dnl genprogc/thread_quick_ref.htm
 
 
 dnl **********************************************************************
+dnl Check for nghttp2
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to build with nghttp2])
+OPT_H2="no"
+AC_ARG_WITH(nghttp2,
+AC_HELP_STRING([--with-nghttp2=PATH],[Enable nghttp2 usage])
+AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
+  [OPT_H2=$withval])
+case "$OPT_H2" in
+  no)
+    dnl --without-nghttp2 option used
+    want_idn="no"
+    AC_MSG_RESULT([no])
+    ;;
+  default)
+    dnl configure option not specified
+    want_h2="no"
+    want_h2_path="default"
+    AC_MSG_RESULT([no])
+    ;;
+  yes)
+    dnl --with-nghttp2 option used without path
+    want_h2="yes"
+    want_h2_path=""
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    dnl --with-nghttp2 option used with path
+    want_h2="yes"
+    want_h2_path="$withval"
+    AC_MSG_RESULT([yes ($withval)])
+    ;;
+esac
+
+curl_h2_msg="disabled (--with-nghttp2)"
+if test X"$OPT_H2" != Xno; then
+  dnl backup the pre-librtmp variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  h2pcdir=${want_h2_path}/lib/pkgconfig
+  CURL_CHECK_PKGCONFIG(libnghttp2, $h2pcdir)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_H2=`CURL_EXPORT_PCDIR([$h2pcdir])
+      $PKGCONFIG --libs-only-l libnghttp2`
+    AC_MSG_NOTICE([-l is $LIB_H2])
+
+    CPP_H2=`CURL_EXPORT_PCDIR([$h2pcdir]) dnl
+      $PKGCONFIG --cflags-only-I libnghttp2`
+    AC_MSG_NOTICE([-I is $CPP_H2])
+
+    LD_H2=`CURL_EXPORT_PCDIR([$h2pcdir])
+      $PKGCONFIG --libs-only-L libnghttp2`
+    AC_MSG_NOTICE([-L is $LD_H2])
+
+  else
+    dnl To avoid link errors, we do not allow --libnghttp2 without
+    dnl a pkgconfig file
+    AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_H2"
+  CPPFLAGS="$CPPFLAGS $CPP_H2"
+  LIBS="$LIB_H2 $LIBS"
+
+  AC_CHECK_LIB(nghttp2, nghttp2_session_client_new,
+    [
+     AC_CHECK_HEADERS(nghttp2/nghttp2.h,
+        curl_h2_msg="enabled (nghttp2)"
+        NGHTTP2_ENABLED=1
+        AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
+        AC_SUBST(USE_NGHTTP2, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+  )
+
+fi
+
+dnl **********************************************************************
 dnl Back to "normal" configuring
 dnl **********************************************************************
 
@@ -3461,6 +3547,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 
