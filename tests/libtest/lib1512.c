@@ -34,7 +34,7 @@
 
 int test(char *URL)
 {
-  CURLcode res = 0;
+  int res = 0;
   CURL *curl[NUM_HANDLES] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;
@@ -44,7 +44,7 @@ int test(char *URL)
   char target_url[256];
   (void)URL; /* URL is setup in the code */
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -84,6 +84,6 @@ test_cleanup:
   curl_slist_free_all(slist);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 
