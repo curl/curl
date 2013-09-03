@@ -2619,48 +2619,49 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     fi
     capath="$want_capath"
     ca="no"
-  elif test "x$cross_compiling" != "xyes"; then
-    dnl NOT cross-compiling and...
-    dnl neither of the --with-ca-* options are provided
-
+  else
     dnl first try autodetecting a CA bundle , then a CA path
     dnl both autodetections can be skipped by --without-ca-*
     ca="no"
     capath="no"
-    if test "x$want_ca" = "xunset"; then
-      dnl the path we previously would have installed the curl ca bundle
-      dnl to, and thus we now check for an already existing cert in that place
-      dnl in case we find no other
-      if test "x$prefix" != xNONE; then
-        cac="${prefix}/share/curl/curl-ca-bundle.crt"
-      else
-        cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
-      fi
+    if test "x$cross_compiling" != "xyes"; then
+      dnl NOT cross-compiling and...
+      dnl neither of the --with-ca-* options are provided
+      if test "x$want_ca" = "xunset"; then
+        dnl the path we previously would have installed the curl ca bundle
+        dnl to, and thus we now check for an already existing cert in that
+        dnl place in case we find no other
+        if test "x$prefix" != xNONE; then
+          cac="${prefix}/share/curl/curl-ca-bundle.crt"
+        else
+          cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+        fi
 
-      for a in /etc/ssl/certs/ca-certificates.crt \
-               /etc/pki/tls/certs/ca-bundle.crt \
-               /usr/share/ssl/certs/ca-bundle.crt \
-               /usr/local/share/certs/ca-root.crt \
-               /etc/ssl/cert.pem \
-               "$cac"; do
-        if test -f "$a"; then
-          ca="$a"
-          break
-        fi
-      done
+        for a in /etc/ssl/certs/ca-certificates.crt \
+                 /etc/pki/tls/certs/ca-bundle.crt \
+                 /usr/share/ssl/certs/ca-bundle.crt \
+                 /usr/local/share/certs/ca-root.crt \
+                 /etc/ssl/cert.pem \
+                 "$cac"; do
+          if test -f "$a"; then
+            ca="$a"
+            break
+          fi
+        done
+      fi
+      if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
+              "x$OPENSSL_ENABLED" = "x1"; then
+        for a in /etc/ssl/certs/; do
+          if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+            capath="$a"
+            break
+          fi
+        done
+      fi
+    else
+      dnl no option given and cross-compiling
+      AC_MSG_WARN([skipped the ca-cert path detection when cross-compiling])
     fi
-    if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
-            "x$OPENSSL_ENABLED" = "x1"; then
-      for a in /etc/ssl/certs/; do
-        if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-          capath="$a"
-          break
-        fi
-      done
-    fi
-  else
-    dnl no option given and cross-compiling
-    AC_MSG_WARN([skipped the ca-cert path detection when cross-compiling])
   fi
 
   if test "x$ca" != "xno"; then
