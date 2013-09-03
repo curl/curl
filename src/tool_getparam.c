@@ -285,7 +285,8 @@ static const struct feat feats[] = {
   {"krb4",           CURL_VERSION_KERBEROS4},
   {"libz",           CURL_VERSION_LIBZ},
   {"CharConv",       CURL_VERSION_CONV},
-  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP}
+  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
+  {"HTTP2",          CURL_VERSION_HTTP2}
 };
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
