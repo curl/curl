@@ -2172,6 +2172,7 @@ typedef struct {
 #define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
 #define CURL_VERSION_TLSAUTH_SRP (1<<14) /* TLS-SRP auth is supported */
 #define CURL_VERSION_NTLM_WB   (1<<15) /* NTLM delegating to winbind helper */
+#define CURL_VERSION_HTTP2     (1<<16) /* HTTP2 support built-in */
 
  /*
  * NAME curl_version_info()
