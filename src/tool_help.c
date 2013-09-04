@@ -100,6 +100,8 @@ static const char *const helptext[] = {
   "     --hostpubmd5 MD5  "
   "Hex encoded MD5 string of the host public key. (SSH)",
   " -0, --http1.0       Use HTTP 1.0 (H)",
+  "     --http1.1       Use HTTP 1.1 (H)",
+  "     --http2.0       Use HTTP 2.0 (H)",
   "     --ignore-content-length  Ignore the HTTP Content-Length header",
   " -i, --include       Include protocol headers in the output (H/F)",
   " -k, --insecure      Allow connections to SSL sites without certs (H)",

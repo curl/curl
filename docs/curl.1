@@ -113,8 +113,14 @@ same command line option.)
 Make curl display progress as a simple progress bar instead of the standard,
 more informational, meter.
 .IP "-0, --http1.0"
-(HTTP) Forces curl to issue its requests using HTTP 1.0 instead of using its
-internally preferred: HTTP 1.1.
+(HTTP) Tells curl to use HTTP version 1.0 instead of using its internally
+preferred: HTTP 1.1.
+.IP "--http1.1"
+(HTTP) Tells curl to use HTTP version 1.1. This is the internal default
+version. (Added in 7.33.0)
+.IP "--http2.0"
+(HTTP) Tells curl to issue its requests using HTTP 2.0. This requires that the
+underlying libcurl was built to support it. (Added in 7.33.0)
 .IP "-1, --tlsv1"
 (SSL)
 Forces curl to use TLS version 1 when negotiating with a remote TLS server.

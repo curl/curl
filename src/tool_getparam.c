@@ -176,7 +176,9 @@ static const struct LongShort aliases[]= {
   {"$J", "metalink",                 FALSE},
   {"$K", "sasl-ir",                  FALSE},
   {"$L", "test-event",               FALSE},
-  {"0",  "http1.0",                  FALSE},
+  {"00",  "http1.0",                 FALSE},
+  {"01",  "http1.1",                 FALSE},
+  {"02",  "http2.0",                 FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
   {"3",  "sslv3",                    FALSE},
@@ -985,9 +987,21 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case '~': /* --xattr */
       config->xattr = toggle;
       break;
-    case '0':
-      /* HTTP version 1.0 */
-      config->httpversion = CURL_HTTP_VERSION_1_0;
+    case '0': /* --http* options */
+      switch(subletter) {
+      case '0':
+        /* HTTP version 1.0 */
+        config->httpversion = CURL_HTTP_VERSION_1_0;
+        break;
+      case '1':
+        /* HTTP version 1.1 */
+        config->httpversion = CURL_HTTP_VERSION_1_1;
+        break;
+      case '2':
+        /* HTTP version 2.0 */
+        config->httpversion = CURL_HTTP_VERSION_2_0;
+        break;
+      }
       break;
     case '1':
       /* TLS version 1 */
