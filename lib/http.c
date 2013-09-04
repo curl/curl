@@ -1470,14 +1470,19 @@ CURLcode Curl_http_done(struct connectdata *conn,
 }
 
 
-/* Determine if we should use HTTP 1.1 for this request. Reasons to avoid it
-   are if the user specifically requested HTTP 1.0, if the server we are
-   connected to only supports 1.0, or if any server previously contacted to
-   handle this request only supports 1.0. */
-static bool use_http_1_1(const struct SessionHandle *data,
-                         const struct connectdata *conn)
+/*
+ * Determine if we should use HTTP 1.1 (OR BETTER) for this request. Reasons
+ * to avoid it include:
+ *
+ * - if the user specifically requested HTTP 1.0
+ * - if the server we are connected to only supports 1.0
+ * - if any server previously contacted to handle this request only supports
+ * 1.0.
+ */
+static bool use_http_1_1plus(const struct SessionHandle *data,
+                             const struct connectdata *conn)
 {
-  return ((data->set.httpversion == CURL_HTTP_VERSION_1_1) ||
+  return ((data->set.httpversion >= CURL_HTTP_VERSION_1_1) ||
          ((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
           ((conn->httpversion == 11) ||
            ((conn->httpversion != 10) &&
@@ -1493,7 +1498,7 @@ static CURLcode expect100(struct SessionHandle *data,
   const char *ptr;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if(use_http_1_1(data, conn)) {
+  if(use_http_1_1plus(data, conn)) {
     /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
        100-continue to the headers which actually speeds up post operations
        (as there is one packet coming back from the web server) */
@@ -1796,7 +1801,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
-      else if(use_http_1_1(data, conn)) {
+      else if(use_http_1_1plus(data, conn)) {
         /* HTTP, upload, unknown file size and not HTTP 1.0 */
         data->req.upload_chunky = TRUE;
       }
@@ -2096,7 +2101,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   /* Use 1.1 unless the user specifically asked for 1.0 or the server only
      supports 1.0 */
-  httpstring= use_http_1_1(data, conn)?"1.1":"1.0";
+  httpstring= use_http_1_1plus(data, conn)?"1.1":"1.0";
 
   /* initialize a dynamic send-buffer */
   req_buffer = Curl_add_buffer_init();
