@@ -579,9 +579,9 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
   else
 #endif
-  if((imapc->authmechs & SASL_MECH_XOAUTH2) &&
-     (imapc->prefmech & SASL_MECH_XOAUTH2) &&
-     (imapc->prefmech != SASL_AUTH_ANY) || conn->xoauth2_bearer) {
+  if(((imapc->authmechs & SASL_MECH_XOAUTH2) &&
+      (imapc->prefmech & SASL_MECH_XOAUTH2) &&
+      (imapc->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
     mech = "XOAUTH2";
     state1 = IMAP_AUTHENTICATE_XOAUTH2;
     state2 = IMAP_AUTHENTICATE_FINAL;

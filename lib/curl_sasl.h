@@ -36,7 +36,7 @@
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
-#define SASL_AUTH_ANY           ~0
+#define SASL_AUTH_ANY           ~0U
 
 /* This is used to generate a base64 encoded PLAIN authentication message */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
