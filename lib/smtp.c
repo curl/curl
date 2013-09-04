@@ -500,9 +500,9 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
     }
   else
 #endif
-
   if((smtpc->authmechs & SASL_MECH_XOAUTH2) &&
-     (smtpc->prefmech & SASL_MECH_XOAUTH2)) {
+     (smtpc->prefmech & SASL_MECH_XOAUTH2) &&
+     (smtpc->prefmech != SASL_AUTH_ANY) || conn->xoauth2_bearer) {
     mech = "XOAUTH2";
     state1 = SMTP_AUTH_XOAUTH2;
     state2 = SMTP_AUTH_FINAL;
