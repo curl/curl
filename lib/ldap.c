@@ -77,13 +77,14 @@
 /* Use our own implementation. */
 
 typedef struct {
-    char   *lud_host;
-    int     lud_port;
-    char   *lud_dn;
-    char  **lud_attrs;
-    int     lud_scope;
-    char   *lud_filter;
-    char  **lud_exts;
+  char   *lud_host;
+  int     lud_port;
+  char   *lud_dn;
+  char  **lud_attrs;
+  int     lud_scope;
+  char   *lud_filter;
+  char  **lud_exts;
+  char  **lud_attrs_dup; /* gets each entry malloc'ed */
 } CURL_LDAPURLDesc;
 
 #undef LDAPURLDesc
@@ -364,7 +365,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
-                     ludp->lud_filter, ludp->lud_attrs, 0, &result);
+                     ludp->lud_filter, ludp->lud_attrs_dup, 0, &result);
 
   if(rc != 0 && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
@@ -543,14 +544,9 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
   }
 
   for(i = 0; ludp->lud_attrs && ludp->lud_attrs[i]; i++) {
-    ludp->lud_attrs[i] = curl_easy_unescape(data, ludp->lud_attrs[i], 0, NULL);
-    if(!ludp->lud_attrs[i])
-      return (FALSE);
-  }
-
-  for(i = 0; ludp->lud_exts && ludp->lud_exts[i]; i++) {
-    ludp->lud_exts[i] = curl_easy_unescape(data, ludp->lud_exts[i], 0, NULL);
-    if(!ludp->lud_exts[i])
+    ludp->lud_attrs_dup[i] = curl_easy_unescape(data, ludp->lud_attrs[i],
+                                                0, NULL);
+    if(!ludp->lud_attrs_dup[i])
       return (FALSE);
   }
 
@@ -623,6 +619,11 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     for(i = 0; ludp->lud_attrs[i]; i++)
       LDAP_TRACE (("attr[%d] '%s'\n", i, ludp->lud_attrs[i]));
+
+    /* allocate the array to receive the unescaped attributes */
+    ludp->lud_attrs_dup = calloc(i+1, sizeof(char*));
+    if(!ludp->lud_attrs_dup)
+      return LDAP_NO_MEMORY;
   }
 
   p = q;
@@ -637,8 +638,9 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   if(*p && *p != '?') {
     ludp->lud_scope = str2scope(p);
-    if(ludp->lud_scope == -1)
+    if(ludp->lud_scope == -1) {
       return LDAP_INVALID_SYNTAX;
+    }
     LDAP_TRACE (("scope %d\n", ludp->lud_scope));
   }
 
@@ -651,24 +653,12 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   q = strchr(p, '?');
   if(q)
     *q++ = '\0';
-  if(!*p)
+  if(!*p) {
     return LDAP_INVALID_SYNTAX;
+  }
 
   ludp->lud_filter = p;
   LDAP_TRACE (("filter '%s'\n", ludp->lud_filter));
-
-  p = q;
-  if(!p)
-    goto success;
-
-  /* parse extensions
-   */
-  ludp->lud_exts = split_str(p);
-  if(!ludp->lud_exts)
-    return LDAP_NO_MEMORY;
-
-  for(i = 0; ludp->lud_exts[i]; i++)
-    LDAP_TRACE (("exts[%d] '%s'\n", i, ludp->lud_exts[i]));
 
   success:
   if(!unescape_elements(conn->data, ludp))
@@ -709,16 +699,18 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp)
     free(ludp->lud_filter);
 
   if(ludp->lud_attrs) {
-    for(i = 0; ludp->lud_attrs[i]; i++)
-      free(ludp->lud_attrs[i]);
+    if(ludp->lud_attrs_dup) {
+      for(i = 0; ludp->lud_attrs_dup[i]; i++) {
+        if(!ludp->lud_attrs_dup[i])
+          /* abort loop on first NULL */
+          break;
+        free(ludp->lud_attrs_dup[i]);
+      }
+      free(ludp->lud_attrs_dup);
+    }
     free(ludp->lud_attrs);
   }
 
-  if(ludp->lud_exts) {
-    for(i = 0; ludp->lud_exts[i]; i++)
-      free(ludp->lud_exts[i]);
-    free(ludp->lud_exts);
-  }
   free (ludp);
 }
 #endif  /* !HAVE_LDAP_URL_PARSE */
