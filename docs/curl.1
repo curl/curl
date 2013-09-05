@@ -394,7 +394,8 @@ If this option is used several times, the last one will be used.
 .IP "-E, --cert <certificate[:password]>"
 (SSL) Tells curl to use the specified client certificate file when getting a
 file with HTTPS, FTPS or another SSL-based protocol. The certificate must be
-in PEM format.  If the optional password isn't specified, it will be queried
+in PKCS#12 format if using Secure Transport, or PEM format if using any other
+engine.  If the optional password isn't specified, it will be queried
 for on the terminal. Note that this option assumes a \&"certificate" file that
 is the private key and the private certificate concatenated! See \fI--cert\fP
 and \fI--key\fP to specify them independently.
@@ -410,9 +411,10 @@ recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
 (iOS and Mac OS X only) If curl is built against Secure Transport, then the
-certificate string must match the name of a certificate that's in the system or
-user keychain. The private key corresponding to the certificate, and
-certificate chain (if any),  must also be present in the keychain.
+certificate string can either be the name of a certificate/private key in the
+system or user keychain, or the path to a PKCS#12-encoded certificate and
+private key. If you want to use a file from the current directory, please
+precede it with "./" prefix, in order to avoid confusion with a nickname.
 
 If this option is used several times, the last one will be used.
 .IP "--engine <name>"

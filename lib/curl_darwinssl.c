@@ -819,6 +819,68 @@ static OSStatus CopyIdentityWithLabel(char *label,
   return status;
 }
 
+static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
+                                           const char *cPassword,
+                                           SecIdentityRef *out_cert_and_key)
+{
+  OSStatus status = errSecItemNotFound;
+  CFURLRef pkcs_url = CFURLCreateFromFileSystemRepresentation(NULL,
+    (const UInt8 *)cPath, strlen(cPath), false);
+  CFStringRef password = cPassword ? CFStringCreateWithCString(NULL,
+    cPassword, kCFStringEncodingUTF8) : NULL;
+  CFDataRef pkcs_data = NULL;
+
+  /* We can import P12 files on iOS or OS X 10.6 or later: */
+#if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
+  if(CFURLCreateDataAndPropertiesFromResource(NULL, pkcs_url, &pkcs_data,
+    NULL, NULL, &status)) {
+    const void *cKeys[] = {kSecImportExportPassphrase};
+    const void *cValues[] = {password};
+    CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
+      password ? 1L : 0L, NULL, NULL);
+    CFArrayRef items = NULL;
+
+    /* Here we go: */
+    status = SecPKCS12Import(pkcs_data, options, &items);
+    if(status == noErr) {
+      CFDictionaryRef identity_and_trust = CFArrayGetValueAtIndex(items, 0L);
+      const void *temp_identity = CFDictionaryGetValue(identity_and_trust,
+        kSecImportItemIdentity);
+
+      /* Retain the identity; we don't care about any other data... */
+      CFRetain(temp_identity);
+      *out_cert_and_key = (SecIdentityRef)temp_identity;
+      CFRelease(items);
+    }
+    CFRelease(options);
+    CFRelease(pkcs_data);
+  }
+#endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
+  if(password)
+    CFRelease(password);
+  CFRelease(pkcs_url);
+  return status;
+}
+
+/* This code was borrowed from nss.c, with some modifications:
+ * Determine whether the nickname passed in is a filename that needs to
+ * be loaded as a PEM or a regular NSS nickname.
+ *
+ * returns 1 for a file
+ * returns 0 for not a file
+ */
+CF_INLINE bool is_file(const char *filename)
+{
+  struct_stat st;
+
+  if(filename == NULL)
+    return false;
+
+  if(stat(filename, &st) == 0)
+    return S_ISREG(st.st_mode);
+  return false;
+}
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -988,9 +1050,27 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
   if(data->set.str[STRING_CERT]) {
     SecIdentityRef cert_and_key = NULL;
+    bool is_cert_file = is_file(data->set.str[STRING_CERT]);
 
-    /* User wants to authenticate with a client cert. Look for it: */
-    err = CopyIdentityWithLabel(data->set.str[STRING_CERT], &cert_and_key);
+    /* User wants to authenticate with a client cert. Look for it:
+       If we detect that this is a file on disk, then let's load it.
+       Otherwise, assume that the user wants to use an identity loaded
+       from the Keychain. */
+    if(is_cert_file) {
+      if(!data->set.str[STRING_CERT_TYPE])
+        infof(data, "WARNING: SSL: Certificate type not set, assuming "
+                    "PKCS#12 format.\n");
+      else if(strncmp(data->set.str[STRING_CERT_TYPE], "P12",
+        strlen(data->set.str[STRING_CERT_TYPE])) != 0)
+        infof(data, "WARNING: SSL: The Security framework only supports "
+                    "loading identities that are in PKCS#12 format.\n");
+
+      err = CopyIdentityFromPKCS12File(data->set.str[STRING_CERT],
+        data->set.str[STRING_KEY_PASSWD], &cert_and_key);
+    }
+    else
+      err = CopyIdentityWithLabel(data->set.str[STRING_CERT], &cert_and_key);
+
     if(err == noErr) {
       SecCertificateRef cert = NULL;
       CFTypeRef certs_c[1];
@@ -1027,8 +1107,29 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       CFRelease(cert_and_key);
     }
     else {
-      failf(data, "SSL: Can't find the certificate \"%s\" and its private key "
-                  "in the Keychain.", data->set.str[STRING_CERT]);
+      switch(err) {
+        case errSecPkcs12VerifyFailure: case errSecAuthFailed:
+          failf(data, "SSL: Incorrect password for the certificate \"%s\" "
+                      "and its private key.", data->set.str[STRING_CERT]);
+          break;
+        case errSecDecode: case errSecUnknownFormat:
+          failf(data, "SSL: Couldn't make sense of the data in the "
+                      "certificate \"%s\" and its private key.",
+                      data->set.str[STRING_CERT]);
+          break;
+        case errSecPassphraseRequired:
+          failf(data, "SSL The certificate \"%s\" requires a password.",
+                      data->set.str[STRING_CERT]);
+          break;
+        case errSecItemNotFound:
+          failf(data, "SSL: Can't find the certificate \"%s\" and its private "
+                      "key in the Keychain.", data->set.str[STRING_CERT]);
+          break;
+        default:
+          failf(data, "SSL: Can't load the certificate \"%s\" and its private "
+                      "key: OSStatus %d", data->set.str[STRING_CERT], err);
+          break;
+      }
       return CURLE_SSL_CERTPROBLEM;
     }
   }
