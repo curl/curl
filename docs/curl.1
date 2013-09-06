@@ -286,7 +286,8 @@ If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
 contents of the file must already be URL-encoded. Multiple files can also be
 specified. Posting data from a file named 'foobar' would thus be done with
-\fI--data @foobar\fP.
+\fI--data\fP @filename. When --data is told to read from a file like that,
+carriage returns and newlines will be stripped out.
 .IP "-D, --dump-header <file>"
 Write the protocol headers to the specified file.
 
@@ -308,7 +309,7 @@ whatsoever.
 
 If you start the data with the letter @, the rest should be a filename.  Data
 is posted in a similar manner as \fI--data-ascii\fP does, except that newlines
-are preserved and conversions are never done.
+and carriage returns are preserved and conversions are never done.
 
 If this option is used several times, the ones following the first will append
 data as described in \fI-d, --data\fP.
