@@ -287,7 +287,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
         }
         else
           step_n = 1;
-        if(*endp == ']') {
+        if(endp && (*endp == ']')) {
           pattern= endp+1;
         }
         else
