@@ -31,8 +31,8 @@
 
 typedef enum {
   GLOB_OK,
-  GLOB_NO_MEM,
-  GLOB_ERROR
+  GLOB_NO_MEM = CURLE_OUT_OF_MEMORY,
+  GLOB_ERROR = CURLE_URL_MALFORMAT
 } GlobCode;
 
 void glob_cleanup(URLGlob* glob);
@@ -423,14 +423,12 @@ int glob_url(URLGlob** glob, char* url, unsigned long *urlnum, FILE *error)
   else {
     if(error && glob_expand->errormsg[0]) {
       /* send error description to the error-stream */
-      fprintf(error, "curl: (%d) [globbing] %s",
-              (res == GLOB_NO_MEM) ? CURLE_OUT_OF_MEMORY : CURLE_URL_MALFORMAT,
-              glob_expand->errormsg);
+      fprintf(error, "curl: (%d) [globbing] %s", res, glob_expand->errormsg);
     }
     /* it failed, we cleanup */
     glob_cleanup(glob_expand);
     *urlnum = 1;
-    return (res == GLOB_NO_MEM) ? CURLE_OUT_OF_MEMORY : CURLE_URL_MALFORMAT;
+    return res;
   }
 
   *glob = glob_expand;
