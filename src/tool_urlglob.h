@@ -64,7 +64,8 @@ typedef struct {
   size_t urllen;
   char *glob_buffer;
   char beenhere;
-  char errormsg[80]; /* error message buffer */
+  const char *error; /* error message */
+  size_t pos;        /* column position of error or 0 */
 } URLGlob;
 
 int glob_url(URLGlob**, char*, unsigned long *, FILE *);
