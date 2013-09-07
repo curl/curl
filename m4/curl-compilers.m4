@@ -1479,7 +1479,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH], [
           return n;
       }
     ]],[[
-      int i[2];
+      int i[2]={0,0};
       int j = rand(i[0]);
       if(j)
         return j;
