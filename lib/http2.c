@@ -32,6 +32,7 @@
 #include "http.h"
 #include "sendf.h"
 #include "curl_base64.h"
+#include "curl_memory.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
