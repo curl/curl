@@ -560,6 +560,7 @@ sub protocolsetup {
             'AUTH' => \&AUTH_pop3,
             'RETR' => \&RETR_pop3,
             'LIST' => \&LIST_pop3,
+            'DELE' => \&DELE_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
@@ -1293,6 +1294,21 @@ my @pop3list=(
      sendcontrol ".\r\n";
 
      return 0;
+}
+
+sub DELE_pop3 {
+    my ($msg) = @_;
+
+    logmsg "DELE_pop3 got $msg\n";
+
+    if ($msg eq "") {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        sendcontrol "+OK\r\n";
+    }
+
+    return 0;
 }
 
 ################
