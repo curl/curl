@@ -556,11 +556,11 @@ sub protocolsetup {
     }
     elsif($proto eq 'pop3') {
         %commandfunc = (
-            'CAPA' => \&CAPA_pop3,
             'AUTH' => \&AUTH_pop3,
-            'RETR' => \&RETR_pop3,
-            'LIST' => \&LIST_pop3,
+            'CAPA' => \&CAPA_pop3,
             'DELE' => \&DELE_pop3,
+            'LIST' => \&LIST_pop3,
+            'RETR' => \&RETR_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
