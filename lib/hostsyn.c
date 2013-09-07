@@ -72,4 +72,40 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 
 }
 
+/*
+ * Function provided by the resolver backend to set
+ * outgoing interface to use for DNS requests
+ */
+CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+                                const char *interface)
+{
+  (void)data;
+  (void)interface;
+  return CURLE_NOT_BUILT_IN;
+}
+
+/*
+ * Function provided by the resolver backend to set
+ * local IPv4 address to use as source address for DNS requests
+ */
+CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+                                const char *local_ip4)
+{
+  (void)data;
+  (void)local_ip4;
+  return CURLE_NOT_BUILT_IN;
+}
+
+/*
+ * Function provided by the resolver backend to set
+ * local IPv6 address to use as source address for DNS requests
+ */
+CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+                                const char *local_ip6)
+{
+  (void)data;
+  (void)local_ip6;
+  return CURLE_NOT_BUILT_IN;
+}
+
 #endif /* truly sync */

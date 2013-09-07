@@ -635,4 +635,28 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 
 }
 
+CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+                                const char *interface)
+{
+  (void)data;
+  (void)interface;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+                                const char *local_ip4)
+{
+  (void)data;
+  (void)local_ip4;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+                                const char *local_ip6)
+{
+  (void)data;
+  (void)local_ip6;
+  return CURLE_NOT_BUILT_IN;
+}
+
 #endif /* CURLRES_THREADED */

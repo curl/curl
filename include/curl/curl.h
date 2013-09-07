@@ -1556,6 +1556,19 @@ typedef enum {
   /* The XOAUTH2 bearer token */
   CINIT(XOAUTH2_BEARER, OBJECTPOINT, 220),
 
+  /* Set the interface string to use as outgoing network
+   * interface for DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_INTERFACE, OBJECTPOINT, 221),
+
+  /* Set the local IPv4 address to use for outgoing DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_LOCAL_IP4, OBJECTPOINT, 222),
+
+  /* Set the local IPv4 address to use for outgoing DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_LOCAL_IP6, OBJECTPOINT, 223),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

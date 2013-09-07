@@ -265,6 +265,10 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_RTSP_STREAM_URI ||                                     \
    (option) == CURLOPT_RTSP_TRANSPORT ||                                      \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                      \
+   (option) == CURLOPT_DNS_SERVERS ||                                         \
+   (option) == CURLOPT_DNS_INTERFACE ||                                       \
+   (option) == CURLOPT_DNS_LOCAL_IP4 ||                                       \
+   (option) == CURLOPT_DNS_LOCAL_IP6 ||                                       \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */

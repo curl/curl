@@ -623,4 +623,65 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 #endif
   return result;
 }
+
+CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+                                const char *interface)
+{
+#if (ARES_VERSION >= 0x010704)
+  if(!interface) interface = "";
+  ares_set_local_dev((ares_channel)data->state.resolver, interface);
+  return CURLE_OK;
+#else /* c-ares version too old! */
+  (void)data;
+  (void)interface;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+                                const char *local_ip4)
+{
+#if (ARES_VERSION >= 0x010704)
+  uint32_t a4;
+
+  if((!local_ip4) || (local_ip4[0] == 0)) {
+    a4 = 0; /* disabled: do not bind to a specific address */
+  }
+  else {
+    if(Curl_inet_pton(AF_INET, local_ip4, &a4) != 1) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+  }
+  ares_set_local_ip4((ares_channel)data->state.resolver, ntohl(a4));
+  return CURLE_OK;
+#else /* c-ares version too old! */
+  (void)data;
+  (void)local_ip4;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+                                const char *local_ip6)
+{
+#if (ARES_VERSION >= 0x010704)
+  unsigned char a6[INET6_ADDRSTRLEN];
+
+  if((!local_ip6) || (local_ip6[0] == 0)) {
+    /* disabled: do not bind to a specific address */
+    memset(a6, 0, sizeof(a6));
+  }
+  else {
+    if(Curl_inet_pton(AF_INET6, local_ip6, a6) != 1) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+  }
+  ares_set_local_ip6((ares_channel)data->state.resolver, a6);
+  return CURLE_OK;
+#else /* c-ares version too old! */
+  (void)data;
+  (void)local_ip6;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
 #endif /* CURLRES_ARES */
