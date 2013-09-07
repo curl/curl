@@ -17,3 +17,8 @@ HTTP2 with libcurl
   (or NPN) to negotiate which protocol to continue with. Possibly introduce an
   option that will cause libcurl to fail if not possible to use http2.
 
+To consider:
+
+  - How to tell libcurl when using the multi interface that all or some of the
+    handles are allowed to re-use the same physical connection. Can we just
+    re-use existing pipelining logic?
