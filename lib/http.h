@@ -151,6 +151,8 @@ struct HTTP {
 struct http_conn {
 #ifdef USE_NGHTTP2
   nghttp2_session *h2;
+#else
+  int unused; /* prevent a compiler warning */
 #endif
 };
 
