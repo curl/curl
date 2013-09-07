@@ -1001,13 +1001,14 @@ struct connectdata {
 
   union {
     struct ftp_conn ftpc;
+    struct http_conn httpc;
     struct ssh_conn sshc;
     struct tftp_state_data *tftpc;
     struct imap_conn imapc;
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
-    void *generic;
+    void *generic; /* RTMP and LDAP use this */
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
