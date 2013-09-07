@@ -27,7 +27,9 @@
 #include <curl/mprintf.h>
 
 #include <nghttp2/nghttp2.h>
+#include "urldata.h"
 #include "http2.h"
+#include "http.h"
 
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
@@ -37,6 +39,23 @@ int Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
   return snprintf(p, len, " nghttp2/%s", h2->version_str);
+}
+
+/*
+ * Append headers to ask for a HTTP1.1 to HTTP2 upgrade.
+ */
+CURLcode Curl_http2_request(Curl_send_buffer *req,
+                            struct connectdata *conn)
+{
+  const char *base64="AABBCC"; /* a fake string to start with */
+  CURLcode result =
+    Curl_add_bufferf(req,
+                     "Connection: Upgrade, HTTP2-Settings\r\n"
+                     "Upgrade: HTTP/2.0\r\n"
+                     "HTTP2-Settings: %s\r\n",
+                     base64);
+  (void)conn;
+  return result;
 }
 
 #endif

@@ -22,11 +22,21 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+
+#ifdef USE_NGHTTP2
+#include "http.h"
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
  * total length written.
  */
 int Curl_http2_ver(char *p, size_t len);
+
+CURLcode Curl_http2_request(Curl_send_buffer *req,
+                            struct connectdata *conn);
+#else /* USE_NGHTTP2 */
+#define Curl_http2_request(x,y) CURLE_OK
+#endif
 
 #endif /* HEADER_CURL_HTTP2_H */
 
