@@ -66,7 +66,7 @@ test709 test710 test711 test712 \
 test800 test801 test802 test803 test804 test805 test806 test807 test808 \
 test809 test810 test811 test812 test813 test814 \
 \
-test850 test851 test852 test853 test854 test855 test856 test857 \
+test850 test851 test852 test853 test854 test855 test856 test857 test858 \
 \
 test900 test901 test902 test903 test904 test905 test906 test907 test908 \
 test909 test910 test911 \
