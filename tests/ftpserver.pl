@@ -1280,7 +1280,7 @@ sub LIST_pop3 {
     my @data = (
         "1 100\r\n",
         "2 4294967400\r\n",	# > 4 GB
-        "4 200\r\n", # Note that message 3 is a simulated "deleted" message
+        "3 200\r\n",
     );
 
     logmsg "retrieve a message list\n";

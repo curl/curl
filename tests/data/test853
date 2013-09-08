@@ -19,7 +19,7 @@ SLOWDOWN
 <datacheck>
 1 100
 2 4294967400
-4 200
+3 200
 </datacheck>
 </reply>
 
