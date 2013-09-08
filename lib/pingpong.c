@@ -33,6 +33,7 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "non-ascii.h"
+#include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -104,6 +105,9 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
 
   if(Curl_pp_moredata(pp))
     /* We are receiving and there is data in the cache so just read it */
+    rc = 1;
+  else if(!pp->sendleft && Curl_ssl_data_pending(conn, FIRSTSOCKET))
+    /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
     rc = Curl_socket_ready(pp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
