@@ -1465,10 +1465,10 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
         return result;
 
       data->req.bytecount += chunk;
-      size -= chunk;
 
       infof(data, "Written %" FORMAT_OFF_TU " bytes, %" FORMAT_OFF_TU
-            " bytes are left for transfer\n", (curl_off_t)chunk, size);
+            " bytes are left for transfer\n", (curl_off_t)chunk,
+            size - chunk);
 
       /* Have we used the entire cache or just part of it?*/
       if(pp->cache_size > chunk) {
@@ -1485,7 +1485,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
       }
     }
 
-    if(!size)
+    if(data->req.bytecount == size)
       /* The entire data is already transferred! */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
     else {
