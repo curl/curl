@@ -560,6 +560,7 @@ sub protocolsetup {
             'CAPA' => \&CAPA_pop3,
             'DELE' => \&DELE_pop3,
             'LIST' => \&LIST_pop3,
+            'NOOP' => \&NOOP_pop3,
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
             'STAT' => \&STAT_pop3,
@@ -1321,6 +1322,19 @@ sub STAT_pop3 {
         # Send statistics for the built-in fake message list as
         # detailed in the LIST_pop3 function above
         sendcontrol "+OK 3 4294967800\r\n";
+    }
+
+    return 0;
+}
+
+sub NOOP_pop3 {
+    my ($args) = @_;
+
+    if ($args) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        sendcontrol "+OK\r\n";
     }
 
     return 0;
