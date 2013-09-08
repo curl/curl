@@ -778,7 +778,7 @@ sub fix_imap_params {
 sub CAPABILITY_imap {
     my ($testno) = @_;
 
-    if((!$capabilities) && (!$auth_mechs)) {
+    if((!@capabilities) && (!@auth_mechs)) {
         sendcontrol "$cmdid BAD Command\r\n";
     }
     else {
@@ -1200,7 +1200,7 @@ sub LOGOUT_imap {
 sub CAPA_pop3 {
     my ($testno) = @_;
 
-    if((!$capabilities) && (!$auth_mechs)) {
+    if((!@capabilities) && (!@auth_mechs)) {
         sendcontrol "-ERR Unsupported command: 'CAPA'\r\n";
     }
     else {
@@ -1244,7 +1244,7 @@ sub CAPA_pop3 {
 sub AUTH_pop3 {
     my ($testno) = @_;
 
-    if(!$auth_mechs) {
+    if(!@auth_mechs) {
         sendcontrol "-ERR Unsupported command: 'AUTH'\r\n";
     }
     else {
