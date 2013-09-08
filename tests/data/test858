@@ -19,7 +19,7 @@ CUSTOMREQUEST
 pop3
 </server>
  <name>
-POP3 DELE message
+POP3 DELE message (CUSTOMREQUEST)
  </name>
  <command>
 pop3://%HOSTIP:%POP3PORT/858 -u user:secret -X DELE -I
