@@ -125,6 +125,9 @@ SLOWDOWN
  - Send FTP responses with 0.01 sec delay between each byte
 PASVBADIP
  - makes PASV send back an illegal IP in its 227 response
+CAPA [capabilities]
+ - Enables support for and specifies a list of space separated capabilities to
+   return to the client for the IMAP CAPABILITY and POP3 CAPA commands
 
 For HTTP/HTTPS:
 auth_required   if this is set and a POST/PUT is made without auth, the

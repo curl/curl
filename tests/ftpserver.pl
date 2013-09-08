@@ -138,7 +138,7 @@ my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
 my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
-my $support_capa;  # set if server supports capability command
+my @capabilities;  # set if server supports capability commands
 my $support_auth;  # set if server supports authentication command
 my %customreply;   #
 my %customcount;   #
@@ -777,18 +777,27 @@ sub fix_imap_params {
 
 sub CAPABILITY_imap {
     my ($testno) = @_;
-    my $data;
 
-    if(!$support_capa) {
+    if(!$capabilities) {
         sendcontrol "$cmdid BAD Command\r\n";
     }
     else {
+        my $data;
+
+        # Calculate the CAPABILITY response
         $data = "* CAPABILITY IMAP4";
+
+        for my $c (@capabilities) {
+            $data .= " $c";
+        }
+
         if($support_auth) {
             $data .= " AUTH=UNKNOWN";
         }
+
         $data .= " pingpong test server\r\n";
 
+        # Send the CAPABILITY response
         sendcontrol $data;
         sendcontrol "$cmdid OK CAPABILITY completed\r\n";
     }
@@ -1190,23 +1199,33 @@ sub LOGOUT_imap {
 
 sub CAPA_pop3 {
     my ($testno) = @_;
-    my @data = ();
 
-    if(!$support_capa) {
-        push @data, "-ERR Unsupported command: 'CAPA'\r\n";
+    if(!$capabilities) {
+        sendcontrol "-ERR Unsupported command: 'CAPA'\r\n";
     }
     else {
+        my @data = ();
+
+        # Calculate the CAPA response
         push @data, "+OK List of capabilities follows\r\n";
-        push @data, "USER\r\n";
+
+        for my $c (@capabilities) {
+            push @data, "$c\r\n";
+        }
+
         if($support_auth) {
             push @data, "SASL UNKNOWN\r\n";
         }
-        push @data, "IMPLEMENTATION POP3 pingpong test server\r\n";
-        push @data, ".\r\n";
-    }
 
-    for my $d (@data) {
-        sendcontrol $d;
+        push @data, "IMPLEMENTATION POP3 pingpong test server\r\n";
+
+        # Send the CAPA response
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        # End with the magic 3-byte end of listing marker
+        sendcontrol ".\r\n";
     }
 
     return 0;
@@ -2126,7 +2145,7 @@ sub customize {
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
-    $support_capa = 0;  # default is to not support capability command
+    @capabilities = (); # default is to not support capability commands
     $support_auth = 0;  # default is to not support authentication command
     %customreply = ();  #
     %customcount = ();  #
@@ -2192,9 +2211,9 @@ sub customize {
             logmsg "FTPD: instructed to use NODATACONN\n";
             $nodataconn=1;
         }
-        elsif($_ =~ /SUPPORTCAPA/) {
+        elsif($_ =~ /CAPA (.*)/) {
             logmsg "FTPD: instructed to support CAPABILITY command\n";
-            $support_capa=1;
+            @capabilities = split(/ /, $1);
         }
         elsif($_ =~ /SUPPORTAUTH/) {
             logmsg "FTPD: instructed to support AUTHENTICATION command\n";
