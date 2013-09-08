@@ -560,12 +560,12 @@ sub protocolsetup {
             'CAPA' => \&CAPA_pop3,
             'DELE' => \&DELE_pop3,
             'LIST' => \&LIST_pop3,
+            'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
             'PASS' => '+OK Access granted',
-            'QUIT' => '+OK byebye',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
@@ -1306,6 +1306,12 @@ sub DELE_pop3 {
     else {
         sendcontrol "+OK\r\n";
     }
+
+    return 0;
+}
+
+sub QUIT_pop3 {
+    sendcontrol "+OK byebye\r\n";
 
     return 0;
 }
