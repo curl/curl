@@ -38,8 +38,11 @@ that returns pause signals to the library that it couldn't take care of any
 data at all, and that data will then be delivered again to the callback when
 the writing is later unpaused.
 
-NOTE: while it may feel tempting, take care and notice that you cannot call
-this function from another thread.
+While it may feel tempting, take care and notice that you cannot call this
+function from another thread. To unpause, you may for example call it from the
+progress callback (see \fIcurl_easy_setopt(3)\fP's
+\fICURLOPT_PROGRESSFUNCTION\fP), which gets called at least once per second,
+even if the connection is paused.
 
 When this function is called to unpause reading, the chance is high that you
 will get your write callback called before this function returns.
