@@ -139,7 +139,7 @@ my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my @capabilities;  # set if server supports capability commands
-my $support_auth;  # set if server supports authentication command
+my @auth_mechs;    # set if server supports authentication commands
 my %customreply;   #
 my %customcount;   #
 my %delayreply;    #
@@ -778,7 +778,7 @@ sub fix_imap_params {
 sub CAPABILITY_imap {
     my ($testno) = @_;
 
-    if(!$capabilities) {
+    if((!$capabilities) && (!$auth_mechs)) {
         sendcontrol "$cmdid BAD Command\r\n";
     }
     else {
@@ -791,8 +791,8 @@ sub CAPABILITY_imap {
             $data .= " $c";
         }
 
-        if($support_auth) {
-            $data .= " AUTH=UNKNOWN";
+        for my $am (@auth_mechs) {
+            $data .= " AUTH=$am";
         }
 
         $data .= " pingpong test server\r\n";
@@ -1200,11 +1200,12 @@ sub LOGOUT_imap {
 sub CAPA_pop3 {
     my ($testno) = @_;
 
-    if(!$capabilities) {
+    if((!$capabilities) && (!$auth_mechs)) {
         sendcontrol "-ERR Unsupported command: 'CAPA'\r\n";
     }
     else {
         my @data = ();
+        my $mechs;
 
         # Calculate the CAPA response
         push @data, "+OK List of capabilities follows\r\n";
@@ -1213,8 +1214,17 @@ sub CAPA_pop3 {
             push @data, "$c\r\n";
         }
 
-        if($support_auth) {
-            push @data, "SASL UNKNOWN\r\n";
+        for my $am (@auth_mechs) {
+            if(!$mechs) {
+                $mechs = "$am";
+            }
+            else {
+                $mechs .= " $am";
+            }
+        }
+
+        if($mechs) {
+            push @data, "SASL $mechs\r\n";
         }
 
         push @data, "IMPLEMENTATION POP3 pingpong test server\r\n";
@@ -1233,19 +1243,27 @@ sub CAPA_pop3 {
 
 sub AUTH_pop3 {
     my ($testno) = @_;
-    my @data = ();
 
-    if(!$support_auth) {
-        push @data, "-ERR Unsupported command: 'AUTH'\r\n";
+    if(!$auth_mechs) {
+        sendcontrol "-ERR Unsupported command: 'AUTH'\r\n";
     }
     else {
-        push @data, "+OK List of supported mechanisms follows\r\n";
-        push @data, "UNKNOWN\r\n";
-        push @data, ".\r\n";
-    }
+        my @data = ();
 
-    for my $d (@data) {
-        sendcontrol $d;
+        # Calculate the AUTH response
+        push @data, "+OK List of supported mechanisms follows\r\n";
+
+        for my $am (@auth_mechs) {
+            push @data, "$am\r\n";
+        }
+
+        # Send the AUTH response
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        # End with the magic 3-byte end of listing marker
+        sendcontrol ".\r\n";
     }
 
     return 0;
@@ -2146,7 +2164,7 @@ sub customize {
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
     @capabilities = (); # default is to not support capability commands
-    $support_auth = 0;  # default is to not support authentication command
+    @auth_mechs = ();   # default is to not support authentication commands
     %customreply = ();  #
     %customcount = ();  #
     %delayreply = ();   #
@@ -2215,9 +2233,9 @@ sub customize {
             logmsg "FTPD: instructed to support CAPABILITY command\n";
             @capabilities = split(/ /, $1);
         }
-        elsif($_ =~ /SUPPORTAUTH/) {
+        elsif($_ =~ /AUTH (.*)/) {
             logmsg "FTPD: instructed to support AUTHENTICATION command\n";
-            $support_auth=1;
+            @auth_mechs = split(/ /, $1);
         }
         elsif($_ =~ /NOSAVE/) {
             # don't actually store the file we upload - to be used when
