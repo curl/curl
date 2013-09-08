@@ -84,7 +84,9 @@ typedef struct {
   int     lud_scope;
   char   *lud_filter;
   char  **lud_exts;
-  char  **lud_attrs_dup; /* gets each entry malloc'ed */
+  size    lud_attrs_dups; /* how many were dup'ed, this field is not in the
+                             "real" struct so can only be used in code without
+                             HAVE_LDAP_URL_PARSE defined */
 } CURL_LDAPURLDesc;
 
 #undef LDAPURLDesc
@@ -365,7 +367,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
-                     ludp->lud_filter, ludp->lud_attrs_dup, 0, &result);
+                     ludp->lud_filter, ludp->lud_attrs, 0, &result);
 
   if(rc != 0 && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
@@ -540,14 +542,15 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
   if(ludp->lud_filter) {
     ludp->lud_filter = curl_easy_unescape(data, ludp->lud_filter, 0, NULL);
     if(!ludp->lud_filter)
-       return (FALSE);
+       return FALSE;
   }
 
   for(i = 0; ludp->lud_attrs && ludp->lud_attrs[i]; i++) {
-    ludp->lud_attrs_dup[i] = curl_easy_unescape(data, ludp->lud_attrs[i],
-                                                0, NULL);
-    if(!ludp->lud_attrs_dup[i])
-      return (FALSE);
+    ludp->lud_attrs[i] = curl_easy_unescape(data, ludp->lud_attrs[i],
+                                            0, NULL);
+    if(!ludp->lud_attrs[i])
+      return FALSE;
+    ludp->lud_attrs_dups++;
   }
 
   if(ludp->lud_dn) {
@@ -619,11 +622,6 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     for(i = 0; ludp->lud_attrs[i]; i++)
       LDAP_TRACE (("attr[%d] '%s'\n", i, ludp->lud_attrs[i]));
-
-    /* allocate the array to receive the unescaped attributes */
-    ludp->lud_attrs_dup = calloc(i+1, sizeof(char*));
-    if(!ludp->lud_attrs_dup)
-      return LDAP_NO_MEMORY;
   }
 
   p = q;
@@ -699,15 +697,8 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp)
     free(ludp->lud_filter);
 
   if(ludp->lud_attrs) {
-    if(ludp->lud_attrs_dup) {
-      for(i = 0; ludp->lud_attrs_dup[i]; i++) {
-        if(!ludp->lud_attrs_dup[i])
-          /* abort loop on first NULL */
-          break;
-        free(ludp->lud_attrs_dup[i]);
-      }
-      free(ludp->lud_attrs_dup);
-    }
+    for(i = 0; i < ludp->lud_attrs_dups; i++)
+      free(ludp->lud_attrs[i]);
     free(ludp->lud_attrs);
   }
 
