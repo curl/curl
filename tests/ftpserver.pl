@@ -562,6 +562,7 @@ sub protocolsetup {
             'LIST' => \&LIST_pop3,
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
+            'STAT' => \&STAT_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
@@ -1305,6 +1306,21 @@ sub DELE_pop3 {
     }
     else {
         sendcontrol "+OK\r\n";
+    }
+
+    return 0;
+}
+
+sub STAT_pop3 {
+    my ($args) = @_;
+
+    if ($args ne "") {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        # Send statistics for the built-in fake message list as
+        # detailed in the LIST_pop3 function above
+        sendcontrol "+OK 3 4294967800\r\n";
     }
 
     return 0;
