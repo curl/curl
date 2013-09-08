@@ -564,6 +564,7 @@ sub protocolsetup {
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
             'STAT' => \&STAT_pop3,
+            'UIDL' => \&UIDL_pop3,
         );
         %displaytext = (
             'USER' => '+OK We are happy you popped in!',
@@ -1373,6 +1374,28 @@ sub NOOP_pop3 {
     else {
         sendcontrol "+OK\r\n";
     }
+
+    return 0;
+}
+
+sub UIDL_pop3 {
+    # This is a built-in fake-message UID list
+    my @data = (
+        "1 1\r\n",
+        "2 2\r\n",
+        "3 4\r\n", # Note that UID 3 is a simulated "deleted" message
+    );
+
+    logmsg "retrieve a message UID list\n";
+
+    sendcontrol "+OK Listing starts\r\n";
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
+    # End with the magic 3-byte end of listing marker
+    sendcontrol ".\r\n";
 
     return 0;
 }
