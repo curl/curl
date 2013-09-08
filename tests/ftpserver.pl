@@ -564,6 +564,7 @@ sub protocolsetup {
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
             'STAT' => \&STAT_pop3,
+            'TOP'  => \&TOP_pop3,
             'UIDL' => \&UIDL_pop3,
         );
         %displaytext = (
@@ -1396,6 +1397,52 @@ sub UIDL_pop3 {
 
     # End with the magic 3-byte end of listing marker
     sendcontrol ".\r\n";
+
+    return 0;
+}
+
+sub TOP_pop3 {
+    my ($args) = @_;
+    my ($msg, $lines) = split(/ /, $args, 2);
+
+    logmsg "TOP_pop3 got $args\n";
+
+    if (($msg eq "") || ($lines eq "")) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        my @data;
+
+        if ($lines == "0") {
+            logmsg "retrieve header of mail\n";
+        }
+        else {
+            logmsg "retrieve top $lines lines of mail\n";
+        }
+
+        my $testno = $msg;
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        @data = getpart("reply", "data$testpart");
+
+        sendcontrol "+OK Mail transfer starts\r\n";
+
+        # Send mail content
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        # End with the magic 3-byte end of mail marker, assumes that the
+        # mail body ends with a CRLF!
+        sendcontrol ".\r\n";
+    }
 
     return 0;
 }
