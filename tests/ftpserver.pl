@@ -1301,7 +1301,7 @@ sub DELE_pop3 {
 
     logmsg "DELE_pop3 got $msg\n";
 
-    if ($msg eq "") {
+    if (!$msg) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
@@ -1314,7 +1314,7 @@ sub DELE_pop3 {
 sub STAT_pop3 {
     my ($args) = @_;
 
-    if ($args ne "") {
+    if ($args) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
