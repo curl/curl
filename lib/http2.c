@@ -155,7 +155,9 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
    */
 
   /* this returns number of bytes it wrote */
-  binlen = nghttp2_pack_settings_payload(binsettings, settings,
+  binlen = nghttp2_pack_settings_payload(binsettings,
+                                         sizeof(binsettings),
+                                         settings,
                                          sizeof(settings)/sizeof(settings[0]));
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
