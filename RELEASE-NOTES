@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o TFTP: make the CURLOPT_LOW_SPEED* options work [4]
  o curl.h: name space pollution by "enum type" [5]
  o multi: move on from STATE_DONE faster [6]
+ o FTP: 60 secs delay if aborted in the CURLOPT_HEADERFUNCTION callback [11]
 
 This release includes the following known bugs:
 
@@ -55,3 +56,4 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/bug/view.cgi?id=1267
  [9] = http://curl.haxx.se/mail/lib-2013-08/0234.html
  [10] = http://curl.haxx.se/mail/lib-2013-08/0136.html
+ [11] = https://bugzilla.redhat.com/1005686
