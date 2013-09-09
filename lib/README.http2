@@ -3,6 +3,13 @@ HTTP2 with libcurl
 
  Spec: http://tools.ietf.org/html/draft-ietf-httpbis-http2-06
 
+ nghttp2 (https://github.com/tatsuhiro-t/nghttp2)
+
+  We're depending on this 3rd party library for the actual low level protocol
+  handling parts. The reason for this is that HTTP2 is much more complex at
+  that layer than HTTP1.1 (which we implement on our own) and that nghttp2 is
+  an already existing and well functional library.
+
  Over an http:// URL
 
   If CURLOPT_HTTP_VERSION is set to CURL_HTTP_VERSION_2, libcurl will include
