@@ -42,6 +42,7 @@ This release includes the following bugfixes:
  o curl_easy_pause: suggest one way to unpause
  o imap: Fixed calculation of transfer when partial FETCH received [16]
  o pingpong: Check SSL library buffers for already read data [16]
+ o imap/pop3/smtp: Speed up SSL connection initialization
 
 This release includes the following known bugs:
 
