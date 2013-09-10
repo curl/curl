@@ -685,7 +685,7 @@ static int _ldap_url_parse (const struct connectdata *conn,
 
 static void _ldap_free_urldesc (LDAPURLDesc *ludp)
 {
-  int i;
+  size_t i;
 
   if(!ludp)
     return;
