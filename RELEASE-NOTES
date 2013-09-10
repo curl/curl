@@ -14,6 +14,8 @@ This release includes the following changes:
  o test TFTP server: support "writedelay" within <servercmd>
  o krb4 support has been removed
  o imap and smtp: added basic SASL XOAUTH2 support [9]
+ o darwinssl: add support for PKCS#12 files for client authentication
+ o Pass password to OpenSSL engine by user interface [15]
 
 This release includes the following bugfixes:
 
@@ -30,6 +32,17 @@ This release includes the following bugfixes:
  o curl.h: name space pollution by "enum type" [5]
  o multi: move on from STATE_DONE faster [6]
  o FTP: 60 secs delay if aborted in the CURLOPT_HEADERFUNCTION callback [11]
+ o multi_socket: improved 100-continue timeout handling
+ o curl_multi_remove_handle: allow multiple removes
+ o FTP: fix getsock during DO_MORE state [12]
+ o -x: rephrased the --proxy section somewhat
+ o acinclude: fix --without-ca-path when cross-compiling [13]
+ o LDAP: fix bad free() when URL parsing failed [14]
+ o --data: mention CRLF treatment when reading from file
+ o curl_easy_pause: suggest one way to unpause
+ o imap: Fixed calculation of transfer when partial FETCH received [16]
+ o pingpong: Check SSL library buffers for already read data [16]
+ o url: handle abortion by read/write callbacks, too [17]
 
 This release includes the following known bugs:
 
@@ -40,7 +53,9 @@ advice from friends like these:
 
  Alex McLellan, Bill Doyle, Colby Ranger, Fabian Keil, Gisle Vanem,
  John E. Malmberg, Jonathan Nieder, Kamil Dudka, Shawn Landden,
- Tor Arntsen, Will Dietz, Yi Huang, Kyle L. Huff, Steve Holme
+ Tor Arntsen, Will Dietz, Yi Huang, Kyle L. Huff, Steve Holme, Mike Mio,
+ Stefan Neis, Nick Zitmann, Geoff Beier, John Dunn, Jiri Hruska,
+ Tomas Mlcoch,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,3 +72,9 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/mail/lib-2013-08/0234.html
  [10] = http://curl.haxx.se/mail/lib-2013-08/0136.html
  [11] = https://bugzilla.redhat.com/1005686
+ [12] = http://curl.haxx.se/mail/lib-2013-08/0109.html
+ [13] = http://curl.haxx.se/bug/view.cgi?id=1273
+ [14] = http://curl.haxx.se/mail/lib-2013-08/0209.html
+ [15] = http://curl.haxx.se/mail/lib-2013-08/0265.html
+ [16] = http://curl.haxx.se/mail/lib-2013-08/0170.html
+ [17] = https://bugzilla.redhat.com/1005686
