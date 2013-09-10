@@ -84,9 +84,9 @@ typedef struct {
   int     lud_scope;
   char   *lud_filter;
   char  **lud_exts;
-  size    lud_attrs_dups; /* how many were dup'ed, this field is not in the
-                             "real" struct so can only be used in code without
-                             HAVE_LDAP_URL_PARSE defined */
+  size_t    lud_attrs_dups; /* how many were dup'ed, this field is not in the
+                               "real" struct so can only be used in code
+                               without HAVE_LDAP_URL_PARSE defined */
 } CURL_LDAPURLDesc;
 
 #undef LDAPURLDesc
