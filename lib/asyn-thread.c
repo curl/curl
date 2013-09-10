@@ -265,7 +265,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
 static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data*)arg;
-  char   service [NI_MAXSERV];
+  char service[12];
   int rc;
 
   snprintf(service, sizeof(service), "%d", tsd->port);
@@ -559,7 +559,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   struct in_addr in;
   Curl_addrinfo *res;
   int error;
-  char sbuf[NI_MAXSERV];
+  char sbuf[12];
   int pf = PF_INET;
 #ifdef CURLRES_IPV6
   struct in6_addr in6;
