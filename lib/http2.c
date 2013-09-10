@@ -171,8 +171,9 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
 
   result = Curl_add_bufferf(req,
                             "Connection: Upgrade, HTTP2-Settings\r\n"
-                            "Upgrade: HTTP/2.0\r\n"
-                            "HTTP2-Settings: %s\r\n", base64);
+                            "Upgrade: %s\r\n"
+                            "HTTP2-Settings: %s\r\n",
+                            NGHTTP2_PROTO_VERSION_ID, base64);
   free(base64);
 
   return result;
