@@ -42,7 +42,6 @@ This release includes the following bugfixes:
  o curl_easy_pause: suggest one way to unpause
  o imap: Fixed calculation of transfer when partial FETCH received [16]
  o pingpong: Check SSL library buffers for already read data [16]
- o url: handle abortion by read/write callbacks, too [17]
 
 This release includes the following known bugs:
 
@@ -77,4 +76,3 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/mail/lib-2013-08/0209.html
  [15] = http://curl.haxx.se/mail/lib-2013-08/0265.html
  [16] = http://curl.haxx.se/mail/lib-2013-08/0170.html
- [17] = https://bugzilla.redhat.com/1005686
