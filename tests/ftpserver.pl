@@ -585,9 +585,11 @@ sub protocolsetup {
             'APPEND'     => \&APPEND_imap,
             'CAPABILITY' => \&CAPABILITY_imap,
             'CHECK'      => \&CHECK_imap,
+            'CLOSE'      => \&CLOSE_imap,
             'CREATE'     => \&CREATE_imap,
             'DELETE'     => \&DELETE_imap,
             'EXAMINE'    => \&EXAMINE_imap,
+            'EXPUNGE'    => \&EXPUNGE_imap,
             'FETCH'      => \&FETCH_imap,
             'LIST'       => \&LIST_imap,
             'LOGOUT'     => \&LOGOUT_imap,
@@ -1191,6 +1193,47 @@ sub CHECK_imap {
     }
     else {
         sendcontrol "$cmdid OK CHECK completed\r\n";
+    }
+
+    return 0;
+}
+
+sub CLOSE_imap {
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
+    elsif (!@deleted) {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        sendcontrol "$cmdid OK CLOSE completed\r\n";
+
+        @deleted = ();
+    }
+
+    return 0;
+}
+
+sub EXPUNGE_imap {
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
+    else {
+        if (!@deleted) {
+            # Report the number of existing messages as per the SELECT
+            # command
+            sendcontrol "* 172 EXISTS\r\n";
+        }
+        else {
+            # Report the message UIDs being deleted
+            for my $d (@deleted) {
+                sendcontrol "* $d EXPUNGE\r\n";
+            }
+
+            @deleted = ();
+        }
+
+        sendcontrol "$cmdid OK EXPUNGE completed\r\n";
     }
 
     return 0;
