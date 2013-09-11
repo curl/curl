@@ -26,7 +26,7 @@ This release includes the following bugfixes:
  o tests 2032, 2033: Don't hardcode port in expected output
  o urlglob: better detect unclosed braces, empty lists and overflows [7]
  o urlglob: error out on range overflow [8]
- o imap: Fixed response check for SEARCH and EXPUNGE commands [10]
+ o imap: Fixed response check for SEARCH, EXPUNGE, LSUB and UID commands [10]
  o handle arbitrary-length username and password [2]
  o TFTP: make the CURLOPT_LOW_SPEED* options work [4]
  o curl.h: name space pollution by "enum type" [5]
