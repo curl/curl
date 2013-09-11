@@ -593,6 +593,7 @@ sub protocolsetup {
             'EXPUNGE'    => \&EXPUNGE_imap,
             'FETCH'      => \&FETCH_imap,
             'LIST'       => \&LIST_imap,
+            'LSUB'       => \&LSUB_imap,
             'LOGOUT'     => \&LOGOUT_imap,
             'RENAME'     => \&RENAME_imap,
             'SEARCH'     => \&SEARCH_imap,
@@ -1036,6 +1037,40 @@ sub LIST_imap {
         }
 
         sendcontrol "$cmdid OK LIST Completed\r\n";
+    }
+
+    return 0;
+}
+
+sub LSUB_imap {
+    my ($args) = @_;
+    my ($reference, $mailbox) = split(/ /, $args, 2);
+    fix_imap_params($reference, $mailbox);
+
+    logmsg "LSUB_imap got $args\n";
+
+    if ($reference eq "") {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        my $testno = $reference;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        sendcontrol "$cmdid OK LSUB Completed\r\n";
     }
 
     return 0;
