@@ -600,6 +600,7 @@ sub protocolsetup {
             'SELECT'     => \&SELECT_imap,
             'STATUS'     => \&STATUS_imap,
             'STORE'      => \&STORE_imap
+            'UID'        => \&UID_imap,
         );
         %displaytext = (
             'LOGIN'   => ' OK LOGIN completed',
@@ -1287,6 +1288,44 @@ sub COPY_imap {
     }
     else {
         sendcontrol "$cmdid OK COPY completed\r\n";
+    }
+
+    return 0;
+}
+
+sub UID_imap {
+    my ($args) = @_;
+    my ($command) = split(/ /, $args, 1);
+    fix_imap_params($command, $mailbox);
+
+    logmsg "UID_imap got $args\n";
+
+    if ($selected eq "") {
+        sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
+    }
+    elsif (($command ne "COPY") && ($command ne "FETCH") &&
+           ($command ne "STORE") && ($command ne "SEARCH")) {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        my $testno = $selected;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        sendcontrol "$cmdid OK $command completed\r\n";
     }
 
     return 0;
