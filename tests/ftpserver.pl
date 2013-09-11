@@ -563,6 +563,7 @@ sub protocolsetup {
             'NOOP' => \&NOOP_pop3,
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
+            'RSET' => \&RSET_pop3,
             'STAT' => \&STAT_pop3,
             'TOP'  => \&TOP_pop3,
             'UIDL' => \&UIDL_pop3,
@@ -1451,6 +1452,25 @@ sub TOP_pop3 {
         # End with the magic 3-byte end of mail marker, assumes that the
         # mail body ends with a CRLF!
         sendcontrol ".\r\n";
+    }
+
+    return 0;
+}
+
+sub RSET_pop3 {
+    my ($args) = @_;
+
+    if ($args) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        if (@deleted) {
+            logmsg "resetting @deleted message(s)\n";
+
+            @deleted = ();
+        }
+
+        sendcontrol "+OK\r\n";
     }
 
     return 0;
