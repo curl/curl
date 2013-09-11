@@ -586,6 +586,7 @@ sub protocolsetup {
             'CAPABILITY' => \&CAPABILITY_imap,
             'CHECK'      => \&CHECK_imap,
             'CLOSE'      => \&CLOSE_imap,
+            'COPY'       => \&COPY_imap,
             'CREATE'     => \&CREATE_imap,
             'DELETE'     => \&DELETE_imap,
             'EXAMINE'    => \&EXAMINE_imap,
@@ -1234,6 +1235,23 @@ sub EXPUNGE_imap {
         }
 
         sendcontrol "$cmdid OK EXPUNGE completed\r\n";
+    }
+
+    return 0;
+}
+
+sub COPY_imap {
+    my ($args) = @_;
+    my ($uid, $mailbox) = split(/ /, $args, 2);
+    fix_imap_params($uid, $mailbox);
+
+    logmsg "COPY_imap got $args\n";
+
+    if (($uid eq "") || ($mailbox eq "")) {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        sendcontrol "$cmdid OK COPY completed\r\n";
     }
 
     return 0;
