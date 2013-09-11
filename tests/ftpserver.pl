@@ -759,6 +759,9 @@ sub RCPT_smtp {
     $smtp_rcpt = $args;
 }
 
+# What was deleted by IMAP STORE / POP3 DELE commands
+my @deleted;
+
 ################
 ################ IMAP commands
 ################
@@ -965,7 +968,7 @@ sub APPEND_imap {
 
 sub STORE_imap {
     my ($args) = @_;
-    my ($uid, $what) = split(/ /, $args, 2);
+    my ($uid, $what, $value) = split(/ /, $args, 3);
     fix_imap_params($uid);
 
     logmsg "STORE_imap got $args\n";
@@ -973,11 +976,15 @@ sub STORE_imap {
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (($uid eq "") || ($what eq "")) {
+    elsif (($uid eq "") || ($what ne "+Flags") || ($value eq "")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
-        sendcontrol "* $uid FETCH (FLAGS (\\Seen \\Deleted))\r\n";
+        if($value eq "\\Deleted") {
+            push(@deleted, $uid);
+        }
+
+        sendcontrol "* $uid FETCH (FLAGS (\\Seen $value))\r\n";
         sendcontrol "$cmdid OK STORE completed\r\n";
     }
 
@@ -1345,6 +1352,8 @@ sub DELE_pop3 {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
+        push (@deleted, $msg);
+
         sendcontrol "+OK\r\n";
     }
 
@@ -1448,6 +1457,12 @@ sub TOP_pop3 {
 }
 
 sub QUIT_pop3 {
+    if(@deleted) {
+        logmsg "deleting @deleted message(s)\n";
+
+        @deleted = ();
+    }
+
     sendcontrol "+OK byebye\r\n";
 
     return 0;
