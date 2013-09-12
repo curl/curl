@@ -34,8 +34,10 @@ int Curl_http2_ver(char *p, size_t len);
 
 CURLcode Curl_http2_request(Curl_send_buffer *req,
                             struct connectdata *conn);
+void Curl_http2_switched(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_request(x,y) CURLE_OK
+#define Curl_http2_switched(x)
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

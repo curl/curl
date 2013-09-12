@@ -2872,10 +2872,27 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
 
-        /* if we did wait for this do enable write now! */
-        if(k->exp100) {
-          k->exp100 = EXP100_SEND_DATA;
-          k->keepon |= KEEP_SEND;
+        /* "A user agent MAY ignore unexpected 1xx status responses." */
+        switch(k->httpcode) {
+        case 100:
+          /* if we did wait for this do enable write now! */
+          if(k->exp100) {
+            k->exp100 = EXP100_SEND_DATA;
+            k->keepon |= KEEP_SEND;
+          }
+          break;
+        case 101:
+          /* Switching Protocols */
+          if(k->upgr101 == UPGR101_REQUESTED) {
+            infof(data, "Received 101\n");
+            k->upgr101 = UPGR101_RECEIVED;
+
+            /* switch to http2 now */
+            Curl_http2_switched(conn);
+          }
+          break;
+        default:
+          break;
         }
       }
       else {

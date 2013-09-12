@@ -580,13 +580,19 @@ struct Curl_async {
 typedef CURLcode (*Curl_do_more_func)(struct connectdata *, int *);
 typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
 
-
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
   EXP100_AWAITING_CONTINUE,   /* waiting for the 100 Continue header */
   EXP100_SENDING_REQUEST,     /* still sending the request but will wait for
                                  the 100 header once done with the request */
   EXP100_FAILED               /* used on 417 Expectation Failed */
+};
+
+enum upgrade101 {
+  UPGR101_INIT,               /* default state */
+  UPGR101_REQUESTED,          /* upgrade requested */
+  UPGR101_RECEIVED,           /* response received */
+  UPGR101_WORKING             /* talking upgraded protocol */
 };
 
 /*
@@ -639,6 +645,7 @@ struct SingleRequest {
                                    'RTSP/1.? XXX' line */
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
+  enum upgrade101 upgr101;      /* 101 upgrade state */
 
   int auto_decoding;            /* What content encoding. sec 3.5, RFC2616. */
 

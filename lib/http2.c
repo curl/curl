@@ -38,6 +38,32 @@
 #include "memdebug.h"
 
 /*
+ * HTTP2 handler interface. This isn't added to the general list of protocols
+ * but will be used at run-time when the protocol is dynamically switched from
+ * HTTP to HTTP2.
+ */
+const struct Curl_handler Curl_handler_http2 = {
+  "HTTP2",                              /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* do_it */
+  ZERO_NULL     ,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  PORT_HTTP,                            /* defport */
+  0,                                    /* protocol */
+  PROTOPT_NONE                          /* flags */
+};
+
+
+/*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
  * total length written.
  */
@@ -138,6 +164,7 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
   ssize_t binlen;
   char *base64;
   size_t blen;
+  struct SingleRequest *k = &conn->data->req;
 
   if(!conn->proto.httpc.h2) {
     /* The nghttp2 session is not yet setup, do it */
@@ -176,7 +203,16 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
                             NGHTTP2_PROTO_VERSION_ID, base64);
   free(base64);
 
+  k->upgr101 = UPGR101_REQUESTED;
+
   return result;
+}
+
+void Curl_http2_switched(struct connectdata *conn)
+{
+  /* we are switched! */
+  conn->handler = &Curl_handler_http2;
+  infof(conn->data, "We have switched to HTTP2\n");
 }
 
 #endif
