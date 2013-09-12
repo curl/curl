@@ -599,7 +599,7 @@ sub protocolsetup {
             'SEARCH'     => \&SEARCH_imap,
             'SELECT'     => \&SELECT_imap,
             'STATUS'     => \&STATUS_imap,
-            'STORE'      => \&STORE_imap
+            'STORE'      => \&STORE_imap,
             'UID'        => \&UID_imap,
         );
         %displaytext = (
