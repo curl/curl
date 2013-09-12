@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,8 +39,15 @@ maintain while using libcurl.  This essentially means you call
 for details.
 
 To transfer files, you always set up an "easy handle" using
-\fIcurl_easy_init(3)\fP, but when you want the file(s) transferred you have
-the option of using the "easy" interface, or the "multi" interface.
+\fIcurl_easy_init(3)\fP for a single specific transfer (in either
+direction). You then set your desired set of options in that handle with
+\fIcurk_easy_setopt(3)\fP. Options you set with \fIcurl_easy_setopt(3)\fP will
+be used on every repeated use of this handle until you either call the
+function again and change the option, or you reset them all with
+\fIcurl_easy_reset(3)\fP.
+
+To actually transfer data you have the option of using the "easy" interface,
+or the "multi" interface.
 
 The easy interface is a synchronous interface with which you call
 \fIcurl_easy_perform(3)\fP and let it perform the transfer. When it is
@@ -51,7 +58,8 @@ The multi interface on the other hand is an asynchronous interface, that you
 call and that performs only a little piece of the transfer on each invoke. It
 is perfect if you want to do things while the transfer is in progress, or
 similar. The multi interface allows you to select() on libcurl action, and
-even to easily download multiple files simultaneously using a single thread. See further details in the \fIlibcurl-multi(3)\fP man page.
+even to easily download multiple files simultaneously using a single
+thread. See further details in the \fIlibcurl-multi(3)\fP man page.
 
 You can have multiple easy handles share certain data, even if they are used
 in different threads. This magic is setup using the share interface, as
@@ -115,19 +123,21 @@ Persistent connections means that libcurl can re-use the same connection for
 several transfers, if the conditions are right.
 
 libcurl will \fBalways\fP attempt to use persistent connections. Whenever you
-use \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP, libcurl will
-attempt to use an existing connection to do the transfer, and if none exists
-it'll open a new one that will be subject for re-use on a possible following
-call to \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP.
+use \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP etc, libcurl
+will attempt to use an existing connection to do the transfer, and if none
+exists it'll open a new one that will be subject for re-use on a possible
+following call to \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP.
 
 To allow libcurl to take full advantage of persistent connections, you should
-do as many of your file transfers as possible using the same curl handle. When
-you call \fIcurl_easy_cleanup(3)\fP, all the possibly open connections held by
-libcurl will be closed and forgotten.
+do as many of your file transfers as possible using the same handle.
 
-Note that the options set with \fIcurl_easy_setopt(3)\fP will be used on
-every repeated \fIcurl_easy_perform(3)\fP call.
+If you use the easy interface, and you call \fIcurl_easy_cleanup(3)\fP, all
+the possibly open connections held by libcurl will be closed and forgotten.
 
+When you've created a multi handle and are using the multi interface, the
+connection pool is instead kept in the multi handle so closing and creating
+new easy handles to do transfers will not affect them. Instead all added easy
+handles can take advantage of the single shared pool.
 .SH "GLOBAL CONSTANTS"
 There are a variety of constants that libcurl uses, mainly through its
 internal use of other libraries, which are too complicated for the
