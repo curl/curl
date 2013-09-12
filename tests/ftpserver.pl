@@ -1296,7 +1296,7 @@ sub COPY_imap {
 sub UID_imap {
     my ($args) = @_;
     my ($command) = split(/ /, $args, 1);
-    fix_imap_params($command, $mailbox);
+    fix_imap_params($command);
 
     logmsg "UID_imap got $args\n";
 
