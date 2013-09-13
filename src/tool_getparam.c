@@ -80,7 +80,7 @@ static const struct LongShort aliases[]= {
   {"*B", "bearer",                   TRUE},
   {"*c", "connect-timeout",          TRUE},
   {"*d", "ciphers",                  TRUE},
-  {"*D", "dns-interface",                TRUE},
+  {"*D", "dns-interface",            TRUE},
   {"*e", "disable-epsv",             FALSE},
   {"*E", "epsv",                     FALSE},
          /* 'epsv' made like this to make --no-epsv and --epsv to work
