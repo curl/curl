@@ -891,6 +891,19 @@ Active Directory server.
 For more information about the individual components of a LDAP URL please
 see RFC4516.
 
+.B RTMP
+
+There's no official URL spec for RTMP so libcurl uses the URL syntax supported
+by the underlying librtmp library. It has a syntax where it wants a
+traditional URL, followed by a space and a series of space-separated
+name=value pairs.
+
+While space is not typically a "legal" letter, libcurl accepts them. When a
+user wants to pass in a '#' (hash) character it will be treated as a fragment
+and get cut off by libcurl if provided literally. You will instead have to
+escape it by providing it as backslash and its ASCII value in hexadecimal:
+"\\23".
+
 .B NOTES
 
 Starting with version 7.20.0, the fragment part of the URI will not be sent as
