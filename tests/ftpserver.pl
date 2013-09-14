@@ -1584,7 +1584,7 @@ sub TOP_pop3 {
     if (!grep /^TOP$/, @capabilities) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
-    elsif ((!$msg) || (!$lines)) {
+    elsif (($msg eq "") || ($lines eq "")) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
