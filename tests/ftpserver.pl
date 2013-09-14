@@ -561,16 +561,16 @@ sub protocolsetup {
             'DELE' => \&DELE_pop3,
             'LIST' => \&LIST_pop3,
             'NOOP' => \&NOOP_pop3,
+            'PASS' => \&PASS_pop3,
             'QUIT' => \&QUIT_pop3,
             'RETR' => \&RETR_pop3,
             'RSET' => \&RSET_pop3,
             'STAT' => \&STAT_pop3,
             'TOP'  => \&TOP_pop3,
             'UIDL' => \&UIDL_pop3,
+            'USER' => \&USER_pop3,
         );
         %displaytext = (
-            'USER' => '+OK We are happy you popped in!',
-            'PASS' => '+OK Access granted',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
@@ -1366,6 +1366,9 @@ sub LOGOUT_imap {
 ################ POP3 commands
 ################
 
+# Who is attempting to log in
+my $username;
+
 sub CAPA_pop3 {
     my ($testno) = @_;
 
@@ -1433,6 +1436,38 @@ sub AUTH_pop3 {
 
         # End with the magic 3-byte end of listing marker
         sendcontrol ".\r\n";
+    }
+
+    return 0;
+}
+
+sub USER_pop3 {
+    my ($user) = @_;
+
+    logmsg "USER_pop3 got $user\n";
+
+    if (!$user) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        $username = $user;
+
+        sendcontrol "+OK\r\n";
+    }
+
+    return 0;
+}
+
+sub PASS_pop3 {
+    my ($password) = @_;
+
+    logmsg "PASS_pop3 got $password\n";
+
+    if (($username ne "user") && ($password ne "secret")) {
+        sendcontrol "-ERR Login failure\r\n";
+    }
+    else {
+        sendcontrol "+OK Login successful\r\n";
     }
 
     return 0;
