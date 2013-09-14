@@ -833,7 +833,7 @@ sub LOGIN_imap {
     if ($user eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
-    elsif (($user ne $TEXT_USERNAME) && ($password ne $TEXT_PASSWORD)) {
+    elsif (($user ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
         sendcontrol "$cmdid NO LOGIN failed\r\n";
     }
     else {
@@ -1489,7 +1489,7 @@ sub PASS_pop3 {
 
     logmsg "PASS_pop3 got $password\n";
 
-    if (($username ne $TEXT_USERNAME) && ($password ne $TEXT_PASSWORD)) {
+    if (($username ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
         sendcontrol "-ERR Login failure\r\n";
     }
     else {
