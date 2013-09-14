@@ -844,22 +844,27 @@ sub LOGIN_imap {
 }
 
 sub SELECT_imap {
-    my ($testno) = @_;
-    fix_imap_params($testno);
+    my ($mailbox) = @_;
+    fix_imap_params($mailbox);
 
-    logmsg "SELECT_imap got test $testno\n";
+    logmsg "SELECT_imap got test $mailbox\n";
 
-    # Example from RFC 3501, 6.3.1. SELECT Command
-    sendcontrol "* 172 EXISTS\r\n";
-    sendcontrol "* 1 RECENT\r\n";
-    sendcontrol "* OK [UNSEEN 12] Message 12 is first unseen\r\n";
-    sendcontrol "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n";
-    sendcontrol "* OK [UIDNEXT 4392] Predicted next UID\r\n";
-    sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
-    sendcontrol "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n";
-    sendcontrol "$cmdid OK [READ-WRITE] SELECT completed\r\n";
+    if($mailbox eq "") {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        # Example from RFC 3501, 6.3.1. SELECT Command
+        sendcontrol "* 172 EXISTS\r\n";
+        sendcontrol "* 1 RECENT\r\n";
+        sendcontrol "* OK [UNSEEN 12] Message 12 is first unseen\r\n";
+        sendcontrol "* OK [UIDVALIDITY 3857529045] UIDs valid\r\n";
+        sendcontrol "* OK [UIDNEXT 4392] Predicted next UID\r\n";
+        sendcontrol "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft)\r\n";
+        sendcontrol "* OK [PERMANENTFLAGS (\\Deleted \\Seen \\*)] Limited\r\n";
+        sendcontrol "$cmdid OK [READ-WRITE] SELECT completed\r\n";
 
-    $selected = $testno;
+        $selected = $mailbox;
+    }
 
     return 0;
 }
