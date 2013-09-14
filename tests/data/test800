@@ -27,7 +27,7 @@ body
 imap
 </server>
  <name>
-IMAP FETCH
+IMAP FETCH message
  </name>
  <command>
 'imap://%HOSTIP:%IMAPPORT/800/;UID=1' -u user:secret

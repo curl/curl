@@ -24,7 +24,7 @@ body
 imap
 </server>
  <name>
-IMAP FETCH by UID and SECTION
+IMAP FETCH message by UID and SECTION
  </name>
  <command>
 'imap://%HOSTIP:%IMAPPORT/801/;UID=123/;SECTION=1' -u user:secret
