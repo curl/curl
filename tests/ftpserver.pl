@@ -595,6 +595,7 @@ sub protocolsetup {
             'LIST'       => \&LIST_imap,
             'LSUB'       => \&LSUB_imap,
             'LOGOUT'     => \&LOGOUT_imap,
+            'NOOP'       => \&NOOP_imap,
             'RENAME'     => \&RENAME_imap,
             'SEARCH'     => \&SEARCH_imap,
             'SELECT'     => \&SELECT_imap,
@@ -1326,6 +1327,29 @@ sub UID_imap {
         }
 
         sendcontrol "$cmdid OK $command completed\r\n";
+    }
+
+    return 0;
+}
+
+sub NOOP_imap {
+    my ($args) = @_;
+    my @data = (
+        "* 22 EXPUNGE\r\n",
+        "* 23 EXISTS\r\n",
+        "* 3 RECENT\r\n",
+        "* 14 FETCH (FLAGS (\\Seen \\Deleted))\r\n",
+    );
+
+    if ($args) {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    else {
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        sendcontrol "$cmdid OK NOOP completed\r\n";
     }
 
     return 0;
