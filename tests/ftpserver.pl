@@ -170,6 +170,12 @@ my $got_exit_signal = 0; # set if program should finish execution ASAP
 my $exit_signal;         # first signal handled in exit_signal_handler
 
 #**********************************************************************
+# Mail related definitions
+#
+my $TEXT_USERNAME = "user";
+my $TEXT_PASSWORD = "secret";
+
+#**********************************************************************
 # exit_signal_handler will be triggered to indicate that the program
 # should finish its execution in a controlled way as soon as possible.
 # For now, program will also terminate from within this handler.
@@ -594,6 +600,7 @@ sub protocolsetup {
             'FETCH'      => \&FETCH_imap,
             'LIST'       => \&LIST_imap,
             'LSUB'       => \&LSUB_imap,
+            'LOGIN'      => \&LOGIN_imap,
             'LOGOUT'     => \&LOGOUT_imap,
             'NOOP'       => \&NOOP_imap,
             'RENAME'     => \&RENAME_imap,
@@ -604,7 +611,6 @@ sub protocolsetup {
             'UID'        => \&UID_imap,
         );
         %displaytext = (
-            'LOGIN'   => ' OK LOGIN completed',
             'welcome' => join("",
             '        _   _ ____  _     '."\r\n",
             '    ___| | | |  _ \| |    '."\r\n",
@@ -812,6 +818,26 @@ sub CAPABILITY_imap {
         # Send the CAPABILITY response
         sendcontrol $data;
         sendcontrol "$cmdid OK CAPABILITY completed\r\n";
+    }
+
+    return 0;
+}
+
+sub LOGIN_imap {
+    my ($args) = @_;
+    my ($user, $password) = split(/ /, $args, 2);
+    fix_imap_params($user, $password);
+
+    logmsg "LOGIN_imap got $args\n";
+
+    if ($user eq "") {
+        sendcontrol "$cmdid BAD Command Argument\r\n";
+    }
+    elsif (($user ne $TEXT_USERNAME) && ($password ne $TEXT_PASSWORD)) {
+        sendcontrol "$cmdid NO LOGIN failed\r\n";
+    }
+    else {
+        sendcontrol "$cmdid OK LOGIN completed\r\n";
     }
 
     return 0;
@@ -1463,7 +1489,7 @@ sub PASS_pop3 {
 
     logmsg "PASS_pop3 got $password\n";
 
-    if (($username ne "user") && ($password ne "secret")) {
+    if (($username ne $TEXT_USERNAME) && ($password ne $TEXT_PASSWORD)) {
         sendcontrol "-ERR Login failure\r\n";
     }
     else {
