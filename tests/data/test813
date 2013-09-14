@@ -19,7 +19,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP RENAME Mailbox (CUSTOMREQUEST)
+IMAP RENAME mailbox (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'RENAME 666 813'

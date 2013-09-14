@@ -22,7 +22,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP SEARCH (CUSTOMREQUEST)
+IMAP SEARCH for NEW messages (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT/810 -u user:secret -X 'SEARCH NEW'

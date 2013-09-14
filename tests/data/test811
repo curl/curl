@@ -19,7 +19,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP CREATE Mailbox (CUSTOMREQUEST)
+IMAP CREATE mailbox (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'CREATE 811'

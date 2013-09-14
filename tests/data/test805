@@ -19,7 +19,7 @@ UPLOAD
 imap
 </server>
  <name>
-IMAP APPEND
+IMAP APPEND message
  </name>
  <command>
 -u user:secret -T log/upload805 'imap://%HOSTIP:%IMAPPORT/805'

@@ -19,7 +19,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP CHECK Mailbox (CUSTOMREQUEST)
+IMAP CHECK mailbox (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT/814 -u user:secret -X 'CHECK'

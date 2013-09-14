@@ -19,7 +19,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP DELETE Mailbox (CUSTOMREQUEST)
+IMAP DELETE mailbox (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'DELETE 812'
