@@ -1556,16 +1556,21 @@ sub UIDL_pop3 {
         "3 4\r\n", # Note that UID 3 is a simulated "deleted" message
     );
 
-    logmsg "retrieve a message UID list\n";
-
-    sendcontrol "+OK Listing starts\r\n";
-
-    for my $d (@data) {
-        sendcontrol $d;
+    if (!grep /^UIDL$/, @capabilities) {
+        sendcontrol "-ERR Unrecognized command\r\n";
     }
+    else {
+        logmsg "retrieve a message UID list\n";
 
-    # End with the magic 3-byte end of listing marker
-    sendcontrol ".\r\n";
+        sendcontrol "+OK Listing starts\r\n";
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+
+        # End with the magic 3-byte end of listing marker
+        sendcontrol ".\r\n";
+    }
 
     return 0;
 }
@@ -1576,7 +1581,10 @@ sub TOP_pop3 {
 
     logmsg "TOP_pop3 got $args\n";
 
-    if (($msg eq "") || ($lines eq "")) {
+    if (!grep /^TOP$/, @capabilities) {
+        sendcontrol "-ERR Unrecognized command\r\n";
+    }
+    elsif ((!$msg) || (!$lines)) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
