@@ -724,7 +724,7 @@ sub EHLO_smtp {
     }
 
     # Send the EHLO response
-    for (my $i = 0; $i < @data; i++) {
+    for (my $i = 0; $i < @data; $i++) {
         my $d = $data[$i];
 
         if($i < @data - 1) {
