@@ -623,14 +623,14 @@ sub protocolsetup {
     elsif($proto eq 'smtp') {
         %commandfunc = (
             'DATA' => \&DATA_smtp,
+            'EHLO' => \&EHLO_smtp,
             'HELO' => \&HELO_smtp,
             'RCPT' => \&RCPT_smtp,
+            'QUIT' => \&QUIT_smtp,
         );
         %displaytext = (
-            'EHLO' => "250-SIZE\r\n250 Welcome visitor, stay a while staaaaaay forever",
             'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
-            'QUIT' => '200 byebye',
             'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
@@ -783,6 +783,19 @@ sub HELO_smtp {
     }
 
     sendcontrol "250 SMTP pingpong test server Hello $client\r\n";
+
+    return 0;
+}
+
+sub EHLO_smtp {
+    sendcontrol "250-SIZE\r\n";
+    sendcontrol "250 Welcome visitor, stay a while staaaaaay forever\r\n";
+
+    return 0;
+}
+
+sub QUIT_smtp {
+    sendcontrol "200 byebye";
 
     return 0;
 }
