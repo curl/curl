@@ -689,6 +689,55 @@ sub close_dataconn {
 # what set by "RCPT"
 my $smtp_rcpt;
 
+sub EHLO_smtp {
+    my ($client) = @_;
+    my @data;
+
+    # TODO: Get the IP address of the client connection to use in the EHLO
+    # response when the client doesn't specify one but for now use 127.0.0.1
+    if (!$client) {
+        $client = "[127.0.0.1]";
+    }
+
+    # Calculate the EHLO response
+    push @data, "ESMTP pingpong test server Hello $client";
+
+    if((@capabilities) || (@auth_mechs)) {
+        my $mechs;
+
+        for my $c (@capabilities) {
+            push @data, $c;
+        }
+
+        for my $am (@auth_mechs) {
+            if(!$mechs) {
+                $mechs = "$am";
+            }
+            else {
+                $mechs .= " $am";
+            }
+        }
+
+        if($mechs) {
+            push @data, "AUTH $mechs";
+        }
+    }
+
+    # Send the EHLO response
+    for (my $i = 0; $i < @data; i++) {
+        my $d = $data[$i];
+
+        if($i < @data - 1) {
+            sendcontrol "250-$d\r\n";
+        }
+        else {
+            sendcontrol "250 $d\r\n";
+        }
+    }
+
+    return 0;
+}
+
 sub DATA_smtp {
     my $testno;
 
@@ -783,13 +832,6 @@ sub HELO_smtp {
     }
 
     sendcontrol "250 SMTP pingpong test server Hello $client\r\n";
-
-    return 0;
-}
-
-sub EHLO_smtp {
-    sendcontrol "250-SIZE\r\n";
-    sendcontrol "250 Welcome visitor, stay a while staaaaaay forever\r\n";
 
     return 0;
 }

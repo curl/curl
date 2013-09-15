@@ -127,10 +127,11 @@ PASVBADIP
  - makes PASV send back an illegal IP in its 227 response
 CAPA [capabilities]
  - Enables support for and specifies a list of space separated capabilities to
-   return to the client for the IMAP CAPABILITY and POP3 CAPA commands
+   return to the client for the IMAP CAPABILITY, POP3 CAPA and SMTP EHLO
+   commands
 AUTH [mechanisms]
  - Enables support for SASL authentication and specifies a list of space
-   separated mechanisms for IMAP and POP3
+   separated mechanisms for IMAP, POP3 and SMTP
 
 For HTTP/HTTPS:
 auth_required   if this is set and a POST/PUT is made without auth, the
