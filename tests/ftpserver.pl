@@ -837,7 +837,7 @@ sub HELO_smtp {
 }
 
 sub QUIT_smtp {
-    sendcontrol "200 byebye\r\n";
+    sendcontrol "221 byebye\r\n";
 
     return 0;
 }
