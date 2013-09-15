@@ -623,6 +623,7 @@ sub protocolsetup {
     elsif($proto eq 'smtp') {
         %commandfunc = (
             'DATA' => \&DATA_smtp,
+            'HELO' => \&HELO_smtp,
             'RCPT' => \&RCPT_smtp,
         );
         %displaytext = (
@@ -770,6 +771,20 @@ sub RCPT_smtp {
     my ($args) = @_;
 
     $smtp_rcpt = $args;
+}
+
+sub HELO_smtp {
+    my ($client) = @_;
+
+    # TODO: Get the IP address of the client connection to use in the HELO
+    # response when the client doesn't specify one but for now use 127.0.0.1
+    if (!$client) {
+        $client = "[127.0.0.1]";
+    }
+
+    sendcontrol "250 SMTP pingpong test server Hello $client\r\n";
+
+    return 0;
 }
 
 # What was deleted by IMAP STORE / POP3 DELE commands

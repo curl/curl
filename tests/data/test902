@@ -12,7 +12,6 @@ RFC821
 <reply>
 <servercmd>
 REPLY EHLO 500 Command unrecognized
-REPLY HELO 250 Already old but still servicing...
 </servercmd>
 </reply>
 
