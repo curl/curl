@@ -11,6 +11,9 @@ SMTP
 #
 # Server-side
 <reply>
+<servercmd>
+CAPA SIZE
+</servercmd>
 </reply>
 
 #
