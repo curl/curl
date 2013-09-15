@@ -2639,7 +2639,10 @@ sub customize {
         }
         elsif($_ =~ /CAPA (.*)/) {
             logmsg "FTPD: instructed to support CAPABILITY command\n";
-            @capabilities = split(/ /, $1);
+            @capabilities = split(/ (?!(?:[^" ]|[^"] [^"])+")/, $1);
+            foreach (@capabilities) {
+                $_ = $1 if /^"(.*)"$/;
+            }
         }
         elsif($_ =~ /AUTH (.*)/) {
             logmsg "FTPD: instructed to support AUTHENTICATION command\n";
