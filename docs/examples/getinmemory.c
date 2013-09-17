@@ -41,7 +41,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
-  mem->memory = realloc(mem->memory, mem->size + realsize + 1);
+  mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
   if(mem->memory == NULL) {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
@@ -63,7 +63,7 @@ int main(void)
 
   struct MemoryStruct chunk;
 
-  chunk.memory = malloc(1);  /* will be grown as needed by the realloc above */
+  chunk.memory = (char *)malloc(1);  /* will be grown as needed by the realloc above */
   chunk.size = 0;    /* no data at this point */
 
   curl_global_init(CURL_GLOBAL_ALL);
