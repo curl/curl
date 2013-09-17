@@ -739,7 +739,7 @@ sub EHLO_smtp {
 }
 
 sub MAIL_smtp {
-    sendcontrol "200 Note taken\r\n";
+    sendcontrol "250 Sender OK\r\n";
 
     return 0;
 }
