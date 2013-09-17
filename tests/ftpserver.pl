@@ -625,11 +625,11 @@ sub protocolsetup {
             'DATA' => \&DATA_smtp,
             'EHLO' => \&EHLO_smtp,
             'HELO' => \&HELO_smtp,
+            'MAIL' => \&MAIL_smtp,
             'RCPT' => \&RCPT_smtp,
             'QUIT' => \&QUIT_smtp,
         );
         %displaytext = (
-            'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
             'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
@@ -734,6 +734,12 @@ sub EHLO_smtp {
             sendcontrol "250 $d\r\n";
         }
     }
+
+    return 0;
+}
+
+sub MAIL_smtp {
+    sendcontrol "200 Note taken\r\n";
 
     return 0;
 }
