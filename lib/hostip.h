@@ -205,7 +205,7 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data, char *servers);
  * outgoing interface to use for DNS requests
  */
 CURLcode Curl_set_dns_interface(struct SessionHandle *data,
-                                const char *interface);
+                                const char *interf);
 
 /*
  * Function provided by the resolver backend to set

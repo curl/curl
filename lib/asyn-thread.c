@@ -636,10 +636,10 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 }
 
 CURLcode Curl_set_dns_interface(struct SessionHandle *data,
-                                const char *interface)
+                                const char *interf)
 {
   (void)data;
-  (void)interface;
+  (void)interf;
   return CURLE_NOT_BUILT_IN;
 }
 

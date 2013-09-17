@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,10 +77,10 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
  * outgoing interface to use for DNS requests
  */
 CURLcode Curl_set_dns_interface(struct SessionHandle *data,
-                                const char *interface)
+                                const char *interf)
 {
   (void)data;
-  (void)interface;
+  (void)interf;
   return CURLE_NOT_BUILT_IN;
 }
 

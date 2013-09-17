@@ -625,15 +625,18 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 }
 
 CURLcode Curl_set_dns_interface(struct SessionHandle *data,
-                                const char *interface)
+                                const char *interf)
 {
 #if (ARES_VERSION >= 0x010704)
-  if(!interface) interface = "";
-  ares_set_local_dev((ares_channel)data->state.resolver, interface);
+  if(!interf)
+    interf = "";
+
+  ares_set_local_dev((ares_channel)data->state.resolver, interf);
+
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)interface;
+  (void)interf;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
@@ -652,7 +655,9 @@ CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
+
   ares_set_local_ip4((ares_channel)data->state.resolver, ntohl(a4));
+
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
@@ -676,7 +681,9 @@ CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
+
   ares_set_local_ip6((ares_channel)data->state.resolver, a6);
+
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
