@@ -739,7 +739,56 @@ sub EHLO_smtp {
 }
 
 sub MAIL_smtp {
-    sendcontrol "250 Sender OK\r\n";
+    my ($args) = @_;
+
+    logmsg "MAIL_smtp got $args\n";
+
+    if (!$args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        my $from;
+        my $size;
+        my @elements = split(/ /, $args);
+
+        # Get the FROM and SIZE parameters
+        for my $e (@elements) {
+            if($e =~ /^FROM:(.*)$/) {
+                $from = $1;
+            }
+            elsif($e =~ /^SIZE=(\d+)$/) {
+                $size = $1;
+            }
+        }
+
+        # Validate the from address (only <> and a valid email address inside
+        # <> are allowed, such as <user@example.com>)
+        if ((!$from) || (($from ne "<>") && ($from !~
+            /^<([a-zA-Z][\w_.]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/))) {
+            sendcontrol "501 Invalid address\r\n";
+        }
+        else {
+            my @found;
+            my $valid = 1;
+
+            # Check the capabilities for SIZE and if the specified size is
+            # greater than the message size then reject it
+            if (@found = grep /^SIZE (\d+)$/, @capabilities) {
+                if ($found[0] =~ /^SIZE (\d+)$/) {
+                    if ($size > $1) {
+                        valid = 0;
+                    }
+                }
+            }
+
+            if(!$valid) {
+                sendcontrol "552 Message size too large\r\n";
+            }
+            else {
+                sendcontrol "250 Sender OK\r\n";
+            }
+        }
+    }
 
     return 0;
 }
