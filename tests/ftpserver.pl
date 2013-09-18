@@ -776,7 +776,7 @@ sub MAIL_smtp {
             if (@found = grep /^SIZE (\d+)$/, @capabilities) {
                 if ($found[0] =~ /^SIZE (\d+)$/) {
                     if ($size > $1) {
-                        valid = 0;
+                        $valid = 0;
                     }
                 }
             }
