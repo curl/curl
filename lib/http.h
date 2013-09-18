@@ -152,6 +152,9 @@ struct HTTP {
 struct http_conn {
 #ifdef USE_NGHTTP2
   nghttp2_session *h2;
+  char *mem;     /* points to a buffer in memory to store or read from */
+  size_t size;   /* size of the buffer 'mem' points to */
+  ssize_t nread; /* how much data that was sent/recv by the HTTP2 engine */
 #else
   int unused; /* prevent a compiler warning */
 #endif

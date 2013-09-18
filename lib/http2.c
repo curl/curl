@@ -111,7 +111,7 @@ static ssize_t recv_callback(nghttp2_session *h2,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   ssize_t nread;
-  CURLcode rc = Curl_read(conn, conn->sock[0], (char *)buf, length, &nread);
+  CURLcode rc = Curl_read_plain(conn->sock[0], (char *)buf, length, &nread);
   (void)h2;
   (void)flags;
 
@@ -208,10 +208,46 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
   return result;
 }
 
+/*
+ * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
+ * a regular CURLcode value.
+ */
+static ssize_t http2_recv(struct connectdata *conn, int sockindex,
+                          char *mem, size_t len, CURLcode *err)
+{
+  int rc;
+  (void)sockindex; /* we always do HTTP2 on sockindex 0 */
+
+  conn->proto.httpc.mem = mem;
+  conn->proto.httpc.size = len;
+
+  rc = nghttp2_session_recv(conn->proto.httpc.h2);
+
+  if(rc < 0) {
+    *err = CURLE_RECV_ERROR;
+  }
+  return 0;
+}
+
+/* return number of received (decrypted) bytes */
+static ssize_t http2_send(struct connectdata *conn, int sockindex,
+                          const void *mem, size_t len, CURLcode *err)
+{
+  /* TODO: proper implementation */
+  (void)conn;
+  (void)sockindex;
+  (void)mem;
+  (void)len;
+  (void)err;
+  return 0;
+}
+
 void Curl_http2_switched(struct connectdata *conn)
 {
   /* we are switched! */
   conn->handler = &Curl_handler_http2;
+  conn->recv[FIRSTSOCKET] = http2_recv;
+  conn->send[FIRSTSOCKET] = http2_send;
   infof(conn->data, "We have switched to HTTP2\n");
 }
 
