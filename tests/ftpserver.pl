@@ -1529,7 +1529,7 @@ sub CAPA_pop3 {
     my ($testno) = @_;
 
     if((!@capabilities) && (!@auth_mechs)) {
-        sendcontrol "-ERR Unsupported command: 'CAPA'\r\n";
+        sendcontrol "-ERR Unrecognized command\r\n";
     }
     else {
         my @data = ();
@@ -1573,7 +1573,7 @@ sub AUTH_pop3 {
     my ($testno) = @_;
 
     if(!@auth_mechs) {
-        sendcontrol "-ERR Unsupported command: 'AUTH'\r\n";
+        sendcontrol "-ERR Unrecognized command\r\n";
     }
     else {
         my @data = ();
