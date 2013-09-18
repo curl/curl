@@ -1810,7 +1810,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
        */
       if(CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
         failf(data, "Unknown SSL protocol error in connection to %s:%ld ",
-              conn->host.name, conn->port);
+              conn->host.name, conn->remote_port);
         return rc;
       }
       /* Could be a CERT problem */
