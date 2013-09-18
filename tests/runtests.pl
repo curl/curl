@@ -793,7 +793,7 @@ sub verifyftp {
         # SMTP is a bit different since it requires more options and it
         # has _no_ output!
         $extra .= "--mail-rcpt verifiedserver ";
-        $extra .= "--mail-from fake ";
+        $extra .= "--mail-from fake@example.com ";
         $extra .= "--upload /dev/null ";
         $extra .= "--stderr - "; # move stderr to parse the verbose stuff
     }
