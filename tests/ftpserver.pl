@@ -1841,7 +1841,7 @@ sub QUIT_pop3 {
         @deleted = ();
     }
 
-    sendcontrol "+OK byebye\r\n";
+    sendcontrol "+OK cURL POP3 server signing off\r\n";
 
     return 0;
 }
