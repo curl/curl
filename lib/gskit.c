@@ -503,7 +503,16 @@ static CURLcode gskit_connect_step1(struct connectdata * conn, int sockindex)
     sni = (char *) NULL;
     break;
   case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
     tlsv1enable = true;
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    failf(data, "GSKit doesn't support TLS 1.1!");
+    cc = CURLE_SSL_CONNECT_ERROR;
+    break;
+  case CURL_SSLVERSION_TLSv1_2:
+    failf(data, "GSKit doesn't support TLS 1.2!");
+    cc = CURLE_SSL_CONNECT_ERROR;
     break;
   default:              /* CURL_SSLVERSION_DEFAULT. */
     sslv3enable = true;
@@ -555,7 +564,7 @@ static CURLcode gskit_connect_step1(struct connectdata * conn, int sockindex)
                   GSK_PROTOCOL_SSLV3_OFF);
   if(cc == CURLE_OK)
     cc = set_enum(data, connssl->handle, GSK_PROTOCOL_TLSV1,
-                  sslv3enable?  GSK_PROTOCOL_TLSV1_ON:
+                  tlsv1enable?  GSK_PROTOCOL_TLSV1_ON:
                   GSK_PROTOCOL_TLSV1_OFF);
   if(cc == CURLE_OK)
     cc = set_enum(data, connssl->handle, GSK_SERVER_AUTH_TYPE,
