@@ -52,12 +52,14 @@
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED < 1050 */
 
 #define CURL_BUILD_IOS 0
+#define CURL_BUILD_IOS_7 0
 #define CURL_BUILD_MAC 1
 /* This is the maximum API level we are allowed to use when building: */
 #define CURL_BUILD_MAC_10_5 MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
 #define CURL_BUILD_MAC_10_6 MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
 #define CURL_BUILD_MAC_10_7 MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 #define CURL_BUILD_MAC_10_8 MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
+#define CURL_BUILD_MAC_10_9 MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
 /* These macros mean "the following code is present to allow runtime backward
    compatibility with at least this cat or earlier":
    (You set this at build-time by setting the MACOSX_DEPLOYMENT_TARGET
@@ -66,9 +68,11 @@
 #define CURL_SUPPORT_MAC_10_6 MAC_OS_X_VERSION_MIN_REQUIRED <= 1060
 #define CURL_SUPPORT_MAC_10_7 MAC_OS_X_VERSION_MIN_REQUIRED <= 1070
 #define CURL_SUPPORT_MAC_10_8 MAC_OS_X_VERSION_MIN_REQUIRED <= 1080
+#define CURL_SUPPORT_MAC_10_9 MAC_OS_X_VERSION_MIN_REQUIRED <= 1090
 
 #elif TARGET_OS_EMBEDDED || TARGET_OS_IPHONE
 #define CURL_BUILD_IOS 1
+#define CURL_BUILD_IOS_7 __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
 #define CURL_BUILD_MAC 0
 #define CURL_BUILD_MAC_10_5 0
 #define CURL_BUILD_MAC_10_6 0
@@ -660,6 +664,110 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
       return "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA";
       break;
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+#if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
+    /* TLS PSK (RFC 4279): */
+    case TLS_PSK_WITH_RC4_128_SHA:
+      return "TLS_PSK_WITH_RC4_128_SHA";
+      break;
+    case TLS_PSK_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_PSK_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_PSK_WITH_AES_128_CBC_SHA:
+      return "TLS_PSK_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_PSK_WITH_AES_256_CBC_SHA:
+      return "TLS_PSK_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DHE_PSK_WITH_RC4_128_SHA:
+      return "TLS_DHE_PSK_WITH_RC4_128_SHA";
+      break;
+    case TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_DHE_PSK_WITH_AES_128_CBC_SHA:
+      return "TLS_DHE_PSK_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DHE_PSK_WITH_AES_256_CBC_SHA:
+      return "TLS_DHE_PSK_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_RSA_PSK_WITH_RC4_128_SHA:
+      return "TLS_RSA_PSK_WITH_RC4_128_SHA";
+      break;
+    case TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA:
+      return "TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA";
+      break;
+    case TLS_RSA_PSK_WITH_AES_128_CBC_SHA:
+      return "TLS_RSA_PSK_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_RSA_PSK_WITH_AES_256_CBC_SHA:
+      return "TLS_RSA_PSK_WITH_AES_256_CBC_SHA";
+      break;
+    /* More TLS PSK (RFC 4785): */
+    case TLS_PSK_WITH_NULL_SHA:
+      return "TLS_PSK_WITH_NULL_SHA";
+      break;
+    case TLS_DHE_PSK_WITH_NULL_SHA:
+      return "TLS_DHE_PSK_WITH_NULL_SHA";
+      break;
+    case TLS_RSA_PSK_WITH_NULL_SHA:
+      return "TLS_RSA_PSK_WITH_NULL_SHA";
+      break;
+    /* Even more TLS PSK (RFC 5487): */
+    case TLS_PSK_WITH_AES_128_GCM_SHA256:
+      return "TLS_PSK_WITH_AES_128_GCM_SHA256";
+      break;
+    case TLS_PSK_WITH_AES_256_GCM_SHA384:
+      return "TLS_PSK_WITH_AES_256_GCM_SHA384";
+      break;
+    case TLS_DHE_PSK_WITH_AES_128_GCM_SHA256:
+      return "TLS_DHE_PSK_WITH_AES_128_GCM_SHA256";
+      break;
+    case TLS_DHE_PSK_WITH_AES_256_GCM_SHA384:
+      return "TLS_DHE_PSK_WITH_AES_256_GCM_SHA384";
+      break;
+    case TLS_RSA_PSK_WITH_AES_128_GCM_SHA256:
+      return "TLS_RSA_PSK_WITH_AES_128_GCM_SHA256";
+      break;
+    case TLS_RSA_PSK_WITH_AES_256_GCM_SHA384:
+      return "TLS_PSK_WITH_AES_256_GCM_SHA384";
+      break;
+    case TLS_PSK_WITH_AES_128_CBC_SHA256:
+      return "TLS_PSK_WITH_AES_128_CBC_SHA256";
+      break;
+    case TLS_PSK_WITH_AES_256_CBC_SHA384:
+      return "TLS_PSK_WITH_AES_256_CBC_SHA384";
+      break;
+    case TLS_PSK_WITH_NULL_SHA256:
+      return "TLS_PSK_WITH_NULL_SHA256";
+      break;
+    case TLS_PSK_WITH_NULL_SHA384:
+      return "TLS_PSK_WITH_NULL_SHA384";
+      break;
+    case TLS_DHE_PSK_WITH_AES_128_CBC_SHA256:
+      return "TLS_DHE_PSK_WITH_AES_128_CBC_SHA256";
+      break;
+    case TLS_DHE_PSK_WITH_AES_256_CBC_SHA384:
+      return "TLS_DHE_PSK_WITH_AES_256_CBC_SHA384";
+      break;
+    case TLS_DHE_PSK_WITH_NULL_SHA256:
+      return "TLS_DHE_PSK_WITH_NULL_SHA256";
+      break;
+    case TLS_DHE_PSK_WITH_NULL_SHA384:
+      return "TLS_RSA_PSK_WITH_NULL_SHA384";
+      break;
+    case TLS_RSA_PSK_WITH_AES_128_CBC_SHA256:
+      return "TLS_RSA_PSK_WITH_AES_128_CBC_SHA256";
+      break;
+    case TLS_RSA_PSK_WITH_AES_256_CBC_SHA384:
+      return "TLS_RSA_PSK_WITH_AES_256_CBC_SHA384";
+      break;
+    case TLS_RSA_PSK_WITH_NULL_SHA256:
+      return "TLS_RSA_PSK_WITH_NULL_SHA256";
+      break;
+    case TLS_RSA_PSK_WITH_NULL_SHA384:
+      return "TLS_RSA_PSK_WITH_NULL_SHA384";
+      break;
+#endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
   }
   return "TLS_NULL_WITH_NULL_NULL";
 }
@@ -1227,6 +1335,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         case 0xC006: /* TLS_ECDHE_ECDSA_WITH_NULL_SHA */
         case 0xC00B: /* TLS_ECDH_RSA_WITH_NULL_SHA */
         case 0xC010: /* TLS_ECDHE_RSA_WITH_NULL_SHA */
+        case 0x002C: /* TLS_PSK_WITH_NULL_SHA */
+        case 0x002D: /* TLS_DHE_PSK_WITH_NULL_SHA */
+        case 0x002E: /* TLS_RSA_PSK_WITH_NULL_SHA */
+        case 0x00B0: /* TLS_PSK_WITH_NULL_SHA256 */
+        case 0x00B1: /* TLS_PSK_WITH_NULL_SHA384 */
+        case 0x00B4: /* TLS_DHE_PSK_WITH_NULL_SHA256 */
+        case 0x00B5: /* TLS_DHE_PSK_WITH_NULL_SHA384 */
+        case 0x00B8: /* TLS_RSA_PSK_WITH_NULL_SHA256 */
+        case 0x00B9: /* TLS_RSA_PSK_WITH_NULL_SHA384 */
         /* Disable anonymous ciphersuites: */
         case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5:
         case SSL_DH_anon_WITH_RC4_128_MD5:
@@ -1281,6 +1398,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
   Curl_safefree(all_ciphers);
   Curl_safefree(allowed_ciphers);
+
+#if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
+  /* We want to enable 1/n-1 when using a CBC cipher unless the user
+     specifically doesn't want us doing that: */
+  SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
+                      !data->set.ssl_enable_beast);
+#endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* Check if there's a cached ID we can/should use here! */
   if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
