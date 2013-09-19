@@ -204,6 +204,12 @@ static CURLcode Curl_qsossl_handshake(struct connectdata * conn, int sockindex)
   case CURL_SSLVERSION_SSLv3:
     h->protocol = SSL_VERSION_3;
     break;
+
+  case CURL_SSLVERSION_TLSv1_0:
+  case CURL_SSLVERSION_TLSv1_1:
+  case CURL_SSLVERSION_TLSv1_2:
+    failf(data, "TLS minor version cannot be set");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   h->peerCert = NULL;

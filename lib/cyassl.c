@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -98,7 +98,18 @@ cyassl_connect_step1(struct connectdata *conn,
     req_method = SSLv23_client_method();
     break;
   case CURL_SSLVERSION_TLSv1:
+    infof(data, "CyaSSL cannot be configured to use TLS 1.0-1.2, "
+          "TLS 1.0 is used exclusively\n");
     req_method = TLSv1_client_method();
+    break;
+  case CURL_SSLVERSION_TLSv1_0:
+    req_method = TLSv1_client_method();
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    req_method = TLSv1_1_client_method();
+    break;
+  case CURL_SSLVERSION_TLSv1_2:
+    req_method = TLSv1_2_client_method();
     break;
   case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();

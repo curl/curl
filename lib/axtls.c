@@ -164,7 +164,8 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1:
     break;
   default:
-    failf(data, "axTLS only supports TLSv1");
+    failf(data, "axTLS only supports TLS 1.0 and 1.1, "
+          "and it cannot be specified which one to use");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
