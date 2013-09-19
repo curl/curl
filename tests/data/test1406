@@ -32,7 +32,7 @@ To: another
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@foo --mail-rcpt 1406@foobar.example --mail-from 1406@from -T log/test1406.eml --libcurl log/test1406.c
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@foo --mail-rcpt 1406@foobar.example --mail-from 1406@example.com -T log/test1406.eml --libcurl log/test1406.c
 </command>
 </client>
 
@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@foo --mail-rcpt 1406@foobar.examp
 <verify>
 <protocol>
 EHLO user
-MAIL FROM:<1406@from> SIZE=38
+MAIL FROM:<1406@example.com> SIZE=38
 RCPT TO:<1406@foo>
 RCPT TO:<1406@foobar.example>
 DATA
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_MAIL_FROM, "1406@from");
+  curl_easy_setopt(hnd, CURLOPT_MAIL_FROM, "1406@example.com");
   curl_easy_setopt(hnd, CURLOPT_MAIL_RCPT, slist1);
 
   /* Here is a list of options the curl code used that cannot get generated
