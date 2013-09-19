@@ -12,7 +12,7 @@ RFC4954
 # Server-side
 <reply>
 <servercmd>
-REPLY EHLO 250 AUTH PLAIN
+AUTH PLAIN
 REPLY AUTH 334 PLAIN supported
 REPLY dGVzdAB0ZXN0ADEyMzQ= 235 Authenticated
 </servercmd>

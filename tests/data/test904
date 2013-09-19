@@ -11,7 +11,7 @@ RFC4954
 # Server-side
 <reply>
 <servercmd>
-REPLY EHLO 250 AUTH LOGIN
+AUTH LOGIN
 REPLY AUTH 334 LOGIN supported
 REPLY dGVzdA== 334 UGFzc3dvcmQ6
 REPLY MTIzNA== 235 Authenticated
