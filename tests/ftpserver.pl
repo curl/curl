@@ -764,7 +764,7 @@ sub MAIL_smtp {
         # Validate the from address (only <> and a valid email address inside
         # <> are allowed, such as <user@example.com>)
         if ((!$from) || (($from ne "<>") && ($from !~
-            /^<([a-zA-Z][\w_.]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/))) {
+            /^<([a-zA-Z0-9._%+-]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/))) {
             sendcontrol "501 Invalid address\r\n";
         }
         else {
