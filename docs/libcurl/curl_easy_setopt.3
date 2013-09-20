@@ -2162,10 +2162,14 @@ In unix-like systems, this might cause signals to be used unless
 
 Default timeout is 0 (zero) which means it never times out.
 .IP CURLOPT_TIMEOUT_MS
-Like \fICURLOPT_TIMEOUT\fP but takes number of milliseconds instead. If
-libcurl is built to use the standard system name resolver, that portion
-of the transfer will still use full-second resolution for timeouts with
-a minimum timeout allowed of one second.
+An alternative to \fICURLOPT_TIMEOUT\fP but takes number of milliseconds
+instead. If libcurl is built to use the standard system name resolver, that
+portion of the transfer will still use full-second resolution for timeouts
+with a minimum timeout allowed of one second.
+
+If both \fICURLOPT_TIMEOUT\fP and \fICURLOPT_TIMEOUT_MS\fP are set, the value
+set last will be used.
+
 (Added in 7.16.2)
 .IP CURLOPT_LOW_SPEED_LIMIT
 Pass a long as parameter. It contains the transfer speed in bytes per second
