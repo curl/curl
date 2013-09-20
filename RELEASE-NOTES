@@ -13,7 +13,7 @@ This release includes the following changes:
  o CURLM_ADDED_ALREADY: new error code
  o test TFTP server: support "writedelay" within <servercmd>
  o krb4 support has been removed
- o imap and smtp: added basic SASL XOAUTH2 support [9]
+ o imap/pop3/smtp: added basic SASL XOAUTH2 support [9]
  o darwinssl: add support for PKCS#12 files for client authentication
  o Pass password to OpenSSL engine by user interface [15]
 

@@ -28,6 +28,7 @@
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  * RFC5034 POP3 SASL Authentication Mechanism
+ * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
 
@@ -326,6 +327,8 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
           pop3c->authmechs |= SASL_MECH_EXTERNAL;
         else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
           pop3c->authmechs |= SASL_MECH_NTLM;
+        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+          pop3c->authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
         len -= wordlen;
@@ -371,6 +374,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
+    "AUTH_XOAUTH2",
     "AUTH_FINAL",
     "APOP",
     "USER",
@@ -599,7 +603,20 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     }
     else
 #endif
-    if((pop3c->authmechs & SASL_MECH_LOGIN) &&
+    if(((pop3c->authmechs & SASL_MECH_XOAUTH2) &&
+        (pop3c->prefmech & SASL_MECH_XOAUTH2) &&
+        (pop3c->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
+      mech = "XOAUTH2";
+      state1 = POP3_AUTH_XOAUTH2;
+      state2 = POP3_AUTH_FINAL;
+      pop3c->authused = SASL_MECH_XOAUTH2;
+
+      if(data->set.sasl_ir)
+        result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                                  conn->xoauth2_bearer,
+                                                  &initresp, &len);
+    }
+    else if((pop3c->authmechs & SASL_MECH_LOGIN) &&
        (pop3c->prefmech & SASL_MECH_LOGIN)) {
       mech = "LOGIN";
       state1 = POP3_AUTH_LOGIN;
@@ -1110,6 +1127,43 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
+/* For AUTH XOAUTH2 (without initial response) responses */
+static CURLcode pop3_state_auth_xoauth2_resp(struct connectdata *conn,
+                                             int pop3code, pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  size_t len = 0;
+  char *xoauth = NULL;
+
+  (void)instate; /* no use for this yet */
+
+  if(pop3code != '+') {
+    failf(data, "Access denied: %d", pop3code);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the authorisation message */
+    result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
+                                              conn->xoauth2_bearer,
+                                              &xoauth, &len);
+
+    /* Send the message */
+    if(!result) {
+      if(xoauth) {
+        result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", xoauth);
+
+        if(!result)
+          state(conn, POP3_AUTH_FINAL);
+      }
+
+      Curl_safefree(xoauth);
+    }
+  }
+
+  return result;
+}
+
 /* For final responses to the AUTH sequence */
 static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
                                            int pop3code,
@@ -1327,6 +1381,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
                                                   pop3c->state);
       break;
 #endif
+
+    case POP3_AUTH_XOAUTH2:
+      result = pop3_state_auth_xoauth2_resp(conn, pop3code, pop3c->state);
+      break;
 
     case POP3_AUTH_FINAL:
       result = pop3_state_auth_final_resp(conn, pop3code, pop3c->state);
@@ -1753,6 +1811,10 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
       else if(strequal(value, "NTLM")) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_NTLM;
+      }
+      else if(strequal(value, "XOAUTH2")) {
+        pop3c->preftype = POP3_TYPE_SASL;
+        pop3c->prefmech = SASL_MECH_XOAUTH2;
       }
       else {
         pop3c->preftype = POP3_TYPE_NONE;
