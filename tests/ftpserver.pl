@@ -630,7 +630,6 @@ sub protocolsetup {
             'QUIT' => \&QUIT_smtp,
         );
         %displaytext = (
-            'RCPT' => '200 Receivers accepted',
             'welcome' => join("",
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
@@ -874,7 +873,13 @@ sub DATA_smtp {
 sub RCPT_smtp {
     my ($args) = @_;
 
+    logmsg "RCPT_smtp got $args\n";
+
     $smtp_rcpt = $args;
+
+    sendcontrol "200 Receivers accepted\r\n";
+
+    return 0;
 }
 
 sub HELO_smtp {
