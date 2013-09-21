@@ -693,50 +693,65 @@ my $smtp_type;
 
 sub EHLO_smtp {
     my ($client) = @_;
-    my @data;
 
-    # TODO: Get the IP address of the client connection to use in the EHLO
-    # response when the client doesn't specify one but for now use 127.0.0.1
-    if (!$client) {
-        $client = "[127.0.0.1]";
-    }
+    if($client eq "verifiedserver") {
+        # This is the secret command that verifies that this actually is
+        # the curl test server
+        sendcontrol "554 WE ROOLZ: $$\r\n";
 
-    # Set the server type to ESMTP
-    $smtp_type = "ESMTP";
-
-    # Calculate the EHLO response
-    push @data, "$smtp_type pingpong test server Hello $client";
-
-    if((@capabilities) || (@auth_mechs)) {
-        my $mechs;
-
-        for my $c (@capabilities) {
-            push @data, $c;
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
         }
 
-        for my $am (@auth_mechs) {
-            if(!$mechs) {
-                $mechs = "$am";
+        logmsg "return proof we are we\n";
+    }
+    else {
+        my @data;
+
+        # TODO: Get the IP address of the client connection to use in the
+        # EHLO response when the client doesn't specify one but for now use
+        # 127.0.0.1
+        if (!$client) {
+            $client = "[127.0.0.1]";
+        }
+
+        # Set the server type to ESMTP
+        $smtp_type = "ESMTP";
+
+        # Calculate the EHLO response
+        push @data, "$smtp_type pingpong test server Hello $client";
+
+        if((@capabilities) || (@auth_mechs)) {
+            my $mechs;
+
+            for my $c (@capabilities) {
+                push @data, $c;
+            }
+
+            for my $am (@auth_mechs) {
+                if(!$mechs) {
+                    $mechs = "$am";
+                }
+                else {
+                    $mechs .= " $am";
+                }
+            }
+
+            if($mechs) {
+                push @data, "AUTH $mechs";
+            }
+        }
+
+        # Send the EHLO response
+        for (my $i = 0; $i < @data; $i++) {
+            my $d = $data[$i];
+
+            if($i < @data - 1) {
+                sendcontrol "250-$d\r\n";
             }
             else {
-                $mechs .= " $am";
+                sendcontrol "250 $d\r\n";
             }
-        }
-
-        if($mechs) {
-            push @data, "AUTH $mechs";
-        }
-    }
-
-    # Send the EHLO response
-    for (my $i = 0; $i < @data; $i++) {
-        my $d = $data[$i];
-
-        if($i < @data - 1) {
-            sendcontrol "250-$d\r\n";
-        }
-        else {
-            sendcontrol "250 $d\r\n";
         }
     }
 
@@ -808,14 +823,8 @@ sub DATA_smtp {
         return; # failure
     }
 
-    if($testno eq "<verifiedserver>") {
-        sendcontrol "554 WE ROOLZ: $$\r\n";
-        return 0; # don't wait for data now
-    }
-    else {
-        $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
-        sendcontrol "354 Show me the mail\r\n";
-    }
+    $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
+    sendcontrol "354 Show me the mail\r\n";
 
     logmsg "===> rcpt $testno was $smtp_rcpt\n";
 
