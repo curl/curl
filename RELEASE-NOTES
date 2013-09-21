@@ -49,6 +49,7 @@ This release includes the following bugfixes:
  o libcurl.3: for multi interface connections are held in the multi handle
  o curl_easy_setopt.3: mention RTMP URL quirks [17]
  o curl.1: detail how short/long options work [18]
+ o curl.1: Added information about optional login options to --user option
  o curl: Added clarification to the --mail options in the --help output
  o curl_easy_setopt.3: clarify that TIMEOUT and TIMEOUT_MS set the same value
  o openssl: use correct port number in error message [19]
