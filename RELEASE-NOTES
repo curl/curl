@@ -15,7 +15,10 @@ This release includes the following changes:
  o krb4 support has been removed
  o imap/pop3/smtp: added basic SASL XOAUTH2 support [9]
  o darwinssl: add support for PKCS#12 files for client authentication
+ o darwinssl: enable BEAST workaround on iOS 7 & later
  o Pass password to OpenSSL engine by user interface [15]
+ o c-ares: Add support for various DNS binding options
+ o cookies: add expiration
 
 This release includes the following bugfixes:
 
@@ -43,6 +46,12 @@ This release includes the following bugfixes:
  o imap: Fixed calculation of transfer when partial FETCH received [16]
  o pingpong: Check SSL library buffers for already read data [16]
  o imap/pop3/smtp: Speed up SSL connection initialization
+ o libcurl.3: for multi interface connections are held in the multi handle
+ o curl_easy_setopt.3: mention RTMP URL quirks [17]
+ o curl.1: detail how short/long options work [18]
+ o curl: Added clarification to the --mail options in the --help output
+ o curl_easy_setopt.3: clarify that TIMEOUT and TIMEOUT_MS set the same value
+ o openssl: use correct port number in error message [19]
 
 This release includes the following known bugs:
 
@@ -55,7 +64,8 @@ advice from friends like these:
  John E. Malmberg, Jonathan Nieder, Kamil Dudka, Shawn Landden,
  Tor Arntsen, Will Dietz, Yi Huang, Kyle L. Huff, Steve Holme, Mike Mio,
  Stefan Neis, Nick Zitzmann, Geoff Beier, John Dunn, Jiri Hruska,
- Tomas Mlcoch,
+ Tomas Mlcoch, Kim Vandry, Ben Greear, Gorilla Maguila, Jerry Krinock,
+ Yamada Yasuharu, Gordon Marler
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -77,3 +87,6 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/mail/lib-2013-08/0209.html
  [15] = http://curl.haxx.se/mail/lib-2013-08/0265.html
  [16] = http://curl.haxx.se/mail/lib-2013-08/0170.html
+ [17] = http://curl.haxx.se/bug/view.cgi?id=1278
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1279
+ [19] = http://curl.haxx.se/bug/view.cgi?id=1281
