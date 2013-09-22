@@ -813,15 +813,25 @@ sub MAIL_smtp {
     return 0;
 }
 
-sub DATA_smtp {
-    my $testno;
+sub RCPT_smtp {
+    my ($args) = @_;
 
-    if($smtp_rcpt =~ /^TO:(.*)/) {
-        $testno = $1;
+    logmsg "RCPT_smtp got $args\n";
+
+    if($args !~ /^TO:(.*)/) {
+        sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
-        return; # failure
+        $smtp_rcpt = $1;
+
+        sendcontrol "200 Receivers accepted\r\n";
     }
+
+    return 0;
+}
+
+sub DATA_smtp {
+    my $testno = $smtp_rcpt;
 
     $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
     sendcontrol "354 Show me the mail\r\n";
@@ -883,18 +893,6 @@ sub DATA_smtp {
     sendcontrol "250 OK, data received!\r\n";
     logmsg "received $ulsize bytes upload\n";
 
-}
-
-sub RCPT_smtp {
-    my ($args) = @_;
-
-    logmsg "RCPT_smtp got $args\n";
-
-    $smtp_rcpt = $args;
-
-    sendcontrol "200 Receivers accepted\r\n";
-
-    return 0;
 }
 
 sub HELO_smtp {
