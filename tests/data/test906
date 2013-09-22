@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@foo -T -
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@example.com -T -
 </command>
 </client>
 
@@ -36,7 +36,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 906@foo -T -
 <protocol>
 EHLO user
 MAIL FROM:<>
-RCPT TO:<906@foo>
+RCPT TO:<906@example.com>
 DATA
 QUIT
 </protocol>

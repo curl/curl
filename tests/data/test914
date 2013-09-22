@@ -26,7 +26,7 @@ To: another
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 914@foo --mail-from invalid -T log/test914.eml
+smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 914@example.com --mail-from invalid -T log/test914.eml
 </command>
 </client>
 
