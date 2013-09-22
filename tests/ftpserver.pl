@@ -849,13 +849,22 @@ sub RCPT_smtp {
 
     logmsg "RCPT_smtp got $args\n";
 
+    # Get the TO parameter
     if($args !~ /^TO:(.*)/) {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
         $smtp_rcpt = $1;
 
-        sendcontrol "250 Recipient OK\r\n";
+        # Validate the to address (only a valid email address inside <> is
+        # allowed, such as <user@example.com>)
+        if ($smtp_rcpt !~
+            /^<([a-zA-Z0-9._%+-]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/) {
+            sendcontrol "501 Invalid address\r\n";
+        }
+        else {
+            sendcontrol "250 Recipient OK\r\n";
+        }
     }
 
     return 0;
