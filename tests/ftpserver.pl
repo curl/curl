@@ -824,7 +824,7 @@ sub RCPT_smtp {
     else {
         $smtp_rcpt = $1;
 
-        sendcontrol "200 Receivers accepted\r\n";
+        sendcontrol "250 Recipient OK\r\n";
     }
 
     return 0;
