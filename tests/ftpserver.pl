@@ -758,6 +758,37 @@ sub EHLO_smtp {
     return 0;
 }
 
+sub HELO_smtp {
+    my ($client) = @_;
+
+    if($client eq "verifiedserver") {
+        # This is the secret command that verifies that this actually is
+        # the curl test server
+        sendcontrol "554 WE ROOLZ: $$\r\n";
+
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
+        }
+
+        logmsg "return proof we are we\n";
+    }
+    else {
+        # TODO: Get the IP address of the client connection to use in the HELO
+        # response when the client doesn't specify one but for now use 127.0.0.1
+        if (!$client) {
+            $client = "[127.0.0.1]";
+        }
+
+        # Set the server type to SMTP
+        $smtp_type = "SMTP";
+
+        # Send the HELO response
+        sendcontrol "250 $smtp_type pingpong test server Hello $client\r\n";
+    }
+
+    return 0;
+}
+
 sub MAIL_smtp {
     my ($args) = @_;
 
@@ -893,24 +924,6 @@ sub DATA_smtp {
     sendcontrol "250 OK, data received!\r\n";
     logmsg "received $ulsize bytes upload\n";
 
-}
-
-sub HELO_smtp {
-    my ($client) = @_;
-
-    # TODO: Get the IP address of the client connection to use in the HELO
-    # response when the client doesn't specify one but for now use 127.0.0.1
-    if (!$client) {
-        $client = "[127.0.0.1]";
-    }
-
-    # Set the server type to SMTP
-    $smtp_type = "SMTP";
-
-    # Send the HELO response
-    sendcontrol "250 $smtp_type pingpong test server Hello $client\r\n";
-
-    return 0;
 }
 
 sub QUIT_smtp {
