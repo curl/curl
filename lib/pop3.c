@@ -313,21 +313,21 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
-        if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
           pop3c->authmechs |= SASL_MECH_LOGIN;
-        else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
           pop3c->authmechs |= SASL_MECH_PLAIN;
-        else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
           pop3c->authmechs |= SASL_MECH_CRAM_MD5;
-        else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
           pop3c->authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
           pop3c->authmechs |= SASL_MECH_GSSAPI;
-        else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
           pop3c->authmechs |= SASL_MECH_EXTERNAL;
-        else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
           pop3c->authmechs |= SASL_MECH_NTLM;
-        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
           pop3c->authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
@@ -576,13 +576,13 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     if((pop3c->authmechs & SASL_MECH_DIGEST_MD5) &&
        (pop3c->prefmech & SASL_MECH_DIGEST_MD5)) {
-      mech = "DIGEST-MD5";
+      mech = SASL_MECH_STRING_DIGEST_MD5;
       state1 = POP3_AUTH_DIGESTMD5;
       pop3c->authused = SASL_MECH_DIGEST_MD5;
     }
     else if((pop3c->authmechs & SASL_MECH_CRAM_MD5) &&
             (pop3c->prefmech & SASL_MECH_CRAM_MD5)) {
-      mech = "CRAM-MD5";
+      mech = SASL_MECH_STRING_CRAM_MD5;
       state1 = POP3_AUTH_CRAMMD5;
       pop3c->authused = SASL_MECH_CRAM_MD5;
     }
@@ -591,7 +591,7 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
     if((pop3c->authmechs & SASL_MECH_NTLM) &&
        (pop3c->prefmech & SASL_MECH_NTLM)) {
-      mech = "NTLM";
+      mech = SASL_MECH_STRING_NTLM;
       state1 = POP3_AUTH_NTLM;
       state2 = POP3_AUTH_NTLM_TYPE2MSG;
       pop3c->authused = SASL_MECH_NTLM;
@@ -606,7 +606,7 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     if(((pop3c->authmechs & SASL_MECH_XOAUTH2) &&
         (pop3c->prefmech & SASL_MECH_XOAUTH2) &&
         (pop3c->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
-      mech = "XOAUTH2";
+      mech = SASL_MECH_STRING_XOAUTH2;
       state1 = POP3_AUTH_XOAUTH2;
       state2 = POP3_AUTH_FINAL;
       pop3c->authused = SASL_MECH_XOAUTH2;
@@ -618,7 +618,7 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     }
     else if((pop3c->authmechs & SASL_MECH_LOGIN) &&
        (pop3c->prefmech & SASL_MECH_LOGIN)) {
-      mech = "LOGIN";
+      mech = SASL_MECH_STRING_LOGIN;
       state1 = POP3_AUTH_LOGIN;
       state2 = POP3_AUTH_LOGIN_PASSWD;
       pop3c->authused = SASL_MECH_LOGIN;
@@ -629,7 +629,7 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     }
     else if((pop3c->authmechs & SASL_MECH_PLAIN) &&
             (pop3c->prefmech & SASL_MECH_PLAIN)) {
-      mech = "PLAIN";
+      mech = SASL_MECH_STRING_PLAIN;
       state1 = POP3_AUTH_PLAIN;
       state2 = POP3_AUTH_FINAL;
       pop3c->authused = SASL_MECH_PLAIN;
@@ -1788,31 +1788,31 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
         pop3c->preftype = POP3_TYPE_APOP;
         pop3c->prefmech = SASL_AUTH_NONE;
       }
-      else if(strequal(value, "LOGIN")) {
+      else if(strequal(value, SASL_MECH_STRING_LOGIN)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_LOGIN;
       }
-      else if(strequal(value, "PLAIN")) {
+      else if(strequal(value, SASL_MECH_STRING_PLAIN)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_PLAIN;
       }
-      else if(strequal(value, "CRAM-MD5")) {
+      else if(strequal(value, SASL_MECH_STRING_CRAM_MD5)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_CRAM_MD5;
       }
-      else if(strequal(value, "DIGEST-MD5")) {
+      else if(strequal(value, SASL_MECH_STRING_DIGEST_MD5)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_DIGEST_MD5;
       }
-      else if(strequal(value, "GSSAPI")) {
+      else if(strequal(value, SASL_MECH_STRING_GSSAPI)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_GSSAPI;
       }
-      else if(strequal(value, "NTLM")) {
+      else if(strequal(value, SASL_MECH_STRING_NTLM)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_NTLM;
       }
-      else if(strequal(value, "XOAUTH2")) {
+      else if(strequal(value, SASL_MECH_STRING_XOAUTH2)) {
         pop3c->preftype = POP3_TYPE_SASL;
         pop3c->prefmech = SASL_MECH_XOAUTH2;
       }

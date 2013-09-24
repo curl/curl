@@ -24,19 +24,34 @@
 
 #include "pingpong.h"
 
-/* Authentication mechanism flags */
-#define SASL_MECH_LOGIN         (1 << 0)
-#define SASL_MECH_PLAIN         (1 << 1)
-#define SASL_MECH_CRAM_MD5      (1 << 2)
-#define SASL_MECH_DIGEST_MD5    (1 << 3)
-#define SASL_MECH_GSSAPI        (1 << 4)
-#define SASL_MECH_EXTERNAL      (1 << 5)
-#define SASL_MECH_NTLM          (1 << 6)
-#define SASL_MECH_XOAUTH2       (1 << 7)
-
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
 #define SASL_AUTH_ANY           ~0U
+
+/* Authentication mechanism flags */
+#define SASL_MECH_LOGIN             (1 << 0)
+#define SASL_MECH_PLAIN             (1 << 1)
+#define SASL_MECH_CRAM_MD5          (1 << 2)
+#define SASL_MECH_DIGEST_MD5        (1 << 3)
+#define SASL_MECH_GSSAPI            (1 << 4)
+#define SASL_MECH_EXTERNAL          (1 << 5)
+#define SASL_MECH_NTLM              (1 << 6)
+#define SASL_MECH_XOAUTH2           (1 << 7)
+
+/* Authentication mechanism strings */
+#define SASL_MECH_STRING_LOGIN      "LOGIN"
+#define SASL_MECH_STRING_PLAIN      "PLAIN"
+#define SASL_MECH_STRING_CRAM_MD5   "CRAM-MD5"
+#define SASL_MECH_STRING_DIGEST_MD5 "DIGEST-MD5"
+#define SASL_MECH_STRING_GSSAPI     "GSSAPI"
+#define SASL_MECH_STRING_EXTERNAL   "EXTERNAL"
+#define SASL_MECH_STRING_NTLM       "NTLM"
+#define SASL_MECH_STRING_XOAUTH2    "XOAUTH2"
+
+/* This is used to test whether the line starts with the given mechanism */
+#define sasl_mech_equal(line, wordlen, mech) \
+  (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
+   !memcmp(line, mech, wordlen))
 
 /* This is used to generate a base64 encoded PLAIN authentication message */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,

@@ -277,21 +277,21 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
-        if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
           smtpc->authmechs |= SASL_MECH_LOGIN;
-        else if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
           smtpc->authmechs |= SASL_MECH_PLAIN;
-        else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
           smtpc->authmechs |= SASL_MECH_CRAM_MD5;
-        else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
           smtpc->authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
           smtpc->authmechs |= SASL_MECH_GSSAPI;
-        else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
           smtpc->authmechs |= SASL_MECH_EXTERNAL;
-        else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
           smtpc->authmechs |= SASL_MECH_NTLM;
-        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
           smtpc->authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
@@ -473,13 +473,13 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if((smtpc->authmechs & SASL_MECH_DIGEST_MD5) &&
      (smtpc->prefmech & SASL_MECH_DIGEST_MD5)) {
-    mech = "DIGEST-MD5";
+    mech = SASL_MECH_STRING_DIGEST_MD5;
     state1 = SMTP_AUTH_DIGESTMD5;
     smtpc->authused = SASL_MECH_DIGEST_MD5;
   }
   else if((smtpc->authmechs & SASL_MECH_CRAM_MD5) &&
           (smtpc->prefmech & SASL_MECH_CRAM_MD5)) {
-    mech = "CRAM-MD5";
+    mech = SASL_MECH_STRING_CRAM_MD5;
     state1 = SMTP_AUTH_CRAMMD5;
     smtpc->authused = SASL_MECH_CRAM_MD5;
   }
@@ -488,7 +488,7 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
   if((smtpc->authmechs & SASL_MECH_NTLM) &&
      (smtpc->prefmech & SASL_MECH_NTLM)) {
-    mech = "NTLM";
+    mech = SASL_MECH_STRING_NTLM;
     state1 = SMTP_AUTH_NTLM;
     state2 = SMTP_AUTH_NTLM_TYPE2MSG;
     smtpc->authused = SASL_MECH_NTLM;
@@ -503,7 +503,7 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
   if(((smtpc->authmechs & SASL_MECH_XOAUTH2) &&
       (smtpc->prefmech & SASL_MECH_XOAUTH2) &&
       (smtpc->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
-    mech = "XOAUTH2";
+    mech = SASL_MECH_STRING_XOAUTH2;
     state1 = SMTP_AUTH_XOAUTH2;
     state2 = SMTP_AUTH_FINAL;
     smtpc->authused = SASL_MECH_XOAUTH2;
@@ -515,7 +515,7 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
   }
   else if((smtpc->authmechs & SASL_MECH_LOGIN) &&
      (smtpc->prefmech & SASL_MECH_LOGIN)) {
-    mech = "LOGIN";
+    mech = SASL_MECH_STRING_LOGIN;
     state1 = SMTP_AUTH_LOGIN;
     state2 = SMTP_AUTH_LOGIN_PASSWD;
     smtpc->authused = SASL_MECH_LOGIN;
@@ -526,7 +526,7 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
   }
   else if((smtpc->authmechs & SASL_MECH_PLAIN) &&
           (smtpc->prefmech & SASL_MECH_PLAIN)) {
-    mech = "PLAIN";
+    mech = SASL_MECH_STRING_PLAIN;
     state1 = SMTP_AUTH_PLAIN;
     state2 = SMTP_AUTH_FINAL;
     smtpc->authused = SASL_MECH_PLAIN;
@@ -1786,19 +1786,19 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
 
       if(strequal(value, "*"))
         smtpc->prefmech = SASL_AUTH_ANY;
-      else if(strequal(value, "LOGIN"))
+      else if(strequal(value, SASL_MECH_STRING_LOGIN))
         smtpc->prefmech = SASL_MECH_LOGIN;
-      else if(strequal(value, "PLAIN"))
+      else if(strequal(value, SASL_MECH_STRING_PLAIN))
         smtpc->prefmech = SASL_MECH_PLAIN;
-      else if(strequal(value, "CRAM-MD5"))
+      else if(strequal(value, SASL_MECH_STRING_CRAM_MD5))
         smtpc->prefmech = SASL_MECH_CRAM_MD5;
-      else if(strequal(value, "DIGEST-MD5"))
+      else if(strequal(value, SASL_MECH_STRING_DIGEST_MD5))
         smtpc->prefmech = SASL_MECH_DIGEST_MD5;
-      else if(strequal(value, "GSSAPI"))
+      else if(strequal(value, SASL_MECH_STRING_GSSAPI))
         smtpc->prefmech = SASL_MECH_GSSAPI;
-      else if(strequal(value, "NTLM"))
+      else if(strequal(value, SASL_MECH_STRING_NTLM))
         smtpc->prefmech = SASL_MECH_NTLM;
-      else if(strequal(value, "XOAUTH2"))
+      else if(strequal(value, SASL_MECH_STRING_XOAUTH2))
         smtpc->prefmech = SASL_MECH_XOAUTH2;
       else
         smtpc->prefmech = SASL_AUTH_NONE;

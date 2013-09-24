@@ -555,13 +555,13 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if((imapc->authmechs & SASL_MECH_DIGEST_MD5) &&
      (imapc->prefmech & SASL_MECH_DIGEST_MD5)) {
-    mech = "DIGEST-MD5";
+    mech = SASL_MECH_STRING_DIGEST_MD5;
     state1 = IMAP_AUTHENTICATE_DIGESTMD5;
     imapc->authused = SASL_MECH_DIGEST_MD5;
   }
   else if((imapc->authmechs & SASL_MECH_CRAM_MD5) &&
           (imapc->prefmech & SASL_MECH_CRAM_MD5)) {
-    mech = "CRAM-MD5";
+    mech = SASL_MECH_STRING_CRAM_MD5;
     state1 = IMAP_AUTHENTICATE_CRAMMD5;
     imapc->authused = SASL_MECH_CRAM_MD5;
   }
@@ -570,7 +570,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
 #ifdef USE_NTLM
     if((imapc->authmechs & SASL_MECH_NTLM) &&
        (imapc->prefmech & SASL_MECH_NTLM)) {
-    mech = "NTLM";
+    mech = SASL_MECH_STRING_NTLM;
     state1 = IMAP_AUTHENTICATE_NTLM;
     state2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
     imapc->authused = SASL_MECH_NTLM;
@@ -585,7 +585,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   if(((imapc->authmechs & SASL_MECH_XOAUTH2) &&
       (imapc->prefmech & SASL_MECH_XOAUTH2) &&
       (imapc->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
-    mech = "XOAUTH2";
+    mech = SASL_MECH_STRING_XOAUTH2;
     state1 = IMAP_AUTHENTICATE_XOAUTH2;
     state2 = IMAP_AUTHENTICATE_FINAL;
     imapc->authused = SASL_MECH_XOAUTH2;
@@ -597,7 +597,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
   else if((imapc->authmechs & SASL_MECH_LOGIN) &&
      (imapc->prefmech & SASL_MECH_LOGIN)) {
-    mech = "LOGIN";
+    mech = SASL_MECH_STRING_LOGIN;
     state1 = IMAP_AUTHENTICATE_LOGIN;
     state2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
     imapc->authused = SASL_MECH_LOGIN;
@@ -608,7 +608,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
   else if((imapc->authmechs & SASL_MECH_PLAIN) &&
           (imapc->prefmech & SASL_MECH_PLAIN)) {
-    mech = "PLAIN";
+    mech = SASL_MECH_STRING_PLAIN;
     state1 = IMAP_AUTHENTICATE_PLAIN;
     state2 = IMAP_AUTHENTICATE_FINAL;
     imapc->authused = SASL_MECH_PLAIN;
@@ -885,21 +885,21 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
         wordlen -= 5;
 
         /* Test the word for a matching authentication mechanism */
-        if(wordlen == 5 && !memcmp(line, "LOGIN", 5))
+        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
           imapc->authmechs |= SASL_MECH_LOGIN;
-        if(wordlen == 5 && !memcmp(line, "PLAIN", 5))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
           imapc->authmechs |= SASL_MECH_PLAIN;
-        else if(wordlen == 8 && !memcmp(line, "CRAM-MD5", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
           imapc->authmechs |= SASL_MECH_CRAM_MD5;
-        else if(wordlen == 10 && !memcmp(line, "DIGEST-MD5", 10))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
           imapc->authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(wordlen == 6 && !memcmp(line, "GSSAPI", 6))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
           imapc->authmechs |= SASL_MECH_GSSAPI;
-        else if(wordlen == 8 && !memcmp(line, "EXTERNAL", 8))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
           imapc->authmechs |= SASL_MECH_EXTERNAL;
-        else if(wordlen == 4 && !memcmp(line, "NTLM", 4))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
           imapc->authmechs |= SASL_MECH_NTLM;
-        else if(wordlen == 7 && !memcmp(line, "XOAUTH2", 7))
+        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
           imapc->authmechs |= SASL_MECH_XOAUTH2;
       }
 
@@ -2275,19 +2275,19 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
 
       if(strequal(value, "*"))
         imapc->prefmech = SASL_AUTH_ANY;
-      else if(strequal(value, "LOGIN"))
+      else if(strequal(value, SASL_MECH_STRING_LOGIN))
         imapc->prefmech = SASL_MECH_LOGIN;
-      else if(strequal(value, "PLAIN"))
+      else if(strequal(value, SASL_MECH_STRING_PLAIN))
         imapc->prefmech = SASL_MECH_PLAIN;
-      else if(strequal(value, "CRAM-MD5"))
+      else if(strequal(value, SASL_MECH_STRING_CRAM_MD5))
         imapc->prefmech = SASL_MECH_CRAM_MD5;
-      else if(strequal(value, "DIGEST-MD5"))
+      else if(strequal(value, SASL_MECH_STRING_DIGEST_MD5))
         imapc->prefmech = SASL_MECH_DIGEST_MD5;
-      else if(strequal(value, "GSSAPI"))
+      else if(strequal(value, SASL_MECH_STRING_GSSAPI))
         imapc->prefmech = SASL_MECH_GSSAPI;
-      else if(strequal(value, "NTLM"))
+      else if(strequal(value, SASL_MECH_STRING_NTLM))
         imapc->prefmech = SASL_MECH_NTLM;
-      else if(strequal(value, "XOAUTH2"))
+      else if(strequal(value, SASL_MECH_STRING_XOAUTH2))
         imapc->prefmech = SASL_MECH_XOAUTH2;
       else
         imapc->prefmech = SASL_AUTH_NONE;
