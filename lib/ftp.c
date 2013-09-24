@@ -4250,7 +4250,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         dirlen++;
 
       ftpc->dirs[0] = curl_easy_unescape(conn->data, slash_pos ? cur_pos : "/",
-                                         slash_pos ? curlx_sztosi(dirlen) : 1,
+                                         slash_pos ? curlx_uztosi(dirlen) : 1,
                                          NULL);
       if(!ftpc->dirs[0]) {
         freedirs(ftpc);
