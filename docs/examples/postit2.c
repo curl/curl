@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   struct curl_httppost *formpost=NULL;
   struct curl_httppost *lastptr=NULL;
   struct curl_slist *headerlist=NULL;
-  static const char buf[] = "Expect:";
+  const char buf[] = "Expect:";
 
   curl_global_init(CURL_GLOBAL_ALL);
 

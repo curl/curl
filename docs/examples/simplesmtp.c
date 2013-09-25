@@ -30,10 +30,10 @@ int main(void)
   struct curl_slist *recipients = NULL;
 
   /* value for envelope reverse-path */
-  static const char *from = "<bradh@example.com>";
+  const char *from = "<bradh@example.com>";
 
   /* this becomes the envelope forward-path */
-  static const char *to = "<bradh@example.net>";
+  const char *to = "<bradh@example.net>";
 
   curl = curl_easy_init();
   if(curl) {

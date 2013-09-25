@@ -379,7 +379,7 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
 static int init_fifo (GlobalInfo *g)
 {
   struct stat st;
-  static const char *fifo = "hiper.fifo";
+  const char *fifo = "hiper.fifo";
   curl_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
