@@ -28,7 +28,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  static const char *postthis="moo mooo moo moo";
+  const char *postthis="moo mooo moo moo";
 
   curl = curl_easy_init();
   if(curl) {

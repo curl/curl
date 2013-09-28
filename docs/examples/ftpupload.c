@@ -73,8 +73,8 @@ int main(void)
   curl_off_t fsize;
 
   struct curl_slist *headerlist=NULL;
-  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
+  const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
   if(stat(LOCAL_FILE, &file_info)) {
