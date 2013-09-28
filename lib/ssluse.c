@@ -294,7 +294,7 @@ static int do_file_type(const char *type)
   return -1;
 }
 
-#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+#if defined(HAVE_OPENSSL_ENGINE_H) && defined(HAVE_ENGINE_LOAD_FOUR_ARGS)
 /*
  * Supply default password to the engine user interface conversation.
  * The password is passed by OpenSSL engine from ENGINE_load_private_key()
