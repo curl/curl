@@ -882,7 +882,7 @@ sub DATA_smtp {
     if ($args) {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
-    elsif ($smtp_client !~ /^(\d*)$/)
+    elsif ($smtp_client !~ /^(\d*)$/) {
         sendcontrol "501 Invalid arguments\r\n";
     }
     else {
