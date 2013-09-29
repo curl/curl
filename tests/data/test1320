@@ -35,7 +35,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://smtp.1320:%SMTPPORT/user --mail-rcpt 1320@example.com --mail-from 1320@example.com -T - -p -x %HOSTIP:%PROXYPORT
+smtp://smtp.1320:%SMTPPORT/1320 --mail-rcpt 1320@example.com --mail-from 1320@example.com -T - -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
@@ -46,7 +46,7 @@ smtp://smtp.1320:%SMTPPORT/user --mail-rcpt 1320@example.com --mail-from 1320@ex
 ^User-Agent: curl/.*
 </strip>
 <protocol>
-EHLO user
+EHLO 1320
 MAIL FROM:<1320@example.com>
 RCPT TO:<1320@example.com>
 DATA

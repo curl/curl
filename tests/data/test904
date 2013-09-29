@@ -31,7 +31,7 @@ SMTP login authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@example.com --mail-from 904@example.com -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt 904@example.com --mail-from 904@example.com -u test:1234 -T -
 </command>
 </client>
 
@@ -39,7 +39,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@example.com --mail-from 904@exampl
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
+EHLO 904
 AUTH LOGIN
 dGVzdA==
 MTIzNA==

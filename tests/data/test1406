@@ -32,7 +32,7 @@ To: another
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@example.com --mail-rcpt 1406@foobar.example.com --mail-from 1406@example.com -T log/test1406.eml --libcurl log/test1406.c
+smtp://%HOSTIP:%SMTPPORT/1406 --mail-rcpt 1406@example.com --mail-rcpt 1406@foobar.example.com --mail-from 1406@example.com -T log/test1406.eml --libcurl log/test1406.c
 </command>
 </client>
 
@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 1406@example.com --mail-rcpt 1406@foob
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
+EHLO 1406
 MAIL FROM:<1406@example.com> SIZE=38
 RCPT TO:<1406@example.com>
 RCPT TO:<1406@foobar.example.com>
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
-  curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/user");
+  curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/1406");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");

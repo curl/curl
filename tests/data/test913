@@ -30,7 +30,7 @@ To: another
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 913@example.com --mail-from 913@example.com -T log/test913.eml
+smtp://%HOSTIP:%SMTPPORT/913 --mail-rcpt 913@example.com --mail-from 913@example.com -T log/test913.eml
 </command>
 </client>
 
@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 913@example.com --mail-from 913@exampl
 55
 </errorcode>
 <protocol>
-EHLO user
+EHLO 913
 MAIL FROM:<913@example.com> SIZE=38
 QUIT
 </protocol>

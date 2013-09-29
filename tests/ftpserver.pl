@@ -685,11 +685,11 @@ sub close_dataconn {
 ################ SMTP commands
 ################
 
-# what set by "RCPT"
-my $smtp_rcpt;
-
 # The type of server (SMTP or ESMTP)
 my $smtp_type;
+
+# The client (which normally contains the test number)
+my $smtp_client;
 
 sub EHLO_smtp {
     my ($client) = @_;
@@ -753,6 +753,9 @@ sub EHLO_smtp {
                 sendcontrol "250 $d\r\n";
             }
         }
+
+        # Store the client (as it may contain the test number)
+        $smtp_client = $client;
     }
 
     return 0;
@@ -784,6 +787,9 @@ sub HELO_smtp {
 
         # Send the HELO response
         sendcontrol "250 $smtp_type pingpong test server Hello $client\r\n";
+
+        # Store the client (as it may contain the test number)
+        $smtp_client = $client;
     }
 
     return 0;
@@ -854,11 +860,11 @@ sub RCPT_smtp {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
-        $smtp_rcpt = $1;
+        my $to = $1;
 
         # Validate the to address (only a valid email address inside <> is
         # allowed, such as <user@example.com>)
-        if ($smtp_rcpt !~
+        if ($to !~
             /^<([a-zA-Z0-9._%+-]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/) {
             sendcontrol "501 Invalid address\r\n";
         }
@@ -872,17 +878,17 @@ sub RCPT_smtp {
 
 sub DATA_smtp {
     my ($args) = @_;
-    my $testno = $smtp_rcpt;
 
     if ($args) {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
+    elsif ($smtp_client !~ /^(\d*)$/)
+        sendcontrol "501 Invalid arguments\r\n";
+    }
     else {
-        $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
         sendcontrol "354 Show me the mail\r\n";
 
-        logmsg "===> rcpt $testno was $smtp_rcpt\n";
-
+        my $testno = $smtp_client;
         my $filename = "log/upload.$testno";
 
         logmsg "Store test number $testno in $filename\n";

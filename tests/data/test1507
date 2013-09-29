@@ -32,7 +32,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user
+smtp://%HOSTIP:%SMTPPORT/1507
 </command>
 </client>
 
@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/user
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
+EHLO 1507
 MAIL FROM:<1507-realuser@example.com>
 RCPT TO:<1507-recipient@example.com>
 DATA
