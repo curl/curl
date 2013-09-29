@@ -43,7 +43,7 @@ smtp://%HOSTIP:%SMTPPORT/1406 --mail-rcpt recipient.one@example.com --mail-rcpt 
 EHLO 1406
 MAIL FROM:<sender@example.com> SIZE=38
 RCPT TO:<recipient.one@example.com>
-RCPT TO:<recipient.two@foobar.example.com>
+RCPT TO:<recipient.two@example.com>
 DATA
 QUIT
 </protocol>

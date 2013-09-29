@@ -47,8 +47,8 @@ smtp://smtp.1320:%SMTPPORT/1320 --mail-rcpt recipient@example.com --mail-from se
 </strip>
 <protocol>
 EHLO 1320
-MAIL FROM:<recipient@example.com>
-RCPT TO:<sender@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
