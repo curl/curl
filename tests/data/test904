@@ -31,7 +31,7 @@ SMTP login authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt 904@example.com --mail-from 904@example.com -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 -T -
 </command>
 </client>
 
@@ -43,8 +43,8 @@ EHLO 904
 AUTH LOGIN
 dGVzdA==
 MTIzNA==
-MAIL FROM:<904@example.com>
-RCPT TO:<904@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>

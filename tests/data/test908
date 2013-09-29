@@ -30,7 +30,7 @@ SMTP login authentication with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/908 --mail-rcpt 908@example.com --mail-from 908@example.com -u test:1234 --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/908 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 --sasl-ir -T -
 </command>
 </client>
 
@@ -41,8 +41,8 @@ smtp://%HOSTIP:%SMTPPORT/908 --mail-rcpt 908@example.com --mail-from 908@example
 EHLO 908
 AUTH LOGIN dGVzdA==
 MTIzNA==
-MAIL FROM:<908@example.com>
-RCPT TO:<908@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>

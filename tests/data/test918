@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt 918@example.com --mail-rcpt invalid --mail-rcpt 918@bar.example.com --mail-rcpt sTrAnGe --mail-rcpt 918@another.example.com --mail-from 918@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt recipient.one@example.com --mail-rcpt invalid --mail-rcpt recipient.three@example.com --mail-rcpt sTrAnGe --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -38,8 +38,8 @@ smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt 918@example.com --mail-rcpt invalid --m
 </errorcode>
 <protocol>
 EHLO 918
-MAIL FROM:<918@example.com>
-RCPT TO:<918@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient.one@example.com>
 RCPT TO:<invalid>
 QUIT
 </protocol>

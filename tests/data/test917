@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/917 --mail-rcpt 917@example.com --mail-rcpt 917@foo.example.com --mail-rcpt 917@bar.example.com --mail-rcpt 917@foobar.example.com --mail-rcpt 917@another.example.com --mail-from 917@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/917 --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-rcpt recipient.three@example.com --mail-rcpt recipient.four@example.com --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -35,12 +35,12 @@ smtp://%HOSTIP:%SMTPPORT/917 --mail-rcpt 917@example.com --mail-rcpt 917@foo.exa
 <verify>
 <protocol>
 EHLO 917
-MAIL FROM:<917@example.com>
-RCPT TO:<917@example.com>
-RCPT TO:<917@foo.example.com>
-RCPT TO:<917@bar.example.com>
-RCPT TO:<917@foobar.example.com>
-RCPT TO:<917@another.example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient.one@example.com>
+RCPT TO:<recipient.two@example.com>
+RCPT TO:<recipient.three@example.com>
+RCPT TO:<recipient.four@example.com>
+RCPT TO:<recipient.five@example.com>
 DATA
 QUIT
 </protocol>

@@ -32,7 +32,7 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/901 --mail-rcpt 901@example.com --mail-from 901@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/901 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -41,8 +41,8 @@ smtp://%HOSTIP:%SMTPPORT/901 --mail-rcpt 901@example.com --mail-from 901@example
 <verify>
 <protocol>
 EHLO 901
-MAIL FROM:<901@example.com>
-RCPT TO:<901@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>

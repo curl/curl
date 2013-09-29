@@ -25,7 +25,7 @@ SMTP with no mail data
 </stdin>
 
  <command>
-smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt 911@example.com --mail-from 911@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -34,8 +34,8 @@ smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt 911@example.com --mail-from 911@example
 <verify>
 <protocol>
 EHLO 911
-MAIL FROM:<911@example.com>
-RCPT TO:<911@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>

@@ -39,7 +39,7 @@ LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/906 --mail-rcpt 906@example.com --mail-from 906@example.com -u testuser:testpass -T -
+smtp://%HOSTIP:%SMTPPORT/906 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
 </command>
 </client>
 
@@ -51,8 +51,8 @@ EHLO 906
 AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoKBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
-MAIL FROM:<906@example.com>
-RCPT TO:<906@example.com>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
