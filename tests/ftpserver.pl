@@ -871,68 +871,81 @@ sub RCPT_smtp {
 }
 
 sub DATA_smtp {
+    my ($args) = @_;
     my $testno = $smtp_rcpt;
 
-    $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
-    sendcontrol "354 Show me the mail\r\n";
+    if ($args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        $testno =~ s/^([^0-9]*)([0-9]+).*/$2/;
+        sendcontrol "354 Show me the mail\r\n";
 
-    logmsg "===> rcpt $testno was $smtp_rcpt\n";
+        logmsg "===> rcpt $testno was $smtp_rcpt\n";
 
-    my $filename = "log/upload.$testno";
+        my $filename = "log/upload.$testno";
 
-    logmsg "Store test number $testno in $filename\n";
+        logmsg "Store test number $testno in $filename\n";
 
-    open(FILE, ">$filename") ||
-        return 0; # failed to open output
+        open(FILE, ">$filename") ||
+            return 0; # failed to open output
 
-    my $line;
-    my $ulsize=0;
-    my $disc=0;
-    my $raw;
-    while (5 == (sysread \*SFREAD, $line, 5)) {
-        if($line eq "DATA\n") {
-            my $i;
-            my $eob;
-            sysread \*SFREAD, $i, 5;
+        my $line;
+        my $ulsize=0;
+        my $disc=0;
+        my $raw;
+        while (5 == (sysread \*SFREAD, $line, 5)) {
+            if($line eq "DATA\n") {
+                my $i;
+                my $eob;
+                sysread \*SFREAD, $i, 5;
 
-            my $size = 0;
-            if($i =~ /^([0-9a-fA-F]{4})\n/) {
-                $size = hex($1);
+                my $size = 0;
+                if($i =~ /^([0-9a-fA-F]{4})\n/) {
+                    $size = hex($1);
+                }
+
+                read_mainsockf(\$line, $size);
+
+                $ulsize += $size;
+                print FILE $line if(!$nosave);
+
+                $raw .= $line;
+                if($raw =~ /\x0d\x0a\x2e\x0d\x0a/) {
+                    # end of data marker!
+                    $eob = 1;
+                }
+
+                logmsg "> Appending $size bytes to file\n";
+
+                if($eob) {
+                    logmsg "Found SMTP EOB marker\n";
+                    last;
+                }
             }
-
-            read_mainsockf(\$line, $size);
-
-            $ulsize += $size;
-            print FILE $line if(!$nosave);
-
-            $raw .= $line;
-            if($raw =~ /\x0d\x0a\x2e\x0d\x0a/) {
-                # end of data marker!
-                $eob = 1;
+            elsif($line eq "DISC\n") {
+                # disconnect!
+                $disc=1;
+                last;
             }
-            logmsg "> Appending $size bytes to file\n";
-            if($eob) {
-                logmsg "Found SMTP EOB marker\n";
+            else {
+                logmsg "No support for: $line";
                 last;
             }
         }
-        elsif($line eq "DISC\n") {
-            # disconnect!
-            $disc=1;
-            last;
-        }
-        else {
-            logmsg "No support for: $line";
-            last;
-        }
-    }
-    if($nosave) {
-        print FILE "$ulsize bytes would've been stored here\n";
-    }
-    close(FILE);
-    sendcontrol "250 OK, data received!\r\n";
-    logmsg "received $ulsize bytes upload\n";
 
+        if($nosave) {
+            print FILE "$ulsize bytes would've been stored here\n";
+        }
+
+        close(FILE);
+
+        logmsg "received $ulsize bytes upload\n";
+
+        sendcontrol "250 OK, data received!\r\n";
+    }
+
+    return 0;
 }
 
 sub QUIT_smtp {
@@ -1163,6 +1176,7 @@ sub APPEND_imap {
         if($nosave) {
             print FILE "$size bytes would've been stored here\n";
         }
+
         close(FILE);
 
         logmsg "received $size bytes upload\n";
