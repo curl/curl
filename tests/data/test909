@@ -8,10 +8,6 @@ SMTP
 #
 # Server-side
 <reply>
-# the key in this response is that it doesn't include SIZE support
-<servercmd>
-REPLY EHLO 250 mooo
-</servercmd>
 </reply>
 
 #
