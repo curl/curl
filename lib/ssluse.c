@@ -1429,19 +1429,12 @@ ossl_connect_step1(struct connectdata *conn,
   switch(data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
-#ifdef USE_TLS_SRP
-    if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
-      infof(data, "Set version TLSv1 for SRP authorisation\n");
-      req_method = TLSv1_client_method() ;
-    }
-    else
-#endif
-    /* we try to figure out version */
-    req_method = SSLv23_client_method();
-    use_sni(TRUE);
-    break;
   case CURL_SSLVERSION_TLSv1:
-    req_method = TLSv1_client_method();
+  case CURL_SSLVERSION_TLSv1_0:
+  case CURL_SSLVERSION_TLSv1_1:
+  case CURL_SSLVERSION_TLSv1_2:
+    /* it will be handled later with the context options */
+    req_method = SSLv23_client_method();
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv2:
@@ -1554,9 +1547,39 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
-  /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
-  if(data->set.ssl.version == CURL_SSLVERSION_DEFAULT)
+  switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
     ctx_options |= SSL_OP_NO_SSLv2;
+#ifdef USE_TLS_SRP
+    if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+      infof(data, "Set version TLSv1.x for SRP authorisation\n");
+      ctx_options |= SSL_OP_NO_SSLv3;
+    }
+#endif
+    break;
+  case CURL_SSLVERSION_TLSv1:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
+    break;
+  case CURL_SSLVERSION_TLSv1_0:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
+    ctx_options |= SSL_OP_NO_TLSv1_1;
+    ctx_options |= SSL_OP_NO_TLSv1_2;
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
+    ctx_options |= SSL_OP_NO_TLSv1;
+    ctx_options |= SSL_OP_NO_TLSv1_2;
+    break;
+  case CURL_SSLVERSION_TLSv1_2:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
+    ctx_options |= SSL_OP_NO_TLSv1;
+    ctx_options |= SSL_OP_NO_TLSv1_1;
+    break;
+  }
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
 
