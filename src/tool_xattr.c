@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,13 +23,18 @@
 
 #ifdef HAVE_FSETXATTR
 #  include <sys/xattr.h> /* header from libc, not from libattr */
+#  define USE_XATTR
+#elif defined(__FreeBSD_version) && (__FreeBSD_version > 500000)
+#  include <sys/types.h>
+#  include <sys/extattr.h>
+#  define USE_XATTR
 #endif
 
 #include "tool_xattr.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef HAVE_FSETXATTR
+#ifdef USE_XATTR
 
 /* mapping table of curl metadata to extended attribute names */
 static const struct xattr_mapping {
@@ -60,6 +65,12 @@ int fwrite_xattr(CURL *curl, int fd)
       err = fsetxattr(fd, mappings[i].attr, value, strlen(value), 0, 0);
 #elif defined(HAVE_FSETXATTR_5)
       err = fsetxattr(fd, mappings[i].attr, value, strlen(value), 0);
+#elif defined(__FreeBSD_version)
+      err = extattr_set_fd(fd, EXTATTR_NAMESPACE_USER, mappings[i].attr, value,
+                           strlen(value));
+      /* FreeBSD's extattr_set_fd returns the length of the extended attribute
+       */
+      err = err < 0 ? err : 0;
 #endif
     }
     i++;
