@@ -2351,7 +2351,7 @@ ossl_connect_step3(struct connectdata *conn,
    * operations.
    */
 
-  if(!data->set.ssl.verifypeer)
+  if(!data->set.ssl.verifypeer && !data->set.ssl.verifyhost)
     (void)servercert(conn, connssl, FALSE);
   else
     retcode = servercert(conn, connssl, TRUE);
