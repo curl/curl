@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
+  backends, so relying on this information in a generic app is flaky.
+
 83. curl is unable to load non-default openssl engines, because openssl isn't
   initialized properly. This seems to require OpenSSL_config() or
   CONF_modules_load_file() to be used by libcurl but the first seems to not
