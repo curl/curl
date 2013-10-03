@@ -1330,6 +1330,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         case SSL_NULL_WITH_NULL_NULL:
         case SSL_RSA_WITH_NULL_MD5:
         case SSL_RSA_WITH_NULL_SHA:
+        case 0x003B: /* TLS_RSA_WITH_NULL_SHA256 */
         case SSL_FORTEZZA_DMS_WITH_NULL_SHA:
         case 0xC001: /* TLS_ECDH_ECDSA_WITH_NULL_SHA */
         case 0xC006: /* TLS_ECDHE_ECDSA_WITH_NULL_SHA */
