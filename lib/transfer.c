@@ -542,6 +542,10 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
             if(!Curl_meets_timecondition(data, k->timeofdoc)) {
               *done = TRUE;
+              /* We're simulating a http 304 from server so we return
+                 what should have been returned from the server */
+              data->info.httpcode = 304;
+              infof(data, "Simulate a HTTP 304 response!\n");
               /* we abort the transfer before it is completed == we ruin the
                  re-use ability. Close the connection */
               conn->bits.close = TRUE;
