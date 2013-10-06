@@ -56,8 +56,8 @@ This release includes the following bugfixes:
  o darwinssl: block TLS_RSA_WITH_NULL_SHA256 cipher
  o OpenSSL: acknowledge CURLOPT_SSL_VERIFYHOST without VERIFYPEER
  o xattr: add support for FreeBSD xattr API
- o win32: fix Visual Studio 2010 build with WINVER >= 0x600
- o configure: use icc options without space
+ o win32: fix Visual Studio 2010 build with WINVER >= 0x600 [22]
+ o configure: use icc options without space [21]
  o test1112: Increase the timeout from 7s to 16s [20]
 
 This release includes the following known bugs:
@@ -100,3 +100,5 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/view.cgi?id=1279
  [19] = http://curl.haxx.se/bug/view.cgi?id=1281
  [20] = http://curl.haxx.se/mail/lib-2010-02/0200.html
+ [21] = http://curl.haxx.se/mail/lib-2013-09/0182.html
+ [22] = http://curl.haxx.se/bug/view.cgi?id=1282
