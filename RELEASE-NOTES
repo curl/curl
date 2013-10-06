@@ -53,6 +53,12 @@ This release includes the following bugfixes:
  o curl: Added clarification to the --mail options in the --help output
  o curl_easy_setopt.3: clarify that TIMEOUT and TIMEOUT_MS set the same value
  o openssl: use correct port number in error message [19]
+ o darwinssl: block TLS_RSA_WITH_NULL_SHA256 cipher
+ o OpenSSL: acknowledge CURLOPT_SSL_VERIFYHOST without VERIFYPEER
+ o xattr: add support for FreeBSD xattr API
+ o win32: fix Visual Studio 2010 build with WINVER >= 0x600
+ o configure: use icc options without space
+ o test1112: Increase the timeout from 7s to 16s [20]
 
 This release includes the following known bugs:
 
@@ -67,7 +73,8 @@ advice from friends like these:
  Stefan Neis, Nick Zitzmann, Geoff Beier, John Dunn, Jiri Hruska,
  Tomas Mlcoch, Kim Vandry, Ben Greear, Gorilla Maguila, Jerry Krinock,
  Yamada Yasuharu, Gordon Marler, Dave Thompson, D. Flinkmann,
- Benoit Sigoure, Clemens Gruber, Guenter Knauf, Petr Pisar
+ Benoit Sigoure, Clemens Gruber, Guenter Knauf, Petr Pisar, Elmira A Semenova,
+ Francois Charlier, Ishan SinghLevett, Marcel Raad, Ulf Samuelsson
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -92,3 +99,4 @@ References to bug reports and discussions on issues:
  [17] = http://curl.haxx.se/bug/view.cgi?id=1278
  [18] = http://curl.haxx.se/bug/view.cgi?id=1279
  [19] = http://curl.haxx.se/bug/view.cgi?id=1281
+ [20] = http://curl.haxx.se/mail/lib-2010-02/0200.html
