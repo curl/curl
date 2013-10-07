@@ -2288,6 +2288,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = result;
       }
       else {
+        /* store this original bitmask setup to use later on if we can't
+           figure out a "real" bitmask */
+        sshc->orig_waitfor = data->req.keepon;
+
         /* we want to use the _sending_ function even when the socket turns
            out readable as the underlying libssh2 scp send function will deal
            with both accordingly */
@@ -2604,9 +2608,7 @@ static void ssh_block2waitfor(struct connectdata *conn, bool block)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   int dir;
-  if(!block)
-    conn->waitfor = 0;
-  else if((dir = libssh2_session_block_directions(sshc->ssh_session))) {
+  if(block && (dir = libssh2_session_block_directions(sshc->ssh_session))) {
     /* translate the libssh2 define bits into our own bit defines */
     conn->waitfor = ((dir&LIBSSH2_SESSION_BLOCK_INBOUND)?KEEP_RECV:0) |
       ((dir&LIBSSH2_SESSION_BLOCK_OUTBOUND)?KEEP_SEND:0);

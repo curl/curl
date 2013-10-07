@@ -59,6 +59,7 @@ This release includes the following bugfixes:
  o win32: fix Visual Studio 2010 build with WINVER >= 0x600 [22]
  o configure: use icc options without space [21]
  o test1112: Increase the timeout from 7s to 16s [20]
+ o SCP: upload speed on a fast connection limited to 16384 B/s
 
 This release includes the following known bugs:
 
