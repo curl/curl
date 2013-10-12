@@ -77,7 +77,7 @@ static const struct LongShort aliases[]= {
   {"*6", "dns-ipv6-addr",            TRUE},
   {"*a", "random-file",              TRUE},
   {"*b", "egd-file",                 TRUE},
-  {"*B", "bearer",                   TRUE},
+  {"*B", "oauth2-bearer",             TRUE},
   {"*c", "connect-timeout",          TRUE},
   {"*d", "ciphers",                  TRUE},
   {"*D", "dns-interface",            TRUE},
