@@ -79,9 +79,12 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			 \
  curl_multi_assign.pdf curl_easy_pause.pdf curl_easy_recv.pdf		 \
  curl_easy_send.pdf curl_multi_socket_action.pdf curl_multi_wait.pdf
 
+m4macrodir = $(datadir)/aclocal
+dist_m4macro_DATA = libcurl.m4
+
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
-EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) libcurl.m4 ABI \
+EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) ABI \
   symbols-in-versions symbols.pl
 MAN2HTML= roffit --mandir=. < $< >$@
 
