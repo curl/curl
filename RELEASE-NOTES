@@ -1,8 +1,8 @@
 Curl and libcurl 7.33.0
 
  Public curl releases:         135
- Command line options:         155
- curl_easy_setopt() options:   201
+ Command line options:         161
+ curl_easy_setopt() options:   205
  Public functions in libcurl:  58
  Known libcurl bindings:       42
  Contributors:                 1057
@@ -19,6 +19,7 @@ This release includes the following changes:
  o Pass password to OpenSSL engine by user interface [15]
  o c-ares: Add support for various DNS binding options
  o cookies: add expiration
+ o curl: added --oauth2-bearer option
 
 This release includes the following bugfixes:
 
@@ -60,6 +61,8 @@ This release includes the following bugfixes:
  o configure: use icc options without space [21]
  o test1112: Increase the timeout from 7s to 16s [20]
  o SCP: upload speed on a fast connection limited to 16384 B/s
+ o curl_setup_once: fix errno access for lwip on Windows [24]
+ o HTTP: Output http response 304 when modified time is too old [23]
 
 This release includes the following known bugs:
 
@@ -75,7 +78,8 @@ advice from friends like these:
  Tomas Mlcoch, Kim Vandry, Ben Greear, Gorilla Maguila, Jerry Krinock,
  Yamada Yasuharu, Gordon Marler, Dave Thompson, D. Flinkmann,
  Benoit Sigoure, Clemens Gruber, Guenter Knauf, Petr Pisar, Elmira A Semenova,
- Francois Charlier, Ishan SinghLevett, Marcel Raad, Ulf Samuelsson
+ Francois Charlier, Ishan SinghLevett, Marcel Raad, Ulf Samuelsson,
+ Andrej E Baranov, Derek Higgins, Heinrich Schaefer
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -103,3 +107,5 @@ References to bug reports and discussions on issues:
  [20] = http://curl.haxx.se/mail/lib-2010-02/0200.html
  [21] = http://curl.haxx.se/mail/lib-2013-09/0182.html
  [22] = http://curl.haxx.se/bug/view.cgi?id=1282
+ [23] = http://curl.haxx.se/bug/view.cgi?id=1288
+ [24] = http://curl.haxx.se/mail/lib-2013-10/0048.html
