@@ -32,14 +32,14 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /*
-** callback for CURLOPT_PROGRESSFUNCTION
+** callback for CURLOPT_XFERINFOFUNCTION
 */
 
 #define MAX_BARLENGTH 256
 
 int tool_progress_cb(void *clientp,
-                     double dltotal, double dlnow,
-                     double ultotal, double ulnow)
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow)
 {
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherits some of his concepts. */
@@ -60,10 +60,10 @@ int tool_progress_cb(void *clientp,
     return 0;
 
   /* expected transfer size */
-  total = (curl_off_t)dltotal + (curl_off_t)ultotal + bar->initial_size;
+  total = dltotal + ultotal + bar->initial_size;
 
   /* we've come this far */
-  point = (curl_off_t)dlnow + (curl_off_t)ulnow + bar->initial_size;
+  point = dlnow + ulnow + bar->initial_size;
 
   if(point > total)
     /* we have got more than the expected total! */

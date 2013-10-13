@@ -1235,8 +1235,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
            !config->noprogress && !config->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
-          my_setopt(curl, CURLOPT_PROGRESSFUNCTION, tool_progress_cb);
-          my_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
+          my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);
+          my_setopt(curl, CURLOPT_XFERINFODATA, &progressbar);
         }
 
         /* new in libcurl 7.24.0: */

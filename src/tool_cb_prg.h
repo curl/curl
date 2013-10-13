@@ -43,8 +43,8 @@ void progressbarinit(struct ProgressData *bar,
 */
 
 int tool_progress_cb(void *clientp,
-                     double dltotal, double dlnow,
-                     double ultotal, double ulnow);
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow);
 
 #endif /* HEADER_CURL_TOOL_CB_PRG_H */
 
