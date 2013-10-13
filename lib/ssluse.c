@@ -1192,8 +1192,8 @@ static CURLcode verifyhost(struct connectdata *conn,
     /* an alternative name field existed, but didn't match and then
        we MUST fail */
     infof(data, "\t subjectAltName does not match %s\n", conn->host.dispname);
-    failf(data, "SSL: alternative certificate subject names does not match "
-            "target host name '%s'", conn->host.dispname);
+    failf(data, "SSL: no alternative certificate subject name matches "
+          "target host name '%s'", conn->host.dispname);
     res = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
