@@ -1,6 +1,6 @@
-Curl and libcurl 7.33.0
+Curl and libcurl 7.33.1
 
- Public curl releases:         135
+ Public curl releases:         136
  Command line options:         161
  curl_easy_setopt() options:   205
  Public functions in libcurl:  58
@@ -9,60 +9,11 @@ Curl and libcurl 7.33.0
 
 This release includes the following changes:
 
- o test code for testing the event based API [3]
- o CURLM_ADDED_ALREADY: new error code
- o test TFTP server: support "writedelay" within <servercmd>
- o krb4 support has been removed
- o imap/pop3/smtp: added basic SASL XOAUTH2 support [9]
- o darwinssl: add support for PKCS#12 files for client authentication
- o darwinssl: enable BEAST workaround on iOS 7 & later
- o Pass password to OpenSSL engine by user interface [15]
- o c-ares: Add support for various DNS binding options
- o cookies: add expiration
- o curl: added --oauth2-bearer option
+ o 
 
 This release includes the following bugfixes:
 
- o nss: make sure that NSS is initialized
- o curl: make --no-[option] work properly for several options
- o FTP: with socket_action send better socket updates in active mode [1]
- o curl: fix the --sasl-ir in the --help output
- o tests 2032, 2033: Don't hardcode port in expected output
- o urlglob: better detect unclosed braces, empty lists and overflows [7]
- o urlglob: error out on range overflow [8]
- o imap: Fixed response check for SEARCH, EXPUNGE, LSUB, UID and NOOP commands [10]
- o handle arbitrary-length username and password [2]
- o TFTP: make the CURLOPT_LOW_SPEED* options work [4]
- o curl.h: name space pollution by "enum type" [5]
- o multi: move on from STATE_DONE faster [6]
- o FTP: 60 secs delay if aborted in the CURLOPT_HEADERFUNCTION callback [11]
- o multi_socket: improved 100-continue timeout handling
- o curl_multi_remove_handle: allow multiple removes
- o FTP: fix getsock during DO_MORE state [12]
- o -x: rephrased the --proxy section somewhat
- o acinclude: fix --without-ca-path when cross-compiling [13]
- o LDAP: fix bad free() when URL parsing failed [14]
- o --data: mention CRLF treatment when reading from file
- o curl_easy_pause: suggest one way to unpause
- o imap: Fixed calculation of transfer when partial FETCH received [16]
- o pingpong: Check SSL library buffers for already read data [16]
- o imap/pop3/smtp: Speed up SSL connection initialization
- o libcurl.3: for multi interface connections are held in the multi handle
- o curl_easy_setopt.3: mention RTMP URL quirks [17]
- o curl.1: detail how short/long options work [18]
- o curl.1: Added information about optional login options to --user option
- o curl: Added clarification to the --mail options in the --help output
- o curl_easy_setopt.3: clarify that TIMEOUT and TIMEOUT_MS set the same value
- o openssl: use correct port number in error message [19]
- o darwinssl: block TLS_RSA_WITH_NULL_SHA256 cipher
- o OpenSSL: acknowledge CURLOPT_SSL_VERIFYHOST without VERIFYPEER
- o xattr: add support for FreeBSD xattr API
- o win32: fix Visual Studio 2010 build with WINVER >= 0x600 [22]
- o configure: use icc options without space [21]
- o test1112: Increase the timeout from 7s to 16s [20]
- o SCP: upload speed on a fast connection limited to 16384 B/s
- o curl_setup_once: fix errno access for lwip on Windows [24]
- o HTTP: Output http response 304 when modified time is too old [23]
+ o 
 
 This release includes the following known bugs:
 
@@ -71,41 +22,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Alex McLellan, Bill Doyle, Colby Ranger, Fabian Keil, Gisle Vanem,
- John E. Malmberg, Jonathan Nieder, Kamil Dudka, Shawn Landden,
- Tor Arntsen, Will Dietz, Yi Huang, Kyle L. Huff, Steve Holme, Mike Mio,
- Stefan Neis, Nick Zitzmann, Geoff Beier, John Dunn, Jiri Hruska,
- Tomas Mlcoch, Kim Vandry, Ben Greear, Gorilla Maguila, Jerry Krinock,
- Yamada Yasuharu, Gordon Marler, Dave Thompson, D. Flinkmann,
- Benoit Sigoure, Clemens Gruber, Guenter Knauf, Petr Pisar, Elmira A Semenova,
- Francois Charlier, Ishan SinghLevett, Marcel Raad, Ulf Samuelsson,
- Andrej E Baranov, Derek Higgins, Heinrich Schaefer
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2013-08/0043.html
- [2] = http://bugs.debian.org/719856
- [3] = http://daniel.haxx.se/blog/2013/08/20/testing-curl_multi_socket_action/
- [4] = http://curl.haxx.se/bug/view.cgi?id=1269
- [5] = https://github.com/bagder/curl/pull/76
- [6] = http://curl.haxx.se/mail/lib-2013-08/0211.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=1264
- [8] = http://curl.haxx.se/bug/view.cgi?id=1267
- [9] = http://curl.haxx.se/mail/lib-2013-08/0234.html
- [10] = http://curl.haxx.se/mail/lib-2013-08/0136.html
- [11] = https://bugzilla.redhat.com/1005686
- [12] = http://curl.haxx.se/mail/lib-2013-08/0109.html
- [13] = http://curl.haxx.se/bug/view.cgi?id=1273
- [14] = http://curl.haxx.se/mail/lib-2013-08/0209.html
- [15] = http://curl.haxx.se/mail/lib-2013-08/0265.html
- [16] = http://curl.haxx.se/mail/lib-2013-08/0170.html
- [17] = http://curl.haxx.se/bug/view.cgi?id=1278
- [18] = http://curl.haxx.se/bug/view.cgi?id=1279
- [19] = http://curl.haxx.se/bug/view.cgi?id=1281
- [20] = http://curl.haxx.se/mail/lib-2010-02/0200.html
- [21] = http://curl.haxx.se/mail/lib-2013-09/0182.html
- [22] = http://curl.haxx.se/bug/view.cgi?id=1282
- [23] = http://curl.haxx.se/bug/view.cgi?id=1288
- [24] = http://curl.haxx.se/mail/lib-2013-10/0048.html
+ 
