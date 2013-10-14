@@ -754,7 +754,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                              curlx_uztoui(strlen(conn->user)));
 
       if(!sshc->authlist) {
-        if((err = libssh2_session_last_errno(sshc->ssh_session)) ==
+        if(libssh2_userauth_authenticated(sshc->ssh_session)) {
+          sshc->authed = TRUE;
+          infof(data, "SSH user accepted with no authentication\n");
+          state(conn, SSH_AUTH_DONE);
+          break;
+        }
+        else if((err = libssh2_session_last_errno(sshc->ssh_session)) ==
            LIBSSH2_ERROR_EAGAIN) {
           rc = LIBSSH2_ERROR_EAGAIN;
           break;
