@@ -1216,16 +1216,16 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
     else {
       switch(err) {
-        case errSecPkcs12VerifyFailure: case errSecAuthFailed:
+        case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
           failf(data, "SSL: Incorrect password for the certificate \"%s\" "
                       "and its private key.", data->set.str[STRING_CERT]);
           break;
-        case errSecDecode: case errSecUnknownFormat:
+        case errSecDecode: case -25257: /* errSecUnknownFormat */
           failf(data, "SSL: Couldn't make sense of the data in the "
                       "certificate \"%s\" and its private key.",
                       data->set.str[STRING_CERT]);
           break;
-        case errSecPassphraseRequired:
+        case -25260: /* errSecPassphraseRequired */
           failf(data, "SSL The certificate \"%s\" requires a password.",
                       data->set.str[STRING_CERT]);
           break;
