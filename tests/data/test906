@@ -41,6 +41,9 @@ mail body
  <command>
 smtp://%HOSTIP:%SMTPPORT/906 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
 </command>
+<precheck>
+chkhostname curlhost
+</precheck>
 </client>
 
 #
