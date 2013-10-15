@@ -1498,14 +1498,26 @@ Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
 specified but \fI--tlsauthtype\fP is not, then this option defaults to "SRP".
 (Added in 7.21.4)
-.IP "--tlsuser <user>"
-Set username for use with the TLS authentication method specified with
-\fI--tlsauthtype\fP. Requires that \fI--tlspassword\fP also be set.  (Added in
-7.21.4)
 .IP "--tlspassword <password>"
 Set password for use with the TLS authentication method specified with
 \fI--tlsauthtype\fP. Requires that \fI--tlsuser\fP also be set.  (Added in
 7.21.4)
+.IP "--tlsuser <user>"
+Set username for use with the TLS authentication method specified with
+\fI--tlsauthtype\fP. Requires that \fI--tlspassword\fP also be set.  (Added in
+7.21.4)
+.IP "--tlsv1.0"
+(SSL)
+Forces curl to use TLS version 1.0 when negotiating with a remote TLS server.
+(Added in 7.34.0)
+.IP "--tlsv1.1"
+(SSL)
+Forces curl to use TLS version 1.1 when negotiating with a remote TLS server.
+(Added in 7.34.0)
+.IP "--tlsv1.2"
+(SSL)
+Forces curl to use TLS version 1.2 when negotiating with a remote TLS server.
+(Added in 7.34.0)
 .IP "--tr-encoding"
 (HTTP) Request a compressed Transfer-Encoding response using one of the
 algorithms curl supports, and uncompress the data while receiving it.
