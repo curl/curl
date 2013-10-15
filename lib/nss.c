@@ -1244,8 +1244,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(SSL_OptionSet(model, SSL_HANDSHAKE_AS_CLIENT, PR_TRUE) != SECSuccess)
     goto error;
 
-  /* do not use SSL cache if we are not going to verify peer */
-  ssl_no_cache = (data->set.ssl.verifypeer) ? PR_FALSE : PR_TRUE;
+  /* do not use SSL cache if disabled or we are not going to verify peer */
+  ssl_no_cache = (conn->ssl_config.sessionid && data->set.ssl.verifypeer) ?
+    PR_FALSE : PR_TRUE;
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
 
