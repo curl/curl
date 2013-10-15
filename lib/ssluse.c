@@ -1577,7 +1577,7 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
     ctx_options |= SSL_OP_NO_TLSv1;
-#if defined(SSL_OP_NO_TLSv1_1)
+#if defined(SSL_OP_NO_TLSv1_2)
     ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     break;
