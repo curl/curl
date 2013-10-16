@@ -1559,10 +1559,12 @@ ossl_connect_step1(struct connectdata *conn,
     }
 #endif
     break;
+
   case CURL_SSLVERSION_TLSv1:
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
     break;
+
   case CURL_SSLVERSION_TLSv1_0:
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
@@ -1573,6 +1575,8 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     break;
+
+#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
   case CURL_SSLVERSION_TLSv1_1:
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
@@ -1581,6 +1585,7 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     break;
+
   case CURL_SSLVERSION_TLSv1_2:
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
@@ -1589,6 +1594,11 @@ ossl_connect_step1(struct connectdata *conn,
     ctx_options |= SSL_OP_NO_TLSv1_1;
 #endif
     break;
+#endif
+
+  default:
+    failf(data, "Unsupported cipher version");
+    return CURLE_SSL_CIPHER;
   }
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
