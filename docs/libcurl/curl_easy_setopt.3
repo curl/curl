@@ -2410,6 +2410,8 @@ Even though this option doesn't need any parameter, in some configurations
 arguments. Therefore, it's recommended to pass 1 as parameter to this option.
 .IP CURLOPT_SSLVERSION
 Pass a long as parameter to control what version of SSL/TLS to attempt to use.
+(Added in 7.9.2)
+
 The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
@@ -2423,11 +2425,11 @@ Force SSLv2
 .IP CURL_SSLVERSION_SSLv3
 Force SSLv3
 .IP CURL_SSLVERSION_TLSv1_0
-Force TLSv1.0
+Force TLSv1.0 (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_1
-Force TLSv1.1
+Force TLSv1.1 (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_2
-Force TLSv1.2
+Force TLSv1.2 (Added in 7.34.0)
 .RE
 .IP CURLOPT_SSL_VERIFYPEER
 Pass a long as parameter. By default, curl assumes a value of 1.
