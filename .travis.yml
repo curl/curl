@@ -1,0 +1,11 @@
+language: c
+
+before_script:
+  - ./buildconf
+
+compiler:
+  - clang
+  - gcc
+
+notifications:
+  email: false
