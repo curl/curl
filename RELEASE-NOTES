@@ -13,7 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o nss: missing initialization in NTLM code causing test 906 to fail
 
 This release includes the following known bugs:
 

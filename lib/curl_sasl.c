@@ -40,6 +40,10 @@
 #include "warnless.h"
 #include "curl_memory.h"
 
+#ifdef USE_NSS
+#include "nssg.h" /* for Curl_nss_force_init() */
+#endif
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
@@ -468,7 +472,14 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
-  CURLcode result = Curl_ntlm_decode_type2_message(data, header, ntlm);
+  CURLcode result;
+#ifdef USE_NSS
+  /* make sure the crypto backend is initialized */
+  result = Curl_nss_force_init(data);
+  if(result)
+    return result;
+#endif
+  result = Curl_ntlm_decode_type2_message(data, header, ntlm);
 
   if(!result)
     result = Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm,
