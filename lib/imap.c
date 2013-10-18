@@ -1982,7 +1982,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* The IMAP session may or may not have been allocated/setup at this
      point! */
-  if(!dead_connection && imapc->pp.conn)
+  if(!dead_connection && imapc->pp.conn && imapc->pp.conn->bits.protoconnstart)
     if(!imap_perform_logout(conn))
       (void)imap_block_statemach(conn); /* ignore errors on LOGOUT */
 

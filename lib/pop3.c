@@ -1634,8 +1634,7 @@ static CURLcode pop3_do(struct connectdata *conn, bool *done)
  * Disconnect from an POP3 server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode pop3_disconnect(struct connectdata *conn,
-                                bool dead_connection)
+static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
@@ -1645,7 +1644,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn,
 
   /* The POP3 session may or may not have been allocated/setup at this
      point! */
-  if(!dead_connection && pop3c->pp.conn)
+  if(!dead_connection && pop3c->pp.conn && pop3c->pp.conn->bits.protoconnstart)
     if(!pop3_perform_quit(conn))
       (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
 

@@ -1632,8 +1632,7 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
  * Disconnect from an SMTP server. Cleanup protocol-specific per-connection
  * resources. BLOCKING.
  */
-static CURLcode smtp_disconnect(struct connectdata *conn,
-                                bool dead_connection)
+static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
@@ -1643,7 +1642,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn,
 
   /* The SMTP session may or may not have been allocated/setup at this
      point! */
-  if(!dead_connection && smtpc->pp.conn)
+  if(!dead_connection && smtpc->pp.conn && smtpc->pp.conn->bits.protoconnstart)
     if(!smtp_perform_quit(conn))
       (void)smtp_block_statemach(conn); /* ignore errors on QUIT */
 
