@@ -9,11 +9,18 @@ Curl and libcurl 7.33.1
 
 This release includes the following changes:
 
- o 
+ o SSL: protocol version can be specified more precisely [1]
 
 This release includes the following bugfixes:
 
- o nss: missing initialization in NTLM code causing test 906 to fail
+ o darwinssl: un-break iOS build after PKCS#12 feature added
+ o tool: use XFERFUNCTION to save some casts [2]
+ o usercertinmem: fix memory leaks
+ o ssh: Handle successful SSH_USERAUTH_NONE [3]
+ o NSS: acknowledge the --no-sessionid/CURLOPT_SSL_SESSIONID_CACHE option [4]
+ o test906: Fixed failing test on some platforms [5]
+ o curl_sasl: initialize NSS before using NTLM crypto
+ o imap/pop3/smtp: Fixed QUIT / LOGOUT being sent when SSL connect fails
 
 This release includes the following known bugs:
 
@@ -22,10 +29,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Nick Zitzmann, Gergely Nagy, Alessandro Ghedini, Dave Reisner,
+ Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
+ Kamil Dudka
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- 
+ [1] = https://github.com/bagder/curl/pull/79
+ [2] = http://curl.haxx.se/mail/lib-2013-10/0089.html
+ [3] = http://curl.haxx.se/mail/lib-2013-10/0096.html
+ [4] = http://curl.haxx.se/mail/lib-2013-10/0113.html
+ [5] = http://sourceforge.net/p/curl/bugs/1291
