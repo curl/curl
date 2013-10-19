@@ -52,6 +52,7 @@ BEGIN {
 use strict;
 use warnings;
 use IPC::Open2;
+use Digest::MD5;
 
 require "getpart.pm";
 require "ftp.pm";
@@ -174,6 +175,7 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 #
 my $TEXT_USERNAME = "user";
 my $TEXT_PASSWORD = "secret";
+my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 
 #**********************************************************************
 # exit_signal_handler will be triggered to indicate that the program
@@ -562,6 +564,7 @@ sub protocolsetup {
     }
     elsif($proto eq 'pop3') {
         %commandfunc = (
+            'APOP' => \&APOP_pop3,
             'AUTH' => \&AUTH_pop3,
             'CAPA' => \&CAPA_pop3,
             'DELE' => \&DELE_pop3,
@@ -583,7 +586,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve'."\r\n")
+            '+OK cURL POP3 server ready to serve '.$POP3_TIMESTAMP."\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -1628,6 +1631,27 @@ sub CAPA_pop3 {
 
         # End with the magic 3-byte end of listing marker
         sendcontrol ".\r\n";
+    }
+
+    return 0;
+}
+
+sub APOP_pop3 {
+    my ($args) = @_;
+    my ($user, $secret) = split(/ /, $args, 2);
+
+    if (($user eq "") || ($secret eq "")) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        my $digest = Digest::MD5::md5_hex($POP3_TIMESTAMP, $TEXT_PASSWORD);
+
+        if (($user ne $TEXT_USERNAME) || ($secret ne $digest)) {
+            sendcontrol "-ERR Login failure\r\n";
+        }
+        else {
+            sendcontrol "+OK Login successful\r\n";
+        }
     }
 
     return 0;
