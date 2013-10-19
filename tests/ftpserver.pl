@@ -3060,7 +3060,7 @@ while(1) {
         }
         elsif($proto eq "pop3") {
             # POP3 long "commands" are base64 authentication data
-            unless($full =~ /^[A-Z0-9+\/]+={0,2}$/i)) {
+            unless($full =~ /^[A-Z0-9+\/]+={0,2}$/i) {
                 sendcontrol "-ERR '$full': command not understood.\r\n";
                 last;
             }
