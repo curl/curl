@@ -1640,7 +1640,10 @@ sub APOP_pop3 {
     my ($args) = @_;
     my ($user, $secret) = split(/ /, $args, 2);
 
-    if (($user eq "") || ($secret eq "")) {
+    if (!grep /^APOP$/, @capabilities) {
+        sendcontrol "-ERR Unrecognized command\r\n";
+    }
+    elsif (($user eq "") || ($secret eq "")) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
