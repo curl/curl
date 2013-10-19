@@ -14,7 +14,7 @@ RFC5034
 <servercmd>
 AUTH LOGIN
 REPLY AUTH +
-REPLY dXNlcg== +UGFzc3dvcmQ6
+REPLY dXNlcg== + UGFzc3dvcmQ6
 REPLY c2VjcmV0 +OK Login successful
 </servercmd>
 <data>
