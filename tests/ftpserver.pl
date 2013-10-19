@@ -3049,6 +3049,7 @@ while(1) {
                 sendcontrol "$1 '$full': command not understood.\r\n";
                 last;
             }
+
             $cmdid=$1; # set the global variable
             $FTPCMD=$2;
             $FTPARG=$3;
@@ -3056,6 +3057,16 @@ while(1) {
         elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
             $FTPARG=$3;
+        }
+        elsif($proto eq "pop3") {
+            # POP3 long "commands" are base64 authentication data
+            unless($full =~ /^[A-Z0-9+\/]+={0,2}$/i)) {
+                sendcontrol "-ERR '$full': command not understood.\r\n";
+                last;
+            }
+
+            $FTPCMD=$full;
+            $FTPARG="";
         }
         elsif(($proto eq "smtp") && ($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
             # SMTP long "commands" are base64 authentication data.
