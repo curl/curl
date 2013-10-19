@@ -68,6 +68,7 @@ test809 test810 test811 test812 test813 test814 \
 \
 test850 test851 test852 test853 test854 test855 test856 test857 test858 \
 test859 test860 test861 test862 test863 test864 test865 test866 test867 \
+test868 \
 \
 test900 test901 test902 test903 test904 test905 test906 test907 test908 \
 test909 test910 test911 test912 test913 test914 test915 test916 test917 \
