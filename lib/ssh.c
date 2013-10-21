@@ -2725,6 +2725,10 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   struct SessionHandle *data = conn->data;
 
+  /* initialize per-handle data if not already */
+  if(!data->req.protop)
+    ssh_setup_connection(conn);
+
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
   conn->bits.close = FALSE;
