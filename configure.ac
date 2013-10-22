@@ -1983,6 +1983,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test "x$USE_CYASSL" = "xyes"; then
       AC_MSG_NOTICE([detected CyaSSL])
 
+      dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
+      AC_CHECK_SIZEOF(long long)
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
