@@ -324,9 +324,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(strcmp(alg, "md5-sess") != 0)
     return CURLE_LOGIN_DENIED;
 
+#ifndef DEBUGBUILD
   /* Generate 64 bits of random data */
   for(i = 0; i < 8; i++)
     cnonce[i] = table16[Curl_rand(data)%16];
+#endif
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
