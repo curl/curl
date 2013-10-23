@@ -2729,9 +2729,14 @@ sub customize {
     logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
     while(<CUSTOM>) {
-        if($_ =~ /REPLY ([A-Za-z0-9+\/=]+) (.*)/) {
+        if($_ =~ /REPLY ([A-Za-z0-9+\/=]*) (.*)/) {
             $customreply{$1}=eval "qq{$2}";
-            logmsg "FTPD: set custom reply for $1\n";
+            if($1 eq "") {
+                logmsg "FTPD: set custom reply for empty response\n";
+            }
+            else {
+                logmsg "FTPD: set custom reply for $1\n";
+            }
         }
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
             # we blank the customreply for this command when having
