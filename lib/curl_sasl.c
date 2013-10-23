@@ -268,8 +268,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
+#ifndef DEBUGBUILD
   static const char table16[] = "0123456789abcdef";
-
+#endif
   CURLcode result = CURLE_OK;
   unsigned char *chlg = (unsigned char *) NULL;
   size_t chlglen = 0;
