@@ -514,6 +514,7 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
                                           const char *bearer,
                                           char **outptr, size_t *outlen)
 {
+  CURLcode result = CURLE_OK;
   char *xoauth;
 
   xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
@@ -522,8 +523,12 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the reply */
-  return Curl_base64_encode(data, xoauth, strlen(xoauth), outptr,
-                            outlen);
+  result = Curl_base64_encode(data, xoauth, strlen(xoauth), outptr,
+                              outlen);
+
+  Curl_safefree(xoauth);
+
+  return result;
 }
 
 /*
