@@ -22,8 +22,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <unistd.h>
-
 #include <curl/curl.h>
 
 /*
@@ -59,7 +57,6 @@ int main(int argc, char **argv)
   CURL *curl;
   CURLcode res;
   FILE * hd_src ;
-  int hd ;
   struct stat file_info;
 
   char *file;
@@ -72,9 +69,7 @@ int main(int argc, char **argv)
   url = argv[2];
 
   /* get the file size of the local file */
-  hd = open(file, O_RDONLY) ;
-  fstat(hd, &file_info);
-  close(hd) ;
+  stat(file, &file_info);
 
   /* get a FILE * of the same file, could also be made with
      fdopen() from the previous descriptor, but hey this is just
