@@ -19,8 +19,14 @@ This release includes the following bugfixes:
  o ssh: Handle successful SSH_USERAUTH_NONE [3]
  o NSS: acknowledge the --no-sessionid/CURLOPT_SSL_SESSIONID_CACHE option [4]
  o test906: Fixed failing test on some platforms [5]
- o curl_sasl: initialize NSS before using NTLM crypto
+ o sasl: initialize NSS before using NTLM crypto
+ o sasl: Fixed memory leak in OAUTH2 message creation
  o imap/pop3/smtp: Fixed QUIT / LOGOUT being sent when SSL connect fails
+ o cmake: unbreak for non-Windows platforms [6]
+ o ssh: initialize per-handle data in ssh_connect()
+ o glob: fix broken URLs
+ o configure: check for long long when building with cyassl
+ o CURLOPT_RESOLVE: mention they don't time-out [7]
 
 This release includes the following known bugs:
 
@@ -31,7 +37,8 @@ advice from friends like these:
 
  Nick Zitzmann, Gergely Nagy, Alessandro Ghedini, Dave Reisner,
  Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
- Kamil Dudka
+ Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
+ Romulo Ceccon, Patrick Monnerat
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -42,3 +49,5 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/mail/lib-2013-10/0096.html
  [4] = http://curl.haxx.se/mail/lib-2013-10/0113.html
  [5] = http://sourceforge.net/p/curl/bugs/1291
+ [6] = http://sourceforge.net/p/curl/bugs/1292
+ [7] = http://curl.haxx.se/mail/lib-2013-10/0062.html
