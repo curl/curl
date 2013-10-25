@@ -226,5 +226,12 @@ extern int Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
 #define sendto                  Curl_os400_sendto
 #define recvfrom                Curl_os400_recvfrom
 
+#ifdef HAVE_LIBZ
+#define zlibVersion             Curl_os400_zlibVersion
+#define inflateInit_            Curl_os400_inflateInit_
+#define inflateInit2_           Curl_os400_inflateInit2_
+#define inflate                 Curl_os400_inflate
+#define inflateEnd              Curl_os400_inflateEnd
+#endif
 
 #endif /* HEADER_CURL_SETUP_OS400_H */

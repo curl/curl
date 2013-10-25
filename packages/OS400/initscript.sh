@@ -1,6 +1,16 @@
 #!/bin/sh
 
 
+setenv()
+
+{
+        #       Define and export.
+
+        eval ${1}="${2}"
+        export ${1}
+}
+
+
 case "${SCRIPTDIR}" in
 /*)     ;;
 *)      SCRIPTDIR="`pwd`/${SCRIPTDIR}"
@@ -32,18 +42,23 @@ export SONAME
 #
 ################################################################################
 
-TARGETLIB='CURL'                # Target OS/400 program library
-STATBNDDIR='CURL_A'             # Static binding directory.
-DYNBNDDIR='CURL'                # Dynamic binding directory.
-SRVPGM="CURL.${SONAME}"         # Service program.
-TGTCCSID='500'                  # Target CCSID of objects
-DEBUG='*ALL'                    # Debug level
-OPTIMIZE='10'                   # Optimisation level
-OUTPUT='*NONE'                  # Compilation output option.
-TGTRLS='V5R3M0'                 # Target OS release
+setenv TARGETLIB        'CURL'                  # Target OS/400 program library.
+setenv STATBNDDIR       'CURL_A'                # Static binding directory.
+setenv DYNBNDDIR        'CURL'                  # Dynamic binding directory.
+setenv SRVPGM           "CURL.${SONAME}"        # Service program.
+setenv TGTCCSID         '500'                   # Target CCSID of objects.
+setenv DEBUG            '*ALL'                  # Debug level.
+setenv OPTIMIZE         '10'                    # Optimisation level
+setenv OUTPUT           '*NONE'                 # Compilation output option.
+setenv TGTRLS           'V5R3M0'                # Target OS release.
+setenv IFSDIR           '/curl'                 # Installation IFS directory.
 
-export TARGETLIB STATBNDDIR DYNBNDDIR SRVPGM TGTCCSID DEBUG OPTIMIZE OUTPUT
-export TGTRLS
+#       Define ZLIB availability and locations.
+
+setenv WITH_ZLIB        0                       # Define to 1 to enable.
+setenv ZLIB_INCLUDE     '/zlib/include'         # ZLIB include IFS directory.
+setenv ZLIB_LIB         'ZLIB'                  # ZLIB library.
+setenv ZLIB_BNDDIR      'ZLIB_A'                # ZLIB binding directory.
 
 
 ################################################################################
@@ -133,14 +148,26 @@ make_module()
         CMD="${CMD} LOCALETYPE(*LOCALE)"
         CMD="${CMD} INCDIR('/qibm/proddata/qadrt/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include'"
-        CMD="${CMD} '${TOPDIR}/packages/OS400' ${INCLUDES})"
+        CMD="${CMD} '${TOPDIR}/packages/OS400'"
+
+        if [ "${WITH_ZLIB}" != "0" ]
+        then    CMD="${CMD} '${ZLIB_INCLUDE}'"
+        fi
+
+        CMD="${CMD} ${INCLUDES})"
         CMD="${CMD} TGTCCSID(${TGTCCSID}) TGTRLS(${TGTRLS})"
         CMD="${CMD} OUTPUT(${OUTPUT})"
         CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
         CMD="${CMD} DBGVIEW(${DEBUG})"
 
-        if [ "${3}" ]
-        then    CMD="${CMD} DEFINE(${3})"
+        DEFINES="${3}"
+
+        if [ "${WITH_ZLIB}" != "0" ]
+        then    DEFINES="${DEFINES} HAVE_LIBZ HAVE_ZLIB_H"
+        fi
+
+        if [ "${DEFINES}" ]
+        then    CMD="${CMD} DEFINE(${DEFINES})"
         fi
 
         system "${CMD}"
@@ -154,11 +181,17 @@ make_module()
 db2_name()
 
 {
-        basename "${1}"                                                 |
-        tr 'a-z-' 'A-Z_'                                                |
-        sed -e 's/\..*//'                                               \
-            -e 's/^CURL_*/C/'                                           \
-            -e 's/^\(.\).*\(.........\)$/\1\2/'
+        if [ "${2}" = 'nomangle' ]
+        then    basename "${1}"                                         |
+                tr 'a-z-' 'A-Z_'                                        |
+                sed -e 's/\..*//'                                       \
+                    -e 's/^\(.\).*\(.........\)$/\1\2/'
+        else    basename "${1}"                                         |
+                tr 'a-z-' 'A-Z_'                                        |
+                sed -e 's/\..*//'                                       \
+                    -e 's/^CURL_*/C/'                                   \
+                    -e 's/^\(.\).*\(.........\)$/\1\2/'
+        fi
 }
 
 

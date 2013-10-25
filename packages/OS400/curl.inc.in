@@ -115,6 +115,8 @@
      d                 c                   X'00004000'
      d CURL_VERSION_NTLM_WB...
      d                 c                   X'00008000'
+     d CURL_VERSION_HTTP2...
+     d                 c                   X'00010000'
       *
      d HTTPPOST_FILENAME...
      d                 c                   X'00000001'
@@ -212,6 +214,8 @@
      d                 c                   1
      d CURL_HTTP_VERSION_1_1...
      d                 c                   2
+     d CURL_HTTP_VERSION_2_0...
+     d                 c                   3
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -1168,6 +1172,14 @@
      d                 c                   00218
      d  CURLOPT_XFERINFOFUNCTION...
      d                 c                   20219
+     d  CURLOPT_XOAUTH2_BEARER...
+     d                 c                   10220
+     d  CURLOPT_DNS_INTERFACE...
+     d                 c                   10221
+     d  CURLOPT_DNS_LOCAL_IP4...
+     d                 c                   10222
+     d  CURLOPT_DNS_LOCAL_IP6...
+     d                 c                   10223
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_SSLKEYPASSWD...
@@ -1457,7 +1469,9 @@
      d                 c                   5
      d  CURLM_UNKNOWN_OPTION...
      d                 c                   6
-     d  CURLM_LAST     c                   7
+     d  CURLM_ADDED_ALREADY...
+     d                 c                   7
+     d  CURLM_LAST     c                   8
       *
      d CURLMSG         s             10i 0 based(######ptr######)               Enum
      d  CURLMSG_NONE   c                   0
@@ -1566,12 +1580,7 @@
      d  addrlen                      10u 0
      d  addr                         16                                         struct sockaddr
       *
-     d curl_khkey      ds                  based(######ptr######)
-     d                                     qualified
-     d  key                            *                                        const char *
-     d  len                          10u 0
-     d  keytype                      10i 0
-      *
+     d curl_khtype     s             10i 0 based(######ptr######)               enum
      d CURLKHTYPE_UNKNOWN...
      d                 c                   0
      d CURLKHTYPE_RSA1...
@@ -1580,6 +1589,12 @@
      d                 c                   2
      d CURLKHTYPE_DSS...
      d                 c                   3
+      *
+     d curl_khkey      ds                  based(######ptr######)
+     d                                     qualified
+     d  key                            *                                        const char *
+     d  len                          10u 0
+     d  keytype                            like(curl_khtype)
       *
      d curl_forms      ds                  based(######ptr######)
      d                                     qualified

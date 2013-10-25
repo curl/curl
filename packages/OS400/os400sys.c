@@ -38,6 +38,10 @@
 #include <qadrt.h>
 #include <errno.h>
 
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif
+
 #ifdef USE_QSOSSL
 #include <qsossl.h>
 #endif
@@ -241,6 +245,28 @@ buffer_undef(localkey_t key, long size)
 }
 
 
+static char *
+set_thread_string(localkey_t key, const char * s)
+
+{
+  int i;
+  char * cp;
+
+  if(!s)
+    return (char *) NULL;
+
+  i = strlen(s) + 1;
+  cp = Curl_thread_buffer(key, MAX_CONV_EXPANSION * i + 1);
+
+  if(cp) {
+    i = QadrtConvertE2A(cp, s, MAX_CONV_EXPANSION * i, i);
+    cp[i] = '\0';
+  }
+
+  return cp;
+}
+
+
 int
 Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
               char * nodename, curl_socklen_t nodenamelen,
@@ -434,23 +460,8 @@ char *
 Curl_SSL_Strerror_a(int sslreturnvalue, SSLErrorMsg * serrmsgp)
 
 {
-  int i;
-  char * cp;
-  char * cp2;
-
-  cp = SSL_Strerror(sslreturnvalue, serrmsgp);
-
-  if (!cp)
-    return cp;
-
-  i = strlen(cp);
-
-  if (!(cp2 = Curl_thread_buffer(LK_SSL_ERROR, MAX_CONV_EXPANSION * i + 1)))
-    return cp2;
-
-  i = QadrtConvertE2A(cp2, cp, MAX_CONV_EXPANSION * i, i);
-  cp2[i] = '\0';
-  return cp2;
+  return set_thread_string(LK_SSL_ERROR,
+                           SSL_Strerror(sslreturnvalue, serrmsgp));
 }
 
 #endif /* USE_QSOSSL */
@@ -825,23 +836,7 @@ const char *
 Curl_gsk_strerror_a(int gsk_return_value)
 
 {
-  int i;
-  const char * cp;
-  char * cp2;
-
-  cp = gsk_strerror(gsk_return_value);
-
-  if (!cp)
-    return cp;
-
-  i = strlen(cp);
-
-  if (!(cp2 = Curl_thread_buffer(LK_GSK_ERROR, MAX_CONV_EXPANSION * i + 1)))
-    return cp2;
-
-  i = QadrtConvertE2A(cp2, cp, MAX_CONV_EXPANSION * i, i);
-  cp2[i] = '\0';
-  return cp2;
+  return set_thread_string(LK_GSK_ERROR, gsk_strerror(gsk_return_value));
 }
 
 int
@@ -1235,23 +1230,7 @@ char *
 Curl_ldap_err2string_a(int error)
 
 {
-  int i;
-  char * cp;
-  char * cp2;
-
-  cp = ldap_err2string(error);
-
-  if (!cp)
-    return cp;
-
-  i = strlen(cp);
-
-  if (!(cp2 = Curl_thread_buffer(LK_LDAP_ERROR, MAX_CONV_EXPANSION * i + 1)))
-    return cp2;
-
-  i = QadrtConvertE2A(cp2, cp, MAX_CONV_EXPANSION * i, i);
-  cp2[i] = '\0';
-  return cp2;
+  return set_thread_string(LK_LDAP_ERROR, ldap_err2string(error));
 }
 
 
@@ -1492,3 +1471,79 @@ Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
   *addrlen = laddrlen;
   return rcvlen;
 }
+
+
+#ifdef HAVE_LIBZ
+const char *
+Curl_os400_zlibVersion(void)
+
+{
+  return set_thread_string(LK_ZLIB_VERSION, zlibVersion());
+}
+
+
+int
+Curl_os400_inflateInit_(z_streamp strm, const char * version, int stream_size)
+
+{
+  z_const char * msgb4 = strm->msg;
+  int ret;
+
+  ret = inflateInit(strm);
+
+  if(strm->msg != msgb4)
+    strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
+
+  return ret;
+}
+
+
+int
+Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
+                                        const char * version, int stream_size)
+
+{
+  z_const char * msgb4 = strm->msg;
+  int ret;
+
+  ret = inflateInit2(strm, windowBits);
+
+  if(strm->msg != msgb4)
+    strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
+
+  return ret;
+}
+
+
+int
+Curl_os400_inflate(z_streamp strm, int flush)
+
+{
+  z_const char * msgb4 = strm->msg;
+  int ret;
+
+  ret = inflate(strm, flush);
+
+  if(strm->msg != msgb4)
+    strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
+
+  return ret;
+}
+
+
+int
+Curl_os400_inflateEnd(z_streamp strm)
+
+{
+  z_const char * msgb4 = strm->msg;
+  int ret;
+
+  ret = inflateEnd(strm);
+
+  if(strm->msg != msgb4)
+    strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
+
+  return ret;
+}
+
+#endif

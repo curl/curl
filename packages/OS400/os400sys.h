@@ -39,6 +39,8 @@ typedef enum {
         LK_EASY_STRERROR,
         LK_SHARE_STRERROR,
         LK_MULTI_STRERROR,
+        LK_ZLIB_VERSION,
+        LK_ZLIB_MSG,
         LK_LAST
 }               localkey_t;
 

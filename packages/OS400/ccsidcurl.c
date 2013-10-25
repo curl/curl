@@ -1111,11 +1111,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-#ifdef USE_TLS_SRP
-    if((int) STRING_LAST != (int) STRING_TLSAUTH_PASSWORD + 1)
-#else
-    if((int) STRING_LAST != (int) STRING_MAIL_AUTH + 1)
-#endif
+    if((int) STRING_LAST != (int) STRING_BEARER + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
@@ -1176,6 +1172,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_USERAGENT:
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
+  case CURLOPT_XOAUTH2_BEARER:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 

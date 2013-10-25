@@ -529,10 +529,10 @@
 #define SEND_TYPE_RETV int
 
 /* Define to use the QsoSSL package. */
-#define USE_QSOSSL
+#undef USE_QSOSSL
 
 /* Define to use the GSKit package. */
-#undef USE_GSKIT
+#define USE_GSKIT
 
 /* Use the system keyring as the default CA bundle. */
 #define CURL_CA_BUNDLE  "/QIBM/UserData/ICSS/Cert/Server/DEFAULT.KDB"

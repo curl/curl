@@ -29,8 +29,37 @@
 
 /* Some symbols are undefined/unsupported on OS400 versions < V7R1. */
 #ifndef GSK_SSL_EXTN_SERVERNAME_REQUEST
-#define GSK_SSL_EXTN_SERVERNAME_REQUEST                 230
+#define GSK_SSL_EXTN_SERVERNAME_REQUEST         230
 #endif
+
+#ifndef GSK_TLSV10_CIPHER_SPECS
+#define GSK_TLSV10_CIPHER_SPECS                 236
+#endif
+
+#ifndef GSK_TLSV11_CIPHER_SPECS
+#define GSK_TLSV11_CIPHER_SPECS                 237
+#endif
+
+#ifndef GSK_TLSV12_CIPHER_SPECS
+#define GSK_TLSV12_CIPHER_SPECS                 238
+#endif
+
+#ifndef GSK_PROTOCOL_TLSV11
+#define GSK_PROTOCOL_TLSV11                     437
+#endif
+
+#ifndef GSK_PROTOCOL_TLSV12
+#define GSK_PROTOCOL_TLSV12                     438
+#endif
+
+#ifndef GSK_FALSE
+#define GSK_FALSE                               0
+#endif
+
+#ifndef GSK_TRUE
+#define GSK_TRUE                                1
+#endif
+
 
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
@@ -54,30 +83,65 @@
 #include "memdebug.h"
 
 
+/* SSL version flags. */
+#define CURL_GSKPROTO_SSLV2     0
+#define CURL_GSKPROTO_SSLV2_MASK        (1 << CURL_GSKPROTO_SSLV2)
+#define CURL_GSKPROTO_SSLV3     1
+#define CURL_GSKPROTO_SSLV3_MASK        (1 << CURL_GSKPROTO_SSLV3)
+#define CURL_GSKPROTO_TLSV10    2
+#define CURL_GSKPROTO_TLSV10_MASK        (1 << CURL_GSKPROTO_TLSV10)
+#define CURL_GSKPROTO_TLSV11    3
+#define CURL_GSKPROTO_TLSV11_MASK        (1 << CURL_GSKPROTO_TLSV11)
+#define CURL_GSKPROTO_TLSV12    4
+#define CURL_GSKPROTO_TLSV12_MASK        (1 << CURL_GSKPROTO_TLSV12)
+#define CURL_GSKPROTO_LAST      5
+
+
 /* Supported ciphers. */
 typedef struct {
   const char *  name;           /* Cipher name. */
   const char *  gsktoken;       /* Corresponding token for GSKit String. */
-  int           sslver;         /* SSL version. */
+  unsigned int  versions;       /* SSL version flags. */
 }  gskit_cipher;
 
 static const gskit_cipher  ciphertable[] = {
-  { "null-md5",         "01",   CURL_SSLVERSION_SSLv3 },
-  { "null-sha",         "02",   CURL_SSLVERSION_SSLv3 },
-  { "exp-rc4-md5",      "03",   CURL_SSLVERSION_SSLv3 },
-  { "rc4-md5",          "04",   CURL_SSLVERSION_SSLv3 },
-  { "rc4-sha",          "05",   CURL_SSLVERSION_SSLv3 },
-  { "exp-rc2-cbc-md5",  "06",   CURL_SSLVERSION_SSLv3 },
-  { "exp-des-cbc-sha",  "09",   CURL_SSLVERSION_SSLv3 },
-  { "des-cbc3-sha",     "0A",   CURL_SSLVERSION_SSLv3 },
-  { "aes128-sha",       "2F",   CURL_SSLVERSION_TLSv1 },
-  { "aes256-sha",       "35",   CURL_SSLVERSION_TLSv1 },
-  { "rc4-md5",          "1",    CURL_SSLVERSION_SSLv2 },
-  { "exp-rc4-md5",      "2",    CURL_SSLVERSION_SSLv2 },
-  { "rc2-md5",          "3",    CURL_SSLVERSION_SSLv2 },
-  { "exp-rc2-md5",      "4",    CURL_SSLVERSION_SSLv2 },
-  { "des-cbc-md5",      "6",    CURL_SSLVERSION_SSLv2 },
-  { "des-cbc3-md5",     "7",    CURL_SSLVERSION_SSLv2 },
+  { "null-md5",         "01",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
+  { "null-sha",         "02",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
+  { "exp-rc4-md5",      "03",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK },
+  { "rc4-md5",          "04",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
+  { "rc4-sha",          "05",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
+  { "exp-rc2-cbc-md5",  "06",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK },
+  { "exp-des-cbc-sha",  "09",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK },
+  { "des-cbc3-sha",     "0A",
+      CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+      CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
+  { "aes128-sha",       "2F",
+      CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
+      CURL_GSKPROTO_TLSV12_MASK },
+  { "aes256-sha",       "35",
+      CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
+      CURL_GSKPROTO_TLSV12_MASK },
+  { "null-sha256",      "3B",   CURL_GSKPROTO_TLSV12_MASK },
+  { "aes128-sha256",    "3D",   CURL_GSKPROTO_TLSV12_MASK },
+  { "aes256-sha256",    "3D",   CURL_GSKPROTO_TLSV12_MASK },
+  { "rc4-md5",          "1",    CURL_GSKPROTO_SSLV2_MASK },
+  { "exp-rc4-md5",      "2",    CURL_GSKPROTO_SSLV2_MASK },
+  { "rc2-md5",          "3",    CURL_GSKPROTO_SSLV2_MASK },
+  { "exp-rc2-md5",      "4",    CURL_GSKPROTO_SSLV2_MASK },
+  { "des-cbc-md5",      "6",    CURL_GSKPROTO_SSLV2_MASK },
+  { "des-cbc3-md5",     "7",    CURL_GSKPROTO_SSLV2_MASK },
   { (const char *) NULL, (const char *) NULL, 0       }
 };
 
@@ -142,8 +206,8 @@ static CURLcode gskit_status(struct SessionHandle * data, int rc,
 }
 
 
-static CURLcode set_enum(struct SessionHandle * data,
-                         gsk_handle h, GSK_ENUM_ID id, GSK_ENUM_VALUE value)
+static CURLcode set_enum(struct SessionHandle * data, gsk_handle h,
+                GSK_ENUM_ID id, GSK_ENUM_VALUE value, bool unsupported_ok)
 {
   int rc = gsk_attribute_set_enum(h, id, value);
 
@@ -153,6 +217,9 @@ static CURLcode set_enum(struct SessionHandle * data,
   case GSK_ERROR_IO:
     failf(data, "gsk_attribute_set_enum() I/O error: %s", strerror(errno));
     break;
+  case GSK_ATTRIBUTE_INVALID_ID:
+    if(unsupported_ok)
+      return CURLE_UNSUPPORTED_PROTOCOL;
   default:
     failf(data, "gsk_attribute_set_enum(): %s", gsk_strerror(rc));
     break;
@@ -161,8 +228,8 @@ static CURLcode set_enum(struct SessionHandle * data,
 }
 
 
-static CURLcode set_buffer(struct SessionHandle * data,
-                           gsk_handle h, GSK_BUF_ID id, const char * buffer)
+static CURLcode set_buffer(struct SessionHandle * data, gsk_handle h,
+                        GSK_BUF_ID id, const char * buffer, bool unsupported_ok)
 {
   int rc = gsk_attribute_set_buffer(h, id, buffer, 0);
 
@@ -172,6 +239,9 @@ static CURLcode set_buffer(struct SessionHandle * data,
   case GSK_ERROR_IO:
     failf(data, "gsk_attribute_set_buffer() I/O error: %s", strerror(errno));
     break;
+  case GSK_ATTRIBUTE_INVALID_ID:
+    if(unsupported_ok)
+      return CURLE_UNSUPPORTED_PROTOCOL;
   default:
     failf(data, "gsk_attribute_set_buffer(): %s", gsk_strerror(rc));
     break;
@@ -219,17 +289,20 @@ static CURLcode set_callback(struct SessionHandle * data,
 }
 
 
-static CURLcode set_ciphers(struct SessionHandle * data, gsk_handle h)
+static CURLcode set_ciphers(struct SessionHandle * data,
+                                        gsk_handle h, unsigned int * protoflags)
 {
   const char * cipherlist = data->set.str[STRING_SSL_CIPHER_LIST];
-  char * sslv2ciphers;
-  char * sslv3ciphers;
   const char * clp;
   const gskit_cipher * ctp;
-  char * v2p;
-  char * v3p;
   int i;
+  int l;
+  bool unsupported;
   CURLcode cc;
+  struct {
+    char * buf;
+    char * ptr;
+  } ciphers[CURL_GSKPROTO_LAST];
 
   /* Compile cipher list into GSKit-compatible cipher lists. */
 
@@ -243,42 +316,44 @@ static CURLcode set_ciphers(struct SessionHandle * data, gsk_handle h)
   /* We allocate GSKit buffers of the same size as the input string: since
      GSKit tokens are always shorter than their cipher names, allocated buffers
      will always be large enough to accomodate the result. */
-  i = strlen(cipherlist) + 1;
-  v2p = malloc(i);
-  if(!v2p)
-    return CURLE_OUT_OF_MEMORY;
-  v3p = malloc(i);
-  if(!v3p) {
-    free(v2p);
-    return CURLE_OUT_OF_MEMORY;
+  l = strlen(cipherlist) + 1;
+  memset((char *) ciphers, 0, sizeof ciphers);
+  for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
+    ciphers[i].buf = malloc(l);
+    if(!ciphers[i].buf) {
+      while(i--)
+        free(ciphers[i].buf);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    ciphers[i].ptr = ciphers[i].buf;
+    *ciphers[i].ptr = '\0';
   }
-  sslv2ciphers = v2p;
-  sslv3ciphers = v3p;
 
   /* Process each cipher in input string. */
+  unsupported = FALSE;
+  cc = CURLE_OK;
   for(;;) {
     for(clp = cipherlist; *cipherlist && !is_separator(*cipherlist);)
       cipherlist++;
-    i = cipherlist - clp;
-    if(!i)
+    l = cipherlist - clp;
+    if(!l)
       break;
     /* Search the cipher in our table. */
     for(ctp = ciphertable; ctp->name; ctp++)
-      if(strnequal(ctp->name, clp, i) && !ctp->name[i])
+      if(strnequal(ctp->name, clp, l) && !ctp->name[l])
         break;
-    if(!ctp->name)
-      failf(data, "Unknown cipher %.*s: ignored", i, clp);
+    if(!ctp->name) {
+      failf(data, "Unknown cipher %.*s", l, clp);
+      cc = CURLE_SSL_CIPHER;
+    }
     else {
-      switch (ctp->sslver) {
-      case CURL_SSLVERSION_SSLv2:
-        strcpy(v2p, ctp->gsktoken);
-        v2p += strlen(v2p);
-        break;
-      default:
-        /* GSKit wants TLSv1 ciphers with SSLv3 ciphers. */
-        strcpy(v3p, ctp->gsktoken);
-        v3p += strlen(v3p);
-        break;
+      unsupported |= !(ctp->versions & (CURL_GSKPROTO_SSLV2_MASK |
+                        CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK));
+      for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
+        if(ctp->versions & (1 << i)) {
+          strcpy(ciphers[i].ptr, ctp->gsktoken);
+          ciphers[i].ptr += strlen(ctp->gsktoken);
+        }
       }
     }
 
@@ -286,13 +361,63 @@ static CURLcode set_ciphers(struct SessionHandle * data, gsk_handle h)
     while(is_separator(*cipherlist))
       cipherlist++;
   }
-  *v2p = '\0';
-  *v3p = '\0';
-  cc = set_buffer(data, h, GSK_V2_CIPHER_SPECS, sslv2ciphers);
-  if(cc == CURLE_OK)
-    cc = set_buffer(data, h, GSK_V3_CIPHER_SPECS, sslv3ciphers);
-  free(sslv2ciphers);
-  free(sslv3ciphers);
+
+  /* Disable protocols with empty cipher lists. */
+  for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
+    if(!(*protoflags & (1 << i)) || !ciphers[i].buf[0]) {
+      *protoflags &= ~(1 << i);
+      ciphers[i].buf[0] = '\0';
+    }
+  }
+
+  /* Try to set-up TLSv1.1 and TLSv2.1 ciphers. */
+  if(*protoflags & CURL_GSKPROTO_TLSV11_MASK) {
+    cc = set_buffer(data, h, GSK_TLSV11_CIPHER_SPECS,
+                    ciphers[CURL_GSKPROTO_TLSV11].buf, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL) {
+      cc = CURLE_OK;
+      if(unsupported) {
+        failf(data, "TLSv1.1-only ciphers are not yet supported");
+        cc = CURLE_SSL_CIPHER;
+      }
+    }
+  }
+  if(cc == CURLE_OK && (*protoflags & CURL_GSKPROTO_TLSV12_MASK)) {
+    cc = set_buffer(data, h, GSK_TLSV12_CIPHER_SPECS,
+                    ciphers[CURL_GSKPROTO_TLSV12].buf, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL) {
+      cc = CURLE_OK;
+      if(unsupported) {
+        failf(data, "TLSv1.2-only ciphers are not yet supported");
+        cc = CURLE_SSL_CIPHER;
+      }
+    }
+  }
+
+  /* Try to set-up TLSv1.0 ciphers. If not successful, concatenate them to
+     the SSLv3 ciphers. OS/400 prior to version 7.1 will understand it. */
+  if(cc == CURLE_OK && (*protoflags & CURL_GSKPROTO_TLSV10_MASK)) {
+    cc = set_buffer(data, h, GSK_TLSV10_CIPHER_SPECS,
+                    ciphers[CURL_GSKPROTO_TLSV10].buf, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL) {
+      cc = CURLE_OK;
+      strcpy(ciphers[CURL_GSKPROTO_SSLV3].ptr,
+             ciphers[CURL_GSKPROTO_TLSV10].ptr);
+    }
+  }
+
+  /* Set-up other ciphers. */
+  if(cc == CURLE_OK &&  (*protoflags & CURL_GSKPROTO_SSLV3_MASK))
+    cc = set_buffer(data, h, GSK_V3_CIPHER_SPECS,
+                    ciphers[CURL_GSKPROTO_SSLV3].buf, FALSE);
+  if(cc == CURLE_OK && (*protoflags & CURL_GSKPROTO_SSLV2_MASK))
+    cc = set_buffer(data, h, GSK_V2_CIPHER_SPECS,
+                    ciphers[CURL_GSKPROTO_SSLV2].buf, FALSE);
+
+  /* Clean-up. */
+  for(i = 0; i < CURL_GSKPROTO_LAST; i++)
+    free(ciphers[i].buf);
+
   return cc;
 }
 
@@ -333,15 +458,15 @@ static CURLcode init_environment(struct SessionHandle * data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  c = set_enum(data, h, GSK_SESSION_TYPE, GSK_CLIENT_SESSION);
+  c = set_enum(data, h, GSK_SESSION_TYPE, GSK_CLIENT_SESSION, FALSE);
   if(c == CURLE_OK && appid)
-    c = set_buffer(data, h, GSK_OS400_APPLICATION_ID, appid);
+    c = set_buffer(data, h, GSK_OS400_APPLICATION_ID, appid, FALSE);
   if(c == CURLE_OK && file)
-    c = set_buffer(data, h, GSK_KEYRING_FILE, file);
+    c = set_buffer(data, h, GSK_KEYRING_FILE, file, FALSE);
   if(c == CURLE_OK && label)
-    c = set_buffer(data, h, GSK_KEYRING_LABEL, label);
+    c = set_buffer(data, h, GSK_KEYRING_LABEL, label, FALSE);
   if(c == CURLE_OK && password)
-    c = set_buffer(data, h, GSK_KEYRING_PW, password);
+    c = set_buffer(data, h, GSK_KEYRING_PW, password, FALSE);
 
   if(c == CURLE_OK) {
     /* Locate CAs, Client certificate and key according to our settings.
@@ -438,10 +563,8 @@ static CURLcode gskit_connect_step1(struct connectdata * conn, int sockindex)
   char * keyringfile;
   char * keyringpwd;
   char * keyringlabel;
-  char * v2ciphers;
-  char * v3ciphers;
   char * sni;
-  bool sslv2enable, sslv3enable, tlsv1enable;
+  unsigned int protoflags;
   long timeout;
   Qso_OverlappedIO_t commarea;
 
@@ -491,52 +614,39 @@ static CURLcode gskit_connect_step1(struct connectdata * conn, int sockindex)
     return cc;
 
   /* Determine which SSL/TLS version should be enabled. */
-  sslv2enable = sslv3enable = tlsv1enable = false;
+  protoflags = CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
+               CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK;
   sni = conn->host.name;
   switch (data->set.ssl.version) {
   case CURL_SSLVERSION_SSLv2:
-    sslv2enable = true;
+    protoflags = CURL_GSKPROTO_SSLV2_MASK;
     sni = (char *) NULL;
     break;
   case CURL_SSLVERSION_SSLv3:
-    sslv3enable = true;
+    protoflags = CURL_GSKPROTO_SSLV2_MASK;
     sni = (char *) NULL;
     break;
   case CURL_SSLVERSION_TLSv1:
+    protoflags = CURL_GSKPROTO_TLSV10_MASK |
+                 CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK;
+    break;
   case CURL_SSLVERSION_TLSv1_0:
-    tlsv1enable = true;
+    protoflags = CURL_GSKPROTO_TLSV10_MASK;
     break;
   case CURL_SSLVERSION_TLSv1_1:
-    failf(data, "GSKit doesn't support TLS 1.1!");
-    cc = CURLE_SSL_CONNECT_ERROR;
+    protoflags = CURL_GSKPROTO_TLSV11_MASK;
     break;
   case CURL_SSLVERSION_TLSv1_2:
-    failf(data, "GSKit doesn't support TLS 1.2!");
-    cc = CURLE_SSL_CONNECT_ERROR;
-    break;
-  default:              /* CURL_SSLVERSION_DEFAULT. */
-    sslv3enable = true;
-    tlsv1enable = true;
+    protoflags = CURL_GSKPROTO_TLSV12_MASK;
     break;
   }
 
   /* Process SNI. Ignore if not supported (on OS400 < V7R1). */
   if(sni) {
-    rc = gsk_attribute_set_buffer(connssl->handle,
-                                  GSK_SSL_EXTN_SERVERNAME_REQUEST, sni, 0);
-    switch (rc) {
-    case GSK_OK:
-    case GSK_ATTRIBUTE_INVALID_ID:
-      break;
-    case GSK_ERROR_IO:
-      failf(data, "gsk_attribute_set_buffer() I/O error: %s", strerror(errno));
-      cc = CURLE_SSL_CONNECT_ERROR;
-      break;
-    default:
-      failf(data, "gsk_attribute_set_buffer(): %s", gsk_strerror(rc));
-      cc = CURLE_SSL_CONNECT_ERROR;
-      break;
-    }
+    cc = set_buffer(data, connssl->handle,
+                    GSK_SSL_EXTN_SERVERNAME_REQUEST, sni, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL)
+      cc = CURLE_OK;
   }
 
   /* Set session parameters. */
@@ -553,23 +663,51 @@ static CURLcode gskit_connect_step1(struct connectdata * conn, int sockindex)
   if(cc == CURLE_OK)
     cc = set_numeric(data, connssl->handle, GSK_FD, conn->sock[sockindex]);
   if(cc == CURLE_OK)
-    cc = set_ciphers(data, connssl->handle);
+    cc = set_ciphers(data, connssl->handle, &protoflags);
+  if(!protoflags) {
+    failf(data, "No SSL protocol/cipher combination enabled");
+    cc = CURLE_SSL_CIPHER;
+  }
   if(cc == CURLE_OK)
       cc = set_enum(data, connssl->handle, GSK_PROTOCOL_SSLV2,
-                    sslv2enable? GSK_PROTOCOL_SSLV2_ON:
-                    GSK_PROTOCOL_SSLV2_OFF);
+                    (protoflags & CURL_GSKPROTO_SSLV2_MASK)?
+                    GSK_PROTOCOL_SSLV2_ON: GSK_PROTOCOL_SSLV2_OFF, FALSE);
   if(cc == CURLE_OK)
     cc = set_enum(data, connssl->handle, GSK_PROTOCOL_SSLV3,
-                  sslv3enable? GSK_PROTOCOL_SSLV3_ON:
-                  GSK_PROTOCOL_SSLV3_OFF);
+                  (protoflags & CURL_GSKPROTO_SSLV3_MASK)?
+                  GSK_PROTOCOL_SSLV3_ON: GSK_PROTOCOL_SSLV3_OFF, FALSE);
   if(cc == CURLE_OK)
     cc = set_enum(data, connssl->handle, GSK_PROTOCOL_TLSV1,
-                  tlsv1enable?  GSK_PROTOCOL_TLSV1_ON:
-                  GSK_PROTOCOL_TLSV1_OFF);
+                  (protoflags & CURL_GSKPROTO_TLSV10_MASK)?
+                  GSK_PROTOCOL_TLSV1_ON: GSK_PROTOCOL_TLSV1_OFF, FALSE);
+  if(cc == CURLE_OK) {
+    cc = set_enum(data, connssl->handle, GSK_PROTOCOL_TLSV11,
+                   (protoflags & CURL_GSKPROTO_TLSV11_MASK)?
+                   GSK_TRUE: GSK_FALSE, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL) {
+      cc = CURLE_OK;
+      if(protoflags == CURL_GSKPROTO_TLSV11_MASK) {
+        failf(data, "TLS 1.1 not yet supported");
+        cc = CURLE_SSL_CIPHER;
+      }
+    }
+  }
+  if(cc == CURLE_OK) {
+    cc = set_enum(data, connssl->handle, GSK_PROTOCOL_TLSV12,
+                  (protoflags & CURL_GSKPROTO_TLSV12_MASK)?
+                  GSK_TRUE: GSK_FALSE, TRUE);
+    if(cc == CURLE_UNSUPPORTED_PROTOCOL) {
+      cc = CURLE_OK;
+      if(protoflags == CURL_GSKPROTO_TLSV12_MASK) {
+        failf(data, "TLS 1.2 not yet supported");
+        cc = CURLE_SSL_CIPHER;
+      }
+    }
+  }
   if(cc == CURLE_OK)
     cc = set_enum(data, connssl->handle, GSK_SERVER_AUTH_TYPE,
                   data->set.ssl.verifypeer? GSK_SERVER_AUTH_FULL:
-                  GSK_SERVER_AUTH_PASSTHRU);
+                  GSK_SERVER_AUTH_PASSTHRU, FALSE);
 
   if(cc == CURLE_OK) {
     /* Start handshake. Try asynchronous first. */
