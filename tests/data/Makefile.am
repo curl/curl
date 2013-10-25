@@ -70,7 +70,7 @@ test850 test851 test852 test853 test854 test855 test856 test857 test858 \
 test859 test860 test861 test862 test863 test864 test865 test866 test867 \
 test868 test869 test870 \
 \
-test900 test901 test902 test903 test904 test905 test906                 \
+test900 test901 test902 test903 test904 test905 test906 test907         \
 test909 test910 test911 test912 test913 test914 test915 test916 test917 \
 test918 test919 test920 \
 \
