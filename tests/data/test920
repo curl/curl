@@ -2,8 +2,7 @@
 <info>
 <keywords>
 SMTP
-SMTP AUTH PLAIN SASL-IR
-RFC4616
+SMTP AUTH LOGIN SASL-IR
 RFC4954
 </keywords>
 </info>
@@ -12,8 +11,9 @@ RFC4954
 # Server-side
 <reply>
 <servercmd>
-AUTH PLAIN
-REPLY AUTH 235 Authenticated
+AUTH LOGIN
+REPLY AUTH 334 UGFzc3dvcmQ6
+REPLY MTIzNA== 235 Authenticated
 </servercmd>
 </reply>
 
@@ -24,13 +24,13 @@ REPLY AUTH 235 Authenticated
 smtp
 </server>
  <name>
-SMTP plain authentication with initial response
+SMTP login authentication with initial response
  </name>
 <stdin>
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/920 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 --sasl-ir -T -
 </command>
 </client>
 
@@ -38,8 +38,9 @@ smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 907
-AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ=
+EHLO 920
+AUTH LOGIN dGVzdA==
+MTIzNA==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
