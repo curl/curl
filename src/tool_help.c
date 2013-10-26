@@ -215,7 +215,8 @@ static const char *const helptext[] = {
   " -T, --upload-file FILE  Transfer FILE to destination",
   "     --url URL       URL to work with",
   " -B, --use-ascii     Use ASCII/text transfer",
-  " -u, --user USER[:PASSWORD]  Server user and password",
+  " -u, --user USER[:PASSWORD][;OPTIONS]  Server user, password and login"
+  " options",
   "     --tlsuser USER  TLS username",
   "     --tlspassword STRING TLS password",
   "     --tlsauthtype STRING  TLS authentication type (default SRP)",
