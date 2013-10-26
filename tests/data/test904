@@ -13,8 +13,8 @@ RFC4954
 <servercmd>
 AUTH LOGIN
 REPLY AUTH 334 LOGIN supported
-REPLY dGVzdA== 334 UGFzc3dvcmQ6
-REPLY MTIzNA== 235 Authenticated
+REPLY dXNlcg== 334 UGFzc3dvcmQ6
+REPLY c2VjcmV0 235 Authenticated
 </servercmd>
 </reply>
 
@@ -31,7 +31,7 @@ SMTP login authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -41,8 +41,8 @@ smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sende
 <protocol>
 EHLO 904
 AUTH LOGIN
-dGVzdA==
-MTIzNA==
+dXNlcg==
+c2VjcmV0
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

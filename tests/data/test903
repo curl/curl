@@ -14,7 +14,7 @@ RFC4954
 <servercmd>
 AUTH PLAIN
 REPLY AUTH 334 PLAIN supported
-REPLY dGVzdAB0ZXN0ADEyMzQ= 235 Authenticated
+REPLY dXNlcgB1c2VyAHNlY3JldA== 235 Authenticated
 </servercmd>
 </reply>
 
@@ -31,7 +31,7 @@ SMTP plain authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/903 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/903 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/903 --mail-rcpt recipient@example.com --mail-from sende
 <protocol>
 EHLO 903
 AUTH PLAIN
-dGVzdAB0ZXN0ADEyMzQ=
+dXNlcgB1c2VyAHNlY3JldA==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

@@ -13,7 +13,7 @@ RFC4954
 <servercmd>
 AUTH LOGIN
 REPLY AUTH 334 UGFzc3dvcmQ6
-REPLY MTIzNA== 235 Authenticated
+REPLY c2VjcmV0 235 Authenticated
 </servercmd>
 </reply>
 
@@ -30,7 +30,7 @@ SMTP login authentication with initial response
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/920 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 --sasl-ir -T -
+smtp://%HOSTIP:%SMTPPORT/920 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret --sasl-ir -T -
 </command>
 </client>
 
@@ -39,8 +39,8 @@ smtp://%HOSTIP:%SMTPPORT/920 --mail-rcpt recipient@example.com --mail-from sende
 <verify>
 <protocol>
 EHLO 920
-AUTH LOGIN dGVzdA==
-MTIzNA==
+AUTH LOGIN dXNlcg==
+c2VjcmV0
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
