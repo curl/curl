@@ -147,6 +147,12 @@ struct ftp_conn {
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
+  /* newhost must be able to hold a full IP-style address in ASCII, which
+     in the IPv6 case means 5*8-1 = 39 letters */
+#define NEWHOST_BUFSIZE 48
+  char newhost[NEWHOST_BUFSIZE]; /* this is the pair to connect the DATA... */
+  unsigned short newport;        /* connection to */
+
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

@@ -1802,6 +1802,79 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
   return result;
 }
 
+/*
+ * Perform the necessary magic that needs to be done once the TCP connection
+ * to the proxy has completed.
+ */
+static CURLcode proxy_magic(struct connectdata *conn,
+                            char *newhost, unsigned short newport,
+                            bool *magicdone)
+{
+  struct SessionHandle *data=conn->data;
+  CURLcode result;
+
+  *magicdone = FALSE;
+  switch(conn->proxytype) {
+  case CURLPROXY_SOCKS5:
+  case CURLPROXY_SOCKS5_HOSTNAME:
+    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost,
+                         newport, SECONDARYSOCKET, conn);
+    *magicdone = TRUE;
+    break;
+  case CURLPROXY_SOCKS4:
+    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
+                         SECONDARYSOCKET, conn, FALSE);
+    *magicdone = TRUE;
+    break;
+  case CURLPROXY_SOCKS4A:
+    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
+                         SECONDARYSOCKET, conn, TRUE);
+    *magicdone = TRUE;
+    break;
+  case CURLPROXY_HTTP:
+  case CURLPROXY_HTTP_1_0:
+    /* do nothing here. handled later. */
+    break;
+  default:
+    failf(data, "unknown proxytype option given");
+    result = CURLE_COULDNT_CONNECT;
+    break;
+  }
+
+  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
+    /* BLOCKING */
+    /* We want "seamless" FTP operations through HTTP proxy tunnel */
+
+    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
+     * member conn->proto.http; we want FTP through HTTP and we have to
+     * change the member temporarily for connecting to the HTTP proxy. After
+     * Curl_proxyCONNECT we have to set back the member to the original
+     * struct FTP pointer
+     */
+    struct HTTP http_proxy;
+    struct FTP *ftp_save = data->req.protop;
+    memset(&http_proxy, 0, sizeof(http_proxy));
+    data->req.protop = &http_proxy;
+
+    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
+
+    data->req.protop = ftp_save;
+
+    if(result)
+      return result;
+
+    if(conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE) {
+      /* the CONNECT procedure is not complete, the tunnel is not yet up */
+      state(conn, FTP_STOP); /* this phase is completed */
+      conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
+      return result;
+    }
+    else
+      *magicdone = TRUE;
+  }
+  return result;
+}
+
 static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
                                     int ftpcode)
 {
@@ -1812,13 +1885,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   struct Curl_dns_entry *addr=NULL;
   int rc;
   unsigned short connectport; /* the local port connect() should use! */
-  unsigned short newport=0; /* remote port */
   bool connected;
-
-  /* newhost must be able to hold a full IP-style address in ASCII, which
-     in the IPv6 case means 5*8-1 = 39 letters */
-#define NEWHOST_BUFSIZE 48
-  char newhost[NEWHOST_BUFSIZE];
   char *str=&data->state.buffer[4];  /* start on the first letter */
 
   if((ftpc->count1 == 0) &&
@@ -1851,7 +1918,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
         if(ptr) {
-          newport = (unsigned short)(num & 0xffff);
+          ftpc->newport = (unsigned short)(num & 0xffff);
 
           if(conn->bits.tunnel_proxy ||
              conn->proxytype == CURLPROXY_SOCKS5 ||
@@ -1860,10 +1927,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
              conn->proxytype == CURLPROXY_SOCKS4A)
             /* proxy tunnel -> use other host info because ip_addr_str is the
                proxy address not the ftp host */
-            snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
+            snprintf(ftpc->newhost, sizeof(ftpc->newhost), "%s",
+                     conn->host.name);
           else
             /* use the same IP we are already connected to */
-            snprintf(newhost, NEWHOST_BUFSIZE, "%s", conn->ip_addr_str);
+            snprintf(ftpc->newhost, NEWHOST_BUFSIZE, "%s", conn->ip_addr_str);
         }
       }
       else
@@ -1916,14 +1984,15 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
          conn->proxytype == CURLPROXY_SOCKS4A)
         /* proxy tunnel -> use other host info because ip_addr_str is the
            proxy address not the ftp host */
-        snprintf(newhost, sizeof(newhost), "%s", conn->host.name);
+        snprintf(ftpc->newhost, sizeof(ftpc->newhost), "%s", conn->host.name);
       else
-        snprintf(newhost, sizeof(newhost), "%s", conn->ip_addr_str);
+        snprintf(ftpc->newhost, sizeof(ftpc->newhost), "%s",
+                 conn->ip_addr_str);
     }
     else
-      snprintf(newhost, sizeof(newhost),
+      snprintf(ftpc->newhost, sizeof(ftpc->newhost),
                "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-    newport = (unsigned short)(((port[0]<<8) + port[1]) & 0xffff);
+    ftpc->newport = (unsigned short)(((port[0]<<8) + port[1]) & 0xffff);
   }
   else if(ftpc->count1 == 0) {
     /* EPSV failed, move on to PASV */
@@ -1957,15 +2026,15 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   }
   else {
     /* normal, direct, ftp connection */
-    rc = Curl_resolv(conn, newhost, newport, &addr);
+    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
       (void)Curl_resolver_wait_resolv(conn, &addr);
 
-    connectport = newport; /* we connect to the remote port */
+    connectport = ftpc->newport; /* we connect to the remote port */
 
     if(!addr) {
-      failf(data, "Can't resolve new host %s:%hu", newhost, connectport);
+      failf(data, "Can't resolve new host %s:%hu", ftpc->newhost, connectport);
       return CURLE_FTP_CANT_GET_HOST;
     }
   }
@@ -1990,82 +2059,21 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   /*
    * When this is used from the multi interface, this might've returned with
    * the 'connected' set to FALSE and thus we are now awaiting a non-blocking
-   * connect to connect and we should not be "hanging" here waiting.
+   * connect to connect.
    */
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conninfo, newhost, connectport);
+    ftp_pasv_verbose(conn, conninfo, ftpc->newhost, connectport);
 
-  switch(conn->proxytype) {
-    /* FIX: this MUST wait for a proper connect first if 'connected' is
-     * FALSE */
-  case CURLPROXY_SOCKS5:
-  case CURLPROXY_SOCKS5_HOSTNAME:
-    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost, newport,
-                         SECONDARYSOCKET, conn);
-    connected = TRUE;
-    break;
-  case CURLPROXY_SOCKS4:
-    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, FALSE);
-    connected = TRUE;
-    break;
-  case CURLPROXY_SOCKS4A:
-    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, TRUE);
-    connected = TRUE;
-    break;
-  case CURLPROXY_HTTP:
-  case CURLPROXY_HTTP_1_0:
-    /* do nothing here. handled later. */
-    break;
-  default:
-    failf(data, "unknown proxytype option given");
-    result = CURLE_COULDNT_CONNECT;
-    break;
+  if(connected) {
+    /* Only do the proxy connection magic if we're actually connected.  We do
+       this little trick and send in the same 'connected' variable here again
+       and it will be set FALSE by proxy_magic() for when for example the
+       CONNECT procedure doesn't complete */
+    infof(data, "Connection to proxy confirmed almost instantly\n");
+    result = proxy_magic(conn, ftpc->newhost, ftpc->newport, &connected);
   }
-
-  if(result) {
-    if(ftpc->count1 == 0 && ftpcode == 229)
-      return ftp_epsv_disable(conn);
-    return result;
-  }
-
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* FIX: this MUST wait for a proper connect first if 'connected' is
-     * FALSE */
-
-    /* BLOCKING */
-    /* We want "seamless" FTP operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want FTP through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * FTP pointer
-     */
-    struct HTTP http_proxy;
-    struct FTP *ftp_save = data->req.protop;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->req.protop = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
-
-    data->req.protop = ftp_save;
-
-    if(result)
-      return result;
-
-    if(conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE) {
-      /* the CONNECT procedure is not complete, the tunnel is not yet up */
-      state(conn, FTP_STOP); /* this phase is completed */
-      conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
-
-      return result;
-    }
-  }
-
   conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
@@ -3625,6 +3633,10 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     /* Ready to do more? */
     if(connected) {
       DEBUGF(infof(data, "DO-MORE connected phase starts\n"));
+      if(conn->bits.proxy) {
+        infof(data, "Connection to proxy confirmed\n");
+        result = proxy_magic(conn, ftpc->newhost, ftpc->newport, &connected);
+      }
     }
     else {
       if(result && (ftpc->count1 == 0)) {

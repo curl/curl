@@ -70,7 +70,7 @@ void Curl_close_connections(struct SessionHandle *data);
 #define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi
                                                      service */
 
-CURLcode Curl_connected_proxy(struct connectdata *conn);
+CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define Curl_verboseconnect(x)  Curl_nop_stmt

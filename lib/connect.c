@@ -777,7 +777,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       /* we are connected with TCP, awesome! */
 
       /* see if we need to do any proxy magic first once we connected */
-      code = Curl_connected_proxy(conn);
+      code = Curl_connected_proxy(conn, sockindex);
       if(code)
         return code;
 

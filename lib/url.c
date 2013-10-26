@@ -3219,9 +3219,12 @@ static CURLcode ConnectionStore(struct SessionHandle *data,
    Note: this function's sub-functions call failf()
 
 */
-CURLcode Curl_connected_proxy(struct connectdata *conn)
+CURLcode Curl_connected_proxy(struct connectdata *conn,
+                              int sockindex)
 {
-  if(!conn->bits.proxy)
+  if(!conn->bits.proxy || sockindex)
+    /* this magic only works for the primary socket as the secondary is used
+       for FTP only and it has FTP specific magic in ftp.c */
     return CURLE_OK;
 
   switch(conn->proxytype) {
@@ -3281,7 +3284,7 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     conn->ip_addr = addr;
 
     if(*connected) {
-      result = Curl_connected_proxy(conn);
+      result = Curl_connected_proxy(conn, FIRSTSOCKET);
       if(!result) {
         conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
         Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */

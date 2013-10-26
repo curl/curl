@@ -129,6 +129,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
 
   curlx_nonblock(sock, FALSE);
 
+  infof(data, "SOCKS4 communication to %s:%d\n", hostname, remote_port);
+
   /*
    * Compose socks4 request
    *
@@ -181,6 +183,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       }
       else
         hp = NULL; /* fail! */
+
+      infof(data, "SOCKS4 connect to %s (locally resolved)\n", buf);
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
 
