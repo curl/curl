@@ -1810,8 +1810,8 @@ static CURLcode proxy_magic(struct connectdata *conn,
                             char *newhost, unsigned short newport,
                             bool *magicdone)
 {
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data=conn->data;
-  CURLcode result;
 
   *magicdone = FALSE;
   switch(conn->proxytype) {
