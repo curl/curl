@@ -1881,7 +1881,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result;
   struct SessionHandle *data=conn->data;
-  Curl_addrinfo *conninfo;
   struct Curl_dns_entry *addr=NULL;
   int rc;
   unsigned short connectport; /* the local port connect() should use! */
@@ -2041,8 +2040,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   result = Curl_connecthost(conn,
                             addr,
-                            &conn->sock[SECONDARYSOCKET],
-                            &conninfo,
                             &connected);
 
   Curl_resolv_unlock(data, addr); /* we're done using this address */
@@ -2064,7 +2061,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conninfo, ftpc->newhost, connectport);
+    ftp_pasv_verbose(conn, conn->ip_addr, ftpc->newhost, connectport);
 
   if(connected) {
     /* Only do the proxy connection magic if we're actually connected.  We do

@@ -838,6 +838,7 @@ struct connectdata {
      within the DNS cache, so this pointer is only valid as long as the DNS
      cache entry remains locked. It gets unlocked in Curl_done() */
   Curl_addrinfo *ip_addr;
+  Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
 
   /* 'ip_addr_str' is the ip_addr data as a human readable string.
      It remains available as long as the connection does, which is longer than
@@ -889,6 +890,7 @@ struct connectdata {
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
+  curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
   bool sock_accepted[2]; /* TRUE if the socket on this index was created with
                             accept() */
   Curl_recv *recv[2];

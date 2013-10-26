@@ -33,8 +33,6 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 CURLcode Curl_connecthost(struct connectdata *conn,
                           const struct Curl_dns_entry *host, /* connect to
                                                                 this */
-                          curl_socket_t *sockconn, /* not set if error */
-                          Curl_addrinfo **addr, /* the one we used */
                           bool *connected); /* truly connected? */
 
 /* generic function that returns how much time there's left to run, according

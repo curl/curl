@@ -3260,7 +3260,6 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
                               bool *connected)
 {
   CURLcode result;
-  Curl_addrinfo *addr;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
@@ -3276,13 +3275,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
    *************************************************************/
   result= Curl_connecthost(conn,
                            conn->dns_entry,
-                           &conn->sock[FIRSTSOCKET],
-                           &addr,
                            connected);
   if(CURLE_OK == result) {
-    /* All is cool, we store the current information */
-    conn->ip_addr = addr;
-
     if(*connected) {
       result = Curl_connected_proxy(conn, FIRSTSOCKET);
       if(!result) {
@@ -5643,8 +5637,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
       Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
       conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
       *protocol_done = TRUE;
-      Curl_verboseconnect(conn);
       Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
+      Curl_verboseconnect(conn);
     }
     /* Stop the loop now */
     break;
