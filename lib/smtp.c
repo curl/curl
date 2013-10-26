@@ -27,7 +27,8 @@
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
  * RFC6749 OAuth 2.0 Authorization Framework
- * Draft   SMTP URL Interface
+ * Draft   SMTP URL Interface   <draft-earhart-url-smtp-00.txt>
+ * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
 
