@@ -234,8 +234,11 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
   if(len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
     return FALSE;       /* Nothing for us */
 
-  /* Do we have a command response? */
-  result = (line[3] == ' ') ? TRUE : FALSE;
+  /* Do we have a command response? This should be the response code followed
+     by a space and optionally some text as per RFC-5321 and as outlined in
+     Section 4. Examples of RFC-4954 but some e-mail servers ignore this and
+     only send the response code instead. */
+  result = (line[3] == ' ' || len == 5) ? TRUE : FALSE;
   if(result)
     *resp = curlx_sltosi(strtol(line, NULL, 10));
 
