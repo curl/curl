@@ -270,7 +270,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
+ * chlg64  [in]     - Pointer to the base64 encoded challenge message.
  * nonce   [in/out] - The buffer where the nonce will be stored.
  * nlen    [in]     - The length of the nonce buffer.
  * realm   [in/out] - The buffer where the realm will be stored.
@@ -488,8 +488,36 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
-  return Curl_ntlm_create_type1_message(userp, passwdp, ntlm, outptr,
-                                        outlen);
+  return Curl_ntlm_create_type1_message(userp, passwdp, ntlm, outptr, outlen);
+}
+
+/*
+ * Curl_sasl_decode_ntlm_type2_message()
+ *
+ * This is used to decode an already encoded NTLM type-2 message.
+ *
+ * Parameters:
+ *
+ * data     [in]     - Pointer to session handle.
+ * type2msg [in]     - Pointer to the base64 encoded type-2 message.
+ * ntlm     [in/out] - The ntlm data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm)
+{
+#ifdef USE_NSS
+  CURLcode result;
+
+  /* make sure the crypto backend is initialized */
+  result = Curl_nss_force_init(data);
+  if(result)
+    return result;
+#endif
+
+  return Curl_ntlm_decode_type2_message(data, type2msg, ntlm);
 }
 
 /*
@@ -501,7 +529,6 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
  * Parameters:
  *
  * data    [in]     - Pointer to session handle.
- * header  [in]     - Pointer to the base64 encoded type-2 message buffer.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The ntlm data struct being used and modified.
@@ -512,26 +539,13 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
-                                             const char *header,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
-  CURLcode result;
-#ifdef USE_NSS
-  /* make sure the crypto backend is initialized */
-  result = Curl_nss_force_init(data);
-  if(result)
-    return result;
-#endif
-  result = Curl_ntlm_decode_type2_message(data, header, ntlm);
-
-  if(!result)
-    result = Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm,
-                                            outptr, outlen);
-
-  return result;
+  return Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm, outptr,
+                                        outlen);
 }
 #endif /* USE_NTLM */
 

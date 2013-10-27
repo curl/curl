@@ -1148,23 +1148,31 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     /* Get the type-2 message */
     pop3_get_message(data->state.buffer, &type2msg);
 
-    /* Create the type-3 message */
-    result = Curl_sasl_create_ntlm_type3_message(data, type2msg, conn->user,
-                                                 conn->passwd, &conn->ntlm,
-                                                 &type3msg, &len);
+    /* Decode the type-2 message */
+    result = Curl_sasl_decode_ntlm_type2_message(data, type2msg, &conn->ntlm);
+    if(result) {
+      /* Send the cancellation */
+      result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "*");
 
-    /* Send the message */
-    if(!result) {
-      if(type3msg) {
+      if(!result)
+        state(conn, POP3_AUTH_CANCEL);
+    }
+    else {
+      /* Create the type-3 message */
+      result = Curl_sasl_create_ntlm_type3_message(data, conn->user,
+                                                   conn->passwd, &conn->ntlm,
+                                                   &type3msg, &len);
+      if(!result && type3msg) {
+        /* Send the message */
         result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", type3msg);
 
         if(!result)
           state(conn, POP3_AUTH_FINAL);
       }
-
-      Curl_safefree(type3msg);
     }
   }
+
+  Curl_safefree(type3msg);
 
   return result;
 }

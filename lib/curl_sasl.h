@@ -101,10 +101,13 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
                                              char **outptr,
                                              size_t *outlen);
 
-/* This is used to decode an incoming NTLM type-2 message and generate a
-   base64 encoded type-3 response */
+/* This is used to decode a base64 encoded NTLM type-2 message */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm);
+
+/* This is used to generate a base64 encoded NTLM type-3 message */
 CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
-                                             const char *header,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
