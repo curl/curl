@@ -55,7 +55,7 @@
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
-static bool sasl_digest_get_key_value(const unsigned char *chlg,
+static bool sasl_digest_get_key_value(const char *chlg,
                                       const char *key,
                                       char *value,
                                       size_t max_val_len,
@@ -64,7 +64,7 @@ static bool sasl_digest_get_key_value(const unsigned char *chlg,
   char *find_pos;
   size_t i;
 
-  find_pos = strstr((const char *) chlg, key);
+  find_pos = strstr(chlg, key);
   if(!find_pos)
     return FALSE;
 
@@ -264,6 +264,66 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 }
 
 /*
+ * Curl_sasl_decode_digest_md5_message()
+ *
+ * This is used to decode an already encoded DIGEST-MD5 challenge message.
+ *
+ * Parameters:
+ *
+ * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
+ * nonce   [in/out] - The buffer where the nonce will be stored.
+ * nlen    [in]     - The length of the nonce buffer.
+ * realm   [in/out] - The buffer where the realm will be stored.
+ * rlen    [in]     - The length of the realm buffer.
+ * alg     [in/out] - The buffer where the algorithm will be stored.
+ * alen    [in]     - The length of the algorithm buffer.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_digest_md5_message(const char *chlg64,
+                                             char *nonce, size_t nlen,
+                                             char *realm, size_t rlen,
+                                             char *alg, size_t alen)
+{
+  CURLcode result = CURLE_OK;
+  char *chlg = NULL;
+  size_t chlglen = 0;
+  size_t chlg64len = strlen(chlg64);
+
+  if(chlg64len && *chlg64 != '=') {
+    result = Curl_base64_decode(chlg64, (unsigned char **) &chlg, &chlglen);
+    if(result)
+      return result;
+  }
+
+  /* Ensure we have a valid challenge message */
+  if(!chlg)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* Retrieve nonce string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "nonce=\"", nonce, nlen, '\"')) {
+    Curl_safefree(chlg);
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+
+  /* Retrieve realm string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "realm=\"", realm, rlen, '\"')) {
+    /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
+    strcpy(realm, "");
+  }
+
+  /* Retrieve algorithm string from the challenge */
+  if(!sasl_digest_get_key_value(chlg, "algorithm=", alg, alen, ',')) {
+    Curl_safefree(chlg);
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+
+  Curl_safefree(chlg);
+
+  return CURLE_OK;
+}
+
+/*
  * Curl_sasl_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message
@@ -272,10 +332,11 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
+ * nonce   [in]     - The nonce.
+ * realm   [in]     - The realm.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
- * service [in]     - The service type such as www, smtp or pop
+ * service [in]     - The service type such as www, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -283,7 +344,8 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char *chlg64,
+                                             const char *nonce,
+                                             const char *realm,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
@@ -302,49 +364,12 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char HA2_hex[2 * MD5_DIGEST_LEN + 1];
   char resp_hash_hex[2 * MD5_DIGEST_LEN + 1];
 
-  char nonce[64];
-  char realm[128];
-  char alg[64];
   char nonceCount[] = "00000001";
   char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
   char qop[]        = "auth";
   char uri[128];
   char response[512];
-
-  result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-
-  if(result)
-    return result;
-
-  if(!chlg)
-    return CURLE_LOGIN_DENIED;
-
-  /* Retrieve nonce string from the challenge */
-  if(!sasl_digest_get_key_value(chlg, "nonce=\"", nonce,
-                                sizeof(nonce), '\"')) {
-    Curl_safefree(chlg);
-    return CURLE_LOGIN_DENIED;
-  }
-
-  /* Retrieve realm string from the challenge */
-  if(!sasl_digest_get_key_value(chlg, "realm=\"", realm,
-                                sizeof(realm), '\"')) {
-    /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
-    strcpy(realm, "");
-  }
-
-  /* Retrieve algorithm string from the challenge */
-  if(!sasl_digest_get_key_value(chlg, "algorithm=", alg, sizeof(alg), ',')) {
-    Curl_safefree(chlg);
-    return CURLE_LOGIN_DENIED;
-  }
-
-  Curl_safefree(chlg);
-
-  /* We do not support other algorithms */
-  if(strcmp(alg, "md5-sess") != 0)
-    return CURLE_LOGIN_DENIED;
 
 #ifndef DEBUGBUILD
   /* Generate 64 bits of random data */
