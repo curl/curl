@@ -970,7 +970,7 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
   }
   else {
     /* Create the response message */
-    result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
+    result = Curl_sasl_create_cram_md5_message(data, chlg, conn->user,
                                                conn->passwd, &rplyb64, &len);
     if(!result && rplyb64) {
       /* Send the response */
