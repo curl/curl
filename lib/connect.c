@@ -573,7 +573,7 @@ static CURLcode trynextip(struct connectdata *conn,
 
     do {
       ai = ai->ai_next;
-    } while(ai && ai->ai_family == family);
+    } while(ai && ai->ai_family != family);
   }
   Curl_closesocket(conn, fd_to_close);
   return CURLE_COULDNT_CONNECT;
