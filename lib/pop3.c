@@ -352,6 +352,35 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
 
 /***********************************************************************
  *
+ * pop3_get_message()
+ *
+ * Gets the authentication message from the response buffer.
+ */
+static void pop3_get_message(char *buffer, char** outptr)
+{
+  size_t len = 0;
+  char* message = NULL;
+
+  /* Find the start of the message */
+  for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
+    ;
+
+  /* Find the end of the message */
+  for(len = strlen(message); len--;)
+    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+        message[len] != '\t')
+      break;
+
+  /* Terminate the challenge */
+  if(++len) {
+    message[len] = '\0';
+  }
+
+  *outptr = message;
+}
+
+/***********************************************************************
+ *
  * state()
  *
  * This is the ONLY way to change POP3 state!
@@ -934,9 +963,9 @@ static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *chlg64 = data->state.buffer;
-  size_t len = 0;
+  char *chlg64 = NULL;
   char *rplyb64 = NULL;
+  size_t len = 0;
 
   (void)instate; /* no use for this yet */
 
@@ -945,21 +974,8 @@ static CURLcode pop3_state_auth_cram_resp(struct connectdata *conn,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Get the challenge */
-  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
-    ;
-
-  /* Terminate the challenge */
-  if(*chlg64 != '=') {
-    for(len = strlen(chlg64); len--;)
-      if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
-         chlg64[len] != '\t')
-        break;
-
-    if(++len) {
-      chlg64[len] = '\0';
-    }
-  }
+  /* Get the challenge message */
+  pop3_get_message(data->state.buffer, &chlg64);
 
   /* Create the response message */
   result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
@@ -987,9 +1003,9 @@ static CURLcode pop3_state_auth_digest_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *chlg64 = data->state.buffer;
-  size_t len = 0;
+  char *chlg64 = NULL;
   char *rplyb64 = NULL;
+  size_t len = 0;
 
   (void)instate; /* no use for this yet */
 
@@ -998,9 +1014,8 @@ static CURLcode pop3_state_auth_digest_resp(struct connectdata *conn,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Get the challenge */
-  for(chlg64 += 2; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
-    ;
+  /* Get the challenge message */
+  pop3_get_message(data->state.buffer, &chlg64);
 
   /* Create the response message */
   result = Curl_sasl_create_digest_md5_message(data, chlg64, conn->user,
@@ -1094,8 +1109,9 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  size_t len = 0;
+  char *type2msg = NULL;
   char *type3msg = NULL;
+  size_t len = 0;
 
   (void)instate; /* no use for this yet */
 
@@ -1104,11 +1120,12 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
+    /* Get the type-2 message */
+    pop3_get_message(data->state.buffer, &type2msg);
+
     /* Create the type-3 message */
-    result = Curl_sasl_create_ntlm_type3_message(data,
-                                                 data->state.buffer + 2,
-                                                 conn->user, conn->passwd,
-                                                 &conn->ntlm,
+    result = Curl_sasl_create_ntlm_type3_message(data, type2msg, conn->user,
+                                                 conn->passwd, &conn->ntlm,
                                                  &type3msg, &len);
 
     /* Send the message */

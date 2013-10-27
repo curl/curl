@@ -219,7 +219,7 @@ static void smtp_to_smtps(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_endofresp()
+ * smtp_endofresp()
  *
  * Checks for an ending SMTP status code at the start of the given string, but
  * also detects various capabilities from the EHLO response including the
@@ -305,6 +305,35 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
   }
 
   return result;
+}
+
+/***********************************************************************
+ *
+ * smtp_get_message()
+ *
+ * Gets the authentication message from the response buffer.
+ */
+static void smtp_get_message(char *buffer, char** outptr)
+{
+  size_t len = 0;
+  char* message = NULL;
+
+  /* Find the start of the message */
+  for(message = buffer + 4; *message == ' ' || *message == '\t'; message++)
+    ;
+
+  /* Find the end of the message */
+  for(len = strlen(message); len--;)
+    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+        message[len] != '\t')
+      break;
+
+  /* Terminate the challenge */
+  if(++len) {
+    message[len] = '\0';
+  }
+
+  *outptr = message;
 }
 
 /***********************************************************************
@@ -914,9 +943,9 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *chlg64 = data->state.buffer;
-  size_t len = 0;
+  char *chlg64 = NULL;
   char *rplyb64 = NULL;
+  size_t len = 0;
 
   (void)instate; /* no use for this yet */
 
@@ -925,21 +954,8 @@ static CURLcode smtp_state_auth_cram_resp(struct connectdata *conn,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Get the challenge */
-  for(chlg64 += 4; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
-    ;
-
-  /* Terminate the challenge */
-  if(*chlg64 != '=') {
-    for(len = strlen(chlg64); len--;)
-      if(chlg64[len] != '\r' && chlg64[len] != '\n' && chlg64[len] != ' ' &&
-         chlg64[len] != '\t')
-        break;
-
-    if(++len) {
-      chlg64[len] = '\0';
-    }
-  }
+  /* Get the challenge message */
+  smtp_get_message(data->state.buffer, &chlg64);
 
   /* Create the response message */
   result = Curl_sasl_create_cram_md5_message(data, chlg64, conn->user,
@@ -967,9 +983,9 @@ static CURLcode smtp_state_auth_digest_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  char *chlg64 = data->state.buffer;
-  size_t len = 0;
+  char *chlg64 = NULL;
   char *rplyb64 = NULL;
+  size_t len = 0;
 
   (void)instate; /* no use for this yet */
 
@@ -978,9 +994,8 @@ static CURLcode smtp_state_auth_digest_resp(struct connectdata *conn,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Get the challenge */
-  for(chlg64 += 4; *chlg64 == ' ' || *chlg64 == '\t'; chlg64++)
-    ;
+  /* Get the challenge message */
+  smtp_get_message(data->state.buffer, &chlg64);
 
   /* Create the response message */
   result = Curl_sasl_create_digest_md5_message(data, chlg64, conn->user,
@@ -1075,6 +1090,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  char *type2msg = NULL;
   char *type3msg = NULL;
   size_t len = 0;
 
@@ -1085,11 +1101,12 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
     result = CURLE_LOGIN_DENIED;
   }
   else {
+    /* Get the type-2 message */
+    smtp_get_message(data->state.buffer, &type2msg);
+
     /* Create the type-3 message */
-    result = Curl_sasl_create_ntlm_type3_message(data,
-                                                 data->state.buffer + 4,
-                                                 conn->user, conn->passwd,
-                                                 &conn->ntlm,
+    result = Curl_sasl_create_ntlm_type3_message(data, type2msg, conn->user,
+                                                 conn->passwd, &conn->ntlm,
                                                  &type3msg, &len);
 
     /* Send the message */
