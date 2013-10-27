@@ -426,6 +426,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
     "AUTHENTICATE_XOAUTH2",
+    "AUTHENTICATE_CANCEL",
     "AUTHENTICATE_FINAL",
     "LOGIN",
     "LIST",
@@ -1287,7 +1288,7 @@ static CURLcode imap_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
-/* For AUTH XOAUTH2 (without initial response) responses */
+/* For AUTHENTICATE XOAUTH2 (without initial response) responses */
 static CURLcode imap_state_auth_xoauth2_resp(struct connectdata *conn,
                                              int imapcode,
                                              imapstate instate)
@@ -1325,7 +1326,22 @@ static CURLcode imap_state_auth_xoauth2_resp(struct connectdata *conn,
   return result;
 }
 
-/* For final responses to the AUTHENTICATE sequence */
+/* For AUTHENTICATE cancellation responses */
+static CURLcode imap_state_auth_cancel_resp(struct connectdata *conn,
+                                            int imapcode,
+                                            imapstate instate)
+{
+  struct SessionHandle *data = conn->data;
+
+  (void)imapcode;
+  (void)instate; /* no use for this yet */
+
+  failf(data, "Authentication cancelled");
+
+  return CURLE_LOGIN_DENIED;
+}
+
+/* For final responses in the AUTHENTICATE sequence */
 static CURLcode imap_state_auth_final_resp(struct connectdata *conn,
                                            int imapcode,
                                            imapstate instate)
@@ -1676,6 +1692,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_AUTHENTICATE_XOAUTH2:
       result = imap_state_auth_xoauth2_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_AUTHENTICATE_CANCEL:
+      result = imap_state_auth_cancel_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_AUTHENTICATE_FINAL:

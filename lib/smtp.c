@@ -363,6 +363,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
     "AUTH_XOAUTH2",
+    "AUTH_CANCEL",
     "AUTH_FINAL",
     "MAIL",
     "RCPT",
@@ -1163,7 +1164,22 @@ static CURLcode smtp_state_auth_xoauth2_resp(struct connectdata *conn,
   return result;
 }
 
-/* For the final responses to the AUTH sequence */
+/* For AUTH cancellation responses */
+static CURLcode smtp_state_auth_cancel_resp(struct connectdata *conn,
+                                            int smtpcode,
+                                            smtpstate instate)
+{
+  struct SessionHandle *data = conn->data;
+
+  (void)smtpcode;
+  (void)instate; /* no use for this yet */
+
+  failf(data, "Authentication cancelled");
+
+  return CURLE_LOGIN_DENIED;
+}
+
+/* For final responses in the AUTH sequence */
 static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
                                            int smtpcode,
                                            smtpstate instate)
@@ -1373,6 +1389,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
 
     case SMTP_AUTH_XOAUTH2:
       result = smtp_state_auth_xoauth2_resp(conn, smtpcode, smtpc->state);
+      break;
+
+    case SMTP_AUTH_CANCEL:
+      result = smtp_state_auth_cancel_resp(conn, smtpcode, smtpc->state);
       break;
 
     case SMTP_AUTH_FINAL:

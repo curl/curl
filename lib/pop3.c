@@ -405,6 +405,7 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
     "AUTH_XOAUTH2",
+    "AUTH_CANCEL",
     "AUTH_FINAL",
     "APOP",
     "USER",
@@ -1182,7 +1183,22 @@ static CURLcode pop3_state_auth_xoauth2_resp(struct connectdata *conn,
   return result;
 }
 
-/* For final responses to the AUTH sequence */
+/* For AUTH cancellation responses */
+static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
+                                            int pop3code,
+                                            pop3state instate)
+{
+  struct SessionHandle *data = conn->data;
+
+  (void)pop3code;
+  (void)instate; /* no use for this yet */
+
+  failf(data, "Authentication cancelled");
+
+  return CURLE_LOGIN_DENIED;
+}
+
+/* For final responses in the AUTH sequence */
 static CURLcode pop3_state_auth_final_resp(struct connectdata *conn,
                                            int pop3code,
                                            pop3state instate)
@@ -1402,6 +1418,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_AUTH_XOAUTH2:
       result = pop3_state_auth_xoauth2_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_AUTH_CANCEL:
+      result = pop3_state_auth_cancel_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_AUTH_FINAL:
