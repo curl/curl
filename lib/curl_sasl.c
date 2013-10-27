@@ -246,7 +246,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
 
-  /* Prepare the response */
+  /* Generate the response */
   response = aprintf(
       "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
            userp, digest[0], digest[1], digest[2], digest[3], digest[4],
@@ -255,7 +255,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Base64 encode the reply */
+  /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
   Curl_safefree(response);
@@ -354,8 +354,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 #ifndef DEBUGBUILD
   static const char table16[] = "0123456789abcdef";
 #endif
+  CURLcode result = CURLE_OK;
   size_t i;
   MD5_context *ctxt;
+  char *response = NULL;
   unsigned char digest[MD5_DIGEST_LEN];
   char HA1_hex[2 * MD5_DIGEST_LEN + 1];
   char HA2_hex[2 * MD5_DIGEST_LEN + 1];
@@ -366,7 +368,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char method[]     = "AUTHENTICATE";
   char qop[]        = "auth";
   char uri[128];
-  char response[512];
 
 #ifndef DEBUGBUILD
   /* Generate 64 bits of random data */
@@ -451,14 +452,20 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
-  snprintf(response, sizeof(response),
-           "username=\"%s\",realm=\"%s\",nonce=\"%s\","
-           "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s",
-           userp, realm, nonce,
-           cnonce, nonceCount, uri, resp_hash_hex);
+  /* Generate the response */
+  response = aprintf("username=\"%s\",realm=\"%s\",nonce=\"%s\","
+                     "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s",
+                     userp, realm, nonce,
+                     cnonce, nonceCount, uri, resp_hash_hex);
+  if(!response)
+    return CURLE_OUT_OF_MEMORY;
 
-  /* Base64 encode the reply */
-  return Curl_base64_encode(data, response, 0, outptr, outlen);
+  /* Base64 encode the response */
+  result = Curl_base64_encode(data, response, 0, outptr, outlen);
+
+  Curl_safefree(response);
+
+  return result;
 }
 #endif
 
