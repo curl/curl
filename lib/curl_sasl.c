@@ -168,7 +168,37 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-/*
+ /*
+ * Curl_sasl_decode_cram_md5_message()
+ *
+ * This is used to decode an already encoded CRAM-MD5 challenge message.
+ *
+ * Parameters:
+ *
+ * chlg64  [in]     - Pointer to the base64 encoded challenge message.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                           size_t *outlen)
+{
+  CURLcode result = CURLE_OK;
+  size_t chlg64len = strlen(chlg64);
+
+  *outptr = NULL;
+  *outlen = 0;
+
+  /* Decode the challenge if necessary */
+  if(chlg64len && *chlg64 != '=')
+    result = Curl_base64_decode(chlg64, (unsigned char **) outptr, outlen);
+
+    return result;
+ }
+
+ /*
  * Curl_sasl_create_cram_md5_message()
  *
  * This is used to generate an already encoded CRAM-MD5 response message ready
@@ -177,7 +207,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the base64 encoded challenge buffer.
+ * chlg    [in]     - The challenge.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
@@ -187,42 +217,31 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char *chlg64,
+                                           const char *chlg,
                                            const char *userp,
                                            const char *passwdp,
                                            char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
-  size_t chlg64len = strlen(chlg64);
-  unsigned char *chlg = (unsigned char *) NULL;
   size_t chlglen = 0;
   HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
   char *response;
 
-  /* Decode the challenge if necessary */
-  if(chlg64len && *chlg64 != '=') {
-    result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-
-    if(result)
-      return result;
-  }
+  if(chlg)
+    chlglen = strlen(chlg);
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
                         (const unsigned char *) passwdp,
                         curlx_uztoui(strlen(passwdp)));
-
-  if(!ctxt) {
-    Curl_safefree(chlg);
+  if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
-  }
 
   /* Update the digest with the given challenge */
   if(chlglen > 0)
-    Curl_HMAC_update(ctxt, chlg, curlx_uztoui(chlglen));
-
-  Curl_safefree(chlg);
+    Curl_HMAC_update(ctxt, (const unsigned char *) chlg,
+                     curlx_uztoui(chlglen));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
@@ -240,6 +259,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
   Curl_safefree(response);
+
   return result;
 }
 

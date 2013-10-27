@@ -66,6 +66,10 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
                                         size_t *outlen);
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+/* This is used to decode a base64 encoded CRAM-MD5 challange message */
+CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                           size_t *outlen);
+
 /* This is used to generate a base64 encoded CRAM-MD5 response message */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
                                            const char *chlg64,
@@ -75,7 +79,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char *chlg64,
+                                             const char *chlg,
                                              const char *user,
                                              const char *passwdp,
                                              const char *service,
