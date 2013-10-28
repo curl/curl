@@ -33,7 +33,7 @@
 typedef unsigned long   u_int32_t;
 
 
-/* System API wrapper prototypes and definitions to support ASCII parameters. */
+/* System API wrapper prototypes & definitions to support ASCII parameters. */
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -42,7 +42,8 @@ typedef unsigned long   u_int32_t;
 #include <qsoasync.h>
 #include <gssapi.h>
 
-extern int      Curl_getaddrinfo_a(const char * nodename, const char * servname,
+extern int      Curl_getaddrinfo_a(const char * nodename,
+                                   const char * servname,
                                    const struct addrinfo * hints,
                                    struct addrinfo * * res);
 #define getaddrinfo             Curl_getaddrinfo_a
@@ -66,7 +67,8 @@ extern int      Curl_SSL_Init_a(SSLInit * init);
 #define SSL_Init                Curl_SSL_Init_a
 
 
-extern char *   Curl_SSL_Strerror_a(int sslreturnvalue, SSLErrorMsg * serrmsgp);
+extern char *   Curl_SSL_Strerror_a(int sslreturnvalue,
+                                    SSLErrorMsg * serrmsgp);
 #define SSL_Strerror            Curl_SSL_Strerror_a
 
 

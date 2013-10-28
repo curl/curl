@@ -38,13 +38,13 @@ CURL_EXTERN char * curl_easy_unescape_ccsid(CURL * handle, const char * string,
                                             int length, int * outlength,
                                             unsigned int sccsid,
                                             unsigned int dccsid);
-CURL_EXTERN struct curl_slist * curl_slist_append_ccsid(struct curl_slist * lst,
+CURL_EXTERN struct curl_slist * curl_slist_append_ccsid(struct curl_slist * l,
                                                         const char * data,
                                                         unsigned int ccsid);
 CURL_EXTERN time_t curl_getdate_ccsid(const char * p, const time_t * unused,
                                       unsigned int ccsid);
 CURL_EXTERN curl_version_info_data * curl_version_info_ccsid(CURLversion stamp,
-                                                             unsigned int csid);
+                                                             unsigned int cid);
 CURL_EXTERN const char * curl_easy_strerror_ccsid(CURLcode error,
                                                   unsigned int ccsid);
 CURL_EXTERN const char * curl_share_strerror_ccsid(CURLSHcode error,
