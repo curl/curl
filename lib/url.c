@@ -3256,43 +3256,6 @@ CURLcode Curl_connected_proxy(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode ConnectPlease(struct SessionHandle *data,
-                              struct connectdata *conn,
-                              bool *connected)
-{
-  CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
-
-  infof(data, "About to connect() to %s%s port %ld (#%ld)\n",
-        conn->bits.proxy?"proxy ":"",
-        hostname, conn->port, conn->connection_id);
-#else
-  (void)data;
-#endif
-
-  /*************************************************************
-   * Connect to server/proxy
-   *************************************************************/
-  result= Curl_connecthost(conn,
-                           conn->dns_entry,
-                           connected);
-  if(CURLE_OK == result) {
-    if(*connected) {
-      result = Curl_connected_proxy(conn, FIRSTSOCKET);
-      if(!result) {
-        conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
-        Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
-      }
-    }
-  }
-
-  if(result)
-    *connected = FALSE; /* mark it as not connected */
-
-  return result;
-}
-
 /*
  * verboseconnect() displays verbose information after a connect
  */
@@ -5600,36 +5563,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     /* loop for CURL_SERVER_CLOSED_CONNECTION */
 
     if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
-      /* Try to connect only if not already connected */
-      bool connected = FALSE;
-
-      result = ConnectPlease(data, conn, &connected);
-
-      if(result && !conn->ip_addr) {
-        /* transport connection failure not related with authentication */
-        conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
-        return result;
-      }
-
-      if(connected) {
-        result = Curl_protocol_connect(conn, protocol_done);
-        if(CURLE_OK == result)
-          conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
-      }
-      else
-        conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
-
-      /* if the connection was closed by the server while exchanging
-         authentication informations, retry with the new set
-         authentication information */
-      if(conn->bits.proxy_connect_closed) {
-        /* reset the error buffer */
-        if(data->set.errorbuffer)
-          data->set.errorbuffer[0] = '\0';
-        data->state.errorbuf = FALSE;
-        continue;
-      }
-
+      conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
+      result = Curl_connecthost(conn, conn->dns_entry);
       if(CURLE_OK != result)
         return result;
     }

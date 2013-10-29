@@ -874,6 +874,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 
   if(nfds) {
     /* wait... */
+    infof(data, "Curl_poll(%d ds, %d ms)\n", nfds, timeout_ms);
     i = Curl_poll(ufds, nfds, timeout_ms);
 
     if(i) {

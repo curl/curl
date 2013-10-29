@@ -1884,7 +1884,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   struct Curl_dns_entry *addr=NULL;
   int rc;
   unsigned short connectport; /* the local port connect() should use! */
-  bool connected;
   char *str=&data->state.buffer[4];  /* start on the first letter */
 
   if((ftpc->count1 == 0) &&
@@ -2038,9 +2037,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     }
   }
 
-  result = Curl_connecthost(conn,
-                            addr,
-                            &connected);
+  conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
+  result = Curl_connecthost(conn, addr);
 
   Curl_resolv_unlock(data, addr); /* we're done using this address */
 
@@ -2051,7 +2049,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return result;
   }
 
-  conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
 
   /*
    * When this is used from the multi interface, this might've returned with
@@ -2063,15 +2060,6 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conn->ip_addr, ftpc->newhost, connectport);
 
-  if(connected) {
-    /* Only do the proxy connection magic if we're actually connected.  We do
-       this little trick and send in the same 'connected' variable here again
-       and it will be set FALSE by proxy_magic() for when for example the
-       CONNECT procedure doesn't complete */
-    infof(data, "Connection to proxy confirmed almost instantly\n");
-    result = proxy_magic(conn, ftpc->newhost, ftpc->newport, &connected);
-  }
-  conn->bits.tcpconnect[SECONDARYSOCKET] = connected;
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
 

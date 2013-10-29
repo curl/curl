@@ -164,8 +164,7 @@ tcpkeepalive(struct SessionHandle *data,
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai, /* start connecting to this */
-                curl_socket_t *sock,
-                bool *connected);
+                curl_socket_t *sock);
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
@@ -534,12 +533,9 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    more address exists or error */
 static CURLcode trynextip(struct connectdata *conn,
                           int sockindex,
-                          int tempindex,
-                          bool *connected)
+                          int tempindex)
 {
-  curl_socket_t sockfd;
-  Curl_addrinfo *ai;
-  int family = tempindex ? AF_INET6 : AF_INET;
+  CURLcode rc = CURLE_COULDNT_CONNECT;
 
   /* First clean up after the failed socket.
      Don't close it yet to ensure that the next IP's socket gets a different
@@ -547,36 +543,35 @@ static CURLcode trynextip(struct connectdata *conn,
      interface is used with certain select() replacements such as kqueue. */
   curl_socket_t fd_to_close = conn->tempsock[tempindex];
   conn->tempsock[tempindex] = CURL_SOCKET_BAD;
-  *connected = FALSE;
 
-  if(sockindex != FIRSTSOCKET) {
-    Curl_closesocket(conn, fd_to_close);
-    return CURLE_COULDNT_CONNECT; /* no next */
-  }
+  if(sockindex == FIRSTSOCKET) {
+    Curl_addrinfo *ai;
+    int family;
 
-  /* try the next address with same family */
-  ai = conn->tempaddr[tempindex]->ai_next;
-  while(ai && ai->ai_family != family)
-    ai = ai->ai_next;
-
-  while(ai && ai->ai_family == family) {
-    CURLcode res = singleipconnect(conn, ai, &sockfd, connected);
-    if(res)
-      return res;
-    if(sockfd != CURL_SOCKET_BAD) {
-      /* store the new socket descriptor */
-      conn->tempsock[tempindex] = sockfd;
-      conn->tempaddr[tempindex] = ai;
-      Curl_closesocket(conn, fd_to_close);
-      return CURLE_OK;
+    if(conn->tempaddr[tempindex]) {
+      /* find next address in the same protocol family */
+      family = conn->tempaddr[tempindex]->ai_family;
+      ai = conn->tempaddr[tempindex]->ai_next;
+    }
+    else {
+      /* happy eyeballs - try the other protocol family */
+      int firstfamily = conn->tempaddr[0]->ai_family;
+      family = (firstfamily == AF_INET) ? AF_INET6 : AF_INET;
+      ai = conn->tempaddr[0]->ai_next;
     }
 
-    do {
+    while(ai && ai->ai_family != family)
       ai = ai->ai_next;
-    } while(ai && ai->ai_family != family);
+    if(ai) {
+      rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
+      conn->tempaddr[tempindex] = ai;
+    }
   }
-  Curl_closesocket(conn, fd_to_close);
-  return CURLE_COULDNT_CONNECT;
+
+  if(fd_to_close != CURL_SOCKET_BAD)
+    Curl_closesocket(conn, fd_to_close);
+
+  return rc;
 }
 
 /* Copies connection info into the session handle to make it available
@@ -701,7 +696,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   CURLcode code = CURLE_OK;
-  long allow = DEFAULT_CONNECT_TIMEOUT;
+  long allow;
   int error = 0;
   struct timeval now;
   int result;
@@ -748,6 +743,12 @@ CURLcode Curl_is_connected(struct connectdata *conn,
               conn->timeoutms_per_addr);
         error = ETIMEDOUT;
       }
+
+      /* should we try another protocol family? */
+      if(i == 0 && conn->tempaddr[1] == NULL &&
+         curlx_tvdiff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+        trynextip(conn, sockindex, 1);
+      }
     }
     else if(result == CURL_CSELECT_OUT) {
       if(verifyconnect(conn->tempsock[i], &error)) {
@@ -759,13 +760,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->ip_addr = conn->tempaddr[i];
 
         /* close the other socket, if open */
-        if(conn->tempsock[other] != CURL_SOCKET_BAD) {
-          if(conn->fclosesocket)
-            conn->fclosesocket(conn->closesocket_client,
-                               conn->tempsock[other]);
-          else
-            sclose(conn->tempsock[other]);
-        }
+        if(conn->tempsock[other] != CURL_SOCKET_BAD)
+          Curl_closesocket(conn, conn->tempsock[other]);
 
         /* see if we need to do any proxy magic first once we connected */
         code = Curl_connected_proxy(conn, sockindex);
@@ -797,18 +793,28 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
       Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
-      infof(data, "connect to %s port %ld: %s\n",
+      infof(data, "connect to %s port %ld failed: %s\n",
             ipaddress, conn->port, Curl_strerror(conn, error));
 
       conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
                                  allow : allow / 2;
 
-      code = trynextip(conn, sockindex, i, connected);
+      code = trynextip(conn, sockindex, i);
     }
   }
 
   if(code) {
     /* no more addresses to try */
+
+    /* if the first address family runs out of addresses to try before
+       the happy eyeball timeout, go ahead and try the next family now */
+    if(conn->tempaddr[1] == NULL) {
+      int rc;
+      rc = trynextip(conn, sockindex, 1);
+      if(rc == CURLE_OK)
+        return CURLE_OK;
+    }
+
     failf(data, "Failed to connect to %s port %ld: %s",
           conn->host.name, conn->port, Curl_strerror(conn, error));
   }
@@ -927,8 +933,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai,
-                curl_socket_t *sockp,
-                bool *connected)
+                curl_socket_t *sockp)
 {
   struct Curl_sockaddr_ex addr;
   int rc;
@@ -941,7 +946,6 @@ singleipconnect(struct connectdata *conn,
   long port;
 
   *sockp = CURL_SOCKET_BAD;
-  *connected = FALSE; /* default is not connected */
 
   res = Curl_socket(conn, ai, &addr, &sockfd);
   if(res)
@@ -1038,14 +1042,12 @@ singleipconnect(struct connectdata *conn,
 
     default:
       /* unknown error, fallthrough and try another address! */
-      failf(data, "Failed to connect to %s: %s",
-            conn->ip_addr_str, Curl_strerror(conn,error));
+      infof(data, "Immediate connect fail for %s: %s\n",
+            ipaddress, Curl_strerror(conn,error));
       data->state.os_errno = error;
 
       /* connect failed */
-      Curl_closesocket(conn, sockfd);
-
-      break;
+      return CURLE_COULDNT_CONNECT;
     }
   }
   else
@@ -1061,23 +1063,13 @@ singleipconnect(struct connectdata *conn,
  */
 
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
-                          const struct Curl_dns_entry *remotehost,
-                          bool *connected)           /* really connected? */
+                          const struct Curl_dns_entry *remotehost)
 {
   struct SessionHandle *data = conn->data;
-  struct timeval after;
   struct timeval before = Curl_tvnow();
-  int i;
+  CURLcode res;
 
-  /*************************************************************
-   * Figure out what maximum time we have left
-   *************************************************************/
-  long timeout_ms;
-
-  *connected = FALSE; /* default to not connected */
-
-  /* get the timeout left */
-  timeout_ms = Curl_timeleft(data, &before, TRUE);
+  long timeout_ms = Curl_timeleft(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */
@@ -1087,69 +1079,26 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   conn->num_addr = Curl_num_addresses(remotehost->addr);
   conn->tempaddr[0] = remotehost->addr;
-  conn->tempaddr[1] = remotehost->addr;
+  conn->tempaddr[1] = NULL;
+  conn->tempsock[0] = CURL_SOCKET_BAD;
+  conn->tempsock[1] = CURL_SOCKET_BAD;
+  Curl_expire(conn->data,
+              HAPPY_EYEBALLS_TIMEOUT + (MULTI_TIMEOUT_INACCURACY/1000));
 
-  /* Below is the loop that attempts to connect to all IP-addresses we
-   * know for the given host.
-   * One by one, for each protocol, until one IP succeeds.
-   */
+  /* Max time for the next connection attempt */
+  conn->timeoutms_per_addr =
+    conn->tempaddr[0]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
 
-  for(i=0; i<2; i++) {
-    curl_socket_t sockfd = CURL_SOCKET_BAD;
-    Curl_addrinfo *ai = conn->tempaddr[i];
-    int family = i ? AF_INET6 : AF_INET;
+  /* start connecting to first IP */
+  res = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
+  while(res != CURLE_OK &&
+        conn->tempaddr[0] &&
+        conn->tempaddr[0]->ai_next &&
+        conn->tempsock[0] == CURL_SOCKET_BAD)
+    res = trynextip(conn, FIRSTSOCKET, 0);
 
-    /* find first address for this address family, if any */
-    while(ai && ai->ai_family != family)
-      ai = ai->ai_next;
-
-    /*
-     * Connecting with a Curl_addrinfo chain
-     */
-    while(ai) {
-      CURLcode res;
-
-      /* Max time for the next connection attempt */
-      conn->timeoutms_per_addr = ai->ai_next == NULL ?
-                                 timeout_ms : timeout_ms / 2;
-
-      /* start connecting to the IP curr_addr points to */
-      res = singleipconnect(conn, ai, &sockfd, connected);
-      if(res)
-        return res;
-
-      if(sockfd != CURL_SOCKET_BAD)
-        break;
-
-      /* get a new timeout for next attempt */
-      after = Curl_tvnow();
-      timeout_ms -= Curl_tvdiff(after, before);
-      if(timeout_ms < 0) {
-        failf(data, "connect() timed out!");
-        return CURLE_OPERATION_TIMEDOUT;
-      }
-      before = after;
-
-      /* next addresses */
-      do {
-        ai = ai->ai_next;
-      } while(ai && ai->ai_family != family);
-    }  /* end of connect-to-each-address loop */
-
-    conn->tempsock[i] = sockfd;
-    conn->tempaddr[i] = ai;
-  }
-
-  if((conn->tempsock[0] == CURL_SOCKET_BAD) &&
-     (conn->tempsock[1] == CURL_SOCKET_BAD)) {
-    /* no good connect was made */
-    failf(data, "couldn't connect to %s at %s:%ld",
-          conn->bits.proxy?"proxy":"host",
-          conn->bits.proxy?conn->proxy.name:conn->host.name, conn->port);
-    return CURLE_COULDNT_CONNECT;
-  }
-
-  /* leave the socket in non-blocking mode */
+  if(conn->tempsock[0] == CURL_SOCKET_BAD)
+    return res;
 
   data->info.numconnects++; /* to track the number of connections made */
 

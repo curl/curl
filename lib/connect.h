@@ -31,9 +31,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
                            bool *connected);
 
 CURLcode Curl_connecthost(struct connectdata *conn,
-                          const struct Curl_dns_entry *host, /* connect to
-                                                                this */
-                          bool *connected); /* truly connected? */
+                          const struct Curl_dns_entry *host);
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
@@ -42,6 +40,8 @@ long Curl_timeleft(struct SessionHandle *data,
                    bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
+#define HAPPY_EYEBALLS_TIMEOUT     200 /* milliseconds to wait between
+                                          ipv4/ipv6 connection attempts */
 
 /*
  * Used to extract socket and connectdata struct for the most recent
