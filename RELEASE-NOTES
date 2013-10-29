@@ -10,6 +10,10 @@ Curl and libcurl 7.33.1
 This release includes the following changes:
 
  o SSL: protocol version can be specified more precisely [1]
+ o email: Added support for cancelling NTLM authentication
+ o email: Added support for cancelling DIGEST-MD5 authentication
+ o email: Added support for canceling CRAM-MD5 authentication
+ o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
 
 This release includes the following bugfixes:
 
@@ -27,6 +31,8 @@ This release includes the following bugfixes:
  o glob: fix broken URLs
  o configure: check for long long when building with cyassl
  o CURLOPT_RESOLVE: mention they don't time-out [7]
+ o docs/examples/httpput.c: fix build for MSVC
+ o FTP: make the data connection work when going through proxy
 
 This release includes the following known bugs:
 
@@ -38,7 +44,8 @@ advice from friends like these:
  Nick Zitzmann, Gergely Nagy, Alessandro Ghedini, Dave Reisner,
  Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
  Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
- Romulo Ceccon, Patrick Monnerat
+ Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
+ Paul Marks, Rémy Léone
 
         Thanks! (and sorry if I forgot to mention someone)
 
