@@ -747,9 +747,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
-        break;
+        error = ETIMEDOUT;
       }
-      return CURLE_OK;
+      break;
 
     case CURL_CSELECT_OUT:
       if(verifyconnect(conn->tempsock[i], &error)) {
@@ -802,22 +802,25 @@ CURLcode Curl_is_connected(struct connectdata *conn,
      * address" for the given host. But first remember the latest error.
      */
     if(error) {
+      char ipaddress[MAX_IPADR_LEN];
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
-    }
+      Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
+      infof(data, "connect to %s port %ld: %s\n",
+            ipaddress, conn->port, Curl_strerror(conn, error));
 
-    conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
-                               allow : allow / 2;
-    code = trynextip(conn, sockindex, i, connected);
+      conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
+                                 allow : allow / 2;
 
-    if(code) {
-      error = SOCKERRNO;
-      data->state.os_errno = error;
-      failf(data, "Failed connect to %s:%ld; %s",
-            conn->host.name, conn->port, Curl_strerror(conn, error));
+      code = trynextip(conn, sockindex, i, connected);
     }
   }
 
+  if(code) {
+    /* no more addresses to try */
+    failf(data, "Failed to connect to %s port %ld: %s",
+          conn->host.name, conn->port, Curl_strerror(conn, error));
+  }
   return code;
 }
 
