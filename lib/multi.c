@@ -787,9 +787,9 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 
   /* If the internally desired timeout is actually shorter than requested from
      the outside, then use the shorter time! But only if the internal timer
-     is actually larger than 0! */
+     is actually larger than -1! */
   (void)multi_timeout(multi, &timeout_internal);
-  if((timeout_internal > 0) && (timeout_internal < (long)timeout_ms))
+  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
   /* Count up how many fds we have from the multi handle */
