@@ -559,14 +559,14 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 /*
  * Curl_sasl_create_xoauth2_message()
  *
- * This is used to generate an already encoded XOAUTH2 message ready
- * for sending to the recipient.
+ * This is used to generate an already encoded OAuth 2.0 message ready for
+ * sending to the recipient.
  *
  * Parameters:
  *
  * data    [in]     - The session handle.
  * user    [in]     - The user name.
- * bearer  [in]     - The XOAUTH Bearer token.
+ * bearer  [in]     - The bearer token.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -579,16 +579,15 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
                                           char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
-  char *xoauth;
+  char *xoauth = NULL;
 
+  /* Generate the message */
   xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
-
   if(!xoauth)
     return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the reply */
-  result = Curl_base64_encode(data, xoauth, strlen(xoauth), outptr,
-                              outlen);
+  result = Curl_base64_encode(data, xoauth, strlen(xoauth), outptr, outlen);
 
   Curl_safefree(xoauth);
 

@@ -10,9 +10,7 @@ Curl and libcurl 7.33.1
 This release includes the following changes:
 
  o SSL: protocol version can be specified more precisely [1]
- o email: Added support for cancelling NTLM authentication
- o email: Added support for cancelling DIGEST-MD5 authentication
- o email: Added support for canceling CRAM-MD5 authentication
+ o imap/pop3/smtp: Added graceful cancellation of SASL authentication
  o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
 
 This release includes the following bugfixes:

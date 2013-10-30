@@ -845,19 +845,16 @@ static CURLcode smtp_state_auth_plain_resp(struct connectdata *conn,
     /* Create the authorisation message */
     result = Curl_sasl_create_plain_message(conn->data, conn->user,
                                             conn->passwd, &plainauth, &len);
+    if(!result && plainauth) {
+      /* Send the message */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
 
-    /* Send the message */
-    if(!result) {
-      if(plainauth) {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", plainauth);
-
-        if(!result)
-          state(conn, SMTP_AUTH_FINAL);
-      }
-
-      Curl_safefree(plainauth);
+      if(!result)
+        state(conn, SMTP_AUTH_FINAL);
     }
   }
+
+  Curl_safefree(plainauth);
 
   return result;
 }
@@ -882,19 +879,16 @@ static CURLcode smtp_state_auth_login_resp(struct connectdata *conn,
     /* Create the user message */
     result = Curl_sasl_create_login_message(conn->data, conn->user,
                                             &authuser, &len);
+    if(!result && authuser) {
+      /* Send the user */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
 
-    /* Send the user */
-    if(!result) {
-      if(authuser) {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authuser);
-
-        if(!result)
-          state(conn, SMTP_AUTH_LOGIN_PASSWD);
-      }
-
-      Curl_safefree(authuser);
+      if(!result)
+        state(conn, SMTP_AUTH_LOGIN_PASSWD);
     }
   }
+
+  Curl_safefree(authuser);
 
   return result;
 }
@@ -919,19 +913,16 @@ static CURLcode smtp_state_auth_login_password_resp(struct connectdata *conn,
     /* Create the password message */
     result = Curl_sasl_create_login_message(conn->data, conn->passwd,
                                             &authpasswd, &len);
+    if(!result && authpasswd) {
+      /* Send the password */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
 
-    /* Send the password */
-    if(!result) {
-      if(authpasswd) {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", authpasswd);
-
-        if(!result)
-          state(conn, SMTP_AUTH_FINAL);
-      }
-
-      Curl_safefree(authpasswd);
+      if(!result)
+        state(conn, SMTP_AUTH_FINAL);
     }
   }
+
+  Curl_safefree(authpasswd);
 
   return result;
 }
@@ -1091,19 +1082,16 @@ static CURLcode smtp_state_auth_ntlm_resp(struct connectdata *conn,
     result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
                                                  &conn->ntlm,
                                                  &type1msg, &len);
+    if(!result && type1msg) {
+      /* Send the message */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type1msg);
 
-    /* Send the message */
-    if(!result) {
-      if(type1msg) {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", type1msg);
-
-        if(!result)
-          state(conn, SMTP_AUTH_NTLM_TYPE2MSG);
-      }
-
-      Curl_safefree(type1msg);
+      if(!result)
+        state(conn, SMTP_AUTH_NTLM_TYPE2MSG);
     }
   }
+
+  Curl_safefree(type1msg);
 
   return result;
 }
@@ -1179,19 +1167,16 @@ static CURLcode smtp_state_auth_xoauth2_resp(struct connectdata *conn,
     result = Curl_sasl_create_xoauth2_message(conn->data, conn->user,
                                               conn->xoauth2_bearer,
                                               &xoauth, &len);
+    if(!result && xoauth) {
+      /* Send the message */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", xoauth);
 
-    /* Send the message */
-    if(!result) {
-      if(xoauth) {
-        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", xoauth);
-
-        if(!result)
-          state(conn, SMTP_AUTH_FINAL);
-      }
-
-      Curl_safefree(xoauth);
+      if(!result)
+        state(conn, SMTP_AUTH_FINAL);
     }
   }
+
+  Curl_safefree(xoauth);
 
   return result;
 }
