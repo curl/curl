@@ -104,11 +104,27 @@ fail_unless(size == 1, "size should be 1");
 verify_memory(decoded, "i", 2);
 Curl_safefree(decoded);
 
-/* this is an illegal input */
+/* This is illegal input as the data is too short */
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("aQ", &decoded, &size);
-/* return code indiferent, but output shall be as follows */
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(size == 0, "size should be 0");
+fail_if(decoded, "returned pointer should be NULL");
+
+/* This is illegal input as it contains three padding characters */
+size = 1; /* not zero */
+decoded = &anychar; /* not NULL */
+rc = Curl_base64_decode("a===", &decoded, &size);
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(size == 0, "size should be 0");
+fail_if(decoded, "returned pointer should be NULL");
+
+/* This is illegal input as it contains a padding character mid input */
+size = 1; /* not zero */
+decoded = &anychar; /* not NULL */
+rc = Curl_base64_decode("a=Q=", &decoded, &size);
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 

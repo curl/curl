@@ -82,6 +82,7 @@ static void decodeQuantum(unsigned char *dest, const char *src)
 CURLcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen)
 {
+  size_t srcLen = 0;
   size_t length = 0;
   size_t equalsTerm = 0;
   size_t i;
@@ -92,21 +93,31 @@ CURLcode Curl_base64_decode(const char *src,
 
   *outptr = NULL;
   *outlen = 0;
+  srcLen = strlen(src);
 
+  /* Check the length of the input string is valid */
+  if(!srcLen || srcLen % 4)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* Find the position of any = padding characters */
   while((src[length] != '=') && src[length])
     length++;
+
   /* A maximum of two = padding characters is allowed */
   if(src[length] == '=') {
     equalsTerm++;
     if(src[length+equalsTerm] == '=')
       equalsTerm++;
   }
+  
+  /* Check the = padding characters weren't part way through the input */
+  if(length + equalsTerm != srcLen)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* Calculate the number of quantums */
   numQuantums = (length + equalsTerm) / 4;
 
-  /* Don't allocate a buffer if the decoded length is 0 */
-  if(numQuantums == 0)
-    return CURLE_OK;
-
+  /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - equalsTerm;
 
   /* The buffer must be large enough to make room for the last quantum
