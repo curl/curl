@@ -47,17 +47,14 @@
 
  7. SMTP
  7.1 Pipelining
- 7.2 Graceful base64 decoding failure
- 7.3 Enhanced capability support
+ 7.2 Enhanced capability support
  
  8. POP3
  8.1 Pipelining
- 8.2 Graceful base64 decoding failure
- 8.3 Enhanced capability support
+ 8.2 Enhanced capability support
  
  9. IMAP
- 9.1 Graceful base64 decoding failure
- 9.2 Enhanced capability support
+ 9.1 Enhanced capability support
  
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -318,14 +315,7 @@ to provide the data to send.
 
  Add support for pipelining emails.
 
-7.2 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC4954.
-
-7.3 Enhanced capability support
+7.2 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the EHLO command.
@@ -336,28 +326,14 @@ to provide the data to send.
 
  Add support for pipelining commands.
 
-8.2 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC5034.
- 
-8.3 Enhanced capability support
+8.2 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPA command.
 
 9. IMAP
 
-9.1 Graceful base64 decoding failure
-
- Rather than shutting down the session and returning an error when the
- decoding of a base64 encoded authentication response fails, we should
- gracefully shutdown the authentication process by sending a * response to the
- server as per RFC3501.
-
-9.2 Enhanced capability support
+9.1 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPABILITY command.
