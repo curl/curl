@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -219,8 +219,8 @@ done. The struct reports how many certs it found and then you can extract info
 for each of those certs by following the linked lists. The info chain is
 provided in a series of data in the format "name:content" where the content is
 for the specific named data. See also the certinfo.c example. NOTE: this
-option is only available in libcurl built with OpenSSL support. (Added in
-7.19.1)
+option is only available in libcurl built with OpenSSL, NSS, GSKit or QsoSSL
+support. (Added in 7.19.1)
 .IP CURLINFO_CONDITION_UNMET
 Pass a pointer to a long to receive the number 1 if the condition provided in
 the previous request didn't match (see \fICURLOPT_TIMECONDITION\fP). Alas, if

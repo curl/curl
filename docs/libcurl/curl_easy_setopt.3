@@ -2549,9 +2549,10 @@ is ignored.
 
 .IP CURLOPT_CERTINFO
 Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl (if built with OpenSSL) will extract lots of information
+this enabled, libcurl (if built with OpenSSL, NSS, GSKit or QsoSSL) will
+extract lots of information
 and data about the certificates in the certificate chain used in the SSL
-connection. This data is then possible to extract after a transfer using
+connection. This data may then be retrieved after a transfer using
 \fIcurl_easy_getinfo(3)\fP and its option \fICURLINFO_CERTINFO\fP. (Added in
 7.19.1)
 .IP CURLOPT_RANDOM_FILE
