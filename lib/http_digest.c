@@ -141,10 +141,6 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     d = &data->state.digest;
   }
 
-  /* skip initial whitespaces */
-  while(*header && ISSPACE(*header))
-    header++;
-
   if(checkprefix("Digest", header)) {
     header += strlen("Digest");
 

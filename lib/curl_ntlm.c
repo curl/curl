@@ -77,10 +77,6 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 
   ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
 
-  /* skip initial whitespaces */
-  while(*header && ISSPACE(*header))
-    header++;
-
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 

@@ -701,7 +701,7 @@ Curl_http_output_auth(struct connectdata *conn,
 
 CURLcode Curl_http_input_auth(struct connectdata *conn,
                               int httpcode,
-                              const char *header) /* the first non-space */
+                              const char *auth) /* the first non-space */
 {
   /*
    * This resource requires authentication
@@ -709,23 +709,16 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
 
   unsigned long *availp;
-  const char *start;
   struct auth *authp;
 
   if(httpcode == 407) {
-    start = header+strlen("Proxy-authenticate:");
     availp = &data->info.proxyauthavail;
     authp = &data->state.authproxy;
   }
   else {
-    start = header+strlen("WWW-Authenticate:");
     availp = &data->info.httpauthavail;
     authp = &data->state.authhost;
   }
-
-  /* pass all white spaces */
-  while(*start && ISSPACE(*start))
-    start++;
 
   /*
    * Here we check if we want the specific single authentication (using ==) and
@@ -744,10 +737,10 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
    *
    */
 
-  while(*start) {
+  while(*auth) {
 #ifdef USE_HTTP_NEGOTIATE
-    if(checkprefix("GSS-Negotiate", start) ||
-       checkprefix("Negotiate", start)) {
+    if(checkprefix("GSS-Negotiate", auth) ||
+       checkprefix("Negotiate", auth)) {
       int neg;
       *availp |= CURLAUTH_GSSNEGOTIATE;
       authp->avail |= CURLAUTH_GSSNEGOTIATE;
@@ -760,7 +753,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           data->state.authproblem = TRUE;
         }
         else {
-          neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), start);
+          neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), auth);
           if(neg == 0) {
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->change.url);
@@ -779,14 +772,14 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
 #endif
 #ifdef USE_NTLM
       /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", start)) {
+      if(checkprefix("NTLM", auth)) {
         *availp |= CURLAUTH_NTLM;
         authp->avail |= CURLAUTH_NTLM;
         if(authp->picked == CURLAUTH_NTLM ||
            authp->picked == CURLAUTH_NTLM_WB) {
           /* NTLM authentication is picked and activated */
           CURLcode ntlm =
-            Curl_input_ntlm(conn, (httpcode == 407)?TRUE:FALSE, start);
+            Curl_input_ntlm(conn, (httpcode == 407)?TRUE:FALSE, auth);
           if(CURLE_OK == ntlm) {
             data->state.authproblem = FALSE;
 #ifdef NTLM_WB_ENABLED
@@ -798,14 +791,14 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
 
               /* Get the challenge-message which will be passed to
                * ntlm_auth for generating the type 3 message later */
-              while(*start && ISSPACE(*start))
-                start++;
-              if(checkprefix("NTLM", start)) {
-                start += strlen("NTLM");
-                while(*start && ISSPACE(*start))
-                  start++;
-                if(*start)
-                  if((conn->challenge_header = strdup(start)) == NULL)
+              while(*auth && ISSPACE(*auth))
+                auth++;
+              if(checkprefix("NTLM", auth)) {
+                auth += strlen("NTLM");
+                while(*auth && ISSPACE(*auth))
+                  auth++;
+                if(*auth)
+                  if((conn->challenge_header = strdup(auth)) == NULL)
                     return CURLE_OUT_OF_MEMORY;
               }
             }
@@ -820,7 +813,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
       else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(checkprefix("Digest", start)) {
+        if(checkprefix("Digest", auth)) {
           if((authp->avail & CURLAUTH_DIGEST) != 0) {
             infof(data, "Ignoring duplicate digest auth header.\n");
           }
@@ -833,7 +826,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
              * authentication isn't activated yet, as we need to store the
              * incoming data from this header in case we are gonna use
              * Digest. */
-            dig = Curl_input_digest(conn, (httpcode == 407)?TRUE:FALSE, start);
+            dig = Curl_input_digest(conn, (httpcode == 407)?TRUE:FALSE, auth);
 
             if(CURLDIGEST_FINE != dig) {
               infof(data, "Authentication problem. Ignoring this.\n");
@@ -843,7 +836,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
         }
         else
 #endif
-          if(checkprefix("Basic", start)) {
+          if(checkprefix("Basic", auth)) {
             *availp |= CURLAUTH_BASIC;
             authp->avail |= CURLAUTH_BASIC;
             if(authp->picked == CURLAUTH_BASIC) {
@@ -857,12 +850,12 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           }
 
     /* there may be multiple methods on one line, so keep reading */
-    while(*start && *start != ',') /* read up to the next comma */
-      start++;
-    if(*start == ',') /* if we're on a comma, skip it */
-      start++;
-    while(*start && ISSPACE(*start))
-      start++;
+    while(*auth && *auth != ',') /* read up to the next comma */
+      auth++;
+    if(*auth == ',') /* if we're on a comma, skip it */
+      auth++;
+    while(*auth && ISSPACE(*auth))
+      auth++;
   }
   return CURLE_OK;
 }
@@ -3455,7 +3448,14 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              (401 == k->httpcode)) ||
             (checkprefix("Proxy-authenticate:", k->p) &&
              (407 == k->httpcode))) {
-      result = Curl_http_input_auth(conn, k->httpcode, k->p);
+      char *auth = copy_header_value(k->p);
+      if(!auth)
+        return CURLE_OUT_OF_MEMORY;
+
+      result = Curl_http_input_auth(conn, k->httpcode, auth);
+
+      Curl_safefree(auth);
+
       if(result)
         return result;
     }
