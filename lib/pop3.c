@@ -371,7 +371,7 @@ static void pop3_get_message(char *buffer, char** outptr)
         message[len] != '\t')
       break;
 
-  /* Terminate the challenge */
+  /* Terminate the message */
   if(++len) {
     message[len] = '\0';
   }
