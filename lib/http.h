@@ -35,11 +35,12 @@ extern const struct Curl_handler Curl_handler_http;
 extern const struct Curl_handler Curl_handler_https;
 #endif
 
+/* Header specific function */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
-
 char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader);
+char *copy_header_value(const char *h);
 
 /* ------------------------------------------------------------------------- */
 /*

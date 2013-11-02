@@ -187,7 +187,7 @@ char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader)
  * case of allocation failure. Returns an empty string if the header value
  * consists entirely of whitespace.
  */
-static char *copy_header_value(const char *h)
+char *copy_header_value(const char *h)
 {
   const char *start;
   const char *end;

@@ -452,8 +452,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                       (401 == k->httpcode)) ||
                      (checkprefix("Proxy-authenticate:", line_start) &&
                       (407 == k->httpcode))) {
-                    result = Curl_http_input_auth(conn, k->httpcode,
-                                                  line_start);
+
+                    char *auth = copy_header_value(line_start);
+                    if(!auth)
+                      return CURLE_OUT_OF_MEMORY;
+
+                    result = Curl_http_input_auth(conn, k->httpcode, auth);
+
+                    Curl_safefree(auth);
+
                     if(result)
                       return result;
                   }
