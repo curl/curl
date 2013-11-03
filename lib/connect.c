@@ -742,16 +742,14 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     /* check socket for connect */
     result = Curl_socket_ready(CURL_SOCKET_BAD, conn->tempsock[i], 0);
 
-    switch(result) {
-    case 0: /* no connection yet */
+    if(result == 0) { /* no connection yet */
       if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
         error = ETIMEDOUT;
       }
-      break;
-
-    case CURL_CSELECT_OUT:
+    }
+    else if(result == CURL_CSELECT_OUT) {
       if(verifyconnect(conn->tempsock[i], &error)) {
         /* we are connected with TCP, awesome! */
         int other = i ^ 1;
@@ -786,16 +784,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       }
       else
         infof(data, "Connection failed\n");
-      break;
-
-    case CURL_CSELECT_ERR|CURL_CSELECT_OUT:
-      (void)verifyconnect(conn->tempsock[i], &error);
-      break;
-
-    default:
-      infof(data, "Whut?\n");
-      return CURLE_OK;
     }
+    else if((result & CURL_CSELECT_ERR) == CURL_CSELECT_ERR)
+      (void)verifyconnect(conn->tempsock[i], &error);
 
     /*
      * The connection failed here, we should attempt to connect to the "next
@@ -821,6 +812,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     failf(data, "Failed to connect to %s port %ld: %s",
           conn->host.name, conn->port, Curl_strerror(conn, error));
   }
+
   return code;
 }
 
