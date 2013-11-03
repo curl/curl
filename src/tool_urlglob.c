@@ -215,7 +215,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
       }
     }
     else
-      pattern+=3;
+      pattern += 4;
 
     *posp += (pattern - *patternp);
 
