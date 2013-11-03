@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+STORE
+CLOSE
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1>
+* 123 FETCH (FLAGS (\Seen \Deleted))
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP delete message (CUSTOMREQUEST)
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT/815 -X 'STORE 123 +Flags \Deleted' -Q -CLOSE -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT 815
+A004 STORE 123 +Flags \Deleted
+A005 CLOSE
+A006 LOGOUT
+</protocol>
+</verify>
+</testcase>

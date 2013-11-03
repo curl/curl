@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+STORE
+EXPUNGE
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1>
+* 123 FETCH (FLAGS (\Seen \Deleted))
+</data1>
+<data2>
+* 123 EXPUNGE
+</data2>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP delete message with confirmation (CUSTOMREQUEST)
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT/816 -X 'STORE 123 +Flags \Deleted' -Q -EXPUNGE -u user:secret 
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT 816
+A004 STORE 123 +Flags \Deleted
+A005 EXPUNGE
+A006 LOGOUT
+</protocol>
+</verify>
+</testcase>
