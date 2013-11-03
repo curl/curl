@@ -252,7 +252,7 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
   size_t inlength = end - from;
   int size = 1;
   size_t outlength;
-  int chsize;
+  int charsize;
   unsigned int wc;
   char * buf;
 
@@ -305,7 +305,7 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
       default: /* case 1: */
         wc = (wc << 8) | *(const unsigned char *) from++;
       }
-      chsize = 1;
+      charsize = 1;
       if(wc >= 0x00000080) {
         if(wc >= 0x00000800) {
           if(wc >= 0x00010000) {
@@ -315,18 +315,18 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
             }
             buf[outlength + 3] = (char) (0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
-            chsize++;
+            charsize++;
           }
           buf[outlength + 2] = (char) (0x80 | (wc & 0x3F));
           wc = (wc >> 6) | 0x00000800;
-          chsize++;
+          charsize++;
         }
         buf[outlength + 1] = (char) (0x80 | (wc & 0x3F));
         wc = (wc >> 6) | 0x000000C0;
-        chsize++;
+        charsize++;
       }
       buf[outlength] = (char) wc;
-      outlength += chsize;
+      outlength += charsize;
     }
   }
   buf[outlength] = '\0';
