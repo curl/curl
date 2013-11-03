@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,6 +63,7 @@
 #include "curl_memory.h"
 #include "rawstr.h"
 #include "warnless.h"
+#include "x509asn1.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
