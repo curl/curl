@@ -120,7 +120,7 @@ static const char *const helptext[] = {
   "     --libcurl FILE  Dump libcurl equivalent code of this command line",
 #endif
   "     --limit-rate RATE  Limit transfer speed to this rate",
-  " -l, --list-only     List only names of an FTP directory (F)",
+  " -l, --list-only     List only mode (F/POP3)",
   "     --local-port RANGE  Force use of these local port numbers",
   " -L, --location      Follow redirects (H)",
   "     --location-trusted like --location and send auth to other hosts (H)",
