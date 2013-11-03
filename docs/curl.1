@@ -806,14 +806,23 @@ see if your curl supports it.
 If this option is used several times, the last one will be used.
 .IP "-l, --list-only"
 (FTP)
-When listing an FTP directory, this switch forces a name-only view.
-Especially useful if you want to machine-parse the contents of an FTP
-directory since the normal directory view doesn't use a standard look
-or format.
+When listing an FTP directory, this switch forces a name-only view. This is
+especially useful if the user wants to machine-parse the contents of an FTP
+directory since the normal directory view doesn't use a standard look or
+format. When used like this, the option causes a NLST command to be sent to
+the server instead of LIST.
 
-This option causes an FTP NLST command to be sent.  Some FTP servers
-list only files in their response to NLST; they do not include
-subdirectories and symbolic links.
+Note: Some FTP servers list only files in their response to NLST; they do not
+include sub-directories and symbolic links.
+
+(POP3)
+When retrieving a specific email from POP3, this switch forces a LIST command
+to be performed instead of RETR. This is particularly useful if the user wants
+to see if a specific message id exists on the server and what size it is.
+
+Note: When combined with \fI-X, --request <command>\fP, this option can be used
+to send an UIDL command instead, so the user may use the email's unique
+identifier rather than it's message id to make the request.
 
 .IP "-L, --location"
 (HTTP/HTTPS) If the server reports that the requested page has moved to a
@@ -1055,9 +1064,10 @@ working directory before you invoke curl with the \fB-O, --remote-name\fP flag!
 
 You may use this option as many times as the number of URLs you have.
 .IP "--oauth2-bearer"
-(IMAP/POP3/SMTP) Specify the Bearer Token for OAUTH 2.0 server authentication.
-The Bearer Token is used in conjunction with the user name which can be
-specified as part of the \fI--url\fP or \fI-u, --user\fP options.
+(IMAP, POP3, SMTP)
+Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
+is used in conjunction with the user name which can be specified as part of the
+\fI--url\fP or \fI-u, --user\fP options.
 
 The Bearer Token and user name are formatted according to RFC 6750.
 
