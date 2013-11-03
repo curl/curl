@@ -35,12 +35,12 @@ extern const struct Curl_handler Curl_handler_http;
 extern const struct Curl_handler Curl_handler_https;
 #endif
 
-/* Header specific function */
+/* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader);
-char *copy_header_value(const char *h);
+char *Curl_copy_header_value(const char *header);
 
 /* ------------------------------------------------------------------------- */
 /*
@@ -82,8 +82,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
 
 /* These functions are in http.c */
 void Curl_http_auth_stage(struct SessionHandle *data, int stage);
-CURLcode Curl_http_input_auth(struct connectdata *conn,
-                              int httpcode, const char *header);
+CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
+                              const char *auth);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
 CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 

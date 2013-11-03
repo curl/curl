@@ -187,25 +187,25 @@ char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader)
  * case of allocation failure. Returns an empty string if the header value
  * consists entirely of whitespace.
  */
-char *copy_header_value(const char *h)
+char *Curl_copy_header_value(const char *header)
 {
   const char *start;
   const char *end;
   char *value;
   size_t len;
 
-  DEBUGASSERT(h);
+  DEBUGASSERT(header);
 
   /* Find the end of the header name */
-  while(*h && (*h != ':'))
-    ++h;
+  while(*header && (*header != ':'))
+    ++header;
 
-  if(*h)
+  if(*header)
     /* Skip over colon */
-    ++h;
+    ++header;
 
   /* Find the first non-space letter */
-  start = h;
+  start = header;
   while(*start && ISSPACE(*start))
     start++;
 
@@ -224,7 +224,7 @@ char *copy_header_value(const char *h)
     end--;
 
   /* get length of the type */
-  len = end-start+1;
+  len = end - start + 1;
 
   value = malloc(len + 1);
   if(!value)
@@ -699,8 +699,7 @@ Curl_http_output_auth(struct connectdata *conn,
  * proxy CONNECT loop.
  */
 
-CURLcode Curl_http_input_auth(struct connectdata *conn,
-                              int httpcode,
+CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                               const char *auth) /* the first non-space */
 {
   /*
@@ -711,7 +710,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   unsigned long *availp;
   struct auth *authp;
 
-  if(httpcode == 407) {
+  if(proxy) {
     availp = &data->info.proxyauthavail;
     authp = &data->state.authproxy;
   }
@@ -753,7 +752,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           data->state.authproblem = TRUE;
         }
         else {
-          neg = Curl_input_negotiate(conn, (bool)(httpcode == 407), auth);
+          neg = Curl_input_negotiate(conn, proxy, auth);
           if(neg == 0) {
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->change.url);
@@ -779,7 +778,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
            authp->picked == CURLAUTH_NTLM_WB) {
           /* NTLM authentication is picked and activated */
           CURLcode ntlm =
-            Curl_input_ntlm(conn, (httpcode == 407)?TRUE:FALSE, auth);
+            Curl_input_ntlm(conn, proxy, auth);
           if(CURLE_OK == ntlm) {
             data->state.authproblem = FALSE;
 #ifdef NTLM_WB_ENABLED
@@ -826,7 +825,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
              * authentication isn't activated yet, as we need to store the
              * incoming data from this header in case we are gonna use
              * Digest. */
-            dig = Curl_input_digest(conn, (httpcode == 407)?TRUE:FALSE, auth);
+            dig = Curl_input_digest(conn, proxy, auth);
 
             if(CURLDIGEST_FINE != dig) {
               infof(data, "Authentication problem. Ignoring this.\n");
@@ -1824,7 +1823,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the host name
        is the same as the first one! */
-    char *cookiehost = copy_header_value(ptr);
+    char *cookiehost = Curl_copy_header_value(ptr);
     if(!cookiehost)
       return CURLE_OUT_OF_MEMORY;
     if(!*cookiehost)
@@ -3240,7 +3239,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
     }
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
-      char *contenttype = copy_header_value(k->p);
+      char *contenttype = Curl_copy_header_value(k->p);
       if(!contenttype)
         return CURLE_OUT_OF_MEMORY;
       if(!*contenttype)
@@ -3252,7 +3251,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       }
     }
     else if(checkprefix("Server:", k->p)) {
-      char *server_name = copy_header_value(k->p);
+      char *server_name = Curl_copy_header_value(k->p);
 
       /* Turn off pipelining if the server version is blacklisted */
       if(conn->bundle && conn->bundle->server_supports_pipelining) {
@@ -3448,11 +3447,13 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              (401 == k->httpcode)) ||
             (checkprefix("Proxy-authenticate:", k->p) &&
              (407 == k->httpcode))) {
-      char *auth = copy_header_value(k->p);
+
+      bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
+      char *auth = Curl_copy_header_value(k->p);
       if(!auth)
         return CURLE_OUT_OF_MEMORY;
 
-      result = Curl_http_input_auth(conn, k->httpcode, auth);
+      result = Curl_http_input_auth(conn, proxy, auth);
 
       Curl_safefree(auth);
 
@@ -3463,7 +3464,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             checkprefix("Location:", k->p) &&
             !data->req.location) {
       /* this is the URL that the server advises us to use instead */
-      char *location = copy_header_value(k->p);
+      char *location = Curl_copy_header_value(k->p);
       if(!location)
         return CURLE_OUT_OF_MEMORY;
       if(!*location)

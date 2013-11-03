@@ -145,8 +145,6 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   const char* protocol;
   CURLcode error;
 
-  while(*header && ISSPACE(*header))
-    header++;
   if(checkprefix("GSS-Negotiate", header)) {
     protocol = "GSS-Negotiate";
     gss = TRUE;
