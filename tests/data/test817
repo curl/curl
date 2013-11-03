@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+COPY
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP COPY message to mailbox (CUSTOMREQUEST)
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'COPY 123 817'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 COPY 123 817
+A004 LOGOUT
+</protocol>
+</verify>
+</testcase>
