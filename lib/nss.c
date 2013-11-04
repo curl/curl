@@ -696,10 +696,8 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
       }
       Curl_ssl_init_certinfo(conn->data, i);
       for(i = 0; cert; cert = cert2) {
-        Curl_extract_certinfo(conn, i++,
-                              (unsigned char *) cert->derCert.data,
-                              (unsigned char *) cert->derCert.data +
-                                                cert->derCert.len);
+        Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
+                              (char *)cert->derCert.data + cert->derCert.len);
         if(cert->isRoot) {
           CERT_DestroyCertificate(cert);
           break;
