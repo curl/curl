@@ -356,7 +356,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     conn->response_header = NULL;
     break;
   case NTLMSTATE_TYPE2:
-    input = aprintf("TT %s", conn->challenge_header);
+    input = aprintf("TT %s\n", conn->challenge_header);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
     res = ntlm_wb_response(conn, input, ntlm->state);
