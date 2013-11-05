@@ -5562,11 +5562,11 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
     result = Curl_connecthost(conn, conn->dns_entry);
-    if(CURLE_OK != result)
+    if(result)
       return result;
   }
   else {
-    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+    Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
     Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
     conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
     *protocol_done = TRUE;
