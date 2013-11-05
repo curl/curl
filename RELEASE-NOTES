@@ -12,6 +12,7 @@ This release includes the following changes:
  o SSL: protocol version can be specified more precisely [1]
  o imap/pop3/smtp: Added graceful cancellation of SASL authentication
  o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
+ o base64: Added validation of base64 input strings when decoding [8]
 
 This release includes the following bugfixes:
 
@@ -31,6 +32,10 @@ This release includes the following bugfixes:
  o CURLOPT_RESOLVE: mention they don't time-out [7]
  o docs/examples/httpput.c: fix build for MSVC
  o FTP: make the data connection work when going through proxy
+ o NSS: support for CERTINFO feature
+ o curl_multi_wait: accept 0 from multi_timeout() as valid timeout
+ o glob_range: pass the closing bracket for a-z ranges
+ o tool_help: Updated --list-only description to include POP3
 
 This release includes the following known bugs:
 
@@ -43,7 +48,7 @@ advice from friends like these:
  Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
  Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
  Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
- Paul Marks, Rémy Léone
+ Paul Marks, Rémy Léone, Marcin Gryszkalis
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -56,3 +61,4 @@ References to bug reports and discussions on issues:
  [5] = http://sourceforge.net/p/curl/bugs/1291
  [6] = http://sourceforge.net/p/curl/bugs/1292
  [7] = http://curl.haxx.se/mail/lib-2013-10/0062.html
+ [8] = http://curl.haxx.se/mail/lib-2013-10/0242.html
