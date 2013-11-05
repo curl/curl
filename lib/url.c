@@ -5559,25 +5559,19 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
      is later set again for the progress meter purpose */
   conn->now = Curl_tvnow();
 
-  for(;;) {
-    /* loop for CURL_SERVER_CLOSED_CONNECTION */
-
-    if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
-      conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
-      result = Curl_connecthost(conn, conn->dns_entry);
-      if(CURLE_OK != result)
-        return result;
-    }
-    else {
-      Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
-      Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
-      conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
-      *protocol_done = TRUE;
-      Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
-      Curl_verboseconnect(conn);
-    }
-    /* Stop the loop now */
-    break;
+  if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
+    conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
+    result = Curl_connecthost(conn, conn->dns_entry);
+    if(CURLE_OK != result)
+      return result;
+  }
+  else {
+    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+    Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
+    conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
+    *protocol_done = TRUE;
+    Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
+    Curl_verboseconnect(conn);
   }
 
   conn->now = Curl_tvnow(); /* time this *after* the connect is done, we
