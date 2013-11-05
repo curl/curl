@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+85. Wrong STARTTRANSFER timer accounting for POST requests
+  Timer works fine with GET requests, but while using POST the time for
+  CURLINFO_STARTTRANSFER_TIME is wrong. While using POST
+  CURLINFO_STARTTRANSFER_TIME minus CURLINFO_PRETRANSFER_TIME is near to zero
+  every time.
+  http://curl.haxx.se/bug/view.cgi?id=1213
+
 84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
   backends, so relying on this information in a generic app is flaky.
 
