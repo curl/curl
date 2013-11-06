@@ -3114,9 +3114,10 @@ while(1) {
         else {
             $text = $displaytext{$FTPCMD};
         }
+
         my $check;
         if($text && ($text ne "")) {
-            if($cmdid && ($cmdid ne "")) {
+            if(($cmdid) && ($cmdid ne "") && ($fake) && ($fake ne "")) {
                 sendcontrol "$cmdid$text\r\n";
             }
             else {
