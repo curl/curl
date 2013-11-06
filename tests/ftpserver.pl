@@ -3117,7 +3117,7 @@ while(1) {
 
         my $check;
         if($text && ($text ne "")) {
-            if(($cmdid) && ($cmdid ne "") && ($fake) && ($fake ne "")) {
+            if(($cmdid) && ($cmdid ne "") && ((!$fake) || ($fake eq ""))) {
                 sendcontrol "$cmdid$text\r\n";
             }
             else {
