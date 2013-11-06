@@ -35,7 +35,10 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #define CURLRC DOT_CHAR "curlrc"
-#define ISSEP(x) (((x) == '=') || ((x) == ':'))
+
+/* only acknowledge colon or equals as separators if the option was not
+   specified with an initial dash! */
+#define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
 
 static const char *unslashquote(const char *line, char *param);
 static char *my_get_line(FILE *fp);
@@ -123,6 +126,7 @@ int parseconfig(const char *filename,
     char *param;
     int lineno = 0;
     bool alloced_param;
+    bool dashed_option;
 
     while(NULL != (aline = my_get_line(file))) {
       lineno++;
@@ -146,7 +150,11 @@ int parseconfig(const char *filename,
 
       /* the option keywords starts here */
       option = line;
-      while(*line && !ISSPACE(*line) && !ISSEP(*line))
+
+      /* the option starts with a dash? */
+      dashed_option = option[0]=='-'?TRUE:FALSE;
+
+      while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
         line++;
       /* ... and has ended here */
 
@@ -158,7 +166,7 @@ int parseconfig(const char *filename,
 #endif
 
       /* pass spaces and separator(s) */
-      while(*line && (ISSPACE(*line) || ISSEP(*line)))
+      while(*line && (ISSPACE(*line) || ISSEP(*line, dashed_option)))
         line++;
 
       /* the parameter starts here (unless quoted) */

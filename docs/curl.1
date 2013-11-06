@@ -722,16 +722,21 @@ See this online resource for further details:
 .IP "-K, --config <config file>"
 Specify which config file to read curl arguments from. The config file is a
 text file in which command line arguments can be written which then will be
-used as if they were written on the actual command line. Options and their
-parameters must be specified on the same config file line, separated by
-whitespace, colon, the equals sign or any combination thereof (however,
-the preferred separator is the equals sign). If the parameter is to contain
-whitespace, the parameter must be enclosed within quotes. Within double
-quotes, the following escape sequences are available: \\\\, \\", \\t, \\n,
-\\r and \\v. A backslash preceding any other letter is ignored. If the
-first column of a config line is a '#' character, the rest of the line will be
-treated as a comment. Only write one option per physical line in the config
-file.
+used as if they were written on the actual command line.
+
+Options and their parameters must be specified on the same config file line,
+separated by whitespace, colon, or the equals sign. Long option names can
+optionally be given in the config file without the initial double dashes and
+if so, the colon or equals characters can be used as separators. If the option
+is specified with one or two dashes, there can be no colon or equals character
+between the option and its parameter.
+
+If the parameter is to contain whitespace, the parameter must be enclosed
+within quotes. Within double quotes, the following escape sequences are
+available: \\\\, \\", \\t, \\n, \\r and \\v. A backslash preceding any other
+letter is ignored. If the first column of a config line is a '#' character,
+the rest of the line will be treated as a comment. Only write one option per
+physical line in the config file.
 
 Specify the filename to -K, --config as '-' to make curl read the file from
 stdin.
@@ -741,9 +746,6 @@ it using the \fI--url\fP option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
 url = "http://curl.haxx.se/docs/"
-
-Long option names can optionally be given in the config file without the
-initial double dashes.
 
 When curl is invoked, it always (unless \fI-q\fP is used) checks for a default
 config file and uses it if found. The default config file is checked for in
