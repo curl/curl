@@ -3108,34 +3108,33 @@ while(1) {
             }
         }
 
-        my $text;
-        $text = $customreply{$FTPCMD};
-        my $fake = $text;
+        my $check = 1; # no response yet
 
+        # See if there is a custom reply for our command
+        my $text = $customreply{$FTPCMD};
         if($text && ($text ne "")) {
             if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
                 # used enough number of times, now blank the customreply
                 $customreply{$FTPCMD}="";
             }
+
+            sendcontrol "$text\r\n";
+            $check = 0;
         }
         else {
+            # See if there is any display text for our command
             $text = $displaytext{$FTPCMD};
-        }
+            if($text && ($text ne "")) {
+                if($proto eq 'imap') {
+                    sendcontrol "$cmdid $text\r\n";
+                }
+                else {
+                    sendcontrol "$text\r\n";
+                }
 
-        my $check;
-        if($text && ($text ne "")) {
-            if(($cmdid) && ($cmdid ne "") && ($fake) && ($fake ne "")) {
-                sendcontrol "$cmdid$text\r\n";
+                $check = 0;
             }
-            else {
-                sendcontrol "$text\r\n";
-            }
-        }
-        else {
-            $check=1; # no response yet
-        }
 
-        unless($fake && ($fake ne "")) {
             # only perform this if we're not faking a reply
             my $func = $commandfunc{$FTPCMD};
             if($func) {
