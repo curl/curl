@@ -1866,7 +1866,6 @@ static CURLcode proxy_magic(struct connectdata *conn,
     if(conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE) {
       /* the CONNECT procedure is not complete, the tunnel is not yet up */
       state(conn, FTP_STOP); /* this phase is completed */
-      conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
       return result;
     }
     else

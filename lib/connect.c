@@ -758,10 +758,13 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         /* use this socket from now on */
         conn->sock[sockindex] = conn->tempsock[i];
         conn->ip_addr = conn->tempaddr[i];
+        conn->tempsock[i] = CURL_SOCKET_BAD;
 
         /* close the other socket, if open */
-        if(conn->tempsock[other] != CURL_SOCKET_BAD)
+        if(conn->tempsock[other] != CURL_SOCKET_BAD) {
           Curl_closesocket(conn, conn->tempsock[other]);
+          conn->tempsock[other] = CURL_SOCKET_BAD;
+        }
 
         /* see if we need to do any proxy magic first once we connected */
         code = Curl_connected_proxy(conn, sockindex);

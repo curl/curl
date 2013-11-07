@@ -2503,6 +2503,10 @@ static void conn_free(struct connectdata *conn)
     Curl_closesocket(conn, conn->sock[SECONDARYSOCKET]);
   if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     Curl_closesocket(conn, conn->sock[FIRSTSOCKET]);
+  if(CURL_SOCKET_BAD != conn->tempsock[0])
+    Curl_closesocket(conn, conn->tempsock[0]);
+  if(CURL_SOCKET_BAD != conn->tempsock[1])
+    Curl_closesocket(conn, conn->tempsock[1]);
 
 #if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
@@ -3522,6 +3526,8 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
+  conn->tempsock[0] = CURL_SOCKET_BAD; /* no file descriptor */
+  conn->tempsock[1] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
 
