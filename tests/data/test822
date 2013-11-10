@@ -1,0 +1,68 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+IMAP AUTH NTLM
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH NTLM
+REPLY AUTHENTICATE +
+REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= + TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+REPLY TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoKBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q= A002 OK AUTHENTICATE completed
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<features>
+NTLM
+</features>
+ <name>
+IMAP NTLM authentication
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/822/;UID=1' -u testuser:testpass
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE NTLM
+TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoKBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
+A003 SELECT 822
+A004 FETCH 1 BODY[]
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>
