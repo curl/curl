@@ -3062,7 +3062,7 @@ while(1) {
                 $FTPARG="";
             }
             else {
-                sendcontrol "$1 '$full': command not understood.\r\n";
+                sendcontrol "$full BAD Command\r\n";
                 last;
             }
         }
@@ -3073,7 +3073,7 @@ while(1) {
         elsif($proto eq "pop3") {
             # POP3 long "commands" are base64 authentication data
             unless($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
-                sendcontrol "-ERR '$full': command not understood.\r\n";
+                sendcontrol "-ERR Unrecognized command\r\n";
                 last;
             }
 
@@ -3086,7 +3086,7 @@ while(1) {
             $FTPARG="";
         }
         else {
-            sendcontrol "500 '$full': command not understood.\r\n";
+            sendcontrol "500 Unrecognized command\r\n";
             last;
         }
 
