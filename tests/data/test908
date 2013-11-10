@@ -25,7 +25,7 @@ REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB 235 Authenticated
 smtp
 </server>
  <name>
-SMTP OAUTH2 authentication
+SMTP OAuth 2.0 authentication
  </name>
 <stdin>
 mail body
