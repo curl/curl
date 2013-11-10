@@ -3049,15 +3049,22 @@ while(1) {
         my $FTPARG;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            unless(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
-                   ($full =~ /^([^ ]+) ([^ ]+)/)) {
+            if(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
+               ($full =~ /^([^ ]+) ([^ ]+)/)) {
+                $cmdid=$1; # set the global variable
+                $FTPCMD=$2;
+                $FTPARG=$3;
+            }
+            # IMAP long "commands" are base64 authentication data
+            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+                # Command id has already been set
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
                 sendcontrol "$1 '$full': command not understood.\r\n";
                 last;
             }
-
-            $cmdid=$1; # set the global variable
-            $FTPCMD=$2;
-            $FTPARG=$3;
         }
         elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
