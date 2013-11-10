@@ -36,6 +36,9 @@ This release includes the following bugfixes:
  o curl_multi_wait: accept 0 from multi_timeout() as valid timeout
  o glob_range: pass the closing bracket for a-z ranges
  o tool_help: Updated --list-only description to include POP3
+ o Curl_ssl_push_certinfo_len: don't %.*s non-zero-terminated string [9]
+ o cmake: fix Windows build with IPv6 support [10]
+ o ares: Fixed compilation under Visual Studio 2012 [11]
 
 This release includes the following known bugs:
 
@@ -48,7 +51,8 @@ advice from friends like these:
  Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
  Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
  Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
- Paul Marks, Rémy Léone, Marcin Gryszkalis
+ Paul Marks, Rémy Léone, Marcin Gryszkalis, Felix Yan, Z98, Andreas Rieke,
+ Kim Vandry
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -62,3 +66,6 @@ References to bug reports and discussions on issues:
  [6] = http://sourceforge.net/p/curl/bugs/1292
  [7] = http://curl.haxx.se/mail/lib-2013-10/0062.html
  [8] = http://curl.haxx.se/mail/lib-2013-10/0242.html
+ [9] = http://curl.haxx.se/bug/view.cgi?id=1295
+ [10] = http://sourceforge.net/p/curl/bugs/1064
+ [11] = http://curl.haxx.se/mail/lib-2013-11/0057.html
