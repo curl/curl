@@ -2532,9 +2532,10 @@ Curl considers the server the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the host name in the
 URL to which you told Curl to connect.
 
-When the value is 1, libcurl will return a failure. It was previously (in
-7.28.0 and earlier) a debug option of some sorts, but it is no longer
-supported due to frequently leading to programmer mistakes.
+When the value is 1, \fIcurl_easy_setopt\fP will return an error and the option
+value will not be changed.  It was previously (in 7.28.0 and earlier) a debug
+option of some sorts, but it is no longer supported due to frequently leading
+to programmer mistakes.
 
 When the value is 0, the connection succeeds regardless of the names in the
 certificate.
@@ -2544,9 +2545,8 @@ The default value for this option is 2.
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
 \fICURLOPT_SSL_VERIFYPEER\fP.  If libcurl is built against NSS and
-\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_SSL_VERIFYHOST\fP
-is ignored.
-
+\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_SSL_VERIFYHOST\fP is also set
+to zero and cannot be overridden.
 .IP CURLOPT_CERTINFO
 Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
 this enabled, libcurl (if built with OpenSSL, NSS, GSKit or QsoSSL) will
