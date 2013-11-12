@@ -14,8 +14,8 @@ RFC5034
 <reply>
 <servercmd>
 AUTH CRAM-MD5
-REPLY AUTH + PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+
-REPLY dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw +OK Login successful
+REPLY AUTH + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
+REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== +OK Login successful
 </servercmd>
 <data>
 From: me@somewhere
@@ -41,7 +41,7 @@ crypto
 POP3 CRAM-MD5 authentication
  </name>
  <command>
-pop3://%HOSTIP:%POP3PORT/867 -u tim:tanstaaftanstaaf
+pop3://%HOSTIP:%POP3PORT/867 -u user:secret
 </command>
 </client>
 
@@ -51,7 +51,7 @@ pop3://%HOSTIP:%POP3PORT/867 -u tim:tanstaaftanstaaf
 <protocol>
 CAPA
 AUTH CRAM-MD5
-dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
+dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
 RETR 867
 QUIT
 </protocol>

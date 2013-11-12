@@ -13,8 +13,8 @@ RFC4954
 <reply>
 <servercmd>
 AUTH CRAM-MD5
-REPLY AUTH 334 PDE4OTYuNjk3MTcwOTUyQHBvc3RvZmZpY2UucmVzdG9uLm1jaS5uZXQ+
-REPLY dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw 235 Authenticated
+REPLY AUTH 334 PDE5NzIuOTg3NjU0MzIxQGN1cmw+
+REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== 235 Authenticated
 </servercmd>
 </reply>
 
@@ -34,7 +34,7 @@ SMTP CRAM-MD5 authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/905 --mail-rcpt recipient@example.com --mail-from sender@example.com -u tim:tanstaaftanstaaf -T -
+smtp://%HOSTIP:%SMTPPORT/905 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>
 
@@ -44,7 +44,7 @@ smtp://%HOSTIP:%SMTPPORT/905 --mail-rcpt recipient@example.com --mail-from sende
 <protocol>
 EHLO 905
 AUTH CRAM-MD5
-dGltIGI5MTNhNjAyYzdlZGE3YTQ5NWI0ZTZlNzMzNGQzODkw
+dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
