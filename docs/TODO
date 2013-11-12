@@ -38,6 +38,7 @@
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
  5.4 HTTP2/SPDY
+ 5.5 auth= in URLs
 
  6. TELNET
  6.1 ditch stdin
@@ -284,6 +285,17 @@
  be a better option, either used directly or wrapped with a more spindly-like
  API.
 
+5.5 auth= in URLs
+
+ Add the ability to specify the preferred authentication mechanism to use by
+ using ;auth=<mech> in the login part of the URL.
+
+ For example:
+
+ http://test:pass;auth=NTLM@example.com would be equivalent to specifing --user
+ test:pass;auth=NTLM or --user test:pass --ntlm from the command line. 
+
+ Additionally this should be implemented for proxy base URLs as well.
 
 6. TELNET
 
