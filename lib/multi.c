@@ -639,7 +639,7 @@ static int waitconnect_getsock(struct connectdata *conn,
      socket to become readable to be able to get the response headers */
   if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT) {
     sock[0] = conn->sock[FIRSTSOCKET];
-    return GETSOCK_READSOCK(0);
+    rc = GETSOCK_READSOCK(0);
   }
 
   return rc;
