@@ -827,10 +827,10 @@ typedef enum {
   /* Name of proxy to use. */
   CINIT(PROXY, OBJECTPOINT, 4),
 
-  /* "name:password" to use when fetching. */
+  /* "user:password;options" to use when fetching. */
   CINIT(USERPWD, OBJECTPOINT, 5),
 
-  /* "name:password" to use with proxy. */
+  /* "user:password" to use with proxy. */
   CINIT(PROXYUSERPWD, OBJECTPOINT, 6),
 
   /* Range to get, specified as an ASCII string. */
@@ -1568,6 +1568,9 @@ typedef enum {
   /* Set the local IPv4 address to use for outgoing DNS requests.
    * Only supported by the c-ares DNS backend */
   CINIT(DNS_LOCAL_IP6, OBJECTPOINT, 223),
+
+  /* Set authentication options directly */
+  CINIT(OPTIONS, OBJECTPOINT, 224),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

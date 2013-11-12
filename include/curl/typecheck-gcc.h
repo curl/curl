@@ -269,6 +269,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_DNS_INTERFACE ||                                       \
    (option) == CURLOPT_DNS_LOCAL_IP4 ||                                       \
    (option) == CURLOPT_DNS_LOCAL_IP6 ||                                       \
+   (option) == CURLOPT_OPTIONS ||                                             \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */

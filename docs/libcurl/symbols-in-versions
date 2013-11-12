@@ -417,6 +417,7 @@ CURLOPT_NOSIGNAL                7.10
 CURLOPT_NOTHING                 7.1.1         7.11.1      7.11.0
 CURLOPT_OPENSOCKETDATA          7.17.1
 CURLOPT_OPENSOCKETFUNCTION      7.17.1
+CURLOPT_OPTIONS                 7.34.0
 CURLOPT_PASSWDDATA              7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWDFUNCTION          7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWORD                7.19.1
