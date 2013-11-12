@@ -210,6 +210,7 @@ my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
+my $has_sspi;    # set if libcurl is built with SSPI support
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 my $has_metalink;# set if curl is built with Metalink support
@@ -220,7 +221,7 @@ my $has_nss;      # built with NSS
 my $has_yassl;    # built with yassl
 my $has_polarssl; # built with polarssl
 my $has_axtls;    # built with axTLS
-my $has_winssl;   # built with WinSSL (Schannel/SSPI)
+my $has_winssl;   # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;# build with DarwinSSL (Secure Transport)
 
 my $has_shared = "unknown";  # built shared
@@ -2406,6 +2407,10 @@ sub checksystem {
                 # NTLM delegation to winbind daemon ntlm_auth helper enabled
                 $has_ntlm_wb=1;
             }
+            if($feat =~ /SSPI/i) {
+                # SSPI enabled
+                $has_sspi=1;
+            }
             if($feat =~ /CharConv/i) {
                 # CharConv enabled
                 $has_charconv=1;
@@ -2832,6 +2837,11 @@ sub singletest {
         }
         elsif($f eq "NTLM_WB") {
             if($has_ntlm_wb) {
+                next;
+            }
+        }
+        elsif($f eq "SSPI") {
+            if($has_sspi) {
                 next;
             }
         }
