@@ -1027,6 +1027,8 @@ singleipconnect(struct connectdata *conn,
   conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
 #endif
 
+  *sockp = sockfd;
+
   if(-1 == rc) {
     switch (error) {
     case EINPROGRESS:
@@ -1040,7 +1042,6 @@ singleipconnect(struct connectdata *conn,
     case EAGAIN:
 #endif
 #endif
-      *sockp = sockfd;
       return CURLE_OK;
 
     default:
@@ -1053,8 +1054,6 @@ singleipconnect(struct connectdata *conn,
       return CURLE_COULDNT_CONNECT;
     }
   }
-  else
-    *sockp = sockfd;
 
   return CURLE_OK;
 }
