@@ -13,6 +13,7 @@ This release includes the following changes:
  o imap/pop3/smtp: Added graceful cancellation of SASL authentication
  o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
  o base64: Added validation of base64 input strings when decoding [8]
+ o curl_easy_setopt: Added the ability to set the login options separately
 
 This release includes the following bugfixes:
 
@@ -39,6 +40,10 @@ This release includes the following bugfixes:
  o Curl_ssl_push_certinfo_len: don't %.*s non-zero-terminated string [9]
  o cmake: fix Windows build with IPv6 support [10]
  o ares: Fixed compilation under Visual Studio 2012 [11]
+ o curl_easy_setopt.3: clarify CURLOPT_SSL_VERIFYHOST documentation [12]
+ o curl.1: mention that -O does no URL decoding [13]
+ o darwinssl: PKCS#12 import feature now requires Lion or later [14]
+ o darwinssl: check for SSLSetSessionOption() presence when toggling BEAST
 
 This release includes the following known bugs:
 
@@ -52,7 +57,7 @@ advice from friends like these:
  Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
  Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
  Paul Marks, Rémy Léone, Marcin Gryszkalis, Felix Yan, Z98, Andreas Rieke,
- Kim Vandry
+ Kim Vandry, Tomas Hoger, Michael Osipov, myriachan
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -69,3 +74,6 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/bug/view.cgi?id=1295
  [10] = http://sourceforge.net/p/curl/bugs/1064
  [11] = http://curl.haxx.se/mail/lib-2013-11/0057.html
+ [12] = https://github.com/bagder/curl/pull/83
+ [13] = http://sourceforge.net/p/curl/bugs/1299
+ [14] = http://curl.haxx.se/mail/lib-2013-11/0076.html
