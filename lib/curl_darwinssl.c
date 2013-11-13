@@ -1439,7 +1439,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
      specifically doesn't want us doing that: */
-  SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
+  if(SSLSetSessionOption != NULL)
+    SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                       !data->set.ssl_enable_beast);
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
