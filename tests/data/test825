@@ -13,7 +13,7 @@ RFC4616
 <servercmd>
 AUTH PLAIN
 CAPA SASL-IR
-REPLY AUTHENTICATE + dXNlcgB1c2VyAHNlY3JldA== A002 OK AUTHENTICATE completed
+REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
 <data>
 From: me@somewhere
