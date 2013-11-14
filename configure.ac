@@ -1065,6 +1065,7 @@ AC_HELP_STRING([--disable-ipv6],[Disable ipv6 support]),
   AC_TRY_RUN([ /* is AF_INET6 available? */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdlib.h> /* for exit() */
 main()
 {
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
