@@ -1313,7 +1313,6 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct SMTP *smtp = data->req.protop;
 
   (void)instate; /* no use for this yet */
 
