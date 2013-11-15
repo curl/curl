@@ -1660,12 +1660,18 @@ SMTP mail request. The linked list should be a fully valid list of \fBstruct
 curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
 create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire list.
 
-Each recipient should be specified within a pair of angled brackets (<>),
-however, should you not use an angled bracket as the first character libcurl
-will assume you provided a single email address and enclose that address
-within brackets for you.
+When performing a mail transfer, each recipient should be specified within a
+pair of angled brackets (<>), however, should you not use an angled bracket as
+the first character libcurl will assume you provided a single email address and
+enclose that address within brackets for you. (Added in 7.20.0)
 
-(Added in 7.20.0)
+When performing an address verification (VRFY command), each recipient should
+be specified as the user name or user name and domain (as per Section 3.5 of
+RFC5321). (Added in 7.34.0)
+
+When performing a mailing list expand (EXPN command), each recipient should be
+specified using the mailing list name, such as "Friends" or "London-Office".
+(Added in 7.34.0)
 .IP CURLOPT_MAIL_AUTH
 Pass a pointer to a zero terminated string as parameter. This will be used
 to specify the authentication address (identity) of a submitted message that
@@ -2037,35 +2043,32 @@ source file to the remote target file.
 Pass a curl_off_t as parameter. It contains the offset in number of bytes that
 you want the transfer to start from. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
-Pass a pointer to a zero terminated string as parameter. It can be used to
-specify the request instead of GET or HEAD when performing HTTP based
-requests, instead of LIST and NLST when performing FTP directory listings and
-instead of LIST and RETR when issuing POP3 based commands. This is
-particularly useful, for example, for performing a HTTP DELETE request or a
-POP3 DELE command.
+Pass a pointer to a zero terminated string as parameter.
 
-Please don't perform this at will, on HTTP based requests, by making sure
-your server supports the command you are sending first.
- 
 When you change the request method by setting \fBCURLOPT_CUSTOMREQUEST\fP to
 something, you don't actually change how libcurl behaves or acts in regards
 to the particular request method, it will only change the actual string sent
 in the request.
 
+Restore to the internal default by setting this to NULL.
+
+This option can be used to specify the request:
+
+.B HTTP
+
+Instead of GET or HEAD when performing HTTP based requests. This is
+particularly useful, for example, for performing a HTTP DELETE request.
+
 For example:
 
-With the HTTP protocol when you tell libcurl to do a HEAD request, but then
-specify a GET though a custom request libcurl will still act as if it sent a
-HEAD. To switch to a proper HEAD use \fICURLOPT_NOBODY\fP, to switch to a
-proper POST use \fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and to switch
-to a proper GET use CURLOPT_HTTPGET.
+When you tell libcurl to do a HEAD request, but then specify a GET though a
+custom request libcurl will still act as if it sent a HEAD. To switch to a
+proper HEAD use \fICURLOPT_NOBODY\fP, to switch to a proper POST use
+\fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and to switch to a proper GET
+use CURLOPT_HTTPGET.
 
-With the POP3 protocol when you tell libcurl to use a custom request it will
-behave like a LIST or RETR command was sent where it expects data to be
-returned by the server. As such \fICURLOPT_NOBODY\fP should be used when
-specifying commands such as DELE and NOOP for example.
-
-Restore to the internal default by setting this to NULL.
+Please don't perform this at will, on HTTP based requests, by making sure
+your server supports the command you are sending first.
 
 Many people have wrongly used this option to replace the entire request with
 their own, including multiple headers and POST contents. While that might
@@ -2075,7 +2078,36 @@ could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
 replace or extend the set of headers sent by libcurl. Use
 \fICURLOPT_HTTP_VERSION\fP to change HTTP version.
 
-(Support for POP3 added in 7.26.0)
+.B FTP
+
+Instead of LIST and NLST when performing FTP directory listings.
+
+.B IMAP
+
+Instead of LIST when issuing IMAP based commands. (Added in 7.30.0)
+
+.B POP3
+
+Instead of LIST and RETR when issuing POP3 based commands. (Added in 7.26.0)
+
+For example:
+
+When you tell libcurl to use a custom request it will behave like a LIST or
+RETR command was sent where it expects data to be returned by the server. As
+such \fICURLOPT_NOBODY\fP should be used when specifying commands such as
+DELE and NOOP for example.
+
+.B SMTP
+
+When you tell libcurl to use a custom request it will behave as a NOOP or VRFY
+request depending on what other options are set. (Added in 7.34.0)
+
+For example:
+
+If the \fICURLOPT_NOBODY\fP option is specified then the request can be used to
+specify the RSET command. Otherwise a multiline listing is returned which can
+be used to specify a HELP request or, if used in conjuection with the
+\fICURLOPT_MAIL_RCPT\fP option, a EXPN request.
 .IP CURLOPT_FILETIME
 Pass a long. If it is 1, libcurl will attempt to get the modification date of
 the remote document in this operation. This requires that the remote server
