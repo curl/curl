@@ -228,6 +228,7 @@ static void smtp_to_smtps(struct connectdata *conn)
 static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
   bool result = FALSE;
 
   /* Nothing for us */
@@ -247,7 +248,7 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
       *resp = 0;
   }
   /* Do we have a multiline (continuation) response? */
-  else if(line[3] == '-') {
+  else if(line[3] == '-' && smtpc->state == SMTP_EHLO) {
     result = TRUE;
     *resp = 1;  /* Internal response code */
   }
