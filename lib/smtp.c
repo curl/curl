@@ -104,6 +104,7 @@ static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
 static CURLcode smtp_parse_url_options(struct connectdata *conn);
 static CURLcode smtp_parse_url_path(struct connectdata *conn);
+static CURLcode smtp_parse_custom_request(struct connectdata *conn);
 
 /*
  * SMTP protocol handler.
@@ -314,6 +315,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_XOAUTH2",
     "AUTH_CANCEL",
     "AUTH_FINAL",
+    "COMMAND",
     "MAIL",
     "RCPT",
     "DATA",
@@ -544,6 +546,28 @@ static CURLcode smtp_perform_authenticate(struct connectdata *conn)
       result = CURLE_LOGIN_DENIED;
     }
   }
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * smtp_perform_command()
+ *
+ * Sends a SMTP based command.
+ */
+static CURLcode smtp_perform_command(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->req.protop;
+
+  /* Send the command */
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s",
+                         smtp->custom && smtp->custom[0] != '\0' ?
+                         smtp->custom : "NOOP");
+  if(!result)
+    state(conn, SMTP_COMMAND);
 
   return result;
 }
@@ -1231,6 +1255,29 @@ static CURLcode smtp_state_auth_final_resp(struct connectdata *conn,
   return result;
 }
 
+/* For command responses */
+static CURLcode smtp_state_command_resp(struct connectdata *conn, int smtpcode,
+                                        smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->req.protop;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode/100 != 2) {
+    failf(data, "%s failed: %d",
+          smtp->custom && smtp->custom[0] != '\0' ? smtp->custom : "NOOP",
+          smtpcode);
+    result = CURLE_RECV_ERROR;
+  }
+
+  /* End of DO phase */
+  state(conn, SMTP_STOP);
+
+  return result;
+}
+
 /* For MAIL responses */
 static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
                                      smtpstate instate)
@@ -1433,6 +1480,10 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       result = smtp_state_auth_final_resp(conn, smtpcode, smtpc->state);
       break;
 
+    case SMTP_COMMAND:
+      result = smtp_state_command_resp(conn, smtpcode, smtpc->state);
+      break;
+
     case SMTP_MAIL:
       result = smtp_state_mail_resp(conn, smtpcode, smtpc->state);
       break;
@@ -1596,7 +1647,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     conn->bits.close = TRUE; /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only) {
+  else if(!data->set.connect_only && data->set.upload && data->set.mail_rcpt) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4. */
@@ -1645,31 +1696,38 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  *
  * smtp_perform()
  *
- * This is the actual DO function for SMTP. Send a mail according to the
- * options previously setup.
+ * This is the actual DO function for SMTP. Transfer a mail or send a command
+ *  according to the options previously setup.
  */
 static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
 {
   /* This is SMTP and no proxy */
   CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
-  if(conn->data->set.opt_no_body) {
+  if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct SMTP *smtp = conn->data->req.protop;
+    struct SMTP *smtp = data->req.protop;
     smtp->transfer = FTPTRANSFER_INFO;
   }
 
   *dophase_done = FALSE; /* not done yet */
 
   /* Start the first command in the DO phase */
-  result = smtp_perform_mail(conn);
+  if(data->set.upload && data->set.mail_rcpt)
+    /* MAIL transfer */
+    result = smtp_perform_mail(conn);
+  else
+    /* SMTP based command (NOOP or RSET) */
+    result = smtp_perform_command(conn);
+
   if(result)
     return result;
 
-  /* run the state-machine */
+  /* Run the state-machine */
   result = smtp_multi_statemach(conn, dophase_done);
 
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
@@ -1694,6 +1752,11 @@ static CURLcode smtp_do(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
 
   *done = FALSE; /* default to false */
+
+  /* Parse the custom request */
+  result = smtp_parse_custom_request(conn);
+  if(result)
+    return result;
 
   result = smtp_regular_transfer(conn, done);
 
@@ -1908,6 +1971,26 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
 
   /* URL decode the path and use it as the domain in our EHLO */
   return Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
+}
+
+/***********************************************************************
+ *
+ * smtp_parse_custom_request()
+ *
+ * Parse the custom request.
+ */
+static CURLcode smtp_parse_custom_request(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->req.protop;
+  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+
+  /* URL decode the custom request */
+  if(custom)
+    result = Curl_urldecode(data, custom, 0, &smtp->custom, NULL, TRUE);
+
+  return result;
 }
 
 CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)

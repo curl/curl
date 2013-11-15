@@ -47,6 +47,7 @@ typedef enum {
   SMTP_AUTH_XOAUTH2,
   SMTP_AUTH_CANCEL,
   SMTP_AUTH_FINAL,
+  SMTP_COMMAND,     /* NOOP and RSET */
   SMTP_MAIL,        /* MAIL FROM */
   SMTP_RCPT,        /* RCPT TO */
   SMTP_DATA,
@@ -61,6 +62,7 @@ typedef enum {
    used. */
 struct SMTP {
   curl_pp_transfer transfer;
+  char *custom;            /* Custom Request */
   struct curl_slist *rcpt; /* Recipient list */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
