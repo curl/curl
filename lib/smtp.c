@@ -228,7 +228,6 @@ static void smtp_to_smtps(struct connectdata *conn)
 static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
                            int *resp)
 {
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
   bool result = FALSE;
 
   /* Nothing for us */
