@@ -563,7 +563,7 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
 
-  if(smtp->custom && smtp->custom[0] != '\0') 
+  if(smtp->custom && smtp->custom[0] != '\0')
     /* Send the custom command */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s", smtp->custom,
                            smtp->rcpt ? smtp->rcpt->data : "");
