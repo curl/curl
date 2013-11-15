@@ -1352,16 +1352,19 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
 
-  /* Read the response from the server */
-  result = Curl_pp_readresp(sock, pp, &smtpcode, &nread);
-  if(result)
-    return result;
+  do {
+    /* Read the response from the server */
+    result = Curl_pp_readresp(sock, pp, &smtpcode, &nread);
+    if(result)
+      return result;
 
-  /* Store the latest response for later retrieval */
-  if(smtpc->state != SMTP_QUIT && smtpcode != 1)
-    data->info.httpcode = smtpcode;
+    /* Store the latest response for later retrieval if necessary */
+    if(smtpc->state != SMTP_QUIT && smtpcode != 1)
+      data->info.httpcode = smtpcode;
 
-  if(smtpcode) {
+    if(!smtpcode)
+      break;
+
     /* We have now received a full SMTP server response */
     switch(smtpc->state) {
     case SMTP_SERVERGREET:
@@ -1453,7 +1456,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       state(conn, SMTP_STOP);
       break;
     }
-  }
+  } while(!result && smtpc->state != SMTP_STOP && Curl_pp_moredata(pp));
 
   return result;
 }
