@@ -47,7 +47,7 @@ typedef enum {
   SMTP_AUTH_XOAUTH2,
   SMTP_AUTH_CANCEL,
   SMTP_AUTH_FINAL,
-  SMTP_COMMAND,     /* NOOP and RSET */
+  SMTP_COMMAND,     /* VRFY, EXPN, NOOP, RSET and HELP */
   SMTP_MAIL,        /* MAIL FROM */
   SMTP_RCPT,        /* RCPT TO */
   SMTP_DATA,

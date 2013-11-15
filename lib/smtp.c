@@ -249,7 +249,8 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
       *resp = 0;
   }
   /* Do we have a multiline (continuation) response? */
-  else if(line[3] == '-' && smtpc->state == SMTP_EHLO) {
+  else if(line[3] == '-' &&
+          (smtpc->state == SMTP_EHLO || smtpc->state == SMTP_COMMAND)) {
     result = TRUE;
     *resp = 1;  /* Internal response code */
   }
@@ -562,10 +563,17 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
 
-  /* Send the command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s",
-                         smtp->custom && smtp->custom[0] != '\0' ?
-                         smtp->custom : "NOOP");
+  if(smtp->custom && smtp->custom[0] != '\0') 
+    /* Send the custom command */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s", smtp->custom,
+                           smtp->rcpt ? smtp->rcpt->data : "");
+  else if(smtp->rcpt)
+    /* Send the VRFY command */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s", smtp->rcpt->data);
+  else
+    /* Send the NOOP command */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "NOOP");
+
   if(!result)
     state(conn, SMTP_COMMAND);
 
@@ -1262,18 +1270,41 @@ static CURLcode smtp_state_command_resp(struct connectdata *conn, int smtpcode,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
+  char *line = data->state.buffer;
+  size_t len = strlen(line);
 
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
-    failf(data, "%s failed: %d",
-          smtp->custom && smtp->custom[0] != '\0' ? smtp->custom : "NOOP",
-          smtpcode);
+  if((smtp->rcpt && smtpcode/100 != 2 && smtpcode != 553 && smtpcode != 1) ||
+     (!smtp->rcpt && smtpcode/100 != 2 && smtpcode != 1)) {
+    failf(data, "Command failed: %d", smtpcode);
     result = CURLE_RECV_ERROR;
   }
+  else {
+    /* Temporarily add the LF character back and send as body to the client */
+    if(!data->set.opt_no_body) {
+      line[len] = '\n';
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
+      line[len] = '\0';
+    }
 
-  /* End of DO phase */
-  state(conn, SMTP_STOP);
+    if(smtpcode != 1) {
+      if(smtp->rcpt) {
+        smtp->rcpt = smtp->rcpt->next;
+
+        if(smtp->rcpt) {
+          /* Send the next command */
+          result = smtp_perform_command(conn);
+        }
+        else
+          /* End of DO phase */
+          state(conn, SMTP_STOP);
+      }
+      else
+        /* End of DO phase */
+        state(conn, SMTP_STOP);
+    }
+  }
 
   return result;
 }
@@ -1696,8 +1727,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
  *
  * smtp_perform()
  *
- * This is the actual DO function for SMTP. Transfer a mail or send a command
- *  according to the options previously setup.
+ * This is the actual DO function for SMTP. Transfer a mail, send a command
+ * or get some data according to the options previously setup.
  */
 static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
                              bool *dophase_done)
@@ -1705,12 +1736,12 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   /* This is SMTP and no proxy */
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct SMTP *smtp = data->req.protop;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct SMTP *smtp = data->req.protop;
     smtp->transfer = FTPTRANSFER_INFO;
   }
 
@@ -1720,9 +1751,13 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   if(data->set.upload && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(conn);
-  else
-    /* SMTP based command (NOOP or RSET) */
+  else {
+    /* Store the first recipient (or NULL if not specified) */
+    smtp->rcpt = data->set.mail_rcpt;
+
+    /* SMTP based command (VRFY, EXPN, NOOP, RSET or HELP) */
     result = smtp_perform_command(conn);
+  }
 
   if(result)
     return result;
