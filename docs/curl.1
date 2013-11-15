@@ -822,8 +822,7 @@ to see if a specific message id exists on the server and what size it is.
 
 Note: When combined with \fI-X, --request <command>\fP, this option can be used
 to send an UIDL command instead, so the user may use the email's unique
-identifier rather than it's message id to make the request.
-
+identifier rather than it's message id to make the request. (Added in 7.21.5)
 .IP "-L, --location"
 (HTTP/HTTPS) If the server reports that the requested page has moved to a
 different location (indicated with a Location: header and a 3XX response code),
@@ -903,10 +902,18 @@ return with exit code 63.
 files this option has no effect even if the file transfer ends up being larger
 than this given limit. This concerns both FTP and HTTP transfers.
 .IP "--mail-rcpt <address>"
-(SMTP) Specify a single address that the given mail should get sent to. This
-option can be used multiple times to specify many recipients.
+(SMTP) Specify a single address, user name or mailing list name.
 
-(Added in 7.20.0)
+When performing a mail transfer, the recipient should specify a valid email
+address to send the mail to. (Added in 7.20.0)
+
+When performing an address verification (VRFY command), the recipient should be
+specified as the user name or user name and domain (as per Section 3.5 of
+RFC5321). (Added in 7.34.0)
+
+When performing a mailing list expand (EXPN command), the recipient should be
+specified using the mailing list name, such as "Friends" or "London-Office".
+(Added in 7.34.0)
 .IP "--max-redirs <num>"
 Set maximum number of redirection-followings allowed. If \fI-L, --location\fP
 is used, this option can be used to prevent curl from following redirections
@@ -1791,10 +1798,12 @@ Specifies a custom POP3 command to use instead of LIST or RETR. (Added in
 7.26.0)
 
 (IMAP)
-Specified a custom IMAP command to use insead of LIST. (Added in 7.30.0)
+Specifies a custom IMAP command to use insead of LIST. (Added in 7.30.0)
+
+(SMTP)
+Specifies a custom SMTP command to use instead of VRFY or NOOP. (Added in 7.34.0)
 
 If this option is used several times, the last one will be used.
-
 .IP "--xattr"
 When saving output to a file, this option tells curl to store certain file
 metadata in extended file attributes. Currently, the URL is stored in the
