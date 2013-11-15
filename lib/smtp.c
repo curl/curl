@@ -671,16 +671,14 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
   struct SMTP *smtp = data->req.protop;
 
   /* Send the RCPT TO command */
-  if(smtp->rcpt) {
-    if(smtp->rcpt->data[0] == '<')
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                             smtp->rcpt->data);
-    else
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                             smtp->rcpt->data);
-    if(!result)
-      state(conn, SMTP_RCPT);
-  }
+  if(smtp->rcpt->data[0] == '<')
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
+                            smtp->rcpt->data);
+  else
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
+                            smtp->rcpt->data);
+  if(!result)
+    state(conn, SMTP_RCPT);
 
   return result;
 }
@@ -1324,11 +1322,9 @@ static CURLcode smtp_state_mail_resp(struct connectdata *conn, int smtpcode,
     result = CURLE_SEND_ERROR;
     state(conn, SMTP_STOP);
   }
-  else {
-    smtp->rcpt = data->set.mail_rcpt;
-
+  else
+    /* Start the RCPT TO command */
     result = smtp_perform_rcpt_to(conn);
-  }
 
   return result;
 }
@@ -1349,17 +1345,14 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     state(conn, SMTP_STOP);
   }
   else {
-    if(smtp->rcpt) {
-      smtp->rcpt = smtp->rcpt->next;
+    smtp->rcpt = smtp->rcpt->next;
+
+    if(smtp->rcpt)
+      /* Send the next RCPT TO command */
       result = smtp_perform_rcpt_to(conn);
-
-      /* If we failed or still are sending RCPT data then return */
-      if(result || smtp->rcpt)
-        return result;
-    }
-
-    /* Send the DATA command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
+    else
+      /* Send the DATA command */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
 
     if(!result)
       state(conn, SMTP_DATA);
@@ -1747,17 +1740,16 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   *dophase_done = FALSE; /* not done yet */
 
+  /* Store the first recipient (or NULL if not specified) */
+  smtp->rcpt = data->set.mail_rcpt;
+
   /* Start the first command in the DO phase */
   if(data->set.upload && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(conn);
-  else {
-    /* Store the first recipient (or NULL if not specified) */
-    smtp->rcpt = data->set.mail_rcpt;
-
+  else
     /* SMTP based command (VRFY, EXPN, NOOP, RSET or HELP) */
     result = smtp_perform_command(conn);
-  }
 
   if(result)
     return result;
