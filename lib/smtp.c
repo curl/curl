@@ -1349,12 +1349,13 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     if(smtp->rcpt)
       /* Send the next RCPT TO command */
       result = smtp_perform_rcpt_to(conn);
-    else
+    else {
       /* Send the DATA command */
       result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
 
-    if(!result)
-      state(conn, SMTP_DATA);
+      if(!result)
+        state(conn, SMTP_DATA);
+    }
   }
 
   return result;
