@@ -9,7 +9,9 @@ VRFY
 #
 # Server-side
 <reply>
+<data>
 252 Send some mail and I'll try my best
+</data>
 </reply>
 
 #
