@@ -627,9 +627,14 @@ sub protocolsetup {
         %commandfunc = (
             'DATA' => \&DATA_smtp,
             'EHLO' => \&EHLO_smtp,
+            'EXPN' => \&EXPN_smtp,
             'HELO' => \&HELO_smtp,
+            'HELP' => \&HELP_smtp,
             'MAIL' => \&MAIL_smtp,
+            'NOOP' => \&NOOP_smtp,
+            'RSET' => \&RSET_smtp,
             'RCPT' => \&RCPT_smtp,
+            'VRFY' => \&VRFY_smtp,
             'QUIT' => \&QUIT_smtp,
         );
         %displaytext = (
@@ -952,6 +957,113 @@ sub DATA_smtp {
         logmsg "received $ulsize bytes upload\n";
 
         sendcontrol "250 OK, data received!\r\n";
+    }
+
+    return 0;
+}
+
+sub NOOP_smtp {
+    my ($args) = @_;
+
+    if($args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        sendcontrol "250 OK\r\n";
+    }
+
+    return 0;
+}
+
+sub RSET_smtp {
+    my ($args) = @_;
+
+    if($args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        sendcontrol "250 Resetting\r\n";
+    }
+
+    return 0;
+}
+
+sub HELP_smtp {
+    my ($args) = @_;
+
+    # One argument is optional
+    if($args) {
+        logmsg "HELP_smtp got $args\n";
+    }
+
+    sendcontrol "214-This server supports the following commands:\r\n";
+
+    if(@auth_mechs) {
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL QUIT HELP AUTH\r\n";
+    }
+    else {
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL QUIT HELP\r\n";
+    }
+
+    return 0;
+}
+
+sub VRFY_smtp {
+    my ($args) = @_;
+    my ($username, $address) = split(/ /, $args, 2);
+
+    logmsg "VRFY_smtp got $args\n";
+
+    if($username eq "") {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        my $testno = $smtp_client;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+    }
+
+    return 0;
+}
+
+sub EXPN_smtp {
+    my ($list_name) = @_;
+
+    logmsg "EXPN_smtp got $list_name\n";
+
+    if(!$list_name) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        my $testno = $smtp_client;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
     }
 
     return 0;
