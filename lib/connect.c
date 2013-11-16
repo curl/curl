@@ -562,6 +562,7 @@ static CURLcode trynextip(struct connectdata *conn,
 
     while(ai && ai->ai_family != family)
       ai = ai->ai_next;
+
     if(ai) {
       rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
       conn->tempaddr[tempindex] = ai;
@@ -1027,10 +1028,8 @@ singleipconnect(struct connectdata *conn,
   conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
 #endif
 
-  *sockp = sockfd;
-
   if(-1 == rc) {
-    switch (error) {
+    switch(error) {
     case EINPROGRESS:
     case EWOULDBLOCK:
 #if defined(EAGAIN)
@@ -1042,7 +1041,8 @@ singleipconnect(struct connectdata *conn,
     case EAGAIN:
 #endif
 #endif
-      return CURLE_OK;
+      res = CURLE_OK;
+      break;
 
     default:
       /* unknown error, fallthrough and try another address! */
@@ -1051,11 +1051,15 @@ singleipconnect(struct connectdata *conn,
       data->state.os_errno = error;
 
       /* connect failed */
-      return CURLE_COULDNT_CONNECT;
+      Curl_closesocket(conn, sockfd);
+      res = CURLE_COULDNT_CONNECT;
     }
   }
 
-  return CURLE_OK;
+  if(!res)
+    *sockp = sockfd;
+
+  return res;
 }
 
 /*
