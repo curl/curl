@@ -11,7 +11,7 @@ HELP
 <reply>
 <data>
 214-This server supports the following commands:
-214 214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP
+214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP
 </data>
 </reply>
 
