@@ -1710,6 +1710,9 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     result = smtp_block_statemach(conn);
   }
 
+  /* Cleanup our per-request based variables */
+  Curl_safefree(smtp->custom);
+
   /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
 
