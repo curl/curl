@@ -1388,8 +1388,7 @@ typedef enum {
   CINIT(ADDRESS_SCOPE, LONG, 171),
 
   /* Collect certificate chain info and allow it to get retrievable with
-     CURLINFO_CERTINFO after the transfer is complete. (Unfortunately) only
-     working with OpenSSL-powered builds. */
+     CURLINFO_CERTINFO after the transfer is complete. */
   CINIT(CERTINFO, LONG, 172),
 
   /* "name" and "pwd" to use when fetching. */
@@ -1986,6 +1985,28 @@ struct curl_certinfo {
                                    format "name: value" */
 };
 
+/* enum for the different supported SSL backends */
+typedef enum {
+  CURLSSLBACKEND_NONE = 0,
+  CURLSSLBACKEND_OPENSSL = 1,
+  CURLSSLBACKEND_GNUTLS = 2,
+  CURLSSLBACKEND_NSS = 3,
+  CURLSSLBACKEND_QSOSSL = 4,
+  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_POLARSSL = 6,
+  CURLSSLBACKEND_CYASSL = 7,
+  CURLSSLBACKEND_SCHANNEL = 8,
+  CURLSSLBACKEND_DARWINSSL = 9
+} curl_ssl_backend;
+
+/* Information about the SSL library used and the respective internal SSL
+   handle, which can be used to obtain further information regarding the
+   connection. Asked for with CURLINFO_TLS_SESSION. */
+struct curl_tlsinfo {
+  curl_ssl_backend ssl_backend;
+  void *internals;
+};
+
 #define CURLINFO_STRING   0x100000
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
@@ -2037,9 +2058,10 @@ typedef enum {
   CURLINFO_PRIMARY_PORT     = CURLINFO_LONG   + 40,
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
+  CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 42
+  CURLINFO_LASTONE          = 43
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

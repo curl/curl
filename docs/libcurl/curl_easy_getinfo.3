@@ -221,6 +221,18 @@ provided in a series of data in the format "name:content" where the content is
 for the specific named data. See also the certinfo.c example. NOTE: this
 option is only available in libcurl built with OpenSSL, NSS, GSKit or QsoSSL
 support. (Added in 7.19.1)
+.IP CURLINFO_TLS_SESSION
+Pass a pointer to a 'struct curl_tlsinfo *'.  The pointer will be initialized
+to refer to a 'struct curl_tlsinfo *' that will contain an enum indicating the
+SSL library used for the handshake and the respective internal TLS session
+structure of this underlying SSL library.
+
+This may then be used to extract certificate information in a format
+convenient for further processing, such as manual validation. NOTE: this
+option may not be available for all SSL backends; unsupported SSL backends
+will return 'CURLSSLBACKEND_NONE' to indicate that they are not supported;
+this does not mean that no SSL backend was used. (Added in 7.34.0)
+
 .IP CURLINFO_CONDITION_UNMET
 Pass a pointer to a long to receive the number 1 if the condition provided in
 the previous request didn't match (see \fICURLOPT_TIMECONDITION\fP). Alas, if

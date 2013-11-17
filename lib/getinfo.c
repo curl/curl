@@ -277,7 +277,53 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
     ptr.to_certinfo = &data->info.certs;
     *param_slistp = ptr.to_slist;
     break;
+  case CURLINFO_TLS_SESSION:
+    {
+      struct curl_tlsinfo **tlsinfop = (struct curl_tlsinfo **) param_slistp;
+      struct curl_tlsinfo *tlsinfo = &data->tlsinfo;
+      struct connectdata *conn = data->easy_conn;
+      unsigned int sockindex = 0;
 
+      *tlsinfop = tlsinfo;
+      tlsinfo->ssl_backend = CURLSSLBACKEND_NONE;
+      tlsinfo->internals = NULL;
+
+      /* Find the active ("in use") SSL connection, if any */
+      while((sockindex < sizeof(conn->ssl) / sizeof(conn->ssl[0])) &&
+            (!conn->ssl[sockindex].use))
+        sockindex++;
+
+      if(sockindex == sizeof(conn->ssl) / sizeof(conn->ssl[0]))
+        break; /* no SSL session found */
+
+      /* Return the TLS session information from the relevant backend */
+#ifdef USE_SSLEAY
+      tlsinfo->ssl_backend = CURLSSLBACKEND_OPENSSL;
+      tlsinfo->internals = conn->ssl[sockindex].ctx;
+#endif
+#ifdef USE_GNUTLS
+      tlsinfo->ssl_backend = CURLSSLBACKEND_GNUTLS;
+      tlsinfo->internals = conn->ssl[sockindex].session;
+#endif
+#ifdef USE_NSS
+      tlsinfo->ssl_backend = CURLSSLBACKEND_NSS;
+      tlsinfo->internals = conn->ssl[sockindex].handle;
+#endif
+#ifdef USE_QSOSSL
+      tlsinfo->ssl_backend = CURLSSLBACKEND_QSOSSL;
+      tlsinfo->internals = conn->ssl[sockindex].handle;
+#endif
+#ifdef USE_GSKIT
+      tlsinfo->ssl_backend = CURLSSLBACKEND_GSKIT;
+      tlsinfo->internals = conn->ssl[sockindex].handle;
+#endif
+      /* NOTE: For other SSL backends, it is not immediately clear what data
+         to return from 'struct ssl_connect_data'; thus, for now we keep the
+         backend as CURLSSLBACKEND_NONE in those cases, which should be
+         interpreted as "not supported" */
+      break;
+    }
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
