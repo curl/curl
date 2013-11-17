@@ -999,10 +999,10 @@ sub HELP_smtp {
     sendcontrol "214-This server supports the following commands:\r\n";
 
     if(@auth_mechs) {
-        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL QUIT HELP AUTH\r\n";
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP AUTH\r\n";
     }
     else {
-        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL QUIT HELP\r\n";
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP\r\n";
     }
 
     return 0;
