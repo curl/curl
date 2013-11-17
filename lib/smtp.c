@@ -563,16 +563,16 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
 
-  if(smtp->custom && smtp->custom[0] != '\0')
-    /* Send the custom command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s", smtp->custom,
-                           smtp->rcpt ? smtp->rcpt->data : "");
-  else if(smtp->rcpt)
-    /* Send the VRFY command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s", smtp->rcpt->data);
+  /* Send the command */
+  if(smtp->rcpt)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s",
+                            smtp->custom && smtp->custom[0] != '\0' ?
+                            smtp->custom : "VRFY",
+                            smtp->rcpt->data);
   else
-    /* Send the HELP command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "HELP");
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s",
+                           smtp->custom && smtp->custom[0] != '\0' ?
+                           smtp->custom : "HELP");
 
   if(!result)
     state(conn, SMTP_COMMAND);
