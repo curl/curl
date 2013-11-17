@@ -14,6 +14,7 @@ This release includes the following changes:
  o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
  o base64: Added validation of base64 input strings when decoding [8]
  o curl_easy_setopt: Added the ability to set the login options separately
+ o smtp: Added support for additional SMTP commands
 
 This release includes the following bugfixes:
 
@@ -44,6 +45,7 @@ This release includes the following bugfixes:
  o curl.1: mention that -O does no URL decoding [13]
  o darwinssl: PKCS#12 import feature now requires Lion or later [14]
  o darwinssl: check for SSLSetSessionOption() presence when toggling BEAST
+ o configure: Fix test with -Werror=implicit-function-declaration [15]
 
 This release includes the following known bugs:
 
@@ -57,7 +59,8 @@ advice from friends like these:
  Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
  Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
  Paul Marks, Rémy Léone, Marcin Gryszkalis, Felix Yan, Z98, Andreas Rieke,
- Kim Vandry, Tomas Hoger, Michael Osipov, myriachan
+ Kim Vandry, Tomas Hoger, Michael Osipov, myriachan, Yaakov Selkowitz,
+ Fabian Keil
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -77,3 +80,4 @@ References to bug reports and discussions on issues:
  [12] = https://github.com/bagder/curl/pull/83
  [13] = http://sourceforge.net/p/curl/bugs/1299
  [14] = http://curl.haxx.se/mail/lib-2013-11/0076.html
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1304
