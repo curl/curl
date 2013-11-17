@@ -2084,11 +2084,11 @@ Instead of LIST and NLST when performing FTP directory listings.
 
 .B IMAP
 
-Instead of LIST when issuing IMAP based commands. (Added in 7.30.0)
+Instead of LIST when issuing IMAP based requests. (Added in 7.30.0)
 
 .B POP3
 
-Instead of LIST and RETR when issuing POP3 based commands. (Added in 7.26.0)
+Instead of LIST and RETR when issuing POP3 based requests. (Added in 7.26.0)
 
 For example:
 
@@ -2099,15 +2099,14 @@ DELE and NOOP for example.
 
 .B SMTP
 
-When you tell libcurl to use a custom request it will behave as a NOOP or VRFY
-request depending on what other options are set. (Added in 7.34.0)
+Instead of a HELP or VRFY when issuing SMTP based requests. (Added in 7.34.0)
 
 For example:
 
-If the \fICURLOPT_NOBODY\fP option is specified then the request can be used to
-specify the RSET command. Otherwise a multiline listing is returned which can
-be used to specify a HELP request or, if used in conjuection with the
-\fICURLOPT_MAIL_RCPT\fP option, a EXPN request.
+Normally a multiline response is returned which can be used, in conjuection with
+\fICURLOPT_MAIL_RCPT\fP, to specify an EXPN request. If the \fICURLOPT_NOBODY\fP
+option is specified then the request can be used to issue NOOP and RSET
+commands.
 .IP CURLOPT_FILETIME
 Pass a long. If it is 1, libcurl will attempt to get the modification date of
 the remote document in this operation. This requires that the remote server

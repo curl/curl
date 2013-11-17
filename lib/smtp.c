@@ -571,8 +571,8 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
     /* Send the VRFY command */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s", smtp->rcpt->data);
   else
-    /* Send the NOOP command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "NOOP");
+    /* Send the HELP command */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "HELP");
 
   if(!result)
     state(conn, SMTP_COMMAND);
