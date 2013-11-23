@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+IMAP AUTH CRAM-MD5
+RFC2195
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH CRAM-MD5
+REPLY AUTHENTICATE + Rubbish
+REPLY * A002 NO AUTH exchange cancelled by client
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<features>
+crypto
+</features>
+ <name>
+IMAP CRAM-MD5 graceful cancellation
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/830/;UID=1' -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE CRAM-MD5
+*
+A003 LOGOUT
+</protocol>
+</verify>
+</testcase>
