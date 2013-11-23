@@ -3168,7 +3168,8 @@ while(1) {
                 $FTPARG=$3;
             }
             # IMAP long "commands" are base64 authentication data
-            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+            elsif(($full =~ /^[A-Z0-9+\/]*={0,2}$/i) ||
+                  ($full == "*")) {
                 # Command id has already been set
                 $FTPCMD=$full;
                 $FTPARG="";
