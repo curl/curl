@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-SMTP
+POP3
 CRLF-in-URL
 </keywords>
 </info>
@@ -9,13 +9,13 @@ CRLF-in-URL
 # Client-side
 <client>
 <server>
-smtp
+pop3
 </server>
  <name>
-SMTP with URL-encoded CR LF in the URL
+POP3 with URL-encoded CR LF in the URL
  </name>
  <command>
-smtp://%HOSTIP:%SMTPPORT/%0d%0a/1323
+pop3://%HOSTIP:%POP3PORT/%0d%0a/875
 </command>
 </client>
 
