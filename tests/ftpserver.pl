@@ -3167,9 +3167,14 @@ while(1) {
                 $FTPCMD=$2;
                 $FTPARG=$3;
             }
+            # IMAP authentication cancellation
+            elsif($full =~ /^\*$/) {
+                # Command id has already been set
+                $FTPCMD="*";
+                $FTPARG="";
+            }
             # IMAP long "commands" are base64 authentication data
-            elsif(($full =~ /^[A-Z0-9+\/]*={0,2}$/i) ||
-                  ($full == "*")) {
+            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
                 # Command id has already been set
                 $FTPCMD=$full;
                 $FTPARG="";
@@ -3184,19 +3189,36 @@ while(1) {
             $FTPARG=$3;
         }
         elsif($proto eq "pop3") {
+            # POP3 authentication cancellation
+            if($full =~ /^\*$/) {
+                $FTPCMD="*";
+                $FTPARG="";
+            }
             # POP3 long "commands" are base64 authentication data
-            unless($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
                 sendcontrol "-ERR Unrecognized command\r\n";
                 last;
             }
-
-            $FTPCMD=$full;
-            $FTPARG="";
         }
-        elsif(($proto eq "smtp") && ($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
-            # SMTP long "commands" are base64 authentication data.
-            $FTPCMD=$full;
-            $FTPARG="";
+        elsif($proto eq "smtp") {
+            # SMTP authentication cancellation
+            if($full =~ /^\*$/) {
+                $FTPCMD="*";
+                $FTPARG="";
+            }
+            # SMTP long "commands" are base64 authentication data
+            elsif($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i) {
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
+                sendcontrol "500 Unrecognized command\r\n";
+                last;
+            }
         }
         else {
             sendcontrol "500 Unrecognized command\r\n";
