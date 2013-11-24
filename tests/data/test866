@@ -13,7 +13,7 @@ RFC5034
 <reply>
 <servercmd>
 AUTH LOGIN
-REPLY AUTH +
+REPLY AUTH + VXNlcm5hbWU6
 REPLY dXNlcg== + UGFzc3dvcmQ6
 REPLY c2VjcmV0 +OK Login successful
 </servercmd>
