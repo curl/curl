@@ -41,11 +41,13 @@ IMAP CRAM-MD5 graceful cancellation
 <errorcode>
 67
 </errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "LOGOUT"
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE CRAM-MD5
 *
-A003 LOGOUT
 </protocol>
 </verify>
 </testcase>

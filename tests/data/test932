@@ -42,11 +42,13 @@ smtp://%HOSTIP:%SMTPPORT/932 --mail-rcpt recipient@example.com --mail-from sende
 <errorcode>
 67
 </errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "QUIT"
 <protocol>
 EHLO 932
 AUTH CRAM-MD5
 *
-QUIT
 </protocol>
 </verify>
 </testcase>
