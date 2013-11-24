@@ -291,9 +291,10 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
   struct hostcache_prune_data user;
 
-  if(!dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
-    /* cache forever means never prune, and NULL hostcache means
-       we can't do it */
+  if(!dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache ||
+     dns->inuse)
+    /* cache forever means never prune, and NULL hostcache means we can't do
+       it, if it still is in use then we leave it */
     return 0;
 
   time(&user.now);
@@ -428,9 +429,13 @@ int Curl_resolv(struct connectdata *conn,
   /* free the allocated entry_id again */
   free(entry_id);
 
+  infof(data, "Hostname was %sfound in DNS cache\n", dns?"":"NOT ");
+
   /* See whether the returned entry is stale. Done before we release lock */
-  if(remove_entry_if_stale(data, dns))
+  if(remove_entry_if_stale(data, dns)) {
+    infof(data, "Hostname in DNS cache was stale, zapped\n");
     dns = NULL; /* the memory deallocation is being handled by the hash */
+  }
 
   if(dns) {
     dns->inuse++; /* we use it! */
