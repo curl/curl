@@ -33,6 +33,7 @@ smtp://%HOSTIP:%SMTPPORT/918 --mail-rcpt recipient.one@example.com --mail-rcpt i
 #
 # Verify data after the test has been "shot"
 <verify>
+# 55 - CURLE_SEND_ERROR
 <errorcode>
 55
 </errorcode>

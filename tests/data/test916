@@ -33,6 +33,7 @@ smtp://%HOSTIP:%SMTPPORT/916 --mail-rcpt invalid --mail-from sender@example.com 
 #
 # Verify data after the test has been "shot"
 <verify>
+# 55 - CURLE_SEND_ERROR
 <errorcode>
 55
 </errorcode>
