@@ -26,7 +26,7 @@ imap
 IMAP LIST mailbox
  </name>
  <command>
--u user:secret 'imap://%HOSTIP:%IMAPPORT/806/'
+imap://%HOSTIP:%IMAPPORT/806 -u user:secret
 </command>
 </client>
 

@@ -22,7 +22,7 @@ imap
 IMAP APPEND message
  </name>
  <command>
--u user:secret -T log/upload805 'imap://%HOSTIP:%IMAPPORT/805'
+imap://%HOSTIP:%IMAPPORT/805 -T log/upload805 -u user:secret
 </command>
 <file name="log/upload805">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
