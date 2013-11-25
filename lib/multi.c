@@ -41,6 +41,7 @@
 #include "bundles.h"
 #include "multihandle.h"
 #include "pipeline.h"
+#include "sigpipe.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1786,12 +1787,18 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
   struct SessionHandle *nextdata;
 
   if(GOOD_MULTI_HANDLE(multi)) {
+    SIGPIPE_VARIABLE(pipe);
+    bool restore_pipe = FALSE;
+
     multi->type = 0; /* not good anymore */
 
     /* Close all the connections in the connection cache */
     close_all_connections(multi);
 
     if(multi->closure_handle) {
+      sigpipe_ignore(multi->closure_handle, &pipe);
+      restore_pipe = TRUE;
+
       multi->closure_handle->dns.hostcache = multi->hostcache;
       Curl_hostcache_clean(multi->closure_handle,
                            multi->closure_handle->dns.hostcache);
@@ -1836,6 +1843,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     Curl_pipeline_set_server_blacklist(NULL, &multi->pipelining_server_bl);
 
     free(multi);
+    if(restore_pipe)
+      sigpipe_restore(&pipe);
 
     return CURLM_OK;
   }
