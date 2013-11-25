@@ -560,12 +560,19 @@ static CURLcode trynextip(struct connectdata *conn,
       ai = conn->tempaddr[0]->ai_next;
     }
 
-    while(ai && ai->ai_family != family)
-      ai = ai->ai_next;
+    while(ai) {
+      while(ai && ai->ai_family != family)
+        ai = ai->ai_next;
 
-    if(ai) {
-      rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
-      conn->tempaddr[tempindex] = ai;
+      if(ai) {
+        rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
+        conn->tempaddr[tempindex] = ai;
+        if(rc == CURLE_COULDNT_CONNECT) {
+          ai = ai->ai_next;
+          continue;
+        }
+      }
+      break;
     }
   }
 
