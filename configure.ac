@@ -2071,8 +2071,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      dnl The function PK11_CreateGenericObject is needed to load libnsspem.so
-      AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
+      dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
+      AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
        [
        AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
        AC_SUBST(USE_NSS, [1])

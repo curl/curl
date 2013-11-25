@@ -1215,9 +1215,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRErrorCode err = 0;
   PRFileDesc *model = NULL;
-  PRBool ssl2 = PR_FALSE;
-  PRBool ssl3 = PR_FALSE;
-  PRBool tlsv1 = PR_FALSE;
+  SSLVersionRange sslver;
   PRBool ssl_no_cache;
   PRBool ssl_cbc_random_iv;
   struct SessionHandle *data = conn->data;
@@ -1292,20 +1290,25 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
-    ssl3 = PR_TRUE;
-    if(data->state.ssl_connect_retry)
+    sslver.min = SSL_LIBRARY_VERSION_3_0;
+    if(data->state.ssl_connect_retry) {
       infof(data, "TLS disabled due to previous handshake failure\n");
+      sslver.max = SSL_LIBRARY_VERSION_3_0;
+    }
     else
-      tlsv1 = PR_TRUE;
+      sslver.max = SSL_LIBRARY_VERSION_TLS_1_0;
     break;
   case CURL_SSLVERSION_TLSv1:
-    tlsv1 = PR_TRUE;
+    sslver.min = SSL_LIBRARY_VERSION_TLS_1_0;
+    sslver.max = SSL_LIBRARY_VERSION_TLS_1_0;
     break;
   case CURL_SSLVERSION_SSLv2:
-    ssl2 = PR_TRUE;
+    sslver.min = SSL_LIBRARY_VERSION_2;
+    sslver.max = SSL_LIBRARY_VERSION_2;
     break;
   case CURL_SSLVERSION_SSLv3:
-    ssl3 = PR_TRUE;
+    sslver.min = SSL_LIBRARY_VERSION_3_0;
+    sslver.max = SSL_LIBRARY_VERSION_3_0;
     break;
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
@@ -1315,14 +1318,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
   }
 
-  if(SSL_OptionSet(model, SSL_ENABLE_SSL2, ssl2) != SECSuccess)
-    goto error;
-  if(SSL_OptionSet(model, SSL_ENABLE_SSL3, ssl3) != SECSuccess)
-    goto error;
-  if(SSL_OptionSet(model, SSL_ENABLE_TLS, tlsv1) != SECSuccess)
-    goto error;
-
-  if(SSL_OptionSet(model, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
+  if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
     goto error;
 
   ssl_cbc_random_iv = !data->set.ssl_enable_beast;
@@ -1508,11 +1504,13 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(model)
     PR_Close(model);
 
-    /* cleanup on connection failure */
-    Curl_llist_destroy(connssl->obj_list, NULL);
-    connssl->obj_list = NULL;
+  /* cleanup on connection failure */
+  Curl_llist_destroy(connssl->obj_list, NULL);
+  connssl->obj_list = NULL;
 
-  if(ssl3 && tlsv1 && isTLSIntoleranceError(err)) {
+  if((sslver.min == SSL_LIBRARY_VERSION_3_0)
+      && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
+      && isTLSIntoleranceError(err)) {
     /* schedule reconnect through Curl_retry_request() */
     data->state.ssl_connect_retry = TRUE;
     infof(data, "Error in TLS handshake, trying SSLv3...\n");
