@@ -1211,6 +1211,46 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static CURLcode nss_init_sslver(SSLVersionRange *sslver,
+                                struct SessionHandle *data)
+{
+  switch (data->set.ssl.version) {
+  default:
+  case CURL_SSLVERSION_DEFAULT:
+    sslver->min = SSL_LIBRARY_VERSION_3_0;
+    if(data->state.ssl_connect_retry) {
+      infof(data, "TLS disabled due to previous handshake failure\n");
+      sslver->max = SSL_LIBRARY_VERSION_3_0;
+    }
+    else
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_TLSv1:
+    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
+    sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_SSLv2:
+    sslver->min = SSL_LIBRARY_VERSION_2;
+    sslver->max = SSL_LIBRARY_VERSION_2;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_SSLv3:
+    sslver->min = SSL_LIBRARY_VERSION_3_0;
+    sslver->max = SSL_LIBRARY_VERSION_3_0;
+    return CURLE_OK;
+
+  case CURL_SSLVERSION_TLSv1_0:
+  case CURL_SSLVERSION_TLSv1_1:
+  case CURL_SSLVERSION_TLSv1_2:
+    break;
+  }
+
+  failf(data, "TLS minor version cannot be set");
+  return CURLE_SSL_CONNECT_ERROR;
+}
+
 CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRErrorCode err = 0;
@@ -1287,37 +1327,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
 
-  switch (data->set.ssl.version) {
-  default:
-  case CURL_SSLVERSION_DEFAULT:
-    sslver.min = SSL_LIBRARY_VERSION_3_0;
-    if(data->state.ssl_connect_retry) {
-      infof(data, "TLS disabled due to previous handshake failure\n");
-      sslver.max = SSL_LIBRARY_VERSION_3_0;
-    }
-    else
-      sslver.max = SSL_LIBRARY_VERSION_TLS_1_0;
-    break;
-  case CURL_SSLVERSION_TLSv1:
-    sslver.min = SSL_LIBRARY_VERSION_TLS_1_0;
-    sslver.max = SSL_LIBRARY_VERSION_TLS_1_0;
-    break;
-  case CURL_SSLVERSION_SSLv2:
-    sslver.min = SSL_LIBRARY_VERSION_2;
-    sslver.max = SSL_LIBRARY_VERSION_2;
-    break;
-  case CURL_SSLVERSION_SSLv3:
-    sslver.min = SSL_LIBRARY_VERSION_3_0;
-    sslver.max = SSL_LIBRARY_VERSION_3_0;
-    break;
-  case CURL_SSLVERSION_TLSv1_0:
-  case CURL_SSLVERSION_TLSv1_1:
-  case CURL_SSLVERSION_TLSv1_2:
-    failf(data, "TLS minor version cannot be set\n");
-    curlerr = CURLE_SSL_CONNECT_ERROR;
+  /* enable/disable the requested SSL version(s) */
+  if(nss_init_sslver(&sslver, data) != CURLE_OK)
     goto error;
-  }
-
   if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
     goto error;
 
