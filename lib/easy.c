@@ -50,11 +50,6 @@
 #include <sys/param.h>
 #endif
 
-#if defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION) && defined(USE_OPENSSL)
-#define SIGPIPE_IGNORE 1
-#include <signal.h>
-#endif
-
 #include "strequal.h"
 #include "urldata.h"
 #include <curl/curl.h>
@@ -78,62 +73,13 @@
 #include "warnless.h"
 #include "conncache.h"
 #include "multiif.h"
+#include "sigpipe.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-#ifdef SIGPIPE_IGNORE
-struct sigpipe_ignore {
-  struct sigaction old_pipe_act;
-  bool no_signal;
-};
-
-#define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
-
-/*
- * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
- * internals, and then sigpipe_restore() will restore the situation when we
- * return from libcurl again.
- */
-static void sigpipe_ignore(struct SessionHandle *data,
-                           struct sigpipe_ignore *ig)
-{
-  /* get a local copy of no_signal because the SessionHandle might not be
-     around when we restore */
-  ig->no_signal = data->set.no_signal;
-  if(!data->set.no_signal) {
-    struct sigaction action;
-    /* first, extract the existing situation */
-    memset(&ig->old_pipe_act, 0, sizeof(struct sigaction));
-    sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
-    action = ig->old_pipe_act;
-    /* ignore this signal */
-    action.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &action, NULL);
-  }
-}
-
-/*
- * sigpipe_restore() puts back the outside world's opinion of signal handler
- * and SIGPIPE handling. It MUST only be called after a corresponding
- * sigpipe_ignore() was used.
- */
-static void sigpipe_restore(struct sigpipe_ignore *ig)
-{
-  if(!ig->no_signal)
-    /* restore the outside state */
-    sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
-}
-
-#else
-/* for systems without sigaction */
-#define sigpipe_ignore(x,y) Curl_nop_stmt
-#define sigpipe_restore(x)  Curl_nop_stmt
-#define SIGPIPE_VARIABLE(x)
-#endif
 
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
