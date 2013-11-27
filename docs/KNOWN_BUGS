@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+86. The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3
+  and SMTP if a failure occures during the authentication phase of a
+  connection.
+
 85. Wrong STARTTRANSFER timer accounting for POST requests
   Timer works fine with GET requests, but while using POST the time for
   CURLINFO_STARTTRANSFER_TIME is wrong. While using POST
