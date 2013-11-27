@@ -1787,8 +1787,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
   struct SessionHandle *nextdata;
 
   if(GOOD_MULTI_HANDLE(multi)) {
-    SIGPIPE_VARIABLE(pipe);
     bool restore_pipe = FALSE;
+    SIGPIPE_VARIABLE(pipe);
 
     multi->type = 0; /* not good anymore */
 
