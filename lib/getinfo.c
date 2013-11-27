@@ -288,6 +288,9 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
       tlsinfo->ssl_backend = CURLSSLBACKEND_NONE;
       tlsinfo->internals = NULL;
 
+      if(!conn)
+        break;
+
       /* Find the active ("in use") SSL connection, if any */
       while((sockindex < sizeof(conn->ssl) / sizeof(conn->ssl[0])) &&
             (!conn->ssl[sockindex].use))
