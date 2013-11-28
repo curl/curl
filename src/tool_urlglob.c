@@ -40,16 +40,13 @@ typedef enum {
 
 void glob_cleanup(URLGlob* glob);
 
-static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount,
-                           char *fixed, size_t len)
+static GlobCode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
   pat->content.Set.size = 1;
   pat->content.Set.ptr_s = 0;
   pat->globindex = -1;
-
-  (*amount)++;
 
   pat->content.Set.elements = malloc(sizeof(char*));
 
@@ -314,6 +311,8 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
   GlobCode res = GLOB_OK;
   int globindex = 0; /* count "actual" globs */
 
+  *amount = 1;
+
   while(*pattern && !res) {
     char *buf = glob->glob_buffer;
     int sublen = 0;
@@ -337,12 +336,9 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
     if(sublen) {
       /* we got a literal string, add it as a single-item list */
       *buf = '\0';
-      res = glob_fixed(glob, amount, glob->glob_buffer, sublen);
+      res = glob_fixed(glob, glob->glob_buffer, sublen);
     }
     else {
-      if(!*amount)
-        *amount = 1;
-
       switch (*pattern) {
       case '\0': /* done  */
         break;
