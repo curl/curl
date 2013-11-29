@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -633,10 +633,8 @@ gtls_connect_step3(struct connectdata *conn,
     else
       infof(data, "\t server certificate verification OK\n");
   }
-  else {
+  else
     infof(data, "\t server certificate verification SKIPPED\n");
-    goto after_server_cert_verification;
-  }
 
   /* initialize an X.509 certificate structure. */
   gnutls_x509_crt_init(&x509_cert);
@@ -765,8 +763,6 @@ gtls_connect_step3(struct connectdata *conn,
   infof(data, "\t issuer: %s\n", certbuf);
 
   gnutls_x509_crt_deinit(x509_cert);
-
-after_server_cert_verification:
 
   /* compression algorithm (if any) */
   ptr = gnutls_compression_get_name(gnutls_compression_get(session));
