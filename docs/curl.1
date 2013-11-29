@@ -646,10 +646,10 @@ you can specify URLs that contain the letters {}[] without having them being
 interpreted by curl itself. Note that these letters are not normal legal URL
 contents but they should be encoded according to the URI standard.
 .IP "-G, --get"
-When used, this option will make all data specified with \fI-d, --data\fP or
-\fI--data-binary\fP to be used in an HTTP GET request instead of the POST
-request that otherwise would be used. The data will be appended to the URL
-with a '?' separator.
+When used, this option will make all data specified with \fI-d, --data\fP,
+\fI--data-binary\fP or \fI--data-urlencode\fP to be used in an HTTP GET
+request instead of the POST request that otherwise would be used. The data
+will be appended to the URL with a '?' separator.
 
 If used in combination with -I, the POST data will instead be appended to the
 URL with a HEAD request.
