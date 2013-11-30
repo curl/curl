@@ -115,14 +115,13 @@ CURLcode Curl_base64_decode(const char *src,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Calculate the number of quantums */
-  numQuantums = (length + equalsTerm) / 4;
+  numQuantums = srcLen / 4;
 
   /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - equalsTerm;
 
-  /* The buffer must be large enough to make room for the last quantum
-  (which may be partially thrown out) and the zero terminator. */
-  newstr = malloc(rawlen+4);
+  /* Allocate our buffer including room for a zero terminator */
+  newstr = malloc(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -135,16 +134,16 @@ CURLcode Curl_base64_decode(const char *src,
     newstr += 3; src += 4;
   }
 
-  /* This final decode may actually read slightly past the end of the buffer
-  if the input string is missing pad bytes.  This will almost always be
-  harmless. */
+  /* Decode the last quantum */
   decodeQuantum(lastQuantum, src);
   for(i = 0; i < 3 - equalsTerm; i++)
     newstr[i] = lastQuantum[i];
 
-  newstr[i] = '\0'; /* zero terminate */
+  /* Zero terminate */
+  newstr[i] = '\0';
 
-  *outlen = rawlen; /* return size of decoded data */
+  /* Return the size of decoded data */
+  *outlen = rawlen;
 
   return CURLE_OK;
 }
