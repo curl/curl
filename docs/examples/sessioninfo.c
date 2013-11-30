@@ -32,7 +32,7 @@ static CURL *curl;
 
 static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  const struct curl_tlsinfo *tlsinfo;
+  const struct curl_tlssessioninfo *info;
   unsigned int cert_list_size;
   const gnutls_datum_t *chainp;
   CURLcode res;
@@ -40,14 +40,13 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
   (void)stream;
   (void)ptr;
 
-  res = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &tlsinfo);
+  res = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info);
 
   if(!res) {
-    switch(tlsinfo->ssl_backend) {
+    switch(info->backend) {
     case CURLSSLBACKEND_GNUTLS:
-      /* tlsinfo->internals is now the gnutls_session_t */
-      chainp = gnutls_certificate_get_peers(tlsinfo->internals,
-                                            &cert_list_size);
+      /* info->internals is now the gnutls_session_t */
+      chainp = gnutls_certificate_get_peers(info->internals, &cert_list_size);
       if((chainp) && (cert_list_size)) {
         unsigned int i;
 
@@ -57,8 +56,7 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 
           if(GNUTLS_E_SUCCESS == gnutls_x509_crt_init(&cert)) {
             if(GNUTLS_E_SUCCESS ==
-               gnutls_x509_crt_import(cert, &chainp[i],
-                                      GNUTLS_X509_FMT_DER)) {
+               gnutls_x509_crt_import(cert, &chainp[i], GNUTLS_X509_FMT_DER)) {
               if(GNUTLS_E_SUCCESS ==
                  gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &dn)) {
                 fprintf(stderr, "Certificate #%d: %.*s", i, dn.size, dn.data);

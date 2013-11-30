@@ -1997,13 +1997,13 @@ typedef enum {
   CURLSSLBACKEND_CYASSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,
   CURLSSLBACKEND_DARWINSSL = 9
-} curl_ssl_backend;
+} curl_sslbackend;
 
 /* Information about the SSL library used and the respective internal SSL
    handle, which can be used to obtain further information regarding the
    connection. Asked for with CURLINFO_TLS_SESSION. */
-struct curl_tlsinfo {
-  curl_ssl_backend ssl_backend;
+struct curl_tlssessioninfo {
+  curl_sslbackend backend;
   void *internals;
 };
 

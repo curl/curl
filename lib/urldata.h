@@ -1637,8 +1637,8 @@ struct SessionHandle {
                                   other dynamic purposes */
   struct WildcardData wildcard; /* wildcard download state info */
   struct PureInfo info;        /* stats, reports and info data */
-  struct curl_tlsinfo tlsinfo; /* Information about the TLS session, only
-                                  valid after a client has asked for it */
+  struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
+                                     valid after a client has asked for it */
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   iconv_t outbound_cd;         /* for translating to the network encoding */
   iconv_t inbound_cd;          /* for translating from the network encoding */
