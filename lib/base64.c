@@ -68,11 +68,11 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
     }
   }
 
-  if(padding < 2)
+  if(padding < 1)
     dest[2] = curlx_ultouc(x & 0xFFUL);
 
   x >>= 8;
-  if(padding < 1)
+  if(padding < 2)
     dest[1] = curlx_ultouc(x & 0xFFUL);
 
   x >>= 8;
