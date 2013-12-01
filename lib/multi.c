@@ -1788,7 +1788,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
   if(GOOD_MULTI_HANDLE(multi)) {
     bool restore_pipe = FALSE;
-    SIGPIPE_VARIABLE(pipe);
+    SIGPIPE_VARIABLE(pipe_st);
 
     multi->type = 0; /* not good anymore */
 
@@ -1796,7 +1796,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     close_all_connections(multi);
 
     if(multi->closure_handle) {
-      sigpipe_ignore(multi->closure_handle, &pipe);
+      sigpipe_ignore(multi->closure_handle, &pipe_st);
       restore_pipe = TRUE;
 
       multi->closure_handle->dns.hostcache = multi->hostcache;
@@ -1844,7 +1844,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     free(multi);
     if(restore_pipe)
-      sigpipe_restore(&pipe);
+      sigpipe_restore(&pipe_st);
 
     return CURLM_OK;
   }
