@@ -68,9 +68,13 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
     }
   }
 
-  dest[2] = curlx_ultouc(x & 0xFFUL);
+  if(padding < 2)
+    dest[2] = curlx_ultouc(x & 0xFFUL);
+
   x >>= 8;
-  dest[1] = curlx_ultouc(x & 0xFFUL);
+  if(padding < 1)
+    dest[1] = curlx_ultouc(x & 0xFFUL);
+
   x >>= 8;
   dest[0] = curlx_ultouc(x & 0xFFUL);
 
@@ -94,23 +98,22 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 CURLcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen)
 {
-  size_t srcLen = 0;
+  size_t srclen = 0;
   size_t length = 0;
-  size_t equalsTerm = 0;
+  size_t padding = 0;
   size_t i;
   size_t result;
   size_t numQuantums;
-  unsigned char lastQuantum[3];
   size_t rawlen = 0;
   unsigned char *pos;
   unsigned char *newstr;
 
   *outptr = NULL;
   *outlen = 0;
-  srcLen = strlen(src);
+  srclen = strlen(src);
 
   /* Check the length of the input string is valid */
-  if(!srcLen || srcLen % 4)
+  if(!srclen || srclen % 4)
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Find the position of any = padding characters */
@@ -119,20 +122,20 @@ CURLcode Curl_base64_decode(const char *src,
 
   /* A maximum of two = padding characters is allowed */
   if(src[length] == '=') {
-    equalsTerm++;
-    if(src[length+equalsTerm] == '=')
-      equalsTerm++;
+    padding++;
+    if(src[length + 1] == '=')
+      padding++;
   }
 
   /* Check the = padding characters weren't part way through the input */
-  if(length + equalsTerm != srcLen)
+  if(length + padding != srclen)
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Calculate the number of quantums */
-  numQuantums = srcLen / 4;
+  numQuantums = srclen / 4;
 
   /* Calculate the size of the decoded string */
-  rawlen = (numQuantums * 3) - equalsTerm;
+  rawlen = (numQuantums * 3) - padding;
 
   /* Allocate our buffer including room for a zero terminator */
   newstr = malloc(rawlen + 1);
@@ -141,9 +144,8 @@ CURLcode Curl_base64_decode(const char *src,
 
   pos = newstr;
 
-  /* Decode all but the last quantum (which may not decode to a
-  multiple of 3 bytes) */
-  for(i = 0; i < numQuantums - 1; i++) {
+  /* Decode the quantums */
+  for(i = 0; i < numQuantums; i++) {
     result = decodeQuantum(pos, src);
     if(!result) {
       Curl_safefree(newstr);
@@ -155,19 +157,8 @@ CURLcode Curl_base64_decode(const char *src,
     src += 4;
   }
 
-  /* Decode the last quantum */
-  result = decodeQuantum(lastQuantum, src);
-  if(!result) {
-    Curl_safefree(newstr);
-
-    return CURLE_BAD_CONTENT_ENCODING;
-  }
-
-  for(i = 0; i < 3 - equalsTerm; i++)
-    pos[i] = lastQuantum[i];
-
   /* Zero terminate */
-  pos[i] = '\0';
+  *pos = '\0';
 
   /* Return the decoded data */
   *outptr = newstr;
