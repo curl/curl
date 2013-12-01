@@ -47,6 +47,10 @@ This release includes the following bugfixes:
  o darwinssl: PKCS#12 import feature now requires Lion or later [14]
  o darwinssl: check for SSLSetSessionOption() presence when toggling BEAST
  o configure: Fix test with -Werror=implicit-function-declaration [15]
+ o sigpipe: factor out sigpipe_reset from easy.c
+ o curl_multi_cleanup: ignore SIGPIPE
+ o globbing: curl glob counter mismatch with {} list use [16]
+ o parseconfig: dash options can't specified with colon or equals [17]
 
 This release includes the following known bugs:
 
@@ -61,7 +65,7 @@ advice from friends like these:
  Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
  Paul Marks, Rémy Léone, Marcin Gryszkalis, Felix Yan, Z98, Andreas Rieke,
  Kim Vandry, Tomas Hoger, Michael Osipov, myriachan, Yaakov Selkowitz,
- Fabian Keil, Christian Grothoff
+ Fabian Keil, Christian Grothoff, Jeff King
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -82,3 +86,5 @@ References to bug reports and discussions on issues:
  [13] = http://sourceforge.net/p/curl/bugs/1299
  [14] = http://curl.haxx.se/mail/lib-2013-11/0076.html
  [15] = http://curl.haxx.se/bug/view.cgi?id=1304
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1305
+ [17] = http://curl.haxx.se/bug/view.cgi?id=1297
