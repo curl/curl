@@ -40,22 +40,32 @@
 static const char table64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static void decodeQuantum(unsigned char *dest, const char *src)
+static size_t decodeQuantum(unsigned char *dest, const char *src)
 {
+  size_t padding = 0;
   const char *s, *p;
   unsigned long i, v, x = 0;
 
   for(i = 0, s = src; i < 4; i++, s++) {
     v = 0;
-    p = table64;
-    while(*p && (*p != *s)) {
-      v++;
-      p++;
-    }
-    if(*p == *s)
-      x = (x << 6) + v;
-    else if(*s == '=')
+
+    if(*s == '=') {
       x = (x << 6);
+      padding++;
+    }
+    else {
+      p = table64;
+
+      while(*p && (*p != *s)) {
+        v++;
+        p++;
+      }
+
+      if(*p == *s)
+        x = (x << 6) + v;
+      else
+        return 0;
+    }
   }
 
   dest[2] = curlx_ultouc(x & 0xFFUL);
@@ -63,6 +73,8 @@ static void decodeQuantum(unsigned char *dest, const char *src)
   dest[1] = curlx_ultouc(x & 0xFFUL);
   x >>= 8;
   dest[0] = curlx_ultouc(x & 0xFFUL);
+
+  return 3 - padding;
 }
 
 /*
@@ -86,9 +98,11 @@ CURLcode Curl_base64_decode(const char *src,
   size_t length = 0;
   size_t equalsTerm = 0;
   size_t i;
+  size_t result;
   size_t numQuantums;
   unsigned char lastQuantum[3];
   size_t rawlen = 0;
+  unsigned char *pos;
   unsigned char *newstr;
 
   *outptr = NULL;
@@ -125,24 +139,38 @@ CURLcode Curl_base64_decode(const char *src,
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
-  *outptr = newstr;
+  pos = newstr;
 
   /* Decode all but the last quantum (which may not decode to a
   multiple of 3 bytes) */
   for(i = 0; i < numQuantums - 1; i++) {
-    decodeQuantum(newstr, src);
-    newstr += 3; src += 4;
+    result = decodeQuantum(pos, src);
+    if(!result) {
+      Curl_safefree(newstr);
+
+      return CURLE_BAD_CONTENT_ENCODING;
+    }
+
+    pos += result;
+    src += 4;
   }
 
   /* Decode the last quantum */
-  decodeQuantum(lastQuantum, src);
+  result = decodeQuantum(lastQuantum, src);
+  if(!result) {
+    Curl_safefree(newstr);
+
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+
   for(i = 0; i < 3 - equalsTerm; i++)
-    newstr[i] = lastQuantum[i];
+    pos[i] = lastQuantum[i];
 
   /* Zero terminate */
-  newstr[i] = '\0';
+  pos[i] = '\0';
 
-  /* Return the size of decoded data */
+  /* Return the decoded data */
+  *outptr = newstr;
   *outlen = rawlen;
 
   return CURLE_OK;
