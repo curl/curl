@@ -30,6 +30,8 @@
 #define MULTI_TIMEOUT_INACCURACY 3000
 #endif
 
+#define MULTI_TIMEOUT_INACCURACY_MS (MULTI_TIMEOUT_INACCURACY / 1000)
+
 /*
  * Prototypes for library-wide functions provided by multi.c
  */

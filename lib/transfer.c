@@ -1309,10 +1309,11 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
-      Curl_expire(data, data->set.timeout);
+      Curl_expire(data, data->set.timeout + MULTI_TIMEOUT_INACCURACY_MS);
 
     if(data->set.connecttimeout)
-      Curl_expire(data, data->set.connecttimeout);
+      Curl_expire(data, data->set.connecttimeout +
+                  MULTI_TIMEOUT_INACCURACY_MS);
 
     /* In case the handle is re-used and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
