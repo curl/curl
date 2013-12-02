@@ -77,9 +77,7 @@ PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 
 PRLock * nss_initlock = NULL;
 PRLock * nss_crllock = NULL;
-#ifdef HAVE_NSS_INITCONTEXT
 NSSInitContext * nss_context = NULL;
-#endif
 
 volatile int initialized = 0;
 
@@ -893,7 +891,6 @@ isTLSIntoleranceError(PRInt32 err)
 
 static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
 {
-#ifdef HAVE_NSS_INITCONTEXT
   NSSInitParameters initparams;
 
   if(nss_context != NULL)
@@ -901,12 +898,6 @@ static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
 
   memset((void *) &initparams, '\0', sizeof(initparams));
   initparams.length = sizeof(initparams);
-#else /* HAVE_NSS_INITCONTEXT */
-  SECStatus rv;
-
-  if(NSS_IsInitialized())
-    return CURLE_OK;
-#endif
 
   if(cert_dir) {
     const bool use_sql = NSS_VersionCheck("3.12.0");
@@ -915,35 +906,22 @@ static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
       return CURLE_OUT_OF_MEMORY;
 
     infof(data, "Initializing NSS with certpath: %s\n", certpath);
-#ifdef HAVE_NSS_INITCONTEXT
     nss_context = NSS_InitContext(certpath, "", "", "", &initparams,
             NSS_INIT_READONLY | NSS_INIT_PK11RELOAD);
     free(certpath);
 
     if(nss_context != NULL)
       return CURLE_OK;
-#else /* HAVE_NSS_INITCONTEXT */
-    rv = NSS_Initialize(certpath, "", "", "", NSS_INIT_READONLY);
-    free(certpath);
-
-    if(rv == SECSuccess)
-      return CURLE_OK;
-#endif
 
     infof(data, "Unable to initialize NSS database\n");
   }
 
   infof(data, "Initializing NSS with certpath: none\n");
-#ifdef HAVE_NSS_INITCONTEXT
   nss_context = NSS_InitContext("", "", "", "", &initparams, NSS_INIT_READONLY
          | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
          | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
   if(nss_context != NULL)
     return CURLE_OK;
-#else /* HAVE_NSS_INITCONTEXT */
-  if(NSS_NoDB_Init(NULL) == SECSuccess)
-    return CURLE_OK;
-#endif
 
   infof(data, "Unable to initialize NSS\n");
   return CURLE_SSL_CACERT_BADFILE;
@@ -1039,12 +1017,8 @@ void Curl_nss_cleanup(void)
       SECMOD_DestroyModule(mod);
       mod = NULL;
     }
-#ifdef HAVE_NSS_INITCONTEXT
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
-#else /* HAVE_NSS_INITCONTEXT */
-    NSS_Shutdown();
-#endif
   }
   PR_Unlock(nss_initlock);
 
