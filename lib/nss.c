@@ -1191,13 +1191,10 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
-    sslver->min = SSL_LIBRARY_VERSION_3_0;
     if(data->state.ssl_connect_retry) {
       infof(data, "TLS disabled due to previous handshake failure\n");
       sslver->max = SSL_LIBRARY_VERSION_3_0;
     }
-    else
-      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
     return CURLE_OK;
 
   case CURL_SSLVERSION_TLSv1:
@@ -1251,7 +1248,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   PRErrorCode err = 0;
   PRFileDesc *model = NULL;
-  SSLVersionRange sslver;
   PRBool ssl_no_cache;
   PRBool ssl_cbc_random_iv;
   struct SessionHandle *data = conn->data;
@@ -1262,6 +1258,11 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   PRSocketOptionData sock_opt;
   long time_left;
   PRUint32 timeout;
+
+  SSLVersionRange sslver = {
+    SSL_LIBRARY_VERSION_3_0,      /* min */
+    SSL_LIBRARY_VERSION_TLS_1_0   /* max */
+  };
 
   if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
