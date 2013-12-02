@@ -54,9 +54,7 @@
 #  define MD5_CTX    void *
 #  define SHA_CTX    void *
 #  define SHA256_CTX void *
-#  ifdef HAVE_NSS_INITCONTEXT
-     static NSSInitContext *nss_context;
-#  endif
+   static NSSInitContext *nss_context;
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
@@ -240,7 +238,6 @@ static int nss_hash_init(void **pctx, SECOidTag hash_alg)
   PK11Context *ctx;
 
   /* we have to initialize NSS if not initialized alraedy */
-#ifdef HAVE_NSS_INITCONTEXT
   if(!NSS_IsInitialized() && !nss_context) {
     static NSSInitParameters params;
     params.length = sizeof params;
@@ -248,7 +245,6 @@ static int nss_hash_init(void **pctx, SECOidTag hash_alg)
         | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
         | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
   }
-#endif
 
   ctx = PK11_CreateDigestContext(hash_alg);
   if(!ctx)
@@ -894,7 +890,7 @@ void clean_metalink(struct Configurable *config)
 
 void metalink_cleanup(void)
 {
-#if defined(USE_NSS) && defined(HAVE_NSS_INITCONTEXT)
+#ifdef USE_NSS
   if(nss_context) {
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
