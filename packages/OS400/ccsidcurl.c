@@ -648,7 +648,8 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
 
     case CURLINFO_SLIST:
       ccsid = va_arg(arg, unsigned int);
-      if(info == CURLINFO_CERTINFO) {
+      switch (info) {
+      case CURLINFO_CERTINFO:
         cipf = *(struct curl_certinfo * *) paramp;
         if(cipf) {
           if(!(cipt = (struct curl_certinfo *) malloc(sizeof *cipt)))
@@ -679,12 +680,18 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
 
           *(struct curl_certinfo * *) paramp = cipt;
         }
-      }
-      else {
+
+        break;
+
+      case CURLINFO_TLS_SESSION:
+        break;
+
+      default:
         slp = (struct curl_slist * *) paramp;
         if(*slp)
           if(!(*slp = slist_convert(ccsid, *slp, ASCII_CCSID)))
             ret = CURLE_OUT_OF_MEMORY;
+        break;
       }
     }
 

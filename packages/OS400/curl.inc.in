@@ -1349,9 +1349,34 @@
      d                 c                   X'00100029'
      d  CURLINFO_LOCAL_PORT...                                                  CURLINFO_LONG + 42
      d                 c                   X'0020002A'
+     d  CURLINFO_TLS_SESSION...                                                 CURLINFO_SLIST + 43
+     d                 c                   X'0040002B'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
+      *
+     d curl_sslbackend...
+     d                 s             10i 0 based(######ptr######)               Enum
+     d  CURLSSLBACKEND_NONE...
+     d                 c                   0
+     d  CURLSSLBACKEND_OPENSSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_GNUTLS...
+     d                 c                   2
+     d  CURLSSLBACKEND_NSS...
+     d                 c                   3
+     d  CURLSSLBACKEND_QSOSSL...
+     d                 c                   4
+     d  CURLSSLBACKEND_GSKIT...
+     d                 c                   5
+     d  CURLSSLBACKEND_POLARSSL...
+     d                 c                   6
+     d  CURLSSLBACKEND_CYASSL...
+     d                 c                   7
+     d  CURLSSLBACKEND_SCHANNEL...
+     d                 c                   8
+     d  CURLSSLBACKEND_DARWINSSL...
+     d                 c                   9
       *
      d curl_closepolicy...
      d                 s             10i 0 based(######ptr######)               Enum
@@ -1644,6 +1669,12 @@
      d  user                           *                                        char *
      d  group                          *                                        char *
      d  target                         *                                        char *
+      *
+     d curl_tlssessioninfo...
+     d                 ds                  based(######ptr######)
+     d                                     qualified
+     d  backend                            like(curl_sslbackend)
+     d  internals                      *                                        void *
       *
      d curl_fileinfo   ds                  based(######ptr######)
      d                                     qualified
