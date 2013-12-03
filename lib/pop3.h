@@ -93,7 +93,7 @@ extern const struct Curl_handler Curl_handler_pop3s;
 
 /* Authentication type values */
 #define POP3_TYPE_NONE      0
-#define POP3_TYPE_ANY       ~0
+#define POP3_TYPE_ANY       ~0U
 
 /* This is the 5-bytes End-Of-Body marker for POP3 */
 #define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
