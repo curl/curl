@@ -827,7 +827,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     }
 
     failf(data, "Failed to connect to %s port %ld: %s",
-          conn->host.name, conn->port, Curl_strerror(conn, error));
+          conn->bits.proxy?conn->proxy.name:conn->host.name,
+          conn->port, Curl_strerror(conn, error));
   }
 
   return code;
