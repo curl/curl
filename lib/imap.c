@@ -584,8 +584,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
     return result;
   }
 
-  /* Calculate the supported authentication mechanism by decreasing order of
-     security */
+  /* Calculate the supported authentication mechanism, by decreasing order of
+     security, as well as the initial response where appropriate */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if((imapc->authmechs & SASL_MECH_DIGEST_MD5) &&
      (imapc->prefmech & SASL_MECH_DIGEST_MD5)) {

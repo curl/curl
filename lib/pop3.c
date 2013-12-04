@@ -601,8 +601,8 @@ static CURLcode pop3_perform_authenticate(struct connectdata *conn)
     return result;
   }
 
-  /* Calculate the supported authentication mechanism by decreasing order of
-     security */
+  /* Calculate the supported authentication mechanism, by decreasing order of
+     security, as well as the initial response where appropriate */
   if(pop3c->authtypes & POP3_TYPE_SASL) {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     if((pop3c->authmechs & SASL_MECH_DIGEST_MD5) &&
@@ -1625,12 +1625,12 @@ static CURLcode pop3_perform(struct connectdata *conn, bool *connected,
 {
   /* This is POP3 and no proxy */
   CURLcode result = CURLE_OK;
+  struct POP3 *pop3 = conn->data->req.protop;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
   if(conn->data->set.opt_no_body) {
     /* Requested no body means no transfer */
-    struct POP3 *pop3 = conn->data->req.protop;
     pop3->transfer = FTPTRANSFER_INFO;
   }
 
