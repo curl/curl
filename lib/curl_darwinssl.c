@@ -834,7 +834,7 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
   return server_cert_summary;
 }
 
-#if CURL_SUPPORT_MAC_10_7
+#if CURL_SUPPORT_MAC_10_6
 /* The SecKeychainSearch API was deprecated in Lion, and using it will raise
    deprecation warnings, so let's not compile this unless it's necessary: */
 static OSStatus CopyIdentityWithLabelOldSchool(char *label,
@@ -874,7 +874,7 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
     CFRelease(search);
   return status;
 }
-#endif /* CURL_SUPPORT_MAC_10_7 */
+#endif /* CURL_SUPPORT_MAC_10_6 */
 
 static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
@@ -914,12 +914,12 @@ static OSStatus CopyIdentityWithLabel(char *label,
     CFRelease(query_dict);
   }
   else {
-#if CURL_SUPPORT_MAC_10_7
+#if CURL_SUPPORT_MAC_10_6
     /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
 #endif /* CURL_SUPPORT_MAC_10_7 */
   }
-#elif CURL_SUPPORT_MAC_10_7
+#elif CURL_SUPPORT_MAC_10_6
   /* For developers building on older cats, we have no choice but to fall back
      to SecKeychainSearch. */
   status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
