@@ -302,6 +302,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   /* We have a Digest setup for this, use it!  Now, to get all the details for
      this sorted out, I must urge you dear friend to read up on the RFC2617
      section 3.2.2, */
+  size_t urilen;
   unsigned char md5buf[16]; /* 16 bytes/128 bits */
   unsigned char request_digest[33];
   unsigned char *md5this;
@@ -436,13 +437,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
      Further details on Digest implementation differences:
      http://www.fngtps.com/2006/09/http-authentication
   */
-  if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
-    md5this = (unsigned char *)aprintf("%s:%.*s", request,
-                                       curlx_sztosi(tmp - (char *)uripath),
-                                       uripath);
-  }
+
+  if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL))
+    urilen = tmp - (char *)uripath;
   else
-    md5this = (unsigned char *)aprintf("%s:%s", request, uripath);
+    urilen = strlen((char *)uripath);
+
+  md5this = (unsigned char *)aprintf("%s:%.*s", request, urilen, uripath);
 
   if(d->qop && Curl_raw_equal(d->qop, "auth-int")) {
     /* We don't support auth-int for PUT or POST at the moment.
@@ -507,7 +508,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "username=\"%s\", "
                "realm=\"%s\", "
                "nonce=\"%s\", "
-               "uri=\"%s\", "
+               "uri=\"%.*s\", "
                "cnonce=\"%s\", "
                "nc=%08x, "
                "qop=%s, "
@@ -516,7 +517,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                userp_quoted,
                d->realm,
                d->nonce,
-               uripath, /* this is the PATH part of the URL */
+               urilen, uripath, /* this is the PATH part of the URL */
                d->cnonce,
                d->nc,
                d->qop,
@@ -533,13 +534,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "username=\"%s\", "
                "realm=\"%s\", "
                "nonce=\"%s\", "
-               "uri=\"%s\", "
+               "uri=\"%.*s\", "
                "response=\"%s\"",
                proxy?"Proxy-":"",
                userp_quoted,
                d->realm,
                d->nonce,
-               uripath, /* this is the PATH part of the URL */
+               urilen, uripath, /* this is the PATH part of the URL */
                request_digest);
   }
   Curl_safefree(userp_quoted);
