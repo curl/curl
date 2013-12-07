@@ -52,6 +52,10 @@ This release includes the following bugfixes:
  o curl_multi_cleanup: ignore SIGPIPE
  o globbing: curl glob counter mismatch with {} list use [16]
  o parseconfig: dash options can't specified with colon or equals [17]
+ o digest: fix CURLAUTH_DIGEST_IE [19]
+ o curl.h: <sys/select.h> for OpenBSD [20]
+ o darwinssl: Fix #if 10.6.0 for SecKeychainSearch
+ o TFTP: fix return codes for connect timeout [21]
 
 This release includes the following known bugs:
 
@@ -60,13 +64,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Nick Zitzmann, Gergely Nagy, Alessandro Ghedini, Dave Reisner,
- Ishan SinghLevett, Tyler Hall, Paul Donohue, David Walser, Steve Holme,
- Kamil Dudka, Oliver Kuckertz, Gisle Vanem, Javier Barroso, Chris Conlon,
- Romulo Ceccon, Patrick Monnerat, Björn Stenberg, Patrick Monnerat,
- Paul Marks, Rémy Léone, Marcin Gryszkalis, Felix Yan, Z98, Andreas Rieke,
- Kim Vandry, Tomas Hoger, Michael Osipov, myriachan, Yaakov Selkowitz,
- Fabian Keil, Christian Grothoff, Jeff King
+ Alessandro Ghedini, Andreas Rieke, Björn Stenberg, Chris Conlon,
+ Christian Grothoff, Christian Weisgerber, Dave Reisner, David Walser,
+ Dima Tisnek, Fabian Keil, Felix Yan, Gergely Nagy, Gisle Vanem,
+ Ishan SinghLevett, James Dury, Javier Barroso, Jeff King, Kamil Dudka,
+ Kim Vandry, Marcin Gryszkalis, Melissa Mears, Michael Osipov, Nick Zitzmann,
+ Oliver Kuckertz, Patrick Monnerat, Paul Donohue, Paul Marks, Romulo A. Ceccon,
+ Romulo Ceccon, Rémy Léone, Sergey Tatarincev, Steve Holme, Tomas Hoger,
+ Tyler Hall, Yaakov Selkowitz
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -90,3 +95,6 @@ References to bug reports and discussions on issues:
  [16] = http://curl.haxx.se/bug/view.cgi?id=1305
  [17] = http://curl.haxx.se/bug/view.cgi?id=1297
  [18] = http://curl.haxx.se/mail/lib-2013-11/0162.html
+ [19] = http://curl.haxx.se/bug/view.cgi?id=1308
+ [20] = http://curl.haxx.se/mail/lib-2013-12/0017.html
+ [21] = http://curl.haxx.se/bug/view.cgi?id=1310
