@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -526,7 +526,7 @@ static int parsedate(const char *date, time_t *output)
     /* Add the time zone diff between local time zone and GMT. */
     long delta = (long)(tzoff!=-1?tzoff:0);
 
-    if((delta>0) && (t + delta < t))
+    if((delta>0) && (t > LONG_MAX  - delta))
       return -1; /* time_t overflow */
 
     t += delta;
