@@ -653,7 +653,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
   }
 
   if(!result) {
-    if(mech) {
+    if(mech && (imapc->preftype & IMAP_TYPE_SASL)) {
       /* Perform SASL based authentication */
       if(initresp) {
         result = imap_sendf(conn, "AUTHENTICATE %s %s", mech, initresp);
@@ -670,7 +670,8 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn)
 
       Curl_safefree(initresp);
     }
-    else if(!imapc->login_disabled)
+    else if((!imapc->login_disabled) &&
+            (imapc->preftype & IMAP_TYPE_CLEARTEXT))
       /* Perform clear text authentication */
       result = imap_perform_login(conn);
     else {
@@ -1837,7 +1838,8 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
   pp->endofresp = imap_endofresp;
   pp->conn = conn;
 
-  /* Set the default preferred authentication mechanism */
+  /* Set the default preferred authentication type and mechanism */
+  imapc->preftype = IMAP_TYPE_ANY;
   imapc->prefmech = SASL_AUTH_ANY;
 
   /* Initialise the pingpong layer */
@@ -2331,24 +2333,42 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
     if(strnequal(key, "AUTH", 4)) {
       const char *value = ptr + 1;
 
-      if(strequal(value, "*"))
+      if(strequal(value, "*")) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_AUTH_ANY;
-      else if(strequal(value, SASL_MECH_STRING_LOGIN))
+      }
+      else if(strequal(value, SASL_MECH_STRING_LOGIN)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_LOGIN;
-      else if(strequal(value, SASL_MECH_STRING_PLAIN))
+      }
+      else if(strequal(value, SASL_MECH_STRING_PLAIN)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_PLAIN;
-      else if(strequal(value, SASL_MECH_STRING_CRAM_MD5))
+      }
+      else if(strequal(value, SASL_MECH_STRING_CRAM_MD5)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_CRAM_MD5;
-      else if(strequal(value, SASL_MECH_STRING_DIGEST_MD5))
+      }
+      else if(strequal(value, SASL_MECH_STRING_DIGEST_MD5)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_DIGEST_MD5;
-      else if(strequal(value, SASL_MECH_STRING_GSSAPI))
+      }
+      else if(strequal(value, SASL_MECH_STRING_GSSAPI)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_GSSAPI;
-      else if(strequal(value, SASL_MECH_STRING_NTLM))
+      }
+      else if(strequal(value, SASL_MECH_STRING_NTLM)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_NTLM;
-      else if(strequal(value, SASL_MECH_STRING_XOAUTH2))
+      }
+      else if(strequal(value, SASL_MECH_STRING_XOAUTH2)) {
+        imapc->preftype = IMAP_TYPE_SASL;
         imapc->prefmech = SASL_MECH_XOAUTH2;
-      else
+      }
+      else {
+        imapc->preftype = IMAP_TYPE_NONE;
         imapc->prefmech = SASL_AUTH_NONE;
+      }
     }
     else
       result = CURLE_URL_MALFORMAT;
