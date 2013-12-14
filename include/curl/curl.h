@@ -1569,7 +1569,7 @@ typedef enum {
   CINIT(DNS_LOCAL_IP6, OBJECTPOINT, 223),
 
   /* Set authentication options directly */
-  CINIT(OPTIONS, OBJECTPOINT, 224),
+  CINIT(LOGIN_OPTIONS, OBJECTPOINT, 224),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

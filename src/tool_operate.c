@@ -1051,6 +1051,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_NETRC_FILE, config->netrc_file);
 
         my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii?1L:0L);
+        if(config->login_options)
+          my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
         my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt_str(curl, CURLOPT_RANGE, config->range);
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);

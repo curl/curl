@@ -1165,22 +1165,22 @@ authentication. You should not use this option together with the (older)
 CURLOPT_USERPWD option.
 
 To specify the password and login options, along with the user name, use the
-\fICURLOPT_PASSWORD\fP and \fICURLOPT_OPTIONS\fP options or alternatively use
-the older \CURLOPT_USERPWD\fP option instead. (Added in 7.19.1)
+\fICURLOPT_PASSWORD\fP and \fICURLOPT_LOGIN_OPTIONS\fP options. (Added in
+7.19.1)
 .IP CURLOPT_PASSWORD
 Pass a char * as parameter, which should be pointing to the zero terminated
 password to use for the transfer.
 
 The CURLOPT_PASSWORD option should be used in conjunction with the
 \fICURLOPT_USERNAME\fP option. (Added in 7.19.1)
-.IP CURLOPT_OPTIONS
+.IP CURLOPT_LOGIN_OPTIONS
 Pass a char * as parameter, which should be pointing to the zero terminated
 options string to use for the transfer.
 
-\CURLOPT_OPTIONS\fP can be used to set protocol specific authentication options,
-such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*", and
-should be used in conjunction with the \fICURLOPT_USERNAME\fP option. (Added in
-7.34.0)
+\CURLOPT_LOGIN_OPTIONS\fP can be used to set protocol specific login options,
+such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
+and should be used in conjunction with the \fICURLOPT_USERNAME\fP option.
+(Added in 7.34.0)
 .IP CURLOPT_PROXYUSERNAME
 Pass a char * as parameter, which should be pointing to the zero terminated
 user name to use for the transfer while connecting to Proxy.

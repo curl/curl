@@ -299,13 +299,11 @@ static CURLcode setstropt(char **charp, char *s)
   return CURLE_OK;
 }
 
-static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
-                                  char **optionsp)
+static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 {
   CURLcode result = CURLE_OK;
   char *user = NULL;
   char *passwd = NULL;
-  char *options = NULL;
 
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
@@ -313,7 +311,7 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
     result = parse_login_details(option, strlen(option),
                                  (userp ? &user : NULL),
                                  (passwdp ? &passwd : NULL),
-                                 (optionsp ? &options : NULL));
+                                 NULL);
   }
 
   if(!result) {
@@ -334,12 +332,6 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
     if(passwdp) {
       Curl_safefree(*passwdp);
       *passwdp = passwd;
-    }
-
-    /* Store the options part of option if required */
-    if(optionsp) {
-      Curl_safefree(*optionsp);
-      *optionsp = options;
     }
   }
 
@@ -1553,12 +1545,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_USERPWD:
     /*
-     * user:password;options to use in the operation
+     * user:password to use in the operation
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_USERNAME],
-                               &data->set.str[STRING_PASSWORD],
-                               &data->set.str[STRING_OPTIONS]);
+                               &data->set.str[STRING_PASSWORD]);
     break;
 
   case CURLOPT_USERNAME:
@@ -1577,7 +1568,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                        va_arg(param, char *));
     break;
 
-  case CURLOPT_OPTIONS:
+  case CURLOPT_LOGIN_OPTIONS:
     /*
      * authentication options to use in the operation
      */
@@ -1662,7 +1653,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD], NULL);
+                               &data->set.str[STRING_PROXYPASSWORD]);
     break;
   case CURLOPT_PROXYUSERNAME:
     /*

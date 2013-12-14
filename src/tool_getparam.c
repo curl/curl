@@ -218,6 +218,7 @@ static const struct LongShort aliases[]= {
   {"El", "tlspassword",              TRUE},
   {"Em", "tlsauthtype",              TRUE},
   {"En", "ssl-allow-beast",          FALSE},
+  {"Eo", "login-options",            TRUE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1366,10 +1367,15 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
-      case 'n': /* no empty SSL fragments */
+      case 'n': /* no empty SSL fragments, --ssl-allow-beast */
         if(curlinfo->features & CURL_VERSION_SSL)
           config->ssl_allow_beast = toggle;
         break;
+
+      case 'o': /* --login-options */
+        GetStr(&config->login_options, nextarg);
+        break;
+
       default: /* certificate file */
       {
         char *certname, *passphrase;
@@ -1687,7 +1693,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
     break;
     case 'u':
-      /* user:password;options  */
+      /* user:password  */
       GetStr(&config->userpwd, nextarg);
       cleanarg(nextarg);
       break;

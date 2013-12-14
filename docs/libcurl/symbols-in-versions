@@ -395,6 +395,7 @@ CURLOPT_KRB4LEVEL               7.3           7.17.0
 CURLOPT_KRBLEVEL                7.16.4
 CURLOPT_LOCALPORT               7.15.2
 CURLOPT_LOCALPORTRANGE          7.15.2
+CURLOPT_LOGIN_OPTIONS           7.34.0
 CURLOPT_LOW_SPEED_LIMIT         7.1
 CURLOPT_LOW_SPEED_TIME          7.1
 CURLOPT_MAIL_AUTH               7.25.0
@@ -418,7 +419,6 @@ CURLOPT_NOSIGNAL                7.10
 CURLOPT_NOTHING                 7.1.1         7.11.1      7.11.0
 CURLOPT_OPENSOCKETDATA          7.17.1
 CURLOPT_OPENSOCKETFUNCTION      7.17.1
-CURLOPT_OPTIONS                 7.34.0
 CURLOPT_PASSWDDATA              7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWDFUNCTION          7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWORD                7.19.1

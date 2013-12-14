@@ -74,6 +74,7 @@ struct Configurable {
                     0 => -s is used to NOT show errors
                     1 => -S has been used to show errors */
   char *userpwd;
+  char *login_options;
   char *tls_username;
   char *tls_password;
   char *tls_authtype;
