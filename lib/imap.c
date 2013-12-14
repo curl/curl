@@ -2334,7 +2334,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
       const char *value = ptr + 1;
 
       if(strequal(value, "*")) {
-        imapc->preftype = IMAP_TYPE_SASL;
+        imapc->preftype = IMAP_TYPE_ANY;
         imapc->prefmech = SASL_AUTH_ANY;
       }
       else if(strequal(value, SASL_MECH_STRING_LOGIN)) {
