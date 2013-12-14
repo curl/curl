@@ -17,6 +17,8 @@ This release includes the following changes:
  o smtp: Added support for additional SMTP commands
  o curl_easy_getinfo: Added CURLINFO_TLS_SESSION for accessing TLS internals
  o nss: allow to use TLS > 1.0 if built against recent NSS [18]
+ o SECURITY: added this document to describe our security processes [22]
+ o parseconfig: warn if unquoted white spaces are detected
 
 This release includes the following bugfixes:
 
@@ -56,6 +58,9 @@ This release includes the following bugfixes:
  o curl.h: <sys/select.h> for OpenBSD [20]
  o darwinssl: Fix #if 10.6.0 for SecKeychainSearch
  o TFTP: fix return codes for connect timeout [21]
+ o login options: remove the ;[options] support from CURLOPT_USERPWD [23]
+ o imap: Fixed incorrect fallback to clear text authentication
+ o parsedate: avoid integer overflow
 
 This release includes the following known bugs:
 
@@ -71,7 +76,7 @@ advice from friends like these:
  Kim Vandry, Marcin Gryszkalis, Melissa Mears, Michael Osipov, Nick Zitzmann,
  Oliver Kuckertz, Patrick Monnerat, Paul Donohue, Paul Marks, Romulo A. Ceccon,
  Romulo Ceccon, Rémy Léone, Sergey Tatarincev, Steve Holme, Tomas Hoger,
- Tyler Hall, Yaakov Selkowitz
+ Tyler Hall, Yaakov Selkowitz, Eric Lubin, Petr Bahula
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -98,3 +103,5 @@ References to bug reports and discussions on issues:
  [19] = http://curl.haxx.se/bug/view.cgi?id=1308
  [20] = http://curl.haxx.se/mail/lib-2013-12/0017.html
  [21] = http://curl.haxx.se/bug/view.cgi?id=1310
+ [22] = http://curl.haxx.se/dev/security.html
+ [23] = http://curl.haxx.se/bug/view.cgi?id=1311
