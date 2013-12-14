@@ -1131,7 +1131,7 @@ option is omitted, and \fICURLOPT_NETRC\fP is set, libcurl will attempt to
 find a .netrc file in the current user's home directory. (Added in 7.10.9)
 .IP CURLOPT_USERPWD
 Pass a char * as parameter, pointing to a zero terminated login details string
-for the connection. The format of which is: [user name]:[password];[options].
+for the connection. The format of which is: [user name]:[password].
 
 When using NTLM, you can set the domain by prepending it to the user name and
 separating the domain and name with a forward (/) or backward slash (\\). Like
@@ -1145,15 +1145,18 @@ and password information to hosts using the initial host name (unless
 other hosts it will not send the user and password to those. This is enforced
 to prevent accidental information leakage.
 
-At present only IMAP, POP3 and SMTP support login options as part of the
-details string. For more information about the login options please see
-RFC2384, RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.31.0).
-
 Use \fICURLOPT_HTTPAUTH\fP to specify the authentication method for HTTP based
-connections.
+connections or \fICURLOPT_LOGIN_OPTIONS\fP to control IMAP, POP3 and SMTP
+options.
+
+The user and password strings are not URL decoded, so there's no way to send
+in a user name containing a colon using this option. Use \fCURLOPT_USERNAME\fP
+for that, or include it in the URL.
 .IP CURLOPT_PROXYUSERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
-the connection to the HTTP proxy.
+the connection to the HTTP proxy. Both the name and the password will be URL
+decoded before use, so to include for example a colon in the user name you
+should encode it as %3A.
 
 Use \fICURLOPT_PROXYAUTH\fP to specify the authentication method.
 .IP CURLOPT_USERNAME
@@ -1174,13 +1177,16 @@ password to use for the transfer.
 The CURLOPT_PASSWORD option should be used in conjunction with the
 \fICURLOPT_USERNAME\fP option. (Added in 7.19.1)
 .IP CURLOPT_LOGIN_OPTIONS
-Pass a char * as parameter, which should be pointing to the zero terminated
-options string to use for the transfer.
+(Added in 7.34.0) Pass a char * as parameter, which should be pointing to the
+zero terminated options string to use for the transfer.
+
+At present only IMAP, POP3 and SMTP support login options. For more
+information about the login options please see RFC2384, RFC5092 and IETF draft
+draft-earhart-url-smtp-00.txt
 
 \CURLOPT_LOGIN_OPTIONS\fP can be used to set protocol specific login options,
 such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
 and should be used in conjunction with the \fICURLOPT_USERNAME\fP option.
-(Added in 7.34.0)
 .IP CURLOPT_PROXYUSERNAME
 Pass a char * as parameter, which should be pointing to the zero terminated
 user name to use for the transfer while connecting to Proxy.
