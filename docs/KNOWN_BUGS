@@ -3,6 +3,14 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+87. -J/--remote-header-name doesn't decode %-encoded file names. RFC6266
+  details how it should be done. The can of worm is basically that we have no
+  charset handling in curl and ascii >=128 is a challenge for us. Not to
+  mention that decoding also means that we need to check for nastyness that is
+  attempted, like "../" sequences and the like. Probably everything to the left
+  of any embedded slashes should be cut off.
+  http://curl.haxx.se/bug/view.cgi?id=1294
+
 86. The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3
   and SMTP if a failure occures during the authentication phase of a
   connection.

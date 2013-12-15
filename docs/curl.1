@@ -711,6 +711,9 @@ cookies when they're closed down.
 (HTTP) This option tells the \fI-O, --remote-name\fP option to use the
 server-specified Content-Disposition filename instead of extracting a filename
 from the URL.
+
+There's no attempt to decode %-sequences (yet) in the provided file name, so
+this option may provide you with rather unexpected file names.
 .IP "-k, --insecure"
 (SSL) This option explicitly allows curl to perform "insecure" SSL connections
 and transfers. All SSL connections are attempted to be made secure by using
