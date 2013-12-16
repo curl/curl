@@ -5,7 +5,10 @@ Curl and libcurl 7.34.0
  curl_easy_setopt() options:   206
  Public functions in libcurl:  58
  Known libcurl bindings:       42
- Contributors:                 1080
+ Contributors:                 1104
+
+This release includes the following security fix:
+ o gtls: respect *VERIFYHOST independently of *VERIFYPEER [26]
 
 This release includes the following changes:
 
@@ -61,6 +64,8 @@ This release includes the following bugfixes:
  o login options: remove the ;[options] support from CURLOPT_USERPWD [23]
  o imap: Fixed incorrect fallback to clear text authentication
  o parsedate: avoid integer overflow
+ o curl.1: document -J doesn't %-decode [25]
+ o multi: add timer inaccuracy margin to timeout/connecttimeout [24]
 
 This release includes the following known bugs:
 
@@ -75,8 +80,8 @@ advice from friends like these:
  Ishan SinghLevett, James Dury, Javier Barroso, Jeff King, Kamil Dudka,
  Kim Vandry, Marcin Gryszkalis, Melissa Mears, Michael Osipov, Nick Zitzmann,
  Oliver Kuckertz, Patrick Monnerat, Paul Donohue, Paul Marks, Romulo A. Ceccon,
- Romulo Ceccon, Rémy Léone, Sergey Tatarincev, Steve Holme, Tomas Hoger,
- Tyler Hall, Yaakov Selkowitz, Eric Lubin, Petr Bahula
+ Rémy Léone, Sergey Tatarincev, Steve Holme, Tomas Hoger, Tyler Hall,
+ Yaakov Selkowitz, Eric Lubin, Petr Bahula, He Qin, Marc Deslauriers
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -105,3 +110,6 @@ References to bug reports and discussions on issues:
  [21] = http://curl.haxx.se/bug/view.cgi?id=1310
  [22] = http://curl.haxx.se/dev/security.html
  [23] = http://curl.haxx.se/bug/view.cgi?id=1311
+ [24] = http://curl.haxx.se/bug/view.cgi?id=1298
+ [25] = http://curl.haxx.se/bug/view.cgi?id=1294
+ [26] = http://curl.haxx.se/docs/adv_20131217.html
