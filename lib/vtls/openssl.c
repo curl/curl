@@ -41,7 +41,7 @@
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the ssl config check function */
 #include "inet_pton.h"
-#include "ssluse.h"
+#include "openssl.h"
 #include "connect.h"
 #include "slist.h"
 #include "strequal.h"

@@ -9,7 +9,7 @@
 
 CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
-  ldap.c vtls/ssluse.c version.c getenv.c escape.c mprintf.c telnet.c	\
+  ldap.c vtls/openssl.c version.c getenv.c escape.c mprintf.c telnet.c	\
   netrc.c getinfo.c transfer.c strequal.c easy.c security.c      	\
   curl_fnmatch.c fileinfo.c ftplistparser.c wildcard.c krb5.c		\
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
@@ -30,7 +30,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h vtls/qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
-  if2ip.h speedcheck.h urldata.h curl_ldap.h vtls/ssluse.h escape.h telnet.h	\
+  if2ip.h speedcheck.h urldata.h curl_ldap.h vtls/openssl.h escape.h telnet.h	\
   getinfo.h strequal.h curl_sec.h memdebug.h http_chunks.h		\
   curl_fnmatch.h wildcard.h fileinfo.h ftplistparser.h strtok.h		\
   connect.h llist.h hash.h content_encoding.h share.h curl_md4.h	\

@@ -60,7 +60,7 @@
 #include "urldata.h"
 #define SSLGEN_C
 #include "sslgen.h" /* generic SSL protos etc */
-#include "ssluse.h" /* OpenSSL versions */
+#include "openssl.h" /* OpenSSL versions */
 #include "gtls.h"   /* GnuTLS versions */
 #include "nssg.h"   /* NSS versions */
 #include "qssl.h"   /* QSOSSL versions */
