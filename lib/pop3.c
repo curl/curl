@@ -574,15 +574,13 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
 
 /***********************************************************************
  *
- * pop3_perform_authenticate()
+ * pop3_perform_authentication()
  *
- * Sends an AUTH command allowing the client to login with the appropriate
- * SASL authentication mechanism.
- *
- * Additionally, the function will perform fallback to APOP and USER commands
- * should a common mechanism not be available between the client and server.
+ * Initiates the authentication sequence, with the appropriate SASL
+ * authentication mechanism, falling back to APOP and clear text should a
+ * common mechanism not be available between the client and server.
  */
-static CURLcode pop3_perform_authenticate(struct connectdata *conn)
+static CURLcode pop3_perform_authentication(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -809,14 +807,14 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
       result = pop3_perform_starttls(conn);
     else if(data->set.use_ssl == CURLUSESSL_TRY)
       /* Fallback and carry on with authentication */
-      result = pop3_perform_authenticate(conn);
+      result = pop3_perform_authentication(conn);
     else {
       failf(data, "STLS not supported.");
       result = CURLE_USE_SSL_FAILED;
     }
   }
   else
-    result = pop3_perform_authenticate(conn);
+    result = pop3_perform_authentication(conn);
 
   return result;
 }
@@ -837,7 +835,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = pop3_perform_authenticate(conn);
+      result = pop3_perform_authentication(conn);
   }
   else
     result = pop3_perform_upgrade_tls(conn);

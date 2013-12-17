@@ -557,15 +557,13 @@ static CURLcode imap_perform_login(struct connectdata *conn)
 
 /***********************************************************************
  *
- * imap_perform_authenticate()
+ * imap_perform_authentication()
  *
- * Sends an AUTHENTICATE command allowing the client to login with the
- * appropriate SASL authentication mechanism.
- *
- * Additionally, the function will perform fallback to the LOGIN command
- * should a common mechanism not be available between the client and server.
+ * Initiates the authentication sequence, with the appropriate SASL
+ * authentication mechanism, falling back to clear text should a common
+ * mechanism not be available between the client and server.
  */
-static CURLcode imap_perform_authenticate(struct connectdata *conn)
+static CURLcode imap_perform_authentication(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -949,14 +947,14 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
         result = imap_perform_starttls(conn);
       else if(data->set.use_ssl == CURLUSESSL_TRY)
         /* Fallback and carry on with authentication */
-        result = imap_perform_authenticate(conn);
+        result = imap_perform_authentication(conn);
       else {
         failf(data, "STARTTLS not supported.");
         result = CURLE_USE_SSL_FAILED;
       }
     }
     else
-      result = imap_perform_authenticate(conn);
+      result = imap_perform_authentication(conn);
   }
   else
     result = imap_perform_login(conn);
@@ -980,7 +978,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = imap_perform_authenticate(conn);
+      result = imap_perform_authentication(conn);
   }
   else
     result = imap_perform_upgrade_tls(conn);

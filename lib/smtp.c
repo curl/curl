@@ -430,12 +430,12 @@ static CURLcode smtp_perform_upgrade_tls(struct connectdata *conn)
 
 /***********************************************************************
  *
- * smtp_perform_authenticate()
+ * smtp_perform_authentication()
  *
- * Sends an AUTH command allowing the client to login with the appropriate
- * SASL authentication mechanism.
+ * Initiates the authentication sequence, with the appropriate SASL
+ * authentication mechanism.
  */
-static CURLcode smtp_perform_authenticate(struct connectdata *conn)
+static CURLcode smtp_perform_authentication(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -738,7 +738,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
       result = CURLE_USE_SSL_FAILED;
     }
     else
-      result = smtp_perform_authenticate(conn);
+      result = smtp_perform_authentication(conn);
   }
   else
     result = smtp_perform_upgrade_tls(conn);
@@ -835,14 +835,14 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
           result = smtp_perform_starttls(conn);
         else if(data->set.use_ssl == CURLUSESSL_TRY)
           /* Fallback and carry on with authentication */
-          result = smtp_perform_authenticate(conn);
+          result = smtp_perform_authentication(conn);
         else {
           failf(data, "STARTTLS not supported.");
           result = CURLE_USE_SSL_FAILED;
         }
       }
       else
-        result = smtp_perform_authenticate(conn);
+        result = smtp_perform_authentication(conn);
     }
   }
 
