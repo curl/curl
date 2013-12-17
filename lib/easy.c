@@ -54,7 +54,7 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"

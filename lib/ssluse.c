@@ -46,7 +46,7 @@
 #include "slist.h"
 #include "strequal.h"
 #include "select.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 #include "rawstr.h"
 #include "hostcheck.h"
 

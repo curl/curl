@@ -32,7 +32,7 @@
 
 #include "urldata.h" /* for struct SessionHandle */
 #include "formdata.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 #include "strequal.h"
 #include "curl_memory.h"
 #include "sendf.h"

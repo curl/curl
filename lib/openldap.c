@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) 2010, 2013, Howard Chu, <hyc@openldap.org>
  * Copyright (C) 2011 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -41,7 +41,7 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 #include "transfer.h"
 #include "curl_ldap.h"
 #include "curl_memory.h"

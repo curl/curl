@@ -60,20 +60,15 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
 # $(top_srcdir)/ares is for in-tree c-ares's external include files
 
-if USE_EMBEDDED_ARES
-AM_CPPFLAGS = -I$(top_builddir)/include/curl \
-              -I$(top_builddir)/include      \
-              -I$(top_srcdir)/include        \
-              -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib            \
-              -I$(top_builddir)/ares         \
-              -I$(top_srcdir)/ares
-else
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \
               -I$(top_builddir)/include      \
               -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib
+
+if USE_EMBEDDED_ARES
+AM_CPPFLAGS += -I$(top_builddir)/ares        \
+               -I$(top_srcdir)/ares
 endif
 
 # Prevent LIBS from being used for all link targets

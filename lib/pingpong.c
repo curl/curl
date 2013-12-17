@@ -33,7 +33,7 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "non-ascii.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

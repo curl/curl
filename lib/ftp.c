@@ -62,7 +62,7 @@
 #include "curl_sec.h"
 #include "strtoofft.h"
 #include "strequal.h"
-#include "sslgen.h"
+#include "vtls/sslgen.h"
 #include "connect.h"
 #include "strerror.h"
 #include "inet_ntop.h"
