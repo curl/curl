@@ -1,71 +1,19 @@
-Curl and libcurl 7.34.0
+Curl and libcurl 7.34.1
 
- Public curl releases:         136
+ Public curl releases:         137
  Command line options:         161
  curl_easy_setopt() options:   206
  Public functions in libcurl:  58
  Known libcurl bindings:       42
  Contributors:                 1104
 
-This release includes the following security fix:
- o gtls: respect *VERIFYHOST independently of *VERIFYPEER [26]
-
 This release includes the following changes:
 
- o SSL: protocol version can be specified more precisely [1]
- o imap/pop3/smtp: Added graceful cancellation of SASL authentication
- o Add "Happy Eyeballs" for IPv4/IPv6 dual connect attempts
- o base64: Added validation of base64 input strings when decoding [8]
- o curl_easy_setopt: Added the ability to set the login options separately
- o smtp: Added support for additional SMTP commands
- o curl_easy_getinfo: Added CURLINFO_TLS_SESSION for accessing TLS internals
- o nss: allow to use TLS > 1.0 if built against recent NSS [18]
- o SECURITY: added this document to describe our security processes [22]
- o parseconfig: warn if unquoted white spaces are detected
+ o 
 
 This release includes the following bugfixes:
 
- o darwinssl: un-break iOS build after PKCS#12 feature added
- o tool: use XFERFUNCTION to save some casts [2]
- o usercertinmem: fix memory leaks
- o ssh: Handle successful SSH_USERAUTH_NONE [3]
- o NSS: acknowledge the --no-sessionid/CURLOPT_SSL_SESSIONID_CACHE option [4]
- o test906: Fixed failing test on some platforms [5]
- o sasl: initialize NSS before using NTLM crypto
- o sasl: Fixed memory leak in OAUTH2 message creation
- o imap/pop3/smtp: Fixed QUIT / LOGOUT being sent when SSL connect fails
- o cmake: unbreak for non-Windows platforms [6]
- o ssh: initialize per-handle data in ssh_connect()
- o glob: fix broken URLs
- o configure: check for long long when building with cyassl
- o CURLOPT_RESOLVE: mention they don't time-out [7]
- o docs/examples/httpput.c: fix build for MSVC
- o FTP: make the data connection work when going through proxy
- o NSS: support for CERTINFO feature
- o curl_multi_wait: accept 0 from multi_timeout() as valid timeout
- o glob_range: pass the closing bracket for a-z ranges
- o tool_help: Updated --list-only description to include POP3
- o Curl_ssl_push_certinfo_len: don't %.*s non-zero-terminated string [9]
- o cmake: fix Windows build with IPv6 support [10]
- o ares: Fixed compilation under Visual Studio 2012 [11]
- o curl_easy_setopt.3: clarify CURLOPT_SSL_VERIFYHOST documentation [12]
- o curl.1: mention that -O does no URL decoding [13]
- o darwinssl: PKCS#12 import feature now requires Lion or later [14]
- o darwinssl: check for SSLSetSessionOption() presence when toggling BEAST
- o configure: Fix test with -Werror=implicit-function-declaration [15]
- o sigpipe: factor out sigpipe_reset from easy.c
- o curl_multi_cleanup: ignore SIGPIPE
- o globbing: curl glob counter mismatch with {} list use [16]
- o parseconfig: dash options can't specified with colon or equals [17]
- o digest: fix CURLAUTH_DIGEST_IE [19]
- o curl.h: <sys/select.h> for OpenBSD [20]
- o darwinssl: Fix #if 10.6.0 for SecKeychainSearch
- o TFTP: fix return codes for connect timeout [21]
- o login options: remove the ;[options] support from CURLOPT_USERPWD [23]
- o imap: Fixed incorrect fallback to clear text authentication
- o parsedate: avoid integer overflow
- o curl.1: document -J doesn't %-decode [25]
- o multi: add timer inaccuracy margin to timeout/connecttimeout [24]
+ o 
 
 This release includes the following known bugs:
 
@@ -74,42 +22,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Alessandro Ghedini, Andreas Rieke, Björn Stenberg, Chris Conlon,
- Christian Grothoff, Christian Weisgerber, Dave Reisner, David Walser,
- Dima Tisnek, Fabian Keil, Felix Yan, Gergely Nagy, Gisle Vanem,
- Ishan SinghLevett, James Dury, Javier Barroso, Jeff King, Kamil Dudka,
- Kim Vandry, Marcin Gryszkalis, Melissa Mears, Michael Osipov, Nick Zitzmann,
- Oliver Kuckertz, Patrick Monnerat, Paul Donohue, Paul Marks, Romulo A. Ceccon,
- Rémy Léone, Sergey Tatarincev, Steve Holme, Tomas Hoger, Tyler Hall,
- Yaakov Selkowitz, Eric Lubin, Petr Bahula, He Qin, Marc Deslauriers
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://github.com/bagder/curl/pull/79
- [2] = http://curl.haxx.se/mail/lib-2013-10/0089.html
- [3] = http://curl.haxx.se/mail/lib-2013-10/0096.html
- [4] = http://curl.haxx.se/mail/lib-2013-10/0113.html
- [5] = http://sourceforge.net/p/curl/bugs/1291
- [6] = http://sourceforge.net/p/curl/bugs/1292
- [7] = http://curl.haxx.se/mail/lib-2013-10/0062.html
- [8] = http://curl.haxx.se/mail/lib-2013-10/0242.html
- [9] = http://curl.haxx.se/bug/view.cgi?id=1295
- [10] = http://sourceforge.net/p/curl/bugs/1064
- [11] = http://curl.haxx.se/mail/lib-2013-11/0057.html
- [12] = https://github.com/bagder/curl/pull/83
- [13] = http://sourceforge.net/p/curl/bugs/1299
- [14] = http://curl.haxx.se/mail/lib-2013-11/0076.html
- [15] = http://curl.haxx.se/bug/view.cgi?id=1304
- [16] = http://curl.haxx.se/bug/view.cgi?id=1305
- [17] = http://curl.haxx.se/bug/view.cgi?id=1297
- [18] = http://curl.haxx.se/mail/lib-2013-11/0162.html
- [19] = http://curl.haxx.se/bug/view.cgi?id=1308
- [20] = http://curl.haxx.se/mail/lib-2013-12/0017.html
- [21] = http://curl.haxx.se/bug/view.cgi?id=1310
- [22] = http://curl.haxx.se/dev/security.html
- [23] = http://curl.haxx.se/bug/view.cgi?id=1311
- [24] = http://curl.haxx.se/bug/view.cgi?id=1298
- [25] = http://curl.haxx.se/bug/view.cgi?id=1294
- [26] = http://curl.haxx.se/docs/adv_20131217.html
+ [1] =
