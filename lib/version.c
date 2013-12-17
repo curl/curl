@@ -24,7 +24,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "http2.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */

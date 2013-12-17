@@ -78,7 +78,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "netrc.h"
 
 #include "formdata.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
 #include "sendf.h"

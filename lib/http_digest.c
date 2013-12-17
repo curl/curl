@@ -31,7 +31,7 @@
 #include "http_digest.h"
 #include "strtok.h"
 #include "curl_memory.h"
-#include "vtls/sslgen.h" /* for Curl_rand() */
+#include "vtls/vtls.h" /* for Curl_rand() */
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 #include "warnless.h"
 

@@ -70,7 +70,7 @@
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "http_digest.h"
 #include "curl_ntlm.h"
 #include "http_negotiate.h"

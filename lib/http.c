@@ -54,7 +54,7 @@
 #include "curl_base64.h"
 #include "cookie.h"
 #include "strequal.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "http_digest.h"
 #include "curl_ntlm.h"
 #include "curl_ntlm_wb.h"

@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "connect.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "ssh.h"
 #include "multiif.h"
 #include "non-ascii.h"

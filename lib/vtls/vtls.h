@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SSLGEN_H
-#define HEADER_CURL_SSLGEN_H
+#ifndef HEADER_CURL_VTLS_H
+#define HEADER_CURL_VTLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,4 +123,4 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #endif
 
-#endif /* HEADER_CURL_SSLGEN_H */
+#endif /* HEADER_CURL_VTLS_H */

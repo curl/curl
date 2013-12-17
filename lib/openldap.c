@@ -41,7 +41,7 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "transfer.h"
 #include "curl_ldap.h"
 #include "curl_memory.h"

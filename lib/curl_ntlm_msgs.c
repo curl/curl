@@ -47,7 +47,7 @@
 #  include "curl_sspi.h"
 #endif
 
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"

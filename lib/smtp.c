@@ -72,7 +72,7 @@
 
 #include "strtoofft.h"
 #include "strequal.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "connect.h"
 #include "strerror.h"
 #include "select.h"

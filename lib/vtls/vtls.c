@@ -58,8 +58,8 @@
 #endif
 
 #include "urldata.h"
-#define SSLGEN_C
-#include "sslgen.h" /* generic SSL protos etc */
+
+#include "vtls.h" /* generic SSL protos etc */
 #include "openssl.h" /* OpenSSL versions */
 #include "gtls.h"   /* GnuTLS versions */
 #include "nssg.h"   /* NSS versions */

@@ -28,7 +28,7 @@
 #include "getinfo.h"
 
 #include "curl_memory.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
 

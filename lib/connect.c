@@ -71,7 +71,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "inet_ntop.h"
 #include "inet_pton.h"
-#include "vtls/sslgen.h" /* for Curl_ssl_check_cxn() */
+#include "vtls/vtls.h" /* for Curl_ssl_check_cxn() */
 #include "progress.h"
 #include "warnless.h"
 #include "conncache.h"

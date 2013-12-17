@@ -34,7 +34,7 @@
 
 #include "curl_base64.h"
 #include "curl_md5.h"
-#include "vtls/sslgen.h"
+#include "vtls/vtls.h"
 #include "curl_hmac.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
