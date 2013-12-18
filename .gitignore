@@ -46,3 +46,4 @@ CHANGES.dist
 .cproject
 .settings
 /[0-9]*.patch
+.dirstamp
