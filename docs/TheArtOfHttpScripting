@@ -1,16 +1,72 @@
-Online:  http://curl.haxx.se/docs/httpscripting.html
-Date:    Jan 19, 2011
+Updated: Dec 24, 2013 (http://curl.haxx.se/docs/httpscripting.html)
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
 
-                The Art Of Scripting HTTP Requests Using Curl
-                =============================================
 
- This document will assume that you're familiar with HTML and general
- networking.
+The Art Of Scripting HTTP Requests Using Curl
 
- The possibility to write scripts is essential to make a good computer
- system. Unix' capability to be extended by shell scripts and various tools to
- run various automated commands and scripts is one reason why it has succeeded
- so well.
+ 1. HTTP Scripting
+ 1.1 Background
+ 1.2 The HTTP Protocol
+ 1.3 See the Protocol
+ 1.4 See the Timing
+ 1.5 See the Response
+ 2. URL
+ 2.1 Spec
+ 2.2 Host
+ 2.3 Port number
+ 2.4 User name and password
+ 2.5 Path part
+ 3. Fetch a page
+ 3.1 GET
+ 3.2 HEAD
+ 4. HTML forms
+ 4.1 Forms explained
+ 4.2 GET
+ 4.3 POST
+ 4.4 File Upload POST
+ 4.5 Hidden Fields
+ 4.6 Figure Out What A POST Looks Like
+ 5. HTTP upload
+ 5.1 PUT
+ 6. HTTP Authentication
+ 6.1 Basic Authentication
+ 6.2 Other Authentication
+ 6.3 Proxy Authentication
+ 6.4 Hiding credentials
+ 7. More HTTP Headers
+ 7.1 Referer
+ 7.2 User Agent
+ 8. Redirects
+ 8.1 Location header
+ 8.2 Other redirects
+ 9. Cookies
+ 9.1 Cookie Basics
+ 9.2 Cookie options
+ 10. HTTPS
+ 10.1 HTTPS is HTTP secure
+ 10.2 Certificates
+ 11. Custom Request Elements
+ 11.1 Modify method and headers
+ 11.2 More on changed methods
+ 12. Web Login
+ 12.1 Some login tricks
+ 13. Debug
+ 13.1 Some debug tricks
+ 14. References
+ 14.1 Standards
+ 14.2 Sites
+
+==============================================================================
+
+1. HTTP Scripting
+
+ 1.1 Background
+
+ This document assumes that you're familiar with HTML and general networking.
 
  The increasing amount of applications moving to the web has made "HTTP
  Scripting" more frequently requested and wanted. To be able to automatically
@@ -27,7 +83,7 @@ Date:    Jan 19, 2011
  to glue everything together using some kind of script language or repeated
  manual invokes.
 
-1. The HTTP Protocol
+ 1.2 The HTTP Protocol
 
  HTTP is the protocol used to fetch data from web servers. It is a very simple
  protocol that is built upon TCP/IP. The protocol also allows information to
@@ -44,7 +100,7 @@ Date:    Jan 19, 2011
  well), response headers and most often also a response body. The "body" part
  is the plain data you requested, like the actual HTML or the image etc.
 
- 1.1 See the Protocol
+ 1.3 See the Protocol
 
   Using curl's option --verbose (-v as a short option) will display what kind
   of commands curl sends to the server, as well as a few other informational
@@ -59,13 +115,88 @@ Date:    Jan 19, 2011
 
       curl --trace-ascii debugdump.txt http://www.example.com/
 
+ 1.4 See the Timing
+
+  Many times you may wonder what exactly is taking all the time, or you just
+  want to know the amount of milliseconds between two points in a
+  transfer. For those, and other similar situations, the --trace-time option
+  is what you need. It'll prepend the time to each trace output line:
+
+      curl --trace-ascii d.txt --trace-time http://example.com/
+
+ 1.5 See the Response
+
+  By default curl sends the response to stdout. You need to redirect it
+  somewhere to avoid that, most often that is done with -o or -O.
+
 2. URL
+
+ 2.1 Spec
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you've seen URLs like
- http://curl.haxx.se or https://yourbank.com a million times.
+ http://curl.haxx.se or https://yourbank.com a million times. RFC 3986 is the
+ canonical spec.
 
-3. GET a page
+ 2.2 Host
+
+ The host name is usually resolved using DNS or your /etc/hosts file to an IP
+ address and that's what curl will communicate with. Alternatively you specify
+ the IP address directly in the URL instead of a name.
+
+ For development and other trying out situation, you can point out a different
+ IP address for a host name than what would otherwise be used, by using curl's
+ --resolve option:
+
+      curl --resolve www.example.org:80:127.0.0.1 http://www.example.org/
+ 
+ 2.3 Port number
+
+ Each protocol curl supports operate on a default port number, be it over TCP
+ or in some cases UDP. Normally you don't have to take that into
+ consideration, but at times you run test servers on other ports or
+ similar. Then you can specify the port number in the URL with a colon and a
+ number immediately following the host name. Like when doing HTTP to port
+ 1234:
+
+      curl http://www.example.org:1234/
+
+ The port number you specify in the URL is the number that the server uses to
+ offer its services. Sometimes you may use a local proxy, and then you may
+ need to specify that proxy's port number separate on what curl needs to
+ connect to locally. Like when using a HTTP proxy on port 4321:
+
+      curl --proxy http://proxy.example.org:4321 http://remote.example.org/
+
+ 2.4 User name and password
+
+ Some services are setup to require HTTP authentication and then you need to
+ provide name and password which then is transfered to the remote site in
+ various ways depending on the exact authentication protocol used.
+
+ You can opt to either insert the user and password in the URL or you can
+ provide them separately:
+
+      curl http://user:password@example.org/
+
+ or
+
+      curl -u user:password http://example.org/
+
+ You need to pay attention that this kind of HTTP authentication is not what
+ is usually done and requested by user-oriented web sites these days. They
+ tend to use forms and cookies instead.
+
+ 2.5 Path part
+
+ The path part is just sent off to the server to request that it sends back
+ the associated response. The path is what is to the right side of the slash
+ that follows the host name and possibly port number.
+
+
+3. Fetch a page
+
+ 3.1 GET
 
  The simplest and most common request/operation made using HTTP is to get a
  URL. The URL could itself refer to a web page, an image or a file. The client
@@ -79,10 +210,23 @@ Date:    Jan 19, 2011
 
  All HTTP replies contain a set of response headers that are normally hidden,
  use curl's --include (-i) option to display them as well as the rest of the
- document. You can also ask the remote server for ONLY the headers by using
- the --head (-I) option (which will make curl issue a HEAD request).
+ document.
 
-4. Forms
+ 3.2 HEAD
+
+ You can ask the remote server for ONLY the headers by using the --head (-I)
+ option which will make curl issue a HEAD request. In some special cases
+ servers deny the HEAD method while others still work, which is a particular
+ kind of annoyance.
+
+ The HEAD method is defined and made so that the server returns the headers
+ exactly the way it would do for a GET, but without a body. It means that you
+ may see a Content-Length: in the response headers, but there must not be an
+ actual body in the HEAD response.
+
+4. HTML forms
+
+ 4.1 Forms explained
 
  Forms are the general way a web site can present a HTML page with fields for
  the user to enter data in, and then press some kind of 'OK' or 'submit'
@@ -95,7 +239,7 @@ Date:    Jan 19, 2011
  Of course there has to be some kind of program in the server end to receive
  the data you send. You cannot just invent something out of the air.
 
- 4.1 GET
+ 4.2 GET
 
   A GET-form uses the method GET, as specified in HTML like:
 
@@ -121,7 +265,7 @@ Date:    Jan 19, 2011
 
         curl "http://www.hotmail.com/when/junk.cgi?birthyear=1905&press=OK"
 
- 4.2 POST
+ 4.3 POST
 
   The GET method makes all input field names get displayed in the URL field of
   your browser. That's generally a good thing when you want to be able to
@@ -158,7 +302,7 @@ Date:    Jan 19, 2011
 
         curl --data-urlencode "name=I am Daniel" http://www.example.com
 
- 4.3 File Upload POST
+ 4.4 File Upload POST
 
   Back in late 1995 they defined an additional way to post data over HTTP. It
   is documented in the RFC 1867, why this method sometimes is referred to as
@@ -179,7 +323,7 @@ Date:    Jan 19, 2011
 
         curl --form upload=@localfilename --form press=OK [URL]
 
- 4.4 Hidden Fields
+ 4.5 Hidden Fields
 
   A very common way for HTML based application to pass state information
   between pages is to add hidden fields to the forms. Hidden fields are
@@ -200,7 +344,7 @@ Date:    Jan 19, 2011
 
         curl --data "birthyear=1905&press=OK&person=daniel" [URL]
 
- 4.5 Figure Out What A POST Looks Like
+ 4.6 Figure Out What A POST Looks Like
 
   When you're about fill in a form and send to a server by using curl instead
   of a browser, you're of course very interested in sending a POST exactly the
@@ -213,7 +357,9 @@ Date:    Jan 19, 2011
   You will then clearly see the data get appended to the URL, separated with a
   '?'-letter as GET forms are supposed to.
 
-5. PUT
+5. HTTP upload
+
+ 5.1 PUT
 
  The perhaps best way to upload data to a HTTP server is to use PUT. Then
  again, this of course requires that someone put a program or script on the
@@ -224,6 +370,8 @@ Date:    Jan 19, 2011
         curl --upload-file uploadfile http://www.example.com/receive.cgi
 
 6. HTTP Authentication
+
+ 6.1 Basic Authentication
 
  HTTP Authentication is the ability to tell the server your username and
  password so that it can verify that you're allowed to do the request you're
@@ -236,9 +384,13 @@ Date:    Jan 19, 2011
 
         curl --user name:password http://www.example.com
 
+ 6.2 Other Authentication
+
  The site might require a different authentication method (check the headers
  returned by the server), and then --ntlm, --digest, --negotiate or even
  --anyauth might be options that suit you.
+
+ 6.3 Proxy Authentication
 
  Sometimes your HTTP access is only available through the use of a HTTP
  proxy. This seems to be especially common at various companies. A HTTP proxy
@@ -253,6 +405,8 @@ Date:    Jan 19, 2011
  If you use any one these user+password options but leave out the password
  part, curl will prompt for the password interactively.
 
+ 6.4 Hiding credentials
+
  Do note that when a program is run, its parameters might be possible to see
  when listing the running processes of the system. Thus, other users may be
  able to watch your passwords if you pass them as plain command line
@@ -262,7 +416,9 @@ Date:    Jan 19, 2011
  many web sites will not use this concept when they provide logins etc. See
  the Web Login chapter further below for more details on that.
 
-7. Referer
+7. More HTTP Headers
+
+ 7.1 Referer
 
  A HTTP request may include a 'referer' field (yes it is misspelled), which
  can be used to tell from which URL the client got to this particular
@@ -276,7 +432,7 @@ Date:    Jan 19, 2011
 
         curl --referer http://www.example.come http://www.example.com
 
-8. User Agent
+ 7.2 User Agent
 
  Very similar to the referer field, all HTTP requests may set the User-Agent
  field. It names what user agent (client) that is being used. Many
@@ -298,7 +454,9 @@ Date:    Jan 19, 2011
 
   curl --user-agent "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
 
-9. Redirects
+8. Redirects
+
+ 8.1 Location header
 
  When a resource is requested from a server, the reply from the server may
  include a hint about where the browser should go next to find this page, or a
@@ -318,7 +476,16 @@ Date:    Jan 19, 2011
  only use POST in the first request, and then revert to GET in the following
  operations.
 
-10. Cookies
+ 8.2 Other redirects
+
+ Browser typically support at least two other ways of redirects that curl
+ doesn't: first the html may contain a meta refresh tag that asks the browser
+ to load a specific URL after a set number of seconds, or it may use
+ javascript to do it.
+
+9. Cookies
+
+ 9.1 Cookie Basics
 
  The way the web browsers do "client side state control" is by using
  cookies. Cookies are just names with associated contents. The cookies are
@@ -334,6 +501,8 @@ Date:    Jan 19, 2011
  into a single logical session. To be able to use curl in such occasions, we
  must be able to record and send back cookies the way the web application
  expects them. The same way browsers deal with them.
+
+ 9.2 Cookie options
 
  The simplest way to send a few cookies to the server when getting a page with
  curl is to add them on the command line like:
@@ -366,16 +535,18 @@ Date:    Jan 19, 2011
         curl --cookie nada --location http://www.example.com
 
  Curl has the ability to read and write cookie files that use the same file
- format that Netscape and Mozilla do. It is a convenient way to share cookies
- between browsers and automatic scripts. The --cookie (-b) switch
- automatically detects if a given file is such a cookie file and parses it,
- and by using the --cookie-jar (-c) option you'll make curl write a new cookie
- file at the end of an operation:
+ format that Netscape and Mozilla once used. It is a convenient way to share
+ cookies between scripts or invokes. The --cookie (-b) switch automatically
+ detects if a given file is such a cookie file and parses it, and by using the
+ --cookie-jar (-c) option you'll make curl write a new cookie file at the end
+ of an operation:
 
         curl --cookie cookies.txt --cookie-jar newcookies.txt \
         http://www.example.com
 
-11. HTTPS
+10. HTTPS
+
+ 10.1 HTTPS is HTTP secure
 
  There are a few ways to do secure HTTP transfers. The by far most common
  protocol for doing this is what is generally known as HTTPS, HTTP over
@@ -391,7 +562,7 @@ Date:    Jan 19, 2011
 
         curl https://secure.example.com
 
- 11.1 Certificates
+ 10.2 Certificates
 
   In the HTTPS world, you use certificates to validate that you are the one
   you claim to be, as an addition to normal passwords. Curl supports client-
@@ -413,7 +584,9 @@ Date:    Jan 19, 2011
 
         http://curl.haxx.se/docs/sslcerts.html
 
-12. Custom Request Elements
+11. Custom Request Elements
+
+11.1 Modify method and headers
 
  Doing fancy stuff, you may need to add or change elements of a single curl
  request.
@@ -434,7 +607,26 @@ Date:    Jan 19, 2011
 
         curl --header "Destination: http://nowhere" http://example.com
 
-13. Web Login
+ 11.2 More on changed methods
+
+ It should be noted that curl selects which methods to use on its own
+ depending on what action to ask for. -d will do POST, -I will do HEAD and so
+ on. If you use the --request / -X option you can change the method keyword
+ curl selects, but you will not modify curl's behavior. This means that if you
+ for example use -d "data" to do a POST, you can modify the method to a
+ PROPFIND with -X and curl will still think it sends a POST. You can change
+ the normal GET to a POST method by simply adding -X POST in a command line
+ like:
+
+        curl -X POST http://example.org/
+
+ ... but curl will still think and act as if it sent a GET so it won't send any
+ request body etc.
+
+
+12. Web Login
+
+ 12.1 Some login tricks
 
  While not strictly just HTTP related, it still cause a lot of people problems
  so here's the executive run-down of how the vast majority of all login forms
@@ -463,7 +655,9 @@ Date:    Jan 19, 2011
  to do a proper login POST. Remember that the contents need to be URL encoded
  when sent in a normal POST.
 
-14. Debug
+13. Debug
+
+ 13.1 Some debug tricks
 
  Many times when you run curl on a site, you'll notice that the site doesn't
  seem to respond the same way to your curl requests as it does to your
@@ -473,35 +667,40 @@ Date:    Jan 19, 2011
  browser's requests:
 
  * Use the --trace-ascii option to store fully detailed logs of the requests
-   for easier analyzing and better understanding
+ for easier analyzing and better understanding
 
  * Make sure you check for and use cookies when needed (both reading with
-   --cookie and writing with --cookie-jar)
+ --cookie and writing with --cookie-jar)
 
  * Set user-agent to one like a recent popular browser does
 
  * Set referer like it is set by the browser
 
  * If you use POST, make sure you send all the fields and in the same order as
-   the browser does it. (See chapter 4.5 above)
+ the browser does it.
 
  A very good helper to make sure you do this right, is the LiveHTTPHeader tool
  that lets you view all headers you send and receive with Mozilla/Firefox
- (even when using HTTPS).
+ (even when using HTTPS). Chrome features similar functionality out of the box
+ among the developer's tools.
 
  A more raw approach is to capture the HTTP traffic on the network with tools
  such as ethereal or tcpdump and check what headers that were sent and
  received by the browser. (HTTPS makes this technique inefficient.)
 
-15. References
+14. References
+
+ 14.1 Standards
 
  RFC 2616 is a must to read if you want in-depth understanding of the HTTP
- protocol.
+ protocol
 
- RFC 3986 explains the URL syntax.
+ RFC 3986 explains the URL syntax
 
- RFC 2109 defines how cookies are supposed to work.
+ RFC 1867 defines the HTTP post upload format
 
- RFC 1867 defines the HTTP post upload format.
+ RFC 6525 defines how HTTP cookies work
+
+ 14.2 Sites
 
  http://curl.haxx.se is the home of the cURL project
