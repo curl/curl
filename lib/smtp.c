@@ -475,7 +475,6 @@ static CURLcode smtp_perform_auth(struct connectdata *conn,
 static CURLcode smtp_perform_authentication(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *mech = NULL;
   char *initresp = NULL;
   size_t len = 0;
