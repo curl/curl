@@ -12,6 +12,7 @@ RFC2195
 <reply>
 <servercmd>
 AUTH CRAM-MD5
+CAPA LOGINDISABLED
 REPLY AUTHENTICATE + Rubbish
 REPLY * A002 NO AUTH exchange cancelled by client
 </servercmd>

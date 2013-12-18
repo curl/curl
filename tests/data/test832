@@ -12,6 +12,7 @@ RFC2831
 <reply>
 <servercmd>
 AUTH DIGEST-MD5
+CAPA LOGINDISABLED
 REPLY AUTHENTICATE + Rubbish
 REPLY * A002 NO AUTH exchange cancelled by client
 </servercmd>
