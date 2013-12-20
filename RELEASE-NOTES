@@ -9,10 +9,13 @@ Curl and libcurl 7.34.1
 
 This release includes the following changes:
 
+ o imap/pop3/smtp: Added support for SASL authentication downgrades
  o 
 
 This release includes the following bugfixes:
 
+ o curl_easy_setopt: Fixed OAuth 2.0 Bearer option name [1]
+ o pop3: Fixed selection of APOP when server replies with an invalid timestamp
  o 
 
 This release includes the following known bugs:
@@ -22,10 +25,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Steve Holme, Viktor Szakáts
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1313
