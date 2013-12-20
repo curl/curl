@@ -561,7 +561,8 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
-            (pop3c->preftype & POP3_TYPE_APOP))
+            (pop3c->preftype & POP3_TYPE_APOP) &&
+            (pop3c->apoptimestamp))
       /* Perform APOP authentication */
       result = pop3_perform_apop(conn);
 #endif
@@ -663,6 +664,8 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
           size_t timestamplen = len - 2 - i;
+          if(!timestamplen)
+            break;
 
           /* Allocate some memory for the timestamp */
           pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
@@ -1198,7 +1201,8 @@ static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
-            (pop3c->preftype & POP3_TYPE_APOP))
+            (pop3c->preftype & POP3_TYPE_APOP) &&
+            (pop3c->apoptimestamp))
       /* Perform APOP authentication */
       result = pop3_perform_apop(conn);
 #endif
