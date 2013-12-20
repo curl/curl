@@ -1376,12 +1376,15 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
   if(pp->sendleft)
     return Curl_pp_flushsend(pp);
 
-  /* Read the response from the server */
-  result = Curl_pp_readresp(sock, pp, &pop3code, &nread);
-  if(result)
-    return result;
+ do {
+    /* Read the response from the server */
+    result = Curl_pp_readresp(sock, pp, &pop3code, &nread);
+    if(result)
+      return result;
 
-  if(pop3code) {
+    if(!pop3code)
+      break;
+
     /* We have now received a full POP3 server response */
     switch(pop3c->state) {
     case POP3_SERVERGREET:
@@ -1471,7 +1474,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       state(conn, POP3_STOP);
       break;
     }
-  }
+  } while(!result && pop3c->state != POP3_STOP && Curl_pp_moredata(pp));
 
   return result;
 }
