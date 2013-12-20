@@ -237,7 +237,6 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t wordlen;
-  size_t i;
 
   /* Do we have an error response? */
   if(len >= 4 && !memcmp("-ERR", line, 4)) {
@@ -246,31 +245,8 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
     return TRUE;
   }
 
-  /* Are we processing servergreet responses? */
-  if(pop3c->state == POP3_SERVERGREET) {
-    /* Look for the APOP timestamp */
-    if(len >= 3 && line[len - 3] == '>') {
-      for(i = 0; i < len - 3; ++i) {
-        if(line[i] == '<') {
-          /* Calculate the length of the timestamp */
-          size_t timestamplen = len - 2 - i;
-
-          /* Allocate some memory for the timestamp */
-          pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
-
-          if(!pop3c->apoptimestamp)
-            break;
-
-          /* Copy the timestamp */
-          memcpy(pop3c->apoptimestamp, line + i, timestamplen);
-          pop3c->apoptimestamp[timestamplen] = '\0';
-          break;
-        }
-      }
-    }
-  }
   /* Are we processing CAPA command responses? */
-  else if(pop3c->state == POP3_CAPA) {
+  if(pop3c->state == POP3_CAPA) {
     /* Do we have the terminating line? */
     if(len >= 1 && !memcmp(line, ".", 1)) {
       *resp = '+';
@@ -733,6 +709,10 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  const char *line = data->state.buffer;
+  size_t len = strlen(line);
+  size_t i;
 
   (void)instate; /* no use for this yet */
 
@@ -740,8 +720,30 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     failf(data, "Got unexpected pop3-server response");
     result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
-  else
+  else {
+    /* Look for the APOP timestamp */
+    if(len >= 3 && line[len - 3] == '>') {
+      for(i = 0; i < len - 3; ++i) {
+        if(line[i] == '<') {
+          /* Calculate the length of the timestamp */
+          size_t timestamplen = len - 2 - i;
+
+          /* Allocate some memory for the timestamp */
+          pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
+
+          if(!pop3c->apoptimestamp)
+            break;
+
+          /* Copy the timestamp */
+          memcpy(pop3c->apoptimestamp, line + i, timestamplen);
+          pop3c->apoptimestamp[timestamplen] = '\0';
+          break;
+        }
+      }
+    }
+
     result = pop3_perform_capa(conn);
+  }
 
   return result;
 }
