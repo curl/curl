@@ -659,11 +659,11 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   }
   else {
     /* Look for the APOP timestamp */
-    if(len >= 3 && line[len - 3] == '>') {
-      for(i = 0; i < len - 3; ++i) {
+    if(len >= 4 && line[len - 2] == '>') {
+      for(i = 3; i < len - 2; ++i) {
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
-          size_t timestamplen = len - 2 - i;
+          size_t timestamplen = len - 1 - i;
           if(!timestamplen)
             break;
 
