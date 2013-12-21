@@ -376,10 +376,8 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
           if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
             /* This is the end of the last line, copy the last line to the
                start of the buffer and zero terminate, for old times sake */
-            char *meow;
-            int n;
-            for(meow=pp->linestart_resp, n=0; meow<ptr; meow++, n++)
-              buf[n] = *meow;
+            size_t n = ptr - pp->linestart_resp;
+            memcpy(buf, pp->linestart_resp, n);
             buf[n]=0; /* zero terminate */
             keepon=FALSE;
             pp->linestart_resp = ptr+1; /* advance pointer */
