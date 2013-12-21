@@ -380,7 +380,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
             int n;
             for(meow=pp->linestart_resp, n=0; meow<ptr; meow++, n++)
               buf[n] = *meow;
-            *meow=0; /* zero terminate */
+            buf[n]=0; /* zero terminate */
             keepon=FALSE;
             pp->linestart_resp = ptr+1; /* advance pointer */
             i++; /* skip this before getting out */
