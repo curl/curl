@@ -653,8 +653,6 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  DEBUGF(infof(data, "Server Greeting: %s\n", line));
-
   if(pop3code != '+') {
     failf(data, "Got unexpected pop3-server response");
     result = CURLE_FTP_WEIRD_SERVER_REPLY;
@@ -678,7 +676,6 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
           /* Copy the timestamp */
           memcpy(pop3c->apoptimestamp, line + i, timestamplen);
           pop3c->apoptimestamp[timestamplen] = '\0';
-          DEBUGF(infof(data, "APOP Timestamp: %s\n", pop3c->apoptimestamp));
           break;
         }
       }
