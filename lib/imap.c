@@ -2314,7 +2314,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
   const char *ptr = options;
   bool reset = TRUE;
 
-  while(*ptr) {
+  while(ptr && *ptr) {
     const char *key = ptr;
 
     while(*ptr && *ptr != '=')
