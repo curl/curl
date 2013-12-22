@@ -1945,8 +1945,8 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
       }
 
       while(*ptr && *ptr != ';') {
-          ptr++;
-          len++;
+        ptr++;
+        len++;
       }
 
       if(strnequal(value, "*", len))
