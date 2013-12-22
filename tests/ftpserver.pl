@@ -141,6 +141,7 @@ my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
+my %fulltextreply; #
 my %commandreply;  #
 my %customcount;   #
 my %delayreply;    #
@@ -2831,6 +2832,7 @@ sub customize {
     $nodataconn150 = 0; # default is to not send 150 without data channel
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
+    %fulltextreply = ();#
     %commandreply = (); #
     %customcount = ();  #
     %delayreply = ();   #
@@ -2841,7 +2843,11 @@ sub customize {
     logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
     while(<CUSTOM>) {
-        if($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
+        if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+\/=\*]+)\" (.*)/) {
+            $fulltextreply{$1}=eval "qq{$2}";
+            logmsg "FTPD: set custom reply for $1\n";
+        }
+        elsif($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
             $commandreply{$1}=eval "qq{$2}";
             if($1 eq "") {
                 logmsg "FTPD: set custom reply for empty command\n";
