@@ -123,8 +123,8 @@ my $sockfilt_timeout = 5;  # default timeout for sockfilter eXsysreads
 #**********************************************************************
 # global vars which depend on server protocol selection
 #
-my %commandfunc;  # protocol command specific function callbacks
-my %displaytext;  # text returned to client before callback runs
+my %commandfunc;   # protocol command specific function callbacks
+my %displaytext;   # text returned to client before callback runs
 
 #**********************************************************************
 # global vars customized for each test from the server commands file
@@ -141,7 +141,7 @@ my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
-my %customreply;   #
+my %commandreply;  #
 my %customcount;   #
 my %delayreply;    #
 
@@ -2831,7 +2831,7 @@ sub customize {
     $nodataconn150 = 0; # default is to not send 150 without data channel
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
-    %customreply = ();  #
+    %commandreply = (); #
     %customcount = ();  #
     %delayreply = ();   #
 
@@ -2842,19 +2842,19 @@ sub customize {
 
     while(<CUSTOM>) {
         if($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
-            $customreply{$1}=eval "qq{$2}";
+            $commandreply{$1}=eval "qq{$2}";
             if($1 eq "") {
-                logmsg "FTPD: set custom reply for empty response\n";
+                logmsg "FTPD: set custom reply for empty command\n";
             }
             else {
-                logmsg "FTPD: set custom reply for $1\n";
+                logmsg "FTPD: set custom reply for $1 command\n";
             }
         }
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
-            # we blank the customreply for this command when having
+            # we blank the custom reply for this command when having
             # been used this number of times
             $customcount{$1}=$2;
-            logmsg "FTPD: blank custom reply for $1 after $2 uses\n";
+            logmsg "FTPD: blank custom reply for $1 command after $2 uses\n";
         }
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
@@ -3091,13 +3091,13 @@ while(1) {
 
     &customize(); # read test control instructions
 
-    my $welcome = $customreply{"welcome"};
+    my $welcome = $commandreply{"welcome"};
     if(!$welcome) {
         $welcome = $displaytext{"welcome"};
     }
     else {
         # clear it after use
-        $customreply{"welcome"}="";
+        $commandreply{"welcome"}="";
         if($welcome !~ /\r\n\z/) {
             $welcome .= "\r\n";
         }
@@ -3246,11 +3246,11 @@ while(1) {
         my $check = 1; # no response yet
 
         # See if there is a custom reply for our command
-        my $text = $customreply{$FTPCMD};
+        my $text = $commandreply{$FTPCMD};
         if($text && ($text ne "")) {
             if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
-                # used enough number of times, now blank the customreply
-                $customreply{$FTPCMD}="";
+                # used enough times so blank the custom command reply
+                $commandreply{$FTPCMD}="";
             }
 
             sendcontrol "$text\r\n";
