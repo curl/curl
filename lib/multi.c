@@ -1381,7 +1381,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       Curl_move_handle_from_send_to_recv_pipe(data, data->easy_conn);
       /* Check if we can move pending requests to send pipe */
       Curl_multi_process_pending_handles(multi);
-      multistate(data, CURLM_STATE_WAITPERFORM);
+
+      /* Only perform the transfer if there's a good socket to work with.
+         Having both BAD is a signal to skip immediately to DONE */
+      if((data->easy_conn->sockfd != CURL_SOCKET_BAD) ||
+         (data->easy_conn->writesockfd != CURL_SOCKET_BAD))
+        multistate(data, CURLM_STATE_WAITPERFORM);
+      else
+        multistate(data, CURLM_STATE_DONE);
       result = CURLM_CALL_MULTI_PERFORM;
       break;
 
