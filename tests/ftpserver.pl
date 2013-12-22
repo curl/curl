@@ -3251,36 +3251,45 @@ while(1) {
 
         my $check = 1; # no response yet
 
-        # See if there is a custom reply for our command
-        my $text = $commandreply{$FTPCMD};
+        # See if there is a custom reply for the full text
+        my $fulltext = $FTPCMD . " " . $FTPARG;
+        my $text = $fulltextreply{$fulltext};
         if($text && ($text ne "")) {
-            if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
-                # used enough times so blank the custom command reply
-                $commandreply{$FTPCMD}="";
-            }
-
             sendcontrol "$text\r\n";
             $check = 0;
         }
         else {
-            # See if there is any display text for our command
-            $text = $displaytext{$FTPCMD};
+            # See if there is a custom reply for the command
+            $text = $commandreply{$FTPCMD};
             if($text && ($text ne "")) {
-                if($proto eq 'imap') {
-                    sendcontrol "$cmdid $text\r\n";
-                }
-                else {
-                    sendcontrol "$text\r\n";
+                if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
+                    # used enough times so blank the custom command reply
+                    $commandreply{$FTPCMD}="";
                 }
 
+                sendcontrol "$text\r\n";
                 $check = 0;
             }
+            else {
+                # See if there is any display text for the command
+                $text = $displaytext{$FTPCMD};
+                if($text && ($text ne "")) {
+                    if($proto eq 'imap') {
+                        sendcontrol "$cmdid $text\r\n";
+                    }
+                    else {
+                        sendcontrol "$text\r\n";
+                    }
 
-            # only perform this if we're not faking a reply
-            my $func = $commandfunc{$FTPCMD};
-            if($func) {
-                &$func($FTPARG, $FTPCMD);
-                $check=0; # taken care of
+                    $check = 0;
+                }
+
+                # only perform this if we're not faking a reply
+                my $func = $commandfunc{$FTPCMD};
+                if($func) {
+                    &$func($FTPARG, $FTPCMD);
+                    $check = 0;
+                }
             }
         }
 
