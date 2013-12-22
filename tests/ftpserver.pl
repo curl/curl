@@ -3252,7 +3252,7 @@ while(1) {
         my $check = 1; # no response yet
 
         # See if there is a custom reply for the full text
-        my $fulltext = $FTPCMD . " " . $FTPARG;
+        my $fulltext = $FTPARG ? $FTPCMD . " " . $FTPARG : $FTPCMD;
         my $text = $fulltextreply{$fulltext};
         if($text && ($text ne "")) {
             sendcontrol "$text\r\n";
