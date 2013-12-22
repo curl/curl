@@ -2,7 +2,7 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH CRAM-MD5
+IMAP AUTH CRAM-MD5 SASL CANCELLATION
 RFC2195
 </keywords>
 </info>
