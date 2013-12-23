@@ -42,7 +42,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-smtp://%HOSTIP:%SMTPPORT/936 --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
+smtp://%HOSTIP:%SMTPPORT/936 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 <precheck>
 chkhostname curlhost
