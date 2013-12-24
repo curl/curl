@@ -780,8 +780,12 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
     else
       result = pop3_perform_authentication(conn);
   }
-  else
-    result = pop3_perform_user(conn);
+  else {
+    /* Clear text is supported when CAPA isn't recognised */
+    pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
+
+    result = pop3_perform_authentication(conn);
+  }
 
   return result;
 }
