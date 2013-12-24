@@ -11,6 +11,7 @@ POP3 APOP
 <reply>
 <servercmd>
 CAPA APOP
+REPLY welcome +OK cURL POP3 server ready to serve <1972.987654321\@curl>
 </servercmd>
 <data>
 From: me@somewhere

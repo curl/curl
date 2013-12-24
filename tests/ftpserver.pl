@@ -587,7 +587,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve '.$POP3_TIMESTAMP."\r\n")
+            '+OK cURL POP3 server ready to serve '."\r\n")
         );
     }
     elsif($proto eq 'imap') {
