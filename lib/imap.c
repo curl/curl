@@ -917,7 +917,7 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
       result = imap_perform_authentication(conn);
   }
   else
-    result = imap_perform_login(conn);
+    result = imap_perform_authentication(conn);
 
   return result;
 }
