@@ -1707,32 +1707,39 @@ my $username;
 
 sub CAPA_pop3 {
     my ($testno) = @_;
+    my @list = ();
+    my $mechs;
 
-    if((!@capabilities) && (!@auth_mechs)) {
+    # Calculate the capability list based on the specified capabilities
+    # (except APOP) and any authentication mechanisms
+    for my $c (@capabilities) {
+        push @list, "$c\r\n" unless $c eq "APOP";
+    }
+
+    for my $am (@auth_mechs) {
+        if(!$mechs) {
+            $mechs = "$am";
+        }
+        else {
+            $mechs .= " $am";
+        }
+    }
+
+    if($mechs) {
+        push @list, "SASL $mechs\r\n";
+    }
+
+    if(!@list) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
     else {
         my @data = ();
-        my $mechs;
 
         # Calculate the CAPA response
         push @data, "+OK List of capabilities follows\r\n";
 
-        for my $c (@capabilities) {
-            push @data, "$c\r\n";
-        }
-
-        for my $am (@auth_mechs) {
-            if(!$mechs) {
-                $mechs = "$am";
-            }
-            else {
-                $mechs .= " $am";
-            }
-        }
-
-        if($mechs) {
-            push @data, "SASL $mechs\r\n";
+        for my $l (@list) {
+            push @data, "$l\r\n";
         }
 
         push @data, "IMPLEMENTATION POP3 pingpong test server\r\n";

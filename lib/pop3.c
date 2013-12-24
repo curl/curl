@@ -561,8 +561,7 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
-            (pop3c->preftype & POP3_TYPE_APOP) &&
-            (pop3c->apoptimestamp))
+            (pop3c->preftype & POP3_TYPE_APOP))
       /* Perform APOP authentication */
       result = pop3_perform_apop(conn);
 #endif
@@ -658,8 +657,9 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   else {
-    /* Look for the APOP timestamp */
+    /* Does the server support APOP authentication? */
     if(len >= 4 && line[len - 2] == '>') {
+      /* Look for the APOP timestamp */
       for(i = 3; i < len - 2; ++i) {
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
@@ -676,6 +676,9 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
           /* Copy the timestamp */
           memcpy(pop3c->apoptimestamp, line + i, timestamplen);
           pop3c->apoptimestamp[timestamplen] = '\0';
+
+          /* Store the APOP capability */
+          pop3c->authtypes |= POP3_TYPE_APOP;
           break;
         }
       }
@@ -709,10 +712,6 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
     /* Does the server support clear text authentication? */
     else if(len >= 4 && !memcmp(line, "USER", 4))
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
-
-    /* Does the server support APOP authentication? */
-    else if(len >= 4 && !memcmp(line, "APOP", 4))
-      pop3c->authtypes |= POP3_TYPE_APOP;
 
     /* Does the server support SASL based authentication? */
     else if(len >= 5 && !memcmp(line, "SASL ", 5)) {
@@ -1201,8 +1200,7 @@ static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
-            (pop3c->preftype & POP3_TYPE_APOP) &&
-            (pop3c->apoptimestamp))
+            (pop3c->preftype & POP3_TYPE_APOP))
       /* Perform APOP authentication */
       result = pop3_perform_apop(conn);
 #endif
