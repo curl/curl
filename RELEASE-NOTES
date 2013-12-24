@@ -15,7 +15,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o curl_easy_setopt: Fixed OAuth 2.0 Bearer option name [1]
- o pop3: pop3: Fixed APOP being determined by CAPA response rather than by timestamp
+ o pop3: Fixed APOP being determined by CAPA response rather than by timestamp
  o 
 
 This release includes the following known bugs:
