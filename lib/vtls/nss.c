@@ -36,7 +36,7 @@
 #include "connect.h"
 #include "strequal.h"
 #include "select.h"
-#include "sslgen.h"
+#include "vtls.h"
 #include "llist.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */

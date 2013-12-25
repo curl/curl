@@ -96,7 +96,7 @@
 #include "inet_pton.h"
 #include "connect.h"
 #include "select.h"
-#include "sslgen.h"
+#include "vtls.h"
 #include "curl_darwinssl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */

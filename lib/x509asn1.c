@@ -28,7 +28,7 @@
 #include "urldata.h"
 #include "strequal.h"
 #include "hostcheck.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "sendf.h"
 #include "inet_pton.h"
 #include "curl_base64.h"

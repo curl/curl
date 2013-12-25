@@ -34,7 +34,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "qssl.h"
-#include "sslgen.h"
+#include "vtls.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "x509asn1.h"

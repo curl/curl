@@ -69,7 +69,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "gskit.h"
-#include "sslgen.h"
+#include "vtls.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strequal.h"

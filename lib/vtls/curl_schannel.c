@@ -61,7 +61,7 @@
 
 #include "curl_sspi.h"
 #include "curl_schannel.h"
-#include "sslgen.h"
+#include "vtls.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
 #include "strerror.h"
