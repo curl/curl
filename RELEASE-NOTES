@@ -10,12 +10,20 @@ Curl and libcurl 7.34.1
 This release includes the following changes:
 
  o imap/pop3/smtp: Added support for SASL authentication downgrades
+ o imap/pop3/smtp: Extended the login options to support multiple auth mechanisms
+ o TheArtOfHttpScripting: major update, converted layout and more
  o 
 
 This release includes the following bugfixes:
 
  o curl_easy_setopt: Fixed OAuth 2.0 Bearer option name [1]
  o pop3: Fixed APOP being determined by CAPA response rather than by timestamp
+ o Curl_pp_readresp: zero terminate line [2]
+ o FILE: don't wait due to CURLOPT_MAX_RECV_SPEED_LARGE [3]
+ o docs: mention CURLOPT_MAX_RECV/SEND_SPEED_LARGE don't work for FILE://
+ o pop3: Fixed auth preference not being honored when CAPA not supported
+ o imap: Fixed auth preference not being honored when CAPABILITY not supported
+ o threaded resolver: Use pthread_t * for curl_thread_t [4]
  o 
 
 This release includes the following known bugs:
@@ -25,10 +33,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steve Holme, Viktor Szakáts
+ Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/bug/view.cgi?id=1313
+ [2] = http://curl.haxx.se/mail/lib-2013-12/0113.html
+ [3] = http://curl.haxx.se/bug/view.cgi?id=1312
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1314
