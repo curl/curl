@@ -24,7 +24,7 @@
 #include "curl_setup.h"
 
 /*
- * This header should only be needed to get included by sslgen.c and gskit.c
+ * This header should only be needed to get included by vtls.c and gskit.c
  */
 
 #include "urldata.h"

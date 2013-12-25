@@ -22,7 +22,7 @@
 
 /*
  * Source file for all GnuTLS-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but vtls.c should ever call or use these functions.
  *
  * Note: don't use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.

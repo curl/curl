@@ -22,7 +22,7 @@
 
 /*
  * Source file for all CyaSSL-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but vtls.c should ever call or use these functions.
  *
  */
 

@@ -26,7 +26,7 @@
 
 #ifdef USE_SSLEAY
 /*
- * This header should only be needed to get included by sslgen.c and ssluse.c
+ * This header should only be needed to get included by vtls.c and openssl.c
  */
 
 #include "urldata.h"

@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, DirecTV
- * contact: Eric Hu <ehu@directv.com>
+ * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
+ * Copyright (C) 2010 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
 
 /*
  * Source file for all axTLS-specific code for the TLS/SSL layer. No code
- * but sslgen.c should ever call or use these functions.
+ * but vtls.c should ever call or use these functions.
  */
 
 #include "curl_setup.h"
@@ -522,10 +522,10 @@ void Curl_axtls_close(struct connectdata *conn, int sockindex)
 
   infof(conn->data, "  Curl_axtls_close\n");
 
-    /* line from ssluse.c: (void)SSL_shutdown(connssl->ssl);
+    /* line from openssl.c: (void)SSL_shutdown(connssl->ssl);
        axTLS compat layer does nothing for SSL_shutdown */
 
-    /* The following line is from ssluse.c.  There seems to be no axTLS
+    /* The following line is from openssl.c.  There seems to be no axTLS
        equivalent.  ssl_free and ssl_ctx_free close things.
        SSL_set_connect_state(connssl->handle); */
 
@@ -538,7 +538,7 @@ void Curl_axtls_close(struct connectdata *conn, int sockindex)
  */
 int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 {
-  /* Outline taken from ssluse.c since functions are in axTLS compat layer.
+  /* Outline taken from openssl.c since functions are in axTLS compat layer.
      axTLS's error set is much smaller, so a lot of error-handling was removed.
    */
   int retval = 0;
@@ -638,7 +638,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
  */
 int Curl_axtls_check_cxn(struct connectdata *conn)
 {
-  /* ssluse.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
+  /* openssl.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
      axTLS compat layer always returns the last argument, so connection is
      always alive? */
 
@@ -650,7 +650,7 @@ void Curl_axtls_session_free(void *ptr)
 {
   (void)ptr;
   /* free the ID */
-  /* both ssluse.c and gtls.c do something here, but axTLS's OpenSSL
+  /* both openssl.c and gtls.c do something here, but axTLS's OpenSSL
      compatibility layer does nothing, so we do nothing too. */
 }
 

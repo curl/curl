@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012-2013, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012-2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2013, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
 
 /*
  * Source file for all iOS and Mac OS X SecureTransport-specific code for the
- * TLS/SSL layer. No code but sslgen.c should ever call or use these functions.
+ * TLS/SSL layer. No code but vtls.c should ever call or use these functions.
  */
 
 #include "curl_setup.h"

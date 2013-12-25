@@ -25,7 +25,7 @@
 
 #ifdef USE_NSS
 /*
- * This header should only be needed to get included by sslgen.c and nss.c
+ * This header should only be needed to get included by vtls.c and nss.c
  */
 
 #include "urldata.h"
