@@ -128,14 +128,24 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     return CURLE_ABORTED_BY_CALLBACK;
   }
   else if(nread == CURL_READFUNC_PAUSE) {
-    struct SingleRequest *k = &data->req;
-    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-    k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
-    if(data->req.upload_chunky) {
-      /* Back out the preallocation done above */
-      data->req.upload_fromhere -= (8 + 2);
+
+    if(conn->handler->flags & PROTOPT_NONETWORK) {
+      /* protocols that work without network cannot be paused. This is
+         actually only FILE:// just now, and it can't pause since the transfer
+         isn't done using the "normal" procedure. */
+      failf(data, "Read callback asked for PAUSE when not supported!");
+      return CURLE_READ_ERROR;
     }
-    *nreadp = 0;
+    else {
+      struct SingleRequest *k = &data->req;
+      /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+      k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
+      if(data->req.upload_chunky) {
+        /* Back out the preallocation done above */
+        data->req.upload_fromhere -= (8 + 2);
+      }
+      *nreadp = 0;
+    }
     return CURLE_OK; /* nothing was read */
   }
   else if((size_t)nread > buffersize) {

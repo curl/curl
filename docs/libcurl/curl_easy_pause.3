@@ -31,8 +31,8 @@ curl_easy_pause - pause and unpause a connection
 Using this function, you can explicitly mark a running connection to get
 paused, and you can unpause a connection that was previously paused.
 
-A connection can be paused by using this function or by letting the read
-or the write callbacks return the proper magic return code
+A connection can be paused by using this function or by letting the read or
+the write callbacks return the proper magic return code
 (\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
 that returns pause signals to the library that it couldn't take care of any
 data at all, and that data will then be delivered again to the callback when
@@ -68,6 +68,10 @@ Convenience define that unpauses both directions
 CURLE_OK (zero) means that the option was set properly, and a non-zero return
 code means something wrong occurred after the new state was set.  See the
 \fIlibcurl-errors(3)\fP man page for the full list with descriptions.
+.SH LIMITATIONS
+The pausing of transfers does not work with protocols that work without
+network connectivity, like FILE://. Trying to pause such a transfer, in any
+direction, will cause problems in the worst case or an error in the best case.
 .SH AVAILABILITY
 This function was added in libcurl 7.18.0. Before this version, there was no
 explicit support for pausing transfers.

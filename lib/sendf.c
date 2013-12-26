@@ -444,10 +444,18 @@ CURLcode Curl_client_write(struct connectdata *conn,
       wrote = len;
     }
 
-    if(CURL_WRITEFUNC_PAUSE == wrote)
+    if(conn->handler->flags & PROTOPT_NONETWORK) {
+      /* protocols that work without network cannot be paused. This is
+         actually only FILE:// just now, and it can't pause since the transfer
+         isn't done using the "normal" procedure. */
+      failf(data, "Write callback asked for PAUSE when not supported!");
+      return CURLE_WRITE_ERROR;
+    }
+
+    else if(CURL_WRITEFUNC_PAUSE == wrote)
       return pausewrite(data, type, ptr, len);
 
-    if(wrote != len) {
+    else if(wrote != len) {
       failf(data, "Failed writing body (%zu != %zu)", wrote, len);
       return CURLE_WRITE_ERROR;
     }
