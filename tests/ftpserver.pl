@@ -752,7 +752,6 @@ sub EHLO_smtp {
 
     # Store the client (as it may contain the test number)
     $smtp_client = $client;
-}
 
     return 0;
 }
