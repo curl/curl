@@ -702,70 +702,57 @@ my $smtp_client;
 
 sub EHLO_smtp {
     my ($client) = @_;
+    my @data;
 
-    if($client eq "verifiedserver") {
-        # This is the secret command that verifies that this actually is
-        # the curl test server
-        sendcontrol "554 WE ROOLZ: $$\r\n";
-
-        if($verbose) {
-            print STDERR "FTPD: We returned proof we are the test server\n";
-        }
-
-        logmsg "return proof we are we\n";
+    # TODO: Get the IP address of the client connection to use in the
+    # EHLO response when the client doesn't specify one but for now use
+    # 127.0.0.1
+    if(!$client) {
+        $client = "[127.0.0.1]";
     }
-    else {
-        my @data;
 
-        # TODO: Get the IP address of the client connection to use in the
-        # EHLO response when the client doesn't specify one but for now use
-        # 127.0.0.1
-        if (!$client) {
-            $client = "[127.0.0.1]";
+    # Set the server type to ESMTP
+    $smtp_type = "ESMTP";
+
+    # Calculate the EHLO response
+    push @data, "$smtp_type pingpong test server Hello $client";
+
+    if((@capabilities) || (@auth_mechs)) {
+        my $mechs;
+
+        for my $c (@capabilities) {
+            push @data, $c;
         }
 
-        # Set the server type to ESMTP
-        $smtp_type = "ESMTP";
-
-        # Calculate the EHLO response
-        push @data, "$smtp_type pingpong test server Hello $client";
-
-        if((@capabilities) || (@auth_mechs)) {
-            my $mechs;
-
-            for my $c (@capabilities) {
-                push @data, $c;
-            }
-
-            for my $am (@auth_mechs) {
-                if(!$mechs) {
-                    $mechs = "$am";
-                }
-                else {
-                    $mechs .= " $am";
-                }
-            }
-
-            if($mechs) {
-                push @data, "AUTH $mechs";
-            }
-        }
-
-        # Send the EHLO response
-        for (my $i = 0; $i < @data; $i++) {
-            my $d = $data[$i];
-
-            if($i < @data - 1) {
-                sendcontrol "250-$d\r\n";
+        for my $am (@auth_mechs) {
+            if(!$mechs) {
+                $mechs = "$am";
             }
             else {
-                sendcontrol "250 $d\r\n";
+                $mechs .= " $am";
             }
         }
 
-        # Store the client (as it may contain the test number)
-        $smtp_client = $client;
+        if($mechs) {
+            push @data, "AUTH $mechs";
+        }
     }
+
+    # Send the EHLO response
+    for(my $i = 0; $i < @data; $i++) {
+        my $d = $data[$i];
+
+        if($i < @data - 1) {
+            sendcontrol "250-$d\r\n";
+        }
+        else {
+            sendcontrol "250 $d\r\n";
+        }
+    }
+
+    # Store the client (as it may contain the test number)
+    $smtp_client = $client;
+}
 
     return 0;
 }
@@ -773,33 +760,20 @@ sub EHLO_smtp {
 sub HELO_smtp {
     my ($client) = @_;
 
-    if($client eq "verifiedserver") {
-        # This is the secret command that verifies that this actually is
-        # the curl test server
-        sendcontrol "554 WE ROOLZ: $$\r\n";
-
-        if($verbose) {
-            print STDERR "FTPD: We returned proof we are the test server\n";
-        }
-
-        logmsg "return proof we are we\n";
+    # TODO: Get the IP address of the client connection to use in the HELO
+    # response when the client doesn't specify one but for now use 127.0.0.1
+    if(!$client) {
+        $client = "[127.0.0.1]";
     }
-    else {
-        # TODO: Get the IP address of the client connection to use in the HELO
-        # response when the client doesn't specify one but for now use 127.0.0.1
-        if (!$client) {
-            $client = "[127.0.0.1]";
-        }
 
-        # Set the server type to SMTP
-        $smtp_type = "SMTP";
+    # Set the server type to SMTP
+    $smtp_type = "SMTP";
 
-        # Send the HELO response
-        sendcontrol "250 $smtp_type pingpong test server Hello $client\r\n";
+    # Send the HELO response
+    sendcontrol "250 $smtp_type pingpong test server Hello $client\r\n";
 
-        # Store the client (as it may contain the test number)
-        $smtp_client = $client;
-    }
+    # Store the client (as it may contain the test number)
+    $smtp_client = $client;
 
     return 0;
 }
@@ -997,13 +971,26 @@ sub HELP_smtp {
         logmsg "HELP_smtp got $args\n";
     }
 
-    sendcontrol "214-This server supports the following commands:\r\n";
+    if($smtp_client eq "verifiedserver") {
+        # This is the secret command that verifies that this actually is
+        # the curl test server
+        sendcontrol "214 WE ROOLZ: $$\r\n";
 
-    if(@auth_mechs) {
-        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP AUTH\r\n";
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
+        }
+
+        logmsg "return proof we are we\n";
     }
     else {
-        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP\r\n";
+        sendcontrol "214-This server supports the following commands:\r\n";
+
+        if(@auth_mechs) {
+            sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP AUTH\r\n";
+        }
+        else {
+            sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP\r\n";
+        }
     }
 
     return 0;

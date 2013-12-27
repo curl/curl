@@ -790,14 +790,6 @@ sub verifyftp {
     if($proto eq "ftps") {
         $extra .= "--insecure --ftp-ssl-control ";
     }
-    elsif($proto eq "smtp") {
-        # SMTP is a bit different since it requires more options and it
-        # has _no_ output!
-        $extra .= "--mail-rcpt verifiedserver ";
-        $extra .= "--mail-from fake\@example.com ";
-        $extra .= "--upload /dev/null ";
-        $extra .= "--stderr - "; # move stderr to parse the verbose stuff
-    }
 
     my $flags = "--max-time $server_response_maxtime ";
     $flags .= "--silent ";
