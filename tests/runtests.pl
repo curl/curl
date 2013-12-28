@@ -2751,7 +2751,7 @@ sub singletest {
         my $f = $_;
         $f =~ s/\s//g;
 
-        if($f =~ /^[^!](.*)$/) {
+        if($f =~ /^([^!].*)$/) {
             # Store the feature for later
             $feature{$1} = $1;
 
