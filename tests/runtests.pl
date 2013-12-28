@@ -2746,11 +2746,12 @@ sub singletest {
         @what = getpart("client", "features");
     }
 
+    # We require a feature to be present
     for(@what) {
         my $f = $_;
         $f =~ s/\s//g;
 
-        $feature{$f}=$f; # we require this feature
+        $feature{$f} = $f;
 
         if($f eq "SSL") {
             if($ssl_version) {
@@ -2867,6 +2868,121 @@ sub singletest {
 
         $why = "curl lacks $f support";
         last;
+    }
+
+    # We require a feature to not be present
+    if(!$why) {
+        for(@what) {
+            my $f = $_;
+            $f =~ s/\s//g;
+
+            if($f =~ /^!(.*)$/) {
+                if($1 eq "SSL") {
+                    if(!$ssl_version) {
+                        next;
+                    }
+                }
+                elsif($1 eq "OpenSSL") {
+                    if(!$has_openssl) {
+                        next;
+                    }
+                }
+                elsif($1 eq "GnuTLS") {
+                    if(!$has_gnutls) {
+                        next;
+                    }
+                }
+                elsif($1 eq "NSS") {
+                    if(!$has_nss) {
+                        next;
+                    }
+                }
+                elsif($1 eq "axTLS") {
+                    if(!$has_axtls) {
+                        next;
+                    }
+                }
+                elsif($1 eq "WinSSL") {
+                    if(!$has_winssl) {
+                        next;
+                    }
+                }
+                elsif($1 eq "DarwinSSL") {
+                    if(!$has_darwinssl) {
+                        next;
+                    }
+                }
+                elsif($1 eq "TrackMemory") {
+                    if(!$has_memory_tracking) {
+                        next;
+                    }
+                }
+                elsif($1 eq "large_file") {
+                    if(!$large_file) {
+                        next;
+                    }
+                }
+                elsif($1 eq "idn") {
+                    if(!$has_idn) {
+                        next;
+                    }
+                }
+                elsif($1 eq "ipv6") {
+                    if(!$has_ipv6) {
+                        next;
+                    }
+                }
+                elsif($1 eq "libz") {
+                    if(!$has_libz) {
+                        next;
+                    }
+                }
+                elsif($1 eq "NTLM") {
+                    if(!$has_ntlm) {
+                        next;
+                    }
+                }
+                elsif($1 eq "NTLM_WB") {
+                    if(!$has_ntlm_wb) {
+                        next;
+                    }
+                }
+                elsif($1 eq "SSPI") {
+                    if(!$has_sspi) {
+                        next;
+                    }
+                }
+                elsif($1 eq "getrlimit") {
+                    if(!$has_getrlimit) {
+                        next;
+                    }
+                }
+                elsif($1 eq "crypto") {
+                    if(!$has_crypto) {
+                        next;
+                    }
+                }
+                elsif($1 eq "TLS-SRP") {
+                    if(!$has_tls_srp) {
+                        next;
+                    }
+                }
+                elsif($1 eq "Metalink") {
+                    if(!$has_metalink) {
+                        next;
+                    }
+                }
+                else {
+                    next;
+                }
+            }
+            else {
+                next;
+            }
+
+            $why = "curl has $1 support";
+            last;
+        }
     }
 
     if(!$why) {
