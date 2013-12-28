@@ -1081,7 +1081,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 {
   struct SessionHandle *data = conn->data;
   struct timeval before = Curl_tvnow();
-  CURLcode res;
+  CURLcode res = CURLE_COULDNT_CONNECT;
 
   long timeout_ms = Curl_timeleft(data, &before, TRUE);
 
