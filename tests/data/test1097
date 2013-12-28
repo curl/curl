@@ -47,6 +47,7 @@ https
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 HTTP POST using CONNECT with --proxy-ntlm but no auth is required

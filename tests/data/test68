@@ -55,6 +55,7 @@ Wrong password dude. Get it fixed and return.
 <client>
 <features>
 NTLM
+!SSPI
 </features>
 <server>
 http

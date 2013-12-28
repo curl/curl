@@ -19,6 +19,7 @@ http
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 HTTP POST with --proxy-ntlm and no SSL with no response

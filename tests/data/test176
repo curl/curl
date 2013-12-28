@@ -47,6 +47,7 @@ content for you
 <client>
 <features>
 NTLM
+!SSPI
 </features>
 <server>
 http

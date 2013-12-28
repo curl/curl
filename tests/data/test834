@@ -36,6 +36,7 @@ imap
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 IMAP NTLM authentication with SASL downgrade

@@ -36,6 +36,7 @@ pop3
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 POP3 NTLM authentication

@@ -26,6 +26,7 @@ imap
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 IMAP NTLM graceful cancellation

@@ -25,6 +25,7 @@ smtp
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 SMTP NTLM authentication with initial response

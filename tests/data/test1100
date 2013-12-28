@@ -63,6 +63,7 @@ This is the final page !
 <client>
 <features>
 NTLM
+!SSPI
 </features>
 <server>
 http

@@ -50,6 +50,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+!SSPI
 </features>
 <server>
 http

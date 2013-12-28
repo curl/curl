@@ -75,6 +75,7 @@ http
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 HTTP 1.0 proxy CONNECT auth NTLM and then POST
