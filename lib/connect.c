@@ -1104,12 +1104,12 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     conn->tempaddr[0]->ai_next == NULL ? timeout_ms : timeout_ms / 2;
 
   /* start connecting to first IP */
-  res = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
-  while(res != CURLE_OK &&
-        conn->tempaddr[0] &&
-        conn->tempaddr[0]->ai_next &&
-        conn->tempsock[0] == CURL_SOCKET_BAD)
-    res = trynextip(conn, FIRSTSOCKET, 0);
+  while(conn->tempaddr[0]) {
+    res = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
+    if(res == CURLE_OK)
+        break;
+    conn->tempaddr[0] = conn->tempaddr[0]->ai_next;
+  }
 
   if(conn->tempsock[0] == CURL_SOCKET_BAD)
     return res;
