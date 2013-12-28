@@ -2751,123 +2751,126 @@ sub singletest {
         my $f = $_;
         $f =~ s/\s//g;
 
-        $feature{$f} = $f;
+        if($f =~ /^[^!](.*)$/) {
+            # Store the feature for later
+            $feature{$1} = $1;
 
-        if($f eq "SSL") {
-            if($ssl_version) {
+            if($1 eq "SSL") {
+                if($ssl_version) {
+                    next;
+                }
+            }
+            elsif($1 eq "OpenSSL") {
+                if($has_openssl) {
+                    next;
+                }
+            }
+            elsif($1 eq "GnuTLS") {
+                if($has_gnutls) {
+                    next;
+                }
+            }
+            elsif($1 eq "NSS") {
+                if($has_nss) {
+                    next;
+                }
+            }
+            elsif($1 eq "axTLS") {
+                if($has_axtls) {
+                    next;
+                }
+            }
+            elsif($1 eq "WinSSL") {
+                if($has_winssl) {
+                    next;
+                }
+            }
+            elsif($1 eq "DarwinSSL") {
+                if($has_darwinssl) {
+                    next;
+                }
+            }
+            elsif($1 eq "unittest") {
+                if($debug_build) {
+                    next;
+                }
+            }
+            elsif($1 eq "debug") {
+                if($debug_build) {
+                    next;
+                }
+            }
+            elsif($1 eq "TrackMemory") {
+                if($has_memory_tracking) {
+                    next;
+                }
+            }
+            elsif($1 eq "large_file") {
+                if($large_file) {
+                    next;
+                }
+            }
+            elsif($1 eq "idn") {
+                if($has_idn) {
+                    next;
+                }
+            }
+            elsif($1 eq "ipv6") {
+                if($has_ipv6) {
+                    next;
+                }
+            }
+            elsif($1 eq "libz") {
+                if($has_libz) {
+                    next;
+                }
+            }
+            elsif($1 eq "NTLM") {
+                if($has_ntlm) {
+                    next;
+                }
+            }
+            elsif($1 eq "NTLM_WB") {
+                if($has_ntlm_wb) {
+                    next;
+                }
+            }
+            elsif($1 eq "SSPI") {
+                if($has_sspi) {
+                    next;
+                }
+            }
+            elsif($1 eq "getrlimit") {
+                if($has_getrlimit) {
+                    next;
+                }
+            }
+            elsif($1 eq "crypto") {
+                if($has_crypto) {
+                    next;
+                }
+            }
+            elsif($1 eq "TLS-SRP") {
+                if($has_tls_srp) {
+                    next;
+                }
+            }
+            elsif($1 eq "Metalink") {
+                if($has_metalink) {
+                    next;
+                }
+            }
+            elsif($1 eq "socks") {
                 next;
             }
-        }
-        elsif($f eq "OpenSSL") {
-            if($has_openssl) {
+            # See if this "feature" is in the list of supported protocols
+            elsif (grep /^\Q$1\E$/i, @protocols) {
                 next;
             }
-        }
-        elsif($f eq "GnuTLS") {
-            if($has_gnutls) {
-                next;
-            }
-        }
-        elsif($f eq "NSS") {
-            if($has_nss) {
-                next;
-            }
-        }
-        elsif($f eq "axTLS") {
-            if($has_axtls) {
-                next;
-            }
-        }
-        elsif($f eq "WinSSL") {
-            if($has_winssl) {
-                next;
-            }
-        }
-        elsif($f eq "DarwinSSL") {
-            if($has_darwinssl) {
-                next;
-            }
-        }
-        elsif($f eq "unittest") {
-            if($debug_build) {
-                next;
-            }
-        }
-        elsif($f eq "debug") {
-            if($debug_build) {
-                next;
-            }
-        }
-        elsif($f eq "TrackMemory") {
-            if($has_memory_tracking) {
-                next;
-            }
-        }
-        elsif($f eq "large_file") {
-            if($large_file) {
-                next;
-            }
-        }
-        elsif($f eq "idn") {
-            if($has_idn) {
-                next;
-            }
-        }
-        elsif($f eq "ipv6") {
-            if($has_ipv6) {
-                next;
-            }
-        }
-        elsif($f eq "libz") {
-            if($has_libz) {
-                next;
-            }
-        }
-        elsif($f eq "NTLM") {
-            if($has_ntlm) {
-                next;
-            }
-        }
-        elsif($f eq "NTLM_WB") {
-            if($has_ntlm_wb) {
-                next;
-            }
-        }
-        elsif($f eq "SSPI") {
-            if($has_sspi) {
-                next;
-            }
-        }
-        elsif($f eq "getrlimit") {
-            if($has_getrlimit) {
-                next;
-            }
-        }
-        elsif($f eq "crypto") {
-            if($has_crypto) {
-                next;
-            }
-        }
-        elsif($f eq "TLS-SRP") {
-            if($has_tls_srp) {
-                next;
-            }
-        }
-        elsif($f eq "Metalink") {
-            if($has_metalink) {
-                next;
-            }
-        }
-        elsif($f eq "socks") {
-            next;
-        }
-        # See if this "feature" is in the list of supported protocols
-        elsif (grep /^\Q$f\E$/i, @protocols) {
-            next;
-        }
 
-        $why = "curl lacks $f support";
-        last;
+            $why = "curl lacks $1 support";
+            last;
+        }
     }
 
     # We require a feature to not be present
