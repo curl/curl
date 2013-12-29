@@ -73,6 +73,19 @@
 #endif
 
 /*
+ * Non-ANSI integer extensions
+ */
+
+#if (defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)) || \
+    (defined(__WATCOMC__) && defined(__386__)) || \
+    (defined(__POCC__) && defined(_MSC_VER)) || \
+    (defined(_WIN32_WCE)) || \
+    (defined(__MINGW32__)) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64))
+#  define MP_HAVE_INT_EXTENSIONS
+#endif
+
+/*
  * Max integer data types that mprintf.c is capable
  */
 
@@ -189,17 +202,27 @@ static long dprintf_DollarString(char *input, char **end)
   return 0;
 }
 
-static int dprintf_IsQualifierNoDollar(char c)
+static bool dprintf_IsQualifierNoDollar(const char *fmt)
 {
-  switch (c) {
+#if defined(MP_HAVE_INT_EXTENSIONS)
+  if(!strncmp(fmt, "I32", 3) || !strncmp(fmt, "I64", 3)) {
+    return TRUE;
+  }
+#endif
+
+  switch(*fmt) {
   case '-': case '+': case ' ': case '#': case '.':
   case '0': case '1': case '2': case '3': case '4':
   case '5': case '6': case '7': case '8': case '9':
   case 'h': case 'l': case 'L': case 'z': case 'q':
   case '*': case 'O':
-    return 1; /* true */
+#if defined(MP_HAVE_INT_EXTENSIONS)
+  case 'I':
+#endif
+    return TRUE;
+
   default:
-    return 0; /* false */
+    return FALSE;
   }
 }
 
@@ -255,8 +278,20 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       /* Handle the flags */
 
-      while(dprintf_IsQualifierNoDollar(*fmt)) {
-        switch (*fmt++) {
+      while(dprintf_IsQualifierNoDollar(fmt)) {
+#if defined(MP_HAVE_INT_EXTENSIONS)
+        if(!strncmp(fmt, "I32", 3)) {
+          flags |= FLAGS_LONG;
+          fmt += 3;
+        }
+        else if(!strncmp(fmt, "I64", 3)) {
+          flags |= FLAGS_LONGLONG;
+          fmt += 3;
+        }
+        else
+#endif
+
+        switch(*fmt++) {
         case ' ':
           flags |= FLAGS_SPACE;
           break;
@@ -296,6 +331,15 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
+#if defined(MP_HAVE_INT_EXTENSIONS)
+        case 'I':
+#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+          flags |= FLAGS_LONGLONG;
+#else
+          flags |= FLAGS_LONG;
+#endif
+          break;
+#endif
         case 'l':
           if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
