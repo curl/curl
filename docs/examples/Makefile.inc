@@ -4,8 +4,8 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   https multi-app multi-debugcallback multi-double multi-post multi-single \
   persistant post-callback postit2 sepheaders simple simplepost simplessl  \
   sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard \
-  smtp-multi simplesmtp smtp-tls smtp-vrfy smtp-expn rtsp externalsocket \
-  resolve progressfunc pop3s pop3slist imap url2file sftpget ftpsget \
+  smtp-multi smtp-send smtp-tls smtp-vrfy smtp-expn rtsp externalsocket \
+  resolve progressfunc pop3s pop3slist imap-fetch url2file sftpget ftpsget \
   postinmemory
 
 # These examples require external dependencies that may not be commonly

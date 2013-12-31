@@ -24,7 +24,7 @@
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's SMTP
- * capabilities. It builds on the simplesmtp.c example, adding some
+ * capabilities. It builds on the smtp-send.c example, adding some
  * authentication and transport security.
  */
 
@@ -70,7 +70,6 @@ static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
   }
   return 0;
 }
-
 
 int main(void)
 {
@@ -150,5 +149,6 @@ int main(void)
     curl_slist_free_all(recipients);
     curl_easy_cleanup(curl);
   }
+
   return 0;
 }

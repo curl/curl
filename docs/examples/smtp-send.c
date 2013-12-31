@@ -23,6 +23,11 @@
 #include <string.h>
 #include <curl/curl.h>
 
+/* This is a simple example showing how to send mail using libcurl's SMTP
+ * capabilities. For an exmaple of using the multi interface please see
+ * smtp-multi.c.
+ */
+
 int main(void)
 {
   CURL *curl;
@@ -66,6 +71,7 @@ int main(void)
 
     /* send the message (including headers) */
     res = curl_easy_perform(curl);
+
     /* Check for errors */
     if(res != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
@@ -84,5 +90,6 @@ int main(void)
      */
     curl_easy_cleanup(curl);
   }
+
   return 0;
 }
