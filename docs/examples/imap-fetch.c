@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,12 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
+/* This is a simple example showing how to fetch mail using libcurl's IMAP
+ * capabilities.
+ *
+ * Note that this example requires libcurl 7.30.0 or above.
+ */
+
 int main(void)
 {
   CURL *curl;
@@ -32,13 +38,20 @@ int main(void)
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
 
-    /* This will fetch the mailbox named "foobar" */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/foobar");
+    /* This will fetch message 1 from the user's inbox */
+    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX/;UID=1");
 
+    /* Perform the fetch */
     res = curl_easy_perform(curl);
 
-    /* always cleanup */
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+
+    /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
   return (int)res;
 }
