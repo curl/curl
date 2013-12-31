@@ -82,7 +82,7 @@ int main(void)
   upload_ctx.lines_read = 0;
 
   curl = curl_easy_init();
-  if (curl) {
+  if(curl) {
     /* This is the URL for your mailserver. Note the use of port 587 here,
      * instead of the normal SMTP port (25). Port 587 is commonly used for
      * secure mail submission (see RFC4403), but you should use whatever
@@ -118,6 +118,7 @@ int main(void)
 
     /* value for envelope reverse-path */
     curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+
     /* Add two recipients, in this particular case they correspond to the
      * To: and Cc: addressees in the header, but they could be any kind of
      * recipient. */
@@ -131,6 +132,7 @@ int main(void)
      */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* Since the traffic will be encrypted, it is very useful to turn on debug
      * information within libcurl to see what is happening during the transfer.

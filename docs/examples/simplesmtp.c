@@ -62,6 +62,7 @@ int main(void)
      * as a FILE pointer) as shown here.
      */
     curl_easy_setopt(curl, CURLOPT_READDATA, stdin);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* send the message (including headers) */
     res = curl_easy_perform(curl);
