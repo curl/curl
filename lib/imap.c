@@ -775,7 +775,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   /* Send the APPEND command */
-  result = imap_sendf(conn, "APPEND %s (\\Seen) {%" FORMAT_OFF_T "}",
+  result = imap_sendf(conn, "APPEND %s (\\Seen) {%" CURL_FORMAT_CURL_OFF_T "}",
                       mailbox, conn->data->set.infilesize);
 
   Curl_safefree(mailbox);
@@ -1494,7 +1494,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   }
 
   if(parsed) {
-    infof(data, "Found %" FORMAT_OFF_TU " bytes to download\n", size);
+    infof(data, "Found %" CURL_FORMAT_CURL_OFF_TU " bytes to download\n", size);
     Curl_pgrsSetDownloadSize(data, size);
 
     if(pp->cache) {
@@ -1513,7 +1513,8 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
       data->req.bytecount += chunk;
 
-      infof(data, "Written %" FORMAT_OFF_TU " bytes, %" FORMAT_OFF_TU
+      infof(data, "Written %" CURL_FORMAT_CURL_OFF_TU
+            " bytes, %" CURL_FORMAT_CURL_OFF_TU
             " bytes are left for transfer\n", (curl_off_t)chunk,
             size - chunk);
 

@@ -380,9 +380,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                       keepon = 2;
 
                       if(cl) {
-
-                        infof(data, "Ignore %" FORMAT_OFF_T
+                        infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
                               " bytes of response-body\n", cl);
+
                         /* remove the remaining chunk of what we already
                            read */
                         cl -= (gotbytes - i);

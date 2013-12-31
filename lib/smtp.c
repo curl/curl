@@ -582,7 +582,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
   /* Calculate the optional SIZE parameter */
   if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
-    size = aprintf("%" FORMAT_OFF_T, data->set.infilesize);
+    size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->set.infilesize);
 
     if(!size) {
       Curl_safefree(from);

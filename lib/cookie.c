@@ -815,7 +815,7 @@ Curl_cookie_add(struct SessionHandle *data,
   if(c->running)
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
-          "expire %" FORMAT_OFF_T "\n",
+          "expire %" CURL_FORMAT_CURL_OFF_T "\n",
           replace_old?"Replaced":"Added", co->name, co->value,
           co->domain, co->path, co->expires);
 
@@ -1172,7 +1172,7 @@ static char *get_netscape_format(const struct Cookie *co)
     "%s\t"   /* tailmatch */
     "%s\t"   /* path */
     "%s\t"   /* secure */
-    "%" FORMAT_OFF_T "\t"   /* expires */
+    "%" CURL_FORMAT_CURL_OFF_T "\t"   /* expires */
     "%s\t"   /* name */
     "%s",    /* value */
     co->httponly?"#HttpOnly_":"",

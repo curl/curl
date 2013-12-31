@@ -2263,8 +2263,8 @@ static CURLcode ftp_state_retr(struct connectdata *conn,
       if(data->state.resume_from< 0) {
         /* We're supposed to download the last abs(from) bytes */
         if(filesize < -data->state.resume_from) {
-          failf(data, "Offset (%" FORMAT_OFF_T
-                ") was beyond file size (%" FORMAT_OFF_T ")",
+          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
+                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2275,8 +2275,8 @@ static CURLcode ftp_state_retr(struct connectdata *conn,
       }
       else {
         if(filesize < data->state.resume_from) {
-          failf(data, "Offset (%" FORMAT_OFF_T
-                ") was beyond file size (%" FORMAT_OFF_T ")",
+          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
+                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2298,13 +2298,13 @@ static CURLcode ftp_state_retr(struct connectdata *conn,
     }
 
     /* Set resume file transfer offset */
-    infof(data, "Instructs server to resume from offset %" FORMAT_OFF_T
-          "\n", data->state.resume_from);
+    infof(data, "Instructs server to resume from offset %"
+          CURL_FORMAT_CURL_OFF_T "\n", data->state.resume_from);
 
-    PPSENDF(&ftpc->pp, "REST %" FORMAT_OFF_T, data->state.resume_from);
+    PPSENDF(&ftpc->pp, "REST %" CURL_FORMAT_CURL_OFF_T,
+            data->state.resume_from);
 
     state(conn, FTP_RETR_REST);
-
   }
   else {
     /* no resume */
@@ -2331,7 +2331,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
       snprintf(buf, sizeof(data->state.buffer),
-               "Content-Length: %" FORMAT_OFF_T "\r\n", filesize);
+               "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
       result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;
@@ -2508,10 +2508,12 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
     else if((instate != FTP_LIST) && (data->set.prefer_ascii))
       size = -1; /* kludge for servers that understate ASCII mode file size */
 
-    infof(data, "Maxdownload = %" FORMAT_OFF_T "\n", data->req.maxdownload);
+    infof(data, "Maxdownload = %" CURL_FORMAT_CURL_OFF_T "\n",
+          data->req.maxdownload);
 
     if(instate != FTP_LIST)
-      infof(data, "Getting file with size: %" FORMAT_OFF_T "\n", size);
+      infof(data, "Getting file with size: %" CURL_FORMAT_CURL_OFF_T "\n",
+            size);
 
     /* FTP download: */
     conn->proto.ftpc.state_saved = instate;
@@ -3367,8 +3369,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
        (data->set.infilesize != *ftp->bytecountp) &&
        !data->set.crlf &&
        (ftp->transfer == FTPTRANSFER_BODY)) {
-      failf(data, "Uploaded unaligned file size (%" FORMAT_OFF_T
-            " out of %" FORMAT_OFF_T " bytes)",
+      failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
+            " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
             *ftp->bytecountp, data->set.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
@@ -3385,8 +3387,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
         *ftp->bytecountp) &&
 #endif /* CURL_DO_LINEEND_CONV */
        (data->req.maxdownload != *ftp->bytecountp)) {
-      failf(data, "Received only partial file: %" FORMAT_OFF_T " bytes",
-            *ftp->bytecountp);
+      failf(data, "Received only partial file: %" CURL_FORMAT_CURL_OFF_T
+            " bytes", *ftp->bytecountp);
       result = CURLE_PARTIAL_FILE;
     }
     else if(!ftpc->dont_check &&
@@ -3551,26 +3553,27 @@ static CURLcode ftp_range(struct connectdata *conn)
     if((-1 == to) && (from>=0)) {
       /* X - */
       data->state.resume_from = from;
-      DEBUGF(infof(conn->data, "FTP RANGE %" FORMAT_OFF_T " to end of file\n",
-                   from));
+      DEBUGF(infof(conn->data, "FTP RANGE %" CURL_FORMAT_CURL_OFF_T
+                   " to end of file\n", from));
     }
     else if(from < 0) {
       /* -Y */
       data->req.maxdownload = -from;
       data->state.resume_from = from;
-      DEBUGF(infof(conn->data, "FTP RANGE the last %" FORMAT_OFF_T " bytes\n",
-                   -from));
+      DEBUGF(infof(conn->data, "FTP RANGE the last %" CURL_FORMAT_CURL_OFF_T
+                   " bytes\n", -from));
     }
     else {
       /* X-Y */
       data->req.maxdownload = (to-from)+1; /* include last byte */
       data->state.resume_from = from;
-      DEBUGF(infof(conn->data, "FTP RANGE from %" FORMAT_OFF_T
-                   " getting %" FORMAT_OFF_T " bytes\n",
+      DEBUGF(infof(conn->data, "FTP RANGE from %" CURL_FORMAT_CURL_OFF_T
+                   " getting %" CURL_FORMAT_CURL_OFF_T " bytes\n",
                    from, data->req.maxdownload));
     }
-    DEBUGF(infof(conn->data, "range-download from %" FORMAT_OFF_T
-                 " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
+    DEBUGF(infof(conn->data, "range-download from %" CURL_FORMAT_CURL_OFF_T
+                 " to %" CURL_FORMAT_CURL_OFF_T ", totally %"
+                 CURL_FORMAT_CURL_OFF_T " bytes\n",
                  from, to, data->req.maxdownload));
     ftpc->dont_check = TRUE; /* dont check for successful transfer */
   }

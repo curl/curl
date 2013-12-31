@@ -499,7 +499,8 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 
     /* add tsize option */
     if(data->set.upload && (data->set.infilesize != -1))
-      snprintf( buf, sizeof(buf), "%" FORMAT_OFF_T, data->set.infilesize );
+      snprintf(buf, sizeof(buf), "%" CURL_FORMAT_CURL_OFF_T,
+               data->set.infilesize);
     else
       strcpy(buf, "0"); /* the destination is large enough */
 

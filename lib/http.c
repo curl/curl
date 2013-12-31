@@ -414,8 +414,9 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
         /* this is already marked to get closed */
         return CURLE_OK;
 
-      infof(data, "NTLM send, close instead of sending %" FORMAT_OFF_T
-            " bytes\n", (curl_off_t)(expectsend - bytessent));
+      infof(data, "NTLM send, close instead of sending %"
+            CURL_FORMAT_CURL_OFF_T " bytes\n",
+            (curl_off_t)(expectsend - bytessent));
     }
 
     /* This is not NTLM or many bytes left to send: close
@@ -2018,9 +2019,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
               /* this checks for greater-than only to make sure that the
                  CURL_READFUNC_ABORT return code still aborts */
-              failf(data, "Could only read %" FORMAT_OFF_T
-                    " bytes from the input",
-                    passed);
+              failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
+                    " bytes from the input", passed);
               return CURLE_READ_ERROR;
             }
           } while(passed < data->state.resume_from);
@@ -2065,8 +2065,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
         conn->allocptr.rangeline =
-          aprintf("Content-Range: bytes 0-%" FORMAT_OFF_T
-                  "/%" FORMAT_OFF_T "\r\n",
+          aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
+                  "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->set.infilesize - 1, data->set.infilesize);
 
       }
@@ -2075,8 +2075,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         curl_off_t total_expected_size=
           data->state.resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
-          aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
-                  "/%" FORMAT_OFF_T "\r\n",
+          aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
+                  "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->state.range, total_expected_size-1,
                   total_expected_size);
       }
@@ -2084,7 +2084,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* Range was selected and then we just pass the incoming range and
            append total size */
         conn->allocptr.rangeline =
-          aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
+          aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
                   data->state.range, data->set.infilesize);
       }
       if(!conn->allocptr.rangeline)
@@ -2294,8 +2294,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        !Curl_checkheaders(data, "Content-Length:")) {
       /* only add Content-Length if not uploading chunked */
       result = Curl_add_bufferf(req_buffer,
-                                "Content-Length: %" FORMAT_OFF_T "\r\n",
-                                http->postsize);
+                                "Content-Length: %" CURL_FORMAT_CURL_OFF_T
+                                "\r\n", http->postsize);
       if(result)
         return result;
     }
@@ -2366,8 +2366,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        !Curl_checkheaders(data, "Content-Length:")) {
       /* only add Content-Length if not uploading chunked */
       result = Curl_add_bufferf(req_buffer,
-                                "Content-Length: %" FORMAT_OFF_T "\r\n",
-                                postsize );
+                                "Content-Length: %" CURL_FORMAT_CURL_OFF_T
+                                "\r\n", postsize);
       if(result)
         return result;
     }
@@ -2417,8 +2417,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* we allow replacing this header if not during auth negotiation,
            although it isn't very wise to actually set your own */
         result = Curl_add_bufferf(req_buffer,
-                                  "Content-Length: %" FORMAT_OFF_T"\r\n",
-                                  postsize);
+                                  "Content-Length: %" CURL_FORMAT_CURL_OFF_T
+                                  "\r\n", postsize);
         if(result)
           return result;
       }
@@ -2582,8 +2582,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(http->writebytecount >= postsize) {
       /* already sent the entire request body, mark the "upload" as
          complete */
-      infof(data, "upload completely sent off: %" FORMAT_OFF_T " out of "
-            "%" FORMAT_OFF_T " bytes\n",
+      infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
+            " out of %" CURL_FORMAT_CURL_OFF_T " bytes\n",
             http->writebytecount, postsize);
       data->req.upload_done = TRUE;
       data->req.keepon &= ~KEEP_SEND; /* we're done writing */
@@ -3233,7 +3233,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
            happens for example when older Apache servers send large
            files */
         conn->bits.close = TRUE;
-        infof(data, "Negative content-length: %" FORMAT_OFF_T
+        infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
               ", closing after transfer\n", contentlength);
       }
     }

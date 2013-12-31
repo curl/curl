@@ -85,8 +85,8 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
        (curl_off_t)conn->chunk.datasize > chunk_penalty_size)
       penalized = TRUE;
 
-    infof(data, "Conn: %ld (%p) Receive pipe weight: (%" FORMAT_OFF_T
-          "/%zu), penalized: %s\n",
+    infof(data, "Conn: %ld (%p) Receive pipe weight: (%"
+          CURL_FORMAT_CURL_OFF_T "/%zu), penalized: %s\n",
           conn->connection_id, (void *)conn, recv_size,
           conn->chunk.datasize, penalized?"TRUE":"FALSE");
     return penalized;

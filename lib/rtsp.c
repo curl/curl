@@ -509,7 +509,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, "Content-Length:")) {
         result = Curl_add_bufferf(req_buffer,
-            "Content-Length: %" FORMAT_OFF_T"\r\n",
+            "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
             (data->set.upload ? putsize : postsize));
         if(result)
           return result;

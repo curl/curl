@@ -646,9 +646,9 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                always will fit in a size_t */
             infof(data,
                   "Rewinding stream by : %zu"
-                  " bytes on url %s (size = %" FORMAT_OFF_T
-                  ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
+                  " bytes on url %s (size = %" CURL_FORMAT_CURL_OFF_T
+                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T ", nread = %zd)\n",
                   excess, data->state.path,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
@@ -657,9 +657,9 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             infof(data,
                   "Excess found in a non pipelined read:"
                   " excess = %zu"
-                  ", size = %" FORMAT_OFF_T
-                  ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T "\n",
+                  ", size = %" CURL_FORMAT_CURL_OFF_T
+                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
                   excess, k->size, k->maxdownload, k->bytecount);
           }
         }
@@ -1095,13 +1095,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(0 > Curl_timeleft(data, &k->now, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %ld milliseconds with %"
-              FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
+              CURL_FORMAT_CURL_OFF_T " out of %"
+              CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount,
               k->size);
       }
       else {
         failf(data, "Operation timed out after %ld milliseconds with %"
-              FORMAT_OFF_T " bytes received",
+              CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount);
       }
       return CURLE_OPERATION_TIMEDOUT;
@@ -1123,7 +1124,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        (k->bytecount != (k->size + data->state.crlf_conversions)) &&
 #endif /* CURL_DO_LINEEND_CONV */
        !data->req.newurl) {
-      failf(data, "transfer closed with %" FORMAT_OFF_T
+      failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
             " bytes remaining to read",
             k->size - k->bytecount);
       return CURLE_PARTIAL_FILE;

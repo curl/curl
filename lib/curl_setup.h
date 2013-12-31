@@ -140,29 +140,6 @@
 #endif
 
 /*
- * Set up internal curl_off_t formatting string directives for
- * exclusive use with libcurl's internal *printf functions.
- */
-
-#ifdef FORMAT_OFF_T
-#  error "FORMAT_OFF_T shall not be defined before this point!"
-   Error Compilation_aborted_FORMAT_OFF_T_already_defined
-#endif
-
-#ifdef FORMAT_OFF_TU
-#  error "FORMAT_OFF_TU shall not be defined before this point!"
-   Error Compilation_aborted_FORMAT_OFF_TU_already_defined
-#endif
-
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
-#  define FORMAT_OFF_T  "lld"
-#  define FORMAT_OFF_TU "llu"
-#else
-#  define FORMAT_OFF_T  "ld"
-#  define FORMAT_OFF_TU "lu"
-#endif
-
-/*
  * Disable other protocols when http is the only one desired.
  */
 
