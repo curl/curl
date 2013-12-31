@@ -23,15 +23,12 @@
 #include <string.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to verify an email address from an
- * SMTP server.
+/* This is a simple example showing how to expand an email mailing list.
  *
  * Notes:
  *
  * 1) This example requires libcurl v7.34.0 or above.
- * 2) Not all email servers support this command and even if your email server
- *    does support it, it may respond with a 252 response code even though the
- *    address doesn't exist.
+ * 2) Not all email servers support this command.
  */
 
 int main(void)
@@ -47,10 +44,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.net");
 
     /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array  */
-    recipients = curl_slist_append(recipients, "<recipient@example.com>");
+    recipients = curl_slist_append(recipients, "Friends");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* Perform the VRFY */
+    /* Set the EXPN command */
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "EXPN");
+
+    /* Perform the custom request */
     res = curl_easy_perform(curl);
 
     /* Check for errors */
