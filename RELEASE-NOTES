@@ -12,6 +12,7 @@ This release includes the following changes:
  o imap/pop3/smtp: Added support for SASL authentication downgrades
  o imap/pop3/smtp: Extended the login options to support multiple auth mechanisms
  o TheArtOfHttpScripting: major update, converted layout and more
+ o mprintf: Added support for I, I32 and I64 size specifiers
  o 
 
 This release includes the following bugfixes:
@@ -24,6 +25,9 @@ This release includes the following bugfixes:
  o pop3: Fixed auth preference not being honored when CAPA not supported
  o imap: Fixed auth preference not being honored when CAPABILITY not supported
  o threaded resolver: Use pthread_t * for curl_thread_t [4]
+ o FILE: we don't support paused transfers using this protocol [5]
+ o connect: Try all addresses in first connection attempt [6]
+ o curl_easy_setopt.3: Added SMTP information to CURLOPT_INFILESIZE_LARGE
  o 
 
 This release includes the following known bugs:
@@ -33,7 +37,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr
+ Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr, Björn Stenberg,
+ Michal Górny, Anthony G. Basile
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -43,3 +48,5 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/mail/lib-2013-12/0113.html
  [3] = http://curl.haxx.se/bug/view.cgi?id=1312
  [4] = http://curl.haxx.se/bug/view.cgi?id=1314
+ [5] = http://curl.haxx.se/bug/view.cgi?id=1286
+ [6] = http://curl.haxx.se/bug/view.cgi?id=1315
