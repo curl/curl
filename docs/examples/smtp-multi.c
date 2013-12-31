@@ -92,47 +92,47 @@ static long tvdiff(struct timeval newer, struct timeval older)
 
 int main(void)
 {
-   CURL *curl;
-   CURLM *mcurl;
-   int still_running = 1;
-   struct timeval mp_start;
-   struct WriteThis pooh;
-   struct curl_slist* rcpt_list = NULL;
+  CURL *curl;
+  CURLM *mcurl;
+  int still_running = 1;
+  struct timeval mp_start;
+  struct WriteThis pooh;
+  struct curl_slist* rcpt_list = NULL;
 
-   pooh.counter = 0;
+  pooh.counter = 0;
 
-   curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
-   curl = curl_easy_init();
-   if(!curl)
-     return 1;
+  curl = curl_easy_init();
+  if(!curl)
+    return 1;
 
-   mcurl = curl_multi_init();
-   if(!mcurl)
-     return 2;
+  mcurl = curl_multi_init();
+  if(!mcurl)
+    return 2;
 
-   rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
-   /* more addresses can be added here
-      rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
-   */
+  rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
+  /* more addresses can be added here
+     rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
+  */
 
-   curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SMTPSERVER SMTPPORT);
-   curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
-   curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
-   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-   curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
-   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
-   curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
-   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-   curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
-   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   curl_easy_setopt(curl, CURLOPT_SSLVERSION, 0L);
-   curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
-   curl_multi_add_handle(mcurl, curl);
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SMTPSERVER SMTPPORT);
+  curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
+  curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
+  curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_SSLVERSION, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+  curl_multi_add_handle(mcurl, curl);
 
-   mp_start = tvnow();
+  mp_start = tvnow();
 
   /* we start some action by calling perform right away */
   curl_multi_perform(mcurl, &still_running);
