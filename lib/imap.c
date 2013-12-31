@@ -1494,7 +1494,8 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   }
 
   if(parsed) {
-    infof(data, "Found %" CURL_FORMAT_CURL_OFF_TU " bytes to download\n", size);
+    infof(data, "Found %" CURL_FORMAT_CURL_OFF_TU " bytes to download\n",
+          size);
     Curl_pgrsSetDownloadSize(data, size);
 
     if(pp->cache) {
