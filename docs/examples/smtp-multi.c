@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,46 +31,54 @@
  */
 #define USERNAME "user@example.com"
 #define PASSWORD "123qwerty"
-#define SMTPSERVER "smtp.example.com"
-#define SMTPPORT ":587" /* it is a colon+port string, but you can set it
+#define SERVER   "smtp.example.com"
+#define PORT     ":587" /* it is a colon+port string, but you can set it
                            to "" to use the default port */
-#define RECIPIENT "<recipient@example.com>"
-#define MAILFROM "<realuser@example.com>"
+#define FROM     "<sender@example.com>"
+#define TO       "<recipient@example.com>"
+#define CC       "<info@example.com>"
 
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
-/* Note that you should include the actual meta data headers here as well if
-   you want the mail to have a Subject, another From:, show a To: or whatever
-   you think your mail should feature! */
-static const char *text[]={
-  "one\n",
-  "two\n",
-  "three\n",
-  " Hello, this is CURL email SMTP\n",
+static const char *payload_text[] = {
+  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
+  "To: " TO "\r\n",
+  "From: " FROM "(Example User)\r\n",
+  "Cc: " CC "(Another example User)\r\n",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+  "Subject: SMTP TLS example message\r\n",
+  "\r\n", /* empty line to divide headers from body, see RFC5322 */
+  "The body of the message starts here.\r\n",
+  "\r\n",
+  "It could be a lot of lines, could be MIME encoded, whatever.\r\n",
+  "Check RFC5322.\r\n",
   NULL
 };
 
-struct WriteThis {
-  int counter;
+struct upload_status {
+  int lines_read;
 };
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
+  }
 
-  data = text[pooh->counter];
+  data = payload_text[upload_ctx->lines_read];
 
   if(data) {
     size_t len = strlen(data);
     memcpy(ptr, data, len);
-    pooh->counter++; /* advance pointer */
+    upload_ctx->lines_read++;
+
     return len;
   }
-  return 0;                         /* no more data left to deliver */
+
+  return 0;
 }
 
 static struct timeval tvnow(void)
@@ -96,10 +104,10 @@ int main(void)
   CURLM *mcurl;
   int still_running = 1;
   struct timeval mp_start;
-  struct WriteThis pooh;
-  struct curl_slist* rcpt_list = NULL;
+  struct curl_slist *recipients = NULL;
+  struct upload_status upload_ctx;
 
-  pooh.counter = 0;
+  upload_ctx.lines_read = 0;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -111,22 +119,23 @@ int main(void)
   if(!mcurl)
     return 2;
 
-  rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
-  /* more addresses can be added here
-     rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
-  */
+  /* Add two recipients, in this particular case they correspond to the
+   * To: and Cc: addressees in the header, but they could be any kind of
+   * recipient. */
+  recipients = curl_slist_append(recipients, TO);
+  recipients = curl_slist_append(recipients, CC);
 
-  curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SMTPSERVER SMTPPORT);
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SERVER PORT);
   curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
   curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
-  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+  curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
-  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
   curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_SSLVERSION, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
@@ -173,7 +182,6 @@ int main(void)
        greater or equal than -1.  We call select(maxfd + 1, ...), specially in
        case of (maxfd == -1), we call select(0, ...), which is basically equal
        to sleep. */
-
     rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     if (tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
@@ -193,11 +201,12 @@ int main(void)
     }
   }
 
-  curl_slist_free_all(rcpt_list);
+  curl_slist_free_all(recipients);
   curl_multi_remove_handle(mcurl, curl);
   curl_multi_cleanup(mcurl);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
+
   return 0;
 }
 
