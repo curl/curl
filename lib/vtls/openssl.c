@@ -1551,13 +1551,21 @@ ossl_connect_step1(struct connectdata *conn,
 
   switch(data->set.ssl.version) {
   case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_SSLv3:
     ctx_options |= SSL_OP_NO_SSLv2;
 #ifdef USE_TLS_SRP
     if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
       infof(data, "Set version TLSv1.x for SRP authorisation\n");
       ctx_options |= SSL_OP_NO_SSLv3;
     }
+#endif
+    break;
+
+  case CURL_SSLVERSION_SSLv3:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_TLSv1;
+#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+    ctx_options |= SSL_OP_NO_TLSv1_1;
+    ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     break;
 
