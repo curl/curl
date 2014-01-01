@@ -44,7 +44,7 @@ int main(void)
     /* Set the STORE command with the Deleted flag for message 1. Note that
      * you can use the STORE command to set other flags such as Seen, Answered,
      * Flagged, Draft and Recent. */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "STORE 1 +Flags \Deleted");
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "STORE 1 +Flags \\Deleted");
 
     /* Perform the custom request */
     res = curl_easy_perform(curl);
