@@ -23,6 +23,8 @@ include(Utilities)
 
 project( CURL C )
 
+message(WARNING "the curl cmake build system is poorly maintained. Be aware")
+
 file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
 string (REGEX MATCH "LIBCURL_VERSION_MAJOR[ \t]+([0-9]+)"
   LIBCURL_VERSION_MJ ${CURL_VERSION_H_CONTENTS})
