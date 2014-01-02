@@ -42,7 +42,7 @@
 #include "curl_memory.h"
 
 #ifdef USE_NSS
-#include "nssg.h" /* for Curl_nss_force_init() */
+#include "vtls/nssg.h" /* for Curl_nss_force_init() */
 #endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
