@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1585,13 +1585,20 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       result = CURLM_CALL_MULTI_PERFORM;
 
       if(data->easy_conn) {
+        CURLcode res;
+
         /* Remove ourselves from the receive pipeline, if we are there. */
         Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
 
         /* post-transfer command */
-        data->result = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+        res = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+
+        /* allow a previously set error code take precedence */
+        if(!data->result)
+          data->result = res;
+
         /*
          * If there are other handles on the pipeline, Curl_done won't set
          * easy_conn to NULL.  In such a case, curl_multi_remove_handle() can
@@ -1680,6 +1687,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(data->easy_conn && Curl_pgrsUpdate(data->easy_conn)) {
         /* aborted due to progress callback return code must close the
            connection */
+        data->result = CURLE_ABORTED_BY_CALLBACK;
         data->easy_conn->bits.close = TRUE;
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
