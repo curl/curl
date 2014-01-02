@@ -1150,7 +1150,7 @@ connections or \fICURLOPT_LOGIN_OPTIONS\fP to control IMAP, POP3 and SMTP
 options.
 
 The user and password strings are not URL decoded, so there's no way to send
-in a user name containing a colon using this option. Use \fCURLOPT_USERNAME\fP
+in a user name containing a colon using this option. Use \fICURLOPT_USERNAME\fP
 for that, or include it in the URL.
 .IP CURLOPT_PROXYUSERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
@@ -1184,7 +1184,7 @@ At present only IMAP, POP3 and SMTP support login options. For more
 information about the login options please see RFC2384, RFC5092 and IETF draft
 draft-earhart-url-smtp-00.txt
 
-\CURLOPT_LOGIN_OPTIONS\fP can be used to set protocol specific login options,
+\fBCURLOPT_LOGIN_OPTIONS\fP can be used to set protocol specific login options,
 such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
 and should be used in conjunction with the \fICURLOPT_USERNAME\fP option.
 .IP CURLOPT_PROXYUSERNAME
