@@ -641,6 +641,9 @@ $(DIROBJ):
 {.\}.c{$(DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
 
+{.\vtls\}.c{$(DIROBJ)\}.obj:
+	$(CC) $(CFLAGS) /Fo"$@"  $<
+
 debug-dll\libcurl.res \
 debug-dll-ssl-dll\libcurl.res \
 debug-dll-zlib-dll\libcurl.res \
