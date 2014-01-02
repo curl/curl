@@ -315,9 +315,11 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(OBJDIR)/nwos.o
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(notdir $(CSOURCES)))) $(OBJDIR)/nwos.o
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o $(LDLIBS)
+
+vpath %.c . vtls
 
 all: lib nlm
 
