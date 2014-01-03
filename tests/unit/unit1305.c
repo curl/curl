@@ -37,7 +37,6 @@
 #include "hash.h"
 #include "hostip.h"
 
-#include "curl_memory.h"
 #include "memdebug.h" /* LAST include file */
 
 static struct SessionHandle *data;
