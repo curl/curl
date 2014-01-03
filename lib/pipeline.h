@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,7 +40,5 @@ bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
 
 CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
                                              struct curl_llist **list_ptr);
-
-void print_pipeline(struct connectdata *conn);
 
 #endif /* HEADER_CURL_PIPELINE_H */

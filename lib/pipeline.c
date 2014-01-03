@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013-2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,7 +118,9 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
     Curl_expire(conn->send_pipe->head->ptr, 1);
   }
 
+#if 0 /* enable for pipeline debugging */
   print_pipeline(conn);
+#endif
 
   return rc;
 }
@@ -309,7 +311,7 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
   return CURLM_OK;
 }
 
-
+#if 0
 void print_pipeline(struct connectdata *conn)
 {
   struct curl_llist_element *curr;
@@ -331,3 +333,5 @@ void print_pipeline(struct connectdata *conn)
     }
   }
 }
+
+#endif
