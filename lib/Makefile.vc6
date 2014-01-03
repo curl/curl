@@ -601,8 +601,8 @@ X_OBJS= \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \
 	$(DIROBJ)\ssh.obj \
-	$(DIROBJ)\sslgen.obj \
-	$(DIROBJ)\ssluse.obj \
+	$(DIROBJ)\vtls.obj \
+	$(DIROBJ)\openssl.obj \
 	$(DIROBJ)\strdup.obj \
 	$(DIROBJ)\strequal.obj \
 	$(DIROBJ)\strerror.obj \
