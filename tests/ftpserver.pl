@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -78,7 +78,7 @@ my $ipvnum = 4;     # server IPv number (4 or 6)
 my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
-
+my $cwd_testno;     # test case numbers extracted from CWD command
 my $path   = '.';
 my $logdir = $path .'/log';
 
@@ -152,7 +152,7 @@ my %delayreply;    #
 # $ftptargetdir is keeping the fake "name" of LIST directory.
 #
 my $ftplistparserstate;
-my $ftptargetdir;
+my $ftptargetdir="";
 
 #**********************************************************************
 # global variables used when running a ftp server to keep state info
@@ -2078,7 +2078,10 @@ sub switch_directory_goto {
 sub switch_directory {
     my $target_dir = $_[0];
 
-    if($target_dir eq "/") {
+    if($target_dir =~ /^test-(\d+)/) {
+        $cwd_testno = $1;
+    }
+    elsif($target_dir eq "/") {
         $ftptargetdir = "/";
     }
     else {
@@ -2111,7 +2114,7 @@ sub PWD_ftp {
 }
 
 sub LIST_ftp {
-  #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
+    #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
 # this is a built-in fake-dir ;-)
 my @ftpdir=("total 20\r\n",
@@ -2150,8 +2153,23 @@ my @ftpdir=("total 20\r\n",
     }
 
     logmsg "pass LIST data on data connection\n";
-    for(@ftpdir) {
-        senddata $_;
+
+    if($cwd_testno) {
+        loadtest("$srcdir/data/test$cwd_testno");
+
+        my @data = getpart("reply", "data");
+        for(@data) {
+            my $send = $_;
+            logmsg "send $send as data\n";
+            senddata $send;
+        }
+        $cwd_testno = 0; # forget it again
+    }
+    else {
+        # old hard-coded style
+        for(@ftpdir) {
+            senddata $_;
+        }
     }
     close_dataconn(0);
     sendcontrol "226 ASCII transfer complete\r\n";

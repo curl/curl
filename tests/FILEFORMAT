@@ -59,6 +59,12 @@ transfers.
 of data encoded with base64. It is the only way a test case can contain binary
 data. (This attribute can in fact be used on any section, but it doesn't make
 much sense for other sections than "data").
+
+For FTP file listings, the <data> section will be used *only* if you make sure
+that there has been a CWD done first to a directory named 'test-[num]' where
+[num] is the test case number. Otherwise the ftp server can't know from which
+test file to load the list content.
+
 </data>
 <dataNUM>
 Send back this contents instead of the <data> one. The num is set by:
