@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -400,40 +400,54 @@ chdir $CURLDIR;
 
 # Do the git thing, or not...
 if ($git) {
+  my $gitstat = 0;
+  my @commits;
+
   # update quietly to the latest git
   if($nogitpull) {
     logit "skipping git pull (--nogitpull)";
   } else {
-    my $gitstat = 0;
-    my @commits;
     logit "run git pull in curl";
     system("git pull 2>&1");
     $gitstat += $?;
     logit "failed to update from curl git ($?), continue anyway" if ($?);
-    # get the last 5 commits for show (even if no pull was made)
-    @commits=`git log --pretty=oneline --abbrev-commit -5`;
-    logit "The most recent curl git commits:";
-    for (@commits) {
-      chomp ($_);
-      logit "  $_";
-    }
-    if (-d "ares/.git") {
-      chdir "ares";
+
+    # Set timestamp to the UTC the git update took place.
+    $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
+  }
+
+  # get the last 5 commits for show (even if no pull was made)
+  @commits=`git log --pretty=oneline --abbrev-commit -5`;
+  logit "The most recent curl git commits:";
+  for (@commits) {
+    chomp ($_);
+    logit "  $_";
+  }
+
+  if (-d "ares/.git") {
+    chdir "ares";
+
+    if($nogitpull) {
+      logit "skipping git pull (--nogitpull) in ares";
+    } else {
       logit "run git pull in ares";
       system("git pull 2>&1");
       $gitstat += $?;
       logit "failed to update from ares git ($?), continue anyway" if ($?);
-      # get the last 5 commits for show (even if no pull was made)
-      @commits=`git log --pretty=oneline --abbrev-commit -5`;
-      logit "The most recent ares git commits:";
-      for (@commits) {
-        chomp ($_);
-        logit "  $_";
-      }
-      chdir "$pwd/$CURLDIR";
+
+      # Set timestamp to the UTC the git update took place.
+      $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
     }
-    # Set timestamp to the UTC the git update took place.
-    $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
+
+    # get the last 5 commits for show (even if no pull was made)
+    @commits=`git log --pretty=oneline --abbrev-commit -5`;
+    logit "The most recent ares git commits:";
+    for (@commits) {
+      chomp ($_);
+      logit "  $_";
+    }
+
+    chdir "$pwd/$CURLDIR";
   }
 
   if($nobuildconf) {
