@@ -112,7 +112,12 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--stunnel') {
         if($ARGV[1]) {
-            $stunnel = $ARGV[1];
+            if($ARGV[1] =~ /^([\w\/]+)$/) {
+                $stunnel = $ARGV[1];
+            }
+            else {
+                $stunnel = "\"". $ARGV[1] ."\"";
+            }
             shift @ARGV;
         }
     }
