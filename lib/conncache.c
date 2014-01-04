@@ -166,10 +166,13 @@ void Curl_conncache_remove_conn(struct conncache *connc,
     if(bundle->num_connections == 0) {
       conncache_remove_bundle(connc, bundle);
     }
-    connc->num_connections--;
 
-    DEBUGF(infof(conn->data, "The cache now contains %d members\n",
-                 connc->num_connections));
+    if(connc) {
+      connc->num_connections--;
+
+      DEBUGF(infof(conn->data, "The cache now contains %d members\n",
+                   connc->num_connections));
+    }
   }
 }
 
