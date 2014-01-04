@@ -84,7 +84,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* Set username and password */
-    curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
     /* This will create a new message 100. Note that you should perform an
      * EXAMINE command to obtain the UID of the next message to create and a

@@ -24,8 +24,9 @@
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's SMTP
- * capabilities. It builds on the smtp-send.c example, adding some
- * authentication and transport security.
+ * capabilities. It builds on the smtp-send.c example to add authentication
+ * and, more importantly, transport security to protect the authentication
+ * details from being snooped.
  */
 
 #define FROM    "<sender@example.org>"
@@ -84,6 +85,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    /* Set username and password */
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+
     /* This is the URL for your mailserver. Note the use of port 587 here,
      * instead of the normal SMTP port (25). Port 587 is commonly used for
      * secure mail submission (see RFC4403), but you should use whatever
@@ -109,12 +114,6 @@ int main(void)
      * that are known to libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See
      * docs/SSLCERTS for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
-
-    /* A common reason for requiring transport security is to protect
-     * authentication details (user names and passwords) from being "snooped"
-     * on the network. Here is how the user name and password are provided: */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "user@example.net");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "P@ssw0rd");
 
     /* Value for envelope reverse-path */
     curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);

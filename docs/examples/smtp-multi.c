@@ -29,8 +29,6 @@
 /*
  * This is the list of basic details you need to tweak to get things right.
  */
-#define USERNAME "user@example.com"
-#define PASSWORD "123qwerty"
 #define SERVER   "smtp.example.com"
 #define PORT     ":587" /* it is a colon+port string, but you can set it
                            to "" to use the default port */
@@ -126,8 +124,8 @@ int main(void)
   recipients = curl_slist_append(recipients, CC);
 
   curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SERVER PORT);
-  curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
-  curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
+  curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+  curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
   curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
