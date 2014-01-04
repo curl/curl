@@ -69,12 +69,12 @@ may have been fixed since this was written!
   option as for all other operating systems.
 
 75. NTLM authentication involving unicode user name or password only works
-  properly if built with UNICODE defined together with the schannel/winssl
+  properly if built with UNICODE defined together with the WinSSL/schannel
   backend. The original problem was mentioned in:
   http://curl.haxx.se/mail/lib-2009-10/0024.html
   http://curl.haxx.se/bug/view.cgi?id=896
 
-  The schannel version verified to work as mentioned in
+  The WinSSL/schannel version verified to work as mentioned in
   http://curl.haxx.se/mail/lib-2012-07/0073.html
 
 73. if a connection is made to a FTP server but the server then just never

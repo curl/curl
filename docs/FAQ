@@ -422,7 +422,7 @@ FAQ
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   GnuTLS, yassl, NSS, PolarSSL, axTLS, Secure Transport (native iOS/OS X),
-  schannel (native Windows) or qssl (native IBM i). They all have their pros
+  WinSSL (native Windows) or qssl (native IBM i). They all have their pros
   and cons, and we try to maintain a comparison of them here:
   http://curl.haxx.se/docs/ssl-compared.html
 
