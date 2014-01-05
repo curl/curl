@@ -166,6 +166,18 @@ CFGSET   = TRUE
 !ENDIF
 
 ######################
+# release-winssl
+
+!IF "$(CFG)" == "release-winssl"
+TARGET   = $(LIBCURL_STA_LIB_REL)
+DIROBJ   = $(CFG)
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) /out:$(DIROBJ)\$(TARGET)
+CC       = $(CCNODBG) $(RTLIB) $(CFLAGSWINSSL) $(CFLAGSLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
 # release-zlib
 
 !IF "$(CFG)" == "release-zlib"

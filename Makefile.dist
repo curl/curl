@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -136,11 +136,35 @@ vc-zlib: $(VC)
 	cd ..\src
 	nmake /f Makefile.$(VC) cfg=release-zlib
 
+vc-x64-zlib: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib
+
 vc-ssl: $(VC)
 	cd lib
 	nmake /f Makefile.$(VC) cfg=release-ssl
 	cd ..\src
 	nmake /f Makefile.$(VC) cfg=release-ssl
+
+vc-winssl: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-winssl WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-winssl WINDOWS_SSPI=1
+
+vc-x64-ssl: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl
+
+vc-x64-winssl: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl WINDOWS_SSPI=1
 
 vc-ssl-zlib: $(VC)
 	cd lib
