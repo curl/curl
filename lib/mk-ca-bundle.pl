@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -34,19 +34,38 @@ use Getopt::Std;
 use MIME::Base64;
 use LWP::UserAgent;
 use strict;
-use vars qw($opt_b $opt_f $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_l $opt_n $opt_q $opt_t $opt_u $opt_v $opt_w);
 
-my $url = 'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1';
+my %urls = (
+  'nss' =>
+    'http://mxr.mozilla.org/nss/source/lib/ckfw/builtins/certdata.txt?raw=1',
+  'central' =>
+    'http://mxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+  'aurora' =>
+    'http://mxr.mozilla.org/mozilla-aurora/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+  'beta' =>
+    'http://mxr.mozilla.org/mozilla-beta/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+  'release' =>
+    'http://mxr.mozilla.org/mozilla-release/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+  'mozilla' =>
+    'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1'
+);
+
+$opt_d = 'release';
+
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.19';
+my $version = '1.20';
 
 $opt_w = 76; # default base64 encoded lines length
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bfhilnqtuvw:');
+getopts('bd:fhilnqtuvw:');
+
+# Use predefined URL or else custom URL specified on command line.
+my $url = ( defined( $urls{$opt_d} ) ) ? $urls{$opt_d} : $opt_d;
 
 if ($opt_i) {
   print ("=" x 78 . "\n");
@@ -60,9 +79,29 @@ if ($opt_i) {
   print ("=" x 78 . "\n");
 }
 
+sub WARNING_MESSAGE() {
+  if ( $opt_d =~ m/^risk$/i ) { # Long Form Warning and Exit
+    print "Warning: Use of this script may pose some risk:\n";
+	print "\n";
+	print "  1) Using http is subject to man in the middle attack of certdata content\n";
+	print "  2) Default to 'release', but more recent updates may be found in other trees\n";
+	print "  3) certdata.txt file format may change, lag time to update this script\n";
+	print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
+	print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
+	print "  6) Use of this script will make a security engineer grind his teeth and\n";
+	print "     swear at you.  ;)\n";
+    exit;
+  } else { # Short Form Warning
+    print "Warning: Use of this script may pose some risk, -d risk for more details.\n";
+  }
+}
+
 sub HELP_MESSAGE() {
-  print "Usage:\t${0} [-b] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [-w<l>] [<outputfile>]\n";
+  print "Usage:\t${0} [-b] [-d<certdata>] [-f] [-i] [-l] [-n] [-q] [-t] [-u] [-v] [-w<l>] [<outputfile>]\n";
   print "\t-b\tbackup an existing version of ca-bundle.crt\n";
+  print "\t-d\tspecify Mozilla tree to pull certdata.txt or custom URL\n";
+  print "\t\t  Valid names are:\n";
+  print "\t\t    ", join( ", ", map { ( $_ =~ m/$opt_d/ ) ? "$_ (default)" : "$_" } sort keys %urls ), "\n";
   print "\t-f\tforce rebuild even if certdata.txt is current\n";
   print "\t-i\tprint version info about used modules\n";
   print "\t-l\tprint license info about certdata.txt\n";
@@ -79,6 +118,7 @@ sub VERSION_MESSAGE() {
   print "${0} version ${version} running Perl ${]} on ${^O}\n";
 }
 
+WARNING_MESSAGE() unless ($opt_q || $url =~ m/^(ht|f)tps:/i );
 HELP_MESSAGE() if ($opt_h);
 
 my $crt = $ARGV[0] || 'ca-bundle.crt';
