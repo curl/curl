@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,16 +21,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-/* See multi_socket() for the explanation of this constant. Counted in number
-   of microseconds. */
-#ifdef WIN32
-#define MULTI_TIMEOUT_INACCURACY 40000
-#else
-#define MULTI_TIMEOUT_INACCURACY 3000
-#endif
-
-#define MULTI_TIMEOUT_INACCURACY_MS (MULTI_TIMEOUT_INACCURACY / 1000)
 
 /*
  * Prototypes for library-wide functions provided by multi.c

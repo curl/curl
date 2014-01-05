@@ -1104,8 +1104,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   conn->tempaddr[1] = NULL;
   conn->tempsock[0] = CURL_SOCKET_BAD;
   conn->tempsock[1] = CURL_SOCKET_BAD;
-  Curl_expire(conn->data,
-              HAPPY_EYEBALLS_TIMEOUT + (MULTI_TIMEOUT_INACCURACY/1000));
+  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT);
 
   /* Max time for the next connection attempt */
   conn->timeoutms_per_addr =

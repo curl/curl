@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1320,11 +1320,10 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
-      Curl_expire(data, data->set.timeout + MULTI_TIMEOUT_INACCURACY_MS);
+      Curl_expire(data, data->set.timeout);
 
     if(data->set.connecttimeout)
-      Curl_expire(data, data->set.connecttimeout +
-                  MULTI_TIMEOUT_INACCURACY_MS);
+      Curl_expire(data, data->set.connecttimeout);
 
     /* In case the handle is re-used and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
@@ -1970,8 +1969,7 @@ Curl_setup_transfer(
 
         /* Set a timeout for the multi interface. Add the inaccuracy margin so
            that we don't fire slightly too early and get denied to run. */
-        Curl_expire(data, CURL_TIMEOUT_EXPECT_100 +
-                    MULTI_TIMEOUT_INACCURACY / 1000);
+        Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
       }
       else {
         if(data->state.expect100header)
