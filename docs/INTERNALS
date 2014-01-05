@@ -337,10 +337,10 @@ SSL libraries
  in future libcurl versions.
 
  To deal with this internally in the best way possible, we have a generic SSL
- function API as provided by the sslgen.[ch] system, and they are the only SSL
- functions we must use from within libcurl. sslgen is then crafted to use the
+ function API as provided by the vtls.[ch] system, and they are the only SSL
+ functions we must use from within libcurl. vtls is then crafted to use the
  appropriate lower-level function calls to whatever SSL library that is in
- use.
+ use. For example vtls/openssl.[ch] for the OpenSSL library.
 
 Library Symbols
 ===============
