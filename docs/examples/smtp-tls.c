@@ -24,7 +24,7 @@
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's SMTP
- * capabilities. It builds on the smtp-send.c example to add authentication
+ * capabilities. It builds on the smtp-mail.c example to add authentication
  * and, more importantly, transport security to protect the authentication
  * details from being snooped.
  */
