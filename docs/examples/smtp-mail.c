@@ -26,6 +26,8 @@
 /* This is a simple example showing how to send mail using libcurl's SMTP
  * capabilities. For an exmaple of using the multi interface please see
  * smtp-multi.c.
+ *
+ * Note that this example requires libcurl 7.20.0 or above.
  */
 
 int main(void)

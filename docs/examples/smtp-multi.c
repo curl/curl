@@ -19,12 +19,14 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* This is an example application source code sending SMTP mail using the
- * multi interface.
- */
-
 #include <string.h>
 #include <curl/curl.h>
+
+/* This is an example showing how to send mail using libcurl's SMTP
+ * capabilities via the multi interface.
+ *
+ * Note that this example requires libcurl 7.20.0 or above.
+ */
 
 /*
  * This is the list of basic details you need to tweak to get things right.

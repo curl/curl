@@ -27,6 +27,8 @@
  * capabilities. It builds on the smtp-mail.c example to add authentication
  * and, more importantly, transport security to protect the authentication
  * details from being snooped.
+ *
+ * Note that this example requires libcurl 7.20.0 or above.
  */
 
 #define FROM    "<sender@example.org>"
