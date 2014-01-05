@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to ontain message statistics using
+/* This is a simple example showing how to obtain message statistics using
  * libcurl's POP3 capabilities.
  *
  * Note that this example requires libcurl 7.26.0 or above.
