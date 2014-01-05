@@ -6,7 +6,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard \
   smtp-multi smtp-send smtp-ssl smtp-tls smtp-vrfy smtp-expn rtsp \
   externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl pop3-dele \
-  pop3-ssl imap-list imap-fetch imap-store imap-append imap-examine \
+  pop3-top pop3-ssl imap-list imap-fetch imap-store imap-append imap-examine \
   imap-search imap-create imap-delete imap-copy imap-ssl imap-tls url2file \
   sftpget ftpsget postinmemory
 
