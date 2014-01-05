@@ -22,10 +22,16 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
+/* This is a simple example showing how to retrieve mail using libcurl's POP3
+ * capabilities.
+ *
+ * Note that this example requires libcurl 7.20.0 or above.
+ */
+
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   curl = curl_easy_init();
   if(curl) {
@@ -33,34 +39,31 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will list every message of the given mailbox */
-    curl_easy_setopt(curl, CURLOPT_URL, "pop3s://user@pop.example.com/");
+    /* This will retreive message 1 from the user's mailbox. Note the use of
+     * pop3s:// rather than pop3:// to request a SSL based connection. */
+    curl_easy_setopt(curl, CURLOPT_URL, "pop3s://pop.example.com/1");
 
-#ifdef SKIP_PEER_VERIFICATION
-    /*
-     * If you want to connect to a site who isn't using a certificate that is
+    /* If you want to connect to a site who isn't using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the
      * verification of the server's certificate. This makes the connection
      * A LOT LESS SECURE.
      *
      * If you have a CA cert for the server stored someplace else than in the
      * default bundle, then the CURLOPT_CAPATH option might come handy for
-     * you.
-     */
+     * you. */
+#ifdef SKIP_PEER_VERIFICATION
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-#ifdef SKIP_HOSTNAME_VERFICATION
-    /*
-     * If the site you're connecting to uses a different host name that what
+    /* If the site you're connecting to uses a different host name that what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl will refuse to connect. You can skip
-     * this check, but this will make the connection less secure.
-     */
+     * this check, but this will make the connection less secure. */
+#ifdef SKIP_HOSTNAME_VERFICATION
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
-    /* Perform the request, res will get the return code */
+    /* Perform the retr */
     res = curl_easy_perform(curl);
 
     /* Check for errors */

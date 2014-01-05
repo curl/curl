@@ -22,10 +22,16 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
+/* This is a simple example using libcurl's POP3 capabilities to list the
+ * contents of a mailbox.
+ *
+ * Note that this example requires libcurl 7.20.0 or above.
+ */
+
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   curl = curl_easy_init();
   if(curl) {
@@ -33,34 +39,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will only fetch the message with ID "1" of the given mailbox */
-    curl_easy_setopt(curl, CURLOPT_URL, "pop3s://user@pop.example.com/1");
+    /* This will list every message of the given mailbox */
+    curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com");
 
-#ifdef SKIP_PEER_VERIFICATION
-    /*
-     * If you want to connect to a site who isn't using a certificate that is
-     * signed by one of the certs in the CA bundle you have, you can skip the
-     * verification of the server's certificate. This makes the connection
-     * A LOT LESS SECURE.
-     *
-     * If you have a CA cert for the server stored someplace else than in the
-     * default bundle, then the CURLOPT_CAPATH option might come handy for
-     * you.
-     */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-#endif
-
-#ifdef SKIP_HOSTNAME_VERFICATION
-    /*
-     * If the site you're connecting to uses a different host name that what
-     * they have mentioned in their server certificate's commonName (or
-     * subjectAltName) fields, libcurl will refuse to connect. You can skip
-     * this check, but this will make the connection less secure.
-     */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-#endif
-
-    /* Perform the request, res will get the return code */
+    /* Perform the list */
     res = curl_easy_perform(curl);
 
     /* Check for errors */
