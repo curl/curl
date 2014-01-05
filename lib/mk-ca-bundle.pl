@@ -64,6 +64,11 @@ $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
 getopts('bd:fhilnqtuvw:');
 
+if(!defined($opt_d)) {
+    # to make plain "-d" use not cause warnings, and actually still work
+    $opt_d = 'release';
+}
+
 # Use predefined URL or else custom URL specified on command line.
 my $url = ( defined( $urls{$opt_d} ) ) ? $urls{$opt_d} : $opt_d;
 
