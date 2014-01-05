@@ -40,29 +40,28 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will retreive message 1 from the user's mailbox. Note the use of
-     * pop3s:// rather than pop3:// to request a SSL based connection. */
-    curl_easy_setopt(curl, CURLOPT_URL, "pop3s://pop.example.com/1");
+    /* This will retreive message 1 from the user's mailbox */
+    curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
-    /* If you want to connect to a site who isn't using a certificate that is
-     * signed by one of the certs in the CA bundle you have, you can skip the
-     * verification of the server's certificate. This makes the connection
-     * A LOT LESS SECURE.
-     *
-     * If you have a CA cert for the server stored someplace else than in the
-     * default bundle, then the CURLOPT_CAPATH option might come handy for
-     * you. */
-#ifdef SKIP_PEER_VERIFICATION
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-#endif
+    /* In this example, we'll start with a plain text connection, and upgrade
+     * to Transport Layer Security (TLS) using the STLS command. Be careful of
+     * using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
+     * will continue anyway - see the security discussion in the libcurl
+     * tutorial for more details. */
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
-    /* If the site you're connecting to uses a different host name that what
-     * they have mentioned in their server certificate's commonName (or
-     * subjectAltName) fields, libcurl will refuse to connect. You can skip
-     * this check, but this will make the connection less secure. */
-#ifdef SKIP_HOSTNAME_VERFICATION
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-#endif
+    /* If your server doesn't have a valid certificate, then you can disable
+     * part of the Transport Layer Security protection by setting the
+     * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
+     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+     *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+     * That is, in general, a bad idea. It is still better than sending your
+     * authentication details in plain text though.
+     * Instead, you should get the issuer certificate (or the host certificate
+     * if the certificate is self-signed) and add it to the set of certificates
+     * that are known to libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See
+     * docs/SSLCERTS for more information. */
+    curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
     /* Since the traffic will be encrypted, it is very useful to turn on debug
      * information within libcurl to see what is happening during the
