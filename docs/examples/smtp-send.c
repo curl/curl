@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,9 +42,8 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    /* this is the URL for your mailserver - you can also use an smtps:// URL
-     * here */
-    curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.net.");
+    /* This is the URL for your mailserver */
+    curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
     /* Note that this option isn't strictly required, omitting it will result in
      * libcurl will sent the MAIL FROM command with no sender data. All
