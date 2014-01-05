@@ -2162,10 +2162,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
-    data=multi->easyp;
-    while(data) {
-      singlesocket(multi, data);
-      data = data->next;
+    if(result != CURLM_BAD_HANDLE) {
+      data=multi->easyp;
+      while(data) {
+        singlesocket(multi, data);
+        data = data->next;
+      }
     }
 
     /* or should we fall-through and do the timer-based stuff? */
