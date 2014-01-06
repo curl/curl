@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,15 +55,16 @@ int tool_progress_cb(void *clientp,
   curl_off_t total;
   curl_off_t point;
 
-  if(bar->calls && (tvdiff(now, bar->prevtime) < 200L))
-    /* after first call, limit progress-bar updating to 5 Hz */
-    return 0;
-
   /* expected transfer size */
   total = dltotal + ultotal + bar->initial_size;
 
   /* we've come this far */
   point = dlnow + ulnow + bar->initial_size;
+
+  if(bar->calls && (tvdiff(now, bar->prevtime) < 200L) && point < total)
+    /* after first call, limit progress-bar updating to 5 Hz */
+    /* update when we're at 100% even if last update is less than 200ms ago */
+    return 0;
 
   if(point > total)
     /* we have got more than the expected total! */
