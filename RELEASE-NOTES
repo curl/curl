@@ -28,6 +28,13 @@ This release includes the following bugfixes:
  o FILE: we don't support paused transfers using this protocol [5]
  o connect: Try all addresses in first connection attempt [6]
  o curl_easy_setopt.3: Added SMTP information to CURLOPT_INFILESIZE_LARGE
+ o OpenSSL: Fix forcing SSLv3 connections [7]
+ o openssl: allow explicit sslv2 selection [8]
+ o FTP parselist: fix "total" parser [9]
+ o conncache: fix possible dereference of null pointer
+ o multi.c: fix possible dereference of null pointer
+ o mk-ca-bundle: introduces -d and warns about using this script
+ o ConnectionExists: fix NTLM check for new connection [10]
  o 
 
 This release includes the following known bugs:
@@ -38,7 +45,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr, Björn Stenberg,
- Michal Górny, Anthony G. Basile
+ Michal Górny, Anthony G. Basile, Barry Abrahamson, Christian Weisgerber,
+ Marc Hoersken, Justin Maggard, Leif W, Paras S
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -50,3 +58,7 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/bug/view.cgi?id=1314
  [5] = http://curl.haxx.se/bug/view.cgi?id=1286
  [6] = http://curl.haxx.se/bug/view.cgi?id=1315
+ [7] = http://curl.haxx.se/mail/lib-2014-01/0002.html
+ [8] = http://curl.haxx.se/mail/lib-2014-01/0013.html
+ [9] = http://curl.haxx.se/mail/lib-2014-01/0019.html
+ [10] = http://curl.haxx.se/mail/lib-2014-01/0046.html
