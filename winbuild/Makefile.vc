@@ -15,7 +15,7 @@ CFGSET=true
 
 !MESSAGE Usage: nmake /f Makefile.vc mode=<static or dll> <options>
 !MESSAGE where <options> is one or many of:
-!MESSAGE   VC=<6,7,8,9,10,11>           - VC versions
+!MESSAGE   VC=<6,7,8,9,10,11,12>        - VC versions
 !MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
 !MESSAGE                                  Defaults to sibbling directory deps: ../deps
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
