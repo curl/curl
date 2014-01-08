@@ -103,18 +103,11 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
 
   pipeline = conn->send_pipe;
 
-  infof(conn->data, "Adding handle: conn: %p\n", (void *)conn);
-  infof(conn->data, "Adding handle: send: %d\n", conn->send_pipe->size);
-  infof(conn->data, "Adding handle: recv: %d\n", conn->recv_pipe->size);
   rc = Curl_addHandleToPipeline(handle, pipeline);
 
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
     conn->writechannel_inuse = FALSE; /* not in use yet */
-#ifdef DEBUGBUILD
-    infof(conn->data, "%p is at send pipe head!\n",
-          (void *)conn->send_pipe->head->ptr);
-#endif
     Curl_expire(conn->send_pipe->head->ptr, 1);
   }
 
