@@ -657,6 +657,10 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
   struct Curl_sockaddr_storage ssloc;
   struct SessionHandle *data = conn->data;
 
+  if(conn->socktype == SOCK_DGRAM)
+    /* there's no connection! */
+    return;
+
   if(!conn->bits.reuse) {
 
     len = sizeof(struct Curl_sockaddr_storage);
