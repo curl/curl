@@ -1256,7 +1256,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
           failf(data, "SSL: Incorrect password for the certificate \"%s\" "
                       "and its private key.", data->set.str[STRING_CERT]);
           break;
-        case errSecDecode: case -25257: /* errSecUnknownFormat */
+        case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
           failf(data, "SSL: Couldn't make sense of the data in the "
                       "certificate \"%s\" and its private key.",
                       data->set.str[STRING_CERT]);
