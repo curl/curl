@@ -1404,7 +1404,7 @@ ossl_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
   CURLcode retcode = CURLE_OK;
-
+  char *ciphers;
   struct SessionHandle *data = conn->data;
   SSL_METHOD_QUAL SSL_METHOD *req_method=NULL;
   void *ssl_sessionid=NULL;
@@ -1629,12 +1629,12 @@ ossl_connect_step1(struct connectdata *conn,
     }
   }
 
-  if(data->set.str[STRING_SSL_CIPHER_LIST]) {
-    if(!SSL_CTX_set_cipher_list(connssl->ctx,
-                                data->set.str[STRING_SSL_CIPHER_LIST])) {
-      failf(data, "failed setting cipher list");
-      return CURLE_SSL_CIPHER;
-    }
+  ciphers = data->set.str[STRING_SSL_CIPHER_LIST];
+  if(!ciphers)
+    ciphers = (char *)DEFAULT_CIPHER_SELECTION;
+  if(!SSL_CTX_set_cipher_list(connssl->ctx, ciphers)) {
+    failf(data, "failed setting cipher list: %s", ciphers);
+    return CURLE_SSL_CIPHER;
   }
 
 #ifdef USE_TLS_SRP
