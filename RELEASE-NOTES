@@ -13,6 +13,7 @@ This release includes the following changes:
  o imap/pop3/smtp: Extended the login options to support multiple auth mechanisms
  o TheArtOfHttpScripting: major update, converted layout and more
  o mprintf: Added support for I, I32 and I64 size specifiers
+ o makefile: Added support for VC11 and VC12
  o 
 
 This release includes the following bugfixes:
@@ -35,6 +36,11 @@ This release includes the following bugfixes:
  o multi.c: fix possible dereference of null pointer
  o mk-ca-bundle: introduces -d and warns about using this script
  o ConnectionExists: fix NTLM check for new connection [10]
+ o trynextip: fix build for non-IPV6 capable systems [11]
+ o Curl_updateconninfo: don't do anything for UDP "connections" [12]
+ o darwinssl: un-break Leopard build after PKCS#12 change [13]
+ o threaded-resolver: never use NULL hints with getaddrinf [14]
+ o multi_socket: remind app if timeout didn't run
  o 
 
 This release includes the following known bugs:
@@ -46,7 +52,8 @@ advice from friends like these:
 
  Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr, Björn Stenberg,
  Michal Górny, Anthony G. Basile, Barry Abrahamson, Christian Weisgerber,
- Marc Hoersken, Justin Maggard, Leif W, Paras S
+ Marc Hoersken, Justin Maggard, Leif W, Paras S, Iida Yosiaki, Priyanka Shah,
+ Nick Zitzmann, Abram Pousada, Fabian Frank
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -62,3 +69,8 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2014-01/0013.html
  [9] = http://curl.haxx.se/mail/lib-2014-01/0019.html
  [10] = http://curl.haxx.se/mail/lib-2014-01/0046.html
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1322
+ [12] = http://curl.haxx.se/mail/archive-2014-01/0016.html
+ [13] = http://curl.haxx.se/mail/lib-2013-12/0150.html
+ [14] = http://curl.haxx.se/mail/lib-2014-01/0061.html
+
