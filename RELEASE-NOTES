@@ -13,7 +13,7 @@ This release includes the following changes:
  o imap/pop3/smtp: Extended the login options to support multiple auth mechanisms
  o TheArtOfHttpScripting: major update, converted layout and more
  o mprintf: Added support for I, I32 and I64 size specifiers
- o makefile: Added support for VC11 and VC12
+ o makefile: Added support for VC7, VC11 and VC12
  o 
 
 This release includes the following bugfixes:

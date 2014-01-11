@@ -290,6 +290,18 @@ linux-ssl: ssl
 # We don't need to do anything for vc6.
 vc6:
 
+# VC7 makefiles are for use with VS.NET and VS.NET 2003
+vc7: lib/Makefile.vc7 src/Makefile.vc7
+
+lib/Makefile.vc7: lib/Makefile.vc6
+	@echo "generate $@"
+	@sed -e "s/VC6/VC7/g" lib/Makefile.vc6 > lib/Makefile.vc7
+
+src/Makefile.vc7: src/Makefile.vc6
+	@echo "generate $@"
+	@sed -e "s/VC6/VC7/g" src/Makefile.vc6 > src/Makefile.vc7
+
+# VC8 makefiles are for use with VS2005
 vc8: lib/Makefile.vc8 src/Makefile.vc8
 
 lib/Makefile.vc8: lib/Makefile.vc6
