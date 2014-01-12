@@ -29,6 +29,8 @@
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
+#define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
+
 static struct timeval tvnow(void)
 {
   struct timeval now;
