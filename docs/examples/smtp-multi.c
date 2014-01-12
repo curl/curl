@@ -78,19 +78,19 @@ static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
 
 static struct timeval tvnow(void)
 {
-  /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
   struct timeval now;
+
+  /* time() returns the value of time in seconds since the epoch */
   now.tv_sec = (long)time(NULL);
   now.tv_usec = 0;
+
   return now;
 }
 
 static long tvdiff(struct timeval newer, struct timeval older)
 {
-  return (newer.tv_sec-older.tv_sec)*1000+
-    (newer.tv_usec-older.tv_usec)/1000;
+  return (newer.tv_sec - older.tv_sec) * 1000 +
+    (newer.tv_usec - older.tv_usec) / 1000;
 }
 
 int main(void)
@@ -150,15 +150,15 @@ int main(void)
 
   while(still_running) {
     struct timeval timeout;
-    int rc; /* select() return code */
-
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -1;
+    int rc;
 
     long curl_timeo = -1;
 
+    /* Initialise the file descriptors */
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
@@ -187,17 +187,16 @@ int main(void)
     rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
-      fprintf(stderr, "ABORTING TEST, since it seems "
-              "that it would have run forever.\n");
+      fprintf(stderr,
+              "ABORTING: Since it seems that we would have run forever.\n");
       break;
     }
 
     switch(rc) {
-    case -1:
-      /* select error */
+    case -1:  /* select error */
       break;
-    case 0: /* timeout */
-    default: /* action */
+    case 0:   /* timeout */
+    default:  /* action */
       curl_multi_perform(mcurl, &still_running);
       break;
     }
