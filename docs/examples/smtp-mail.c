@@ -30,17 +30,59 @@
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
+#define FROM    "<sender@example.org>"
+#define TO      "<addressee@example.net>"
+#define CC      "<info@example.org>"
+
+static const char *payload_text[] = {
+  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
+  "To: " TO "\r\n",
+  "From: " FROM "(Example User)\r\n",
+  "Cc: " CC "(Another example User)\r\n",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+  "Subject: SMTP example message\r\n",
+  "\r\n", /* empty line to divide headers from body, see RFC5322 */
+  "The body of the message starts here.\r\n",
+  "\r\n",
+  "It could be a lot of lines, could be MIME encoded, whatever.\r\n",
+  "Check RFC5322.\r\n",
+  NULL
+};
+
+struct upload_status {
+  int lines_read;
+};
+
+static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp)
+{
+  struct upload_status *upload_ctx = (struct upload_status *)userp;
+  const char *data;
+
+  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+    return 0;
+  }
+
+  data = payload_text[upload_ctx->lines_read];
+
+  if(data) {
+    size_t len = strlen(data);
+    memcpy(ptr, data, len);
+    upload_ctx->lines_read++;
+
+    return len;
+  }
+
+  return 0;
+}
+
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
   struct curl_slist *recipients = NULL;
+  struct upload_status upload_ctx;
 
-  /* value for envelope reverse-path */
-  static const char *from = "<bradh@example.com>";
-
-  /* this becomes the envelope forward-path */
-  static const char *to = "<bradh@example.net>";
+  upload_ctx.lines_read = 0;
 
   curl = curl_easy_init();
   if(curl) {
@@ -48,26 +90,25 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
     /* Note that this option isn't strictly required, omitting it will result in
-     * libcurl will sent the MAIL FROM command with no sender data. All
+     * libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise, they
      * could cause an endless loop. See RFC 5321 Section 4.5.5 for more details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, from);
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
 
-    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array.  */
-    recipients = curl_slist_append(recipients, to);
+    /* Add two recipients, in this particular case they correspond to the
+     * To: and Cc: addressees in the header, but they could be any kind of
+     * recipient. */
+    recipients = curl_slist_append(recipients, TO);
+    recipients = curl_slist_append(recipients, CC);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* You provide the payload (headers and the body of the message) as the
-     * "data" element. There are two choices, either:
-     * - provide a callback function and specify the function name using the
-     * CURLOPT_READFUNCTION option; or
-     * - just provide a FILE pointer that can be used to read the data from.
-     * The easiest case is just to read from standard input, (which is available
-     * as a FILE pointer) as shown here.
-     */
-    curl_easy_setopt(curl, CURLOPT_READDATA, stdin);
+    /* We're using a callback function to specify the payload (the headers and
+     * body of the message). You could just use the CURLOPT_READDATA option to
+     * specify a FILE pointer to read from. */
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* send the message (including headers) */
