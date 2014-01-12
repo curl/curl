@@ -23,7 +23,7 @@
 #include <curl/curl.h>
 
 /* This is a simple example showing how to fetch mail using libcurl's IMAP
- * capabilities. It builds on the imap-fetch.c example to demonstrate how t
+ * capabilities. It builds on the imap-fetch.c example to demonstrate how to
  * use libcurl's multi interface.
  *
  * Note that this example requires libcurl 7.30.0 or above.
