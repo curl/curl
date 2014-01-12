@@ -23,17 +23,12 @@
 #include <curl/curl.h>
 
 /* This is an example showing how to send mail using libcurl's SMTP
- * capabilities via the multi interface.
+ * capabilities. It builds on the smtp-mail.c example to demonstrate how to use
+ * libcurl's multi interface.
  *
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
-/*
- * This is the list of basic details you need to tweak to get things right.
- */
-#define SERVER   "smtp.example.com"
-#define PORT     ":587" /* it is a colon+port string, but you can set it
-                           to "" to use the default port */
 #define FROM     "<sender@example.com>"
 #define TO       "<recipient@example.com>"
 #define CC       "<info@example.com>"
@@ -46,7 +41,7 @@ static const char *payload_text[] = {
   "From: " FROM "(Example User)\r\n",
   "Cc: " CC "(Another example User)\r\n",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
-  "Subject: SMTP TLS example message\r\n",
+  "Subject: SMTP multi example message\r\n",
   "\r\n", /* empty line to divide headers from body, see RFC5322 */
   "The body of the message starts here.\r\n",
   "\r\n",
@@ -125,20 +120,12 @@ int main(void)
   recipients = curl_slist_append(recipients, TO);
   recipients = curl_slist_append(recipients, CC);
 
-  curl_easy_setopt(curl, CURLOPT_URL, "smtp://" SERVER PORT);
-  curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-  curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.example.com");
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
   curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
-  curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSLVERSION, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
   curl_multi_add_handle(mcurl, curl);
 
   mp_start = tvnow();
@@ -184,7 +171,7 @@ int main(void)
        to sleep. */
     rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if (tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       break;
