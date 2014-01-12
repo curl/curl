@@ -111,7 +111,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    /* send the message (including headers) */
+    /* Send the message */
     res = curl_easy_perform(curl);
 
     /* Check for errors */
@@ -119,7 +119,7 @@ int main(void)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(res));
 
-    /* free the list of recipients */
+    /* Free the list of recipients */
     curl_slist_free_all(recipients);
 
     /* curl won't send the QUIT command until you call cleanup, so you should be
