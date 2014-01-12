@@ -114,23 +114,38 @@ int main(void)
   if(!mcurl)
     return 2;
 
+  /* This is the URL for your mailserver */
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
+
+  /* Note that this option isn't strictly required, omitting it will result in
+   * libcurl sending the MAIL FROM command with empty sender data. All
+   * autoresponses should have an empty reverse-path, and should be directed
+   * to the address in the reverse-path which triggered them. Otherwise, they
+   * could cause an endless loop. See RFC 5321 Section 4.5.5 for more details.
+   */
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+
   /* Add two recipients, in this particular case they correspond to the
    * To: and Cc: addressees in the header, but they could be any kind of
    * recipient. */
   recipients = curl_slist_append(recipients, TO);
   recipients = curl_slist_append(recipients, CC);
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-  curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.example.com");
+  /* We're using a callback function to specify the payload (the headers and
+   * body of the message). You could just use the CURLOPT_READDATA option to
+   * specify a FILE pointer to read from. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
   curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
-  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+  /* Tell the multi stack about our easy handle */
   curl_multi_add_handle(mcurl, curl);
 
+  /* Record the start time which we can use later */
   mp_start = tvnow();
 
-  /* we start some action by calling perform right away */
+  /* We start some action by calling perform right away */
   curl_multi_perform(mcurl, &still_running);
 
   while(still_running) {
@@ -148,7 +163,7 @@ int main(void)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    /* set a suitable timeout to play around with */
+    /* Set a suitable timeout to play around with */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
@@ -161,7 +176,7 @@ int main(void)
         timeout.tv_usec = (curl_timeo % 1000) * 1000;
     }
 
-    /* get file descriptors from the transfers */
+    /* Get file descriptors from the transfers */
     curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* In a real-world program you OF COURSE check the return code of the
@@ -188,7 +203,10 @@ int main(void)
     }
   }
 
+  /* Free the list of recipients */
   curl_slist_free_all(recipients);
+
+  /* Always cleanup */
   curl_multi_remove_handle(mcurl, curl);
   curl_multi_cleanup(mcurl);
   curl_easy_cleanup(curl);
@@ -196,5 +214,3 @@ int main(void)
 
   return 0;
 }
-
-
