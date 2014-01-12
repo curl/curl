@@ -133,5 +133,5 @@ int main(void)
     curl_easy_cleanup(curl);
   }
 
-  return 0;
+  return (int)res;
 }
