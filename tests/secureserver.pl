@@ -252,10 +252,10 @@ if($stunnel_version >= 400) {
             CApath = $path
             cert = $certfile
             debug = $loglevel
-            output = /dev/stdout
             socket = $socketopt";
         if($stunnel !~ /tstunnel(\.exe)?"?$/) {
             print STUNCONF "
+            output = $logfile
             pid = $pidfile
             foreground = yes";
         }
