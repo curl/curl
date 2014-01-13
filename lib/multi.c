@@ -985,11 +985,19 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                 Curl_tvdiff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
-          failf(data, "Operation timed out after %ld milliseconds with %"
-                CURL_FORMAT_CURL_OFF_T " out of %"
-                CURL_FORMAT_CURL_OFF_T " bytes received",
-                Curl_tvdiff(now, data->progress.t_startsingle), k->bytecount,
-                k->size);
+          if(k->size != -1) {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " out of %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(k->now, data->progress.t_startsingle),
+                  k->bytecount, k->size);
+          }
+          else {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(now, data->progress.t_startsingle),
+                  k->bytecount);
+          }
         }
 
         /* Force the connection closed because the server could continue to
