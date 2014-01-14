@@ -2134,6 +2134,8 @@ as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
 For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE\fP is
 mandatory.
 
+To "unset" this value again, set it to -1.
+
 When sending emails using SMTP, this command can be used to specify the
 optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
 
@@ -2145,6 +2147,8 @@ libcurl what the expected size of the infile is.  This value should be passed
 as a curl_off_t. (Added in 7.11.0)
 
 For uploading using SCP, this option or \fICURLOPT_INFILESIZE\fP is mandatory.
+
+To "unset" this value again, set it to -1.
 
 When sending emails using SMTP, this command can be used to specify the
 optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
