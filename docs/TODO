@@ -17,6 +17,7 @@
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
+ 1.7 Detect when called from witin callbacks
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -174,6 +175,12 @@
 
  Dynamically allocate buffer size depending on protocol in use in combination
  with freeing it after each individual transfer? Other suggestions?
+
+1.7 Detect when called from witin callbacks
+
+ We should set a state variable before calling callbacks, so that we
+ subsequently can add code within libcurl that returns error if called within
+ callbacks for when that's not supported.
 
 
 2. libcurl - multi interface
