@@ -31,8 +31,7 @@
  4.2 Alter passive/active on failure and retry
  4.3 Earlier bad letter detection
  4.4 REST for large files
- 4.5 FTP proxy support
- 4.6 ASCII support
+ 4.5 ASCII support
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
@@ -71,9 +70,8 @@
  12.4 Cache OpenSSL contexts
  12.5 Export session ids
  12.6 Provide callback for cert verification
- 12.7 Support other SSL libraries
- 12.8 improve configure --with-ssl
- 12.9 Support DANE
+ 12.7 improve configure --with-ssl
+ 12.8 Support DANE
 
  13. GnuTLS
  13.1 SSL engine stuff
@@ -238,13 +236,7 @@
  the server doesn't set the pointer to the requested index. The tricky
  (impossible?) part is to figure out if the server did the right thing or not.
 
-4.5 FTP proxy support
-
- Support the most common FTP proxies, Philip Newton provided a list allegedly
- from ncftp. This is not a subject without debate, and is probably not really
- suitable for libcurl.  http://curl.haxx.se/mail/archive-2003-04/0126.html
-
-4.6 ASCII support
+4.5 ASCII support
 
  FTP ASCII transfers do not follow RFC959. They don't convert the data
  accordingly.
@@ -416,17 +408,12 @@ to provide the data to send.
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
 
-12.7 Support other SSL libraries
-
- Make curl's SSL layer capable of using other free SSL libraries.  Such as
- MatrixSSL (http://www.matrixssl.org/).
-
-12.8 improve configure --with-ssl
+12.7 improve configure --with-ssl
 
  make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
  then NSS...
 
-12.9 Support DANE
+12.8 Support DANE
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
