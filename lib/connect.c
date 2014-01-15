@@ -939,7 +939,8 @@ void Curl_sndbufset(curl_socket_t sockfd)
     memset(&osver, 0, sizeof(osver));
     osver.dwOSVersionInfoSize = sizeof(osver);
     osver.dwMajorVersion = majorVersion;
-    majorVersionMask = VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    majorVersionMask = VerSetConditionMask(0, VER_MAJORVERSION,
+                                           VER_GREATER_EQUAL);
 
     if(VerifyVersionInfo(&osver, VER_MAJORVERSION, majorVersionMask))
       detectOsState = DETECT_OS_VISTA_OR_LATER;
