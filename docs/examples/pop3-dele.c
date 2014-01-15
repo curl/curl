@@ -45,6 +45,9 @@ int main(void)
     /* Set the DELE command */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELE");
 
+    /* Do not perform a transfer as DELE returns no data */
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+
     /* Perform the custom request */
     res = curl_easy_perform(curl);
 
