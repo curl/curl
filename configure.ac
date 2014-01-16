@@ -1294,6 +1294,12 @@ if test x"$want_gss" = xyes; then
      *-*-darwin*)
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
+     *-hp-hpux*)
+        if test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+        fi
+        LIBS="-lgss $LIBS"
+        ;;
      *)
         if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
@@ -1310,7 +1316,14 @@ if test x"$want_gss" = xyes; then
      esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-     LIBS="-lgssapi $LIBS"
+     case $host in
+     *-hp-hpux*)
+        LIBS="-lgss $LIBS"
+        ;;
+     *)
+        LIBS="-lgssapi $LIBS"
+        ;;
+     esac
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
