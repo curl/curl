@@ -29,40 +29,25 @@
 #define MAXNUM_SIZE 16
 
 typedef enum {
-  CHUNK_FIRST, /* never use */
-
-  /* In this we await and buffer all hexadecimal digits until we get one
-     that isn't a hexadecimal digit. When done, we go POSTHEX */
+  /* await and buffer all hexadecimal digits until we get one that isn't a
+     hexadecimal digit. When done, we go CHUNK_LF */
   CHUNK_HEX,
 
-  /* We have received the hexadecimal digit and we eat all characters until
-     we get a CRLF pair. When we see a CR we go to the CR state. */
-  CHUNK_POSTHEX,
-
-  /* A single CR has been found and we should get a LF right away in this
-     state or we go back to POSTHEX. When LF is received, we go to DATA.
-     If the size given was zero, we set state to STOP and return. */
-  CHUNK_CR,
+  /* wait for LF, ignore all else */
+  CHUNK_LF,
 
   /* We eat the amount of data specified. When done, we move on to the
      POST_CR state. */
   CHUNK_DATA,
 
-  /* POSTCR should get a CR and nothing else, then move to POSTLF */
-  CHUNK_POSTCR,
-
-  /* POSTLF should get a LF and nothing else, then move back to HEX as the
-     CRLF combination marks the end of a chunk */
+  /* POSTLF should get a CR and then a LF and nothing else, then move back to
+     HEX as the CRLF combination marks the end of a chunk. A missing CR is no
+     big deal. */
   CHUNK_POSTLF,
 
-  /* Each Chunk body should end with a CRLF.  Read a CR and nothing else,
-     then move to CHUNK_STOP */
-  CHUNK_STOPCR,
-
-  /* This is mainly used to really mark that we're out of the game.
-     NOTE: that there's a 'dataleft' field in the struct that will tell how
-     many bytes that were not passed to the client in the end of the last
-     buffer! */
+  /* Used to mark that we're out of the game.  NOTE: that there's a 'dataleft'
+     field in the struct that will tell how many bytes that were not passed to
+     the client in the end of the last buffer! */
   CHUNK_STOP,
 
   /* At this point optional trailer headers can be found, unless the next line
@@ -77,10 +62,7 @@ typedef enum {
      signalled If this is an empty trailer CHUNKE_STOP will be signalled.
      Otherwise the trailer will be broadcasted via Curl_client_write() and the
      next state will be CHUNK_TRAILER */
-  CHUNK_TRAILER_POSTCR,
-
-  CHUNK_LAST /* never use */
-
+  CHUNK_TRAILER_POSTCR
 } ChunkyState;
 
 typedef enum {
