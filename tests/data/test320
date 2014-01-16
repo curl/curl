@@ -71,13 +71,13 @@ Content-type: text/html
 <h5>If your browser supports session resuming, then you should see the same session ID, when you press the <b>reload</b> button.</h5>
 <p>Connected as user 'jsmith'.</p>
 <P>
-<TABLE border=1><TR><TD>
+<TABLE border=1><TR><TD></TD></TR>
 <TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
 <TR><TD>Compression</TD><TD>NULL</TD></TR>
 <TR><TD>Cipher</TD><TD>AES-128-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
 <TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_128_CBC_SHA1</TD></TR></p></TABLE>
-
+<PRE>
 Host: %HOSTIP:%HTTPTLSSRPPORT
 Accept: */*
 
@@ -87,8 +87,8 @@ Accept: */*
 </file>
 <stripfile>
 s/^<p>Session ID:.*//
-s/^<hr><P>Your HTTP header was:.*//
-s/Protocol version:.*//
+s/^<hr><P>Your HTTP header was:<PRE>.*/<PRE>/
+s/Protocol version:.*[0-9]//
 </stripfile>
 </verify>
 
