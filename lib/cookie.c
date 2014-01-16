@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -501,7 +501,7 @@ Curl_cookie_add(struct SessionHandle *data,
           }
           /* Note that if the date couldn't get parsed for whatever reason,
              the cookie will be treated as a session cookie */
-          co->expires = curl_getdate(what, &now);
+          co->expires = curl_getdate(what, NULL);
 
           /* Session cookies have expires set to 0 so if we get that back
              from the date parser let's add a second to make it a
