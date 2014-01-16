@@ -489,9 +489,6 @@ Curl_cookie_add(struct SessionHandle *data,
             badcookie = TRUE;
             break;
           }
-          co->expires =
-            strtol((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0],NULL,10)
-            + (long)now;
         }
         else if(Curl_raw_equal("expires", name)) {
           strstore(&co->expirestr, whatptr);
@@ -499,17 +496,6 @@ Curl_cookie_add(struct SessionHandle *data,
             badcookie = TRUE;
             break;
           }
-          /* Note that if the date couldn't get parsed for whatever reason,
-             the cookie will be treated as a session cookie */
-          co->expires = curl_getdate(what, NULL);
-
-          /* Session cookies have expires set to 0 so if we get that back
-             from the date parser let's add a second to make it a
-             non-session cookie */
-          if(co->expires == 0)
-            co->expires = 1;
-          else if(co->expires < 0)
-            co->expires = 0;
         }
         else if(!co->name) {
           co->name = strdup(name);
@@ -543,6 +529,30 @@ Curl_cookie_add(struct SessionHandle *data,
            coming up */
         semiptr=strchr(ptr, '\0');
     } while(semiptr);
+
+    if(co->maxage) {
+      co->expires =
+        curlx_strtoofft((*co->maxage=='\"')?
+                        &co->maxage[1]:&co->maxage[0], NULL, 10);
+      if(CURL_OFF_T_MAX - now < co->expires)
+        /* avoid overflow */
+        co->expires = CURL_OFF_T_MAX;
+      else
+        co->expires += now;
+    }
+    else if(co->expirestr) {
+      /* Note that if the date couldn't get parsed for whatever reason,
+         the cookie will be treated as a session cookie */
+      co->expires = curl_getdate(co->expirestr, NULL);
+
+      /* Session cookies have expires set to 0 so if we get that back
+         from the date parser let's add a second to make it a
+         non-session cookie */
+      if(co->expires == 0)
+        co->expires = 1;
+      else if(co->expires < 0)
+        co->expires = 0;
+    }
 
     if(!badcookie && !co->domain) {
       if(domain) {
