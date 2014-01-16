@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ struct Curl_chunker {
   char hexbuffer[ MAXNUM_SIZE + 1];
   int hexindex;
   ChunkyState state;
-  size_t datasize;
+  curl_off_t datasize;
   size_t dataleft; /* untouched data amount at the end of the last buffer */
 };
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,7 @@
 #include "http.h"
 #include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_to_network prototype */
+#include "strtoofft.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -113,7 +114,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
   struct Curl_chunker *ch = &conn->chunk;
   struct SingleRequest *k = &data->req;
   size_t piece;
-  size_t length = (size_t)datalen;
+  curl_off_t length = (curl_off_t)datalen;
   size_t *wrote = (size_t *)wrotep;
 
   *wrote = 0; /* nothing's written yet */
@@ -141,6 +142,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
       }
       else {
+        char *endptr;
         if(0 == ch->hexindex) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
@@ -155,10 +157,13 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         if(result) {
           /* Curl_convert_from_network calls failf if unsuccessful */
           /* Treat it as a bad hex character */
-          return(CHUNKE_ILLEGAL_HEX);
+          return CHUNKE_ILLEGAL_HEX ;
         }
 
-        ch->datasize=strtoul(ch->hexbuffer, NULL, 16);
+        ch->datasize=curlx_strtoofft(ch->hexbuffer, &endptr, 16);
+        if(errno == ERANGE)
+          /* over or underflow is an error */
+          return CHUNKE_ILLEGAL_HEX;
         ch->state = CHUNK_POSTHEX;
       }
       break;
