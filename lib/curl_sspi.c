@@ -79,7 +79,8 @@ CURLcode Curl_sspi_global_init(void)
     DWORD majorVersion = 4;
     DWORD platformId = VER_PLATFORM_WIN32_NT;
 
-#if (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
+#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
+    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
     OSVERSIONINFO osver;
 
     memset(&osver, 0, sizeof(osver));
