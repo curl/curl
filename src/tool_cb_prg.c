@@ -61,8 +61,8 @@ int tool_progress_cb(void *clientp,
   /* we've come this far */
   point = dlnow + ulnow + bar->initial_size;
 
-  if(bar->calls && (tvdiff(now, bar->prevtime) < 200L) && point < total)
-    /* after first call, limit progress-bar updating to 5 Hz */
+  if(bar->calls && (tvdiff(now, bar->prevtime) < 100L) && point < total)
+    /* after first call, limit progress-bar updating to 10 Hz */
     /* update when we're at 100% even if last update is less than 200ms ago */
     return 0;
 
