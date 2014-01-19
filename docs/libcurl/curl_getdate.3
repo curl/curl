@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,22 +21,17 @@
 .\" **************************************************************************
 .TH curl_getdate 3 "12 Aug 2005" "libcurl 7.0" "libcurl Manual"
 .SH NAME
-curl_getdate - Convert a date string to number of seconds since January 1,
-1970
+curl_getdate - Convert a date string to number of seconds
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
 .BI "time_t curl_getdate(char *" datestring ", time_t *"now " );"
 .ad
 .SH DESCRIPTION
-This function returns the number of seconds since January 1st 1970 in the UTC
-time zone, for the date and time that the \fIdatestring\fP parameter
-specifies. The \fInow\fP parameter is not used, pass a NULL there.
-
-\fBNOTE:\fP This function was rewritten for the 7.12.2 release and this
-documentation covers the functionality of the new one. The new one is not
-feature-complete with the old one, but most of the formats supported by the
-new one was supported by the old too.
+\fIcurl_getdate(3)\fP returns the number of seconds since the Epoch, January
+1st 1970 00:00:00 in the UTC time zone, for the date and time that the
+\fIdatestring\fP parameter specifies. The \fInow\fP parameter is not used,
+pass a NULL there.
 .SH PARSING DATES AND TIMES
 A "date" is a string containing several items separated by whitespace. The
 order of the items is immaterial.  A date string may contain many flavors of
@@ -108,10 +103,3 @@ number).
 Having a 64 bit time_t is not a guarantee that dates beyond 03:14:07 UTC,
 January 19, 2038 will work fine. On systems with a 64 bit time_t but with a
 crippled mktime(), \fIcurl_getdate\fP will return -1 in this case.
-.SH REWRITE
-The former version of this function was built with yacc and was not only very
-large, it was also never quite understood and it wasn't possible to build with
-non-GNU tools since only GNU Bison could make it thread-safe!
-
-The rewrite was done for 7.12.2. The new one is much smaller and uses simpler
-code.
