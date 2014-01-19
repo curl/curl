@@ -32,6 +32,7 @@
 #include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_to_network prototype */
 #include "strtoofft.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -188,7 +189,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       /* We expect 'datasize' of data. We have 'length' right now, it can be
          more or less than 'datasize'. Get the smallest piece.
       */
-      piece = (ch->datasize >= length)?length:ch->datasize;
+      piece = curlx_sotouz((ch->datasize >= length)?length:ch->datasize);
 
       /* Write the data portion available */
 #ifdef HAVE_LIBZ
@@ -350,8 +351,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
         /* Record the length of any data left in the end of the buffer
            even if there's no more chunks to read */
+        ch->dataleft = curlx_sotouz(length);
 
-        ch->dataleft = length;
         return CHUNKE_STOP; /* return stop */
       }
       else
