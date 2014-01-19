@@ -45,6 +45,13 @@ This release includes the following bugfixes:
  o error message: Sensible message on timeout when transfer size unknown [16]
  o curl_easy_setopt.3: mention how to unset CURLOPT_INFILESIZE*
  o win32: Fixed use of deprecated function 'GetVersionInfoEx' for VC12 [17]
+ o configure: fix gssapi linking on HP-UX [18]
+ o chunked-parser: abort on overflows, allow 64 bit chunks
+ o chunked parsing: relax the CR strictness [19]
+ o cookie: max-age fixes [20]
+ o progress bar: always update when at 100%
+ o progress bar: increase update frequency to 10Hz
+ o tool: Fixed incorrect return code if command line parser runs out of memory
  o 
 
 This release includes the following known bugs:
@@ -57,7 +64,8 @@ advice from friends like these:
  Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr, Björn Stenberg,
  Michal Górny, Anthony G. Basile, Barry Abrahamson, Christian Weisgerber,
  Marc Hoersken, Justin Maggard, Leif W, Paras S, Iida Yosiaki, Priyanka Shah,
- Nick Zitzmann, Abram Pousada, Fabian Frank, Jeff Hodges, Colin Hogben
+ Nick Zitzmann, Abram Pousada, Fabian Frank, Jeff Hodges, Colin Hogben,
+ Michael Osipov, Dan Fandrich, Shayan Pooya, Chen Prog, Tobias Markus
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -80,4 +88,7 @@ References to bug reports and discussions on issues:
  [15] = http://curl.haxx.se/bug/view.cgi?id=1323
  [16] = http://curl.haxx.se/mail/lib-2014-01/0115.html
  [17] = http://curl.haxx.se/mail/lib-2014-01/0134.html
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1321
+ [19] = http://curl.haxx.se/mail/archive-2014-01/0000.html
+ [20] = http://curl.haxx.se/mail/lib-2014-01/0130.html
 
