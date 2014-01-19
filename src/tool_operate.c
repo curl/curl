@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -286,12 +286,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* Parse options */
   for(i = 1, stillflags = TRUE; i < argc; i++) {
+    char *orig_opt = argv[i];
+
     if(stillflags &&
        ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
-      char *orig_opt = argv[i];
-
       char *flag = argv[i];
 
       if(curlx_strequal("--", argv[i]))
@@ -302,18 +302,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         nextarg = (i < (argc-1)) ? argv[i+1] : NULL;
 
         res = getparameter(flag, nextarg, &passarg, config);
-        if(res) {
-          int retval = CURLE_OK;
-          if(res != PARAM_HELP_REQUESTED) {
-            const char *reason = param2text(res);
-            helpf(config->errors, "option %s: %s\n", orig_opt, reason);
-            retval = CURLE_FAILED_INIT;
-          }
-          res = retval;
-          goto quit_curl;
-        }
-
-        if(passarg) /* we're supposed to skip this */
+        if(!res && passarg) /* we're supposed to skip this */
           i++;
       }
     }
@@ -321,8 +310,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       bool used;
       /* just add the URL please */
       res = getparameter((char *)"--url", argv[i], &used, config);
-      if(res)
-        goto quit_curl;
+    }
+
+    if(res) {
+      int retval = CURLE_OK;
+      if(res != PARAM_HELP_REQUESTED) {
+        const char *reason = param2text(res);
+        helpf(config->errors, "option %s: %s\n", orig_opt, reason);
+        retval = CURLE_FAILED_INIT;
+      }
+      res = retval;
+      goto quit_curl;
     }
   }
 
