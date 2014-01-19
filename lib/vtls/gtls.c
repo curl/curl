@@ -350,9 +350,6 @@ static CURLcode
 gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
-#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
-  static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
-#endif
   struct SessionHandle *data = conn->data;
   gnutls_session session;
   int rc;
@@ -363,6 +360,19 @@ gtls_connect_step1(struct connectdata *conn,
   struct in6_addr addr;
 #else
   struct in_addr addr;
+#endif
+#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
+  static int cipher_priority[] = { GNUTLS_CIPHER_AES_128_GCM,
+    GNUTLS_CIPHER_AES_256_GCM, GNUTLS_CIPHER_AES_128_CBC,
+    GNUTLS_CIPHER_AES_256_CBC, GNUTLS_CIPHER_CAMELLIA_128_CBC,
+    GNUTLS_CIPHER_CAMELLIA_256_CBC, GNUTLS_CIPHER_3DES_CBC,
+  };
+  static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
+  static int protocol_priority[] = { 0, 0, 0, 0 };
+#else
+#define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
+  const char* prioritylist;
+  const char *err;
 #endif
 
   if(conn->ssl[sockindex].state == ssl_connection_complete)
@@ -471,33 +481,87 @@ gtls_connect_step1(struct connectdata *conn,
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
-  if(data->set.ssl.version == CURL_SSLVERSION_SSLv3) {
 #ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
-    static const int protocol_priority[] = { GNUTLS_SSL3, 0 };
-    rc = gnutls_protocol_set_priority(session, protocol_priority);
-#else
-    const char *err;
-    /* the combination of the cipher ARCFOUR with SSL 3.0 and TLS 1.0 is not
-       vulnerable to attacks such as the BEAST, why this code now explicitly
-       asks for that
-    */
-    rc = gnutls_priority_set_direct(session,
-                                    "NORMAL:-VERS-TLS-ALL:+VERS-SSL3.0:"
-                                    "-CIPHER-ALL:+ARCFOUR-128",
-                                    &err);
-#endif
-    if(rc != GNUTLS_E_SUCCESS)
-      return CURLE_SSL_CONNECT_ERROR;
-  }
+  rc = gnutls_cipher_set_priority(session, cipher_priority);
+  if(rc != GNUTLS_E_SUCCESS)
+    return CURLE_SSL_CONNECT_ERROR;
 
-#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
   /* Sets the priority on the certificate types supported by gnutls. Priority
-     is higher for types specified before others. After specifying the types
-     you want, you must append a 0. */
+   is higher for types specified before others. After specifying the types
+   you want, you must append a 0. */
   rc = gnutls_certificate_type_set_priority(session, cert_type_priority);
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
+
+  if(data->set.ssl.cipher_list != NULL) {
+    failf(data, "can't pass a custom cipher list to older GnuTLS"
+          " versions");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  switch (data->set.ssl.version) {
+    case CURL_SSLVERSION_SSLv3:
+      protocol_priority[0] = GNUTLS_SSL3;
+      break;
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      protocol_priority[0] = GNUTLS_TLS1_0;
+      protocol_priority[1] = GNUTLS_TLS1_1;
+      protocol_priority[2] = GNUTLS_TLS1_2;
+      break;
+    case CURL_SSLVERSION_TLSv1_0:
+      protocol_priority[0] = GNUTLS_TLS1_0;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      protocol_priority[0] = GNUTLS_TLS1_1;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      protocol_priority[0] = GNUTLS_TLS1_2;
+    break;
+      case CURL_SSLVERSION_SSLv2:
+    default:
+      failf(data, "GnuTLS does not support SSLv2");
+      return CURLE_SSL_CONNECT_ERROR;
+      break;
+  }
+  rc = gnutls_protocol_set_priority(session, protocol_priority);
+#else
+  switch (data->set.ssl.version) {
+    case CURL_SSLVERSION_SSLv3:
+      prioritylist = GNUTLS_CIPHERS ":-VERS-TLS-ALL:+VERS-SSL3.0";
+      sni = false;
+      break;
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0";
+      break;
+    case CURL_SSLVERSION_TLSv1_0:
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                     "+VERS-TLS1.0";
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                     "+VERS-TLS1.1";
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                     "+VERS-TLS1.2";
+      break;
+    case CURL_SSLVERSION_SSLv2:
+    default:
+      failf(data, "GnuTLS does not support SSLv2");
+      return CURLE_SSL_CONNECT_ERROR;
+      break;
+  }
+  rc = gnutls_priority_set_direct(session, prioritylist, &err);
 #endif
+
+
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "Did you pass a valid GnuTLS cipher list?");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
 
   if(data->set.str[STRING_CERT]) {
     if(gnutls_certificate_set_x509_key_file(
