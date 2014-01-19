@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1101,8 +1101,8 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
 #if defined(USE_GNUTLS_NETTLE)
   struct md5_ctx MD5pw;
   md5_init(&MD5pw);
-  md5_update(&MD5pw, tmplen, tmp);
-  md5_digest(&MD5pw, md5len, md5sum);
+  md5_update(&MD5pw, (unsigned int)tmplen, tmp);
+  md5_digest(&MD5pw, (unsigned int)md5len, md5sum);
 #elif defined(USE_GNUTLS)
   gcry_md_hd_t MD5pw;
   gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
