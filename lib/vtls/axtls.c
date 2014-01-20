@@ -622,7 +622,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
     }
     else {
       failf(conn->data, "axTLS recv error (%d)", ret);
-      *err = map_error_to_curl(ret);
+      *err = map_error_to_curl((int) ret);
       ret = -1;
     }
   }
