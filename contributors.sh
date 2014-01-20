@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013-2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -37,10 +37,29 @@ fi
 # cut off spaces first and last on the line
 # only count names with a space (ie more than one word)
 # sort all unique names
+# awk them into RELEASE-NOTES format
 git log $start..HEAD | \
 egrep '(Author|Commit|by):' | \
 cut -d: -f2- | \
 cut '-d<' -f1 | \
 sed -e 's/^ //' -e 's/ $//g' | \
 grep ' ' | \
-sort -u
+sort -u |
+awk '{
+ num++;
+ n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
+ #print n;
+ if(length(n) > 78) {
+   printf("  %s\n", p);
+   n=sprintf("%s,", $0);
+ }
+ p=n;
+
+}
+
+ END {
+   printf("  %s\n", p);
+   printf("  (%d contributors)\n", num);
+ }
+
+'
