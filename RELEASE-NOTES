@@ -52,7 +52,9 @@ This release includes the following bugfixes:
  o progress bar: always update when at 100%
  o progress bar: increase update frequency to 10Hz
  o tool: Fixed incorrect return code if command line parser runs out of memory
- o 
+ o HTTP POST: omit Content-Length if data size is unknown
+ o GnuTLS: disable insecure ciphers
+ o GnuTLS: honor --slv2 and the --tlsv1[.N] switches
 
 This release includes the following known bugs:
 
@@ -61,11 +63,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Steve Holme, Viktor Szakáts, Mohammad AlSaleh, Luke Dashjr, Björn Stenberg,
- Michal Górny, Anthony G. Basile, Barry Abrahamson, Christian Weisgerber,
- Marc Hoersken, Justin Maggard, Leif W, Paras S, Iida Yosiaki, Priyanka Shah,
- Nick Zitzmann, Abram Pousada, Fabian Frank, Jeff Hodges, Colin Hogben,
- Michael Osipov, Dan Fandrich, Shayan Pooya, Chen Prog, Tobias Markus
+  Abram Pousada, Barry Abrahamson, Björn Stenberg, Cédric Deltheil, Chen Prog,
+  Christian Weisgerber, Colin Hogben, Dan Fandrich, Daniel Stenberg,
+  Fabian Frank, Guenter Knauf, He Qin, Iida Yosiaki, Jeff Hodges,
+  Justin Maggard, Leif W, Luke Dashjr, Marc Hoersken, Michael Osipov,
+  Michal Górny and Anthony G. Basile, Mohammad AlSaleh, Nick Zitzmann, Paras S,
+  Petr Novak, Priyanka Shah, Steve Holme, Tobias Markus, Viktor Szakáts,
 
         Thanks! (and sorry if I forgot to mention someone)
 
