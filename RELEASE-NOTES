@@ -52,6 +52,7 @@ This release includes the following bugfixes:
  o progress bar: always update when at 100%
  o progress bar: increase update frequency to 10Hz
  o tool: Fixed incorrect return code if command line parser runs out of memory
+ o tool: Fixed incorrect return code if password prompting runs out of memory
  o HTTP POST: omit Content-Length if data size is unknown [21]
  o GnuTLS: disable insecure ciphers
  o GnuTLS: honor --slv2 and the --tlsv1[.N] switches
