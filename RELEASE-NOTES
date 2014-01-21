@@ -52,7 +52,7 @@ This release includes the following bugfixes:
  o progress bar: always update when at 100%
  o progress bar: increase update frequency to 10Hz
  o tool: Fixed incorrect return code if command line parser runs out of memory
- o HTTP POST: omit Content-Length if data size is unknown
+ o HTTP POST: omit Content-Length if data size is unknown [21]
  o GnuTLS: disable insecure ciphers
  o GnuTLS: honor --slv2 and the --tlsv1[.N] switches
 
@@ -94,4 +94,4 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/view.cgi?id=1321
  [19] = http://curl.haxx.se/mail/archive-2014-01/0000.html
  [20] = http://curl.haxx.se/mail/lib-2014-01/0130.html
-
+ [21] = http://curl.haxx.se/mail/lib-2014-01/0103.html
