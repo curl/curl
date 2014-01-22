@@ -57,7 +57,7 @@ int test(char *URL)
   CURL *curl;
   CURLcode result = CURLE_OK;
   int res = 0;
-  struct WriteThis pooh = { data, strlen(data) };
+  struct WriteThis pooh = { data, sizeof(data)-1 };
 
   global_init(CURL_GLOBAL_ALL);
 
