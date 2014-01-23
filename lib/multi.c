@@ -329,6 +329,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->conn_cache = NULL;
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
+  Curl_llist_destroy(multi->msglist, NULL);
 
   free(multi);
   return NULL;
