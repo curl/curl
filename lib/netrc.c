@@ -62,8 +62,6 @@ int Curl_parsenetrc(const char *host,
   FILE *file;
   int retcode=1;
   int specific_login = (**loginp != 0);
-  char *home = NULL;
-  bool home_alloc = FALSE;
   bool netrc_alloc = FALSE;
   enum host_lookup_state state=NOTHING;
 
@@ -74,7 +72,8 @@ int Curl_parsenetrc(const char *host,
 #define NETRC DOT_CHAR "netrc"
 
   if(!netrcfile) {
-    home = curl_getenv("HOME"); /* portable environment reader */
+    bool home_alloc = FALSE;
+    char *home = curl_getenv("HOME"); /* portable environment reader */
     if(home) {
       home_alloc = TRUE;
 #if defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
@@ -92,15 +91,17 @@ int Curl_parsenetrc(const char *host,
       return -1;
 
     netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
+    if(home_alloc)
+      Curl_safefree(home);
     if(!netrcfile) {
-      if(home_alloc)
-        free(home);
       return -1;
     }
     netrc_alloc = TRUE;
   }
 
   file = fopen(netrcfile, "r");
+  if(netrc_alloc)
+    Curl_safefree(netrcfile);
   if(file) {
     char *tok;
     char *tok_buf;
@@ -146,8 +147,10 @@ int Curl_parsenetrc(const char *host,
             else {
               free(*loginp);
               *loginp = strdup(tok);
-              if(!*loginp)
-                return -1; /* allocation failed */
+              if(!*loginp) {
+                retcode = -1; /* allocation failed */
+                goto out;
+              }
             }
             state_login=0;
           }
@@ -155,8 +158,10 @@ int Curl_parsenetrc(const char *host,
             if(state_our_login || !specific_login) {
               free(*passwordp);
               *passwordp = strdup(tok);
-              if(!*passwordp)
-                return -1; /* allocation failed */
+              if(!*passwordp) {
+                retcode = -1; /* allocation failed */
+                goto out;
+              }
             }
             state_password=0;
           }
@@ -176,13 +181,9 @@ int Curl_parsenetrc(const char *host,
       } /* while(tok) */
     } /* while fgets() */
 
+    out:
     fclose(file);
   }
-
-  if(home_alloc)
-    free(home);
-  if(netrc_alloc)
-    free(netrcfile);
 
   return retcode;
 }
