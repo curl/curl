@@ -14,6 +14,9 @@ PROGRESSFUNCTION
 <server>
 none
 </server>
+<features>
+http
+</features>
 <tool>
 lib1513
 </tool>

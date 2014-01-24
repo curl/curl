@@ -9,6 +9,9 @@
 <server>
 none
 </server>
+<features>
+http
+</features>
 # tool is what to use instead of 'curl'
 <tool>
 lib509
