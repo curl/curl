@@ -501,7 +501,7 @@ sub checktestcmd {
 sub runclient {
     my ($cmd)=@_;
     my $ret = system($cmd);
-    print "CMD ($ret): $cmd\n" if($verbose);
+    print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
 
 # This is one way to test curl on a remote machine
