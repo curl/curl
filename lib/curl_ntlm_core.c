@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -96,12 +96,19 @@
 #include "rawstr.h"
 #include "curl_memory.h"
 #include "curl_ntlm_core.h"
+#include "curl_md5.h"
+#include "curl_hmac.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#define NTLM_HMAC_MD5_LEN     (16)
+#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
+#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
 #ifdef USE_SSLEAY
 /*
@@ -377,6 +384,16 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
+static void ascii_uppercase_to_unicode_le(unsigned char *dest,
+                                          const char *src, size_t srclen)
+{
+  size_t i;
+  for(i = 0; i < srclen; i++) {
+    dest[2 * i] = (unsigned char)(toupper(src[i]));
+    dest[2 * i + 1] = '\0';
+  }
+}
+
 /*
  * Set up nt hashed passwords
  */
@@ -431,6 +448,173 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
 
   return CURLE_OK;
 }
+
+/* This returns the HMAC MD5 digest */
+CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
+                       const unsigned char *data, unsigned int datalen,
+                       unsigned char *output)
+{
+  HMAC_context *ctxt = Curl_HMAC_init(Curl_HMAC_MD5, key, keylen);
+
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Update the digest with the given challenge */
+  Curl_HMAC_update(ctxt, data, datalen);
+
+  /* Finalise the digest */
+  Curl_HMAC_final(ctxt, output);
+
+  return CURLE_OK;
+}
+
+/* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
+ * (uppercase UserName + Domain) as the data
+ */
+CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
+                                       const char *domain, size_t domlen,
+                                       unsigned char *ntlmhash,
+                                       unsigned char *ntlmv2hash)
+{
+  /* Unicode representation */
+  size_t identity_len = (userlen + domlen) * 2;
+  unsigned char *identity = malloc(identity_len);
+  CURLcode res = CURLE_OK;
+
+  if(!identity)
+    return CURLE_OUT_OF_MEMORY;
+
+  ascii_uppercase_to_unicode_le(identity, user, userlen);
+  ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
+
+  res = Curl_hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
+                      ntlmv2hash);
+
+  Curl_safefree(identity);
+
+  return res;
+}
+
+/*
+ * Curl_ntlm_core_mk_ntlmv2_resp()
+ *
+ * This creates the NTLMv2 response as set in the ntlm type-3 message.
+ *
+ * Parameters:
+ *
+ * ntlmv2hash       [in] - The ntlmv2 hash (16 bytes)
+ * challenge_client [in] - The client nonce (8 bytes)
+ * ntlm             [in] - The ntlm data struct being used to read TargetInfo
+                           and Server challenge received in the type-2 message
+ * ntresp          [out] - The address where a pointer to newly allocated
+ *                         memory holding the NTLMv2 response.
+ * ntresp_len      [out] - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
+                                       unsigned char *challenge_client,
+                                       struct ntlmdata *ntlm,
+                                       unsigned char **ntresp,
+                                       unsigned int *ntresp_len)
+{
+/* NTLMv2 response structure :
+------------------------------------------------------------------------------
+0     HMAC MD5         16 bytes
+------BLOB--------------------------------------------------------------------
+16    Signature        0x01010000
+20    Reserved         long (0x00000000)
+24    Timestamp        LE, 64-bit signed value representing the number of
+                       tenths of a microsecond since January 1, 1601.
+32    Client Nonce     8 bytes
+40    Unknown          4 bytes
+44    Target Info      N bytes (from the type-2 message)
+44+N  Unknown          4 bytes
+------------------------------------------------------------------------------
+*/
+
+  unsigned char *ptr = NULL;
+  unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
+  long long tw;
+  CURLcode res = CURLE_OK;
+
+  /* Calculate the timestamp */
+  tw = ((long long)time(NULL) + 11644473600ULL) * 10000000ULL;
+
+  /* Calculate the response len */
+  *ntresp_len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
+
+  /* Allocate the response */
+  *ntresp = malloc(*ntresp_len);
+  if(!*ntresp)
+    return CURLE_OUT_OF_MEMORY;
+
+  ptr = *ntresp;
+  memset(ptr, 0, *ntresp_len);
+
+  /* Create the BLOB structure */
+  snprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
+           NTLMv2_BLOB_SIGNATURE
+           "%c%c%c%c",  /* Reserved = 0 */
+           0, 0, 0, 0);
+
+  memcpy(ptr + 24, &tw, 8); /*Re-Write this line for Big Endian*/
+  memcpy(ptr + 32, challenge_client, 8);
+  memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
+
+  /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
+  memcpy(ptr + 8, &ntlm->nonce[0], 8);
+  res = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
+                      NTLMv2_BLOB_LEN + 8, hmac_output);
+  if(res) {
+    Curl_safefree(*ntresp);
+    *ntresp_len = 0;
+    return res;
+  }
+
+  /* Concatenate the HMAC MD5 output  with the BLOB */
+  memcpy(ptr, hmac_output, NTLM_HMAC_MD5_LEN);
+
+  return res;
+}
+
+/*
+ * Curl_ntlm_core_mk_lmv2_resp()
+ *
+ * This creates the LMv2 response as used in the ntlm type-3 message.
+ *
+ * Parameters:
+ *
+ * ntlmv2hash        [in] - The ntlmv2 hash (16 bytes)
+ * challenge_client  [in] - The client nonce (8 bytes)
+ * challenge_client  [in] - The server challenge (8 bytes)
+ * lmresp           [out] - The LMv2 response (24 bytes)
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+                                      unsigned char *challenge_client,
+                                      unsigned char *challenge_server,
+                                      unsigned char *lmresp)
+{
+  unsigned char data[16];
+  unsigned char hmac_output[16];
+  CURLcode res = CURLE_OK;
+
+  memcpy(&data[0], challenge_server, 8);
+  memcpy(&data[8], challenge_client, 8);
+
+  res = Curl_hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
+  if(res)
+    return res;
+
+  /* Concatenate the HMAC MD5 output  with the client nonce */
+  memcpy(lmresp, hmac_output, 16);
+  memcpy(lmresp+16, challenge_client, 8);
+
+  return res;
+}
+
 #endif /* USE_NTRESPONSES */
 
 #endif /* USE_NTLM && !USE_WINDOWS_SSPI */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,6 +45,13 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         const char* header,
                                         struct ntlmdata* ntlm);
+
+/* This is to decode target info received in NTLM type-2 message */
+CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
+                                       unsigned char* buffer,
+                                       size_t size,
+                                       struct ntlmdata* ntlm);
+
 
 /* This is to clean up the ntlm data structure */
 #ifdef USE_WINDOWS_SSPI

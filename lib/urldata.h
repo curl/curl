@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -435,6 +435,8 @@ struct ntlmdata {
 #else
   unsigned int flags;
   unsigned char nonce[8];
+  void* target_info; /* TargetInfo received in the ntlm type-2 message */
+  unsigned int target_info_len;
 #endif
 };
 

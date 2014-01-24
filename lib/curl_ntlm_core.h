@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,9 +58,30 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
                                unsigned char *lmbuffer /* 21 bytes */);
 
 #if USE_NTRESPONSES
+CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
+                       const unsigned char *data, unsigned int datalen,
+                       unsigned char *output);
+
 CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
                                    const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
+
+CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
+                                       const char *domain, size_t domlen,
+                                       unsigned char *ntlmhash,
+                                       unsigned char *ntlmv2hash);
+
+CURLcode  Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
+                                        unsigned char *challenge_client,
+                                        struct ntlmdata *ntlm,
+                                        unsigned char **ntresp,
+                                        unsigned int *ntresp_len);
+
+CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+                                      unsigned char *challenge_client,
+                                      unsigned char *challenge_server,
+                                      unsigned char *lmresp);
+
 #endif
 
 #endif /* USE_NTLM && !USE_WINDOWS_SSPI */
