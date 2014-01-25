@@ -394,6 +394,20 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
   }
 }
 
+static void write32_le(const int value, unsigned char *buffer)
+{
+  buffer[0] = (char)(value & 0x000000FF);
+  buffer[1] = (char)((value & 0x0000FF00) >> 8);
+  buffer[2] = (char)((value & 0x00FF0000) >> 16);
+  buffer[3] = (char)((value & 0xFF000000) >> 24);
+}
+
+static void write64_le(const long long value, unsigned char *buffer)
+{
+  write32_le((long)value, buffer);
+  write32_le((long)(value >> 32), buffer + 4);
+}
+
 /*
  * Set up nt hashed passwords
  */
@@ -558,7 +572,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
            "%c%c%c%c",  /* Reserved = 0 */
            0, 0, 0, 0);
 
-  memcpy(ptr + 24, &tw, 8); /*Re-Write this line for Big Endian*/
+  write64_le(tw, ptr + 24);
   memcpy(ptr + 32, challenge_client, 8);
   memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
 
