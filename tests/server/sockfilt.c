@@ -92,9 +92,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef USE_WINSOCK
-#include <conio.h>  /* for _kbhit() used in select_ws() */
-#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
@@ -514,16 +511,29 @@ static void lograw(unsigned char *buffer, ssize_t len)
  * http://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
  * http://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
  */
+DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
+{
+  HANDLE handle;
+  DWORD mode;
+
+  handle = (HANDLE) lpParameter;
+
+  if(GetConsoleMode(handle, &mode))
+    WaitForSingleObjectEx(handle, INFINITE, FALSE);
+  else
+    ReadFile(handle, NULL, 0, &mode, NULL);
+
+  return 0;
+}
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
-  long networkevents;
-  DWORD milliseconds, wait, idx, mode, avail, events, inputs;
+  DWORD milliseconds, wait, idx, mode;
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
-  INPUT_RECORD *inputrecords;
   HANDLE handle, *handles;
   curl_socket_t sock, *fdarr, *wsasocks;
+  long networkevents;
   int error, fds;
   DWORD nfd = 0, wsa = 0;
   int ret = 0;
@@ -586,7 +596,10 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     if(networkevents) {
       fdarr[nfd] = curlx_sitosk(fds);
       if(fds == fileno(stdin)) {
-        handles[nfd] = GetStdHandle(STD_INPUT_HANDLE);
+        handles[nfd] = CreateThread(NULL, 0,
+                                    &select_ws_stdin_wait_thread,
+                                    GetStdHandle(STD_INPUT_HANDLE),
+                                    0, NULL);
       }
       else if(fds == fileno(stdout)) {
         handles[nfd] = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -634,46 +647,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     /* check if the current internal handle was triggered */
     if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) <= idx &&
        WaitForSingleObjectEx(handle, 0, FALSE) == WAIT_OBJECT_0) {
-      /* try to handle the event with STD* handle functions */
+      /* first handle stdin, stdout and stderr */
       if(fds == fileno(stdin)) {
-        /* check if there is no data in the input buffer */
-        if(!stdin->_cnt) {
-          /* check if we are getting data from a PIPE */
-          if(!GetConsoleMode(handle, &mode)) {
-            /* check if there is no data from PIPE input */
-            if(!PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL))
-              avail = 0;
-            if(!avail) {
-              FD_CLR(sock, readfds);
-              /* reduce CPU load */
-              Sleep(10);
-            }
-          } /* check if there is no data from keyboard input */
-          else if (!_kbhit()) {
-            /* check if there are INPUT_RECORDs in the input buffer */
-            if(GetNumberOfConsoleInputEvents(handle, &events)) {
-              if(events > 0) {
-                /* remove INPUT_RECORDs from the input buffer */
-                inputrecords = (INPUT_RECORD*)malloc(events *
-                                                     sizeof(INPUT_RECORD));
-                if(inputrecords) {
-                  if(!ReadConsoleInput(handle, inputrecords,
-                                       events, &inputs))
-                    inputs = 0;
-                  free(inputrecords);
-                }
-
-                /* check if we got all inputs, otherwise clear buffer */
-                if(events != inputs)
-                  FlushConsoleInputBuffer(handle);
-              }
-            }
-
-            /* remove from descriptor set since there is no real data */
-            FD_CLR(sock, readfds);
-          }
-        }
-
         /* stdin is never ready for write or exceptional */
         FD_CLR(sock, writefds);
         FD_CLR(sock, exceptfds);
