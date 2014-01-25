@@ -357,22 +357,19 @@ class PipelineRequestHandler(SocketServer.BaseRequestHandler):
     self._send_buffer = ""
     self._start_time = time.time()
     try:
-      poller = select.epoll(sizehint=1)
-      poller.register(self.request.fileno(), select.EPOLLIN)
       while not self._response_builder.processed_end or self._send_buffer:
 
         time_left = self._GetTimeUntilTimeout()
         time_until_next_send = self._GetTimeUntilNextSend()
         max_poll_time = min(time_left, time_until_next_send) + MIN_POLL_TIME
 
-        events = None
+        rlist, wlist, xlist = [], [], []
+        fileno = self.request.fileno()
         if max_poll_time > 0:
+          rlist.append(fileno)
           if self._send_buffer:
-            poller.modify(self.request.fileno(),
-                          select.EPOLLIN | select.EPOLLOUT)
-          else:
-            poller.modify(self.request.fileno(), select.EPOLLIN)
-          events = poller.poll(timeout=max_poll_time)
+            wlist.append(fileno)
+          rlist, wlist, xlist = select.select(rlist, wlist, xlist, max_poll_time)
 
         if self._GetTimeUntilTimeout() <= 0:
           return
@@ -382,22 +379,21 @@ class PipelineRequestHandler(SocketServer.BaseRequestHandler):
           self._num_written = self._num_queued
           self._last_queued_time = 0
 
-        for fd, mode in events:
-          if mode & select.EPOLLIN:
-            new_data = self.request.recv(MAX_REQUEST_SIZE, socket.MSG_DONTWAIT)
-            if not new_data:
-              return
-            new_requests = self._request_parser.ParseAdditionalData(new_data)
-            self._response_builder.QueueRequests(
-                new_requests, self._request_parser.were_all_requests_http_1_1)
-            self._num_queued += len(new_requests)
-            self._last_queued_time = time.time()
-          elif mode & select.EPOLLOUT:
-            num_bytes_sent = self.request.send(self._send_buffer[0:4096])
-            self._send_buffer = self._send_buffer[num_bytes_sent:]
-            time.sleep(0.05)
-          else:
+        if fileno in rlist:
+          self.request.setblocking(False)
+          new_data = self.request.recv(MAX_REQUEST_SIZE)
+          self.request.setblocking(True)
+          if not new_data:
             return
+          new_requests = self._request_parser.ParseAdditionalData(new_data)
+          self._response_builder.QueueRequests(
+              new_requests, self._request_parser.were_all_requests_http_1_1)
+          self._num_queued += len(new_requests)
+          self._last_queued_time = time.time()
+        elif fileno in wlist:
+          num_bytes_sent = self.request.send(self._send_buffer[0:4096])
+          self._send_buffer = self._send_buffer[num_bytes_sent:]
+          time.sleep(0.05)
 
     except RequestTooLargeError as e:
       self.request.send(self._response_builder.WriteError(
@@ -415,7 +411,7 @@ class PipelineRequestHandler(SocketServer.BaseRequestHandler):
     self.request.close()
 
 
-class PipelineServer(SocketServer.ForkingMixIn, SocketServer.TCPServer):
+class PipelineServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
   pass
 
 
