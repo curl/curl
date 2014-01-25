@@ -3,10 +3,11 @@
 <keywords>
 HTTP
 HTTP CONNECT
+HTTP proxy
 IPv6
 </keywords>
-
 </info>
+
 #
 # Server-side
 <reply>

@@ -3,11 +3,13 @@
 <keywords>
 HTTP
 HTTP GET
+HTTP proxy
 cookies
 cookiejar
 delete expired cookie
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>
