@@ -54,6 +54,9 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 ftp
 http-proxy
 </server>
+<features>
+http
+</features>
  <name>
 FTP LIST tunneled through HTTP proxy
  </name>

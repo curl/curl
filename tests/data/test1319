@@ -51,6 +51,9 @@ body
 pop3
 http-proxy
 </server>
+<features>
+http
+</features>
  <name>
 POP3 fetch tunneled through HTTP proxy
  </name>

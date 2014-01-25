@@ -47,6 +47,9 @@ body
 imap
 http-proxy
 </server>
+<features>
+http
+</features>
  <name>
 IMAP FETCH tunneled through HTTP proxy
  </name>

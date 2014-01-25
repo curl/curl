@@ -25,8 +25,11 @@ smtp: sure hit me
 smtp
 http-proxy
 </server>
+<features>
+http
+</features>
  <name>
-SMTP send tunneled trough HTTP proxy
+SMTP send tunneled through HTTP proxy
  </name>
 <stdin>
 From: different

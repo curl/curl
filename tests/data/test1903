@@ -32,6 +32,9 @@ Handle 1 Completed with status 0
 <server>
 http-pipe
 </server>
+<features>
+http
+</features>
 <tool>
 lib1900
 </tool>
