@@ -2160,6 +2160,9 @@ my @ftpdir=("total 20\r\n",
         my @data = getpart("reply", "data");
         for(@data) {
             my $send = $_;
+            # convert all \n to \r\n for ASCII transfer
+            $send =~ s/\r\n/\n/g;
+            $send =~ s/\n/\r\n/g;
             logmsg "send $send as data\n";
             senddata $send;
         }
