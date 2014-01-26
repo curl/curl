@@ -993,6 +993,7 @@ REDUCING SIZE
      --disable-verbose (eliminates debugging strings and error code strings)
      --enable-hidden-symbols (eliminates unneeded symbols in the shared library)
      --without-libidn (disables support for the libidn DNS library)
+     --without-librtmp (disables support for RTMP)
      --without-ssl (disables support for SSL/TLS)
      --without-zlib (disables support for on-the-fly decompression)
 
@@ -1011,9 +1012,9 @@ REDUCING SIZE
    .comment section).
 
    Using these techniques it is possible to create a basic HTTP-only shared
-   libcurl library for i386 Linux platforms that is only 106 KiB in size, and
-   an FTP-only library that is 108 KiB in size (as of libcurl version 7.27.0,
-   using gcc 4.6.3).
+   libcurl library for i386 Linux platforms that is only 114 KiB in size, and
+   an FTP-only library that is 115 KiB in size (as of libcurl version 7.34.1,
+   using gcc 4.8.2).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size than dynamically linking.
