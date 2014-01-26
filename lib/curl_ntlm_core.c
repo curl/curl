@@ -547,6 +547,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 ------------------------------------------------------------------------------
 */
 
+  unsigned int len = 0;
   unsigned char *ptr = NULL;
   unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
   long long tw;
@@ -556,15 +557,14 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   tw = ((long long)time(NULL) + 11644473600ULL) * 10000000ULL;
 
   /* Calculate the response len */
-  *ntresp_len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
+  len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
 
   /* Allocate the response */
-  *ntresp = malloc(*ntresp_len);
-  if(!*ntresp)
+  ptr = malloc(len);
+  if(!ptr)
     return CURLE_OUT_OF_MEMORY;
 
-  ptr = *ntresp;
-  memset(ptr, 0, *ntresp_len);
+  memset(ptr, 0, len);
 
   /* Create the BLOB structure */
   snprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
@@ -581,13 +581,16 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   res = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
                       NTLMv2_BLOB_LEN + 8, hmac_output);
   if(res) {
-    Curl_safefree(*ntresp);
-    *ntresp_len = 0;
+    Curl_safefree(ptr);
     return res;
   }
 
   /* Concatenate the HMAC MD5 output  with the BLOB */
   memcpy(ptr, hmac_output, NTLM_HMAC_MD5_LEN);
+
+  /* Return the response */
+  *ntresp = ptr;
+  *ntresp_len = len;
 
   return res;
 }
