@@ -3616,7 +3616,8 @@ sub singletest {
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @actual;
+            map s/\r\n/\n/g, @validstdout;
+            map s/\n/\r\n/g, @validstdout;
         }
 
         if($hash{'nonewline'}) {
@@ -3644,7 +3645,8 @@ sub singletest {
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @out;
+            map s/\r\n/\n/g, @reply;
+            map s/\n/\r\n/g, @reply;
         }
 
         $res = compare($testnum, $testname, "data", \@out, \@reply);
@@ -3788,9 +3790,9 @@ sub singletest {
 
             my $filemode=$hash{'mode'};
             if($filemode && ($filemode eq "text") && $has_textaware) {
-                # text mode when running on windows means adding an extra
-                # strip expression
-                push @stripfile, "s/\r\n/\n/";
+                # text mode when running on windows: fix line endings
+                map s/\r\n/\n/g, @outfile;
+                map s/\n/\r\n/g, @outfile;
             }
 
             my $strip;
