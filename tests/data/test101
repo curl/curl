@@ -10,7 +10,7 @@ LIST
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
-<datacheck>
+<datacheck mode="text">
 total 20
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 .
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 ..
