@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -511,7 +511,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
  * http://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
  * http://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
  */
-DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
+static DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
 {
   HANDLE handle;
   DWORD mode;
@@ -528,7 +528,7 @@ DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
-  DWORD milliseconds, wait, idx, mode;
+  DWORD milliseconds, wait, idx;
   WSAEVENT wsaevent, *wsaevents;
   WSANETWORKEVENTS wsanetevents;
   HANDLE handle, *handles;
