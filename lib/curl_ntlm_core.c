@@ -554,7 +554,11 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   CURLcode res = CURLE_OK;
 
   /* Calculate the timestamp */
+#if defined(DEBUGBUILD)
+  tw = 11644473600ULL * 10000000ULL;
+#else
   tw = ((long long)time(NULL) + 11644473600ULL) * 10000000ULL;
+#endif
 
   /* Calculate the response len */
   len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
