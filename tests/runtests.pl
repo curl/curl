@@ -3147,14 +3147,19 @@ sub singletest {
     my @reply = getpart("reply", "data");
     my @replycheck = getpart("reply", "datacheck");
 
+    my %replyattr = getpartattr("reply", "data");
+    my %replycheckattr = getpartattr("reply", "datacheck");
+
     if (@replycheck) {
         # we use this file instead to check the final output against
 
-        my %hash = getpartattr("reply", "datacheck");
-        if($hash{'nonewline'}) {
+        if($replycheckattr{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the datacheck
             chomp($replycheck[$#replycheck]);
+        }
+        if($replycheckattr{'mode'}) {
+            $replyattr{'mode'} = $replycheckattr{'mode'};
         }
 
         @reply=@replycheck;
@@ -3636,13 +3641,11 @@ sub singletest {
         $ok .= "-"; # stdout not checked
     }
 
-    my %replyattr = getpartattr("reply", "data");
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
-        my %hash = getpartattr("reply", "data");
         # get the mode attribute
-        my $filemode=$hash{'mode'};
+        my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
             # text mode when running on windows: fix line endings
             map s/\r\n/\n/g, @reply;
