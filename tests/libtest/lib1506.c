@@ -32,13 +32,13 @@
 int test(char *URL)
 {
   int res = 0;
-  CURL *curl[NUM_HANDLES];
+  CURL *curl[NUM_HANDLES] = {0};
   int running;
   CURLM *m = NULL;
   int i;
   char target_url[256];
   char dnsentry[256];
-  struct curl_slist *slist = NULL;
+  struct curl_slist *slist = NULL, *slist2;
   char *port = libtest_arg3;
   char *address = libtest_arg2;
 
@@ -48,11 +48,13 @@ int test(char *URL)
   for(i=0; i < NUM_HANDLES; i++) {
     sprintf(dnsentry, "server%d.example.com:%s:%s", i + 1, port, address);
     printf("%s\n", dnsentry);
-    slist = curl_slist_append(slist, dnsentry);
+    slist2 = curl_slist_append(slist, dnsentry);
+    if(!slist2) {
+      fprintf(stderr, "curl_slist_append() failed\n");
+      goto test_cleanup;
+    }
+    slist = slist2;
   }
-
-  for(i=0; i < NUM_HANDLES; i++)
-    curl[i] = NULL;
 
   start_test_timing();
 

@@ -63,21 +63,18 @@ static long tvdiff(struct timeval newer, struct timeval older)
 
 int test(char *URL)
 {
-   CURL *curl;
-   CURLM *mcurl;
+   int res = 0;
+   CURL *curl = NULL;
+   CURLM *mcurl = NULL;
    int still_running = 1;
    struct timeval mp_start;
    struct curl_slist* rcpt_list = NULL;
 
    curl_global_init(CURL_GLOBAL_DEFAULT);
 
-   curl = curl_easy_init();
-   if(!curl)
-     return 1;
+   easy_init(curl);
 
-   mcurl = curl_multi_init();
-   if(!mcurl)
-     return 2;
+   multi_init(mcurl);
 
    rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
    /* more addresses can be added here
@@ -94,7 +91,7 @@ int test(char *URL)
    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   curl_multi_add_handle(mcurl, curl);
+   multi_add_handle(mcurl, curl);
 
    mp_start = tvnow();
 
@@ -157,12 +154,15 @@ int test(char *URL)
     }
   }
 
+test_cleanup:
+
   curl_slist_free_all(rcpt_list);
   curl_multi_remove_handle(mcurl, curl);
   curl_multi_cleanup(mcurl);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return 0;
+
+  return res;
 }
 
 
