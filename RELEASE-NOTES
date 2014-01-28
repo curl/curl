@@ -1,4 +1,4 @@
-Curl and libcurl 7.34.1
+Curl and libcurl 7.35.0
 
  Public curl releases:         137
  Command line options:         161
@@ -16,6 +16,8 @@ This release includes the following changes:
  o makefile: Added support for VC7, VC11 and VC12
 
 This release includes the following bugfixes:
+
+ o SECURITY ADVISORY: re-use of wrong HTTP NTLM connection [25]
 
  o curl_easy_setopt: Fixed OAuth 2.0 Bearer option name [1]
  o pop3: Fixed APOP being determined by CAPA response rather than by timestamp
@@ -58,6 +60,9 @@ This release includes the following bugfixes:
  o multi: Fixed a memory leak on OOM condition
  o netrc: Fixed a memory and file descriptor leak on OOM
  o getpass: fix password parsing from console [22]
+ o TFTP: fix crash on time-out [23]
+ o hostip: don't remove DNS entries that are in use [24]
+ o tests: lots of tests fixed to pass the OOM torture tests
 
 This release includes the following known bugs:
 
@@ -68,11 +73,11 @@ advice from friends like these:
 
   Abram Pousada, Barry Abrahamson, Björn Stenberg, Cédric Deltheil, Chen Prog,
   Christian Weisgerber, Colin Hogben, Dan Fandrich, Daniel Stenberg,
-  Fabian Frank, Guenter Knauf, He Qin, Iida Yosiaki, Jeff Hodges,
-  Justin Maggard, Leif W, Luke Dashjr, Maks Naumov, Marc Hoersken,
+  Fabian Frank, Glenn Sheridan, Guenter Knauf, He Qin, Iida Yosiaki,
+  Jeff Hodges, Justin Maggard, Leif W, Luke Dashjr, Maks Naumov, Marc Hoersken,
   Michael Osipov, Michal Górny and Anthony G. Basile, Mohammad AlSaleh,
-  Nick Zitzmann, Paras S, Petr Novak, Priyanka Shah, Steve Holme,
-  Tobias Markus, Viktor Szakáts,
+  Nick Zitzmann, Paras Sethia, Petr Novak, Priyanka Shah, Romulo A. Ceccon,
+  Steve Holme, Tobias Markus, Viktor Szakáts, Yehezkel Horowitz, Yingwei Liu
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -100,3 +105,6 @@ References to bug reports and discussions on issues:
  [20] = http://curl.haxx.se/mail/lib-2014-01/0130.html
  [21] = http://curl.haxx.se/mail/lib-2014-01/0103.html
  [22] = https://github.com/bagder/curl/pull/87
+ [23] = http://curl.haxx.se/mail/lib-2014-01/0246.html
+ [24] = http://curl.haxx.se/bug/view.cgi?id=1327
+ [25] = http://curl.haxx.se/docs/adv_20140129.html
