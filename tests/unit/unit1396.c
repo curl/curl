@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+CURL *hnd;
+
 static CURLcode unit_setup(void)
 {
   return CURLE_OK;
@@ -28,6 +30,8 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
+  if (hnd)
+    curl_easy_cleanup(hnd);
 }
 
 struct test {
@@ -40,7 +44,7 @@ struct test {
 UNITTEST_START
 {
   /* unescape, this => that */
-  struct test list1[]={
+  const struct test list1[]={
     {"%61", 3, "a", 1},
     {"%61a", 4, "aa", 2},
     {"%61b", 4, "ab", 2},
@@ -56,7 +60,7 @@ UNITTEST_START
     {NULL, 0, NULL, 0} /* end of list marker */
   };
   /* escape, this => that */
-  struct test list2[]={
+  const struct test list2[]={
     {"a", 1, "a", 1},
     {"/", 1, "%2F", 3},
     {"a=b", 3, "a%3Db", 5},
@@ -70,16 +74,16 @@ UNITTEST_START
     {NULL, 0, NULL, 0} /* end of list marker */
   };
   int i;
-  CURL *hnd;
 
   hnd = curl_easy_init();
+  abort_unless(hnd != NULL, "returned NULL!");
   for(i=0; list1[i].in; i++) {
     int outlen;
     char *out = curl_easy_unescape(hnd,
                                    list1[i].in, list1[i].inlen,
                                    &outlen);
 
-    fail_unless(out != NULL, "returned NULL!");
+    abort_unless(out != NULL, "returned NULL!");
     fail_unless(outlen == list1[i].outlen, "wrong output length returned");
     fail_unless(!memcmp(out, list1[i].out, list1[i].outlen),
                 "bad output data returned");
@@ -90,10 +94,11 @@ UNITTEST_START
   }
 
   for(i=0; list2[i].in; i++) {
+    int outlen;
     char *out = curl_easy_escape(hnd, list2[i].in, list2[i].inlen);
-    int outlen = (int)strlen(out);
+    abort_unless(out != NULL, "returned NULL!");
 
-    fail_unless(out != NULL, "returned NULL!");
+    outlen = (int)strlen(out);
     fail_unless(outlen == list2[i].outlen, "wrong output length returned");
     fail_unless(!memcmp(out, list2[i].out, list2[i].outlen),
                 "bad output data returned");
@@ -102,8 +107,5 @@ UNITTEST_START
 
     curl_free(out);
   }
-
-  curl_easy_cleanup(hnd);
-
 }
 UNITTEST_STOP
