@@ -14,7 +14,6 @@ This release includes the following changes:
  o TheArtOfHttpScripting: major update, converted layout and more
  o mprintf: Added support for I, I32 and I64 size specifiers
  o makefile: Added support for VC7, VC11 and VC12
- o 
 
 This release includes the following bugfixes:
 
@@ -56,6 +55,9 @@ This release includes the following bugfixes:
  o HTTP POST: omit Content-Length if data size is unknown [21]
  o GnuTLS: disable insecure ciphers
  o GnuTLS: honor --slv2 and the --tlsv1[.N] switches
+ o multi: Fixed a memory leak on OOM condition
+ o netrc: Fixed a memory and file descriptor leak on OOM
+ o getpass: fix password parsing from console [22]
 
 This release includes the following known bugs:
 
@@ -67,9 +69,10 @@ advice from friends like these:
   Abram Pousada, Barry Abrahamson, Björn Stenberg, Cédric Deltheil, Chen Prog,
   Christian Weisgerber, Colin Hogben, Dan Fandrich, Daniel Stenberg,
   Fabian Frank, Guenter Knauf, He Qin, Iida Yosiaki, Jeff Hodges,
-  Justin Maggard, Leif W, Luke Dashjr, Marc Hoersken, Michael Osipov,
-  Michal Górny and Anthony G. Basile, Mohammad AlSaleh, Nick Zitzmann, Paras S,
-  Petr Novak, Priyanka Shah, Steve Holme, Tobias Markus, Viktor Szakáts,
+  Justin Maggard, Leif W, Luke Dashjr, Maks Naumov, Marc Hoersken,
+  Michael Osipov, Michal Górny and Anthony G. Basile, Mohammad AlSaleh,
+  Nick Zitzmann, Paras S, Petr Novak, Priyanka Shah, Steve Holme,
+  Tobias Markus, Viktor Szakáts,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -96,3 +99,4 @@ References to bug reports and discussions on issues:
  [19] = http://curl.haxx.se/mail/archive-2014-01/0000.html
  [20] = http://curl.haxx.se/mail/lib-2014-01/0130.html
  [21] = http://curl.haxx.se/mail/lib-2014-01/0103.html
+ [22] = https://github.com/bagder/curl/pull/87
