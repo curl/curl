@@ -5176,7 +5176,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(data->set.str[STRING_BEARER]) {
     conn->xoauth2_bearer = strdup(data->set.str[STRING_BEARER]);
     if(!conn->xoauth2_bearer) {
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
