@@ -31,17 +31,24 @@ static CURLcode unit_setup(void)
 {
   password = strdup("");
   login = strdup("");
+  if (!password || !login) {
+	  Curl_safefree(password);
+	  Curl_safefree(login);
+	  return CURLE_OUT_OF_MEMORY;
+  }
   return CURLE_OK;
 }
 
 static void unit_stop(void)
 {
+  Curl_safefree(password);
+  Curl_safefree(login);
 }
 
 UNITTEST_START
   int result;
 
-  static const char* filename1 = "log/netrc1304";
+  static const char* const filename1 = "log/netrc1304";
   memcpy(filename, filename1, strlen(filename1));
 
   /*
@@ -49,7 +56,9 @@ UNITTEST_START
    */
   result = Curl_parsenetrc("test.example.com", &login, &password, filename);
   fail_unless(result == 1, "Host not found should return 1");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(login[0] == 0, "login should not have been changed");
 
   /*
@@ -57,9 +66,12 @@ UNITTEST_START
    */
   free(login);
   login = strdup("me");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should be found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "me", 2) == 0, "login should not have been changed");
 
   /*
@@ -67,9 +79,12 @@ UNITTEST_START
    */
   free(login);
   login = strdup("me");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("test.example.com", &login, &password, filename);
   fail_unless(result == 1, "Host should be found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "me", 2) == 0, "login should not have been changed");
 
   /*
@@ -78,9 +93,12 @@ UNITTEST_START
    */
   free(login);
   login = strdup("admi");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should be found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "admi", 4) == 0, "login should not have been changed");
 
   /*
@@ -89,9 +107,12 @@ UNITTEST_START
    */
   free(login);
   login = strdup("adminn");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should be found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "adminn", 6) == 0, "login should not have been changed");
 
   /*
@@ -100,10 +121,13 @@ UNITTEST_START
    */
   free(login);
   login = strdup("");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should have been found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(strncmp(password, "passwd", 6) == 0,
               "password should be 'passwd'");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "admin", 5) == 0, "login should be 'admin'");
 
   /*
@@ -112,10 +136,13 @@ UNITTEST_START
    */
   free(password);
   password = strdup("");
+  abort_unless(password != NULL, "returned NULL!");
   result = Curl_parsenetrc("example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should have been found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(strncmp(password, "passwd", 6) == 0,
               "password should be 'passwd'");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "admin", 5) == 0, "login should be 'admin'");
 
   /*
@@ -124,12 +151,16 @@ UNITTEST_START
    */
   free(password);
   password = strdup("");
+  abort_unless(password != NULL, "returned NULL!");
   free(login);
   login = strdup("");
+  abort_unless(login != NULL, "returned NULL!");
   result = Curl_parsenetrc("curl.example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should have been found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(strncmp(password, "none", 4) == 0,
               "password should be 'none'");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
 
   /*
@@ -138,14 +169,14 @@ UNITTEST_START
    */
   free(password);
   password = strdup("");
+  abort_unless(password != NULL, "returned NULL!");
   result = Curl_parsenetrc("curl.example.com", &login, &password, filename);
   fail_unless(result == 0, "Host should have been found");
+  abort_unless(password != NULL, "returned NULL!");
   fail_unless(strncmp(password, "none", 4) == 0,
               "password should be 'none'");
+  abort_unless(login != NULL, "returned NULL!");
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
-
-  free(login);
-  free(password);
 
   /* TODO:
    * Test over the size limit password / login!
