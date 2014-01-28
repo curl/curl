@@ -38,12 +38,6 @@ int num_handles;
 int blacklist_num_servers;
 int blacklist_num_sites;
 
-int parse_url_file(const char *filename);
-void free_urls(void);
-int create_handles(void);
-void setup_handle(char *base_url, CURLM *m, int handlenum);
-void remove_handles(void);
-
 static size_t
 write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -54,7 +48,7 @@ write_callback(void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-int parse_url_file(const char *filename)
+static int parse_url_file(const char *filename)
 {
   FILE *f;
   int filetime;
@@ -91,21 +85,21 @@ int parse_url_file(const char *filename)
   return num_handles;
 }
 
-void free_urls(void)
+static void free_urls(void)
 {
   int i;
   for(i = 0;i < num_handles;i++) {
-    free(urlstring[i]);
+    Curl_safefree(urlstring[i]);
   }
   for(i = 0;i < blacklist_num_servers;i++) {
-    free(server_blacklist[i]);
+    Curl_safefree(server_blacklist[i]);
   }
   for(i = 0;i < blacklist_num_sites;i++) {
-    free(site_blacklist[i]);
+    Curl_safefree(site_blacklist[i]);
   }
 }
 
-int create_handles(void)
+static int create_handles(void)
 {
   int i;
 
@@ -115,7 +109,7 @@ int create_handles(void)
   return 0;
 }
 
-void setup_handle(char *base_url, CURLM *m, int handlenum)
+static void setup_handle(char *base_url, CURLM *m, int handlenum)
 {
   char urlbuf[256];
 
@@ -128,7 +122,7 @@ void setup_handle(char *base_url, CURLM *m, int handlenum)
   curl_multi_add_handle(m, handles[handlenum]);
 }
 
-void remove_handles(void)
+static void remove_handles(void)
 {
   int i;
 
@@ -155,7 +149,7 @@ int test(char *URL)
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  m = curl_multi_init();
+  multi_init(m);
 
   create_handles();
 
