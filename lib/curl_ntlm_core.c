@@ -404,8 +404,8 @@ static void write32_le(const int value, unsigned char *buffer)
 
 static void write64_le(const long long value, unsigned char *buffer)
 {
-  write32_le((long)value, buffer);
-  write32_le((long)(value >> 32), buffer + 4);
+  write32_le((int)value, buffer);
+  write32_le((int)(value >> 32), buffer + 4);
 }
 
 /*
