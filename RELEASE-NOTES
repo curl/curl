@@ -1,68 +1,19 @@
-Curl and libcurl 7.35.0
+Curl and libcurl 7.35.1
 
- Public curl releases:         137
+ Public curl releases:         138
  Command line options:         161
  curl_easy_setopt() options:   206
  Public functions in libcurl:  58
  Known libcurl bindings:       42
- Contributors:                 1104
+ Contributors:                 1123
 
 This release includes the following changes:
 
- o imap/pop3/smtp: Added support for SASL authentication downgrades
- o imap/pop3/smtp: Extended the login options to support multiple auth mechanisms
- o TheArtOfHttpScripting: major update, converted layout and more
- o mprintf: Added support for I, I32 and I64 size specifiers
- o makefile: Added support for VC7, VC11 and VC12
+ o 
 
 This release includes the following bugfixes:
 
- o SECURITY ADVISORY: re-use of wrong HTTP NTLM connection [25]
-
- o curl_easy_setopt: Fixed OAuth 2.0 Bearer option name [1]
- o pop3: Fixed APOP being determined by CAPA response rather than by timestamp
- o Curl_pp_readresp: zero terminate line [2]
- o FILE: don't wait due to CURLOPT_MAX_RECV_SPEED_LARGE [3]
- o docs: mention CURLOPT_MAX_RECV/SEND_SPEED_LARGE don't work for FILE://
- o pop3: Fixed auth preference not being honored when CAPA not supported
- o imap: Fixed auth preference not being honored when CAPABILITY not supported
- o threaded resolver: Use pthread_t * for curl_thread_t [4]
- o FILE: we don't support paused transfers using this protocol [5]
- o connect: Try all addresses in first connection attempt [6]
- o curl_easy_setopt.3: Added SMTP information to CURLOPT_INFILESIZE_LARGE
- o OpenSSL: Fix forcing SSLv3 connections [7]
- o openssl: allow explicit sslv2 selection [8]
- o FTP parselist: fix "total" parser [9]
- o conncache: fix possible dereference of null pointer
- o multi.c: fix possible dereference of null pointer
- o mk-ca-bundle: introduces -d and warns about using this script
- o ConnectionExists: fix NTLM check for new connection [10]
- o trynextip: fix build for non-IPV6 capable systems [11]
- o Curl_updateconninfo: don't do anything for UDP "connections" [12]
- o darwinssl: un-break Leopard build after PKCS#12 change [13]
- o threaded-resolver: never use NULL hints with getaddrinf [14]
- o multi_socket: remind app if timeout didn't run
- o OpenSSL: deselect weak ciphers by default [15]
- o error message: Sensible message on timeout when transfer size unknown [16]
- o curl_easy_setopt.3: mention how to unset CURLOPT_INFILESIZE*
- o win32: Fixed use of deprecated function 'GetVersionInfoEx' for VC12 [17]
- o configure: fix gssapi linking on HP-UX [18]
- o chunked-parser: abort on overflows, allow 64 bit chunks
- o chunked parsing: relax the CR strictness [19]
- o cookie: max-age fixes [20]
- o progress bar: always update when at 100%
- o progress bar: increase update frequency to 10Hz
- o tool: Fixed incorrect return code if command line parser runs out of memory
- o tool: Fixed incorrect return code if password prompting runs out of memory
- o HTTP POST: omit Content-Length if data size is unknown [21]
- o GnuTLS: disable insecure ciphers
- o GnuTLS: honor --slv2 and the --tlsv1[.N] switches
- o multi: Fixed a memory leak on OOM condition
- o netrc: Fixed a memory and file descriptor leak on OOM
- o getpass: fix password parsing from console [22]
- o TFTP: fix crash on time-out [23]
- o hostip: don't remove DNS entries that are in use [24]
- o tests: lots of tests fixed to pass the OOM torture tests
+ o 
 
 This release includes the following known bugs:
 
@@ -71,40 +22,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abram Pousada, Barry Abrahamson, Björn Stenberg, Cédric Deltheil, Chen Prog,
-  Christian Weisgerber, Colin Hogben, Dan Fandrich, Daniel Stenberg,
-  Fabian Frank, Glenn Sheridan, Guenter Knauf, He Qin, Iida Yosiaki,
-  Jeff Hodges, Justin Maggard, Leif W, Luke Dashjr, Maks Naumov, Marc Hoersken,
-  Michael Osipov, Michal Górny and Anthony G. Basile, Mohammad AlSaleh,
-  Nick Zitzmann, Paras Sethia, Petr Novak, Priyanka Shah, Romulo A. Ceccon,
-  Steve Holme, Tobias Markus, Viktor Szakáts, Yehezkel Horowitz, Yingwei Liu
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1313
- [2] = http://curl.haxx.se/mail/lib-2013-12/0113.html
- [3] = http://curl.haxx.se/bug/view.cgi?id=1312
- [4] = http://curl.haxx.se/bug/view.cgi?id=1314
- [5] = http://curl.haxx.se/bug/view.cgi?id=1286
- [6] = http://curl.haxx.se/bug/view.cgi?id=1315
- [7] = http://curl.haxx.se/mail/lib-2014-01/0002.html
- [8] = http://curl.haxx.se/mail/lib-2014-01/0013.html
- [9] = http://curl.haxx.se/mail/lib-2014-01/0019.html
- [10] = http://curl.haxx.se/mail/lib-2014-01/0046.html
- [11] = http://curl.haxx.se/bug/view.cgi?id=1322
- [12] = http://curl.haxx.se/mail/archive-2014-01/0016.html
- [13] = http://curl.haxx.se/mail/lib-2013-12/0150.html
- [14] = http://curl.haxx.se/mail/lib-2014-01/0061.html
- [15] = http://curl.haxx.se/bug/view.cgi?id=1323
- [16] = http://curl.haxx.se/mail/lib-2014-01/0115.html
- [17] = http://curl.haxx.se/mail/lib-2014-01/0134.html
- [18] = http://curl.haxx.se/bug/view.cgi?id=1321
- [19] = http://curl.haxx.se/mail/archive-2014-01/0000.html
- [20] = http://curl.haxx.se/mail/lib-2014-01/0130.html
- [21] = http://curl.haxx.se/mail/lib-2014-01/0103.html
- [22] = https://github.com/bagder/curl/pull/87
- [23] = http://curl.haxx.se/mail/lib-2014-01/0246.html
- [24] = http://curl.haxx.se/bug/view.cgi?id=1327
- [25] = http://curl.haxx.se/docs/adv_20140129.html
+ [1] = 
