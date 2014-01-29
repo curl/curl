@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -111,12 +111,13 @@ static ssize_t recv_callback(nghttp2_session *h2,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   ssize_t nread;
-  CURLcode rc = Curl_read_plain(conn->sock[0], (char *)buf, length, &nread);
+  CURLcode rc = Curl_read_plain(conn->sock[FIRSTSOCKET], (char *)buf, length,
+                                &nread);
   (void)h2;
   (void)flags;
 
   if(rc) {
-    failf(conn->data, "Failed recving HTTP2 data");
+    failf(conn->data, "Failed receiving HTTP2 data");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   if(!nread)
@@ -169,7 +170,7 @@ CURLcode Curl_http2_request(Curl_send_buffer *req,
   if(!conn->proto.httpc.h2) {
     /* The nghttp2 session is not yet setup, do it */
     int rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
-                                        &callbacks, &conn);
+                                        &callbacks, conn);
     if(rc) {
       failf(conn->data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
