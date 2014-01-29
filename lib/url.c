@@ -4805,12 +4805,16 @@ static CURLcode override_login(struct SessionHandle *data,
 
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc != CURL_NETRC_IGNORED) {
-    if(Curl_parsenetrc(conn->host.name,
-                       userp, passwdp,
-                       data->set.str[STRING_NETRC_FILE])) {
+    int ret = Curl_parsenetrc(conn->host.name,
+                              userp, passwdp,
+                              data->set.str[STRING_NETRC_FILE]);
+    if(ret > 0) {
       infof(data, "Couldn't find host %s in the "
             DOT_CHAR "netrc file; using defaults\n",
             conn->host.name);
+    }
+    else if(ret < 0 ) {
+      return CURLE_OUT_OF_MEMORY;
     }
     else {
       /* set bits.netrc TRUE to remember that we got the name from a .netrc
