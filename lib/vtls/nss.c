@@ -125,7 +125,6 @@ static const cipher_s cipherlist[] = {
   /* AES ciphers. */
   {"rsa_aes_128_sha",            TLS_RSA_WITH_AES_128_CBC_SHA},
   {"rsa_aes_256_sha",            TLS_RSA_WITH_AES_256_CBC_SHA},
-#ifdef NSS_ENABLE_ECC
   /* ECC ciphers. */
   {"ecdh_ecdsa_null_sha",        TLS_ECDH_ECDSA_WITH_NULL_SHA},
   {"ecdh_ecdsa_rc4_128_sha",     TLS_ECDH_ECDSA_WITH_RC4_128_SHA},
@@ -152,7 +151,6 @@ static const cipher_s cipherlist[] = {
   {"ecdh_anon_3des_sha",         TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA},
   {"ecdh_anon_aes_128_sha",      TLS_ECDH_anon_WITH_AES_128_CBC_SHA},
   {"ecdh_anon_aes_256_sha",      TLS_ECDH_anon_WITH_AES_256_CBC_SHA},
-#endif
 };
 
 /* following ciphers are new in NSS 3.4 and not enabled by default, therefore

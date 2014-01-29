@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o nss: allow to use ECC ciphers if NSS implements them [1]
  o 
 
 This release includes the following known bugs:
@@ -28,4 +29,4 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = https://bugzilla.redhat.com/1058776
