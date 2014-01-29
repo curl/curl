@@ -227,6 +227,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   rc = nghttp2_session_recv(conn->proto.httpc.h2);
 
   if(rc < 0) {
+    failf(conn->data, "nghttp2_session_recv() returned %d\n",
+          rc);
     *err = CURLE_RECV_ERROR;
   }
   return 0;
