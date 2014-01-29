@@ -89,7 +89,7 @@ static ssize_t send_callback(nghttp2_session *h2,
   struct connectdata *conn = (struct connectdata *)userp;
   ssize_t written;
   CURLcode rc =
-    Curl_write(conn, conn->sock[0], data, length, &written);
+    Curl_write(conn, conn->sock[FIRSTSOCKET], data, length, &written);
   (void)h2;
   (void)flags;
 
