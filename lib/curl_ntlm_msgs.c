@@ -256,8 +256,8 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
-                                        const char* header,
-                                        struct ntlmdata* ntlm)
+                                        const char *header,
+                                        struct ntlmdata *ntlm)
 {
 #ifndef USE_WINDOWS_SSPI
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
@@ -363,8 +363,7 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 #ifndef USE_WINDOWS_SSPI
 /* copy the source to the destination and fill in zeroes in every
    other destination byte! */
-static void unicodecpy(unsigned char *dest,
-                       const char *src, size_t length)
+static void unicodecpy(unsigned char *dest, const char *src, size_t length)
 {
   size_t i;
   for(i = 0; i < length; i++) {
