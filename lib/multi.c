@@ -551,9 +551,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
         Curl_getoff_all_pipelines(data, data->easy_conn);
     }
 
+    Curl_wildcard_dtor(&data->wildcard);
+
     /* as this was using a shared connection cache we clear the pointer
        to that since we're not part of that multi handle anymore */
-      data->state.conn_cache = NULL;
+    data->state.conn_cache = NULL;
 
     /* change state without using multistate(), only to make singlesocket() do
        what we want */
