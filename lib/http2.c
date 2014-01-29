@@ -141,8 +141,6 @@ static const nghttp2_session_callbacks callbacks = {
   NULL,
   NULL,
   NULL,
-  NULL,
-  NULL,
   NULL
 };
 
