@@ -130,9 +130,110 @@ static ssize_t recv_callback(nghttp2_session *h2,
   return nread;
 }
 
+static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
+                         void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "on_frame_recv() was called with header %x\n",
+        frame->hd.type);
+  return 0;
+}
+
+static int on_invalid_frame_recv(nghttp2_session *session,
+                                 const nghttp2_frame *frame,
+                                 nghttp2_error_code error_code, void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "on_invalid_frame_recv() was called, error_code = %d\n",
+        error_code);
+  return 0;
+}
+
+static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
+                              int32_t stream_id,
+                              const uint8_t *data, size_t len, void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)flags;
+  (void)stream_id;
+  (void)data;
+  infof(conn->data, "on_data_chunk_recv() was called with len = %u\n", len);
+  return 0;
+}
+
+static int before_frame_send(nghttp2_session *session,
+                             const nghttp2_frame *frame,
+                             void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "before_frame_send() was called\n");
+  return 0;
+}
+static int on_frame_send(nghttp2_session *session,
+                         const nghttp2_frame *frame,
+                         void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "on_frame_send() was called\n");
+  return 0;
+}
+static int on_frame_not_send(nghttp2_session *session,
+                             const nghttp2_frame *frame,
+                             int lib_error_code, void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "on_frame_not_send() was called, lib_error_code = %d\n",
+        lib_error_code);
+  return 0;
+}
+static int on_stream_close(nghttp2_session *session, int32_t stream_id,
+                           nghttp2_error_code error_code, void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)stream_id;
+  infof(conn->data, "on_stream_close() was called, error_code = %d\n",
+        error_code);
+  return 0;
+}
+
+static int on_unknown_frame_recv(nghttp2_session *session,
+                                 const uint8_t *head, size_t headlen,
+                                 const uint8_t *payload, size_t payloadlen,
+                                 void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)head;
+  (void)headlen;
+  (void)payload;
+  (void)payloadlen;
+  infof(conn->data, "on_unknown_frame_recv() was called\n");
+  return 0;
+}
+static int on_begin_headers(nghttp2_session *session,
+                            const nghttp2_frame *frame, void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+  infof(conn->data, "on_begin_headers() was called\n");
+  return 0;
+}
 
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
-static int got_header(nghttp2_session *session, const nghttp2_frame *frame,
+static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                       const uint8_t *name, size_t namelen,
                       const uint8_t *value, size_t valuelen,
                       void *userp)
@@ -162,18 +263,18 @@ static int got_header(nghttp2_session *session, const nghttp2_frame *frame,
  * This is all callbacks nghttp2 calls
  */
 static const nghttp2_session_callbacks callbacks = {
-  send_callback, /* nghttp2_send_callback */
-  recv_callback, /* nghttp2_recv_callback */
-  NULL,          /* nghttp2_on_frame_recv_callback */
-  NULL,          /* nghttp2_on_invalid_frame_recv_callback */
-  NULL,          /* nghttp2_on_data_chunk_recv_callback */
-  NULL,          /* nghttp2_before_frame_send_callback */
-  NULL,          /* nghttp2_on_frame_send_callback */
-  NULL,          /* nghttp2_on_frame_not_send_callback */
-  NULL,          /* nghttp2_on_stream_close_callback */
-  NULL,          /* nghttp2_on_unknown_frame_recv_callback */
-  NULL,          /* nghttp2_on_begin_headers_callback */
-  got_header     /* nghttp2_on_header_callback */
+  send_callback,         /* nghttp2_send_callback */
+  recv_callback,         /* nghttp2_recv_callback */
+  on_frame_recv,         /* nghttp2_on_frame_recv_callback */
+  on_invalid_frame_recv, /* nghttp2_on_invalid_frame_recv_callback */
+  on_data_chunk_recv,    /* nghttp2_on_data_chunk_recv_callback */
+  before_frame_send,     /* nghttp2_before_frame_send_callback */
+  on_frame_send,         /* nghttp2_on_frame_send_callback */
+  on_frame_not_send,     /* nghttp2_on_frame_not_send_callback */
+  on_stream_close,       /* nghttp2_on_stream_close_callback */
+  on_unknown_frame_recv, /* nghttp2_on_unknown_frame_recv_callback */
+  on_begin_headers,      /* nghttp2_on_begin_headers_callback */
+  on_header              /* nghttp2_on_header_callback */
 };
 
 /*
