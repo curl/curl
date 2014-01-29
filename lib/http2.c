@@ -130,22 +130,50 @@ static ssize_t recv_callback(nghttp2_session *h2,
   return nread;
 }
 
+
+/* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
+static int got_header(nghttp2_session *session, const nghttp2_frame *frame,
+                      const uint8_t *name, size_t namelen,
+                      const uint8_t *value, size_t valuelen,
+                      void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  (void)frame;
+
+  if(namelen + valuelen < 200) {
+    char buffer[256];
+    memcpy(buffer, name, namelen);
+    buffer[namelen]=':';
+    memcpy(&buffer[namelen+1], value, valuelen);
+    buffer[namelen + valuelen + 1]=0;
+    infof(conn->data, "Got '%s'\n", buffer);
+    /* TODO: the headers need to be passed to the http parser */
+  }
+  else {
+    infof(conn->data, "Got header with no name or too long\n",
+          namelen, name, valuelen, value);
+  }
+
+  return 0; /* 0 is successful */
+}
+
 /*
  * This is all callbacks nghttp2 calls
  */
 static const nghttp2_session_callbacks callbacks = {
-  send_callback,
-  recv_callback,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  send_callback, /* nghttp2_send_callback */
+  recv_callback, /* nghttp2_recv_callback */
+  NULL,          /* nghttp2_on_frame_recv_callback */
+  NULL,          /* nghttp2_on_invalid_frame_recv_callback */
+  NULL,          /* nghttp2_on_data_chunk_recv_callback */
+  NULL,          /* nghttp2_before_frame_send_callback */
+  NULL,          /* nghttp2_on_frame_send_callback */
+  NULL,          /* nghttp2_on_frame_not_send_callback */
+  NULL,          /* nghttp2_on_stream_close_callback */
+  NULL,          /* nghttp2_on_unknown_frame_recv_callback */
+  NULL,          /* nghttp2_on_begin_headers_callback */
+  got_header     /* nghttp2_on_header_callback */
 };
 
 /*
