@@ -191,14 +191,13 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   PRBool cipher_state[NUM_OF_CIPHERS];
   PRBool found;
   char *cipher;
-  SECStatus rv;
 
   /* First disable all ciphers. This uses a different max value in case
    * NSS adds more ciphers later we don't want them available by
    * accident
    */
   for(i=0; i<SSL_NumImplementedCiphers; i++) {
-    SSL_CipherPrefSet(model, SSL_ImplementedCiphers[i], SSL_NOT_ALLOWED);
+    SSL_CipherPrefSet(model, SSL_ImplementedCiphers[i], PR_FALSE);
   }
 
   /* Set every entry in our list to false */
@@ -238,8 +237,10 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
 
   /* Finally actually enable the selected ciphers */
   for(i=0; i<NUM_OF_CIPHERS; i++) {
-    rv = SSL_CipherPrefSet(model, cipherlist[i].num, cipher_state[i]);
-    if(rv != SECSuccess) {
+    if(!cipher_state[i])
+      continue;
+
+    if(SSL_CipherPrefSet(model, cipherlist[i].num, PR_TRUE) != SECSuccess) {
       failf(data, "cipher-suite not supported by NSS: %s", cipherlist[i].name);
       return SECFailure;
     }
