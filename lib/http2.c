@@ -37,6 +37,10 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
+#if (NGHTTP2_VERSION_NUM < 0x000300)
+#error too old nghttp2 version, upgrade!
+#endif
+
 /*
  * HTTP2 handler interface. This isn't added to the general list of protocols
  * but will be used at run-time when the protocol is dynamically switched from
