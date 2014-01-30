@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,7 +104,7 @@ static const char *const helptext[] = {
   "Hex encoded MD5 string of the host public key. (SSH)",
   " -0, --http1.0       Use HTTP 1.0 (H)",
   "     --http1.1       Use HTTP 1.1 (H)",
-  "     --http2.0       Use HTTP 2.0 (H)",
+  "     --http2         Use HTTP 2 (H)",
   "     --ignore-content-length  Ignore the HTTP Content-Length header",
   " -i, --include       Include protocol headers in the output (H/F)",
   " -k, --insecure      Allow connections to SSL sites without certs (H)",

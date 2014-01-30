@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -182,7 +182,7 @@ static const struct LongShort aliases[]= {
   {"$L", "test-event",               FALSE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
-  {"02",  "http2.0",                 FALSE},
+  {"02",  "http2",                   FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"10",  "tlsv1.0",                 FALSE},
   {"11",  "tlsv1.1",                 FALSE},
