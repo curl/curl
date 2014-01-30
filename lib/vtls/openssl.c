@@ -1400,6 +1400,12 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #endif
 
 #ifdef USE_NGHTTP2
+
+#if !defined(HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB) || \
+  defined(OPENSSL_NO_NEXTPROTONEG)
+#error http2 builds require OpenSSL with NPN support
+#endif
+
 /*
  * in is a list of lenght prefixed strings. this function has to select
  * the protocol we want to use from the list and write its string into out.
