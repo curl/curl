@@ -156,7 +156,7 @@ struct http_conn {
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
   char *mem;     /* points to a buffer in memory to store or read from */
-  size_t size;   /* size of the buffer 'mem' points to */
+  size_t len;    /* size of the buffer 'mem' points to */
   ssize_t nread; /* how much data that was sent/recv by the HTTP2 engine */
 #else
   int unused; /* prevent a compiler warning */

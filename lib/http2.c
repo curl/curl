@@ -62,7 +62,7 @@ const struct Curl_handler Curl_handler_http2 = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
-  0,                                    /* protocol */
+  CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -247,22 +247,28 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                       void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *c = &conn->proto.httpc;
+  size_t hlen = namelen + valuelen + 3; /* colon + CRLF == 3 bytes */
+
   (void)session;
   (void)frame;
 
-  if(namelen + valuelen < 200) {
-    char buffer[256];
-    memcpy(buffer, name, namelen);
-    buffer[namelen]=':';
-    memcpy(&buffer[namelen+1], value, valuelen);
-    buffer[namelen + valuelen + 1]=0;
-    infof(conn->data, "Got '%s'\n", buffer);
-    /* TODO: the headers need to be passed to the http parser */
+  if(namelen && (name[0] == ':')) {
+    /* special case */
+    hlen = snprintf(c->mem, c->len, "HTTP/2.0 %s\r\n", value);
   }
-  else {
-    infof(conn->data, "Got header with no name or too long\n",
-          namelen, name, valuelen, value);
+  else if(hlen + 1 < c->len) { /* hlen + a zero byte */
+    /* convert to a HTTP1-style header */
+    memcpy(c->mem, name, namelen);
+    c->mem[namelen]=':';
+    memcpy(&c->mem[namelen+1], value, valuelen);
+    c->mem[namelen + valuelen + 1]='\r';
+    c->mem[namelen + valuelen + 2]='\n';
+    c->mem[namelen + valuelen + 3]=0; /* to display this easier */
   }
+  infof(conn->data, "Got %s", c->mem);
+  c->mem += hlen;
+  c->len -= hlen;
 
   return 0; /* 0 is successful */
 }
@@ -376,7 +382,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
   conn->proto.httpc.mem = mem;
-  conn->proto.httpc.size = len;
+  conn->proto.httpc.len = len;
 
   rc = nghttp2_session_recv(conn->proto.httpc.h2);
 
@@ -385,7 +391,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
           rc);
     *err = CURLE_RECV_ERROR;
   }
-  return 0;
+  return len - conn->proto.httpc.len;
 }
 
 /* return number of received (decrypted) bytes */
