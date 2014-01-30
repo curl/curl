@@ -763,8 +763,13 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
 
-    /* Need to create 8 bytes random client nonce */
+#if defined(DEBUGBUILD)
+    /* Use static client nonce in debug (Test Suite) builds */
+    memcpy(entropy, "12345678", sizeof(entropy));
+#else
+    /* Create an 8 byte random client nonce */
     Curl_ssl_random(data, entropy, sizeof(entropy));
+#endif
 
     res = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
     if(res)
