@@ -145,7 +145,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     c->bodystarted = TRUE;
   }
 
-  if(len < c->len) {
+  if(len <= c->len) {
     memcpy(c->mem, data, len);
     c->mem += len;
     c->len -= len;
