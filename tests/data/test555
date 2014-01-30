@@ -93,7 +93,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com/path/555 http://%HOSTIP:%HTTPPORT s1lly:pers0n
+http://test.remote.example.com/path/555 http://%HOSTIP:%HTTPPORT testuser:testpass
 </command>
 <precheck>
 chkhostname curlhost
@@ -129,7 +129,7 @@ Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
 POST http://test.remote.example.com/path/555 HTTP/1.1
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAIYrD1xJmhNBNL9fLzuk9PV9436GAxPu0EKWzqQ/sZDVLXnp1JrySgl8A+cibE6z4HMxbGx5Y3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAACAAIAPYAAAAIAAgA/gAAAAAAAAAAAAAABoKBAFuu0VIvKeMdPwjDPk7eAnwxMjM0NTY3OC1uDhL9DbZXt27JqdXMDkABAQAAAAAAAACAPtXesZ0BMTIzNDU2NzgAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAdGVzdHVzZXJjdXJsaG9zdA==
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: test.remote.example.com
 Accept: */*

@@ -90,7 +90,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-http://test.remote.example.com.265:%HTTPPORT/path/2650002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
+http://test.remote.example.com.265:%HTTPPORT/path/2650002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --proxytunnel -d "postit"
 </command>
 <precheck>
 chkhostname curlhost
@@ -110,7 +110,7 @@ Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.example.com.265:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.265:%HTTPPORT
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAABQAFAHAAAAAIAAgAdQAAAAAAAAAAAAAABoKBAKAeQjzKtCQ7ubW8S6MN7B59436GAxPu0CVROwwNBsgxML49gcbAXLT/bU+H5wrS9XNpbGx5Y3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAACAAIAPYAAAAIAAgA/gAAAAAAAAAAAAAABoKBAFuu0VIvKeMdPwjDPk7eAnwxMjM0NTY3OC1uDhL9DbZXt27JqdXMDkABAQAAAAAAAACAPtXesZ0BMTIzNDU2NzgAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAdGVzdHVzZXJjdXJsaG9zdA==
 Proxy-Connection: Keep-Alive
 
 POST /path/2650002 HTTP/1.1
