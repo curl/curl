@@ -103,41 +103,6 @@ static ssize_t send_callback(nghttp2_session *h2,
   return written;
 }
 
-/*
- * The implementation of nghttp2_recv_callback type. Here we read data from
- * the network and write them in |buf|. The capacity of |buf| is |length|
- * bytes. Returns the number of bytes stored in |buf|. See the documentation
- * of nghttp2_recv_callback for the details.
- */
-static ssize_t recv_callback(nghttp2_session *h2,
-                             uint8_t *buf, size_t length, int flags,
-                             void *userp)
-{
-  struct connectdata *conn = (struct connectdata *)userp;
-  ssize_t nread;
-  CURLcode rc;
-
-  infof(conn->data, "recv_callback() was called with length %d\n", length);
-
-  rc = Curl_read_plain(conn->sock[FIRSTSOCKET], (char *)buf, length,
-                       &nread);
-  (void)h2;
-  (void)flags;
-
-  if(CURLE_AGAIN == rc) {
-    infof(conn->data, "recv_callback() returns NGHTTP2_ERR_WOULDBLOCK\n");
-    return NGHTTP2_ERR_WOULDBLOCK;
-  }
-  else if(rc) {
-    failf(conn->data, "Failed receiving HTTP2 data: %d", rc);
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
-  }
-  else
-    infof(conn->data, "recv_callback() returns %d to nghttp2\n", nread);
-
-  return nread;
-}
-
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -289,7 +254,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
  */
 static const nghttp2_session_callbacks callbacks = {
   send_callback,         /* nghttp2_send_callback */
-  recv_callback,         /* nghttp2_recv_callback */
+  NULL,                  /* nghttp2_recv_callback */
   on_frame_recv,         /* nghttp2_on_frame_recv_callback */
   on_invalid_frame_recv, /* nghttp2_on_invalid_frame_recv_callback */
   on_data_chunk_recv,    /* nghttp2_on_data_chunk_recv_callback */
@@ -382,6 +347,8 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
+#define H2_BUFSIZE 4096
+
 /*
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
@@ -389,18 +356,48 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
 static ssize_t http2_recv(struct connectdata *conn, int sockindex,
                           char *mem, size_t len, CURLcode *err)
 {
-  int rc;
+  CURLcode rc;
+  ssize_t rv;
+  ssize_t nread;
+  char inbuf[H2_BUFSIZE];
+
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
   conn->proto.httpc.mem = mem;
   conn->proto.httpc.len = len;
 
-  rc = nghttp2_session_recv(conn->proto.httpc.h2);
+  infof(conn->data, "http2_recv\n");
 
-  if(rc < 0) {
-    failf(conn->data, "nghttp2_session_recv() returned %d\n",
-          rc);
-    *err = CURLE_RECV_ERROR;
+  for(;;) {
+    rc = Curl_read_plain(conn->sock[FIRSTSOCKET], inbuf, H2_BUFSIZE, &nread);
+
+    if(rc == CURLE_AGAIN) {
+      *err = rc;
+      return -1;
+    }
+    if(rc) {
+      failf(conn->data, "Failed receiving HTTP2 data");
+      *err = CURLE_RECV_ERROR;
+      return 0;
+    }
+    infof(conn->data, "nread=%zd\n", nread);
+    if(!nread) {
+      *err = CURLE_RECV_ERROR;
+      return 0; /* TODO EOF? */
+    }
+    rv = nghttp2_session_mem_recv(conn->proto.httpc.h2,
+                                  (const uint8_t *)inbuf, nread);
+
+    if(nghttp2_is_fatal((int)rv)) {
+      failf(conn->data, "nghttp2_session_mem_recv() returned %d:%s\n",
+            rv, nghttp2_strerror((int)rv));
+      *err = CURLE_RECV_ERROR;
+      return 0;
+    }
+    if(rv < nread) {
+      /* Happens when NGHTTP2_ERR_PAUSE is returned from user callback */
+      break;
+    }
   }
   return len - conn->proto.httpc.len;
 }
