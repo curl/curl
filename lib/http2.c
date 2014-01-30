@@ -124,12 +124,16 @@ static ssize_t recv_callback(nghttp2_session *h2,
   (void)h2;
   (void)flags;
 
-  if(rc) {
-    failf(conn->data, "Failed receiving HTTP2 data");
+  if(CURLE_AGAIN == rc) {
+    infof(conn->data, "recv_callback() returns NGHTTP2_ERR_WOULDBLOCK\n");
+    return NGHTTP2_ERR_WOULDBLOCK;
+  }
+  else if(rc) {
+    failf(conn->data, "Failed receiving HTTP2 data: %d", rc);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
-  if(!nread)
-    return NGHTTP2_ERR_WOULDBLOCK;
+  else
+    infof(conn->data, "recv_callback() returns %d to nghttp2\n", nread);
 
   return nread;
 }
