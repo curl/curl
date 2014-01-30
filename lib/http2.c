@@ -372,8 +372,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     rc = Curl_read_plain(conn->sock[FIRSTSOCKET], inbuf, H2_BUFSIZE, &nread);
 
     if(rc == CURLE_AGAIN) {
-      *err = rc;
-      return -1;
+      if(len == conn->proto.httpc.len) {
+        *err = rc;
+        return 0;
+      }
+      return len - conn->proto.httpc.len;
     }
     if(rc) {
       failf(conn->data, "Failed receiving HTTP2 data");
