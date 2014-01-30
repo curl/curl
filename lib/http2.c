@@ -166,11 +166,22 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               const uint8_t *data, size_t len, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)flags;
-  (void)stream_id;
   (void)data;
-  infof(conn->data, "on_data_chunk_recv() was called with len = %u\n", len);
+  infof(conn->data, "on_data_chunk_recv() "
+        "len = %u, stream = %x\n", len, stream_id);
+
+  if(len < c->len) {
+    memcpy(c->mem, data, len);
+    c->mem += len;
+    c->len -= len;
+  }
+  else {
+    infof(conn->data, "EEEEEEK\n");
+  }
+
   return 0;
 }
 
