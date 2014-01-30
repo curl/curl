@@ -201,11 +201,18 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
       char *port;
       struct site_blacklist_entry *entry;
 
-      entry = malloc(sizeof(struct site_blacklist_entry));
-
       hostname = strdup(*sites);
-      if(!hostname)
+      if(!hostname) {
+        Curl_llist_destroy(new_list, NULL);
         return CURLM_OUT_OF_MEMORY;
+      }
+
+      entry = malloc(sizeof(struct site_blacklist_entry));
+      if(!entry) {
+        free(hostname);
+        Curl_llist_destroy(new_list, NULL);
+        return CURLM_OUT_OF_MEMORY;
+      }
 
       port = strchr(hostname, ':');
       if(port) {
@@ -220,8 +227,11 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
 
       entry->hostname = hostname;
 
-      if(!Curl_llist_insert_next(new_list, new_list->tail, entry))
+      if(!Curl_llist_insert_next(new_list, new_list->tail, entry)) {
+        site_blacklist_llist_dtor(NULL, entry);
+        Curl_llist_destroy(new_list, NULL);
         return CURLM_OUT_OF_MEMORY;
+      }
 
       sites++;
     }
