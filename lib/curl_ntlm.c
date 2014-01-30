@@ -239,8 +239,10 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn)
 #ifndef USE_WINDOWS_SSPI
   Curl_safefree(conn->ntlm.target_info);
   conn->ntlm.target_info_len = 0;
-#endif
 
+  Curl_safefree(conn->proxyntlm.target_info);
+  conn->proxyntlm.target_info_len = 0;
+#endif
 }
 
 #endif /* USE_NTLM */
