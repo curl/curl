@@ -288,8 +288,8 @@ static nghttp2_settings_entry settings[] = {
 /*
  * Append headers to ask for a HTTP1.1 to HTTP2 upgrade.
  */
-CURLcode Curl_http2_request(Curl_send_buffer *req,
-                            struct connectdata *conn)
+CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
+                                    struct connectdata *conn)
 {
   uint8_t binsettings[80];
   CURLcode result;

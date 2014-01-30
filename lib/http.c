@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2176,7 +2176,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      (data->set.httpversion == CURL_HTTP_VERSION_2_0)) {
     /* append HTTP2 updrade magic stuff to the HTTP request if it isn't done
        over SSL */
-    result = Curl_http2_request(req_buffer, conn);
+    result = Curl_http2_request_upgrade(req_buffer, conn);
     if(result)
       return result;
   }
