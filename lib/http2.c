@@ -138,13 +138,21 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   infof(conn->data, "on_data_chunk_recv() "
         "len = %u, stream = %x\n", len, stream_id);
 
+  if(!c->bodystarted) {
+    memcpy(c->mem, "\r\n", 2); /* signal end of headers */
+    c->mem += 2;
+    c->len -= 2;
+    c->bodystarted = TRUE;
+  }
+
   if(len < c->len) {
     memcpy(c->mem, data, len);
     c->mem += len;
     c->len -= len;
   }
   else {
-    infof(conn->data, "EEEEEEK\n");
+    infof(conn->data, "EEEEEEK: %d > %d\n", len, c->len);
+    /* return NGHTTP2_ERR_PAUSE; */
   }
 
   return 0;
@@ -242,7 +250,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     c->mem[namelen + valuelen + 2]='\n';
     c->mem[namelen + valuelen + 3]=0; /* to display this easier */
   }
-  infof(conn->data, "Got %s", c->mem);
   c->mem += hlen;
   c->len -= hlen;
 
@@ -366,7 +373,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   conn->proto.httpc.mem = mem;
   conn->proto.httpc.len = len;
 
-  infof(conn->data, "http2_recv\n");
+  infof(conn->data, "http2_recv: %d bytes buffer\n",
+        conn->proto.httpc.len);
 
   for(;;) {
     rc = Curl_read_plain(conn->sock[FIRSTSOCKET], inbuf, H2_BUFSIZE, &nread);
@@ -383,7 +391,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       *err = CURLE_RECV_ERROR;
       return 0;
     }
-    infof(conn->data, "nread=%zd\n", nread);
+
     if(!nread) {
       *err = CURLE_RECV_ERROR;
       return 0; /* TODO EOF? */
@@ -401,6 +409,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       /* Happens when NGHTTP2_ERR_PAUSE is returned from user callback */
       break;
     }
+    break;
   }
   return len - conn->proto.httpc.len;
 }
@@ -427,6 +436,7 @@ int Curl_http2_switched(struct connectdata *conn)
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
   infof(conn->data, "We have switched to HTTP2\n");
+  httpc->bodystarted = FALSE;
 
   /* send the SETTINGS frame (again) */
   rc = nghttp2_session_upgrade(httpc->h2, httpc->binsettings, httpc->binlen,
