@@ -320,12 +320,12 @@ CURLcode Curl_http2_send_request(struct connectdata *conn)
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                     struct connectdata *conn)
 {
-  uint8_t binsettings[80];
   CURLcode result;
   ssize_t binlen;
   char *base64;
   size_t blen;
   struct SingleRequest *k = &conn->data->req;
+  uint8_t *binsettings = conn->proto.httpc.binsettings;
 
   Curl_http2_init(conn);
 
@@ -335,14 +335,14 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
    */
 
   /* this returns number of bytes it wrote */
-  binlen = nghttp2_pack_settings_payload(binsettings,
-                                         sizeof(binsettings),
+  binlen = nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
                                          settings,
                                          sizeof(settings)/sizeof(settings[0]));
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
     return CURLE_FAILED_INIT;
   }
+  conn->proto.httpc.binlen = binlen;
 
   result = Curl_base64_encode(conn->data, (const char *)binsettings, binlen,
                               &base64, &blen);
@@ -397,13 +397,20 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   return 0;
 }
 
-void Curl_http2_switched(struct connectdata *conn)
+int Curl_http2_switched(struct connectdata *conn)
 {
+  int rc;
+  struct http_conn *httpc = &conn->proto.httpc;
   /* we are switched! */
   conn->handler = &Curl_handler_http2;
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
   infof(conn->data, "We have switched to HTTP2\n");
+
+  /* send the SETTINGS frame (again) */
+  rc = nghttp2_session_upgrade(httpc->h2, httpc->binsettings, httpc->binlen,
+                               conn);
+  return rc;
 }
 
 #endif

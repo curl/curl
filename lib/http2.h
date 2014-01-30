@@ -36,7 +36,7 @@ CURLcode Curl_http2_init(struct connectdata *conn);
 CURLcode Curl_http2_send_request(struct connectdata *conn);
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                     struct connectdata *conn);
-void Curl_http2_switched(struct connectdata *conn);
+int Curl_http2_switched(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x)
 #define Curl_http2_send_request(x)

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -151,7 +151,10 @@ struct HTTP {
 
 struct http_conn {
 #ifdef USE_NGHTTP2
+#define H2_BINSETTINGS_LEN 80
   nghttp2_session *h2;
+  uint8_t binsettings[H2_BINSETTINGS_LEN];
+  size_t  binlen; /* length of the binsettings data */
   char *mem;     /* points to a buffer in memory to store or read from */
   size_t size;   /* size of the buffer 'mem' points to */
   ssize_t nread; /* how much data that was sent/recv by the HTTP2 engine */
