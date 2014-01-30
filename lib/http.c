@@ -1668,6 +1668,21 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
+  switch (conn->negnpn) {
+    case NPN_HTTP2_DRAFT09:
+      infof(data, "http, we have to use HTTP-draft-09/2\n");
+      Curl_http2_init(conn);
+      Curl_http2_switched(conn);
+      Curl_http2_send_request(conn);
+      break;
+    case NPN_HTTP1_1:
+      /* continue with HTTP/1.1 when explicitly requested */
+      break;
+    default:
+      /* and as fallback */
+      break;
+  }
+
   http = data->req.protop;
 
   if(!data->state.this_is_a_follow) {

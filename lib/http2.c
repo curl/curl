@@ -115,8 +115,12 @@ static ssize_t recv_callback(nghttp2_session *h2,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   ssize_t nread;
-  CURLcode rc = Curl_read_plain(conn->sock[FIRSTSOCKET], (char *)buf, length,
-                                &nread);
+  CURLcode rc;
+
+  infof(conn->data, "recv_callback() was called with length %d\n", length);
+
+  rc = Curl_read_plain(conn->sock[FIRSTSOCKET], (char *)buf, length,
+                       &nread);
   (void)h2;
   (void)flags;
 
@@ -286,6 +290,31 @@ static nghttp2_settings_entry settings[] = {
 };
 
 /*
+ * Initialize nghttp2 for a Curl connection
+ */
+CURLcode Curl_http2_init(struct connectdata *conn) {
+  if(!conn->proto.httpc.h2) {
+    /* The nghttp2 session is not yet setup, do it */
+    int rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
+                                        &callbacks, conn);
+    if(rc) {
+      failf(conn->data, "Couldn't initialize nghttp2!");
+      return CURLE_OUT_OF_MEMORY; /* most likely at least */
+    }
+  }
+  return CURLE_OK;
+}
+
+/*
+ * Send a request using http2
+ */
+CURLcode Curl_http2_send_request(struct connectdata *conn)
+{
+  (void)conn;
+  return CURLE_OK;
+}
+
+/*
  * Append headers to ask for a HTTP1.1 to HTTP2 upgrade.
  */
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
@@ -298,15 +327,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   size_t blen;
   struct SingleRequest *k = &conn->data->req;
 
-  if(!conn->proto.httpc.h2) {
-    /* The nghttp2 session is not yet setup, do it */
-    int rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
-                                        &callbacks, conn);
-    if(rc) {
-      failf(conn->data, "Couldn't initialize nghttp2!");
-      return CURLE_OUT_OF_MEMORY; /* most likely at least */
-    }
-  }
+  Curl_http2_init(conn);
 
   /* As long as we have a fixed set of settings, we don't have to dynamically
    * figure out the base64 strings since it'll always be the same. However,
