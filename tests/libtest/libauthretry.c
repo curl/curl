@@ -35,8 +35,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
   char* full_url = malloc(strlen(url) + 4 + 1);
   if (!full_url) {
     fprintf(stderr, "Not enough memory for full url\n");
-    res = CURLE_OUT_OF_MEMORY;
-    goto test_cleanup;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   sprintf(full_url, "%s%04d", url, seq);
