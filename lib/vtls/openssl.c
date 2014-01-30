@@ -1399,6 +1399,37 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #  define use_sni(x)  Curl_nop_stmt
 #endif
 
+#ifdef USE_NGHTTP2
+/*
+ * in is a list of lenght prefixed strings. this function has to select
+ * the protocol we want to use from the list and write its string into out.
+ */
+static int
+select_next_proto_cb(SSL *ssl,
+                     unsigned char **out, unsigned char *outlen,
+                     const unsigned char *in, unsigned int inlen,
+                     void *arg)
+{
+  struct connectdata *conn = (struct connectdata*) arg;
+  int retval = nghttp2_select_next_protocol(out, outlen, in, inlen);
+  (void)ssl;
+
+  if(retval == 1) {
+    infof(conn->data, "NPN, negotiated HTTP2\n");
+    conn->negnpn = NPN_HTTP2_DRAFT09;
+  }
+  else if(retval == 0) {
+    infof(conn->data, "NPN, negotiated HTTP1.1\n");
+    conn->negnpn = NPN_HTTP1_1;
+  }
+  else {
+    infof(conn->data, "NPN, no overlap, negotiated nothing\n");
+  }
+
+  return SSL_TLSEXT_ERR_OK;
+}
+#endif
+
 static CURLcode
 ossl_connect_step1(struct connectdata *conn,
                    int sockindex)
@@ -1616,6 +1647,10 @@ ossl_connect_step1(struct connectdata *conn,
   }
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
+
+#ifdef USE_NGHTTP2
+  SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb, conn);
+#endif
 
   if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
     if(!cert_stuff(conn,

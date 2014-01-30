@@ -597,6 +597,12 @@ enum upgrade101 {
   UPGR101_WORKING             /* talking upgraded protocol */
 };
 
+enum negotiatenpn {
+  NPN_INIT,                   /* default state */
+  NPN_HTTP1_1,                /* HTTP/1.1 negotiated */
+  NPN_HTTP2_DRAFT09           /* HTTP-draft-0.9/2.0 negotiated */
+};
+
 /*
  * Request specific data in the easy handle (SessionHandle).  Previously,
  * these members were on the connectdata struct but since a conn struct may
@@ -1048,6 +1054,8 @@ struct connectdata {
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state[2]; /* two separate ones to allow FTP */
   struct connectbundle *bundle; /* The bundle we are member of */
+
+  enum negotiatenpn negnpn;
 };
 
 /* The end of connectdata. */
