@@ -149,6 +149,9 @@ struct HTTP {
                         points to an allocated send_buffer struct */
 };
 
+typedef int (*sending)(void); /* Curl_send */
+typedef int (*recving)(void); /* Curl_recv */
+
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
@@ -158,6 +161,9 @@ struct http_conn {
   char *mem;     /* points to a buffer in memory to store or read from */
   size_t len;    /* size of the buffer 'mem' points to */
   bool bodystarted;
+  sending send_underlying; /* underlying send Curl_send callback */
+  recving recv_underlying; /* underlying recv Curl_recv callback */
+  bool closed; /* TRUE on HTTP2 stream close */
 #else
   int unused; /* prevent a compiler warning */
 #endif

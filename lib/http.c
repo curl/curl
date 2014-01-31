@@ -1056,6 +1056,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     return res;
   }
 
+
   if(conn->handler->flags & PROTOPT_SSL) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
@@ -1673,7 +1674,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       infof(data, "http, we have to use HTTP-draft-09/2\n");
       Curl_http2_init(conn);
       Curl_http2_switched(conn);
-      Curl_http2_send_request(conn);
       break;
     case NPN_HTTP1_1:
       /* continue with HTTP/1.1 when explicitly requested */
