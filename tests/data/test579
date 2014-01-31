@@ -72,7 +72,7 @@ http://%HOSTIP:%HTTPPORT/579 log/ip579
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip579" mode="text">
+<file name="log/ip579">
 Progress callback called with UL 0 out of 0
 Progress callback called with UL 0 out of -1
 Progress callback called with UL 8 out of -1

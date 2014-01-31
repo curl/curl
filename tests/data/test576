@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
 <errorcode>
 0
 </errorcode>
-<stdout mode="text">
+<stdout>
 =============================================================
 Remains:      14
 Filename:     .

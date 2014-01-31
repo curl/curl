@@ -25,7 +25,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout mode="text">
+<stdout>
 All curl_mprintf() unsigned short tests OK!
 All curl_mprintf() signed short tests OK!
 All curl_mprintf() unsigned int tests OK!

@@ -7,7 +7,7 @@ FILE
 #
 # Server-side
 <reply>
-<data mode="text">
+<data>
 foo
    bar swsclose
 bar

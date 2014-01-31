@@ -72,7 +72,7 @@ http://%HOSTIP:%HTTPPORT/506
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout mode="text">
+<stdout>
 GLOBAL_INIT
 SHARE_INIT
 CURLSHOPT_LOCKFUNC

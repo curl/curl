@@ -59,7 +59,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout mode="text">
+<stdout>
 hello
 </stdout>
 </verify>

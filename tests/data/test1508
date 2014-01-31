@@ -24,7 +24,7 @@ http://%HOSTIP:%HTTPPORT/path/1508
 
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/stdout1508" mode="text">
+<file name="log/stdout1508">
 We are done
 </file>
 </verify>

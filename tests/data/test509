@@ -28,7 +28,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout mode="text">
+<stdout>
 seen custom_calloc()
 seen custom_malloc()
 seen custom_realloc()

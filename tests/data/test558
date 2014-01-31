@@ -34,7 +34,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/memdump" mode="text">
+<file name="log/memdump">
 MEM lib558.c: malloc()
 MEM lib558.c: free()
 MEM escape.c: malloc()

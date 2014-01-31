@@ -8,7 +8,7 @@ FTP
 #
 # Server-side
 <reply>
-<data mode="text">
+<data>
 file contents
 </data>
 

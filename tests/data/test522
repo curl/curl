@@ -53,7 +53,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<stdout mode="text">
+<stdout>
 hello
 </stdout>
 </verify>

@@ -22,7 +22,15 @@
 #include "test.h"
 
 #ifdef HAVE_LOCALE_H
-#include <locale.h> /* for setlocale() */
+#  include <locale.h> /* for setlocale() */
+#endif
+
+#ifdef HAVE_IO_H
+#  include <io.h> /* for setmode() */
+#endif
+
+#ifdef HAVE_FCNTL_H
+#  include <fcntl.h> /* for setmode() */
 #endif
 
 #ifdef CURLDEBUG
@@ -97,6 +105,14 @@ static void memory_tracking_init(void)
 int main(int argc, char **argv)
 {
   char *URL;
+
+#ifdef O_BINARY
+#  ifdef __HIGHC__
+  _setmode(stdout, O_BINARY);
+#  else
+  setmode(fileno(stdout), O_BINARY);
+#  endif
+#endif
 
   memory_tracking_init();
 

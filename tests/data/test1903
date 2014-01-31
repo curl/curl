@@ -9,7 +9,7 @@ multi
 
 # Server-side
 <reply>
-<data mode="text">
+<data>
 Adding handle 0
 Handle 0 Completed with status 0
 Adding handle 1

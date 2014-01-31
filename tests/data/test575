@@ -100,7 +100,7 @@ EPSV
 RETR someothertext.txt
 QUIT
 </protocol>
-<stdout mode="text">
+<stdout>
 This file should have permissions 444
 This file should have permissions 666
 This file should have permissions 777

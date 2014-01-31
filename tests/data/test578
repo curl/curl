@@ -8,7 +8,7 @@ HTTP POST
 #
 # Server-side
 <reply name="1">
-<data mode="text">
+<data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/500 log/ip578
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip578" mode="text">
+<file name="log/ip578">
 PASSED, UL data matched data size
 </file>
 </verify>

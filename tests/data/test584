@@ -76,7 +76,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<stdout mode="text">
+<stdout>
 HTTP/1.1 200 OK
 Server: test-server/fake
 Content-Length: 4

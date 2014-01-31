@@ -83,7 +83,7 @@ rtsp://%HOSTIP:%RTSPPORT/571 log/protofile.txt
 </client>
 
 <verify>
-<stdout mode="text">
+<stdout>
 RTP: message size 10, channel 1
 RTP: message size 500, channel 0
 RTP: message size 196, channel 0
