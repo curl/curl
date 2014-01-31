@@ -9,11 +9,15 @@ Curl and libcurl 7.35.1
 
 This release includes the following changes:
 
+ o ntlm: Added support for NTLMv2 [2]
  o 
 
 This release includes the following bugfixes:
 
  o nss: allow to use ECC ciphers if NSS implements them [1]
+ o netrc: Fixed a memory leak in an OOM condition
+ o ftp: fixed a memory leak on wildcard error path
+ o pipeline: Fixed a NULL pointer dereference on OOM
  o 
 
 This release includes the following known bugs:
@@ -23,10 +27,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Dan Fandrich, Daniel Stenberg, Fabian Frank, Gisle Vanem, Kamil Dudka,
+  Prash Dush, Steve Holme, Tatsuhiro Tsujikawa
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = https://bugzilla.redhat.com/1058776
+ [2] = http://curl.haxx.se/mail/lib-2014-01/0183.html
