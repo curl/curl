@@ -38,8 +38,8 @@ Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 
-header length is ........: 239
-header length should be..: 239
+header length is ........: 245
+header length should be..: 245
 </datacheck>
 </reply>
 
