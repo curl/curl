@@ -165,7 +165,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           return CURLE_OUT_OF_MEMORY;
         }
 
-        if(!Curl_checkheaders(data, "Host:")) {
+        if(!Curl_checkProxyheaders(conn, "Host:")) {
           host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
             free(hostheader);
@@ -173,10 +173,10 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             return CURLE_OUT_OF_MEMORY;
           }
         }
-        if(!Curl_checkheaders(data, "Proxy-Connection:"))
+        if(!Curl_checkProxyheaders(conn, "Proxy-Connection:"))
           proxyconn = "Proxy-Connection: Keep-Alive\r\n";
 
-        if(!Curl_checkheaders(data, "User-Agent:") &&
+        if(!Curl_checkProxyheaders(conn, "User-Agent:") &&
            data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
 
@@ -200,7 +200,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         free(hostheader);
 
         if(CURLE_OK == result)
-          result = Curl_add_custom_headers(conn, req_buffer);
+          result = Curl_add_custom_headers(conn, TRUE, req_buffer);
 
         if(CURLE_OK == result)
           /* CRLF terminate the request */

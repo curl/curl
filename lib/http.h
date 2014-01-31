@@ -39,9 +39,13 @@ extern const struct Curl_handler Curl_handler_https;
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
-char *Curl_checkheaders(struct SessionHandle *data, const char *thisheader);
+
+char *Curl_checkheaders(const struct connectdata *conn,
+                        const char *thisheader);
 char *Curl_copy_header_value(const char *header);
 
+char *Curl_checkProxyheaders(const struct connectdata *conn,
+                             const char *thisheader);
 /* ------------------------------------------------------------------------- */
 /*
  * The add_buffer series of functions are used to build one large memory chunk
@@ -67,7 +71,8 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 CURLcode Curl_add_timecondition(struct SessionHandle *data,
                                 Curl_send_buffer *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
-                                   Curl_send_buffer *req_buffer);
+                                 bool is_connect,
+                                 Curl_send_buffer *req_buffer);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);

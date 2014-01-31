@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -903,7 +903,8 @@ typedef enum {
   /* Set cookie in request: */
   CINIT(COOKIE, OBJECTPOINT, 22),
 
-  /* This points to a linked list of headers, struct curl_slist kind */
+  /* This points to a linked list of headers, struct curl_slist kind. This
+     list is also used for RTSP (in spite of its name) */
   CINIT(HTTPHEADER, OBJECTPOINT, 23),
 
   /* This points to a linked list of post entries, struct curl_httppost */
@@ -1580,6 +1581,10 @@ typedef enum {
   /* Time to wait for a response to a HTTP request containing an
    * Expect: 100-continue header before sending the data anyway. */
   CINIT(EXPECT_100_TIMEOUT_MS, LONG, 227),
+
+  /* This points to a linked list of headers used for proxy requests only,
+     struct curl_slist kind */
+  CINIT(PROXYHEADER, OBJECTPOINT, 228),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

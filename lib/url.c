@@ -1067,6 +1067,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.headers = va_arg(param, struct curl_slist *);
     break;
 
+  case CURLOPT_PROXYHEADER:
+    /*
+     * Set a list with proxy headers to use (or replace internals with)
+     *
+     * Since CURLOPT_HTTPHEADER was the only way to set HTTP headers for a
+     * long time we remain doing it this way until CURLOPT_PROXYHEADER is
+     * used. As soon as this option has been used, if set to anything but
+     * NULL, custom headers for proxies are only picked from this list.
+     *
+     * Set this option to NULL to restore the previous behavior.
+     */
+    data->set.proxyheaders = va_arg(param, struct curl_slist *);
+    break;
+
   case CURLOPT_HTTP200ALIASES:
     /*
      * Set a list of aliases for HTTP 200 in response header

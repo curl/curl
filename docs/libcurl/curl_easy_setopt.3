@@ -1541,6 +1541,33 @@ Pass a NULL to this to reset back to no custom headers.
 
 The most commonly replaced headers have "shortcuts" in the options
 \fICURLOPT_COOKIE\fP, \fICURLOPT_USERAGENT\fP and \fICURLOPT_REFERER\fP.
+
+Starting in 7.36.0, libcurl offers an alternative option that sets or replaces
+headers only for requests that are sent to a proxy:
+\fICURLOPT_PROXYHEADER\fP. If \fICURLOPT_PROXYHEADER\fP is not used at all by
+an application, the \fICURLOPT_HTTPHEADER headers\fP will be used for proxy
+requests as well!
+.IP CURLOPT_PROXYHEADER
+Pass a pointer to a linked list of HTTP headers to pass in your HTTP request
+sent to a proxy. The rules for this list is identical to the
+\fICURLOPT_HTTPHEADER\fP option's.
+
+The headers set with this option is only ever used in requests sent to a
+proxy.
+
+As a special quirk to stay backwards compatible with the libcurl versions
+released before this option existed, all headers set with
+\fICURLOPT_HTTPHEADER\fP will also be used for proxies unless you set one or
+more headers (or even just NULL) with \fICURLOPT_PROXYHEADER\fP.
+
+The first line in a request (containing the method, usually a GET or POST) is
+not a header and cannot be replaced using this option. Only the lines
+following the request-line are headers. Adding this method line in this list
+of headers will only cause your request to send an invalid header.
+
+Pass a NULL to this to reset back to no custom headers.
+
+This option was added in libcurl 7.36.0.
 .IP CURLOPT_HTTP200ALIASES
 Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
 responses.  Some servers respond with a custom header response line.  For
