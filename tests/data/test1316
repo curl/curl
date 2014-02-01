@@ -21,7 +21,7 @@ Magic: sure you can FTP me
 
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
-<datacheck>
+<datacheck mode="text">
 HTTP/1.1 200 Mighty fine indeed
 Magic: sure you can FTP me
 
