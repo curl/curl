@@ -369,6 +369,10 @@ static int operate_do(struct Configurable *config)
         heads.stream = newfile;
       }
     }
+    else {
+      /* always use binary mode for protocol header output */
+      set_binmode(heads.stream);
+    }
   }
 
   /* save the values of noprogress and isatty to restore them later on */
