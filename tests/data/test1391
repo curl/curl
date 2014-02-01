@@ -76,8 +76,8 @@ MOOOO
 250 CWD command successful.
 229 Entering Passive Mode (stripped)
 200 I modify TYPE as you wanted
-213 214
-150 Binary data connection for 1391 () (214 bytes).
+213 222
+150 Binary data connection for 1391 () (222 bytes).
 226 File transfer complete
 </file2>
 <stripfile2>
