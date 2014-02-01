@@ -52,11 +52,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile1371" mode="text">
+<file1 name="log/outfile1371">
 12345
 </file1>
 
-<file2 name="log/stdout1371" mode="text">
+<file2 name="log/stdout1371">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

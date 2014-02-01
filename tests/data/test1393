@@ -52,7 +52,7 @@ RETR file1393
 QUIT
 </protocol>
 
-<file1 name="log/download1393" mode="text">
+<file1 name="log/download1393">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -64,7 +64,7 @@ Content-Disposition: filename=name1393; charset=funny; option=strange
 MOOOO
 </file1>
 
-<file2 name="log/stdout1393" mode="text">
+<file2 name="log/stdout1393">
 </file2>
 
 </verify>
