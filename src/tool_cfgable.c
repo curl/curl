@@ -22,6 +22,7 @@
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
+#include "tool_main.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -30,6 +31,16 @@ void init_config(struct Configurable* config)
   memset(config, 0, sizeof(struct Configurable));
 
   config->errors = stderr; /* default errors to stderr */
+  config->postfieldsize = -1;
+  config->showerror = -1; /* will show errors */
+  config->use_httpget = FALSE;
+  config->create_dirs = FALSE;
+  config->maxredirs = DEFAULT_MAXREDIRS;
+  config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
+  config->proto_present = FALSE;
+  config->proto_redir =
+    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+  config->proto_redir_present = FALSE;
 }
 
 void free_config_fields(struct Configurable *config)

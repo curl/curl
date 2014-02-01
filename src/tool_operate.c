@@ -253,18 +253,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   setlocale(LC_ALL, "");
 #endif
 
-  /* inits */
-  config->postfieldsize = -1;
-  config->showerror = -1; /* will show errors */
-  config->use_httpget = FALSE;
-  config->create_dirs = FALSE;
-  config->maxredirs = DEFAULT_MAXREDIRS;
-  config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
-  config->proto_present = FALSE;
-  config->proto_redir =
-    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
-  config->proto_redir_present = FALSE;
-
   if((argc > 1) &&
      (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
      strchr(argv[1], 'q')) {
