@@ -36,7 +36,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/memdump" mode="text">
+<file name="log/memdump">
 MEM unit1330.c: malloc()
 MEM unit1330.c: free()
 </file>

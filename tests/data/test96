@@ -30,7 +30,7 @@ curl memory tracking operational
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/memdump" mode="text">
+<file name="log/memdump">
 MEM tool_paramhlp.c
 MEM tool_cfgable.c
 </file>

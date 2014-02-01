@@ -19,7 +19,7 @@ none
 <verify>
 <file1 name="log/stderr1221" mode="text">
 </file1>
-<file2 name="log/stdout1221" mode="text">
+<file2 name="log/stdout1221">
 Testing curl_10char_object_name...
 
 result: 16AFKPQRST expected: 16AFKPQRST input: 123__678__ABC__FGH__KLM__PQRSTUV

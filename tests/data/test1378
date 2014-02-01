@@ -44,12 +44,12 @@ RETR file1378
 QUIT
 </protocol>
 
-<file1 name="log/download1378" mode="text">
+<file1 name="log/download1378">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout1378" mode="text">
+<file2 name="log/stdout1378">
 </file2>
 
 </verify>

@@ -38,7 +38,7 @@ opcode: 1
 filename: /1099
 mode: octet
 </protocol>
-<stdout mode="text">
+<stdout>
 data for 1099
 </stdout>
 </verify>

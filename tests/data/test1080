@@ -49,7 +49,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<stdout mode="text">
+<stdout>
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10800002.txt?coolsite=yes
 Content-Length: 62
