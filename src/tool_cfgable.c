@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,13 @@
 #include "tool_cfgable.h"
 
 #include "memdebug.h" /* keep this as LAST include */
+
+void init_config(struct Configurable* config)
+{
+  memset(config, 0, sizeof(struct Configurable));
+
+  config->errors = stderr; /* default errors to stderr */
+}
 
 void free_config_fields(struct Configurable *config)
 {
