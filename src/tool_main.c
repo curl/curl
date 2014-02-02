@@ -33,6 +33,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
+#include "tool_msgs.h"
 #include "tool_operate.h"
 #include "tool_panykey.h"
 #include "tool_vms.h"
@@ -120,10 +121,7 @@ void memory_tracking_init(void)
 int main(int argc, char *argv[])
 {
   int res;
-  struct Configurable config;
-
-  /* Initialise the config */
-  init_config(&config);
+  struct Configurable *config;
 
   main_checkfds();
 
@@ -134,15 +132,29 @@ int main(int argc, char *argv[])
   /* Initialize memory tracking */
   memory_tracking_init();
 
-  /* Start our curl operation */
-  res = operate(&config, argc, argv);
+  /* Allocate the initial config */
+  config = malloc(sizeof(struct Configurable));
+
+  if(config) {
+    /* Initialise the config */
+    init_config(config);
+
+    /* Start our curl operation */
+    res = operate(config, argc, argv);
 
 #ifdef __SYMBIAN32__
-  if(config.showerror)
-    tool_pressanykey();
+    if(config->showerror)
+      tool_pressanykey();
 #endif
 
-  free_config_fields(&config);
+    /* Free the config structure */
+    free_config_fields(config);
+    Curl_safefree(config);
+  }
+  else {
+    helpf(stderr, "error initializing curl\n");
+    res = CURLE_FAILED_INIT;
+  }
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)
