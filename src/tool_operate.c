@@ -184,6 +184,17 @@ static curl_off_t VmsSpecialSize(const char * name,
 }
 #endif /* __VMS */
 
+static CURLcode operate_init(struct Configurable *config)
+{
+  /* Get a curl handle to use for all forthcoming curl transfers */
+  config->easy = curl_easy_init();
+  if(!config->easy) {
+    helpf(config->errors, "error initializing curl easy handle\n");
+    return CURLE_FAILED_INIT;
+  }
+
+  return CURLE_OK;
+}
 
 static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
 {
@@ -196,7 +207,7 @@ static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
 
   metalinkfile *mlfile_last = NULL;
 
-  CURL *curl = NULL;
+  CURL *curl = config->easy;
   char *httpgetfields = NULL;
 
   int res = 0;
@@ -211,14 +222,6 @@ static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
   memset(&heads, 0, sizeof(struct OutStruct));
   heads.stream = stdout;
   heads.config = config;
-
-  /* Get a curl handle to use for all forthcoming curl transfers */
-  curl = curl_easy_init();
-  if(!curl) {
-    helpf(config->errors, "error initializing curl easy handle\n");
-    return CURLE_FAILED_INIT;
-  }
-  config->easy = curl;
 
   /*
   ** Beyond this point no return'ing from this function allowed.
@@ -1842,5 +1845,13 @@ static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
 
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
+  int result = 0;
+
+  /* Initialize the easy interface */
+  result = operate_init(config);
+  if(result)
+    return result;
+
+  /* Perform the main operation */
   return operate_do(config, argc, argv);
 }
