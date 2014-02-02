@@ -193,29 +193,3 @@ CURLcode get_url_file_name(char **filename, const char *url)
   return CURLE_OK;
 }
 
-/*
- * This is the main global constructor for the app. Call this before
- * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
- * used, or havoc may be the result.
- */
-CURLcode main_init(void)
-{
-#if defined(__DJGPP__) || defined(__GO32__)
-  /* stop stat() wasting time */
-  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
-#endif
-
-  return curl_global_init(CURL_GLOBAL_DEFAULT);
-}
-
-/*
- * This is the main global destructor for the app. Call this after
- * _all_ libcurl usage is done.
- */
-void main_free(void)
-{
-  curl_global_cleanup();
-  convert_cleanup();
-  metalink_cleanup();
-}
-

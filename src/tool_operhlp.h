@@ -37,9 +37,5 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename);
 
 CURLcode get_url_file_name(char **filename, const char *url);
 
-CURLcode main_init(void);
-
-void main_free(void);
-
 #endif /* HEADER_CURL_TOOL_OPERHLP_H */
 

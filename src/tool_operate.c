@@ -214,19 +214,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   heads.stream = stdout;
   heads.config = config;
 
-  /*
-  ** Initialize curl library - do not call any libcurl functions before
-  ** this point.
-  */
-  if(main_init() != CURLE_OK) {
-    helpf(config->errors, "error initializing curl library\n");
-    return CURLE_FAILED_INIT;
-  }
-
   /* Get libcurl info right away */
   if(get_libcurl_info() != CURLE_OK) {
     helpf(config->errors, "error retrieving curl library information\n");
-    main_free();
     return CURLE_FAILED_INIT;
   }
 
@@ -234,7 +224,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   curl = curl_easy_init();
   if(!curl) {
     helpf(config->errors, "error initializing curl easy handle\n");
-    main_free();
     return CURLE_FAILED_INIT;
   }
   config->easy = curl;
@@ -1891,8 +1880,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   /* Release metalink related resources here */
   clean_metalink(config);
-
-  main_free(); /* cleanup */
 
   return res;
 }

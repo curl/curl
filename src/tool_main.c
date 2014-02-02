@@ -116,6 +116,32 @@ static void memory_tracking_init(void)
 #endif
 
 /*
+ * This is the main global constructor for the app. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+static CURLcode main_init(void)
+{
+#if defined(__DJGPP__) || defined(__GO32__)
+  /* stop stat() wasting time */
+  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
+#endif
+
+  return curl_global_init(CURL_GLOBAL_DEFAULT);
+}
+
+/*
+ * This is the main global destructor for the app. Call this after
+ * _all_ libcurl usage is done.
+ */
+static void main_free(void)
+{
+  curl_global_cleanup();
+  convert_cleanup();
+  metalink_cleanup();
+}
+
+/*
 ** curl tool main function.
 */
 int main(int argc, char *argv[])
@@ -139,8 +165,19 @@ int main(int argc, char *argv[])
     /* Initialise the config */
     init_config(config);
 
-    /* Start our curl operation */
-    res = operate(config, argc, argv);
+    /* Initialize the curl library - do not call any libcurl functions before
+       this point */
+    if(!main_init()) {
+      /* Start our curl operation */
+      res = operate(config, argc, argv);
+
+      /* Perform the main cleanup */
+      main_free();
+    }
+    else {
+      helpf(config->errors, "error initializing curl library\n");
+      res = CURLE_FAILED_INIT;
+    }
 
 #ifdef __SYMBIAN32__
     if(config->showerror)
