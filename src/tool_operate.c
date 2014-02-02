@@ -214,12 +214,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   heads.stream = stdout;
   heads.config = config;
 
-  memory_tracking_init();
-
   /*
   ** Initialize curl library - do not call any libcurl functions before
-  ** this point. Note that the memory_tracking_init() magic above is an
-  ** exception, but then that's not part of the official public API.
+  ** this point.
   */
   if(main_init() != CURLE_OK) {
     helpf(config->errors, "error initializing curl library\n");
