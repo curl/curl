@@ -118,12 +118,15 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  int rv;
   (void)session;
   (void)frame;
   infof(conn->data, "on_frame_recv() was called with header %x\n",
         frame->hd.type);
-  if(frame->hd.type == NGHTTP2_HEADERS &&
-     frame->headers.cat == NGHTTP2_HCAT_RESPONSE) {
+  switch(frame->hd.type) {
+  case NGHTTP2_HEADERS:
+    if(frame->headers.cat != NGHTTP2_HCAT_RESPONSE)
+      break;
     c->bodystarted = TRUE;
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
     c->nread_header_recvbuf = c->len < c->header_recvbuf->size_used ?
@@ -133,10 +136,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
     c->mem += c->nread_header_recvbuf;
     c->len -= c->nread_header_recvbuf;
-  }
-  if((frame->hd.type == NGHTTP2_HEADERS || frame->hd.type == NGHTTP2_DATA) &&
-     frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-    infof(conn->data, "stream_id=%d closed\n", frame->hd.stream_id);
+    break;
+  case NGHTTP2_PUSH_PROMISE:
+    rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                   frame->hd.stream_id, NGHTTP2_CANCEL);
+    if(nghttp2_is_fatal(rv)) {
+      return rv;
+    }
+    break;
   }
   return 0;
 }
@@ -165,6 +172,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   infof(conn->data, "on_data_chunk_recv() "
         "len = %u, stream = %x\n", len, stream_id);
 
+  if(stream_id != c->stream_id) {
+    return 0;
+  }
+
   if(len <= c->len) {
     memcpy(c->mem, data, len);
     c->mem += len;
@@ -183,9 +194,15 @@ static int before_frame_send(nghttp2_session *session,
                              void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)frame;
   infof(conn->data, "before_frame_send() was called\n");
+  if(frame->hd.type == NGHTTP2_HEADERS &&
+     frame->headers.cat == NGHTTP2_HCAT_REQUEST) {
+    /* Get stream ID of our request */
+    c->stream_id = frame->hd.stream_id;
+  }
   return 0;
 }
 static int on_frame_send(nghttp2_session *session,
@@ -218,6 +235,10 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   (void)stream_id;
   infof(conn->data, "on_stream_close() was called, error_code = %d\n",
         error_code);
+
+  if(stream_id != c->stream_id) {
+    return 0;
+  }
 
   c->closed = TRUE;
 
@@ -260,6 +281,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)frame;
+
+  if(frame->hd.stream_id != c->stream_id) {
+    return 0;
+  }
 
   if(namelen == sizeof(":status") - 1 &&
      memcmp(STATUS, name, namelen) == 0) {
@@ -599,6 +624,8 @@ int Curl_http2_switched(struct connectdata *conn)
      &rc);
   assert(rv == 24);
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
+    /* stream 1 is opened implicitly on upgrade */
+    httpc->stream_id = 1;
     /* queue SETTINGS frame (again) */
     rv = nghttp2_session_upgrade(httpc->h2, httpc->binsettings,
                                  httpc->binlen, NULL);
@@ -609,6 +636,8 @@ int Curl_http2_switched(struct connectdata *conn)
     }
   }
   else {
+    /* stream ID is unknown at this point */
+    httpc->stream_id = -1;
     rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
     if(rv != 0) {
       failf(conn->data, "nghttp2_submit_settings() failed: %s(%d)",

@@ -167,6 +167,7 @@ struct http_conn {
   Curl_send_buffer *header_recvbuf; /* store response headers */
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
                                   fed into upper layer */
+  int32_t stream_id; /* stream we are interested in */
 #else
   int unused; /* prevent a compiler warning */
 #endif
