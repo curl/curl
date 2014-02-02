@@ -1834,13 +1834,16 @@ static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
   dumpeasysrc(config);
 #endif
 
+  return res;
+}
+
+static void operate_free(struct Configurable *config)
+{
   if(config->errors_fopened && config->errors)
     fclose(config->errors);
 
   /* Release metalink related resources here */
   clean_metalink(config);
-
-  return res;
 }
 
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
@@ -1853,5 +1856,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     return result;
 
   /* Perform the main operation */
-  return operate_do(config, argc, argv);
+  result = operate_do(config, argc, argv);
+
+  /* Perform the cleanup */
+  operate_free(config);
+
+  return result;
 }
