@@ -1,7 +1,7 @@
+<testcase>
 #
 # This test is like 585 but uses passive FTP instead of HTTP
 #
-<testcase>
 <info>
 <keywords>
 FTP

@@ -1,9 +1,9 @@
+<testcase>
 #
 # For this test the server rejects the EPRT command,
 # code in lib591 makes use of curl_multi_timeout()
 # and server does not establish data connection.
 #
-<testcase>
 <info>
 <keywords>
 FTP

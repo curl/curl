@@ -1,9 +1,9 @@
+<testcase>
 #
 # This test is exactly like 525 but the server rejects the EPRT command.
 # Written up to make sure that there's nothing in the multi interface
 # active connection case that differs between PORT and EPRT use
 #
-<testcase>
 <info>
 <keywords>
 FTP
