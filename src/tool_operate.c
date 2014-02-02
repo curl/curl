@@ -239,23 +239,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   setlocale(LC_ALL, "");
 #endif
 
-  if((argc > 1) &&
-     (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
-     strchr(argv[1], 'q')) {
-    /*
-     * The first flag, that is not a verbose name, but a shortname
-     * and it includes the 'q' flag!
-     */
-    ;
-  }
-  else {
+  /* Parse .curlrc if necessary */
+  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
     parseconfig(NULL, config); /* ignore possible failure */
-  }
 
-  if((argc < 2)  && !config->url_list) {
-    helpf(config->errors, NULL);
-    res = CURLE_FAILED_INIT;
-    goto quit_curl;
+    /* If we had no arguments then make sure a url was specified in .curlrc */
+    if((argc < 2) && (!config->url_list)) {
+      helpf(config->errors, NULL);
+      res = CURLE_FAILED_INIT;
+      goto quit_curl;
+    }
   }
 
   /* Parse options */
