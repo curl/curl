@@ -38,6 +38,7 @@
 #include "tool_panykey.h"
 #include "tool_vms.h"
 #include "tool_main.h"
+#include "tool_libinfo.h"
 
 /*
  * This is low-level hard-hacking memory leak tracking and similar. Using
@@ -120,14 +121,28 @@ static void memory_tracking_init(void)
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-static CURLcode main_init(void)
+static CURLcode main_init(struct Configurable *config)
 {
+  CURLcode result = CURLE_OK;
+
 #if defined(__DJGPP__) || defined(__GO32__)
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
 
-  return curl_global_init(CURL_GLOBAL_DEFAULT);
+  /* Perform the libcurl initialization */
+  result = curl_global_init(CURL_GLOBAL_DEFAULT);
+  if(!result) {
+    /* Get information about libcurl */
+    result = get_libcurl_info();
+
+    if(result)
+      helpf(config->errors, "error retrieving curl library information\n");
+  }
+  else
+    helpf(config->errors, "error initializing curl library\n");
+
+  return result;
 }
 
 /*
@@ -167,16 +182,13 @@ int main(int argc, char *argv[])
 
     /* Initialize the curl library - do not call any libcurl functions before
        this point */
-    if(!main_init()) {
+    res = main_init(config);
+    if(!res) {
       /* Start our curl operation */
       res = operate(config, argc, argv);
 
       /* Perform the main cleanup */
       main_free();
-    }
-    else {
-      helpf(config->errors, "error initializing curl library\n");
-      res = CURLE_FAILED_INIT;
     }
 
 #ifdef __SYMBIAN32__

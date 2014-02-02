@@ -212,12 +212,6 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   heads.stream = stdout;
   heads.config = config;
 
-  /* Get libcurl info right away */
-  if(get_libcurl_info() != CURLE_OK) {
-    helpf(config->errors, "error retrieving curl library information\n");
-    return CURLE_FAILED_INIT;
-  }
-
   /* Get a curl handle to use for all forthcoming curl transfers */
   curl = curl_easy_init();
   if(!curl) {
