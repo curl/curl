@@ -185,7 +185,7 @@ static curl_off_t VmsSpecialSize(const char * name,
 #endif /* __VMS */
 
 
-int operate(struct Configurable *config, int argc, argv_item_t argv[])
+static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
@@ -1838,4 +1838,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   clean_metalink(config);
 
   return res;
+}
+
+int operate(struct Configurable *config, int argc, argv_item_t argv[])
+{
+  return operate_do(config, argc, argv);
 }
