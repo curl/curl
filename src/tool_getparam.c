@@ -1847,3 +1847,47 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
   return PARAM_OK;
 }
+
+ParameterError parse_args(struct Configurable *config, int argc,
+                          argv_item_t argv[])
+{
+  int i;
+  bool stillflags;
+  char *orig_opt;
+  ParameterError result = PARAM_OK;
+
+  for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
+    orig_opt = argv[i];
+
+    if(stillflags && ('-' == argv[i][0])) {
+      char *nextarg;
+      bool passarg;
+      char *flag = argv[i];
+
+      if(curlx_strequal("--", argv[i]))
+        /* This indicates the end of the flags and thus enables the
+           following (URL) argument to start with -. */
+        stillflags = FALSE;
+      else {
+        nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
+
+        result = getparameter(flag, nextarg, &passarg, config);
+        if(!result && passarg)
+          i++; /* we're supposed to skip this */
+      }
+    }
+    else {
+      bool used;
+
+      /* Just add the URL please */
+      result = getparameter((char *)"--url", argv[i], &used, config);
+    }
+  }
+
+  if(result && result != PARAM_HELP_REQUESTED) {
+    const char *reason = param2text(result);
+    helpf(config->errors, "option %s: %s\n", orig_opt, reason);
+  }
+
+  return result;
+}
