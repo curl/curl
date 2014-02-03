@@ -84,7 +84,7 @@ static void main_checkfds(void)
 }
 
 #ifdef CURLDEBUG
-void memory_tracking_init(void)
+static void memory_tracking_init(void)
 {
   char *env;
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
