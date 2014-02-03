@@ -1401,10 +1401,26 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
 #ifdef USE_NGHTTP2
 
+#undef HAS_ALPN
+#if defined(HAVE_SSL_CTX_SET_ALPN_PROTOS) && \
+  defined(HAVE_SSL_CTX_SET_ALPN_SELECT_CB)
+#  define HAS_ALPN 1
+#endif
+
 #if !defined(HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB) || \
   defined(OPENSSL_NO_NEXTPROTONEG)
-#error http2 builds require OpenSSL with NPN support
+#  if !defined(HAS_ALPN)
+#    error http2 builds require OpenSSL with NPN or ALPN support
+#  endif
 #endif
+
+
+/* see http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
+#ifdef HAS_ALPN
+#define ALPN_HTTP_1_1_LENGTH 8
+#define ALPN_HTTP_1_1 "http/1.0"
+#endif
+
 
 /*
  * in is a list of lenght prefixed strings. this function has to select
@@ -1456,6 +1472,9 @@ ossl_connect_step1(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
+#endif
+#ifdef HAS_ALPN
+  unsigned char protocols[128];
 #endif
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
@@ -1656,6 +1675,25 @@ ossl_connect_step1(struct connectdata *conn,
 
 #ifdef USE_NGHTTP2
   SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb, conn);
+
+#ifdef HAS_ALPN
+  protocols[0] = NGHTTP2_PROTO_VERSION_ID_LEN;
+  memcpy(&protocols[1], NGHTTP2_PROTO_VERSION_ID,
+      NGHTTP2_PROTO_VERSION_ID_LEN);
+
+  protocols[NGHTTP2_PROTO_VERSION_ID_LEN+1] = ALPN_HTTP_1_1_LENGTH;
+  memcpy(&protocols[NGHTTP2_PROTO_VERSION_ID_LEN+2], ALPN_HTTP_1_1,
+      ALPN_HTTP_1_1_LENGTH);
+
+  /* expects length prefixed preference ordered list of protocols in wire
+   * format
+   */
+  SSL_CTX_set_alpn_protos(connssl->ctx, protocols,
+      NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH + 2);
+
+  infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
+        ALPN_HTTP_1_1);
+#endif
 #endif
 
   if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
@@ -1829,6 +1867,10 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   int err;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+#ifdef HAS_ALPN
+  char* neg_protocol;
+  int len = 0;
+#endif
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
@@ -1924,6 +1966,28 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
     /* Informational message */
     infof (data, "SSL connection using %s\n",
            SSL_get_cipher(connssl->handle));
+
+#ifdef HAS_ALPN
+    /* Sets data and len to negotiated protocol, len is 0 if no protocol was
+     * negotiated
+     */
+    SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
+    if(len != 0) {
+      infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
+
+      if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
+         memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
+           conn->negnpn = NPN_HTTP2_DRAFT09;
+      }
+      else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
+          neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
+        conn->negnpn = NPN_HTTP1_1;
+      }
+    }
+    else {
+      infof(data, "ALPN, server did not agree to a protocol\n");
+    }
+#endif
 
     return CURLE_OK;
   }
