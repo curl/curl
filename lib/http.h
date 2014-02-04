@@ -168,6 +168,10 @@ struct http_conn {
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
                                   fed into upper layer */
   int32_t stream_id; /* stream we are interested in */
+  const uint8_t *data; /* pointer to data chunk, received in
+                          on_data_chunk */
+  size_t datalen; /* the number of bytes left in data */
+  char *inbuf; /* buffer to receive data from underlying socket */
 #else
   int unused; /* prevent a compiler warning */
 #endif

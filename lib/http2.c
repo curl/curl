@@ -166,6 +166,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  size_t nread;
   (void)session;
   (void)flags;
   (void)data;
@@ -176,16 +177,19 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     return 0;
   }
 
-  if(len <= c->len) {
-    memcpy(c->mem, data, len);
-    c->mem += len;
-    c->len -= len;
-  }
-  else {
-    infof(conn->data, "EEEEEEK: %d > %d\n", len, c->len);
-    /* return NGHTTP2_ERR_PAUSE; */
-  }
+  nread = c->len < len ? c->len : len;
+  memcpy(c->mem, data, nread);
 
+  c->mem += nread;
+  c->len -= nread;
+
+  infof(conn->data, "%zu data written\n", nread);
+
+  if(nread < len) {
+    c->data = data + nread;
+    c->datalen = len - nread;
+    return NGHTTP2_ERR_PAUSE;
+  }
   return 0;
 }
 
@@ -330,14 +334,22 @@ static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
 };
 
+#define H2_BUFSIZE 4096
+
 /*
  * Initialize nghttp2 for a Curl connection
  */
-CURLcode Curl_http2_init(struct connectdata *conn) {
+CURLcode Curl_http2_init(struct connectdata *conn)
+{
   if(!conn->proto.httpc.h2) {
+    int rc;
+    conn->proto.httpc.inbuf = malloc(H2_BUFSIZE);
+    if(conn->proto.httpc.inbuf == NULL)
+      return CURLE_OUT_OF_MEMORY;
+
     /* The nghttp2 session is not yet setup, do it */
-    int rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
-                                        &callbacks, conn);
+    rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
+                                    &callbacks, conn);
     if(rc) {
       failf(conn->data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
@@ -402,8 +414,6 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
-#define H2_BUFSIZE 4096
-
 /*
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
@@ -414,7 +424,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   CURLcode rc;
   ssize_t rv;
   ssize_t nread;
-  char inbuf[H2_BUFSIZE];
   struct http_conn *httpc = &conn->proto.httpc;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
@@ -430,6 +439,21 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return ncopy;
   }
 
+  if(httpc->data) {
+    nread = len < httpc->datalen ? len : httpc->datalen;
+    memcpy(mem, httpc->data, nread);
+
+    httpc->data += nread;
+    httpc->datalen -= nread;
+
+    infof(conn->data, "%zu data written\n", nread);
+    if(httpc->datalen == 0) {
+      httpc->data = NULL;
+      httpc->datalen = 0;
+    }
+    return nread;
+  }
+
   conn->proto.httpc.mem = mem;
   conn->proto.httpc.len = len;
 
@@ -438,7 +462,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   rc = 0;
   nread = ((Curl_recv*)httpc->recv_underlying)(conn, FIRSTSOCKET,
-                                               inbuf, H2_BUFSIZE, &rc);
+                                               httpc->inbuf, H2_BUFSIZE, &rc);
 
   if(rc == CURLE_AGAIN) {
     *err = rc;
@@ -452,7 +476,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
 
   infof(conn->data, "nread=%zd\n", nread);
-  rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
+  rv = nghttp2_session_mem_recv(httpc->h2,
+                                (const uint8_t *)httpc->inbuf, nread);
 
   if(nghttp2_is_fatal((int)rv)) {
     failf(conn->data, "nghttp2_session_mem_recv() returned %d:%s\n",
@@ -612,6 +637,8 @@ int Curl_http2_switched(struct connectdata *conn)
   httpc->closed = FALSE;
   httpc->header_recvbuf = Curl_add_buffer_init();
   httpc->nread_header_recvbuf = 0;
+  httpc->data = NULL;
+  httpc->datalen = 0;
 
   /* Put place holder for status line */
   Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
