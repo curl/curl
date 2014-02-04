@@ -196,7 +196,8 @@ static CURLcode operate_init(struct Configurable *config)
   return CURLE_OK;
 }
 
-static int operate_do(struct Configurable *config, int argc, argv_item_t argv[])
+static int operate_do(struct Configurable *config, int argc,
+                      argv_item_t argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
