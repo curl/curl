@@ -1107,6 +1107,21 @@ is used in conjunction with the user name which can be specified as part of the
 The Bearer Token and user name are formatted according to RFC 6750.
 
 If this option is used several times, the last one will be used.
+.IP "--proxy-header <header>"
+(HTTP) Extra header to use when getting a web page with a proxy. You may
+specify any number of extra headers. This is the equivalent option to \fI-H,
+--header\fP but is for proxy communication only like in CONNECT requests when
+you want a separate header sent to the proxy to what is sent to the actual
+remote host.
+
+curl will make sure that each header you add/replace is sent with the proper
+end-of-line marker, you should thus \fBnot\fP add that as a part of the header
+content: do not add newlines or carriage returns, they will only mess things
+up for you.
+
+This option can be used multiple times to add/replace/remove multiple headers.
+
+(Added in 7.36.0)
 .IP "-p, --proxytunnel"
 When an HTTP proxy is used (\fI-x, --proxy\fP), this option will cause non-HTTP
 protocols to attempt to tunnel through the proxy instead of merely using it to
