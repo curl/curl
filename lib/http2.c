@@ -117,10 +117,23 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)frame;
   infof(conn->data, "on_frame_recv() was called with header %x\n",
         frame->hd.type);
+  if(frame->hd.type == NGHTTP2_HEADERS &&
+     frame->headers.cat == NGHTTP2_HCAT_RESPONSE) {
+    c->bodystarted = TRUE;
+    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
+    c->nread_header_recvbuf = c->len < c->header_recvbuf->size_used ?
+      c->len : c->header_recvbuf->size_used;
+
+    memcpy(c->mem, c->header_recvbuf->buffer, c->nread_header_recvbuf);
+
+    c->mem += c->nread_header_recvbuf;
+    c->len -= c->nread_header_recvbuf;
+  }
   if((frame->hd.type == NGHTTP2_HEADERS || frame->hd.type == NGHTTP2_DATA) &&
      frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
     infof(conn->data, "stream_id=%d closed\n", frame->hd.stream_id);
@@ -151,13 +164,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   (void)data;
   infof(conn->data, "on_data_chunk_recv() "
         "len = %u, stream = %x\n", len, stream_id);
-
-  if(!c->bodystarted) {
-    memcpy(c->mem, "\r\n", 2); /* signal end of headers */
-    c->mem += 2;
-    c->len -= 2;
-    c->bodystarted = TRUE;
-  }
 
   if(len <= c->len) {
     memcpy(c->mem, data, len);
@@ -242,6 +248,8 @@ static int on_begin_headers(nghttp2_session *session,
   return 0;
 }
 
+static const char STATUS[] = ":status";
+
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
 static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                       const uint8_t *name, size_t namelen,
@@ -250,26 +258,23 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
-  size_t hlen = namelen + valuelen + 3; /* colon + CRLF == 3 bytes */
-
   (void)session;
   (void)frame;
 
-  if(namelen && (name[0] == ':')) {
-    /* special case */
-    hlen = snprintf(c->mem, c->len, "HTTP/2.0 %s\r\n", value);
+  if(namelen == sizeof(":status") - 1 &&
+     memcmp(STATUS, name, namelen) == 0) {
+    snprintf(c->header_recvbuf->buffer, 13, "HTTP/2.0 %s", value);
+    c->header_recvbuf->buffer[12] = '\r';
+    return 0;
   }
-  else if(hlen + 1 < c->len) { /* hlen + a zero byte */
+  else {
     /* convert to a HTTP1-style header */
-    memcpy(c->mem, name, namelen);
-    c->mem[namelen]=':';
-    memcpy(&c->mem[namelen+1], value, valuelen);
-    c->mem[namelen + valuelen + 1]='\r';
-    c->mem[namelen + valuelen + 2]='\n';
-    c->mem[namelen + valuelen + 3]=0; /* to display this easier */
+    infof(conn->data, "got header\n");
+    Curl_add_buffer(c->header_recvbuf, name, namelen);
+    Curl_add_buffer(c->header_recvbuf, ":", 1);
+    Curl_add_buffer(c->header_recvbuf, value, valuelen);
+    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
   }
-  c->mem += hlen;
-  c->len -= hlen;
 
   return 0; /* 0 is successful */
 }
@@ -388,6 +393,17 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   struct http_conn *httpc = &conn->proto.httpc;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
+
+  if(httpc->bodystarted &&
+     httpc->nread_header_recvbuf < httpc->header_recvbuf->size_used) {
+    size_t left =
+      httpc->header_recvbuf->size_used - httpc->nread_header_recvbuf;
+    size_t ncopy = len < left ? len : left;
+    memcpy(mem, httpc->header_recvbuf->buffer + httpc->nread_header_recvbuf,
+           ncopy);
+    httpc->nread_header_recvbuf += ncopy;
+    return ncopy;
+  }
 
   conn->proto.httpc.mem = mem;
   conn->proto.httpc.len = len;
@@ -569,6 +585,11 @@ int Curl_http2_switched(struct connectdata *conn)
   infof(conn->data, "We have switched to HTTP2\n");
   httpc->bodystarted = FALSE;
   httpc->closed = FALSE;
+  httpc->header_recvbuf = Curl_add_buffer_init();
+  httpc->nread_header_recvbuf = 0;
+
+  /* Put place holder for status line */
+  Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
 
   /* TODO: May get CURLE_AGAIN */
   rv = (int) ((Curl_send*)httpc->send_underlying)

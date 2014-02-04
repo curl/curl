@@ -164,6 +164,9 @@ struct http_conn {
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   bool closed; /* TRUE on HTTP2 stream close */
+  Curl_send_buffer *header_recvbuf; /* store response headers */
+  size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
+                                  fed into upper layer */
 #else
   int unused; /* prevent a compiler warning */
 #endif
