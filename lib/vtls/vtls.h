@@ -27,6 +27,10 @@
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
 #endif
 
+/* see http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
+#define ALPN_HTTP_1_1_LENGTH 8
+#define ALPN_HTTP_1_1 "http/1.0"
+
 bool Curl_ssl_config_matches(struct ssl_config_data* data,
                              struct ssl_config_data* needle);
 bool Curl_clone_ssl_config(struct ssl_config_data* source,

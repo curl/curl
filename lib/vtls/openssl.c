@@ -1415,13 +1415,6 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #endif
 
 
-/* see http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
-#ifdef HAS_ALPN
-#define ALPN_HTTP_1_1_LENGTH 8
-#define ALPN_HTTP_1_1 "http/1.0"
-#endif
-
-
 /*
  * in is a list of lenght prefixed strings. this function has to select
  * the protocol we want to use from the list and write its string into out.

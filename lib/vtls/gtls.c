@@ -89,6 +89,15 @@ static bool gtls_inited = FALSE;
 #  if (GNUTLS_VERSION_NUMBER >= 0x020c03)
 #    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
+
+#  ifdef USE_NGHTTP2
+#    undef HAS_ALPN
+#    if (GNUTLS_VERSION_NUMBER >= 0x030200)
+#      define HAS_ALPN
+#    else
+#      error http2 builds require GnuTLS >= 3.2.0 for ALPN support
+#    endif
+#  endif
 #endif
 
 /*
@@ -374,6 +383,10 @@ gtls_connect_step1(struct connectdata *conn,
   const char* prioritylist;
   const char *err;
 #endif
+#ifdef HAS_ALPN
+  int protocols_size = 2;
+  gnutls_datum_t protocols[2];
+#endif
 
   if(conn->ssl[sockindex].state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -556,6 +569,15 @@ gtls_connect_step1(struct connectdata *conn,
   rc = gnutls_priority_set_direct(session, prioritylist, &err);
 #endif
 
+#ifdef HAS_ALPN
+  protocols[0].data = NGHTTP2_PROTO_VERSION_ID;
+  protocols[0].size = NGHTTP2_PROTO_VERSION_ID_LEN;
+  protocols[1].data = ALPN_HTTP_1_1;
+  protocols[1].size = ALPN_HTTP_1_1_LENGTH;
+  gnutls_alpn_set_protocols(session, protocols, protocols_size, 0);
+  infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
+        ALPN_HTTP_1_1);
+#endif
 
   if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "Did you pass a valid GnuTLS cipher list?");
@@ -637,6 +659,9 @@ gtls_connect_step3(struct connectdata *conn,
   int rc;
   int incache;
   void *ssl_sessionid;
+#ifdef HAS_ALPN
+  gnutls_datum_t proto;
+#endif
   CURLcode result = CURLE_OK;
 
   /* This function will return the peer's raw certificate (chain) as sent by
@@ -840,6 +865,26 @@ gtls_connect_step3(struct connectdata *conn,
   /* the MAC algorithms name. ie SHA1 */
   ptr = gnutls_mac_get_name(gnutls_mac_get(session));
   infof(data, "\t MAC: %s\n", ptr);
+
+#ifdef HAS_ALPN
+  rc = gnutls_alpn_get_selected_protocol(session, &proto);
+  if(rc == 0) {
+    infof(data, "ALPN, server accepted to use %.*s\n", proto.size, proto.data);
+
+    if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
+      memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
+      NGHTTP2_PROTO_VERSION_ID_LEN) == 0) {
+      conn->negnpn = NPN_HTTP2_DRAFT09;
+    }
+    else if(proto.size == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
+        proto.data, ALPN_HTTP_1_1_LENGTH) == 0) {
+      conn->negnpn = NPN_HTTP1_1;
+    }
+  }
+  else {
+    infof(data, "ALPN, server did not agree to a protocol\n");
+  }
+#endif
 
   conn->ssl[sockindex].state = ssl_connection_complete;
   conn->recv[sockindex] = gtls_recv;
