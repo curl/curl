@@ -120,6 +120,7 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->prequote);
 
   curl_slist_free_all(config->headers);
+  curl_slist_free_all(config->proxyheaders);
 
   if(config->httppost) {
     curl_formfree(config->httppost);

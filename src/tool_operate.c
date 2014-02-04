@@ -947,6 +947,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
           my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
+          /* new in libcurl 7.36.0 */
+          if(config->proxyheaders) {
+            my_setopt_slist(curl, CURLOPT_PROXYHEADER, config->proxyheaders);
+            my_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
+          }
+
           /* new in libcurl 7.5 */
           my_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
 

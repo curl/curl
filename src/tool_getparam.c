@@ -222,6 +222,7 @@ static const struct LongShort aliases[]= {
   {"G",  "get",                      FALSE},
   {"h",  "help",                     FALSE},
   {"H",  "header",                   TRUE},
+  {"Hp", "proxy-header",             TRUE},
   {"i",  "include",                  FALSE},
   {"I",  "head",                     FALSE},
   {"j",  "junk-session-cookies",     FALSE},
@@ -1404,7 +1405,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'H':
       /* A custom header to append to a list */
-      err = add2list(&config->headers, nextarg);
+      if(subletter == 'p') /* --proxy-header */
+        err = add2list(&config->proxyheaders, nextarg);
+      else
+        err = add2list(&config->headers, nextarg);
       if(err)
         return err;
       break;

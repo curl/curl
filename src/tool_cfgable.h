@@ -143,6 +143,7 @@ struct OperationConfig {
   curl_TimeCond timecond;
   time_t condtime;
   struct curl_slist *headers;
+  struct curl_slist *proxyheaders;
   struct curl_httppost *httppost;
   struct curl_httppost *last_post;
   struct curl_slist *telnet_options;
