@@ -1081,6 +1081,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.proxyheaders = va_arg(param, struct curl_slist *);
     break;
 
+  case CURLOPT_HEADEROPT:
+    /*
+     * Set header option.
+     */
+    arg = va_arg(param, long);
+    data->set.sep_headers = (arg & CURLHEADER_SEPARATE)? TRUE: FALSE;
+    break;
+
   case CURLOPT_HTTP200ALIASES:
     /*
      * Set a list of aliases for HTTP 200 in response header

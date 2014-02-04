@@ -1467,6 +1467,7 @@ struct UserDefined {
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
   struct curl_httppost *httppost;  /* linked list of POST data */
+  bool sep_headers;     /* handle host and proxy headers separately */
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
   struct curl_slist *quote;     /* after connection is established */

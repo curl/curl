@@ -200,7 +200,7 @@ char *Curl_checkProxyheaders(const struct connectdata *conn,
   size_t thislen = strlen(thisheader);
   struct SessionHandle *data = conn->data;
 
-  for(head = (conn->bits.proxy && data->set.proxyheaders)?
+  for(head = (conn->bits.proxy && data->set.sep_headers)?
         data->set.proxyheaders:data->set.headers;
       head; head=head->next) {
     if(Curl_raw_nequal(head->data, thisheader, thislen))
@@ -1550,7 +1550,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
 {
   char *ptr;
   struct curl_slist *headers=
-    (is_proxy && conn->data->set.proxyheaders)?
+    (is_proxy && conn->data->set.sep_headers)?
     conn->data->set.proxyheaders:conn->data->set.headers;
 
   while(headers) {

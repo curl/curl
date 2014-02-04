@@ -72,6 +72,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_PROXYHEADER, phl);
+  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   test_setopt(curl, CURLOPT_POST, 0L);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

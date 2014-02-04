@@ -754,6 +754,10 @@ typedef enum {
   CURLFTPMETHOD_LAST       /* not an option, never use */
 } curl_ftpmethod;
 
+/* bitmask defines for CURLOPT_HEADEROPT */
+#define CURLHEADER_UNIFIED  0
+#define CURLHEADER_SEPARATE (1<<0)
+
 /* CURLPROTO_ defines are for the CURLOPT_*PROTOCOLS options */
 #define CURLPROTO_HTTP   (1<<0)
 #define CURLPROTO_HTTPS  (1<<1)
@@ -1585,6 +1589,9 @@ typedef enum {
   /* This points to a linked list of headers used for proxy requests only,
      struct curl_slist kind */
   CINIT(PROXYHEADER, OBJECTPOINT, 228),
+
+  /* Pass in a bitmask of "header options" */
+  CINIT(HEADEROPT, LONG, 229),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -46,7 +46,7 @@ http-proxy
 lib1525
 </tool>
  <name>
-CURLOPT_PROXYHEADER: same headers for host and proxy
+CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
  </name>
  <command>
  http://the.old.moo.1525:%HTTPPORT/1525 %HOSTIP:%PROXYPORT
