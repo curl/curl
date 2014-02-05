@@ -2349,7 +2349,7 @@ sub checksystem {
                $has_darwinssl=1;
                $ssllib="DarwinSSL";
            }
-           elsif ($libcurl =~ /ares/i) {
+           if ($libcurl =~ /ares/i) {
                $has_cares=1;
                $resolver="c-ares";
            }
