@@ -193,6 +193,11 @@ static CURLcode operate_init(struct Configurable *config)
     return CURLE_FAILED_INIT;
   }
 
+  /* Setup proper locale from environment */
+#ifdef HAVE_SETLOCALE
+  setlocale(LC_ALL, "");
+#endif
+
   return CURLE_OK;
 }
 
@@ -229,11 +234,6 @@ static int operate_do(struct Configurable *config, int argc,
   ** Jump to label 'quit_curl' in order to abandon this function
   ** from outside of nested loops further down below.
   */
-
-  /* setup proper locale from environment */
-#ifdef HAVE_SETLOCALE
-  setlocale(LC_ALL, "");
-#endif
 
   /* Parse .curlrc if necessary */
   if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
