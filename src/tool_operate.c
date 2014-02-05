@@ -235,18 +235,6 @@ static int operate_do(struct Configurable *config, int argc,
   ** from outside of nested loops further down below.
   */
 
-  /* Parse .curlrc if necessary */
-  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
-    parseconfig(NULL, config); /* ignore possible failure */
-
-    /* If we had no arguments then make sure a url was specified in .curlrc */
-    if((argc < 2) && (!config->url_list)) {
-      helpf(config->errors, NULL);
-      res = CURLE_FAILED_INIT;
-      goto quit_curl;
-    }
-  }
-
   /* Parse the command line arguments */
   res = parse_args(config, argc, argv);
   if(res) {
@@ -1856,8 +1844,20 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   if(result)
     return result;
 
-  /* Perform the main operation */
-  result = operate_do(config, argc, argv);
+  /* Parse .curlrc if necessary */
+  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
+    parseconfig(NULL, config); /* ignore possible failure */
+
+    /* If we had no arguments then make sure a url was specified in .curlrc */
+    if((argc < 2) && (!config->url_list)) {
+      helpf(config->errors, NULL);
+      result = CURLE_FAILED_INIT;
+    }
+  }
+
+  if(!result)
+    /* Perform the main operation */
+    result = operate_do(config, argc, argv);
 
   /* Perform the cleanup */
   operate_free(config);
