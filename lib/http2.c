@@ -410,7 +410,6 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   free(base64);
 
   k->upgr101 = UPGR101_REQUESTED;
-  k->auto_decoding = GZIP;
 
   return result;
 }
@@ -641,7 +640,7 @@ int Curl_http2_switched(struct connectdata *conn)
   httpc->data = NULL;
   httpc->datalen = 0;
 
-  conn->data->req.auto_decoding = GZIP;
+  conn->httpversion = 20;
 
   /* Put place holder for status line */
   Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
