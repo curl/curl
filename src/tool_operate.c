@@ -235,17 +235,6 @@ static int operate_do(struct Configurable *config, int argc,
   ** from outside of nested loops further down below.
   */
 
-  /* Parse the command line arguments */
-  res = parse_args(config, argc, argv);
-  if(res) {
-    if(res != PARAM_HELP_REQUESTED)
-      res = CURLE_FAILED_INIT;
-    else
-      res = CURLE_OK;
-
-    goto quit_curl;
-  }
-
   if(config->userpwd && !config->xoauth2_bearer) {
     res = checkpasswd("host", &config->userpwd);
     if(res)
@@ -1855,9 +1844,19 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
-  if(!result)
+  if(!result) {
+    /* Parse the command line arguments */
+    ParameterError res = parse_args(config, argc, argv);
+    if(res) {
+      if(res != PARAM_HELP_REQUESTED)
+        result = CURLE_FAILED_INIT;
+      else
+        result = CURLE_OK;
+    }
     /* Perform the main operation */
-    result = operate_do(config, argc, argv);
+    else
+      result = operate_do(config, argc, argv);
+  }
 
   /* Perform the cleanup */
   operate_free(config);
