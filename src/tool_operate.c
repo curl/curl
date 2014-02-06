@@ -247,7 +247,7 @@ static int operate_do(struct Configurable *config, int argc,
       goto quit_curl;
   }
 
-  if((!config->url_list || !config->url_list->url) && !config->list_engines) {
+  if(!config->url_list || !config->url_list->url) {
     helpf(config->errors, "no URL specified!\n");
     res = CURLE_FAILED_INIT;
     goto quit_curl;
@@ -352,15 +352,6 @@ static int operate_do(struct Configurable *config, int argc,
     goto quit_curl;
   }
 #endif
-
-  if(config->list_engines) {
-    struct curl_slist *engines = NULL;
-    curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
-    list_engines(engines);
-    curl_slist_free_all(engines);
-    res = CURLE_OK;
-    goto quit_curl;
-  }
 
   /* Single header file for all URLs */
   if(config->headerfile) {
@@ -1852,6 +1843,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         result = CURLE_FAILED_INIT;
       else
         result = CURLE_OK;
+    }
+    /* Check if we were asked to list the SSL engines */
+    else if(config->list_engines) {
+      struct curl_slist *engines = NULL;
+      curl_easy_getinfo(config->easy, CURLINFO_SSL_ENGINES, &engines);
+      list_engines(engines);
+      curl_slist_free_all(engines);
     }
     /* Perform the main operation */
     else
