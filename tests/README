@@ -144,7 +144,9 @@ The cURL Test Suite
   runtests.pl's -t option will enable torture testing mode, which runs each
   test many times and makes each different memory allocation fail on each
   successive run.  This tests the out of memory error handling code to ensure
-  that memory leaks do not occur even in those situations.
+  that memory leaks do not occur even in those situations. It can help to
+  compile curl with CPPFLAGS=-DMEMDEBUG_LOG_SYNC when using this option, to
+  ensure that the memory log file is properly written even if curl crashes.
 
  1.7 Debug
 
