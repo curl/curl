@@ -12,6 +12,8 @@ HTTP2 with libcurl
 
   Right now, nghttp2 implements http2 draft-09
 
+  We require at least version 0.3.0
+
  Over an http:// URL
 
   If CURLOPT_HTTP_VERSION is set to CURL_HTTP_VERSION_2, libcurl will include
@@ -32,7 +34,7 @@ HTTP2 with libcurl
 SSL libs
 
   The challange is the ALPN and NPN support and all our different SSL
-  backends.  Right now we support ALPN and VPN with OpenSSL and ALPN with
+  backends.  Right now we support ALPN and NPN with OpenSSL and ALPN with
   GnuTLS.
 
 Applications
