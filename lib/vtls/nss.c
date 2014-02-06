@@ -1193,8 +1193,9 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
     if(data->state.ssl_connect_retry) {
       infof(data, "TLS disabled due to previous handshake failure\n");
       sslver->max = SSL_LIBRARY_VERSION_3_0;
+      return CURLE_OK;
     }
-    return CURLE_OK;
+  /* intentional fall-through to default to highest TLS version if possible */
 
   case CURL_SSLVERSION_TLSv1:
     sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
