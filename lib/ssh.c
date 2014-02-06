@@ -932,6 +932,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             infof(data, "Could not create agent object\n");
 
             state(conn, SSH_AUTH_KEY_INIT);
+            break;
           }
         }
 
