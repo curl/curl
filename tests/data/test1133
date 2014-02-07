@@ -40,7 +40,7 @@ foo
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|Content-Type: multipart/mixed, boundary=|-------).*
+^(User-Agent:|Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
 POST /we/want/1133 HTTP/1.1
@@ -71,7 +71,7 @@ foo
 
 ------------------------------24e78000bd32
 Content-Disposition: form-data; name="file3"
-Content-Type: multipart/mixed, boundary=----------------------------7f0e85a48b0b
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
 
 Content-Disposition: attachment; filename="test1133,a\"nd;.txt"
 Content-Type: m/f
