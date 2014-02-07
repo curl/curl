@@ -614,8 +614,43 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
  */
 static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
+  struct connectdata *conn = (struct connectdata*) arg;
+
+#ifndef USE_NGHTTP2
   (void)sock;
-  (void)arg;
+  (void)conn;
+#else
+  unsigned int buflenmax = 50;
+  unsigned char buf[50];
+  unsigned int buflen;
+  SSLNextProtoState state;
+
+  if(SSL_GetNextProto(sock, &state, buf, &buflen, buflenmax) == SECSuccess) {
+
+    switch(state) {
+      case SSL_NEXT_PROTO_NO_SUPPORT:
+      case SSL_NEXT_PROTO_NO_OVERLAP:
+        infof(conn->data, "TLS, neither ALPN nor NPN succeeded\n");
+        return;
+      case SSL_NEXT_PROTO_SELECTED:
+        infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
+        break;
+      case SSL_NEXT_PROTO_NEGOTIATED:
+        infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
+        break;
+    }
+
+    if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
+        memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)
+        == 0) {
+      conn->negnpn = NPN_HTTP2_DRAFT09;
+    }
+    else if(buflen == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1, buf,
+        ALPN_HTTP_1_1_LENGTH)) {
+      conn->negnpn = NPN_HTTP1_1;
+    }
+  }
+#endif
 }
 
 static void display_cert_info(struct SessionHandle *data,
@@ -1264,6 +1299,16 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     SSL_LIBRARY_VERSION_TLS_1_0   /* max */
   };
 
+#ifdef USE_NGHTTP2
+#if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
+  unsigned int alpn_protos_len = NGHTTP2_PROTO_VERSION_ID_LEN +
+      ALPN_HTTP_1_1_LENGTH + 2;
+  unsigned char alpn_protos[NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH
+      + 2];
+  int cur = 0;
+#endif
+#endif
+
   if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
@@ -1374,7 +1419,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(SSL_BadCertHook(model, BadCertHandler, conn) != SECSuccess)
     goto error;
 
-  if(SSL_HandshakeCallback(model, HandshakeCallback, NULL) != SECSuccess)
+  if(SSL_HandshakeCallback(model, HandshakeCallback, conn) != SECSuccess)
     goto error;
 
   if(data->set.ssl.verifypeer) {
@@ -1436,6 +1481,33 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   if(data->set.str[STRING_KEY_PASSWD]) {
     SSL_SetPKCS11PinArg(connssl->handle, data->set.str[STRING_KEY_PASSWD]);
   }
+
+#ifdef USE_NGHTTP2
+#ifdef SSL_ENABLE_NPN
+  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
+    goto error;
+#endif
+
+#ifdef SSL_ENABLE_ALPN
+  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE) != SECSuccess)
+    goto error;
+#endif
+
+#if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
+  alpn_protos[cur] = NGHTTP2_PROTO_VERSION_ID_LEN;
+  cur++;
+  memcpy(&alpn_protos[cur], NGHTTP2_PROTO_VERSION_ID,
+      NGHTTP2_PROTO_VERSION_ID_LEN);
+  cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+  alpn_protos[cur] = ALPN_HTTP_1_1_LENGTH;
+  cur++;
+  memcpy(&alpn_protos[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+
+  if(SSL_SetNextProtoNego(connssl->handle, alpn_protos, alpn_protos_len)
+      != SECSuccess)
+    goto error;
+#endif
+#endif
 
   /* Force handshake on next I/O */
   SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE);
