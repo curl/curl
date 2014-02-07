@@ -3334,6 +3334,13 @@ sub singletest {
         $DBGCURL=$CMDLINE;
     }
 
+    if($gdbthis) {
+        # gdb is incompatible with valgrind, so disable it when debugging
+        # Perhaps a better approach would be to run it under valgrind anyway
+        # with --db-attach=yes or --vgdb=yes.
+        $disablevalgrind=1;
+    }
+
     if($fail_due_event_based) {
         logmsg "This test cannot run event based\n";
         return -1;
