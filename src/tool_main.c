@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 
   if(config) {
     /* Initialise the config */
-    init_config(config);
+    config_init(config);
 
     /* Initialize the curl library - do not call any libcurl functions before
        this point */

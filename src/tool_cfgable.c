@@ -26,7 +26,7 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-void init_config(struct Configurable* config)
+void config_init(struct Configurable* config)
 {
   memset(config, 0, sizeof(struct Configurable));
 
