@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
 #endif
 
     /* Free the config structure */
-    free_config_fields(config);
-    Curl_safefree(config);
+    config_free(config);
+    config = NULL;
   }
   else {
     helpf(stderr, "error initializing curl\n");

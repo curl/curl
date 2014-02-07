@@ -43,7 +43,7 @@ void init_config(struct Configurable* config)
   config->proto_redir_present = FALSE;
 }
 
-void free_config_fields(struct Configurable *config)
+static void free_config_fields(struct Configurable *config)
 {
   struct getout *urlnode;
 
@@ -149,4 +149,10 @@ void free_config_fields(struct Configurable *config)
   Curl_safefree(config->ftp_alternative_to_user);
 
   Curl_safefree(config->libcurl);
+}
+
+void config_free(struct Configurable *config)
+{
+  free_config_fields(config);
+  free(config);
 }

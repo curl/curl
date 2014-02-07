@@ -217,6 +217,6 @@ struct Configurable {
 }; /* struct Configurable */
 
 void init_config(struct Configurable* config);
-void free_config_fields(struct Configurable *config);
+void config_free(struct Configurable* config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
