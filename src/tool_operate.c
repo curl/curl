@@ -1773,12 +1773,6 @@ static int operate_do(struct Configurable *config)
   /* Free list of given URLs */
   clean_getout(config);
 
-  /* Cleanup the curl handle now that our
-     progressbar struct is still in scope */
-  if(curl) {
-    curl_easy_cleanup(curl);
-    config->easy = curl = NULL;
-  }
 #ifndef CURL_DISABLE_LIBCURL_OPTION
   easysrc_cleanup();
 #endif
