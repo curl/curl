@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,13 +19,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
- 
+
 /*
  * Check for bugs #1303 and #1327: libcurl should never remove DNS entries
  * created via CURLOPT_RESOLVE, neither after DNS_CACHE_TIMEOUT elapses
  * (test1515) nor a dead connection is detected (test1616).
  */
- 
+
 #include "test.h"
 #include "testutil.h"
 #include "warnless.h"
@@ -35,15 +35,18 @@
 
 #define DNS_TIMEOUT 1
 
-int debug_callback(CURL *curl, curl_infotype info, char *msg, size_t len, void *ptr)
+static int debug_callback(CURL *curl, curl_infotype info, char *msg, size_t len, void *ptr)
 {
-  if (info == CURLINFO_TEXT)
+  (void)curl;
+  (void)ptr;
+
+  if(info == CURLINFO_TEXT)
     fprintf(stderr, "debug: %.*s", (int) len, msg);
 
   return 0;
 }
 
-int do_one_request(CURLM *m, char *URL, char *resolve)
+static int do_one_request(CURLM *m, char *URL, char *resolve)
 {
   CURL *curls;
   struct curl_slist *resolve_list = NULL;
@@ -51,24 +54,23 @@ int do_one_request(CURLM *m, char *URL, char *resolve)
   int res = 0;
   CURLMsg *msg;
   int msgs_left;
-  
+
   resolve_list = curl_slist_append(resolve_list, resolve);
-  
+
   easy_init(curls);
-  
+
   easy_setopt(curls, CURLOPT_URL, URL);
   easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, debug_callback);
   easy_setopt(curls, CURLOPT_VERBOSE, 1);
   easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
-  
+
   multi_add_handle(m, curls);
   multi_perform(m, &still_running);
-  
+
   abort_on_test_timeout();
 
-  while (still_running)
-  {
+  while(still_running) {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;
@@ -88,20 +90,19 @@ int do_one_request(CURLM *m, char *URL, char *resolve)
     abort_on_test_timeout();
   }
 
-  while ((msg = curl_multi_info_read(m, &msgs_left)))
-  {
-    if (msg->msg == CURLMSG_DONE && msg->easy_handle == curls)
-    {
+  while((msg = curl_multi_info_read(m, &msgs_left))) {
+    if(msg->msg == CURLMSG_DONE && msg->easy_handle == curls) {
       res = msg->data.result;
       break;
     }
   }
-  
+
 test_cleanup:
+
   curl_multi_remove_handle(m, curls);
   curl_easy_cleanup(curls);
   curl_slist_free_all(resolve_list);
-  
+
   return res;
 }
 
@@ -117,24 +118,26 @@ int test(char *URL)
   int count = 2;
 
   snprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s", port, address);
-  char target_url[256];
-  
+
   start_test_timing();
-  
+
   global_init(CURL_GLOBAL_ALL);
   multi_init(multi);
-  
-  for (i = 1; i <= count; i++)
-  {
+
+  for(i = 1; i <= count; i++) {
+    char target_url[256];
     snprintf(target_url, sizeof(target_url), "http://testserver.example.com:%s%s%04d", port, path, i);
+
     /* second request must succeed like the first one */
-    if ((res = do_one_request(multi, target_url, dns_entry)))
+    if((res = do_one_request(multi, target_url, dns_entry)))
       goto test_cleanup;
-    if (i < count)
+
+    if(i < count)
       sleep(DNS_TIMEOUT + 1);
   }
 
 test_cleanup:
+
   curl_multi_cleanup(multi);
 
   return (int) res;
