@@ -153,6 +153,21 @@ static void free_config_fields(struct Configurable *config)
 
 void config_free(struct Configurable *config)
 {
-  free_config_fields(config);
-  free(config);
+  struct Configurable *last = config;
+
+  /* Find the last config structure */
+  while(last->next)
+    last = last->next;
+
+  /* Free each of the structures in reverse order */
+  do {
+    struct Configurable *prev = last->prev;
+    if(prev)
+      last->easy = NULL;
+
+    free_config_fields(last);
+    free(last);
+
+    last = prev;
+  } while(last);
 }

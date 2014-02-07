@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
       tool_pressanykey();
 #endif
 
-    /* Free the config structure */
+    /* Free the config structures */
     config_free(config);
     config = NULL;
   }

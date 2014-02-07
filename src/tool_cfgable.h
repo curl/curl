@@ -213,8 +213,11 @@ struct Configurable {
 #ifdef CURLDEBUG
   bool test_event_based;
 #endif
-  char *xoauth2_bearer;     /* XOAUTH2 bearer token */
-}; /* struct Configurable */
+  char *xoauth2_bearer;       /* XOAUTH2 bearer token */
+
+  struct Configurable* prev;
+  struct Configurable* next;  /* Always last in the struct */
+};
 
 void config_init(struct Configurable* config);
 void config_free(struct Configurable* config);

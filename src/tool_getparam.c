@@ -1859,7 +1859,29 @@ ParameterError parse_args(struct Configurable *config, int argc,
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
     orig_opt = argv[i];
 
-    if(stillflags && ('-' == argv[i][0])) {
+    if(curlx_strequal(":", argv[i]) &&
+       ((config->url_list && config->url_list->url) || config->list_engines)) {
+
+      /* Allocate the next config */
+      config->next = malloc(sizeof(struct Configurable));
+      if(config->next) {
+        /* Initialise the newly created config */
+        config_init(config->next);
+
+        /* Copy the easy handle */
+        config->next->easy = config->easy;
+
+        /* Move onto the new config */
+        config->next->prev = config;
+        config = config->next;
+
+        /* Reset the flag indicator */
+        stillflags = TRUE;
+      }
+      else
+        result = PARAM_NO_MEM;
+    }
+    else if(stillflags && ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
       char *flag = argv[i];
@@ -1886,7 +1908,11 @@ ParameterError parse_args(struct Configurable *config, int argc,
 
   if(result && result != PARAM_HELP_REQUESTED) {
     const char *reason = param2text(result);
-    helpf(config->errors, "option %s: %s\n", orig_opt, reason);
+
+    if(!curlx_strequal(":", orig_opt))
+      helpf(config->errors, "option %s: %s\n", orig_opt, reason);
+    else
+      helpf(config->errors, "%s\n", reason);
   }
 
   return result;
