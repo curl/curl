@@ -632,21 +632,23 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       case SSL_NEXT_PROTO_NO_OVERLAP:
         infof(conn->data, "TLS, neither ALPN nor NPN succeeded\n");
         return;
+#ifdef SSL_NEXT_PROTO_SELECTED
       case SSL_NEXT_PROTO_SELECTED:
         infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
         break;
+#endif
       case SSL_NEXT_PROTO_NEGOTIATED:
         infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
         break;
     }
 
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
-        memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)
-        == 0) {
+       memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)
+       == 0) {
       conn->negnpn = NPN_HTTP2_DRAFT09;
     }
     else if(buflen == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1, buf,
-        ALPN_HTTP_1_1_LENGTH)) {
+                                                     ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = NPN_HTTP1_1;
     }
   }
