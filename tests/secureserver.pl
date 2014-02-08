@@ -206,7 +206,7 @@ if((!$ver_major) || (!$ver_minor)) {
 $stunnel_version = (100*$ver_major) + $ver_minor;
 
 #***************************************************************************
-# Verify minimmum stunnel required version
+# Verify minimum stunnel required version
 #
 if($stunnel_version < 310) {
     print "$ssltext Unsupported stunnel version $ver_major.$ver_minor\n";
@@ -252,6 +252,7 @@ if($stunnel_version >= 400) {
             CApath = $path
             cert = $certfile
             debug = $loglevel
+            fips = no
             socket = $socketopt";
         if($stunnel !~ /tstunnel(\.exe)?"?$/) {
             print STUNCONF "
@@ -279,8 +280,9 @@ if($stunnel_version >= 400) {
         print "cert = $certfile\n";
         print "pid = $pidfile\n";
         print "debug = $loglevel\n";
-        print "output = $logfile\n";
+        print "fips = no\n";
         print "socket = $socketopt\n";
+        print "output = $logfile\n";
         print "foreground = yes\n";
         print "\n";
         print "[curltest]\n";
