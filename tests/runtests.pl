@@ -3809,9 +3809,16 @@ sub singletest {
             my $strip;
             for $strip (@stripfile) {
                 chomp $strip;
+                my @newgen;
                 for(@generated) {
                     eval $strip;
+                    if($_) {
+                        push @newgen, $_;
+                    }
                 }
+                # this is to get rid of array entries that vanished (zero
+                # length) because of replacements
+                @generated = @newgen;
             }
 
             @outfile = fixarray(@outfile);
