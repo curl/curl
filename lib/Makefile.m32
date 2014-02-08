@@ -285,7 +285,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENC
 	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
 
 %.o: %.c $(PROOT)/include/curl/curlbuild.h
-	$(CC) $(INCLUDES) $(CFLAGS) -c $<
+	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 
 %.res: %.rc
 	$(RC) $(RCFLAGS) $< -o $@
