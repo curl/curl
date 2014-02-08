@@ -1111,7 +1111,7 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
     /* filename need be escaped */
     filename_escaped = malloc(strlen(filename)*2+1);
     if(!filename_escaped) {
-      free(filebasename);
+      Curl_safefree(filebasename);
       return CURLE_OUT_OF_MEMORY;
     }
     p0 = filename_escaped;
