@@ -1786,9 +1786,6 @@ static int operate_do(struct Configurable *config)
   if(heads.alloc_filename)
     Curl_safefree(heads.filename);
 
-  if(config->trace_fopened && config->trace_stream)
-    fclose(config->trace_stream);
-
 #ifndef CURL_DISABLE_LIBCURL_OPTION
   /* Dump the libcurl code if previously enabled.
      NOTE: that this function relies on config->errors amongst other things
@@ -1801,9 +1798,6 @@ static int operate_do(struct Configurable *config)
 
 static void operate_free(struct Configurable *config)
 {
-  if(config->errors_fopened && config->errors)
-    fclose(config->errors);
-
   /* Release metalink related resources here */
   clean_metalink(config);
 }
