@@ -252,8 +252,11 @@ if($stunnel_version >= 400) {
             CApath = $path
             cert = $certfile
             debug = $loglevel
-            fips = no
             socket = $socketopt";
+        if($stunnel_version >= 500) {
+            print STUNCONF "
+            fips = no";
+        }
         if($stunnel !~ /tstunnel(\.exe)?"?$/) {
             print STUNCONF "
             output = $logfile
