@@ -10,6 +10,10 @@ Curl and libcurl 7.35.1
 This release includes the following changes:
 
  o ntlm: Added support for NTLMv2 [2]
+ o tool: Added support for URL specific options [3]
+ o openssl: add ALPN support
+ o gtls: add ALPN support
+ o nss: add ALPN and NPN support
  o 
 
 This release includes the following bugfixes:
@@ -18,6 +22,13 @@ This release includes the following bugfixes:
  o netrc: Fixed a memory leak in an OOM condition
  o ftp: fixed a memory leak on wildcard error path
  o pipeline: Fixed a NULL pointer dereference on OOM
+ o winssl: improved default SSL/TLS protocol selection
+ o nss: prefer highest available TLS version
+ o 100-continue: fix timeout condition [4]
+ o ssh: Fixed a NULL pointer dereference on OOM condition
+ o formpost: use semicolon in multipart/mixed [5]
+ o --help: add missing --tlsv1.x options
+ o formdata: Fixed memory leak on OOM condition
  o 
 
 This release includes the following known bugs:
@@ -28,7 +39,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Dan Fandrich, Daniel Stenberg, Fabian Frank, Gisle Vanem, Kamil Dudka,
-  Prash Dush, Steve Holme, Tatsuhiro Tsujikawa
+  Marc Hoersken, Prash Dush, Remi Gacogne, Rob Davies, Steve Holme,
+  Tatsuhiro Tsujikawa
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +48,6 @@ References to bug reports and discussions on issues:
 
  [1] = https://bugzilla.redhat.com/1058776
  [2] = http://curl.haxx.se/mail/lib-2014-01/0183.html
+ [3] = http://curl.haxx.se/mail/archive-2013-11/0006.html
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1334
+ [5] = http://curl.haxx.se/bug/view.cgi?id=1333
