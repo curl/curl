@@ -87,9 +87,8 @@
  15.3 prevent file overwriting
  15.4 simultaneous parallel transfers
  15.5 provide formpost headers
- 15.6 url-specific options
- 15.7 warning when setting an option
- 15.8 IPv6 addresses with globbing
+ 15.6 warning when setting an option
+ 15.7 IPv6 addresses with globbing
 
  16. Build
  16.1 roffit
@@ -494,27 +493,13 @@ to provide the data to send.
  which should overwrite the program reasonable defaults (plain/text,
  8bit...)
 
-15.6 url-specific options
-
- Provide a way to make options bound to a specific URL among several on the
- command line. Possibly by letting ':' separate options between URLs,
- similar to this:
-
-    curl --data foo --url url.com : \
-        --url url2.com : \
-        --url url3.com --data foo3
-
- (More details: http://curl.haxx.se/mail/archive-2004-07/0133.html)
-
- The example would do a POST-GET-POST combination on a single command line.
-
-15.7 warning when setting an option
+15.6 warning when setting an option
 
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
   compiled into the library.
 
-15.8 IPv6 addresses with globbing
+15.7 IPv6 addresses with globbing
 
   Currently the command line client needs to get url globbing disabled (with
   -g) for it to support IPv6 numerical addresses. This is a rather silly flaw
@@ -590,7 +575,7 @@ to provide the data to send.
  for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
  similar.
 
-10. Next major release
+19. Next major release
 
 19.1 cleanup return codes
 
