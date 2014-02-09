@@ -23,7 +23,7 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP delete message (CUSTOMREQUEST)
+IMAP STORE - delete message (CUSTOMREQUEST)
  </name>
  <command>
 imap://%HOSTIP:%IMAPPORT/815 -X 'STORE 123 +Flags \Deleted' -u user:secret : imap://%HOSTIP:%IMAPPORT/815 -X CLOSE
