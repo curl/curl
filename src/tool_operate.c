@@ -1844,9 +1844,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       list_engines(engines);
       curl_slist_free_all(engines);
     }
-    /* Perform the main operation */
-    else
-      result = operate_do(config);
+    /* Perform the main operations */
+    else {
+      struct Configurable *operation = config;
+
+      while(!result && operation) {
+        result = operate_do(operation);
+
+        operation = operation->next;
+      }
+    }
   }
 
   /* Perform the cleanup */
