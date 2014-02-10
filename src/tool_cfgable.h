@@ -214,6 +214,8 @@ struct Configurable {
   bool test_event_based;
 #endif
   char *xoauth2_bearer;       /* XOAUTH2 bearer token */
+  bool nonpn;                 /* enable/disable TLS NPN extension */
+  bool noalpn;                /* enable/disable TLS ALPN extension */
 
   struct Configurable* prev;
   struct Configurable* next;  /* Always last in the struct */

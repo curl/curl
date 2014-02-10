@@ -90,7 +90,9 @@ static const struct LongShort aliases[]= {
 #endif
   {"*F", "dns-servers",              TRUE},
   {"*g", "trace",                    TRUE},
+  {"*G", "npn",                      FALSE},
   {"*h", "trace-ascii",              TRUE},
+  {"*H", "alpn",                     FALSE},
   {"*i", "limit-rate",               TRUE},
   {"*j", "compressed",               FALSE},
   {"*J", "tr-encoding",              FALSE},
@@ -554,12 +556,18 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           warnf(config, "--trace overrides an earlier trace/verbose option\n");
         config->tracetype = TRACE_BIN;
         break;
+      case 'G': /* --npn */
+        config->nonpn = (!toggle)?TRUE:FALSE;
+        break;
       case 'h': /* --trace-ascii */
         GetStr(&config->trace_dump, nextarg);
         if(config->tracetype && (config->tracetype != TRACE_ASCII))
           warnf(config,
                 "--trace-ascii overrides an earlier trace/verbose option\n");
         config->tracetype = TRACE_ASCII;
+        break;
+      case 'H': /* --alpn */
+        config->noalpn = (!toggle)?TRUE:FALSE;
         break;
       case 'i': /* --limit-rate */
       {

@@ -1571,6 +1571,12 @@ typedef enum {
   /* Set authentication options directly */
   CINIT(LOGIN_OPTIONS, OBJECTPOINT, 224),
 
+  /* Enable/disable TLS NPN extension (http2 over ssl might fail without) */
+  CINIT(SSL_ENABLE_NPN, LONG, 225),
+
+  /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
+  CINIT(SSL_ENABLE_ALPN, LONG, 226),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

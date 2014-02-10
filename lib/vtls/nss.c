@@ -616,14 +616,15 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
 
-#ifndef USE_NGHTTP2
-  (void)sock;
-  (void)conn;
-#else
+#ifdef USE_NGHTTP2
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
   SSLNextProtoState state;
+
+  if(!conn->data->set.ssl_enable_npn && !conn->data->set.ssl_enable_alpn) {
+    return;
+  }
 
   if(SSL_GetNextProto(sock, &state, buf, &buflen, buflenmax) == SECSuccess) {
 
@@ -1311,6 +1312,7 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 #endif
 #endif
 
+
   if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
@@ -1485,31 +1487,44 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   }
 
 #ifdef USE_NGHTTP2
+  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
 #ifdef SSL_ENABLE_NPN
-  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
-    goto error;
+    if(data->set.ssl_enable_npn) {
+      if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
+        goto error;
+    }
 #endif
 
 #ifdef SSL_ENABLE_ALPN
-  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE) != SECSuccess)
-    goto error;
+    if(data->set.ssl_enable_alpn) {
+      if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE)
+          != SECSuccess)
+        goto error;
+    }
 #endif
 
 #if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
-  alpn_protos[cur] = NGHTTP2_PROTO_VERSION_ID_LEN;
-  cur++;
-  memcpy(&alpn_protos[cur], NGHTTP2_PROTO_VERSION_ID,
-      NGHTTP2_PROTO_VERSION_ID_LEN);
-  cur += NGHTTP2_PROTO_VERSION_ID_LEN;
-  alpn_protos[cur] = ALPN_HTTP_1_1_LENGTH;
-  cur++;
-  memcpy(&alpn_protos[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+    if(data->set.ssl_enable_npn || data->set.ssl_enable_alpn) {
+      alpn_protos[cur] = NGHTTP2_PROTO_VERSION_ID_LEN;
+      cur++;
+      memcpy(&alpn_protos[cur], NGHTTP2_PROTO_VERSION_ID,
+          NGHTTP2_PROTO_VERSION_ID_LEN);
+      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+      alpn_protos[cur] = ALPN_HTTP_1_1_LENGTH;
+      cur++;
+      memcpy(&alpn_protos[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
 
-  if(SSL_SetNextProtoNego(connssl->handle, alpn_protos, alpn_protos_len)
-      != SECSuccess)
-    goto error;
+      if(SSL_SetNextProtoNego(connssl->handle, alpn_protos, alpn_protos_len)
+          != SECSuccess)
+        goto error;
+    }
+    else {
+      infof(data, "SSL, can't negotiate HTTP/2.0 with neither NPN nor ALPN\n");
+    }
 #endif
+  }
 #endif
+
 
   /* Force handshake on next I/O */
   SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE);

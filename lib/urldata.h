@@ -1593,6 +1593,9 @@ struct UserDefined {
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
 
   size_t maxconnects;  /* Max idle connections in the connection cache */
+
+  bool ssl_enable_npn;  /* TLS NPN extension? */
+  bool ssl_enable_alpn; /* TLS ALPN extension? */
 };
 
 struct Names {

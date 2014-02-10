@@ -563,6 +563,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
 
+  set->ssl_enable_npn = TRUE;
+  set->ssl_enable_alpn = TRUE;
   return res;
 }
 
@@ -2477,6 +2479,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_TCP_KEEPINTVL:
     data->set.tcp_keepintvl = va_arg(param, long);
+    break;
+  case CURLOPT_SSL_ENABLE_NPN:
+    data->set.ssl_enable_npn = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
+  case CURLOPT_SSL_ENABLE_ALPN:
+    data->set.ssl_enable_alpn = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
 
   default:

@@ -1350,6 +1350,14 @@ static int operate_do(struct Configurable *config)
         if(config->sasl_ir)
           my_setopt(curl, CURLOPT_SASL_IR, 1L);
 
+        if(config->nonpn) {
+          my_setopt(curl, CURLOPT_SSL_ENABLE_NPN, 0L);
+        }
+
+        if(config->noalpn) {
+          my_setopt(curl, CURLOPT_SSL_ENABLE_ALPN, 0L);
+        }
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
