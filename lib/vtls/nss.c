@@ -632,7 +632,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       case SSL_NEXT_PROTO_NO_OVERLAP:
         infof(conn->data, "TLS, neither ALPN nor NPN succeeded\n");
         return;
-#ifdef SSL_NEXT_PROTO_SELECTED
+#ifdef SSL_ENABLE_ALPN
       case SSL_NEXT_PROTO_SELECTED:
         infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
         break;
