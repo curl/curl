@@ -50,6 +50,7 @@ my $stuncert;
 
 my $ver_major;
 my $ver_minor;
+my $fips_support;
 my $stunnel_version;
 my $socketopt;
 my $cmd;
@@ -189,7 +190,11 @@ foreach my $veropt (('-version', '-V')) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
             $ver_major = $1;
             $ver_minor = $2;
-            last;
+        }
+        elsif($verstr =~ /^sslVersion.*fips *= *yes/) {
+            # the fips option causes an error if stunnel doesn't support it
+            $fips_support = 1;
+            last
         }
     }
     last if($ver_major);
@@ -253,7 +258,8 @@ if($stunnel_version >= 400) {
             cert = $certfile
             debug = $loglevel
             socket = $socketopt";
-        if($stunnel_version >= 500) {
+        if($fips_support) {
+            # disable fips in case OpenSSL doesn't support it
             print STUNCONF "
             fips = no";
         }
@@ -283,7 +289,6 @@ if($stunnel_version >= 400) {
         print "cert = $certfile\n";
         print "pid = $pidfile\n";
         print "debug = $loglevel\n";
-        print "fips = no\n";
         print "socket = $socketopt\n";
         print "output = $logfile\n";
         print "foreground = yes\n";
