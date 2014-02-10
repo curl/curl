@@ -1806,6 +1806,11 @@ static int operate_do(struct Configurable *config)
 
 static void operate_free(struct Configurable *config)
 {
+  if(config->easy) {
+    curl_easy_cleanup(config->easy);
+    config->easy = NULL;
+  }
+
   /* Release metalink related resources here */
   clean_metalink(config);
 }
