@@ -1667,26 +1667,33 @@ ossl_connect_step1(struct connectdata *conn,
   SSL_CTX_set_options(connssl->ctx, ctx_options);
 
 #ifdef USE_NGHTTP2
-  SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb, conn);
+  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.ssl_enable_npn) {
+      SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb,
+          conn);
+    }
 
 #ifdef HAS_ALPN
-  protocols[0] = NGHTTP2_PROTO_VERSION_ID_LEN;
-  memcpy(&protocols[1], NGHTTP2_PROTO_VERSION_ID,
-      NGHTTP2_PROTO_VERSION_ID_LEN);
+    if(data->set.ssl_enable_alpn) {
+      protocols[0] = NGHTTP2_PROTO_VERSION_ID_LEN;
+      memcpy(&protocols[1], NGHTTP2_PROTO_VERSION_ID,
+          NGHTTP2_PROTO_VERSION_ID_LEN);
 
-  protocols[NGHTTP2_PROTO_VERSION_ID_LEN+1] = ALPN_HTTP_1_1_LENGTH;
-  memcpy(&protocols[NGHTTP2_PROTO_VERSION_ID_LEN+2], ALPN_HTTP_1_1,
-      ALPN_HTTP_1_1_LENGTH);
+      protocols[NGHTTP2_PROTO_VERSION_ID_LEN+1] = ALPN_HTTP_1_1_LENGTH;
+      memcpy(&protocols[NGHTTP2_PROTO_VERSION_ID_LEN+2], ALPN_HTTP_1_1,
+          ALPN_HTTP_1_1_LENGTH);
 
-  /* expects length prefixed preference ordered list of protocols in wire
-   * format
-   */
-  SSL_CTX_set_alpn_protos(connssl->ctx, protocols,
-      NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH + 2);
+      /* expects length prefixed preference ordered list of protocols in wire
+       * format
+       */
+      SSL_CTX_set_alpn_protos(connssl->ctx, protocols,
+          NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH + 2);
 
-  infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
-        ALPN_HTTP_1_1);
+      infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
+            ALPN_HTTP_1_1);
+    }
 #endif
+  }
 #endif
 
   if(data->set.str[STRING_CERT] || data->set.str[STRING_CERT_TYPE]) {
@@ -1964,21 +1971,23 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
-    SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
-    if(len != 0) {
-      infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
+    if(data->set.ssl_enable_alpn) {
+      SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
+      if(len != 0) {
+        infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
 
-      if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
-         memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
-           conn->negnpn = NPN_HTTP2_DRAFT09;
+        if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
+           memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
+             conn->negnpn = NPN_HTTP2_DRAFT09;
+        }
+        else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
+            neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
+          conn->negnpn = NPN_HTTP1_1;
+        }
       }
-      else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
-          neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
-        conn->negnpn = NPN_HTTP1_1;
+      else {
+        infof(data, "ALPN, server did not agree to a protocol\n");
       }
-    }
-    else {
-      infof(data, "ALPN, server did not agree to a protocol\n");
     }
 #endif
 
