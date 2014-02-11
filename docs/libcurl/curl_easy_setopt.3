@@ -2451,6 +2451,20 @@ load your private key.
 
 (This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
 CURLOPT_SSLCERTPASSWD up to 7.9.2)
+.IP CURLOPT_SSL_ENABLE_ALPN
+Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. By
+default, libcurl assumes a value of 1. This option enables/disables ALPN in
+the SSL handshake (if the SSL backend libcurl is built to use supports it),
+which can be used to negotiate http2.
+
+(Added in 7.36.0)
+.IP CURLOPT_SSL_ENABLE_NPN
+Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. By
+default, libcurl assumes a value of 1. This option enables/disables NPN in the
+SSL handshake (if the SSL backend libcurl is built to use supports it), which
+can be used to negotiate http2.
+
+(Added in 7.36.0)
 .IP CURLOPT_SSLENGINE
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
