@@ -1619,7 +1619,8 @@ When setting \fICURLOPT_HTTPGET\fP to 1, it will automatically set
 .IP CURLOPT_HTTP_VERSION
 Pass a long, set to one of the values described below. They force libcurl to
 use the specific HTTP versions. This is not sensible to do unless you have a
-good reason.
+good reason. You have to set this option if you want to use libcurl's HTTP 2.0
+support.
 .RS
 .IP CURL_HTTP_VERSION_NONE
 We don't care about what version the library uses. libcurl will use whatever
@@ -1628,6 +1629,9 @@ it thinks fit.
 Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
+.IP CURL_HTTP_VERSION_2_0
+Attempt HTTP 2.0 requests. libcurl will fall back to HTTP 1.x if HTTP 2.0
+can't be negotiated with the server.
 .RE
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
 Ignore the Content-Length header. This is useful for Apache 1.x (and similar
