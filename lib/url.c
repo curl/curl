@@ -2903,8 +2903,9 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *check;
   struct connectdata *chosen = 0;
   bool canPipeline = IsPipeliningPossible(data, needle);
-  bool wantNTLM = (data->state.authhost.want & CURLAUTH_NTLM) ||
-    (data->state.authhost.want & CURLAUTH_NTLM_WB) ? TRUE : FALSE;
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
+                       (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
+    (needle->handler->protocol & CURLPROTO_HTTP) ? TRUE : FALSE;
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
@@ -3059,16 +3060,15 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
-      if((needle->handler->protocol & CURLPROTO_FTP) ||
-         ((needle->handler->protocol & CURLPROTO_HTTP) && wantNTLM)) {
-         /* This is FTP or HTTP+NTLM, verify that we're using the same name
-            and password as well */
-         if(!strequal(needle->user, check->user) ||
-            !strequal(needle->passwd, check->passwd)) {
-            /* one of them was different */
-            continue;
-         }
-         credentialsMatch = TRUE;
+      if((needle->handler->protocol & CURLPROTO_FTP) || wantNTLMhttp) {
+        /* This is FTP or HTTP+NTLM, verify that we're using the same name
+           and password as well */
+        if(!strequal(needle->user, check->user) ||
+           !strequal(needle->passwd, check->passwd)) {
+          /* one of them was different */
+          continue;
+        }
+        credentialsMatch = TRUE;
       }
 
       if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
@@ -3120,12 +3120,12 @@ ConnectionExists(struct SessionHandle *data,
       }
 
       if(match) {
-        /* If we are looking for an NTLM connection, check if this is already
-           authenticating with the right credentials. If not, keep looking so
-           that we can reuse NTLM connections if possible. (Especially we
-           must not reuse the same connection if partway through
-           a handshake!) */
-        if(wantNTLM) {
+        /* If we are looking for an HTTP+NTLM connection, check if this is
+           already authenticating with the right credentials. If not, keep
+           looking so that we can reuse NTLM connections if
+           possible. (Especially we must not reuse the same connection if
+           partway through a handshake!) */
+        if(wantNTLMhttp) {
           if(credentialsMatch && check->ntlm.state != NTLMSTATE_NONE) {
             chosen = check;
 
