@@ -162,8 +162,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         }
 
         ch->datasize=curlx_strtoofft(ch->hexbuffer, &endptr, 16);
-        if(errno == ERANGE)
-          /* over or underflow is an error */
+        if((ch->datasize == CURL_OFF_T_MAX) && (errno == ERANGE))
+          /* overflow is an error */
           return CHUNKE_ILLEGAL_HEX;
         ch->state = CHUNK_LF; /* now wait for the CRLF */
       }
