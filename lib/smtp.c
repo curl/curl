@@ -497,8 +497,6 @@ static CURLcode smtp_perform_authentication(struct connectdata *conn)
     if(mech) {
       /* Perform SASL based authentication */
       result = smtp_perform_auth(conn, mech, initresp, len, state1, state2);
-
-      Curl_safefree(initresp);
     }
     else {
       /* Other mechanisms not supported */
@@ -507,6 +505,7 @@ static CURLcode smtp_perform_authentication(struct connectdata *conn)
     }
   }
 
+  Curl_safefree(initresp);
   return result;
 }
 
@@ -1213,8 +1212,6 @@ static CURLcode smtp_state_auth_cancel_resp(struct connectdata *conn,
     if(mech) {
       /* Retry SASL based authentication */
       result = smtp_perform_auth(conn, mech, initresp, len, state1, state2);
-
-      Curl_safefree(initresp);
     }
     else {
       failf(data, "Authentication cancelled");
@@ -1223,6 +1220,7 @@ static CURLcode smtp_state_auth_cancel_resp(struct connectdata *conn,
     }
   }
 
+  Curl_safefree(initresp);
   return result;
 }
 

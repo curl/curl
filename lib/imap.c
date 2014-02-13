@@ -626,7 +626,6 @@ static CURLcode imap_perform_authentication(struct connectdata *conn)
       /* Perform SASL based authentication */
       result = imap_perform_authenticate(conn, mech, initresp, state1, state2);
 
-      Curl_safefree(initresp);
     }
     else if((!imapc->login_disabled) &&
             (imapc->preftype & IMAP_TYPE_CLEARTEXT))
@@ -639,6 +638,7 @@ static CURLcode imap_perform_authentication(struct connectdata *conn)
     }
   }
 
+  Curl_safefree(initresp);
   return result;
 }
 
@@ -1332,7 +1332,6 @@ static CURLcode imap_state_auth_cancel_resp(struct connectdata *conn,
       /* Retry SASL based authentication */
       result = imap_perform_authenticate(conn, mech, initresp, state1, state2);
 
-      Curl_safefree(initresp);
     }
     else if((!imapc->login_disabled) &&
             (imapc->preftype & IMAP_TYPE_CLEARTEXT))
@@ -1345,6 +1344,7 @@ static CURLcode imap_state_auth_cancel_resp(struct connectdata *conn,
     }
   }
 
+  Curl_safefree(initresp);
   return result;
 }
 
