@@ -199,6 +199,8 @@ CURLcode Curl_urldecode(struct SessionHandle *data,
   if(ostring)
     /* store output string */
     *ostring = ns;
+  else
+    free(ns);
 
   return CURLE_OK;
 }

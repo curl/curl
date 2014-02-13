@@ -123,8 +123,8 @@ static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
     }
     dictp[olen]=0;
 
-    free(newp);
   }
+  free(newp);
   return dictp;
 }
 

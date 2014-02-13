@@ -1110,8 +1110,10 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
 
     /* filename need be escaped */
     filename_escaped = malloc(strlen(filename)*2+1);
-    if(!filename_escaped)
-      return CURLE_OUT_OF_MEMORY;
+    if(!filename_escaped) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
     p0 = filename_escaped;
     p1 = filename;
     while(*p1) {
@@ -1125,6 +1127,7 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
   result = AddFormDataf(form, size,
                         "; filename=\"%s\"",
                         filename);
+out:
   Curl_safefree(filename_escaped);
   Curl_safefree(filebasename);
   return result;

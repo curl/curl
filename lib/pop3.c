@@ -1199,8 +1199,6 @@ static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
     if(mech) {
       /* Retry SASL based authentication */
       result = pop3_perform_auth(conn, mech, initresp, len, state1, state2);
-
-      Curl_safefree(initresp);
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
@@ -1219,6 +1217,7 @@ static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
     }
   }
 
+  Curl_safefree(initresp);
   return result;
 }
 
