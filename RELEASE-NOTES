@@ -14,7 +14,9 @@ This release includes the following changes:
  o openssl: add ALPN support
  o gtls: add ALPN support
  o nss: add ALPN and NPN support
- o 
+ o added CURLOPT_EXPECT_100_TIMEOUT_MS [7]
+ o tool: add --no-alpn and --no-npn
+ o added CURLOPT_SSL_ENABLE_NPN and CURLOPT_SSL_ENABLE_ALPN
 
 This release includes the following bugfixes:
 
@@ -29,7 +31,10 @@ This release includes the following bugfixes:
  o formpost: use semicolon in multipart/mixed [5]
  o --help: add missing --tlsv1.x options
  o formdata: Fixed memory leak on OOM condition
- o 
+ o ConnectionExists: reusing possible HTTP+NTLM connections better [6]
+ o mingw32: fix compilation
+ o chunked decoder: track overflows correctly [8]
+ o curl_easy_setopt.3: add CURL_HTTP_VERSION_2_0
 
 This release includes the following known bugs:
 
@@ -38,9 +43,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Fabian Frank, Gisle Vanem, Kamil Dudka,
-  Marc Hoersken, Prash Dush, Remi Gacogne, Rob Davies, Steve Holme,
-  Tatsuhiro Tsujikawa
+  Adam Sampson, Dan Fandrich, Daniel Stenberg, Fabian Frank, Gisle Vanem,
+  Kamil Dudka, Marc Hoersken, Prash Dush, Remi Gacogne, Rob Davies,
+  Romulo A. Ceccon, Steve Holme, Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma,
+
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -51,3 +57,6 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/mail/archive-2013-11/0006.html
  [4] = http://curl.haxx.se/bug/view.cgi?id=1334
  [5] = http://curl.haxx.se/bug/view.cgi?id=1333
+ [6] = http://curl.haxx.se/mail/lib-2014-02/0100.html
+ [7] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTEXPECT100TIMEOUTMS
+ [8] = http://curl.haxx.se/mail/lib-2014-02/0097.html
