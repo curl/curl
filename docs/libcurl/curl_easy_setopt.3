@@ -1649,6 +1649,12 @@ Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
 transfer decoding will be disabled, if set to 1 it is enabled
 (default). libcurl does chunked transfer decoding by default unless this
 option is set to zero. (added in 7.16.2)
+.IP CURLOPT_EXPECT_100_TIMEOUT_MS
+Pass a long to tell libcurl the number of milliseconds to wait for a server
+response with the HTTP status 100 (Continue), 417 (Expectation Failed) or
+similar after sending a HTTP request containing an Expect: 100-continue
+header. If this times out before a response is received, the request body is
+sent anyway. By default, libcurl waits 1000 milliseconds. (Added in 7.36.0)
 .SH SMTP OPTIONS
 .IP CURLOPT_MAIL_FROM
 Pass a pointer to a zero terminated string as parameter. This should be used

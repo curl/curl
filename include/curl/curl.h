@@ -1577,6 +1577,10 @@ typedef enum {
   /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
   CINIT(SSL_ENABLE_ALPN, LONG, 226),
 
+  /* Time to wait for a response to a HTTP request containing an
+   * Expect: 100-continue header before sending the data anyway. */
+  CINIT(EXPECT_100_TIMEOUT_MS, LONG, 227),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

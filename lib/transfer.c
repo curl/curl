@@ -87,8 +87,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#define CURL_TIMEOUT_EXPECT_100 1000 /* counting ms here */
-
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
@@ -839,7 +837,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
 
           /* set a timeout for the multi interface */
-          Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
+          Curl_expire(data, data->set.expect_100_timeout);
           break;
         }
 
@@ -1075,7 +1073,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       */
 
       long ms = Curl_tvdiff(k->now, k->start100);
-      if(ms >= CURL_TIMEOUT_EXPECT_100) {
+      if(ms >= data->set.expect_100_timeout) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
         k->keepon |= KEEP_SEND;
@@ -1969,7 +1967,7 @@ Curl_setup_transfer(
 
         /* Set a timeout for the multi interface. Add the inaccuracy margin so
            that we don't fire slightly too early and get denied to run. */
-        Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
+        Curl_expire(data, data->set.expect_100_timeout);
       }
       else {
         if(data->state.expect100header)

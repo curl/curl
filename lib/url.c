@@ -565,6 +565,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
+
+  set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   return res;
 }
 
@@ -1255,6 +1257,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpauth = auth;
   }
   break;
+
+  case CURLOPT_EXPECT_100_TIMEOUT_MS:
+    /*
+     * Time to wait for a response to a HTTP request containing an
+     * Expect: 100-continue header before sending the data anyway.
+     */
+    data->set.expect_100_timeout = va_arg(param, long);
+    break;
 
 #endif   /* CURL_DISABLE_HTTP */
 
