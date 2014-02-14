@@ -1493,6 +1493,10 @@ static CURLcode expect100(struct SessionHandle *data,
   const char *ptr;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
+  if(conn->httpversion == 20) {
+    /* We don't use Expect in HTTP2 */
+    return CURLE_OK;
+  }
   if(use_http_1_1plus(data, conn)) {
     /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
        100-continue to the headers which actually speeds up post operations
@@ -1797,35 +1801,40 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
-  ptr = Curl_checkheaders(data, "Transfer-Encoding:");
-  if(ptr) {
-    /* Some kind of TE is requested, check if 'chunked' is chosen */
-    data->req.upload_chunky =
-      Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
-  }
+  if(conn->httpversion == 20)
+    /* In HTTP2 forbids Transfer-Encoding: chunked */
+    ptr = NULL;
   else {
-    if((conn->handler->protocol&CURLPROTO_HTTP) &&
-       data->set.upload &&
-       (data->set.infilesize == -1)) {
-      if(conn->bits.authneg)
-        /* don't enable chunked during auth neg */
-        ;
-      else if(use_http_1_1plus(data, conn)) {
-        /* HTTP, upload, unknown file size and not HTTP 1.0 */
-        data->req.upload_chunky = TRUE;
-      }
-      else {
-        failf(data, "Chunky upload is not supported by HTTP 1.0");
-        return CURLE_UPLOAD_FAILED;
-      }
+    ptr = Curl_checkheaders(data, "Transfer-Encoding:");
+    if(ptr) {
+      /* Some kind of TE is requested, check if 'chunked' is chosen */
+      data->req.upload_chunky =
+        Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
     }
     else {
-      /* else, no chunky upload */
-      data->req.upload_chunky = FALSE;
-    }
+      if((conn->handler->protocol&CURLPROTO_HTTP) &&
+         data->set.upload &&
+         (data->set.infilesize == -1)) {
+        if(conn->bits.authneg)
+          /* don't enable chunked during auth neg */
+          ;
+        else if(use_http_1_1plus(data, conn)) {
+          /* HTTP, upload, unknown file size and not HTTP 1.0 */
+          data->req.upload_chunky = TRUE;
+        }
+        else {
+          failf(data, "Chunky upload is not supported by HTTP 1.0");
+          return CURLE_UPLOAD_FAILED;
+        }
+      }
+      else {
+        /* else, no chunky upload */
+        data->req.upload_chunky = FALSE;
+      }
 
-    if(data->req.upload_chunky)
-      te = "Transfer-Encoding: chunked\r\n";
+      if(data->req.upload_chunky)
+        te = "Transfer-Encoding: chunked\r\n";
+    }
   }
 
   Curl_safefree(conn->allocptr.host);
@@ -2465,7 +2474,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(data->set.postfields) {
 
-      if(!data->state.expect100header &&
+      /* In HTTP2, we send request body in DATA frame regardless of
+         its size. */
+      if(conn->httpversion != 20 &&
+         !data->state.expect100header &&
          (postsize < MAX_INITIAL_POST_SIZE))  {
         /* if we don't use expect: 100  AND
            postsize is less than MAX_INITIAL_POST_SIZE

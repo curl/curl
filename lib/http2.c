@@ -34,6 +34,7 @@
 #include "curl_base64.h"
 #include "curl_memory.h"
 #include "rawstr.h"
+#include "multiif.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -41,6 +42,38 @@
 #if (NGHTTP2_VERSION_NUM < 0x000300)
 #error too old nghttp2 version, upgrade!
 #endif
+
+static int http2_perform_getsock(const struct connectdata *conn,
+                                 curl_socket_t *sock, /* points to
+                                                         numsocks
+                                                         number of
+                                                         sockets */
+                                 int numsocks)
+{
+  const struct http_conn *httpc = &conn->proto.httpc;
+  int bitmap = GETSOCK_BLANK;
+  (void)numsocks;
+
+  /* TODO We should check underlying socket state if it is SSL socket
+     because of renegotiation. */
+  sock[0] = conn->sock[FIRSTSOCKET];
+
+  if(nghttp2_session_want_read(httpc->h2))
+    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+
+  if(nghttp2_session_want_write(httpc->h2))
+    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+
+  return bitmap;
+}
+
+static int http2_getsock(struct connectdata *conn,
+                         curl_socket_t *sock, /* points to numsocks
+                                                 number of sockets */
+                         int numsocks)
+{
+  return http2_perform_getsock(conn, sock, numsocks);
+}
 
 /*
  * HTTP2 handler interface. This isn't added to the general list of protocols
@@ -56,10 +89,10 @@ const struct Curl_handler Curl_handler_http2 = {
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
+  http2_getsock,                        /* proto_getsock */
+  http2_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  http2_perform_getsock,                /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
@@ -67,6 +100,25 @@ const struct Curl_handler Curl_handler_http2 = {
   PROTOPT_NONE                          /* flags */
 };
 
+const struct Curl_handler Curl_handler_http2_ssl = {
+  "HTTP2",                              /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* do_it */
+  ZERO_NULL     ,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  http2_getsock,                        /* proto_getsock */
+  http2_getsock,                        /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  http2_perform_getsock,                /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  PORT_HTTP,                            /* defport */
+  CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
+  PROTOPT_SSL                           /* flags */
+};
 
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
@@ -326,6 +378,37 @@ static const nghttp2_session_callbacks callbacks = {
   on_header              /* nghttp2_on_header_callback */
 };
 
+static ssize_t data_source_read_callback(nghttp2_session *session,
+                                         int32_t stream_id,
+                                         uint8_t *buf, size_t length,
+                                         int *eof,
+                                         nghttp2_data_source *source,
+                                         void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *c = &conn->proto.httpc;
+  size_t nread;
+  (void)session;
+  (void)stream_id;
+  (void)eof;
+  (void)source;
+
+  nread = c->upload_len < length ? c->upload_len : length;
+  if(nread > 0) {
+    memcpy(buf, c->upload_mem, nread);
+    c->upload_mem += nread;
+    c->upload_len -= nread;
+    c->upload_left -= nread;
+  }
+
+  if(c->upload_left == 0)
+    *eof = 1;
+  else if(nread == 0)
+    return NGHTTP2_ERR_DEFERRED;
+
+  return nread;
+}
+
 /*
  * The HTTP2 settings we send in the Upgrade request
  */
@@ -428,6 +511,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
+  /* Nullify here because we call nghttp2_session_send() and they
+     might refer to the old buffer. */
+  httpc->upload_mem = NULL;
+  httpc->upload_len = 0;
+
   if(httpc->bodystarted &&
      httpc->nread_header_recvbuf < httpc->header_recvbuf->size_used) {
     size_t left =
@@ -527,9 +615,24 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   size_t i;
   char *hdbuf = (char*)mem;
   char *end;
+  nghttp2_data_provider data_prd;
   (void)sockindex;
 
   infof(conn->data, "http2_send len=%zu\n", len);
+
+  if(httpc->stream_id != -1) {
+    /* If stream_id != -1, we have dispatched request HEADERS, and now
+       are going to send or sending request body in DATA frame */
+    httpc->upload_mem = mem;
+    httpc->upload_len = len;
+    nghttp2_session_resume_data(httpc->h2, httpc->stream_id);
+    rv = nghttp2_session_send(httpc->h2);
+    if(nghttp2_is_fatal(rv)) {
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
+    return len - httpc->upload_len;
+  }
 
   /* Calculate number of headers contained in [mem, mem + len) */
   /* Here, we assume the curl http code generate *correct* HTTP header
@@ -594,9 +697,31 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     nva[i].valuelen = (uint16_t)(end - hdbuf);
 
     hdbuf = end + 2;
+    /* Inspect Content-Length header field and retrieve the request
+       entity length so that we can set END_STREAM to the last DATA
+       frame. */
+    if(nva[i].namelen == 14 &&
+       Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
+      size_t j;
+      for(j = 0; j < nva[i].valuelen; ++j) {
+        httpc->upload_left *= 10;
+        httpc->upload_left += nva[i].value[j] - '0';
+      }
+      infof(conn->data, "request content-length=%zu\n", httpc->upload_left);
+    }
   }
 
-  rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, NULL, NULL);
+  switch(conn->data->set.httpreq) {
+  case HTTPREQ_POST:
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_PUT:
+    data_prd.read_callback = data_source_read_callback;
+    data_prd.source.ptr = NULL;
+    rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, &data_prd, NULL);
+    break;
+  default:
+    rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, NULL, NULL);
+  }
 
   free(nva);
 
@@ -612,9 +737,17 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  /* TODO: Still whole HEADERS frame may have not been sent because of
-     EAGAIN. But I don't know how to setup to call
-     nghttp2_session_send() when socket becomes writable. */
+  if(httpc->stream_id != -1) {
+    /* If whole HEADERS frame was sent off to the underlying socket,
+       the nghttp2 library calls data_source_read_callback. But only
+       it found that no data available, so it deferred the DATA
+       transmission. Which means that nghttp2_session_want_write()
+       returns 0 on http2_perform_getsock(), which results that no
+       writable socket check is performed. To workaround this, we
+       issue nghttp2_session_resume_data() here to bring back DATA
+       transmission from deferred state. */
+    nghttp2_session_resume_data(httpc->h2, httpc->stream_id);
+  }
 
   return len;
 }
@@ -627,7 +760,11 @@ int Curl_http2_switched(struct connectdata *conn)
   /* we are switched! */
   /* Don't know this is needed here at this moment. Original
      handler->flags is still useful. */
-  /* conn->handler = &Curl_handler_http2; */
+  if(conn->handler->flags & PROTOPT_SSL)
+    conn->handler = &Curl_handler_http2_ssl;
+  else
+    conn->handler = &Curl_handler_http2;
+
   httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
   httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
   conn->recv[FIRSTSOCKET] = http2_recv;
@@ -639,6 +776,9 @@ int Curl_http2_switched(struct connectdata *conn)
   httpc->nread_header_recvbuf = 0;
   httpc->data = NULL;
   httpc->datalen = 0;
+  httpc->upload_left = 0;
+  httpc->upload_mem = NULL;
+  httpc->upload_len = 0;
 
   conn->httpversion = 20;
 
