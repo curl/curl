@@ -234,29 +234,15 @@ static int operate_do(struct Configurable *config)
   ** from outside of nested loops further down below.
   */
 
-  if(config->userpwd && !config->xoauth2_bearer) {
-    res = checkpasswd("host", &config->userpwd);
-    if(res)
-      goto quit_curl;
-  }
+  /* Get the required aguments */
+  res = get_args(config);
+  if(res)
+    goto quit_curl;
 
-  if(config->proxyuserpwd) {
-    res = checkpasswd("proxy", &config->proxyuserpwd);
-    if(res)
-      goto quit_curl;
-  }
-
+  /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
     helpf(config->errors, "no URL specified!\n");
     res = CURLE_FAILED_INIT;
-    goto quit_curl;
-  }
-
-  if(!config->useragent)
-    config->useragent = my_useragent();
-  if(!config->useragent) {
-    helpf(config->errors, "out of memory\n");
-    res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
 

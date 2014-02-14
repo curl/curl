@@ -33,6 +33,7 @@
 #include "tool_homedir.h"
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
+#include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -365,8 +366,8 @@ ParameterError str2offset(curl_off_t *val, const char *str)
   return PARAM_BAD_NUMERIC;
 }
 
-CURLcode checkpasswd(const char *kind, /* for what purpose */
-                     char **userpwd)   /* pointer to allocated string */
+static CURLcode checkpasswd(const char *kind, /* for what purpose */
+                            char **userpwd)   /* pointer to allocated string */
 {
   char *psep;
   char *osep;
@@ -464,3 +465,40 @@ long delegation(struct Configurable *config, char *str)
   return CURLGSSAPI_DELEGATION_NONE;
 }
 
+/*
+ * my_useragent: returns allocated string with default user agent
+ */
+static char *my_useragent(void)
+{
+  return strdup(CURL_NAME "/" CURL_VERSION);
+}
+
+CURLcode get_args(struct Configurable *config)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Check we have a password for the given host user */
+  if(config->userpwd && !config->xoauth2_bearer) {
+    result = checkpasswd("host", &config->userpwd);
+    if(result)
+      return result;
+  }
+
+  /* Check we have a password for the given proxy user */
+  if(config->proxyuserpwd) {
+    result = checkpasswd("proxy", &config->proxyuserpwd);
+    if(result)
+      return result;
+  }
+
+  /* Check we have a user agent */
+  if(!config->useragent) {
+    config->useragent = my_useragent();
+    if(!config->useragent) {
+      helpf(config->errors, "out of memory\n");
+      result = CURLE_OUT_OF_MEMORY;
+    }
+  }
+
+  return result;
+}

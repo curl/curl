@@ -40,7 +40,7 @@ long proto2num(struct Configurable *config, long *val, const char *str);
 
 ParameterError str2offset(curl_off_t *val, const char *str);
 
-CURLcode checkpasswd(const char *kind, char **userpwd);
+CURLcode get_args(struct Configurable *config);
 
 ParameterError add2list(struct curl_slist **list, const char *ptr);
 

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-char *my_useragent(void);
-
 void list_engines(const struct curl_slist *engines);
 
 void clean_getout(struct Configurable *config);

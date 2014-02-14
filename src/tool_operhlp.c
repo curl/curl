@@ -30,18 +30,9 @@
 #include "tool_cfgable.h"
 #include "tool_convert.h"
 #include "tool_operhlp.h"
-#include "tool_version.h"
 #include "tool_metalink.h"
 
 #include "memdebug.h" /* keep this as LAST include */
-
-/*
- * my_useragent: returns allocated string with default user agent
- */
-char *my_useragent(void)
-{
-  return strdup( CURL_NAME "/" CURL_VERSION );
-}
 
 /*
  * Print list of OpenSSL supported engines
@@ -192,4 +183,3 @@ CURLcode get_url_file_name(char **filename, const char *url)
 
   return CURLE_OK;
 }
-
