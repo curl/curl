@@ -989,8 +989,8 @@ if one is specified.  The only wildcard available is a single * character,
 which matches all hosts, and effectively disables the proxy. Each name in this
 list is matched as either a domain which contains the hostname, or the
 hostname itself. For example, example.com would match example.com,
-example.com:80, and www.example.com, but not www.notanexample.com.  (Added in
-7.19.4)
+example.com:80, and www.example.com, but not www.notanexample.com or
+example.com.othertld.  (Added in 7.19.4)
 .IP CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to 1 to make the library tunnel all operations through a
 given HTTP proxy. There is a big difference between using a proxy and to
