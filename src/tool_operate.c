@@ -234,11 +234,6 @@ static int operate_do(struct Configurable *config)
   ** from outside of nested loops further down below.
   */
 
-  /* Get the required aguments */
-  res = get_args(config);
-  if(res)
-    goto quit_curl;
-
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
     helpf(config->errors, "no URL specified!\n");
@@ -1845,6 +1840,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     else {
       struct Configurable *operation = config;
 
+      /* Get the required aguments for each operation */
+      while(!result && operation) {
+        result = get_args(operation);
+
+        operation = operation->next;
+      }
+
+      /* Reset the operation pointer */
+      operation = config;
+
+      /* Perform each operation */
       while(!result && operation) {
         result = operate_do(operation);
 
