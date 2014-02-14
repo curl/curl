@@ -398,6 +398,7 @@ CURLcode Curl_axtls_connect_nonblocking(
 {
   CURLcode conn_step;
   int ssl_fcn_return;
+  int i;
 
  *done = FALSE;
   /* connectdata is calloc'd and connecting_state is only changed in this
@@ -414,14 +415,14 @@ CURLcode Curl_axtls_connect_nonblocking(
   if(conn->ssl[sockindex].connecting_state == ssl_connect_2) {
     /* Check to make sure handshake was ok. */
     if(ssl_handshake_status(conn->ssl[sockindex].ssl) != SSL_OK) {
-      ssl_fcn_return = ssl_read(conn->ssl[sockindex].ssl, NULL);
-      if(ssl_fcn_return < 0) {
-        Curl_axtls_close(conn, sockindex);
-        ssl_display_error(ssl_fcn_return); /* goes to stdout. */
-        return map_error_to_curl(ssl_fcn_return);
-      }
-      else {
-        return CURLE_OK; /* Return control to caller for retries */
+      for(i=0; i<5; i++) {
+        ssl_fcn_return = ssl_read(conn->ssl[sockindex].ssl, NULL);
+        if(ssl_fcn_return < 0) {
+          Curl_axtls_close(conn, sockindex);
+          ssl_display_error(ssl_fcn_return); /* goes to stdout. */
+          return map_error_to_curl(ssl_fcn_return);
+        }
+        return CURLE_OK;
       }
     }
     infof (conn->data, "handshake completed successfully\n");
