@@ -17,9 +17,9 @@ none
 #
 # Verify data after the test has been "shot"
 <verify>
-<file1 name="log/stderr1222" mode="text">
+<file1 name="log/stderr1222">
 </file1>
-<file2 name="log/stdout1222" mode="text">
+<file2 name="log/stdout1222">
 Testing curl_8char_object_name...
 
 result: 16AFKPQR expected: 16AFKPQR input: 123__678__ABC__FGH__KLM__PQRSTUV
