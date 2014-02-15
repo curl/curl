@@ -7,9 +7,9 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   smtp-mail smtp-multi smtp-ssl smtp-tls smtp-vrfy smtp-expn rtsp \
   externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl pop3-dele \
   pop3-top pop3-stat pop3-noop pop3-ssl pop3-tls pop3-multi imap-list \
-  imap-fetch imap-store imap-append imap-examine imap-search imap-create \
-  imap-delete imap-copy imap-noop imap-ssl imap-tls imap-multi url2file \
-  sftpget ftpsget postinmemory
+  imap-lsub imap-fetch imap-store imap-append imap-examine imap-search \
+  imap-create imap-delete imap-copy imap-noop imap-ssl imap-tls imap-multi \
+  url2file sftpget ftpsget postinmemory
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
