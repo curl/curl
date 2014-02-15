@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/*
 <errorcode>
 0
 </errorcode>
-<stdout mode="text">
+<stdout>
 =============================================================
 Remains:      12
 Filename:     .
