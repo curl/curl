@@ -297,6 +297,7 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
   errno = GetLastError();
   return -1;
 }
+#undef  read
 #define read(a,b,c) read_wincon(a,b,c)
 
 /*
@@ -331,6 +332,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
   errno = GetLastError();
   return -1;
 }
+#undef  write
 #define write(a,b,c) write_wincon(a,b,c)
 #endif
 
