@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP NTLM auth
+connection re-use
+</keywords>
+</info>
+# Server-side
+<reply>
+<servercmd>
+connection-monitor
+</servercmd>
+
+<data>
+HTTP/1.1 200 fine!
+Content-Length: 20
+
+Feel free to get it
+</data>
+
+<data3>
+HTTP/1.1 200 OK
+Server: Another one/1.0
+Content-Length: 4
+
+boo
+</data3>
+
+<datacheck>
+HTTP/1.1 200 fine!
+Content-Length: 20
+
+Feel free to get it
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with --anyauth (but no auth!) and connection re-use
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1419 --anyauth http://%HOSTIP:%HTTPPORT/14190003
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1419 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /14190003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>

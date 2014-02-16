@@ -3133,8 +3133,10 @@ ConnectionExists(struct SessionHandle *data,
             *force_reuse = TRUE;
             break;
           }
-          else
-            continue;
+          else if(credentialsMatch)
+            /* this is a backup choice */
+            chosen = check;
+          continue;
         }
 
         if(canPipeline) {
