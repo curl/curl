@@ -366,7 +366,9 @@ ParameterError str2offset(curl_off_t *val, const char *str)
   return PARAM_BAD_NUMERIC;
 }
 
-static CURLcode checkpasswd(const char *kind, /* for what purpose */
+static CURLcode checkpasswd(const char *kind,   /* for what purpose */
+                            const size_t index, /* operation index */
+                            const bool last,    /* TRUE if last operation */
                             char **userpwd)   /* pointer to allocated string */
 {
   char *psep;
@@ -393,9 +395,15 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       *osep = '\0';
 
     /* build a nice-looking prompt */
-    curlx_msnprintf(prompt, sizeof(prompt),
-                    "Enter %s password for user '%s':",
-                    kind, *userpwd);
+    if(!index && last)
+      curlx_msnprintf(prompt, sizeof(prompt),
+                      "Enter %s password for user '%s':",
+                      kind, *userpwd);
+    else
+      curlx_msnprintf(prompt, sizeof(prompt),
+                      "Enter %s password for user '%s' on URL #%"
+                      CURL_FORMAT_CURL_OFF_TU ":",
+                      kind, *userpwd, index + 1);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
@@ -473,20 +481,21 @@ static char *my_useragent(void)
   return strdup(CURL_NAME "/" CURL_VERSION);
 }
 
-CURLcode get_args(struct Configurable *config)
+CURLcode get_args(struct Configurable *config, const size_t index)
 {
   CURLcode result = CURLE_OK;
+  bool last = (config->next ? FALSE : TRUE);
 
   /* Check we have a password for the given host user */
   if(config->userpwd && !config->xoauth2_bearer) {
-    result = checkpasswd("host", &config->userpwd);
+    result = checkpasswd("host", index, last, &config->userpwd);
     if(result)
       return result;
   }
 
   /* Check we have a password for the given proxy user */
   if(config->proxyuserpwd) {
-    result = checkpasswd("proxy", &config->proxyuserpwd);
+    result = checkpasswd("proxy", index, last, &config->proxyuserpwd);
     if(result)
       return result;
   }

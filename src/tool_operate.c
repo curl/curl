@@ -1838,11 +1838,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
     /* Perform the main operations */
     else {
+      size_t count = 0;
       struct Configurable *operation = config;
 
       /* Get the required aguments for each operation */
       while(!result && operation) {
-        result = get_args(operation);
+        result = get_args(operation, count++);
 
         operation = operation->next;
       }
