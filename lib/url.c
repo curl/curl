@@ -3190,7 +3190,8 @@ ConnectionDone(struct SessionHandle *data, struct connectdata *conn)
 {
   /* data->multi->maxconnects can be negative, deal with it. */
   size_t maxconnects =
-    (data->multi->maxconnects < 0) ? 0 : data->multi->maxconnects;
+    (data->multi->maxconnects < 0) ? data->multi->num_easy * 4:
+    data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
   /* Mark the current connection as 'unused' */

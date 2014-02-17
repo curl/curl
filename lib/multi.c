@@ -317,6 +317,9 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->closure_handle->state.conn_cache = multi->conn_cache;
 
   multi->max_pipeline_length = 5;
+
+  /* -1 means it not set by user, use the default value */
+  multi->maxconnects = -1;
   return (CURLM *) multi;
 
   error:
