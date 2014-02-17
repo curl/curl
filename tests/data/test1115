@@ -29,9 +29,6 @@ Content-Length: 0
 <server>
 http
 </server>
-<features>
-crypto
-</features>
  <name>
 HTTP GET with unexpected 1xx response
  </name>

@@ -56,6 +56,9 @@ ok
 <server>
 http
 </server>
+<features>
+crypto
+</features>
 # tool is what to use instead of 'curl'
 <tool>
 lib565

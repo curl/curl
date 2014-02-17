@@ -63,6 +63,9 @@ ok
 <server>
 http
 </server>
+<features>
+crypto
+</features>
  <name>
 HTTP POST --digest with PUT and resumed upload and modified method
  </name>

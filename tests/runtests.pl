@@ -2403,6 +2403,8 @@ sub checksystem {
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
                 $has_ntlm=1;
+		# Use this as a proxy for any cryptographic authentication
+                $has_crypto=1;
             }
             if($feat =~ /NTLM_WB/i) {
                 # NTLM delegation to winbind daemon ntlm_auth helper enabled
@@ -2512,10 +2514,6 @@ sub checksystem {
 
     $has_shared = `sh $CURLCONFIG --built-shared`;
     chomp $has_shared;
-
-    # curl doesn't list cryptographic support separately, so assume it's
-    # always available
-    $has_crypto=1;
 
     my $hostname=join(' ', runclientoutput("hostname"));
     my $hosttype=join(' ', runclientoutput("uname -a"));

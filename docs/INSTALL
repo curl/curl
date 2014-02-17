@@ -1026,7 +1026,6 @@ REDUCING SIZE
    command line.  Following is a list of appropriate key words:
 
      --disable-cookies          !cookies
-     --disable-crypto-auth      !HTTP\ Digest\ auth !HTTP\ proxy\ Digest\ auth
      --disable-manual           !--manual
      --disable-proxy            !HTTP\ proxy !proxytunnel !SOCKS4 !SOCKS5
 
