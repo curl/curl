@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -81,9 +81,9 @@ not used by libcurl but only passed-thru as-is. Set the callback pointer with
 \fICURLMOPT_TIMERFUNCTION\fP. (Added in 7.16.0)
 .IP CURLMOPT_MAXCONNECTS
 Pass a long. The set number will be used as the maximum amount of
-simultaneously open connections that libcurl may cache. Default is 10, and
-libcurl will enlarge the size for each added easy handle to make it fit 4
-times the number of added easy handles.
+simultaneously open connections that libcurl may keep in its connection cache
+after completed use. By default libcurl will enlarge the size for each added
+easy handle to make it fit 4 times the number of added easy handles.
 
 By setting this option, you can prevent the cache size from growing beyond the
 limit set by you.
@@ -93,6 +93,9 @@ number of open connections from increasing.
 
 This option is for the multi handle's use only, when using the easy interface
 you should instead use the \fICURLOPT_MAXCONNECTS\fP option.
+
+See \fICURLMOPT_MAX_TOTAL_CONNECTIONS\fP for limiting the number of active
+connections.
 
 (Added in 7.16.3)
 .IP CURLMOPT_MAX_HOST_CONNECTIONS
