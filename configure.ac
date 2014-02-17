@@ -3249,6 +3249,7 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_CRYPTO_AUTH, 1, [to disable cryptographic authentication])
+       CURL_DISABLE_CRYPTO_AUTH=1
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -3382,7 +3383,8 @@ fi
 if test "x$USE_WINDOWS_SSPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
 fi
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+	"x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
