@@ -1744,6 +1744,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   while(data) {
     CURLMcode result;
     struct WildcardData *wc = &data->wildcard;
+    SIGPIPE_VARIABLE(pipe_st);
 
     if(data->set.wildcardmatch) {
       if(!wc->filelist) {
@@ -1753,9 +1754,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
     }
 
+    sigpipe_ignore(data, &pipe_st);
     do
       result = multi_runsingle(multi, now, data);
     while(CURLM_CALL_MULTI_PERFORM == result);
+    sigpipe_restore(&pipe_st);
 
     if(data->set.wildcardmatch) {
       /* destruct wildcard structures if it is needed */
@@ -2200,6 +2203,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          and just move on. */
       ;
     else {
+      SIGPIPE_VARIABLE(pipe_st);
+
       data = entry->easy;
 
       if(data->magic != CURLEASY_MAGIC_NUMBER)
@@ -2225,9 +2230,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         /* set socket event bitmask if they're not locked */
         data->easy_conn->cselect_bits = ev_bitmask;
 
+      sigpipe_ignore(data, &pipe_st);
       do
         result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
+      sigpipe_restore(&pipe_st);
 
       if(data->easy_conn &&
          !(data->easy_conn->handler->flags & PROTOPT_DIRLOCK))
@@ -2265,9 +2272,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   do {
     /* the first loop lap 'data' can be NULL */
     if(data) {
+      SIGPIPE_VARIABLE(pipe_st);
+
+      sigpipe_ignore(data, &pipe_st);
       do
         result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
+      sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since
