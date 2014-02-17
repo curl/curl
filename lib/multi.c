@@ -1024,6 +1024,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(CURLE_OK == data->result) {
         /* after init, go CONNECT */
         multistate(data, CURLM_STATE_CONNECT);
+        Curl_pgrsTime(data, TIMER_STARTSINGLE);
         result = CURLM_CALL_MULTI_PERFORM;
       }
       break;
@@ -1035,7 +1036,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. */
-      Curl_pgrsTime(data, TIMER_STARTSINGLE);
       data->result = Curl_connect(data, &data->easy_conn,
                                   &async, &protocol_connect);
       if(CURLE_NO_CONNECTION_AVAILABLE == data->result) {
