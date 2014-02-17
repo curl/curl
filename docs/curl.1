@@ -147,7 +147,10 @@ HTTP 2 to negoatiate HTTP 2 support with the server during https sessions.
 (Added in 7.36.0)
 .IP "-1, --tlsv1"
 (SSL)
-Forces curl to use TLS version 1 when negotiating with a remote TLS server.
+Forces curl to use TLS version 1.x when negotiating with a remote TLS server.
+You can use options \fI--tlsv1.0\fP, \fI--tlsv1.1\fP, and \fI--tlsv1.2\fP to
+control the TLS version more precisely (if the SSL backend in use supports such
+a level of control).
 .IP "-2, --sslv2"
 (SSL)
 Forces curl to use SSL version 2 when negotiating with a remote SSL server.
