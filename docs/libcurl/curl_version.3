@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,6 +30,8 @@ curl_version - returns the libcurl version string
 .SH DESCRIPTION
 Returns a human readable string with the version number of libcurl and some of
 its important components (like OpenSSL version).
+
+We recommend using \fIcurl_version_info(3)\fP instead!
 .SH RETURN VALUE
 A pointer to a zero terminated string. The string resides in a statically
 allocated buffer and must not be freed by the caller.
