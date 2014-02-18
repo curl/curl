@@ -39,6 +39,9 @@
 #define sleep(s) Sleep(s * 1000)
 #endif
 
+#define _MPRINTF_REPLACE
+#include "mprintf.h"
+
 static int debug_callback(CURL *curl, curl_infotype info, char *msg, size_t len, void *ptr)
 {
   (void)curl;
