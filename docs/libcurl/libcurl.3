@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,22 +29,21 @@ specific man pages for each function mentioned in here. There are also the
 \fIlibcurl-share(3)\fP man page and the \fIlibcurl-tutorial(3)\fP man page for
 in-depth understanding on how to program with libcurl.
 
-There are more than thirty custom bindings available that bring libcurl access
-to your favourite language. Look elsewhere for documentation on those.
+There are many bindings available that bring libcurl access to your favourite
+language. Look elsewhere for documentation on those.
 
-libcurl has a global constant environment that you must set up and
-maintain while using libcurl.  This essentially means you call
+libcurl has a global constant environment that you must set up and maintain
+while using libcurl.  This essentially means you call
 \fIcurl_global_init(3)\fP at the start of your program and
-\fIcurl_global_cleanup(3)\fP at the end.  See GLOBAL CONSTANTS below
-for details.
+\fIcurl_global_cleanup(3)\fP at the end.  See \fBGLOBAL CONSTANTS\fP below for
+details.
 
-To transfer files, you always set up an "easy handle" using
-\fIcurl_easy_init(3)\fP for a single specific transfer (in either
-direction). You then set your desired set of options in that handle with
-\fIcurk_easy_setopt(3)\fP. Options you set with \fIcurl_easy_setopt(3)\fP will
-be used on every repeated use of this handle until you either call the
-function again and change the option, or you reset them all with
-\fIcurl_easy_reset(3)\fP.
+To transfer files, you create an "easy handle" using \fIcurl_easy_init(3)\fP
+for a single individual transfer (in either direction). You then set your
+desired set of options in that handle with \fIcurk_easy_setopt(3)\fP. Options
+you set with \fIcurl_easy_setopt(3)\fP stick. They will be used on every
+repeated use of this handle until you either change the option, or you reset
+them all with \fIcurl_easy_reset(3)\fP.
 
 To actually transfer data you have the option of using the "easy" interface,
 or the "multi" interface.
@@ -98,6 +97,8 @@ Unix-like operating system that ship libcurl as part of their distributions
 often don't provide the curl-config tool, but simply install the library and
 headers in the common path for this purpose.
 
+Many Linux and similar sytems use pkg-config to provide build and link options
+about libraries and libcurl supports that as well.
 .SH "LIBCURL SYMBOL NAMES"
 All public functions in the libcurl interface are prefixed with 'curl_' (with
 a lowercase c). You can find other functions in the library source code, but
@@ -115,8 +116,8 @@ several threads. libcurl is thread-safe and can be used in any number of
 threads, but you must use separate curl handles if you want to use libcurl in
 more than one thread simultaneously.
 
-The global environment functions are not thread-safe.  See GLOBAL CONSTANTS
-below for details.
+The global environment functions are not thread-safe.  See \fBGLOBAL
+CONSTANTS\fP below for details.
 
 .SH "PERSISTENT CONNECTIONS"
 Persistent connections means that libcurl can re-use the same connection for
