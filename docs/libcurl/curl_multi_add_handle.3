@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,8 +33,10 @@ this \fImulti_handle\fP control the specified \fIeasy_handle\fP.  Furthermore,
 libcurl now initiates the connection associated with the specified
 \fIeasy_handle\fP.
 
-When an easy handle has been added to a multi stack, you can not and you must
-not use \fIcurl_easy_perform(3)\fP on that handle!
+While an easy handle is added to a multi stack, you can not and you must not
+use \fIcurl_easy_perform(3)\fP on that handle. After having removed the handle
+from the multi stack again, it is perfectly fine to use it with the easy
+interface again.
 
 If the easy handle is not set to use a shared (CURLOPT_SHARE) or global DNS
 cache (CURLOPT_DNS_USE_GLOBAL_CACHE), it will be made to use the DNS cache
