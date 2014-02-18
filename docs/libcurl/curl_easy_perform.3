@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -25,33 +25,41 @@ curl_easy_perform - Perform a file transfer
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode curl_easy_perform(CURL *" handle ");"
+.BI "CURLcode curl_easy_perform(CURL *" easy_handle ");"
 .ad
 .SH DESCRIPTION
-This function is called after the init and all the \fIcurl_easy_setopt(3)\fP
-calls are made, and will perform the transfer as described in the options.  It
-must be called with the same
-.I handle
-as input as the curl_easy_init call returned.
+Invoke this function after \fIcurl_easy_init(3)\fP and all the
+\fIcurl_easy_setopt(3)\fP calls are made, and will perform the transfer as
+described in the options. It must be called with the same \fBeasy_handle\fP as
+input as the \fIcurl_easy_init(3)\fP call returned.
+
+\fIcurl_easy_perform(3)\fP performs the entire request in a blocking manner
+and returns when done, or if it failed. For non-blocking behavior, see
+\fIcurl_multi_perform(3)\fP.
 
 You can do any amount of calls to \fIcurl_easy_perform(3)\fP while using the
-same handle. If you intend to transfer more than one file, you are even
-encouraged to do so. libcurl will then attempt to re-use the same connection
-for the following transfers, thus making the operations faster, less CPU
-intense and using less network resources. Just note that you will have to use
-\fIcurl_easy_setopt(3)\fP between the invokes to set options for the following
-curl_easy_perform.
+same \fBeasy_handle\fP. If you intend to transfer more than one file, you are
+even encouraged to do so. libcurl will then attempt to re-use the same
+connection for the following transfers, thus making the operations faster,
+less CPU intense and using less network resources. Just note that you will
+have to use \fIcurl_easy_setopt(3)\fP between the invokes to set options for
+the following curl_easy_perform.
 
 You must never call this function simultaneously from two places using the
-same handle. Let the function return first before invoking it another time. If
-you want parallel transfers, you must use several curl handles.
+same \fBeasy_handle\fP. Let the function return first before invoking it
+another time. If you want parallel transfers, you must use several curl
+easy_handles.
+
+While the \fBeasy_handle\fP is added to a multi handle, it cannot be used by
+\fIcurl_easy_perform(3)\fP.
 .SH RETURN VALUE
-0 means everything was ok, non-zero means an error occurred as
+CURLE_OK (0) means everything was ok, non-zero means an error occurred as
 .I <curl/curl.h>
-defines. If the CURLOPT_ERRORBUFFER was set with
-.I curl_easy_setopt
-there will be a readable error message in the error buffer when non-zero is
-returned.
+defines - see \fIlibcurl-errors(3)\fP. If the \fBCURLOPT_ERRORBUFFER\fP was
+set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
+the error buffer when non-zero is returned.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_setopt "(3), "
+.BR curl_multi_add_handle "(3), " curl_multi_perform "(3), "
+.BR libcurl-errors "(3), "
 
