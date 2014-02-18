@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,8 +28,8 @@ curl_multi_assign \- set data to association with an internal socket
 CURLMcode curl_multi_assign(CURLM *multi_handle, curl_socket_t sockfd,
                             void *sockptr);
 .SH DESCRIPTION
-This function assigns an association in the multi handle between the given
-socket and a private pointer of the application. This is (only) useful for
+This function creates an association in the multi handle between the given
+socket and a private pointer of the application. This is designed for
 \fIcurl_multi_socket(3)\fP uses.
 
 When set, the \fIsockptr\fP pointer will be passed to all future socket
@@ -51,13 +51,13 @@ The standard CURLMcode for multi interface error codes.
 .SH "TYPICAL USAGE"
 In a typical application you allocate a struct or at least use some kind of
 semi-dynamic data for each socket that we must wait for action on when using
-the \fIcurl_multi_socket(3)\fP approach.
+the \fIcurl_multi_socket_action(3)\fP approach.
 
 When our socket-callback gets called by libcurl and we get to know about yet
 another socket to wait for, we can use \fIcurl_multi_assign(3)\fP to point out
 the particular data so that when we get updates about this same socket again,
 we don't have to find the struct associated with this socket by ourselves.
 .SH AVAILABILITY
-This function was added in libcurl 7.15.5, although not deemed stable yet.
+This function was added in libcurl 7.15.5.
 .SH "SEE ALSO"
-.BR curl_multi_setopt "(3), " curl_multi_socket "(3) "
+.BR curl_multi_setopt "(3), " curl_multi_socket_action "(3) "
