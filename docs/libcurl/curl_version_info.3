@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_version_info 3 "10 June 2009" "libcurl 7.19.6" "libcurl Manual"
+.TH curl_version_info 3 "18 Feb 2014" "libcurl 7.33.0" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -30,11 +30,12 @@ curl_version_info - returns run-time libcurl version info
 .ad
 .SH DESCRIPTION
 Returns a pointer to a filled in struct with information about various
-run-time features in libcurl. \fItype\fP should be set to the version of this
-functionality by the time you write your program. This way, libcurl will
-always return a proper struct that your program understands, while programs in
-the future might get a different struct. CURLVERSION_NOW will be the most
-recent one for the library you have installed:
+features in the running version of libcurl. \fItype\fP should be set to the
+version of this functionality by the time you write your program. This way,
+libcurl will always return a proper struct that your program understands,
+while programs in the future might get a different
+struct. \fBCURLVERSION_NOW\fP will be the most recent one for the library you
+have installed:
 
         data = curl_version_info(CURLVERSION_NOW);
 
@@ -133,6 +134,9 @@ libcurl was built with support for TLS-SRP. (Added in 7.21.4)
 .IP CURL_VERSION_NTLM_WB
 libcurl was built with support for NTLM delegation to a winbind helper.
 (Added in 7.22.0)
+.IP CURL_VERSION_HTTP2
+libcurl was built with support for HTTP2.
+(Added in 7.33.0)
 .RE
 \fIssl_version\fP is an ASCII string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.
