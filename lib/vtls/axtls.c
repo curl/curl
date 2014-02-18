@@ -390,7 +390,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 /*
  * Use axTLS's non-blocking connection feature to open an SSL connection.
  * This is called after a TCP connection is already established.
-*/
+ */
 CURLcode Curl_axtls_connect_nonblocking(
     struct connectdata *conn,
     int sockindex,
@@ -415,6 +415,9 @@ CURLcode Curl_axtls_connect_nonblocking(
   if(conn->ssl[sockindex].connecting_state == ssl_connect_2) {
     /* Check to make sure handshake was ok. */
     if(ssl_handshake_status(conn->ssl[sockindex].ssl) != SSL_OK) {
+      /* Loop to perform more work in between sleeps. This is work around the
+         fact that axtls does not expose any knowledge about when work needs
+         to be performed. This can save ~25% of time on SSL handshakes. */
       for(i=0; i<5; i++) {
         ssl_fcn_return = ssl_read(conn->ssl[sockindex].ssl, NULL);
         if(ssl_fcn_return < 0) {
