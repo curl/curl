@@ -40,7 +40,7 @@
 #endif
 
 #define _MPRINTF_REPLACE
-#include "mprintf.h"
+#include <curl/mprintf.h>
 
 static int debug_callback(CURL *curl, curl_infotype info, char *msg, size_t len, void *ptr)
 {
