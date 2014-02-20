@@ -795,6 +795,8 @@ struct Curl_handler {
                                       gets a default */
 #define PROTOPT_NOURLQUERY (1<<6)   /* protocol can't handle
                                         url query strings (?foo=bar) ! */
+#define PROTOPT_CREDSPERREQUEST (1<<7) /* requires login creditials per request
+                                          as opposed to per connection */
 
 
 /* return the count of bytes sent, or -1 on error */

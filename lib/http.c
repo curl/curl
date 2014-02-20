@@ -145,7 +145,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
-  PROTOPT_SSL                           /* flags */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST /* flags */
 };
 #endif
 
