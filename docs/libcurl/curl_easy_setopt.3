@@ -1549,19 +1549,19 @@ There's an alternative option that sets or replaces headers only for requests
 that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER\fP. Use
 \fICURLOPT_HEADEROPT\fP to control the behavior.
 .IP CURLOPT_HEADEROPT
-Pass a long that is a bitmask of options of how to deal with headers. The
-available options are:
+Pass a long that is a bitmask of options of how to deal with headers. The two
+mutually exclusive options are:
 
 CURLHEADER_UNIFIED - keep working as before. This means CURLOPT_HTTPHEADER
-headers will be used in requests both to servers and in CONNECT requests. With
-this option enabled, \fICURLOPT_PROXYHEADER\fP will not have any effect.
+headers will be used in requests both to servers and proxies. With this option
+enabled, \fICURLOPT_PROXYHEADER\fP will not have any effect.
 
 CURLHEADER_SEPARATE - makes \fICURLOPT_HTTPHEADER\fP headers only get sent to
-a host and not to a proxy if CONNECT is being used. It has to be set to make
-\fICURLOPT_PROXYHEADER\fP get used.
-
-This behavior is set per request and an application can alter it between
-different invokes if desired.
+a server and not to a proxy. Proxy headers must be set with
+\fICURLOPT_PROXYHEADER\fP to get used. Note that if a non-CONNECT request is
+sent to a proxy, libcurl will send both server headers and proxy headers. When
+doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER\fP headers only do the
+proxy and then \fICURLOPT_HTTPHEADER\fP headers only to the server.
 
 (Added in 7.36.0)
 .IP CURLOPT_PROXYHEADER
