@@ -314,13 +314,13 @@ static int operate_do(struct Configurable *config)
       if(SetHTTPrequest(config,
                         (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
                         &config->httpreq)) {
-        res = PARAM_BAD_USE;
+        res = CURLE_FAILED_INIT;
         goto quit_curl;
       }
     }
     else {
       if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq)) {
-        res = PARAM_BAD_USE;
+        res = CURLE_FAILED_INIT;
         goto quit_curl;
       }
     }
