@@ -17,6 +17,8 @@ This release includes the following changes:
  o added CURLOPT_EXPECT_100_TIMEOUT_MS [7]
  o tool: add --no-alpn and --no-npn
  o added CURLOPT_SSL_ENABLE_NPN and CURLOPT_SSL_ENABLE_ALPN
+ o winssl: enable TLSv1.1 and TLSv1.2 by default
+ o winssl: TLSv1.2 disables certificate signatures using MD5 hash
 
 This release includes the following bugfixes:
 
@@ -24,7 +26,6 @@ This release includes the following bugfixes:
  o netrc: Fixed a memory leak in an OOM condition
  o ftp: fixed a memory leak on wildcard error path
  o pipeline: Fixed a NULL pointer dereference on OOM
- o winssl: improved default SSL/TLS protocol selection
  o nss: prefer highest available TLS version
  o 100-continue: fix timeout condition [4]
  o ssh: Fixed a NULL pointer dereference on OOM condition
