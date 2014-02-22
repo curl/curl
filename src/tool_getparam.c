@@ -1310,7 +1310,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
         if(config->engine && curlx_raw_equal(config->engine,"list"))
-          config->list_engines = TRUE;
+          return PARAM_ENGINES_REQUESTED;
         break;
       case 'g': /* CA info PEM file */
         /* CA cert directory */
@@ -1819,7 +1819,7 @@ ParameterError parse_args(struct Configurable *config, int argc,
     orig_opt = argv[i];
 
     if(curlx_strequal(":", argv[i]) &&
-       ((config->url_list && config->url_list->url) || config->list_engines)) {
+       (config->url_list && config->url_list->url)) {
 
       /* Allocate the next config */
       config->next = malloc(sizeof(struct Configurable));
@@ -1865,7 +1865,8 @@ ParameterError parse_args(struct Configurable *config, int argc,
     }
   }
 
-  if(result && result != PARAM_HELP_REQUESTED) {
+  if(result && result != PARAM_HELP_REQUESTED &&
+     result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
 
     if(!curlx_strequal(":", orig_opt))

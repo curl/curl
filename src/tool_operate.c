@@ -1826,14 +1826,13 @@ CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
     /* Parse the command line arguments */
     ParameterError res = parse_args(config, argc, argv);
     if(res) {
-      if(res != PARAM_HELP_REQUESTED)
+      result = CURLE_OK;
+
+      /* Check if we were asked to list the SSL engines */
+      if(res == PARAM_ENGINES_REQUESTED)
+        tool_list_engines(config->easy);
+      else if(res != PARAM_HELP_REQUESTED)
         result = CURLE_FAILED_INIT;
-      else
-        result = CURLE_OK;
-    }
-    /* Check if we were asked to list the SSL engines */
-    else if(config->list_engines) {
-      tool_list_engines(config->easy);
     }
     /* Perform the main operations */
     else {

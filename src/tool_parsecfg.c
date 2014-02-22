@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -230,7 +230,8 @@ int parseconfig(const char *filename,
         if(!strcmp(filename, "-")) {
           filename = (char *)"<stdin>";
         }
-        if(PARAM_HELP_REQUESTED != res) {
+        if(res != PARAM_HELP_REQUESTED &&
+           res != PARAM_ENGINES_REQUESTED) {
           const char *reason = param2text(res);
           warnf(config, "%s:%d: warning: '%s' %s\n",
                 filename, lineno, option, reason);
