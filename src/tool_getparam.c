@@ -43,7 +43,6 @@
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
-#include "tool_version.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -274,31 +273,6 @@ static const struct LongShort aliases[]= {
   {"z",  "time-cond",                TRUE},
   {"#",  "progress-bar",             FALSE},
   {"~",  "xattr",                    FALSE},
-};
-
-struct feat {
-  const char *name;
-  int bitmask;
-};
-
-static const struct feat feats[] = {
-  {"AsynchDNS",      CURL_VERSION_ASYNCHDNS},
-  {"Debug",          CURL_VERSION_DEBUG},
-  {"TrackMemory",    CURL_VERSION_CURLDEBUG},
-  {"GSS-Negotiate",  CURL_VERSION_GSSNEGOTIATE},
-  {"IDN",            CURL_VERSION_IDN},
-  {"IPv6",           CURL_VERSION_IPV6},
-  {"Largefile",      CURL_VERSION_LARGEFILE},
-  {"NTLM",           CURL_VERSION_NTLM},
-  {"NTLM_WB",        CURL_VERSION_NTLM_WB},
-  {"SPNEGO",         CURL_VERSION_SPNEGO},
-  {"SSL",            CURL_VERSION_SSL},
-  {"SSPI",           CURL_VERSION_SSPI},
-  {"krb4",           CURL_VERSION_KERBEROS4},
-  {"libz",           CURL_VERSION_LIBZ},
-  {"CharConv",       CURL_VERSION_CONV},
-  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
-  {"HTTP2",          CURL_VERSION_HTTP2}
 };
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
@@ -1727,35 +1701,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->tracetype = TRACE_NONE;
       break;
     case 'V':
-    {
-      const char *const *proto;
-
-      if(!toggle)
-        /* --no-version yields no output! */
-        break;
-
-      printf(CURL_ID "%s\n", curl_version());
-      if(curlinfo->protocols) {
-        printf("Protocols: ");
-        for(proto = curlinfo->protocols; *proto; ++proto) {
-          printf("%s ", *proto);
-        }
-        puts(""); /* newline */
+      if(toggle) {  /* --no-version yields no output! */
+        tool_version_info();
+        return PARAM_HELP_REQUESTED;
       }
-      if(curlinfo->features) {
-        unsigned int i;
-        printf("Features: ");
-        for(i = 0; i < sizeof(feats)/sizeof(feats[0]); i++) {
-          if(curlinfo->features & feats[i].bitmask)
-            printf("%s ", feats[i].name);
-        }
-#ifdef USE_METALINK
-        printf("Metalink ");
-#endif
-        puts(""); /* newline */
-      }
-    }
-    return PARAM_HELP_REQUESTED;
+      break;
+
     case 'w':
       /* get the output string */
       if('@' == *nextarg) {
