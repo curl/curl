@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+struct Configurable;
+
 void clean_getout(struct Configurable *config);
 
 bool output_expected(const char *url, const char *uploadfile);
