@@ -79,6 +79,7 @@
 #include "tool_writeout.h"
 #include "tool_xattr.h"
 #include "tool_vms.h"
+#include "tool_help.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -1831,10 +1832,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
     /* Check if we were asked to list the SSL engines */
     else if(config->list_engines) {
-      struct curl_slist *engines = NULL;
-      curl_easy_getinfo(config->easy, CURLINFO_SSL_ENGINES, &engines);
-      list_engines(engines);
-      curl_slist_free_all(engines);
+      tool_list_engines(config->easy);
     }
     /* Perform the main operations */
     else {

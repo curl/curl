@@ -23,6 +23,7 @@
 
 #include "tool_panykey.h"
 #include "tool_help.h"
+#include "tool_operhlp.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -255,4 +256,13 @@ void tool_help(void)
       tool_pressanykey();
 #endif
   }
+}
+
+void tool_list_engines(CURL *curl)
+{
+  struct curl_slist *engines = NULL;
+
+  curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+  list_engines(engines);
+  curl_slist_free_all(engines);
 }
