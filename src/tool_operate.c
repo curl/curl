@@ -112,7 +112,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
   "If you'd like to turn off curl's verification of the certificate, use\n" \
   " the -k (or --insecure) option.\n"
 
-static int is_fatal_error(int code)
+static bool is_fatal_error(CURLcode code)
 {
   switch(code) {
   /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
@@ -122,12 +122,13 @@ static int is_fatal_error(int code)
   case CURLE_FUNCTION_NOT_FOUND:
   case CURLE_BAD_FUNCTION_ARGUMENT:
     /* critical error */
-    return 1;
+    return TRUE;
   default:
     break;
   }
+
   /* no error or not critical */
-  return 0;
+  return FALSE;
 }
 
 #ifdef __VMS
@@ -202,7 +203,7 @@ static CURLcode operate_init(struct Configurable *config)
   return CURLE_OK;
 }
 
-static int operate_do(struct Configurable *config)
+static CURLcode operate_do(struct Configurable *config)
 {
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
@@ -1787,7 +1788,7 @@ static int operate_do(struct Configurable *config)
   dumpeasysrc(config);
 #endif
 
-  return res;
+  return (CURLcode)res;
 }
 
 static void operate_free(struct Configurable *config)
@@ -1801,9 +1802,9 @@ static void operate_free(struct Configurable *config)
   clean_metalink(config);
 }
 
-int operate(struct Configurable *config, int argc, argv_item_t argv[])
+CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
-  int result = 0;
+  CURLcode result = CURLE_OK;
 
   /* Initialize the easy interface */
   result = operate_init(config);

@@ -161,7 +161,7 @@ static void main_free(void)
 */
 int main(int argc, char *argv[])
 {
-  int res;
+  CURLcode result = CURLE_OK;
   struct Configurable *config;
 
   main_checkfds();
@@ -182,10 +182,10 @@ int main(int argc, char *argv[])
 
     /* Initialize the curl library - do not call any libcurl functions before
        this point */
-    res = main_init(config);
-    if(!res) {
+    result = main_init(config);
+    if(!result) {
       /* Start our curl operation */
-      res = operate(config, argc, argv);
+      result = operate(config, argc, argv);
 
       /* Perform the main cleanup */
       main_free();
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
   }
   else {
     helpf(stderr, "error initializing curl\n");
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
   }
 
 #ifdef __NOVELL_LIBC__
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 #ifdef __VMS
   vms_special_exit(res, vms_show);
 #else
-  return res;
+  return (int)result;
 #endif
 }
 
