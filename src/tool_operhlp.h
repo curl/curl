@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-void list_engines(const struct curl_slist *engines);
-
 void clean_getout(struct Configurable *config);
 
 bool output_expected(const char *url, const char *uploadfile);

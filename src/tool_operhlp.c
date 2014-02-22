@@ -34,20 +34,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/*
- * Print list of OpenSSL supported engines
- */
-void list_engines(const struct curl_slist *engines)
-{
-  puts("Build-time engines:");
-  if(!engines) {
-    puts("  <none>");
-    return;
-  }
-  for(; engines; engines = engines->next)
-    printf("  %s\n", engines->data);
-}
-
 void clean_getout(struct Configurable *config)
 {
   struct getout *next;
