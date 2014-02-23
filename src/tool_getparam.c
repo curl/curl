@@ -32,7 +32,6 @@
 #include "tool_cb_prg.h"
 #include "tool_formparse.h"
 #include "tool_getparam.h"
-#include "tool_help.h"
 #include "tool_helpers.h"
 #include "tool_libinfo.h"
 #include "tool_metalink.h"
@@ -1395,7 +1394,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
     case 'h': /* h for help */
       if(toggle) {
-        tool_help();
         return PARAM_HELP_REQUESTED;
       }
       /* we now actually support --no-help too! */

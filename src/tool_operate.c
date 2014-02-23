@@ -1829,8 +1829,11 @@ CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
     if(res) {
       result = CURLE_OK;
 
+      /* Check if we were asked for the help */
+      if(res == PARAM_HELP_REQUESTED)
+        tool_help();
       /* Check if we were asked for the manual */
-      if(res == PARAM_MANUAL_REQUESTED)
+      else if(res == PARAM_MANUAL_REQUESTED)
         hugehelp();
       /* Check if we were asked for the version information */
       else if(res == PARAM_VERSION_INFO_REQUESTED)
@@ -1838,7 +1841,7 @@ CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
       /* Check if we were asked to list the SSL engines */
       if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines(config->easy);
-      else if(res != PARAM_HELP_REQUESTED)
+      else
         result = CURLE_FAILED_INIT;
     }
     /* Perform the main operations */
