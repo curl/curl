@@ -156,17 +156,6 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "schannel: disable server certificate revocation checks\n");
     }
 
-    if(Curl_inet_pton(AF_INET, conn->host.name, &addr)
-#ifdef ENABLE_IPV6
-       || Curl_inet_pton(AF_INET6, conn->host.name, &addr6)
-#endif
-      ) {
-      schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: using IP address, SNI is being disabled by "
-                  "disabling the servername check against the "
-                  "subject names in server certificates.\n");
-    }
-
     if(!data->set.ssl.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
       infof(data, "schannel: verifyhost setting prevents Schannel from "
@@ -226,6 +215,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       Curl_safefree(connssl->cred);
       return CURLE_SSL_CONNECT_ERROR;
     }
+  }
+
+  /* Warn if SNI is disabled due to use of an IP address */
+  if(Curl_inet_pton(AF_INET, conn->host.name, &addr)
+#ifdef ENABLE_IPV6
+     || Curl_inet_pton(AF_INET6, conn->host.name, &addr6)
+#endif
+    ) {
+    infof(data, "schannel: using IP address, SNI is not supported by OS.\n");
   }
 
   /* setup output buffer */
