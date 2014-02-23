@@ -27,10 +27,6 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
-#ifdef USE_MANUAL
-#  include "tool_hugehelp.h"
-#endif
-
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
@@ -1465,8 +1461,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case 'M': /* M for manual, huge help */
       if(toggle) { /* --no-manual shows no manual... */
 #ifdef USE_MANUAL
-        hugehelp();
-        return PARAM_HELP_REQUESTED;
+        return PARAM_MANUAL_REQUESTED;
 #else
         warnf(config,
               "built-in manual was disabled at build-time!\n");
@@ -1864,6 +1859,7 @@ ParameterError parse_args(struct Configurable *config, int argc,
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
+     result != PARAM_MANUAL_REQUESTED &&
      result != PARAM_VERSION_INFO_REQUESTED &&
      result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
