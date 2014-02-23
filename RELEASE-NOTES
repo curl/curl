@@ -45,6 +45,10 @@ This release includes the following bugfixes:
  o multi: make MAXCONNECTS default 4 x number of easy handles function
  o configure: Fix the --disable-crypto-auth option
  o multi: ignore SIGPIPE internally
+ o curl.1: update the description of --tlsv1
+ o SFTP: skip reading the dir when NOBODY=1 [10]
+ o easy: Fixed a memory leak on OOM condition
+ o tool: Fixed incorrect return code when setting HTTP request fails
 
 This release includes the following known bugs:
 
@@ -54,10 +58,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Sampson, Arvid Norberg, Colin Hogben, Dan Fandrich, Daniel Stenberg,
-  Fabian Frank, Gisle Vanem, Jeff King, Kamil Dudka, Marc Hoersken,
-  Patrick Monnerat, Prash Dush, Remi Gacogne, Rob Davies, Romulo A. Ceccon,
-  Shao Shuchao, Steve Holme, Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma,
-  Yehezkel Horowitz,
+  Fabian Frank, Gisle Vanem, Hubert Kario, Jeff King, Maks Naumov,
+  Kamil Dudka, Marc Hoersken, Patrick Monnerat, Prash Dush, Remi Gacogne,
+  Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
+  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -72,3 +76,4 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTEXPECT100TIMEOUTMS
  [8] = http://curl.haxx.se/mail/lib-2014-02/0097.html
  [9] = http://thread.gmane.org/gmane.comp.version-control.git/242213
+ [10] = http://curl.haxx.se/mail/lib-2014-02/0155.html
