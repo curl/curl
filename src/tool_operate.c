@@ -187,7 +187,8 @@ static curl_off_t VmsSpecialSize(const char * name,
 }
 #endif /* __VMS */
 
-static CURLcode operate_do(struct OperationConfig *config)
+static CURLcode operate_do(struct GlobalConfig *global,
+                           struct OperationConfig *config)
 {
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
@@ -408,7 +409,7 @@ static CURLcode operate_do(struct OperationConfig *config)
     if(!config->globoff && infiles) {
       /* Unless explicitly shut off */
       res = glob_url(&inglob, infiles, &infilenum,
-                     config->showerror?config->errors:NULL);
+                     global->showerror?config->errors:NULL);
       if(res) {
         Curl_safefree(outfiles);
         break;
@@ -459,7 +460,7 @@ static CURLcode operate_do(struct OperationConfig *config)
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         res = glob_url(&urls, urlnode->url, &urlnum,
-                       config->showerror?config->errors:NULL);
+                       global->showerror?config->errors:NULL);
         if(res) {
           Curl_safefree(uploadfile);
           break;
@@ -1554,12 +1555,12 @@ static CURLcode operate_do(struct OperationConfig *config)
 #ifdef __VMS
         if(is_vms_shell()) {
           /* VMS DCL shell behavior */
-          if(!config->showerror)
+          if(!global->showerror)
             vms_show = VMSSTS_HIDE;
         }
         else
 #endif
-        if(res && config->showerror) {
+        if(res && global->showerror) {
           fprintf(config->errors, "curl: (%d) %s\n", res, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror((CURLcode)res));
           if(res == CURLE_SSL_CACERT)
@@ -1836,7 +1837,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 
       /* Perform each operation */
       while(!result && config->current) {
-        result = operate_do(config->current);
+        result = operate_do(config, config->current);
 
         config->current = config->current->next;
       }

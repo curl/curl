@@ -130,6 +130,9 @@ static CURLcode main_init(struct GlobalConfig *config)
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
 
+  /* Initialise the global config */
+  config->showerror = -1;             /* Will show errors */
+
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
   if(config->first) {
@@ -213,7 +216,7 @@ int main(int argc, char *argv[])
     result = operate(&global, argc, argv);
 
 #ifdef __SYMBIAN32__
-    if(global.first->showerror)
+    if(global.showerror)
       tool_pressanykey();
 #endif
 

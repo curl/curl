@@ -32,7 +32,6 @@ void config_init(struct OperationConfig* config)
 
   config->errors = stderr; /* default errors to stderr */
   config->postfieldsize = -1;
-  config->showerror = -1; /* will show errors */
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;

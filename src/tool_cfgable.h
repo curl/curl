@@ -70,9 +70,6 @@ struct OperationConfig {
   char *dns_interface; /* interface name */
   char *dns_ipv4_addr; /* dot notation */
   char *dns_ipv6_addr; /* dot notation */
-  int showerror; /* -1 == unset, default => show errors
-                    0 => -s is used to NOT show errors
-                    1 => -S has been used to show errors */
   char *userpwd;
   char *login_options;
   char *tls_username;
@@ -222,6 +219,9 @@ struct OperationConfig {
 
 struct GlobalConfig {
   CURL *easy;                     /* Once we have one, we keep it here */
+  int showerror;                  /* -1 == unset, default => show errors
+                                      0 => -s is used to NOT show errors
+                                      1 => -S has been used to show errors */
 
   struct OperationConfig *first;
   struct OperationConfig *current;
