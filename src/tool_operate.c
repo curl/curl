@@ -1789,7 +1789,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 
   /* Parse .curlrc if necessary */
   if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
-    parseconfig(NULL, config->first); /* ignore possible failure */
+    parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
     if((argc < 2) && (!config->first->url_list)) {

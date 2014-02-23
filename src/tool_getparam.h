@@ -44,10 +44,9 @@ typedef enum {
 struct GlobalConfig;
 struct OperationConfig;
 
-ParameterError getparameter(char *flag,
-                            char *nextarg,
-                            bool *usedarg,
-                            struct OperationConfig *config);
+ParameterError getparameter(char *flag, char *nextarg, bool *usedarg,
+                            struct GlobalConfig *global,
+                            struct OperationConfig *operation);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,

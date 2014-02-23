@@ -373,6 +373,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
                             char *nextarg, /* NULL if unset */
                             bool *usedarg, /* set to TRUE if the arg
                                               has been used */
+                            struct GlobalConfig *global,
                             struct OperationConfig *config)
 {
   char letter;
@@ -1433,7 +1434,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       config->insecure_ok = toggle;
       break;
     case 'K': /* parse config file */
-      if(parseconfig(nextarg, config))
+      if(parseconfig(nextarg, global))
         warnf(config, "error trying read config from the '%s' file\n",
               nextarg);
       break;
@@ -1847,7 +1848,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
       else {
         nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
-        result = getparameter(flag, nextarg, &passarg, operation);
+        result = getparameter(flag, nextarg, &passarg, config, operation);
         if(!result && passarg)
           i++; /* we're supposed to skip this */
       }
@@ -1856,7 +1857,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter((char *)"--url", argv[i], &used, operation);
+      result = getparameter((char *)"--url", argv[i], &used, config, operation);
     }
   }
 

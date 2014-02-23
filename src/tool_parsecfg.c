@@ -44,7 +44,7 @@ static const char *unslashquote(const char *line, char *param);
 static char *my_get_line(FILE *fp);
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename, struct OperationConfig *config)
+int parseconfig(const char *filename, struct GlobalConfig *global)
 {
   int res;
   FILE *file;
@@ -52,6 +52,7 @@ int parseconfig(const char *filename, struct OperationConfig *config)
   bool usedarg;
   char *home;
   int rc = 0;
+  struct OperationConfig *operation = global->first;
 
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
@@ -201,8 +202,8 @@ int parseconfig(const char *filename, struct OperationConfig *config)
         case '#': /* comment */
           break;
         default:
-          warnf(config, "%s:%d: warning: '%s' uses unquoted white space in the"
-                " line that may cause side-effects!\n",
+          warnf(operation, "%s:%d: warning: '%s' uses unquoted white space in"
+                " the line that may cause side-effects!\n",
                 filename, lineno, option);
         }
       }
@@ -218,7 +219,7 @@ int parseconfig(const char *filename, struct OperationConfig *config)
 #ifdef DEBUG_CONFIG
       fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, &usedarg, config);
+      res = getparameter(option, param, &usedarg, global, operation);
 
       if(param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
@@ -234,7 +235,7 @@ int parseconfig(const char *filename, struct OperationConfig *config)
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED) {
           const char *reason = param2text(res);
-          warnf(config, "%s:%d: warning: '%s' %s\n",
+          warnf(operation, "%s:%d: warning: '%s' %s\n",
                 filename, lineno, option, reason);
         }
       }
