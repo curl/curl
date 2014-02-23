@@ -154,19 +154,13 @@ void config_free(struct OperationConfig *config)
 {
   struct OperationConfig *last = config;
 
-  /* Find the last config structure */
-  while(last->next)
-    last = last->next;
-
   /* Free each of the structures in reverse order */
-  do {
+  while(last) {
     struct OperationConfig *prev = last->prev;
-    if(prev)
-      last->easy = NULL;
 
     free_config_fields(last);
     free(last);
 
     last = prev;
-  } while(last);
+  }
 }

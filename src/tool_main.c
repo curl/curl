@@ -172,13 +172,17 @@ static CURLcode main_init(struct GlobalConfig *config)
  */
 static void main_free(struct GlobalConfig *config)
 {
+  /* Cleanup the easy handle */
+  curl_easy_cleanup(config->easy);
+  config->easy = NULL;
+
   /* Main cleanup */
   curl_global_cleanup();
   convert_cleanup();
   metalink_cleanup();
 
   /* Free the config structures */
-  config_free(config->first);
+  config_free(config->last);
   config->first = NULL;
   config->last = NULL;
 }

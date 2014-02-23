@@ -1772,18 +1772,10 @@ static CURLcode operate_do(struct OperationConfig *config)
   dumpeasysrc(config);
 #endif
 
-  return (CURLcode)res;
-}
-
-static void operate_free(struct OperationConfig *config)
-{
-  if(config->easy) {
-    curl_easy_cleanup(config->easy);
-    config->easy = NULL;
-  }
-
   /* Release metalink related resources here */
   clean_metalink(config);
+
+  return (CURLcode)res;
 }
 
 CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
@@ -1850,9 +1842,6 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
       }
     }
   }
-
-  /* Perform the cleanup */
-  operate_free(config->first);
 
   return result;
 }
