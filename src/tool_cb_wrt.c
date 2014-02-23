@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;
   struct OutStruct *outs = userdata;
-  struct Configurable *config = outs->config;
+  struct OperationConfig *config = outs->config;
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value

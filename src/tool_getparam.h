@@ -41,12 +41,12 @@ typedef enum {
   PARAM_LAST
 } ParameterError;
 
-struct Configurable;
+struct OperationConfig;
 
 ParameterError getparameter(char *flag,
                             char *nextarg,
                             bool *usedarg,
-                            struct Configurable *config);
+                            struct OperationConfig *config);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,
@@ -54,7 +54,7 @@ void parse_cert_parameter(const char *cert_parameter,
                           char **passphrase);
 #endif
 
-ParameterError parse_args(struct Configurable *config, int argc,
+ParameterError parse_args(struct OperationConfig *config, int argc,
                           argv_item_t argv[]);
 
 #endif /* HEADER_CURL_TOOL_GETPARAM_H */

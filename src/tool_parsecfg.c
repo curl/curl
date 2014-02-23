@@ -44,8 +44,7 @@ static const char *unslashquote(const char *line, char *param);
 static char *my_get_line(FILE *fp);
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename,
-                struct Configurable *config)
+int parseconfig(const char *filename, struct OperationConfig *config)
 {
   int res;
   FILE *file;

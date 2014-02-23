@@ -37,7 +37,7 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-struct getout *new_getout(struct Configurable *config)
+struct getout *new_getout(struct OperationConfig *config)
 {
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
@@ -241,7 +241,7 @@ ParameterError str2udouble(double *val, const char *str)
  * data.
  */
 
-long proto2num(struct Configurable *config, long *val, const char *str)
+long proto2num(struct OperationConfig *config, long *val, const char *str)
 {
   char *buffer;
   const char *sep = ",";
@@ -439,7 +439,7 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
   return PARAM_OK;
 }
 
-int ftpfilemethod(struct Configurable *config, const char *str)
+int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
   if(curlx_raw_equal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
@@ -451,7 +451,7 @@ int ftpfilemethod(struct Configurable *config, const char *str)
   return CURLFTPMETHOD_MULTICWD;
 }
 
-int ftpcccmethod(struct Configurable *config, const char *str)
+int ftpcccmethod(struct OperationConfig *config, const char *str)
 {
   if(curlx_raw_equal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
@@ -461,7 +461,7 @@ int ftpcccmethod(struct Configurable *config, const char *str)
   return CURLFTPSSL_CCC_PASSIVE;
 }
 
-long delegation(struct Configurable *config, char *str)
+long delegation(struct OperationConfig *config, char *str)
 {
   if(curlx_raw_equal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
@@ -481,7 +481,7 @@ static char *my_useragent(void)
   return strdup(CURL_NAME "/" CURL_VERSION);
 }
 
-CURLcode get_args(struct Configurable *config, const size_t i)
+CURLcode get_args(struct OperationConfig *config, const size_t i)
 {
   CURLcode result = CURLE_OK;
   bool last = (config->next ? FALSE : TRUE);

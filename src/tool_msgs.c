@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@
  * mute (--silent) was selected.
  */
 
-void warnf(struct Configurable *config, const char *fmt, ...)
+void warnf(struct OperationConfig *config, const char *fmt, ...)
 {
   if(!config->mute) {
     va_list ap;

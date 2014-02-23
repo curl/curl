@@ -121,7 +121,7 @@ static void memory_tracking_init(void)
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-static CURLcode main_init(struct Configurable *config)
+static CURLcode main_init(struct OperationConfig *config)
 {
   CURLcode result = CURLE_OK;
 
@@ -162,7 +162,7 @@ static void main_free(void)
 int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
-  struct Configurable *config;
+  struct OperationConfig *config;
 
   main_checkfds();
 
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   memory_tracking_init();
 
   /* Allocate the initial config */
-  config = malloc(sizeof(struct Configurable));
+  config = malloc(sizeof(struct OperationConfig));
 
   if(config) {
     /* Initialise the config */

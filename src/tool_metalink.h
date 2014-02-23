@@ -101,7 +101,7 @@ extern const digest_params SHA256_DIGEST_PARAMS[1];
  * Counts the resource in the metalinkfile.
  */
 int count_next_metalink_resource(metalinkfile *mlfile);
-void clean_metalink(struct Configurable *config);
+void clean_metalink(struct OperationConfig *config);
 
 /*
  * Performs final parse operation and extracts information from
@@ -113,7 +113,7 @@ void clean_metalink(struct Configurable *config);
  * -1: Parsing failed; or no file is found
  * -2: Parsing succeeded with some warnings.
  */
-int parse_metalink(struct Configurable *config, struct OutStruct *outs,
+int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
                    const char *metalink_url);
 
 /*
@@ -142,7 +142,7 @@ int check_metalink_content_type(const char *content_type);
  *   No checksum in Metalink supported, hash algorithm not available, or
  *   Metalink does not contain checksum.
  */
-int metalink_check_hash(struct Configurable *config,
+int metalink_check_hash(struct OperationConfig *config,
                         metalinkfile *mlfile,
                         const char *filename);
 

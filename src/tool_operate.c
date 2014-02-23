@@ -187,7 +187,7 @@ static curl_off_t VmsSpecialSize(const char * name,
 }
 #endif /* __VMS */
 
-static CURLcode operate_init(struct Configurable *config)
+static CURLcode operate_init(struct OperationConfig *config)
 {
   /* Get a curl handle to use for all forthcoming curl transfers */
   config->easy = curl_easy_init();
@@ -204,7 +204,7 @@ static CURLcode operate_init(struct Configurable *config)
   return CURLE_OK;
 }
 
-static CURLcode operate_do(struct Configurable *config)
+static CURLcode operate_do(struct OperationConfig *config)
 {
   char errorbuffer[CURL_ERROR_SIZE];
   struct ProgressData progressbar;
@@ -1792,7 +1792,7 @@ static CURLcode operate_do(struct Configurable *config)
   return (CURLcode)res;
 }
 
-static void operate_free(struct Configurable *config)
+static void operate_free(struct OperationConfig *config)
 {
   if(config->easy) {
     curl_easy_cleanup(config->easy);
@@ -1803,7 +1803,7 @@ static void operate_free(struct Configurable *config)
   clean_metalink(config);
 }
 
-CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
+CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
 
@@ -1847,7 +1847,7 @@ CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
     /* Perform the main operations */
     else {
       size_t count = 0;
-      struct Configurable *operation = config;
+      struct OperationConfig *operation = config;
 
       /* Get the required aguments for each operation */
       while(!result && operation) {

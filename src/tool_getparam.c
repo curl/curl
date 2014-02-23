@@ -373,7 +373,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
                             char *nextarg, /* NULL if unset */
                             bool *usedarg, /* set to TRUE if the arg
                                               has been used */
-                            struct Configurable *config)
+                            struct OperationConfig *config)
 {
   char letter;
   char subletter = '\0'; /* subletters can only occur on long options */
@@ -1798,7 +1798,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
   return PARAM_OK;
 }
 
-ParameterError parse_args(struct Configurable *config, int argc,
+ParameterError parse_args(struct OperationConfig *config, int argc,
                           argv_item_t argv[])
 {
   int i;
@@ -1813,7 +1813,7 @@ ParameterError parse_args(struct Configurable *config, int argc,
        (config->url_list && config->url_list->url)) {
 
       /* Allocate the next config */
-      config->next = malloc(sizeof(struct Configurable));
+      config->next = malloc(sizeof(struct OperationConfig));
       if(config->next) {
         /* Initialise the newly created config */
         config_init(config->next);

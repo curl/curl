@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-struct getout *new_getout(struct Configurable *config);
+struct getout *new_getout(struct OperationConfig *config);
 
 ParameterError file2string(char **bufp, FILE *file);
 
@@ -36,19 +36,19 @@ ParameterError str2unum(long *val, const char *str);
 ParameterError str2double(double *val, const char *str);
 ParameterError str2udouble(double *val, const char *str);
 
-long proto2num(struct Configurable *config, long *val, const char *str);
+long proto2num(struct OperationConfig *config, long *val, const char *str);
 
 ParameterError str2offset(curl_off_t *val, const char *str);
 
-CURLcode get_args(struct Configurable *config, const size_t index);
+CURLcode get_args(struct OperationConfig *config, const size_t i);
 
 ParameterError add2list(struct curl_slist **list, const char *ptr);
 
-int ftpfilemethod(struct Configurable *config, const char *str);
+int ftpfilemethod(struct OperationConfig *config, const char *str);
 
-int ftpcccmethod(struct Configurable *config, const char *str);
+int ftpcccmethod(struct OperationConfig *config, const char *str);
 
-long delegation(struct Configurable *config, char *str);
+long delegation(struct OperationConfig *config, char *str);
 
 #endif /* HEADER_CURL_TOOL_PARAMHLP_H */
 

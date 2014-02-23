@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -230,7 +230,7 @@ static char *c_escape(const char *str)
 }
 
 /* setopt wrapper for enum types */
-CURLcode tool_setopt_enum(CURL *curl, struct Configurable *config,
+CURLcode tool_setopt_enum(CURL *curl, struct OperationConfig *config,
                           const char *name, CURLoption tag,
                           const NameValue *nvlist, long lval)
 {
@@ -263,7 +263,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct Configurable *config,
 }
 
 /* setopt wrapper for flags */
-CURLcode tool_setopt_flags(CURL *curl, struct Configurable *config,
+CURLcode tool_setopt_flags(CURL *curl, struct OperationConfig *config,
                            const char *name, CURLoption tag,
                            const NameValue *nvlist, long lval)
 {
@@ -305,7 +305,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct Configurable *config,
 }
 
 /* setopt wrapper for bitmasks */
-CURLcode tool_setopt_bitmask(CURL *curl, struct Configurable *config,
+CURLcode tool_setopt_bitmask(CURL *curl, struct OperationConfig *config,
                              const char *name, CURLoption tag,
                              const NameValueUnsigned *nvlist,
                              long lval)
@@ -348,7 +348,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct Configurable *config,
 }
 
 /* setopt wrapper for CURLOPT_HTTPPOST */
-CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
+CURLcode tool_setopt_httppost(CURL *curl, struct OperationConfig *config,
                               const char *name, CURLoption tag,
                               struct curl_httppost *post)
 {
@@ -424,7 +424,7 @@ CURLcode tool_setopt_httppost(CURL *curl, struct Configurable *config,
 }
 
 /* setopt wrapper for curl_slist options */
-CURLcode tool_setopt_slist(CURL *curl, struct Configurable *config,
+CURLcode tool_setopt_slist(CURL *curl, struct OperationConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list)
 {
@@ -464,7 +464,7 @@ CURLcode tool_setopt_slist(CURL *curl, struct Configurable *config,
 
 /* generic setopt wrapper for all other options.
  * Some type information is encoded in the tag value. */
-CURLcode tool_setopt(CURL *curl, bool str, struct Configurable *config,
+CURLcode tool_setopt(CURL *curl, bool str, struct OperationConfig *config,
                      const char *name, CURLoption tag, ...)
 {
   va_list arg;

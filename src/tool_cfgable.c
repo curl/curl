@@ -26,9 +26,9 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-void config_init(struct Configurable* config)
+void config_init(struct OperationConfig* config)
 {
-  memset(config, 0, sizeof(struct Configurable));
+  memset(config, 0, sizeof(struct OperationConfig));
 
   config->errors = stderr; /* default errors to stderr */
   config->postfieldsize = -1;
@@ -43,7 +43,7 @@ void config_init(struct Configurable* config)
   config->proto_redir_present = FALSE;
 }
 
-static void free_config_fields(struct Configurable *config)
+static void free_config_fields(struct OperationConfig *config)
 {
   struct getout *urlnode;
 
@@ -150,9 +150,9 @@ static void free_config_fields(struct Configurable *config)
   Curl_safefree(config->libcurl);
 }
 
-void config_free(struct Configurable *config)
+void config_free(struct OperationConfig *config)
 {
-  struct Configurable *last = config;
+  struct OperationConfig *last = config;
 
   /* Find the last config structure */
   while(last->next)
@@ -160,7 +160,7 @@ void config_free(struct Configurable *config)
 
   /* Free each of the structures in reverse order */
   do {
-    struct Configurable *prev = last->prev;
+    struct OperationConfig *prev = last->prev;
     if(prev)
       last->easy = NULL;
 

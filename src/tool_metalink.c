@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -594,7 +594,7 @@ static int check_hash(const char *filename,
   return check_ok;
 }
 
-int metalink_check_hash(struct Configurable *config,
+int metalink_check_hash(struct OperationConfig *config,
                         metalinkfile *mlfile,
                         const char *filename)
 {
@@ -712,7 +712,7 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
   return f;
 }
 
-int parse_metalink(struct Configurable *config, struct OutStruct *outs,
+int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
                    const char *metalink_url)
 {
   metalink_error_t r;
@@ -791,7 +791,7 @@ size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
                          void *userdata)
 {
   struct OutStruct *outs = userdata;
-  struct Configurable *config = outs->config;
+  struct OperationConfig *config = outs->config;
   int rv;
 
   /*
@@ -878,7 +878,7 @@ static void delete_metalinkfile(metalinkfile *mlfile)
   Curl_safefree(mlfile);
 }
 
-void clean_metalink(struct Configurable *config)
+void clean_metalink(struct OperationConfig *config)
 {
   while(config->metalinkfile_list) {
     metalinkfile *mlfile = config->metalinkfile_list;

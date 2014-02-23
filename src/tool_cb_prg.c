@@ -101,7 +101,7 @@ int tool_progress_cb(void *clientp,
 }
 
 void progressbarinit(struct ProgressData *bar,
-                     struct Configurable *config)
+                     struct OperationConfig *config)
 {
 #ifdef __EMX__
   /* 20000318 mgs */
@@ -148,4 +148,3 @@ void progressbarinit(struct ProgressData *bar,
 
   bar->out = config->errors;
 }
-

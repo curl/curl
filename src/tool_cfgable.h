@@ -27,7 +27,7 @@
 
 #include "tool_metalink.h"
 
-struct Configurable {
+struct OperationConfig {
   CURL *easy;               /* once we have one, we keep it here */
   bool remote_time;
   char *random_file;
@@ -216,11 +216,11 @@ struct Configurable {
   bool nonpn;                 /* enable/disable TLS NPN extension */
   bool noalpn;                /* enable/disable TLS ALPN extension */
 
-  struct Configurable* prev;
-  struct Configurable* next;  /* Always last in the struct */
+  struct OperationConfig* prev;
+  struct OperationConfig* next; /* Always last in the struct */
 };
 
-void config_init(struct Configurable* config);
-void config_free(struct Configurable* config);
+void config_init(struct OperationConfig* config);
+void config_free(struct OperationConfig* config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */

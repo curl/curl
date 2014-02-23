@@ -140,7 +140,7 @@ static char *get_param_word(char **str, char **end_pos)
  *
  ***************************************************************************/
 
-int formparse(struct Configurable *config,
+int formparse(struct OperationConfig *config,
               const char *input,
               struct curl_httppost **httppost,
               struct curl_httppost **last_post,

@@ -34,7 +34,7 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-void clean_getout(struct Configurable *config)
+void clean_getout(struct OperationConfig *config)
 {
   struct getout *next;
   struct getout *node = config->url_list;
