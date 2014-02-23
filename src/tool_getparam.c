@@ -1814,32 +1814,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
     orig_opt = argv[i];
 
-    if(curlx_strequal(":", argv[i]) &&
-       (operation->url_list && operation->url_list->url)) {
-
-      /* Allocate the next config */
-      operation->next = malloc(sizeof(struct OperationConfig));
-      if(operation->next) {
-        /* Initialise the newly created config */
-        config_init(operation->next);
-
-        /* Copy the easy handle */
-        operation->next->easy = config->easy;
-
-        /* Update the last operation pointer */
-        config->last = operation->next;
-
-        /* Move onto the new config */
-        operation->next->prev = operation;
-        operation = operation->next;
-
-        /* Reset the flag indicator */
-        stillflags = TRUE;
-      }
-      else
-        result = PARAM_NO_MEM;
-    }
-    else if(stillflags && ('-' == argv[i][0])) {
+    if(stillflags && ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
       char *flag = argv[i];
@@ -1852,7 +1827,32 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
         nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
         result = getparameter(flag, nextarg, &passarg, config, operation);
-        if(!result && passarg)
+        if(result == PARAM_NEXT_OPERATION) {
+          if(operation->url_list && operation->url_list->url) {
+            /* Allocate the next config */
+            operation->next = malloc(sizeof(struct OperationConfig));
+            if(operation->next) {
+              /* Initialise the newly created config */
+              config_init(operation->next);
+
+              /* Copy the easy handle */
+              operation->next->easy = config->easy;
+
+              /* Update the last operation pointer */
+              config->last = operation->next;
+
+              /* Move onto the new config */
+              operation->next->prev = operation;
+              operation = operation->next;
+            }
+            else
+              result = PARAM_NO_MEM;
+          }
+
+          /* Reset result to continue */
+          result = PARAM_OK;
+        }
+        else if(!result && passarg)
           i++; /* we're supposed to skip this */
       }
     }

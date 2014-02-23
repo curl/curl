@@ -29,7 +29,7 @@ imap
 IMAP STORE - delete message with confirmation (CUSTOMREQUEST)
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/816 -X 'STORE 123 +Flags \Deleted' -u user:secret : imap://%HOSTIP:%IMAPPORT/816 -X EXPUNGE
+imap://%HOSTIP:%IMAPPORT/816 -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/816 -X EXPUNGE
 </command>
 </client>
 
