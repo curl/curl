@@ -162,7 +162,10 @@ static void main_free(void)
 int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
+  struct GlobalConfig global;
   struct OperationConfig *config;
+
+  memset(&global, 0, sizeof(global));
 
   main_checkfds();
 
@@ -173,7 +176,7 @@ int main(int argc, char *argv[])
   /* Initialize memory tracking */
   memory_tracking_init();
 
-  /* Allocate the initial config */
+  /* Allocate the initial operate config */
   config = malloc(sizeof(struct OperationConfig));
 
   if(config) {

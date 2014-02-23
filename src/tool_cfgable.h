@@ -28,7 +28,7 @@
 #include "tool_metalink.h"
 
 struct OperationConfig {
-  CURL *easy;               /* once we have one, we keep it here */
+  CURL *easy;               /* A copy of the handle from GlobalConfig */
   bool remote_time;
   char *random_file;
   char *egd_file;
@@ -218,6 +218,13 @@ struct OperationConfig {
 
   struct OperationConfig* prev;
   struct OperationConfig* next; /* Always last in the struct */
+};
+
+struct GlobalConfig {
+  CURL *easy;                     /* Once we have one, we keep it here */
+
+  struct OperationConfig *first;
+  struct OperationConfig *last;   /* Always last in the struct */
 };
 
 void config_init(struct OperationConfig* config);
