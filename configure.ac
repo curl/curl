@@ -2469,19 +2469,19 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         AC_MSG_RESULT(yes)
         if test "x$OPENSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="OPENSSL_"
-        elif test "x$GNUTLS_ENABLED" == "x1"; then
+        elif test "x$GNUTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="GNUTLS_"
-        elif test "x$NSS_ENABLED" == "x1"; then
+        elif test "x$NSS_ENABLED" = "x1"; then
           versioned_symbols_flavour="NSS_"
-        elif test "x$POLARSSL_ENABLED" == "x1"; then
+        elif test "x$POLARSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="POLARSSL_"
-        elif test "x$CYASSL_ENABLED" == "x1"; then
+        elif test "x$CYASSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="CYASSL_"
-        elif test "x$AXTLS_ENABLED" == "x1"; then
+        elif test "x$AXTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="AXTLS_"
-        elif test "x$WINSSL_ENABLED" == "x1"; then
+        elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WINSSL_"
-        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+        elif test "x$DARWINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="DARWINSSL_"
         else
           versioned_symbols_flavour=""
