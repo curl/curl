@@ -231,6 +231,7 @@ int parseconfig(const char *filename,
           filename = (char *)"<stdin>";
         }
         if(res != PARAM_HELP_REQUESTED &&
+           res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED) {
           const char *reason = param2text(res);
           warnf(config, "%s:%d: warning: '%s' %s\n",

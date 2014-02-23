@@ -1701,10 +1701,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->tracetype = TRACE_NONE;
       break;
     case 'V':
-      if(toggle) {  /* --no-version yields no output! */
-        tool_version_info();
-        return PARAM_HELP_REQUESTED;
-      }
+      if(toggle)    /* --no-version yields no output! */
+        return PARAM_VERSION_INFO_REQUESTED;
       break;
 
     case 'w':
@@ -1866,6 +1864,7 @@ ParameterError parse_args(struct Configurable *config, int argc,
   }
 
   if(result && result != PARAM_HELP_REQUESTED &&
+     result != PARAM_VERSION_INFO_REQUESTED &&
      result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
 
