@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     result = operate(global.first, argc, argv);
 
 #ifdef __SYMBIAN32__
-    if(global->first->showerror)
+    if(global.first->showerror)
       tool_pressanykey();
 #endif
 
