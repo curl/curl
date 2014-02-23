@@ -1839,7 +1839,7 @@ CURLcode operate(struct Configurable *config, int argc, argv_item_t argv[])
       else if(res == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();
       /* Check if we were asked to list the SSL engines */
-      if(res == PARAM_ENGINES_REQUESTED)
+      else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines(config->easy);
       else
         result = CURLE_FAILED_INIT;
