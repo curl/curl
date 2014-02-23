@@ -121,7 +121,7 @@ static void memory_tracking_init(void)
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-static CURLcode main_init(struct OperationConfig *config)
+static CURLcode main_init(struct GlobalConfig *config)
 {
   CURLcode result = CURLE_OK;
 
@@ -130,17 +130,29 @@ static CURLcode main_init(struct OperationConfig *config)
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
 
-  /* Perform the libcurl initialization */
-  result = curl_global_init(CURL_GLOBAL_DEFAULT);
-  if(!result) {
-    /* Get information about libcurl */
-    result = get_libcurl_info();
+  /* Allocate the initial operate config */
+  config->first = malloc(sizeof(struct OperationConfig));
+  if(config->first) {
+    /* Perform the libcurl initialization */
+    result = curl_global_init(CURL_GLOBAL_DEFAULT);
+    if(!result) {
+      /* Get information about libcurl */
+      result = get_libcurl_info();
 
-    if(result)
-      helpf(config->errors, "error retrieving curl library information\n");
+      if(!result) {
+        /* Initialise the config */
+        config_init(config->first);
+      }
+      else
+        helpf(stderr, "error retrieving curl library information\n");
+    }
+    else
+      helpf(stderr, "error initializing curl library\n");
   }
-  else
-    helpf(config->errors, "error initializing curl library\n");
+  else {
+    helpf(stderr, "error initializing curl\n");
+    result = CURLE_FAILED_INIT;
+  }
 
   return result;
 }
@@ -163,8 +175,6 @@ int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
-  struct OperationConfig *config;
-
   memset(&global, 0, sizeof(global));
 
   main_checkfds();
@@ -176,36 +186,26 @@ int main(int argc, char *argv[])
   /* Initialize memory tracking */
   memory_tracking_init();
 
-  /* Allocate the initial operate config */
-  config = malloc(sizeof(struct OperationConfig));
+  /* Initialize the curl library - do not call any libcurl functions before
+     this point */
+  result = main_init(&global);
+  if(!result) {
+    /* Start our curl operation */
+    result = operate(global.first, argc, argv);
 
-  if(config) {
-    /* Initialise the config */
-    config_init(config);
+    /* Perform the main cleanup */
+    main_free();
+  }
 
-    /* Initialize the curl library - do not call any libcurl functions before
-       this point */
-    result = main_init(config);
-    if(!result) {
-      /* Start our curl operation */
-      result = operate(config, argc, argv);
-
-      /* Perform the main cleanup */
-      main_free();
-    }
-
+  if(global.first) {
 #ifdef __SYMBIAN32__
-    if(config->showerror)
+    if(global->first->showerror)
       tool_pressanykey();
 #endif
 
     /* Free the config structures */
-    config_free(config);
-    config = NULL;
-  }
-  else {
-    helpf(stderr, "error initializing curl\n");
-    result = CURLE_FAILED_INIT;
+    config_free(global.first);
+    global.first = NULL;
   }
 
 #ifdef __NOVELL_LIBC__
