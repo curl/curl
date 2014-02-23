@@ -161,11 +161,17 @@ static CURLcode main_init(struct GlobalConfig *config)
  * This is the main global destructor for the app. Call this after
  * _all_ libcurl usage is done.
  */
-static void main_free(void)
+static void main_free(struct GlobalConfig *config)
 {
+  /* Main cleanup */
   curl_global_cleanup();
   convert_cleanup();
   metalink_cleanup();
+
+  /* Free the config structures */
+  config_free(config->first);
+  config->first = NULL;
+  config->last = NULL;
 }
 
 /*
@@ -193,19 +199,13 @@ int main(int argc, char *argv[])
     /* Start our curl operation */
     result = operate(global.first, argc, argv);
 
-    /* Perform the main cleanup */
-    main_free();
-  }
-
-  if(global.first) {
 #ifdef __SYMBIAN32__
     if(global->first->showerror)
       tool_pressanykey();
 #endif
 
-    /* Free the config structures */
-    config_free(global.first);
-    global.first = NULL;
+    /* Perform the main cleanup */
+    main_free(&global);
   }
 
 #ifdef __NOVELL_LIBC__
