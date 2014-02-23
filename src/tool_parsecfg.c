@@ -225,7 +225,29 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
-      if(res != PARAM_OK) {
+      if(res == PARAM_NEXT_OPERATION) {
+        if(operation->url_list && operation->url_list->url) {
+          /* Allocate the next config */
+          operation->next = malloc(sizeof(struct OperationConfig));
+          if(operation->next) {
+            /* Initialise the newly created config */
+            config_init(operation->next);
+
+            /* Copy the easy handle */
+            operation->next->easy = global->easy;
+
+            /* Update the last operation pointer */
+            global->last = operation->next;
+
+            /* Move onto the new config */
+            operation->next->prev = operation;
+            operation = operation->next;
+          }
+          else
+            res = PARAM_NO_MEM;
+        }
+      }
+      else if(res != PARAM_OK) {
         /* the help request isn't really an error */
         if(!strcmp(filename, "-")) {
           filename = (char *)"<stdin>";
