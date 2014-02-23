@@ -267,6 +267,7 @@ static const struct LongShort aliases[]= {
   {"y",  "speed-time",               TRUE},
   {"z",  "time-cond",                TRUE},
   {"#",  "progress-bar",             FALSE},
+  {":",  "next",                     FALSE},
   {"~",  "xattr",                    FALSE},
 };
 
@@ -986,6 +987,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       else
         config->progressmode = CURL_PROGRESS_STATS;
       break;
+    case ':': /* --next */
+      return PARAM_NEXT_OPERATION;
     case '~': /* --xattr */
       config->xattr = toggle;
       break;

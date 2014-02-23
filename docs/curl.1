@@ -124,6 +124,11 @@ same command line option.)
 .IP "-#, --progress-bar"
 Make curl display progress as a simple progress bar instead of the standard,
 more informational, meter.
+.IP "-:, --next"
+Tells curl to use a separate operation for the following URL and associated
+options. This allows you to send several URL requests, each with their own
+specific options, for example, such as different user names or custom requests
+for each. (Added in 7.36.0)
 .IP "-0, --http1.0"
 (HTTP) Tells curl to use HTTP version 1.0 instead of using its internally
 preferred: HTTP 1.1.
