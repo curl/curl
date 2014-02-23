@@ -1831,14 +1831,14 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         operation = operation->next;
       }
 
-      /* Reset the operation pointer */
-      operation = config->first;
+      /* Set the current operation pointer */
+      config->current = config->first;
 
       /* Perform each operation */
-      while(!result && operation) {
-        result = operate_do(operation);
+      while(!result && config->current) {
+        result = operate_do(config->current);
 
-        operation = operation->next;
+        config->current = config->current->next;
       }
     }
   }

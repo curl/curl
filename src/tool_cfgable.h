@@ -224,6 +224,7 @@ struct GlobalConfig {
   CURL *easy;                     /* Once we have one, we keep it here */
 
   struct OperationConfig *first;
+  struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */
 };
 
