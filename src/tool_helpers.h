@@ -25,7 +25,8 @@
 
 const char *param2text(int res);
 
-int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store);
+int SetHTTPrequest(struct OperationConfig *config, HttpReq req,
+                   HttpReq *store);
 
 #endif /* HEADER_CURL_TOOL_HELPERS_H */
 

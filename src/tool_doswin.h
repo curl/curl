@@ -35,7 +35,8 @@ char **__crt0_glob_function(char *arg);
 
 #ifdef WIN32
 
-CURLcode FindWin32CACert(struct OperationConfig *config, const char *bundle_file);
+CURLcode FindWin32CACert(struct OperationConfig *config,
+                         const char *bundle_file);
 
 #endif /* WIN32 */
 
