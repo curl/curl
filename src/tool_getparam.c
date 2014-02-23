@@ -1798,32 +1798,36 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
   return PARAM_OK;
 }
 
-ParameterError parse_args(struct OperationConfig *config, int argc,
+ParameterError parse_args(struct GlobalConfig *config, int argc,
                           argv_item_t argv[])
 {
   int i;
   bool stillflags;
   char *orig_opt;
   ParameterError result = PARAM_OK;
+  struct OperationConfig *operation = config->first;
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
     orig_opt = argv[i];
 
     if(curlx_strequal(":", argv[i]) &&
-       (config->url_list && config->url_list->url)) {
+       (operation->url_list && operation->url_list->url)) {
 
       /* Allocate the next config */
-      config->next = malloc(sizeof(struct OperationConfig));
-      if(config->next) {
+      operation->next = malloc(sizeof(struct OperationConfig));
+      if(operation->next) {
         /* Initialise the newly created config */
-        config_init(config->next);
+        config_init(operation->next);
 
         /* Copy the easy handle */
-        config->next->easy = config->easy;
+        operation->next->easy = config->easy;
+
+        /* Update the last operation pointer */
+        config->last = operation->next;
 
         /* Move onto the new config */
-        config->next->prev = config;
-        config = config->next;
+        operation->next->prev = operation;
+        operation = operation->next;
 
         /* Reset the flag indicator */
         stillflags = TRUE;
@@ -1843,7 +1847,7 @@ ParameterError parse_args(struct OperationConfig *config, int argc,
       else {
         nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
-        result = getparameter(flag, nextarg, &passarg, config);
+        result = getparameter(flag, nextarg, &passarg, operation);
         if(!result && passarg)
           i++; /* we're supposed to skip this */
       }
@@ -1852,7 +1856,7 @@ ParameterError parse_args(struct OperationConfig *config, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter((char *)"--url", argv[i], &used, config);
+      result = getparameter((char *)"--url", argv[i], &used, operation);
     }
   }
 
@@ -1863,9 +1867,9 @@ ParameterError parse_args(struct OperationConfig *config, int argc,
     const char *reason = param2text(result);
 
     if(!curlx_strequal(":", orig_opt))
-      helpf(config->errors, "option %s: %s\n", orig_opt, reason);
+      helpf(operation->errors, "option %s: %s\n", orig_opt, reason);
     else
-      helpf(config->errors, "%s\n", reason);
+      helpf(operation->errors, "%s\n", reason);
   }
 
   return result;

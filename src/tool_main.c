@@ -131,7 +131,7 @@ static CURLcode main_init(struct GlobalConfig *config)
 #endif
 
   /* Allocate the initial operate config */
-  config->first = malloc(sizeof(struct OperationConfig));
+  config->first = config->last = malloc(sizeof(struct OperationConfig));
   if(config->first) {
     /* Perform the libcurl initialization */
     result = curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -140,8 +140,17 @@ static CURLcode main_init(struct GlobalConfig *config)
       result = get_libcurl_info();
 
       if(!result) {
-        /* Initialise the config */
-        config_init(config->first);
+        /* Get a curl handle to use for all forthcoming curl transfers */
+        config->easy = curl_easy_init();
+        if(config->easy) {
+          /* Initialise the config */
+          config_init(config->first);
+          config->first->easy = config->easy;
+        }
+        else {
+          helpf(stderr, "error initializing curl easy handle\n");
+          result = CURLE_FAILED_INIT;
+        }
       }
       else
         helpf(stderr, "error retrieving curl library information\n");
@@ -197,7 +206,7 @@ int main(int argc, char *argv[])
   result = main_init(&global);
   if(!result) {
     /* Start our curl operation */
-    result = operate(global.first, argc, argv);
+    result = operate(&global, argc, argv);
 
 #ifdef __SYMBIAN32__
     if(global.first->showerror)

@@ -54,7 +54,7 @@ void parse_cert_parameter(const char *cert_parameter,
                           char **passphrase);
 #endif
 
-ParameterError parse_args(struct OperationConfig *config, int argc,
+ParameterError parse_args(struct GlobalConfig *config, int argc,
                           argv_item_t argv[]);
 
 #endif /* HEADER_CURL_TOOL_GETPARAM_H */

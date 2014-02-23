@@ -187,23 +187,6 @@ static curl_off_t VmsSpecialSize(const char * name,
 }
 #endif /* __VMS */
 
-static CURLcode operate_init(struct OperationConfig *config)
-{
-  /* Get a curl handle to use for all forthcoming curl transfers */
-  config->easy = curl_easy_init();
-  if(!config->easy) {
-    helpf(config->errors, "error initializing curl easy handle\n");
-    return CURLE_FAILED_INIT;
-  }
-
-  /* Setup proper locale from environment */
-#ifdef HAVE_SETLOCALE
-  setlocale(LC_ALL, "");
-#endif
-
-  return CURLE_OK;
-}
-
 static CURLcode operate_do(struct OperationConfig *config)
 {
   char errorbuffer[CURL_ERROR_SIZE];
@@ -1803,22 +1786,22 @@ static void operate_free(struct OperationConfig *config)
   clean_metalink(config);
 }
 
-CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[])
+CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
 
-  /* Initialize the easy interface */
-  result = operate_init(config);
-  if(result)
-    return result;
+  /* Setup proper locale from environment */
+#ifdef HAVE_SETLOCALE
+  setlocale(LC_ALL, "");
+#endif
 
   /* Parse .curlrc if necessary */
   if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
-    parseconfig(NULL, config); /* ignore possible failure */
+    parseconfig(NULL, config->first); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
-    if((argc < 2) && (!config->url_list)) {
-      helpf(config->errors, NULL);
+    if((argc < 2) && (!config->first->url_list)) {
+      helpf(config->first->errors, NULL);
       result = CURLE_FAILED_INIT;
     }
   }
@@ -1847,7 +1830,7 @@ CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[])
     /* Perform the main operations */
     else {
       size_t count = 0;
-      struct OperationConfig *operation = config;
+      struct OperationConfig *operation = config->first;
 
       /* Get the required aguments for each operation */
       while(!result && operation) {
@@ -1857,7 +1840,7 @@ CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[])
       }
 
       /* Reset the operation pointer */
-      operation = config;
+      operation = config->first;
 
       /* Perform each operation */
       while(!result && operation) {
@@ -1869,7 +1852,7 @@ CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[])
   }
 
   /* Perform the cleanup */
-  operate_free(config);
+  operate_free(config->first);
 
   return result;
 }

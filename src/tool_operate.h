@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-CURLcode operate(struct OperationConfig *config, int argc, argv_item_t argv[]);
+CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
 
 #endif /* HEADER_CURL_TOOL_OPERATE_H */
 
