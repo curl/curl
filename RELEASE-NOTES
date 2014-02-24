@@ -19,6 +19,7 @@ This release includes the following changes:
  o added CURLOPT_SSL_ENABLE_NPN and CURLOPT_SSL_ENABLE_ALPN
  o winssl: enable TLSv1.1 and TLSv1.2 by default
  o winssl: TLSv1.2 disables certificate signatures using MD5 hash
+ o winssl: enable hostname verification of IP address using SAN or CN [11]
 
 This release includes the following bugfixes:
 
@@ -58,9 +59,9 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Sampson, Arvid Norberg, Colin Hogben, Dan Fandrich, Daniel Stenberg,
-  Fabian Frank, Gisle Vanem, Hubert Kario, Jeff King, Maks Naumov,
-  Kamil Dudka, Marc Hoersken, Patrick Monnerat, Prash Dush, Remi Gacogne,
-  Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
+  David Ryskalczyk, Fabian Frank, Gisle Vanem, Hubert Kario, Jeff King,
+  Maks Naumov, Kamil Dudka, Marc Hoersken, Patrick Monnerat, Prash Dush,
+  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
   Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
 
         Thanks! (and sorry if I forgot to mention someone)
@@ -77,3 +78,4 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2014-02/0097.html
  [9] = http://thread.gmane.org/gmane.comp.version-control.git/242213
  [10] = http://curl.haxx.se/mail/lib-2014-02/0155.html
+ [11] = http://curl.haxx.se/mail/lib-2014-02/0243.html
