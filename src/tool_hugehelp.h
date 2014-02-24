@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef USE_MANUAL
 void hugehelp(void);
-#else
-#define hugehelp() Curl_nop_stmt
-#endif
 
 #endif /* HEADER_CURL_TOOL_HUGEHELP_H */
