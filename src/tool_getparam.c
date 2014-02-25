@@ -1857,7 +1857,8 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter((char *)"--url", argv[i], &used, config, operation);
+      result = getparameter((char *)"--url", argv[i], &used, config,
+                            operation);
     }
   }
 
