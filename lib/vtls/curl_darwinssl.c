@@ -1323,19 +1323,25 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  /* If this is a domain name and not an IP address, then configure SNI.
+  /* Configure hostname check. SNI is used if available.
+   * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
-  /* If this is a domain name and not an IP address, then configure SNI: */
-  if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
-#ifdef ENABLE_IPV6
-     (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
-#endif
-     data->set.ssl.verifyhost) {
+  if(data->set.ssl.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
-                               strlen(conn->host.name));
+    strlen(conn->host.name));
+
     if(err != noErr) {
       infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d\n",
             err);
+    }
+
+    if((Curl_inet_pton(AF_INET, conn->host.name, &addr))
+  #ifdef ENABLE_IPV6
+    || (Curl_inet_pton(AF_INET6, conn->host.name, &addr))
+  #endif
+       ) {
+         infof(data, "WARNING: using IP address, SNI is being disabled by "
+         "the OS.\n");
     }
   }
 
