@@ -41,6 +41,7 @@ typedef enum {
   PARAM_LAST
 } ParameterError;
 
+struct GlobalConfig;
 struct OperationConfig;
 
 ParameterError getparameter(char *flag,
