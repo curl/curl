@@ -67,7 +67,7 @@
    fun:multi_runsingle
    fun:curl_multi_perform
    fun:easy_perform
-   fun:operate_do
+   fun:operate_do.isra.0
    fun:operate
    fun:main
 }
