@@ -27,6 +27,8 @@
 
 #include "tool_metalink.h"
 
+struct GlobalConfig;
+
 struct OperationConfig {
   CURL *easy;               /* A copy of the handle from GlobalConfig */
   bool remote_time;
@@ -213,6 +215,7 @@ struct OperationConfig {
   bool nonpn;                 /* enable/disable TLS NPN extension */
   bool noalpn;                /* enable/disable TLS ALPN extension */
 
+  struct GlobalConfig *global;
   struct OperationConfig* prev;
   struct OperationConfig* next; /* Always last in the struct */
 };

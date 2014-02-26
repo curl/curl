@@ -1838,6 +1838,9 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
               /* Copy the easy handle */
               operation->next->easy = config->easy;
 
+              /* Set the global config pointer */
+              operation->next->global = config;
+
               /* Update the last operation pointer */
               config->last = operation->next;
 

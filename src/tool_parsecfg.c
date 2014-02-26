@@ -236,6 +236,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
             /* Copy the easy handle */
             operation->next->easy = global->easy;
 
+            /* Set the global config pointer */
+            operation->next->global = global;
+
             /* Update the last operation pointer */
             global->last = operation->next;
 
