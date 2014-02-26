@@ -514,6 +514,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
+  if(httpc->closed) {
+    return 0;
+  }
+
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
   httpc->upload_mem = NULL;
