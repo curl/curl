@@ -40,7 +40,7 @@
 
 void warnf(struct OperationConfig *config, const char *fmt, ...)
 {
-  if(!config->mute) {
+  if(!config->global->mute) {
     va_list ap;
     int len;
     char *ptr;

@@ -209,6 +209,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   bool orig_isatty;
 
   errorbuffer[0] = '\0';
+
   /* default headers output stream is stdout */
   memset(&hdrcbdata, 0, sizeof(struct HdrCbData));
   memset(&heads, 0, sizeof(struct OutStruct));
@@ -752,7 +753,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           config->isatty = orig_isatty;
         }
 
-        if(urlnum > 1 && !(config->mute)) {
+        if(urlnum > 1 && !global->mute) {
           fprintf(config->errors, "\n[%lu/%lu]: %s --> %s\n",
                   li+1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
@@ -1105,7 +1106,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         progressbarinit(&progressbar, config);
         if((config->progressmode == CURL_PROGRESS_BAR) &&
-           !config->noprogress && !config->mute) {
+           !config->noprogress && !global->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);
@@ -1371,7 +1372,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
           res = curl_easy_perform(curl);
 
-          if(outs.is_cd_filename && outs.stream && !config->mute &&
+          if(outs.is_cd_filename && outs.stream && !global->mute &&
              outs.filename)
             printf("curl: Saved to filename '%s'\n", outs.filename);
 
@@ -1459,7 +1460,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
               if(outs.bytes && outs.filename) {
                 /* We have written data to a output file, we truncate file
                  */
-                if(!config->mute)
+                if(!global->mute)
                   fprintf(config->errors, "Throwing away %"
                           CURL_FORMAT_CURL_OFF_T " bytes\n",
                           outs.bytes);
@@ -1469,7 +1470,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 if(ftruncate( fileno(outs.stream), outs.init)) {
                   /* when truncate fails, we can't just append as then we'll
                      create something strange, bail out */
-                  if(!config->mute)
+                  if(!global->mute)
                     fprintf(config->errors,
                             "failed to truncate, exiting\n");
                   res = CURLE_WRITE_ERROR;

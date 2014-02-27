@@ -1619,9 +1619,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case 's':
       /* don't show progress meter, don't show errors : */
       if(toggle)
-        config->mute = config->noprogress = TRUE;
+        global->mute = config->noprogress = TRUE;
       else
-        config->mute = config->noprogress = FALSE;
+        global->mute = config->noprogress = FALSE;
       if(global->showerror < 0)
         /* if still on the default value, set showerror to the reverse of
            toggle. This is to allow -S and -s to be used in an independent

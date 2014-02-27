@@ -87,7 +87,6 @@ struct OperationConfig {
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
-  bool mute;                /* don't show messages, --silent given */
   bool use_ascii;           /* select ascii or text transfer */
   bool autoreferer;         /* automatically set referer */
   bool failonerror;         /* fail on (HTTP) errors */
@@ -225,6 +224,7 @@ struct GlobalConfig {
   int showerror;                  /* -1 == unset, default => show errors
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
+  bool mute;                      /* don't show messages, --silent given */
 
   struct OperationConfig *first;
   struct OperationConfig *current;
