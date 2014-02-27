@@ -210,8 +210,8 @@ struct OperationConfig {
   bool noalpn;                /* enable/disable TLS ALPN extension */
 
   struct GlobalConfig *global;
-  struct OperationConfig* prev;
-  struct OperationConfig* next; /* Always last in the struct */
+  struct OperationConfig *prev;
+  struct OperationConfig *next; /* Always last in the struct */
 };
 
 struct GlobalConfig {
@@ -231,7 +231,7 @@ struct GlobalConfig {
   struct OperationConfig *last;   /* Always last in the struct */
 };
 
-void config_init(struct OperationConfig* config);
-void config_free(struct OperationConfig* config);
+void config_init(struct OperationConfig *config);
+void config_free(struct OperationConfig *config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
