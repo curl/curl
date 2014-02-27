@@ -170,6 +170,15 @@ static CURLcode main_init(struct GlobalConfig *config)
   return result;
 }
 
+static void free_config_fields(struct GlobalConfig *config)
+{
+  Curl_safefree(config->trace_dump);
+
+  if(config->trace_fopened && config->trace_stream)
+    fclose(config->trace_stream);
+  config->trace_stream = NULL;
+}
+
 /*
  * This is the main global destructor for the app. Call this after
  * _all_ libcurl usage is done.
@@ -184,6 +193,7 @@ static void main_free(struct GlobalConfig *config)
   curl_global_cleanup();
   convert_cleanup();
   metalink_cleanup();
+  free_config_fields(config);
 
   /* Free the config structures */
   config_free(config->last);

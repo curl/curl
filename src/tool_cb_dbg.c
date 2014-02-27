@@ -44,8 +44,9 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
                   unsigned char *data, size_t size,
                   void *userdata)
 {
-  struct OperationConfig *config = userdata;
-  FILE *output = config->errors;
+  struct OperationConfig *operation = userdata;
+  struct GlobalConfig *config = operation->global;
+  FILE *output = operation->errors;
   const char *text;
   struct timeval tv;
   struct tm *now;
@@ -76,7 +77,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       config->trace_stream = stdout;
     else if(curlx_strequal("%", config->trace_dump))
       /* Ok, this is somewhat hackish but we do it undocumented for now */
-      config->trace_stream = config->errors;  /* aka stderr */
+      config->trace_stream = operation->errors;  /* aka stderr */
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
       config->trace_fopened = TRUE;
@@ -87,7 +88,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     output = config->trace_stream;
 
   if(!output) {
-    warnf(config, "Failed to create/open output");
+    warnf(operation, "Failed to create/open output");
     return 0;
   }
 
@@ -141,7 +142,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
            to stderr or stdout, we don't display the alert about the data not
            being shown as the data _is_ shown then just not via this
            function */
-        if(!config->isatty ||
+        if(!operation->isatty ||
            ((output != stderr) && (output != stdout))) {
           if(!newl)
             fprintf(output, "%s%s ", timebuf, s_infotype[type]);

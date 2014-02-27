@@ -121,11 +121,6 @@ struct OperationConfig {
   bool crlf;
   char *customrequest;
   char *krblevel;
-  char *trace_dump;         /* file to dump the network trace to, or NULL */
-  FILE *trace_stream;
-  bool trace_fopened;
-  trace tracetype;
-  bool tracetime;           /* include timestamp? */
   long httpversion;
   int progressmode;         /* CURL_PROGRESS_BAR or CURL_PROGRESS_STATS */
   bool nobuffer;
@@ -225,6 +220,11 @@ struct GlobalConfig {
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
   bool mute;                      /* don't show messages, --silent given */
+  char *trace_dump;               /* file to dump the network trace to */
+  FILE *trace_stream;
+  bool trace_fopened;
+  trace tracetype;
+  bool tracetime;                 /* include timestamp? */
 
   struct OperationConfig *first;
   struct OperationConfig *current;

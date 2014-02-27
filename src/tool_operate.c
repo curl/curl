@@ -1147,7 +1147,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* disable it */
           my_setopt(curl, CURLOPT_FTP_USE_EPRT, 0L);
 
-        if(config->tracetype != TRACE_NONE) {
+        if(global->tracetype != TRACE_NONE) {
           my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
           my_setopt(curl, CURLOPT_DEBUGDATA, config);
           my_setopt(curl, CURLOPT_VERBOSE, 1L);
