@@ -149,6 +149,7 @@ static CURLcode main_init(struct GlobalConfig *config)
           /* Initialise the config */
           config_init(config->first);
           config->first->easy = config->easy;
+          config->first->global = config;
         }
         else {
           helpf(stderr, "error initializing curl easy handle\n");
