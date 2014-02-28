@@ -310,6 +310,7 @@ static int data_pending(const struct connectdata *conn)
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
+#if defined(USE_NGHTTP2)
     Curl_ssl_data_pending(conn, FIRSTSOCKET) ||
     /* For HTTP/2, we may read up everything including responde body
        with header fields in Curl_http_readwrite_headers. If no
@@ -320,6 +321,9 @@ static int data_pending(const struct connectdata *conn)
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&CURLPROTO_HTTP) && conn->httpversion == 20 &&
      conn->proto.httpc.closed);
+#else
+    Curl_ssl_data_pending(conn, FIRSTSOCKET);
+#endif
 }
 
 static void read_rewind(struct connectdata *conn,
