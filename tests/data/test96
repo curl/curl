@@ -35,7 +35,6 @@ MEM tool_paramhlp.c
 MEM tool_cfgable.c
 MEM tool_cfgable.c
 MEM tool_cfgable.c
-MEM tool_cfgable.c
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /tool_paramhlp/) && ($_ !~ /tool_cfgable/))
