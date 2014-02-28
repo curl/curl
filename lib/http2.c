@@ -376,6 +376,9 @@ static const nghttp2_session_callbacks callbacks = {
   on_unknown_frame_recv, /* nghttp2_on_unknown_frame_recv_callback */
   on_begin_headers,      /* nghttp2_on_begin_headers_callback */
   on_header              /* nghttp2_on_header_callback */
+#if NGHTTP2_VERSION_NUM >= 0x000400
+  , NULL                 /* nghttp2_select_padding_callback */
+#endif
 };
 
 static ssize_t data_source_read_callback(nghttp2_session *session,
