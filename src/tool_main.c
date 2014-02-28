@@ -154,13 +154,18 @@ static CURLcode main_init(struct GlobalConfig *config)
         else {
           helpf(stderr, "error initializing curl easy handle\n");
           result = CURLE_FAILED_INIT;
+          free(config->first);
         }
       }
-      else
+      else {
         helpf(stderr, "error retrieving curl library information\n");
+        free(config->first);
+      }
     }
-    else
+    else {
       helpf(stderr, "error initializing curl library\n");
+      free(config->first);
+    }
   }
   else {
     helpf(stderr, "error initializing curl\n");
