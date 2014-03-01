@@ -187,6 +187,8 @@ static void free_config_fields(struct GlobalConfig *config)
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
   config->trace_stream = NULL;
+
+  Curl_safefree(config->libcurl);
 }
 
 /*

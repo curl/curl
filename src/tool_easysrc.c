@@ -165,7 +165,7 @@ CURLcode easysrc_cleanup(void)
   return CURLE_OK;
 }
 
-void dumpeasysrc(struct OperationConfig *config)
+void dumpeasysrc(struct GlobalConfig *config)
 {
   struct curl_slist *ptr;
   char *o = config->libcurl;
@@ -180,7 +180,7 @@ void dumpeasysrc(struct OperationConfig *config)
     else
       out = stdout;
     if(!out)
-      warnf(config, "Failed to open %s to write libcurl code!\n", o);
+      warnf(config->current, "Failed to open %s to write libcurl code!\n", o);
     else {
       int i;
       const char *c;

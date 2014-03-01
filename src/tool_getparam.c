@@ -867,7 +867,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
               "--libcurl option was disabled at build-time!\n");
         return PARAM_OPTION_UNKNOWN;
 #else
-        GetStr(&config->libcurl, nextarg);
+        GetStr(&global->libcurl, nextarg);
         break;
 #endif
       case '#': /* --raw */

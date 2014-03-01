@@ -40,7 +40,8 @@ extern CURLcode easysrc_add(struct curl_slist **plist, const char *bupf);
 extern CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...);
 extern CURLcode easysrc_perform(void);
 extern CURLcode easysrc_cleanup(void);
-void dumpeasysrc(struct OperationConfig *config);
+
+void dumpeasysrc(struct GlobalConfig *config);
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 

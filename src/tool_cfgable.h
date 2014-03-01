@@ -179,7 +179,6 @@ struct OperationConfig {
   bool ignorecl;            /* --ignore-content-length */
   bool disable_sessionid;
 
-  char *libcurl;            /* output libcurl code to this file name */
   bool raw;
   bool post301;
   bool post302;
@@ -225,6 +224,7 @@ struct GlobalConfig {
   trace tracetype;
   bool tracetime;                 /* include timestamp? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
+  char *libcurl;                  /* Output libcurl code to this file name */
 
   struct OperationConfig *first;
   struct OperationConfig *current;
