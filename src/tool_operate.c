@@ -1773,7 +1773,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   /* Dump the libcurl code if previously enabled.
      NOTE: that this function relies on config->errors amongst other things
      so not everything can be closed and cleaned before this is called */
-  dumpeasysrc(config);
+  dumpeasysrc(global);
 #endif
 
   /* Release metalink related resources here */
