@@ -52,7 +52,7 @@ void warnf(struct OperationConfig *config, const char *fmt, ...)
 
     ptr = print_buffer;
     while(len > 0) {
-      fputs(WARN_PREFIX, config->errors);
+      fputs(WARN_PREFIX, config->global->errors);
 
       if(len > (int)WARN_TEXTWIDTH) {
         int cut = WARN_TEXTWIDTH-1;
@@ -65,13 +65,13 @@ void warnf(struct OperationConfig *config, const char *fmt, ...)
              max text width then! */
           cut = WARN_TEXTWIDTH-1;
 
-        (void)fwrite(ptr, cut + 1, 1, config->errors);
-        fputs("\n", config->errors);
+        (void)fwrite(ptr, cut + 1, 1, config->global->errors);
+        fputs("\n", config->global->errors);
         ptr += cut+1; /* skip the space too */
         len -= cut;
       }
       else {
-        fputs(ptr, config->errors);
+        fputs(ptr, config->global->errors);
         len = 0;
       }
     }

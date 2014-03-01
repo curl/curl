@@ -146,5 +146,5 @@ void progressbarinit(struct ProgressData *bar,
   bar->width = scr_size[0] - 1;
 #endif
 
-  bar->out = config->errors;
+  bar->out = config->global->errors;
 }

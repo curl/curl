@@ -224,7 +224,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
-    helpf(config->errors, "no URL specified!\n");
+    helpf(global->errors, "no URL specified!\n");
     res = CURLE_FAILED_INIT;
     goto quit_curl;
   }
@@ -247,7 +247,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       config->cacert = strdup(env);
       if(!config->cacert) {
         curl_free(env);
-        helpf(config->errors, "out of memory\n");
+        helpf(global->errors, "out of memory\n");
         res = CURLE_OUT_OF_MEMORY;
         goto quit_curl;
       }
@@ -258,7 +258,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         config->capath = strdup(env);
         if(!config->capath) {
           curl_free(env);
-          helpf(config->errors, "out of memory\n");
+          helpf(global->errors, "out of memory\n");
           res = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
@@ -269,7 +269,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           config->cacert = strdup(env);
           if(!config->cacert) {
             curl_free(env);
-            helpf(config->errors, "out of memory\n");
+            helpf(global->errors, "out of memory\n");
             res = CURLE_OUT_OF_MEMORY;
             goto quit_curl;
           }
@@ -294,7 +294,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       httpgetfields = strdup(config->postfields);
       Curl_safefree(config->postfields);
       if(!httpgetfields) {
-        helpf(config->errors, "out of memory\n");
+        helpf(global->errors, "out of memory\n");
         res = CURLE_OUT_OF_MEMORY;
         goto quit_curl;
       }
@@ -316,7 +316,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #ifndef CURL_DISABLE_LIBCURL_OPTION
   res = easysrc_init();
   if(res) {
-    helpf(config->errors, "out of memory\n");
+    helpf(global->errors, "out of memory\n");
     goto quit_curl;
   }
 #endif
@@ -399,7 +399,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
     if(urlnode->outfile) {
       outfiles = strdup(urlnode->outfile);
       if(!outfiles) {
-        helpf(config->errors, "out of memory\n");
+        helpf(global->errors, "out of memory\n");
         res = CURLE_OUT_OF_MEMORY;
         break;
       }
@@ -410,7 +410,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
     if(!config->globoff && infiles) {
       /* Unless explicitly shut off */
       res = glob_url(&inglob, infiles, &infilenum,
-                     global->showerror?config->errors:NULL);
+                     global->showerror?global->errors:NULL);
       if(res) {
         Curl_safefree(outfiles);
         break;
@@ -436,12 +436,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(inglob) {
           res = glob_next_url(&uploadfile, inglob);
           if(res == CURLE_OUT_OF_MEMORY)
-            helpf(config->errors, "out of memory\n");
+            helpf(global->errors, "out of memory\n");
         }
         else if(!up) {
           uploadfile = strdup(infiles);
           if(!uploadfile) {
-            helpf(config->errors, "out of memory\n");
+            helpf(global->errors, "out of memory\n");
             res = CURLE_OUT_OF_MEMORY;
           }
         }
@@ -461,7 +461,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         res = glob_url(&urls, urlnode->url, &urlnum,
-                       global->showerror?config->errors:NULL);
+                       global->showerror?global->errors:NULL);
         if(res) {
           Curl_safefree(uploadfile);
           break;
@@ -555,7 +555,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             if(res)
               goto show_error;
             if((!outfile || !*outfile) && !config->content_disposition) {
-              helpf(config->errors, "Remote file name has no length!\n");
+              helpf(global->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
               goto quit_urls;
             }
@@ -585,7 +585,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
              file output call */
 
           if(config->create_dirs || metalink) {
-            res = create_dir_hierarchy(outfile, config->errors);
+            res = create_dir_hierarchy(outfile, global->errors);
             /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
             if(res == CURLE_WRITE_ERROR)
               goto quit_urls;
@@ -624,7 +624,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
 #endif
             if(!file) {
-              helpf(config->errors, "Can't open '%s'!\n", outfile);
+              helpf(global->errors, "Can't open '%s'!\n", outfile);
               res = CURLE_WRITE_ERROR;
               goto quit_urls;
             }
@@ -686,7 +686,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if((infd == -1) || fstat(infd, &fileinfo))
 #endif
           {
-            helpf(config->errors, "Can't open '%s'!\n", uploadfile);
+            helpf(global->errors, "Can't open '%s'!\n", uploadfile);
             if(infd != -1) {
               close(infd);
               infd = STDIN_FILENO;
@@ -754,7 +754,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 
         if(urlnum > 1 && !global->mute) {
-          fprintf(config->errors, "\n[%lu/%lu]: %s --> %s\n",
+          fprintf(global->errors, "\n[%lu/%lu]: %s --> %s\n",
                   li+1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
             printf("%s%s\n", CURLseparator, this_url);
@@ -799,8 +799,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           this_url = urlbuffer; /* use our new URL instead! */
         }
 
-        if(!config->errors)
-          config->errors = stderr;
+        if(!global->errors)
+          global->errors = stderr;
 
         if((!outfile || !strcmp(outfile, "-")) && !config->use_ascii) {
           /* We get the output to stdout and we have not got the ASCII/text
@@ -1098,7 +1098,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE, (long)config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
-        my_setopt(curl, CURLOPT_STDERR, config->errors);
+        my_setopt(curl, CURLOPT_STDERR, global->errors);
 
         /* three new ones in libcurl 7.3: */
         my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
@@ -1357,11 +1357,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
               res = CURLE_OUT_OF_MEMORY;
               goto show_error;
             }
-            fprintf(config->errors, "Metalink: parsing (%s) metalink/XML...\n",
-                    this_url);
+            fprintf(config->global->errors,
+                    "Metalink: parsing (%s) metalink/XML...\n", this_url);
           }
           else if(metalink)
-            fprintf(config->errors, "Metalink: fetching (%s) from (%s)...\n",
+            fprintf(config->global->errors,
+                    "Metalink: fetching (%s) from (%s)...\n",
                     mlfile->filename, this_url);
 #endif /* USE_METALINK */
 
@@ -1461,7 +1462,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 /* We have written data to a output file, we truncate file
                  */
                 if(!global->mute)
-                  fprintf(config->errors, "Throwing away %"
+                  fprintf(global->errors, "Throwing away %"
                           CURL_FORMAT_CURL_OFF_T " bytes\n",
                           outs.bytes);
                 fflush(outs.stream);
@@ -1471,7 +1472,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   /* when truncate fails, we can't just append as then we'll
                      create something strange, bail out */
                   if(!global->mute)
-                    fprintf(config->errors,
+                    fprintf(global->errors,
                             "failed to truncate, exiting\n");
                   res = CURLE_WRITE_ERROR;
                   goto quit_urls;
@@ -1507,7 +1508,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
                 if(response != 200 && response != 206) {
                   metalink_next_res = 1;
-                  fprintf(config->errors,
+                  fprintf(global->errors,
                           "Metalink: fetching (%s) from (%s) FAILED "
                           "(HTTP status code %d)\n",
                           mlfile->filename, this_url, response);
@@ -1516,7 +1517,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             }
             else {
               metalink_next_res = 1;
-              fprintf(config->errors,
+              fprintf(global->errors,
                       "Metalink: fetching (%s) from (%s) FAILED (%s)\n",
                       mlfile->filename, this_url,
                       (errorbuffer[0]) ?
@@ -1524,7 +1525,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             }
           }
           if(metalink && !metalink_next_res)
-            fprintf(config->errors, "Metalink: fetching (%s) from (%s) OK\n",
+            fprintf(global->errors, "Metalink: fetching (%s) from (%s) OK\n",
                     mlfile->filename, this_url);
 
           /* In all ordinary cases, just break out of loop here */
@@ -1562,10 +1563,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else
 #endif
         if(res && global->showerror) {
-          fprintf(config->errors, "curl: (%d) %s\n", res, (errorbuffer[0]) ?
+          fprintf(global->errors, "curl: (%d) %s\n", res, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror((CURLcode)res));
           if(res == CURLE_SSL_CACERT)
-            fprintf(config->errors, "%s%s",
+            fprintf(global->errors, "%s%s",
                     CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2);
         }
 
@@ -1598,7 +1599,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
-            fprintf(config->errors, "(%d) Failed writing body\n", res);
+            fprintf(global->errors, "(%d) Failed writing body\n", res);
           }
         }
         else if(!outs.s_isreg && outs.stream) {
@@ -1607,7 +1608,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(!res && rc) {
             /* something went wrong in the writing process */
             res = CURLE_WRITE_ERROR;
-            fprintf(config->errors, "(%d) Failed writing body\n", res);
+            fprintf(global->errors, "(%d) Failed writing body\n", res);
           }
         }
 
@@ -1639,13 +1640,14 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(!metalink && config->use_metalink && res == CURLE_OK) {
           int rv = parse_metalink(config, &outs, this_url);
           if(rv == 0)
-            fprintf(config->errors, "Metalink: parsing (%s) OK\n", this_url);
+            fprintf(config->global->errors, "Metalink: parsing (%s) OK\n",
+                    this_url);
           else if(rv == -1)
-            fprintf(config->errors, "Metalink: parsing (%s) FAILED\n",
+            fprintf(config->global->errors, "Metalink: parsing (%s) FAILED\n",
                     this_url);
         }
         else if(metalink && res == CURLE_OK && !metalink_next_res) {
-          int rv = metalink_check_hash(config, mlfile, outs.filename);
+          int rv = metalink_check_hash(global, mlfile, outs.filename);
           if(rv == 0) {
             metalink_next_res = 1;
           }
@@ -1795,7 +1797,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
     if((argc < 2) && (!config->first->url_list)) {
-      helpf(config->first->errors, NULL);
+      helpf(config->errors, NULL);
       result = CURLE_FAILED_INIT;
     }
   }

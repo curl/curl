@@ -138,8 +138,6 @@ struct OperationConfig {
   bool proxyanyauth;
   char *writeout;           /* %-styled format string to output */
   bool writeenv;            /* write results to environment, if available */
-  FILE *errors;             /* errors stream, defaults to stderr */
-  bool errors_fopened;      /* whether errors stream isn't stderr */
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;
@@ -220,6 +218,8 @@ struct GlobalConfig {
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
   bool mute;                      /* don't show messages, --silent given */
+  FILE *errors;                   /* Error stream, defaults to stderr */
+  bool errors_fopened;            /* Whether error stream isn't stderr */
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
   bool trace_fopened;

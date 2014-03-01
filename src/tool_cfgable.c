@@ -30,7 +30,6 @@ void config_init(struct OperationConfig* config)
 {
   memset(config, 0, sizeof(struct OperationConfig));
 
-  config->errors = stderr; /* default errors to stderr */
   config->postfieldsize = -1;
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
@@ -115,10 +114,6 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->xoauth2_bearer);
 
   Curl_safefree(config->writeout);
-
-  if(config->errors_fopened && config->errors)
-    fclose(config->errors);
-  config->errors = NULL;
 
   curl_slist_free_all(config->quote);
   curl_slist_free_all(config->postquote);

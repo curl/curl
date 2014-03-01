@@ -142,7 +142,7 @@ int check_metalink_content_type(const char *content_type);
  *   No checksum in Metalink supported, hash algorithm not available, or
  *   Metalink does not contain checksum.
  */
-int metalink_check_hash(struct OperationConfig *config,
+int metalink_check_hash(struct GlobalConfig *config,
                         metalinkfile *mlfile,
                         const char *filename);
 

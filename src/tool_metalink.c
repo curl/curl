@@ -594,7 +594,7 @@ static int check_hash(const char *filename,
   return check_ok;
 }
 
-int metalink_check_hash(struct OperationConfig *config,
+int metalink_check_hash(struct GlobalConfig *config,
                         metalinkfile *mlfile,
                         const char *filename)
 {
@@ -602,8 +602,7 @@ int metalink_check_hash(struct OperationConfig *config,
   fprintf(config->errors, "Metalink: validating (%s)...\n", filename);
   if(mlfile->checksum == NULL) {
     fprintf(config->errors,
-            "Metalink: validating (%s) FAILED (digest missing)\n",
-            filename);
+            "Metalink: validating (%s) FAILED (digest missing)\n", filename);
     return -2;
   }
   rv = check_hash(filename, mlfile->checksum->digest_def,
@@ -727,7 +726,7 @@ int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
     return -1;
   }
   if(metalink->files == NULL) {
-    fprintf(config->errors, "Metalink: parsing (%s) WARNING "
+    fprintf(config->global->errors, "Metalink: parsing (%s) WARNING "
             "(missing or invalid file name)\n",
             metalink_url);
     metalink_delete(metalink);
@@ -737,7 +736,7 @@ int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
     struct getout *url;
     /* Skip an entry which has no resource. */
     if(!(*files)->resources) {
-      fprintf(config->errors, "Metalink: parsing (%s) WARNING "
+      fprintf(config->global->errors, "Metalink: parsing (%s) WARNING "
               "(missing or invalid resource)\n",
               metalink_url, (*files)->name);
       continue;
@@ -764,8 +763,8 @@ int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
       mlfile = new_metalinkfile(*files);
       if(!mlfile->checksum) {
         warnings = TRUE;
-        fprintf(config->errors, "Metalink: parsing (%s) WARNING "
-                "(digest missing)\n",
+        fprintf(config->global->errors,
+                "Metalink: parsing (%s) WARNING (digest missing)\n",
                 metalink_url);
       }
       /* Set name as url */
@@ -809,7 +808,7 @@ size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
   if(rv == 0)
     return sz * nmemb;
   else {
-    fprintf(config->errors, "Metalink: parsing FAILED\n");
+    fprintf(config->global->errors, "Metalink: parsing FAILED\n");
     return failure;
   }
 }

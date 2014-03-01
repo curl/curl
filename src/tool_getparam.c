@@ -681,14 +681,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           if(!newfile)
             warnf(config, "Failed to open %s!\n", nextarg);
           else {
-            if(config->errors_fopened)
-              fclose(config->errors);
-            config->errors = newfile;
-            config->errors_fopened = TRUE;
+            if(global->errors_fopened)
+              fclose(global->errors);
+            global->errors = newfile;
+            global->errors_fopened = TRUE;
           }
         }
         else
-          config->errors = stdout;
+          global->errors = stdout;
         break;
       case 'w': /* --interface */
         /* interface */
@@ -1875,9 +1875,9 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
     const char *reason = param2text(result);
 
     if(!curlx_strequal(":", orig_opt))
-      helpf(operation->errors, "option %s: %s\n", orig_opt, reason);
+      helpf(config->errors, "option %s: %s\n", orig_opt, reason);
     else
-      helpf(operation->errors, "%s\n", reason);
+      helpf(config->errors, "%s\n", reason);
   }
 
   return result;

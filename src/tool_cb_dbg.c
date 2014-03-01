@@ -46,7 +46,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 {
   struct OperationConfig *operation = userdata;
   struct GlobalConfig *config = operation->global;
-  FILE *output = operation->errors;
+  FILE *output = config->errors;
   const char *text;
   struct timeval tv;
   struct tm *now;
@@ -77,7 +77,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       config->trace_stream = stdout;
     else if(curlx_strequal("%", config->trace_dump))
       /* Ok, this is somewhat hackish but we do it undocumented for now */
-      config->trace_stream = operation->errors;  /* aka stderr */
+      config->trace_stream = config->errors;  /* aka stderr */
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
       config->trace_fopened = TRUE;

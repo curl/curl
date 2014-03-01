@@ -504,7 +504,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   if(!config->useragent) {
     config->useragent = my_useragent();
     if(!config->useragent) {
-      helpf(config->errors, "out of memory\n");
+      helpf(config->global->errors, "out of memory\n");
       result = CURLE_OUT_OF_MEMORY;
     }
   }

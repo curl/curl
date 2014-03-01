@@ -132,6 +132,7 @@ static CURLcode main_init(struct GlobalConfig *config)
 
   /* Initialise the global config */
   config->showerror = -1;             /* Will show errors */
+  config->errors = stderr;            /* Default errors to stderr */
 
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
@@ -178,6 +179,10 @@ static CURLcode main_init(struct GlobalConfig *config)
 static void free_config_fields(struct GlobalConfig *config)
 {
   Curl_safefree(config->trace_dump);
+
+  if(config->errors_fopened && config->errors)
+    fclose(config->errors);
+  config->errors = NULL;
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
