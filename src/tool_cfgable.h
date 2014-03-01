@@ -100,7 +100,6 @@ struct OperationConfig {
   bool netrc_opt;
   bool netrc;
   char *netrc_file;
-  bool noprogress;          /* don't show progress meter, --silent given */
   bool isatty;              /* updated internally only if output is a tty */
   struct getout *url_list;  /* point to the first node */
   struct getout *url_last;  /* point to the last/current node */
@@ -122,7 +121,6 @@ struct OperationConfig {
   char *customrequest;
   char *krblevel;
   long httpversion;
-  int progressmode;         /* CURL_PROGRESS_BAR or CURL_PROGRESS_STATS */
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;
@@ -218,6 +216,7 @@ struct GlobalConfig {
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
   bool mute;                      /* don't show messages, --silent given */
+  bool noprogress;                /* don't show progress bar --silent given */
   FILE *errors;                   /* Error stream, defaults to stderr */
   bool errors_fopened;            /* Whether error stream isn't stderr */
   char *trace_dump;               /* file to dump the network trace to */
@@ -225,6 +224,7 @@ struct GlobalConfig {
   bool trace_fopened;
   trace tracetype;
   bool tracetime;                 /* include timestamp? */
+  int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
 
   struct OperationConfig *first;
   struct OperationConfig *current;

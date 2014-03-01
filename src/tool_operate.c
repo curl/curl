@@ -345,7 +345,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   }
 
   /* save the values of noprogress and isatty to restore them later on */
-  orig_noprogress = config->noprogress;
+  orig_noprogress = global->noprogress;
   orig_isatty = config->isatty;
 
   /*
@@ -741,15 +741,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(uploadfile && config->resume_from_current)
           config->resume_from = -1; /* -1 will then force get-it-yourself */
 
-        if(output_expected(this_url, uploadfile)
-           && outs.stream && isatty(fileno(outs.stream)))
+        if(output_expected(this_url, uploadfile) && outs.stream &&
+           isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
-          config->noprogress = config->isatty = TRUE;
+          global->noprogress = config->isatty = TRUE;
         else {
           /* progress meter is per download, so restore config
              values */
-          config->noprogress = orig_noprogress;
+          global->noprogress = orig_noprogress;
           config->isatty = orig_isatty;
         }
 
@@ -851,7 +851,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(uploadfilesize != -1)
           my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt_str(curl, CURLOPT_URL, this_url);     /* what to fetch */
-        my_setopt(curl, CURLOPT_NOPROGRESS, config->noprogress?1L:0L);
+        my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
         if(config->no_body) {
           my_setopt(curl, CURLOPT_NOBODY, 1L);
           my_setopt(curl, CURLOPT_HEADER, 1L);
@@ -1105,8 +1105,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
 
         progressbarinit(&progressbar, config);
-        if((config->progressmode == CURL_PROGRESS_BAR) &&
-           !config->noprogress && !global->mute) {
+        if((global->progressmode == CURL_PROGRESS_BAR) &&
+           !global->noprogress && !global->mute) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);
@@ -1533,7 +1533,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         }
 
-        if((config->progressmode == CURL_PROGRESS_BAR) &&
+        if((global->progressmode == CURL_PROGRESS_BAR) &&
            progressbar.calls)
           /* if the custom progress bar has been displayed, we output a
              newline here */

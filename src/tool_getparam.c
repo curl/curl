@@ -983,9 +983,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case '#': /* --progress-bar */
       if(toggle)
-        config->progressmode = CURL_PROGRESS_BAR;
+        global->progressmode = CURL_PROGRESS_BAR;
       else
-        config->progressmode = CURL_PROGRESS_STATS;
+        global->progressmode = CURL_PROGRESS_STATS;
       break;
     case ':': /* --next */
       return PARAM_NEXT_OPERATION;
@@ -1619,9 +1619,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case 's':
       /* don't show progress meter, don't show errors : */
       if(toggle)
-        global->mute = config->noprogress = TRUE;
+        global->mute = global->noprogress = TRUE;
       else
-        global->mute = config->noprogress = FALSE;
+        global->mute = global->noprogress = FALSE;
       if(global->showerror < 0)
         /* if still on the default value, set showerror to the reverse of
            toggle. This is to allow -S and -s to be used in an independent
