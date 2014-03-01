@@ -142,8 +142,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
            to stderr or stdout, we don't display the alert about the data not
            being shown as the data _is_ shown then just not via this
            function */
-        if(!operation->isatty ||
-           ((output != stderr) && (output != stdout))) {
+        if(!config->isatty || ((output != stderr) && (output != stdout))) {
           if(!newl)
             fprintf(output, "%s%s ", timebuf, s_infotype[type]);
           fprintf(output, "[data not shown]\n");

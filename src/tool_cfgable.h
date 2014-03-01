@@ -100,7 +100,6 @@ struct OperationConfig {
   bool netrc_opt;
   bool netrc;
   char *netrc_file;
-  bool isatty;              /* updated internally only if output is a tty */
   struct getout *url_list;  /* point to the first node */
   struct getout *url_last;  /* point to the last/current node */
   struct getout *url_get;   /* point to the node to fill in URL */
@@ -216,6 +215,7 @@ struct GlobalConfig {
                                       1 => -S has been used to show errors */
   bool mute;                      /* don't show messages, --silent given */
   bool noprogress;                /* don't show progress bar --silent given */
+  bool isatty;                    /* Updated internally if output is a tty */
   FILE *errors;                   /* Error stream, defaults to stderr */
   bool errors_fopened;            /* Whether error stream isn't stderr */
   char *trace_dump;               /* file to dump the network trace to */

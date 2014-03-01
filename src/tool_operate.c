@@ -346,7 +346,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
   /* save the values of noprogress and isatty to restore them later on */
   orig_noprogress = global->noprogress;
-  orig_isatty = config->isatty;
+  orig_isatty = global->isatty;
 
   /*
   ** Nested loops start here.
@@ -745,12 +745,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
            isatty(fileno(outs.stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
-          global->noprogress = config->isatty = TRUE;
+          global->noprogress = global->isatty = TRUE;
         else {
           /* progress meter is per download, so restore config
              values */
           global->noprogress = orig_noprogress;
-          config->isatty = orig_isatty;
+          global->isatty = orig_isatty;
         }
 
         if(urlnum > 1 && !global->mute) {
@@ -1749,6 +1749,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
   */
 
   quit_curl:
+
+  /* Reset the global config variables */
+  global->noprogress = orig_noprogress;
+  global->isatty = orig_isatty;
 
   /* Free function-local referenced allocated memory */
   Curl_safefree(httpgetfields);
